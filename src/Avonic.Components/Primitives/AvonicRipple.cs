@@ -80,11 +80,18 @@ public class AvonicRipple : Control
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicRipple>(VerticalAlignment.Stretch);
     }
 
+    // ── Animation timing (must match AvonicRippleHandler constants) ──────────
+
+    private static readonly TimeSpan ExpandDuration  = TimeSpan.FromMilliseconds(225);
+    private static readonly TimeSpan FadeOutDuration = TimeSpan.FromMilliseconds(150);
+    private static readonly TimeSpan CleanupBuffer   = TimeSpan.FromMilliseconds(50);
+
     // ── Composition state ─────────────────────────────────────────────────────
 
     private CompositionContainerVisual? _container;
     private CompositionCustomVisual?    _active;
     private int                         _pointers;
+    private DateTime                    _pressStart;
 
     // ── Parent event subscription ─────────────────────────────────────────────
 
@@ -172,6 +179,7 @@ public class AvonicRipple : Control
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         if (Interlocked.CompareExchange(ref _pointers, 1, 0) != 0) return;
 
+        _pressStart = DateTime.UtcNow;
         var pos = e.GetPosition(this);
 
         // Clamp to bounds — pointer may be slightly outside due to capture
@@ -212,10 +220,18 @@ public class AvonicRipple : Control
 
         visual.SendHandlerMessage(AvonicRippleHandler.SecondStepMessage);
 
+        // Compute how much animation time remains from this moment.
+        // A fast tap defers fade-out until the expand finishes (225ms), then fades
+        // for 150ms — so worst-case the animation runs 375ms from press start.
+        // Removing the composition visual before the fade completes causes a hard cut.
+        var elapsed     = DateTime.UtcNow - _pressStart;
+        var remaining   = ExpandDuration + FadeOutDuration - elapsed + CleanupBuffer;
+        var cleanupDelay = remaining > CleanupBuffer ? remaining : CleanupBuffer;
+
         var container = _container;
         DispatcherTimer.RunOnce(() =>
         {
             container?.Children.Remove(visual);
-        }, TimeSpan.FromMilliseconds(200), DispatcherPriority.Render);
+        }, cleanupDelay, DispatcherPriority.Render);
     }
 }

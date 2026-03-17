@@ -15,8 +15,13 @@
             <StackPanel >
 
                 <avonic:AvonicButton Content="Solid Button" Margin="0,0,0,8" Fill="Solid" />
+                <avonic:AvonicButton Content="Solid Button" Margin="0,0,0,8" Fill="Solid" Shape="Round" />
+
                 <avonic:AvonicButton Content="Outline Button" Margin="0,0,0,8" Fill="Outline" />
+                <avonic:AvonicButton Content="Outline Button" Margin="0,0,0,8" Fill="Outline" Shape="Round" />
+
                 <avonic:AvonicButton Content="Clear Button" Margin="0,0,0,8" Fill="Clear" />
+                <avonic:AvonicButton Content="Clear Button" Margin="0,0,0,8" Fill="Clear" Shape="Round" />
             </StackPanel>
         </Border>
 
@@ -37,14 +42,14 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{TemplateBinding CornerRadius}"
                         MinHeight="{TemplateBinding MinHeight}"
-                        Padding="{TemplateBinding Padding}"
                         ClipToBounds="True">
-                    <Grid>
-                        <!-- Ripple layer — fills Border, beneath content -->
+                    <Panel>
+                        <!-- Ripple layer — fills full Border bounds, beneath content -->
                         <avonicPrimitives:AvonicRipple
                             CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <Grid ColumnDefinitions="Auto,Auto,Auto"
+                              Margin="{TemplateBinding Padding}"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
 
@@ -80,7 +85,7 @@
                                                               RelativeSource={RelativeSource TemplatedParent},
                                                               Converter={x:Static ObjectConverters.IsNotNull}}" />
                         </Grid>
-                    </Grid>
+                    </Panel>
                 </Border>
             </ControlTemplate>
         </Setter>
