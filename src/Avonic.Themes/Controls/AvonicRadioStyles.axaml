@@ -1,0 +1,129 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <!-- ── AvonicRadio ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid Name="PART_Root"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto"
+                      VerticalAlignment="Center">
+
+                    <!-- Radio indicator ring -->
+                    <Border Name="PART_Outer"
+                            Width="{DynamicResource Avonic.Radio.Size}"
+                            Height="{DynamicResource Avonic.Radio.Size}"
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                            BorderBrush="{DynamicResource Avonic.BorderBrush}"
+                            BorderThickness="{DynamicResource Avonic.Radio.BorderThickness}"
+                            Background="Transparent"
+                            VerticalAlignment="Center">
+
+                        <!-- Inner dot (visible when :checked) -->
+                        <Ellipse Name="PART_Dot"
+                                 Width="{DynamicResource Avonic.Radio.DotSize}"
+                                 Height="{DynamicResource Avonic.Radio.DotSize}"
+                                 Fill="{DynamicResource Avonic.PrimaryBrush}"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 IsVisible="False" />
+                    </Border>
+
+                    <!-- Label slot -->
+                    <ContentPresenter Name="PART_Label"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      VerticalAlignment="Center" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Checked: primary ring, show dot ───────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:checked /template/ Border#PART_Outer">
+        <Setter Property="BorderBrush" Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicRadio:checked /template/ Ellipse#PART_Dot">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Label placement: End (default) ────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:label-end /template/ Border#PART_Outer">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicRadio:label-end /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Radio.LabelMarginEnd}" />
+    </Style>
+
+    <!-- ── Label placement: Start ────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:label-start /template/ Border#PART_Outer">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicRadio:label-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Radio.LabelMarginStart}" />
+    </Style>
+
+    <!-- ── Label placement: Stacked ──────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:label-stacked /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="0" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin"              Value="{DynamicResource Avonic.Radio.LabelMarginStacked}" />
+    </Style>
+    <Style Selector="avonic|AvonicRadio:label-stacked /template/ Border#PART_Outer">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="1" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ── Justify: Start ───────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:justify-start /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- ── Justify: End ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:justify-end /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- ── Alignment: Start ──────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:alignment-start /template/ Border#PART_Outer">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="avonic|AvonicRadio:alignment-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <!-- ── Pressed ───────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:pressed /template/ Border#PART_Outer">
+        <Setter Property="Opacity" Value="0.7" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRadio:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <!-- ── AvonicRadioGroup — transparent passthrough ────────────────────────── -->
+    <Style Selector="avonic|AvonicRadioGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>

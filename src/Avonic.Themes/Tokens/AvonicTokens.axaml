@@ -1,0 +1,129 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── Base Colours ─────────────────────────────────────────────────── -->
+    <Color x:Key="Avonic.Color.Background">#FFFFFF</Color>
+    <Color x:Key="Avonic.Color.Foreground">#111318</Color>
+    <Color x:Key="Avonic.Color.Muted">#F4F4F5</Color>
+    <Color x:Key="Avonic.Color.MutedForeground">#71717A</Color>
+    <Color x:Key="Avonic.Color.Border">#E4E4E7</Color>
+    <Color x:Key="Avonic.Color.Primary">#3880FF</Color>
+    <Color x:Key="Avonic.Color.PrimaryForeground">#FFFFFF</Color>
+    <Color x:Key="Avonic.Color.Destructive">#EF4444</Color>
+    <Color x:Key="Avonic.Color.DestructiveForeground">#FFFFFF</Color>
+    <Color x:Key="Avonic.Color.Pressed">#1A000000</Color>
+
+    <!-- ── Brushes ───────────────────────────────────────────────────────── -->
+    <SolidColorBrush x:Key="Avonic.BackgroundBrush"          Color="{StaticResource Avonic.Color.Background}" />
+    <SolidColorBrush x:Key="Avonic.ForegroundBrush"          Color="{StaticResource Avonic.Color.Foreground}" />
+    <SolidColorBrush x:Key="Avonic.MutedBrush"               Color="{StaticResource Avonic.Color.Muted}" />
+    <SolidColorBrush x:Key="Avonic.MutedForegroundBrush"     Color="{StaticResource Avonic.Color.MutedForeground}" />
+    <SolidColorBrush x:Key="Avonic.BorderBrush"              Color="{StaticResource Avonic.Color.Border}" />
+    <SolidColorBrush x:Key="Avonic.PrimaryBrush"             Color="{StaticResource Avonic.Color.Primary}" />
+    <SolidColorBrush x:Key="Avonic.PrimaryForegroundBrush"   Color="{StaticResource Avonic.Color.PrimaryForeground}" />
+    <SolidColorBrush x:Key="Avonic.DestructiveBrush"         Color="{StaticResource Avonic.Color.Destructive}" />
+    <SolidColorBrush x:Key="Avonic.PressedBrush"             Color="{StaticResource Avonic.Color.Pressed}" />
+
+    <!-- ── Typography ───────────────────────────────────────────────────── -->
+    <x:Double x:Key="Avonic.FontSize.Body">16</x:Double>
+    <x:Double x:Key="Avonic.FontSize.Caption">14</x:Double>
+    <x:Double x:Key="Avonic.FontSize.Small">12</x:Double>
+
+    <!-- ── Spacing & Structure ──────────────────────────────────────────── -->
+    <x:Double x:Key="Avonic.Item.MinHeight">48</x:Double>
+    <Thickness x:Key="Avonic.Item.Padding">16,0</Thickness>
+    <Thickness x:Key="Avonic.Item.InnerPadding">0,12</Thickness>
+    <Thickness x:Key="Avonic.Item.StartSlotMargin">0,0,16,0</Thickness>
+    <Thickness x:Key="Avonic.Item.EndSlotMargin">16,0,0,0</Thickness>
+    <x:Double x:Key="Avonic.List.InsetMargin">16</x:Double>
+
+    <!-- ── Corner Radii ─────────────────────────────────────────────────── -->
+    <CornerRadius x:Key="Avonic.CornerRadius.None">0</CornerRadius>
+    <CornerRadius x:Key="Avonic.CornerRadius.Default">8</CornerRadius>
+    <CornerRadius x:Key="Avonic.CornerRadius.Rounded">12</CornerRadius>
+    <CornerRadius x:Key="Avonic.CornerRadius.Pill">999</CornerRadius>
+
+    <!-- ── Border Thickness ─────────────────────────────────────────────── -->
+    <Thickness x:Key="Avonic.Item.BorderThickness.Full">0,0,0,0.75</Thickness>
+    <Thickness x:Key="Avonic.Item.BorderThickness.None">0</Thickness>
+
+    <!-- ── Checkbox ─────────────────────────────────────────────────────── -->
+    <x:Double    x:Key="Avonic.Checkbox.Size">20</x:Double>
+    <CornerRadius x:Key="Avonic.Checkbox.CornerRadius">4</CornerRadius>
+    <Thickness   x:Key="Avonic.Checkbox.BorderThickness">1.5</Thickness>
+    <Thickness   x:Key="Avonic.Checkbox.LabelMarginEnd">8,0,0,0</Thickness>
+    <Thickness   x:Key="Avonic.Checkbox.LabelMarginStart">0,0,8,0</Thickness>
+    <Thickness   x:Key="Avonic.Checkbox.LabelMarginStacked">0,0,0,8</Thickness>
+
+    <!-- ── Toggle ────────────────────────────────────────────────────────── -->
+    <x:Double  x:Key="Avonic.Toggle.TrackWidth">52</x:Double>
+    <x:Double  x:Key="Avonic.Toggle.TrackHeight">32</x:Double>
+    <x:Double  x:Key="Avonic.Toggle.HandleSize">26</x:Double>
+    <Thickness x:Key="Avonic.Toggle.LabelMarginEnd">12,0,0,0</Thickness>
+    <Thickness x:Key="Avonic.Toggle.LabelMarginStart">0,0,12,0</Thickness>
+    <Thickness x:Key="Avonic.Toggle.LabelMarginStacked">0,0,0,8</Thickness>
+    <Color     x:Key="Avonic.Color.Toggle.TrackOff">#D1D1D6</Color>
+    <SolidColorBrush x:Key="Avonic.Toggle.TrackOffBrush" Color="{StaticResource Avonic.Color.Toggle.TrackOff}" />
+
+    <!-- ── Radio ──────────────────────────────────────────────────────────── -->
+    <x:Double  x:Key="Avonic.Radio.Size">20</x:Double>
+    <x:Double  x:Key="Avonic.Radio.DotSize">10</x:Double>
+    <Thickness x:Key="Avonic.Radio.BorderThickness">2</Thickness>
+    <Thickness x:Key="Avonic.Radio.LabelMarginEnd">8,0,0,0</Thickness>
+    <Thickness x:Key="Avonic.Radio.LabelMarginStart">0,0,8,0</Thickness>
+    <Thickness x:Key="Avonic.Radio.LabelMarginStacked">0,0,0,8</Thickness>
+
+    <!-- ── Range ────────────────────────────────────────────────────────── -->
+    <x:Double  x:Key="Avonic.Range.TrackHeight">4</x:Double>
+    <x:Double  x:Key="Avonic.Range.KnobSize">22</x:Double>
+    <x:Double  x:Key="Avonic.Range.PinSize">28</x:Double>
+    <Thickness x:Key="Avonic.Range.LabelMarginStart">0,0,12,0</Thickness>
+    <Thickness x:Key="Avonic.Range.LabelMarginEnd">12,0,0,0</Thickness>
+    <Thickness x:Key="Avonic.Range.LabelMarginStacked">0,0,0,8</Thickness>
+    <x:Double  x:Key="Avonic.Range.LabelFixedWidth">100</x:Double>
+    <Thickness x:Key="Avonic.Range.StartContentMargin">0,0,10,0</Thickness>
+    <Thickness x:Key="Avonic.Range.EndContentMargin">10,0,0,0</Thickness>
+    <Thickness x:Key="Avonic.Range.KnobBorderThickness">1.5</Thickness>
+    <Color     x:Key="Avonic.Color.Range.TrackInactive">#D1D1D6</Color>
+    <SolidColorBrush x:Key="Avonic.Range.TrackInactiveBrush"  Color="{StaticResource Avonic.Color.Range.TrackInactive}" />
+    <SolidColorBrush x:Key="Avonic.Range.KnobBrush"           Color="{StaticResource Avonic.Color.Background}" />
+    <SolidColorBrush x:Key="Avonic.Range.KnobBorderBrush"     Color="{StaticResource Avonic.Color.Primary}" />
+
+    <!-- ── Input / Textarea ─────────────────────────────────────────────── -->
+    <x:Double    x:Key="Avonic.Input.MinHeight">48</x:Double>
+    <CornerRadius x:Key="Avonic.Input.CornerRadius">8</CornerRadius>
+    <Thickness   x:Key="Avonic.Input.InnerPadding">12,0</Thickness>
+    <Thickness   x:Key="Avonic.Textarea.InnerPadding">12,10</Thickness>
+    <x:Double    x:Key="Avonic.Textarea.MinHeight">72</x:Double>
+    <Thickness   x:Key="Avonic.Input.StartSlotMargin">0,0,8,0</Thickness>
+    <Thickness   x:Key="Avonic.Input.EndSlotMargin">8,0,0,0</Thickness>
+    <Thickness   x:Key="Avonic.Input.FooterMargin">0,4,0,0</Thickness>
+    <Thickness   x:Key="Avonic.Input.LabelMarginStart">0,0,12,0</Thickness>
+    <Thickness   x:Key="Avonic.Input.LabelMarginEnd">12,0,0,0</Thickness>
+    <Thickness   x:Key="Avonic.Input.LabelMarginStacked">0,0,0,6</Thickness>
+    <Thickness   x:Key="Avonic.Input.LabelMarginFloating">0,0,0,4</Thickness>
+    <x:Double    x:Key="Avonic.Input.LabelFixedWidth">100</x:Double>
+    <!-- Border thicknesses -->
+    <Thickness   x:Key="Avonic.Input.BorderThickness.Default">0,0,0,1</Thickness>
+    <Thickness   x:Key="Avonic.Input.BorderThickness.None">0</Thickness>
+    <Thickness   x:Key="Avonic.Input.BorderThickness.Outline">1</Thickness>
+    <Thickness   x:Key="Avonic.Input.BorderThickness.Focused">0,0,0,2</Thickness>
+    <Thickness   x:Key="Avonic.Input.BorderThickness.FocusedBottom">0,0,0,2</Thickness>
+    <!-- Border brushes -->
+    <SolidColorBrush x:Key="Avonic.Input.BorderBrush" Color="{StaticResource Avonic.Color.Border}" />
+
+    <!-- ── Button ───────────────────────────────────────────────────────── -->
+    <x:Double  x:Key="Avonic.Button.Height.Small">28</x:Double>
+    <x:Double  x:Key="Avonic.Button.Height.Default">36</x:Double>
+    <x:Double  x:Key="Avonic.Button.Height.Large">48</x:Double>
+    <Thickness x:Key="Avonic.Button.Padding.Small">12,0</Thickness>
+    <Thickness x:Key="Avonic.Button.Padding.Default">16,0</Thickness>
+    <Thickness x:Key="Avonic.Button.Padding.Large">24,0</Thickness>
+    <x:Double  x:Key="Avonic.Button.FontSize.Small">13</x:Double>
+    <x:Double  x:Key="Avonic.Button.FontSize.Default">14</x:Double>
+    <x:Double  x:Key="Avonic.Button.FontSize.Large">16</x:Double>
+    <Thickness x:Key="Avonic.Button.BorderThickness.Outline">1.5</Thickness>
+    <Thickness x:Key="Avonic.Button.StartSlotMargin">0,0,6,0</Thickness>
+    <Thickness x:Key="Avonic.Button.EndSlotMargin">6,0,0,0</Thickness>
+
+</ResourceDictionary>

@@ -1,0 +1,187 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
+
+    <Design.PreviewWith>
+
+        <Border Background="White" Padding="20">
+            <Border.Styles>
+                <Style Selector=":is(avonic|AvonicCheckbox)">
+                    <Setter Property="Foreground" Value="Lime" />
+                </Style>
+            </Border.Styles>
+
+            <StackPanel >
+
+                <avonic:AvonicButton Content="Solid Button" Margin="0,0,0,8" Fill="Solid" />
+                <avonic:AvonicButton Content="Outline Button" Margin="0,0,0,8" Fill="Outline" />
+                <avonic:AvonicButton Content="Clear Button" Margin="0,0,0,8" Fill="Clear" />
+            </StackPanel>
+        </Border>
+
+    </Design.PreviewWith>
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton">
+        <Setter Property="Cursor"               Value="Hand" />
+        <Setter Property="HorizontalAlignment"  Value="Left" />
+        <Setter Property="VerticalAlignment"    Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment"   Value="Center" />
+        <Setter Property="ClipToBounds"         Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        MinHeight="{TemplateBinding MinHeight}"
+                        Padding="{TemplateBinding Padding}"
+                        ClipToBounds="True">
+                    <Grid>
+                        <!-- Ripple layer — fills Border, beneath content -->
+                        <avonicPrimitives:AvonicRipple
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+
+                        <Grid ColumnDefinitions="Auto,Auto,Auto"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+
+                        <!-- Start slot -->
+                        <ContentPresenter Name="PART_StartContent"
+                                          Grid.Column="0"
+                                          Content="{TemplateBinding StartContent}"
+                                          ContentTemplate="{TemplateBinding StartContentTemplate}"
+                                          VerticalAlignment="Center"
+                                          Margin="{DynamicResource Avonic.Button.StartSlotMargin}"
+                                          IsVisible="{Binding StartContent,
+                                                              RelativeSource={RelativeSource TemplatedParent},
+                                                              Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                        <!-- Label -->
+                        <ContentPresenter Name="PART_Content"
+                                          Grid.Column="1"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          FontWeight="{TemplateBinding FontWeight}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          VerticalAlignment="Center" />
+
+                        <!-- End slot -->
+                        <ContentPresenter Name="PART_EndContent"
+                                          Grid.Column="2"
+                                          Content="{TemplateBinding EndContent}"
+                                          ContentTemplate="{TemplateBinding EndContentTemplate}"
+                                          VerticalAlignment="Center"
+                                          Margin="{DynamicResource Avonic.Button.EndSlotMargin}"
+                                          IsVisible="{Binding EndContent,
+                                                              RelativeSource={RelativeSource TemplatedParent},
+                                                              Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Fill: Solid (default) ─────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:fill-solid">
+        <Setter Property="Background"       Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="Foreground"       Value="{DynamicResource Avonic.PrimaryForegroundBrush}" />
+        <Setter Property="BorderThickness"  Value="0" />
+        <Setter Property="BorderBrush"      Value="Transparent" />
+    </Style>
+    <Style Selector="avonic|AvonicButton:fill-solid:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- ── Fill: Outline ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:fill-outline">
+        <Setter Property="Background"       Value="Transparent" />
+        <Setter Property="Foreground"       Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderThickness"  Value="{DynamicResource Avonic.Button.BorderThickness.Outline}" />
+        <Setter Property="BorderBrush"      Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicButton:fill-outline:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- ── Fill: Clear ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:fill-clear">
+        <Setter Property="Background"       Value="Transparent" />
+        <Setter Property="Foreground"       Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderThickness"  Value="0" />
+        <Setter Property="BorderBrush"      Value="Transparent" />
+    </Style>
+    <Style Selector="avonic|AvonicButton:fill-clear:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- ── Ripple fill per button variant ───────────────────────────────────── -->
+    <!-- Solid: coloured background → white ripple -->
+    <Style Selector="avonic|AvonicButton:fill-solid avonicPrimitives|AvonicRipple">
+        <Setter Property="RippleFill" Value="{DynamicResource Avonic.PrimaryForegroundBrush}" />
+    </Style>
+    <!-- Outline / Clear: transparent background → primary colour ripple -->
+    <Style Selector="avonic|AvonicButton:fill-outline avonicPrimitives|AvonicRipple">
+        <Setter Property="RippleFill" Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicButton:fill-clear avonicPrimitives|AvonicRipple">
+        <Setter Property="RippleFill" Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+
+    <!-- ── Size: Small ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:size-small">
+        <Setter Property="MinHeight"    Value="{DynamicResource Avonic.Button.Height.Small}" />
+        <Setter Property="Padding"      Value="{DynamicResource Avonic.Button.Padding.Small}" />
+        <Setter Property="FontSize"     Value="{DynamicResource Avonic.Button.FontSize.Small}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Avonic.CornerRadius.Default}" />
+    </Style>
+
+    <!-- ── Size: Default ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:size-default">
+        <Setter Property="MinHeight"    Value="{DynamicResource Avonic.Button.Height.Default}" />
+        <Setter Property="Padding"      Value="{DynamicResource Avonic.Button.Padding.Default}" />
+        <Setter Property="FontSize"     Value="{DynamicResource Avonic.Button.FontSize.Default}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Avonic.CornerRadius.Default}" />
+    </Style>
+
+    <!-- ── Size: Large ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:size-large">
+        <Setter Property="MinHeight"    Value="{DynamicResource Avonic.Button.Height.Large}" />
+        <Setter Property="Padding"      Value="{DynamicResource Avonic.Button.Padding.Large}" />
+        <Setter Property="FontSize"     Value="{DynamicResource Avonic.Button.FontSize.Large}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Avonic.CornerRadius.Default}" />
+    </Style>
+
+    <!-- ── Shape: Round ──────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:shape-round">
+        <Setter Property="CornerRadius" Value="{DynamicResource Avonic.CornerRadius.Pill}" />
+    </Style>
+
+    <!-- ── Expand: Block ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:expand-block">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Margin"              Value="16,0" />
+    </Style>
+
+    <!-- ── Expand: Full ──────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:expand-full">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Margin"              Value="0" />
+        <Setter Property="CornerRadius"        Value="{DynamicResource Avonic.CornerRadius.None}" />
+    </Style>
+
+    <!-- ── Strong ────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:strong">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicButton:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

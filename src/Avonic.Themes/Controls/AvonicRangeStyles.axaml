@@ -1,0 +1,203 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Border Background="White" Padding="20" MinWidth="200" MinHeight="100">
+            <avonic:AvonicRange Value="100" ShowPin="True" LabelPlacement="Stacked">
+                <avonic:AvonicRange.StartContent>
+                    <TextBlock Text="🔈" FontSize="18" VerticalAlignment="Center" />
+                </avonic:AvonicRange.StartContent>
+                <avonic:AvonicRange.EndContent>
+                    <TextBlock Text="🔊" FontSize="18" VerticalAlignment="Center" />
+                </avonic:AvonicRange.EndContent>
+                <avonic:AvonicLabel>Audio</avonic:AvonicLabel>
+            </avonic:AvonicRange>
+        </Border>
+    </Design.PreviewWith>
+    
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!--
+                    Outer grid: 2 cols (Auto label, * slider) × 2 rows (Auto, Auto).
+                    Pseudoclass styles assign Grid.Column/Row to PART_Label and PART_SliderRow
+                    for each LabelPlacement variant. Default is :label-start (label col=0, slider col=1).
+                -->
+                <Grid Name="PART_Root"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto">
+
+                    <!-- Label slot -->
+                    <ContentPresenter Name="PART_Label"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      VerticalAlignment="Center" />
+
+                    <!-- Slider row: [start content] [track] [end content] -->
+                    <Grid Name="PART_SliderRow"
+                          ColumnDefinitions="Auto,*,Auto"
+                          VerticalAlignment="Center">
+
+                        <!-- Start slot -->
+                        <ContentPresenter Name="PART_StartContent"
+                                          Content="{TemplateBinding StartContent}"
+                                          Margin="{DynamicResource Avonic.Range.StartContentMargin}"
+                                          VerticalAlignment="Center" />
+
+                        <!-- Track area — Panel so active bar, knob and hit area share the same space -->
+                        <Panel Grid.Column="1"
+                               MinHeight="48"
+                               ClipToBounds="False"
+                               VerticalAlignment="Center">
+
+                            <!-- Inactive bar (background, full width) -->
+                            <Border Name="PART_InactiveBar"
+                                    Height="{DynamicResource Avonic.Range.TrackHeight}"
+                                    CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                                    Background="{DynamicResource Avonic.Range.TrackInactiveBrush}"
+                                    IsHitTestVisible="False"
+                                    VerticalAlignment="Center" />
+
+                            <!-- Active bar (left-aligned; Width driven from code via ratio) -->
+                            <Border Name="PART_ActiveBar"
+                                    Width="0"
+                                    Height="{DynamicResource Avonic.Range.TrackHeight}"
+                                    CornerRadius="999,0,0,999"
+                                    Background="{DynamicResource Avonic.PrimaryBrush}"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False"
+                                    VerticalAlignment="Center" />
+
+                            <!--
+                                Knob — HorizontalAlignment=Left, Margin.Left driven from code.
+                                Elevation shadow gives the knob a lifted feel.
+                            -->
+                            <Border Name="PART_Knob"
+                                    Width="{DynamicResource Avonic.Range.KnobSize}"
+                                    Height="{DynamicResource Avonic.Range.KnobSize}"
+                                    CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                                    Background="{DynamicResource Avonic.Range.KnobBrush}"
+                                    BorderBrush="{DynamicResource Avonic.Range.KnobBorderBrush}"
+                                    BorderThickness="{DynamicResource Avonic.Range.KnobBorderThickness}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    IsHitTestVisible="False"
+                                    ZIndex="10" />
+
+                            <!--
+                                Pin — shown when :show-pin:dragging.
+                                Sits above the knob; text is updated from code (PART_PinLabel).
+                                Horizontal position mirrors the knob's Margin.Left.
+                                TODO: mirror Knob.Margin.Left in PART_Pin.Margin.Left from code.
+                            -->
+                            <Border Name="PART_Pin"
+                                    Width="{DynamicResource Avonic.Range.PinSize}"
+                                    Height="{DynamicResource Avonic.Range.PinSize}"
+                                    CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                                    Background="{DynamicResource Avonic.PrimaryBrush}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    IsVisible="False"
+                                    IsHitTestVisible="False"
+                                    ZIndex="20">
+                                <TextBlock Name="PART_PinLabel"
+                                           Foreground="{DynamicResource Avonic.PrimaryForegroundBrush}"
+                                           FontSize="{DynamicResource Avonic.FontSize.Small}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <!--
+                                Hit area — transparent overlay on top of everything.
+                                Pointer events are attached to this element in code.
+                                MinHeight=48 ensures 48dp touch target.
+                            -->
+                            <Border Name="PART_TrackHitArea"
+                                    Background="Transparent"
+                                    MinHeight="48"
+                                    ZIndex="99"
+                                    IsHitTestVisible="True" />
+
+                        </Panel>
+
+                        <!-- End slot -->
+                        <ContentPresenter Name="PART_EndContent"
+                                          Grid.Column="2"
+                                          Content="{TemplateBinding EndContent}"
+                                          Margin="{DynamicResource Avonic.Range.EndContentMargin}"
+                                          VerticalAlignment="Center" />
+
+                    </Grid>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Label placement: Start (default) ──────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:label-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Range.LabelMarginStart}" />
+    </Style>
+    <Style Selector="avonic|AvonicRange:label-start /template/ Grid#PART_SliderRow">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: End ──────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:label-end /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Range.LabelMarginEnd}" />
+    </Style>
+    <Style Selector="avonic|AvonicRange:label-end /template/ Grid#PART_SliderRow">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: Fixed (same as Start, fixed label width) ─────────── -->
+    <Style Selector="avonic|AvonicRange:label-fixed /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Width"         Value="{DynamicResource Avonic.Range.LabelFixedWidth}" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Range.LabelMarginStart}" />
+    </Style>
+    <Style Selector="avonic|AvonicRange:label-fixed /template/ Grid#PART_SliderRow">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: Stacked ──────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:label-stacked /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="0" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+        <Setter Property="Margin"              Value="{DynamicResource Avonic.Range.LabelMarginStacked}" />
+    </Style>
+    <Style Selector="avonic|AvonicRange:label-stacked /template/ Grid#PART_SliderRow">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="1" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+    </Style>
+
+    <!-- ── Pin: visible while dragging ──────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:show-pin:dragging /template/ Border#PART_Pin">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Dragging: enlarge knob slightly ───────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:dragging /template/ Border#PART_Knob">
+        <Setter Property="BorderBrush" Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicRange:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

@@ -1,0 +1,119 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid Name="PART_Root"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto"
+                      VerticalAlignment="Center">
+
+                    <!-- Toggle track -->
+                    <Border Name="PART_Track"
+                            Width="{DynamicResource Avonic.Toggle.TrackWidth}"
+                            Height="{DynamicResource Avonic.Toggle.TrackHeight}"
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                            Background="{DynamicResource Avonic.Toggle.TrackOffBrush}"
+                            VerticalAlignment="Center">
+                        <Grid>
+                            <!-- Handle — sits in a Grid so HorizontalAlignment drives position -->
+                            <Border Name="PART_Handle"
+                                    Width="{DynamicResource Avonic.Toggle.HandleSize}"
+                                    Height="{DynamicResource Avonic.Toggle.HandleSize}"
+                                    CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                                    Background="{DynamicResource Avonic.PrimaryForegroundBrush}"
+                                    HorizontalAlignment="Left"
+                                    Margin="3,0,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Label slot -->
+                    <ContentPresenter Name="PART_Label"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      VerticalAlignment="Center" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Checked: primary track, handle slides right ───────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:checked /template/ Border#PART_Track">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicToggle:checked /template/ Border#PART_Handle">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Margin"              Value="0,0,3,0" />
+    </Style>
+
+    <!-- ── Label placement: End (default) ────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:label-end /template/ Border#PART_Track">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicToggle:label-end /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Toggle.LabelMarginEnd}" />
+    </Style>
+
+    <!-- ── Label placement: Start ────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:label-start /template/ Border#PART_Track">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicToggle:label-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Toggle.LabelMarginStart}" />
+    </Style>
+
+    <!-- ── Label placement: Stacked ──────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:label-stacked /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="0" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin"              Value="{DynamicResource Avonic.Toggle.LabelMarginStacked}" />
+    </Style>
+    <Style Selector="avonic|AvonicToggle:label-stacked /template/ Border#PART_Track">
+        <Setter Property="(Grid.Column)"       Value="0" />
+        <Setter Property="(Grid.Row)"          Value="1" />
+        <Setter Property="(Grid.ColumnSpan)"   Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ── Justify: Start ───────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:justify-start /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- ── Justify: End ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:justify-end /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- ── Alignment: Start ──────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:alignment-start /template/ Border#PART_Track">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="avonic|AvonicToggle:alignment-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <!-- ── Pressed ───────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:pressed /template/ Border#PART_Track">
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicToggle:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

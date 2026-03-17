@@ -1,0 +1,248 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Border Background="White" Padding="20" MinWidth="320">
+            <StackPanel Spacing="16">
+                <avonic:AvonicTextarea Placeholder="Write something..." LabelPlacement="Stacked">Notes</avonic:AvonicTextarea>
+                <avonic:AvonicTextarea Placeholder="Write something..." Fill="Outline" LabelPlacement="Stacked" Rows="5">Bio</avonic:AvonicTextarea>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!--
+                    Same outer grid pattern as AvonicInput.
+                    PART_TextBox uses AcceptsReturn=True, TextWrapping=Wrap.
+                    Rows drives the MinHeight of PART_TextBox via font-size * rows token.
+                -->
+                <Grid Name="PART_Root"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto,Auto">
+
+                    <!-- Label slot -->
+                    <ContentPresenter Name="PART_Label"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      FontSize="{DynamicResource Avonic.FontSize.Caption}"
+                                      VerticalAlignment="Top" />
+
+                    <!-- Textarea wrapper -->
+                    <Border Name="PART_InputWrapper"
+                            Background="Transparent"
+                            BorderBrush="{DynamicResource Avonic.Input.BorderBrush}"
+                            BorderThickness="{DynamicResource Avonic.Input.BorderThickness.Default}"
+                            CornerRadius="{DynamicResource Avonic.Input.CornerRadius}"
+                            Padding="{DynamicResource Avonic.Textarea.InnerPadding}">
+
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              RowDefinitions="*,Auto">
+
+                            <!-- Start slot -->
+                            <ContentPresenter Name="PART_StartContent"
+                                              Grid.Column="0"
+                                              Grid.Row="0"
+                                              Content="{TemplateBinding StartContent}"
+                                              Margin="{DynamicResource Avonic.Input.StartSlotMargin}"
+                                              VerticalAlignment="Top"
+                                              IsVisible="{TemplateBinding StartContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                            <!-- Native TextBox configured for multi-line -->
+                            <TextBox Name="PART_TextBox"
+                                     Grid.Column="1"
+                                     Grid.Row="0"
+                                     Watermark="{TemplateBinding Placeholder}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     MinHeight="{DynamicResource Avonic.Textarea.MinHeight}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Padding="0"
+                                     FontSize="{DynamicResource Avonic.FontSize.Body}"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     VerticalAlignment="Top"
+                                     VerticalContentAlignment="Top" />
+
+                            <!-- End slot -->
+                            <ContentPresenter Name="PART_EndContent"
+                                              Grid.Column="2"
+                                              Grid.Row="0"
+                                              Content="{TemplateBinding EndContent}"
+                                              Margin="{DynamicResource Avonic.Input.EndSlotMargin}"
+                                              VerticalAlignment="Top"
+                                              IsVisible="{TemplateBinding EndContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Footer row -->
+                    <Grid Name="PART_Footer"
+                          ColumnDefinitions="*,Auto"
+                          Margin="{DynamicResource Avonic.Input.FooterMargin}">
+
+                        <TextBlock Name="PART_HelperText"
+                                   Grid.Column="0"
+                                   Text="{TemplateBinding HelperText}"
+                                   FontSize="{DynamicResource Avonic.FontSize.Small}"
+                                   Foreground="{DynamicResource Avonic.MutedForegroundBrush}"
+                                   TextWrapping="Wrap"
+                                   IsVisible="False" />
+
+                        <TextBlock Name="PART_ErrorText"
+                                   Grid.Column="0"
+                                   Text="{TemplateBinding ErrorText}"
+                                   FontSize="{DynamicResource Avonic.FontSize.Small}"
+                                   Foreground="{DynamicResource Avonic.DestructiveBrush}"
+                                   TextWrapping="Wrap"
+                                   IsVisible="False" />
+
+                        <TextBlock Name="PART_Counter"
+                                   Grid.Column="1"
+                                   FontSize="{DynamicResource Avonic.FontSize.Small}"
+                                   Foreground="{DynamicResource Avonic.MutedForegroundBrush}"
+                                   IsVisible="False" />
+                    </Grid>
+
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Footer always full-width in row 2 ─────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea /template/ Grid#PART_Footer">
+        <Setter Property="(Grid.Row)"        Value="2" />
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+    </Style>
+
+    <!-- ── Helper text ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea /template/ TextBlock#PART_HelperText">
+        <Setter Property="IsVisible"
+                Value="{TemplateBinding HelperText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:has-error /template/ TextBlock#PART_HelperText">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- ── Error text ────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:has-error /template/ TextBlock#PART_ErrorText">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Label placement: Start (default) ──────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:label-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Input.LabelMarginStart}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-start /template/ Border#PART_InputWrapper">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: End ──────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:label-end /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Input.LabelMarginEnd}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-end /template/ Border#PART_InputWrapper">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: Fixed ────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:label-fixed /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Width"         Value="{DynamicResource Avonic.Input.LabelFixedWidth}" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Input.LabelMarginStart}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-fixed /template/ Border#PART_InputWrapper">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+
+    <!-- ── Label placement: Stacked ──────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:label-stacked /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="0" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+        <Setter Property="Margin"            Value="{DynamicResource Avonic.Input.LabelMarginStacked}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-stacked /template/ Border#PART_InputWrapper">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="1" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+    </Style>
+
+    <!-- ── Label placement: Floating ─────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:label-floating /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="0" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+        <Setter Property="Margin"            Value="{DynamicResource Avonic.Input.LabelMarginFloating}" />
+        <Setter Property="IsVisible"         Value="False" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-floating /template/ Border#PART_InputWrapper">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="1" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-floating:focused /template/ ContentPresenter#PART_Label">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:label-floating:has-value /template/ ContentPresenter#PART_Label">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Fill: Solid ───────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:fill-solid /template/ Border#PART_InputWrapper">
+        <Setter Property="Background"      Value="{DynamicResource Avonic.MutedBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.None}" />
+    </Style>
+
+    <!-- ── Fill: Outline ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:fill-outline /template/ Border#PART_InputWrapper">
+        <Setter Property="Background"      Value="Transparent" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.Outline}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.BorderBrush}" />
+    </Style>
+
+    <!-- ── Focused ───────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:focused /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.Focused}" />
+    </Style>
+    <Style Selector="avonic|AvonicTextarea:fill-solid:focused /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedBottom}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+
+    <!-- ── Error ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:has-error /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.DestructiveBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.Focused}" />
+    </Style>
+
+    <!-- ── Readonly ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:readonly /template/ Border#PART_InputWrapper">
+        <Setter Property="Opacity" Value="0.7" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <!-- ── TextBox: suppress focus adorner ──────────────────────────────────── -->
+    <Style Selector="avonic|AvonicTextarea /template/ TextBox#PART_TextBox">
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+    </Style>
+
+</Styles>

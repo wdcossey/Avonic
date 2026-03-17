@@ -1,0 +1,107 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
+
+    <Style Selector="avonic|AvonicItem">
+        <Setter Property="Background"             Value="{DynamicResource Avonic.BackgroundBrush}" />
+        <Setter Property="Foreground"             Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="MinHeight"              Value="{DynamicResource Avonic.Item.MinHeight}" />
+        <Setter Property="Padding"                Value="{DynamicResource Avonic.Item.Padding}" />
+        <Setter Property="HorizontalAlignment"    Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{DynamicResource Avonic.BorderBrush}"
+                        BorderThickness="{DynamicResource Avonic.Item.BorderThickness.Full}"
+                        Padding="{TemplateBinding Padding}">
+
+                
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          MinHeight="{DynamicResource Avonic.Item.MinHeight}">
+
+                        <!-- Ripple layer — fills Border, beneath content
+                        <avonicPrimitives:AvonicRipple Grid.Column="0" Grid.ColumnSpan="2" /> -->
+                            
+                        <!-- Start slot -->
+                        <ContentPresenter Name="PART_StartContent"
+                                          Grid.Column="0"
+                                          Content="{TemplateBinding StartContent}"
+                                          ContentTemplate="{TemplateBinding StartContentTemplate}"
+                                          VerticalAlignment="Center"
+                                          Margin="{DynamicResource Avonic.Item.StartSlotMargin}"
+                                          IsVisible="{Binding StartContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                        <!-- Default / label slot -->
+                        <ContentPresenter Name="PART_Content"
+                                          Grid.Column="1"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          VerticalAlignment="Center"
+                                          Margin="{DynamicResource Avonic.Item.InnerPadding}" />
+
+                        <!-- End slot -->
+                        <StackPanel Name="PART_EndArea"
+                                    Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="{DynamicResource Avonic.Item.EndSlotMargin}">
+
+                            <ContentPresenter Name="PART_EndContent"
+                                              Content="{TemplateBinding EndContent}"
+                                              ContentTemplate="{TemplateBinding EndContentTemplate}"
+                                              VerticalAlignment="Center"
+                                              IsVisible="{Binding EndContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                            <!-- Detail chevron — visibility controlled entirely by styles below -->
+                            <TextBlock Name="PART_DetailChevron"
+                                       Text="›"
+                                       FontSize="22"
+                                       Foreground="{DynamicResource Avonic.BorderBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="4,0,0,0" />
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Lines: none -->
+    <Style Selector="avonic|AvonicItem:lines-none /template/ Border#PART_Root">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Item.BorderThickness.None}" />
+    </Style>
+
+    <!-- Lines: inset — thinner left offset, simulated via the inner content margin -->
+    <Style Selector="avonic|AvonicItem:lines-inset /template/ Border#PART_Root">
+        <Setter Property="BorderThickness" Value="0,0,0,0.75" />
+        <Setter Property="Padding"         Value="16,0,0,0" />
+    </Style>
+
+    <!-- Detail chevron: hidden by default, shown when :detail is active -->
+    <Style Selector="avonic|AvonicItem /template/ TextBlock#PART_DetailChevron">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="avonic|AvonicItem:detail /template/ TextBlock#PART_DetailChevron">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- Button: pointer cursor -->
+    <Style Selector="avonic|AvonicItem:button">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- Pressed state overlay -->
+    <Style Selector="avonic|AvonicItem:button:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- Disabled -->
+    <Style Selector="avonic|AvonicItem:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

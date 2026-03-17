@@ -1,0 +1,49 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Style Selector="avonic|AvonicContent">
+        <Setter Property="Background"          Value="{DynamicResource Avonic.BackgroundBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment"   Value="Stretch" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+
+                    <!-- Scrollable content layer -->
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  Background="{TemplateBinding Background}">
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Padding="{TemplateBinding ContentPadding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </ScrollViewer>
+
+                    <!-- Fixed overlay layer (non-scrolling) -->
+                    <ContentPresenter Name="PART_FixedContent"
+                                      Content="{TemplateBinding FixedContent}"
+                                      ContentTemplate="{TemplateBinding FixedContentTemplate}"
+                                      IsVisible="{Binding FixedContent,
+                                                          RelativeSource={RelativeSource TemplatedParent},
+                                                          Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Enable horizontal scrolling -->
+    <Style Selector="avonic|AvonicContent:scroll-x /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+    </Style>
+
+    <!-- Disable vertical scrolling -->
+    <Style Selector="avonic|AvonicContent:not(:scroll-y) /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+</Styles>

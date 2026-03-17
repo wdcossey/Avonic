@@ -1,0 +1,65 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Minimal TextBox template for internal Avonic use (AvonicInput, AvonicTextarea).
+        No chrome — transparent background, zero border, no focus ring.
+        AvonicInput / AvonicTextarea set Background, BorderThickness, Padding directly
+        on the TextBox element, so {TemplateBinding} picks those up correctly.
+
+        Since we own this template, the defensive Fluent-fighting selectors
+        (TextBox /template/ Border overrides) in Input and Textarea styles are removed.
+    -->
+    <Style Selector="TextBox">
+        <Setter Property="SelectionBrush" Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_BorderElement"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <Panel>
+
+                        <!-- Text + caret + selection -->
+                        <ScrollViewer Name="PART_ContentHost"
+                                      HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                                      VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                                      IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                                      AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretBrush="{TemplateBinding CaretBrush}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           LineHeight="{TemplateBinding LineHeight}"
+                                           LetterSpacing="{TemplateBinding LetterSpacing}"
+                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                           Margin="{TemplateBinding Padding}" />
+                        </ScrollViewer>
+
+                        <!-- Watermark / placeholder -->
+                        <TextBlock Name="PART_Watermark"
+                                   Text="{TemplateBinding Watermark}"
+                                   TextAlignment="{TemplateBinding TextAlignment}"
+                                   TextWrapping="{TemplateBinding TextWrapping}"
+                                   Foreground="{DynamicResource Avonic.MutedForegroundBrush}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   IsVisible="{TemplateBinding Text, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                                   Margin="{TemplateBinding Padding}"
+                                   IsHitTestVisible="False" />
+
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>

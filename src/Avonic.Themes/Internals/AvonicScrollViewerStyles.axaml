@@ -1,0 +1,26 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Minimal ScrollViewer template for internal Avonic use.
+        No scrollbars — mobile-first: touch/gesture scrolling only.
+        ScrollContentPresenter binds to its parent ScrollViewer automatically
+        for CanHorizontallyScroll / CanVerticallyScroll via the template relation.
+    -->
+    <Style Selector="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="Transparent">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer
+                            CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                            CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                            IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>

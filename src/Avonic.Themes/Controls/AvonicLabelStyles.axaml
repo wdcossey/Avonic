@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Style Selector="avonic|AvonicLabel">
+        <Setter Property="FontSize"   Value="{DynamicResource Avonic.FontSize.Body}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Foreground="{TemplateBinding Foreground}"
+                                  FontSize="{TemplateBinding FontSize}"
+                                  FontWeight="{TemplateBinding FontWeight}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Secondary / muted label colour -->
+    <Style Selector="avonic|AvonicLabel.secondary">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.MutedForegroundBrush}" />
+        <Setter Property="FontSize"   Value="{DynamicResource Avonic.FontSize.Caption}" />
+    </Style>
+
+</Styles>

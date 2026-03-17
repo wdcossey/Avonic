@@ -1,0 +1,171 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:themes="using:Avonic.Themes">
+
+    <Design.PreviewWith>
+
+        <Border Background="White" Padding="8 0" MinWidth="200" MinHeight="100">
+            <Border.Styles>
+                <Style Selector=":is(avonic|AvonicCheckbox)">
+                    <Setter Property="Foreground" Value="Lime" />
+                </Style>
+            </Border.Styles>
+
+            <StackPanel >
+                <avonic:AvonicCheckbox Content="Checkbox label" IsChecked="True">
+                    <avonic:AvonicCheckbox.Resources>
+                        <Color x:Key="Avonic.BorderBrush">Firebrick</Color>
+                        <Color x:Key="Avonic.ForegroundBrush">Firebrick</Color>
+                        <Color x:Key="Avonic.PrimaryForegroundBrush">White</Color>
+                        <Color x:Key="Avonic.PrimaryBrush">Firebrick</Color>
+                        <CornerRadius x:Key="Avonic.Checkbox.CornerRadius">99</CornerRadius>
+                    </avonic:AvonicCheckbox.Resources>
+                    </avonic:AvonicCheckbox>
+                <avonic:AvonicCheckbox Content="Checkbox label" IsChecked="True" />
+                <avonic:AvonicCheckbox Content="Checkbox label" IsIndeterminate="True" />
+            </StackPanel>
+        </Border>
+
+    </Design.PreviewWith>
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!--
+                    Two-column, two-row grid. Column/Row assignments are applied entirely
+                    via the placement pseudoclass styles below so that :label-start and
+                    :label-stacked can reflow without touching the template AXAML.
+                -->
+                <Grid Name="PART_Root"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto"
+                      VerticalAlignment="Center">
+
+                    <!-- The checkbox indicator box -->
+                    <Border Name="PART_Box"
+                            Width="{DynamicResource Avonic.Checkbox.Size}"
+                            Height="{DynamicResource Avonic.Checkbox.Size}"
+                            CornerRadius="{DynamicResource Avonic.Checkbox.CornerRadius}"
+                            BorderBrush="{DynamicResource Avonic.BorderBrush}"
+                            BorderThickness="{DynamicResource Avonic.Checkbox.BorderThickness}"
+                            Background="Transparent"
+                            VerticalAlignment="Center">
+                        <Panel>
+                            <!-- Checkmark (visible when :checked) -->
+                            <TextBlock Name="PART_Checkmark"
+                                       Text="✓"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Avonic.PrimaryForegroundBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       IsVisible="False" />
+
+                            <!-- Indeterminate dash (visible when :indeterminate) -->
+                            <Border Name="PART_IndeterminateMark"
+                                    Width="10" Height="2"
+                                    Background="{DynamicResource Avonic.PrimaryForegroundBrush}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsVisible="False" />
+                        </Panel>
+                    </Border>
+
+                    <!-- Label slot -->
+                    <ContentPresenter Name="PART_Label"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      VerticalAlignment="Center" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Checked: fill box, show tick ─────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:checked /template/ Border#PART_Box">
+        <Setter Property="Background"   Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderBrush"  Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:checked /template/ TextBlock#PART_Checkmark">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Indeterminate: fill box, show dash ────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:indeterminate /template/ Border#PART_Box">
+        <Setter Property="Background"  Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:indeterminate /template/ Border#PART_IndeterminateMark">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Label placement: End (default) ────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:label-end /template/ Border#PART_Box">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:label-end /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Checkbox.LabelMarginEnd}" />
+    </Style>
+
+    <!-- ── Label placement: Start ────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:label-start /template/ Border#PART_Box">
+        <Setter Property="(Grid.Column)" Value="1" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:label-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)" Value="0" />
+        <Setter Property="(Grid.Row)"    Value="0" />
+        <Setter Property="Margin"        Value="{DynamicResource Avonic.Checkbox.LabelMarginStart}" />
+    </Style>
+
+    <!-- ── Label placement: Stacked (label above, box centred below) ──────────── -->
+    <Style Selector="avonic|AvonicCheckbox:label-stacked /template/ ContentPresenter#PART_Label">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="0" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin"            Value="{DynamicResource Avonic.Checkbox.LabelMarginStacked}" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:label-stacked /template/ Border#PART_Box">
+        <Setter Property="(Grid.Column)"     Value="0" />
+        <Setter Property="(Grid.Row)"        Value="1" />
+        <Setter Property="(Grid.ColumnSpan)" Value="2" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ── Justify: Start ───────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:justify-start /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- ── Justify: End ─────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:justify-end /template/ Grid#PART_Root">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <!-- ── Alignment: Start ──────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:alignment-start /template/ Border#PART_Box">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="avonic|AvonicCheckbox:alignment-start /template/ ContentPresenter#PART_Label">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <!-- ── Pressed ───────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:pressed /template/ Border#PART_Box">
+        <Setter Property="Opacity" Value="0.7" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicCheckbox:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

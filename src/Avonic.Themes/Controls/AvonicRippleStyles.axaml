@@ -1,0 +1,15 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Primitives">
+
+    <!-- ── AvonicRipple on AvonicButton fill variants ─────────────────────────── -->
+    <!--
+        Solid buttons have a coloured background → white ripple (foreground colour).
+        Outline / Clear buttons are transparent → primary colour ripple.
+    -->
+    <Style Selector="avonic|AvonicRipple">
+        <Setter Property="RippleFill"    Value="{DynamicResource Avonic.PrimaryForegroundBrush}" />
+        <Setter Property="RippleOpacity" Value="0.16" />
+    </Style>
+
+</Styles>

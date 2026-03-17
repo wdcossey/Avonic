@@ -1,0 +1,54 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Style Selector="avonic|AvonicListHeader">
+        <Setter Property="Foreground"       Value="{DynamicResource Avonic.MutedForegroundBrush}" />
+        <Setter Property="FontSize"         Value="{DynamicResource Avonic.FontSize.Small}" />
+        <Setter Property="FontWeight"       Value="SemiBold" />
+        <Setter Property="Padding"          Value="16,12,16,8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Root"
+                        Padding="{TemplateBinding Padding}"
+                        BorderBrush="{DynamicResource Avonic.BorderBrush}"
+                        BorderThickness="0">
+                    <Grid ColumnDefinitions="*,Auto">
+
+                        <!-- Label / default slot -->
+                        <ContentPresenter Grid.Column="0"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          FontWeight="{TemplateBinding FontWeight}"
+                                          VerticalAlignment="Center" />
+
+                        <!-- End slot -->
+                        <ContentPresenter Name="PART_EndContent"
+                                          Grid.Column="1"
+                                          Content="{TemplateBinding EndContent}"
+                                          ContentTemplate="{TemplateBinding EndContentTemplate}"
+                                          VerticalAlignment="Center"
+                                          IsVisible="{Binding EndContent,
+                                                              RelativeSource={RelativeSource TemplatedParent},
+                                                              Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Lines: full -->
+    <Style Selector="avonic|AvonicListHeader:lines-full /template/ Border#PART_Root">
+        <Setter Property="BorderThickness" Value="0,0,0,0.75" />
+    </Style>
+
+    <!-- Lines: inset -->
+    <Style Selector="avonic|AvonicListHeader:lines-inset /template/ Border#PART_Root">
+        <Setter Property="BorderThickness" Value="0,0,0,0.75" />
+        <Setter Property="Padding"         Value="32,12,16,8" />
+    </Style>
+
+</Styles>

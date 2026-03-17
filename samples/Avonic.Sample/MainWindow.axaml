@@ -1,0 +1,662 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives"
+        x:Class="Avonic.Sample.MainWindow"
+        Title="Avonic Sample"
+        Width="390"
+        Height="800"
+        Background="#F2F2F7">
+
+    <avonic:AvonicContent Background="#F2F2F7">
+        <StackPanel Spacing="32" Margin="0,48,0,48">
+
+            <!-- Header -->
+            <StackPanel Margin="16,0">
+                <TextBlock Text="Avonic"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Foreground="#111318" />
+                <TextBlock Text="Mobile-first component library for AvaloniaUI"
+                           FontSize="15"
+                           Foreground="#71717A"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Tier 1 — Behaviour Primitives -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TIER 1 — BEHAVIOUR PRIMITIVES"
+                                         Margin="16,0" />
+
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicRipple" FontSize="16" />
+                                <TextBlock Text="Composable touch ripple — drop in any ControlTemplate"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicPressable" FontSize="16" />
+                                <TextBlock Text="Touch feedback primitive — press, cancel, hold"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="SafeAreaInsets" FontSize="16" />
+                                <TextBlock Text="Notch, home indicator, status bar awareness"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- AvonicRipple — standalone demo -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="RIPPLE — VARIANTS" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8" Orientation="Horizontal">
+
+                    <!-- Bounded ripple on a pressable surface -->
+                    <avonicPrimitives:AvonicPressable Width="120" Height="48"
+                                                      CornerRadius="8"
+                                                      Background="#3880FF">
+                        <Panel>
+                            <avonicPrimitives:AvonicRipple CornerRadius="8" />
+                            <TextBlock Text="Bounded"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Panel>
+                    </avonicPrimitives:AvonicPressable>
+
+                    <!-- Unbounded ripple -->
+                    <avonicPrimitives:AvonicPressable Width="120" Height="48"
+                                                      CornerRadius="8"
+                                                      Background="#2DD36F">
+                        <Panel >
+                            <avonicPrimitives:AvonicRipple RippleType="Unbounded" />
+                            <TextBlock Text="Unbounded"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Panel>
+                    </avonicPrimitives:AvonicPressable>
+
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Tier 2 — Layout Primitives -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TIER 2 — LAYOUT PRIMITIVES"
+                                         Margin="16,0" />
+
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.StartContent>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#3880FF">
+                                <TextBlock Text="≡" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="18" />
+                            </Border>
+                        </avonic:AvonicItem.StartContent>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>AvonicList</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <TextBlock Text="Inset=True" FontSize="13" Foreground="#71717A" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.StartContent>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#2DD36F">
+                                <TextBlock Text="▤" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="18" />
+                            </Border>
+                        </avonic:AvonicItem.StartContent>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>AvonicItem</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <TextBlock Text="Start + End" FontSize="13" Foreground="#71717A" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.StartContent>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#FFC409">
+                                <TextBlock Text="T" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="18" FontWeight="Bold" />
+                            </Border>
+                        </avonic:AvonicItem.StartContent>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>AvonicLabel</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <TextBlock Text="Fixed/Stacked" FontSize="13" Foreground="#71717A" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.StartContent>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#EB445A">
+                                <TextBlock Text="↕" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="18" />
+                            </Border>
+                        </avonic:AvonicItem.StartContent>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>AvonicContent</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <TextBlock Text="ScrollY=True" FontSize="13" Foreground="#71717A" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.StartContent>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#92949C">
+                                <TextBlock Text="§" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="18" />
+                            </Border>
+                        </avonic:AvonicItem.StartContent>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>AvonicListHeader</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <TextBlock Text="Section title" FontSize="13" Foreground="#71717A" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- AvonicListHeader variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="LIST HEADER VARIANTS"
+                                         Margin="16,0" />
+
+                <!-- Default header (content only) -->
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicLabel>Item below a plain header</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Header with EndContent -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Margin="16,0" Content="FAVOURITES">
+                    <avonic:AvonicListHeader.EndContent>
+                        <TextBlock Text="See All"
+                                   FontSize="13"
+                                   Foreground="#3880FF"
+                                   VerticalAlignment="Center" />
+                    </avonic:AvonicListHeader.EndContent>
+                </avonic:AvonicListHeader>
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicLabel>First item</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Button="True" Detail="True" Lines="None">
+                        <avonic:AvonicLabel>Second item</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Item variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="ITEM VARIANTS" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicLabel>Button + Detail</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Button="True" Detail="True" Lines="Inset">
+                        <avonic:AvonicLabel>Lines = Inset</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem IsEnabled="False" Lines="None">
+                        <avonic:AvonicLabel>Disabled item</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Full-bleed list -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="FULL-BLEED LIST" Margin="16,0" />
+                <avonic:AvonicList>
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicLabel>Full width item</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicLabel>Another item</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicLabel>Last item (no border)</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Tier 3 — Interactive Atoms -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TIER 3 — INTERACTIVE ATOMS"
+                                         Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicButton" FontSize="16" />
+                                <TextBlock Text="Fill, shape, size, expand variants"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicCheckbox" FontSize="16" />
+                                <TextBlock Text="Checked, indeterminate, label placement"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicToggle" FontSize="16" />
+                                <TextBlock Text="Tap or drag to toggle, label placement"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None" Button="True" Detail="True">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel>
+                                <TextBlock Text="AvonicRadio / AvonicRadioGroup" FontSize="16" />
+                                <TextBlock Text="Mutually exclusive group selection"
+                                           FontSize="14" Foreground="#71717A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- AvonicButton — Fill variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="BUTTON — FILL" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8">
+                    <avonic:AvonicButton>Solid (default)</avonic:AvonicButton>
+                    <avonic:AvonicButton Fill="Outline">Outline</avonic:AvonicButton>
+                    <avonic:AvonicButton Fill="Clear">Clear</avonic:AvonicButton>
+                    <avonic:AvonicButton IsEnabled="False">Disabled</avonic:AvonicButton>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- AvonicButton — Size variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="BUTTON — SIZE" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8" Orientation="Horizontal">
+                    <avonic:AvonicButton Size="Small">Small</avonic:AvonicButton>
+                    <avonic:AvonicButton>Default</avonic:AvonicButton>
+                    <avonic:AvonicButton Size="Large">Large</avonic:AvonicButton>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- AvonicButton — Shape + Strong -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="BUTTON — SHAPE &amp; STRONG" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8" Orientation="Horizontal">
+                    <avonic:AvonicButton Shape="Round">Round</avonic:AvonicButton>
+                    <avonic:AvonicButton Strong="True">Strong</avonic:AvonicButton>
+                    <avonic:AvonicButton Shape="Round" Fill="Outline">Round Outline</avonic:AvonicButton>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- AvonicButton — Expand -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="BUTTON — EXPAND" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="0,8">
+                    <avonic:AvonicButton Expand="Block">Block</avonic:AvonicButton>
+                    <avonic:AvonicButton Expand="Full">Full</avonic:AvonicButton>
+                    <avonic:AvonicButton Expand="Block" Fill="Outline">Block + Outline</avonic:AvonicButton>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Tier 3 continued — Checkbox ─────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="CHECKBOX — VARIANTS" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel Spacing="16" Margin="0,8">
+                                <avonic:AvonicCheckbox>
+                                    <avonic:AvonicLabel>Unchecked (default)</avonic:AvonicLabel>
+                                </avonic:AvonicCheckbox>
+                                <avonic:AvonicCheckbox IsChecked="True">
+                                    <avonic:AvonicLabel>Checked</avonic:AvonicLabel>
+                                </avonic:AvonicCheckbox>
+                                <avonic:AvonicCheckbox IsIndeterminate="True">
+                                    <avonic:AvonicLabel>Indeterminate</avonic:AvonicLabel>
+                                </avonic:AvonicCheckbox>
+                                <avonic:AvonicCheckbox IsEnabled="False">
+                                    <avonic:AvonicLabel>Disabled</avonic:AvonicLabel>
+                                </avonic:AvonicCheckbox>
+                                <avonic:AvonicCheckbox LabelPlacement="Start">
+                                    <avonic:AvonicLabel>Label Start</avonic:AvonicLabel>
+                                </avonic:AvonicCheckbox>
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Tier 3 continued — Toggle ──────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TOGGLE — VARIANTS" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>Aeroplane Mode</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <avonic:AvonicToggle />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>Wi-Fi</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <avonic:AvonicToggle IsChecked="True" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicLabel>Bluetooth (disabled)</avonic:AvonicLabel>
+                        </avonic:AvonicItem.Content>
+                        <avonic:AvonicItem.EndContent>
+                            <avonic:AvonicToggle IsEnabled="False" />
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Standalone toggle with label -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TOGGLE — LABEL PLACEMENT" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <StackPanel Spacing="16" Margin="0,8">
+                                <avonic:AvonicToggle>
+                                    <avonic:AvonicLabel>Label End (default)</avonic:AvonicLabel>
+                                </avonic:AvonicToggle>
+                                <avonic:AvonicToggle LabelPlacement="Start">
+                                    <avonic:AvonicLabel>Label Start</avonic:AvonicLabel>
+                                </avonic:AvonicToggle>
+                            </StackPanel>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Tier 3 continued — Radio ────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="RADIO — GROUP" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRadioGroup>
+                                <StackPanel Spacing="4" Margin="0,8">
+                                    <avonic:AvonicRadio Value="dogs">
+                                        <avonic:AvonicLabel>Dogs</avonic:AvonicLabel>
+                                    </avonic:AvonicRadio>
+                                    <avonic:AvonicRadio Value="cats">
+                                        <avonic:AvonicLabel>Cats</avonic:AvonicLabel>
+                                    </avonic:AvonicRadio>
+                                    <avonic:AvonicRadio Value="birds" IsEnabled="False">
+                                        <avonic:AvonicLabel>Birds (disabled)</avonic:AvonicLabel>
+                                    </avonic:AvonicRadio>
+                                </StackPanel>
+                            </avonic:AvonicRadioGroup>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Tier 3 — Range ──────────────────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="RANGE — BASIC" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange>
+                                <avonic:AvonicLabel>Volume</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange Value="30" Snaps="True" Step="10">
+                                <avonic:AvonicLabel>Snaps (step 10)</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange ShowPin="True" Value="50">
+                                <avonic:AvonicLabel>Show pin</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange IsEnabled="False" Value="40">
+                                <avonic:AvonicLabel>Disabled</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="RANGE — START / END SLOTS" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange Value="60" LabelPlacement="Stacked">
+                                <avonic:AvonicRange.StartContent>
+                                    <TextBlock Text="🔈" FontSize="18" VerticalAlignment="Center" />
+                                </avonic:AvonicRange.StartContent>
+                                <avonic:AvonicRange.EndContent>
+                                    <TextBlock Text="🔊" FontSize="18" VerticalAlignment="Center" />
+                                </avonic:AvonicRange.EndContent>
+                                <avonic:AvonicLabel>Audio</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicRange Value="25" LabelPlacement="Fixed">
+                                <avonic:AvonicLabel>Brightness</avonic:AvonicLabel>
+                            </avonic:AvonicRange>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- ─── INPUT ─────────────────────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="INPUT — LABEL PLACEMENT" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+
+                    <!-- Start (default) -->
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicInput Placeholder="Enter value..." LabelPlacement="Start">
+                                Username
+                            </avonic:AvonicInput>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                    <!-- Fixed -->
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicInput Placeholder="Enter value..." LabelPlacement="Fixed">
+                                Email
+                            </avonic:AvonicInput>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                    <!-- Stacked -->
+                    <avonic:AvonicItem Lines="Full">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicInput Placeholder="Enter value..." LabelPlacement="Stacked">
+                                Password
+                            </avonic:AvonicInput>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                    <!-- Floating -->
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicItem.Content>
+                            <avonic:AvonicInput Placeholder="Enter value..." LabelPlacement="Floating">
+                                Notes
+                            </avonic:AvonicInput>
+                        </avonic:AvonicItem.Content>
+                    </avonic:AvonicItem>
+
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- ─── INPUT — FILL VARIANTS ────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="INPUT — FILL VARIANTS" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8">
+
+                    <avonic:AvonicInput Placeholder="Default (underline)" LabelPlacement="Stacked">
+                        Default
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Solid fill" Fill="Solid" LabelPlacement="Stacked">
+                        Solid
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Outline" Fill="Outline" LabelPlacement="Stacked">
+                        Outline
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Outline + round" Fill="Outline" Shape="Round" LabelPlacement="Stacked">
+                        Round
+                    </avonic:AvonicInput>
+
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ─── INPUT — HELPER / ERROR / COUNTER ─────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="INPUT — HELPER / ERROR / COUNTER" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8">
+
+                    <avonic:AvonicInput Placeholder="jane@example.com"
+                                        Fill="Outline"
+                                        LabelPlacement="Stacked"
+                                        HelperText="We'll never share your email.">
+                        Email
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Enter password"
+                                        Fill="Outline"
+                                        LabelPlacement="Stacked"
+                                        ErrorText="Password must be at least 8 characters.">
+                        Password
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Write something..."
+                                        Fill="Outline"
+                                        LabelPlacement="Stacked"
+                                        MaxLength="100"
+                                        Counter="True">
+                        Bio
+                    </avonic:AvonicInput>
+
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ─── INPUT — SLOTS ────────────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="INPUT — START / END SLOTS" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8">
+
+                    <avonic:AvonicInput Placeholder="Search..." Fill="Solid" Shape="Round" LabelPlacement="Stacked">
+                        <avonic:AvonicInput.StartContent>
+                            <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center" />
+                        </avonic:AvonicInput.StartContent>
+                        Search
+                    </avonic:AvonicInput>
+
+                    <avonic:AvonicInput Placeholder="Amount" Fill="Outline" LabelPlacement="Stacked">
+                        <avonic:AvonicInput.StartContent>
+                            <TextBlock Text="$" FontSize="16" VerticalAlignment="Center"
+                                       Foreground="#71717A" />
+                        </avonic:AvonicInput.StartContent>
+                        <avonic:AvonicInput.EndContent>
+                            <TextBlock Text="USD" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="#71717A" />
+                        </avonic:AvonicInput.EndContent>
+                        Amount
+                    </avonic:AvonicInput>
+
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ─── TEXTAREA ──────────────────────────────────────────────────── -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TEXTAREA" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="16,8">
+
+                    <avonic:AvonicTextarea Placeholder="Tell us about yourself..."
+                                           LabelPlacement="Stacked"
+                                           Rows="4">
+                        Bio
+                    </avonic:AvonicTextarea>
+
+                    <avonic:AvonicTextarea Placeholder="Write a message..."
+                                           Fill="Outline"
+                                           LabelPlacement="Stacked"
+                                           HelperText="Max 500 characters."
+                                           MaxLength="500"
+                                           Counter="True"
+                                           Rows="5">
+                        Message
+                    </avonic:AvonicTextarea>
+
+                    <avonic:AvonicTextarea Placeholder="This is read-only..."
+                                           Fill="Solid"
+                                           LabelPlacement="Stacked"
+                                           IsReadOnly="True"
+                                           Value="Read-only content here.">
+                        Notes
+                    </avonic:AvonicTextarea>
+
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </avonic:AvonicContent>
+
+</Window>

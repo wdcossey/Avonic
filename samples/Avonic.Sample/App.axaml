@@ -1,0 +1,11 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avonic="using:Avonic.Themes"
+             x:Class="Avonic.Sample.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Styles>
+        <avonic:AvonicTheme />
+    </Application.Styles>
+
+</Application>
