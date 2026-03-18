@@ -1,0 +1,62 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicChip">
+        <Setter Property="Background"       Value="{DynamicResource Avonic.MutedBrush}" />
+        <Setter Property="Foreground"       Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="FontSize"         Value="{DynamicResource Avonic.FontSize.Caption}" />
+        <Setter Property="Padding"          Value="{DynamicResource Avonic.Chip.Padding}" />
+        <Setter Property="MinHeight"        Value="32" />
+        <Setter Property="ClipToBounds"     Value="True" />
+        <Setter Property="Cursor"           Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                        Padding="{TemplateBinding Padding}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <avonicPrimitives:AvonicRipple
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                            RippleFill="{DynamicResource Avonic.ForegroundBrush}" />
+
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Filled (default) ──────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicChip:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- ── Outline ───────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicChip:outline">
+        <Setter Property="Background"      Value="Transparent" />
+        <Setter Property="Foreground"      Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="avonic|AvonicChip:outline:pressed /template/ Border#PART_Root">
+        <Setter Property="Background" Value="{DynamicResource Avonic.PressedBrush}" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicChip:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>

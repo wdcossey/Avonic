@@ -1,0 +1,27 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Style Selector="avonic|AvonicAvatar">
+        <Setter Property="Width"   Value="{DynamicResource Avonic.Avatar.Size}" />
+        <Setter Property="Height"  Value="{DynamicResource Avonic.Avatar.Size}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                        ClipToBounds="True"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalContentAlignment="Center"
+                                      VerticalContentAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>

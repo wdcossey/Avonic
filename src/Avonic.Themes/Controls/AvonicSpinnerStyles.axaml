@@ -1,0 +1,228 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSpinner">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="Width"      Value="{DynamicResource Avonic.Spinner.Size}" />
+        <Setter Property="Height"     Value="{DynamicResource Avonic.Spinner.Size}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- Shared container — variant templates swap the inner visual -->
+                <Panel Name="PART_Root"
+                       Width="{TemplateBinding Width}"
+                       Height="{TemplateBinding Height}">
+
+                    <!-- ── Circular / Crescent ──────────────────────────────── -->
+                    <Border Name="PART_Circular"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}"
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                            BorderThickness="{DynamicResource Avonic.Spinner.RingThickness}"
+                            RenderTransformOrigin="50%,50%"
+                            IsVisible="False">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                <GradientStop Color="Transparent" Offset="0" />
+                                <GradientStop Color="{Binding $parent[avonic:AvonicSpinner].Foreground.(SolidColorBrush.Color)}" Offset="0.75" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
+
+                    <!-- ── Dots ─────────────────────────────────────────────── -->
+                    <StackPanel Name="PART_Dots"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="5"
+                                IsVisible="False">
+                        <Ellipse Name="PART_Dot1"
+                                 Width="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Height="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                        <Ellipse Name="PART_Dot2"
+                                 Width="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Height="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                        <Ellipse Name="PART_Dot3"
+                                 Width="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Height="{DynamicResource Avonic.Spinner.DotSize}"
+                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                    </StackPanel>
+
+                    <!-- ── Lines ────────────────────────────────────────────── -->
+                    <Panel Name="PART_Lines"
+                           Width="{TemplateBinding Width}"
+                           Height="{TemplateBinding Height}"
+                           IsVisible="False">
+                        <!-- 8 short lines arranged around centre, rotated via animation -->
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%" >
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="0" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.85"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="45" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.7"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="90" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.55"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="135" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.4"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="180" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.3"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="225" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.2"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="270" />
+                            </Border.RenderTransform>
+                        </Border>
+                        <Border Width="3" Height="8"
+                                CornerRadius="2"
+                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Opacity="0.1"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="0,3,0,0"
+                                RenderTransformOrigin="50%,350%">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="315" />
+                            </Border.RenderTransform>
+                        </Border>
+                    </Panel>
+
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Circular / Crescent: visible + rotating ───────────────────────────── -->
+    <Style Selector="avonic|AvonicSpinner:spinner-circular /template/ Border#PART_Circular,
+                     avonic|AvonicSpinner:spinner-crescent /template/ Border#PART_Circular">
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+            <Animation Duration="0:0:0.8" IterationCount="INFINITE" Easing="LinearEasing">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- ── Dots: pulsing opacity animation ───────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSpinner:spinner-dots /template/ StackPanel#PART_Dots">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="avonic|AvonicSpinner:spinner-dots /template/ Ellipse#PART_Dot1">
+        <Style.Animations>
+            <Animation Duration="0:0:1.2" IterationCount="INFINITE" Easing="SineEaseInOut">
+                <KeyFrame Cue="0%">   <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+                <KeyFrame Cue="33%">  <Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                <KeyFrame Cue="100%"> <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="avonic|AvonicSpinner:spinner-dots /template/ Ellipse#PART_Dot2">
+        <Style.Animations>
+            <Animation Duration="0:0:1.2" IterationCount="INFINITE" Easing="SineEaseInOut" Delay="0:0:0.2">
+                <KeyFrame Cue="0%">   <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+                <KeyFrame Cue="33%">  <Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                <KeyFrame Cue="100%"> <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="avonic|AvonicSpinner:spinner-dots /template/ Ellipse#PART_Dot3">
+        <Style.Animations>
+            <Animation Duration="0:0:1.2" IterationCount="INFINITE" Easing="SineEaseInOut" Delay="0:0:0.4">
+                <KeyFrame Cue="0%">   <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+                <KeyFrame Cue="33%">  <Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                <KeyFrame Cue="100%"> <Setter Property="Opacity" Value="1.0" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- ── Lines: rotating the panel container ───────────────────────────────── -->
+    <Style Selector="avonic|AvonicSpinner:spinner-lines /template/ Panel#PART_Lines,
+                     avonic|AvonicSpinner:spinner-bubbles /template/ Panel#PART_Lines,
+                     avonic|AvonicSpinner:spinner-circles /template/ Panel#PART_Lines">
+        <Setter Property="IsVisible"             Value="True" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Style.Animations>
+            <Animation Duration="0:0:1.0" IterationCount="INFINITE" Easing="LinearEasing">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+</Styles>

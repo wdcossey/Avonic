@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <Style Selector="avonic|AvonicBadge">
+        <Setter Property="Background"  Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="Foreground"  Value="{DynamicResource Avonic.PrimaryForegroundBrush}" />
+        <Setter Property="FontSize"    Value="{DynamicResource Avonic.FontSize.Small}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+        <Setter Property="Padding"     Value="{DynamicResource Avonic.Badge.Padding}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      FontSize="{TemplateBinding FontSize}"
+                                      FontWeight="{TemplateBinding FontWeight}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>

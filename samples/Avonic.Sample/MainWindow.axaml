@@ -656,6 +656,273 @@
                 </StackPanel>
             </StackPanel>
 
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- TIER 4 — COMPOSED PATTERNS                                   -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="TIER 4 — COMPOSED PATTERNS"
+                                         Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicCard — content container with elevation</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicChip — compact interactive tag</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicBadge — count / status indicator</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicAvatar — circular image container</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicProgressBar — determinate &amp; indeterminate</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicSpinner — loading indicator variants</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem>
+                        <avonic:AvonicLabel>AvonicSearchbar — search input with clear/cancel</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicLabel>AvonicItemSliding — swipe-to-reveal actions</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Card -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="CARD VARIANTS" Margin="16,0" />
+
+                <!-- Static card -->
+                <avonic:AvonicCard>
+                    <StackPanel Padding="16">
+                        <TextBlock Text="Static Card"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="Cards group related content and actions about a single subject."
+                                   TextWrapping="Wrap"
+                                   Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicCard>
+
+                <!-- Tappable card -->
+                <avonic:AvonicCard Button="True">
+                    <StackPanel Padding="16">
+                        <TextBlock Text="Tappable Card"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="Set Button=True to make the card respond to taps."
+                                   TextWrapping="Wrap"
+                                   Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicCard>
+
+                <!-- Card with avatar and badge -->
+                <avonic:AvonicCard Button="True">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" RowDefinitions="Auto">
+                        <avonic:AvonicAvatar Grid.Column="0"
+                                             Margin="0,0,12,0"
+                                             Background="#3880FF">
+                            <TextBlock Text="AB"
+                                       Foreground="White"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </avonic:AvonicAvatar>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Alex Brown" FontWeight="SemiBold" />
+                            <TextBlock Text="Just now" FontSize="13" Foreground="#71717A" />
+                        </StackPanel>
+                        <avonic:AvonicBadge Grid.Column="2" VerticalAlignment="Center">3</avonic:AvonicBadge>
+                    </Grid>
+                </avonic:AvonicCard>
+            </StackPanel>
+
+            <!-- Chip variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="CHIP VARIANTS" Margin="16,0" />
+                <WrapPanel Margin="16,8" HorizontalAlignment="Left">
+                    <avonic:AvonicChip Margin="4">Default</avonic:AvonicChip>
+                    <avonic:AvonicChip Margin="4" Outline="True">Outline</avonic:AvonicChip>
+                    <avonic:AvonicChip Margin="4">🏷 Tagged</avonic:AvonicChip>
+                    <avonic:AvonicChip Margin="4" IsEnabled="False">Disabled</avonic:AvonicChip>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Badge variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="BADGE VARIANTS" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicLabel>Badge in items</avonic:AvonicLabel>
+                        <avonic:AvonicItem.EndContent>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <avonic:AvonicBadge>1</avonic:AvonicBadge>
+                                <avonic:AvonicBadge Background="#EF4444">99+</avonic:AvonicBadge>
+                                <avonic:AvonicBadge Background="#22C55E">New</avonic:AvonicBadge>
+                            </StackPanel>
+                        </avonic:AvonicItem.EndContent>
+                    </avonic:AvonicItem>
+                </avonic:AvonicList>
+            </StackPanel>
+
+            <!-- Avatar variants -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="AVATAR VARIANTS" Margin="16,0" />
+                <StackPanel Orientation="Horizontal" Spacing="12" Margin="16,8">
+                    <!-- Initials avatar -->
+                    <avonic:AvonicAvatar Background="#3880FF">
+                        <TextBlock Text="AB"
+                                   Foreground="White"
+                                   FontWeight="SemiBold"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </avonic:AvonicAvatar>
+                    <!-- Larger avatar -->
+                    <avonic:AvonicAvatar Width="56" Height="56" Background="#22C55E">
+                        <TextBlock Text="CD"
+                                   Foreground="White"
+                                   FontWeight="SemiBold"
+                                   FontSize="18"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </avonic:AvonicAvatar>
+                    <!-- Emoji avatar -->
+                    <avonic:AvonicAvatar Background="#F59E0B">
+                        <TextBlock Text="🦊"
+                                   FontSize="22"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </avonic:AvonicAvatar>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ProgressBar -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="PROGRESS BAR" Margin="16,0" />
+                <StackPanel Spacing="16" Margin="16,8">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Determinate (75%)" FontSize="13" Foreground="#71717A" />
+                        <avonic:AvonicProgressBar Value="0.75" />
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Determinate (40%) with buffer (80%)" FontSize="13" Foreground="#71717A" />
+                        <avonic:AvonicProgressBar Value="0.4" Buffer="0.8" />
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Indeterminate" FontSize="13" Foreground="#71717A" />
+                        <avonic:AvonicProgressBar Type="Indeterminate" />
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Reversed (60%)" FontSize="13" Foreground="#71717A" />
+                        <avonic:AvonicProgressBar Value="0.6" Reversed="True" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Spinner -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="SPINNER VARIANTS" Margin="16,0" />
+                <WrapPanel Margin="16,8" HorizontalAlignment="Left">
+                    <StackPanel Spacing="6" Margin="12,8" HorizontalAlignment="Center">
+                        <avonic:AvonicSpinner HorizontalAlignment="Center" />
+                        <TextBlock Text="circular" FontSize="11" Foreground="#71717A"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Spacing="6" Margin="12,8" HorizontalAlignment="Center">
+                        <avonic:AvonicSpinner Variant="Crescent" HorizontalAlignment="Center" />
+                        <TextBlock Text="crescent" FontSize="11" Foreground="#71717A"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Spacing="6" Margin="12,8" HorizontalAlignment="Center">
+                        <avonic:AvonicSpinner Variant="Dots" HorizontalAlignment="Center" />
+                        <TextBlock Text="dots" FontSize="11" Foreground="#71717A"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Spacing="6" Margin="12,8" HorizontalAlignment="Center">
+                        <avonic:AvonicSpinner Variant="Lines" HorizontalAlignment="Center" />
+                        <TextBlock Text="lines" FontSize="11" Foreground="#71717A"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Searchbar -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="SEARCHBAR" Margin="16,0" />
+                <StackPanel Spacing="12" Margin="0,8">
+                    <avonic:AvonicSearchbar Placeholder="Search…" Margin="0" />
+                    <avonic:AvonicSearchbar Placeholder="With cancel button"
+                                            ShowCancelButton="True" />
+                    <avonic:AvonicSearchbar Placeholder="Disabled search"
+                                            IsEnabled="False" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ItemSliding -->
+            <StackPanel Spacing="0">
+                <avonic:AvonicListHeader Content="ITEM SLIDING" Margin="16,0" />
+                <avonic:AvonicList Inset="True">
+
+                    <!-- Swipe left (end) to reveal Delete -->
+                    <avonic:AvonicItemSliding>
+                        <avonic:AvonicItemSliding.EndOptions>
+                            <avonic:AvonicItemOptions>
+                                <avonic:AvonicItemOption Color="Danger">
+                                    <avonic:AvonicItemOption.StartContent>
+                                        <TextBlock Text="🗑" FontSize="20" HorizontalAlignment="Center" />
+                                    </avonic:AvonicItemOption.StartContent>
+                                    Delete
+                                </avonic:AvonicItemOption>
+                            </avonic:AvonicItemOptions>
+                        </avonic:AvonicItemSliding.EndOptions>
+                        <avonic:AvonicItem Lines="Inset">
+                            <avonic:AvonicLabel>Swipe left to delete</avonic:AvonicLabel>
+                        </avonic:AvonicItem>
+                    </avonic:AvonicItemSliding>
+
+                    <!-- Swipe either side -->
+                    <avonic:AvonicItemSliding>
+                        <avonic:AvonicItemSliding.StartOptions>
+                            <avonic:AvonicItemOptions Side="Start">
+                                <avonic:AvonicItemOption Color="Success">
+                                    <avonic:AvonicItemOption.StartContent>
+                                        <TextBlock Text="★" FontSize="20" HorizontalAlignment="Center" />
+                                    </avonic:AvonicItemOption.StartContent>
+                                    Favourite
+                                </avonic:AvonicItemOption>
+                            </avonic:AvonicItemOptions>
+                        </avonic:AvonicItemSliding.StartOptions>
+                        <avonic:AvonicItemSliding.EndOptions>
+                            <avonic:AvonicItemOptions>
+                                <avonic:AvonicItemOption Color="Warning">
+                                    <avonic:AvonicItemOption.StartContent>
+                                        <TextBlock Text="📁" FontSize="20" HorizontalAlignment="Center" />
+                                    </avonic:AvonicItemOption.StartContent>
+                                    Archive
+                                </avonic:AvonicItemOption>
+                                <avonic:AvonicItemOption Color="Danger">
+                                    <avonic:AvonicItemOption.StartContent>
+                                        <TextBlock Text="🗑" FontSize="20" HorizontalAlignment="Center" />
+                                    </avonic:AvonicItemOption.StartContent>
+                                    Delete
+                                </avonic:AvonicItemOption>
+                            </avonic:AvonicItemOptions>
+                        </avonic:AvonicItemSliding.EndOptions>
+                        <avonic:AvonicItem Lines="None">
+                            <avonic:AvonicLabel>Swipe either side</avonic:AvonicLabel>
+                        </avonic:AvonicItem>
+                    </avonic:AvonicItemSliding>
+
+                </avonic:AvonicList>
+            </StackPanel>
+
         </StackPanel>
     </avonic:AvonicContent>
 

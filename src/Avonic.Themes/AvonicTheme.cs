@@ -95,5 +95,39 @@ public class AvonicTheme : Styles
         {
             Source = new Uri("avares://Avonic.Themes/Controls/AvonicTextareaStyles.axaml")
         });
+
+        // ── Tier 4 — Composed Patterns ───────────────────────────────────────
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicCardStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicChipStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicBadgeStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicAvatarStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicProgressBarStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicSpinnerStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicSearchbarStyles.axaml")
+        });
+        Add(new StyleInclude(BaseUri)
+        {
+            Source = new Uri("avares://Avonic.Themes/Controls/AvonicItemSlidingStyles.axaml")
+        });
     }
 }

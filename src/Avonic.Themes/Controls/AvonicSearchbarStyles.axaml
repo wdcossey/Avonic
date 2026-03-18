@@ -1,0 +1,94 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avonic="using:Avonic.Components.Controls">
+
+    <!-- ── Base ─────────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSearchbar">
+        <Setter Property="Background"          Value="{DynamicResource Avonic.MutedBrush}" />
+        <Setter Property="Foreground"          Value="{DynamicResource Avonic.ForegroundBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Padding"             Value="8,0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="*,Auto" Margin="{TemplateBinding Padding}">
+
+                    <!-- Search field container -->
+                    <Border Grid.Column="0"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
+                            MinHeight="{DynamicResource Avonic.Searchbar.MinHeight}"
+                            Padding="12,0">
+
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <!-- Search icon -->
+                            <TextBlock Grid.Column="0"
+                                       Text="🔍"
+                                       FontSize="16"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource Avonic.MutedForegroundBrush}" />
+
+                            <!-- Text input -->
+                            <TextBox Name="PART_Input"
+                                     Grid.Column="1"
+                                     Text="{TemplateBinding Text, Mode=OneWay}"
+                                     Watermark="{TemplateBinding Placeholder}"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     VerticalAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     FontSize="{DynamicResource Avonic.FontSize.Body}" />
+
+                            <!-- Clear button — visible when :has-value -->
+                            <Button Name="PART_ClearButton"
+                                    Grid.Column="2"
+                                    Content="✕"
+                                    FontSize="14"
+                                    Background="Transparent"
+                                    Foreground="{DynamicResource Avonic.MutedForegroundBrush}"
+                                    BorderThickness="0"
+                                    Padding="4"
+                                    VerticalAlignment="Center"
+                                    IsVisible="False" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Cancel button — visible when :show-cancel -->
+                    <Button Name="PART_CancelButton"
+                            Grid.Column="1"
+                            Content="{TemplateBinding CancelButtonText}"
+                            Background="Transparent"
+                            Foreground="{DynamicResource Avonic.PrimaryBrush}"
+                            BorderThickness="0"
+                            Padding="12,0,4,0"
+                            VerticalAlignment="Center"
+                            IsVisible="False" />
+
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- ── Has value: show clear button ──────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSearchbar:has-value /template/ Button#PART_ClearButton">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Show cancel: show cancel button ───────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSearchbar:show-cancel /template/ Button#PART_CancelButton">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!-- ── Focused: ring highlight ───────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSearchbar:focused /template/ Border">
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+
+    <!-- ── Disabled ──────────────────────────────────────────────────────────── -->
+    <Style Selector="avonic|AvonicSearchbar:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+</Styles>
