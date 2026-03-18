@@ -2,6 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="#F2F2F7" Padding="0,16" MinWidth="360" MinHeight="120">
+            <StackPanel Spacing="12">
+                <avonic:AvonicSearchbar Placeholder="Search…" />
+                <avonic:AvonicSearchbar Placeholder="With cancel" ShowCancelButton="True" />
+                <avonic:AvonicSearchbar Placeholder="Disabled" IsEnabled="False" />
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ── Base ─────────────────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicSearchbar">
         <Setter Property="Background"          Value="{DynamicResource Avonic.MutedBrush}" />

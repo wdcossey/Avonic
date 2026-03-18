@@ -2,6 +2,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="16" MinWidth="300" MinHeight="80">
+            <StackPanel Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <avonic:AvonicSpinner HorizontalAlignment="Center" />
+                    <TextBlock Text="circular" FontSize="11" Foreground="#71717A" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <avonic:AvonicSpinner Variant="Dots" HorizontalAlignment="Center" />
+                    <TextBlock Text="dots" FontSize="11" Foreground="#71717A" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <avonic:AvonicSpinner Variant="Lines" HorizontalAlignment="Center" />
+                    <TextBlock Text="lines" FontSize="11" Foreground="#71717A" HorizontalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ── Base ─────────────────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicSpinner">
         <Setter Property="Foreground" Value="{DynamicResource Avonic.PrimaryBrush}" />

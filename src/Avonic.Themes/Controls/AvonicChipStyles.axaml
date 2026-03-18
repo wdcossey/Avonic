@@ -3,6 +3,17 @@
         xmlns:avonic="using:Avonic.Components.Controls"
         xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="16" MinWidth="260" MinHeight="80">
+            <WrapPanel HorizontalAlignment="Left">
+                <avonic:AvonicChip Margin="4">Default</avonic:AvonicChip>
+                <avonic:AvonicChip Margin="4" Outline="True">Outline</avonic:AvonicChip>
+                <avonic:AvonicChip Margin="4">🏷 Tagged</avonic:AvonicChip>
+                <avonic:AvonicChip Margin="4" IsEnabled="False">Disabled</avonic:AvonicChip>
+            </WrapPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ── Base ─────────────────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicChip">
         <Setter Property="Background"       Value="{DynamicResource Avonic.MutedBrush}" />

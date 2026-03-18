@@ -2,6 +2,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="#F2F2F7" MinWidth="360" MinHeight="160">
+            <StackPanel>
+                <avonic:AvonicItemSliding>
+                    <avonic:AvonicItemSliding.EndOptions>
+                        <avonic:AvonicItemOptions>
+                            <avonic:AvonicItemOption Color="Danger">Delete</avonic:AvonicItemOption>
+                        </avonic:AvonicItemOptions>
+                    </avonic:AvonicItemSliding.EndOptions>
+                    <avonic:AvonicItem Lines="Inset">
+                        <avonic:AvonicLabel>Swipe left to delete</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicItemSliding>
+                <avonic:AvonicItemSliding>
+                    <avonic:AvonicItemSliding.StartOptions>
+                        <avonic:AvonicItemOptions Side="Start">
+                            <avonic:AvonicItemOption Color="Success">Favourite</avonic:AvonicItemOption>
+                        </avonic:AvonicItemOptions>
+                    </avonic:AvonicItemSliding.StartOptions>
+                    <avonic:AvonicItemSliding.EndOptions>
+                        <avonic:AvonicItemOptions>
+                            <avonic:AvonicItemOption Color="Warning">Archive</avonic:AvonicItemOption>
+                            <avonic:AvonicItemOption Color="Danger">Delete</avonic:AvonicItemOption>
+                        </avonic:AvonicItemOptions>
+                    </avonic:AvonicItemSliding.EndOptions>
+                    <avonic:AvonicItem Lines="None">
+                        <avonic:AvonicLabel>Swipe either side</avonic:AvonicLabel>
+                    </avonic:AvonicItem>
+                </avonic:AvonicItemSliding>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <!-- AvonicItemSliding                                                      -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->

@@ -2,6 +2,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="24" MinWidth="320" MinHeight="140">
+            <StackPanel Spacing="20">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Determinate — 75%" FontSize="12" Foreground="#71717A" />
+                    <avonic:AvonicProgressBar Value="0.75" />
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Determinate — 40% (buffer 80%)" FontSize="12" Foreground="#71717A" />
+                    <avonic:AvonicProgressBar Value="0.4" Buffer="0.8" />
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Indeterminate" FontSize="12" Foreground="#71717A" />
+                    <avonic:AvonicProgressBar Type="Indeterminate" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ── Base ─────────────────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicProgressBar">
         <Setter Property="Background"          Value="{DynamicResource Avonic.MutedBrush}" />

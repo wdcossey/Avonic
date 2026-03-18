@@ -2,6 +2,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="16" MinWidth="200" MinHeight="80">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <avonic:AvonicAvatar Background="#3880FF">
+                    <TextBlock Text="AB" Foreground="White" FontWeight="SemiBold" FontSize="14"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </avonic:AvonicAvatar>
+                <avonic:AvonicAvatar Width="56" Height="56" Background="#22C55E">
+                    <TextBlock Text="CD" Foreground="White" FontWeight="SemiBold" FontSize="18"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </avonic:AvonicAvatar>
+                <avonic:AvonicAvatar Background="#F59E0B">
+                    <TextBlock Text="🦊" FontSize="22"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </avonic:AvonicAvatar>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <Style Selector="avonic|AvonicAvatar">
         <Setter Property="Width"   Value="{DynamicResource Avonic.Avatar.Size}" />
         <Setter Property="Height"  Value="{DynamicResource Avonic.Avatar.Size}" />

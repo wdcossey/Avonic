@@ -2,6 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="16" MinWidth="200" MinHeight="60">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <avonic:AvonicBadge>1</avonic:AvonicBadge>
+                <avonic:AvonicBadge Background="#EF4444">99+</avonic:AvonicBadge>
+                <avonic:AvonicBadge Background="#22C55E">New</avonic:AvonicBadge>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <Style Selector="avonic|AvonicBadge">
         <Setter Property="Background"  Value="{DynamicResource Avonic.PrimaryBrush}" />
         <Setter Property="Foreground"  Value="{DynamicResource Avonic.PrimaryForegroundBrush}" />

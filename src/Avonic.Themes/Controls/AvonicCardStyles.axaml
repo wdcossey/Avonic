@@ -2,6 +2,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avonic="using:Avonic.Components.Controls">
 
+    <Design.PreviewWith>
+        <Border Background="#F2F2F7" Padding="0" MinWidth="320" MinHeight="200">
+            <StackPanel>
+                <avonic:AvonicCard>
+                    <StackPanel Padding="16">
+                        <TextBlock Text="Static Card" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Cards group related content." TextWrapping="Wrap" Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicCard>
+                <avonic:AvonicCard Button="True">
+                    <StackPanel Padding="16">
+                        <TextBlock Text="Tappable Card" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Button=True makes this interactive." Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicCard>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <!-- ── Base ─────────────────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicCard">
         <Setter Property="Background"          Value="{DynamicResource Avonic.BackgroundBrush}" />
