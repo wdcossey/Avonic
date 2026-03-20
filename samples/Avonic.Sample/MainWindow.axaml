@@ -697,7 +697,7 @@
 
                 <!-- Static card -->
                 <avonic:AvonicCard>
-                    <StackPanel Padding="16">
+                    <StackPanel >
                         <TextBlock Text="Static Card"
                                    FontSize="18"
                                    FontWeight="SemiBold"
@@ -710,7 +710,7 @@
 
                 <!-- Tappable card -->
                 <avonic:AvonicCard Button="True">
-                    <StackPanel Padding="16">
+                    <StackPanel >
                         <TextBlock Text="Tappable Card"
                                    FontSize="18"
                                    FontWeight="SemiBold"
@@ -722,8 +722,8 @@
                 </avonic:AvonicCard>
 
                 <!-- Card with avatar and badge -->
-                <avonic:AvonicCard Button="True">
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16" RowDefinitions="Auto">
+                <avonic:AvonicCard Button="True" >
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto" Margin="6">
                         <avonic:AvonicAvatar Grid.Column="0"
                                              Margin="0,0,12,0"
                                              Background="#3880FF">

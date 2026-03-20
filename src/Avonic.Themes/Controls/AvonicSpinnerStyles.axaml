@@ -39,15 +39,9 @@
                             Height="{TemplateBinding Height}"
                             CornerRadius="{DynamicResource Avonic.CornerRadius.Pill}"
                             BorderThickness="{DynamicResource Avonic.Spinner.RingThickness}"
+                            BorderBrush="{TemplateBinding Foreground}"
                             RenderTransformOrigin="50%,50%"
-                            IsVisible="False">
-                        <Border.BorderBrush>
-                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                                <GradientStop Color="Transparent" Offset="0" />
-                                <GradientStop Color="{Binding $parent[avonic:AvonicSpinner].Foreground.(SolidColorBrush.Color)}" Offset="0.75" />
-                            </LinearGradientBrush>
-                        </Border.BorderBrush>
-                    </Border>
+                            IsVisible="False" />
 
                     <!-- ── Dots ─────────────────────────────────────────────── -->
                     <StackPanel Name="PART_Dots"
@@ -59,15 +53,15 @@
                         <Ellipse Name="PART_Dot1"
                                  Width="{DynamicResource Avonic.Spinner.DotSize}"
                                  Height="{DynamicResource Avonic.Spinner.DotSize}"
-                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                                 Fill="{TemplateBinding Foreground}" />
                         <Ellipse Name="PART_Dot2"
                                  Width="{DynamicResource Avonic.Spinner.DotSize}"
                                  Height="{DynamicResource Avonic.Spinner.DotSize}"
-                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                                 Fill="{TemplateBinding Foreground}" />
                         <Ellipse Name="PART_Dot3"
                                  Width="{DynamicResource Avonic.Spinner.DotSize}"
                                  Height="{DynamicResource Avonic.Spinner.DotSize}"
-                                 Fill="{Binding $parent[avonic:AvonicSpinner].Foreground}" />
+                                 Fill="{TemplateBinding Foreground}" />
                     </StackPanel>
 
                     <!-- ── Lines ────────────────────────────────────────────── -->
@@ -78,7 +72,7 @@
                         <!-- 8 short lines arranged around centre, rotated via animation -->
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
                                 Margin="0,3,0,0"
@@ -89,7 +83,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.85"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -101,7 +95,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.7"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -113,7 +107,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.55"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -125,7 +119,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.4"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -137,7 +131,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.3"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -149,7 +143,7 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.2"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
@@ -161,12 +155,12 @@
                         </Border>
                         <Border Width="3" Height="8"
                                 CornerRadius="2"
-                                Background="{Binding $parent[avonic:AvonicSpinner].Foreground}"
+                                Background="{TemplateBinding Foreground}"
                                 Opacity="0.1"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Center"
                                 Margin="0,3,0,0"
-                                RenderTransformOrigin="50%,350%">
+                                RenderTransformOrigin="50%,360%">
                             <Border.RenderTransform>
                                 <RotateTransform Angle="315" />
                             </Border.RenderTransform>

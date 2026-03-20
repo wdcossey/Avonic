@@ -32,7 +32,7 @@ public class AvonicAvatarTests
         var window = new Window { Content = avatar, Width = 390, Height = 200 };
         window.Show();
 
-        Assert.True(avatar.IsAttachedToVisualTree);
+        Assert.True(TopLevel.GetTopLevel(avatar) is not null);
     }
 
     [AvaloniaFact]

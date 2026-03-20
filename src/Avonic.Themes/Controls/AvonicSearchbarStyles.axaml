@@ -5,7 +5,7 @@
     <Design.PreviewWith>
         <Border Background="#F2F2F7" Padding="0,16" MinWidth="360" MinHeight="120">
             <StackPanel Spacing="12">
-                <avonic:AvonicSearchbar Placeholder="Search…" />
+                <avonic:AvonicSearchbar Placeholder="Search…" Text="Hello" />
                 <avonic:AvonicSearchbar Placeholder="With cancel" ShowCancelButton="True" />
                 <avonic:AvonicSearchbar Placeholder="Disabled" IsEnabled="False" />
             </StackPanel>

@@ -1,5 +1,3 @@
-using Avalonia.Interactivity;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>

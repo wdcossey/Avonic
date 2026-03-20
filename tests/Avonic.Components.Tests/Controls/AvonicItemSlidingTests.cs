@@ -102,8 +102,11 @@ public class AvonicItemSlidingTests
         var dragRaised = false;
         sliding.Drag += (_, _) => dragRaised = true;
 
-        window.MouseDown(new Avalonia.Point(160, 28), Avalonia.Input.MouseButton.Left);
-        window.MouseMove(new Avalonia.Point(110, 28));
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
+        // First move crosses the drag threshold and steals pointer capture.
+        // The Drag event is raised on the second move once dragging is confirmed.
+        window.MouseMove(new Avalonia.Point(145, 100));
+        window.MouseMove(new Avalonia.Point(125, 100));
 
         Assert.True(dragRaised);
     }
@@ -190,7 +193,7 @@ public class AvonicItemSlidingTests
         var raised = false;
         option.Pressed += (_, _) => raised = true;
 
-        window.MouseDown(new Avalonia.Point(40, 28), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.True(raised);
     }

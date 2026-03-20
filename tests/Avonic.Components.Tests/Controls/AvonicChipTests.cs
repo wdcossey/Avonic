@@ -65,7 +65,7 @@ public class AvonicChipTests
         var raised = false;
         chip.Pressed += (_, _) => raised = true;
 
-        window.MouseDown(new Avalonia.Point(40, 24), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.True(raised);
     }
@@ -80,7 +80,7 @@ public class AvonicChipTests
         var raised = false;
         chip.Pressed += (_, _) => raised = true;
 
-        window.MouseDown(new Avalonia.Point(40, 24), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.False(raised);
     }

@@ -1,6 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:avonic="using:Avonic.Components.Controls">
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
 
     <Design.PreviewWith>
         <Border Background="#F2F2F7" MinWidth="360" MinHeight="160">
@@ -78,10 +79,16 @@
     <!-- AvonicItemOptions                                                      -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <Style Selector="avonic|AvonicItemOptions">
-        <Setter Property="ItemsPanel">
-            <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" />
-            </ItemsPanelTemplate>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter">
+                    <ItemsPresenter.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsPresenter.ItemsPanel>
+                </ItemsPresenter>
+            </ControlTemplate>
         </Setter>
     </Style>
 
@@ -103,7 +110,6 @@
                         ClipToBounds="True">
                     <Panel>
                         <avonicPrimitives:AvonicRipple
-                            xmlns:avonicPrimitives="using:Avonic.Components.Primitives"
                             RippleFill="{DynamicResource Avonic.PrimaryForegroundBrush}" />
 
                         <StackPanel VerticalAlignment="Center"

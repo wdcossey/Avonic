@@ -1,6 +1,3 @@
-using Avalonia;
-using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Primitives;
 using Avonic.Components.Primitives;
 
 namespace Avonic.Components.Controls;

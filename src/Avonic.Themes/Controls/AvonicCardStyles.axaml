@@ -1,18 +1,19 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:avonic="using:Avonic.Components.Controls">
+        xmlns:avonic="using:Avonic.Components.Controls"
+        xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
 
     <Design.PreviewWith>
         <Border Background="#F2F2F7" Padding="0" MinWidth="320" MinHeight="200">
             <StackPanel>
                 <avonic:AvonicCard>
-                    <StackPanel Padding="16">
+                    <StackPanel Margin="16">
                         <TextBlock Text="Static Card" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
                         <TextBlock Text="Cards group related content." TextWrapping="Wrap" Foreground="#71717A" />
                     </StackPanel>
                 </avonic:AvonicCard>
                 <avonic:AvonicCard Button="True">
-                    <StackPanel Padding="16">
+                    <StackPanel Margin="16">
                         <TextBlock Text="Tappable Card" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
                         <TextBlock Text="Button=True makes this interactive." Foreground="#71717A" />
                     </StackPanel>
@@ -40,18 +41,27 @@
                                           OffsetX="0" OffsetY="2"
                                           Opacity="1" />
                     </Border.Effect>
-                    <ContentPresenter Content="{TemplateBinding Content}"
-                                      ContentTemplate="{TemplateBinding ContentTemplate}"
-                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    <Panel>
+                        <avonicPrimitives:AvonicRipple
+                            CornerRadius="{DynamicResource Avonic.CornerRadius.Rounded}"
+                            RippleFill="{DynamicResource Avonic.ForegroundBrush}"
+                            IsVisible="False" />
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Panel>
                 </Border>
             </ControlTemplate>
         </Setter>
     </Style>
 
-    <!-- ── Button mode: pointer cursor ───────────────────────────────────────── -->
+    <!-- ── Button mode: pointer cursor + ripple ─────────────────────────────── -->
     <Style Selector="avonic|AvonicCard:button">
         <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="avonic|AvonicCard:button /template/ avonicPrimitives|AvonicRipple">
+        <Setter Property="IsVisible" Value="True" />
     </Style>
 
     <!-- ── Button mode: pressed overlay ─────────────────────────────────────── -->

@@ -71,8 +71,8 @@ public class AvonicCardTests
         var clicked = false;
         card.Click += (_, _) => clicked = true;
 
-        window.MouseDown(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
-        window.MouseUp(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
+        window.MouseUp(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.True(clicked);
     }
@@ -93,8 +93,8 @@ public class AvonicCardTests
         var clicked = false;
         card.Click += (_, _) => clicked = true;
 
-        window.MouseDown(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
-        window.MouseUp(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
+        window.MouseUp(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.False(clicked);
     }
@@ -116,8 +116,8 @@ public class AvonicCardTests
         var clicked = false;
         card.Click += (_, _) => clicked = true;
 
-        window.MouseDown(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
-        window.MouseUp(new Avalonia.Point(100, 40), Avalonia.Input.MouseButton.Left);
+        window.MouseDown(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
+        window.MouseUp(new Avalonia.Point(195, 100), Avalonia.Input.MouseButton.Left);
 
         Assert.False(clicked);
     }

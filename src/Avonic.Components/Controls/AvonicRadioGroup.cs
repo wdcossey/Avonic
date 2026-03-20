@@ -1,5 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -33,7 +31,15 @@ public class AvonicRadioGroup : ContentControl
     public object? Value
     {
         get => _value;
-        set => SetAndRaise(ValueProperty, ref _value, value);
+        set
+        {
+            var unchanged = Equals(_value, value);
+            SetAndRaise(ValueProperty, ref _value, value);
+            // SetAndRaise no-ops when the value is unchanged (e.g. null → null),
+            // so OnPropertyChanged won't fire. Sync children explicitly in that case.
+            if (unchanged)
+                SyncChildrenToValue(value);
+        }
     }
 
     // ── Events ───────────────────────────────────────────────────────────────

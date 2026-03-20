@@ -1,10 +1,3 @@
-using System.Collections.Specialized;
-using System.Linq;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Primitives;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>

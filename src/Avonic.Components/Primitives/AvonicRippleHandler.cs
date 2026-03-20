@@ -1,5 +1,3 @@
-using System;
-using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Media;
 using Avalonia.Rendering.Composition;

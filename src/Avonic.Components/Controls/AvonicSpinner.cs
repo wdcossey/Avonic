@@ -1,9 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Primitives;
-using Avonic.Components.Controls.Enums;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>
@@ -44,6 +38,13 @@ public class AvonicSpinner : TemplatedControl
     {
         get => GetValue(DurationProperty);
         set => SetValue(DurationProperty, value);
+    }
+
+    // ── Constructor ──────────────────────────────────────────────────────────
+
+    public AvonicSpinner()
+    {
+        UpdateVariantPseudoClasses(Variant);
     }
 
     // ── Property Change ──────────────────────────────────────────────────────

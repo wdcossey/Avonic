@@ -1,9 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Primitives;
-using Avonic.Components.Controls.Enums;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>
@@ -46,6 +40,13 @@ public class AvonicProgressBar : TemplatedControl
 
     public static readonly StyledProperty<bool> ReversedProperty =
         AvaloniaProperty.Register<AvonicProgressBar, bool>(nameof(Reversed), defaultValue: false);
+
+    // ── Constructor ──────────────────────────────────────────────────────────
+
+    public AvonicProgressBar()
+    {
+        UpdateTypePseudoClasses(Type);
+    }
 
     // ── Public API ───────────────────────────────────────────────────────────
 

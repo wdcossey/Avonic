@@ -1,12 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avonic.Components.Controls.Enums;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>
@@ -25,6 +16,12 @@ public class AvonicItemSliding : ContentControl
     /// <summary>Fraction of the options width at which a release snaps the item open.</summary>
     private const double SnapThreshold = 0.4;
 
+    /// <summary>
+    /// Minimum horizontal movement (px) before a drag is confirmed.
+    /// Prevents stealing taps from the inner item.
+    /// </summary>
+    private const double DragStartThreshold = 8.0;
+
     // ── Template parts ───────────────────────────────────────────────────────
 
     private ContentPresenter? _contentPresenter;
@@ -33,7 +30,9 @@ public class AvonicItemSliding : ContentControl
 
     // ── Drag state ───────────────────────────────────────────────────────────
 
+    private bool   _pointerDown;
     private bool   _isDragging;
+    private Point  _pointerDownPosition;
     private Point  _dragStart;
     private double _translateX;
 
@@ -74,6 +73,18 @@ public class AvonicItemSliding : ContentControl
         remove => RemoveHandler(DragEvent, value);
     }
 
+    // ── Constructor ──────────────────────────────────────────────────────────
+
+    public AvonicItemSliding()
+    {
+        // Use handledEventsToo: true so we receive events even when the inner
+        // AvonicItem (AvonicPressable) has already set e.Handled = true.
+        AddHandler(PointerPressedEvent,     OnPointerPressedCore,     handledEventsToo: true);
+        AddHandler(PointerMovedEvent,       OnPointerMovedCore,       handledEventsToo: true);
+        AddHandler(PointerReleasedEvent,    OnPointerReleasedCore,    handledEventsToo: true);
+        AddHandler(PointerCaptureLostEvent, OnPointerCaptureLostCore, handledEventsToo: true);
+    }
+
     // ── Template ─────────────────────────────────────────────────────────────
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -108,61 +119,74 @@ public class AvonicItemSliding : ContentControl
 
     // ── Input Handling ───────────────────────────────────────────────────────
 
-    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    private void OnPointerPressedCore(object? sender, PointerPressedEventArgs e)
     {
-        base.OnPointerPressed(e);
+        if (!IsEffectivelyEnabled) return;
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
 
-        if (!IsEffectivelyEnabled || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            return;
-
-        e.Pointer.Capture(this);
-        _isDragging = true;
-        _dragStart  = e.GetPosition(this);
-
-        PseudoClasses.Set(":dragging", true);
-        e.Handled = true;
+        _pointerDown         = true;
+        _pointerDownPosition = e.GetPosition(this);
+        _dragStart           = _pointerDownPosition;
+        _isDragging          = false;
     }
 
-    protected override void OnPointerMoved(PointerEventArgs e)
+    private void OnPointerMovedCore(object? sender, PointerEventArgs e)
     {
-        base.OnPointerMoved(e);
+        if (!_pointerDown) return;
 
-        if (!_isDragging) return;
+        var currentPos = e.GetPosition(this);
 
-        var delta  = e.GetPosition(this).X - _dragStart.X;
+        if (!_isDragging)
+        {
+            var deltaX = currentPos.X - _pointerDownPosition.X;
+            var deltaY = currentPos.Y - _pointerDownPosition.Y;
+
+            // Wait until horizontal movement is dominant and exceeds the threshold.
+            // This avoids conflicting with vertical scrolling.
+            if (Math.Abs(deltaX) < DragStartThreshold) return;
+            if (Math.Abs(deltaY) > Math.Abs(deltaX)) return;
+
+            // Confirmed horizontal drag — steal pointer capture from inner item.
+            e.Pointer.Capture(this);
+            _isDragging = true;
+            _dragStart  = currentPos;
+            PseudoClasses.Set(":dragging", true);
+            return;
+        }
+
+        var delta  = currentPos.X - _dragStart.X;
         var target = _translateX + delta;
-        _dragStart = e.GetPosition(this);
+        _dragStart = currentPos;
 
-        // Clamp so we cannot drag past the full options width
         var maxStart = GetOptionsWidth(SlideSide.Start);
         var maxEnd   = GetOptionsWidth(SlideSide.End);
         target = Math.Clamp(target, -maxEnd, maxStart);
 
         ApplyTranslate(target);
-
         RaiseEvent(new SlidingDragEventArgs(DragEvent, this, target));
+        e.Handled = true;
     }
 
-    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    private void OnPointerReleasedCore(object? sender, PointerReleasedEventArgs e)
     {
-        base.OnPointerReleased(e);
+        if (!_pointerDown) return;
+        _pointerDown = false;
 
         if (!_isDragging) return;
 
         _isDragging = false;
         e.Pointer.Capture(null);
         PseudoClasses.Set(":dragging", false);
-
         SnapOrClose();
         e.Handled = true;
     }
 
-    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    private void OnPointerCaptureLostCore(object? sender, PointerCaptureLostEventArgs e)
     {
-        base.OnPointerCaptureLost(e);
-
         if (!_isDragging) return;
-        _isDragging = false;
+
+        _isDragging  = false;
+        _pointerDown = false;
         PseudoClasses.Set(":dragging", false);
         SnapOrClose();
     }
@@ -195,7 +219,7 @@ public class AvonicItemSliding : ContentControl
     {
         _translateX = x;
 
-        if (_contentPresenter != null)
+        if (_contentPresenter is not null)
             _contentPresenter.RenderTransform = new Avalonia.Media.TranslateTransform(x, 0);
     }
 

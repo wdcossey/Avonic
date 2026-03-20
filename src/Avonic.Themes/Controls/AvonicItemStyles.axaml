@@ -3,6 +3,26 @@
         xmlns:avonic="using:Avonic.Components.Controls"
         xmlns:avonicPrimitives="using:Avonic.Components.Primitives">
 
+    <Design.PreviewWith>
+        <Border Background="White" Padding="20" MinWidth="320">
+        
+            <StackPanel>
+                <avonic:AvonicItem>
+                    <StackPanel Margin="16,12">
+                        <TextBlock Text="Static Item" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Items are for lists of actionable content." TextWrapping="Wrap" Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicItem>
+                <avonic:AvonicItem Button="True">
+                    <StackPanel Margin="16,12">
+                        <TextBlock Text="Tappable Item" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Button=True makes this interactive." Foreground="#71717A" />
+                    </StackPanel>
+                </avonic:AvonicItem>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
     <Style Selector="avonic|AvonicItem">
         <Setter Property="Background"             Value="{DynamicResource Avonic.BackgroundBrush}" />
         <Setter Property="Foreground"             Value="{DynamicResource Avonic.ForegroundBrush}" />
@@ -23,7 +43,7 @@
                           MinHeight="{DynamicResource Avonic.Item.MinHeight}">
 
                         <!-- Ripple layer — fills Border, beneath content
-                        <avonicPrimitives:AvonicRipple Grid.Column="0" Grid.ColumnSpan="2" /> -->
+                        <avonicPrimitives:AvonicRipple Grid.Column="0" Grid.ColumnSpan="3" /> -->
                             
                         <!-- Start slot -->
                         <ContentPresenter Name="PART_StartContent"

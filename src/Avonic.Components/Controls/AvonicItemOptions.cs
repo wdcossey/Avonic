@@ -1,8 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avonic.Components.Controls.Enums;
-
 namespace Avonic.Components.Controls;
 
 /// <summary>
@@ -25,6 +20,13 @@ public class AvonicItemOptions : ItemsControl
     {
         get => GetValue(SideProperty);
         set => SetValue(SideProperty, value);
+    }
+
+    // ── Constructor ──────────────────────────────────────────────────────────
+
+    public AvonicItemOptions()
+    {
+        UpdateSidePseudoClasses(Side);
     }
 
     // ── Property Change ──────────────────────────────────────────────────────

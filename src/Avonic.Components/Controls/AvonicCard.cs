@@ -1,8 +1,4 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
-using Avalonia.Input;
-using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace Avonic.Components.Controls;
 
@@ -15,6 +11,15 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(":button")]
 public class AvonicCard : ContentControl
 {
+    // ── Default values ───────────────────────────────────────────────────────
+
+    static AvonicCard()
+    {
+        // Transparent background ensures the card is always hit-testable,
+        // even when no theme provides an opaque background brush.
+        BackgroundProperty.OverrideDefaultValue<AvonicCard>(Brushes.Transparent);
+    }
+
     // ── Styled Properties ────────────────────────────────────────────────────
 
     public static readonly StyledProperty<bool> ButtonProperty =
