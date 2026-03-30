@@ -263,11 +263,31 @@
         <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedBottom}" />
         <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
     </Style>
+    <!-- Focused + fill-outline: keep full all-sides border, thicker -->
+    <Style Selector="avonic|AvonicInput:fill-outline:focused /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedOutline}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
+    <!-- Focused + shape-round: pill shape needs full all-sides border regardless of fill -->
+    <Style Selector="avonic|AvonicInput:shape-round:focused /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedOutline}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.PrimaryBrush}" />
+    </Style>
 
     <!-- ── Error: red border ─────────────────────────────────────────────────── -->
     <Style Selector="avonic|AvonicInput:has-error /template/ Border#PART_InputWrapper">
         <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.DestructiveBrush}" />
         <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.Focused}" />
+    </Style>
+    <!-- Error + fill-outline: keep full all-sides border, thicker -->
+    <Style Selector="avonic|AvonicInput:fill-outline:has-error /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedOutline}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.DestructiveBrush}" />
+    </Style>
+    <!-- Error + shape-round: pill shape needs full all-sides border regardless of fill -->
+    <Style Selector="avonic|AvonicInput:shape-round:has-error /template/ Border#PART_InputWrapper">
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Input.BorderThickness.FocusedOutline}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Avonic.DestructiveBrush}" />
     </Style>
 
     <!-- ── Readonly ──────────────────────────────────────────────────────────── -->

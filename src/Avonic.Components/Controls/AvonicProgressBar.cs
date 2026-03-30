@@ -113,7 +113,7 @@ public class AvonicProgressBar : TemplatedControl
     protected override Size ArrangeOverride(Size finalSize)
     {
         var arranged = base.ArrangeOverride(finalSize);
-        UpdateBarWidths();
+        UpdateBarWidths(arranged.Width);
         return arranged;
     }
 
@@ -125,12 +125,14 @@ public class AvonicProgressBar : TemplatedControl
         PseudoClasses.Set(":indeterminate", type == ProgressBarType.Indeterminate);
     }
 
-    private void UpdateBarWidths()
+    private void UpdateBarWidths(double? width = null)
     {
+        var w = width ?? Bounds.Width;
+
         if (_progressBar != null)
-            _progressBar.Width = Bounds.Width * Value;
+            _progressBar.Width = w * Value;
 
         if (_bufferBar != null)
-            _bufferBar.Width = Bounds.Width * Buffer;
+            _bufferBar.Width = w * Buffer;
     }
 }

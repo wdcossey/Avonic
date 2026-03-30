@@ -109,6 +109,7 @@
     <Thickness   x:Key="Avonic.Input.BorderThickness.Outline">1</Thickness>
     <Thickness   x:Key="Avonic.Input.BorderThickness.Focused">0,0,0,2</Thickness>
     <Thickness   x:Key="Avonic.Input.BorderThickness.FocusedBottom">0,0,0,2</Thickness>
+    <Thickness   x:Key="Avonic.Input.BorderThickness.FocusedOutline">2</Thickness>
     <!-- Border brushes -->
     <SolidColorBrush x:Key="Avonic.Input.BorderBrush" Color="{StaticResource Avonic.Color.Border}" />
 
