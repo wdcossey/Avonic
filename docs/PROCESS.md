@@ -48,12 +48,16 @@ Rules that are not negotiable:
 
 ## 3. Compare
 
-Side by side with the real web component in **md** mode at a phone viewport:
+Side by side with the real web component in **md** mode at a phone viewport.
+`node tools/ionic-ref/render.js <ion-tag> [--html …] [--tap]` produces the Ionic side:
+screenshots (and press/release frames), the shadow DOM tree, bounding boxes, computed layout
+and the resolved value of every CSS variable, under `docs/components/<ion-tag>/ref/`.
 
 1. Every behaviour in the plan is exercised on both and the result recorded in
    `docs/components/<ion-tag>/COMPARISON.md` — match / deliberate difference / gap.
-2. Visual: the Avonic rendering is placed next to the Ionic rendering. Differences are
-   listed and either fixed or recorded as deliberate.
+2. Visual: the Avonic rendering (headless screenshot from the test harness or the sample app)
+   is placed next to the Ionic `ref/` images. Differences are listed and either fixed or
+   recorded as deliberate.
 3. Any gap found here goes back to **Build**. The control does not proceed with open gaps.
 
 ## 4. Review

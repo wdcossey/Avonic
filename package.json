@@ -20,5 +20,8 @@
   "dependencies": {
     "@ionic/core": "^8.8.1",
     "@ionic/docs": "^8.8.1"
+  },
+  "devDependencies": {
+    "playwright-core": "1.56.1"
   }
 }

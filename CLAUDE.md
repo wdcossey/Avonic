@@ -25,6 +25,8 @@ src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS va
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless + xUnit behaviour tests
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
+tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
+                         screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs
 ```
 
@@ -55,8 +57,9 @@ Fetched by `npm install` (never committed):
 | Icons | `node_modules/ionicons/dist/svg/*.svg` |
 
 `node tools/ionic-api.js <ion-tag>` prints the spec as a Markdown checklist. **Start every control
-from that output.** The `src/` directory does not exist in the published npm package — do not look
-for `.tsx` or `.scss` files.
+from that output.** `node tools/ionic-ref/render.js <ion-tag> [--tap]` renders the real component
+and writes the evidence used in the plan and the compare step. The `src/` directory does not exist
+in the published npm package — do not look for `.tsx` or `.scss` files.
 
 ---
 
