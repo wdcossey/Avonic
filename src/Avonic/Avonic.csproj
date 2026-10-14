@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Umbrella package: references Components + Themes. Contains no code of its own. -->
+  <PropertyGroup>
+    <PackageId>Avonic</PackageId>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Avonic.Components\Avonic.Components.csproj" />
+    <ProjectReference Include="..\Avonic.Themes\Avonic.Themes.csproj" />
+  </ItemGroup>
+
+</Project>

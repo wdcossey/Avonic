@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Avonic.Themes</PackageId>
+    <Description>Default theme for Avonic.Components: a recreation of Ionic's Material Design mode, with every Ionic CSS variable exposed as a resource key.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="**\*.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Avonic.Components\Avonic.Components.csproj" />
+  </ItemGroup>
+
+</Project>

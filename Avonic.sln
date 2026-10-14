@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Components", "src\Avonic.Components\Avonic.Components.csproj", "{0311CE70-DF09-4F20-B37D-A00F47B85476}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Themes", "src\Avonic.Themes\Avonic.Themes.csproj", "{34BAA5DD-342D-48D8-9553-710AA4640EAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic", "src\Avonic\Avonic.csproj", "{6C4F882F-AFFC-4936-91EC-51126675C39A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B5BA07F5-5D25-450D-9E84-CEE7E67BD1C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Components.Tests", "tests\Avonic.Components.Tests\Avonic.Components.Tests.csproj", "{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0311CE70-DF09-4F20-B37D-A00F47B85476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0311CE70-DF09-4F20-B37D-A00F47B85476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0311CE70-DF09-4F20-B37D-A00F47B85476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0311CE70-DF09-4F20-B37D-A00F47B85476}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34BAA5DD-342D-48D8-9553-710AA4640EAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34BAA5DD-342D-48D8-9553-710AA4640EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34BAA5DD-342D-48D8-9553-710AA4640EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34BAA5DD-342D-48D8-9553-710AA4640EAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C4F882F-AFFC-4936-91EC-51126675C39A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C4F882F-AFFC-4936-91EC-51126675C39A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C4F882F-AFFC-4936-91EC-51126675C39A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C4F882F-AFFC-4936-91EC-51126675C39A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0311CE70-DF09-4F20-B37D-A00F47B85476} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
+		{34BAA5DD-342D-48D8-9553-710AA4640EAC} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
+		{6C4F882F-AFFC-4936-91EC-51126675C39A} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
+		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D} = {B5BA07F5-5D25-450D-9E84-CEE7E67BD1C4}
+	EndGlobalSection
+EndGlobal

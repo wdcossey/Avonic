@@ -1,0 +1,24 @@
+{
+  "name": "avonic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wdcossey/Avonic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wdcossey/Avonic/issues"
+  },
+  "homepage": "https://github.com/wdcossey/Avonic#readme",
+  "dependencies": {
+    "@ionic/core": "^8.8.1",
+    "@ionic/docs": "^8.8.1"
+  }
+}

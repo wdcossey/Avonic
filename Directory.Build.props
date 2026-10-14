@@ -1,0 +1,23 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- NuGet metadata shared by the packable projects under src/ -->
+  <PropertyGroup>
+    <Authors>William Cossey</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/wdcossey/Avonic</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wdcossey/Avonic</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>avalonia;ionic;mobile;touch;components</PackageTags>
+    <Description>Faithful recreation of Ionic Framework components for AvaloniaUI. Not affiliated with or endorsed by Ionic, Inc.</Description>
+  </PropertyGroup>
+
+</Project>
