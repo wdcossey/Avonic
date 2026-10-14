@@ -130,6 +130,12 @@ Three honest options:
 
 Recommendation: **A** if "faithful" is the goal (it was stated as such). **B** is the pragmatic v2.0 with A as v2.x, *provided* the token keys are named for it from day one. C is what v1 was.
 
+> **Decision (October 2026): B, with Ionic's `md` mode as the base skin.**
+> Components recreate Ionic's behaviour faithfully (mobile/tablet first). There is one visual
+> language, and it is a recreation of Ionic's Material Design mode — not an invented one.
+> Every Ionic CSS variable is exposed as an `Avonic.*` resource key so end users can restyle.
+> iOS mode is not a goal; the token naming must not preclude it later.
+
 ### 3.2 `core.json` is the spec. Every component starts from it.
 
 Write `tools/ionic-api.js <ion-tag>` (≈30 lines of Node) that prints a checklist of props / events / methods / slots / parts / CSS vars. The checklist is pasted into the component's doc page as a fidelity table and **every row is ticked or has a written reason it's omitted.** No component is "done" below ~90%.
