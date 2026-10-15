@@ -44,7 +44,7 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 
 | Ionic | Avonic | Status |
 |---|---|---|
-| `ion-ripple-effect` | `AvonicRippleEffect` (+ `Behaviors.Activatable` = Ionic `tap-click`; `AvonicConfig.Animated` / `.RippleEffect`) | built, compared, reviewed — awaiting sign-off — [docs](docs/components/ion-ripple-effect/README.md) |
+| `ion-ripple-effect` | `AvonicRippleEffect` (+ `Behaviors.Activatable` = Ionic `tap-click`; `AvonicConfig.Animated` / `.RippleEffect`) | done (signed off 2026-10-15) — [docs](docs/components/ion-ripple-effect/README.md) |
 
 A row is added here only when the control has completed every step in `docs/PROCESS.md`.
 

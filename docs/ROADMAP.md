@@ -9,7 +9,7 @@ Foundation first; each depends on the one before it.
 
 | # | Ionic | Status |
 |---|---|---|
-| 1 | `ion-ripple-effect` (+ the `tap-click` activatable behaviour) | **awaiting sign-off** — [docs](components/ion-ripple-effect/README.md) · [comparison](components/ion-ripple-effect/COMPARISON.md) |
+| 1 | `ion-ripple-effect` (+ the `tap-click` activatable behaviour) | **done** (signed off 2026-10-15) — [docs](components/ion-ripple-effect/README.md) · [comparison](components/ion-ripple-effect/COMPARISON.md) |
 | 2 | `ion-icon` (ionicons pipeline) | planned |
 | 3 | `ion-item` | planned |
 | 4 | `ion-label` | planned |
