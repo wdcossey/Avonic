@@ -1,0 +1,13 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:themes="using:Avonic.Themes"
+             x:Class="Avonic.Sample.App"
+             RequestedThemeVariant="Light">
+
+    <Application.Styles>
+        <!-- Base theme for native controls (Window, TextBlock, Button…); Avonic styles only Avonic controls. -->
+        <SimpleTheme />
+        <themes:AvonicTheme />
+    </Application.Styles>
+
+</Application>

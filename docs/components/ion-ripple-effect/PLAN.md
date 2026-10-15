@@ -1,6 +1,7 @@
 # ion-ripple-effect → `AvonicRippleEffect` — Plan
 
-> Status: **awaiting approval**. No code is written until this plan is signed off.
+> Status: **approved 2026-10-15** — D1 include `Activatable`; D2 constants in Components;
+> D3 `AddRipple` returns `Action`; D4 Skia in the headless harness. Now in **Build**.
 > Sources read: `dist/collection/components/ripple-effect/ripple-effect.js` + `.css`,
 > `dist/collection/utils/tap-click/index.js`, `@ionic/docs` core.json 8.8.1.
 > Reference render: [`ref/README.md`](ref/README.md) (`node tools/ionic-ref/render.js ion-ripple-effect --tap`).
@@ -60,12 +61,12 @@ From `tap-click/index.js` (the `Activatable` behaviour):
 
 | # | Behaviour | Source |
 |---|---|---|
-| A1 | Pointer down on an activatable surface (left/primary button only; `button === 2` ignored) starts a **100 ms** defer (`ADD_ACTIVATED_DEFERS`); *instant* surfaces skip the defer. | pointerDown, setActivatedElement |
+| A1 | Pointer down on an activatable surface (any button except the secondary, `button === 2`) starts a **100 ms** defer (`ADD_ACTIVATED_DEFERS`); *instant* surfaces skip the defer. Only the innermost activatable under the pointer is a candidate (`getActivatableTarget`). | pointerDown, setActivatedElement |
 | A2 | When the defer fires: surface gets `:activated`; if ripples are enabled, the surface's ripple gets `AddRipple(x, y)` with the **original pointer-down position**; any previous active ripple is released first. | addActivated |
-| A3 | Pointer up **before** the defer fires: activate now (so a quick tap still ripples), then release smoothly. | setActivatedElement |
-| A4 | Pointer up after activation ("smooth" release): ripple release action invoked (subject to B8); `:activated` cleared **150 ms** after activation (`CLEAR_STATE_DEFERS`) or immediately if already past that. Instant surfaces clear immediately. | removeActivated(true) |
+| A3 | Pointer up **before** the defer fires: activate now (so a quick tap still ripples) — at the **pointer-up** position, since `setActivatedElement(undefined, ev)` passes the release event's coordinates — then release smoothly. | setActivatedElement |
+| A4 | Pointer up after activation ("smooth" release): ripple release action invoked (subject to B8). If the release comes within **150 ms** of activation (`CLEAR_STATE_DEFERS`), `:activated` is cleared 150 ms after the release; otherwise immediately. Instant surfaces clear immediately. A new press while a clear is pending drops the old state at once. | removeActivated(true), setActivatedElement |
 | A5 | Pointer cancel, or a gesture claiming the pointer (`ionGestureCaptured` → in Avonic: pointer capture lost / a scroll gesture starting): defer cancelled, ripple released, `:activated` cleared immediately. A cancel before the defer fires means **no ripple at all**. | cancelActive, removeActivated(false) |
-| A6 | A second pointer down while a surface is active is ignored. | pointerDown guard |
+| A6 | While any surface is pressed, pointer downs anywhere are ignored — one active surface application-wide (`activatableEle`). | pointerDown guard |
 | A7 | Global switch: ripples are off when config `animated` or `rippleEffect` is false. | useRippleEffect |
 
 ## Avalonia mapping

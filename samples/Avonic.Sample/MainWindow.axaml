@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Avonic.Sample.MainWindow"
+        Title="Avonic"
+        Width="390" Height="844" CanResize="False"
+        Background="White">
+
+    <!-- Phone-sized shell. The header and page list are plain Avalonia until ion-toolbar /
+         ion-list exist; each Avonic control gets one page under Pages/. -->
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#F8F8F8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Height="56">
+            <DockPanel VerticalAlignment="Center" Margin="8,0">
+                <Button Name="BackButton" DockPanel.Dock="Left" Content="Back" IsVisible="False" Click="OnBack" />
+                <TextBlock Name="PageTitle" Text="Avonic" FontSize="20" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Margin="8,0" />
+            </DockPanel>
+        </Border>
+
+        <ContentControl Name="Host" />
+    </DockPanel>
+
+</Window>

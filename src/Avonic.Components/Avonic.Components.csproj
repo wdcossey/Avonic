@@ -10,8 +10,10 @@
     <PackageReference Include="Avalonia" />
   </ItemGroup>
 
+  <!-- *.axaml files are included automatically by Avalonia 12's build props. -->
+
   <ItemGroup>
-    <AvaloniaResource Include="**\*.axaml" />
+    <InternalsVisibleTo Include="Avonic.Components.Tests" />
   </ItemGroup>
 
 </Project>

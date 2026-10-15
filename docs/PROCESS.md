@@ -34,11 +34,15 @@ One PR, one control, all of:
 |---|---|
 | Control class — behaviour, properties, events, pseudoclasses, **no visual opinion** | `src/Avonic.Components/Controls/<Name>/` |
 | Functional stub template (structure only) | same folder, `<Name>.axaml` |
-| Styled template using only resource keys | `src/Avonic.Themes/Controls/<Name>.axaml` |
+| Styled template using only resource keys — when the control has a visual (a control whose look Ionic hard-codes with no CSS variable has none; say so in the plan) | `src/Avonic.Themes/Controls/<Name>.axaml` |
 | Resource keys — one per Ionic CSS var, named by the rule in `CLAUDE.md` | `src/Avonic.Themes/Tokens/<Name>.axaml` |
 | `Design.PreviewWith` block | in the Themes template |
 | Behaviour tests — one per behaviour listed in the plan; each must **fail** if the behaviour is removed | `tests/Avonic.Components.Tests/Controls/<Name>Tests.cs` |
 | Sample page | `samples/Avonic.Sample/Pages/<Name>Page.axaml` |
+
+Test fixtures that exist for this: `TestClock` replaces Avonic's clock and defer scheduler so
+timelines are asserted to the millisecond; `Scene` shows a headless window and closes it when the
+test ends; `window.CaptureRenderedFrame()` gives real pixels (Skia) for the compare step.
 
 Rules that are not negotiable:
 - `dotnet build` and `dotnet test` are green **before every commit**. No "it's just XAML".

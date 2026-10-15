@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Resource keys, one per Ionic CSS custom property, named by the rule in CLAUDE.md
+        (`‐‐ion-color-primary` → Avonic.Color.Primary; `‐‐inner-padding-start` on ion-item →
+        Avonic.Item.InnerPaddingStart). Values are Ionic's md defaults.
+
+        Keys are added by the control that introduces them, in its own PR.
+        ion-ripple-effect introduces none (it has no CSS variables).
+    -->
+
+</ResourceDictionary>

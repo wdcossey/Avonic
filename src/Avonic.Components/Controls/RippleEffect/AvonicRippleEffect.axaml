@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!--
+        Functional stub for ion-ripple-effect. The host fills its parent (inset: 0) and is a
+        presentation-only layer; the ripple circles are created in code (Ionic hard-codes their
+        shape, opacity and timings with no CSS variable, so they are constants in Components).
+        Nothing here is visual: the only structure is the container the circles are placed in.
+    -->
+    <ControlTheme x:Key="{x:Type c:AvonicRippleEffect}" TargetType="c:AvonicRippleEffect">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Canvas Name="PART_Container" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

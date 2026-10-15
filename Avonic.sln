@@ -15,13 +15,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B5BA07F5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Components.Tests", "tests\Avonic.Components.Tests\Avonic.Components.Tests.csproj", "{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5D20AA90-6969-D8BD-9DCD-8634F4692FDA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Sample", "samples\Avonic.Sample\Avonic.Sample.csproj", "{D671D334-A649-4DBC-B719-1308744851E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0311CE70-DF09-4F20-B37D-A00F47B85476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -40,11 +41,19 @@ Global
 		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D671D334-A649-4DBC-B719-1308744851E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D671D334-A649-4DBC-B719-1308744851E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D671D334-A649-4DBC-B719-1308744851E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D671D334-A649-4DBC-B719-1308744851E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0311CE70-DF09-4F20-B37D-A00F47B85476} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
 		{34BAA5DD-342D-48D8-9553-710AA4640EAC} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
 		{6C4F882F-AFFC-4936-91EC-51126675C39A} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
 		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D} = {B5BA07F5-5D25-450D-9E84-CEE7E67BD1C4}
+		{D671D334-A649-4DBC-B719-1308744851E0} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal

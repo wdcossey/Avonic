@@ -21,9 +21,14 @@ Ionic implementation before writing a line, and you build and test before every 
 
 ```
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
+  Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
+  Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click)
+  AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
+  AvonicComponentsStyles.cs   merges the stub ControlThemes; AvonicTheme includes it
 src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable)
 src/Avonic/              umbrella NuGet package — references both, no code
-tests/Avonic.Components.Tests/   Avalonia.Headless + xUnit behaviour tests
+tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step
+samples/Avonic.Sample/   phone-sized desktop app, one page per control
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
                          screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/
@@ -39,7 +44,7 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 
 | Ionic | Avonic | Status |
 |---|---|---|
-| _none yet_ | | |
+| `ion-ripple-effect` | `AvonicRippleEffect` (+ `Behaviors.Activatable` = Ionic `tap-click`; `AvonicConfig.Animated` / `.RippleEffect`) | built, compared, reviewed — awaiting sign-off — [docs](docs/components/ion-ripple-effect/README.md) |
 
 A row is added here only when the control has completed every step in `docs/PROCESS.md`.
 
@@ -80,6 +85,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `--ion-color-primary` | `Avonic.Color.Primary` (`Color`) + `Avonic.Color.PrimaryBrush` | keep Ionic's `-contrast` / `-shade` / `-tint` names |
 | `--ion-foo` | `Avonic.Foo` | |
 | `--foo-bar` on `ion-item` | `Avonic.Item.FooBar` | `--inner-padding-start` → `Avonic.Item.InnerPaddingStart` |
+| string-union prop `'a' \| 'b'` | enum `<Component><Prop>` | `ion-ripple-effect` `type` → `RippleEffectType { Bounded, Unbounded }` |
+| visual constant with **no** CSS variable | a constant in `Avonic.Components` — it is behaviour, not theme | ripple opacity 0.16, 225 ms expand |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.

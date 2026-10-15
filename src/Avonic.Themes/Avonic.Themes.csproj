@@ -10,9 +10,7 @@
     <PackageReference Include="Avalonia" />
   </ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="**\*.axaml" />
-  </ItemGroup>
+  <!-- *.axaml files are included automatically by Avalonia 12's build props. -->
 
   <ItemGroup>
     <ProjectReference Include="..\Avonic.Components\Avonic.Components.csproj" />
