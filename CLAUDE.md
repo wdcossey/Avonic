@@ -33,6 +33,7 @@ tools/ionic-api.js       core.json → fidelity checklist (the spec for every co
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
                          screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs
+.mcp.json                Claude Code MCP servers: avalonia-docs (Avalonia's hosted Build MCP — docs and API lookup)
 ```
 
 Stack: libraries target **net8.0**; tests target **net10.0** (xunit v3 needs the SDK's apphost);
