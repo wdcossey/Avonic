@@ -24,7 +24,6 @@ public class AvonicLabel : ContentControl
     public static readonly StyledProperty<LabelPosition?> PositionProperty =
         AvaloniaProperty.Register<AvonicLabel, LabelPosition?>(nameof(Position));
 
-    private bool _attached;
     private bool _loaded;
     private IDisposable? _noAnimateTimer;
 
@@ -51,7 +50,7 @@ public class AvonicLabel : ContentControl
             PseudoClasses.Set(":position-stacked", position == LabelPosition.Stacked);
             PseudoClasses.Set(":position-floating", position == LabelPosition.Floating);
 
-            if (_attached)
+            if (VisualRoot is not null)
             {
                 EmitStyle();
             }
@@ -61,7 +60,6 @@ public class AvonicLabel : ContentControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        _attached = true;
 
         // componentWillLoad and componentDidLoad, which only happen once.
         if (!_loaded)
@@ -80,7 +78,6 @@ public class AvonicLabel : ContentControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _attached = false;
         ClearNoAnimate();
     }
 

@@ -48,21 +48,21 @@ Each becomes a test.
 | 7 | Margins in an item: default slot `0 10`, start `0 10 16 10`, end `16 10 0 10`, and no end margin-start in a toggle or radio item. Nested deeper, none | `::slotted(ion-label)`; measured `start`, `end` |
 | 8 | Long text wraps and grows the item | measured `long`: 75 high, three 18 px lines |
 | 9 | `.ion-text-nowrap`: one line, an ellipsis, clipped, including `h2` and `p` inside | measured `nowrap`, `nw-h2`, `nw-p` |
-| 10 | `.ion-text-wrap`: line height 1.5, except where `h1`–`h6` and `p` set their own | measured `wrap`, `wrap-h` |
+| 10 | `.ion-text-wrap`: line height 1.5 at any depth, except where `h1`–`h6` and `p` set their own | measured `wrap`, `wrap-h` |
 | 11 | `h1`–`h6` and `p`: sizes 24, 16, 14, 14, 14, 14, 14; weight normal; margins, and line heights 28.8, 19.2, normal, 20 | measured `heads` |
 | 12 | `p` is `#666666` as a direct child, the inherited colour nested deeper | `::slotted(p)`; measured `p`, `n-p` |
 | 13 | `p` inherits in a coloured item, including a coloured label's colour, but stays `#666666` in a coloured label in a plain item | `.in-item-color`; measured `colored-p`, `colored2-p`, `danger-p` |
 | 14 | Fixed: 100 wide, at the start, wrapping | measured `fixed`, `fixedlong` |
 | 15 | Stacked: no margin, top-start origin, `translateY(50%) scale(0.75)`, with colour easing over 150 ms | measured `stacked-only`: `matrix(0.75, 0, 0, 0.75, 0, 27)` |
 | 16 | A stacked or floating label fills the item's content height, which is what its percentages are of | `flex: 1` in a column; measured 54 with no sibling, 30 with one |
-| 17 | Floating: `translateY(96%)`, with colour and transform easing over 150 ms | measured `floating` |
+| 17 | Floating: `translateY(96%)`, with colour and transform easing over 150 ms. A change of size moves it at once | measured `floating`; the computed value stays a percentage |
 | 18 | Floating rises to the stacked transform on `.ion-focused`, `item-has-focus`, `item-has-value`, and `item-has-placeholder` unless `item-input` | measured `l-f-f`, `l-hf-f`, `l-hv-f`, `l-hp-f`, `l-hpi-f` |
 | 19 | No transitions for the first 1000 ms if floating when it loaded, and only then | `noAnimate`; measured `true/0s` until 1108 ms; `chg` animates |
 | 20 | Stacked or floating with focus: primary colour, beating `Avonic.Label.Color`. In a coloured item: contrast. In an unknown colour: inherits. A label's own `Color` wins, and a plain or fixed label doesn't change | measured `l-f-*`, `l-fc-s`, `l-fcb-s`, `l-f-sc`, `l-f-v` |
 | 21 | `.ion-invalid.ion-touched` on the item: stacked or floating inherits, even focused or with `Avonic.Label.Color`, because `--highlight-color-invalid` isn't set on an item | measured `l-inv`, `l-invf`, `l-invf2` |
 | 22 | `item-interactive-disabled` without `item-multiple-inputs`: opacity 0.3, no input, default cursor | `label.md.css`; measured `l-id` |
 | 23 | `item-input`: max 200, no input, so a tap goes through to the item. A stacked or floating label has no maximum | `label.md.css`; measured `l-inp`, `l-hpi-f` |
-| 24 | `item-textarea`: at the top. `item-skeleton-text`: clipped | measured `l-ta`, `l-sk` |
+| 24 | `item-textarea`: at the top, at its own height, but stacked and floating still fill. `item-skeleton-text`: clipped | measured `l-ta`, `l-sk`, and a stacked one: `matrix(0.75, 0, 0, 0.75, 0, 27)` |
 | 25 | A tap on a label doesn't forward to the item's first control, even on its blank part, but a tap on the padding does | measured: `toggle: on label blank` leaves it off |
 | 26 | A tap on a label in a button item clicks the item | measured |
 | 27 | RTL: stacked and floating shrink towards the right, and fixed sits at the right | `.label-rtl`; measured with `dir` on the document: 105.5 to 374, and x = 274 |
@@ -98,14 +98,23 @@ directly in the item's slot. Any deeper still doesn't match, as in Ionic.
 that yields nothing gives the property's default, not the inherited value, and this is what the colour system's README
 lists as a limit. This control needs it because a label is often inside a coloured item.
 
-**`white-space` inherits, and so do `TextBlock.TextWrapping` and `TextBlock.TextTrimming`.** They're set on the label,
-so anything inside it follows, as in CSS. `line-height: 1.5` is a factor of each element's own size, so it's set on each
-`TextBlock`, through `Css.Em`.
+**`white-space` and `line-height` inherit, and so do `TextBlock.TextWrapping`, `TextBlock.TextTrimming` and
+`TextBlock.LineHeight`.** They're set on the label, so anything inside it follows, as in CSS.
 
-**`translateY(50%)` is `Css.TranslateScale`,** a converter from the label's `Bounds` to a `TransformOperations`. Avalonia
-has no percentage translate, and `Bounds` is what CSS's percentage is of. `TransformOperations` is what a transition can
-ease. A `RenderTransform` doesn't affect layout, as a CSS transform doesn't. `FlowDirection` mirrors the origin, so
-RTL needs no rule of its own.
+**No rule for a `TextBlock` uses a descendant selector.** A rule for a `TextBlock` is checked for every `TextBlock` in the
+app, and a descendant selector then walks up its ancestors, in an app with no labels too. Measured on this PC, attaching
+5,000 `TextBlock`s at a depth of 20, alternating with and without so warm-up doesn't count: `::slotted(*) h1` translated
+literally, as nine selectors, took 200 ms at the median against 177 ms, about 13%, or 5 µs per `TextBlock`. The styles
+here took 205 ms with and 216 ms without, so no measurable cost. It's a judgement call for a rare case, made because every
+`TextBlock` pays and later controls would add to it. So they use `c|AvonicLabel > TextBlock.h1` and
+`c|AvonicLabel > :is(Panel) > TextBlock.h1`.
+
+**`translateY(50%)` is `Css.TranslateY`, read by `Css.TranslateScale` with `Bounds`.** Avalonia has no percentage
+translate, and `Bounds` is what CSS's percentage is of. The theme eases `Css.TranslateY` and `Css.Scale`, not the transform:
+in CSS the computed value stays a percentage, so a rotation or a sibling's size moves the label at once, and only a
+change of state eases. Measured mid-flight, stacked to floating at 0.8647 and 38.39 is each function interpolated on its
+own, which this is too. A `RenderTransform` doesn't affect layout, as a CSS transform doesn't. `FlowDirection` mirrors
+the origin, so RTL needs no rule of its own.
 
 **A stacked or floating label fills the height.** The item's theme aligns its slots to the top for these, which is right
 for the others, but `.input-wrapper` still stretches, and the label's `flex: 1` fills it. `Styles/Label.axaml` stretches
@@ -123,6 +132,8 @@ which is what `flex: 1` beside a fixed-height sibling is.
 | `item-input`'s label is as wide as its text up to 200, where Ionic's is `min-content` (measured 58, one word per line) | Avalonia has no `min-content`. Nothing in Ionic 8 raises `input`, so only a custom child reaches this |
 | A label moved to another item tells the new item | Ionic only emits on first load, so measured `b` gets nothing. Recycled containers are normal in Avalonia. As in Ionic, the old item keeps its classes |
 | A right-to-left subtree acts like a right-to-left document, so a stacked label shrinks to the right | Ionic's `label-rtl` only reads `document.dir`, so with `dir` on a `div`, measured, its text ends at 284 and leaves a gap. `FlowDirection` has no separate document level |
+| `h1`–`h6` and `p` get their rules directly in the label or in a panel directly in it, where Ionic's reach any depth (measured `n-h2`) | See the design: a descendant selector adds about 13% to attaching every `TextBlock` in the app. Set the values yourself deeper down |
+| With `ion-text-wrap`, a `TextBlock` with its own `FontSize` gets 1.5 of the label's size, not its own | `TextBlock.LineHeight` inherits as a size. Same reason |
 | A label detached in its first second doesn't stay stuck without transitions | Ionic cancels the timer and never clears the state, which is an accident |
 
 ## Not in this PR

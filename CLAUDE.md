@@ -110,10 +110,11 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `--foo` falling back to something else | key set to `<b:CssUnset />`, read through `Css.Var` with the fallback as the next value | `--color-hover: var(--color)`; `currentColor` is the host's `Foreground` |
 | `1.25em` | `Css.Em` on the font size | `--detail-icon-font-size` → factor `1.25` |
 | `color: inherit` | `$parent[Control].(TextElement.Foreground)`, as the last value of a `Css.Var` | A binding that yields nothing gives the default, not the inherited value |
-| `translateY(50%) scale(0.75)` | `Css.TranslateScale` on `Bounds`, with the fraction and the scale as `ConverterParameter` | `0.5,0.75` |
-| `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c|AvonicItem:item-input c|AvonicLabel` |
+| `translateY(50%) scale(0.75)` | `Css.TranslateY` `0.5` and `Css.Scale` `0.75`, read by `Css.TranslateScale` with `Bounds` | Ease those two, not the transform: a change of size moves it at once in CSS |
+| `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c\|AvonicItem:item-input c\|AvonicLabel` |
 | A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
 | `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |
+| A CSS rule for every descendant, on text | `>`, and `> :is(Panel) >`, not a descendant selector | A rule for a `TextBlock` is checked for every `TextBlock` in the app, and a descendant selector walks up its ancestors |
 | `::slotted(ion-foo[slot=start])` | `c\|AvonicHost /template/ ContentPresenter#PART_Start > c\|AvonicFoo`, in `Styles/` | `>` means direct children, as `::slotted` does |
 | `.ion-focusable`, `.ion-focused` | `FocusVisible.IsEnabled`, `:ion-focused` | |
 | `outline: none` | `FocusAdorner` set to `{x:Null}` in the theme | Unset falls back to the base theme's dashed rectangle. It reads null either way, so a test has to check the `AdornerLayer` |

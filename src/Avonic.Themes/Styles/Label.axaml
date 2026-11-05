@@ -27,12 +27,10 @@
 
     <!-- A translation of label.md.css and item.md.css's rules for labels, in the order that matters: later
          beats earlier here, where CSS uses specificity. It's all here, not in a ControlTheme, because nearly
-         every rule depends on an ancestor, and Styles beat a ControlTheme. -->
+         every rule depends on an ancestor, and Styles beat a ControlTheme.
 
-    <!-- line-height doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
-    <Style Selector="c|AvonicLabel TextBlock">
-        <Setter Property="ClipToBounds" Value="False" />
-    </Style>
+         A rule for a TextBlock is checked for every TextBlock in the app. A descendant selector then walks
+         up its ancestors, which every TextBlock pays for, in a label or not, so they use '>' here. -->
 
     <!-- :host-context(.item) -->
     <Style Selector="c|AvonicItem c|AvonicLabel">
@@ -82,35 +80,39 @@
         <Setter Property="ClipToBounds" Value="True" />
     </Style>
 
-    <!-- :host(.ion-text-wrap). line-height is a factor of each element's own font size. -->
-    <Style Selector="c|AvonicLabel.ion-text-wrap TextBlock">
-        <Setter Property="LineHeight">
+    <!-- :host(.ion-text-wrap). It inherits, as line-height does, as a size rather than a factor. -->
+    <Style Selector="c|AvonicLabel.ion-text-wrap">
+        <Setter Property="TextBlock.LineHeight">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
     </Style>
 
-    <!-- ::slotted(*) h1 etc. line-height 1.2 on h1 and h2 is from Ionic's global typography. -->
-    <Style Selector="c|AvonicLabel TextBlock.h1">
+    <!-- ::slotted(*) h1 etc, with a panel standing for the slot. line-height 1.2 on h1 and h2 is from Ionic's
+         global typography. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+    <Style Selector="c|AvonicLabel > TextBlock.h1, c|AvonicLabel > :is(Panel) > TextBlock.h1">
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight" Value="28.8" />
     </Style>
-    <Style Selector="c|AvonicLabel TextBlock.h2">
+    <Style Selector="c|AvonicLabel > TextBlock.h2, c|AvonicLabel > :is(Panel) > TextBlock.h2">
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,2,0,2" />
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight" Value="19.2" />
     </Style>
-    <Style Selector="c|AvonicLabel TextBlock.h3, c|AvonicLabel TextBlock.h4, c|AvonicLabel TextBlock.h5, c|AvonicLabel TextBlock.h6">
+    <Style Selector="c|AvonicLabel > TextBlock.h3, c|AvonicLabel > TextBlock.h4, c|AvonicLabel > TextBlock.h5, c|AvonicLabel > TextBlock.h6, c|AvonicLabel > :is(Panel) > TextBlock.h3, c|AvonicLabel > :is(Panel) > TextBlock.h4, c|AvonicLabel > :is(Panel) > TextBlock.h5, c|AvonicLabel > :is(Panel) > TextBlock.h6">
         <Setter Property="Margin" Value="0,2,0,2" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight" Value="NaN" />
     </Style>
-    <Style Selector="c|AvonicLabel TextBlock.p">
+    <Style Selector="c|AvonicLabel > TextBlock.p, c|AvonicLabel > :is(Panel) > TextBlock.p">
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="LineHeight" Value="20" />
@@ -159,8 +161,18 @@
     <Style Selector="c|AvonicItem c|AvonicLabel:position-stacked, c|AvonicItem c|AvonicLabel:position-floating">
         <Setter Property="Margin" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <!-- flex: 1 in a column fills it, whatever item-textarea's align-self says -->
+        <Setter Property="VerticalAlignment" Value="Stretch" />
         <Setter Property="MaxWidth" Value="Infinity" />
         <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+        <!-- The height tracks at once, as CSS's percentage does. Only TranslateY and Scale ease. -->
+        <Setter Property="RenderTransform">
+            <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
     </Style>
     <!-- flex: 1 in a column of .input-wrapper, which stretches. It's what translateY's percentage is of. -->
     <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_Container, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_Container">
@@ -174,7 +186,8 @@
 
     <!-- :host(.label-stacked) -->
     <Style Selector="c|AvonicItem c|AvonicLabel:position-stacked">
-        <Setter Property="RenderTransform" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={x:Static b:Css.TranslateScale}, ConverterParameter='0.5,0.75'}" />
+        <Setter Property="b:Css.TranslateY" Value="0.5" />
+        <Setter Property="b:Css.Scale" Value="0.75" />
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
@@ -184,11 +197,13 @@
 
     <!-- :host(.label-floating) -->
     <Style Selector="c|AvonicItem c|AvonicLabel:position-floating">
-        <Setter Property="RenderTransform" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={x:Static b:Css.TranslateScale}, ConverterParameter='0.96,1'}" />
+        <Setter Property="b:Css.TranslateY" Value="0.96" />
+        <Setter Property="b:Css.Scale" Value="1" />
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
-                <TransformOperationsTransition Property="{x:Static Visual.RenderTransformProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
             </Transitions>
         </Setter>
     </Style>
@@ -200,7 +215,8 @@
 
     <!-- :host-context(.ion-focused).label-floating, and has-focus, has-placeholder, has-value -->
     <Style Selector="c|AvonicItem:ion-focused c|AvonicLabel:position-floating, c|AvonicItem:item-has-focus c|AvonicLabel:position-floating, c|AvonicItem:item-has-placeholder:not(:item-input) c|AvonicLabel:position-floating, c|AvonicItem:item-has-value c|AvonicLabel:position-floating">
-        <Setter Property="RenderTransform" Value="{Binding Bounds, RelativeSource={RelativeSource Self}, Converter={x:Static b:Css.TranslateScale}, ConverterParameter='0.5,0.75'}" />
+        <Setter Property="b:Css.TranslateY" Value="0.5" />
+        <Setter Property="b:Css.Scale" Value="0.75" />
     </Style>
 
     <!-- :host-context(.ion-focused).label-stacked:not(.ion-color), and floating, and has-focus -->

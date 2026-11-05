@@ -149,7 +149,6 @@ public class AvonicLabelTests
         var label = new AvonicLabel { Content = "x", Color = "danger" };
         using var scene = InScene(label);
 
-        Assert.True(Has(label, ":ion-color"));
         Assert.Equal(Danger, TextColor(Text(label)));
     });
 
@@ -385,6 +384,17 @@ public class AvonicLabelTests
         Assert.True(Has(item, ":item-label"));
     }
 
+    [AvaloniaFact]
+    public void Content_Alignment_Reaches_The_Content()
+    {
+        var content = new Border { Width = 10, Height = 10 };
+        var label = new AvonicLabel { Content = content, Width = 100, Height = 100, HorizontalContentAlignment = HorizontalAlignment.Center, VerticalContentAlignment = VerticalAlignment.Center };
+        var host = new StackPanel { Children = { label } };
+        using var scene = new Scene(host);
+
+        Assert.Equal(new Point(45, 45), content.TranslatePoint(default, label));
+    }
+
     // ── 7. Margins ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -545,15 +555,26 @@ public class AvonicLabelTests
     // ── 10. .ion-text-wrap ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B10_Wrap_Is_Line_Height_1_5_Of_Each_Elements_Own_Size() => InstalledTheme.Run(_ =>
+    public void B10_Wrap_Is_Line_Height_1_5_At_Any_Depth() => InstalledTheme.Run(_ =>
     {
         var plain = new TextBlock { Text = "x" };
-        var big = new TextBlock { Text = "x", FontSize = 20 };
-        var label = WithClass("ion-text-wrap", new StackPanel { Children = { plain, big } });
+        var nested = new TextBlock { Text = "x" };
+        var label = WithClass("ion-text-wrap", new StackPanel { Children = { plain, new Border { Child = nested } } });
         using var scene = InScene(new AvonicItem { Content = label });
 
         Assert.Equal(24, plain.LineHeight);
-        Assert.Equal(30, big.LineHeight);
+        Assert.Equal(24, nested.LineHeight);
+    });
+
+    [AvaloniaFact]
+    public void B10_Wrap_Follows_The_Labels_Size() => InstalledTheme.Run(_ =>
+    {
+        var plain = new TextBlock { Text = "x" };
+        var label = WithClass("ion-text-wrap", plain);
+        label.FontSize = 20;
+        using var scene = InScene(new AvonicItem { Content = label });
+
+        Assert.Equal(30, plain.LineHeight);
     });
 
     [AvaloniaFact]
@@ -650,13 +671,51 @@ public class AvonicLabelTests
     });
 
     [AvaloniaFact]
-    public void B11_The_Rules_Reach_Any_Depth() => InstalledTheme.Run(_ =>
+    public void B11_They_Apply_Directly_And_In_A_Panel_But_Not_Deeper() => InstalledTheme.Run(_ =>
     {
-        var block = new TextBlock { Text = "x", Classes = { "h2" } };
-        var label = new AvonicLabel { Content = new Border { Child = new Border { Child = block } } };
-        using var scene = InScene(label);
+        var direct = new TextBlock { Text = "x", Classes = { "h2" } };
+        var inPanel = new TextBlock { Text = "x", Classes = { "h2" } };
+        var deeper = new TextBlock { Text = "x", Classes = { "h2" } };
+        using var scene = InScene(
+            new AvonicLabel { Content = direct },
+            new AvonicLabel { Content = new Grid { Children = { inPanel } } },
+            new AvonicLabel { Content = new Border { Child = deeper } });
 
-        Assert.Equal(19.2, block.LineHeight);
+        Assert.Equal(19.2, direct.LineHeight);
+        Assert.Equal(19.2, inPanel.LineHeight);
+
+        // Deliberate: measured, these apply at any depth in Ionic. See the plan for what that would cost.
+        Assert.True(double.IsNaN(deeper.LineHeight));
+    });
+
+    [AvaloniaTheory]
+    [InlineData("h1")]
+    [InlineData("h2")]
+    [InlineData("p")]
+    public void B11_A_Line_Height_Does_Not_Clip_Any_Of_Them(string element)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            var direct = new TextBlock { Text = "x", Classes = { element } };
+            var inPanel = new TextBlock { Text = "x", Classes = { element } };
+            using var scene = InScene(
+                new AvonicLabel { Content = direct },
+                new AvonicLabel { Content = new StackPanel { Children = { inPanel } } });
+
+            Assert.False(direct.ClipToBounds);
+            Assert.False(inPanel.ClipToBounds);
+        });
+    }
+
+    [AvaloniaFact]
+    public void B11_Plain_Text_Keeps_The_Default_Clip() => InstalledTheme.Run(_ =>
+    {
+        var block = new TextBlock { Text = "x" };
+        var outside = new TextBlock { Text = "x", Classes = { "p" } };
+        using var scene = InScene(new AvonicLabel { Content = block }, outside);
+
+        Assert.True(block.ClipToBounds);
+        Assert.True(outside.ClipToBounds);
     });
 
     [AvaloniaFact]
@@ -950,11 +1009,62 @@ public class AvonicLabelTests
         clock.At(1000);
         Dispatcher.UIThread.RunJobs();
 
-        Assert.Equal(2, label.Transitions!.Count);
+        Assert.Equal(3, label.Transitions!.Count);
         Assert.Contains(label.Transitions, transition => transition is BrushTransition { Duration.TotalMilliseconds: 150 });
-        var transform = Assert.IsType<TransformOperationsTransition>(label.Transitions.Single(transition => transition is TransformOperationsTransition));
-        Assert.Equal(Visual.RenderTransformProperty, transform.Property);
-        Assert.Equal(TimeSpan.FromMilliseconds(150), transform.Duration);
+        Assert.Contains(label.Transitions, transition => transition is DoubleTransition { Duration.TotalMilliseconds: 150 } double_ && double_.Property == Css.TranslateYProperty);
+        Assert.Contains(label.Transitions, transition => transition is DoubleTransition { Duration.TotalMilliseconds: 150 } double_ && double_.Property == Css.ScaleProperty);
+    });
+
+    [AvaloniaFact]
+    public void B17_A_Change_Of_Size_Moves_It_At_Once() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var (item, label, child) = FloatingItem();
+        using var scene = InScene(item);
+        clock.At(1000);
+        Dispatcher.UIThread.RunJobs();
+        AssertLowered(label);
+
+        child.Height = 14;
+        Dispatcher.UIThread.RunJobs();
+
+        // In CSS only the percentage eases, so a rotation or a sibling's size doesn't make it slide.
+        Assert.Equal(40, label.Bounds.Height);
+        Assert.Equal(38.4, Transform(label).M32, 3);
+    });
+
+    [AvaloniaFact]
+    public void B17_Shown_Late_It_Does_Not_Slide_In() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var (item, label, _) = FloatingItem();
+        item.IsVisible = false;
+        using var scene = InScene(item);
+        clock.At(1000);
+        Dispatcher.UIThread.RunJobs();
+
+        item.IsVisible = true;
+        Dispatcher.UIThread.RunJobs();
+
+        AssertLowered(label);
+    });
+
+    [AvaloniaFact]
+    public void B17_Attached_Again_It_Does_Not_Slide_In() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var (item, label, _) = FloatingItem();
+        var panel = new StackPanel { Children = { item } };
+        using var scene = new Scene(panel);
+        clock.At(1000);
+        Dispatcher.UIThread.RunJobs();
+
+        panel.Children.Clear();
+        Dispatcher.UIThread.RunJobs();
+        panel.Children.Add(item);
+        Dispatcher.UIThread.RunJobs();
+
+        AssertLowered(label);
     });
 
     private static (AvonicItem Item, AvonicLabel Label, Border Child) FloatingItem()
@@ -1052,16 +1162,14 @@ public class AvonicLabelTests
         var (item, label, _) = FloatingItem();
         using var scene = InScene(item);
 
-        Assert.True(Has(label, ":label-no-animate"));
         Assert.Empty(label.Transitions ?? []);
 
         clock.At(999);
         Dispatcher.UIThread.RunJobs();
-        Assert.True(Has(label, ":label-no-animate"));
+        Assert.Empty(label.Transitions ?? []);
 
         clock.At(1000);
         Dispatcher.UIThread.RunJobs();
-        Assert.False(Has(label, ":label-no-animate"));
         Assert.NotEmpty(label.Transitions!);
     });
 
@@ -1097,14 +1205,13 @@ public class AvonicLabelTests
             using var clock = new TestClock();
             var label = new AvonicLabel { Content = "x", Position = position };
             using var scene = InScene(new AvonicItem { Content = label });
-            Assert.False(Has(label, ":label-no-animate"));
 
             // Measured: changing to floating later eases straight away.
             label.Position = LabelPosition.Floating;
             Dispatcher.UIThread.RunJobs();
 
-            Assert.False(Has(label, ":label-no-animate"));
-            Assert.Equal(2, label.Transitions!.Count);
+            Assert.Equal(3, label.Transitions!.Count);
+            Assert.True(Transform(label).M32 < 51.84);
         });
     }
 
@@ -1120,12 +1227,9 @@ public class AvonicLabelTests
         Dispatcher.UIThread.RunJobs();
 
         // Deliberate: Ionic leaves the state on for good here. Attached again, it starts no new window.
-        Assert.False(Has(label, ":label-no-animate"));
-
         panel.Children.Add(item);
         Dispatcher.UIThread.RunJobs();
 
-        Assert.False(Has(label, ":label-no-animate"));
         Assert.NotEmpty(label.Transitions!);
     });
 
@@ -1140,7 +1244,6 @@ public class AvonicLabelTests
         Dispatcher.UIThread.RunJobs();
 
         // :host(.label-no-animate.label-floating): the state's still on, but only for floating.
-        Assert.True(Has(label, ":label-no-animate"));
         Assert.Single(label.Transitions!);
     });
 
@@ -1474,6 +1577,24 @@ public class AvonicLabelTests
         Assert.Equal(10, Box(label, scene.Window).Y);
         Assert.True(label.Bounds.Height < 40);
     });
+
+    [AvaloniaTheory]
+    [InlineData(LabelPosition.Stacked)]
+    [InlineData(LabelPosition.Floating)]
+    public void B24_In_A_Textarea_Item_Stacked_And_Floating_Still_Fill(LabelPosition position)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            using var clock = new TestClock();
+            var label = new AvonicLabel { Content = "x", Position = position };
+            using var scene = InScene(new AvonicItem { Content = label });
+
+            Raise(label, ("label-" + position.ToString().ToLowerInvariant(), true), ("textarea", true));
+
+            // Measured: matrix(0.75, 0, 0, 0.75, 0, 27), for stacked.
+            Assert.Equal(54, label.Bounds.Height);
+        });
+    }
 
     [AvaloniaFact]
     public void B24_A_Skeleton_Item_Clips_The_Label() => InstalledTheme.Run(_ =>

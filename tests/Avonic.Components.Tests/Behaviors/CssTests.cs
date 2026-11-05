@@ -9,14 +9,11 @@ public class CssTests
     private static object? Convert(Avalonia.Data.Converters.IMultiValueConverter converter, object? parameter, params object?[] values) =>
         converter.Convert(values, typeof(object), parameter, CultureInfo.InvariantCulture);
 
-    private static object? TranslateScale(object? bounds, object? parameter) =>
-        Css.TranslateScale.Convert(bounds, typeof(object), parameter, CultureInfo.InvariantCulture);
-
     [Fact]
     public void TranslateScale_Is_A_Fraction_Of_The_Height_And_Then_A_Scale()
     {
         var matrix = Assert.IsType<Avalonia.Media.Transformation.TransformOperations>(
-            TranslateScale(new Rect(5, 5, 100, 40), "0.5,0.75")).Value;
+            Convert(Css.TranslateScale, null, new Rect(5, 5, 100, 40), 0.5, 0.75)).Value;
 
         // translateY(50%) scale(0.75): the translate isn't scaled.
         Assert.Equal(0.75, matrix.M11, 3);
@@ -26,10 +23,10 @@ public class CssTests
     }
 
     [Fact]
-    public void TranslateScale_Needs_Bounds_And_A_Parameter()
+    public void TranslateScale_Needs_Bounds_And_Both_Values()
     {
-        Assert.Same(AvaloniaProperty.UnsetValue, TranslateScale(null, "0.5,0.75"));
-        Assert.Same(AvaloniaProperty.UnsetValue, TranslateScale(new Rect(0, 0, 1, 1), null));
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, null, 0.5, 0.75));
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, new Rect(0, 0, 1, 1), 0.5));
     }
 
     [Fact]

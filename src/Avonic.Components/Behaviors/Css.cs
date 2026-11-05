@@ -26,37 +26,45 @@ public static class Css
     /// <summary>Four padding variables, in the order start, top, end, bottom, as a <see cref="Thickness"/>.</summary>
     public static readonly IMultiValueConverter Box = new BoxConverter();
 
+    /// <summary>The percentage in <c>translateY(50%)</c>, as a fraction such as <c>0.5</c>. A style can ease it.</summary>
+    public static readonly AttachedProperty<double> TranslateYProperty =
+        AvaloniaProperty.RegisterAttached<StyledElement, double>("TranslateY", typeof(Css));
+
+    /// <summary>The factor in <c>scale(0.75)</c>. A style can ease it.</summary>
+    public static readonly AttachedProperty<double> ScaleProperty =
+        AvaloniaProperty.RegisterAttached<StyledElement, double>("Scale", typeof(Css), 1);
+
     /// <summary>
-    /// <c>translateY(50%) scale(0.75)</c>: from the element's <c>Bounds</c>, which is what the percentage is
-    /// of. The <c>ConverterParameter</c> is the fraction and the scale, such as <c>0.5,0.75</c>. The result
-    /// can be eased by a <c>TransformOperationsTransition</c>.
+    /// <c>translateY(50%) scale(0.75)</c>: the values are the element's <c>Bounds</c>, which is what the
+    /// percentage is of, then <see cref="TranslateYProperty"/> and <see cref="ScaleProperty"/>. Ease those
+    /// two, not the result: in CSS a change of size moves the element at once, and only a change of the
+    /// percentage eases.
     /// </summary>
-    public static readonly IValueConverter TranslateScale = new TranslateScaleConverter();
+    public static readonly IMultiValueConverter TranslateScale = new TranslateScaleConverter();
+
+    public static double GetTranslateY(StyledElement element) => element.GetValue(TranslateYProperty);
+    public static void SetTranslateY(StyledElement element, double value) => element.SetValue(TranslateYProperty, value);
+
+    public static double GetScale(StyledElement element) => element.GetValue(ScaleProperty);
+    public static void SetScale(StyledElement element, double value) => element.SetValue(ScaleProperty, value);
 
     private static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
 
-    private sealed class TranslateScaleConverter : IValueConverter
+    private sealed class TranslateScaleConverter : IMultiValueConverter
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is not Rect bounds || parameter is not string text)
+            if (values is not [Rect bounds, double fraction, double scale])
             {
                 return AvaloniaProperty.UnsetValue;
             }
-
-            var values = text.Split(',');
-            var fraction = double.Parse(values[0], CultureInfo.InvariantCulture);
-            var scale = double.Parse(values[1], CultureInfo.InvariantCulture);
 
             var builder = TransformOperations.CreateBuilder(2);
             builder.AppendScale(scale, scale);
             builder.AppendTranslate(0, bounds.Height * fraction);
             return builder.Build();
         }
-
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-            throw new NotSupportedException();
     }
 
     private sealed class VarConverter : IMultiValueConverter
