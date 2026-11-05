@@ -474,7 +474,8 @@ public class AvonicItemTests
     public void B5_Turning_Button_Off_During_A_Space_Press_Does_Not_Click()
     {
         var clicks = 0;
-        var item = new AvonicItem { Button = true, Content = "x" };
+        var toggle = StubControl(ItemControlType.Toggle);
+        var item = new AvonicItem { Button = true, EndContent = toggle };
         item.Click += (_, _) => clicks++;
         using var scene = new Scene(item);
         item.Focus();
@@ -484,13 +485,15 @@ public class AvonicItemTests
         ReleaseKey(scene, PhysicalKey.Space);
 
         Assert.Equal(0, clicks);
+        Assert.Equal(0, toggle.ItemTaps);
     }
 
     [AvaloniaFact]
     public void B5_Keys_Do_Nothing_On_A_Plain_Item()
     {
         var clicks = 0;
-        var item = new AvonicItem { Content = "x" };
+        var toggle = StubControl(ItemControlType.Toggle);
+        var item = new AvonicItem { EndContent = toggle };
         item.Click += (_, _) => clicks++;
         using var scene = new Scene(item);
         item.Focusable = true;
@@ -499,6 +502,7 @@ public class AvonicItemTests
         PressKey(scene, PhysicalKey.Enter);
 
         Assert.Equal(0, clicks);
+        Assert.Equal(0, toggle.ItemTaps);
     }
 
     [AvaloniaFact]
