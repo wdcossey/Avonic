@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicCard>
+                <c:AvonicCardContent Content="Plain" />
+            </c:AvonicCard>
+            <c:AvonicCard Button="True">
+                <c:AvonicCardContent Content="Button" />
+            </c:AvonicCard>
+            <c:AvonicCard Color="danger">
+                <c:AvonicCardContent Content="Danger" />
+            </c:AvonicCard>
+            <c:AvonicCard IsEnabled="False">
+                <c:AvonicCardContent Content="Disabled" />
+            </c:AvonicCard>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of card.md.css. The header, title, subtitle and content are in Styles/Card.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicCard}" TargetType="c:AvonicCard">
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <!-- overflow: hidden is on PART_Native, because here it would clip the shadow too -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- background: var(background), which is var(ion-card-background, ...) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Card.Background" />
+                <DynamicResource ResourceKey="Avonic.CardBackgroundBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- color: var(color), which is var(ion-card-color, ...) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Card.Color" />
+                <DynamicResource ResourceKey="Avonic.CardColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Host" CornerRadius="{TemplateBinding CornerRadius}">
+                    <Border Name="PART_Native"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <ContentPresenter Name="PART_ContentPresenter"
+                                              Padding="{TemplateBinding Padding}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- box-shadow -->
+        <Style Selector="^ /template/ Border#PART_Host">
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Card.BoxShadow}" />
+        </Style>
+
+        <!-- button, a { cursor: pointer } -->
+        <Style Selector="^:button">
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- :host(.card-disabled). pointer-events: none is IsEnabled itself. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+
+        <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so the background is
+             transparent, and var(ion-color-contrast) invalid, so the text inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,173 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicCard>
+                <StackPanel>
+                    <c:AvonicCardHeader>
+                        <StackPanel>
+                            <c:AvonicCardTitle Content="Title" />
+                            <c:AvonicCardSubtitle Content="Subtitle" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                    <c:AvonicCardContent Content="Content" />
+                </StackPanel>
+            </c:AvonicCard>
+            <c:AvonicCard>
+                <c:AvonicCardContent>
+                    <StackPanel>
+                        <TextBlock Classes="h1" Text="Heading" />
+                        <TextBlock Classes="p" Text="Paragraph" />
+                    </StackPanel>
+                </c:AvonicCardContent>
+            </c:AvonicCard>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of the md CSS of ion-card-header, ion-card-title, ion-card-subtitle and ion-card-content, in the
+         order that matters: where CSS uses specificity, here a rule with a pseudoclass or class beats one without,
+         and then later beats earlier. It's all here, not in a ControlTheme, because these depend on what they're in,
+         and Styles beat a ControlTheme. ion-card itself is in Controls/AvonicCard.axaml.
+
+         A rule for a TextBlock is checked for every TextBlock in the app. A descendant selector then walks up its
+         ancestors, which every TextBlock pays for, in a card or not, so they use '>' here. -->
+
+    <!-- ion-card-header's :host. Its color: var(color) is var(color) inherited from the card, so it inherits. -->
+    <Style Selector="c|AvonicCardHeader">
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- ion-card-header's :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, or an ancestor's. -->
+    <Style Selector="c|AvonicCardHeader:ion-color">
+        <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ion-card-title's :host. font-size: 1.25rem, font-weight: 500, line-height: 1.2 -->
+    <Style Selector="c|AvonicCardTitle">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- color: var(color), with color: var(ion-text-color-step-150, ...) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.CardTitle.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <!-- line-height doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+    <Style Selector="c|AvonicCardTitle > TextBlock, c|AvonicCardTitle > :is(Panel) > TextBlock">
+        <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+
+    <!-- ion-card-subtitle's :host. font-size: 0.875rem, font-weight: 500 -->
+    <Style Selector="c|AvonicCardSubtitle">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <!-- color: var(color), with color: var(ion-text-color-step-450, ...) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.CardSubtitle.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep450Brush" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(.ion-color) on both. An unknown colour makes var(ion-color-base) invalid, so it inherits. -->
+    <Style Selector="c|AvonicCardTitle:ion-color, c|AvonicCardSubtitle:ion-color">
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ion-card.ion-color .ion-inherit-color, ion-card-header.ion-color .ion-inherit-color, from core.css. Its
+         specificity beats :host(.ion-color), so it's after it. -->
+    <Style Selector="c|AvonicCard:ion-color c|AvonicCardHeader, c|AvonicCardHeader:ion-color c|AvonicCardHeader, c|AvonicCard:ion-color c|AvonicCardTitle, c|AvonicCardHeader:ion-color c|AvonicCardTitle, c|AvonicCard:ion-color c|AvonicCardSubtitle, c|AvonicCardHeader:ion-color c|AvonicCardSubtitle">
+        <Setter Property="Foreground" Value="{Binding $parent[Control].(TextElement.Foreground)}" />
+    </Style>
+
+    <!-- ::slotted(ion-card-title:not(:first-child)), ::slotted(ion-card-subtitle:not(:first-child)). One child is
+         the slot's first, so it's only in a panel, which stands for the slot. -->
+    <Style Selector="c|AvonicCardHeader > :is(Panel) > c|AvonicCardTitle:not(:nth-child(1)), c|AvonicCardHeader > :is(Panel) > c|AvonicCardSubtitle:not(:nth-child(1))">
+        <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
+
+    <!-- .card-content-md. line-height inherits, as a size rather than a factor. -->
+    <Style Selector="c|AvonicCardContent">
+        <Setter Property="Padding" Value="16,13,16,13" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <!-- ion-card-header + .card-content-md -->
+    <Style Selector="c|AvonicCardContent:after-card-header">
+        <Setter Property="Padding" Value="16,0,16,13" />
+    </Style>
+
+    <!-- .card-content-md h1 etc, with a panel standing for the slot. line-height 1.2 on headings is from Ionic's
+         global typography. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+    <Style Selector="c|AvonicCardContent > TextBlock.h1, c|AvonicCardContent > :is(Panel) > TextBlock.h1">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <Style Selector="c|AvonicCardContent > TextBlock.h2, c|AvonicCardContent > :is(Panel) > TextBlock.h2">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <Style Selector="c|AvonicCardContent > TextBlock.h3, c|AvonicCardContent > TextBlock.h4, c|AvonicCardContent > TextBlock.h5, c|AvonicCardContent > TextBlock.h6, c|AvonicCardContent > :is(Panel) > TextBlock.h3, c|AvonicCardContent > :is(Panel) > TextBlock.h4, c|AvonicCardContent > :is(Panel) > TextBlock.h5, c|AvonicCardContent > :is(Panel) > TextBlock.h6">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <Style Selector="c|AvonicCardContent > TextBlock.p, c|AvonicCardContent > :is(Panel) > TextBlock.p">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+</Styles>

@@ -1,0 +1,1082 @@
+using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
+using Avalonia.Automation.Provider;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Headless;
+using Avalonia.Headless.XUnit;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
+using Avonic.Components.Controls;
+
+namespace Avonic.Components.Tests.Controls;
+
+/// <summary>
+/// <c>ion-card</c> itself. The numbers are from real Ionic in Chromium, at 390 px wide. See
+/// docs/components/ion-card/PLAN.md, whose behaviour numbers these are named after. The other four controls are in
+/// <see cref="AvonicCardFamilyTests"/>. Tests with <c>InstalledTheme</c> check the look. The others run on the stub.
+/// </summary>
+public class AvonicCardTests
+{
+    private static readonly Point Centre = new(195, 40);
+
+    private static AvonicCard ButtonCard() => new()
+    {
+        Button = true,
+        Height = 80,
+        VerticalAlignment = VerticalAlignment.Top,
+        Content = "x",
+    };
+
+    private static T Part<T>(Control host, string name) where T : Control =>
+        host.GetVisualDescendants().OfType<T>().First(control => control.Name == name);
+
+    private static AvonicRippleEffect Ripple(AvonicCard card) => Part<AvonicRippleEffect>(card, "PART_Ripple");
+    private static Border Native(AvonicCard card) => Part<Border>(card, "PART_Native");
+
+    private static bool Has(Control control, string pseudoClass) => control.Classes.Contains(pseudoClass);
+
+    private static Rect Box(Visual visual, Visual root)
+    {
+        var transform = visual.TransformToVisual(root) ?? throw new InvalidOperationException("not in the tree");
+        return new Rect(visual.Bounds.Size).TransformToAABB(transform);
+    }
+
+    private static void Tap(Scene scene, Point point, MouseButton button = MouseButton.Left)
+    {
+        scene.Window.MouseDown(point, button, RawInputModifiers.None);
+        scene.Window.MouseUp(point, button, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    private static void PressKey(Scene scene, PhysicalKey key)
+    {
+        scene.Window.KeyPressQwerty(key, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    private static void ReleaseKey(Scene scene, PhysicalKey key)
+    {
+        scene.Window.KeyReleaseQwerty(key, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
+    {
+        using var buffer = frame.Lock();
+        var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
+        return buffer.Format == PixelFormat.Rgba8888
+            ? Color.FromArgb(pixel[3], pixel[0], pixel[1], pixel[2])
+            : Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
+    }
+
+    private static Color Pixel(Scene scene, int x, int y)
+    {
+        Dispatcher.UIThread.RunJobs();
+        return PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
+    }
+
+    private static Color Solid(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
+
+    private static readonly Color Text450 = Color.Parse("#737373");
+
+    // ── Behaviours 1, 2: what Button turns on ────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B1_Button_Is_Activatable_With_A_Ripple()
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+
+        Assert.True(Activatable.GetIsEnabled(card));
+        Assert.True(Ripple(card).IsVisible);
+
+        using var clock = new TestClock();
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+        Assert.True(Has(card, Activatable.ActivatedPseudoClass));
+        Assert.Single(Ripple(card).Ripples);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+    }
+
+    [AvaloniaFact]
+    public void B1_Button_Shows_A_Hand_Cursor() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicCard { Button = true };
+        var plain = new AvonicCard();
+        using var scene = new Scene(new StackPanel { Children = { button, plain } });
+
+        Assert.Equal(new Cursor(StandardCursorType.Hand).ToString(), button.Cursor?.ToString());
+        Assert.Null(plain.Cursor);
+    });
+
+    [AvaloniaFact]
+    public void B2_Plain_Card_Is_Not_Activatable()
+    {
+        var card = new AvonicCard { Content = "x", Height = 80 };
+        using var scene = new Scene(card);
+
+        Assert.False(Activatable.GetIsEnabled(card));
+        Assert.False(Ripple(card).IsVisible);
+        Assert.False(card.Focusable);
+    }
+
+    [AvaloniaFact]
+    public void B2_Turning_Button_Off_Removes_All_Of_It()
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        Assert.True(card.Focusable);
+
+        card.Button = false;
+
+        Assert.False(Activatable.GetIsEnabled(card));
+        Assert.False(card.Focusable);
+        Assert.False(Ripple(card).IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void B2_An_Apps_Own_Focusable_Survives_Button_Going_On_And_Off()
+    {
+        var card = new AvonicCard { Focusable = false };
+        using var scene = new Scene(card);
+
+        card.Button = true;
+        Assert.False(card.Focusable);
+
+        card.Button = false;
+        Assert.False(card.Focusable);
+    }
+
+    // ── Behaviours 3, 4: Click ───────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B3_Tap_On_Button_Card_Raises_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Secondary_Button_Does_Not_Raise_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre, MouseButton.Right);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Tap_On_Plain_Card_Does_Not_Raise_Click()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Content = "x", Height = 80 };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        Tap(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Tap_On_Disabled_Card_Does_Not_Raise_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.IsEnabled = false;
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Disabled_During_A_Press_Does_Not_Raise_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        card.IsEnabled = false;
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, clicks);
+
+        // And on a second quick press, whose click comes on release too.
+        card.IsEnabled = true;
+        Tap(scene, Centre);
+        Assert.Equal(1, clicks);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        card.IsEnabled = false;
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Click_Bubbles_From_The_Card()
+    {
+        var bubbled = 0;
+        var card = ButtonCard();
+        var parent = new StackPanel { Children = { card } };
+        parent.AddHandler(AvonicCard.ClickEvent, (_, e) =>
+        {
+            bubbled++;
+            Assert.Same(card, e.Source);
+        });
+        using var scene = new Scene(parent);
+
+        Tap(scene, Box(card, scene.Window).Center);
+
+        Assert.Equal(1, bubbled);
+    }
+
+    [AvaloniaFact]
+    public void B3_Three_Quick_Taps_Raise_Click_Three_Times()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        Tap(scene, Centre);
+        Tap(scene, Centre);
+
+        Assert.Equal(3, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_Clicks_On_Release_Not_On_Press()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_On_A_Plain_Card_Does_Not_Click()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Content = "x", Height = 80, VerticalAlignment = VerticalAlignment.Top };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        Tap(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_Released_Off_The_Card_Does_Not_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(new Point(100, 400), RawInputModifiers.None);
+        scene.Window.MouseUp(new Point(100, 400), MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Press_Taken_By_A_Gesture_Does_Not_Click_Later()
+    {
+        var clicks = 0;
+        IPointer? pointer = null;
+        var card = ButtonCard();
+        var other = new Border { Height = 48, Background = Brushes.Gray };
+        card.Click += (_, _) => clicks++;
+        card.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, RoutingStrategies.Tunnel);
+        using var scene = new Scene(new StackPanel { Children = { card, other } });
+
+        Tap(scene, Centre);
+        Assert.Equal(1, clicks);
+
+        // As a scroll does: the pointer goes elsewhere, so the release never reaches the card.
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        pointer!.Capture(other);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        // Elsewhere on the card, so this is a new first tap, which clicks once.
+        Tap(scene, new Point(60, 40));
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Another_Pointer_Releasing_Does_Not_Complete_A_Second_Press()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        card.RaiseEvent(new PointerReleasedEventArgs(
+            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true), scene.Window, Centre, 0,
+            new PointerPointProperties(), KeyModifiers.None, MouseButton.Left));
+        Assert.Equal(1, clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_Another_Pointer_Going_Down_Does_Not_End_A_Second_Press()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        // A second finger, which isn't on any of this press's events.
+        card.RaiseEvent(new PointerPressedEventArgs(
+            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true), scene.Window, Centre, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None)
+        {
+            RoutedEvent = InputElement.PointerPressedEvent,
+            Route = RoutingStrategies.Tunnel,
+        });
+
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B4_Tap_On_A_Child_Also_Raises_Click()
+    {
+        var cardClicks = 0;
+        var childClicks = 0;
+        var child = new Button
+        {
+            Width = 60,
+            Height = 30,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<Button>((_, _) => new Border { Background = Brushes.Gray }),
+        };
+        child.Click += (_, _) => childClicks++;
+        var card = ButtonCard();
+        card.Content = child;
+        card.Click += (_, _) => cardClicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Box(child, scene.Window).Center);
+
+        Assert.Equal(1, childClicks);
+        Assert.Equal(1, cardClicks);
+    }
+
+    [AvaloniaFact]
+    public void B4_A_Child_That_Handles_The_Tap_Stops_Click()
+    {
+        var clicks = 0;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.Tapped += (_, e) => e.Handled = true;
+        var card = ButtonCard();
+        card.Content = child;
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, Box(child, scene.Window).Center);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B4_A_Child_That_Handles_Both_Tap_Events_Stops_Every_Click()
+    {
+        var clicks = 0;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.Tapped += (_, e) => e.Handled = true;
+        child.DoubleTapped += (_, e) => e.Handled = true;
+        var card = ButtonCard();
+        card.Content = child;
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        var centre = Box(child, scene.Window).Center;
+        Tap(scene, centre);
+        Tap(scene, centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    // Measured outer, inner: a tap on the inner card is one click, which reaches both.
+    [AvaloniaFact]
+    public void B4_A_Tap_On_A_Nested_Button_Card_Reaches_Each_Card_Once()
+    {
+        var inner = new AvonicCard { Button = true, Height = 40, Content = "inner" };
+        var outer = ButtonCard();
+        outer.Content = inner;
+        var innerClicks = 0;
+        var outerClicks = 0;
+        var outerSources = new List<object?>();
+        inner.Click += (_, _) => innerClicks++;
+        outer.Click += (_, e) =>
+        {
+            outerClicks++;
+            outerSources.Add(e.Source);
+        };
+        using var scene = new Scene(outer);
+
+        var centre = Box(inner, scene.Window).Center;
+        Tap(scene, centre);
+        Assert.Equal(1, innerClicks);
+        Assert.Equal(1, outerClicks);
+
+        // The second quick press goes the other way.
+        Tap(scene, centre);
+        Assert.Equal(2, innerClicks);
+        Assert.Equal(2, outerClicks);
+        Assert.All(outerSources, source => Assert.Same(inner, source));
+    }
+
+    [AvaloniaFact]
+    public void B4_A_Tap_On_A_Nested_Plain_Card_Clicks_The_Outer_One()
+    {
+        var inner = new AvonicCard { Height = 40, Content = "inner" };
+        var outer = ButtonCard();
+        outer.Content = inner;
+        var clicks = 0;
+        outer.Click += (_, _) => clicks++;
+        using var scene = new Scene(outer);
+
+        Tap(scene, Box(inner, scene.Window).Center);
+
+        Assert.Equal(1, clicks);
+    }
+
+    // ── Behaviour 5: keys ────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B5_Enter_Activates_On_Press()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        Assert.Equal(1, clicks);
+
+        ReleaseKey(scene, PhysicalKey.Enter);
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Space_Activates_On_Release()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Space);
+        Assert.Equal(0, clicks);
+
+        ReleaseKey(scene, PhysicalKey.Space);
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Space_Released_After_Focus_Moved_Away_Does_Not_Activate()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        var other = new Button { Content = "y" };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(new StackPanel { Children = { card, other } });
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Space);
+        other.Focus();
+        card.Focus();
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Turning_Button_Off_And_On_During_A_Space_Press_Does_Not_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Space);
+        card.Button = false;
+        card.Button = true;
+        card.Focus();
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Keys_Do_Nothing_On_A_Plain_Card()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Content = "x", Focusable = true };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        PressKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Keys_On_A_Nested_Control_Are_Its_Own()
+    {
+        var clicks = 0;
+        var child = new Border { Width = 40, Height = 20, Focusable = true };
+        var card = ButtonCard();
+        card.Content = child;
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        child.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        PressKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_A_Key_An_App_Handled_First_Does_Nothing()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        card.AddHandler(InputElement.KeyDownEvent, (_, e) => e.Handled = true, RoutingStrategies.Tunnel);
+        using var scene = new Scene(card);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+
+        Assert.Equal(0, clicks);
+    }
+
+    // ── Behaviour 6: tab stops ───────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B6_Tab_Stops_On_Button_Cards_Only()
+    {
+        var plain = new AvonicCard { Content = "plain" };
+        var button = new AvonicCard { Button = true, Content = "button" };
+        var disabled = new AvonicCard { Button = true, IsEnabled = false, Content = "disabled" };
+        var last = new AvonicCard { Button = true, Content = "last" };
+        using var scene = new Scene(new StackPanel { Children = { plain, button, disabled, last } });
+
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(button.IsFocused);
+
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(last.IsFocused);
+    }
+
+    // ── Behaviour 7: no hover or focus state ─────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B7_Focus_And_Hover_Change_Nothing() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(card.IsFocused);
+        Assert.False(FocusVisible.GetIsEnabled(card));
+        Assert.False(Has(card, FocusVisible.FocusedPseudoClass));
+        Assert.Equal(before, Pixel(scene, 195, 40));
+
+        scene.Window.MouseMove(Centre, RawInputModifiers.None);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+        Assert.Equal(Text450, Solid(card.Foreground));
+    });
+
+    // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it
+    // underneath, in the same order as the sample. FocusAdorner reads null whether or not it's set, because an
+    // unset one falls back to the base theme's default, so only the layer shows what's really drawn.
+    [AvaloniaFact]
+    public void B7_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var card = new AvonicCard { Button = true };
+                var other = new Button();
+                using var scene = new Scene(new StackPanel { Children = { card, other } });
+
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(card)!;
+
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(card.IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
+    // ── Behaviour 8: the ripple ──────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B8_The_Ripple_Fills_The_Card_And_Uses_The_Current_Colour() => InstalledTheme.Run(_ =>
+    {
+        var plain = new AvonicCard { Button = true, Height = 90 };
+        var coloured = new AvonicCard { Button = true, Height = 90, Color = "danger" };
+        var token = new AvonicCard { Button = true, Height = 90 };
+        token.Resources["Avonic.Card.Color"] = Brushes.Lime;
+        using var scene = new Scene(new StackPanel { Children = { plain, coloured, token } });
+
+        var box = Box(Ripple(plain), scene.Window);
+        Assert.Equal(new Rect(10, 10, 370, 90), box);
+
+        Assert.Equal(Text450, Solid(Ripple(plain).Foreground));
+        Assert.Equal(Colors.White, Solid(Ripple(coloured).Foreground));
+        Assert.Equal(Colors.Lime, Solid(Ripple(token).Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B8_The_Ripple_Clips_To_The_Corners() => InstalledTheme.Run(_ =>
+    {
+        // A big radius, so the corner is clearly outside, and content that would otherwise fill it.
+        var card = new AvonicCard
+        {
+            Button = true,
+            Height = 90,
+            VerticalAlignment = VerticalAlignment.Top,
+            CornerRadius = new CornerRadius(20),
+            Content = new Border { Background = Brushes.Red },
+        };
+        card.Resources["Avonic.Card.BoxShadow"] = default(BoxShadows);
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+
+        Assert.Equal(Colors.Red, Pixel(scene, 195, 50));
+        Assert.Equal(Colors.White, Pixel(scene, 11, 11));
+    });
+
+    // ── Behaviour 9: the box ─────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B9_Margin_Is_10_And_The_Font_Is_The_Cards() => InstalledTheme.Run(theme =>
+    {
+        var text = new TextBlock { Text = "x" };
+        var card = new AvonicCard { Content = text };
+        using var scene = new Scene(card);
+
+        Assert.Equal(new Thickness(10), card.Margin);
+        Assert.Equal(new Rect(10, 10, 370, card.Bounds.Height), Box(card, scene.Window));
+        Assert.Equal(14, text.FontSize);
+        Assert.Equal(card.FontFamily, text.FontFamily);
+        Assert.Equal(theme.Resources.TryGetResource("Avonic.FontFamily", null, out var family) ? family : null, card.FontFamily);
+    });
+
+    [AvaloniaFact]
+    public void B9_The_Radius_Is_4_On_What_Is_Drawn_And_What_Clips() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90 };
+        using var scene = new Scene(card);
+
+        Assert.Equal(new CornerRadius(4), card.CornerRadius);
+        Assert.Equal(new CornerRadius(4), Native(card).CornerRadius);
+        Assert.Equal(new CornerRadius(4), Part<Border>(card, "PART_Host").CornerRadius);
+    });
+
+    [AvaloniaFact]
+    public void B9_The_Shadow_Shows_Around_The_Card_But_Content_Is_Clipped() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard
+        {
+            Height = 90,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = new Border { Background = Brushes.Red, Margin = new Thickness(-50) },
+        };
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+
+        // Measured in Chromium at scale 1: 170 straight below the card, and 247 straight above it. Avonic draws 164 and 247.
+        var below = Pixel(scene, 195, 100);
+        Assert.InRange(below.R, 155, 180);
+        Assert.Equal(below.R, below.G);
+        Assert.InRange(Pixel(scene, 195, 9).R, 240, 252);
+
+        // The content overflows by 50, and stops at the card's edge.
+        Assert.Equal(Colors.Red, Pixel(scene, 195, 50));
+        Assert.NotEqual(Colors.Red, Pixel(scene, 195, 5));
+        Assert.NotEqual(Colors.Red, Pixel(scene, 5, 50));
+    });
+
+    [AvaloniaFact]
+    public void B9_The_Shadow_Token_Applies() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, VerticalAlignment = VerticalAlignment.Top };
+        card.Resources["Avonic.Card.BoxShadow"] = default(BoxShadows);
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+
+        Assert.Equal(Colors.White, Pixel(scene, 195, 100));
+    });
+
+    [AvaloniaFact]
+    public void B9_Text_Wraps_And_Grows_The_Card() => InstalledTheme.Run(_ =>
+    {
+        var one = new AvonicCard { Content = "x" };
+        var many = new AvonicCard { Content = new string('x', 10) + string.Concat(Enumerable.Repeat(" word", 100)) };
+        using var scene = new Scene(new StackPanel { Children = { one, many } });
+
+        Assert.True(many.Bounds.Height > one.Bounds.Height * 2);
+    });
+
+    [AvaloniaFact]
+    public void B9_On_The_Stub_Text_Wraps_And_The_Card_Does_Not_Clip_Its_Own_Box()
+    {
+        var many = new AvonicCard { Content = string.Concat(Enumerable.Repeat(" word", 200)) };
+        var one = new AvonicCard { Content = "x" };
+        using var scene = new Scene(new StackPanel { Children = { one, many } });
+
+        Assert.True(many.Bounds.Height > one.Bounds.Height * 2);
+        Assert.False(many.ClipToBounds);
+        Assert.True(Native(many).ClipToBounds);
+    }
+
+    // ── Behaviours 10-12: colours ────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B10_Defaults() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90 };
+        using var scene = new Scene(card);
+
+        Assert.Equal(Colors.White, Solid(Native(card).Background));
+        Assert.Equal(Text450, Solid(card.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B11_The_Cards_Own_Tokens_Apply() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90 };
+        card.Resources["Avonic.Card.Background"] = Brushes.Red;
+        card.Resources["Avonic.Card.Color"] = Brushes.Lime;
+        card.Resources["Avonic.CardBackgroundBrush"] = Brushes.Blue;
+        card.Resources["Avonic.CardColorBrush"] = Brushes.Blue;
+        using var scene = new Scene(card);
+
+        Assert.Equal(Colors.Red, Solid(Native(card).Background));
+        Assert.Equal(Colors.Lime, Solid(card.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B11_The_Global_Tokens_Apply() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90 };
+        card.Resources["Avonic.CardBackgroundBrush"] = Brushes.Blue;
+        card.Resources["Avonic.CardColorBrush"] = Brushes.Yellow;
+        using var scene = new Scene(card);
+
+        Assert.Equal(Colors.Blue, Solid(Native(card).Background));
+        Assert.Equal(Colors.Yellow, Solid(card.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B11_The_Text_Colour_Follows_The_Palette() => InstalledTheme.Run(_ =>
+    {
+        var app = Application.Current!;
+        app.Resources["Avonic.TextColorStep450"] = Colors.Purple;
+        try
+        {
+            var card = new AvonicCard { Height = 90 };
+            using var scene = new Scene(card);
+
+            Assert.Equal(Colors.Purple, Solid(card.Foreground));
+        }
+        finally
+        {
+            app.Resources.Remove("Avonic.TextColorStep450");
+        }
+    });
+
+    [AvaloniaFact]
+    public void B11_An_Apps_Own_Background_Wins() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, Background = Brushes.Teal };
+        using var scene = new Scene(card);
+
+        Assert.Equal(Colors.Teal, Solid(Native(card).Background));
+    });
+
+    [AvaloniaFact]
+    public void B12_Color_Paints_Base_And_Contrast() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, Color = "danger" };
+        card.Resources["Avonic.Card.Background"] = Brushes.Lime;
+        card.Resources["Avonic.Card.Color"] = Brushes.Lime;
+        using var scene = new Scene(card);
+
+        Assert.Equal(Color.Parse("#C5000F"), Solid(Native(card).Background));
+        Assert.Equal(Colors.White, Solid(card.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B12_An_Unknown_Color_Is_Transparent_And_Inherits() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, Color = "nonexistent" };
+        var parent = new Border { Child = card };
+        TextElement.SetForeground(parent, Brushes.Teal);
+        using var scene = new Scene(parent);
+        scene.Window.Background = Brushes.Orange;
+        card.Resources["Avonic.Card.BoxShadow"] = default(BoxShadows);
+
+        Assert.Null(Native(card).Background);
+        Assert.Equal(Colors.Teal, Solid(card.Foreground));
+        Assert.Equal(Colors.Orange, Pixel(scene, 195, 50));
+    });
+
+    [AvaloniaFact]
+    public void B12_No_Color_Keeps_The_Defaults_In_A_Coloured_Ancestor() => InstalledTheme.Run(_ =>
+    {
+        var inner = new AvonicCard { Height = 90 };
+        var outer = new AvonicCard { Color = "danger", Content = inner };
+        using var scene = new Scene(outer);
+
+        Assert.Equal(Colors.White, Solid(Native(inner).Background));
+        Assert.Equal(Text450, Solid(inner.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B12_Clearing_Color_Restores_The_Defaults() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, Color = "danger" };
+        using var scene = new Scene(card);
+
+        card.Color = null;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(Colors.White, Solid(Native(card).Background));
+        Assert.Equal(Text450, Solid(card.Foreground));
+    });
+
+    // ── Behaviour 13: disabled ───────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B13_Disabled_Is_Faded_And_Takes_No_Input() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Button = true, IsEnabled = false, Height = 90, VerticalAlignment = VerticalAlignment.Top };
+        var plain = new AvonicCard { IsEnabled = false, Height = 90 };
+        var enabled = new AvonicCard { Button = true, Height = 90 };
+        using var scene = new Scene(new StackPanel { Children = { card, plain, enabled } });
+
+        Assert.Equal(0.3, card.Opacity);
+        Assert.Equal(0.3, plain.Opacity);
+        Assert.Equal(1, enabled.Opacity);
+
+        var presses = 0;
+        card.PointerPressed += (_, _) => presses++;
+        enabled.PointerPressed += (_, _) => presses += 10;
+        Tap(scene, Box(card, scene.Window).Center);
+        Assert.Equal(0, presses);
+        Tap(scene, Box(enabled, scene.Window).Center);
+        Assert.Equal(10, presses);
+    });
+
+    [AvaloniaFact]
+    public void B13_A_Disabled_Card_Does_Not_Ripple()
+    {
+        using var clock = new TestClock();
+        var card = ButtonCard();
+        card.IsEnabled = false;
+        using var scene = new Scene(card);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+
+        Assert.False(Has(card, Activatable.ActivatedPseudoClass));
+        Assert.Empty(Ripple(card).Ripples);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+    }
+
+    // ── Behaviour 14: automation ─────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B14_Button_Card_Is_An_Invokable_Button()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Button = true, Content = "Open" };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        var peer = ControlAutomationPeer.CreatePeerForElement(card);
+
+        Assert.Equal(AutomationControlType.Button, peer.GetAutomationControlType());
+        Assert.Equal("Open", peer.GetName());
+        Assert.True(peer.IsEnabled());
+        Assert.True(peer.IsContentElement());
+        Assert.True(peer.IsControlElement());
+        Assert.NotNull(peer.GetProvider<IInvokeProvider>());
+        peer.GetProvider<IInvokeProvider>()!.Invoke();
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B14_Plain_Card_Is_A_Group_That_Cannot_Be_Invoked()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Content = "Text" };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        var peer = ControlAutomationPeer.CreatePeerForElement(card);
+
+        Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
+        Assert.Null(peer.GetProvider<IInvokeProvider>());
+        Assert.True(string.IsNullOrEmpty(peer.GetName()));
+        Assert.False(peer.IsContentElement());
+        Assert.IsAssignableFrom<IInvokeProvider>(peer).Invoke();
+        Assert.Equal(0, clicks);
+
+        card.Button = true;
+        Assert.NotNull(peer.GetProvider<IInvokeProvider>());
+    }
+
+    [AvaloniaFact]
+    public void B14_Disabled_Reports_It_And_Invoking_Does_Nothing()
+    {
+        var clicks = 0;
+        var card = new AvonicCard { Button = true, IsEnabled = false };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        var peer = ControlAutomationPeer.CreatePeerForElement(card);
+
+        Assert.False(peer.IsEnabled());
+        Assert.IsAssignableFrom<IInvokeProvider>(peer).Invoke();
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B14_The_Name_Comes_From_All_The_Text_Inside()
+    {
+        var card = new AvonicCard
+        {
+            Button = true,
+            Content = new StackPanel
+            {
+                Children =
+                {
+                    new AvonicCardHeader { Content = new AvonicCardTitle { Content = "Title" } },
+                    new AvonicCardContent { Content = "Body" },
+                },
+            },
+        };
+        using var scene = new Scene(card);
+
+        Assert.Equal("Title Body", ControlAutomationPeer.CreatePeerForElement(card).GetName());
+    }
+
+    [AvaloniaFact]
+    public void B14_The_Name_Leaves_Out_Hidden_Text_And_Reads_Inlines()
+    {
+        var inlines = new TextBlock();
+        inlines.Inlines!.Add(new Run("Runs"));
+        var card = new AvonicCard
+        {
+            Button = true,
+            Content = new StackPanel
+            {
+                Children =
+                {
+                    new TextBlock { Text = "Visible" },
+                    new TextBlock { Text = "Hidden", IsVisible = false },
+                    new Border { IsVisible = false, Child = new TextBlock { Text = "Hidden inside" } },
+                    inlines,
+                },
+            },
+        };
+        using var scene = new Scene(card);
+
+        Assert.Equal("Visible Runs", ControlAutomationPeer.CreatePeerForElement(card).GetName());
+    }
+
+    [AvaloniaFact]
+    public void B14_An_Explicit_Name_Wins()
+    {
+        var card = new AvonicCard { Button = true, Content = "Has a label" };
+        AutomationProperties.SetName(card, "Named");
+        using var scene = new Scene(card);
+
+        Assert.Equal("Named", ControlAutomationPeer.CreatePeerForElement(card).GetName());
+    }
+}
