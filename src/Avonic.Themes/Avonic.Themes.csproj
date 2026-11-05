@@ -14,7 +14,7 @@
 
   <!-- Merged by AvonicTheme; see Directory.Build.targets. -->
   <ItemGroup>
-    <AvonicDiscoveredXaml Include="Tokens/*.axaml;Controls/*.axaml" />
+    <AvonicDiscoveredXaml Include="Tokens/**/*.axaml;Controls/**/*.axaml" />
   </ItemGroup>
 
   <ItemGroup>

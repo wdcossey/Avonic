@@ -75,16 +75,33 @@ public class DiscoveryTests
     }
 
     [AvaloniaFact]
-    public void Sample_Catalog_Finds_And_Creates_The_Ripple_Page()
+    public void No_Key_Is_Defined_Twice_Within_A_Project()
     {
-        var page = Assert.Single(
-            SamplePageCatalog.Discover(typeof(MainWindow).Assembly),
-            entry => entry.Title == "ion-ripple-effect");
+        Assert.Empty(DuplicateKeys(new AvonicComponentsStyles()));
+        Assert.Empty(DuplicateKeys(new AvonicTheme()));
 
-        Assert.IsType<RippleEffectPage>(page.Create());
+        static IEnumerable<object> DuplicateKeys(Styles styles) =>
+            Includes(styles)
+                .SelectMany(include => include.Loaded.Keys)
+                .GroupBy(key => key)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key);
+    }
+
+    [AvaloniaFact]
+    public void Sample_Catalog_Finds_The_Ripple_Page_And_Every_Page_Can_Be_Created()
+    {
+        var pages = SamplePageCatalog.Discover(typeof(MainWindow).Assembly);
+
+        var ripple = Assert.Single(pages, entry => entry.Title == "ion-ripple-effect");
+        Assert.IsType<RippleEffectPage>(ripple.Create());
+        Assert.All(pages, entry => entry.Create());
     }
 
     // Titles sort the opposite way to Order, so a title-only sort can't pass by coincidence.
+    [SamplePage("b-no-order")]
+    private sealed class NoOrderPage;
+
     [SamplePage("a-order-2", Order = 2)]
     private sealed class OrderTwoPage;
 
@@ -99,15 +116,15 @@ public class DiscoveryTests
     {
         var titles = SamplePageCatalog.Discover(typeof(DiscoveryTests).Assembly).Select(entry => entry.Title);
 
-        Assert.Equal(["y-order-1", "z-order-1", "a-order-2"], titles);
+        Assert.Equal(["y-order-1", "z-order-1", "a-order-2", "b-no-order"], titles);
     }
 
     [Fact]
     public void Sample_Every_Page_Is_Marked_For_Discovery()
     {
         var unmarked = typeof(MainWindow).Assembly.GetTypes()
-            .Where(type => type.Namespace == typeof(RippleEffectPage).Namespace
-                           && typeof(UserControl).IsAssignableFrom(type)
+            .Where(type => type.Name.EndsWith("Page", StringComparison.Ordinal)
+                           && typeof(Control).IsAssignableFrom(type)
                            && type.GetCustomAttribute<SamplePageAttribute>() is null);
 
         Assert.Empty(unmarked);

@@ -26,7 +26,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
 src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable); AvonicTheme
-                         merges every discovered Tokens/*.axaml, then Controls/*.axaml
+                         merges every discovered Tokens/**/*.axaml, then Controls/**/*.axaml
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step
 samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]

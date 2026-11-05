@@ -10,8 +10,11 @@ public sealed class SamplePageAttribute(string title) : Attribute
     /// <summary>The Ionic tag, e.g. <c>ion-ripple-effect</c>.</summary>
     public string Title { get; } = title;
 
-    /// <summary>The control's issue number, so parallel PRs don't have to coordinate.</summary>
-    public int Order { get; set; }
+    /// <summary>
+    /// The control's issue number, so parallel PRs don't have to coordinate. A page that omits it
+    /// sorts last rather than jumping to the top of the index.
+    /// </summary>
+    public int Order { get; set; } = int.MaxValue;
 }
 
 public sealed record SamplePageEntry(string Title, Func<Control> Create);

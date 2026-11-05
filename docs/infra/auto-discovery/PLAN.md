@@ -40,7 +40,7 @@ compiled into that assembly.
 | Project | Globs | Merge order |
 |---|---|---|
 | `Avonic.Components` | `Controls/**/*.axaml` | ordinal |
-| `Avonic.Themes` | `Tokens/*.axaml`, `Controls/*.axaml` | `Tokens/` first, then ordinal |
+| `Avonic.Themes` | `Tokens/**/*.axaml`, `Controls/**/*.axaml` | `Tokens/` first, then ordinal |
 
 Order is applied at runtime, because MSBuild globs have no guaranteed order and Windows and Linux can
 differ.
@@ -56,6 +56,9 @@ here because the sample is a desktop app that isn't trimmed.
 - **A Roslyn source generator.** Needs a new project and analyzer packaging to produce one list.
 - **Per-control `[assembly:]` attributes.** Bring back a registration step that is easy to forget.
 
+The Themes globs are recursive, although the issue specifies one level. A template placed in a
+per-control folder, as Components does, would otherwise be silently left out.
+
 ## Tests
 
 | Test | Guards against |
@@ -66,14 +69,14 @@ here because the sample is a desktop app that isn't trimmed.
 | `AvonicTheme` includes the tokens file and every include loads | Themes discovery silently empty |
 | `AvonicTheme` still resolves the ripple `ControlTheme` | Lost layering over the stubs |
 | `AvonicTheme.OrderForMerge` puts tokens first (synthetic input) | Wrong merge order |
-| The catalog finds and creates the ripple page, ordered | Sample discovery broken |
-| Every `UserControl` in `Avonic.Sample.Pages` has `[SamplePage]` | A page silently missing from the index |
+| No key is defined twice within a project | Parallel PRs colliding on a key with no merge conflict to expose it |
+| The catalog finds the ripple page, and every page can be created | Sample discovery broken, or a page that crashes when tapped |
+| The catalog sorts by `Order` then title, with omitted `Order` last | Index order varying between PRs |
+| Every `Control` named `*Page` in the sample has `[SamplePage]` | A page silently missing from the index |
 
 Ordering uses synthetic input because each project has too few real files to expose a wrong order.
 
 ## Deferred
 
-- **`Themes/Controls/**`.** Themes globs only one level, as the issue specifies and matching
-  `PROCESS.md` §2 (`src/Avonic.Themes/Controls/<Name>.axaml`). A nested file would not be discovered.
 - **A real Themes-over-stub override test.** No control has a Themes template yet, so the first one
   to add a template gets this coverage.

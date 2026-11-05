@@ -8,30 +8,35 @@ parallel PRs don't conflict on registrations.
 | Add this file | Picked up by | Mechanism |
 |---|---|---|
 | `src/Avonic.Components/Controls/<Name>/<Name>.axaml` | `AvonicComponentsStyles` | `Controls/**/*.axaml` glob |
-| `src/Avonic.Themes/Tokens/<Name>.axaml` | `AvonicTheme` | `Tokens/*.axaml` glob |
-| `src/Avonic.Themes/Controls/<Name>.axaml` | `AvonicTheme` | `Controls/*.axaml` glob |
+| `src/Avonic.Themes/Tokens/<Name>.axaml` | `AvonicTheme` | `Tokens/**/*.axaml` glob |
+| `src/Avonic.Themes/Controls/<Name>.axaml` | `AvonicTheme` | `Controls/**/*.axaml` glob |
 | `samples/Avonic.Sample/Pages/<Name>Page.axaml` | The sample's index | `[SamplePage]` on the page class |
 
 Mark each sample page with its Ionic tag, using the control's issue number as `Order`:
 
 ```csharp
-[SamplePage("ion-ripple-effect", Order = 1)]
-public partial class RippleEffectPage : UserControl
+[SamplePage("ion-chip", Order = 19)]
+public partial class ChipPage : UserControl
 ```
 
-The index sorts by `Order`, then by title.
+The index sorts by `Order`, then by title. A page with no `Order` sorts last. The ripple page uses
+`Order = 1` because it predates the issues and has no number of its own.
 
 ## Rules
 
 - **Root element.** Every discovered `.axaml` must have a `ResourceDictionary` root. Any other root
   throws when the dictionary loads, and `DiscoveryTests` fails.
-- **Themes files stay one level deep.** `src/Avonic.Themes/Controls/<Name>/<Name>.axaml` is not
-  discovered. `Avonic.Components` allows nesting and uses one folder per control.
+- **Page classes.** A sample page's class name ends in `Page`, and it needs a public parameterless
+  constructor. `DiscoveryTests` fails if either `[SamplePage]` or the constructor is missing.
 - **Themes overrides the stubs.** `AvonicTheme` looks in its own dictionaries before
   `AvonicComponentsStyles`, so a Themes `ControlTheme` with the same key replaces the stub.
 - **Merge order.** Components is ordinal. Themes is `Tokens/` first, then ordinal.
-- **Keys must be unique across files.** Merged dictionaries are searched last-to-first, so a duplicate
-  key resolves by file name, which is rarely what you want.
+- **Keys are unique within a project.** Merged dictionaries are searched last-to-first, so a duplicate
+  would resolve by file name. `DiscoveryTests` fails instead.
+- **Test Themes templates with the theme installed.** A template resolves tokens from
+  `Application.Styles`, and `TestApp` loads only the stubs. Add the theme to `Application.Current.Styles`
+  and remove it afterwards. On a detached `new AvonicTheme()`, applying a template throws on
+  `{StaticResource}` and silently gets no value from `{DynamicResource}`. Both work once installed.
 
 ## How it works
 
@@ -47,4 +52,4 @@ evidence is in [PLAN.md](PLAN.md).
 - **A control renders nothing.** Check that the file matches a glob above, then look at
   `obj/<Configuration>/net8.0/XamlManifest.g.cs` in that project.
 - **A page isn't on the index.** It's missing `[SamplePage]`, which
-  `Sample_Every_Page_Is_Marked_For_Discovery` also catches.
+  `Sample_Every_Page_Is_Marked_For_Discovery` also catches for classes named `*Page`.
