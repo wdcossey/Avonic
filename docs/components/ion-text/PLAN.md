@@ -39,7 +39,7 @@ Each becomes a test, for both shapes where both apply.
 | 11 | A tap on it doesn't forward to the item's first control, and a tap beside it does | `clickedWithinShadowRoot` |
 | 12 | A button item's name includes its text | native `<button>`. For `AvonicText`; words in inlines are a known gap, below |
 | 13 | A change of `Color` repaints at once | `reflect`, `createColorClasses` |
-| 14 | In a label with `.ion-text-nowrap`, it's one line with an ellipsis | `white-space` inherits; measured `nw-t`: 804 wide, cut off by the label's 358 |
+| 14 | With `.ion-text-nowrap` on it, it's one line. In a label with that class, also with an ellipsis | The global class; `white-space` inherits; measured `nw-t`: 804 wide, cut off by the label's 358 |
 
 ## Design
 
@@ -63,8 +63,8 @@ inline` hugs its text, and so does a flex item. Measured `t-block` is 390 wide a
 inline's box isn't really a box. For a block that fills the width, set `HorizontalAlignment` to `Stretch`.
 
 **The stub's `Wrap` stops `white-space` inheriting,** because Avalonia's default is `NoWrap`, and a browser's is to wrap. A
-style can't tell a default from a value set on an ancestor. So `.ion-text-nowrap` on a label has its own rule in
-`Styles/Text.axaml`, the only file this control has in `Avonic.Themes`, because that class is the theme's too.
+style can't tell a default from a value set on an ancestor. So `.ion-text-nowrap`, on the box or on a label around it, has a
+rule in `Styles/Text.axaml`, the only file this control has in `Avonic.Themes`, because that class is the theme's too.
 
 **The one rule is in the stub, with no template or tokens in `Avonic.Themes`.** `PROCESS` says a control whose look Ionic
 hard-codes with no CSS variable has no theme. This isn't a visual opinion: it's what the `Color` property means, and an app
@@ -94,7 +94,7 @@ already covers.
 |---|---|
 | `<ion-text><p>` in a label, with `AvonicText` around a `TextBlock.p`, doesn't get the `p`'s size. Measured in Ionic: 14 px, line height 20, because `::slotted(*) p` reaches any depth | See the design. Put the span inside the `TextBlock` |
 | Around a `p` with no colour, or with an unknown one, Ionic's text inherits, and a span in a `TextBlock.p` shows the `p`'s grey (measured `t-lp2` black) | A span can't undo the `TextBlock` it's in. Leave out the `Classes`, or set `Foreground` |
-| A `TextBlock.TextWrapping="NoWrap"` on some other ancestor doesn't reach an `AvonicText`, where Ionic's `white-space` does (measured `div-t`) | See the design. Set it on the `AvonicText`. A span follows its `TextBlock` anyway |
+| `TextBlock.TextWrapping="NoWrap"`, or `.ion-text-nowrap`, on any other ancestor doesn't reach an `AvonicText`, where Ionic's `white-space` does (measured `div-t`) | See the design. Set it on the `AvonicText`. A span follows its `TextBlock` anyway |
 | An `AvonicTextSpan` directly in a slot shows its type's name | A slot takes a control. Use `AvonicText`, or put the span in a `TextBlock` |
 | A block in `AvonicText` isn't full width by itself (measured `t-h1` 390) | See the design |
 | **Known gap:** a button item's automation name leaves out words in inlines, whether they're in a span or not, because `AvonicItem` reads `TextBlock.Text`, which is empty when a `TextBlock` has inlines. A native `<button>` names itself from all its text | The fix is in the item, so it's proposed in the PR. Until then, set `AutomationProperties.Name` on the item |

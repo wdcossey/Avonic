@@ -441,6 +441,15 @@ public class AvonicTextTests
     });
 
     [AvaloniaFact]
+    public void B14_The_Class_On_The_Box_Itself_Is_One_Line() => InstalledTheme.Run(_ =>
+    {
+        var text = new AvonicText { Content = Long, Classes = { "ion-text-nowrap" } };
+        using var scene = InScene(text);
+
+        Assert.Equal(TextWrapping.NoWrap, Text(text).TextWrapping);
+    });
+
+    [AvaloniaFact]
     public void B14_In_A_Plain_Label_It_Wraps() => InstalledTheme.Run(_ =>
     {
         var text = new AvonicText { Content = Long };

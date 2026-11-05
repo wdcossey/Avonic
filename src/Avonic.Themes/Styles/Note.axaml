@@ -40,8 +40,8 @@
         </Setter>
     </Style>
 
-    <!-- white-space inherits from a label's .ion-text-nowrap. The stub's Wrap would otherwise stop it. -->
-    <Style Selector="c|AvonicLabel.ion-text-nowrap c|AvonicNote">
+    <!-- .ion-text-nowrap on the note, and white-space inherits it from a label. The stub's Wrap would otherwise stop it. -->
+    <Style Selector="c|AvonicNote.ion-text-nowrap, c|AvonicLabel.ion-text-nowrap c|AvonicNote">
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
     </Style>
 

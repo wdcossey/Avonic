@@ -10,9 +10,9 @@
         </c:AvonicItem>
     </Design.PreviewWith>
 
-    <!-- text.css itself is in the stub. This is only how it meets ion-label, which is in the theme: white-space inherits
-         from a label's .ion-text-nowrap, and the stub's Wrap would otherwise stop it. -->
-    <Style Selector="c|AvonicLabel.ion-text-nowrap c|AvonicText">
+    <!-- text.css itself is in the stub. This is only the global .ion-text-nowrap, which is the theme's: on the text, and
+         white-space inherits it from a label. The stub's Wrap would otherwise stop it. -->
+    <Style Selector="c|AvonicText.ion-text-nowrap, c|AvonicLabel.ion-text-nowrap c|AvonicText">
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
     </Style>
 

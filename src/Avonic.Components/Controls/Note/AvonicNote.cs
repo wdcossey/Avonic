@@ -13,8 +13,8 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public class AvonicNote : ContentControl
 {
-    /// <summary>On an item's slot while a note is in it. The theme aligns a note to the top of the row with it.</summary>
-    internal const string HasNotePseudoClass = ":has-note";
+    /// <summary>On the slot a note is in. The theme aligns a note to the top of the row with it.</summary>
+    private const string HasNotePseudoClass = ":has-note";
 
     /// <summary>Ionic <c>color</c>.</summary>
     public static readonly StyledProperty<string?> ColorProperty =
@@ -35,7 +35,7 @@ public class AvonicNote : ContentControl
         // A slot holds one child, so a panel directly in it stands for the slot. A slot is a row, though, so a vertical
         // stack is a group of its own, which the item centres as Ionic does a column in a <div slot="end">.
         var parent = Parent is Panel panel and not StackPanel { Orientation: Orientation.Vertical } ? panel.Parent : Parent;
-        if (parent is ContentPresenter { TemplatedParent: AvonicItem } slot)
+        if (parent is ContentPresenter slot)
         {
             _slot = slot;
             SetHasNote(slot, true);

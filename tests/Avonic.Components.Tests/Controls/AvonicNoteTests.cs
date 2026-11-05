@@ -485,14 +485,14 @@ public class AvonicNoteTests
     });
 
     [AvaloniaFact]
-    public void B8_A_Presenter_That_Is_Not_An_Items_Is_Left_Alone()
+    public void B8_A_Panel_That_Asks_To_Be_Centred_Is() => InstalledTheme.Run(_ =>
     {
-        var note = new AvonicNote { Content = "x" };
-        var presenter = new Avalonia.Controls.Presenters.ContentPresenter { Content = note };
-        using var scene = new Scene(presenter);
+        var panel = new Grid { VerticalAlignment = VerticalAlignment.Center, Children = { new AvonicNote { Content = "x" } } };
+        var item = new AvonicItem { Content = Tall(), EndContent = panel };
+        using var scene = InScene(item);
 
-        Assert.DoesNotContain(AvonicNote.HasNotePseudoClass, presenter.Classes);
-    }
+        AssertCentred(panel, item);
+    });
 
     // ── 9. The item's slot margins ───────────────────────────────────────────────────────────
 
@@ -606,6 +606,15 @@ public class AvonicNoteTests
         Assert.Equal(TextWrapping.NoWrap, Text(note).TextWrapping);
         Assert.Equal(TextTrimming.CharacterEllipsis, Text(note).TextTrimming);
         Assert.Equal(one.Bounds.Height, note.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B15_The_Class_On_The_Note_Itself_Is_One_Line() => InstalledTheme.Run(_ =>
+    {
+        var note = new AvonicNote { Content = Long, Classes = { "ion-text-nowrap" } };
+        using var scene = InScene(note);
+
+        Assert.Equal(TextWrapping.NoWrap, Text(note).TextWrapping);
     });
 
     [AvaloniaFact]

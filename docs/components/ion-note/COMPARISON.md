@@ -58,7 +58,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNot
 | 12 | A tap on it doesn't forward, even on its padding, and a tap on the item's padding does | toggle stays off, then flips | match, against a stub toggle |
 | 13 | A button item's name includes its text | native `<button>` | match |
 | 14 | RTL | an end note at x = 16, with its margin on the right | match |
-| 15 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with `.ion-text-nowrap` on the label only. See the plan |
+| 15 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with the class on the note or on a label. See the plan |
 
 ## Deliberate differences and known gaps
 

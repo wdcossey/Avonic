@@ -48,7 +48,7 @@ Each becomes a test.
 | 12 | A tap on a note doesn't forward to the item's first control, even on its padding, but a tap on the item's padding does | `clickedWithinShadowRoot`; measured `tog-n`, `tog2-n` |
 | 13 | A button item's name includes the note's text | native `<button>` |
 | 14 | RTL: an end note sits at the left, with its margin on the right | measured `rtl`: x = 16, margin-right 16 |
-| 15 | In a label with `.ion-text-nowrap`, it's one line with an ellipsis | `white-space` inherits; measured `nw-n`: 703 wide, cut off by the label's 358 |
+| 15 | With `.ion-text-nowrap` on it, it's one line. In a label with that class, also with an ellipsis | The global class; `white-space` inherits; measured `nw-n`: 703 wide, cut off by the label's 358 |
 
 ## Design
 
@@ -69,7 +69,7 @@ slot has no margin anyway. A rule that does nothing is left out.
 **`align-self: flex-start` needs the slot to stretch, and the slot can't tell what's in it.** The item centres its start
 and end presenters, and its default presenter centres its content. Either way the note's own `VerticalAlignment` has
 nothing to act in. So a note sets a `:has-note` pseudoclass on the presenter it's in, and `Styles/Note.axaml` stretches
-a presenter with that pseudoclass. Anything else in the item keeps its own alignment, unlike a rule for every slot, and
+an item's presenter with that pseudoclass. Anything else in the item keeps its own alignment, unlike a rule for every slot, and
 the item's files don't change. `ionStyle` isn't used because it's per item, not per slot, and Ionic's note doesn't emit it.
 
 **A panel directly in a slot stands for the slot,** as in `ion-label`, because `<ion-note slot="end"><ion-icon slot="end">`
@@ -78,8 +78,9 @@ centred, which is `align-items: center`. A slot is a row, so a vertical `StackPa
 item centres it, as Ionic does a column in a `<div slot="end">` (measured `group`: y = 27.59, 32 high, in a row of 88).
 
 **The stub's `Wrap` stops `white-space` inheriting,** because Avalonia's default is `NoWrap`, and a browser's is to wrap.
-A style can't tell a default from a value set on an ancestor. So `.ion-text-nowrap` on a label, the one place Avonic has that
-class, has its own rule, and that's a descendant selector aimed at this control, which costs other types nothing.
+A style can't tell a default from a value set on an ancestor. So `.ion-text-nowrap` has a rule, on the note and on a label
+around it, the places Avonic has that class. The second is a descendant selector aimed at this control, which costs other
+types nothing.
 
 ## Deliberate differences
 
@@ -87,7 +88,8 @@ class, has its own rule, and that's a descendant selector aimed at this control,
 |---|---|
 | **Known gap:** a long note in `StartContent` or `EndContent` doesn't wrap, and the item cuts it off. Measured in Ionic: in either slot it wraps at 342 wide, and takes all of the row, squeezing a label beside it to 0 wide | Those slots are `Auto` columns in the item's template, as `ion-label`'s plan records. Fixing it means a flex-like layout in the item |
 | A note in a panel directly in a slot acts as slotted, where Ionic's in a `<div slot="end">` is 14 px and centred (measured `in-div`) | See the design: this is what two notes or a note and an icon in one slot have to be. Wrap it in a `Border` for what `<div>` does |
-| A `TextBlock.TextWrapping="NoWrap"` on some other ancestor doesn't reach a note, where Ionic's `white-space` does (measured `div-n`) | See the design. Set it on the note |
+| `TextBlock.TextWrapping="NoWrap"`, or `.ion-text-nowrap`, on any other ancestor doesn't reach a note, where Ionic's `white-space` does (measured `div-n`) | See the design. Set it on the note |
+| Whether a panel is a vertical stack is read when the note attaches, and only a `StackPanel` counts. So a later change of `Orientation` doesn't follow, and a `Grid` with rows acts as a row, with the note at the top | A panel can't say which way it flows. Set `VerticalAlignment="Center"` on the panel to centre it as a group |
 | A note in a vertical `StackPanel` in a slot is 11 px with its padding, where Ionic's in a column in a `<div slot="end">` is 14 with none (measured `group-n`) | A selector for it would be longer than the case is worth. Wrap the stack in a `Border` |
 | A hidden note in a panel still stretches the slot | Nothing shows: the others in the panel are centred anyway. Measured with `display: none`: the icon beside it stays centred |
 | A note is a box, not inline, so it can't sit in a sentence | `ion-note` is nearly always a box in practice. A sentence can use a `Run` or an `AvonicTextSpan` |
@@ -96,7 +98,7 @@ class, has its own rule, and that's a descendant selector aimed at this control,
 
 | What | Goes with |
 |---|---|
-| `::slotted(ion-note)` in `item-divider.md.css` | `ion-item-divider` (#9). `AvonicNote` only sets `:has-note` in an `AvonicItem`, so that control has to widen the check as well as add its rules |
+| `::slotted(ion-note)` in `item-divider.md.css` | `ion-item-divider` (#9): it adds its own rules for the same pseudoclass |
 | The default text size outside a host | Not relevant here, because a note sets its own |
 
 ## Dependencies
