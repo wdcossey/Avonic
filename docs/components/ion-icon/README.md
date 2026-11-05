@@ -26,6 +26,8 @@ xmlns:c="using:Avonic.Components.Controls"
 **Set `FontSize` where you use it.** The box is `1em`, and Avalonia's inherited default isn't the 16 px of a web
 page, so an icon with no `FontSize` above it is small.
 
+**All of the box takes input**, including the middle of an outline icon and a blank icon, as Ionic's host does.
+
 **It sits at the start of its parent.** It's `inline-block` in Ionic, so it doesn't stretch. Unlike most Avalonia
 controls, it defaults to `HorizontalAlignment="Left"` and `VerticalAlignment="Top"`, so set `Center` to centre it.
 
@@ -114,7 +116,9 @@ wins, and a different one after it logs a warning.
 | A relative path | Blank. Use `avares://` |
 
 **Custom SVGs can use** `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon` and `g`, with presentation
-attributes such as `fill`, `stroke` and `transform`. Gradients, `<text>`, `<image>`, `style=` and `<style>` aren't drawn.
+attributes such as `fill`, `stroke`, `transform` and `display`. `<text>`, `<image>`, `style=` and `<style>` aren't drawn, and
+a gradient paints its fallback colour or nothing. `opacity`, `fill-opacity` and `stroke-opacity` are ignored, so those
+layers paint fully opaque.
 An SVG with `<script>` or an `on*` attribute is blank. Use `currentColor` to follow the icon's colour.
 
 An SVG has to be well-formed XML. A `<!DOCTYPE>` is fine, and more than 256 levels of nesting is blank.

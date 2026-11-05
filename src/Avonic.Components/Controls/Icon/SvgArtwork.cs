@@ -78,15 +78,15 @@ internal sealed partial class SvgArtwork
     {
         try
         {
-            // Design tools export a <!DOCTYPE>, so it's skipped rather than rejected. Ignoring it, with no
-            // resolver, means entities are never expanded and nothing external is fetched.
-            using var reader = XmlReader.Create(new StringReader(svg.TrimStart()), new XmlReaderSettings
+            // Design tools export a <!DOCTYPE>, a byte order mark and attribute prefixes they never declare,
+            // and a browser's HTML parser doesn't mind any of them. Ignoring the DTD, with no resolver,
+            // means entities are never expanded and nothing external is fetched.
+            using var reader = new XmlTextReader(new StringReader(svg.TrimStart().TrimStart('\uFEFF').TrimStart()))
             {
+                Namespaces = false,
                 DtdProcessing = DtdProcessing.Ignore,
                 XmlResolver = null,
-                IgnoreComments = true,
-                IgnoreWhitespace = true,
-            });
+            };
 
             return reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "svg" ? ParseRoot(reader) : Empty;
         }
@@ -149,6 +149,16 @@ internal sealed partial class SvgArtwork
             if (reader.LocalName.Equals("script", StringComparison.OrdinalIgnoreCase) || HasEventAttribute(reader))
             {
                 return false;
+            }
+
+            if (reader.GetAttribute("display") == "none")
+            {
+                if (!reader.IsEmptyElement && !SkipElement(reader))
+                {
+                    return false;
+                }
+
+                continue;
             }
 
             var state = Apply(reader, parent);
@@ -293,6 +303,14 @@ internal sealed partial class SvgArtwork
         "none" => null,
         "currentColor" or "currentcolor" => Paint.CurrentColor,
         "inherit" => inherited,
+
+        // A gradient or pattern isn't supported, so it's the same as one that's missing: its fallback
+        // colour if it has one, otherwise nothing.
+        var text when text.StartsWith("url(", StringComparison.OrdinalIgnoreCase) =>
+            text.IndexOf(')') is var end && end >= 0 && text[(end + 1)..].Trim() is { Length: > 0 } fallback
+                ? ParsePaint(fallback, null)
+                : null,
+
         var text => Color.TryParse(CssToAvaloniaHex(text), out var color) ? new Paint(new ImmutableSolidColorBrush(color)) : inherited,
     };
 
@@ -321,7 +339,10 @@ internal sealed partial class SvgArtwork
             number = number[..^2];
         }
 
-        return double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : null;
+        // An invalid value is ignored. TryParse also accepts "NaN" and "Infinity", and neither is a length.
+        return double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) && double.IsFinite(result)
+            ? result
+            : null;
     }
 
     private static double Number(XmlReader reader, string name) => ParseLength(reader.GetAttribute(name)) ?? 0;
@@ -399,7 +420,11 @@ internal sealed partial class SvgArtwork
         {
             "path" => reader.GetAttribute("d"),
             "circle" => EllipsePath(Number(reader, "cx"), Number(reader, "cy"), Number(reader, "r"), Number(reader, "r")),
-            "ellipse" => EllipsePath(Number(reader, "cx"), Number(reader, "cy"), Number(reader, "rx"), Number(reader, "ry")),
+            "ellipse" => EllipsePath(
+                Number(reader, "cx"),
+                Number(reader, "cy"),
+                ParseLength(reader.GetAttribute("rx")) ?? ParseLength(reader.GetAttribute("ry")) ?? 0,
+                ParseLength(reader.GetAttribute("ry")) ?? ParseLength(reader.GetAttribute("rx")) ?? 0),
             "rect" => RectPath(reader),
             "line" => Invariant($"M{Number(reader, "x1")} {Number(reader, "y1")}L{Number(reader, "x2")} {Number(reader, "y2")}"),
             "polyline" => PointsPath(reader.GetAttribute("points"), closed: false),

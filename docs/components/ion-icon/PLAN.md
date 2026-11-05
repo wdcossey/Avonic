@@ -93,7 +93,8 @@ Each becomes a test.
     start of its parent, rather than stretching to fill it.
 11. `Size` gives 18 or 32, and beats a local `FontSize`.
 12. An explicit `Width` and `Height` win, and the artwork is centred and scaled to fit (`xMidYMid meet`).
-13. Painting is clipped to the box (`contain: strict`, `overflow: hidden`).
+13. Painting is clipped to the box (`contain: strict`, `overflow: hidden`), and all of the box takes input, even
+    where nothing is painted, because the host is a box.
 
 **Colour**
 
@@ -172,7 +173,7 @@ On a desktop in Release. A phone will be slower, and this hasn't been measured o
 
 | What | Cost |
 |---|---|
-| `Avonic.Components.dll` | 37 KB → 229 KB: 160 KB of artwork, 33 KB of code |
+| `Avonic.Components.dll` | 36 KB → 231 KB: 160 KB of artwork, 35 KB of code |
 | First icon lookup: decompress and index | 7 ms, 3 MB allocated, most of it short-lived |
 | Kept afterwards | The 758 KB of decompressed SVG text, plus an index of the names |
 | Parsing one icon | 0.045 ms on average, cached after the first use |
@@ -196,8 +197,9 @@ A failed load is blank, as Ionic's `safeFallback` is. Network fetching means asy
 and a security review in a control that doesn't otherwise need any, so it waits until someone needs it.
 
 **SVG support is a subset:** `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon` and `g`, with
-presentation attributes, `fill` and `stroke` colours, and the classes above. Gradients, `<text>`, `<image>`,
-`style=` and `<style>` aren't drawn. This covers every built-in icon, and it's documented for custom ones.
+presentation attributes, `fill` and `stroke` colours, `display="none"`, and the classes above. `<text>`, `<image>`,
+`style=` and `<style>` aren't drawn, a gradient paints its fallback colour or nothing, and the `opacity` family is
+ignored. This covers every built-in icon, and it's documented for custom ones.
 
 An SVG has to be well-formed XML, where Ionic's `innerHTML` is more forgiving, and more than 256 levels of nesting is
 blank. A `<!DOCTYPE>` is skipped, and its entities are never expanded.
@@ -224,8 +226,8 @@ more. `SvgPath` is about 100 lines that work around each of these, by adjusting 
 |---|---|---|
 | After a non-curve command, SVG starts a smooth curve (`S`, `T`) at the current point. Avalonia uses the last control point, however old, and from either kind of curve. `wifi-outline` and `infinite` came out visibly warped | 39 built-in icons | A zero-length curve first makes the control point the current point |
 | The default fill rule is even-odd, and SVG's is nonzero | Any icon with overlapping shapes | Sets `F1` or `F0` |
-| A number straight after `Z` **loops forever** | Custom SVGs | Ends the path at the `Z`, as a browser stops at an error |
-| Bad data throws, including `IndexOutOfRangeException` | Custom SVGs | Draws nothing |
+| Anything but a command straight after `Z` **loops forever**, including Unicode spaces and digits | Custom SVGs | Ends the path at the `Z`, as a browser stops at an error, and rejects non-ASCII data |
+| Bad data throws `InvalidDataException`, `IndexOutOfRangeException` or `FormatException` | Custom SVGs | Draws nothing |
 | A path that doesn't start with a moveto draws from the origin | Custom SVGs | Draws nothing |
 | Valid numbers like `+1` and some exponents are rejected | Custom SVGs | Draws nothing. **Not fixed** |
 
@@ -233,8 +235,10 @@ A full parser (385 lines) was written and then dropped. On built-in icons the wo
 the comparison. A full parser would only improve custom SVGs: a malformed path would keep the part before its error,
 and `+1` would work.
 
-**This isn't proof of no other hang.** 50 malformed inputs were tried, and numbers after `Z` was the only pattern
-that hung. Treat a custom SVG from an untrusted source with care. If Avalonia fixes these, `SvgPath` can shrink.
+**How the hang was checked.** A throwaway fuzz ran 3 million malformed paths through `SvgPath.Parse`, each starting
+from a valid moveto and built from commands, numbers, separators and Unicode. None hung, and none threw anything
+outside the list above. About 282,000 produced geometry, so they reached the parser. That's strong evidence but not
+proof, so treat a custom SVG from an untrusted source with care. If Avalonia fixes these, `SvgPath` can shrink.
 
 `Tokens/Icon.axaml` holds the stroke width token and the `Design.PreviewWith` block. The control looks the
 variable up from itself with a fallback of 32, so `var(--ionicon-stroke-width, 32px)` and subtree overrides

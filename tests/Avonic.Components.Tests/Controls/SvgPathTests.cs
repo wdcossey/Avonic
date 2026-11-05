@@ -165,6 +165,7 @@ public class SvgPathTests
     [InlineData("M0 0L100 100C1 2")]
     [InlineData("M0 0L100 100A1 1 0 2 0 5 5")]
     [InlineData("M1e")] // IndexOutOfRangeException
+    [InlineData("m1 1-E-1")] // FormatException
     public void An_Error_Draws_Nothing_And_Is_Not_Fatal(string data) => Assert.Null(SvgPath.Parse(data, evenOdd: false));
 
     // Valid SVG that Avalonia's parser rejects. None of the bundled icons use these.
@@ -190,6 +191,22 @@ public class SvgPathTests
     [InlineData("M0 0L10 10Z-5", "M0 0L10 10Z")]
     [InlineData("M0 0L10 10Z.5", "M0 0L10 10Z")]
     public void Numbers_After_A_Closepath_End_The_Path(string data, string expected) => Assert.Equal(expected, SvgPath.Prepare(data));
+
+    // These also hang StreamGeometry.Parse, which reads Unicode spaces and digits.
+    [AvaloniaTheory]
+    [InlineData("M0 0L10 10Z\u00A05 5")]
+    [InlineData("M0 0L10 10Z\u20035 5")]
+    [InlineData("M0 0L10 10Z\u0663")]
+    public void Non_Ascii_Data_Draws_Nothing(string data) => Assert.Null(SvgPath.Parse(data, evenOdd: false));
+
+    [AvaloniaTheory]
+    [InlineData("M0 0L10 10Z\v5", "M0 0L10 10Z")]
+    [InlineData("M0 0L10 10Ze5", "M0 0L10 10Z")]
+    [InlineData("M0 0L10 10Z#", "M0 0L10 10Z")]
+    [InlineData("M0 0L10 10Z M5 5L6 6", "M0 0L10 10Z M5 5L6 6")]
+    [InlineData("M0 0L10 10Z", "M0 0L10 10Z")]
+    [InlineData("M0 0L10 10Z  ", "M0 0L10 10Z  ")]
+    public void Only_A_Command_Can_Follow_A_Closepath(string data, string expected) => Assert.Equal(expected, SvgPath.Prepare(data));
 
     // The reset has to survive the path being cut short.
     [AvaloniaFact]

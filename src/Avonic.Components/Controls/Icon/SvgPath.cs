@@ -24,9 +24,10 @@ internal static class SvgPath
             // F1 is nonzero, SVG's default. StreamGeometry's own default is even-odd.
             return StreamGeometry.Parse((evenOdd ? "F0 " : "F1 ") + prepared);
         }
-        catch (Exception)
+        catch (Exception e) when (e is InvalidDataException or IndexOutOfRangeException or FormatException)
         {
-            // It throws at least InvalidDataException and IndexOutOfRangeException on bad data.
+            // What it throws on bad data, found by fuzzing. Anything else, such as no render platform
+            // yet, isn't about the data, so it mustn't become an icon cached as blank.
             return null;
         }
     }
@@ -34,6 +35,13 @@ internal static class SvgPath
     /// <summary>The data, changed where Avalonia would misread it. Null if it can't start a path.</summary>
     internal static string? Prepare(string data)
     {
+        // Path data is ASCII. Avalonia also reads Unicode spaces and digits, which would get past the
+        // closepath check below. An error stops a browser, and here it means drawing nothing.
+        if (!Ascii.IsValid(data))
+        {
+            return null;
+        }
+
         StringBuilder? result = null;
         var previous = '\0';
         var seenCurve = false;
@@ -75,9 +83,9 @@ internal static class SvgPath
 
             previous = command;
 
-            // Numbers straight after a closepath make Avalonia loop forever. They're an error, and a
-            // browser stops at an error, so the path ends here.
-            if (command is 'z' or 'Z' && NumberFollows(data, i + 1))
+            // Anything but a command straight after a closepath makes Avalonia loop forever. It's an
+            // error, and a browser stops at an error, so the path ends here.
+            if (command is 'z' or 'Z' && !CommandFollows(data, i + 1))
             {
                 return (result ?? new StringBuilder()).Append(data, copied, i + 1 - copied).ToString();
             }
@@ -86,14 +94,14 @@ internal static class SvgPath
         return result is null ? data : result.Append(data, copied, data.Length - copied).ToString();
     }
 
-    private static bool NumberFollows(string data, int start)
+    private static bool CommandFollows(string data, int start)
     {
         var i = start;
-        while (i < data.Length && data[i] is ' ' or ',' or '\t' or '\r' or '\n' or '\f')
+        while (i < data.Length && (char.IsWhiteSpace(data[i]) || data[i] == ','))
         {
             i++;
         }
 
-        return i < data.Length && (char.IsAsciiDigit(data[i]) || data[i] is '+' or '-' or '.');
+        return i == data.Length || (char.IsAsciiLetter(data[i]) && data[i] is not ('e' or 'E'));
     }
 }

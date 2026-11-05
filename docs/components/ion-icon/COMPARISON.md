@@ -57,7 +57,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each is covered in `AvonicIc
 | 10 | The box is `1em` square, and doesn't stretch | `font-size: 40px` gave 40×40; `display: inline-block` | match |
 | 11 | `Size` gives 18 or 32 and beats `FontSize` | 18×18 with `font-size: 40px` | match |
 | 12 | An explicit box wins, with the artwork centred | 64×32 | match |
-| 13 | Painting is clipped to the box | `contain: strict`, `overflow: hidden` | match |
+| 13 | Painting is clipped to the box, and all of it takes input | `contain: strict`, `overflow: hidden`; the host is a box | match |
 | 14 | Fill and stroke follow the inherited colour | `rgb(0, 255, 0)` | match |
 | 15 | `Color` gives the base and beats a local colour | `rgb(197, 0, 15)` with `color: lime` | match |
 | 16 | An unknown `Color` falls back to the inherited colour | `rgb(0, 0, 0)` | match |
@@ -82,7 +82,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each is covered in `AvonicIc
 | `name` is `IconName` | `StyledElement.Name` already exists |
 | `ios`, `mode`, `lazy` and `sanitize` aren't declared, and `icon` doesn't take `{ ios, md }` | Each would be a dead prop here. See the [checklist](PLAN.md#props-11) |
 | `http(s)` and relative sources are blank | Fetching is deferred, and there's no page to be relative to. See [Sources](PLAN.md#sources) |
-| A subset of SVG | Covers every built-in icon. Gradients, `<text>`, `<image>` and `style=` aren't drawn in a custom SVG |
+| A subset of SVG | Covers every built-in icon. In a custom SVG, gradients, `<text>`, `<image>` and `style=` aren't drawn, and `opacity` is ignored |
 | A default size from Avalonia's `FontSize`, not 16 px | The `1em` rule matches. A page-level default isn't this control's decision |
 | An SVG with unsafe content is always blank | Ionic can turn this off with `sanitize`. Nothing executes here, so there's no reason to |
 | In a custom SVG, a malformed path draws nothing, and so do valid numbers like `+1` | Ionic's browser keeps the part before an error. Avalonia's parser doesn't, and no built-in icon is affected |

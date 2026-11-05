@@ -5,7 +5,7 @@ using Avalonia.Controls.Automation.Peers;
 using Avalonia.Controls.Documents;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Immutable;
+using Avalonia.Threading;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -87,6 +87,9 @@ public class AvonicIcon : Control
         HorizontalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(HorizontalAlignment.Left);
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(VerticalAlignment.Top);
 
+        // contain: strict, and the SVG's overflow: hidden.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicIcon>(true);
+
         IconNameProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
         MdProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
         IconProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
@@ -94,12 +97,6 @@ public class AvonicIcon : Control
 
         SizeProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.UpdatePseudoClasses());
         FlipRtlProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.UpdatePseudoClasses());
-    }
-
-    public AvonicIcon()
-    {
-        // contain: strict, and the SVG's overflow: hidden.
-        ClipToBounds = true;
     }
 
     /// <inheritdoc cref="IconNameProperty"/>
@@ -168,8 +165,13 @@ public class AvonicIcon : Control
     /// <summary>
     /// Ionicons' <c>addIcons</c>: makes each source available by name. It beats a bundled icon of the
     /// same name, and the first registration of a name wins. A camelCase key also registers in kebab-case.
+    /// Call it on the UI thread.
     /// </summary>
-    public static void AddIcons(IReadOnlyDictionary<string, string> icons) => IconStore.AddIcons(icons);
+    public static void AddIcons(IReadOnlyDictionary<string, string> icons)
+    {
+        Dispatcher.UIThread.VerifyAccess();
+        IconStore.AddIcons(icons);
+    }
 
     /// <summary>Avalonia mirrors drawing under a right-to-left ancestor. Ionic doesn't, so opt out.</summary>
     protected override bool BypassFlowDirectionPolicies => true;
@@ -241,7 +243,16 @@ public class AvonicIcon : Control
     public override void Render(DrawingContext context)
     {
         var bounds = Bounds.Size;
-        if (_artwork.Layers.Count == 0 || bounds.Width <= 0 || bounds.Height <= 0)
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            return;
+        }
+
+        // Ionic's host is a box, so all of it takes input, including the middle of an outline icon and
+        // a blank icon. A transparent brush hit-tests, and no brush wouldn't.
+        context.FillRectangle(Brushes.Transparent, new Rect(bounds));
+
+        if (_artwork.Layers.Count == 0)
         {
             return;
         }

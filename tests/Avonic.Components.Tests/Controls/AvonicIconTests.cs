@@ -6,6 +6,7 @@ using Avalonia.Controls.Automation.Peers;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -1008,6 +1009,97 @@ public sealed class AvonicIconTests : IDisposable
     [AvaloniaFact]
     public void An_Invalid_Path_Paints_Nothing_And_Is_Not_Fatal() =>
         Assert.NotEqual(White, PaintedAt(Svg("""<path d="not a path"/><rect width="512" height="512"/>"""), 256, 256));
+
+    // Ionic's browser reads these as HTML, which doesn't care about either.
+    [AvaloniaTheory]
+    [InlineData("""<svg sketch:type="MSPage" viewBox="0 0 512 512"><rect width="512" height="512"/></svg>""")]
+    [InlineData("""<svg viewBox="0 0 512 512"><rect xlink:href="#a" width="512" height="512"/></svg>""")]
+    [InlineData("\uFEFF<svg viewBox=\"0 0 512 512\"><rect width=\"512\" height=\"512\"/></svg>")]
+    [InlineData("  \uFEFF<svg viewBox=\"0 0 512 512\"><rect width=\"512\" height=\"512\"/></svg>")]
+    public void Export_Quirks_Are_Tolerated(string svg) => Assert.Single(SvgArtwork.Parse(svg).Layers);
+
+    [AvaloniaFact]
+    public void Display_None_Draws_Nothing() =>
+        Assert.Equal(White, PaintedAt(Svg("""<rect display="none" width="512" height="512"/>"""), 256, 256));
+
+    [AvaloniaFact]
+    public void Display_None_Hides_A_Groups_Children() =>
+        Assert.Equal(White, PaintedAt(Svg("""<g display="none"><rect width="512" height="512"/></g>"""), 256, 256));
+
+    [AvaloniaFact]
+    public void Display_None_Still_Blanks_A_Hidden_Script() =>
+        Assert.Empty(SvgArtwork.Parse("""<svg viewBox="0 0 512 512"><g display="none"><script>1</script></g><rect width="512" height="512"/></svg>""").Layers);
+
+    [AvaloniaFact]
+    public void An_Unsupported_Gradient_Paints_Nothing() =>
+        Assert.Equal(White, PaintedAt(Svg("""<rect fill="url(#g)" width="512" height="512"/>"""), 256, 256));
+
+    [AvaloniaFact]
+    public void An_Unsupported_Gradient_Uses_Its_Fallback() =>
+        Assert.Equal(Colors.Red, PaintedAt(Svg("""<rect fill="url(#g) #ff0000" width="512" height="512"/>"""), 256, 256));
+
+    [AvaloniaTheory]
+    [InlineData("NaN")]
+    [InlineData("Infinity")]
+    [InlineData("-Infinity")]
+    public void An_Invalid_Stroke_Width_Is_Ignored(string width) =>
+        Assert.NotEqual(White, PaintedAt(Svg($"""<path stroke="currentColor" stroke-width="{width}" fill="none" d="M0 256H512"/>"""), 256, 256));
+
+    // Measured in Chromium: rx alone gave a bounding box 10 tall, with ry computing to auto.
+    [AvaloniaTheory]
+    [InlineData("""rx="100" """)]
+    [InlineData("""ry="100" """)]
+    public void An_Ellipse_Radius_Takes_The_Other_If_Omitted(string radius)
+    {
+        var src = Svg($"""<ellipse cx="256" cy="256" {radius}/>""");
+
+        Assert.NotEqual(White, PaintedAt(src, 256, 180));
+        Assert.NotEqual(White, PaintedAt(src, 180, 256));
+    }
+
+    // ── Input ────────────────────────────────────────────────────────────────────────────────
+
+    // The hollow middle of a ring, which paints nothing.
+    private static readonly string Ring = Svg("""<circle cx="256" cy="256" r="240" fill="none" stroke="currentColor" stroke-width="32"/>""");
+
+    [AvaloniaFact]
+    public void All_Of_The_Box_Takes_Input()
+    {
+        var icon = Icon(Ring);
+        using var scene = Show(icon);
+        Frame(scene);
+
+        Assert.Contains(icon, scene.Window.GetInputElementsAt(new Point(32, 32)));
+        Assert.Contains(icon, scene.Window.GetInputElementsAt(new Point(1, 1)));
+    }
+
+    [AvaloniaFact]
+    public void A_Blank_Icon_Takes_Input()
+    {
+        var icon = new AvonicIcon { IconName = "no-such-icon", FontSize = 64 };
+        using var scene = Show(icon);
+        Frame(scene);
+
+        Assert.Contains(icon, scene.Window.GetInputElementsAt(new Point(32, 32)));
+    }
+
+    [AvaloniaFact]
+    public void Clipping_Can_Be_Styled()
+    {
+        var icon = new AvonicIcon();
+        Assert.True(icon.ClipToBounds);
+        Assert.False(icon.IsSet(Visual.ClipToBoundsProperty), "A local value would beat a style");
+    }
+
+    // ── Threading ────────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void AddIcons_Off_The_Ui_Thread_Throws()
+    {
+        var failure = Task.Run(() => Record.Exception(() => AvonicIcon.AddIcons(new Dictionary<string, string> { ["off-thread"] = Solid }))).Result;
+
+        Assert.IsType<InvalidOperationException>(failure);
+    }
 
     // ── Accessibility ────────────────────────────────────────────────────────────────────────
 
