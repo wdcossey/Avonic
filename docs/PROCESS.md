@@ -27,7 +27,7 @@ closed. A fresh session needs nothing but the repo and the issue:
 
 Shared files are auto-discovered, so a control adds its own files and never edits another
 control's. Keep it that way. Templates and tokens are found by the globs in each project file
-(`Controls/**/*.axaml` in Components; `Tokens/**/*.axaml` and `Controls/**/*.axaml` in Themes).
+(`Controls/**/*.axaml` in Components; `Tokens/**/*.axaml`, `Controls/**/*.axaml` and `Styles/**/*.axaml` in Themes).
 Sample pages are found by `[SamplePage("<ion-tag>", Order = <issue number>)]`. See
 [auto-discovery](infra/auto-discovery/README.md).
 
@@ -58,6 +58,7 @@ One PR, one control, all of:
 | Functional stub template (structure only) | same folder, `<Name>.axaml` |
 | Styled template using only resource keys — when the control has a visual (a control whose look Ionic hard-codes with no CSS variable has none; say so in the plan) | `src/Avonic.Themes/Controls/<Name>.axaml` |
 | Resource keys — one per Ionic CSS var, named by the rule in `CLAUDE.md` | `src/Avonic.Themes/Tokens/<Name>.axaml` |
+| `::slotted` rules, for this control's content or how it sits in another control | `src/Avonic.Themes/Styles/<Name>.axaml` |
 | `Design.PreviewWith` block | in the Themes template |
 | Behaviour tests — one per behaviour listed in the plan; each must **fail** if the behaviour is removed | `tests/Avonic.Components.Tests/Controls/<Name>Tests.cs` |
 | Sample page | `samples/Avonic.Sample/Pages/<Name>Page.axaml` |

@@ -104,7 +104,10 @@ Other global variables are deferred to the controls that read them. [PLAN.md](PL
 
 - **A literal colour gets two keys:** a `Color`, plus a `…Brush` whose `Color` is a `{DynamicResource}` on
   it. Overriding the `Color` then updates both.
-- **A token that falls back to another variable is a brush that follows it.**
+- **A token that falls back to another variable is a brush that follows it.** A control's own token can do
+  better: give it the value `CssUnset`, and read it through `Css.Var`, as
+  [ion-item](../../components/ion-item/README.md#slotted-styles) does. Overriding the variable it falls back to
+  then moves it too.
 - **A fallback that differs from the global value goes in the control's own tokens.** `--ion-toolbar-color`
   falls back to `#424242`, not the global `#000`. An Avonic key always has a value, so it can't copy CSS's
   "was this variable set?" behaviour, and that control's token won't follow `Avonic.TextColor`.

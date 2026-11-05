@@ -1,0 +1,292 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItem Content="Default lines" />
+            <c:AvonicItem Content="Lines full" Lines="Full" />
+            <c:AvonicItem Content="Lines none" Lines="None" />
+            <c:AvonicItem Content="Button with detail" Button="True" Detail="True" />
+            <c:AvonicItem Content="Danger" Color="danger" Button="True" Detail="True" />
+            <c:AvonicItem Content="Disabled" Button="True" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of item.css and item.md.css. Slotted content is styled in Styles/Item.axaml,
+         because a ControlTheme's styles can't reach it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItem}" TargetType="c:AvonicItem">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 1rem -->
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <!-- color: var(color), which is var(ion-item-color, var(ion-text-color)) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Item.Color" />
+                <DynamicResource ResourceKey="Avonic.ItemColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Panel Background="Transparent">
+                        <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                        <Grid Name="PART_Layout" ColumnDefinitions="Auto,*">
+                            <ContentPresenter Name="PART_Start"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <Border Name="PART_Inner" Grid.Column="1">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <ContentPresenter Name="PART_Container"
+                                                      VerticalContentAlignment="Center"
+                                                      TextWrapping="Wrap"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                    <ContentPresenter Name="PART_End"
+                                                      Grid.Column="1"
+                                                      VerticalAlignment="Center"
+                                                      Content="{TemplateBinding EndContent}"
+                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                                    <c:AvonicIcon Name="PART_DetailIcon"
+                                                  Grid.Column="2"
+                                                  VerticalAlignment="Center"
+                                                  AutomationProperties.AccessibilityView="Raw"
+                                                  Icon="{TemplateBinding DetailIcon}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .item-native -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="MinHeight" Value="{DynamicResource Avonic.Item.MinHeight}" />
+            <Setter Property="CornerRadius" Value="{DynamicResource Avonic.Item.BorderRadius}" />
+            <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Item.BorderWidth}" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Item.Transition}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.Background" />
+                    <DynamicResource ResourceKey="Avonic.ItemBackgroundBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .item-native's padding. It's on a part inside, because ::after and the ripple cover the padding. -->
+        <Style Selector="^ /template/ Grid#PART_Layout">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.Item.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Item.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Item.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Item.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .item-inner -->
+        <Style Selector="^ /template/ Border#PART_Inner">
+            <Setter Property="MinHeight" Value="{DynamicResource Avonic.Item.MinHeight}" />
+            <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Item.InnerBorderWidth}" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Item.InnerBoxShadow}" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.Item.InnerPaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Item.InnerPaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Item.InnerPaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Item.InnerPaddingBottom" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .item-native::after -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Item.Transition}" />
+        </Style>
+
+        <!-- .item-detail-icon -->
+        <Style Selector="^ /template/ c|AvonicIcon#PART_DetailIcon">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.Item.DetailIconOpacity}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.DetailIconColor" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="FontSize">
+                <MultiBinding Converter="{x:Static b:Css.Em}">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Item.DetailIconFontSize" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicItem.DetailIconMarginConverter}">
+                    <DynamicResource ResourceKey="Avonic.Item.InnerPaddingEnd" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color) } -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.RippleColor" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.item-interactive). Before lines, as in item.md.css, so an explicit value beats it. -->
+        <Style Selector="^:item-interactive /template/ Border#PART_Native">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:item-interactive /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <!-- Lines: an explicit value beats the tokens, which are the default -->
+        <Style Selector="^:lines-full /template/ Border#PART_Native">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:lines-full /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-inset /template/ Border#PART_Native">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-inset /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:lines-none /template/ Border#PART_Native">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-none /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <!-- :host(.item-label-stacked), :host(.item-label-floating) -->
+        <Style Selector="^:item-label-stacked /template/ Border#PART_Native, ^:item-label-floating /template/ Border#PART_Native, ^:item-label-stacked /template/ Border#PART_Inner, ^:item-label-floating /template/ Border#PART_Inner">
+            <Setter Property="MinHeight" Value="55" />
+        </Style>
+        <Style Selector="^:item-label-stacked /template/ ContentPresenter, ^:item-label-floating /template/ ContentPresenter">
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+
+        <!-- button, a { cursor: pointer } and .item-control-needs-pointer-cursor -->
+        <Style Selector="^:button, ^:item-control-needs-pointer-cursor">
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- :host(.item-disabled) -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+
+        <!-- :host(.ion-activated) .item-native -->
+        <Style Selector="^:activated">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.Item.Color" />
+                    <DynamicResource ResourceKey="Avonic.ItemColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:activated /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.Item.BackgroundActivatedOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.BackgroundActivated" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-focused) .item-native -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.Item.Color" />
+                    <DynamicResource ResourceKey="Avonic.ItemColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.Item.BackgroundFocusedOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.BackgroundFocused" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-activatable:not(.ion-focused):hover) .item-native. Its specificity beats .ion-activated. -->
+        <Style Selector="^:ion-activatable:ion-hover:not(:ion-focused)">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.Item.Color" />
+                    <DynamicResource ResourceKey="Avonic.ItemColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-activatable:ion-hover:not(:ion-focused) /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.Item.BackgroundHoverOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Item.BackgroundHover" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color) .item-native. After the states, so it beats them, as .ion-color.ion-activated does. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.NullToUnset}}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_Native">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- border-color: var(ion-color-shade). An unknown colour makes it invalid, which is currentColor. -->
+        <Style Selector="^:ion-color /template/ Border#PART_Native, ^:ion-color /template/ Border#PART_Inner">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Shade)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicItem].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-color.ion-activated) .item-native::after -->
+        <Style Selector="^:ion-color:activated /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <!-- :host(.ion-color.ion-focused) and hover .item-native::after -->
+        <Style Selector="^:ion-color:ion-focused /template/ Border#PART_Overlay, ^:ion-color:ion-activatable:ion-hover:not(:ion-focused) /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

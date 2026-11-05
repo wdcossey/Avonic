@@ -13,6 +13,7 @@ registrations. The tables in `CLAUDE.md` and `docs/ROADMAP.md` are handled separ
 | `src/Avonic.Components/Controls/<Name>/<Name>.axaml` | `AvonicComponentsStyles` | `Controls/**/*.axaml` glob |
 | `src/Avonic.Themes/Tokens/<Name>.axaml` | `AvonicTheme` | `Tokens/**/*.axaml` glob, except `Tokens/Palettes/` |
 | `src/Avonic.Themes/Controls/<Name>.axaml` | `AvonicTheme` | `Controls/**/*.axaml` glob |
+| `src/Avonic.Themes/Styles/<Name>.axaml` | `AvonicTheme` | `Styles/**/*.axaml` glob |
 | `samples/Avonic.Sample/Pages/<Name>Page.axaml` | The sample's index | `[SamplePage]` on the page class |
 
 Mark each sample page with its Ionic tag, using the control's issue number as `Order`:
@@ -27,8 +28,11 @@ The index sorts by `Order`, then by title. A page with no `Order` sorts last. Th
 
 ## Rules
 
-- **Root element.** Every discovered `.axaml` must have a `ResourceDictionary` root. Any other root
-  throws when the dictionary loads, and `DiscoveryTests` fails.
+- **Root element.** Every discovered `.axaml` must have a `ResourceDictionary` root, except under
+  `Styles/`, where it must be `Styles`. Any other root throws when the file loads, and `DiscoveryTests`
+  fails.
+- **`Styles/` is for `::slotted` rules.** A `ControlTheme`'s styles only reach the control and its template,
+  so they can't style slotted content. See [ion-item](../../components/ion-item/README.md#slotted-styles).
 - **Page classes.** A sample page's class name ends in `Page`, and it needs a public parameterless
   constructor. `DiscoveryTests` shows every page in a window under the theme, and fails if `[SamplePage]`
   or the constructor is missing or the page throws. A page with any other class name that also lacks

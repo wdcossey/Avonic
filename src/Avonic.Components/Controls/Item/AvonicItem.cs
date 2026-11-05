@@ -1,0 +1,492 @@
+using Avalonia;
+using Avalonia.Automation.Peers;
+using Avalonia.Automation.Provider;
+using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data.Converters;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
+using Avalonia.Metadata;
+using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
+
+namespace Avonic.Components.Controls;
+
+/// <summary>
+/// Ionic <c>ion-item</c>: a row with start, default and end content, and optional detail icon, that
+/// can be tappable. It's also what the form controls inside it report to.
+/// </summary>
+[TemplatePart("PART_Start", typeof(ContentPresenter))]
+[TemplatePart("PART_Container", typeof(ContentPresenter))]
+[TemplatePart("PART_End", typeof(ContentPresenter))]
+[TemplatePart("PART_DetailIcon", typeof(AvonicIcon))]
+[TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
+[PseudoClasses(
+    ":lines-default", ":lines-full", ":lines-inset", ":lines-none", ":button", ":ion-activatable",
+    ":item-multiple-inputs", ":item-control-needs-pointer-cursor")]
+public class AvonicItem : TemplatedControl
+{
+    /// <summary><c>margin-inline-end: -6px</c> on <c>.item-detail-icon</c>. There's no variable for it.</summary>
+    private const double DetailIconMarginEnd = -6;
+
+    // ── Properties ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Ionic <c>button</c>: the item is tappable.</summary>
+    public static readonly StyledProperty<bool> ButtonProperty =
+        AvaloniaProperty.Register<AvonicItem, bool>(nameof(Button));
+
+    /// <summary>Ionic <c>color</c>.</summary>
+    public static readonly StyledProperty<string?> ColorProperty =
+        ColorPalette.ColorProperty.AddOwner<AvonicItem>();
+
+    /// <summary>Ionic <c>detail</c>. In md, only <c>true</c> shows the icon.</summary>
+    public static readonly StyledProperty<bool?> DetailProperty =
+        AvaloniaProperty.Register<AvonicItem, bool?>(nameof(Detail));
+
+    /// <summary>Ionic <c>detailIcon</c>: a name or a source, as <see cref="AvonicIcon.Icon"/> takes.</summary>
+    public static readonly StyledProperty<string> DetailIconProperty =
+        AvaloniaProperty.Register<AvonicItem, string>(nameof(DetailIcon), "chevron-forward");
+
+    /// <summary>Ionic <c>lines</c>. Null leaves it to the item's default, or an <c>ion-list</c>'s.</summary>
+    public static readonly StyledProperty<ItemLines?> LinesProperty =
+        AvaloniaProperty.Register<AvonicItem, ItemLines?>(nameof(Lines));
+
+    /// <summary>Ionic's default slot.</summary>
+    public static readonly StyledProperty<object?> ContentProperty =
+        AvaloniaProperty.Register<AvonicItem, object?>(nameof(Content));
+
+    public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty =
+        AvaloniaProperty.Register<AvonicItem, IDataTemplate?>(nameof(ContentTemplate));
+
+    /// <summary>Ionic's <c>start</c> slot.</summary>
+    public static readonly StyledProperty<object?> StartContentProperty =
+        AvaloniaProperty.Register<AvonicItem, object?>(nameof(StartContent));
+
+    public static readonly StyledProperty<IDataTemplate?> StartContentTemplateProperty =
+        AvaloniaProperty.Register<AvonicItem, IDataTemplate?>(nameof(StartContentTemplate));
+
+    /// <summary>Ionic's <c>end</c> slot.</summary>
+    public static readonly StyledProperty<object?> EndContentProperty =
+        AvaloniaProperty.Register<AvonicItem, object?>(nameof(EndContent));
+
+    public static readonly StyledProperty<IDataTemplate?> EndContentTemplateProperty =
+        AvaloniaProperty.Register<AvonicItem, IDataTemplate?>(nameof(EndContentTemplate));
+
+    public bool Button
+    {
+        get => GetValue(ButtonProperty);
+        set => SetValue(ButtonProperty, value);
+    }
+
+    public string? Color
+    {
+        get => GetValue(ColorProperty);
+        set => SetValue(ColorProperty, value);
+    }
+
+    public bool? Detail
+    {
+        get => GetValue(DetailProperty);
+        set => SetValue(DetailProperty, value);
+    }
+
+    public string DetailIcon
+    {
+        get => GetValue(DetailIconProperty);
+        set => SetValue(DetailIconProperty, value);
+    }
+
+    public ItemLines? Lines
+    {
+        get => GetValue(LinesProperty);
+        set => SetValue(LinesProperty, value);
+    }
+
+    [Content]
+    public object? Content
+    {
+        get => GetValue(ContentProperty);
+        set => SetValue(ContentProperty, value);
+    }
+
+    public IDataTemplate? ContentTemplate
+    {
+        get => GetValue(ContentTemplateProperty);
+        set => SetValue(ContentTemplateProperty, value);
+    }
+
+    public object? StartContent
+    {
+        get => GetValue(StartContentProperty);
+        set => SetValue(StartContentProperty, value);
+    }
+
+    public IDataTemplate? StartContentTemplate
+    {
+        get => GetValue(StartContentTemplateProperty);
+        set => SetValue(StartContentTemplateProperty, value);
+    }
+
+    public object? EndContent
+    {
+        get => GetValue(EndContentProperty);
+        set => SetValue(EndContentProperty, value);
+    }
+
+    public IDataTemplate? EndContentTemplate
+    {
+        get => GetValue(EndContentTemplateProperty);
+        set => SetValue(EndContentTemplateProperty, value);
+    }
+
+    // ── Extensions ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Avonic extension: a <see cref="Button"/> item was tapped or activated by keyboard. Ionic gets
+    /// this from its native <c>&lt;button&gt;</c>.
+    /// </summary>
+    public static readonly RoutedEvent<RoutedEventArgs> ClickEvent =
+        RoutedEvent.Register<AvonicItem, RoutedEventArgs>(nameof(Click), RoutingStrategies.Bubble);
+
+    public event EventHandler<RoutedEventArgs>? Click
+    {
+        add => AddHandler(ClickEvent, value);
+        remove => RemoveHandler(ClickEvent, value);
+    }
+
+    /// <summary>
+    /// For the theme: <c>margin-inline-start: calc(var(--inner-padding-end) / 2)</c> and
+    /// <c>margin-inline-end: -6px</c> on the detail icon.
+    /// </summary>
+    public static readonly IMultiValueConverter DetailIconMarginConverter =
+        new FuncMultiValueConverter<object?, Thickness>(values =>
+            new Thickness(
+                values.FirstOrDefault() is double innerPaddingEnd ? innerPaddingEnd / 2 : 0,
+                0,
+                DetailIconMarginEnd,
+                0));
+
+    // ── State ────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary><c>getFirstInteractive</c>'s selector.</summary>
+    private static readonly HashSet<ItemControlType> FirstInteractiveTypes =
+    [
+        ItemControlType.Toggle,
+        ItemControlType.Checkbox,
+        ItemControlType.Radio,
+        ItemControlType.Select,
+        ItemControlType.Input,
+        ItemControlType.Textarea,
+    ];
+
+    private readonly Dictionary<Type, HashSet<string>> _itemStyles = [];
+    private readonly HashSet<string> _appliedItemStyles = [];
+    private ContentPresenter?[] _slots = [];
+    private AvonicIcon? _detailIcon;
+    private AvonicRippleEffect? _ripple;
+    private bool _multipleInputs;
+    private bool _interactiveDisabled;
+    private bool _spacePressed;
+
+    public AvonicItem()
+    {
+        AddHandler(TappedEvent, OnTapped);
+
+        // Avalonia raises this instead of Tapped for a second quick press. A native <button> clicks each time.
+        AddHandler(DoubleTappedEvent, OnTapped);
+        AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
+        UpdateLines();
+        UpdateInteractivity();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == LinesProperty)
+        {
+            UpdateLines();
+        }
+        else if (change.Property == ButtonProperty)
+        {
+            UpdateInteractivity();
+        }
+        else if (change.Property == DetailProperty)
+        {
+            UpdateDetail();
+        }
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        foreach (var slot in _slots)
+        {
+            if (slot is not null)
+            {
+                slot.PropertyChanged -= OnSlotPropertyChanged;
+            }
+        }
+
+        _slots =
+        [
+            e.NameScope.Find<ContentPresenter>("PART_Start"),
+            e.NameScope.Find<ContentPresenter>("PART_Container"),
+            e.NameScope.Find<ContentPresenter>("PART_End"),
+        ];
+
+        foreach (var slot in _slots)
+        {
+            if (slot is not null)
+            {
+                slot.PropertyChanged += OnSlotPropertyChanged;
+            }
+        }
+
+        _detailIcon = e.NameScope.Find<AvonicIcon>("PART_DetailIcon");
+        _ripple = e.NameScope.Find<AvonicRippleEffect>("PART_Ripple");
+
+        UpdateDetail();
+        UpdateInteractivity();
+    }
+
+    /// <summary><c>updateInteractivityOnSlotChange</c>: a presenter's child changing is <c>slotchange</c>.</summary>
+    private void OnSlotPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            UpdateInteractivity();
+        }
+    }
+
+    private void UpdateLines()
+    {
+        var lines = Lines;
+        PseudoClasses.Set(":lines-default", lines is null);
+        PseudoClasses.Set(":lines-full", lines == ItemLines.Full);
+        PseudoClasses.Set(":lines-inset", lines == ItemLines.Inset);
+        PseudoClasses.Set(":lines-none", lines == ItemLines.None);
+    }
+
+    /// <summary><c>showDetail</c>, in md.</summary>
+    private void UpdateDetail()
+    {
+        if (_detailIcon is not null)
+        {
+            _detailIcon.IsVisible = Detail == true;
+        }
+    }
+
+    // ── The controls inside ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Everything slotted, in slot order. A presenter is its child's logical parent, so the host's own
+    /// logical descendants don't include these.
+    /// </summary>
+    private IEnumerable<Control> SlottedControls() =>
+        _slots.Select(slot => slot?.Child)
+            .OfType<Control>()
+            .SelectMany(child => child.GetSelfAndLogicalDescendants().OfType<Control>());
+
+    private static ItemControlType? TypeOf(Control control) => control switch
+    {
+        IItemControl itemControl => itemControl.ItemControlType,
+        Avalonia.Controls.Button => ItemControlType.Button,
+        _ => null,
+    };
+
+    /// <summary><c>getFirstInteractive</c>.</summary>
+    private IItemControl? FirstInteractive() =>
+        SlottedControls()
+            .Where(control => control.IsEnabled)
+            .OfType<IItemControl>()
+            .FirstOrDefault(control => FirstInteractiveTypes.Contains(control.ItemControlType));
+
+    /// <summary><c>setMultipleInputs</c>, <c>canActivate</c> and <c>isFocusable</c>.</summary>
+    private void UpdateInteractivity()
+    {
+        int covers = 0, inputs = 0, clickables = 0;
+        var focusableChild = false;
+        foreach (var control in SlottedControls())
+        {
+            focusableChild |= FocusVisible.GetIsEnabled(control);
+            switch (TypeOf(control))
+            {
+                case ItemControlType.Checkbox or ItemControlType.Datetime or ItemControlType.Select or ItemControlType.Radio:
+                    covers++;
+                    break;
+                case ItemControlType.Input or ItemControlType.Range or ItemControlType.Searchbar
+                    or ItemControlType.Segment or ItemControlType.Textarea or ItemControlType.Toggle:
+                    inputs++;
+                    break;
+                case ItemControlType.Button:
+                    clickables++;
+                    break;
+            }
+        }
+
+        var clickable = Button;
+        _multipleInputs = covers + inputs > 1 || covers + clickables > 1 || (covers > 0 && clickable);
+        var hasCover = covers == 1 && !_multipleInputs;
+        var canActivate = clickable || hasCover;
+
+        PseudoClasses.Set(":button", clickable);
+        PseudoClasses.Set(":ion-activatable", canActivate);
+        PseudoClasses.Set(":item-multiple-inputs", _multipleInputs);
+        Activatable.SetIsEnabled(this, canActivate);
+        FocusVisible.SetIsEnabled(this, canActivate || focusableChild);
+
+        // Ionic renders a <button> for this, which takes focus. A cover's control takes it itself.
+        Focusable = clickable;
+
+        if (_ripple is not null)
+        {
+            _ripple.IsVisible = canActivate;
+        }
+
+        // firstInteractiveNeedsPointerCursor
+        PseudoClasses.Set(
+            ":item-control-needs-pointer-cursor",
+            FirstInteractive() is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
+
+        UpdateInteractiveDisabled();
+    }
+
+    /// <summary><c>:host(.item-interactive-disabled:not(.item-multiple-inputs)) { pointer-events: none }</c>.</summary>
+    private void UpdateInteractiveDisabled() => IsHitTestVisible = !(_interactiveDisabled && !_multipleInputs);
+
+    /// <summary><c>clickedWithinShadowRoot</c>, inverted. Text in a slot has no element of its own, so it's padding.</summary>
+    private bool IsOnSlottedControl(object? source)
+    {
+        for (var visual = source as Visual; visual is not null && visual != this; visual = visual.GetVisualParent())
+        {
+            foreach (var slot in _slots)
+            {
+                if (slot?.Child == visual)
+                {
+                    return slot.Content is not string;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // ── Input ────────────────────────────────────────────────────────────────────────────────
+
+    private void OnTapped(object? sender, TappedEventArgs e)
+    {
+        if (Button)
+        {
+            RaiseClick();
+        }
+
+        if (!_multipleInputs && FirstInteractive() is { } first && !IsOnSlottedControl(e.Source))
+        {
+            first.OnItemTap();
+            e.Handled = true;
+        }
+    }
+
+    private void RaiseClick() => RaiseEvent(new RoutedEventArgs(ClickEvent, this));
+
+    /// <summary>A native <c>&lt;button&gt;</c>: Enter activates on press, and Space on release.</summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || !Button || !ReferenceEquals(e.Source, this))
+        {
+            return;
+        }
+
+        if (e.Key == Key.Enter)
+        {
+            RaiseClick();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Space)
+        {
+            _spacePressed = true;
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+
+        if (e.Key == Key.Space && _spacePressed)
+        {
+            _spacePressed = false;
+            RaiseClick();
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnLostFocus(FocusChangedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        _spacePressed = false;
+    }
+
+    // ── ionStyle ─────────────────────────────────────────────────────────────────────────────
+
+    /// <summary><c>itemStyle</c>: each true key becomes <c>:item-key</c>, kept per type of child, as Ionic's by tag name.</summary>
+    private void OnIonStyle(object? sender, IonStyleEventArgs e)
+    {
+        e.Handled = true;
+        if (e.Source is null)
+        {
+            return;
+        }
+
+        _itemStyles[e.Source.GetType()] = e.Styles.Where(style => style.Value).Select(style => style.Key).ToHashSet();
+
+        var styles = _itemStyles.Values.SelectMany(keys => keys).ToHashSet();
+        foreach (var removed in _appliedItemStyles.Except(styles))
+        {
+            PseudoClasses.Remove(":item-" + removed);
+        }
+
+        foreach (var added in styles.Except(_appliedItemStyles))
+        {
+            PseudoClasses.Add(":item-" + added);
+        }
+
+        _appliedItemStyles.Clear();
+        _appliedItemStyles.UnionWith(styles);
+
+        _interactiveDisabled = styles.Contains("interactive-disabled");
+        UpdateInteractiveDisabled();
+    }
+
+    // ── Automation ───────────────────────────────────────────────────────────────────────────
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new ItemAutomationPeer(this);
+
+    private sealed class ItemAutomationPeer(AvonicItem owner) : ControlAutomationPeer(owner), IInvokeProvider
+    {
+        protected override AutomationControlType GetAutomationControlTypeCore() =>
+            owner.Button ? AutomationControlType.Button : AutomationControlType.Group;
+
+        protected override string? GetNameCore() => base.GetNameCore() ?? owner.Content as string;
+
+        protected override bool IsContentElementCore() => owner.Button;
+
+        protected override bool IsControlElementCore() => true;
+
+        public void Invoke()
+        {
+            if (owner.Button && owner.IsEffectivelyEnabled)
+            {
+                owner.RaiseClick();
+            }
+        }
+    }
+}

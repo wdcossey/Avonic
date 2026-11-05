@@ -1,0 +1,57 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- Global variables only ion-item reads. They fall back to another variable in Ionic. -->
+    <SolidColorBrush x:Key="Avonic.ItemColorBrush" Color="{DynamicResource Avonic.TextColor}" />
+    <SolidColorBrush x:Key="Avonic.ItemBorderColorBrush" Color="{DynamicResource Avonic.BorderColor}" />
+
+    <!-- rgba(var(ion-text-color-rgb), 0.54) on a slotted ion-icon. There's no variable for it. -->
+    <SolidColorBrush x:Key="Avonic.ItemIconBrush" Color="{DynamicResource Avonic.TextColor}" Opacity="0.54" />
+
+    <!-- ion-item's variables, with md defaults from item.md.css. A CssUnset key falls back to
+         something else in Ionic: the theme's bindings say what. Any brush overrides it. -->
+    <b:CssUnset x:Key="Avonic.Item.Background" />
+    <SolidColorBrush x:Key="Avonic.Item.BackgroundActivated" Color="Transparent" />
+    <x:Double x:Key="Avonic.Item.BackgroundActivatedOpacity">0</x:Double>
+    <b:CssUnset x:Key="Avonic.Item.BackgroundFocused" />
+    <x:Double x:Key="Avonic.Item.BackgroundFocusedOpacity">0.12</x:Double>
+    <b:CssUnset x:Key="Avonic.Item.BackgroundHover" />
+    <x:Double x:Key="Avonic.Item.BackgroundHoverOpacity">0.04</x:Double>
+
+    <b:CssUnset x:Key="Avonic.Item.BorderColor" />
+    <CornerRadius x:Key="Avonic.Item.BorderRadius">0</CornerRadius>
+    <Thickness x:Key="Avonic.Item.BorderWidth">0</Thickness>
+
+    <b:CssUnset x:Key="Avonic.Item.Color" />
+    <b:CssUnset x:Key="Avonic.Item.ColorActivated" />
+    <b:CssUnset x:Key="Avonic.Item.ColorFocused" />
+    <b:CssUnset x:Key="Avonic.Item.ColorHover" />
+
+    <b:CssUnset x:Key="Avonic.Item.DetailIconColor" />
+    <!-- In em, so it stays relative to the item, as 1.25em is -->
+    <x:Double x:Key="Avonic.Item.DetailIconFontSize">1.25</x:Double>
+    <x:Double x:Key="Avonic.Item.DetailIconOpacity">0.25</x:Double>
+
+    <Thickness x:Key="Avonic.Item.InnerBorderWidth">0,0,0,1</Thickness>
+    <BoxShadows x:Key="Avonic.Item.InnerBoxShadow">none</BoxShadows>
+    <x:Double x:Key="Avonic.Item.InnerPaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.Item.InnerPaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.Item.InnerPaddingStart">0</x:Double>
+    <x:Double x:Key="Avonic.Item.InnerPaddingEnd">16</x:Double>
+
+    <x:Double x:Key="Avonic.Item.MinHeight">48</x:Double>
+    <x:Double x:Key="Avonic.Item.PaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.Item.PaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.Item.PaddingStart">16</x:Double>
+    <x:Double x:Key="Avonic.Item.PaddingEnd">0</x:Double>
+
+    <b:CssUnset x:Key="Avonic.Item.RippleColor" />
+
+    <!-- opacity 15ms linear, background-color 15ms linear -->
+    <Transitions x:Key="Avonic.Item.Transition">
+        <DoubleTransition Property="{x:Static Visual.OpacityProperty}" Duration="0:0:0.015" />
+        <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.015" />
+    </Transitions>
+
+</ResourceDictionary>

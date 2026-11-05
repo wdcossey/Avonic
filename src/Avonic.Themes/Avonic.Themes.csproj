@@ -15,7 +15,7 @@
   <!-- Merged by AvonicTheme; see Directory.Build.targets. Palettes are merged by the consumer:
        merging one here would replace the light values. -->
   <ItemGroup>
-    <AvonicDiscoveredXaml Include="Tokens/**/*.axaml;Controls/**/*.axaml" Exclude="Tokens/Palettes/**/*.axaml" />
+    <AvonicDiscoveredXaml Include="Tokens/**/*.axaml;Controls/**/*.axaml;Styles/**/*.axaml" Exclude="Tokens/Palettes/**/*.axaml" />
   </ItemGroup>
 
   <ItemGroup>
