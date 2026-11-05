@@ -1,0 +1,114 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItemDivider Content="Divider" />
+            <c:AvonicItemDivider Color="primary" Content="Primary" />
+            <c:AvonicItemDivider>
+                <c:AvonicItemDivider.StartContent>
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicItemDivider.StartContent>
+                <c:AvonicLabel Content="With icons" />
+                <c:AvonicItemDivider.EndContent>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicItemDivider.EndContent>
+            </c:AvonicItemDivider>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of item-divider.md.css. Slotted content is styled in Styles/ItemDivider.axaml, because a
+         ControlTheme's styles can't reach it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemDivider}" TargetType="c:AvonicItemDivider">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <!-- overflow: hidden -->
+        <Setter Property="ClipToBounds" Value="True" />
+        <!-- border-bottom: 1px solid var(ion-item-border-color, ...). There's no variable of its own. -->
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Avonic.ItemBorderColorBrush}" />
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ItemDivider.Background" />
+                <DynamicResource ResourceKey="Avonic.BackgroundColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- var(ion-color-step-400, var(ion-text-color-step-600, #999999)) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ItemDivider.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep600Brush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingTop" />
+                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingEnd" />
+                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingBottom" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- background-clip is border-box, so a translucent border shows the host's background through it. -->
+                <Border Background="{TemplateBinding Background}"
+                        BackgroundSizing="OuterBorderEdge"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <ContentPresenter Name="PART_Start"
+                                          VerticalAlignment="Center"
+                                          Content="{TemplateBinding StartContent}"
+                                          ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                        <Border Name="PART_Inner" Grid.Column="1">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <ContentPresenter Name="PART_Container"
+                                                  VerticalContentAlignment="Center"
+                                                  TextWrapping="Wrap"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                <ContentPresenter Name="PART_End"
+                                                  Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .item-divider-inner. The host's minimum is inherited, and it's the inner box's that counts: the bottom
+             border makes the host 31 and leaves this 30, measured. -->
+        <Style Selector="^ /template/ Border#PART_Inner">
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color). An unknown colour makes both invalid: transparent, and it inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

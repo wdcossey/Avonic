@@ -1,0 +1,76 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- item-divider.md.css's ::slotted rules. A slotted control's logical parent is the presenter, so '>' means
+         direct children only, as ::slotted does. Rules for controls that don't exist yet go in those controls'
+         own files. -->
+
+    <!-- ::slotted([slot=start]), ::slotted([slot=end]) -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > :is(Control)">
+        <Setter Property="Margin" Value="0,0,16,0" />
+    </Style>
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+
+    <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.7142857143em } -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ItemIconBrush}" />
+        <Setter Property="FontSize">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.7142857142857142">
+                <Binding Path="$parent[c:AvonicItemDivider].FontSize" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(.ion-color) ::slotted(ion-icon). An unknown colour makes it invalid, so it inherits the host's. -->
+    <Style Selector="c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{Binding $parent[c:AvonicItemDivider].Foreground}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=start]), with ::slotted(ion-icon[slot]) -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+        <Setter Property="Margin" Value="0,12,32,12" />
+    </Style>
+    <!-- ::slotted(ion-icon[slot=end]), with ::slotted(ion-icon[slot]) -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Margin" Value="16,12,0,12" />
+    </Style>
+
+    <!-- ::slotted(ion-label), and a panel standing for the slot. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter > c|AvonicLabel, c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,13,0,10" />
+    </Style>
+    <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,13,16,10" />
+    </Style>
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicLabel">
+        <Setter Property="Margin" Value="16,13,0,10" />
+    </Style>
+
+    <!-- ::slotted(p), and a panel standing for the slot. It stays this grey in a coloured divider, measured. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter > TextBlock.p, c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > TextBlock.p">
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep400Brush}" />
+    </Style>
+
+    <!-- A divider has the class "item", so label.md.css's :host-context(.item) applies. See Label.axaml. -->
+    <Style Selector="c|AvonicItemDivider c|AvonicLabel">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Label.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <Style Selector="c|AvonicItemDivider c|AvonicLabel.ion-text-nowrap">
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+</Styles>

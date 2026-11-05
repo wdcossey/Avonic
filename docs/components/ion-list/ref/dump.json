@@ -1,0 +1,268 @@
+{
+  "tag": "ion-list",
+  "snippet": "<div style=\"background:#eeeeee;height:844px\"><ion-list><ion-list-header>Default lines</ion-list-header><ion-item>One</ion-item><ion-item>Two</ion-item></ion-list><ion-list lines=\"full\"><ion-item>Lines full</ion-item><ion-item lines=\"none\">Its own lines, none</ion-item></ion-list><ion-list lines=\"none\"><ion-item>Lines none</ion-item><ion-item lines=\"inset\">Its own lines, inset</ion-item></ion-list><ion-list inset><ion-item button detail>Inset, a button</ion-item><ion-item color=\"danger\">Danger</ion-item><ion-item>The last has no border</ion-item></ion-list><ion-list inset><ion-item>An inset list after an inset list</ion-item></ion-list></div>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "role": "list",
+        "class": "md list-md hydrated"
+      },
+      "classes": [
+        "md",
+        "list-md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 157
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "157px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "8px 0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgb(255, 255, 255)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "content",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-list-header.md.hydrated>\n    #shadow-root\n      <div.list-header-inner part=\"inner\">\n        <slot name=\"\">\n  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n"
+    },
+    {
+      "attributes": {
+        "lines": "full",
+        "role": "list",
+        "class": "md list-md list-lines-full list-md-lines-full hydrated"
+      },
+      "classes": [
+        "md",
+        "list-md",
+        "list-lines-full",
+        "list-md-lines-full",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 157,
+        "w": 390,
+        "h": 113
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "113px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "8px 0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgb(255, 255, 255)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "content",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n  <ion-item.item.md.item-lines-none.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n"
+    },
+    {
+      "attributes": {
+        "lines": "none",
+        "role": "list",
+        "class": "md list-md list-lines-none list-md-lines-none hydrated"
+      },
+      "classes": [
+        "md",
+        "list-md",
+        "list-lines-none",
+        "list-md-lines-none",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 270,
+        "w": 390,
+        "h": 112
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "112px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "8px 0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgb(255, 255, 255)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "content",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n  <ion-item.item.md.item-lines-inset.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n"
+    },
+    {
+      "attributes": {
+        "inset": "",
+        "role": "list",
+        "class": "md list-md list-inset hydrated"
+      },
+      "classes": [
+        "md",
+        "list-md",
+        "list-inset",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 398,
+        "w": 358,
+        "h": 160
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "160px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "8px 0px",
+        "margin": "16px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "2px",
+        "background-color": "rgb(255, 255, 255)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "content",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-item.item.md.item-lines-default.in-list.ion-activatable.ion-focusable.hydrated>\n    #shadow-root\n      <button.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n          <ion-icon.item-detail-icon.md.flip-rtl.hydrated part=\"detail-icon\">\n            #shadow-root\n              <div.icon-inner>\n                <svg>\n                  <path>\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n  <ion-item.ion-color.ion-color-danger.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n"
+    },
+    {
+      "attributes": {
+        "inset": "",
+        "role": "list",
+        "class": "md list-md list-inset hydrated"
+      },
+      "classes": [
+        "md",
+        "list-md",
+        "list-inset",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 574,
+        "w": 358,
+        "h": 64
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "64px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "8px 0px",
+        "margin": "0px 16px 16px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "2px",
+        "background-color": "rgb(255, 255, 255)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "content",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-item.item.md.item-lines-default.in-list.hydrated>\n    #shadow-root\n      <div.item-native part=\"native\">\n        <slot name=\"start\">\n        <div.item-inner part=\"inner\">\n          <div.input-wrapper part=\"container\">\n            <slot name=\"\">\n          <slot name=\"end\">\n"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-item-group has no look, so this is its only template. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemGroup}" TargetType="c:AvonicItemGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

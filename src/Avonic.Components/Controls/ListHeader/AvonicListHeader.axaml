@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-list-header: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicListHeader}" TargetType="c:AvonicListHeader">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- background-clip is border-box, so a translucent border shows the host's background through it. -->
+                <Border Background="{TemplateBinding Background}"
+                        BackgroundSizing="OuterBorderEdge"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <Border Name="PART_Inner">
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          VerticalContentAlignment="Center"
+                                          TextWrapping="Wrap"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

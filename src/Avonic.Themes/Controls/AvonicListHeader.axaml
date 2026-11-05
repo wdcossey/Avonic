@@ -1,0 +1,102 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicListHeader Content="Default" />
+            <c:AvonicListHeader Content="Lines full" Lines="Full" />
+            <c:AvonicListHeader Content="Lines inset" Lines="Inset" />
+            <c:AvonicListHeader Content="Primary" Color="primary" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of list-header.md.css. -->
+    <ControlTheme x:Key="{x:Type c:AvonicListHeader}" TargetType="c:AvonicListHeader">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Padding" Value="16,0,0,0" />
+        <!-- overflow: hidden -->
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Background" Value="{DynamicResource Avonic.ListHeader.Background}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.ListHeader.BorderWidth}" />
+        <Setter Property="BorderBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ListHeader.BorderColor" />
+                <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ListHeader.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- background-clip is border-box, so a translucent border shows the host's background through it. -->
+                <Border Background="{TemplateBinding Background}"
+                        BackgroundSizing="OuterBorderEdge"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <Border Name="PART_Inner">
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          VerticalContentAlignment="Center"
+                                          TextWrapping="Wrap"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .list-header-inner. The host's minimum is inherited, and it's the inner box's that counts: a full
+             line makes the host 46 and leaves this 45, measured. -->
+        <Style Selector="^ /template/ Border#PART_Inner">
+            <Setter Property="MinHeight" Value="45" />
+            <Setter Property="BorderThickness" Value="{DynamicResource Avonic.ListHeader.InnerBorderWidth}" />
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ListHeader.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.list-header-lines-*). An explicit value beats the tokens, which are the default. -->
+        <Style Selector="^:lines-full">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:lines-full /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-inset">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-inset /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:lines-none">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="^:lines-none /template/ Border#PART_Inner">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <!-- :host(.ion-color). An unknown colour makes both invalid: transparent, and it inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
