@@ -86,7 +86,7 @@ Each becomes a test.
 |---|---|---|
 | 1 | `Button` makes the item activatable: `:activated`, a ripple, hover and focus states, a `Hand` cursor | `isClickable`, `canActivate` |
 | 2 | A plain item has none of those | measured: `DIV`, no ripple, no hover overlay |
-| 3 | A tap on a `Button` item raises `Click`; on a plain or disabled one it doesn't | Extension; measured |
+| 3 | A tap on a `Button` item raises `Click`, on release, every time; on a plain or disabled one it doesn't | Extension; measured |
 | 4 | A tap on a child inside a `Button` item also raises `Click` | measured: bubbled from `inner-btn` |
 | 5 | Enter (on press) and Space (on release) raise `Click` when the item has focus | native `<button>`; measured |
 | 6 | A `Button` item is a tab stop; a plain or disabled one isn't | measured tab order |
@@ -105,11 +105,11 @@ Each becomes a test.
 | 19 | Disabled: opacity 0.3, no input, no tab stop | measured |
 | 20 | Focus inside the item shows its focus state if the item is focusable, but a plain nested `Button` doesn't make it so | measured: `btn-nested`, `plain-nested` |
 | 21 | `multipleInputs`, `isFocusable`, `hasCover`, `canActivate` follow the slotted controls, and a slot change updates them | `setMultipleInputs` etc. |
-| 22 | A tap on the padding forwards to the first enabled interactive child, unless there are multiple inputs | `getFirstInteractive`, `onClick` |
+| 22 | A tap on the padding forwards to the first enabled interactive child, unless there are multiple inputs. Disabled through an ancestor counts as disabled | `getFirstInteractive`, `onClick` |
 | 23 | A tap on a slotted child doesn't forward | `clickedWithinShadowRoot` |
 | 24 | `:item-control-needs-pointer-cursor` unless the first interactive is an input or textarea | `firstInteractiveNeedsPointerCursor` |
 | 25 | `IonStyle` from a descendant sets `:item-<key>`, per child type, and stops there | `itemStyle` |
-| 26 | `:item-interactive` swaps the borders; `:item-label-stacked`/`-floating` make the minimum 55 and align to the top | `item.md.css` |
+| 26 | `:item-interactive` swaps the borders; `:item-label-stacked`/`-floating` make the minimum 55, align to the top including the detail icon, and give end content 7 above and below; `:item-textarea` stretches the slots | `item.md.css`; measured |
 | 27 | `:item-interactive-disabled` without multiple inputs takes no input | `item.md.css` |
 | 28 | Box layout: start outside the inner border, end and detail inside it, all vertically centred | measured rects |
 | 29 | Long text in the default slot wraps and grows the item | measured `longtext` |
@@ -118,7 +118,7 @@ Each becomes a test.
 | 32 | An icon nested deeper than the slot, or in the default slot's margins, doesn't get the `[slot]` rules | `::slotted` is direct only |
 | 33 | RTL mirrors the padding and slots | measured |
 | 34 | Overlay and ripple clip to `Avonic.Item.BorderRadius` | `overflow: inherit` |
-| 35 | Automation: a `Button` item is a button that can be invoked; a disabled one reports it | native `<button>`; `aria-disabled` |
+| 35 | Automation: a `Button` item is a button that can be invoked, and a plain one can't. Disabled and `:item-interactive-disabled` report it | native `<button>`; `aria-disabled`; `onClick` only when clickable |
 
 ## Design
 

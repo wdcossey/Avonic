@@ -157,7 +157,8 @@ RaiseEvent(new IonStyleEventArgs(new Dictionary<string, bool>
 }));
 ```
 
-The item's own rules read `interactive`, `interactive-disabled`, `label-stacked` and `label-floating`.
+The item's own rules read `interactive`, `interactive-disabled`, `label-stacked`, `label-floating` and `textarea`. It also
+works out which control is the first interactive one again, so raise this when a control's `IsEnabled` changes.
 
 ### Slotted styles
 

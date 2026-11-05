@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Metadata;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -189,15 +190,18 @@ public class AvonicItem : TemplatedControl
     private AvonicIcon? _detailIcon;
     private AvonicRippleEffect? _ripple;
     private bool _multipleInputs;
-    private bool _interactiveDisabled;
     private bool _spacePressed;
+    private object? _secondTapSource;
 
     public AvonicItem()
     {
         AddHandler(TappedEvent, OnTapped);
 
-        // Avalonia raises this instead of Tapped for a second quick press. A native <button> clicks each time.
-        AddHandler(DoubleTappedEvent, OnTapped);
+        // A second quick press raises DoubleTapped, on the press, and no Tapped. A native <button> clicks each
+        // time, on release, so a finger that goes down to scroll doesn't activate anything.
+        AddHandler(PointerPressedEvent, (_, _) => _secondTapSource = null, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(DoubleTappedEvent, (_, e) => _secondTapSource = e.Source);
+        AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
         UpdateLines();
         UpdateInteractivity();
@@ -255,12 +259,16 @@ public class AvonicItem : TemplatedControl
         UpdateInteractivity();
     }
 
-    /// <summary><c>updateInteractivityOnSlotChange</c>: a presenter's child changing is <c>slotchange</c>.</summary>
+    /// <summary>
+    /// <c>updateInteractivityOnSlotChange</c>: a presenter's child changing is <c>slotchange</c>. The child
+    /// isn't attached yet, so whether it's disabled through an ancestor isn't known until later, which is
+    /// why Ionic also does this in a <c>raf</c> on load.
+    /// </summary>
     private void OnSlotPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ContentPresenter.ChildProperty)
         {
-            UpdateInteractivity();
+            Dispatcher.UIThread.Post(UpdateInteractivity, DispatcherPriority.Loaded);
         }
     }
 
@@ -303,7 +311,7 @@ public class AvonicItem : TemplatedControl
     /// <summary><c>getFirstInteractive</c>.</summary>
     private IItemControl? FirstInteractive() =>
         SlottedControls()
-            .Where(control => control.IsEnabled)
+            .Where(control => control.IsEffectivelyEnabled)
             .OfType<IItemControl>()
             .FirstOrDefault(control => FirstInteractiveTypes.Contains(control.ItemControlType));
 
@@ -341,9 +349,6 @@ public class AvonicItem : TemplatedControl
         Activatable.SetIsEnabled(this, canActivate);
         FocusVisible.SetIsEnabled(this, canActivate || focusableChild);
 
-        // Ionic renders a <button> for this, which takes focus. A cover's control takes it itself.
-        Focusable = clickable;
-
         if (_ripple is not null)
         {
             _ripple.IsVisible = canActivate;
@@ -353,14 +358,9 @@ public class AvonicItem : TemplatedControl
         PseudoClasses.Set(
             ":item-control-needs-pointer-cursor",
             FirstInteractive() is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
-
-        UpdateInteractiveDisabled();
     }
 
-    /// <summary><c>:host(.item-interactive-disabled:not(.item-multiple-inputs)) { pointer-events: none }</c>.</summary>
-    private void UpdateInteractiveDisabled() => IsHitTestVisible = !(_interactiveDisabled && !_multipleInputs);
-
-    /// <summary><c>clickedWithinShadowRoot</c>, inverted. Text in a slot has no element of its own, so it's padding.</summary>
+    /// <summary><c>clickedWithinShadowRoot</c>, inverted. Plain text in a slot has no element of its own, so it's padding.</summary>
     private bool IsOnSlottedControl(object? source)
     {
         for (var visual = source as Visual; visual is not null && visual != this; visual = visual.GetVisualParent())
@@ -369,7 +369,7 @@ public class AvonicItem : TemplatedControl
             {
                 if (slot?.Child == visual)
                 {
-                    return slot.Content is not string;
+                    return !(visual is TextBlock && slot.Content is not Control && slot.ContentTemplate is null);
                 }
             }
         }
@@ -379,18 +379,35 @@ public class AvonicItem : TemplatedControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    private void OnTapped(object? sender, TappedEventArgs e)
+    private void OnTapped(object? sender, TappedEventArgs e) => e.Handled = Tap(e.Source);
+
+    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_secondTapSource is { } source)
+        {
+            _secondTapSource = null;
+            if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
+            {
+                Tap(source);
+            }
+        }
+    }
+
+    /// <summary><c>onClick</c>. True if the tap was forwarded, which ends it: <c>stopImmediatePropagation</c>.</summary>
+    private bool Tap(object? source)
     {
         if (Button)
         {
             RaiseClick();
         }
 
-        if (!_multipleInputs && FirstInteractive() is { } first && !IsOnSlottedControl(e.Source))
+        if (!_multipleInputs && FirstInteractive() is { } first && !IsOnSlottedControl(source))
         {
             first.OnItemTap();
-            e.Handled = true;
+            return true;
         }
+
+        return false;
     }
 
     private void RaiseClick() => RaiseEvent(new RoutedEventArgs(ClickEvent, this));
@@ -462,8 +479,8 @@ public class AvonicItem : TemplatedControl
         _appliedItemStyles.Clear();
         _appliedItemStyles.UnionWith(styles);
 
-        _interactiveDisabled = styles.Contains("interactive-disabled");
-        UpdateInteractiveDisabled();
+        // forceUpdate: Ionic re-renders, which also works out the first interactive control again.
+        UpdateInteractivity();
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
@@ -472,6 +489,14 @@ public class AvonicItem : TemplatedControl
 
     private sealed class ItemAutomationPeer(AvonicItem owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
+        /// <summary>Ionic only sets onClick when clickable, "to prevent screen readers from reading all items as clickable".</summary>
+        protected override object? GetProviderCore(Type providerType) =>
+            providerType == typeof(IInvokeProvider) && !owner.Button ? null : base.GetProviderCore(providerType);
+
+        /// <summary><c>aria-disabled</c>: <c>disabled || childStyles['item-interactive-disabled']</c>.</summary>
+        protected override bool IsEnabledCore() =>
+            base.IsEnabledCore() && !owner.PseudoClasses.Contains(":item-interactive-disabled");
+
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             owner.Button ? AutomationControlType.Button : AutomationControlType.Group;
 
@@ -483,7 +508,7 @@ public class AvonicItem : TemplatedControl
 
         public void Invoke()
         {
-            if (owner.Button && owner.IsEffectivelyEnabled)
+            if (owner.Button && IsEnabled())
             {
                 owner.RaiseClick();
             }

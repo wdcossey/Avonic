@@ -39,4 +39,9 @@
         <Setter Property="Margin" Value="16,12,0,12" />
     </Style>
 
+    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,7,0,7" />
+    </Style>
+
 </Styles>

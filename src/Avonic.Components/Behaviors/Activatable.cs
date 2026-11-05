@@ -89,6 +89,10 @@ public static class Activatable
         surface.PointerEntered += OnPointerEntered;
         surface.PointerExited += OnPointerExited;
         surface.DetachedFromVisualTree += OnSurfaceDetached;
+
+        // CSS :hover applies as soon as .ion-activatable does, even if the pointer hasn't moved.
+        if (surface.IsPointerOver)
+            ((IPseudoClasses)surface.Classes).Add(HoverPseudoClass);
     }
 
     private static void Detach(Control surface)

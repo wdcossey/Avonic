@@ -287,6 +287,58 @@ public class AvonicItemTests
     }
 
     [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_Clicks_On_Release_Not_On_Press()
+    {
+        var clicks = 0;
+        var item = new AvonicItem { Button = true, Content = "x" };
+        item.Click += (_, _) => clicks++;
+        using var scene = new Scene(item);
+
+        Tap(scene, RowCentre);
+        scene.Window.MouseDown(RowCentre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        scene.Window.MouseUp(RowCentre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_Released_Off_The_Item_Does_Not_Click()
+    {
+        var clicks = 0;
+        var item = new AvonicItem { Button = true, Content = "x", Width = 300, Height = 48, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top };
+        item.Click += (_, _) => clicks++;
+        using var scene = new Scene(item);
+        var inside = new Point(100, 24);
+
+        Tap(scene, inside);
+        scene.Window.MouseDown(inside, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(new Point(100, 400), RawInputModifiers.None);
+        scene.Window.MouseUp(new Point(100, 400), MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Press_That_Is_Never_Released_Here_Does_Not_Click_Later()
+    {
+        var clicks = 0;
+        var item = new AvonicItem { Button = true, Content = "x" };
+        item.Click += (_, _) => clicks++;
+        using var scene = new Scene(item);
+
+        Tap(scene, RowCentre);
+        scene.Window.MouseDown(RowCentre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(RowCentre, MouseButton.Left, RawInputModifiers.None);
+        Tap(scene, RowCentre);
+
+        Assert.Equal(3, clicks);
+    }
+
+    [AvaloniaFact]
     public void B4_Tap_On_A_Child_Also_Raises_Click()
     {
         var itemClicks = 0;
@@ -733,6 +785,19 @@ public class AvonicItemTests
     }
 
     [AvaloniaFact]
+    public void B15_Becoming_Activatable_Under_A_Still_Pointer_Hovers()
+    {
+        var item = new AvonicItem();
+        using var scene = new Scene(item);
+        scene.Window.MouseMove(RowCentre, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        item.Button = true;
+
+        Assert.True(Has(item, Activatable.HoverPseudoClass));
+    }
+
+    [AvaloniaFact]
     public void B15_Hover_Ends_When_The_Item_Stops_Being_Activatable()
     {
         var item = new AvonicItem { Button = true };
@@ -1166,6 +1231,19 @@ public class AvonicItemTests
         Assert.Equal(0, disabled.ItemTaps);
     }
 
+    [AvaloniaFact]
+    public void B22_A_Control_Disabled_Through_An_Ancestor_Is_Skipped()
+    {
+        var control = StubControl(ItemControlType.Toggle);
+        var item = new AvonicItem { EndContent = new StackPanel { IsEnabled = false, Children = { control } } };
+        using var scene = new Scene(item);
+
+        Tap(scene, RowCentre);
+
+        Assert.Equal(0, control.ItemTaps);
+        Assert.False(Has(item, ":item-control-needs-pointer-cursor"));
+    }
+
     [AvaloniaTheory]
     [InlineData(ItemControlType.Datetime)]
     [InlineData(ItemControlType.Range)]
@@ -1203,7 +1281,10 @@ public class AvonicItemTests
         var item = new AvonicItem { Content = "A label in text", EndContent = control };
         using var scene = new Scene(item);
 
+        // A background makes the text itself the hit target, rather than whatever is behind it.
         var text = Assert.IsAssignableFrom<TextBlock>(Container(item).Child);
+        text.Background = Brushes.Transparent;
+        Dispatcher.UIThread.RunJobs();
         Tap(scene, Box(text, scene.Window).Center);
 
         Assert.Equal(1, control.ItemTaps);
@@ -1236,6 +1317,39 @@ public class AvonicItemTests
 
         Assert.Equal(1, clicks);
         Assert.Equal(1, control.ItemTaps);
+    }
+
+    [AvaloniaFact]
+    public void B22_Text_From_A_Number_Is_Also_Padding()
+    {
+        var control = StubControl(ItemControlType.Toggle);
+        var item = new AvonicItem { Content = 42, EndContent = control };
+        using var scene = new Scene(item);
+
+        var text = Assert.IsAssignableFrom<TextBlock>(Container(item).Child);
+        text.Background = Brushes.Transparent;
+        Dispatcher.UIThread.RunJobs();
+        Tap(scene, Box(text, scene.Window).Center);
+
+        Assert.Equal(1, control.ItemTaps);
+    }
+
+    [AvaloniaFact]
+    public void B23_A_Tap_On_A_Templated_String_Does_Not_Forward()
+    {
+        var control = StubControl(ItemControlType.Toggle);
+        var item = new AvonicItem
+        {
+            Content = "model",
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>(
+                (_, _) => new Border { Width = 100, Height = 30, Background = Brushes.Gray }),
+            EndContent = control,
+        };
+        using var scene = new Scene(item);
+
+        Tap(scene, Box(Container(item).Child!, scene.Window).Center);
+
+        Assert.Equal(0, control.ItemTaps);
     }
 
     [AvaloniaFact]
@@ -1280,6 +1394,23 @@ public class AvonicItemTests
         using var scene = new Scene(item);
 
         Assert.Equal(needsCursor, Has(item, ":item-control-needs-pointer-cursor"));
+    }
+
+    [AvaloniaFact]
+    public void B24_Pointer_Cursor_Follows_IonStyle()
+    {
+        var toggle = StubControl(ItemControlType.Toggle);
+        var input = StubControl(ItemControlType.Input);
+        var panel = new StackPanel { Children = { toggle } };
+        var item = new AvonicItem { Content = panel };
+        using var scene = new Scene(item);
+        Assert.True(Has(item, ":item-control-needs-pointer-cursor"));
+
+        // Ionic re-renders on ionStyle, which finds the first interactive control again.
+        toggle.IsEnabled = false;
+        Raise(toggle, ("interactive-disabled", true));
+
+        Assert.False(Has(item, ":item-control-needs-pointer-cursor"));
     }
 
     [AvaloniaFact]
@@ -1399,6 +1530,49 @@ public class AvonicItemTests
         });
     }
 
+    [AvaloniaTheory]
+    [InlineData("label-stacked")]
+    [InlineData("label-floating")]
+    public void B26_Stacked_And_Floating_Labels_Move_The_Detail_Icon_And_End_Margins(string key)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            var child = new Border { Height = 80 };
+            var endBox = new Border { Width = 10, Height = 10 };
+            var endIcon = new AvonicIcon { IconName = "star" };
+            var boxItem = new AvonicItem { Content = child, EndContent = endBox, Detail = true };
+            var iconItem = new AvonicItem { Content = new Border(), EndContent = endIcon };
+            using var scene = new Scene(new StackPanel { Children = { boxItem, iconItem } });
+
+            Raise(child, (key, true));
+            Raise((Control)iconItem.Content!, (key, true));
+            Dispatcher.UIThread.RunJobs();
+
+            // Measured: "7px 0px 7px 16px" on both, and the detail icon at the top.
+            Assert.Equal(new Thickness(16, 7, 0, 7), endBox.Margin);
+            Assert.Equal(new Thickness(16, 7, 0, 7), endIcon.Margin);
+            Assert.Equal(0, Box(DetailIcon(boxItem), scene.Window).Y);
+        });
+    }
+
+    [AvaloniaFact]
+    public void B26_Textarea_Stretches_The_Slots() => InstalledTheme.Run(_ =>
+    {
+        var child = new Border { Height = 80 };
+        var start = new Border { Width = 10 };
+        var end = new Border { Width = 10 };
+        var item = new AvonicItem { Content = child, StartContent = start, EndContent = end, Detail = true };
+        using var scene = new Scene(new StackPanel { Children = { item } });
+
+        Raise(child, ("textarea", true));
+        Dispatcher.UIThread.RunJobs();
+
+        // Measured: 81 and 80, the difference being the inner border.
+        Assert.Equal(81, start.Bounds.Height);
+        Assert.Equal(80, end.Bounds.Height);
+        Assert.Equal(0, Box(DetailIcon(item), scene.Window).Y);
+    });
+
     [AvaloniaFact]
     public void B27_Interactive_Disabled_Takes_No_Input()
     {
@@ -1432,6 +1606,22 @@ public class AvonicItemTests
         Raise(child, ("interactive-disabled", true));
 
         Assert.True(item.IsHitTestVisible);
+    }
+
+    [AvaloniaFact]
+    public void B27_An_Apps_Own_Values_Survive()
+    {
+        var overlaid = new AvonicItem { IsHitTestVisible = false, Content = "x" };
+        var unfocusable = new AvonicItem { Button = true, Focusable = false, Content = "x" };
+        var focusable = new AvonicItem { Focusable = true, Content = "x" };
+        using var scene = new Scene(new StackPanel { Children = { overlaid, unfocusable, focusable } });
+
+        overlaid.Content = "y";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(overlaid.IsHitTestVisible);
+        Assert.False(unfocusable.Focusable);
+        Assert.True(focusable.Focusable);
     }
 
     // ── Behaviours 28-33: layout ─────────────────────────────────────────────────────────────
@@ -1687,22 +1877,41 @@ public class AvonicItemTests
         Assert.Equal(AutomationControlType.Button, peer.GetAutomationControlType());
         Assert.Equal("Open", peer.GetName());
         Assert.True(peer.IsEnabled());
-        Assert.IsAssignableFrom<IInvokeProvider>(peer).Invoke();
+        Assert.NotNull(peer.GetProvider<IInvokeProvider>());
+        peer.GetProvider<IInvokeProvider>()!.Invoke();
         Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]
-    public void B35_Plain_Item_Is_A_Group_And_Invoking_Does_Nothing()
+    public void B35_Plain_Item_Is_A_Group_That_Cannot_Be_Invoked()
     {
-        var clicks = 0;
         var item = new AvonicItem { Content = "Row" };
-        item.Click += (_, _) => clicks++;
         using var scene = new Scene(item);
 
         var peer = ControlAutomationPeer.CreatePeerForElement(item);
 
         Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
-        Assert.IsAssignableFrom<IInvokeProvider>(peer).Invoke();
+        Assert.Null(peer.GetProvider<IInvokeProvider>());
+
+        item.Button = true;
+        Assert.NotNull(peer.GetProvider<IInvokeProvider>());
+    }
+
+    [AvaloniaFact]
+    public void B35_Interactive_Disabled_Reports_It_And_Invoking_Does_Nothing()
+    {
+        var clicks = 0;
+        var child = new Border();
+        var item = new AvonicItem { Button = true, Content = child };
+        item.Click += (_, _) => clicks++;
+        using var scene = new Scene(item);
+        var peer = ControlAutomationPeer.CreatePeerForElement(item);
+        Assert.True(peer.IsEnabled());
+
+        Raise(child, ("interactive-disabled", true));
+
+        Assert.False(peer.IsEnabled());
+        peer.GetProvider<IInvokeProvider>()!.Invoke();
         Assert.Equal(0, clicks);
     }
 

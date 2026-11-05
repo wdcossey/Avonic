@@ -49,7 +49,7 @@ Ionic results were measured in Chromium, with `ion-app` for the states, because 
 | 23 | A tap on a slotted child doesn't | from `item.js` | match, on stub controls |
 | 24 | Pointer cursor class | from `item.js` | match, on stub controls |
 | 25 | `ionStyle` to `:item-<key>` | from `item.js` | match, on stub controls |
-| 26 | `.item-interactive`, `.item-label-stacked` | from `item.md.css` | match, on stub controls |
+| 26 | `.item-interactive`, `.item-label-stacked`, `.item-textarea` | Minimum 55, detail icon and start at the top, end margins `7px 0 7px 16px`, stretched slots | match, on stub controls |
 | 27 | `.item-interactive-disabled` | from `item.md.css` | match, on stub controls |
 | 28 | Box layout | Inner x=16, w=374; container w=358, h=47. With icons: 16,12.5 and 350,12; inner x=72 | match, within layout rounding |
 | 29 | Long text wraps | Item grows to 55 | match. The height depends on the font |
