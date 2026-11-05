@@ -64,13 +64,14 @@ per-control folder, as Components does, would otherwise be silently left out.
 | Test | Guards against |
 |---|---|
 | `AvonicComponentsStyles` resolves the ripple `ControlTheme` | Empty or broken discovery unstyling every control |
-| Every discovered Components include loads | A bad path or a root that isn't a `ResourceDictionary` |
 | `AvonicComponentsStyles.OrderForMerge` sorts ordinally (synthetic input) | Merge order varying by OS |
-| `AvonicTheme` includes the tokens file and every include loads | Themes discovery silently empty |
-| `AvonicTheme` still resolves the ripple `ControlTheme` | Lost layering over the stubs |
+| `AvonicTheme` includes the tokens file | Themes discovery silently empty |
+| `AvonicTheme`, installed, still resolves the ripple `ControlTheme` | Lost layering over the stubs |
 | `AvonicTheme.OrderForMerge` puts tokens first (synthetic input) | Wrong merge order |
-| No key is defined twice within a project | Parallel PRs colliding on a key with no merge conflict to expose it |
-| The catalog finds the ripple page, and every page can be created | Sample discovery broken, or a page that crashes when tapped |
+| Every discovered key resolves with the theme installed | A bad path, a wrong root element, or a mistyped token that would only fail when first used |
+| No key is defined twice within a project, per theme variant | Parallel PRs colliding on a key with no merge conflict to expose it |
+| The catalog finds the ripple page | Sample discovery broken |
+| Every page can be shown in a window under the theme | A page that crashes when tapped |
 | The catalog sorts by `Order` then title, with omitted `Order` last | Index order varying between PRs |
 | Every `Control` named `*Page` in the sample has `[SamplePage]` | A page silently missing from the index |
 

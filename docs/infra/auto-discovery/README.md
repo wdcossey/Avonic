@@ -1,7 +1,8 @@
 # Auto-discovery
 
-A control adds its own files and is picked up automatically. Nothing shared needs editing, so
-parallel PRs don't conflict on registrations.
+A control adds its own files and is picked up automatically, so parallel PRs don't conflict on
+registrations. Two shared tables still get a row per control: the component table in `CLAUDE.md` and
+the Done table in `docs/ROADMAP.md`. Parallel PRs can conflict there.
 
 ## How a control uses it
 
@@ -27,16 +28,24 @@ The index sorts by `Order`, then by title. A page with no `Order` sorts last. Th
 - **Root element.** Every discovered `.axaml` must have a `ResourceDictionary` root. Any other root
   throws when the dictionary loads, and `DiscoveryTests` fails.
 - **Page classes.** A sample page's class name ends in `Page`, and it needs a public parameterless
-  constructor. `DiscoveryTests` fails if either `[SamplePage]` or the constructor is missing.
+  constructor. `DiscoveryTests` shows every page in a window under the theme, and fails if `[SamplePage]`
+  or the constructor is missing or the page throws. A page with any other class name that also lacks
+  `[SamplePage]` isn't caught.
 - **Themes overrides the stubs.** `AvonicTheme` looks in its own dictionaries before
   `AvonicComponentsStyles`, so a Themes `ControlTheme` with the same key replaces the stub.
-- **Merge order.** Components is ordinal. Themes is `Tokens/` first, then ordinal.
-- **Keys are unique within a project.** Merged dictionaries are searched last-to-first, so a duplicate
-  would resolve by file name. `DiscoveryTests` fails instead.
+- **Merge order.** Components is ordinal. Themes is `Tokens/` first, then ordinal. The order only makes
+  merging deterministic: templates resolve tokens from the application, and keys are unique, so it
+  doesn't change which value a lookup returns.
+- **Keys are unique within a project**, per theme variant, because merged dictionaries are searched
+  last-to-first and a duplicate would resolve by file name. `DiscoveryTests` fails instead.
+- **Every resource must build.** Entries are built on first lookup, so `DiscoveryTests` looks up every
+  discovered key with the theme installed. A mistyped `{StaticResource}` token fails there rather than
+  when the control is first themed.
 - **Test Themes templates with the theme installed.** A template resolves tokens from
   `Application.Styles`, and `TestApp` loads only the stubs. Add the theme to `Application.Current.Styles`
-  and remove it afterwards. On a detached `new AvonicTheme()`, applying a template throws on
-  `{StaticResource}` and silently gets no value from `{DynamicResource}`. Both work once installed.
+  and remove it afterwards. On a detached `new AvonicTheme()`, looking up a template that uses
+  `{StaticResource}` throws, and one using `{DynamicResource}` silently gets no value. Both work once
+  installed.
 
 ## How it works
 

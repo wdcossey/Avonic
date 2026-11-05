@@ -1,8 +1,10 @@
 using System.Reflection;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using Avonic.Components.Controls;
 using Avonic.Sample;
 using Avonic.Sample.Pages;
@@ -19,6 +21,54 @@ public class DiscoveryTests
     private static List<ResourceInclude> Includes(Styles styles) =>
         styles.Resources.MergedDictionaries.OfType<ResourceInclude>().ToList();
 
+    /// <summary>Every key in a dictionary, including theme variants and nested dictionaries.</summary>
+    private static IEnumerable<(ThemeVariant? Variant, object Key)> Entries(IResourceDictionary dictionary)
+    {
+        foreach (var key in dictionary.Keys)
+        {
+            yield return (null, key);
+        }
+
+        foreach (var (variant, provider) in dictionary.ThemeDictionaries)
+        {
+            if (provider is IResourceDictionary themed)
+            {
+                foreach (var key in themed.Keys)
+                {
+                    yield return (variant, key);
+                }
+            }
+        }
+
+        foreach (var merged in dictionary.MergedDictionaries)
+        {
+            var nested = merged is ResourceInclude include ? include.Loaded : merged as IResourceDictionary;
+            if (nested is not null)
+            {
+                foreach (var entry in Entries(nested))
+                {
+                    yield return entry;
+                }
+            }
+        }
+    }
+
+    /// <summary>Templates resolve tokens from the application, so this is how they really run.</summary>
+    private static void WithInstalledTheme(Action<AvonicTheme> test)
+    {
+        var app = Application.Current!;
+        var theme = new AvonicTheme();
+        app.Styles.Add(theme);
+        try
+        {
+            test(theme);
+        }
+        finally
+        {
+            app.Styles.Remove(theme);
+        }
+    }
+
     private static void AssertResolvesRippleTheme(Styles styles)
     {
         Assert.True(styles.TryGetResource(typeof(AvonicRippleEffect), null, out var found));
@@ -29,15 +79,6 @@ public class DiscoveryTests
     [AvaloniaFact]
     public void Components_Discovers_The_Ripple_ControlTheme() =>
         AssertResolvesRippleTheme(new AvonicComponentsStyles());
-
-    [AvaloniaFact]
-    public void Components_Every_Discovered_Include_Loads()
-    {
-        var includes = Includes(new AvonicComponentsStyles());
-
-        Assert.NotEmpty(includes);
-        Assert.All(includes, include => Assert.NotNull(include.Loaded));
-    }
 
     [Fact]
     public void Components_Merge_Order_Is_Ordinal()
@@ -50,19 +91,14 @@ public class DiscoveryTests
     }
 
     [AvaloniaFact]
-    public void Theme_Discovers_Tokens_And_Every_Include_Loads()
-    {
-        var includes = Includes(new AvonicTheme());
-
+    public void Theme_Discovers_Tokens() =>
         Assert.Contains(
-            includes,
+            Includes(new AvonicTheme()),
             include => include.Source == new Uri("avares://Avonic.Themes/Tokens/AvonicTokens.axaml"));
-        Assert.All(includes, include => Assert.NotNull(include.Loaded));
-    }
 
     [AvaloniaFact]
     public void Theme_Still_Layers_Over_The_Component_Stubs() =>
-        AssertResolvesRippleTheme(new AvonicTheme());
+        WithInstalledTheme(AssertResolvesRippleTheme);
 
     [Fact]
     public void Theme_Merges_Tokens_Before_Controls()
@@ -74,29 +110,57 @@ public class DiscoveryTests
             AvonicTheme.OrderForMerge(paths));
     }
 
+    // Dictionary entries are built on first lookup, so loading a file proves nothing about its
+    // contents. Looking up every key is what catches a mistyped {StaticResource} token.
+    [AvaloniaFact]
+    public void Every_Discovered_Resource_Builds_With_The_Theme_Installed() =>
+        WithInstalledTheme(theme =>
+        {
+            foreach (var styles in new Styles[] { new AvonicComponentsStyles(), theme })
+            {
+                var includes = Includes(styles);
+                Assert.NotEmpty(includes);
+
+                foreach (var (variant, key) in includes.SelectMany(include => Entries(include.Loaded)))
+                {
+                    Assert.True(theme.TryGetResource(key, variant, out _), $"Could not resolve {key}");
+                }
+            }
+        });
+
     [AvaloniaFact]
     public void No_Key_Is_Defined_Twice_Within_A_Project()
     {
         Assert.Empty(DuplicateKeys(new AvonicComponentsStyles()));
         Assert.Empty(DuplicateKeys(new AvonicTheme()));
 
-        static IEnumerable<object> DuplicateKeys(Styles styles) =>
+        static IEnumerable<(ThemeVariant? Variant, object Key)> DuplicateKeys(Styles styles) =>
             Includes(styles)
-                .SelectMany(include => include.Loaded.Keys)
-                .GroupBy(key => key)
+                .SelectMany(include => Entries(include.Loaded))
+                .GroupBy(entry => entry)
                 .Where(group => group.Count() > 1)
                 .Select(group => group.Key);
     }
 
     [AvaloniaFact]
-    public void Sample_Catalog_Finds_The_Ripple_Page_And_Every_Page_Can_Be_Created()
-    {
-        var pages = SamplePageCatalog.Discover(typeof(MainWindow).Assembly);
+    public void Sample_Catalog_Finds_The_Ripple_Page() =>
+        Assert.IsType<RippleEffectPage>(
+            Assert.Single(
+                SamplePageCatalog.Discover(typeof(MainWindow).Assembly),
+                entry => entry.Title == "ion-ripple-effect").Create());
 
-        var ripple = Assert.Single(pages, entry => entry.Title == "ion-ripple-effect");
-        Assert.IsType<RippleEffectPage>(ripple.Create());
-        Assert.All(pages, entry => entry.Create());
-    }
+    [AvaloniaFact]
+    public void Sample_Every_Page_Can_Be_Shown_Under_The_Theme() =>
+        WithInstalledTheme(_ =>
+        {
+            foreach (var entry in SamplePageCatalog.Discover(typeof(MainWindow).Assembly))
+            {
+                var window = new Window { Content = entry.Create() };
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                window.Close();
+            }
+        });
 
     // Titles sort the opposite way to Order, so a title-only sort can't pass by coincidence.
     [SamplePage("b-no-order")]
@@ -124,6 +188,7 @@ public class DiscoveryTests
     {
         var unmarked = typeof(MainWindow).Assembly.GetTypes()
             .Where(type => type.Name.EndsWith("Page", StringComparison.Ordinal)
+                           && !type.IsAbstract
                            && typeof(Control).IsAssignableFrom(type)
                            && type.GetCustomAttribute<SamplePageAttribute>() is null);
 
