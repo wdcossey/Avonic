@@ -10,9 +10,26 @@ the codebase. No step is skipped, no two controls are in flight at once, and not
  └────────┘   └───────┘   └─────────┘   └────────┘   └──────────┘
 ```
 
+## 0. Working from a GitHub issue
+
+Every control and piece of infrastructure is a GitHub issue labelled `P0`…`P4` (priority tier)
+and `component` or `infra`. Issues list what blocks them; start one only when its blockers are
+closed. A fresh session needs nothing but the repo and the issue:
+
+1. Branch `feat/<ion-tag>` (or `infra/<name>`) from `v2`; `npm install`; `dotnet build Avonic.sln`.
+2. Run the loop below. The plan is **not** gated on a human mid-flight: write `PLAN.md`, then
+   continue straight through Build → Compare → Review → Document.
+3. Open a PR into `v2` titled `feat: <ion-tag>` using the PR template. CI must be green.
+   The human review happens **once, at the PR**: plan, comparison, diff. Only the PR merge marks
+   the control done (`CLAUDE.md` row, `docs/ROADMAP.md`, the issue closes with `Closes #N`).
+
+Shared files are auto-discovered (`AvonicComponentsStyles`, `AvonicTheme`, sample pages), so a
+control adds its own files and never edits another control's. Keep it that way.
+
 ## 1. Plan
 
-Produce `docs/components/<ion-tag>/PLAN.md` and get it approved **before any code**.
+Produce `docs/components/<ion-tag>/PLAN.md` **before any code**. It is reviewed at the PR
+together with the comparison, so write it to be read — decisions and omissions must be explicit.
 
 1. Run `node tools/ionic-api.js <ion-tag>` and paste the checklist in. Every row is either
    ticked, or has a one-line reason it is omitted (`out of scope: router`, `not applicable:
@@ -66,8 +83,9 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 
 ## 4. Review
 
-- `/code-review` on the PR, high effort. Findings fixed or explicitly waived in the PR.
-- A human reads `PLAN.md`, `COMPARISON.md` and the diff, and signs off.
+- `/code-review` on the change, high effort, **twice** — the second pass on the fixed diff.
+  Findings fixed or explicitly waived in the PR description.
+- A human reads `PLAN.md`, `COMPARISON.md` and the diff at the PR, and merges or requests changes.
 
 ## 5. Document
 
