@@ -921,6 +921,41 @@ public class AvonicItemTests
         AssertClose(Color.FromRgb(224, 224, 224), Pixel(scene, 200, 24));
     });
 
+    // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it
+    // underneath, in the same order as the sample. FocusAdorner reads null whether or not it's set, because an
+    // unset one falls back to the base theme's default, so only the layer shows what's really drawn.
+    [AvaloniaFact]
+    public void B16_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var item = new AvonicItem { Button = true };
+                var other = new Button();
+                using var scene = new Scene(new StackPanel { Children = { item, other } });
+
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(item)!;
+
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(item.IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
     [AvaloniaFact]
     public void B16_Focus_Tokens_Apply() => InstalledTheme.Run(_ =>
     {

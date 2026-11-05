@@ -39,7 +39,7 @@ Ionic results were measured in Chromium, with `ion-app` for the states, because 
 | 13 | Unknown colour | Transparent, with text in `--color` and borders in the current colour | match. The colour system's known difference for text doesn't apply here, because `Css.Var` can express it |
 | 14 | No colour in a coloured ancestor | from the colour system's rule | match |
 | 15 | Hover | Black at 0.04; contrast on colour | match. Mouse and pen only |
-| 16 | Keyboard focus | Black at 0.12, also while hovered. A click clears it | match |
+| 16 | Keyboard focus | Black at 0.12, also while hovered, with `outline: none`. A click clears it | match |
 | 17 | Pressing with the mouse | `ion-activated`, overlay stays at 0.04 | match |
 | 18 | On colour, the overlay uses contrast | `rgb(255, 255, 255)` at 0.04 and 0.12 | match |
 | 19 | Disabled | Opacity 0.3, `pointer-events: none`, `aria-disabled`, not a tab stop | match |
@@ -62,6 +62,26 @@ Ionic results were measured in Chromium, with `ion-app` for the states, because 
 
 Behaviours 21–27 can only be checked on stub controls, because the controls they're for don't exist yet. Those issues
 compare them for real.
+
+## In the real window
+
+The sample's `ion-item` page, in a real Windows window with real mouse and keyboard input:
+
+| Input | Result |
+|---|---|
+| Automation invoke on a `Button` row | One click |
+| A mouse click, and a double click | One click, and two |
+| Press, drag off the row, release | No click |
+| A click on a plain row, and on a disabled one | No click, no overlay |
+| Hover | The overlay covers the whole row, including the padding |
+| Press | Ripple, clipped to the row |
+| Enter and Space with focus from a click | One click each, with no focus overlay |
+| Tab, and Shift+Tab | Skips plain and disabled rows. Overlay only, with no dashed adorner |
+| A letter key | Clears the focus overlay |
+| Automation | `Button` rows are buttons that can be invoked, plain rows are groups, and the disabled row reports it |
+
+This found one bug that the headless tests couldn't: the base theme's dashed focus rectangle. Touch hasn't been tried on
+real hardware.
 
 ## Deliberate differences
 
