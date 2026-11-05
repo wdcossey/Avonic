@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Presenters;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -608,6 +609,30 @@ public class AvonicCardFamilyTests
         });
 
     [AvaloniaFact]
+    public void B24_The_Template_Follows_The_Controls_Own_Properties() => Assert.All(
+        new ContentControl[] { new AvonicCardHeader(), new AvonicCardTitle(), new AvonicCardSubtitle(), new AvonicCardContent() },
+        control =>
+        {
+            control.Background = Brushes.Teal;
+            control.BorderBrush = Brushes.Lime;
+            control.BorderThickness = new Thickness(2);
+            control.CornerRadius = new CornerRadius(7);
+            control.Padding = new Thickness(3);
+            control.HorizontalContentAlignment = HorizontalAlignment.Right;
+            control.VerticalContentAlignment = VerticalAlignment.Bottom;
+            using var scene = new Scene(control);
+
+            var presenter = control.GetVisualDescendants().OfType<ContentPresenter>().Single();
+            Assert.Equal(Colors.Teal, Solid(presenter.Background));
+            Assert.Equal(Colors.Lime, Solid(presenter.BorderBrush));
+            Assert.Equal(new Thickness(2), presenter.BorderThickness);
+            Assert.Equal(new CornerRadius(7), presenter.CornerRadius);
+            Assert.Equal(new Thickness(3), presenter.Padding);
+            Assert.Equal(HorizontalAlignment.Right, presenter.HorizontalContentAlignment);
+            Assert.Equal(VerticalAlignment.Bottom, presenter.VerticalContentAlignment);
+        });
+
+    [AvaloniaFact]
     public void B24_The_Whole_Box_Takes_Input_On_The_Stub() => Assert.All(
         new ContentControl[] { new AvonicCardTitle(), new AvonicCardSubtitle(), new AvonicCardContent() },
         control =>
@@ -671,13 +696,17 @@ public class AvonicCardFamilyTests
     [AvaloniaFact]
     public void B25_A_Hidden_Header_Still_Counts() => InstalledTheme.Run(_ =>
     {
+        var hiddenFirst = new AvonicCardContent { Content = "x" };
         var header = new AvonicCardHeader();
         var content = new AvonicCardContent { Content = "x" };
-        using var scene = Show(header, content);
+        using var scene = Show(
+            new StackPanel { Children = { new AvonicCardHeader { IsVisible = false }, hiddenFirst } },
+            new StackPanel { Children = { header, content } });
 
         header.IsVisible = false;
         Dispatcher.UIThread.RunJobs();
 
+        Assert.Equal(new Thickness(16, 0, 16, 13), hiddenFirst.Padding);
         Assert.Equal(new Thickness(16, 0, 16, 13), content.Padding);
     });
 

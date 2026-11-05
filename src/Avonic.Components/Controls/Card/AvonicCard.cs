@@ -185,7 +185,7 @@ public class AvonicCard : ContentControl
     {
         base.OnKeyDown(e);
 
-        if (e.Handled || !Button || !ReferenceEquals(e.Source, this))
+        if (!Button || !ReferenceEquals(e.Source, this))
         {
             return;
         }
@@ -249,10 +249,7 @@ public class AvonicCard : ContentControl
 
         public void Invoke()
         {
-            if (IsEnabled())
-            {
-                owner.Tap(owner);
-            }
+            owner.Tap(owner);
         }
     }
 }

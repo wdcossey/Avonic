@@ -4,6 +4,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Presenters;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -452,6 +453,24 @@ public class AvonicCardTests
         Assert.Equal(0, clicks);
     }
 
+    [AvaloniaFact]
+    public void B4_A_Child_That_Takes_The_Press_Still_Clicks_Every_Time()
+    {
+        var clicks = 0;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.PointerPressed += (_, e) => e.Handled = true;
+        var card = ButtonCard();
+        card.Content = child;
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        var centre = Box(child, scene.Window).Center;
+        Tap(scene, centre);
+        Tap(scene, centre);
+
+        Assert.Equal(2, clicks);
+    }
+
     // Measured outer, inner: a tap on the inner card is one click, which reaches both.
     [AvaloniaFact]
     public void B4_A_Tap_On_A_Nested_Button_Card_Reaches_Each_Card_Once()
@@ -581,6 +600,23 @@ public class AvonicCardTests
         ReleaseKey(scene, PhysicalKey.Space);
 
         Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B5_Keys_On_A_Plain_Card_Go_On_To_The_Parent()
+    {
+        var keys = 0;
+        var card = new AvonicCard { Content = "x", Focusable = true };
+        var parent = new Border { Child = card };
+        parent.KeyDown += (_, _) => keys++;
+        using var scene = new Scene(parent);
+        card.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        PressKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(2, keys);
     }
 
     [AvaloniaFact]
@@ -813,6 +849,39 @@ public class AvonicCardTests
         Assert.True(Native(many).ClipToBounds);
     }
 
+    [AvaloniaFact]
+    public void B9_The_Template_Follows_The_Cards_Own_Properties_On_The_Stub()
+    {
+        var card = new AvonicCard { Height = 90, Background = Brushes.Teal, CornerRadius = new CornerRadius(7) };
+        using var scene = new Scene(card);
+
+        AssertTemplateFollows(card);
+    }
+
+    [AvaloniaFact]
+    public void B9_The_Template_Follows_The_Cards_Own_Properties_In_The_Theme() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 90, Background = Brushes.Teal, CornerRadius = new CornerRadius(7) };
+        using var scene = new Scene(card);
+
+        AssertTemplateFollows(card);
+    });
+
+    private static void AssertTemplateFollows(AvonicCard card)
+    {
+        Assert.Equal(Colors.Teal, Solid(Native(card).Background));
+        Assert.Equal(new CornerRadius(7), Native(card).CornerRadius);
+        Assert.Equal(new CornerRadius(7), Part<Border>(card, "PART_Host").CornerRadius);
+
+        var presenter = Part<ContentPresenter>(card, "PART_ContentPresenter");
+        card.Padding = new Thickness(3);
+        card.HorizontalContentAlignment = HorizontalAlignment.Right;
+        card.VerticalContentAlignment = VerticalAlignment.Bottom;
+        Assert.Equal(new Thickness(3), presenter.Padding);
+        Assert.Equal(HorizontalAlignment.Right, presenter.HorizontalContentAlignment);
+        Assert.Equal(VerticalAlignment.Bottom, presenter.VerticalContentAlignment);
+    }
+
     // ── Behaviours 10-12: colours ────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -903,6 +972,20 @@ public class AvonicCardTests
         Assert.Null(Native(card).Background);
         Assert.Equal(Colors.Teal, Solid(card.Foreground));
         Assert.Equal(Colors.Orange, Pixel(scene, 195, 50));
+    });
+
+    [AvaloniaFact]
+    public void B12_An_Unknown_Color_Still_Takes_A_Tap_On_Its_Empty_Part() => InstalledTheme.Run(_ =>
+    {
+        // Nothing in it is painted, so only the template's panel can take this.
+        var clicks = 0;
+        var card = new AvonicCard { Button = true, Color = "nonexistent", Height = 90, VerticalAlignment = VerticalAlignment.Top };
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+
+        Tap(scene, new Point(195, 50));
+
+        Assert.Equal(1, clicks);
     });
 
     [AvaloniaFact]

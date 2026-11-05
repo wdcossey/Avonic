@@ -34,7 +34,6 @@ public class AvonicCardContent : ContentControl
         if (_panel is not null)
         {
             _panel.Children.CollectionChanged -= OnSiblingsChanged;
-            _panel = null;
         }
     }
 
