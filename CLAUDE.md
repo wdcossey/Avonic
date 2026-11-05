@@ -25,6 +25,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md)
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
+  Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
 src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable); AvonicTheme
                          merges every discovered Tokens/**/*.axaml and Controls/**/*.axaml
@@ -36,7 +37,9 @@ samples/Avonic.Sample/   phone-sized desktop app, one page per control, each mar
 Directory.Build.targets  generates XamlManifest.Paths from a project's AvonicDiscoveredXaml globs
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
-                         screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/
+                         screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/;
+                         compare-icons.js compares every icon against it, pixel by pixel
+tools/ionicons/          generates src/Avonic.Components/Icons/ from the ionicons package
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs
 .mcp.json                Claude Code MCP servers: avalonia-docs (Avalonia's hosted Build MCP — docs and API lookup)
 ```
@@ -71,7 +74,7 @@ Fetched by `npm install` (never committed):
 | **API spec** — every prop, event, method, slot, part, CSS var | `node_modules/@ionic/docs/core.json` |
 | **Implementation** — readable Stencil output | `node_modules/@ionic/core/dist/collection/components/<name>/<name>.js` |
 | **Base skin** we recreate | `node_modules/@ionic/core/dist/collection/components/<name>/<name>.md.css` |
-| Icons | `node_modules/ionicons/dist/svg/*.svg` |
+| Icons | `node_modules/ionicons/dist/svg/*.svg`; `ion-icon` itself is in `node_modules/ionicons/dist/collection/components/icon/`, not `@ionic/core` or `core.json` |
 
 `node tools/ionic-api.js <ion-tag>` prints the spec as a Markdown checklist. **Start every control
 from that output.** `node tools/ionic-ref/render.js <ion-tag> [--tap]` renders the real component
@@ -85,7 +88,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | Ionic | Avonic | Example |
 |---|---|---|
 | `@Prop() fooBar` | `StyledProperty` `FooBar`, same name | `labelPlacement` → `LabelPlacement`; `pin` → `Pin` (not `ShowPin`) |
-| `disabled` | `IsEnabled` (Avalonia built-in) — the only renamed prop | |
+| `disabled` | `IsEnabled` (Avalonia built-in) | |
+| `name` on `ion-icon` | `IconName`, because `StyledElement.Name` exists | Other components with a `name` prop need their own decision |
 | `color` | `string? Color` via `ColorPalette.ColorProperty.AddOwner`, resolved to `Avonic.Color.<Name>` keys | `color="danger"` → `Avonic.Color.Danger` |
 | `.ion-color`, `--ion-color-base` | pseudoclass `:ion-color`, `ColorPalette.Base` (also `Contrast`, `Shade`, `Tint`, `BaseColor`, `ContrastColor`) | `:host(.ion-color)` → `^:ion-color` |
 | `mode` | not exposed (ADR 0001) | |
@@ -124,4 +128,5 @@ Avonic-only additions (touch-target enforcement, extra events) are allowed but l
 Apache-2.0. Avonic recreates the API, behaviour and Material Design visuals of
 **Ionic Framework** (© Ionic, Inc., MIT). It is an independent implementation for AvaloniaUI and
 is not affiliated with or endorsed by Ionic, Inc. or the AvaloniaUI team. This attribution appears
-in `README.md` and the NuGet package description.
+in `README.md` and the NuGet package description. The bundled artwork is **Ionicons** (MIT); its
+notice ships at `src/Avonic.Components/Icons/LICENSE`.

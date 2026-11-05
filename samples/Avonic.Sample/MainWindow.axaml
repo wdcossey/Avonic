@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls"
         x:Class="Avonic.Sample.MainWindow"
         Title="Avonic"
         Width="390" Height="844" CanResize="False"
@@ -10,7 +11,10 @@
     <DockPanel>
         <Border DockPanel.Dock="Top" Background="#F8F8F8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Height="56">
             <DockPanel VerticalAlignment="Center" Margin="8,0">
-                <Button Name="BackButton" DockPanel.Dock="Left" Content="Back" IsVisible="False" Click="OnBack" />
+                <Button Name="BackButton" DockPanel.Dock="Left" IsVisible="False" Click="OnBack"
+                        AutomationProperties.Name="Back">
+                    <c:AvonicIcon IconName="arrow-back-sharp" FontSize="24" />
+                </Button>
                 <TextBlock Name="PageTitle" Text="Avonic" FontSize="20" FontWeight="SemiBold"
                            VerticalAlignment="Center" Margin="8,0" />
             </DockPanel>

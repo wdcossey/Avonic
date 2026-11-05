@@ -40,6 +40,9 @@ Avonic recreates the API, behaviour and Material Design visuals of **Ionic Frame
 (© Ionic, Inc., MIT licensed). It is an independent implementation for the AvaloniaUI ecosystem and
 is not affiliated with or endorsed by Ionic, Inc. or the AvaloniaUI team.
 
+Icons are [Ionicons](https://ionic.io/ionicons) (© Ionic, MIT licensed), bundled unmodified. The notice is
+in [`src/Avonic.Components/Icons/LICENSE`](src/Avonic.Components/Icons/LICENSE).
+
 ## Licence
 
 Apache License 2.0 — see [LICENSE](LICENSE).

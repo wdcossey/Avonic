@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="16" FontSize="24">
+            <c:AvonicIcon IconName="heart" Color="danger" />
+            <c:AvonicIcon IconName="chevron-forward" />
+            <c:AvonicIcon IconName="search-sharp" Size="Large" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!--
+        ionicon-stroke-width. Only custom SVGs with the ionicon-stroke-width class read this: no built-in
+        icon does. AvonicIcon has no template, so this is its only token. It falls back to 32 without it.
+    -->
+    <x:Double x:Key="Avonic.Icon.IoniconStrokeWidth">32</x:Double>
+
+</ResourceDictionary>

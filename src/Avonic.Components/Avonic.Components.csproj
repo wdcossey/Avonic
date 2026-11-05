@@ -17,6 +17,12 @@
     <AvonicDiscoveredXaml Include="Controls/**/*.axaml" />
   </ItemGroup>
 
+  <!-- ionicons' artwork; see tools/ionicons/generate.js. Its MIT notice ships with it. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Icons/ionicons.br" LogicalName="Avonic.Components.Icons.ionicons.br" />
+    <None Include="Icons/LICENSE" Pack="true" PackagePath="licenses/ionicons/LICENSE" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Avonic.Components.Tests" />
   </ItemGroup>
