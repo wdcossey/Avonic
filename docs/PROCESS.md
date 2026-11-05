@@ -23,8 +23,11 @@ closed. A fresh session needs nothing but the repo and the issue:
    The human review happens **once, at the PR**: plan, comparison, diff. Only the PR merge marks
    the control done (`CLAUDE.md` row, `docs/ROADMAP.md`, the issue closes with `Closes #N`).
 
-Shared files are auto-discovered (`AvonicComponentsStyles`, `AvonicTheme`, sample pages), so a
-control adds its own files and never edits another control's. Keep it that way.
+Shared files are auto-discovered, so a control adds its own files and never edits another
+control's. Keep it that way. Templates and tokens are found by the globs in each project file
+(`Controls/**/*.axaml` in Components; `Tokens/*.axaml` and `Controls/*.axaml` in Themes). Sample
+pages are found by `[SamplePage("<ion-tag>", Order = <issue number>)]`. See
+[auto-discovery](infra/auto-discovery/README.md).
 
 ## 1. Plan
 

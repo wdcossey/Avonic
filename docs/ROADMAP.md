@@ -26,6 +26,7 @@ that the graph does not record (colour system, icons, gestures, overlays).
 | # | Ionic | Status |
 |---|---|---|
 | — | `ion-ripple-effect` (+ the `tap-click` activatable behaviour) | **done** (signed off 2026-10-15) — [docs](components/ion-ripple-effect/README.md) · [comparison](components/ion-ripple-effect/COMPARISON.md) |
+| [#1](https://github.com/wdcossey/Avonic/issues/1) | infra: auto-discovery of templates, tokens and sample pages | **done** — [docs](infra/auto-discovery/README.md) · [plan](infra/auto-discovery/PLAN.md) |
 
 ## Out of scope
 

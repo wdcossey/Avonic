@@ -84,21 +84,22 @@ public class DiscoveryTests
         Assert.IsType<RippleEffectPage>(page.Create());
     }
 
-    [SamplePage("second", Order = 2)]
-    private sealed class SecondPage;
+    // Titles sort the opposite way to Order, so a title-only sort can't pass by coincidence.
+    [SamplePage("a-order-2", Order = 2)]
+    private sealed class OrderTwoPage;
 
-    [SamplePage("first-b", Order = 1)]
-    private sealed class FirstBPage;
+    [SamplePage("z-order-1", Order = 1)]
+    private sealed class OrderOneLastPage;
 
-    [SamplePage("first-a", Order = 1)]
-    private sealed class FirstAPage;
+    [SamplePage("y-order-1", Order = 1)]
+    private sealed class OrderOneFirstPage;
 
     [Fact]
     public void Sample_Catalog_Orders_By_Order_Then_Title()
     {
         var titles = SamplePageCatalog.Discover(typeof(DiscoveryTests).Assembly).Select(entry => entry.Title);
 
-        Assert.Equal(["first-a", "first-b", "second"], titles);
+        Assert.Equal(["y-order-1", "z-order-1", "a-order-2"], titles);
     }
 
     [Fact]
