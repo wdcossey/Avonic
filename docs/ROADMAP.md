@@ -31,6 +31,8 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 |---|---|---|
 | — | `ion-ripple-effect` (+ the `tap-click` activatable behaviour) | **done** (signed off 2026-10-15) — [docs](components/ion-ripple-effect/README.md) · [comparison](components/ion-ripple-effect/COMPARISON.md) |
 | [#1](https://github.com/wdcossey/Avonic/issues/1) | infra: auto-discovery of templates, tokens and sample pages | **done** — [docs](infra/auto-discovery/README.md) · [plan](infra/auto-discovery/PLAN.md) |
+| [#2](https://github.com/wdcossey/Avonic/issues/2) | infra: colour system (Ionic palette, global `--ion-*` tokens, the `color` prop) | **done** — [docs](infra/color-system/README.md) · [plan](infra/color-system/PLAN.md) |
+| [#3](https://github.com/wdcossey/Avonic/issues/3) | `ion-icon` (all of ionicons bundled) | **done** — [docs](components/ion-icon/README.md) · [comparison](components/ion-icon/COMPARISON.md) |
 
 ## Out of scope
 
