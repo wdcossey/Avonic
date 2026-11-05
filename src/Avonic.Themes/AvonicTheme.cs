@@ -30,8 +30,7 @@ public class AvonicTheme : Styles
         }
     }
 
-    /// <summary>Tokens first, then ordinal: glob order differs between file systems.</summary>
+    /// <summary>Glob order differs between file systems, so merge order is fixed here.</summary>
     internal static IEnumerable<string> OrderForMerge(IEnumerable<string> paths) =>
-        paths.OrderBy(path => path.StartsWith("Tokens/", StringComparison.Ordinal) ? 0 : 1)
-             .ThenBy(path => path, StringComparer.Ordinal);
+        paths.Order(StringComparer.Ordinal);
 }

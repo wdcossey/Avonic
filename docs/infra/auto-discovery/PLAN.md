@@ -40,10 +40,14 @@ compiled into that assembly.
 | Project | Globs | Merge order |
 |---|---|---|
 | `Avonic.Components` | `Controls/**/*.axaml` | ordinal |
-| `Avonic.Themes` | `Tokens/**/*.axaml`, `Controls/**/*.axaml` | `Tokens/` first, then ordinal |
+| `Avonic.Themes` | `Tokens/**/*.axaml`, `Controls/**/*.axaml` | ordinal |
 
 Order is applied at runtime, because MSBuild globs have no guaranteed order and Windows and Linux can
 differ.
+
+The issue asks for tokens first in Themes. That was implemented, then dropped for a single ordinal
+sort: templates resolve tokens from the application and keys are unique, so it never changed which
+value a lookup returned.
 
 Sample pages use `[SamplePage("ion-…", Order = n)]`, found by reflection. `Order` is the control's
 issue number, so parallel PRs don't have to coordinate; ties break on title. Reflection is acceptable
@@ -67,7 +71,7 @@ per-control folder, as Components does, would otherwise be silently left out.
 | `AvonicComponentsStyles.OrderForMerge` sorts ordinally (synthetic input) | Merge order varying by OS |
 | `AvonicTheme` includes the tokens file | Themes discovery silently empty |
 | `AvonicTheme`, installed, still resolves the ripple `ControlTheme` | Lost layering over the stubs |
-| `AvonicTheme.OrderForMerge` puts tokens first (synthetic input) | Wrong merge order |
+| `AvonicTheme.OrderForMerge` sorts ordinally (synthetic input) | Merge order varying by OS |
 | Every discovered key resolves with the theme installed | A bad path, a wrong root element, or a mistyped token that would only fail when first used |
 | No key is defined twice within a project, per theme variant | Parallel PRs colliding on a key with no merge conflict to expose it |
 | The catalog finds the ripple page | Sample discovery broken |

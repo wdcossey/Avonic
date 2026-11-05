@@ -35,9 +35,9 @@ The index sorts by `Order`, then by title. A page with no `Order` sorts last. Th
   `[SamplePage]` isn't caught.
 - **Themes overrides the stubs.** `AvonicTheme` looks in its own dictionaries before
   `AvonicComponentsStyles`, so a Themes `ControlTheme` with the same key replaces the stub.
-- **Merge order.** Components is ordinal. Themes is `Tokens/` first, then ordinal. The order only makes
-  merging deterministic: templates resolve tokens from the application, and keys are unique, so it
-  doesn't change which value a lookup returns.
+- **Merge order.** Both projects sort ordinally. The order only makes merging deterministic:
+  templates resolve tokens from the application, and keys are unique, so it doesn't change which value
+  a lookup returns.
 - **Keys are unique within a project**, per theme variant, because merged dictionaries are searched
   last-to-first and a duplicate would resolve by file name. `DiscoveryTests` fails instead.
 - **Every resource must build.** Entries are built on first lookup, so `DiscoveryTests` looks up every
