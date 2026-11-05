@@ -53,21 +53,7 @@ public class DiscoveryTests
         }
     }
 
-    /// <summary>Templates resolve tokens from the application, so this is how they really run.</summary>
-    private static void WithInstalledTheme(Action<AvonicTheme> test)
-    {
-        var app = Application.Current!;
-        var theme = new AvonicTheme();
-        app.Styles.Add(theme);
-        try
-        {
-            test(theme);
-        }
-        finally
-        {
-            app.Styles.Remove(theme);
-        }
-    }
+    private static void WithInstalledTheme(Action<AvonicTheme> test) => InstalledTheme.Run(test);
 
     private static void AssertResolvesRippleTheme(Styles styles)
     {

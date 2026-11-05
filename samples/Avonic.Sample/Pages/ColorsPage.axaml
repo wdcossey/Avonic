@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:b="using:Avonic.Components.Behaviors"
+             x:Class="Avonic.Sample.Pages.ColorsPage">
+
+    <UserControl.Styles>
+        <!-- :host(.ion-color) { background: var(ion-color-base); color: var(ion-color-contrast); } -->
+        <Style Selector="Border.swatch">
+            <Setter Property="Height" Value="48" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.swatch:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="Border.swatch TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="12,0" />
+        </Style>
+        <Style Selector="Border.swatch:ion-color TextBlock">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.NullToUnset}}" />
+        </Style>
+        <Style Selector="Border.swatch:ion-color Border.shade">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Shade), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="Border.swatch:ion-color Border.tint">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Tint), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Every colour here comes from ColorPalette.Color alone. Each swatch is the base with contrast
+         text, then its shade and tint. -->
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="8">
+            <TextBlock Text="The nine colours" FontWeight="SemiBold" />
+            <Border Classes="swatch" b:ColorPalette.Color="primary"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="primary" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="secondary"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="secondary" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="tertiary"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="tertiary" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="success"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="success" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="warning"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="warning" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="danger"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="danger" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="light"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="light" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="medium"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="medium" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+            <Border Classes="swatch" b:ColorPalette.Color="dark"><Grid ColumnDefinitions="*,48,48"><TextBlock Text="dark" /><Border Grid.Column="1" Classes="shade" /><Border Grid.Column="2" Classes="tint" /></Grid></Border>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
