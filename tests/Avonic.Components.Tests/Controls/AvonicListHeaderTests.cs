@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
@@ -55,7 +56,6 @@ public class AvonicListHeaderTests
         Assert.Equal(new Rect(0, 0, 390, 45), Box(header, scene.Window));
         Assert.Equal(new Rect(16, 0, 374, 45), Box(Inner(header), scene.Window));
         Assert.Equal(14, header.FontSize);
-        Assert.Equal(FontWeight.Normal, header.FontWeight);
         Assert.Equal(14, header.GetVisualDescendants().OfType<TextBlock>().Single().FontSize);
     });
 
@@ -72,6 +72,49 @@ public class AvonicListHeaderTests
         Assert.Equal(Colors.Black, Solid(TextElement.GetForeground(text)));
         Assert.Equal(Colors.Transparent, Solid(Host(header).Background));
     });
+
+    [AvaloniaFact]
+    public void H1_Its_Weight_Is_Inherited() => InstalledTheme.Run(_ =>
+    {
+        var header = new AvonicListHeader();
+        var parent = new StackPanel { Children = { header } };
+        TextElement.SetFontWeight(parent, FontWeight.Bold);
+        using var scene = new Scene(parent);
+
+        Assert.Equal(FontWeight.Bold, header.FontWeight);
+    });
+
+    [AvaloniaFact]
+    public void H1_Its_Text_Follows_The_Text_Colour_Token() => InstalledTheme.Run(_ =>
+    {
+        var header = new AvonicListHeader();
+        using var scene = new Scene(header);
+        scene.Window.Resources["Avonic.TextColorBrush"] = new SolidColorBrush(Token);
+        Run();
+
+        Assert.Equal(Token, Solid(header.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void H1_The_Stub_Passes_On_What_A_Theme_Sets()
+    {
+        var header = new AvonicListHeader
+        {
+            Background = Brushes.Red,
+            BorderBrush = Brushes.Blue,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4),
+            Content = 1,
+            ContentTemplate = new FuncDataTemplate<object>((_, _) => new TextBlock { Text = "t" }),
+        };
+        using var scene = new Scene(header);
+
+        Assert.Same(Brushes.Red, Host(header).Background);
+        Assert.Same(Brushes.Blue, Host(header).BorderBrush);
+        Assert.Equal(new Thickness(1), Host(header).BorderThickness);
+        Assert.Equal(new Thickness(4), Host(header).Padding);
+        Assert.Equal("t", header.GetVisualDescendants().OfType<TextBlock>().Single().Text);
+    }
 
     [AvaloniaFact]
     public void H1_It_Uses_The_Font_Token() => InstalledTheme.Run(_ =>

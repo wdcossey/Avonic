@@ -560,6 +560,47 @@ public class AvonicListTests
     });
 
     [AvaloniaFact]
+    public void L14_It_Works_Through_An_Items_Controls_Presenters() => Scrolling(() =>
+    {
+        // An ItemTemplate that makes inset lists: data-driven sections.
+        var sections = new ItemsControl
+        {
+            ItemsSource = new[] { "a", "b", "c" },
+            ItemTemplate = new FuncDataTemplate<string>((_, _) => new AvonicList { Inset = true, Items = { Item() } }),
+        };
+        using var scene = new Scene(new StackPanel { Children = { sections } });
+
+        var lists = sections.GetVisualDescendants().OfType<AvonicList>().ToList();
+        Assert.Equal(3, lists.Count);
+        Assert.Equal(16, lists[0].Margin.Top);
+        Assert.Equal(0, lists[1].Margin.Top);
+        Assert.Equal(0, lists[2].Margin.Top);
+
+        lists[1].Inset = false;
+        Run();
+        Assert.Equal(16, lists[2].Margin.Top);
+
+        lists[1].Inset = true;
+        Run();
+        Assert.Equal(0, lists[2].Margin.Top);
+    });
+
+    [AvaloniaFact]
+    public void L14_A_Change_Reaches_The_Next_List_Only_Through_Its_Neighbour() => InstalledTheme.Run(_ =>
+    {
+        var first = new AvonicList { Inset = true };
+        var second = new AvonicList { Inset = true };
+        var third = new AvonicList { Inset = true };
+        using var scene = new Scene(new StackPanel { Children = { first, second, third } });
+
+        first.Inset = false;
+        Run();
+
+        Assert.Equal(16, second.Margin.Top);
+        Assert.Equal(0, third.Margin.Top);
+    });
+
+    [AvaloniaFact]
     public void L14_Known_Difference_Margins_Do_Not_Collapse() => InstalledTheme.Run(_ =>
     {
         // Measured in CSS: the parent is 144 high with the margin outside it, and the gap beside a margin of 30 is 30.

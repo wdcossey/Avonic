@@ -25,9 +25,6 @@
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <!-- font-size: 0.875rem -->
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="Normal" />
-        <!-- overflow: hidden -->
-        <Setter Property="ClipToBounds" Value="True" />
         <!-- border-bottom: 1px solid var(ion-item-border-color, ...). There's no variable of its own. -->
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="BorderBrush" Value="{DynamicResource Avonic.ItemBorderColorBrush}" />
@@ -83,6 +80,11 @@
                 </Border>
             </ControlTemplate>
         </Setter>
+
+        <!-- .item-divider-wrapper -->
+        <Style Selector="^ /template/ ContentPresenter#PART_Container">
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
 
         <!-- .item-divider-inner. The host's minimum is inherited, and it's the inner box's that counts: the bottom
              border makes the host 31 and leaves this 30, measured. -->

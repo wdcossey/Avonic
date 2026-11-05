@@ -96,7 +96,8 @@ results that Ionic's own comment doesn't intend: see "For you to decide" in the 
 
 **`.list-inset + ion-list.list-inset` is a pseudoclass.** Avalonia has no sibling combinator, so the control works out
 `:after-inset` from its visual parent's `Children`, and the theme's `^:inset:after-inset` is the rest of the rule. Each list
-listens to that collection, and tells the lists beside it when its own `Inset` changes.
+listens to that collection, and tells the next list when its own `Inset` changes. An `ItemTemplate` that makes inset lists has a
+presenter around each, so the control looks through those, as a sticky divider does.
 
 **`role="listitem"` is a style.** `AvonicItem` can't be edited here, and `AutomationProperties.ControlTypeOverride` is
 all it takes. It means the role depends on the theme: see the differences, and "Proposed for shared files" in the PR.

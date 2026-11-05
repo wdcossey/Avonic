@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Presenters;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using System.Collections.Specialized;
@@ -27,6 +28,7 @@ public class AvonicList : ItemsControl
         AvaloniaProperty.Register<AvonicList, bool>(nameof(Inset));
 
     private AvaloniaList<Control>? _siblings;
+    private Control? _inParent;
 
     public ListLines? Lines
     {
@@ -54,9 +56,10 @@ public class AvonicList : ItemsControl
         else if (change.Property == InsetProperty)
         {
             PseudoClasses.Set(":inset", Inset);
-            foreach (var sibling in _siblings?.OfType<AvonicList>() ?? [])
+            var index = IndexInSiblings();
+            if (index >= 0 && index + 1 < _siblings!.Count)
             {
-                sibling.UpdateAfterInset();
+                ListIn(_siblings[index + 1])?.UpdateAfterInset();
             }
         }
     }
@@ -65,7 +68,14 @@ public class AvonicList : ItemsControl
     {
         base.OnAttachedToVisualTree(e);
 
-        if (this.GetVisualParent() is Panel panel)
+        // An ItemsControl wraps templated content in a presenter. In the DOM there's no such box.
+        _inParent = this;
+        while (_inParent.GetVisualParent() is ContentPresenter { TemplatedParent: null } presenter)
+        {
+            _inParent = presenter;
+        }
+
+        if (_inParent.GetVisualParent() is Panel panel)
         {
             _siblings = panel.Children;
             _siblings.CollectionChanged += OnSiblingsChanged;
@@ -84,6 +94,7 @@ public class AvonicList : ItemsControl
             _siblings = null;
         }
 
+        _inParent = null;
         UpdateAfterInset();
     }
 
@@ -94,14 +105,19 @@ public class AvonicList : ItemsControl
 
     private void OnSiblingsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateAfterInset();
 
+    private int IndexInSiblings() => _inParent is null ? -1 : _siblings?.IndexOf(_inParent) ?? -1;
+
+    private static AvonicList? ListIn(Control sibling) =>
+        (sibling as ContentPresenter)?.Child as AvonicList ?? sibling as AvonicList;
+
     /// <summary>
     /// <c>.list-inset + ion-list</c>: the list before this one is inset. Avalonia's selectors have no sibling
     /// combinator, so it's a pseudoclass, and the theme has the rest of the rule.
     /// </summary>
     private void UpdateAfterInset()
     {
-        var index = _siblings?.IndexOf(this) ?? -1;
-        PseudoClasses.Set(":after-inset", index > 0 && _siblings![index - 1] is AvonicList { Inset: true });
+        var index = IndexInSiblings();
+        PseudoClasses.Set(":after-inset", index > 0 && ListIn(_siblings![index - 1]) is { Inset: true });
     }
 
     protected override AutomationPeer OnCreateAutomationPeer() => new ListAutomationPeer(this);

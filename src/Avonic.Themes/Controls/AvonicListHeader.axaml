@@ -14,13 +14,11 @@
 
     <!-- A translation of list-header.md.css. -->
     <ControlTheme x:Key="{x:Type c:AvonicListHeader}" TargetType="c:AvonicListHeader">
+        <!-- Inherited from html in Ionic. Avalonia has no such level, so it's set here, as a font token has to reach it. -->
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <!-- font-size: 0.875rem -->
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Padding" Value="16,0,0,0" />
-        <!-- overflow: hidden -->
-        <Setter Property="ClipToBounds" Value="True" />
         <Setter Property="Background" Value="{DynamicResource Avonic.ListHeader.Background}" />
         <Setter Property="BorderThickness" Value="{DynamicResource Avonic.ListHeader.BorderWidth}" />
         <Setter Property="BorderBrush">

@@ -62,6 +62,19 @@ public class AvonicItemGroupTests
     }
 
     [AvaloniaFact]
+    public void G1_It_Takes_Another_Panel()
+    {
+        var group = new AvonicItemGroup
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new WrapPanel()),
+            Items = { new TextBlock { Text = "x" } },
+        };
+        using var scene = new Scene(group);
+
+        Assert.Single(group.GetVisualDescendants().OfType<WrapPanel>());
+    }
+
+    [AvaloniaFact]
     public void G2_It_Reads_As_A_Group() => InstalledTheme.Run(_ =>
     {
         var group = new AvonicItemGroup();

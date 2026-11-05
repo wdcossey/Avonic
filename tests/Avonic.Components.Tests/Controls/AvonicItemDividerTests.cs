@@ -69,7 +69,6 @@ public class AvonicItemDividerTests
         Assert.Equal(new Rect(16, 0, 374, 30), Box(Part<Border>(divider, "PART_Inner"), scene.Window));
         Assert.Equal(new Rect(16, 0, 358, 30), Box(Part<ContentPresenter>(divider, "PART_Container"), scene.Window));
         Assert.Equal(14, divider.GetVisualDescendants().OfType<TextBlock>().Single().FontSize);
-        Assert.Equal(FontWeight.Normal, divider.FontWeight);
     });
 
     [AvaloniaFact]
@@ -81,6 +80,17 @@ public class AvonicItemDividerTests
         var box = Box(divider.GetVisualDescendants().OfType<TextBlock>().Single(), divider);
         Assert.InRange(box.Top - (30 - box.Bottom), -1, 1);
         Assert.True(box.Top > 0);
+    });
+
+    [AvaloniaFact]
+    public void D1_Its_Weight_Is_Inherited() => InstalledTheme.Run(_ =>
+    {
+        var divider = new AvonicItemDivider();
+        var parent = new StackPanel { Children = { divider } };
+        TextElement.SetFontWeight(parent, FontWeight.Bold);
+        using var scene = new Scene(parent);
+
+        Assert.Equal(FontWeight.Bold, divider.FontWeight);
     });
 
     [AvaloniaFact]
@@ -107,6 +117,32 @@ public class AvonicItemDividerTests
         Assert.Same(Part<ContentPresenter>(divider, "PART_Container"), content.GetVisualParent());
         Assert.Same(Part<ContentPresenter>(divider, "PART_End"), end.GetVisualParent());
         Assert.Equal(new Point(390 - 7, 0), end.TranslatePoint(default, divider)!.Value.WithY(0));
+    }
+
+    [AvaloniaFact]
+    public void D1_The_Stub_Passes_On_What_A_Theme_Sets()
+    {
+        static IDataTemplate Marker(string text) => new FuncDataTemplate<object>((_, _) => new TextBlock { Text = text });
+        var divider = new AvonicItemDivider
+        {
+            Background = Brushes.Red,
+            BorderBrush = Brushes.Blue,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4),
+            StartContent = 1,
+            StartContentTemplate = Marker("s"),
+            Content = 2,
+            ContentTemplate = Marker("c"),
+            EndContent = 3,
+            EndContentTemplate = Marker("e"),
+        };
+        using var scene = new Scene(divider);
+
+        Assert.Same(Brushes.Red, Host(divider).Background);
+        Assert.Same(Brushes.Blue, Host(divider).BorderBrush);
+        Assert.Equal(new Thickness(1), Host(divider).BorderThickness);
+        Assert.Equal(new Thickness(4), Host(divider).Padding);
+        Assert.Equal(["s", "c", "e"], divider.GetVisualDescendants().OfType<TextBlock>().Select(text => text.Text));
     }
 
     [AvaloniaFact]
@@ -221,6 +257,10 @@ public class AvonicItemDividerTests
         Assert.Equal(new Thickness(16, 0, 0, 0), end.Margin);
         Assert.Equal(42, Box(Part<Border>(divider, "PART_Inner"), scene.Window).Left);
         Assert.Equal(364, Box(end, scene.Window).Left);
+
+        // Centred in the 30 of the inner box.
+        Assert.Equal(10, Box(start, scene.Window).Top);
+        Assert.Equal(10, Box(end, scene.Window).Top);
     });
 
     [AvaloniaFact]
@@ -256,6 +296,27 @@ public class AvonicItemDividerTests
         Assert.Equal(new Rect(16, 3, 24, 24), Box(icon, scene.Window));
         Assert.Equal(0.54, Assert.IsAssignableFrom<ISolidColorBrush>(icon.Foreground).Opacity, 3);
         Assert.Equal(31, divider.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void D5_A_Panel_Stands_For_The_Slot_For_Size_And_Colour() => InstalledTheme.Run(_ =>
+    {
+        // <ion-icon/><ion-label/> are both slotted. Here they share a panel.
+        var plain = new AvonicIcon { IconName = "heart" };
+        var colored = new AvonicIcon { IconName = "heart" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItemDivider { Content = new StackPanel { Children = { plain } } },
+                new AvonicItemDivider { Color = "primary", Content = new StackPanel { Children = { colored } } },
+            },
+        });
+
+        Assert.Equal(24, plain.Bounds.Height);
+        Assert.Equal(0.54, Assert.IsAssignableFrom<ISolidColorBrush>(plain.Foreground).Opacity, 3);
+        Assert.Equal(Colors.White, Solid(colored.Foreground));
+        Assert.Equal(1, colored.Foreground!.Opacity);
     });
 
     [AvaloniaFact]
@@ -462,6 +523,22 @@ public class AvonicItemDividerTests
         Assert.True(Part<Border>(divider, "PART_Inner").ClipToBounds);
     });
 
+    [AvaloniaFact]
+    public void D10_The_Default_Slot_Is_Clipped_Before_The_End_Slot() => InstalledTheme.Run(_ =>
+    {
+        // .item-divider-wrapper { overflow: hidden }: it ends at 334 with an end icon, measured.
+        var divider = new AvonicItemDivider
+        {
+            Content = new Border { Width = 600, Height = 20, Background = Brushes.Red },
+            EndContent = new AvonicIcon { IconName = "star" },
+        };
+        using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { divider } });
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.NotEqual(0xFFFFFFu, Pixel(frame, 330, 24));
+        Assert.Equal(0xFFFFFFu, Pixel(frame, 340, 24));
+    });
+
     // ── Sticky ───────────────────────────────────────────────────────────────────────────────
 
     private static AvonicItem[] RowItems(int count) =>
@@ -593,6 +670,59 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D13_Lower_In_A_Group_It_Still_Ends_With_The_Group() => Scrolling(() =>
+    {
+        var divider = new AvonicItemDivider { Sticky = true };
+        var group = new AvonicItemGroup { Items = { new AvonicItem { Content = "r" }, divider } };
+        foreach (var item in RowItems(6))
+        {
+            group.Items.Add(item);
+        }
+
+        var scroller = new ScrollViewer { Content = new StackPanel { Children = { group, new Border { Height = 1000 } } } };
+        using var scene = new Scene(scroller, 390, 200);
+
+        Assert.Equal(48, Top(divider, scroller));
+        Assert.Equal(0, ScrollTo(scroller, 100, divider));
+
+        // The group is 48 + 31 + 288 = 367 high.
+        Assert.Equal(-14, ScrollTo(scroller, 350, divider));
+    });
+
+    [AvaloniaFact]
+    public void D13_Its_Margin_Is_Kept_At_The_End_But_Not_At_The_Top() => Scrolling(() =>
+    {
+        // Measured: margins of 8 and 6. Stuck at 0 at scroll 16, and -6 at 310 where the group's end is 25 + 6 away.
+        var divider = new AvonicItemDivider { Sticky = true, Margin = new Thickness(0, 8, 0, 6) };
+        var scroller = new ScrollViewer { Content = new AvonicList { Items = { Group(divider), Group(new AvonicItemDivider()) } } };
+        using var scene = new Scene(scroller, 390, 200);
+
+        Assert.Equal(16, Top(divider, scroller));
+        Assert.Equal(0, ScrollTo(scroller, 16, divider));
+        Assert.Equal(0, ScrollTo(scroller, 300, divider));
+        Assert.Equal(-6, ScrollTo(scroller, 310, divider));
+        Assert.Equal(-16, ScrollTo(scroller, 320, divider));
+    });
+
+    [AvaloniaFact]
+    public void D13_From_A_Template_Its_Margin_Is_Counted_Inside_The_Presenter() => Scrolling(() =>
+    {
+        var list = new AvonicList
+        {
+            ItemsSource = new object[] { "d", 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+            ItemTemplate = new FuncDataTemplate<object>((value, _) =>
+                value is string
+                    ? new AvonicItemDivider { Sticky = true, Margin = new Thickness(0, 8, 0, 0) }
+                    : new AvonicItem { Content = "r" }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+        var divider = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single();
+
+        Assert.Equal(0, ScrollTo(scroller, 100, divider));
+    });
+
+    [AvaloniaFact]
     public void D13_It_Never_Goes_Above_Where_It_Would_Be() => Scrolling(() =>
     {
         // A group shorter than the divider has no room to move in.
@@ -630,6 +760,54 @@ public class AvonicItemDividerTests
         list.Inset = false;
         Run();
         Assert.Equal(0, ScrollTo(scroller, 60, divider));
+    });
+
+    [AvaloniaFact]
+    public void D14_Moving_Out_Of_An_Inset_List_Lets_It_Stick() => Scrolling(() =>
+    {
+        var divider = new AvonicItemDivider { Sticky = true };
+        var inset = new AvonicList { Inset = true, Items = { divider } };
+        var plain = new AvonicList();
+        foreach (var item in RowItems(12))
+        {
+            plain.Items.Add(item);
+        }
+
+        var scroller = new ScrollViewer { Content = new StackPanel { Children = { inset, plain } } };
+        using var scene = new Scene(scroller, 390, 200);
+
+        inset.Items.Remove(divider);
+        Run();
+        plain.Items.Insert(0, divider);
+        Run();
+
+        Assert.Equal(0, ScrollTo(scroller, 100, divider));
+    });
+
+    [AvaloniaFact]
+    public void D16_Moving_Out_Of_A_Scroller_Ends_It() => Scrolling(() =>
+    {
+        var divider = new AvonicItemDivider { Sticky = true };
+        var list = new AvonicList { Items = { divider } };
+        foreach (var item in RowItems(12))
+        {
+            list.Items.Add(item);
+        }
+
+        var scroller = new ScrollViewer { Content = list };
+        var outside = new StackPanel();
+        using var scene = new Scene(new Grid { RowDefinitions = new("Auto,200"), Children = { outside, scroller } });
+        Grid.SetRow(scroller, 1);
+        Run();
+        Assert.Equal(0, ScrollTo(scroller, 100, divider));
+
+        list.Items.Remove(divider);
+        Run();
+        outside.Children.Add(divider);
+        Run();
+
+        Assert.Equal(0, divider.TranslatePoint(default, scene.Window)!.Value.Y);
+        Assert.Equal(0, Assert.IsType<TranslateTransform>(divider.RenderTransform).Y);
     });
 
     [AvaloniaFact]
@@ -672,6 +850,7 @@ public class AvonicItemDividerTests
         Run();
         Assert.Equal(-42, Top(divider, scroller));
         Assert.Equal(0, divider.ZIndex);
+        Assert.Null(divider.RenderTransform);
     });
 
     [AvaloniaFact]
@@ -789,6 +968,18 @@ public class AvonicItemDividerTests
         Run();
 
         Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void D18_A_ScrollViewers_Own_Presenter_Is_Left_Alone() => Scrolling(() =>
+    {
+        // It's a ContentPresenter too, and raising it would draw it over the scrollbars.
+        var divider = new AvonicItemDivider { Sticky = true };
+        var scroller = new ScrollViewer { Content = divider };
+        using var scene = new Scene(scroller, 390, 200);
+
+        Assert.Equal(0, Assert.IsAssignableFrom<Visual>(divider.GetVisualParent()).ZIndex);
+        Assert.Equal(100, divider.ZIndex);
     });
 
     [AvaloniaFact]

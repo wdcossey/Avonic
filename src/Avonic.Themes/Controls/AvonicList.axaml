@@ -22,8 +22,6 @@
         <!-- var(ion-item-background, var(ion-background-color, #fff)) -->
         <Setter Property="Background" Value="{DynamicResource Avonic.ItemBackgroundBrush}" />
         <Setter Property="Padding" Value="0,8,0,8" />
-        <!-- contain: content -->
-        <Setter Property="ClipToBounds" Value="True" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"

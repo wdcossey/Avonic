@@ -58,7 +58,9 @@ public class AvonicItemDivider : TemplatedControl
         AvaloniaProperty.Register<AvonicItemDivider, IDataTemplate?>(nameof(EndContentTemplate));
 
     private readonly TranslateTransform _stickyOffset = new();
+    private readonly List<AvonicList> _listsInTheWay = [];
     private Visual? _inParent;
+    private ScrollViewer? _scrollViewer;
     private IDisposable? _transformFrame;
     private IDisposable? _zIndexFrame;
 
@@ -146,10 +148,12 @@ public class AvonicItemDivider : TemplatedControl
         // An ItemsControl wraps templated content in a presenter as tall as the divider. In the DOM there's no such
         // box, so what's beside the divider, and what it has to be drawn above, is the presenter's.
         _inParent = this;
-        while (_inParent.GetVisualParent() is ContentPresenter presenter)
+        while (_inParent.GetVisualParent() is ContentPresenter { TemplatedParent: null } presenter)
         {
             _inParent = presenter;
         }
+
+        FindScrollport();
 
         // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.
         _transformFrame = SetValue(RenderTransformProperty, _stickyOffset, BindingPriority.Style);
@@ -166,7 +170,8 @@ public class AvonicItemDivider : TemplatedControl
         _zIndexFrame?.Dispose();
         _zIndexFrame = null;
         _inParent = null;
-        _stickyOffset.Y = 0;
+        _scrollViewer = null;
+        _listsInTheWay.Clear();
     }
 
     /// <summary>A scroll is a change of arrangement, so a layout pass is the one thing that follows every cause.</summary>
@@ -179,34 +184,60 @@ public class AvonicItemDivider : TemplatedControl
     private void UpdateStickyOffset()
     {
         var offset = 0.0;
-        if (_inParent?.GetVisualParent() is { } parent && FindScrollport() is { } scrollport &&
-            parent.TranslatePoint(new Point(0, _inParent.Bounds.Top), scrollport) is { } natural)
+        if (_inParent?.GetVisualParent() is { } parent && _scrollViewer is { } scrollViewer && !IsInAnInsetList())
         {
-            var toParentEnd = parent.Bounds.Height - _inParent.Bounds.Top - Bounds.Height;
-            offset = Math.Min(-natural.Y, toParentEnd);
-            offset = Math.Max(offset, 0);
+            // Bounds don't include this control's own transform, or its margin.
+            var top = Bounds.Top;
+            for (Visual? visual = this; visual != _inParent && visual is not null;)
+            {
+                visual = visual.GetVisualParent();
+                top += visual?.Bounds.Top ?? 0;
+            }
+
+            if (parent.TranslatePoint(new Point(0, top), scrollViewer) is { } natural)
+            {
+                // Measured: the border box reaches the top, whatever its margin, but the bottom margin stays in the parent.
+                var toParentEnd = parent.Bounds.Height - top - Bounds.Height - Margin.Bottom;
+                offset = Math.Min(-natural.Y, toParentEnd);
+                offset = Math.Max(offset, 0);
+            }
         }
 
         _stickyOffset.Y = offset;
     }
 
-    /// <summary>
-    /// The nearest thing that clips and scrolls. An inset list has <c>overflow: hidden</c>, so it's the divider's
-    /// scrollport, and it never scrolls. Measured: the divider just moves with the page.
-    /// </summary>
-    private Visual? FindScrollport()
+    /// <summary>What scrolls, and the lists before it, once per attach, because the offset runs on every layout pass.</summary>
+    private void FindScrollport()
     {
         foreach (var ancestor in this.GetVisualAncestors())
         {
-            switch (ancestor)
+            if (ancestor is ScrollViewer scrollViewer)
             {
-                case AvonicList { Inset: true }:
-                    return null;
-                case ScrollViewer scrollViewer:
-                    return (Visual?)scrollViewer.Presenter ?? scrollViewer;
+                _scrollViewer = scrollViewer;
+                return;
+            }
+
+            if (ancestor is AvonicList list)
+            {
+                _listsInTheWay.Add(list);
+            }
+        }
+    }
+
+    /// <summary>
+    /// An inset list has <c>overflow: hidden</c>, so it's the divider's scrollport, and it never scrolls. Measured:
+    /// the divider just moves with the page.
+    /// </summary>
+    private bool IsInAnInsetList()
+    {
+        foreach (var list in _listsInTheWay)
+        {
+            if (list.Inset)
+            {
+                return true;
             }
         }
 
-        return null;
+        return false;
     }
 }

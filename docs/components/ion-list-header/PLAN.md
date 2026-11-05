@@ -42,7 +42,7 @@ Each becomes a test.
 
 | # | Behaviour | Source |
 |---|---|---|
-| 1 | 45 high at least, 16 of padding at the start and none at the end, text 14 and normal, centred, black on transparent | `list-header.md.css`; measured `h1` |
+| 1 | 45 high at least, 16 of padding at the start and none at the end, text 14 with its weight inherited, centred, black on transparent | `list-header.md.css`; measured `h1` |
 | 2 | `Lines`: none by default, full draws the outer border and makes the host 46 with a 45 inner, inset draws the inner border in 45, and none has neither, beating the tokens. A list's `Lines` doesn't reach it | measured `h-full`, `h-inset`, `h-none`, `a3h` |
 | 3 | Both borders are `Avonic.ItemBorderColorBrush`, even in a colour, with no shade | measured `h-col`, `h-col2`: `rgba(0, 0, 0, 0.13)` |
 | 4 | `Color` paints base and contrast. The translucent border shows the background through it. An unknown colour is transparent, and the text inherits | measured `h-col`, `h-bad` |

@@ -15,8 +15,9 @@
         <Setter Property="Margin" Value="16,0,0,0" />
     </Style>
 
-    <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.7142857143em } -->
-    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.7142857143em }, and a panel
+         standing for the slot. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > c|AvonicIcon">
         <Setter Property="Foreground" Value="{DynamicResource Avonic.ItemIconBrush}" />
         <Setter Property="FontSize">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.7142857142857142">
@@ -26,7 +27,7 @@
     </Style>
 
     <!-- :host(.ion-color) ::slotted(ion-icon). An unknown colour makes it invalid, so it inherits the host's. -->
-    <Style Selector="c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <Style Selector="c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItemDivider:ion-color /template/ ContentPresenter > :is(Panel) > c|AvonicIcon">
         <Setter Property="Foreground" Value="{Binding $parent[c:AvonicItemDivider].Foreground}" />
     </Style>
 
@@ -60,7 +61,6 @@
 
     <!-- A divider has the class "item", so label.md.css's :host-context(.item) applies. See Label.axaml. -->
     <Style Selector="c|AvonicItemDivider c|AvonicLabel">
-        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Label.Color" />
