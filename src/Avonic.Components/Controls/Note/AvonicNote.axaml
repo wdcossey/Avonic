@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:c="using:Avonic.Components.Controls">
 
-    <!-- ion-note: structure only. The look is in Avonic.Themes. It's as wide as its text, as inline text and a flex
+    <!-- ion-note: structure only. The look is in Avonic.Themes/Styles/Note.axaml. It's as wide as its text, as inline text and a flex
          item both are, and the text wraps. The transparent background makes the whole box take input, because a
          tap on a note's padding hits the note. -->
     <ControlTheme x:Key="{x:Type c:AvonicNote}" TargetType="c:AvonicNote">
@@ -15,7 +15,12 @@
             <ControlTemplate>
                 <ContentPresenter Name="PART_ContentPresenter"
                                   Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
                                   Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                   Content="{TemplateBinding Content}"
                                   ContentTemplate="{TemplateBinding ContentTemplate}" />
             </ControlTemplate>

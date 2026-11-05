@@ -306,6 +306,11 @@ public class AvonicNoteTests
         Assert.Equal(0, Box(start, itemStart).Y);
         Assert.Equal(0, Box(main, itemMain).Y);
         Assert.Equal(0, Box(end, itemEnd).Y);
+
+        // Measured 40, 12 and 40 high in a row of 88: it's at the top, and it doesn't fill the row.
+        Assert.True(start.Bounds.Height < 50);
+        Assert.True(main.Bounds.Height < 25);
+        Assert.True(end.Bounds.Height < 50);
     });
 
     [AvaloniaFact]
@@ -329,8 +334,13 @@ public class AvonicNoteTests
         using var scene = InScene(item);
 
         Assert.Equal(0, Box(note, item).Y);
+        Assert.True(note.Bounds.Height < 50);
+
+        // Centred at their own height. A stretched TextBlock would be centred too, but with its text at the top.
         AssertCentred(other, item);
+        Assert.True(other.Bounds.Height < 25);
         AssertCentred(label, item);
+        Assert.True(label.Bounds.Height < 50);
     });
 
     [AvaloniaTheory]
@@ -345,6 +355,32 @@ public class AvonicNoteTests
 
         Assert.Equal(content.Bounds.Height, label.Bounds.Height);
         Assert.Equal(55, item.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B8_A_Vertical_Stack_Is_A_Group_The_Item_Centres() => InstalledTheme.Run(_ =>
+    {
+        var group = new StackPanel { Children = { new AvonicNote { Content = "x" }, new TextBlock { Text = "x" } } };
+        var item = new AvonicItem { Content = Tall(), EndContent = group };
+        using var scene = InScene(item);
+
+        Assert.True(group.Bounds.Height < item.Bounds.Height);
+        AssertCentred(group, item);
+    });
+
+    [AvaloniaFact]
+    public void B8_In_A_Textarea_Item_The_Rest_Of_A_Panel_Is_Not_Centred() => InstalledTheme.Run(_ =>
+    {
+        var note = new AvonicNote { Content = "x" };
+        var other = new TextBlock { Text = "x" };
+        var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { note, other } };
+        var item = new AvonicItem { Content = Tall(), EndContent = end };
+        using var scene = InScene(item);
+
+        note.RaiseEvent(new IonStyleEventArgs(new Dictionary<string, bool> { ["textarea"] = true }));
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(end.Bounds.Height, other.Bounds.Height);
     });
 
     [AvaloniaFact]
@@ -400,6 +436,24 @@ public class AvonicNoteTests
         using var scene = InScene(item);
 
         item.EndContent = other;
+        Dispatcher.UIThread.RunJobs();
+
+        AssertCentred(other, item);
+    });
+
+    [AvaloniaFact]
+    public void B8_Notes_Taken_Out_While_The_Item_Is_Off_Screen_Leave_It_Centred() => InstalledTheme.Run(_ =>
+    {
+        var other = new TextBlock { Text = "x", VerticalAlignment = VerticalAlignment.Top };
+        var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { new AvonicNote { Content = "x" }, new AvonicNote { Content = "x" }, other } };
+        var item = new AvonicItem { Content = Tall(), EndContent = end };
+        var root = new StackPanel { Children = { item } };
+        using var scene = new Scene(root);
+
+        root.Children.Remove(item);
+        Dispatcher.UIThread.RunJobs();
+        end.Children.RemoveRange(0, 2);
+        root.Children.Add(item);
         Dispatcher.UIThread.RunJobs();
 
         AssertCentred(other, item);
@@ -477,8 +531,9 @@ public class AvonicNoteTests
         var item = new AvonicItem { Content = main };
         using var scene = InScene(alone, item);
 
-        Assert.Equal(Text(alone).Bounds.Width, alone.Bounds.Width);
-        Assert.Equal(Text(main).Bounds.Width, main.Bounds.Width);
+        // Its TextBlock would stretch with it, so this has to be against the row.
+        Assert.True(alone.Bounds.Width < 30);
+        Assert.True(main.Bounds.Width < 30);
         Assert.Equal(new Point(16, 0), Box(main, item).TopLeft);
     });
 
@@ -489,7 +544,7 @@ public class AvonicNoteTests
         var wrap = new AvonicNote { Content = Long };
         using var scene = InScene(hug, wrap);
 
-        Assert.Equal(Text(hug).Bounds.Width, hug.Bounds.Width);
+        Assert.True(hug.Bounds.Width < 30);
         Assert.True(Text(wrap).Bounds.Height > Text(hug).Bounds.Height);
     }
 
@@ -538,6 +593,30 @@ public class AvonicNoteTests
         Assert.False(note.ClipToBounds);
     }
 
+    // ── 15. white-space inherits from a label ────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B15_In_A_Nowrap_Label_It_Is_One_Line_With_An_Ellipsis() => InstalledTheme.Run(_ =>
+    {
+        var note = new AvonicNote { Content = Long };
+        var label = new AvonicLabel { Content = new StackPanel { Children = { note } }, Classes = { "ion-text-nowrap" } };
+        var one = new AvonicNote { Content = "x" };
+        using var scene = InScene(new AvonicItem { Content = label }, new AvonicItem { Content = new AvonicLabel { Content = one } });
+
+        Assert.Equal(TextWrapping.NoWrap, Text(note).TextWrapping);
+        Assert.Equal(TextTrimming.CharacterEllipsis, Text(note).TextTrimming);
+        Assert.Equal(one.Bounds.Height, note.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B15_In_A_Plain_Label_It_Wraps() => InstalledTheme.Run(_ =>
+    {
+        var note = new AvonicNote { Content = Long };
+        using var scene = InScene(new AvonicItem { Content = new AvonicLabel { Content = note } });
+
+        Assert.Equal(TextWrapping.Wrap, Text(note).TextWrapping);
+    });
+
     // ── 12. Taps ─────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -571,6 +650,22 @@ public class AvonicNoteTests
     }
 
     [AvaloniaFact]
+    public void B12_A_Tap_Beside_Or_Below_A_Note_In_The_Default_Slot_Forwards() => InstalledTheme.Run(_ =>
+    {
+        var control = new Stub(ItemControlType.Toggle) { Height = 20 };
+        var note = new AvonicNote { Content = "note" };
+        var item = new AvonicItem { StartContent = control, Content = note };
+        using var scene = InScene(item);
+        var box = Box(note, scene.Window);
+
+        Tap(scene, new Point(box.Right + 20, box.Center.Y));
+        Assert.Equal(1, control.ItemTaps);
+
+        Tap(scene, new Point(box.Center.X, box.Bottom + 10));
+        Assert.Equal(2, control.ItemTaps);
+    });
+
+    [AvaloniaFact]
     public void B12_A_Tap_On_The_Items_Padding_Forwards() => InstalledTheme.Run(_ =>
     {
         var control = new Stub(ItemControlType.Toggle) { Height = 20 };
@@ -592,6 +687,29 @@ public class AvonicNoteTests
 
         Assert.Equal("From a template", Text(note).Text);
     });
+
+    [AvaloniaFact]
+    public void The_Stub_Passes_On_What_A_ContentControl_Has()
+    {
+        var brush = new SolidColorBrush(Token);
+        var note = new AvonicNote
+        {
+            Content = "x",
+            BorderBrush = brush,
+            BorderThickness = new Thickness(3),
+            CornerRadius = new CornerRadius(4),
+            HorizontalContentAlignment = HorizontalAlignment.Right,
+            VerticalContentAlignment = VerticalAlignment.Bottom,
+        };
+        using var scene = InScene(note);
+
+        var presenter = Assert.IsType<Avalonia.Controls.Presenters.ContentPresenter>(Text(note).GetVisualParent());
+        Assert.Same(brush, presenter.BorderBrush);
+        Assert.Equal(new Thickness(3), presenter.BorderThickness);
+        Assert.Equal(new CornerRadius(4), presenter.CornerRadius);
+        Assert.Equal(HorizontalAlignment.Right, presenter.HorizontalContentAlignment);
+        Assert.Equal(VerticalAlignment.Bottom, presenter.VerticalContentAlignment);
+    }
 
     [AvaloniaFact]
     public void The_Stub_Uses_The_Content_Template()

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avonic.Components.Behaviors;
 
@@ -8,7 +9,7 @@ namespace Avonic.Components.Controls;
 
 /// <summary>
 /// Ionic <c>ion-note</c>: a small piece of text, usually at the end of an <see cref="AvonicItem"/>. Its look is in
-/// the theme's <c>Controls/AvonicNote.axaml</c> and <c>Styles/Note.axaml</c>.
+/// the theme's <c>Styles/Note.axaml</c>.
 /// </summary>
 public class AvonicNote : ContentControl
 {
@@ -31,8 +32,9 @@ public class AvonicNote : ContentControl
     {
         base.OnAttachedToLogicalTree(e);
 
-        // A slot holds one child, so a panel directly in it stands for the slot.
-        var parent = Parent is Panel panel ? panel.Parent : Parent;
+        // A slot holds one child, so a panel directly in it stands for the slot. A slot is a row, though, so a vertical
+        // stack is a group of its own, which the item centres as Ionic does a column in a <div slot="end">.
+        var parent = Parent is Panel panel and not StackPanel { Orientation: Orientation.Vertical } ? panel.Parent : Parent;
         if (parent is ContentPresenter { TemplatedParent: AvonicItem } slot)
         {
             _slot = slot;

@@ -48,7 +48,8 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **It's as wide as its text,** and a tap on it doesn't reach the item's first control.
 
 A slot holds one control, so a panel directly in a slot stands for the slot: a note in it is slotted too, and the rest of
-the panel stays centred. Wrap a note in a `Border` to get what `<div slot="end"><ion-note>` does in Ionic: 14 px and centred.
+the panel stays centred. A vertical `StackPanel` there is centred as a group. Wrap a note in a `Border` to get what
+`<div slot="end"><ion-note>` does in Ionic: 14 px and centred.
 
 ## Known gaps
 

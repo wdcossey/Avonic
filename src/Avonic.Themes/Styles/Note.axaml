@@ -1,12 +1,53 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
         xmlns:c="using:Avonic.Components.Controls">
 
-    <!-- item.md.css's rules for notes. A slot holds one child, so a panel directly in it stands for the slot. The
-         margin: 0 of ::slotted(ion-note) needs no rule: it loses to ::slotted([slot=end]), which is in Item.axaml,
-         and the default slot has no margin. -->
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicNote Content="A note" />
+            <c:AvonicNote Color="danger" Content="A danger note" />
+            <c:AvonicItem Content="In an item">
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="Yesterday" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
 
-    <!-- ::slotted(ion-note). 0.6875rem doesn't depend on the item's size. align-self: flex-start is the rest of it. -->
+    <!-- A translation of note.md.css and item.md.css's rules for notes. The template is the stub's. It's all here,
+         in one file, as ion-label's is, so that the slotted size visibly comes after the default. -->
+
+    <!-- :host, with color: var(color), which is var(ion-text-color-step-400), and font-size: 0.875rem -->
+    <Style Selector="c|AvonicNote">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Note.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep400Brush" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so it inherits. -->
+    <Style Selector="c|AvonicNote:ion-color">
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- white-space inherits from a label's .ion-text-nowrap. The stub's Wrap would otherwise stop it. -->
+    <Style Selector="c|AvonicLabel.ion-text-nowrap c|AvonicNote">
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- ::slotted(ion-note). A slot holds one child, so a panel directly in it stands for the slot. The margin: 0
+         needs no rule: it loses to ::slotted([slot=end]), which is in Item.axaml, and the default slot has no margin.
+         0.6875rem doesn't depend on the item's size. align-self: flex-start is the rest of it. -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicNote, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicNote">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="VerticalAlignment" Value="Top" />
@@ -23,9 +64,9 @@
         <Setter Property="VerticalAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
-    <!-- Beside a note in a panel, everything else is still centred, which is align-items: center. Beside a stacked or
-         floating label it's align-items: start, and a stacked or floating label has to fill the panel. -->
-    <Style Selector="c|AvonicItem:not(:item-label-stacked):not(:item-label-floating) /template/ ContentPresenter:has-note > :is(Panel) > :is(Control):not(c|AvonicNote)">
+    <!-- Beside a note in a panel, everything else is still centred, which is align-items: center. It isn't in a stacked,
+         floating or textarea item, where it's start or stretch, and the other rules for those have to apply. -->
+    <Style Selector="c|AvonicItem:not(:item-label-stacked):not(:item-label-floating):not(:item-textarea) /template/ ContentPresenter:has-note > :is(Panel) > :is(Control):not(c|AvonicNote)">
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 

@@ -368,7 +368,9 @@ public class AvonicTextTests
 
         AssertCentred(text, item);
         Assert.Equal(16, Box(text, item).X);
-        Assert.Equal(Text(text).Bounds.Width, text.Bounds.Width);
+
+        // Its TextBlock would stretch with it, so this has to be against the row.
+        Assert.True(text.Bounds.Width < 30);
     });
 
     [AvaloniaFact]
@@ -377,7 +379,7 @@ public class AvonicTextTests
         var text = new AvonicText { Content = "x" };
         using var scene = InScene(text);
 
-        Assert.Equal(Text(text).Bounds.Width, text.Bounds.Width);
+        Assert.True(text.Bounds.Width < 30);
     }
 
     // ── 9. Long text ─────────────────────────────────────────────────────────────────────────
@@ -421,6 +423,41 @@ public class AvonicTextTests
         Assert.Equal(14, span.FontSize);
         Assert.Equal(Danger, SpanColor(span));
         Assert.Equal(Grey, SpanColor(plain));
+    });
+
+    // ── 14. white-space inherits from a label ────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B14_In_A_Nowrap_Label_It_Is_One_Line_With_An_Ellipsis() => InstalledTheme.Run(_ =>
+    {
+        var text = new AvonicText { Content = Long };
+        var label = new AvonicLabel { Content = new StackPanel { Children = { text } }, Classes = { "ion-text-nowrap" } };
+        var one = new AvonicText { Content = "x" };
+        using var scene = InScene(new AvonicItem { Content = label }, new AvonicItem { Content = new AvonicLabel { Content = one } });
+
+        Assert.Equal(TextWrapping.NoWrap, Text(text).TextWrapping);
+        Assert.Equal(TextTrimming.CharacterEllipsis, Text(text).TextTrimming);
+        Assert.Equal(one.Bounds.Height, text.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B14_In_A_Plain_Label_It_Wraps() => InstalledTheme.Run(_ =>
+    {
+        var text = new AvonicText { Content = Long };
+        using var scene = InScene(new AvonicItem { Content = new AvonicLabel { Content = text } });
+
+        Assert.Equal(TextWrapping.Wrap, Text(text).TextWrapping);
+    });
+
+    [AvaloniaFact]
+    public void B14_A_Span_In_A_Nowrap_Label_Follows_Its_TextBlock() => InstalledTheme.Run(_ =>
+    {
+        var block = Block(Word(Long), Span("danger", Word(Long)));
+        var label = new AvonicLabel { Content = block, Classes = { "ion-text-nowrap" } };
+        using var scene = InScene(new AvonicItem { Content = label });
+
+        Assert.Equal(TextWrapping.NoWrap, block.TextWrapping);
+        Assert.Equal(TextTrimming.CharacterEllipsis, block.TextTrimming);
     });
 
     // ── 11. Taps ─────────────────────────────────────────────────────────────────────────────
@@ -500,6 +537,29 @@ public class AvonicTextTests
     });
 
     // ── The default slot's other property ────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void The_Box_Passes_On_What_A_ContentControl_Has()
+    {
+        var brush = new SolidColorBrush(Danger);
+        var text = new AvonicText
+        {
+            Content = "x",
+            BorderBrush = brush,
+            BorderThickness = new Thickness(3),
+            CornerRadius = new CornerRadius(4),
+            HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
+        };
+        using var scene = InScene(text);
+
+        var presenter = Assert.IsType<Avalonia.Controls.Presenters.ContentPresenter>(Text(text).GetVisualParent());
+        Assert.Same(brush, presenter.BorderBrush);
+        Assert.Equal(new Thickness(3), presenter.BorderThickness);
+        Assert.Equal(new CornerRadius(4), presenter.CornerRadius);
+        Assert.Equal(Avalonia.Layout.HorizontalAlignment.Right, presenter.HorizontalContentAlignment);
+        Assert.Equal(Avalonia.Layout.VerticalAlignment.Bottom, presenter.VerticalContentAlignment);
+    }
 
     [AvaloniaFact]
     public void The_Box_Uses_The_Content_Template()

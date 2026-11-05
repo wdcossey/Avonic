@@ -26,7 +26,7 @@ places here.
 ## Found here, not by the tests
 
 Nothing in the frames needed a fix. A test did find the automation gap below, because I'd assumed `TextBlock.Text` holds
-the words of its inlines. It's empty.
+the words of its inlines. It's empty. Code review found the stub's `Wrap` stopping `.ion-text-nowrap`, which is fixed.
 
 ## Behaviours
 
@@ -48,6 +48,7 @@ types where both apply.
 | 11 | A tap on it doesn't forward, and a tap beside it does | | match, against a stub toggle |
 | 12 | A button item's name includes its text | native `<button>` | match for `AvonicText`. **Gap** for words in inlines. See the plan |
 | 13 | A change of `Color` repaints | `reflect` | match, and the span's checked in pixels |
+| 14 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with `.ion-text-nowrap` on the label only. See the plan |
 
 ## Deliberate differences and known gaps
 

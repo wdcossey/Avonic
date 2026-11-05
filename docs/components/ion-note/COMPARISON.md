@@ -33,6 +33,11 @@ and RTL.
 Nothing in the frames needed a fix. The measurements did change the design before any code: without them, I'd have
 treated `align-self: flex-start` as `VerticalAlignment="Top"`, which does nothing in a centred presenter.
 
+Breaking each behaviour on purpose found tests that couldn't fail: a stretched `TextBlock` has the same centre and the same
+width as its parent, so "centred" and "as wide as its text" passed with the rules gone. The tests now check sizes too.
+Code review found the stub's `Wrap` stopping `.ion-text-nowrap`, measured it, and fixed it, along with a vertical stack
+sitting at the top of the row.
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNoteTests`, named after its number.
@@ -53,6 +58,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNot
 | 12 | A tap on it doesn't forward, even on its padding, and a tap on the item's padding does | toggle stays off, then flips | match, against a stub toggle |
 | 13 | A button item's name includes its text | native `<button>` | match |
 | 14 | RTL | an end note at x = 16, with its margin on the right | match |
+| 15 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with `.ion-text-nowrap` on the label only. See the plan |
 
 ## Deliberate differences and known gaps
 

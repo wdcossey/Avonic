@@ -1,0 +1,19 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicItem Width="390">
+            <c:AvonicLabel Classes="ion-text-nowrap">
+                <c:AvonicText Color="danger" Content="One line in a label, with an ellipsis if it's far too long to fit in" />
+            </c:AvonicLabel>
+        </c:AvonicItem>
+    </Design.PreviewWith>
+
+    <!-- text.css itself is in the stub. This is only how it meets ion-label, which is in the theme: white-space inherits
+         from a label's .ion-text-nowrap, and the stub's Wrap would otherwise stop it. -->
+    <Style Selector="c|AvonicLabel.ion-text-nowrap c|AvonicText">
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+    </Style>
+
+</Styles>
