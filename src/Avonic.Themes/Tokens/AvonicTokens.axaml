@@ -6,8 +6,8 @@
         (`‐‐ion-color-primary` → Avonic.Color.Primary; `‐‐inner-padding-start` on ion-item →
         Avonic.Item.InnerPaddingStart). Values are Ionic's md defaults.
 
-        Keys are added by the control that introduces them, in its own PR.
-        ion-ripple-effect introduces none (it has no CSS variables).
+        Each control adds its own Tokens/<Name>.axaml, which is discovered automatically, rather
+        than editing this file. ion-ripple-effect introduces none (it has no CSS variables).
     -->
 
 </ResourceDictionary>

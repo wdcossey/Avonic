@@ -1,16 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avonic.Sample.Pages;
 
 namespace Avonic.Sample;
 
 public partial class MainWindow : Window
 {
-    /// <summary>One entry per Avonic control, in roadmap order.</summary>
-    private static readonly (string Title, Func<Control> Create)[] Pages =
-    [
-        ("ion-ripple-effect", () => new RippleEffectPage()),
-    ];
+    /// <summary>One entry per Avonic control, marked with <see cref="SamplePageAttribute"/>.</summary>
+    private static readonly IReadOnlyList<SamplePageEntry> Pages =
+        SamplePageCatalog.Discover(typeof(MainWindow).Assembly);
 
     public MainWindow()
     {

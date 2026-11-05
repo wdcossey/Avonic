@@ -1,0 +1,35 @@
+<Project>
+
+  <!--
+    Auto-discovery of compiled XAML (docs/infra/auto-discovery). A project declares
+    AvonicDiscoveredXaml globs and gets an internal XamlManifest.Paths listing those files, so a
+    control adds its own .axaml and never edits a shared registration.
+
+    AssetLoader.GetAssets cannot do this: compiled .axaml is not in the asset index.
+
+    Deliberately no Inputs/Outputs, so added and deleted files are always seen.
+    WriteOnlyWhenDifferent keeps the build incremental. Runs before BeforeCompile so the compiler's
+    dependency cache sees the generated file.
+  -->
+  <Target Name="GenerateAvonicXamlManifest"
+          BeforeTargets="BeforeCompile"
+          Condition="'@(AvonicDiscoveredXaml)' != ''">
+
+    <PropertyGroup>
+      <_AvonicXamlManifestFile>$(IntermediateOutputPath)XamlManifest.g.cs</_AvonicXamlManifestFile>
+      <!-- Windows globs yield backslashes: invalid C# escapes and wrong avares:// URIs. -->
+      <_AvonicXamlManifestPaths>@(AvonicDiscoveredXaml->Replace('\', '/')->'"%(Identity)"', ', ')</_AvonicXamlManifestPaths>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(_AvonicXamlManifestFile)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true"
+                      Lines="// &lt;auto-generated /&gt;;namespace $(RootNamespace)%3B;internal static class XamlManifest { internal static readonly string[] Paths = [$(_AvonicXamlManifestPaths)]%3B }" />
+
+    <ItemGroup>
+      <Compile Include="$(_AvonicXamlManifestFile)" />
+      <FileWrites Include="$(_AvonicXamlManifestFile)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
