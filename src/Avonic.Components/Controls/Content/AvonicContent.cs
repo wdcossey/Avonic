@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -7,7 +6,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Metadata;
@@ -85,6 +83,14 @@ public class AvonicContent : TemplatedControl
     public static readonly StyledProperty<bool> ScrollYProperty =
         AvaloniaProperty.Register<AvonicContent, bool>(nameof(ScrollY), true);
 
+    /// <summary>
+    /// Ionic <c>--keyboard-offset</c>: added to the bottom padding, on top of whatever
+    /// <see cref="TemplatedControl.Padding"/> is. The theme sets it from a token. An extension, because in Ionic it's
+    /// only a variable.
+    /// </summary>
+    public static readonly StyledProperty<double> KeyboardOffsetProperty =
+        AvaloniaProperty.Register<AvonicContent, double>(nameof(KeyboardOffset));
+
     /// <summary>Ionic <c>ionScrollStart</c>.</summary>
     public static readonly RoutedEvent<ScrollBaseDetailEventArgs> IonScrollStartEvent =
         RoutedEvent.Register<AvonicContent, ScrollBaseDetailEventArgs>(nameof(IonScrollStart), RoutingStrategies.Bubble);
@@ -97,12 +103,6 @@ public class AvonicContent : TemplatedControl
     public static readonly RoutedEvent<ScrollBaseDetailEventArgs> IonScrollEndEvent =
         RoutedEvent.Register<AvonicContent, ScrollBaseDetailEventArgs>(nameof(IonScrollEnd), RoutingStrategies.Bubble);
 
-    /// <summary>
-    /// <c>--padding-start</c>, <c>-top</c>, <c>-end</c>, <c>-bottom</c> and <c>--keyboard-offset</c>, as this control's
-    /// <see cref="TemplatedControl.Padding"/>: the keyboard offset adds to the bottom, as in
-    /// <c>calc(var(--padding-bottom) + var(--keyboard-offset))</c>.
-    /// </summary>
-    public static readonly IMultiValueConverter PaddingConverter = new ContentPaddingConverter();
 
     private Control? _background;
     private ScrollViewer? _scroll;
@@ -191,6 +191,13 @@ public class AvonicContent : TemplatedControl
         set => SetValue(FullscreenProperty, value);
     }
 
+    /// <inheritdoc cref="KeyboardOffsetProperty"/>
+    public double KeyboardOffset
+    {
+        get => GetValue(KeyboardOffsetProperty);
+        set => SetValue(KeyboardOffsetProperty, value);
+    }
+
     /// <inheritdoc cref="ScrollEventsProperty"/>
     public bool ScrollEvents
     {
@@ -272,6 +279,8 @@ public class AvonicContent : TemplatedControl
     {
         if (await WaitForScrollElement() is { } element)
         {
+            // Reading scrollTop makes a browser lay out, so content that changed just now counts.
+            element.UpdateLayout();
             await ScrollToPoint(x + element.Offset.X, y + element.Offset.Y, duration);
         }
     }
@@ -442,7 +451,7 @@ public class AvonicContent : TemplatedControl
         {
             UpdateOverscroll();
         }
-        else if (change.Property == PaddingProperty)
+        else if (change.Property == PaddingProperty || change.Property == KeyboardOffsetProperty)
         {
             UpdateInsets();
         }
@@ -466,6 +475,10 @@ public class AvonicContent : TemplatedControl
         _frame = null;
         _queued = false;
         OnScrollEnd();
+
+        // Removed before its first layout: a scroll that was waiting for one has nothing left to wait for.
+        _loaded?.TrySetResult();
+        _loaded = null;
     }
 
     private void OnScrollPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -525,7 +538,7 @@ public class AvonicContent : TemplatedControl
         var padding = Padding;
         _container?.SetCurrentValue(
             ContentPresenter.PaddingProperty,
-            new Thickness(padding.Left, padding.Top + _offsetTop, padding.Right, padding.Bottom + _offsetBottom));
+            new Thickness(padding.Left, padding.Top + _offsetTop, padding.Right, padding.Bottom + KeyboardOffset + _offsetBottom));
     }
 
     /// <summary>
@@ -762,11 +775,5 @@ public class AvonicContent : TemplatedControl
         public double StartX, StartY, StartTime, CurrentX, CurrentY, VelocityX, VelocityY, CurrentTime;
     }
 
-    private sealed class ContentPaddingConverter : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
-            values is [double start, double top, double end, double bottom, double keyboard]
-                ? new Thickness(start, top, end, bottom + keyboard)
-                : AvaloniaProperty.UnsetValue;
-    }
+
 }

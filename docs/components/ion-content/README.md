@@ -98,7 +98,7 @@ CSS does. Its own `HorizontalAlignment` and `VerticalAlignment` beat that, and a
 | [x] | `--background` | `Avonic.Content.Background` | Unset, so `Avonic.BackgroundColorBrush` |
 | [x] | `--color` | `Avonic.Content.Color` | Unset, so `Avonic.TextColorBrush`. Not read by the fixed slot |
 | [x] | `--padding-start`, `-end`, `-top`, `-bottom` | `Avonic.Content.PaddingStart`, `…End`, `…Top`, `…Bottom` | 0 |
-| [x] | `--keyboard-offset` | `Avonic.Content.KeyboardOffset` | 0. Adds to the bottom padding |
+| [x] | `--keyboard-offset` | `Avonic.Content.KeyboardOffset` | 0. Adds to the bottom padding, through the `KeyboardOffset` extension |
 | [ ] | `--offset-top`, `--offset-bottom` | — | Not applicable: Ionic overwrites them inline, so a value does nothing. `Fullscreen` sets them |
 | [x] | `--ion-safe-area-top`, `-bottom`, `-left`, `-right` | `Avonic.SafeAreaTop`, `…Bottom`, `…Left`, `…Right` | 0, because Avalonia pads its root view by the safe area itself. Not read by this control, as `content.css` doesn't |
 
@@ -117,4 +117,4 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours).
 
 ## Extensions
 
-None. `GetScrollElement()` returns an Avalonia `ScrollViewer`, as Ionic's returns an element, and `Padding` is `TemplatedControl`'s.
+- **`KeyboardOffset`** (`double`): what `--keyboard-offset` sets, as a property, so that `Padding` on the control doesn't lose it. The token sets it.

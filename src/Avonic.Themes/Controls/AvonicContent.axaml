@@ -19,16 +19,16 @@
     <ControlTheme x:Key="{x:Type c:AvonicContent}" TargetType="c:AvonicContent">
         <!-- font-family: var(ion-font-family, inherit) -->
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
-        <!-- The four padding variables, and the keyboard offset, which adds to the bottom. -->
+        <!-- The four padding variables. The control puts them inside the scroll part, as .inner-scroll has them. -->
         <Setter Property="Padding">
-            <MultiBinding Converter="{x:Static c:AvonicContent.PaddingConverter}">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
                 <DynamicResource ResourceKey="Avonic.Content.PaddingStart" />
                 <DynamicResource ResourceKey="Avonic.Content.PaddingTop" />
                 <DynamicResource ResourceKey="Avonic.Content.PaddingEnd" />
                 <DynamicResource ResourceKey="Avonic.Content.PaddingBottom" />
-                <DynamicResource ResourceKey="Avonic.Content.KeyboardOffset" />
             </MultiBinding>
         </Setter>
+        <Setter Property="KeyboardOffset" Value="{DynamicResource Avonic.Content.KeyboardOffset}" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel>

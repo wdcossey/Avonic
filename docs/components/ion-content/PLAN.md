@@ -62,7 +62,7 @@ Internal, with no Avonic member: `recalculateDimensions` and `getBackgroundEleme
 |---|---|---|---|---|
 | [x] | `--background` | `Avonic.Content.Background` | brush | Unset → `Avonic.BackgroundColorBrush` |
 | [x] | `--color` | `Avonic.Content.Color` | brush | Unset → `Avonic.TextColorBrush` |
-| [x] | `--keyboard-offset` | `Avonic.Content.KeyboardOffset` | `double` | 0 |
+| [x] | `--keyboard-offset` | `Avonic.Content.KeyboardOffset` | `double` | 0. Sets the `KeyboardOffset` extension |
 | [x] | `--padding-bottom` | `Avonic.Content.PaddingBottom` | `double` | 0 |
 | [x] | `--padding-end` | `Avonic.Content.PaddingEnd` | `double` | 0 |
 | [x] | `--padding-start` | `Avonic.Content.PaddingStart` | `double` | 0 |
@@ -99,8 +99,8 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 4 | `Color` paints the scroll part, base and contrast, and the background part stays. It beats `--color` | `:host(.ion-color) .inner-scroll`; measured `p`, `vp` |
 | 5 | An unknown `Color`: no background and the host's text colour, or a coloured ancestor's. It still takes input | measured `bad`, `in`; `var()` invalid at computed time |
 | 6 | The fixed slot keeps what the host inherits: `--color` and `Color` are on the scroll part | measured `pf`, `vf`, `gf` |
-| 7 | Padding moves and narrows the content, scrolls with it and counts in the extent. The keyboard offset adds to the bottom. RTL mirrors it | `.inner-scroll`; measured `pa`, `pb`, `kb`, `rtl` |
-| 8 | Long text wraps to the width | measured `fitc` |
+| 7 | Padding moves and narrows the content, scrolls with it and counts in the extent. The keyboard offset adds to the bottom, whatever sets the padding. RTL mirrors it | `.inner-scroll`; measured `pa`, `pb`, `kb`, `rtl` |
+| 8 | Long text wraps to the width. A `TextBox` stays on one line unless it asks to wrap | measured `fitc`; an `<input>` |
 | 9 | A child is as high as its content, unless it says otherwise | block flow; measured `blkc` 18 |
 | 10 | The wheel moves only the axes that are on, and they can change at runtime | `.scroll-x`, `.scroll-y`; measured `y`, `nn`, `xx`, `xo` |
 | 11 | At its limit it keeps the wheel. If it fits, or with `ScrollY` off, it passes it on | `overscroll-behavior: contain`; measured `nested` |
@@ -144,7 +144,7 @@ With no duration, once loaded, the task is already finished and the offset alrea
 
 **Before the first layout a scroll waits for `Loaded`,** because Avalonia limits an offset by the last layout, which would lose it.
 Ionic's waits too: measured `before attached`, not finished until it's in the page, then at 100. After that the control doesn't wait
-again, so a removed control's task finishes.
+again, and removing it before it loads finishes a waiting task, so a removed control's task finishes.
 
 **A scroll lays out first,** with `UpdateLayout()`. In a browser, reading `scrollHeight` or setting `scrollTop` forces layout. Without this,
 adding content and calling `ScrollToBottom()` goes to the old end. Measured `added then bottom`: 1300 in Ionic.
@@ -164,10 +164,15 @@ scroller's limit and the outer scroller takes the drag, as a test found, where m
 **`ClipToBounds` is off on the host,** in the control. Avalonia clips by default, which silently stopped `Fullscreen` painting or
 taking input outside the host while its layout tests passed. A hit test found it.
 
-**Padding is the control's `Padding` property.** The theme sets it from the tokens with `AvonicContent.PaddingConverter`, which adds the
-keyboard offset, as `Css.Box` has four values and this has five. The control adds `Fullscreen`'s offsets and puts the result on
-`PART_Container`. It's inside the scroll part, because CSS padding on a scroller scrolls with the content and counts in its extent, measured `pb`. So
-`Padding="16"` on a control also works, in place of `.ion-padding`, which the colour system's plan says isn't planned.
+**Padding is the control's `Padding` property.** The theme sets it from the tokens with `Css.Box`. The control adds the keyboard offset and
+`Fullscreen`'s offsets and puts the result on `PART_Container`. It's inside the scroll part, because CSS padding on a scroller scrolls with
+the content and counts in its extent, measured `pb`. So `Padding="16"` on a control also works, in place of `.ion-padding`, which the colour
+system's plan says isn't planned. The keyboard offset is its own property, an extension, so a local `Padding` doesn't lose it.
+
+**A text box stays on one line.** `TextBlock.TextWrapping` inherits, and it's on for text, as CSS wraps. A `TextBox` shares the property, so without
+`c|AvonicContent TextBox` in `Styles/Content.axaml` every single-line field in a page would wrap and grow. It's a descendant selector, which the project
+avoids for common types, because it walks ancestors on attach. A text box is rare next to a `TextBlock`, and I haven't measured the cost. It's only in the
+theme, because a stub's `ControlTheme` can't reach a descendant. `AvonicItem` has the same inherited wrap.
 
 **Behaviour's in the control, at style priority where a child is involved.** A child's `VerticalAlignment` is `Top`, and a fixed child's alignments are
 `Left` and `Top`, set with `SetValue(..., BindingPriority.Style)`, and those frames are disposed when the child goes. An app's own value beats them.
@@ -190,6 +195,10 @@ scroller at its limit keeps the wheel, and one that fits doesn't.
 - **`Avonic.SafeAreaTop`, `Avonic.SafeAreaBottom`, `Avonic.SafeAreaLeft` and `Avonic.SafeAreaRight`** for `header.md.css`, `footer.md.css` and `toolbar.md.css`.
 - **`GetScrollElement()`** for what `header.js` and `footer.js` do with `findIonContent`, though the fade and condense paths are iOS-only.
 - **A class `ion-page` on the page** if there's a wrapper between it and the content. The parent is the page otherwise.
+
+### Extensions
+
+- **`KeyboardOffset`**, a property the token sets, so that a local `Padding` doesn't lose it, and a keyboard utility has somewhere to write.
 
 ## Deliberate differences
 

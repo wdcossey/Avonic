@@ -392,6 +392,31 @@ public class AvonicContentTests
     });
 
     [AvaloniaFact]
+    public void B7_The_Keyboard_Offset_Survives_A_Padding_On_The_Control() => InstalledTheme.Run(_ =>
+    {
+        // calc(var(--padding-bottom) + var(--keyboard-offset)): .ion-padding only sets the first.
+        var content = Tall();
+        content.Padding = new Thickness(16);
+        content.Resources["Avonic.Content.KeyboardOffset"] = 50d;
+        using var scene = new Scene(InBox(content));
+
+        Assert.Equal(new Thickness(16, 16, 16, 66), Container(content).Padding);
+        Assert.Equal(1082, Scroll(content).Extent.Height);
+    });
+
+    [AvaloniaFact]
+    public void B7_The_Keyboard_Offset_Follows_A_Change()
+    {
+        var content = Tall();
+        using var scene = new Scene(InBox(content));
+
+        content.KeyboardOffset = 50;
+        Settle();
+
+        Assert.Equal(1050, Scroll(content).Extent.Height);
+    }
+
+    [AvaloniaFact]
     public void B8_Long_Text_Wraps_To_The_Width()
     {
         // Measured fitc: 390 wide, three lines.
@@ -421,6 +446,27 @@ public class AvonicContentTests
 
         Assert.True(text.Bounds.Width > 390);
     }
+
+    [AvaloniaFact]
+    public void B8_A_Text_Box_Stays_On_One_Line() => InstalledTheme.Run(_ =>
+    {
+        // TextWrapping inherits, and an <input> doesn't wrap. A text box asked to wrap still does.
+        var single = new TextBox();
+        var multi = new TextBox { TextWrapping = TextWrapping.Wrap };
+        var text = new TextBlock();
+        var slotted = new TextBox();
+        var content = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new StackPanel { Children = { single } }, multi, text } },
+            FixedContent = slotted,
+        };
+        using var scene = new Scene(InBox(content));
+
+        Assert.Equal(TextWrapping.NoWrap, single.TextWrapping);
+        Assert.Equal(TextWrapping.NoWrap, slotted.TextWrapping);
+        Assert.Equal(TextWrapping.Wrap, multi.TextWrapping);
+        Assert.Equal(TextWrapping.Wrap, text.TextWrapping);
+    });
 
     [AvaloniaFact]
     public void B9_A_Child_Is_As_High_As_Its_Content()
@@ -1673,6 +1719,38 @@ public class AvonicContentTests
         Assert.False(task.IsCompleted);
         clock.At(200);
         Assert.Equal(100, Scroll(content).Offset.Y);
+        Assert.True(task.IsCompletedSuccessfully);
+    }
+
+    [AvaloniaFact]
+    public void B25_ScrollByPoint_Counts_Content_That_Changed_Just_Now()
+    {
+        // Reading scrollTop lays out, so 700 is already 200 when the -100 is added.
+        var body = new Border { Height = 1000 };
+        var content = new AvonicContent { Content = body };
+        using var scene = new Scene(InBox(content));
+        SetOffset(content, 700);
+
+        body.Height = 500;
+        content.ScrollByPoint(0, -100, 0);
+
+        Assert.Equal(100, Scroll(content).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B25_Removed_Before_Load_A_Waiting_Scroll_Finishes()
+    {
+        var content = Tall();
+        var task = content.ScrollToPoint(null, 100);
+        var box = (Panel)InBox(content);
+        var window = new Window { Content = box };
+
+        window.Show();
+        box.Children.Clear();
+        Settle();
+        window.Close();
+        Settle();
+
         Assert.True(task.IsCompletedSuccessfully);
     }
 
