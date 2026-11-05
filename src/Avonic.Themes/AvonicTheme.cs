@@ -24,9 +24,14 @@ public class AvonicTheme : Styles
     {
         Add(new AvonicComponentsStyles());
 
-        Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri)
+        foreach (var path in OrderForMerge(XamlManifest.Paths))
         {
-            Source = new Uri("avares://Avonic.Themes/Tokens/AvonicTokens.axaml"),
-        });
+            Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = new Uri(BaseUri, path) });
+        }
     }
+
+    /// <summary>Tokens first, then ordinal: glob order differs between file systems.</summary>
+    internal static IEnumerable<string> OrderForMerge(IEnumerable<string> paths) =>
+        paths.OrderBy(path => path.StartsWith("Tokens/", StringComparison.Ordinal) ? 0 : 1)
+             .ThenBy(path => path, StringComparer.Ordinal);
 }

@@ -12,6 +12,15 @@
 
   <!-- *.axaml files are included automatically by Avalonia 12's build props. -->
 
+  <!-- Merged by AvonicTheme; see Directory.Build.targets. -->
+  <ItemGroup>
+    <AvonicDiscoveredXaml Include="Tokens/**/*.axaml;Controls/**/*.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Avonic.Components.Tests" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Avonic.Components\Avonic.Components.csproj" />
   </ItemGroup>

@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Avonic.Components\Avonic.Components.csproj" />
     <ProjectReference Include="..\..\src\Avonic.Themes\Avonic.Themes.csproj" />
+    <ProjectReference Include="..\..\samples\Avonic.Sample\Avonic.Sample.csproj" />
   </ItemGroup>
 
   <ItemGroup>

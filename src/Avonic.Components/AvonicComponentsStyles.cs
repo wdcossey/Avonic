@@ -14,9 +14,13 @@ public class AvonicComponentsStyles : Styles
 
     public AvonicComponentsStyles(IServiceProvider? _ = null)
     {
-        Include("Controls/RippleEffect/AvonicRippleEffect.axaml");
+        foreach (var path in OrderForMerge(XamlManifest.Paths))
+        {
+            Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = new Uri(BaseUri, path) });
+        }
     }
 
-    private void Include(string path) =>
-        Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = new Uri(BaseUri, path) });
+    /// <summary>Glob order differs between file systems, so merge order is fixed here.</summary>
+    internal static IEnumerable<string> OrderForMerge(IEnumerable<string> paths) =>
+        paths.Order(StringComparer.Ordinal);
 }

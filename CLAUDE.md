@@ -24,17 +24,22 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
   Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click)
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
-  AvonicComponentsStyles.cs   merges the stub ControlThemes; AvonicTheme includes it
-src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable)
+  AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
+src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable); AvonicTheme
+                         merges every discovered Tokens/**/*.axaml, then Controls/**/*.axaml
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step
-samples/Avonic.Sample/   phone-sized desktop app, one page per control
+samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]
+Directory.Build.targets  generates XamlManifest.Paths from a project's AvonicDiscoveredXaml globs
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
                          screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs
 .mcp.json                Claude Code MCP servers: avalonia-docs (Avalonia's hosted Build MCP — docs and API lookup)
 ```
+
+A control adds only its own files; templates, tokens and sample pages are auto-discovered
+([convention](docs/infra/auto-discovery/README.md)).
 
 Stack: libraries target **net8.0**; tests target **net10.0** (xunit v3 needs the SDK's apphost);
 built with the **.NET 10 SDK** (`global.json`). **Avalonia 12.1.4**, **xunit v3** — versions are
@@ -97,7 +102,7 @@ Avonic-only additions (touch-target enforcement, extra events) are allowed but l
 ## Rules
 
 1. **Build gate.** `dotnet build Avonic.sln && dotnet test Avonic.sln` green before every commit.
-2. **One control at a time**, through every step of `docs/PROCESS.md`. Plan is approved before code.
+2. **One control per PR**, through every step of `docs/PROCESS.md`. Plan is written before code and reviewed at the PR.
 3. **No dead props.** Declared ⇒ works ⇒ has a test that fails without it.
 4. **Tests assert Ionic behaviour** (from reading `<name>.js`), not the implementation's own pseudoclasses.
 5. **No visual opinion in Components.** No hex colours or `Brushes.*` in Themes outside `Tokens/`.

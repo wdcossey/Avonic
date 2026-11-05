@@ -1,7 +1,7 @@
 # The component loop
 
-Avonic v2 is built **one control at a time**. The loop below is the only way a control enters
-the codebase. No step is skipped, no two controls are in flight at once, and nothing is
+Avonic v2 is built **one control per PR**. The loop below is the only way a control enters
+the codebase. No step is skipped, a session works on one control at a time, and nothing is
 "done" until the last step is signed off.
 
 ```
@@ -23,8 +23,11 @@ closed. A fresh session needs nothing but the repo and the issue:
    The human review happens **once, at the PR**: plan, comparison, diff. Only the PR merge marks
    the control done (`CLAUDE.md` row, `docs/ROADMAP.md`, the issue closes with `Closes #N`).
 
-Shared files are auto-discovered (`AvonicComponentsStyles`, `AvonicTheme`, sample pages), so a
-control adds its own files and never edits another control's. Keep it that way.
+Shared files are auto-discovered, so a control adds its own files and never edits another
+control's. Keep it that way. Templates and tokens are found by the globs in each project file
+(`Controls/**/*.axaml` in Components; `Tokens/**/*.axaml` and `Controls/**/*.axaml` in Themes).
+Sample pages are found by `[SamplePage("<ion-tag>", Order = <issue number>)]`. See
+[auto-discovery](infra/auto-discovery/README.md).
 
 ## 1. Plan
 
@@ -65,7 +68,7 @@ Rules that are not negotiable:
 - `dotnet build` and `dotnet test` are green **before every commit**. No "it's just XAML".
 - A declared property works. If it cannot be made to work yet, it is not declared.
 - Icons come from ionicons via `AvonicIcon`. No emoji, no Unicode glyphs.
-- No hex colours or `Brushes.*` in Themes outside the token file.
+- No hex colours or `Brushes.*` in Themes outside `Tokens/`.
 
 ## 3. Compare
 
@@ -94,4 +97,4 @@ extensions, resource keys. The `CLAUDE.md` component table gains one row, and on
 
 ---
 
-**Then** the next control starts. Not before.
+**Then** that session's next control starts. Not before.
