@@ -52,7 +52,10 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 |---|---|---|
 | `ion-ripple-effect` | `AvonicRippleEffect` (+ `Behaviors.Activatable` = Ionic `tap-click`; `AvonicConfig.Animated` / `.RippleEffect`) | done (signed off 2026-10-15) — [docs](docs/components/ion-ripple-effect/README.md) |
 
-A row is added here only when the control has completed every step in `docs/PROCESS.md`.
+Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
+each priority tier, not by the control's own PR, so a recently finished control may be missing. For
+the latest, see the `Status:` line in `docs/components/<ion-tag>/README.md`
+([process](docs/PROCESS.md#rolling-up-the-tables)).
 
 ---
 

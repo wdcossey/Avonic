@@ -21,7 +21,9 @@ closed. A fresh session needs nothing but the repo and the issue:
    continue straight through Build → Compare → Review → Document.
 3. Open a PR into `v2` titled `feat: <ion-tag>` using the PR template. CI must be green.
    The human review happens **once, at the PR**: plan, comparison, diff. Only the PR merge marks
-   the control done (`CLAUDE.md` row, `docs/ROADMAP.md`, the issue closes with `Closes #N`).
+   the control done: its README's `Status:` line lands and the issue closes with `Closes #N`.
+   A control's PR doesn't edit the `CLAUDE.md` or `docs/ROADMAP.md` tables; see
+   [Rolling up the tables](#rolling-up-the-tables).
 
 Shared files are auto-discovered, so a control adds its own files and never edits another
 control's. Keep it that way. Templates and tokens are found by the globs in each project file
@@ -93,8 +95,23 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 ## 5. Document
 
 `docs/components/<ion-tag>/README.md`: usage, the final ticked checklist, behaviours,
-extensions, resource keys. The `CLAUDE.md` component table gains one row, and only now.
+extensions, resource keys. Directly under its heading goes the status line, written only now:
+
+```markdown
+Status: done · [#N](https://github.com/wdcossey/Avonic/issues/N)
+```
 
 ---
 
 **Then** that session's next control starts. Not before.
+
+## Rolling up the tables
+
+The component table in `CLAUDE.md` and the Done table in `docs/ROADMAP.md` are shared files, so a
+control's PR leaves them alone and parallel PRs can't conflict on them. When every issue in a
+priority tier is closed, or sooner if the human asks, one session raises a single PR that adds the
+finished rows to both tables. Only one roll-up PR is open at a time.
+
+The tables lag between roll-ups, so don't read a missing row as "not built". The current record is
+the status lines, which `git grep -l "^Status: done" docs/components docs/infra` lists, and blockers
+are checked against closed issues.

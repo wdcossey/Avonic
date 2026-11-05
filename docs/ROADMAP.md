@@ -23,6 +23,10 @@ that the graph does not record (colour system, icons, gestures, overlays).
 
 ## Done
 
+Rolled up at the end of each priority tier, so recently finished work may be missing. For the
+latest, see the `Status:` line in each `README.md` under `docs/components/` and `docs/infra/`
+([process](PROCESS.md#rolling-up-the-tables)).
+
 | # | Ionic | Status |
 |---|---|---|
 | — | `ion-ripple-effect` (+ the `tap-click` activatable behaviour) | **done** (signed off 2026-10-15) — [docs](components/ion-ripple-effect/README.md) · [comparison](components/ion-ripple-effect/COMPARISON.md) |

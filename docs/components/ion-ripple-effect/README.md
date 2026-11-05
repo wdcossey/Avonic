@@ -1,5 +1,7 @@
 # `AvonicRippleEffect` — ion-ripple-effect
 
+Status: done (signed off 2026-10-15)
+
 Ionic reference: [`ion-ripple-effect`](https://ionicframework.com/docs/api/ripple-effect) ·
 [Plan](PLAN.md) · [Comparison](COMPARISON.md) · reference render in [`ref/`](ref/)
 

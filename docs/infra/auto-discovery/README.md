@@ -1,8 +1,10 @@
 # Auto-discovery
 
+Status: done · [#1](https://github.com/wdcossey/Avonic/issues/1)
+
 A control adds its own files and is picked up automatically, so parallel PRs don't conflict on
-registrations. Two shared tables still get a row per control: the component table in `CLAUDE.md` and
-the Done table in `docs/ROADMAP.md`. Parallel PRs can conflict there.
+registrations. The tables in `CLAUDE.md` and `docs/ROADMAP.md` are handled separately, by a
+[roll-up](../../PROCESS.md#rolling-up-the-tables).
 
 ## How a control uses it
 
