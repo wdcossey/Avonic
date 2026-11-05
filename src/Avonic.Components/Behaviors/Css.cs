@@ -42,11 +42,6 @@ public static class Css
     /// </summary>
     public static readonly IMultiValueConverter TranslateScale = new TranslateScaleConverter();
 
-    public static double GetTranslateY(StyledElement element) => element.GetValue(TranslateYProperty);
-    public static void SetTranslateY(StyledElement element, double value) => element.SetValue(TranslateYProperty, value);
-
-    public static double GetScale(StyledElement element) => element.GetValue(ScaleProperty);
-    public static void SetScale(StyledElement element, double value) => element.SetValue(ScaleProperty, value);
 
     private static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);

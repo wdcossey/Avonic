@@ -42,6 +42,11 @@ public class AvonicLabelTests
         public void OnItemTap() => ItemTaps++;
     }
 
+    private sealed class OnDispose(Action action) : IDisposable
+    {
+        public void Dispose() => action();
+    }
+
     private static bool Has(Control control, string pseudoClass) => control.Classes.Contains(pseudoClass);
 
     private static void SetState(Control control, string pseudoClass, bool value = true)
@@ -437,6 +442,65 @@ public class AvonicLabelTests
         });
     }
 
+    [AvaloniaTheory]
+    [InlineData(LabelPosition.Stacked)]
+    [InlineData(LabelPosition.Floating)]
+    public void B7_A_Stacked_Or_Floating_Label_Changes_An_End_Labels_Margin(LabelPosition position)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            using var clock = new TestClock();
+            var main = new AvonicLabel { Content = "x" };
+            var end = new AvonicLabel { Content = "x" };
+            using var scene = InScene(new AvonicItem { Content = main, EndContent = end });
+
+            // Last, because the last label to report is the one the item keeps.
+            main.Position = position;
+            Dispatcher.UIThread.RunJobs();
+
+            // Measured: "16px 7px 0px 7px".
+            Assert.Equal(new Thickness(16, 7, 0, 7), end.Margin);
+        });
+    }
+
+    [AvaloniaTheory]
+    [InlineData("toggle", "label-stacked")]
+    [InlineData("toggle", "label-floating")]
+    [InlineData("radio", "label-stacked")]
+    [InlineData("radio", "label-floating")]
+    public void B7_A_Toggle_Or_Radio_Item_With_A_Stacked_Or_Floating_Label(string control, string label)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            var end = new AvonicLabel { Content = "x" };
+            var child = new Border();
+            using var scene = InScene(new AvonicItem { Content = child, EndContent = end });
+
+            Raise(child, (control, true), (label, true));
+
+            Assert.Equal(new Thickness(0, 7, 0, 7), end.Margin);
+        });
+    }
+
+    [AvaloniaFact]
+    public void B5_With_Two_Labels_The_Last_To_Report_Wins() => InstalledTheme.Run(_ =>
+    {
+        var main = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked };
+        var end = new AvonicLabel { Content = "x" };
+        var item = new AvonicItem { Content = main, EndContent = end };
+        using var scene = InScene(item);
+
+        // Ionic keeps these per tag name. Measured: 55 or 48 high, depending on which loaded last. Here the
+        // default slot is measured last, so its label wins on load.
+        Assert.True(Has(item, ":item-label-stacked"));
+
+        end.Position = LabelPosition.Fixed;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(Has(item, ":item-label-stacked"));
+        Assert.True(Has(item, ":item-label-fixed"));
+    });
+
     [AvaloniaFact]
     public void B7_A_Panel_Stands_For_The_Slot_But_Deeper_Does_Not_Match() => InstalledTheme.Run(_ =>
     {
@@ -564,6 +628,22 @@ public class AvonicLabelTests
 
         Assert.Equal(24, plain.LineHeight);
         Assert.Equal(24, nested.LineHeight);
+    });
+
+    [AvaloniaFact]
+    public void B10_Wrap_Is_A_Factor_Of_An_Elements_Own_Size_And_Does_Not_Clip() => InstalledTheme.Run(_ =>
+    {
+        var direct = new TextBlock { Text = "Agy", FontSize = 32 };
+        var inPanel = new TextBlock { Text = "Agy", FontSize = 32 };
+        using var scene = InScene(
+            new AvonicItem { Content = WithClass("ion-text-wrap", direct) },
+            new AvonicItem { Content = WithClass("ion-text-wrap", new StackPanel { Children = { inPanel } }) });
+
+        // Measured: 48 for 32 px text.
+        Assert.Equal(48, direct.LineHeight);
+        Assert.Equal(48, inPanel.LineHeight);
+        Assert.False(direct.ClipToBounds);
+        Assert.False(inPanel.ClipToBounds);
     });
 
     [AvaloniaFact]
@@ -968,14 +1048,52 @@ public class AvonicLabelTests
     });
 
     [AvaloniaFact]
-    public void B16_Other_Content_In_A_Stacked_Item_Stays_At_The_Top() => InstalledTheme.Run(_ =>
+    public void B16_Content_In_A_Stacked_Item_Stays_At_Its_Own_Height_At_The_Top() => InstalledTheme.Run(_ =>
     {
-        var content = new Border { Height = 10, VerticalAlignment = VerticalAlignment.Top };
+        var content = new Border { Child = new Border { Width = 50, Height = 18 } };
         var label = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked };
-        var panel = new StackPanel { Children = { label, content } };
+        using var scene = InScene(new AvonicItem { Content = content, EndContent = label });
+
+        // Measured: at the top of the row, 18 high, beside a stacked label in the end slot.
+        var box = Box(content, scene.Window);
+        Assert.Equal(0, box.Y);
+        Assert.Equal(18, box.Height);
+    });
+
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B16_Stacked_Fills_The_Height_In_The_Other_Slots_Too(bool start)
+    {
+        InstalledTheme.Run(_ =>
+        {
+            var label = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked };
+            var item = new AvonicItem { Content = new Border() };
+            if (start)
+            {
+                item.StartContent = label;
+            }
+            else
+            {
+                item.EndContent = label;
+            }
+
+            using var scene = InScene(item);
+
+            // Measured in the end slot: matrix(0.75, 0, 0, 0.75, 0, 27), and 40.5 high after the scale. The start
+            // slot is outside the inner border, so it has the whole 55.
+            Assert.Equal(start ? 27.5 : 27, Transform(label).M32, 3);
+            Assert.Equal(default, label.Margin);
+        });
+    }
+
+    [AvaloniaFact]
+    public void B16_A_Panel_Stays_Stretched_So_A_Star_Row_Works() => InstalledTheme.Run(_ =>
+    {
+        var panel = new Grid { RowDefinitions = new RowDefinitions("*,Auto"), Children = { new AvonicLabel { Content = "x", Position = LabelPosition.Stacked } } };
         using var scene = InScene(new AvonicItem { Content = panel });
 
-        Assert.Equal(0, Box(panel, scene.Window).Y);
+        Assert.Equal(54, panel.Bounds.Height);
     });
 
     // ── 17, 18, 19. Floating ─────────────────────────────────────────────────────────────────
@@ -1216,7 +1334,24 @@ public class AvonicLabelTests
     }
 
     [AvaloniaFact]
-    public void B19_A_Timer_Does_Not_Outlive_Its_Label() => InstalledTheme.Run(_ =>
+    public void B19_Detaching_Cancels_The_Timer() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var cancelled = false;
+        AvonicConfig.Schedule = (_, _) => new OnDispose(() => cancelled = true);
+        var (item, _, _) = FloatingItem();
+        var panel = new StackPanel { Children = { item } };
+        using var scene = new Scene(panel);
+        Assert.False(cancelled);
+
+        panel.Children.Clear();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(cancelled);
+    });
+
+    [AvaloniaFact]
+    public void B19_Attached_Again_It_Does_Not_Stay_Without_Transitions() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         var (item, label, _) = FloatingItem();
