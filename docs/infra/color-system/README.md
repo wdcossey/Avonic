@@ -71,7 +71,7 @@ part's default in a style as well, because a style can't override a value set di
 - **Test the paint, not `:ion-color`.** Render the control with no `Color` inside a coloured ancestor, and
   assert every part keeps its default. That's the case a missed guard gets wrong.
 - **Names are case-sensitive, like a CSS class.** `Danger` isn't a colour. Neither are the variants of the
-  nine built-in colours, such as `danger-shade`. A custom `sea-tint` is fine.
+  nine built-in colours, such as `danger-shade` and `dangerShade`. A custom `sea-tint` is fine.
 
 ## Unknown colours
 
@@ -113,7 +113,7 @@ Other global variables are deferred to the controls that read them. [PLAN.md](PL
 
 ## Restyling an app
 
-Override the `Color` key, at any level:
+Override the `Color` key at the application, which updates its brush too:
 
 ```xml
 <Application.Resources>
@@ -136,11 +136,13 @@ then works on every control, and `my-brand` maps to `Avonic.Color.MyBrand…`:
 
 **Override for a subtree** by putting the same keys in that element's `Resources`. `Color="danger"` follows
 it. A direct `{DynamicResource Avonic.Color.DangerBrush}` doesn't, because that brush is resolved at the
-application, so in a subtree either override the brush too or use `ColorPalette`.
+application, so override the brush there too. That includes a control's default colour, which differs from
+Ionic; see [PLAN.md](PLAN.md#a-limit-of-the-brush-keys).
 
 ## Dark palette
 
-Merge it yourself, in `Application.Resources` so it wins over the theme. It can be added or removed at runtime:
+Merge it yourself, in `Application.Resources`. It has to be there, rather than on a window, for the `…Brush`
+keys to follow it. It can be added or removed at runtime:
 
 ```xml
 <Application.Resources>

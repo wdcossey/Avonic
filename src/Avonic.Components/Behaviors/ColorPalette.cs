@@ -78,8 +78,10 @@ public static class ColorPalette
     private static readonly AvaloniaProperty[] ValueProperties =
         [BaseProperty, ContrastProperty, ShadeProperty, TintProperty, BaseColorProperty, ContrastColorProperty];
 
-    private static readonly string[] BuiltInColors =
-        ["primary", "secondary", "tertiary", "success", "warning", "danger", "light", "medium", "dark"];
+    private static readonly HashSet<string> BuiltInVariantKeys =
+        new[] { "Primary", "Secondary", "Tertiary", "Success", "Warning", "Danger", "Light", "Medium", "Dark" }
+            .SelectMany(_ => new[] { "Contrast", "Shade", "Tint" }, (color, variant) => KeyPrefix + color + variant)
+            .ToHashSet();
 
     /// <summary>
     /// For a text colour binding. An unknown colour leaves <see cref="ContrastProperty"/> null, and a
@@ -93,10 +95,15 @@ public static class ColorPalette
     /// <c>rgba(var(--ion-color-base-rgb), 0.08)</c>: binds <see cref="BaseColorProperty"/> or
     /// <see cref="ContrastColorProperty"/> to a brush, with the alpha as <c>ConverterParameter</c>.
     /// Each element gets its own brush, so it can be used in a style. Null for an unknown colour.
+    /// As with <c>rgba()</c>, the alpha replaces any in the colour. With no parameter it's opaque,
+    /// so a forgotten one is visible rather than a blank part.
     /// </summary>
     public static readonly IValueConverter WithAlpha =
-        new FuncValueConverter<Color?, object?, IBrush?>((color, alpha) =>
-            color is { } value ? new ImmutableSolidColorBrush(value, Convert.ToDouble(alpha, CultureInfo.InvariantCulture)) : null);
+        new FuncValueConverter<Color?, object?, IBrush?>((color, alpha) => color is { } value
+            ? new ImmutableSolidColorBrush(
+                Color.FromRgb(value.R, value.G, value.B),
+                alpha is null ? 1 : Convert.ToDouble(alpha, CultureInfo.InvariantCulture))
+            : null);
 
     public static string? GetColor(StyledElement element) => element.GetValue(ColorProperty);
     public static void SetColor(StyledElement element, string? value) => element.SetValue(ColorProperty, value);
@@ -171,8 +178,9 @@ public static class ColorPalette
     /// <summary>
     /// <c>danger</c> → <c>Avonic.Color.Danger</c>; <c>my-brand</c> → <c>Avonic.Color.MyBrand</c>.
     /// Null if the name can't be a colour. A CSS class is case-sensitive, so <c>Danger</c> isn't
-    /// <c>danger</c>. <c>danger-shade</c> isn't a colour either, though it would otherwise find the real
-    /// key <c>Avonic.Color.DangerShade</c> and paint it as the base. A custom <c>sea-tint</c> is fine.
+    /// <c>danger</c>. <c>danger-shade</c> and <c>dangerShade</c> aren't colours either, though they'd
+    /// otherwise find the real key <c>Avonic.Color.DangerShade</c> and paint it as the base. A custom
+    /// <c>sea-tint</c> is fine.
     /// </summary>
     internal static string? KeyFor(string? name)
     {
@@ -182,17 +190,13 @@ public static class ColorPalette
         }
 
         var segments = name.Split('-');
-        if (segments.Any(segment => segment.Length == 0 || char.IsAsciiLetterUpper(segment[0])))
+        if (segments.Any(segment => segment.Length == 0 || char.IsUpper(segment[0])))
         {
             return null;
         }
 
-        if (segments is [var color, "contrast" or "shade" or "tint"] && BuiltInColors.Contains(color))
-        {
-            return null;
-        }
-
-        return KeyPrefix + string.Concat(segments.Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..]));
+        var key = KeyPrefix + string.Concat(segments.Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..]));
+        return BuiltInVariantKeys.Contains(key) ? null : key;
     }
 
     private sealed class Subscriptions(IDisposable[] items) : IDisposable

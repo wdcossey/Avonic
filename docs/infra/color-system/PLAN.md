@@ -105,10 +105,10 @@ property that every control binds to, for a case that's already a bug in the app
 Kebab to Pascal, case-sensitive like a CSS class: `danger` → `Avonic.Color.Danger`, `my-brand` →
 `Avonic.Color.MyBrand`, `Danger` → unknown.
 
-A variant of a built-in colour is treated as unknown. Without this, `color="danger-shade"` would find the
-real key `Avonic.Color.DangerShade` and paint it as the base, where Ionic has no such class. Only the nine
-built-in names are checked, so a custom colour called `sea-tint` still works. The cost is that
-`favorite-shade`, for a custom `favorite`, finds that colour's shade.
+A variant of a built-in colour is treated as unknown. Without this, `color="danger-shade"` or
+`color="dangerShade"` would find the real key `Avonic.Color.DangerShade` and paint it as the base, where
+Ionic has no such class. Only the nine built-in colours are checked, so a custom colour called `sea-tint`
+still works. The cost is that `favorite-shade`, for a custom `favorite`, finds that colour's shade.
 
 `myBrand` and `my-brand` both map to `Avonic.Color.MyBrand`. Ionic would treat them as two classes.
 
@@ -177,9 +177,26 @@ distinction. A control's token takes the control's own default (`#424242` for th
 follow `Avonic.TextColor`. This affects outliers such as toolbar text, tab-bar borders and a few
 `step-N` fallbacks. Those values belong in that control's `Tokens/<Name>.axaml`.
 
-A brush also can't follow another brush, only a `Color`. So `--ion-card-background`, which falls back
-through `--ion-item-background` to the background, follows the background directly, and overriding the item
-background doesn't change cards. Dark sets both to the same value, so the shipped palettes aren't affected.
+A brush also can't follow another brush, only a `Color`, and a `Color` can't follow anything. So:
+
+- `--ion-card-background`, which falls back through `--ion-item-background` to the background, follows the
+  background directly. Overriding the item background doesn't change cards. Dark sets both to the same value,
+  so the shipped palettes aren't affected.
+- `--ion-border-color` falls back to `--ion-background-color-step-150` in dark, and `Avonic.BorderColor` is a
+  copy of its value. Overriding the step doesn't change borders.
+
+### A limit of the `…Brush` keys
+
+A `…Brush` key resolves its `Color` from where the dictionary lives, the application. So a `Color` key
+overridden for a subtree reaches `ColorPalette`, which looks up from the element, but not the `…Brush` keys.
+In Ionic, a default that reads `--ion-color-primary` changes within that subtree. Here, a control with no
+`Color` that defaults to `{DynamicResource Avonic.Color.PrimaryBrush}` doesn't.
+
+For the same reason, the dark palette has to be merged at the application, as the README says. Merged on a
+window, `ColorPalette` values would go dark and the `…Brush` keys wouldn't.
+
+A subtree can override the brush as well. Fixing this properly means resolving brushes per element in each
+control's theme, which isn't worth the cost until a control needs it.
 
 ## Deferred
 

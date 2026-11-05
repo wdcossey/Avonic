@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -112,6 +113,17 @@ public class ColorPaletteTests
         AssertUnset(element);
     });
 
+    [AvaloniaFact]
+    public void Wrong_Case_Applies_To_Any_Letter_Not_Only_Ascii() => WithTheme(() =>
+    {
+        var element = Colored("Émeraude");
+        var scope = new Border { Child = element };
+        scope.Resources["Avonic.Color.Émeraude"] = Favorite;
+        using var scene = new Scene(scope);
+
+        AssertUnset(element);
+    });
+
     // createColorClasses: typeof color === 'string' && color.length > 0
     [AvaloniaFact]
     public void Empty_Color_Is_No_Color() => WithTheme(() =>
@@ -157,6 +169,9 @@ public class ColorPaletteTests
     [InlineData("danger-shade")]
     [InlineData("danger-tint")]
     [InlineData("danger-contrast")]
+    [InlineData("dangerShade")]
+    [InlineData("primaryTint")]
+    [InlineData("darkContrast")]
     public void A_Palette_Variant_Is_Not_A_Color_Name(string name) => WithTheme(() =>
     {
         var element = Colored(name);
@@ -241,6 +256,21 @@ public class ColorPaletteTests
         Assert.Equal(Colors.Lime, ColorPalette.GetBaseColor(inside));
         Assert.Equal(DangerContrast, BrushColor(ColorPalette.GetContrast(inside)));
         AssertDanger(outside);
+    });
+
+    // A known difference from Ionic, pinned so the docs stay true: see "A limit of the …Brush keys".
+    [AvaloniaFact]
+    public void A_Subtree_Override_Reaches_ColorPalette_But_Not_The_Brush_Keys() => WithTheme(() =>
+    {
+        var element = Colored("danger");
+        var scope = new Border { Child = element };
+        scope.Resources["Avonic.Color.Danger"] = Colors.Lime;
+        using var scene = new Scene(scope);
+
+        Assert.Equal(Colors.Lime, BrushColor(ColorPalette.GetBase(element)));
+
+        Assert.True(element.TryFindResource("Avonic.Color.DangerBrush", out var brush));
+        Assert.Equal(Danger, BrushColor(brush as IBrush));
     });
 
     // ── Changes over time ────────────────────────────────────────────────────────────────────
@@ -409,10 +439,12 @@ public class ColorPaletteTests
         Assert.Equal(Color.Parse("#0D0E0F"), BrushColor(Part<Border>(control, "PART_Inherited").Background));
     }
 
-    [AvaloniaFact]
-    public void Template_Paints_The_Defaults_Without_A_Color() => WithUsageTheme(() =>
+    [AvaloniaTheory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Template_Paints_The_Defaults_Without_A_Color(string? color) => WithUsageTheme(() =>
     {
-        var control = new ColoredControl();
+        var control = new ColoredControl { Color = color };
         using var scene = new Scene(control);
 
         AssertPaintsDefaults(control);
@@ -494,11 +526,35 @@ public class ColorPaletteTests
         Assert.Equal(Color.Parse("#0054e9"), BrushColor(Part<Border>(primary, "PART_Alpha").Background));
     });
 
-    // Ionic: a solid button with an unknown colour has a transparent background, not its default.
+    // rgba() replaces any alpha in the colour, because the -rgb variable only has three channels.
     [AvaloniaFact]
-    public void Template_With_An_Unknown_Color_Has_No_Backgrounds() => WithUsageTheme(() =>
+    public void WithAlpha_Replaces_The_Colors_Own_Alpha()
     {
-        var control = new ColoredControl { Color = "nonexistent" };
+        var brush = Assert.IsAssignableFrom<ISolidColorBrush>(ColorPalette.WithAlpha.Convert(
+            Color.Parse("#80FF0000"), typeof(IBrush), "0.08", CultureInfo.InvariantCulture));
+
+        Assert.Equal(Color.Parse("#FFFF0000"), brush.Color);
+        Assert.Equal(0.08, brush.Opacity);
+    }
+
+    [AvaloniaFact]
+    public void WithAlpha_Without_A_Parameter_Is_Opaque()
+    {
+        var brush = Assert.IsAssignableFrom<ISolidColorBrush>(ColorPalette.WithAlpha.Convert(
+            Danger, typeof(IBrush), null, CultureInfo.InvariantCulture));
+
+        Assert.Equal(1, brush.Opacity);
+    }
+
+    // Ionic: a solid button with an unknown colour has a transparent background, not its default.
+    [AvaloniaTheory]
+    [InlineData("nonexistent")]
+    [InlineData("Danger")]
+    [InlineData("danger-shade")]
+    [InlineData("dangerShade")]
+    public void Template_With_An_Unknown_Color_Has_No_Backgrounds(string color) => WithUsageTheme(() =>
+    {
+        var control = new ColoredControl { Color = color };
         using var scene = new Scene(control);
 
         Assert.Null(Part<Border>(control, "PART_Native").Background);
