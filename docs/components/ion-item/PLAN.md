@@ -99,7 +99,7 @@ Each becomes a test.
 | 13 | An unknown `Color`: transparent background, text in `--color`, current colour for borders | measured `badcolor`; `var()` invalid at computed time |
 | 14 | No `Color` in a coloured ancestor keeps every default | colour system rule |
 | 15 | Hover: the overlay at 0.04, with the mouse only | `@media (any-hover: hover)`; measured |
-| 16 | Keyboard focus: the overlay at 0.12, beating hover. A press clears it | measured; `focus-visible.js` |
+| 16 | Keyboard focus: the overlay at 0.12, beating hover, with no outline or adorner. A press clears it | measured; `focus-visible.js`; `outline: none` |
 | 17 | Pressing with the mouse keeps the hover overlay; `:activated` adds nothing by default | measured |
 | 18 | On `:ion-color`, the overlay and the state colours use contrast | measured |
 | 19 | Disabled: opacity 0.3, no input, no tab stop | measured |
