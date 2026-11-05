@@ -1096,7 +1096,11 @@ public sealed class AvonicIconTests : IDisposable
     [AvaloniaFact]
     public void AddIcons_Off_The_Ui_Thread_Throws()
     {
-        var failure = Task.Run(() => Record.Exception(() => AvonicIcon.AddIcons(new Dictionary<string, string> { ["off-thread"] = Solid }))).Result;
+        // A real thread: waiting on a Task.Run that hasn't started can run it right here, on the UI thread.
+        Exception? failure = null;
+        var thread = new Thread(() => failure = Record.Exception(() => AvonicIcon.AddIcons(new Dictionary<string, string> { ["off-thread"] = Solid })));
+        thread.Start();
+        thread.Join();
 
         Assert.IsType<InvalidOperationException>(failure);
     }
