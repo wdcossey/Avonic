@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Avalonia;
 using Avalonia.Media;
@@ -16,9 +17,15 @@ namespace Avonic.Components.Controls;
 /// <c>polyline</c>, <c>polygon</c> and <c>g</c>, with presentation attributes. That covers every
 /// built-in icon. Other elements, and <c>style</c>, aren't drawn.
 /// </remarks>
-internal sealed class SvgArtwork
+internal sealed partial class SvgArtwork
 {
     public static readonly SvgArtwork Empty = new(null, []);
+
+    /// <summary>
+    /// A stack overflow can't be caught, so nesting past this is treated as invalid. A browser's parser
+    /// has a limit of its own, and no real icon comes close.
+    /// </summary>
+    private const int MaxDepth = 256;
 
     private SvgArtwork(Rect? viewBox, IReadOnlyList<Layer> layers)
     {
@@ -71,9 +78,11 @@ internal sealed class SvgArtwork
     {
         try
         {
-            using var reader = XmlReader.Create(new StringReader(svg), new XmlReaderSettings
+            // Design tools export a <!DOCTYPE>, so it's skipped rather than rejected. Ignoring it, with no
+            // resolver, means entities are never expanded and nothing external is fetched.
+            using var reader = XmlReader.Create(new StringReader(svg.TrimStart()), new XmlReaderSettings
             {
-                DtdProcessing = DtdProcessing.Prohibit,
+                DtdProcessing = DtdProcessing.Ignore,
                 XmlResolver = null,
                 IgnoreComments = true,
                 IgnoreWhitespace = true,
@@ -116,6 +125,11 @@ internal sealed class SvgArtwork
         if (reader.IsEmptyElement)
         {
             return true;
+        }
+
+        if (reader.Depth > MaxDepth)
+        {
+            return false;
         }
 
         var depth = reader.Depth;
@@ -279,8 +293,20 @@ internal sealed class SvgArtwork
         "none" => null,
         "currentColor" or "currentcolor" => Paint.CurrentColor,
         "inherit" => inherited,
-        var text => Color.TryParse(text, out var color) ? new Paint(new ImmutableSolidColorBrush(color)) : inherited,
+        var text => Color.TryParse(CssToAvaloniaHex(text), out var color) ? new Paint(new ImmutableSolidColorBrush(color)) : inherited,
     };
+
+    /// <summary>CSS's <c>#rrggbbaa</c> and <c>#rgba</c> put alpha last, and Avalonia's put it first.</summary>
+    private static string CssToAvaloniaHex(string text)
+    {
+        if (text.Length is not (5 or 9) || text[0] != '#')
+        {
+            return text;
+        }
+
+        var alphaDigits = text.Length == 9 ? 2 : 1;
+        return string.Concat("#", text.AsSpan(text.Length - alphaDigits), text.AsSpan(1, text.Length - 1 - alphaDigits));
+    }
 
     private static double? ParseLength(string? value)
     {
@@ -308,6 +334,7 @@ internal sealed class SvgArtwork
             : null;
     }
 
+    /// <summary>SVG number lists can run together: <c>10-20</c> and <c>.5.5</c> are two numbers each.</summary>
     private static double[] Numbers(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -315,18 +342,18 @@ internal sealed class SvgArtwork
             return [];
         }
 
-        var parts = value.Split([' ', ',', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var numbers = new double[parts.Length];
-        for (var i = 0; i < parts.Length; i++)
+        var matches = SvgNumber().Matches(value);
+        var numbers = new double[matches.Count];
+        for (var i = 0; i < numbers.Length; i++)
         {
-            if (!double.TryParse(parts[i], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[i]))
-            {
-                return [];
-            }
+            numbers[i] = double.Parse(matches[i].ValueSpan, NumberStyles.Float, CultureInfo.InvariantCulture);
         }
 
         return numbers;
     }
+
+    [GeneratedRegex(@"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")]
+    private static partial Regex SvgNumber();
 
     private static Matrix ParseTransform(string value)
     {
@@ -358,6 +385,8 @@ internal sealed class SvgArtwork
         ("translate", [var x, var y]) => Matrix.CreateTranslation(x, y),
         ("scale", [var s]) => Matrix.CreateScale(s, s),
         ("scale", [var x, var y]) => Matrix.CreateScale(x, y),
+        ("skewX", [var angle]) => new Matrix(1, 0, Math.Tan(Matrix.ToRadians(angle)), 1, 0, 0),
+        ("skewY", [var angle]) => new Matrix(1, Math.Tan(Matrix.ToRadians(angle)), 0, 1, 0, 0),
         ("rotate", [var angle]) => Matrix.CreateRotation(Matrix.ToRadians(angle)),
         ("rotate", [var angle, var x, var y]) =>
             Matrix.CreateTranslation(-x, -y) * Matrix.CreateRotation(Matrix.ToRadians(angle)) * Matrix.CreateTranslation(x, y),

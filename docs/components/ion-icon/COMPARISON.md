@@ -51,10 +51,10 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each is covered in `AvonicIc
 | 4 | Names are lowercased | `HEART` drew the heart | match |
 | 5 | An invalid or blank name resolves to nothing | `he_art`: no SVG | match |
 | 6 | Unknown, missing or no icon: full-size box, nothing painted | 20×20, no SVG | match |
-| 7 | A registered name beats the bundle; changes reload | from `getNamedUrl` | match |
+| 7 | A registered name beats the bundle; changes reload, except a change to no icon keeps the last | from `getNamedUrl`, `if (url)` in `loadIcon` | match |
 | 8 | `addCircle` also registers `add-circle` | from `addIcons` | match |
 | 9 | The first registration of a name wins | from `addToIconMap` | match |
-| 10 | The box is `1em` square | `font-size: 40px` gave 40×40 | match |
+| 10 | The box is `1em` square, and doesn't stretch | `font-size: 40px` gave 40×40; `display: inline-block` | match |
 | 11 | `Size` gives 18 or 32 and beats `FontSize` | 18×18 with `font-size: 40px` | match |
 | 12 | An explicit box wins, with the artwork centred | 64×32 | match |
 | 13 | Painting is clipped to the box | `contain: strict`, `overflow: hidden` | match |
@@ -86,6 +86,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each is covered in `AvonicIc
 | A default size from Avalonia's `FontSize`, not 16 px | The `1em` rule matches. A page-level default isn't this control's decision |
 | An SVG with unsafe content is always blank | Ionic can turn this off with `sanitize`. Nothing executes here, so there's no reason to |
 | In a custom SVG, a malformed path draws nothing, and so do valid numbers like `+1` | Ionic's browser keeps the part before an error. Avalonia's parser doesn't, and no built-in icon is affected |
+| A custom SVG has to be well-formed XML, with at most 256 levels of nesting | Ionic's `innerHTML` is more forgiving. No built-in icon is affected |
 
 ## Gaps
 

@@ -8,6 +8,7 @@ namespace Avonic.Components.Tests.Controls;
 /// The bundled artwork. These read ionicons' own files, so an upgrade without a regenerate fails. They
 /// skip without <c>node_modules</c>, and CI always has it.
 /// </summary>
+[Collection(IconStoreCollection.Name)]
 public partial class IconArtworkTests
 {
     private static string SvgDirectory()
@@ -36,13 +37,13 @@ public partial class IconArtworkTests
     [GeneratedRegex("<(path|circle|rect|ellipse|line|polyline|polygon)[\\s/>]")]
     private static partial Regex Shape();
 
-    [Fact]
+    [AvaloniaFact]
     public void The_Bundle_Has_Every_Icon_In_Ionicons() =>
         Assert.Equal(
             SourceIcons().Select(icon => icon.Name).Order(StringComparer.Ordinal),
             IconStore.BundledNames.Order(StringComparer.Ordinal));
 
-    [Fact]
+    [AvaloniaFact]
     public void The_Bundle_Holds_Each_Svg_Unchanged()
     {
         var mismatched = SourceIcons()

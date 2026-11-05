@@ -26,6 +26,12 @@ xmlns:c="using:Avonic.Components.Controls"
 **Set `FontSize` where you use it.** The box is `1em`, and Avalonia's inherited default isn't the 16 px of a web
 page, so an icon with no `FontSize` above it is small.
 
+**It sits at the start of its parent.** It's `inline-block` in Ionic, so it doesn't stretch. Unlike most Avalonia
+controls, it defaults to `HorizontalAlignment="Left"` and `VerticalAlignment="Top"`, so set `Center` to centre it.
+
+**A change to no icon keeps the last one.** Setting `IconName` to null or an invalid name leaves the current icon
+showing, as Ionic does. An unknown name is blank, because it counts as an icon that failed to load.
+
 ## Fidelity checklist
 
 ### Props
@@ -110,6 +116,8 @@ wins, and a different one after it logs a warning.
 **Custom SVGs can use** `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon` and `g`, with presentation
 attributes such as `fill`, `stroke` and `transform`. Gradients, `<text>`, `<image>`, `style=` and `<style>` aren't drawn.
 An SVG with `<script>` or an `on*` attribute is blank. Use `currentColor` to follow the icon's colour.
+
+An SVG has to be well-formed XML. A `<!DOCTYPE>` is fine, and more than 256 levels of nesting is blank.
 
 A malformed path draws nothing, where a browser keeps the part before the error. So do a few valid forms that
 Avalonia's parser rejects, such as `+1`. If a custom icon has a blank layer, check its numbers. See

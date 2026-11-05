@@ -15,11 +15,19 @@ using Avonic.Components.Controls;
 
 namespace Avonic.Components.Tests.Controls;
 
+/// <summary><see cref="IconStore"/> is process-wide, so the tests that use it can't run in parallel.</summary>
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class IconStoreCollection
+{
+    public const string Name = "IconStore";
+}
+
 /// <summary>
 /// Behaviours from ionicons' <c>icon.js</c>, <c>utils.js</c> and <c>icon.css</c>, and what a browser does
 /// with the SVG. Each was measured in real Ionic; see docs/components/ion-icon/PLAN.md. Painting is
 /// asserted on pixels, using small SVGs that isolate one rule at a time.
 /// </summary>
+[Collection(IconStoreCollection.Name)]
 public sealed class AvonicIconTests : IDisposable
 {
     private static readonly Color White = Colors.White;
@@ -170,6 +178,34 @@ public sealed class AvonicIconTests : IDisposable
     [AvaloniaFact]
     public void Changing_Src_Reloads() => AssertReloads(icon => icon.Src = Solid);
 
+    // loadIcon only changes the content `if (url)`, so with nothing to load the last icon stays.
+    [AvaloniaTheory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("he_art")]
+    public void A_Change_To_No_Icon_Keeps_The_Last_One(string? name)
+    {
+        var icon = new AvonicIcon { IconName = "heart", FontSize = 64 };
+        using var scene = Show(icon);
+        Assert.False(IsBlank(scene));
+
+        icon.IconName = name;
+
+        Assert.False(IsBlank(scene), "Expected the last icon to stay");
+    }
+
+    // An unknown name does have a url, which fails to load.
+    [AvaloniaFact]
+    public void A_Change_To_An_Unknown_Name_Is_Blank()
+    {
+        var icon = new AvonicIcon { IconName = "heart", FontSize = 64 };
+        using var scene = Show(icon);
+
+        icon.IconName = "no-such-icon";
+
+        Assert.True(IsBlank(scene));
+    }
+
     private static void AssertReloads(Action<AvonicIcon> change)
     {
         var icon = new AvonicIcon { FontSize = 64 };
@@ -203,6 +239,14 @@ public sealed class AvonicIconTests : IDisposable
     [AvaloniaFact]
     public void Src_Loads_An_Avalonia_Asset() =>
         AssertPaints(Icon("avares://Avonic.Components.Tests/Controls/TestIcon.svg"));
+
+    // A browser's fetch percent-decodes a data url before it reads the base64.
+    [AvaloniaFact]
+    public void Src_Loads_Percent_Encoded_Base64()
+    {
+        var svg = """<svg viewBox="0 0 512 512"><rect width="512" height="512"/></svg>""";
+        AssertPaints(Icon("data:image/svg+xml;base64," + Uri.EscapeDataString(Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(svg + " ")))));
+    }
 
     [AvaloniaTheory]
     [InlineData("avares://Avonic.Components.Tests/missing.svg")]
@@ -302,6 +346,48 @@ public sealed class AvonicIconTests : IDisposable
         Dispatcher.UIThread.RunJobs();
 
         Assert.Equal(32, icon.Bounds.Height);
+    }
+
+    // display: inline-block. It stays 1em in any parent, at the start.
+    [AvaloniaFact]
+    public void It_Does_Not_Stretch_To_Its_Parent()
+    {
+        var icon = new AvonicIcon { Src = Solid, FontSize = 24 };
+        using var scene = Show(new Border { Width = 64, Height = 64, Child = icon });
+        var frame = Frame(scene);
+
+        Assert.Equal(new Size(24, 24), icon.Bounds.Size);
+        Assert.NotEqual(White, PixelAt(frame, 12, 12));
+        Assert.Equal(White, PixelAt(frame, 40, 40));
+    }
+
+    [AvaloniaFact]
+    public void It_Does_Not_Stretch_In_A_Grid()
+    {
+        var icon = new AvonicIcon { FontSize = 24 };
+        using var scene = new Scene(new Grid { Width = 100, Height = 100, Children = { icon } }, 200, 200);
+
+        Assert.Equal(new Size(24, 24), icon.Bounds.Size);
+    }
+
+    [AvaloniaFact]
+    public void It_Sits_At_The_Start_Of_A_Vertical_StackPanel()
+    {
+        var icon = new AvonicIcon { FontSize = 24 };
+        using var scene = new Scene(new StackPanel { Width = 100, Children = { icon } }, 200, 200);
+
+        Assert.Equal(0, icon.Bounds.X);
+        Assert.Equal(24, icon.Bounds.Width);
+    }
+
+    // An app can still ask for it.
+    [AvaloniaFact]
+    public void An_Explicit_Stretch_Fills_The_Parent()
+    {
+        var icon = new AvonicIcon { FontSize = 24, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+        using var scene = new Scene(new Border { Width = 64, Height = 64, Child = icon }, 200, 200);
+
+        Assert.Equal(new Size(64, 64), icon.Bounds.Size);
     }
 
     // preserveAspectRatio="xMidYMid meet": a 32 square, centred in a 64 by 32 box.
@@ -563,6 +649,20 @@ public sealed class AvonicIconTests : IDisposable
         Assert.NotEqual(White, PixelAt(Frame(scene), 48, 32));
     }
 
+    // Under an LTR parent, the icon's mirror transform doesn't change, so nothing else repaints it.
+    [AvaloniaFact]
+    public void Setting_FlowDirection_On_The_Icon_Repaints()
+    {
+        var icon = Icon(LeftHalf);
+        icon.FlipRtl = true;
+        using var scene = Show(icon);
+        Assert.NotEqual(White, PixelAt(Frame(scene), 16, 32));
+
+        icon.FlowDirection = FlowDirection.RightToLeft;
+
+        Assert.NotEqual(White, PixelAt(Frame(scene), 48, 32));
+    }
+
     [AvaloniaFact]
     public void Changing_FlowDirection_Repaints()
     {
@@ -664,6 +764,21 @@ public sealed class AvonicIconTests : IDisposable
     public void Literal_Colors_Are_Painted() =>
         Assert.Equal(Colors.Red, PaintedAt(Svg("""<rect fill="#ff0000" x="100" y="100" width="300" height="300"/>"""), 256, 256));
 
+    // CSS puts alpha last. Avalonia's own parser would read this as opaque navy.
+    [AvaloniaFact]
+    public void Eight_Digit_Hex_Is_Rgba()
+    {
+        var pixel = PaintedAt(Svg("""<rect fill="#ff000080" width="512" height="512"/>"""), 256, 256);
+
+        Assert.Equal(255, pixel.R);
+        Assert.InRange(pixel.G, 120, 135);
+        Assert.InRange(pixel.B, 120, 135);
+    }
+
+    [AvaloniaFact]
+    public void Four_Digit_Hex_Is_Rgba() =>
+        Assert.Equal(Colors.Red, PaintedAt(Svg("""<rect fill="#f00f" width="512" height="512"/>"""), 256, 256));
+
     [AvaloniaFact]
     public void Stroke_Attributes_Inherit_From_A_Group()
     {
@@ -694,6 +809,34 @@ public sealed class AvonicIconTests : IDisposable
 
         Assert.Equal(White, PaintedAt(src, 100, 256));
         Assert.NotEqual(White, PaintedAt(src, 400, 256));
+    }
+
+    // Tools such as SVGO run numbers together.
+    [AvaloniaFact]
+    public void Number_Lists_Can_Run_Together()
+    {
+        var src = Svg("""<rect width="100" height="100" transform="translate(300-0)"/><polygon points="0-0 100-0 100 100"/>""");
+
+        Assert.NotEqual(White, PaintedAt(src, 350, 50));
+        Assert.NotEqual(White, PaintedAt(src, 90, 10));
+    }
+
+    [AvaloniaFact]
+    public void A_SkewX_Transform_Is_Applied()
+    {
+        var src = Svg("""<rect width="100" height="512" transform="skewX(45)"/>""");
+
+        Assert.Equal(White, PaintedAt(src, 50, 400));
+        Assert.NotEqual(White, PaintedAt(src, 450, 400));
+    }
+
+    [AvaloniaFact]
+    public void A_SkewY_Transform_Is_Applied()
+    {
+        var src = Svg("""<rect width="512" height="100" transform="skewY(45)"/>""");
+
+        Assert.Equal(White, PaintedAt(src, 400, 50));
+        Assert.NotEqual(White, PaintedAt(src, 400, 450));
     }
 
     [AvaloniaFact]
@@ -823,9 +966,44 @@ public sealed class AvonicIconTests : IDisposable
     [InlineData("")]
     public void Invalid_Content_Is_Blank(string svg) => Assert.Empty(SvgArtwork.Parse(svg).Layers);
 
+    // What design tools export.
     [AvaloniaFact]
-    public void A_Document_Type_Is_Rejected() =>
-        Assert.Empty(SvgArtwork.Parse("""<!DOCTYPE svg [<!ENTITY x "y">]><svg viewBox="0 0 512 512"><rect width="512" height="512"/></svg>""").Layers);
+    public void A_Document_Type_Is_Skipped() =>
+        Assert.Single(SvgArtwork.Parse("""
+            <?xml version="1.0" encoding="utf-8"?>
+            <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+            <svg viewBox="0 0 512 512"><rect width="512" height="512"/></svg>
+            """).Layers);
+
+    [AvaloniaFact]
+    public void Leading_Whitespace_Is_Skipped() =>
+        Assert.Single(SvgArtwork.Parse("""
+
+              <?xml version="1.0"?><svg viewBox="0 0 512 512"><rect width="512" height="512"/></svg>
+            """).Layers);
+
+    // The internal subset is ignored, so the entity is never defined, let alone expanded.
+    [AvaloniaFact]
+    public void Entities_Are_Not_Expanded() =>
+        Assert.Empty(SvgArtwork.Parse("""<!DOCTYPE svg [<!ENTITY x "1">]><svg viewBox="0 0 512 512"><rect width="&x;" height="512"/></svg>""").Layers);
+
+    // A stack overflow would kill the process, and can't be caught.
+    [AvaloniaFact]
+    public void Very_Deep_Nesting_Is_Blank_Not_Fatal()
+    {
+        const int Depth = 200_000;
+        var svg = """<svg viewBox="0 0 512 512">""" + string.Concat(Enumerable.Repeat("<g>", Depth)) + """<rect width="512" height="512"/>""" + string.Concat(Enumerable.Repeat("</g>", Depth)) + "</svg>";
+
+        Assert.Empty(SvgArtwork.Parse(svg).Layers);
+    }
+
+    [AvaloniaFact]
+    public void Ordinary_Nesting_Paints()
+    {
+        var svg = """<svg viewBox="0 0 512 512">""" + string.Concat(Enumerable.Repeat("<g>", 50)) + """<rect width="512" height="512"/>""" + string.Concat(Enumerable.Repeat("</g>", 50)) + "</svg>";
+
+        Assert.Single(SvgArtwork.Parse(svg).Layers);
+    }
 
     [AvaloniaFact]
     public void An_Invalid_Path_Paints_Nothing_And_Is_Not_Fatal() =>

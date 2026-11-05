@@ -14,6 +14,7 @@ namespace Avonic.Components.Tests.Controls;
 /// Real frames for the compare step. With <c>AVONIC_CAPTURE_DIR</c> set they're also saved, for
 /// <c>tools/ionic-ref/compare-icons.js</c> and <c>COMPARISON.md</c>.
 /// </summary>
+[Collection(IconStoreCollection.Name)]
 public class AvonicIconCaptureTests
 {
     private static unsafe bool HasInk(WriteableBitmap bitmap, int x0, int y0, int size)

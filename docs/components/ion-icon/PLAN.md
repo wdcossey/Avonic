@@ -79,7 +79,8 @@ Each becomes a test.
 4. Names are lowercased: `HEART` works.
 5. A name with anything but letters, digits and `-` resolves to nothing, as does an empty or blank one.
 6. An unknown name, a missing source or no name at all leaves the box at full size and paints nothing.
-7. A registered name beats the bundled artwork. Changing any of these props reloads the icon.
+7. A registered name beats the bundled artwork. Changing any of these props reloads the icon, except that a
+   change resolving to no icon at all keeps the last one, because `loadIcon` only sets content `if (url)`.
 
 **Registry (`addIcons`)**
 
@@ -88,7 +89,8 @@ Each becomes a test.
 
 **Sizing (`icon.css`)**
 
-10. The box is `1em` square, following an inherited `FontSize`.
+10. The box is `1em` square, following an inherited `FontSize`. It's `inline-block`, so it stays that size at the
+    start of its parent, rather than stretching to fill it.
 11. `Size` gives 18 or 32, and beats a local `FontSize`.
 12. An explicit `Width` and `Height` win, and the artwork is centred and scaled to fit (`xMidYMid meet`).
 13. Painting is clipped to the box (`contain: strict`, `overflow: hidden`).
@@ -196,6 +198,9 @@ and a security review in a control that doesn't otherwise need any, so it waits 
 **SVG support is a subset:** `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon` and `g`, with
 presentation attributes, `fill` and `stroke` colours, and the classes above. Gradients, `<text>`, `<image>`,
 `style=` and `<style>` aren't drawn. This covers every built-in icon, and it's documented for custom ones.
+
+An SVG has to be well-formed XML, where Ionic's `innerHTML` is more forgiving, and more than 256 levels of nesting is
+blank. A `<!DOCTYPE>` is skipped, and its entities are never expanded.
 
 ## Design
 

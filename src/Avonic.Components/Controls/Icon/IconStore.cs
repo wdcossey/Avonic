@@ -173,7 +173,7 @@ internal static partial class IconStore
         {
             try
             {
-                return Encoding.UTF8.GetString(Convert.FromBase64String(data));
+                return Encoding.UTF8.GetString(Convert.FromBase64String(Uri.UnescapeDataString(data)));
             }
             catch (FormatException)
             {

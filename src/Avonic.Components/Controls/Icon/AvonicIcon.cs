@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Automation.Peers;
 using Avalonia.Controls.Documents;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avonic.Components.Behaviors;
@@ -80,7 +81,11 @@ public class AvonicIcon : Control
     static AvonicIcon()
     {
         AffectsMeasure<AvonicIcon>(FontSizeProperty, SizeProperty);
-        AffectsRender<AvonicIcon>(ForegroundProperty, ColorProperty, ColorPalette.BaseProperty, FlipRtlProperty);
+        AffectsRender<AvonicIcon>(ForegroundProperty, ColorProperty, ColorPalette.BaseProperty, FlipRtlProperty, FlowDirectionProperty);
+
+        // display: inline-block. A 1em box at the start of its parent, rather than stretching to fill it.
+        HorizontalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(HorizontalAlignment.Left);
+        VerticalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(VerticalAlignment.Top);
 
         IconNameProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
         MdProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
@@ -201,19 +206,23 @@ public class AvonicIcon : Control
             IconResolver.GetSrc(Src) is { } src ? IconStore.GetSource(src) :
             _iconName is not null ? IconStore.GetNamed(_iconName) :
             IconResolver.GetSrc(Icon) is { } iconSrc ? IconStore.GetSource(iconSrc) :
-            SvgArtwork.Empty;
+            null;
 
-        _artwork = artwork;
-
-        _strokeWidthSubscription?.Dispose();
-        _strokeWidthSubscription = null;
-        if (artwork.UsesStrokeWidthVariable)
+        // `if (url)`: a change to no icon at all leaves the last one showing.
+        if (artwork is not null)
         {
-            _strokeWidthSubscription = this.GetResourceObservable(StrokeWidthKey).Subscribe(new Avalonia.Reactive.AnonymousObserver<object?>(value =>
+            _artwork = artwork;
+
+            _strokeWidthSubscription?.Dispose();
+            _strokeWidthSubscription = null;
+            if (artwork.UsesStrokeWidthVariable)
             {
-                _strokeWidth = value is double width ? width : DefaultStrokeWidth;
-                InvalidateVisual();
-            }));
+                _strokeWidthSubscription = this.GetResourceObservable(StrokeWidthKey).Subscribe(new Avalonia.Reactive.AnonymousObserver<object?>(value =>
+                {
+                    _strokeWidth = value is double width ? width : DefaultStrokeWidth;
+                    InvalidateVisual();
+                }));
+            }
         }
 
         UpdatePseudoClasses();
