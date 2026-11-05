@@ -39,6 +39,18 @@ const DEFAULT_HTML = {
         '<ion-item lines="none"><ion-label>Item three</ion-label></ion-item></ion-list>',
     'ion-button':
         '<ion-button>Default</ion-button> <ion-button fill="outline">Outline</ion-button> <ion-button fill="clear">Clear</ion-button>',
+    'ion-icon':
+        '<div style="font-size:24px">' +
+        ['heart', 'heart-outline', 'heart-sharp', 'search', 'search-outline', 'search-sharp', 'logo-github']
+            .map(n => `<ion-icon name="${n}"></ion-icon> `).join('') + '</div>' +
+        '<div><ion-icon name="star" size="small"></ion-icon> <ion-icon name="star" style="font-size:24px"></ion-icon> ' +
+        '<ion-icon name="star" size="large"></ion-icon> <ion-icon name="star" style="font-size:48px"></ion-icon></div>' +
+        '<div style="font-size:24px">' +
+        ['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger', 'light', 'medium', 'dark']
+            .map(c => `<ion-icon name="ellipse" color="${c}"></ion-icon> `).join('') + '</div>' +
+        '<div style="font-size:24px" dir="rtl"><ion-icon name="arrow-back"></ion-icon> <ion-icon name="chevron-forward"></ion-icon> ' +
+        '<ion-icon name="chevron-forward" flip-rtl="false"></ion-icon> <ion-icon name="trending-up"></ion-icon> ' +
+        '<ion-icon name="trending-up" flip-rtl="true"></ion-icon></div>',
 };
 const snippet = opt('--html', DEFAULT_HTML[tag] ?? `<${tag}></${tag}>`);
 const outDir  = path.resolve(ROOT, opt('--out', path.join('docs', 'components', tag, 'ref')));
@@ -46,8 +58,10 @@ const outDir  = path.resolve(ROOT, opt('--out', path.join('docs', 'components', 
 // CSS vars for this tag, from core.json (deduped across ios/md).
 const core = JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modules/@ionic/docs/core.json'), 'utf8'));
 const comp = core.components.find(c => c.tag === tag);
-if (!comp) { console.error(`unknown component "${tag}"`); process.exit(1); }
-const cssVars = [...new Set(comp.styles.map(s => s.name))];
+// ion-icon comes from the ionicons package, so core.json doesn't list it, but the bundle includes it.
+const CSS_VARS_OUTSIDE_CORE = { 'ion-icon': ['--ionicon-stroke-width'] };
+if (!comp && !CSS_VARS_OUTSIDE_CORE[tag]) { console.error(`unknown component "${tag}"`); process.exit(1); }
+const cssVars = comp ? [...new Set(comp.styles.map(s => s.name))] : CSS_VARS_OUTSIDE_CORE[tag];
 
 // ── tiny static server rooted at the repo so the ESM bundle can lazy-load its chunks ───────
 const MIME = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.html': 'text/html',

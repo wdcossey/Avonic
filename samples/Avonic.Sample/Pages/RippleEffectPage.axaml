@@ -22,9 +22,10 @@
         <TextBlock Text="Expands from the centre and overflows the surface (e.g. icon buttons)." Foreground="#666" FontSize="13" Margin="0,0,0,8" />
         <Border Width="56" Height="56" CornerRadius="28" Background="#E0E0E0" HorizontalAlignment="Left" Margin="24,8"
                 b:Activatable.IsEnabled="True">
-            <!-- An icon would sit here once ion-icon exists; the ripple is the demonstration. -->
             <Panel>
                 <c:AvonicRippleEffect Type="Unbounded" Foreground="#3880FF" />
+                <c:AvonicIcon IconName="heart" Foreground="#3880FF" FontSize="24"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Panel>
         </Border>
 

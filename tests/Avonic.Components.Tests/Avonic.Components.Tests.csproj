@@ -26,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Controls/TestIcon.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

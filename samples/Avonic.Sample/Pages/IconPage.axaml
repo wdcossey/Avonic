@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.IconPage"
+             TextElement.FontSize="24">
+
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="8">
+
+            <TextBlock Text="Variants" FontWeight="SemiBold" FontSize="14" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <c:AvonicIcon IconName="heart" />
+                <c:AvonicIcon IconName="heart-outline" />
+                <c:AvonicIcon IconName="heart-sharp" />
+                <c:AvonicIcon IconName="search" />
+                <c:AvonicIcon IconName="search-outline" />
+                <c:AvonicIcon IconName="search-sharp" />
+                <c:AvonicIcon IconName="logo-github" />
+            </StackPanel>
+
+            <TextBlock Text="Sizes" FontWeight="SemiBold" FontSize="14" Margin="0,16,0,0" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <c:AvonicIcon IconName="star" Size="Small" />
+                <c:AvonicIcon IconName="star" />
+                <c:AvonicIcon IconName="star" Size="Large" />
+                <c:AvonicIcon IconName="star" FontSize="48" />
+            </StackPanel>
+
+            <TextBlock Text="Colours" FontWeight="SemiBold" FontSize="14" Margin="0,16,0,0" />
+            <WrapPanel>
+                <c:AvonicIcon IconName="ellipse" Color="primary" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="secondary" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="tertiary" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="success" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="warning" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="danger" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="light" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="medium" Margin="0,0,16,8" />
+                <c:AvonicIcon IconName="ellipse" Color="dark" Margin="0,0,16,8" />
+            </WrapPanel>
+
+            <TextBlock Text="Right to left" FontWeight="SemiBold" FontSize="14" Margin="0,16,0,0" />
+            <TextBlock Text="Arrows and chevrons flip by themselves. The others only with FlipRtl."
+                       Foreground="#666" FontSize="13" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="16" FlowDirection="RightToLeft" HorizontalAlignment="Left">
+                <c:AvonicIcon IconName="arrow-back" />
+                <c:AvonicIcon IconName="chevron-forward" />
+                <c:AvonicIcon IconName="chevron-forward" FlipRtl="False" />
+                <c:AvonicIcon IconName="trending-up" />
+                <c:AvonicIcon IconName="trending-up" FlipRtl="True" />
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
