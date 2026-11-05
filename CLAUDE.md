@@ -22,11 +22,14 @@ Ionic implementation before writing a line, and you build and test before every 
 ```
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
-  Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click)
+  Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click;
+                         ColorPalette = the `color` prop, see docs/infra/color-system/README.md)
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
 src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS variable); AvonicTheme
                          merges every discovered Tokens/**/*.axaml and Controls/**/*.axaml
+  Tokens/Colors.axaml    Ionic's palette; Tokens/Global.axaml: global --ion-* variables
+  Tokens/Palettes/       merged by the consumer, not the theme (Dark.axaml)
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step
 samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]
@@ -83,7 +86,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 |---|---|---|
 | `@Prop() fooBar` | `StyledProperty` `FooBar`, same name | `labelPlacement` → `LabelPlacement`; `pin` → `Pin` (not `ShowPin`) |
 | `disabled` | `IsEnabled` (Avalonia built-in) — the only renamed prop | |
-| `color` | `string? Color`, resolved to `Avonic.Color.<Name>` keys | `color="danger"` → `Avonic.Color.Danger` |
+| `color` | `string? Color` via `ColorPalette.ColorProperty.AddOwner`, resolved to `Avonic.Color.<Name>` keys | `color="danger"` → `Avonic.Color.Danger` |
+| `.ion-color`, `--ion-color-base` | pseudoclass `:ion-color`, `ColorPalette.Base` (also `Contrast`, `Shade`, `Tint`, `BaseColor`, `ContrastColor`) | `:host(.ion-color)` → `^:ion-color` |
 | `mode` | not exposed (ADR 0001) | |
 | `@Event() ionFoo` | routed event `IonFooEvent`, CLR event `IonFoo` — prefix kept, no collisions with Avalonia members | `ionChange` → `IonChange` |
 | `@Method() foo()` | public method `Foo()`; `Promise<T>` → `T` (sync) unless genuinely async | `close()` → `Close()` |

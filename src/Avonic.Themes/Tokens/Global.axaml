@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Ionic's global variables with their md defaults. Most aren't set in Ionic's light CSS and are
+        read with a fallback, so these are those fallback values. See docs/infra/color-system/PLAN.md.
+        A token that falls back to another variable in Ionic is a brush that follows that variable.
+    -->
+
+    <!-- ion-background-color, ion-text-color -->
+    <Color x:Key="Avonic.BackgroundColor">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <Color x:Key="Avonic.TextColor">#000000</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorBrush" Color="{DynamicResource Avonic.TextColor}" />
+
+    <!-- ion-background-color-step-N: black mixed into white at N/1000 -->
+    <Color x:Key="Avonic.BackgroundColorStep50">#F2F2F2</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep50Brush" Color="{DynamicResource Avonic.BackgroundColorStep50}" />
+    <Color x:Key="Avonic.BackgroundColorStep100">#E6E6E6</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep100Brush" Color="{DynamicResource Avonic.BackgroundColorStep100}" />
+    <Color x:Key="Avonic.BackgroundColorStep150">#D9D9D9</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep150Brush" Color="{DynamicResource Avonic.BackgroundColorStep150}" />
+    <Color x:Key="Avonic.BackgroundColorStep200">#CCCCCC</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep200Brush" Color="{DynamicResource Avonic.BackgroundColorStep200}" />
+    <Color x:Key="Avonic.BackgroundColorStep250">#BFBFBF</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep250Brush" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
+    <Color x:Key="Avonic.BackgroundColorStep300">#B3B3B3</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep300Brush" Color="{DynamicResource Avonic.BackgroundColorStep300}" />
+    <Color x:Key="Avonic.BackgroundColorStep350">#A6A6A6</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep350Brush" Color="{DynamicResource Avonic.BackgroundColorStep350}" />
+    <Color x:Key="Avonic.BackgroundColorStep400">#999999</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep400Brush" Color="{DynamicResource Avonic.BackgroundColorStep400}" />
+    <Color x:Key="Avonic.BackgroundColorStep450">#8C8C8C</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep450Brush" Color="{DynamicResource Avonic.BackgroundColorStep450}" />
+    <Color x:Key="Avonic.BackgroundColorStep500">#808080</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep500Brush" Color="{DynamicResource Avonic.BackgroundColorStep500}" />
+    <Color x:Key="Avonic.BackgroundColorStep550">#737373</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep550Brush" Color="{DynamicResource Avonic.BackgroundColorStep550}" />
+    <Color x:Key="Avonic.BackgroundColorStep600">#666666</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep600Brush" Color="{DynamicResource Avonic.BackgroundColorStep600}" />
+    <Color x:Key="Avonic.BackgroundColorStep650">#595959</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep650Brush" Color="{DynamicResource Avonic.BackgroundColorStep650}" />
+    <Color x:Key="Avonic.BackgroundColorStep700">#4D4D4D</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep700Brush" Color="{DynamicResource Avonic.BackgroundColorStep700}" />
+    <Color x:Key="Avonic.BackgroundColorStep750">#404040</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep750Brush" Color="{DynamicResource Avonic.BackgroundColorStep750}" />
+    <Color x:Key="Avonic.BackgroundColorStep800">#333333</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep800Brush" Color="{DynamicResource Avonic.BackgroundColorStep800}" />
+    <Color x:Key="Avonic.BackgroundColorStep850">#262626</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep850Brush" Color="{DynamicResource Avonic.BackgroundColorStep850}" />
+    <Color x:Key="Avonic.BackgroundColorStep900">#1A1A1A</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep900Brush" Color="{DynamicResource Avonic.BackgroundColorStep900}" />
+    <Color x:Key="Avonic.BackgroundColorStep950">#0D0D0D</Color>
+    <SolidColorBrush x:Key="Avonic.BackgroundColorStep950Brush" Color="{DynamicResource Avonic.BackgroundColorStep950}" />
+
+    <!-- ion-text-color-step-N: the reverse of the background ramp -->
+    <Color x:Key="Avonic.TextColorStep50">#0D0D0D</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep50Brush" Color="{DynamicResource Avonic.TextColorStep50}" />
+    <Color x:Key="Avonic.TextColorStep100">#1A1A1A</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep100Brush" Color="{DynamicResource Avonic.TextColorStep100}" />
+    <Color x:Key="Avonic.TextColorStep150">#262626</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep150Brush" Color="{DynamicResource Avonic.TextColorStep150}" />
+    <Color x:Key="Avonic.TextColorStep200">#333333</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep200Brush" Color="{DynamicResource Avonic.TextColorStep200}" />
+    <Color x:Key="Avonic.TextColorStep250">#404040</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep250Brush" Color="{DynamicResource Avonic.TextColorStep250}" />
+    <Color x:Key="Avonic.TextColorStep300">#4D4D4D</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep300Brush" Color="{DynamicResource Avonic.TextColorStep300}" />
+    <Color x:Key="Avonic.TextColorStep350">#595959</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep350Brush" Color="{DynamicResource Avonic.TextColorStep350}" />
+    <Color x:Key="Avonic.TextColorStep400">#666666</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep400Brush" Color="{DynamicResource Avonic.TextColorStep400}" />
+    <Color x:Key="Avonic.TextColorStep450">#737373</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep450Brush" Color="{DynamicResource Avonic.TextColorStep450}" />
+    <Color x:Key="Avonic.TextColorStep500">#808080</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep500Brush" Color="{DynamicResource Avonic.TextColorStep500}" />
+    <Color x:Key="Avonic.TextColorStep550">#8C8C8C</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep550Brush" Color="{DynamicResource Avonic.TextColorStep550}" />
+    <Color x:Key="Avonic.TextColorStep600">#999999</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep600Brush" Color="{DynamicResource Avonic.TextColorStep600}" />
+    <Color x:Key="Avonic.TextColorStep650">#A6A6A6</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep650Brush" Color="{DynamicResource Avonic.TextColorStep650}" />
+    <Color x:Key="Avonic.TextColorStep700">#B3B3B3</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep700Brush" Color="{DynamicResource Avonic.TextColorStep700}" />
+    <Color x:Key="Avonic.TextColorStep750">#BFBFBF</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep750Brush" Color="{DynamicResource Avonic.TextColorStep750}" />
+    <Color x:Key="Avonic.TextColorStep800">#CCCCCC</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep800Brush" Color="{DynamicResource Avonic.TextColorStep800}" />
+    <Color x:Key="Avonic.TextColorStep850">#D9D9D9</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep850Brush" Color="{DynamicResource Avonic.TextColorStep850}" />
+    <Color x:Key="Avonic.TextColorStep900">#E6E6E6</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep900Brush" Color="{DynamicResource Avonic.TextColorStep900}" />
+    <Color x:Key="Avonic.TextColorStep950">#F2F2F2</Color>
+    <SolidColorBrush x:Key="Avonic.TextColorStep950Brush" Color="{DynamicResource Avonic.TextColorStep950}" />
+
+    <!-- ion-border-color: rgba(0, 0, 0, 0.13) -->
+    <Color x:Key="Avonic.BorderColor">#21000000</Color>
+    <SolidColorBrush x:Key="Avonic.BorderColorBrush" Color="{DynamicResource Avonic.BorderColor}" />
+
+    <!-- ion-backdrop-color, ion-backdrop-opacity, ion-placeholder-opacity -->
+    <Color x:Key="Avonic.BackdropColor">#000000</Color>
+    <SolidColorBrush x:Key="Avonic.BackdropColorBrush" Color="{DynamicResource Avonic.BackdropColor}" />
+    <x:Double x:Key="Avonic.BackdropOpacity">0.32</x:Double>
+    <x:Double x:Key="Avonic.PlaceholderOpacity">0.6</x:Double>
+
+    <!-- Fall back to another variable in Ionic -->
+    <SolidColorBrush x:Key="Avonic.PlaceholderColorBrush" Color="{DynamicResource Avonic.TextColorStep600}" />
+    <SolidColorBrush x:Key="Avonic.OverlayBackgroundColorBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <SolidColorBrush x:Key="Avonic.ItemBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <SolidColorBrush x:Key="Avonic.ToolbarBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+
+    <!-- ion-font-family (html.md) -->
+    <FontFamily x:Key="Avonic.FontFamily">Roboto, Helvetica Neue, sans-serif</FontFamily>
+
+</ResourceDictionary>

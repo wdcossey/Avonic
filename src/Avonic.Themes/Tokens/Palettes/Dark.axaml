@@ -1,0 +1,123 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Ionic's dark palette for md, from css/palettes/dark.always.css (@ionic/core 8.8.1).
+        Not merged by AvonicTheme, because it would replace the light values. Merge it yourself:
+
+            <ResourceInclude Source="avares://Avonic.Themes/Tokens/Palettes/Dark.axaml" />
+
+        The brushes in Colors.axaml and Global.axaml follow these Color keys, so only the keys that
+        change are here.
+    -->
+
+    <!-- primary -->
+    <Color x:Key="Avonic.Color.Primary">#4D8DFF</Color>
+    <Color x:Key="Avonic.Color.PrimaryContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.PrimaryShade">#447CE0</Color>
+    <Color x:Key="Avonic.Color.PrimaryTint">#5F98FF</Color>
+
+    <!-- secondary -->
+    <Color x:Key="Avonic.Color.Secondary">#46B1FF</Color>
+    <Color x:Key="Avonic.Color.SecondaryContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.SecondaryShade">#3E9CE0</Color>
+    <Color x:Key="Avonic.Color.SecondaryTint">#59B9FF</Color>
+
+    <!-- tertiary -->
+    <Color x:Key="Avonic.Color.Tertiary">#8482FB</Color>
+    <Color x:Key="Avonic.Color.TertiaryContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.TertiaryShade">#7472DD</Color>
+    <Color x:Key="Avonic.Color.TertiaryTint">#908FFB</Color>
+
+    <!-- success -->
+    <Color x:Key="Avonic.Color.Success">#2DD55B</Color>
+    <Color x:Key="Avonic.Color.SuccessContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.SuccessShade">#28BB50</Color>
+    <Color x:Key="Avonic.Color.SuccessTint">#42D96B</Color>
+
+    <!-- warning -->
+    <Color x:Key="Avonic.Color.Warning">#FFCE31</Color>
+    <Color x:Key="Avonic.Color.WarningContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.WarningShade">#E0B52B</Color>
+    <Color x:Key="Avonic.Color.WarningTint">#FFD346</Color>
+
+    <!-- danger -->
+    <Color x:Key="Avonic.Color.Danger">#F24C58</Color>
+    <Color x:Key="Avonic.Color.DangerContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.DangerShade">#D5434D</Color>
+    <Color x:Key="Avonic.Color.DangerTint">#F35E69</Color>
+
+    <!-- light -->
+    <Color x:Key="Avonic.Color.Light">#222428</Color>
+    <Color x:Key="Avonic.Color.LightContrast">#FFFFFF</Color>
+    <Color x:Key="Avonic.Color.LightShade">#1E2023</Color>
+    <Color x:Key="Avonic.Color.LightTint">#383A3E</Color>
+
+    <!-- medium -->
+    <Color x:Key="Avonic.Color.Medium">#989AA2</Color>
+    <Color x:Key="Avonic.Color.MediumContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.MediumShade">#86888F</Color>
+    <Color x:Key="Avonic.Color.MediumTint">#A2A4AB</Color>
+
+    <!-- dark -->
+    <Color x:Key="Avonic.Color.Dark">#F4F5F8</Color>
+    <Color x:Key="Avonic.Color.DarkContrast">#000000</Color>
+    <Color x:Key="Avonic.Color.DarkShade">#D7D8DA</Color>
+    <Color x:Key="Avonic.Color.DarkTint">#F5F6F9</Color>
+
+    <!-- ion-background-color, ion-text-color -->
+    <Color x:Key="Avonic.BackgroundColor">#121212</Color>
+    <Color x:Key="Avonic.TextColor">#FFFFFF</Color>
+
+    <!-- ion-background-color-step-N -->
+    <Color x:Key="Avonic.BackgroundColorStep50">#1E1E1E</Color>
+    <Color x:Key="Avonic.BackgroundColorStep100">#2A2A2A</Color>
+    <Color x:Key="Avonic.BackgroundColorStep150">#363636</Color>
+    <Color x:Key="Avonic.BackgroundColorStep200">#414141</Color>
+    <Color x:Key="Avonic.BackgroundColorStep250">#4D4D4D</Color>
+    <Color x:Key="Avonic.BackgroundColorStep300">#595959</Color>
+    <Color x:Key="Avonic.BackgroundColorStep350">#656565</Color>
+    <Color x:Key="Avonic.BackgroundColorStep400">#717171</Color>
+    <Color x:Key="Avonic.BackgroundColorStep450">#7D7D7D</Color>
+    <Color x:Key="Avonic.BackgroundColorStep500">#898989</Color>
+    <Color x:Key="Avonic.BackgroundColorStep550">#949494</Color>
+    <Color x:Key="Avonic.BackgroundColorStep600">#A0A0A0</Color>
+    <Color x:Key="Avonic.BackgroundColorStep650">#ACACAC</Color>
+    <Color x:Key="Avonic.BackgroundColorStep700">#B8B8B8</Color>
+    <Color x:Key="Avonic.BackgroundColorStep750">#C4C4C4</Color>
+    <Color x:Key="Avonic.BackgroundColorStep800">#D0D0D0</Color>
+    <Color x:Key="Avonic.BackgroundColorStep850">#DBDBDB</Color>
+    <Color x:Key="Avonic.BackgroundColorStep900">#E7E7E7</Color>
+    <Color x:Key="Avonic.BackgroundColorStep950">#F3F3F3</Color>
+
+    <!-- ion-text-color-step-N -->
+    <Color x:Key="Avonic.TextColorStep50">#F3F3F3</Color>
+    <Color x:Key="Avonic.TextColorStep100">#E7E7E7</Color>
+    <Color x:Key="Avonic.TextColorStep150">#DBDBDB</Color>
+    <Color x:Key="Avonic.TextColorStep200">#D0D0D0</Color>
+    <Color x:Key="Avonic.TextColorStep250">#C4C4C4</Color>
+    <Color x:Key="Avonic.TextColorStep300">#B8B8B8</Color>
+    <Color x:Key="Avonic.TextColorStep350">#ACACAC</Color>
+    <Color x:Key="Avonic.TextColorStep400">#A0A0A0</Color>
+    <Color x:Key="Avonic.TextColorStep450">#949494</Color>
+    <Color x:Key="Avonic.TextColorStep500">#898989</Color>
+    <Color x:Key="Avonic.TextColorStep550">#7D7D7D</Color>
+    <Color x:Key="Avonic.TextColorStep600">#717171</Color>
+    <Color x:Key="Avonic.TextColorStep650">#656565</Color>
+    <Color x:Key="Avonic.TextColorStep700">#595959</Color>
+    <Color x:Key="Avonic.TextColorStep750">#4D4D4D</Color>
+    <Color x:Key="Avonic.TextColorStep800">#414141</Color>
+    <Color x:Key="Avonic.TextColorStep850">#363636</Color>
+    <Color x:Key="Avonic.TextColorStep900">#2A2A2A</Color>
+    <Color x:Key="Avonic.TextColorStep950">#1E1E1E</Color>
+
+    <!-- ion-border-color isn't set in dark: its fallback is ion-background-color-step-150 -->
+    <Color x:Key="Avonic.BorderColor">#363636</Color>
+
+    <!-- Set directly in dark, rather than following the background -->
+    <SolidColorBrush x:Key="Avonic.ItemBackgroundBrush" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="Avonic.ToolbarBackgroundBrush" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="#1E1E1E" />
+
+</ResourceDictionary>

@@ -1,0 +1,100 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Ionic's palette, from css/core.css (@ionic/core 8.8.1). A Color key per variable, plus a brush
+        that follows it. The -rgb variants have no key: a Color already gives alpha.
+        How a control uses these: docs/infra/color-system/README.md
+    -->
+
+    <!-- primary -->
+    <Color x:Key="Avonic.Color.Primary">#0054E9</Color>
+    <SolidColorBrush x:Key="Avonic.Color.PrimaryBrush" Color="{DynamicResource Avonic.Color.Primary}" />
+    <Color x:Key="Avonic.Color.PrimaryContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.PrimaryContrastBrush" Color="{DynamicResource Avonic.Color.PrimaryContrast}" />
+    <Color x:Key="Avonic.Color.PrimaryShade">#004ACD</Color>
+    <SolidColorBrush x:Key="Avonic.Color.PrimaryShadeBrush" Color="{DynamicResource Avonic.Color.PrimaryShade}" />
+    <Color x:Key="Avonic.Color.PrimaryTint">#1A65EB</Color>
+    <SolidColorBrush x:Key="Avonic.Color.PrimaryTintBrush" Color="{DynamicResource Avonic.Color.PrimaryTint}" />
+
+    <!-- secondary -->
+    <Color x:Key="Avonic.Color.Secondary">#0163AA</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SecondaryBrush" Color="{DynamicResource Avonic.Color.Secondary}" />
+    <Color x:Key="Avonic.Color.SecondaryContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SecondaryContrastBrush" Color="{DynamicResource Avonic.Color.SecondaryContrast}" />
+    <Color x:Key="Avonic.Color.SecondaryShade">#015796</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SecondaryShadeBrush" Color="{DynamicResource Avonic.Color.SecondaryShade}" />
+    <Color x:Key="Avonic.Color.SecondaryTint">#1A73B3</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SecondaryTintBrush" Color="{DynamicResource Avonic.Color.SecondaryTint}" />
+
+    <!-- tertiary -->
+    <Color x:Key="Avonic.Color.Tertiary">#6030FF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.TertiaryBrush" Color="{DynamicResource Avonic.Color.Tertiary}" />
+    <Color x:Key="Avonic.Color.TertiaryContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.TertiaryContrastBrush" Color="{DynamicResource Avonic.Color.TertiaryContrast}" />
+    <Color x:Key="Avonic.Color.TertiaryShade">#542AE0</Color>
+    <SolidColorBrush x:Key="Avonic.Color.TertiaryShadeBrush" Color="{DynamicResource Avonic.Color.TertiaryShade}" />
+    <Color x:Key="Avonic.Color.TertiaryTint">#7045FF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.TertiaryTintBrush" Color="{DynamicResource Avonic.Color.TertiaryTint}" />
+
+    <!-- success -->
+    <Color x:Key="Avonic.Color.Success">#2DD55B</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SuccessBrush" Color="{DynamicResource Avonic.Color.Success}" />
+    <Color x:Key="Avonic.Color.SuccessContrast">#000000</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SuccessContrastBrush" Color="{DynamicResource Avonic.Color.SuccessContrast}" />
+    <Color x:Key="Avonic.Color.SuccessShade">#28BB50</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SuccessShadeBrush" Color="{DynamicResource Avonic.Color.SuccessShade}" />
+    <Color x:Key="Avonic.Color.SuccessTint">#42D96B</Color>
+    <SolidColorBrush x:Key="Avonic.Color.SuccessTintBrush" Color="{DynamicResource Avonic.Color.SuccessTint}" />
+
+    <!-- warning -->
+    <Color x:Key="Avonic.Color.Warning">#FFC409</Color>
+    <SolidColorBrush x:Key="Avonic.Color.WarningBrush" Color="{DynamicResource Avonic.Color.Warning}" />
+    <Color x:Key="Avonic.Color.WarningContrast">#000000</Color>
+    <SolidColorBrush x:Key="Avonic.Color.WarningContrastBrush" Color="{DynamicResource Avonic.Color.WarningContrast}" />
+    <Color x:Key="Avonic.Color.WarningShade">#E0AC08</Color>
+    <SolidColorBrush x:Key="Avonic.Color.WarningShadeBrush" Color="{DynamicResource Avonic.Color.WarningShade}" />
+    <Color x:Key="Avonic.Color.WarningTint">#FFCA22</Color>
+    <SolidColorBrush x:Key="Avonic.Color.WarningTintBrush" Color="{DynamicResource Avonic.Color.WarningTint}" />
+
+    <!-- danger -->
+    <Color x:Key="Avonic.Color.Danger">#C5000F</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DangerBrush" Color="{DynamicResource Avonic.Color.Danger}" />
+    <Color x:Key="Avonic.Color.DangerContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DangerContrastBrush" Color="{DynamicResource Avonic.Color.DangerContrast}" />
+    <Color x:Key="Avonic.Color.DangerShade">#AD000D</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DangerShadeBrush" Color="{DynamicResource Avonic.Color.DangerShade}" />
+    <Color x:Key="Avonic.Color.DangerTint">#CB1A27</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DangerTintBrush" Color="{DynamicResource Avonic.Color.DangerTint}" />
+
+    <!-- light -->
+    <Color x:Key="Avonic.Color.Light">#F4F5F8</Color>
+    <SolidColorBrush x:Key="Avonic.Color.LightBrush" Color="{DynamicResource Avonic.Color.Light}" />
+    <Color x:Key="Avonic.Color.LightContrast">#000000</Color>
+    <SolidColorBrush x:Key="Avonic.Color.LightContrastBrush" Color="{DynamicResource Avonic.Color.LightContrast}" />
+    <Color x:Key="Avonic.Color.LightShade">#D7D8DA</Color>
+    <SolidColorBrush x:Key="Avonic.Color.LightShadeBrush" Color="{DynamicResource Avonic.Color.LightShade}" />
+    <Color x:Key="Avonic.Color.LightTint">#F5F6F9</Color>
+    <SolidColorBrush x:Key="Avonic.Color.LightTintBrush" Color="{DynamicResource Avonic.Color.LightTint}" />
+
+    <!-- medium -->
+    <Color x:Key="Avonic.Color.Medium">#636469</Color>
+    <SolidColorBrush x:Key="Avonic.Color.MediumBrush" Color="{DynamicResource Avonic.Color.Medium}" />
+    <Color x:Key="Avonic.Color.MediumContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.MediumContrastBrush" Color="{DynamicResource Avonic.Color.MediumContrast}" />
+    <Color x:Key="Avonic.Color.MediumShade">#57585C</Color>
+    <SolidColorBrush x:Key="Avonic.Color.MediumShadeBrush" Color="{DynamicResource Avonic.Color.MediumShade}" />
+    <Color x:Key="Avonic.Color.MediumTint">#737478</Color>
+    <SolidColorBrush x:Key="Avonic.Color.MediumTintBrush" Color="{DynamicResource Avonic.Color.MediumTint}" />
+
+    <!-- dark -->
+    <Color x:Key="Avonic.Color.Dark">#222428</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DarkBrush" Color="{DynamicResource Avonic.Color.Dark}" />
+    <Color x:Key="Avonic.Color.DarkContrast">#FFFFFF</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DarkContrastBrush" Color="{DynamicResource Avonic.Color.DarkContrast}" />
+    <Color x:Key="Avonic.Color.DarkShade">#1E2023</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DarkShadeBrush" Color="{DynamicResource Avonic.Color.DarkShade}" />
+    <Color x:Key="Avonic.Color.DarkTint">#383A3E</Color>
+    <SolidColorBrush x:Key="Avonic.Color.DarkTintBrush" Color="{DynamicResource Avonic.Color.DarkTint}" />
+
+</ResourceDictionary>

@@ -11,7 +11,7 @@ registrations. The tables in `CLAUDE.md` and `docs/ROADMAP.md` are handled separ
 | Add this file | Picked up by | Mechanism |
 |---|---|---|
 | `src/Avonic.Components/Controls/<Name>/<Name>.axaml` | `AvonicComponentsStyles` | `Controls/**/*.axaml` glob |
-| `src/Avonic.Themes/Tokens/<Name>.axaml` | `AvonicTheme` | `Tokens/**/*.axaml` glob |
+| `src/Avonic.Themes/Tokens/<Name>.axaml` | `AvonicTheme` | `Tokens/**/*.axaml` glob, except `Tokens/Palettes/` |
 | `src/Avonic.Themes/Controls/<Name>.axaml` | `AvonicTheme` | `Controls/**/*.axaml` glob |
 | `samples/Avonic.Sample/Pages/<Name>Page.axaml` | The sample's index | `[SamplePage]` on the page class |
 
