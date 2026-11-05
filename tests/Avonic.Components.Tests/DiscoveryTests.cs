@@ -101,12 +101,12 @@ public class DiscoveryTests
         WithInstalledTheme(AssertResolvesRippleTheme);
 
     [Fact]
-    public void Theme_Merges_Tokens_Before_Controls()
+    public void Theme_Merge_Order_Is_Ordinal()
     {
-        string[] paths = ["Controls/B.axaml", "Tokens/Z.axaml", "Controls/A.axaml", "Tokens/A.axaml"];
+        string[] paths = ["Tokens/Z.axaml", "Controls/b.axaml", "Tokens/A.axaml", "Controls/B.axaml"];
 
         Assert.Equal(
-            ["Tokens/A.axaml", "Tokens/Z.axaml", "Controls/A.axaml", "Controls/B.axaml"],
+            ["Controls/B.axaml", "Controls/b.axaml", "Tokens/A.axaml", "Tokens/Z.axaml"],
             AvonicTheme.OrderForMerge(paths));
     }
 
