@@ -1,0 +1,48 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-text. text.css is one rule with no variable, so there's nothing for Avonic.Themes to add: this is what the
+         Color property means. It's as wide as its content, as inline text and a flex item both are, and the text wraps.
+         The transparent background makes the whole box take input. -->
+    <ControlTheme x:Key="{x:Type c:AvonicText}" TargetType="c:AvonicText">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <!-- overflow: visible. A ContentControl clips otherwise. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so it inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+    <!-- The same rule on the inline form. Its parent can be a TextBlock or another span. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTextSpan}" TargetType="c:AvonicTextSpan">
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[StyledElement].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

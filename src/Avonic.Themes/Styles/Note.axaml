@@ -1,0 +1,32 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- item.md.css's rules for notes. A slot holds one child, so a panel directly in it stands for the slot. The
+         margin: 0 of ::slotted(ion-note) needs no rule: it loses to ::slotted([slot=end]), which is in Item.axaml,
+         and the default slot has no margin. -->
+
+    <!-- ::slotted(ion-note). 0.6875rem doesn't depend on the item's size. align-self: flex-start is the rest of it. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicNote, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicNote">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <!-- ::slotted(ion-note[slot]) -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Panel) > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_End > :is(Panel) > c|AvonicNote">
+        <Setter Property="Padding" Value="0,18,0,10" />
+    </Style>
+
+    <!-- A note's flex-start has to reach the top of the row, and the item centres its slots. A presenter can't tell
+         what's in it, so a note says so with this pseudoclass. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter:has-note">
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <!-- Beside a note in a panel, everything else is still centred, which is align-items: center. Beside a stacked or
+         floating label it's align-items: start, and a stacked or floating label has to fill the panel. -->
+    <Style Selector="c|AvonicItem:not(:item-label-stacked):not(:item-label-floating) /template/ ContentPresenter:has-note > :is(Panel) > :is(Control):not(c|AvonicNote)">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+</Styles>

@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicNote Content="A note" />
+            <c:AvonicNote Color="danger" Content="A danger note" />
+            <c:AvonicItem Content="In an item">
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="Yesterday" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of note.md.css. How it sits in an item is in Styles/Note.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicNote}" TargetType="c:AvonicNote">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <!-- color: var(color), which is var(ion-text-color-step-400) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Note.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep400Brush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so it inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
