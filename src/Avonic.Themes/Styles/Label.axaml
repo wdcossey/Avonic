@@ -25,9 +25,10 @@
         </StackPanel>
     </Design.PreviewWith>
 
-    <!-- A translation of label.md.css and item.md.css's rules for labels, in the order that matters: later
-         beats earlier here, where CSS uses specificity. It's all here, not in a ControlTheme, because nearly
-         every rule depends on an ancestor, and Styles beat a ControlTheme.
+    <!-- A translation of label.md.css and item.md.css's rules for labels, in the order that matters: where CSS
+         uses specificity, here a rule with a pseudoclass or class beats one without, and then later beats
+         earlier. So Item.axaml's stacked end margin already beats the plain end margin below. It's all here, not
+         in a ControlTheme, because nearly every rule depends on an ancestor, and Styles beat a ControlTheme.
 
          A rule for a TextBlock is checked for every TextBlock in the app. A descendant selector then walks
          up its ancestors, which every TextBlock pays for, in a label or not, so they use '>' here. -->
@@ -64,10 +65,6 @@
     </Style>
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicLabel">
         <Setter Property="Margin" Value="16,10,0,10" />
-    </Style>
-    <!-- :host(.item-label-stacked) ::slotted([slot=end]), as in Item.axaml, which comes before this file -->
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicLabel">
-        <Setter Property="Margin" Value="16,7,0,7" />
     </Style>
     <!-- :host(.item-toggle) ::slotted(ion-label), :host(.item-radio) ::slotted(ion-label) -->
     <Style Selector="c|AvonicItem:item-toggle /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-radio /template/ ContentPresenter#PART_End > c|AvonicLabel">
@@ -203,8 +200,8 @@
         <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
-    <!-- :host(.label-stacked) -->
-    <Style Selector="c|AvonicItem c|AvonicLabel:position-stacked">
+    <!-- :host(.label-stacked). Not only in an item, though an inline box can't show the transform. -->
+    <Style Selector="c|AvonicLabel:position-stacked">
         <Setter Property="b:Css.TranslateY" Value="0.5" />
         <Setter Property="b:Css.Scale" Value="0.75" />
         <Setter Property="Transitions">
@@ -215,7 +212,7 @@
     </Style>
 
     <!-- :host(.label-floating) -->
-    <Style Selector="c|AvonicItem c|AvonicLabel:position-floating">
+    <Style Selector="c|AvonicLabel:position-floating">
         <Setter Property="b:Css.TranslateY" Value="0.96" />
         <Setter Property="b:Css.Scale" Value="1" />
         <Setter Property="Transitions">
@@ -228,7 +225,7 @@
     </Style>
 
     <!-- :host(.label-no-animate.label-floating) -->
-    <Style Selector="c|AvonicItem c|AvonicLabel:position-floating:label-no-animate">
+    <Style Selector="c|AvonicLabel:position-floating:label-no-animate">
         <Setter Property="Transitions" Value="{x:Null}" />
     </Style>
 

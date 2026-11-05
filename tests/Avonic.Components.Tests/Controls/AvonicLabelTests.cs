@@ -146,6 +146,30 @@ public class AvonicLabelTests
         });
     }
 
+    [AvaloniaFact]
+    public void B1_Alone_Stacked_Still_Eases_Its_Colour() => InstalledTheme.Run(_ =>
+    {
+        var label = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked };
+        using var scene = InScene(label);
+
+        // Measured: transition: color 0.15s on alone-stacked, with no transform.
+        Assert.IsType<BrushTransition>(Assert.Single(label.Transitions!));
+    });
+
+    [AvaloniaFact]
+    public void B1_Alone_Floating_Still_Has_Its_Transitions() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var label = new AvonicLabel { Content = "x", Position = LabelPosition.Floating };
+        using var scene = InScene(label);
+        Assert.Empty(label.Transitions ?? []);
+
+        clock.At(1000);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(3, label.Transitions!.Count);
+    });
+
     // ── 2, 3. Color ──────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -393,11 +417,11 @@ public class AvonicLabelTests
     public void Content_Alignment_Reaches_The_Content()
     {
         var content = new Border { Width = 10, Height = 10 };
-        var label = new AvonicLabel { Content = content, Width = 100, Height = 100, HorizontalContentAlignment = HorizontalAlignment.Center, VerticalContentAlignment = VerticalAlignment.Center };
+        var label = new AvonicLabel { Content = content, Width = 100, Height = 100, HorizontalContentAlignment = HorizontalAlignment.Right, VerticalContentAlignment = VerticalAlignment.Bottom };
         var host = new StackPanel { Children = { label } };
         using var scene = new Scene(host);
 
-        Assert.Equal(new Point(45, 45), content.TranslatePoint(default, label));
+        Assert.Equal(new Point(90, 90), content.TranslatePoint(default, label));
     }
 
     // ── 7. Margins ───────────────────────────────────────────────────────────────────────────
