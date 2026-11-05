@@ -44,6 +44,20 @@ const DEFAULT_HTML = {
         '<ion-item color="primary">Primary</ion-item>' +
         '<ion-item disabled button>Disabled</ion-item>' +
         '<div dir="rtl"><ion-item detail><ion-icon name="heart" slot="start"></ion-icon>RTL<ion-icon name="star" slot="end"></ion-icon></ion-item></div>',
+    // The same content as Reference_Page in AvonicLabelCaptureTests.
+    'ion-label':
+        '<ion-item><ion-label>Default</ion-label></ion-item>' +
+        '<ion-item><ion-label color="danger">Danger</ion-label></ion-item>' +
+        '<ion-item color="primary"><ion-label>In a primary item<p>Paragraph</p></ion-label></ion-item>' +
+        '<ion-item><ion-label><h1>Heading one</h1><h2>Heading two</h2><h3>Heading three</h3><p>Paragraph</p></ion-label></ion-item>' +
+        '<ion-item><ion-label class="ion-text-wrap">Wrapped text that certainly has to wrap around because it does not fit on one line</ion-label></ion-item>' +
+        '<ion-item><ion-label class="ion-text-nowrap">Text that does not wrap, so it certainly has to end with an ellipsis instead</ion-label></ion-item>' +
+        '<ion-item><ion-label position="fixed">Fixed</ion-label></ion-item>' +
+        '<ion-item><ion-label position="stacked">Stacked</ion-label></ion-item>' +
+        '<ion-item class="ion-focused"><ion-label position="stacked">Stacked and focused</ion-label></ion-item>' +
+        '<ion-item><ion-label position="floating">Floating, pushed out of the row</ion-label></ion-item>' +
+        '<ion-item class="ion-focused"><ion-label position="floating">Floating and focused</ion-label></ion-item>' +
+        '<div dir="rtl"><ion-item><ion-label position="stacked">RTL stacked</ion-label></ion-item></div>',
     'ion-button':
         '<ion-button>Default</ion-button> <ion-button fill="outline">Outline</ion-button> <ion-button fill="clear">Clear</ion-button>',
     'ion-icon':

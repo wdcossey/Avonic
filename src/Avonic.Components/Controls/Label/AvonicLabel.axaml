@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-label: structure only. The look is in Avonic.Themes/Styles/Label.axaml. Text wraps, as it does in
+         a browser. The transparent background makes the whole box take input, as a browser's element does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicLabel}" TargetType="c:AvonicLabel">
+        <Setter Property="Background" Value="Transparent" />
+        <!-- overflow: visible. A ContentControl clips otherwise. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

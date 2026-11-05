@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-label's one variable. It is "initial" in Ionic, so the text inherits. Any brush overrides it,
+         inside an item only, as in Ionic. -->
+    <b:CssUnset x:Key="Avonic.Label.Color" />
+
+</ResourceDictionary>

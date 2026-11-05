@@ -25,7 +25,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Behaviors/             Ionic's utilities as attached behaviours (Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
-                         Css = var(), em and padding values for themes)
+                         Css = var(), em, padding and transform values for themes)
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -109,6 +109,11 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `--foo-bar` on `ion-item` | `Avonic.Item.FooBar` | `--inner-padding-start` → `Avonic.Item.InnerPaddingStart` |
 | `--foo` falling back to something else | key set to `<b:CssUnset />`, read through `Css.Var` with the fallback as the next value | `--color-hover: var(--color)`; `currentColor` is the host's `Foreground` |
 | `1.25em` | `Css.Em` on the font size | `--detail-icon-font-size` → factor `1.25` |
+| `color: inherit` | `$parent[Control].(TextElement.Foreground)`, as the last value of a `Css.Var` | A binding that yields nothing gives the default, not the inherited value |
+| `translateY(50%) scale(0.75)` | `Css.TranslateScale` on `Bounds`, with the fraction and the scale as `ConverterParameter` | `0.5,0.75` |
+| `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c|AvonicItem:item-input c|AvonicLabel` |
+| A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
+| `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |
 | `::slotted(ion-foo[slot=start])` | `c\|AvonicHost /template/ ContentPresenter#PART_Start > c\|AvonicFoo`, in `Styles/` | `>` means direct children, as `::slotted` does |
 | `.ion-focusable`, `.ion-focused` | `FocusVisible.IsEnabled`, `:ion-focused` | |
 | `outline: none` | `FocusAdorner` set to `{x:Null}` in the theme | Unset falls back to the base theme's dashed rectangle. It reads null either way, so a test has to check the `AdornerLayer` |
