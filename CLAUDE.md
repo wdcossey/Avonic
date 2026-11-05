@@ -96,7 +96,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `part="foo"` | template element `PART_Foo` | `native` → `PART_Native` |
 | host class from a prop | pseudoclass `:<prop>-<value>` | `button-solid` → `:fill-solid` |
 | `--ion-color-primary` | `Avonic.Color.Primary` (`Color`) + `Avonic.Color.PrimaryBrush` | keep Ionic's `-contrast` / `-shade` / `-tint` names |
-| `--ion-foo` | `Avonic.Foo` | |
+| `--ion-foo` | `Avonic.Foo` | a literal colour is `Color` + `Avonic.FooBrush` |
+| `--ion-foo` falling back to another variable | `Avonic.FooBrush` only, following that variable | `--ion-item-background` → `Avonic.ItemBackgroundBrush` |
 | `--foo-bar` on `ion-item` | `Avonic.Item.FooBar` | `--inner-padding-start` → `Avonic.Item.InnerPaddingStart` |
 | string-union prop `'a' \| 'b'` | enum `<Component><Prop>` | `ion-ripple-effect` `type` → `RippleEffectType { Bounded, Unbounded }` |
 | visual constant with **no** CSS variable | a constant in `Avonic.Components` — it is behaviour, not theme | ripple opacity 0.16, 225 ms expand |

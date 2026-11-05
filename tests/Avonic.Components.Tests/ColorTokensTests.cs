@@ -58,21 +58,7 @@ public partial class ColorTokensTests
             .ToDictionary(pair => pair[0].Trim(), pair => pair[1].Trim());
     }
 
-    private static void WithTheme(Action test)
-    {
-        var app = Application.Current!;
-        var theme = new AvonicTheme();
-        app.Styles.Add(theme);
-        try
-        {
-            Dispatcher.UIThread.RunJobs();
-            test();
-        }
-        finally
-        {
-            app.Styles.Remove(theme);
-        }
-    }
+    private static void WithTheme(Action test) => InstalledTheme.Run(_ => test());
 
     private static void WithDark(Action test) => WithTheme(() =>
     {
@@ -244,7 +230,8 @@ public partial class ColorTokensTests
         Assert.True(checkedCount > 40, $"Only {checkedCount} fallbacks found: the pattern probably no longer matches");
     }
 
-    // Each is var(--ion-…, var(--ion-background-color, #fff)) in Ionic.
+    // Each falls back to --ion-background-color in Ionic. A card goes through --ion-item-background on
+    // the way, which a brush can't follow; see "A limit of always-defined keys" in the plan.
     [AvaloniaTheory]
     [InlineData("Avonic.OverlayBackgroundColorBrush")]
     [InlineData("Avonic.ItemBackgroundBrush")]
@@ -365,13 +352,27 @@ public partial class ColorTokensTests
         });
     }
 
+    // One brush held through both changes, as a shown control holds it.
     [AvaloniaFact]
-    public void Removing_Dark_Restores_Light()
+    public void Dark_Can_Be_Merged_And_Removed_At_Runtime() => WithTheme(() =>
     {
-        Color primary = default;
-        WithDark(() => primary = BrushColor("Avonic.Color.PrimaryBrush"));
-        Assert.Equal(Color.Parse("#4d8dff"), primary);
+        var app = Application.Current!;
+        var brush = Resource<ISolidColorBrush>("Avonic.Color.PrimaryBrush");
+        Assert.Equal(Color.Parse("#0054e9"), brush.Color);
 
-        WithTheme(() => Assert.Equal(Color.Parse("#0054e9"), BrushColor("Avonic.Color.PrimaryBrush")));
-    }
+        var dark = Dark();
+        app.Resources.MergedDictionaries.Add(dark);
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(Color.Parse("#4d8dff"), brush.Color);
+        }
+        finally
+        {
+            app.Resources.MergedDictionaries.Remove(dark);
+        }
+
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(Color.Parse("#0054e9"), brush.Color);
+    });
 }

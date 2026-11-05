@@ -35,20 +35,7 @@ public class ColorPaletteTests
     private static readonly Color DangerTint = Color.Parse("#cb1a27");
     private static readonly Color Favorite = Color.Parse("#69bb7b");
 
-    private static void WithTheme(Action test)
-    {
-        var app = Application.Current!;
-        var theme = new AvonicTheme();
-        app.Styles.Add(theme);
-        try
-        {
-            test();
-        }
-        finally
-        {
-            app.Styles.Remove(theme);
-        }
-    }
+    private static void WithTheme(Action test) => InstalledTheme.Run(_ => test());
 
     private static Color? BrushColor(IBrush? brush) => (brush as ISolidColorBrush)?.Color;
 
@@ -177,6 +164,21 @@ public class ColorPaletteTests
 
         Assert.True(HasIonColor(element));
         AssertUnset(element);
+    });
+
+    // Valid in Ionic: .ion-color-sea-tint and .ion-color-myBrand are ordinary classes.
+    [AvaloniaTheory]
+    [InlineData("sea-tint", "Avonic.Color.SeaTint")]
+    [InlineData("shade", "Avonic.Color.Shade")]
+    [InlineData("myBrand", "Avonic.Color.MyBrand")]
+    public void Custom_Color_Names_Are_Not_Mistaken_For_Variants(string name, string key) => WithTheme(() =>
+    {
+        var element = Colored(name);
+        var scope = new Border { Child = element };
+        scope.Resources[key] = Favorite;
+        using var scene = new Scene(scope);
+
+        Assert.Equal(Favorite, BrushColor(ColorPalette.GetBase(element)));
     });
 
     [AvaloniaFact]
@@ -398,14 +400,47 @@ public class ColorPaletteTests
         Assert.Equal("danger", ColorPalette.GetColor(control));
     });
 
+    private static void AssertPaintsDefaults(ColoredControl control)
+    {
+        Assert.Equal(Color.Parse("#010203"), BrushColor(Part<Border>(control, "PART_Native").Background));
+        Assert.Equal(Color.Parse("#040506"), BrushColor(Part<TextBlock>(control, "PART_Text").Foreground));
+        Assert.Equal(Color.Parse("#070809"), BrushColor(Part<Border>(control, "PART_TemplateBound").Background));
+        Assert.Equal(Color.Parse("#0A0B0C"), BrushColor(Part<Border>(control, "PART_Alpha").Background));
+        Assert.Equal(Color.Parse("#0D0E0F"), BrushColor(Part<Border>(control, "PART_Inherited").Background));
+    }
+
     [AvaloniaFact]
-    public void Template_Uses_The_Defaults_Without_A_Color() => WithUsageTheme(() =>
+    public void Template_Paints_The_Defaults_Without_A_Color() => WithUsageTheme(() =>
     {
         var control = new ColoredControl();
         using var scene = new Scene(control);
 
-        Assert.Equal(Color.Parse("#010203"), BrushColor(Part<Border>(control, "PART_Native").Background));
-        Assert.Equal(Color.Parse("#040506"), BrushColor(Part<TextBlock>(control, "PART_Text").Foreground));
+        AssertPaintsDefaults(control);
+    });
+
+    // Ionic: no color inside a coloured wrapper paints the default, though the variable inherits.
+    [AvaloniaFact]
+    public void Template_Inside_A_Colored_Ancestor_Without_A_Color_Paints_The_Defaults() => WithUsageTheme(() =>
+    {
+        var control = new ColoredControl();
+        var ancestor = Colored("danger");
+        ancestor.Child = control;
+        using var scene = new Scene(ancestor);
+
+        AssertPaintsDefaults(control);
+    });
+
+    // Ionic: an unknown color inside a coloured wrapper paints the wrapper's colour.
+    [AvaloniaFact]
+    public void Template_With_An_Unknown_Color_Inside_A_Colored_Ancestor_Paints_Its_Colors() => WithUsageTheme(() =>
+    {
+        var control = new ColoredControl { Color = "nonexistent" };
+        var ancestor = Colored("danger");
+        ancestor.Child = control;
+        using var scene = new Scene(ancestor);
+
+        Assert.Equal(Danger, BrushColor(Part<Border>(control, "PART_Native").Background));
+        Assert.Equal(DangerContrast, BrushColor(Part<TextBlock>(control, "PART_Text").Foreground));
     });
 
     [AvaloniaFact]
@@ -448,14 +483,27 @@ public class ColorPaletteTests
         Assert.Equal(0.08, brush.Opacity);
     });
 
+    [AvaloniaFact]
+    public void Alpha_Brushes_Are_Per_Instance() => WithUsageTheme(() =>
+    {
+        var danger = new ColoredControl { Color = "danger" };
+        var primary = new ColoredControl { Color = "primary" };
+        using var scene = new Scene(new StackPanel { Children = { danger, primary } });
+
+        Assert.Equal(Danger, BrushColor(Part<Border>(danger, "PART_Alpha").Background));
+        Assert.Equal(Color.Parse("#0054e9"), BrushColor(Part<Border>(primary, "PART_Alpha").Background));
+    });
+
     // Ionic: a solid button with an unknown colour has a transparent background, not its default.
     [AvaloniaFact]
-    public void Template_With_An_Unknown_Color_Has_No_Background() => WithUsageTheme(() =>
+    public void Template_With_An_Unknown_Color_Has_No_Backgrounds() => WithUsageTheme(() =>
     {
         var control = new ColoredControl { Color = "nonexistent" };
         using var scene = new Scene(control);
 
         Assert.Null(Part<Border>(control, "PART_Native").Background);
+        Assert.Null(Part<Border>(control, "PART_TemplateBound").Background);
+        Assert.Null(Part<Border>(control, "PART_Alpha").Background);
     });
 
     // Ionic: a badge with an unknown colour keeps visible text, measured as black. A null Foreground

@@ -30,8 +30,12 @@ public string? Color
 | `var(--ion-color-contrast)` | `ColorPalette.Contrast` |
 | `var(--ion-color-shade)` | `ColorPalette.Shade` |
 | `var(--ion-color-tint)` | `ColorPalette.Tint` |
-| `rgba(var(--ion-color-base-rgb), a)` | `ColorPalette.BaseColor` in a brush with `Opacity` |
-| `rgba(var(--ion-color-contrast-rgb), a)` | `ColorPalette.ContrastColor` in a brush with `Opacity` |
+| `rgba(var(--ion-color-base-rgb), a)` | `ColorPalette.BaseColor` through `ColorPalette.WithAlpha` |
+| `rgba(var(--ion-color-contrast-rgb), a)` | `ColorPalette.ContrastColor` through `ColorPalette.WithAlpha` |
+
+**Every read goes under `:ion-color`,** including in template parts. The values inherit, so a control with
+no colour inside a coloured parent can see the parent's, and Ionic's rules ignore them there too. Put each
+part's default in a style as well, because a style can't override a value set directly in the template.
 
 ```xml
 <!-- :host(.ion-color) { background: var(ion-color-base); color: var(ion-color-contrast); } -->
@@ -43,17 +47,20 @@ public string? Color
                             Converter={x:Static b:ColorPalette.NullToUnset}}" />
 </Style>
 
-<!-- A template part can use TemplateBinding -->
-<Border Background="{TemplateBinding (b:ColorPalette.Shade)}" />
+<!-- A template part -->
+<Style Selector="^:ion-color /template/ Border#PART_Native">
+    <Setter Property="BorderBrush" Value="{TemplateBinding (b:ColorPalette.Shade)}" />
+</Style>
 
-<!-- rgba(var(ion-color-base-rgb), 0.08): the brush goes in the template, so each instance has its own -->
-<Border>
-    <Border.Background>
-        <SolidColorBrush Color="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource TemplatedParent}}"
-                         Opacity="0.08" />
-    </Border.Background>
-</Border>
+<!-- rgba(var(ion-color-base-rgb), 0.08) -->
+<Style Selector="^:ion-color /template/ Border#PART_Native">
+    <Setter Property="Background"
+            Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self},
+                            Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.08}" />
+</Style>
 ```
+
+`tests/Avonic.Components.Tests/Behaviors/ColorPaletteUsage.axaml` is a complete working example.
 
 ### Rules
 
@@ -61,10 +68,10 @@ public string? Color
   hides the text.
 - **Don't use it on backgrounds.** Null is correct there. Ionic's solid button with an unknown colour has
   a transparent background.
-- **Read `ColorPalette` only under `:ion-color`.** The values inherit, so a control with no colour inside
-  a coloured parent can see the parent's. Ionic's rules ignore them there too.
-- **Only use `Color="…"` names from the palette or your own keys.** Names are case-sensitive, and
-  `danger-shade` isn't a name. Both resolve to nothing, as they do in Ionic.
+- **Test the paint, not `:ion-color`.** Render the control with no `Color` inside a coloured ancestor, and
+  assert every part keeps its default. That's the case a missed guard gets wrong.
+- **Names are case-sensitive, like a CSS class.** `Danger` isn't a colour. Neither are the variants of the
+  nine built-in colours, such as `danger-shade`. A custom `sea-tint` is fine.
 
 ## Unknown colours
 
@@ -72,8 +79,8 @@ public string? Color
 with nothing behind it, so a solid control loses its background. The one exception is inside a coloured
 ancestor, where the ancestor's values show through.
 
-Text is the one difference from Ionic. It's black rather than inheriting a non-default parent colour; see
-[PLAN.md](PLAN.md#one-known-difference-text-with-an-unknown-colour).
+Text is the one difference from Ionic. It's black rather than inheriting the parent's colour, so on the
+dark palette it's close to invisible; see [PLAN.md](PLAN.md#one-known-difference-text-with-an-unknown-colour).
 
 ## Tokens
 
@@ -113,6 +120,9 @@ Override the `Color` key, at any level:
     <Color x:Key="Avonic.Color.Primary">#7C3AED</Color>
 </Application.Resources>
 ```
+
+Tokens that only have a brush, such as `Avonic.ItemBackgroundBrush`, are overridden by replacing the brush.
+A card doesn't follow an overridden item background, though it does in Ionic, so override both.
 
 **Add a custom colour** by defining its keys, the equivalent of Ionic's `.ion-color-favorite`. `Color="favorite"`
 then works on every control, and `my-brand` maps to `Avonic.Color.MyBrand…`:

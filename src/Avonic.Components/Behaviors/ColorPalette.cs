@@ -1,8 +1,10 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
+using Avalonia.Reactive;
 
 namespace Avonic.Components.Behaviors;
 
@@ -73,13 +75,28 @@ public static class ColorPalette
     private static readonly AttachedProperty<Subscriptions?> SubscriptionsProperty =
         AvaloniaProperty.RegisterAttached<StyledElement, Subscriptions?>("Subscriptions", typeof(ColorPalette));
 
+    private static readonly AvaloniaProperty[] ValueProperties =
+        [BaseProperty, ContrastProperty, ShadeProperty, TintProperty, BaseColorProperty, ContrastColorProperty];
+
+    private static readonly string[] BuiltInColors =
+        ["primary", "secondary", "tertiary", "success", "warning", "danger", "light", "medium", "dark"];
+
     /// <summary>
     /// For a text colour binding. An unknown colour leaves <see cref="ContrastProperty"/> null, and a
-    /// null <c>Foreground</c> hides the text. Ionic's text stays visible, so this gives the property
-    /// its default instead.
+    /// null <c>Foreground</c> hides the text, so this gives the property its default (black) instead.
+    /// Ionic inherits the parent's colour here, which a style can't do; see the colour system's plan.
     /// </summary>
     public static readonly IValueConverter NullToUnset =
         new FuncValueConverter<object?, object?>(value => value ?? AvaloniaProperty.UnsetValue);
+
+    /// <summary>
+    /// <c>rgba(var(--ion-color-base-rgb), 0.08)</c>: binds <see cref="BaseColorProperty"/> or
+    /// <see cref="ContrastColorProperty"/> to a brush, with the alpha as <c>ConverterParameter</c>.
+    /// Each element gets its own brush, so it can be used in a style. Null for an unknown colour.
+    /// </summary>
+    public static readonly IValueConverter WithAlpha =
+        new FuncValueConverter<Color?, object?, IBrush?>((color, alpha) =>
+            color is { } value ? new ImmutableSolidColorBrush(value, Convert.ToDouble(alpha, CultureInfo.InvariantCulture)) : null);
 
     public static string? GetColor(StyledElement element) => element.GetValue(ColorProperty);
     public static void SetColor(StyledElement element, string? value) => element.SetValue(ColorProperty, value);
@@ -106,7 +123,7 @@ public static class ColorPalette
         if (key is null)
         {
             element.ClearValue(SubscriptionsProperty);
-            foreach (var property in new AvaloniaProperty[] { BaseProperty, ContrastProperty, ShadeProperty, TintProperty, BaseColorProperty, ContrastColorProperty })
+            foreach (var property in ValueProperties)
             {
                 element.ClearValue(property);
             }
@@ -128,7 +145,7 @@ public static class ColorPalette
         string key,
         StyledProperty<IBrush?> brushProperty,
         StyledProperty<Color?>? colorProperty) =>
-        element.GetResourceObservable(key).Subscribe(new Observer(value =>
+        element.GetResourceObservable(key).Subscribe(new AnonymousObserver<object?>(value =>
         {
             if (value is Color color)
             {
@@ -153,31 +170,29 @@ public static class ColorPalette
 
     /// <summary>
     /// <c>danger</c> → <c>Avonic.Color.Danger</c>; <c>my-brand</c> → <c>Avonic.Color.MyBrand</c>.
-    /// Null if the name can't be a colour. A CSS class is case-sensitive, so <c>Danger</c> isn't one.
-    /// <c>danger-shade</c> isn't either, though it would otherwise find the real key
-    /// <c>Avonic.Color.DangerShade</c> and paint it as the base.
+    /// Null if the name can't be a colour. A CSS class is case-sensitive, so <c>Danger</c> isn't
+    /// <c>danger</c>. <c>danger-shade</c> isn't a colour either, though it would otherwise find the real
+    /// key <c>Avonic.Color.DangerShade</c> and paint it as the base. A custom <c>sea-tint</c> is fine.
     /// </summary>
     internal static string? KeyFor(string? name)
     {
-        if (string.IsNullOrEmpty(name) || name.Any(char.IsAsciiLetterUpper))
+        if (string.IsNullOrEmpty(name))
         {
             return null;
         }
 
         var segments = name.Split('-');
-        if (segments.Any(segment => segment.Length == 0) || segments[^1] is "contrast" or "shade" or "tint")
+        if (segments.Any(segment => segment.Length == 0 || char.IsAsciiLetterUpper(segment[0])))
+        {
+            return null;
+        }
+
+        if (segments is [var color, "contrast" or "shade" or "tint"] && BuiltInColors.Contains(color))
         {
             return null;
         }
 
         return KeyPrefix + string.Concat(segments.Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..]));
-    }
-
-    private sealed class Observer(Action<object?> onNext) : IObserver<object?>
-    {
-        public void OnNext(object? value) => onNext(value);
-        public void OnError(Exception error) { }
-        public void OnCompleted() { }
     }
 
     private sealed class Subscriptions(IDisposable[] items) : IDisposable

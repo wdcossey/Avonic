@@ -92,18 +92,25 @@ In Ionic, `color: var(--ion-color-contrast)` with nothing behind it inherits the
 Avalonia can't do this from a style. A null `Foreground` hides the text, and a binding that yields
 `UnsetValue` gives the property's default (black) rather than the inherited value.
 
-`ColorPalette.NullToUnset` takes the second option, which matches the measured black text in the usual
-case. It only differs under a parent with a non-default text colour. The name is already a mistake at
-that point, so visible text is what matters.
+`ColorPalette.NullToUnset` takes the second option. It matches the measured black text on the light
+palette, but not under a parent with another text colour. **On the dark palette that's every parent**, so
+the text is black on `#121212` and close to invisible.
+
+This is accepted for now. It only happens after a mistyped colour name, and Ionic's own solid button goes
+blank in that case: white text on a transparent background. Inheriting properly would need another
+property that every control binds to, for a case that's already a bug in the app.
 
 ### Name mapping
 
 Kebab to Pascal, case-sensitive like a CSS class: `danger` → `Avonic.Color.Danger`, `my-brand` →
 `Avonic.Color.MyBrand`, `Danger` → unknown.
 
-A name ending in `-contrast`, `-shade` or `-tint` is treated as unknown. Without this,
-`color="danger-shade"` would find the real key `Avonic.Color.DangerShade` and paint it as the base,
-where Ionic has no such class.
+A variant of a built-in colour is treated as unknown. Without this, `color="danger-shade"` would find the
+real key `Avonic.Color.DangerShade` and paint it as the base, where Ionic has no such class. Only the nine
+built-in names are checked, so a custom colour called `sea-tint` still works. The cost is that
+`favorite-shade`, for a custom `favorite`, finds that colour's shade.
+
+`myBrand` and `my-brand` both map to `Avonic.Color.MyBrand`. Ionic would treat them as two classes.
 
 ### Alternatives rejected
 
@@ -170,6 +177,10 @@ distinction. A control's token takes the control's own default (`#424242` for th
 follow `Avonic.TextColor`. This affects outliers such as toolbar text, tab-bar borders and a few
 `step-N` fallbacks. Those values belong in that control's `Tokens/<Name>.axaml`.
 
+A brush also can't follow another brush, only a `Color`. So `--ion-card-background`, which falls back
+through `--ion-item-background` to the background, follows the background directly, and overriding the item
+background doesn't change cards. Dark sets both to the same value, so the shipped palettes aren't affected.
+
 ## Deferred
 
 | Not here | Why | Goes to |
@@ -194,9 +205,9 @@ follow `Avonic.TextColor`. This affects outliers such as toolbar text, tab-bar b
 | Light ramps match the formula, the `:root.ios` ramps and the md fallbacks | A wrong ramp value |
 | Each `…Brush` follows its `Color`, including a live override | Brushes that ignore an override |
 | Dark isn't merged by `AvonicTheme`; merged by a consumer it takes effect live | Dark replacing light, or not applying |
-| Every row in "Measured behaviour", one test each | Not matching Ionic |
+| Every row in "Measured behaviour", one test each, with a rendered template for the inherited cases | Not matching Ionic, including a control painting an ancestor's colour |
 | Changing and clearing `Color`; moving an element between scopes | Stale values or lost subscriptions |
-| A control using `AddOwner`, with a real `ControlTheme` covering `Base`, `Contrast` and alpha from `BaseColor` | The documented template pattern not working |
+| A control using `AddOwner`, with a real `ControlTheme` covering `Base`, `Contrast`, `TemplateBinding` and `WithAlpha` | The documented template pattern not working |
 | Every sample page shows (existing test) | The sample page throwing |
 
 Tests that read Ionic's CSS skip with a message if `node_modules` is absent. CI runs `npm ci`, so they

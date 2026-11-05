@@ -3,7 +3,8 @@
                     xmlns:b="using:Avonic.Components.Behaviors"
                     xmlns:t="using:Avonic.Components.Tests.Behaviors">
 
-    <!-- The pattern in docs/infra/color-system/README.md, as a real control would use it. -->
+    <!-- The pattern in docs/infra/color-system/README.md, as a real control would use it. Every read of
+         a ColorPalette value is under :ion-color, because the values inherit from coloured ancestors. -->
     <ControlTheme x:Key="{x:Type t:ColoredControl}" TargetType="t:ColoredControl">
         <Setter Property="Background" Value="#010203" />
         <Setter Property="Foreground" Value="#040506" />
@@ -12,22 +13,35 @@
                 <StackPanel>
                     <Border Name="PART_Native" Background="{TemplateBinding Background}" />
                     <TextBlock Name="PART_Text" Foreground="{TemplateBinding Foreground}" />
-                    <Border Name="PART_TemplateBound" Background="{TemplateBinding (b:ColorPalette.Shade)}" />
-                    <Border Name="PART_Alpha">
-                        <Border.Background>
-                            <SolidColorBrush Color="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource TemplatedParent}}"
-                                             Opacity="0.08" />
-                        </Border.Background>
-                    </Border>
+                    <Border Name="PART_TemplateBound" />
+                    <Border Name="PART_Alpha" />
                     <Border Name="PART_Inherited" />
                 </StackPanel>
             </ControlTemplate>
         </Setter>
 
+        <!-- Defaults -->
+        <Style Selector="^ /template/ Border#PART_TemplateBound">
+            <Setter Property="Background" Value="#070809" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Alpha">
+            <Setter Property="Background" Value="#0A0B0C" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Inherited">
+            <Setter Property="Background" Value="#0D0E0F" />
+        </Style>
+
         <!-- :host(.ion-color) { background: var(ion-color-base); color: var(ion-color-contrast); } -->
         <Style Selector="^:ion-color">
             <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
             <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.NullToUnset}}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_TemplateBound">
+            <Setter Property="Background" Value="{TemplateBinding (b:ColorPalette.Shade)}" />
+        </Style>
+        <!-- rgba(var(ion-color-base-rgb), 0.08) -->
+        <Style Selector="^:ion-color /template/ Border#PART_Alpha">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.08}" />
         </Style>
         <Style Selector="^:ion-color /template/ Border#PART_Inherited">
             <Setter Property="Background" Value="{Binding (b:ColorPalette.Tint), RelativeSource={RelativeSource Self}}" />
