@@ -1,0 +1,620 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicButton Content="Solid" />
+            <c:AvonicButton Content="Outline" Fill="Outline" />
+            <c:AvonicButton Content="Clear" Fill="Clear" />
+            <c:AvonicButton Content="Round" Shape="Round" />
+            <c:AvonicButton Content="Small" Size="Small" />
+            <c:AvonicButton Content="Large" Size="Large" />
+            <c:AvonicButton Content="Block" Expand="Block" />
+            <c:AvonicButton Content="Danger" Color="danger" />
+            <c:AvonicButton Content="Disabled" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of button.md.css, in its order, because its state rules have equal specificity and so does
+         everything here with a pseudoclass: later beats earlier. Slotted content and the rules for being inside an
+         item are in Styles/Button.axaml, because a ControlTheme's styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicButton}" TargetType="c:AvonicButton">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextBlock.LetterSpacing">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.06">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <!-- font-kerning: none -->
+        <Setter Property="TextBlock.FontFeatures">
+            <FontFeatureCollection>
+                <FontFeature Tag="kern" Value="0" />
+            </FontFeatureCollection>
+        </Setter>
+        <!-- text-align: center; white-space: normal; line-height: 1 -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Margin" Value="2,4" />
+        <Setter Property="MinHeight" Value="36" />
+        <!-- display: inline-block; vertical-align: -webkit-baseline-middle -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none. The overlay is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <c:ButtonInner Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding IconOnlyContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="IconOnlyContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding StartContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="StartContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="Content" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="EndContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                            </c:ButtonInner>
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .button-native. Its color inherits the host's, and only :ion-color below sets its own. -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.Button.Opacity}" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Button.Transition}" />
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BorderRadius" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Background" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BoxShadow" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- overflow: hidden. It's on a part inside, because a Border's own ClipToBounds also clips its BoxShadow. -->
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="{Binding $parent[Border].CornerRadius}" />
+        </Style>
+
+        <!-- .button-native's padding. It's on a part inside, because ::after and the ripple cover the padding. -->
+        <Style Selector="^ /template/ c|ButtonInner#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="1.1em 8">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .button-native::after. It has no transition, measured. -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color) }, and ripple-color is currentColor -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.RippleColor" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-disabled). A disabled control already takes no input and lets it through. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
+        <!-- :host(.button-solid). A class with no rules, button-default, leaves color to inherit. -->
+        <Style Selector="^:fill-solid">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid /template/ Border#PART_Native">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Background" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BoxShadowSolid" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-outline). A border is only drawn here: elsewhere border-style stays none, measured. -->
+        <Style Selector="^:fill-outline">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline /template/ Border#PART_Native">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BorderWidth" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BorderWidthOutline" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-clear) -->
+        <Style Selector="^:fill-clear">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- color: var(color) on a class that doesn't set it: invalid, so it inherits -->
+        <Style Selector="^:fill-default">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-block), :host(.button-full) -->
+        <Style Selector="^:expand-block, ^:expand-full">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
+        <!-- :host(.ion-focused) -->
+        <Style Selector="^:fill-solid:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-focused, ^:fill-clear:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocusedOpacity" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BackgroundFocusedOpacitySolid" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-focused /template/ Border#PART_Overlay, ^:fill-clear:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocusedOpacity" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BackgroundFocusedOpacityFlat" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocused" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundFocusedOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(:hover). After focus, so it beats focus, by file order: measured. -->
+        <Style Selector="^:fill-solid:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-hover, ^:fill-clear:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHover" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHoverOpacity" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BackgroundHoverOpacitySolid" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-hover /template/ Border#PART_Overlay, ^:fill-clear:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHover" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHoverOpacity" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BackgroundHoverOpacityFlat" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHover" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundHoverOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-activated). After hover, so a press beats it, by file order: measured. -->
+        <Style Selector="^:fill-solid:activated">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:activated, ^:fill-clear:activated">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:activated">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.Button.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:activated /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundActivated" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundActivatedOpacity" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BackgroundActivatedOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-default:activated /template/ Border#PART_Overlay">
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BackgroundActivatedOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-solid.ion-color) .button-native. An unknown colour makes these invalid: the background
+             goes transparent, and the text inherits the host's, which still follows state. -->
+        <Style Selector="^:fill-solid:ion-color /template/ Border#PART_Native">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-outline.ion-color) .button-native, where an invalid border colour is currentColor -->
+        <Style Selector="^:fill-outline:ion-color /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-clear.ion-color) .button-native -->
+        <Style Selector="^:fill-clear:ion-color /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-solid.ion-activated) -->
+        <Style Selector="^:fill-solid:activated /template/ Border#PART_Native">
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BoxShadowSolidActivated" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-round) -->
+        <Style Selector="^:shape-round /template/ Border#PART_Native">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Button.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BorderRadiusRound" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-round /template/ c|ButtonInner#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="26 0">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-full:not(.button-round)) .button-native. It's on the part, so it beats the variable. -->
+        <Style Selector="^:expand-full:not(:shape-round) /template/ Border#PART_Native">
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="^:fill-outline:expand-full:not(:shape-round) /template/ Border#PART_Native">
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicButton.NoSideBordersConverter}">
+                    <DynamicResource ResourceKey="Avonic.Button.BorderWidth" />
+                    <DynamicResource ResourceKey="Avonic.Button.Md.BorderWidthOutline" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-large) -->
+        <Style Selector="^:size-large">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="MinHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="2.8">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:size-large /template/ c|ButtonInner#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="1em 14">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-small) -->
+        <Style Selector="^:size-small">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="MinHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="2.1">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:size-small /template/ c|ButtonInner#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="0.9em 4">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.button-strong) -->
+        <Style Selector="^:strong">
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <!-- :host(.button-has-icon-only) -->
+        <Style Selector="^:has-icon-only">
+            <Setter Property="MinWidth" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='30,2.86,60'}" />
+            <Setter Property="MinHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='30,2.86,60'}" />
+        </Style>
+        <Style Selector="^:has-icon-only /template/ c|ButtonInner#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="icon-only">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:size-small:has-icon-only">
+            <Setter Property="MinWidth" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='23,2.16,54'}" />
+            <Setter Property="MinHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='23,2.16,54'}" />
+        </Style>
+        <Style Selector="^:size-large:has-icon-only">
+            <Setter Property="MinWidth" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='46,2.5,78'}" />
+            <Setter Property="MinHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='46,2.5,78'}" />
+        </Style>
+
+        <!-- :host(.button-solid.ion-color.ion-focused) .button-native::after, and clear and outline. Only the
+             opacity can be overridden here. -->
+        <Style Selector="^:fill-solid:ion-color:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-color:ion-focused /template/ Border#PART_Overlay, ^:fill-clear:ion-color:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- The same on hover. After activated, so it beats it while the mouse is over: measured. -->
+        <Style Selector="^:fill-solid:ion-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:ion-color:ion-hover /template/ Border#PART_Overlay, ^:fill-clear:ion-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

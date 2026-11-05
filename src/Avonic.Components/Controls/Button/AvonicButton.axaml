@@ -1,0 +1,62 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-button: structure only. The look is in Avonic.Themes. The transparent
+         panel is what makes the whole box take input, as Ionic's native button does. The ripple is before
+         the content, because .button-inner's z-index keeps the content above it. PART_Clip is overflow: hidden:
+         it's a part of its own because a Border's ClipToBounds also clips its BoxShadow. -->
+    <ControlTheme x:Key="{x:Type c:AvonicButton}" TargetType="c:AvonicButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <c:ButtonInner Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding IconOnlyContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="IconOnlyContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding StartContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="StartContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="Content" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                                <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}">
+                                    <ContentPresenter.Content>
+                                        <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                            <Binding Path="EndContent" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        </MultiBinding>
+                                    </ContentPresenter.Content>
+                                </ContentPresenter>
+                            </c:ButtonInner>
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

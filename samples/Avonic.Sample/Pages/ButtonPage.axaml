@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ButtonPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <WrapPanel>
+                <c:AvonicButton Content="Solid" Click="OnClick" />
+                <c:AvonicButton Content="Outline" Fill="Outline" Click="OnClick" />
+                <c:AvonicButton Content="Clear" Fill="Clear" Click="OnClick" />
+            </WrapPanel>
+            <TextBlock x:Name="ClickCount" Margin="4" Text="Tap a button" />
+
+            <WrapPanel>
+                <c:AvonicButton Content="Danger" Color="danger" />
+                <c:AvonicButton Content="Success" Color="success" Fill="Outline" />
+                <c:AvonicButton Content="Tertiary" Color="tertiary" Fill="Clear" />
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicButton Content="Round" Shape="Round" />
+                <c:AvonicButton Content="Round" Shape="Round" Fill="Outline" />
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicButton Content="Small" Size="Small" />
+                <c:AvonicButton Content="Default" Size="Default" />
+                <c:AvonicButton Content="Large" Size="Large" />
+            </WrapPanel>
+
+            <c:AvonicButton Content="Block" Expand="Block" />
+            <c:AvonicButton Content="Full" Expand="Full" />
+            <c:AvonicButton Content="Full outline" Expand="Full" Fill="Outline" />
+
+            <WrapPanel>
+                <c:AvonicButton Content="Strong" Strong="True" />
+                <c:AvonicButton Content="Disabled" IsEnabled="False" />
+                <c:AvonicButton Content="Not uppercase" TextTransform="None" />
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicButton Content="Start">
+                    <c:AvonicButton.StartContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicButton.StartContent>
+                </c:AvonicButton>
+                <c:AvonicButton Content="End">
+                    <c:AvonicButton.EndContent>
+                        <c:AvonicIcon IconName="star" />
+                    </c:AvonicButton.EndContent>
+                </c:AvonicButton>
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicButton>
+                    <c:AvonicButton.IconOnlyContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicButton.IconOnlyContent>
+                </c:AvonicButton>
+                <c:AvonicButton Size="Small">
+                    <c:AvonicButton.IconOnlyContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicButton.IconOnlyContent>
+                </c:AvonicButton>
+                <c:AvonicButton Size="Large">
+                    <c:AvonicButton.IconOnlyContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicButton.IconOnlyContent>
+                </c:AvonicButton>
+                <c:AvonicButton Shape="Round">
+                    <c:AvonicButton.IconOnlyContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicButton.IconOnlyContent>
+                </c:AvonicButton>
+            </WrapPanel>
+
+            <c:AvonicButton Content="A long line of text wraps onto the next line, and the button grows to fit it" />
+
+            <c:AvonicItem Content="In an item, a button is small">
+                <c:AvonicItem.EndContent>
+                    <c:AvonicButton Content="Action" Click="OnClick" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem Content="Unless its size is set">
+                <c:AvonicItem.EndContent>
+                    <c:AvonicButton Content="Action" Size="Default" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicButton Content="Right to left" FlowDirection="RightToLeft">
+                <c:AvonicButton.StartContent>
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicButton.StartContent>
+            </c:AvonicButton>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

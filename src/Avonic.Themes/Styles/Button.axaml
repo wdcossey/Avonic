@@ -1,0 +1,85 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- button.md.css's ::slotted rules, and item.md.css's rules for a button. A slotted control's logical parent is
+         the presenter, so '>' means direct children only, as ::slotted does. -->
+
+    <!-- line-height: 1. A TextBlock clips to its line height, which is the font size here, and keeps the line at the
+         top. CSS's line-height never clips and splits the leading. A panel directly in a slot stands for the slot. -->
+    <Style Selector="c|AvonicButton /template/ ContentPresenter > TextBlock, c|AvonicButton /template/ ContentPresenter > :is(Panel) > TextBlock">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin">
+            <MultiBinding Converter="{x:Static c:AvonicButton.HalfLeadingConverter}">
+                <Binding Path="FontFamily" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FontWeight" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="LineHeight" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(ion-icon) { font-size: 1.35em; pointer-events: none } -->
+    <Style Selector="c|AvonicButton /template/ ContentPresenter > c|AvonicIcon">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="FontSize">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.35">
+                <Binding Path="$parent[c:AvonicButton].FontSize" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=start]), in the icon's own em -->
+    <Style Selector="c|AvonicButton /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+        <Setter Property="Margin" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.IconMarginConverter}, ConverterParameter='-0.3,0.3'}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=end]) -->
+    <Style Selector="c|AvonicButton /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Margin" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.IconMarginConverter}, ConverterParameter='0.3,-0.2'}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=icon-only]) { font-size: clamp(15.104px, 1.6em, 43.008px) } -->
+    <Style Selector="c|AvonicButton /template/ ContentPresenter#PART_IconOnly > c|AvonicIcon">
+        <Setter Property="FontSize" Value="{Binding $parent[c:AvonicButton].FontSize, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='15.104,1.6,43.008'}" />
+    </Style>
+
+    <!-- :host(.button-small) ::slotted(ion-icon[slot=icon-only]) -->
+    <Style Selector="c|AvonicButton:size-small /template/ ContentPresenter#PART_IconOnly > c|AvonicIcon">
+        <Setter Property="FontSize" Value="{Binding $parent[c:AvonicButton].FontSize, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='13.002,1.23125,40.385'}" />
+    </Style>
+
+    <!-- :host(.button-large) ::slotted(ion-icon[slot=icon-only]) -->
+    <Style Selector="c|AvonicButton:size-large /template/ ContentPresenter#PART_IconOnly > c|AvonicIcon">
+        <Setter Property="FontSize" Value="{Binding $parent[c:AvonicButton].FontSize, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='15.008,1.4,43.008'}" />
+    </Style>
+
+    <!-- item.md.css's ::slotted([slot=start]) and ::slotted([slot=end]) set one side, and the button's own margin
+         stays on the other three. Item.axaml's rule sets all four and merges after this file, but it has no
+         pseudoclass, and these do. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicButton:in-item">
+        <Setter Property="Margin" Value="2,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicButton:in-item">
+        <Setter Property="Margin" Value="16,4,2,4" />
+    </Style>
+
+    <!-- item.md.css's ::slotted(.button-small). A panel directly in a slot stands for the slot. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicButton:size-small, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicButton:size-small">
+        <Setter Property="MinHeight" Value="25" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicButton:size-small /template/ c|ButtonInner#PART_Inner, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicButton:size-small /template/ c|ButtonInner#PART_Inner">
+        <Setter Property="Margin">
+            <MultiBinding Converter="{x:Static c:AvonicButton.PaddingConverter}" ConverterParameter="0.6em 2">
+                <Binding Path="$parent[c:AvonicButton].FontSize" />
+                <DynamicResource ResourceKey="Avonic.Button.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.Button.PaddingTop" />
+                <DynamicResource ResourceKey="Avonic.Button.PaddingEnd" />
+                <DynamicResource ResourceKey="Avonic.Button.PaddingBottom" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+</Styles>
