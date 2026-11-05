@@ -1,0 +1,50 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The scrolling part of ion-content: no scroll bars, because Ionic has none of its own, and a gesture
+         recognizer, which is what makes a touch drag scroll. It's here because a base theme's template has
+         scroll bars, and TestApp has no base theme. The theme's template uses this one too.
+         The recognizer isn't given Offset, Viewport and Extent, as a base theme's is: with those it gives up at
+         the limit, and an outer scroller takes the drag, where overscroll-behavior: contain keeps it here. -->
+    <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                                 CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-content: structure only. The look is in Avonic.Themes. The container's transparent
+         background is what makes all of the area take input, including with an unknown Color, which leaves the
+         scroll part with no background. Text wraps, as it does in a browser. -->
+    <ControlTheme x:Key="{x:Type c:AvonicContent}" TargetType="c:AvonicContent">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Background" />
+                    <ScrollViewer Name="PART_Scroll" Theme="{DynamicResource AvonicContentScrollViewer}">
+                        <ContentPresenter Name="PART_Container"
+                                          Background="Transparent"
+                                          TextWrapping="Wrap"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </ScrollViewer>
+                    <ContentPresenter Name="PART_Fixed"
+                                      TextWrapping="Wrap"
+                                      Content="{TemplateBinding FixedContent}"
+                                      ContentTemplate="{TemplateBinding FixedContentTemplate}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
