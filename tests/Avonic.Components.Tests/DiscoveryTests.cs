@@ -82,6 +82,22 @@ public class DiscoveryTests
             Includes(new AvonicTheme()),
             include => include.Source == new Uri("avares://Avonic.Themes/Tokens/AvonicTokens.axaml"));
 
+    // A control's ::slotted rules, in a <Styles> file, because a ControlTheme's styles can't reach them.
+    [AvaloniaFact]
+    public void Theme_Discovers_Style_Files_And_They_Load()
+    {
+        var includes = new AvonicTheme().OfType<StyleInclude>().ToList();
+
+        Assert.Contains(includes, include => include.Source == new Uri("avares://Avonic.Themes/Styles/Item.axaml"));
+        Assert.All(includes, include => Assert.IsType<Styles>(include.Loaded, exactMatch: false));
+    }
+
+    [AvaloniaFact]
+    public void Theme_Does_Not_Merge_Style_Files_As_Dictionaries() =>
+        Assert.DoesNotContain(
+            Includes(new AvonicTheme()),
+            include => include.Source!.AbsolutePath.StartsWith("/Styles/", StringComparison.Ordinal));
+
     [AvaloniaFact]
     public void Theme_Still_Layers_Over_The_Component_Stubs() =>
         WithInstalledTheme(AssertResolvesRippleTheme);

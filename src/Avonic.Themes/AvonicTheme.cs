@@ -20,13 +20,27 @@ public class AvonicTheme : Styles
 {
     private static readonly Uri BaseUri = new("avares://Avonic.Themes/");
 
+    /// <summary>
+    /// <c>Styles/*.axaml</c> are <c>&lt;Styles&gt;</c> files. A <c>ControlTheme</c>'s styles can't reach a
+    /// control's slotted content, so rules like <c>::slotted(ion-icon)</c> go here.
+    /// </summary>
+    private const string StylesFolder = "Styles/";
+
     public AvonicTheme(IServiceProvider? _ = null)
     {
         Add(new AvonicComponentsStyles());
 
         foreach (var path in OrderForMerge(XamlManifest.Paths))
         {
-            Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = new Uri(BaseUri, path) });
+            var source = new Uri(BaseUri, path);
+            if (path.StartsWith(StylesFolder, StringComparison.Ordinal))
+            {
+                Add(new StyleInclude(BaseUri) { Source = source });
+            }
+            else
+            {
+                Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = source });
+            }
         }
     }
 

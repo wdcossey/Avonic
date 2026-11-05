@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ItemPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicItem Content="Default lines" />
+            <c:AvonicItem Content="Lines inset" Lines="Inset" />
+            <c:AvonicItem Content="Lines full" Lines="Full" />
+            <c:AvonicItem Content="Lines none" Lines="None" />
+
+            <c:AvonicItem Button="True" Click="OnItemClick">
+                <TextBlock x:Name="ClickCount" Text="Button: tap me" />
+            </c:AvonicItem>
+            <c:AvonicItem Content="Button with detail" Button="True" Detail="True" Click="OnItemClick" />
+            <c:AvonicItem Content="Custom detail icon" Detail="True" DetailIcon="heart" />
+
+            <c:AvonicItem Content="Icons in slots">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem Content="A long line of text wraps onto the next line, and the item grows to fit it" />
+
+            <c:AvonicItem Content="Primary" Color="primary" />
+            <c:AvonicItem Content="Danger button" Color="danger" Button="True" Detail="True">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicItem.StartContent>
+            </c:AvonicItem>
+            <c:AvonicItem Content="Success" Color="success" Lines="Full" />
+
+            <c:AvonicItem Content="Disabled" Button="True" IsEnabled="False" />
+
+            <c:AvonicItem Content="Right to left" Detail="True" FlowDirection="RightToLeft">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

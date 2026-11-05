@@ -40,6 +40,12 @@ public static class Activatable
 
     public const string ActivatedPseudoClass = ":activated";
 
+    /// <summary>
+    /// <c>.ion-activatable:hover</c> inside <c>@media (any-hover: hover)</c>. <c>:pointerover</c> also
+    /// applies during a touch, which would show a hover state on every press on a phone.
+    /// </summary>
+    public const string HoverPseudoClass = ":ion-hover";
+
     // ── Attached properties ──────────────────────────────────────────────────────────────────
 
     /// <summary>Ionic class <c>ion-activatable</c>.</summary>
@@ -80,7 +86,13 @@ public static class Activatable
 
         surface.AddHandler(InputElement.PointerPressedEvent,  OnPointerPressed,  RoutingStrategies.Tunnel, handledEventsToo: true);
         surface.AddHandler(InputElement.PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+        surface.PointerEntered += OnPointerEntered;
+        surface.PointerExited += OnPointerExited;
         surface.DetachedFromVisualTree += OnSurfaceDetached;
+
+        // CSS :hover applies as soon as .ion-activatable does, even if the pointer hasn't moved.
+        if (surface.IsPointerOver)
+            ((IPseudoClasses)surface.Classes).Add(HoverPseudoClass);
     }
 
     private static void Detach(Control surface)
@@ -90,14 +102,32 @@ public static class Activatable
         Reset(state);
         surface.RemoveHandler(InputElement.PointerPressedEvent,  OnPointerPressed);
         surface.RemoveHandler(InputElement.PointerReleasedEvent, OnPointerReleased);
+        surface.PointerEntered -= OnPointerEntered;
+        surface.PointerExited -= OnPointerExited;
         surface.DetachedFromVisualTree -= OnSurfaceDetached;
+        ((IPseudoClasses)surface.Classes).Remove(HoverPseudoClass);
         surface.SetValue(StateProperty, null);
     }
 
     private static void OnSurfaceDetached(object? sender, VisualTreeAttachmentEventArgs e)
     {
         if (sender is Control surface && surface.GetValue(StateProperty) is { } state)
+        {
             Reset(state);
+            ((IPseudoClasses)surface.Classes).Remove(HoverPseudoClass);
+        }
+    }
+
+    private static void OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is Control surface && e.Pointer.Type != PointerType.Touch)
+            ((IPseudoClasses)surface.Classes).Add(HoverPseudoClass);
+    }
+
+    private static void OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is Control surface)
+            ((IPseudoClasses)surface.Classes).Remove(HoverPseudoClass);
     }
 
     /// <summary>Cancel any press and drop any pending or current activation — the surface is going away.</summary>

@@ -33,10 +33,17 @@ const DEFAULT_HTML = {
         '<div class="ion-activatable" style="position:relative;overflow:hidden;width:240px;height:96px;' +
         'display:flex;align-items:center;justify-content:center;background:#e0e0e0;color:#3880ff;user-select:none">' +
         'Tap me<ion-ripple-effect></ion-ripple-effect></div>',
+    // The same content as Reference_Page in AvonicItemCaptureTests. ion-label and ion-list come later.
     'ion-item':
-        '<ion-list><ion-item button detail><ion-label>Item one</ion-label></ion-item>' +
-        '<ion-item><ion-label>Item two</ion-label><ion-note slot="end">end</ion-note></ion-item>' +
-        '<ion-item lines="none"><ion-label>Item three</ion-label></ion-item></ion-list>',
+        '<ion-item>Default lines</ion-item>' +
+        '<ion-item lines="full">Lines full</ion-item>' +
+        '<ion-item lines="none">Lines none</ion-item>' +
+        '<ion-item button detail>Button with detail</ion-item>' +
+        '<ion-item><ion-icon name="heart" slot="start"></ion-icon>Icons<ion-icon name="star" slot="end"></ion-icon></ion-item>' +
+        '<ion-item color="danger" button detail><ion-icon name="heart" slot="start"></ion-icon>Danger</ion-item>' +
+        '<ion-item color="primary">Primary</ion-item>' +
+        '<ion-item disabled button>Disabled</ion-item>' +
+        '<div dir="rtl"><ion-item detail><ion-icon name="heart" slot="start"></ion-icon>RTL<ion-icon name="star" slot="end"></ion-icon></ion-item></div>',
     'ion-button':
         '<ion-button>Default</ion-button> <ion-button fill="outline">Outline</ion-button> <ion-button fill="clear">Clear</ion-button>',
     'ion-icon':

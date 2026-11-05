@@ -1,0 +1,47 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- item.md.css's ::slotted rules. A slotted control's logical parent is the presenter, so '>' means
+         direct children only, as ::slotted does. Rules for controls that don't exist yet go in those
+         controls' own files. -->
+
+    <!-- ::slotted([slot=start]), ::slotted([slot=end]) -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Control)">
+        <Setter Property="Margin" Value="0,0,16,0" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+
+    <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.5em } -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.ItemIconBrush}" />
+        <Setter Property="FontSize">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="$parent[c:AvonicItem].FontSize" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(.ion-color) ::slotted(ion-icon) -->
+    <Style Selector="c|AvonicItem:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{Binding $parent[c:AvonicItem].Foreground}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=start]), with ::slotted(ion-icon[slot]) -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+        <Setter Property="Margin" Value="0,12,32,12" />
+    </Style>
+    <!-- ::slotted(ion-icon[slot=end]), with ::slotted(ion-icon[slot]) -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Margin" Value="16,12,0,12" />
+    </Style>
+
+    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,7,0,7" />
+    </Style>
+
+</Styles>
