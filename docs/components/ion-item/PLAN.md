@@ -88,15 +88,15 @@ Each becomes a test.
 | 2 | A plain item has none of those | measured: `DIV`, no ripple, no hover overlay |
 | 3 | A tap on a `Button` item raises `Click`, on release, every time; on a plain or disabled one it doesn't | Extension; measured |
 | 4 | A tap on a child inside a `Button` item also raises `Click` | measured: bubbled from `inner-btn` |
-| 5 | Enter (on press) and Space (on release) raise `Click` when the item has focus | native `<button>`; measured |
+| 5 | Enter (on press) and Space (on release) act as a tap when the item has focus, including forwarding | native `<button>`; measured |
 | 6 | A `Button` item is a tab stop; a plain or disabled one isn't | measured tab order |
 | 7 | Only `Detail="True"` shows the detail icon, even on a `Button` item | `showDetail`, md; measured |
-| 8 | `DetailIcon` changes it; the default flips in RTL | measured |
+| 8 | `DetailIcon` changes it; it flips in RTL by its name, as `arrow-forward` and `chevron-down` do | measured |
 | 9 | Detail icon: 1.25 em, opacity 0.25, the current colour, 8 px before, −6 px after | measured: 20×20 at x=360 |
 | 10 | `Lines`: default and inset draw the inner border, full the outer, none neither | measured; `:lines-*` |
 | 11 | Full lines make the item 49 high, as the outer border adds to a 48 inner | measured |
 | 12 | `Color` paints base and contrast, and borders use shade | measured `rgb(197, 0, 15)` |
-| 13 | An unknown `Color`: transparent background, current colour for borders | measured `badcolor` |
+| 13 | An unknown `Color`: transparent background, text in `--color`, current colour for borders | measured `badcolor`; `var()` invalid at computed time |
 | 14 | No `Color` in a coloured ancestor keeps every default | colour system rule |
 | 15 | Hover: the overlay at 0.04, with the mouse only | `@media (any-hover: hover)`; measured |
 | 16 | Keyboard focus: the overlay at 0.12, beating hover. A press clears it | measured; `focus-visible.js` |

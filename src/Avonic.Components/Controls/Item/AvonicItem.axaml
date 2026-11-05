@@ -40,16 +40,6 @@
                 </Border>
             </ControlTemplate>
         </Setter>
-
-        <!-- A <button> takes focus. A style, so an app's own Focusable wins. A cover's control takes focus itself. -->
-        <Style Selector="^:button">
-            <Setter Property="Focusable" Value="True" />
-        </Style>
-
-        <!-- :host(.item-interactive-disabled:not(.item-multiple-inputs)) { pointer-events: none } -->
-        <Style Selector="^:item-interactive-disabled:not(:item-multiple-inputs)">
-            <Setter Property="IsHitTestVisible" Value="False" />
-        </Style>
     </ControlTheme>
 
 </ResourceDictionary>

@@ -6,6 +6,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -192,6 +193,10 @@ public class AvonicItem : TemplatedControl
     private bool _multipleInputs;
     private bool _spacePressed;
     private object? _secondTapSource;
+    private IPointer? _secondTapPointer;
+    private IPointer? _pressPointer;
+    private IDisposable? _focusableFrame;
+    private IDisposable? _noInputFrame;
 
     public AvonicItem()
     {
@@ -199,8 +204,12 @@ public class AvonicItem : TemplatedControl
 
         // A second quick press raises DoubleTapped, on the press, and no Tapped. A native <button> clicks each
         // time, on release, so a finger that goes down to scroll doesn't activate anything.
-        AddHandler(PointerPressedEvent, (_, _) => _secondTapSource = null, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(DoubleTappedEvent, (_, e) => _secondTapSource = e.Source);
+        AddHandler(PointerPressedEvent, OnPointerPressedBeforeSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(DoubleTappedEvent, (_, e) =>
+        {
+            _secondTapSource = e.Source;
+            _secondTapPointer = _pressPointer;
+        });
         AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
         UpdateLines();
@@ -217,7 +226,13 @@ public class AvonicItem : TemplatedControl
         }
         else if (change.Property == ButtonProperty)
         {
+            _spacePressed = false;
             UpdateInteractivity();
+        }
+        else if (change.Property == IsEffectivelyEnabledProperty)
+        {
+            // Later, because this runs before the controls inside find out.
+            Dispatcher.UIThread.Post(UpdateInteractivity, DispatcherPriority.Loaded);
         }
         else if (change.Property == DetailProperty)
         {
@@ -349,6 +364,12 @@ public class AvonicItem : TemplatedControl
         Activatable.SetIsEnabled(this, canActivate);
         FocusVisible.SetIsEnabled(this, canActivate || focusableChild);
 
+        // A <button> takes focus, and a cover's control takes it itself.
+        SetStyleValue(ref _focusableFrame, FocusableProperty, clickable, true);
+
+        // :host(.item-interactive-disabled:not(.item-multiple-inputs)) { pointer-events: none }
+        SetStyleValue(ref _noInputFrame, IsHitTestVisibleProperty, PseudoClasses.Contains(":item-interactive-disabled") && !_multipleInputs, false);
+
         if (_ripple is not null)
         {
             _ripple.IsVisible = canActivate;
@@ -358,6 +379,23 @@ public class AvonicItem : TemplatedControl
         PseudoClasses.Set(
             ":item-control-needs-pointer-cursor",
             FirstInteractive() is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
+    }
+
+    /// <summary>
+    /// Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS is,
+    /// so an app's own value wins.
+    /// </summary>
+    private void SetStyleValue(ref IDisposable? frame, StyledProperty<bool> property, bool active, bool value)
+    {
+        if (active && frame is null)
+        {
+            frame = SetValue(property, value, BindingPriority.Style);
+        }
+        else if (!active)
+        {
+            frame?.Dispose();
+            frame = null;
+        }
     }
 
     /// <summary><c>clickedWithinShadowRoot</c>, inverted. Plain text in a slot has no element of its own, so it's padding.</summary>
@@ -381,11 +419,24 @@ public class AvonicItem : TemplatedControl
 
     private void OnTapped(object? sender, TappedEventArgs e) => e.Handled = Tap(e.Source);
 
-    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
+    private void OnPointerPressedBeforeSecondTap(object? sender, PointerPressedEventArgs e)
     {
-        if (_secondTapSource is { } source)
+        // Another finger going down doesn't end this one's press.
+        if (e.Pointer == _secondTapPointer)
         {
             _secondTapSource = null;
+            _secondTapPointer = null;
+        }
+
+        _pressPointer = e.Pointer;
+    }
+
+    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_secondTapSource is { } source && e.Pointer == _secondTapPointer)
+        {
+            _secondTapSource = null;
+            _secondTapPointer = null;
             if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
             {
                 Tap(source);
@@ -424,7 +475,7 @@ public class AvonicItem : TemplatedControl
 
         if (e.Key == Key.Enter)
         {
-            RaiseClick();
+            Tap(this);
             e.Handled = true;
         }
         else if (e.Key == Key.Space)
@@ -441,7 +492,7 @@ public class AvonicItem : TemplatedControl
         if (e.Key == Key.Space && _spacePressed)
         {
             _spacePressed = false;
-            RaiseClick();
+            Tap(this);
             e.Handled = true;
         }
     }
@@ -500,7 +551,18 @@ public class AvonicItem : TemplatedControl
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             owner.Button ? AutomationControlType.Button : AutomationControlType.Group;
 
-        protected override string? GetNameCore() => base.GetNameCore() ?? owner.Content as string;
+        /// <summary>A native button names itself from what's inside it.</summary>
+        protected override string? GetNameCore()
+        {
+            var name = base.GetNameCore();
+            if (!string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+
+            var text = owner.SlottedControls().OfType<TextBlock>().Select(block => block.Text).Where(value => !string.IsNullOrEmpty(value));
+            return string.Join(" ", text);
+        }
 
         protected override bool IsContentElementCore() => owner.Button;
 

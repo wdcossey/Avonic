@@ -28,15 +28,15 @@ Ionic results were measured in Chromium, with `ion-app` for the states, because 
 | 2 | A plain item has none of that | `DIV`, no ripple, overlay stays at 0 on hover | match |
 | 3 | A tap on a `button` item clicks; a disabled one doesn't | `btn<-input-wrapper`; `disabled`: nothing | match |
 | 4 | A tap on a child inside also clicks | `btn-nested<-inner-btn` | match |
-| 5 | Enter and Space activate | `btn<-item-native` for both | match |
+| 5 | Enter and Space activate, and also forward to the first interactive control | `btn<-item-native` for both | match |
 | 6 | Tab stops | `btn`, `btn-nodetail`, `color`, `badcolor`, `btn-nested`, `inner-btn`, `inner-btn2` | match: `plain`, `disabled` and `detail` are skipped |
 | 7 | Only `detail` true shows the icon | `btn`: none; `detail`: shown | match |
-| 8 | The default icon flips in RTL, a custom one doesn't | `flip-rtl` class on the default only | match |
+| 8 | The default icon flips in RTL, and a custom one flips by its name | `chevron-down` and `arrow-forward` flip, `heart` doesn't | match |
 | 9 | Detail icon box and style | 20×20 at x=360, 0.25, `8px`/`-6px`; 25×25 at 20 px | match |
 | 10 | Lines | default and inset: inner 1 px. Full: outer 1 px. None: neither | match |
 | 11 | Full lines make it 49 high | 49 | match |
 | 12 | Colour | `rgb(197, 0, 15)`, white, borders `rgb(173, 0, 13)` | match |
-| 13 | Unknown colour | Transparent, black borders | match |
+| 13 | Unknown colour | Transparent, with text in `--color` and borders in the current colour | match. The colour system's known difference for text doesn't apply here, because `Css.Var` can express it |
 | 14 | No colour in a coloured ancestor | from the colour system's rule | match |
 | 15 | Hover | Black at 0.04; contrast on colour | match. Mouse and pen only |
 | 16 | Keyboard focus | Black at 0.12, also while hovered. A click clears it | match |
