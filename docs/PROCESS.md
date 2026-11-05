@@ -113,5 +113,5 @@ priority tier is closed, or sooner if the human asks, one session raises a singl
 finished rows to both tables. Only one roll-up PR is open at a time.
 
 The tables lag between roll-ups, so don't read a missing row as "not built". The current record is
-the status lines, which `git grep -l "^Status: done" docs` lists, and blockers are checked against
-closed issues.
+the status lines, which `git grep -l "^Status: done" docs/components docs/infra` lists, and blockers
+are checked against closed issues.
