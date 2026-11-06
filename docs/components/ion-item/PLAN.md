@@ -259,28 +259,19 @@ one-line sizes it has just measured: a `TextBlock` is its longest word, from a `
 `Width` is that, a panel adds up or takes the largest, and everything else can't shrink.
 
 **What it costs.** A part with `flex: 1` is measured once, and so is content that fits. A start label is measured on one line and again at its share,
-and looks for its longest word only if its share is less than one line. A row that overflows does too. 300 items, the median of 7, in Release, headless, on this PC. It's two runs, as
-these move about:
+and looks for its longest word only if its share is less than one line. A row that overflows does too. 300 items, the median of 7, in Release, headless, on this PC. It's three runs each, on the final code, as these move about:
 
-| Rows | Open the page, before and after (ms) | Change of width, before and after (ms) |
-|---|---|---|
-| A label | 253, 272 and 247, 291 | 63, 76 and 66, 74 |
-| A label and a short note | 339, 348 and 335, 334 | 60, 73 and 64, 70 |
-| Icons and detail | 360, 338 and 322, 336 | 58, 86 and 73, 87 |
-| A start label | 351, 378 and 345, 436 | 69, 73 and 99, 131 |
-| A note that wraps | 391, 409 and 380, 439 | 20, 13 and 111, 136 |
+| Rows | Open the page, `v2` (ms) | Open the page, now (ms) | Change of width, `v2` (ms) | Change of width, now (ms) |
+|---|---|---|---|---|
+| A label | 320, 308, 338 | 308, 335, 291 | 76, 70, 78 | 60, 67, 71 |
+| A label and a short note | 424, 342, 362 | 298, 383, 356 | 72, 68, 75 | 58, 52, 63 |
+| Icons and detail | 388, 358, 381 | 396, 386, 355 | 89, 70, 85 | 71, 82, 62 |
+| A start label | 349, 365, 394 | 373, 397, 369 | 63, 65, 68 | 87, 99, 92 |
+| A note that wraps | 386, 402, 438 | 397, 443, 432 | 6, 18, 18 | 113, 114, 113 |
 
-Opening is the same within what it moves by. A change of width is the same, except that a start label costs about half as much again, for its word. The last
-row wasn't doing the same thing before: it didn't wrap. That's about 0.45 ms a row, on a rotation rather than a frame. Allocation isn't measured
-separately, and caching the longest word waits until a real page shows it matters.
-
-**This replaces the workarounds.** `:has-note` and its 25 lines go, because a note's `VerticalAlignment` now reaches the row. So does
-`Styles/Label.axaml` stretching the item's slots, and the selector ending `:not(c|AvonicLabel):not(:is(Panel))`.
-
-**Not by style.** The reviews on #60 suggested stretching the slots and centring their children with a style. That's
-`ContentPresenter > :is(Control)`, then again for a panel, for stacked, for floating and for textarea, each checked against every
-element in the app: 6 to 8 alternatives, where these rules cost 6 today. `FlexSlot` needs 1, for what's inside a panel. It also means
-a replaced theme keeps the layout.
+Opening is the same within what it moves by, and so is a change of width, except for two rows. A start label costs about 40% more, as it's measured
+on one line and again at its share. The last row wasn't doing the same thing before, as it didn't wrap: it's about 0.4 ms a row, on a rotation
+rather than a frame. Allocation isn't measured separately. `Resolve` doesn't allocate, and an `Item` is made per child per measure.
 
 ### Style budget
 
