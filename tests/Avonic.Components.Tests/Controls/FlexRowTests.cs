@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -224,7 +225,13 @@ public class FlexRowTests
     public void A_Part_With_Flex_Has_No_Minimum()
     {
         var part = new FlexSlot { Content = Text("Antidisestablishmentarianism"), [FlexRow.FlexProperty] = 1d };
-        using var scene = InRow(100, out _, Fixed(100), part);
+        using var scene = InRow(100, out var row, Fixed(100), part);
+
+        Assert.Equal(0, part.Bounds.Width);
+
+        // Now it's been measured, so there's a size to read that it mustn't.
+        row.Width = 90;
+        Settle();
 
         Assert.Equal(0, part.Bounds.Width);
     }
@@ -269,7 +276,7 @@ public class FlexRowTests
         // A TemplatedControl clips unless told not to, so it has to keep its minimum.
         var button = new Avalonia.Controls.Button { Content = new Border { Width = 200 } };
         var other = Fixed(100);
-        using var scene = InRow(100, out _, button, other);
+        using var scene = InRow(100, out var row, button, other);
 
         Assert.True(button.Bounds.Width >= 200);
     }
@@ -278,10 +285,94 @@ public class FlexRowTests
     public void A_Minimum_Width_Is_Kept_Around_Text()
     {
         var box = new ContentControl { MinWidth = 150, ClipToBounds = false, Content = Text() };
-        using var scene = InRow(100, out _, box, Fixed(100));
+        var other = Fixed(100);
+        using var scene = InRow(100, out _, box, other);
 
         Assert.Equal(150, box.Bounds.Width);
+        Assert.Equal(150, other.Bounds.X);
     }
+
+    [AvaloniaFact]
+    public void A_Fixed_Width_Is_Kept_Around_Text()
+    {
+        var box = new Border { Width = 150, Child = Text() };
+        var other = Fixed(100);
+        using var scene = InRow(100, out _, box, other);
+
+        Assert.Equal(150, other.Bounds.X);
+    }
+
+    [AvaloniaTheory]
+    [InlineData(1)]
+    [InlineData(1.25)]
+    [InlineData(1.5)]
+    [InlineData(1.75)]
+    [InlineData(2)]
+    [InlineData(2.625)]
+    public void A_Word_Fits_At_Its_Own_Width_At_Any_Scale(double scale)
+    {
+        foreach (var word in new[] { "Antidisestablishmentarianism", "certainly", "Supercalifragilistic", "wrap" })
+        {
+            var text = Text(word);
+            using var scene = InRow(300, out var row, Fixed(300), text);
+            scene.Window.SetRenderScaling(scale);
+            Settle();
+            row.InvalidateMeasure();
+            Settle();
+
+            Assert.Single(text.TextLayout.TextLines);
+        }
+    }
+
+    private static double Word(string word)
+    {
+        var alone = new TextBlock { Text = word };
+        alone.Measure(Size.Infinity);
+        return alone.DesiredSize.Width;
+    }
+
+    [AvaloniaFact]
+    public void Text_In_A_Horizontal_Stack_Adds_Its_Words_Up()
+    {
+        var other = Fixed(100);
+        var stack = new StackPanel { Orientation = Orientation.Horizontal, Children = { Text("certainly xx"), Text("Antidisestablishmentarianism xx") } };
+        using var scene = InRow(100, out _, stack, other);
+
+        Assert.InRange(other.Bounds.X, Word("certainly") + Word("Antidisestablishmentarianism") - 2, Word("certainly") + Word("Antidisestablishmentarianism") + 2);
+    }
+
+    [AvaloniaFact]
+    public void Text_In_A_Dock_Panel_Adds_Its_Words_Up()
+    {
+        var first = Text("certainly xx");
+        DockPanel.SetDock(first, Dock.Left);
+        var other = Fixed(100);
+        var dock = new DockPanel { Children = { first, Text("Antidisestablishmentarianism xx") } };
+        using var scene = InRow(100, out _, dock, other);
+
+        Assert.InRange(other.Bounds.X, Word("certainly") + Word("Antidisestablishmentarianism") - 2, Word("certainly") + Word("Antidisestablishmentarianism") + 2);
+    }
+
+    [AvaloniaFact]
+    public void Text_In_A_Row_Inside_Adds_Its_Words_Up()
+    {
+        var other = Fixed(100);
+        var inner = new FlexRow { Children = { Text("certainly xx"), Text("Antidisestablishmentarianism xx") } };
+        using var scene = InRow(100, out _, inner, other);
+
+        Assert.InRange(other.Bounds.X, Word("certainly") + Word("Antidisestablishmentarianism") - 2, Word("certainly") + Word("Antidisestablishmentarianism") + 2);
+    }
+
+    [AvaloniaFact]
+    public void Text_In_A_Button_Adds_Its_Words_Up() => InstalledTheme.Run(_ =>
+    {
+        // Two slots of text in a button, so that adding and taking the largest differ.
+        var button = new AvonicButton { StartContent = "certainly xx", Content = "Antidisestablishmentarianism xx" };
+        var other = Fixed(100);
+        using var scene = InRow(100, out var row, button, other);
+
+        Assert.True(other.Bounds.X >= Word("certainly") + Word("Antidisestablishmentarianism") - 40);
+    });
 
     [AvaloniaFact]
     public void Padding_Around_Text_Counts_In_The_Minimum()
@@ -650,6 +741,34 @@ public class FlexRowTests
         Assert.Equal(0, slot.Bounds.Width);
         Assert.Equal(alone.DesiredSize.Width, content.Bounds.Width, 0);
         Assert.Equal(alone.DesiredSize.Height, content.Bounds.Height);
+    }
+
+    [AvaloniaFact]
+    public void A_Child_Following_Align_Items_Is_Its_Own_Height()
+    {
+        var (_, child, scene) = InTallSlot(new TextBlock { Text = "x" }, VerticalAlignment.Bottom);
+        using (scene)
+        {
+            Assert.Equal(100, child.Bounds.Bottom);
+            Assert.True(child.Bounds.Height < 100);
+        }
+    }
+
+    [AvaloniaFact]
+    public void A_Short_Flex_Child_Does_Not_Look_For_Its_Words_And_A_Long_One_Does()
+    {
+        var word = Text("Antidisestablishmentarianism");
+        FlexRow.SetFlex(word, 1);
+        var other = new Border { [FlexRow.FlexProperty] = 1d };
+        using var scene = InRow(200, out var row, new FlexSlot { Content = word }, other);
+
+        var wide = Word("Antidisestablishmentarianism");
+        Assert.True(wide > 100);
+        Assert.Equal(wide, word.Bounds.Width, 0);
+
+        row.Width = 1000;
+        Settle();
+        Assert.Equal(500, word.Bounds.Width);
     }
 
     [AvaloniaFact]

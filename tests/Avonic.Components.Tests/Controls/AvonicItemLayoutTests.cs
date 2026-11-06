@@ -152,6 +152,9 @@ public class AvonicItemLayoutTests
         Dispatcher.UIThread.RunJobs();
 
         AssertNear(OneLine("Start"), start.Bounds.Width);
+
+        // flex: initial, so the slot is that wide too, and it isn't half the row with the label at its left.
+        AssertNear(16 + start.Bounds.Width + 16, Box(Inner(item), item).X);
     });
 
     [AvaloniaFact]
@@ -522,6 +525,9 @@ public class AvonicItemLayoutTests
 
         Assert.True(item.Bounds.Height > 48);
         Assert.Equal(0, Box(end, item).Y);
+
+        // Its own height, or "centred" would also pass if it filled the row.
+        AssertNear(OneLineHeight(), start.Bounds.Height);
         AssertNear((item.Bounds.Height - 1 - start.Bounds.Height) / 2, Box(start, item).Y);
     });
 
@@ -569,6 +575,24 @@ public class AvonicItemLayoutTests
         Assert.Equal(7, Box(button, item).Y);
     });
 
+    [AvaloniaTheory]
+    [InlineData(LabelPosition.Stacked)]
+    [InlineData(LabelPosition.Floating)]
+    public void F19_What_A_Panel_Holds_Beside_A_Stacked_Label_Is_Not_Centred(LabelPosition position) => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "x" };
+        var item = new AvonicItem
+        {
+            StartContent = new Border { Width = 10, Height = 100 },
+            Content = new AvonicLabel { Content = "x", Position = position },
+            EndContent = new StackPanel { Orientation = Orientation.Horizontal, Children = { text } },
+        };
+        using var scene = InScene(item);
+
+        // The end slot's margin of 7, and no lower, as it isn't centred.
+        Assert.Equal(7, Box(text, item).Y);
+    });
+
     [AvaloniaFact]
     public void F19_A_Child_Of_A_Panel_That_Asks_To_Stretch_Does() => InstalledTheme.Run(_ =>
     {
@@ -601,6 +625,7 @@ public class AvonicItemLayoutTests
         };
         using var scene = InScene(divider);
 
+        Assert.True(text.Bounds.Height < 30);
         AssertNear((divider.Bounds.Height - 1 - text.Bounds.Height) / 2, Box(text, divider).Y);
     });
 
@@ -666,14 +691,25 @@ public class AvonicItemLayoutTests
     [AvaloniaFact]
     public void The_Stub_Lays_Out_Without_A_Theme()
     {
-        var start = new TextBlock { Text = Long, TextWrapping = TextWrapping.Wrap };
-        var end = new TextBlock { Text = "End", TextWrapping = TextWrapping.Wrap };
+        var start = new TextBlock { Text = "S" };
+        var end = new TextBlock { Text = "E" };
         var item = new AvonicItem { StartContent = start, Content = "x", EndContent = end };
         using var scene = InScene(item);
 
-        // No padding or minimum in the stub. The inner is at least as wide as nothing, so the start is everything that's left.
-        Assert.Equal(390, start.Bounds.Width + Inner(item).Bounds.Width, 0);
-        Assert.True(start.Bounds.Height > OneLineHeight());
+        // The inner fills what's left, and the default slot pushes the end to the edge.
+        Assert.Equal(390, Box(Inner(item), item).Right, 0);
+        Assert.Equal(390, Box(end, item).Right, 0);
+    }
+
+    [AvaloniaFact]
+    public void The_Stubs_Wrap_Plain_Text_In_Their_Slots()
+    {
+        var item = new AvonicItem { StartContent = Long };
+        var divider = new AvonicItemDivider { EndContent = Long };
+        using var scene = InScene(new StackPanel { Children = { item, divider } });
+
+        Assert.True(Part<FlexSlot>(item, "PART_Start").Child!.Bounds.Height > OneLineHeight());
+        Assert.True(Part<FlexSlot>(divider, "PART_End").Child!.Bounds.Height > OneLineHeight());
     }
 
     [AvaloniaFact]

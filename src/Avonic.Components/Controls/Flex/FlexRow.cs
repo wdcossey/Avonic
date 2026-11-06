@@ -363,8 +363,6 @@ public sealed class FlexRow : Panel
             textWrapping: TextWrapping.WrapWithOverflow,
             maxWidth: 1,
             letterSpacing: text.LetterSpacing);
-
-        // Up, so the word isn't a fraction of a pixel too wide for itself and broken at its last letter.
-        return Math.Ceiling(layout.Width);
+        return layout.Width;
     }
 }
