@@ -1,0 +1,90 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.CardPage">
+
+    <ScrollViewer>
+        <!-- CSS collapses the margins between cards to 10, and Avalonia adds them up to 20. -->
+        <StackPanel Spacing="-10">
+            <c:AvonicCard>
+                <StackPanel>
+                    <c:AvonicCardHeader>
+                        <StackPanel>
+                            <c:AvonicCardTitle Content="Card title" />
+                            <c:AvonicCardSubtitle Content="Card subtitle" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                    <c:AvonicCardContent Content="Here's a small text description for the card content. It wraps onto the next line, and the card grows to fit it." />
+                </StackPanel>
+            </c:AvonicCard>
+
+            <c:AvonicCard Button="True" Click="OnCardClick">
+                <c:AvonicCardContent>
+                    <TextBlock x:Name="ClickCount" Text="Button: tap me" />
+                </c:AvonicCardContent>
+            </c:AvonicCard>
+
+            <c:AvonicCard Color="danger" Button="True" Click="OnCardClick">
+                <StackPanel>
+                    <c:AvonicCardHeader>
+                        <StackPanel>
+                            <c:AvonicCardTitle Content="Danger card" />
+                            <c:AvonicCardSubtitle Content="Everything inside inherits its contrast" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                    <c:AvonicCardContent Content="A coloured button card" />
+                </StackPanel>
+            </c:AvonicCard>
+
+            <c:AvonicCard>
+                <StackPanel>
+                    <c:AvonicCardHeader Color="primary">
+                        <StackPanel>
+                            <c:AvonicCardTitle Content="Primary header" />
+                            <c:AvonicCardSubtitle Content="On a plain card" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                    <c:AvonicCardContent Content="The content keeps the card's colours" />
+                </StackPanel>
+            </c:AvonicCard>
+
+            <c:AvonicCard>
+                <StackPanel>
+                    <c:AvonicCardHeader>
+                        <StackPanel>
+                            <c:AvonicCardSubtitle Content="Subtitle first" />
+                            <c:AvonicCardTitle Color="tertiary" Content="Tertiary title" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                </StackPanel>
+            </c:AvonicCard>
+
+            <c:AvonicCard>
+                <c:AvonicCardContent>
+                    <StackPanel>
+                        <TextBlock Classes="h1" Text="Heading one" />
+                        <TextBlock Classes="h2" Text="Heading two" />
+                        <TextBlock Classes="h3" Text="Heading three" />
+                        <TextBlock Classes="p" Text="A paragraph" />
+                    </StackPanel>
+                </c:AvonicCardContent>
+            </c:AvonicCard>
+
+            <c:AvonicCard Button="True" IsEnabled="False">
+                <c:AvonicCardContent Content="Disabled" />
+            </c:AvonicCard>
+
+            <c:AvonicCard FlowDirection="RightToLeft">
+                <StackPanel>
+                    <c:AvonicCardHeader>
+                        <StackPanel>
+                            <c:AvonicCardTitle Content="Right to left" />
+                            <c:AvonicCardSubtitle Content="Subtitle" />
+                        </StackPanel>
+                    </c:AvonicCardHeader>
+                    <c:AvonicCardContent Content="Content" />
+                </StackPanel>
+            </c:AvonicCard>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-card-color falls back to another variable in Ionic. ion-card-background is in Global.axaml. -->
+    <SolidColorBrush x:Key="Avonic.CardColorBrush" Color="{DynamicResource Avonic.TextColorStep450}" />
+
+    <!-- The variables of ion-card, ion-card-title and ion-card-subtitle. Each falls back to something else in
+         Ionic: the bindings in Controls/AvonicCard.axaml and Styles/Card.axaml say what. Any brush overrides it. -->
+    <b:CssUnset x:Key="Avonic.Card.Background" />
+    <b:CssUnset x:Key="Avonic.Card.Color" />
+    <b:CssUnset x:Key="Avonic.CardTitle.Color" />
+    <b:CssUnset x:Key="Avonic.CardSubtitle.Color" />
+
+    <!-- box-shadow on the host. There's no variable for it. -->
+    <BoxShadows x:Key="Avonic.Card.BoxShadow">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
+
+</ResourceDictionary>
