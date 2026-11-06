@@ -16,7 +16,8 @@ registrations. The tables in `CLAUDE.md` and `docs/ROADMAP.md` are handled separ
 | `src/Avonic.Themes/Styles/<Name>.axaml` | `AvonicTheme` | `Styles/**/*.axaml` glob |
 | `samples/Avonic.Sample/Pages/<Name>Page.axaml` | The sample's index | `[SamplePage]` on the page class |
 
-Mark each sample page with its Ionic tag, using the control's issue number as `Order`:
+A page gets the height of the window and no more, as a page in an app does, so a tall page needs its own `ScrollViewer`. A test
+checks this. Mark each sample page with its Ionic tag, using the control's issue number as `Order`:
 
 ```csharp
 [SamplePage("ion-chip", Order = 19)]

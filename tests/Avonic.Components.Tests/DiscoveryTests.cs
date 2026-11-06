@@ -2,6 +2,7 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -161,6 +162,27 @@ public class DiscoveryTests
                 window.Show();
                 Dispatcher.UIThread.RunJobs();
                 window.Close();
+            }
+        });
+
+    // The shell gives a page the window's height and no more, so a taller one would be cut off with no way to reach the rest.
+    [AvaloniaFact]
+    public void Sample_A_Page_Taller_Than_The_Window_Scrolls_Itself() =>
+        WithInstalledTheme(_ =>
+        {
+            const double ShellHeight = 844 - 56;
+            foreach (var entry in SamplePageCatalog.Discover(typeof(MainWindow).Assembly))
+            {
+                var page = entry.Create();
+                var window = new Window { Width = 390, Height = 844, Content = page };
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                page.Measure(new Size(390, double.PositiveInfinity));
+                var scrolls = page.GetLogicalDescendants().Any(child => child is ScrollViewer or AvonicContent);
+                var height = page.DesiredSize.Height;
+                window.Close();
+
+                Assert.True(scrolls || height <= ShellHeight, $"{entry.Title} is {height} high, in {ShellHeight}, and doesn't scroll.");
             }
         });
 

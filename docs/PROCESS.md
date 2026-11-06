@@ -91,6 +91,8 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 
 - `/code-review` on the change, high effort, **twice** — the second pass on the fixed diff.
   Findings fixed or explicitly waived in the PR description.
+- **Before calling a batch ready to merge,** run [the real window](../tools/real-window/README.md) and look at its frames. It takes
+  over the PC for about a minute, so ask first. It found a bug that 1,486 tests had missed.
 - If `StyleBudgetTests` goes over, the failure lists the largest rules. See whether the commas can go, or raise the limit
   and say so in the PR, with the new total. See [performance](infra/performance/README.md).
 - A human reads `PLAN.md`, `COMPARISON.md` and the diff at the PR, and merges or requests changes.
