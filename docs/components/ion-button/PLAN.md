@@ -82,7 +82,7 @@ Each becomes a test.
 
 | # | Behaviour | Source |
 |---|---|---|
-| 1 | A tap raises `Click`, on release, every time: on a second quick tap, after a tap on something else, and after a drag, if the press and release both landed on it. Not on the right button, or disabled, even mid-press, or if a child handled the press | native `<button>`; measured `mouse click`, `double click`, `right click`, `press, release off`, and the drags, a mid-press disable and `stopPropagation` |
+| 1 | A tap raises `Click`, on release, every time: on a second quick tap, after a tap on something else, and after a drag, if the press and release both landed on it. Not on the right button, with a second finger, in most chords, after a cancel, or disabled, even mid-press, or if a child handled the press | native `<button>`; measured `mouse click`, `double click`, `right click`, `press, release off`, the drags, a mid-press disable, `stopPropagation`, two fingers, chords, `touch cancelled` |
 | 2 | Enter clicks on press, and Space on release, if it's still focused. Keys on a nested control are its own | native `<button>`; measured `enter down`, `space up` |
 | 3 | It's a tab stop unless disabled, and a press focuses it | measured `tab from tab1`, `mouse click` |
 | 4 | `IonFocus` and `IonBlur` fire on any focus, including a press, bubble, and don't fire for focus on a nested control. Disabling a focused button blurs it | `onFocus`, `onBlur`; `bubbles: true`; measured `focused then disabled` |
@@ -107,7 +107,7 @@ Each becomes a test.
 | 23 | Slotted icon: 1.35 em, no input. Start: margin −0.3 em and 0.3 em of its own size. End: 0.3 em and −0.2 em. Direct children only | measured `start`, `end`, `both`, `defic` |
 | 24 | Icon-only: `:has-icon-only`, padding 0, min width and height clamped on font size: 40.04 by 40.04, icon 22.4. Small 28.08, icon 16. Large 50, icon 28. A slot change updates it. `--padding-top` sets all four | `slotChanged`; measured `only*` |
 | 25 | Start and end don't shrink for long text, and sit at the edges of the centred group | measured `longic`, `blockic` |
-| 26 | Disabled: opacity 0.5, no input, and a tap goes through to what's behind | `pointer-events: none`; measured `dis`, `initembtnd` |
+| 26 | Disabled: opacity 0.5, no input, and a tap goes through to what's behind. In a disabled item it stays 1, or 0.5 if it's disabled itself, inside the item's 0.3 | `pointer-events: none`; measured `dis`, `initembtnd`, `inside`, `both` |
 | 27 | Tokens: every variable applies, per side for padding, and `--opacity` is on the native part | measured `vars`, `varsr`, `varso` |
 | 28 | In an item, `Size` null means small; `Size="Default"` stays standard; at any depth | `inItem`, `closest`; measured `initem`, `initemd`, `initemdeep` |
 | 29 | Directly in an item's slot, a small button: font 12, 25 high, padding 0.6 em and 2, including icon-only, whose min width follows at 25.92 and icon at 14.77. Deeper, the plain small values | `::slotted(.button-small)`; measured `initem`, `initemo`, `initemssm`, `initemdeep` |
@@ -169,8 +169,9 @@ and the default is the converter's parameter in CSS's terms:
 The parameter `icon-only` is the chain in `:host(.button-has-icon-only)`, where `--padding-bottom` and `--padding-end`
 follow `--padding-top`, and `--padding-start` follows `--padding-end`. Measured `onlyv`: `--padding-top: 5px` sets all four.
 
-Three converters are new, and they live on `AvonicButton` because `Behaviors/` is shared: `PaddingConverter`,
-`ClampConverter` for `clamp(30px, 2.86em, 60px)`, and `IconMarginConverter` for a margin in the icon's own em.
+Five converters for the theme are new, and they live on `AvonicButton` because `Behaviors/` is shared: `PaddingConverter`,
+`ClampConverter` for `clamp(30px, 2.86em, 60px)`, `IconMarginConverter` for a margin in the icon's own em,
+`NoSideBordersConverter` for full width, and `HalfLeadingConverter`, below. `TextTransformConverter` is for the template.
 
 ### Layout
 
@@ -203,6 +204,9 @@ ripple, which a slot can't do here. See the gaps.
 
 A native `<button>` clicks on release if the press and the release both landed on it, and nothing else matters. Measured:
 a drag of 150 px within it clicks, a drag off and back clicks, two quick presses click twice, and disabling it mid-press doesn't.
+A second finger means no click, whichever lifts first, and so does a cancelled touch. Pressing the right mouse button during a
+left press means no click, and so does a left press that began while the right one was held, if the right is released first.
+A left tap while the right is held does click.
 
 **This differs from `AvonicItem`, which uses `Tapped`.** `Tapped` has a small movement limit, so a shaky press does nothing.
 It isn't raised for a second quick press, and `DoubleTapped`, which is, also needs the last press to have had the same
@@ -259,6 +263,7 @@ Avonic-only, and never named like an Ionic member.
 | `href`, `download`, `rel`, `target`, router props, `type`, `form`, `buttonType` aren't declared | Each would be a dead prop |
 | `Avonic.Button.Padding*` is px only | An em default stays relative, and an override is a plain number. Use a binding for a relative one |
 | A row of buttons is a panel, not inline flow | Avalonia has no inline flow |
+| A button in a disabled panel fades to 0.5 too, where a disabled `fieldset` does nothing to an `ion-button` (measured: opacity 1, and it still clicks) | In Avalonia a disabled ancestor disables the control, and it should look it. The exception is a disabled item, which has its own opacity, measured |
 | A nested control that handles its press, such as Avalonia's own `Button`, doesn't also click this one, where a click would bubble in a browser | That's how Avalonia's `Button` works, and it's what stops a click here, because `Tapped` comes too late to stop it |
 | A word wider than the button breaks onto more lines, where Chromium's button grows past its parent: 99.6 of 96 (measured `narrow`) | A control can't be measured wider than its parent, and Avalonia 12.1.4 breaks the word even with `WrapWithOverflow`, measured 4 lines |
 | Two block or full buttons in a column are 8 apart, where CSS collapses their margins to 4 | Avalonia has no margin collapsing, as in `ion-label` |

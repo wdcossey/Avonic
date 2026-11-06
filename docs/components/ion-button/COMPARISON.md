@@ -48,6 +48,10 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
 - **A click after being disabled mid-press,** a shaky press that did nothing, and a second tap that a child couldn't stop. All
   three came from using `Tapped`, so the button now tracks the press itself. Each was measured in Chromium first.
 - **Outline and clear on a `Color` painted `Avonic.Button.Background`,** where Ionic sets `background: transparent`. Measured.
+- **A press that lost the pointer still clicked, a second finger still clicked, and releasing another mouse button clicked.**
+  Chromium gives no click for any of them. One suggestion here was wrong: that a left press with a right tap in the middle
+  should click. Measured, it doesn't, and the code already did that.
+- **A button in a disabled item was at 0.15,** 0.5 inside the item's 0.3. Ionic's stays 1. Measured.
 
 ## Behaviours
 
@@ -56,7 +60,7 @@ results were measured in Chromium with `ion-app`.
 
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
-| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click, once for a drag within it or off and back; none for the right button, a release off it, disabled, or a child's `stopPropagation` | match |
+| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click, once for a drag within it or off and back; none for the right button, a release off it, disabled, a child's `stopPropagation`, two fingers, a cancel, or a chord | match |
 | 2 | Enter on press, Space on release | `enter down: click`, `enter up: nothing`, `space down: nothing`, `space up: click` | match |
 | 3 | A tab stop unless disabled; a press focuses it | Tab from `tab1` skips disabled `tab2` to `tab3`; `ionFocus` before `click` | match |
 | 4 | `IonFocus` and `IonBlur` | On any focus, bubbling; `focused then disabled: ionBlur`, nothing focused | match |
@@ -81,7 +85,7 @@ results were measured in Chromium with `ion-app`.
 | 23 | Slotted icons | 18.9, margins −5.67 and 5.67, 5.67 and −3.78, no input | match |
 | 24 | Icon-only | 40.04 with 22.4; 28.08 with 16; 50 with 28; `--padding-top: 5px` sets all four | match |
 | 25 | Start and end | 11.73 and 357.48 in long text; beside the text in a block | match |
-| 26 | Disabled | 0.5; `click dis: nothing`, hit goes to what's behind | match |
+| 26 | Disabled | 0.5; `click dis: nothing`, hit goes to what's behind; in a disabled item 1, or 0.5 if it's disabled too | match. A disabled panel fades it too: deliberate |
 | 27 | Tokens | `vars`, `varsr`, `varso`, and `varss` drawing no border | match |
 | 28 | Null is small in an item | `initem`, `initemdeep` small; `initemd` isn't | match. Avonic follows a move to another item, deliberately |
 | 29 | Directly in a slot | 12, 25, 7.2 and 2; icon-only 29.14 by 25, icon 14.77; deeper 13, 27.3 | match |

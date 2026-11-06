@@ -13,7 +13,7 @@
                         <Panel Background="Transparent">
                             <Border Name="PART_Overlay" />
                             <c:AvonicRippleEffect Name="PART_Ripple" />
-                            <c:ButtonInner Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <c:ButtonInner Name="PART_Inner" HorizontalAlignment="Center">
                                 <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
                                                   ContentTemplate="{TemplateBinding IconOnlyContentTemplate}">
                                     <ContentPresenter.Content>

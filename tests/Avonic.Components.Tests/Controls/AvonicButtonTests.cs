@@ -489,6 +489,165 @@ public class AvonicButtonTests
     }
 
     [AvaloniaFact]
+    public void B1_A_Press_That_Loses_The_Pointer_Does_Not_Click()
+    {
+        // pointercancel, measured "touch cancelled". The release still lands on the button.
+        var clicks = 0;
+        IPointer? pointer = null;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        button.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, RoutingStrategies.Tunnel);
+        using var scene = new Scene(button);
+
+        Press(scene, Centre);
+        pointer!.Capture(null);
+        Release(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Child_Taking_The_Pointer_Is_Still_The_Same_Press()
+    {
+        var clicks = 0;
+        IPointer? pointer = null;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        var button = Boxed(child);
+        button.Click += (_, _) => clicks++;
+        button.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, RoutingStrategies.Tunnel);
+        using var scene = new Scene(button);
+
+        Press(scene, new Point(5, 5));
+        pointer!.Capture(child);
+        Release(scene, new Point(5, 5));
+        Assert.Equal(1, clicks);
+
+        Press(scene, new Point(5, 5));
+        pointer!.Capture(button);
+        Release(scene, new Point(5, 5));
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Child_That_Only_Handles_The_Release_Does_Not_Stop_The_Click()
+    {
+        var clicks = 0;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.PointerReleased += (_, e) => e.Handled = true;
+        var button = Boxed(child);
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Tap(scene, Centre);
+
+        Assert.Equal(1, clicks);
+    }
+
+    private static void RaisePress(AvonicButton button, Pointer pointer, Scene scene) =>
+        button.RaiseEvent(new PointerPressedEventArgs(
+            button, pointer, scene.Window, Centre, 0,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None));
+
+    private static void RaiseRelease(AvonicButton button, Pointer pointer, Scene scene)
+    {
+        pointer.Capture(button);
+        button.RaiseEvent(new PointerReleasedEventArgs(
+            button, pointer, scene.Window, Centre, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+    }
+
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B1_A_Second_Finger_Means_No_Click_Measured(bool secondLiftsFirst)
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+        var first = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        var second = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, false);
+
+        RaisePress(button, first, scene);
+        RaisePress(button, second, scene);
+        RaiseRelease(button, secondLiftsFirst ? second : first, scene);
+        RaiseRelease(button, secondLiftsFirst ? first : second, scene);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_One_Finger_Clicks()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+
+        RaisePress(button, finger, scene);
+        RaiseRelease(button, finger, scene);
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Another_Button_During_A_Press_Means_No_Click_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseDown(Centre, MouseButton.Right, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Right, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Releasing_Another_Button_Does_Not_Click_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        // The middle of this is what matters: the left one is still down.
+        scene.Window.MouseDown(Centre, MouseButton.Right, RawInputModifiers.None);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Right, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Left_Tap_While_The_Right_Is_Held_Clicks_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        scene.Window.MouseDown(Centre, MouseButton.Right, RawInputModifiers.None);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Right, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
     public void B1_The_Right_Button_Does_Not_Click()
     {
         var clicks = 0;
@@ -648,11 +807,12 @@ public class AvonicButtonTests
     [AvaloniaFact]
     public void B2_It_Keeps_The_Keys_It_Uses()
     {
-        var seen = new List<string>();
+        var down = new List<Key>();
+        var up = new List<Key>();
         var button = Boxed();
         var parent = new StackPanel { Children = { button } };
-        parent.KeyDown += (_, e) => seen.Add("down:" + e.Key);
-        parent.KeyUp += (_, e) => seen.Add("up:" + e.Key);
+        parent.KeyDown += (_, e) => down.Add(e.Key);
+        parent.KeyUp += (_, e) => up.Add(e.Key);
         using var scene = new Scene(parent);
         button.Focus();
 
@@ -660,13 +820,13 @@ public class AvonicButtonTests
         PressKey(scene, PhysicalKey.Space);
         ReleaseKey(scene, PhysicalKey.Space);
 
-        Assert.DoesNotContain("down:Enter", seen);
-        Assert.DoesNotContain("down:Space", seen);
-        Assert.DoesNotContain("up:Space", seen);
+        Assert.DoesNotContain(Key.Enter, down);
+        Assert.DoesNotContain(Key.Space, down);
+        Assert.DoesNotContain(Key.Space, up);
 
         // And not one it doesn't.
         PressKey(scene, PhysicalKey.A);
-        Assert.Contains("down:A", seen);
+        Assert.Contains(Key.A, down);
     }
 
     [AvaloniaFact]
@@ -1534,7 +1694,11 @@ public class AvonicButtonTests
         var button = Boxed();
         using var scene = new Scene(button);
 
-        Assert.Equal(new Point(50, 20), Box(Inner(button), scene.Window).Center);
+        // As wide as its content, in the middle: justify-content: center.
+        var inner = Box(Inner(button), scene.Window);
+        Assert.True(inner.Width < 90, $"{inner.Width}");
+        Assert.InRange(inner.Center.X, 49, 51);
+        Assert.InRange(Box(Text(button), scene.Window).Center.Y, 19, 21);
     }
 
     [AvaloniaFact]
@@ -2038,6 +2202,38 @@ public class AvonicButtonTests
             Assert.Equal(0.5, button.Opacity);
             Assert.Equal(1, Native(button).Opacity);
         }
+    });
+
+    [AvaloniaFact]
+    public void B26_In_A_Disabled_Item_Only_Its_Own_Disabled_Fades_It_Measured() => InstalledTheme.Run(_ =>
+    {
+        var inside = new AvonicButton { Content = "Text" };
+        var both = new AvonicButton { Content = "Text", IsEnabled = false };
+        var plain = new AvonicButton { Content = "Text", IsEnabled = false };
+        using var scene = new Scene(NoTransitions(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { IsEnabled = false, EndContent = inside },
+                new AvonicItem { IsEnabled = false, EndContent = both },
+                new AvonicItem { EndContent = plain },
+            },
+        }));
+
+        // Measured: 1 and 0.5, inside an item at 0.3
+        Assert.Equal(1, inside.Opacity);
+        Assert.False(inside.IsEffectivelyEnabled);
+        Assert.Equal(0.5, both.Opacity);
+        Assert.Equal(0.5, plain.Opacity);
+    });
+
+    [AvaloniaFact]
+    public void B26_A_Disabled_Panel_Fades_It_As_Avalonia_Does() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new StackPanel { IsEnabled = false, Children = { button } }));
+
+        Assert.Equal(0.5, button.Opacity);
     });
 
     [AvaloniaFact]

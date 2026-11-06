@@ -449,10 +449,13 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    /// <summary>A new press ends the last one, which a gesture may have taken, so its release never came here.</summary>
+    /// <summary>
+    /// Any new press ends this one. As measured, another mouse button during a press means no click, and so does a
+    /// second finger, whichever lifts first. It also clears a press a gesture took, whose release never came here.
+    /// </summary>
     private void OnPointerPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
-        if (e.Pointer == _pressPointer)
+        if (e.Pointer == _pressPointer || !e.Pointer.IsPrimary)
         {
             _pressPointer = null;
         }
@@ -460,7 +463,7 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     private void OnPointerPressedBubble(object? sender, PointerPressedEventArgs e)
     {
-        if (e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
+        if (e.Pointer.IsPrimary && e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
         {
             _pressPointer = e.Pointer;
         }
@@ -468,15 +471,24 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     private void OnPointerReleasedBubble(object? sender, PointerReleasedEventArgs e)
     {
-        if (e.Pointer == _pressPointer)
+        if (e.Pointer != _pressPointer)
         {
-            _pressPointer = null;
-            if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
-            {
-                RaiseClick();
-            }
+            return;
+        }
+
+        _pressPointer = null;
+
+        // Not InitialPressMouseButton, which is the last button pressed, not the one released.
+        var isLeft = e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased;
+        if (isLeft && HoldsPointer(e.Pointer) && new Rect(Bounds.Size).Contains(e.GetPosition(this)))
+        {
+            RaiseClick();
         }
     }
+
+    /// <summary>A press that lost the pointer was cancelled, as <c>pointercancel</c> does, even if it's released over the button.</summary>
+    private bool HoldsPointer(IPointer pointer) =>
+        pointer.Captured is Visual holder && (holder == this || this.IsVisualAncestorOf(holder));
 
     /// <summary>As Avalonia's own <c>Button</c> does: a handler that sets <c>Handled</c> stops the command.</summary>
     private void RaiseClick()

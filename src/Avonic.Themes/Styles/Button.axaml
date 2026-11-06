@@ -55,6 +55,12 @@
         <Setter Property="FontSize" Value="{Binding $parent[c:AvonicButton].FontSize, Converter={x:Static c:AvonicButton.ClampConverter}, ConverterParameter='15.008,1.4,43.008'}" />
     </Style>
 
+    <!-- :host(.button-disabled) is the button's own disabled. In a disabled item it isn't set, measured: the button stays
+         at 1 inside the item's 0.3, or 0.5 if it's disabled too. :disabled also follows an ancestor, so this undoes it. -->
+    <Style Selector="c|AvonicItem:disabled c|AvonicButton[IsEnabled=True]:disabled">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
     <!-- item.md.css's ::slotted([slot=start]) and ::slotted([slot=end]) set one side, and the button's own margin
          stays on the other three. Item.axaml's rule sets all four and merges after this file, but it has no
          pseudoclass, and these do. -->
