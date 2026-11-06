@@ -441,7 +441,8 @@
             </Setter>
         </Style>
 
-        <!-- :host(.button-outline.ion-color) .button-native, where an invalid border colour is currentColor -->
+        <!-- :host(.button-outline.ion-color) .button-native. The border is var(ion-color-base), or currentColor if that's
+             invalid, and the text is the same base or inherited colour, so it just follows the text. -->
         <Style Selector="^:fill-outline:ion-color /template/ Border#PART_Native">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="TextElement.Foreground">
@@ -450,12 +451,7 @@
                     <Binding Path="$parent[c:AvonicButton].Foreground" />
                 </MultiBinding>
             </Setter>
-            <Setter Property="BorderBrush">
-                <MultiBinding Converter="{x:Static b:Css.Var}">
-                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
-                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
-                </MultiBinding>
-            </Setter>
+            <Setter Property="BorderBrush" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
         </Style>
 
         <!-- :host(.button-clear.ion-color) .button-native -->

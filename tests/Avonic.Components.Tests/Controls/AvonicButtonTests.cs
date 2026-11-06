@@ -1595,6 +1595,22 @@ public class AvonicButtonTests
         }
     });
 
+    [AvaloniaTheory]
+    [InlineData(ButtonFill.Solid, "#FFFFFF")]
+    [InlineData(ButtonFill.Outline, "#C5000F")]
+    [InlineData(ButtonFill.Clear, "#C5000F")]
+    public void B16_Hover_Alone_On_A_Color_Uses_Contrast_Or_Base(ButtonFill fill, string colour) => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "Text", Color = "danger", Fill = fill };
+        button.Resources["Avonic.Button.BackgroundHover"] = Brushes.Lime;
+        var (_, scene, centre) = Themed(button);
+        using (scene)
+        {
+            Hover(scene, centre);
+            Assert.Equal(Color.Parse(colour), Solid(Overlay(button).Background));
+        }
+    });
+
     [AvaloniaFact]
     public void B16_Opacity_Tokens_Still_Apply_And_Text_Stays_Measured_Tokc() => InstalledTheme.Run(_ =>
     {
