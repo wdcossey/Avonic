@@ -50,7 +50,8 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
 - **Outline and clear on a `Color` painted `Avonic.Button.Background`,** where Ionic sets `background: transparent`. Measured.
 - **A press that lost the pointer still clicked, a second finger still clicked, and releasing another mouse button clicked.**
   Chromium gives no click for any of them. One suggestion here was wrong: that a left press with a right tap in the middle
-  should click. Measured, it doesn't, and the code already did that.
+  should click. Measured, it doesn't. My first fix was wrong too: it ended a press whenever another button went down, but left,
+  right down, left up does click. It's the order of the releases that counts, which the deliberate-breakage run led me to measure.
 - **A button in a disabled item was at 0.15,** 0.5 inside the item's 0.3. Ionic's stays 1. Measured.
 
 ## Behaviours
@@ -60,7 +61,7 @@ results were measured in Chromium with `ion-app`.
 
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
-| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click, once for a drag within it or off and back; none for the right button, a release off it, disabled, a child's `stopPropagation`, two fingers, a cancel, or a chord | match |
+| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click, once for a drag within it or off and back; none for the right button, a release off it, disabled, a child's `stopPropagation`, two fingers, a cancel, or another mouse button released first | match |
 | 2 | Enter on press, Space on release | `enter down: click`, `enter up: nothing`, `space down: nothing`, `space up: click` | match |
 | 3 | A tab stop unless disabled; a press focuses it | Tab from `tab1` skips disabled `tab2` to `tab3`; `ionFocus` before `click` | match |
 | 4 | `IonFocus` and `IonBlur` | On any focus, bubbling; `focused then disabled: ionBlur`, nothing focused | match |

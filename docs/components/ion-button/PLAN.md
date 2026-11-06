@@ -204,9 +204,8 @@ ripple, which a slot can't do here. See the gaps.
 
 A native `<button>` clicks on release if the press and the release both landed on it, and nothing else matters. Measured:
 a drag of 150 px within it clicks, a drag off and back clicks, two quick presses click twice, and disabling it mid-press doesn't.
-A second finger means no click, whichever lifts first, and so does a cancelled touch. Pressing the right mouse button during a
-left press means no click, and so does a left press that began while the right one was held, if the right is released first.
-A left tap while the right is held does click.
+A second finger means no click, whichever lifts first, and so does a cancelled touch. With two mouse buttons, what counts is
+the order of the releases: if the left is released first, it clicks, and if the other one is, it doesn't. Measured in all four orders.
 
 **This differs from `AvonicItem`, which uses `Tapped`.** `Tapped` has a small movement limit, so a shaky press does nothing.
 It isn't raised for a second quick press, and `DoubleTapped`, which is, also needs the last press to have had the same

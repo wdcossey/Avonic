@@ -587,12 +587,15 @@ public class AvonicButtonTests
 
         RaisePress(button, finger, scene);
         RaiseRelease(button, finger, scene);
+        Assert.Equal(1, clicks);
 
+        // One press, one click.
+        RaiseRelease(button, finger, scene);
         Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]
-    public void B1_Another_Button_During_A_Press_Means_No_Click_Measured()
+    public void B1_Another_Button_Tapped_During_A_Press_Means_No_Click_Measured()
     {
         var clicks = 0;
         var button = Boxed();
@@ -606,6 +609,25 @@ public class AvonicButtonTests
         Dispatcher.UIThread.RunJobs();
 
         Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Another_Button_Still_Held_At_The_Release_Clicks_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseDown(Centre, MouseButton.Right, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Right, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]
@@ -1684,7 +1706,9 @@ public class AvonicButtonTests
         {
             Assert.Equal(92, button.Bounds.Height);
             var box = Box(button, scene.Window);
-            Assert.InRange(Box(Inner(button), scene.Window).Center.Y, box.Center.Y - 1, box.Center.Y + 1);
+            var presenter = Box(Slot(button, "PART_Content"), scene.Window);
+            Assert.InRange(presenter.Center.Y, box.Center.Y - 1, box.Center.Y + 1);
+            Assert.Equal(14, presenter.Height);
         }
     });
 
@@ -1698,7 +1722,9 @@ public class AvonicButtonTests
         var inner = Box(Inner(button), scene.Window);
         Assert.True(inner.Width < 90, $"{inner.Width}");
         Assert.InRange(inner.Center.X, 49, 51);
-        Assert.InRange(Box(Text(button), scene.Window).Center.Y, 19, 21);
+        var text = Box(Text(button), scene.Window);
+        Assert.InRange(text.Center.Y, 19, 21);
+        Assert.True(text.Height < 30, $"{text.Height}");
     }
 
     [AvaloniaFact]
@@ -2147,18 +2173,19 @@ public class AvonicButtonTests
         var text = "A";
         var fits = new AvonicButton { Content = text };
         using var scene = new Scene(NoTransitions(new StackPanel { Children = { fits } }));
-        while (true)
+        var wrapped = false;
+        for (var length = 0; length < 200 && !wrapped; length++)
         {
             fits.Content = text + "A";
             Dispatcher.UIThread.RunJobs();
-            if (fits.Bounds.Height > 36)
+            wrapped = fits.Bounds.Height > 36;
+            if (!wrapped)
             {
-                break;
+                text += "A";
             }
-
-            text += "A";
         }
 
+        Assert.True(wrapped);
         fits.Content = text;
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(36, fits.Bounds.Height);

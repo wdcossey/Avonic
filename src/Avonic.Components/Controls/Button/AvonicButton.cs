@@ -450,8 +450,8 @@ public class AvonicButton : TemplatedControl, IItemControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Any new press ends this one. As measured, another mouse button during a press means no click, and so does a
-    /// second finger, whichever lifts first. It also clears a press a gesture took, whose release never came here.
+    /// A new press ends the last one, which a gesture may have taken, so its release never came here. A second finger
+    /// means no click, whichever lifts first, as measured.
     /// </summary>
     private void OnPointerPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
@@ -463,12 +463,16 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     private void OnPointerPressedBubble(object? sender, PointerPressedEventArgs e)
     {
-        if (e.Pointer.IsPrimary && e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
+        if (e.Pointer.IsPrimary)
         {
             _pressPointer = e.Pointer;
         }
     }
 
+    /// <summary>
+    /// Measured with two mouse buttons: left, then right down, then left up clicks. Left, then a right tap, then left up
+    /// doesn't, and nor does right, then left, then right up, then left up. So releasing any other button ends the press.
+    /// </summary>
     private void OnPointerReleasedBubble(object? sender, PointerReleasedEventArgs e)
     {
         if (e.Pointer != _pressPointer)
