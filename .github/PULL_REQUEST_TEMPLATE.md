@@ -27,5 +27,6 @@ Closes #
 - [ ] `dotnet test Avonic.sln` — all passing; one test per planned behaviour
 - [ ] No declared property without a working implementation and a test
 - [ ] No emoji / Unicode glyphs as icons; no hex colours in Themes outside `Tokens/`
+- [ ] Style budget: no limit raised, or raised on purpose, with the new total here:
 - [ ] Only this control's files touched (shared files are auto-discovered; the `CLAUDE.md` and `docs/ROADMAP.md` tables are rolled up separately)
 - [ ] `Status:` line added under the heading of the control's README

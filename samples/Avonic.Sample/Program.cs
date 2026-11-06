@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 
 namespace Avonic.Sample;
@@ -5,7 +6,14 @@ namespace Avonic.Sample;
 internal static class Program
 {
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        EnableDiagnostics();
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
+
+    [Conditional("DEBUG")]
+    private static void EnableDiagnostics() => Diagnostics.PerformanceMonitor.EnableDiagnostics();
 
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
