@@ -55,3 +55,10 @@ which rules can ever match a type would remove most of that. An idea, not a bug.
 | Bad data throws `InvalidDataException`, `IndexOutOfRangeException` or `FormatException` | |
 | A path that doesn't start with a moveto draws from the origin | SVG draws nothing |
 | Valid numbers such as `+1` and some exponents are rejected | |
+
+## A wrapped `TextBlock` in RTL loses a pixel at its right edge
+
+**Seen in a frame, and the cause not read.** Latin text that wraps in a `TextBlock` with `FlowDirection="RightToLeft"` has about 1 px of its
+last letter cut off on each full line, headlessly with Skia at 2×. It's a plain `Border` and `TextBlock`, with no Avonic control, at 155 wide
+and 11 px, where the layout reports a width of 154.25 and the box is 155. `ClipToBounds` being on by default is what shows it. Avonic accepts
+it as best effort. It hasn't been tried in a real window.

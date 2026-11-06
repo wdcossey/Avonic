@@ -66,11 +66,8 @@ against the available width. It also makes the hit box the same as Ionic's, whic
 **`margin: 0` needs no rule.** `::slotted(ion-note)`'s `margin: 0` loses to `::slotted([slot=end])`'s, and the default
 slot has no margin anyway. A rule that does nothing is left out.
 
-**`align-self: flex-start` needs the slot to stretch, and the slot can't tell what's in it.** The item centres its start
-and end presenters, and its default presenter centres its content. Either way the note's own `VerticalAlignment` has
-nothing to act in. So a note sets a `:has-note` pseudoclass on the presenter it's in, and `Styles/Note.axaml` stretches
-an item's presenter with that pseudoclass. Anything else in the item keeps its own alignment, unlike a rule for every slot, and
-the item's files don't change. `ionStyle` isn't used because it's per item, not per slot, and Ionic's note doesn't emit it.
+**`align-self: flex-start` is the note's `VerticalAlignment`,** which the item's `FlexSlot` honours since #71. This used to take a `:has-note`
+pseudoclass on the presenter. [The item's plan](../ion-item/PLAN.md#the-flex-layout-71) says what replaced it.
 
 **A panel directly in a slot stands for the slot,** as in `ion-label`, because `<ion-note slot="end"><ion-icon slot="end">`
 has to be a panel here. So a note in one is 11 px, has its padding, and is at the top, and the others in that panel are
@@ -86,7 +83,7 @@ types nothing.
 
 | Difference | Why |
 |---|---|
-| **Known gap:** a long note in `StartContent` or `EndContent` doesn't wrap, and the item cuts it off. Measured in Ionic: in either slot it wraps at 342 wide, and takes all of the row, squeezing a label beside it to 0 wide | Those slots are `Auto` columns in the item's template, as `ion-label`'s plan records. Fixing it means a flex-like layout in the item |
+| A long note's box is as wide as its longest line, where Ionic's is all that's available, 342 in a slot | It's aligned left, for behaviour 10. The text is in the same place, and a tap in the gap reaches the item |
 | A note in a panel directly in a slot acts as slotted, where Ionic's in a `<div slot="end">` is 14 px and centred (measured `in-div`) | See the design: this is what two notes or a note and an icon in one slot have to be. Wrap it in a `Border` for what `<div>` does |
 | `TextBlock.TextWrapping="NoWrap"`, or `.ion-text-nowrap`, on any other ancestor doesn't reach a note, where Ionic's `white-space` does (measured `div-n`) | See the design. Set it on the note |
 | Whether a panel is a vertical stack is read when the note attaches, and only a `StackPanel` counts. So a later change of `Orientation` doesn't follow, and a `Grid` with rows acts as a row, with the note at the top | A panel can't say which way it flows. Set `VerticalAlignment="Center"` on the panel to centre it as a group |

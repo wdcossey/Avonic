@@ -81,8 +81,8 @@ public class AvonicNoteCaptureTests
 
         Assert.Equal(48, page.Children[2].Bounds.Height);
 
-        // The gap the plan records: a long note in the end slot is one line, however wide, and the item cuts it off.
+        // Measured in Ionic: a long note in the end slot wraps at 342. Aligned left, this is as wide as its longest line.
         var longEnd = (AvonicNote)((AvonicItem)page.Children[10]).EndContent!;
-        Assert.True(longEnd.Bounds.Width > page.Bounds.Width);
+        Assert.InRange(longEnd.Bounds.Width, 300, 342);
     });
 }

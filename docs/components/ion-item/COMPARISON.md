@@ -16,6 +16,36 @@ The text is the one visible difference. Roboto isn't installed on this machine, 
 fallback: Arial in Chromium and Segoe UI in Avalonia. That also moves the text by about 1 px, as they have different
 metrics. Icons and borders are in the same places.
 
+## The flex layout
+
+From #71. The rows from the top are in [PLAN.md](PLAN.md#the-flex-layout-71). Ionic on the left, in Chromium, headless, with the page in
+`AvonicItemCaptureTests.Layout_Page` on the right, headless too, from the same `--html` as [`ref/layout/page.html`](ref/layout/page.html):
+
+![](compare/side-layout.png)
+
+**Match,** with every box in the same place. The rows are taller here only because Segoe UI's lines are, at 21.3 against Arial's 18:
+
+| Row | Ionic | Avonic |
+|---|---|---|
+| A long start label, three lines | 74 | 84 |
+| Squeezed default label, seven lines | 147 | 170 |
+| Plain text squeezed, three lines | 55 | 65 |
+| Divider, one line | 40 | 43 |
+| Long divider start or end, two lines | 56 | 61.5 |
+| Everything else | 48 | 48 |
+
+One row differs for another reason. A stacked label in start beside a plain one is 55 in this page, and was 48 in another: two labels report
+to the item, and the last to load wins, which `B5_With_Two_Labels_The_Last_To_Report_Wins` records. The default slot loads last here, so it's 48.
+
+The RTL row's note loses about 1 px at its right edge. A plain `TextBlock` does too, in Avalonia, with no Avonic control: it's [listed](../../infra/avalonia-issues.md).
+
+Each row in the plan has a test in `AvonicItemLayoutTests` named after it, so F1 to F22 are all match, except:
+
+| # | Difference |
+|---|---|
+| F14, F18 | A long note or `AvonicText` is as wide as its longest line, rather than 342. The text is in the same place |
+| F7, F8, F15 | Same layout, with rows that are taller by the font's line height, as above |
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicItemTests`, named after its number. The
@@ -89,4 +119,4 @@ See [PLAN.md](PLAN.md#deliberate-differences).
 
 ## Gaps
 
-None.
+None. The differences that remain are in [PLAN.md](PLAN.md#deliberate-differences).

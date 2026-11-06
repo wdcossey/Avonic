@@ -59,8 +59,14 @@
     <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicLabel, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
         <Setter Property="Margin" Value="0,10,0,10" />
     </Style>
+    <!-- ::slotted(ion-label:not([slot=end])) { flex: 1 }, here and in the rule for the start slot. max-width: 100% is in
+         FlexRow, as it limits the minimum. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicLabel">
+        <Setter Property="c:FlexRow.Flex" Value="1" />
+    </Style>
     <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicLabel">
+        <Setter Property="c:FlexRow.Flex" Value="1" />
         <Setter Property="Margin" Value="0,10,16,10" />
     </Style>
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicLabel">
@@ -103,20 +109,29 @@
     </Style>
 
     <!-- ::slotted(*) h1 etc, with a panel standing for the slot. line-height 1.2 on h1 and h2 is from Ionic's
-         global typography. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+         global typography, and it's a factor of the element's own size. It doesn't clip in CSS, and a TextBlock
+         otherwise clips its descenders to it. -->
     <Style Selector="c|AvonicLabel > TextBlock.h1, c|AvonicLabel > :is(Panel) > TextBlock.h1">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="LineHeight" Value="28.8" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
     </Style>
     <Style Selector="c|AvonicLabel > TextBlock.h2, c|AvonicLabel > :is(Panel) > TextBlock.h2">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,2,0,2" />
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="LineHeight" Value="19.2" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
     </Style>
     <Style Selector="c|AvonicLabel > TextBlock.h3, c|AvonicLabel > TextBlock.h4, c|AvonicLabel > TextBlock.h5, c|AvonicLabel > TextBlock.h6, c|AvonicLabel > :is(Panel) > TextBlock.h3, c|AvonicLabel > :is(Panel) > TextBlock.h4, c|AvonicLabel > :is(Panel) > TextBlock.h5, c|AvonicLabel > :is(Panel) > TextBlock.h6">
         <Setter Property="Margin" Value="0,2,0,2" />
@@ -145,6 +160,8 @@
     </Style>
     <!-- :host-context(.item-input) -->
     <Style Selector="c|AvonicItem:item-input c|AvonicLabel">
+        <!-- flex: initial -->
+        <Setter Property="c:FlexRow.Flex" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="MaxWidth" Value="200" />
         <Setter Property="IsHitTestVisible" Value="False" />
@@ -160,6 +177,8 @@
 
     <!-- :host(.label-fixed). Inline outside an item, where none of this applies. -->
     <Style Selector="c|AvonicItem c|AvonicLabel:position-fixed">
+        <!-- flex: 0 0 100px, measured beating flex: 1. A Width is a minimum in FlexRow, which is flex-shrink: 0. -->
+        <Setter Property="c:FlexRow.Flex" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="Width" Value="100" />
         <Setter Property="MinWidth" Value="100" />
@@ -178,24 +197,13 @@
         <!-- The height tracks at once, as CSS's percentage does. Only TranslateY and Scale ease. -->
         <Setter Property="RenderTransform">
             <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
-                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
                 <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
                 <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
     </Style>
-    <!-- A stacked or floating label fills its slot, in any slot: flex: 1 in the column of .input-wrapper, and
-         align-self: stretch in .item-inner. It's what translateY's percentage is of. A presenter can't tell what's in
-         it, so the slots stretch and anything else goes to the top, which is align-items: start. A panel stays
-         stretched, because it stands for the slot. -->
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter, c|AvonicItem:item-label-floating /template/ ContentPresenter">
-        <Setter Property="VerticalAlignment" Value="Stretch" />
-        <Setter Property="VerticalContentAlignment" Value="Stretch" />
-    </Style>
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter > :is(Control):not(c|AvonicLabel):not(:is(Panel)), c|AvonicItem:item-label-floating /template/ ContentPresenter > :is(Control):not(c|AvonicLabel):not(:is(Panel))">
-        <Setter Property="VerticalAlignment" Value="Top" />
-    </Style>
-    <!-- flex: initial, on :host-context(.item-input), takes that away -->
+    <!-- flex: initial, on :host-context(.item-input), takes the rule above's stretch away -->
     <Style Selector="c|AvonicItem:item-input c|AvonicLabel:position-stacked, c|AvonicItem:item-input c|AvonicLabel:position-floating">
         <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
@@ -214,7 +222,6 @@
     <!-- :host(.label-floating) -->
     <Style Selector="c|AvonicLabel:position-floating">
         <Setter Property="b:Css.TranslateY" Value="0.96" />
-        <Setter Property="b:Css.Scale" Value="1" />
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />

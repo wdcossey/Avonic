@@ -36,31 +36,33 @@
                 <Border Name="PART_Native">
                     <Panel Background="Transparent">
                         <Border Name="PART_Overlay" IsHitTestVisible="False" />
-                        <Grid Name="PART_Layout" ColumnDefinitions="Auto,*">
-                            <ContentPresenter Name="PART_Start"
-                                              VerticalAlignment="Center"
-                                              Content="{TemplateBinding StartContent}"
-                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                            <Border Name="PART_Inner" Grid.Column="1">
-                                <Grid ColumnDefinitions="*,Auto,Auto">
-                                    <ContentPresenter Name="PART_Container"
-                                                      VerticalContentAlignment="Center"
-                                                      TextWrapping="Wrap"
-                                                      Content="{TemplateBinding Content}"
-                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                    <ContentPresenter Name="PART_End"
-                                                      Grid.Column="1"
-                                                      VerticalAlignment="Center"
-                                                      Content="{TemplateBinding EndContent}"
-                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        <c:FlexRow Name="PART_Layout">
+                            <c:FlexSlot Name="PART_Start"
+                                        VerticalContentAlignment="Center"
+                                        TextWrapping="Wrap"
+                                        Content="{TemplateBinding StartContent}"
+                                        ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <Border Name="PART_Inner" c:FlexRow.Flex="1">
+                                <c:FlexRow>
+                                    <c:FlexSlot Name="PART_Container"
+                                                c:FlexRow.Flex="1"
+                                                VerticalContentAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                ClipToBounds="True"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                    <c:FlexSlot Name="PART_End"
+                                                VerticalContentAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                Content="{TemplateBinding EndContent}"
+                                                ContentTemplate="{TemplateBinding EndContentTemplate}" />
                                     <c:AvonicIcon Name="PART_DetailIcon"
-                                                  Grid.Column="2"
                                                   VerticalAlignment="Center"
                                                   AutomationProperties.AccessibilityView="Raw"
                                                   Icon="{TemplateBinding DetailIcon}" />
-                                </Grid>
+                                </c:FlexRow>
                             </Border>
-                        </Grid>
+                        </c:FlexRow>
                         <c:AvonicRippleEffect Name="PART_Ripple" />
                     </Panel>
                 </Border>
@@ -89,7 +91,7 @@
         </Style>
 
         <!-- .item-native's padding. It's on a part inside, because ::after and the ripple cover the padding. -->
-        <Style Selector="^ /template/ Grid#PART_Layout">
+        <Style Selector="^ /template/ c|FlexRow#PART_Layout">
             <Setter Property="Margin">
                 <MultiBinding Converter="{x:Static b:Css.Box}">
                     <DynamicResource ResourceKey="Avonic.Item.PaddingStart" />
@@ -191,13 +193,16 @@
         <Style Selector="^:item-label-stacked /template/ Border#PART_Native, ^:item-label-floating /template/ Border#PART_Native, ^:item-label-stacked /template/ Border#PART_Inner, ^:item-label-floating /template/ Border#PART_Inner">
             <Setter Property="MinHeight" Value="55" />
         </Style>
-        <Style Selector="^:item-label-stacked /template/ ContentPresenter, ^:item-label-floating /template/ ContentPresenter, ^:item-label-stacked /template/ c|AvonicIcon#PART_DetailIcon, ^:item-label-floating /template/ c|AvonicIcon#PART_DetailIcon">
+        <!-- align-items: start. A FlexSlot's VerticalContentAlignment is align-items. -->
+        <Style Selector="^:item-label-stacked /template/ ContentPresenter, ^:item-label-floating /template/ ContentPresenter">
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^:item-label-stacked /template/ c|AvonicIcon#PART_DetailIcon, ^:item-label-floating /template/ c|AvonicIcon#PART_DetailIcon">
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
 
         <!-- :host(.item-textarea) { align-items: stretch }. An icon has its own height, so it sits at the top. -->
         <Style Selector="^:item-textarea /template/ ContentPresenter">
-            <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Stretch" />
         </Style>
         <Style Selector="^:item-textarea /template/ c|AvonicIcon#PART_DetailIcon">

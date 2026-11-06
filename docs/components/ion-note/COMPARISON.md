@@ -23,7 +23,7 @@ and RTL.
 
 - **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines are
   taller: an 11 px line is 15 against 12, so the row beside a stacked label is 58 against 55.
-- **Long in the end slot.** This is the known gap: one line, cut off by the item, where Ionic wraps at 342.
+- **Long in the end slot.** It wraps within 342, as Ionic's does, since #71. As it's aligned left, its box is as wide as its longest line, where Ionic's is 342. The text is in the same place.
 - **The icon in the tall row** is smaller and black, because `Styles/Item.axaml`'s `::slotted(ion-icon)` rules only reach
   an icon directly in a slot. A note and an icon in one slot have to be in a panel here. That belongs to the item, and it's
   listed in the PR. The note itself, and the icon's being centred, match.
@@ -62,8 +62,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNot
 
 ## Deliberate differences and known gaps
 
-All in [PLAN.md](PLAN.md#deliberate-differences). One is a real gap, which is the item's to fix: a long note in
-`StartContent` or `EndContent` doesn't wrap, and the item cuts it off.
+All in [PLAN.md](PLAN.md#deliberate-differences).
 
 ## Real window
 

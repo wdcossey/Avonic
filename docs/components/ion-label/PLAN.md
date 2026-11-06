@@ -117,7 +117,7 @@ own, which this is too. A `RenderTransform` doesn't affect layout, as a CSS tran
 the origin, so RTL needs no rule of its own.
 
 **A stacked or floating label fills the height.** The item's theme aligns its slots to the top for these, which is right
-for other content, but a label's `flex: 1` and `align-self: stretch` fill the slot. A presenter can't tell what's in it, so
+for other content, but a label's `flex: 1` and `align-self: stretch` fill the slot, which `FlexSlot` now does (#71). A presenter can't tell what's in it, so
 `Styles/Label.axaml` stretches the slots and sends anything else to the top, and this doesn't touch the item's files. A
 panel stays stretched, because it stands for the slot. With an input beside it, use `Grid RowDefinitions="*,Auto"`, which is
 what `flex: 1` beside a fixed-height sibling is.
@@ -128,7 +128,6 @@ what `flex: 1` beside a fixed-height sibling is.
 |---|---|
 | A label outside an item fills the width, where Ionic's is inline | Avalonia has no inline flow for controls. Set `HorizontalAlignment` to change it. Text looks the same |
 | Two labels in a slot don't share the width by themselves | One child per slot. A `Grid ColumnDefinitions="*,*"` does it, measured 179 each |
-| **Known gap:** a label in `StartContent` or `EndContent` is as wide as its text, and long text doesn't wrap, so the item cuts it off. Measured in Ionic: a short label in the start slot takes half the row (171 of 358), a long one there wraps at 171, and a long one in the end slot wraps at 342 | Those slots are `Auto` columns in the item's template, so fixing it means a flex-like layout in the item, not a change here. `ion-note` (#8) will hit it too |
 | With two labels in an item, the last to report wins, on load and on a change of `Position` | The same as Ionic, which keeps these per tag name. Ionic's order on load depends on what loaded first (measured `a` 55 high, `b` 48). Avonic's is the order it measures the slots: start, end, default, so a label in the default slot wins |
 | Margins between two headings add up to 4, where CSS collapses them to 2 | Avalonia has no margin collapsing. `h1` or `h2` followed by `p`, the usual pairs, are 2 in both |
 | `item-input`'s label is as wide as its text up to 200, where Ionic's is `min-content` (measured 58, one word per line) | Avalonia has no `min-content`. Nothing in Ionic 8 raises `input`, so only a custom child reaches this |

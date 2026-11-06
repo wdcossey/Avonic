@@ -735,7 +735,7 @@ public class AvonicLabelTests
 
             Assert.Equal(size, block.FontSize);
             Assert.Equal(new Thickness(0, top, 0, bottom), block.Margin);
-            Assert.Equal(lineHeight, block.LineHeight);
+            Assert.Equal(lineHeight, block.LineHeight, 6);
             Assert.Equal(FontWeight.Normal, block.FontWeight);
         });
     }

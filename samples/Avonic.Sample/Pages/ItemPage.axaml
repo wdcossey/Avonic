@@ -27,6 +27,29 @@
 
             <c:AvonicItem Content="A long line of text wraps onto the next line, and the item grows to fit it" />
 
+            <c:AvonicItem>
+                <c:AvonicItem.StartContent>
+                    <c:AvonicLabel Content="A label in the start slot takes half the row" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicLabel Content="And the rest" />
+            </c:AvonicItem>
+
+            <c:AvonicItem Detail="True">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicLabel Content="A long label in the end slot wraps, and leaves nothing for a label in the default slot" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel Content="A short label" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="A note stays at the top" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
             <c:AvonicItem Content="Primary" Color="primary" />
             <c:AvonicItem Content="Danger button" Color="danger" Button="True" Detail="True">
                 <c:AvonicItem.StartContent>

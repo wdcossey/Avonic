@@ -417,11 +417,11 @@ public class AvonicNoteTests
     public void B8_When_The_Only_Note_In_A_Panel_Leaves_The_Slot_Is_Centred_Again() => InstalledTheme.Run(_ =>
     {
         var note = new AvonicNote { Content = "x" };
-        var other = new TextBlock { Text = "x", VerticalAlignment = VerticalAlignment.Top };
+        var other = new TextBlock { Text = "x" };
         var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { note, other } };
         var item = new AvonicItem { Content = Tall(), EndContent = end };
         using var scene = InScene(item);
-        Assert.Equal(0, Box(other, item).Y);
+        Assert.Equal(0, Box(note, item).Y);
 
         end.Children.Remove(note);
         Dispatcher.UIThread.RunJobs();
@@ -446,7 +446,7 @@ public class AvonicNoteTests
     [AvaloniaFact]
     public void B8_Notes_Taken_Out_While_The_Item_Is_Off_Screen_Leave_It_Centred() => InstalledTheme.Run(_ =>
     {
-        var other = new TextBlock { Text = "x", VerticalAlignment = VerticalAlignment.Top };
+        var other = new TextBlock { Text = "x" };
         var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { new AvonicNote { Content = "x" }, new AvonicNote { Content = "x" }, other } };
         var item = new AvonicItem { Content = Tall(), EndContent = end };
         var root = new StackPanel { Children = { item } };
