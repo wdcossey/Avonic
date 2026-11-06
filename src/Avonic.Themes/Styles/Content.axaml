@@ -1,0 +1,11 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The content's text wraps, as in a browser, and TextWrapping inherits, which a TextBox shares. An input stays on
+         one line. A text box's own TextWrapping beats this. -->
+    <Style Selector="c|AvonicContent TextBox">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+</Styles>

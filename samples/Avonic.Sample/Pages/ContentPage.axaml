@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ContentPage">
+
+    <!-- A page: what's around the content is plain until ion-header and ion-footer exist. Their ZIndex is what
+         keeps them on top when the content is Fullscreen, and they're translucent so that it shows. -->
+    <Grid Name="Page" RowDefinitions="Auto,*,Auto">
+        <Border ZIndex="10" Background="#660054E9" Padding="8">
+            <WrapPanel>
+                <Button Content="Top" Margin="2" Click="OnTop" />
+                <Button Content="Bottom, 500 ms" Margin="2" Click="OnBottom" />
+                <Button Content="By 200" Margin="2" Click="OnBy" />
+                <ToggleButton Content="Fullscreen" Margin="2" IsChecked="{Binding #Main.Fullscreen}" />
+                <ToggleButton Content="Primary" Margin="2" Click="OnColor" />
+            </WrapPanel>
+        </Border>
+
+        <c:AvonicContent Name="Main" Grid.Row="1" ScrollEvents="True"
+                         IonScrollStart="OnScrollStart" IonScroll="OnScroll" IonScrollEnd="OnScrollEnd">
+            <StackPanel Name="Rows" />
+            <c:AvonicContent.FixedContent>
+                <Button Content="Fixed" Margin="0,0,16,16"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="OnFixed" />
+            </c:AvonicContent.FixedContent>
+        </c:AvonicContent>
+
+        <Border Grid.Row="2" ZIndex="10" Background="#660054E9" Padding="8">
+            <TextBlock Name="Status" Text="Scroll to see the events" />
+        </Border>
+    </Grid>
+
+</UserControl>

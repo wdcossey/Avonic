@@ -1,0 +1,85 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Grid Width="390" Height="400" RowDefinitions="*,*">
+            <c:AvonicContent>
+                <StackPanel>
+                    <c:AvonicItem Content="First" />
+                    <c:AvonicItem Content="Second" />
+                </StackPanel>
+            </c:AvonicContent>
+            <c:AvonicContent Grid.Row="1" Color="primary" Content="A primary content" />
+        </Grid>
+    </Design.PreviewWith>
+
+    <!-- A translation of content.css. There's no content.md.css. -->
+    <ControlTheme x:Key="{x:Type c:AvonicContent}" TargetType="c:AvonicContent">
+        <!-- font-family: var(ion-font-family, inherit) -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- The four padding variables. The control puts them inside the scroll part, as .inner-scroll has them. -->
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.Content.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.Content.PaddingTop" />
+                <DynamicResource ResourceKey="Avonic.Content.PaddingEnd" />
+                <DynamicResource ResourceKey="Avonic.Content.PaddingBottom" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="KeyboardOffset" Value="{DynamicResource Avonic.Content.KeyboardOffset}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Background" />
+                    <ScrollViewer Name="PART_Scroll" Theme="{DynamicResource AvonicContentScrollViewer}">
+                        <ContentPresenter Name="PART_Container"
+                                          Background="Transparent"
+                                          TextWrapping="Wrap"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </ScrollViewer>
+                    <ContentPresenter Name="PART_Fixed"
+                                      TextWrapping="Wrap"
+                                      Content="{TemplateBinding FixedContent}"
+                                      ContentTemplate="{TemplateBinding FixedContentTemplate}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- #background-content: var(background), which is var(ion-background-color, #fff). A Color doesn't change it. -->
+        <Style Selector="^ /template/ Border#PART_Background">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Content.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .inner-scroll: color: var(color), which is var(ion-text-color, #000). Only here, so the fixed slot
+             keeps what the host inherits, as in Ionic. -->
+        <Style Selector="^ /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Content.Color" />
+                    <DynamicResource ResourceKey="Avonic.TextColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color) .inner-scroll. These read an inherited value, so with an unknown colour they show an
+             ancestor's, or else no background and the host's text colour. -->
+        <Style Selector="^:ion-color /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
