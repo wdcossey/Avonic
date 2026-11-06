@@ -3,76 +3,75 @@
              xmlns:c="using:Avonic.Components.Controls"
              x:Class="Avonic.Sample.Pages.ListPage">
 
-    <ScrollViewer>
-        <StackPanel>
-            <c:AvonicList>
-                <c:AvonicListHeader Content="Default lines" />
-                <c:AvonicItem Content="One" />
-                <c:AvonicItem Content="Two" />
-            </c:AvonicList>
+    <!-- No ScrollViewer here: the sample shell has one, and a sticky divider follows the nearest. -->
+    <StackPanel>
+        <c:AvonicList>
+            <c:AvonicListHeader Content="Default lines" />
+            <c:AvonicItem Content="One" />
+            <c:AvonicItem Content="Two" />
+        </c:AvonicList>
 
-            <c:AvonicList Lines="Full">
-                <c:AvonicListHeader Content="Lines full, on the list" Lines="Full" />
-                <c:AvonicItem Content="Full" />
-                <c:AvonicItem Content="An item's own lines win" Lines="None" />
-            </c:AvonicList>
+        <c:AvonicList Lines="Full">
+            <c:AvonicListHeader Content="Lines full, on the list" Lines="Full" />
+            <c:AvonicItem Content="Full" />
+            <c:AvonicItem Content="An item's own lines win" Lines="None" />
+        </c:AvonicList>
 
-            <c:AvonicList Lines="None">
-                <c:AvonicListHeader Color="primary" Content="Lines none, and a primary header" />
-                <c:AvonicItem Content="None" />
-                <c:AvonicItem Content="None" />
-            </c:AvonicList>
+        <c:AvonicList Lines="None">
+            <c:AvonicListHeader Color="primary" Content="Lines none, and a primary header" />
+            <c:AvonicItem Content="None" />
+            <c:AvonicItem Content="None" />
+        </c:AvonicList>
 
-            <c:AvonicList Inset="True">
-                <c:AvonicItem Button="True" Detail="True" Content="Inset" />
-                <c:AvonicItem Button="True" Detail="True" Content="The last item has no border" />
-            </c:AvonicList>
-            <c:AvonicList Inset="True">
-                <c:AvonicItem Color="danger" Content="An inset list after an inset list" />
-            </c:AvonicList>
+        <c:AvonicList Inset="True">
+            <c:AvonicItem Button="True" Detail="True" Content="Inset" />
+            <c:AvonicItem Button="True" Detail="True" Content="The last item has no border" />
+        </c:AvonicList>
+        <c:AvonicList Inset="True">
+            <c:AvonicItem Color="danger" Content="An inset list after an inset list" />
+        </c:AvonicList>
 
-            <c:AvonicList>
-                <c:AvonicItemGroup>
-                    <c:AvonicItemDivider Sticky="True">
-                        <c:AvonicLabel Content="A sticky divider, in a group" />
-                    </c:AvonicItemDivider>
-                    <c:AvonicItem Content="It stays at the top" />
-                    <c:AvonicItem Content="until this group ends" />
-                    <c:AvonicItem Content="and pushes it away" />
-                </c:AvonicItemGroup>
-                <c:AvonicItemGroup>
-                    <c:AvonicItemDivider Sticky="True" Color="tertiary">
-                        <c:AvonicItemDivider.StartContent>
-                            <c:AvonicIcon IconName="heart" />
-                        </c:AvonicItemDivider.StartContent>
-                        <c:AvonicLabel Content="The next group's divider" />
-                        <c:AvonicItemDivider.EndContent>
-                            <c:AvonicIcon IconName="star" />
-                        </c:AvonicItemDivider.EndContent>
-                    </c:AvonicItemDivider>
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                    <c:AvonicItem Content="Keep scrolling" />
-                </c:AvonicItemGroup>
-            </c:AvonicList>
-        </StackPanel>
-    </ScrollViewer>
+        <c:AvonicList>
+            <c:AvonicItemGroup>
+                <c:AvonicItemDivider Sticky="True">
+                    <c:AvonicLabel Content="A sticky divider, in a group" />
+                </c:AvonicItemDivider>
+                <c:AvonicItem Content="It stays at the top" />
+                <c:AvonicItem Content="until this group ends" />
+                <c:AvonicItem Content="and pushes it away" />
+            </c:AvonicItemGroup>
+            <c:AvonicItemGroup>
+                <c:AvonicItemDivider Sticky="True" Color="tertiary">
+                    <c:AvonicItemDivider.StartContent>
+                        <c:AvonicIcon IconName="heart" />
+                    </c:AvonicItemDivider.StartContent>
+                    <c:AvonicLabel Content="The next group's divider" />
+                    <c:AvonicItemDivider.EndContent>
+                        <c:AvonicIcon IconName="star" />
+                    </c:AvonicItemDivider.EndContent>
+                </c:AvonicItemDivider>
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+                <c:AvonicItem Content="Keep scrolling" />
+            </c:AvonicItemGroup>
+        </c:AvonicList>
+    </StackPanel>
 
 </UserControl>
