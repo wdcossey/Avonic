@@ -897,9 +897,8 @@ public class AvonicCardTests
         Assert.False(Part<Border>(card, "PART_Focus").IsVisible);
     });
 
-    // As an item's: focus-visible marks every surface around the focused element.
     [AvaloniaFact]
-    public void B7_Focus_On_A_Child_Shows_On_The_Card() => InstalledTheme.Run(_ =>
+    public void B7_Focus_On_A_Child_Does_Not_Show_On_The_Card() => InstalledTheme.Run(_ =>
     {
         var child = new Border { Width = 10, Height = 10, Focusable = true };
         var card = ButtonCard();
@@ -911,6 +910,22 @@ public class AvonicCardTests
         child.Focus(NavigationMethod.Tab);
 
         Assert.True(child.IsFocused);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_Nested_Button_Cards_Do_Not_Stack_Their_Overlays() => InstalledTheme.Run(_ =>
+    {
+        var inner = new AvonicCard { Button = true };
+        var outer = ButtonCard();
+        outer.Content = inner;
+        using var scene = new Scene(outer);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        inner.Focus(NavigationMethod.Tab);
+
+        Assert.True(inner.IsFocused);
         AssertBlend(before, Text450, 0.12, Pixel(scene, 195, 40));
     });
 
@@ -928,8 +943,8 @@ public class AvonicCardTests
         Assert.Equal(before, Pixel(scene, 195, 40));
     });
 
-    // Ionic's card isn't ion-focusable, so an item around one doesn't react. Here it does, because an item treats any
-    // FocusVisible child as ion-focusable. A button card directly in an item is rare, so this is recorded, not fixed.
+    // Ionic's card isn't ion-focusable, so an item around one doesn't react. Here it does, at any depth, because an item
+    // treats any FocusVisible descendant as ion-focusable. A button card in an item is rare, so this is recorded, not fixed.
     [AvaloniaFact]
     public void B7_Known_Gap_An_Item_Around_A_Button_Card_Shows_Focus_Too() => InstalledTheme.Run(_ =>
     {

@@ -48,7 +48,7 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [ ] | `download`, `rel`, `target` | — | Not applicable: only apply with `href` |
 | [ ] | `type` | — | Not applicable: HTML form |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
-| [x] | `native` part | `PART_Native` | Other parts: `PART_Host` draws the shadow outside the clip, and `PART_Ripple` |
+| [x] | `native` part | `PART_Native` | Other parts: `PART_Host` draws the shadow outside the clip, `PART_Ripple`, and `PART_Focus` shows keyboard focus (see Extensions) |
 
 ### `AvonicCardHeader`, `AvonicCardTitle`, `AvonicCardSubtitle`, `AvonicCardContent`
 
@@ -105,13 +105,13 @@ Not in Ionic, and named so that they can't collide with it:
 - **`Click`** on `AvonicCard`, a routed event. A native `<button>` gives Ionic this for free. It's only raised by a `Button`
   card, so use `Tapped` for others.
 
-- **Keyboard focus** on a `Button` card, or on something inside it, shows the text colour at 0.12 over the card, and clears as an item's does. In Ionic it's invisible, which is an accessibility cost. `PART_Focus` is that overlay, and it's only in the theme.
+- **Keyboard focus** on a `Button` card itself shows the text colour at 0.12 over the card, and clears as an item's does. In Ionic it's invisible, which is an accessibility cost. `PART_Focus` is that overlay, and it's only in the theme.
 
 `Command` isn't included. It follows #10.
 
 ## Known gaps
 
-- **An item around a `Button` card also shows focus,** where Ionic's doesn't react.
+- **An item around a `Button` card, at any depth, also reacts to focus,** where Ionic's doesn't.
 - **The shadow's offset doesn't scale above 1×,** which is Avalonia's rendering and accepted as best effort. See [COMPARISON.md](COMPARISON.md).
 - **A mouse drag within the card** doesn't click, where it does in Ionic. A finger that slides shouldn't click in either, though this was only run with a mouse.
 - **A child that handles `Tapped`** stops only the first of two quick taps. To stop both, handle `DoubleTapped` too.

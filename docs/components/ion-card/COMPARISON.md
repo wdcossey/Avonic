@@ -81,7 +81,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 | 4 | A child's tap clicks too | `in<inner-btn`; a nested card gets one, as does the outer | match, except a child that only stops the first. See below |
 | 5 | Enter on press, Space on release | `enter down` and `space up` | match |
 | 6 | Tab stops | `button`, not `dis`, `disbtn` or plain | match. See below for what's inside a disabled card |
-| 7 | Hover and focus | `:focus-visible` is true and nothing changes: no class, no colour, no outline | hover matches, including over `SimpleTheme`'s adorner. **Deliberate difference:** keyboard focus shows the text colour at 0.12. See the frame above |
+| 7 | Hover and focus | `:focus-visible` is true and nothing changes: no class, no colour, no outline | hover matches, and there's no outline, including over `SimpleTheme`'s adorner. **Deliberate difference:** keyboard focus shows the text colour at 0.12. See the frame above |
 | 8 | The ripple's box and colour | `10,210,370,90`, `rgb(115, 115, 115)`, white on danger; found in the host's shadow root first | match |
 | 9 | The box | margin 10, radius 4, three shadows, size 14 | match, except the shadow's offsets above 1× |
 | 10 | Defaults | white, `rgb(115, 115, 115)` | match |

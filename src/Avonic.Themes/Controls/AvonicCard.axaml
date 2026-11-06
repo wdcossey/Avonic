@@ -69,8 +69,7 @@
                             <Border Name="PART_Focus"
                                     IsVisible="False"
                                     IsHitTestVisible="False"
-                                    Opacity="0.12"
-                                    Background="{TemplateBinding Foreground}" />
+                                    Opacity="0.12" />
                         </Panel>
                     </Border>
                 </Border>
@@ -87,9 +86,11 @@
             <Setter Property="Cursor" Value="Hand" />
         </Style>
 
-        <!-- Not in Ionic. The same overlay and opacity as an item's or a button's focus. -->
-        <Style Selector="^:ion-focused /template/ Border#PART_Focus">
+        <!-- Not in Ionic. The same overlay and opacity as an item's or a button's focus. Only for focus on the card
+             itself, so that it doesn't stack with the overlay of a card or item inside it. -->
+        <Style Selector="^:ion-focused:focus /template/ Border#PART_Focus">
             <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Background" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" />
         </Style>
 
         <!-- :host(.card-disabled). pointer-events: none is IsEnabled itself. -->
