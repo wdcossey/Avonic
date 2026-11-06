@@ -92,7 +92,9 @@ set directly.
 
 These are in [PLAN.md](PLAN.md#behaviours), numbered, each with tests named after its number. The ones that surprise:
 
-- A `Button` card has **no hover or focus state**, as in Ionic. Keyboard focus on it is invisible.
+- A `Button` card has **no hover state**, as in Ionic.
+- **Keyboard focus shows on a `Button` card, which it doesn't in Ionic.** See [Extensions](#extensions).
+- **Cards in a column are 20 apart unless the panel has `Spacing="-10"`,** where CSS collapses their margins to 10. For bound cards, put it on the `StackPanel` in `ItemsPanel`.
 - A tap on a child also clicks a `Button` card. A nested `Button` card raises one `Click` that reaches both.
 - `Click` comes on release, every time, and not with the secondary button.
 
@@ -103,11 +105,14 @@ Not in Ionic, and named so that they can't collide with it:
 - **`Click`** on `AvonicCard`, a routed event. A native `<button>` gives Ionic this for free. It's only raised by a `Button`
   card, so use `Tapped` for others.
 
+- **Keyboard focus** on a `Button` card, or on something inside it, shows the text colour at 0.12 over the card, and clears as an item's does. In Ionic it's invisible, which is an accessibility cost. `PART_Focus` is that overlay, and it's only in the theme.
+
 `Command` isn't included. It follows #10.
 
 ## Known gaps
 
-- **The shadow's offset and spread don't scale above 1×.** See [COMPARISON.md](COMPARISON.md).
+- **An item around a `Button` card also shows focus,** where Ionic's doesn't react.
+- **The shadow's offset doesn't scale above 1×,** which is Avalonia's rendering and accepted as best effort. See [COMPARISON.md](COMPARISON.md).
 - **A mouse drag within the card** doesn't click, where it does in Ionic. A finger that slides shouldn't click in either, though this was only run with a mouse.
 - **A child that handles `Tapped`** stops only the first of two quick taps. To stop both, handle `DoubleTapped` too.
 - **`--ion-item-background` and `--ion-item-color`** don't move a card. See the [plan](PLAN.md#deliberate-differences).

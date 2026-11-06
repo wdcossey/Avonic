@@ -82,6 +82,35 @@ public class AvonicCardCaptureTests
         Assert.All(page.Children, card => Assert.Equal(370, card.Bounds.Width));
     });
 
+    // Not in Ionic, where this looks the same as an unfocused card: a plain button card, then the same with keyboard focus.
+    [AvaloniaFact]
+    public void Focus_Frame() => InstalledTheme.Run(_ =>
+    {
+        var plain = new AvonicCard { Button = true, Content = new AvonicCardContent { Content = "Button card" } };
+        var focused = new AvonicCard { Button = true, Content = new AvonicCardContent { Content = "Button card with keyboard focus" } };
+        using var scene = new Scene(new StackPanel { Spacing = -10, Children = { plain, focused } }, 390, 150);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+
+        focused.Focus(Avalonia.Input.NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
+        {
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, "avonic-card-focus.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+        }
+
+        // A point with no text in it, in each card, in device pixels.
+        var plainPoint = plain.TranslatePoint(new Point(300, plain.Bounds.Height / 2), scene.Window)!.Value;
+        var focusedPoint = focused.TranslatePoint(new Point(300, focused.Bounds.Height / 2), scene.Window)!.Value;
+        Assert.NotEqual(
+            AvonicCardTests.PixelAt(frame, (int)plainPoint.X * 2, (int)plainPoint.Y * 2),
+            AvonicCardTests.PixelAt(frame, (int)focusedPoint.X * 2, (int)focusedPoint.Y * 2));
+    });
+
     // The same scene as ref-tap: a 338 by 47 button card, in a clip 8 larger all round, pressed in the middle.
     [AvaloniaFact]
     public void Press_Frame() => InstalledTheme.Run(_ =>

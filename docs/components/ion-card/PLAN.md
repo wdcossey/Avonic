@@ -72,7 +72,7 @@ Each becomes a test, named after its number.
 | 4 | A tap on a child inside a `Button` card also raises `Click`, unless the child handles it. A tap on a nested `Button` card reaches each card once | measured: `in<inner-btn`; `inner<, outer<` |
 | 5 | Enter (on press) and Space (on release) act as a tap when the card has focus | native `<button>`; measured `enter down`, `space up` |
 | 6 | A `Button` card is a tab stop; a plain or disabled one isn't | measured tab order |
-| 7 | Hover and keyboard focus change nothing: no overlay, no `:ion-focused`, no outline, no adorner | `.card-native { outline: none }`, no `ion-focusable` class; measured: `:focus-visible` is true, classes and colours are the same |
+| 7 | Hover changes nothing. Keyboard focus on a `Button` card, or on something inside it, shows the text colour at 0.12 over the card, until focus moves, a press anywhere, or a key outside `FOCUS_KEYS`, as an item's does. This is **not in Ionic**: there it changes nothing, and it's invisible. No outline, no adorner. Pointer focus doesn't show | `.card-native { outline: none }`, no `ion-focusable` class; measured: `:focus-visible` is true, classes and colours are the same. The overlay is a deliberate difference, below |
 | 8 | The ripple fills the card, draws over the content, clips to its corners and uses the current colour, including contrast on a coloured card. A plain card or item inside doesn't take it | `--ripple-color` is undefined, so `color` inherits; `getRippleEffect` looks in the host's shadow root first; measured `10,210,370,90`, `rgb(115, 115, 115)`, `rgb(255, 255, 255)` |
 | 9 | Card box: margin 10, radius 4, the three-layer shadow, clipped content, font size 14, the theme's font, text wraps | `card.md.css`; measured |
 | 10 | Card text and background default to `#737373` on the background colour | measured |
@@ -119,9 +119,11 @@ so there a finger sliding on a second press clicks. Here it doesn't, as neither 
 **A nested `Button` card doesn't raise a second `Click`.** A browser has one click, which reaches each card on its way up.
 Here the inner card's `Click` already bubbles through the outer one, so raising another would run its handlers twice.
 
-**No hover or focus state.** The card sets `Activatable` but not `FocusVisible`, because Ionic doesn't set
-`ion-focusable`, and `card.md.css` has no `.ion-focused` or `:hover` rule. The result is that keyboard focus on a card is
-invisible, as it is in Ionic. It's flagged in the PR.
+**No hover state, and a focus state Ionic doesn't have.** Ionic doesn't set `ion-focusable` on a card, and `card.md.css` has no
+`.ion-focused` or `:hover` rule. That makes keyboard focus on a card invisible, which is an accessibility cost, so the decision was to
+differ. The card sets `FocusVisible` as well as `Activatable`, so it follows the same rules as an item. `PART_Focus` is an overlay in
+the theme, with the 0.12 an item or button uses. It's hidden until then, so a plain card pays for no more than the one element. Avalonia's
+own `:focus-visible` was tried first and dropped: it stays on until focus moves, so the card stayed grey after a tap.
 
 **The shadow needs a part outside the clip.** `overflow: hidden` clips the children but not the host's own
 `box-shadow`, while `ClipToBounds` on a `Border` clips what it draws too. So `PART_Host` draws the shadow and
@@ -158,7 +160,9 @@ descendant selector on a `TextBlock`. `line-height` is a factor, so it's `Css.Em
 | `href`, `download`, `rel`, `target`, router props and `type` aren't declared | Each would be a dead prop |
 | `translucent` isn't declared | It does nothing in md |
 | One child per slot | Mapping rule. Wrap several in a panel, which then stands for the slot |
-| Two cards in a `StackPanel` are 20 apart, where CSS collapses their margins to 10 (measured `gap between siblings`) | Avalonia has no margin collapsing, as `ion-label` records. `Spacing="-10"` on the panel gives 10 |
+| Keyboard focus on a `Button` card shows, where Ionic's is invisible | An accessibility cost, and decided in the PR. The overlay is only in the theme, so a replaced theme doesn't have it |
+| **Known gap:** an item around a button card also shows focus, where Ionic's doesn't react | An item treats any `FocusVisible` child as `ion-focusable`. A button card directly in an item is rare, so it isn't worth a second focus rule. `B7_Known_Gap_…` records it |
+| Two cards in a `StackPanel` are 20 apart, where CSS collapses their margins to 10 (measured `gap between siblings`) | Avalonia has no margin collapsing, as `ion-label` records. `Spacing="-10"` on the panel gives 10, and so does an `ItemsControl` whose `ItemsPanel` has it (measured). A pseudoclass from the previous sibling was built and dropped: it only reaches cards directly in the panel, so bound cards stayed at 20, and `Spacing="-10"` then gave 0 for direct ones. That's two rules for developers, where this is one |
 | Margins between two headings add up to 4, where CSS collapses them to 2 | The same. `h1` or `h2` followed by `p`, the usual pairs, are 2 in both |
 | `h1`–`h6` and `p` get their rules directly in the content or in a panel directly in it, where Ionic's reach any depth (measured `d-h2`, `d-p`) | A descendant selector on `TextBlock` is checked for every `TextBlock` in the app. `ion-label` measured it at about 13% on attach. Set the values yourself deeper down |
 | A `TextBlock` nested deeper than a panel with its own `FontSize` gets line height 21, not 1.5 of its size, and can clip. So does a subtitle in the content with its own `FontSize`. In a title, it's 24 rather than 1.2 of its size | `TextBlock.LineHeight` inherits as a size. The same as `ion-label` |
@@ -167,7 +171,7 @@ descendant selector on a `TextBlock`. `line-height` is a factor, so it's `Css.Em
 | `PART_Native` always exists, where Ionic only renders it for `button` and `href` | It carries the clip and the background. With no `Button` nothing differs |
 | **Known gap:** a mouse drag within a `Button` card doesn't click, past Avalonia's small movement limit. Ionic clicks (measured: down, move 60 and 130, up). Touch is meant to match, as a finger that moves is scrolling in both, but this was only run with a mouse | `Tapped` is what the click comes from, copied from `AvonicItem`. The fix is to track press and release directly, which belongs in one shared place. See the PR |
 | **Known gap:** a child that handles `Tapped` stops only the first of two quick taps, and has to handle `DoubleTapped` as well. Ionic stops both (measured) | The same |
-| **Known gap:** above 1× the shadow's offset and spread don't scale, so a card's bottom edge is lighter and its top a little darker. Measured at 3×, straight below a card: 212 against Chromium's 166. At 1× it matches | Avalonia applies them in device pixels. The numbers are in [COMPARISON.md](COMPARISON.md) |
+| **Known gap:** above 1× the shadow's offset doesn't scale, so a card's bottom edge is lighter and its top a little darker. Measured at 3×, straight below a card: 212 against Chromium's 166. At 1× it matches | Measured directly, with a shadow of each kind on its own, at 1×, 2× and 3×: an offset of 10 reaches 10 device pixels at every scale, a spread of 10 reaches 10, 20 and 30, and a blur of 20 reaches 12, 24 and 35. So only the offset ignores the render scale. It's Avalonia's rendering, and accepted as best effort. The numbers are in [COMPARISON.md](COMPARISON.md) |
 | Keyboard activation of a nested control doesn't raise the card's `Click` | As on `AvonicItem`. In a browser the click bubbles. Pointer taps do match |
 | `Click` is only raised by `Button` cards | As on `AvonicItem`. On the web any element gets `click`. Use `Tapped` for the others |
 | A `:disabled` ancestor fades the card too | As on `AvonicItem`: the pseudoclass follows `IsEffectivelyEnabled`. Ionic's class only follows the card's own prop |

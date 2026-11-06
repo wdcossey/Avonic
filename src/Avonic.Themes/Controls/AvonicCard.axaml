@@ -65,6 +65,12 @@
                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                               Content="{TemplateBinding Content}"
                                               ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <!-- Not in Ionic, where keyboard focus on a card is invisible. See the plan. -->
+                            <Border Name="PART_Focus"
+                                    IsVisible="False"
+                                    IsHitTestVisible="False"
+                                    Opacity="0.12"
+                                    Background="{TemplateBinding Foreground}" />
                         </Panel>
                     </Border>
                 </Border>
@@ -79,6 +85,11 @@
         <!-- button, a { cursor: pointer } -->
         <Style Selector="^:button">
             <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- Not in Ionic. The same overlay and opacity as an item's or a button's focus. -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Focus">
+            <Setter Property="IsVisible" Value="True" />
         </Style>
 
         <!-- :host(.card-disabled). pointer-events: none is IsEnabled itself. -->

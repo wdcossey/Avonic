@@ -71,7 +71,7 @@ public class AvonicCardTests
         Dispatcher.UIThread.RunJobs();
     }
 
-    private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
+    internal static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
     {
         using var buffer = frame.Lock();
         var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
@@ -731,25 +731,218 @@ public class AvonicCardTests
         Assert.True(last.IsFocused);
     }
 
-    // ── Behaviour 7: no hover or focus state ─────────────────────────────────────────────────
+    // ── Behaviour 7: hover changes nothing, and keyboard focus shows, unlike Ionic ───────────
+
+    private static void AssertBlend(Color under, Color over, double opacity, Color actual)
+    {
+        Assert.InRange(actual.R, under.R + (over.R - under.R) * opacity - 2, under.R + (over.R - under.R) * opacity + 2);
+        Assert.InRange(actual.G, under.G + (over.G - under.G) * opacity - 2, under.G + (over.G - under.G) * opacity + 2);
+        Assert.InRange(actual.B, under.B + (over.B - under.B) * opacity - 2, under.B + (over.B - under.B) * opacity + 2);
+    }
 
     [AvaloniaFact]
-    public void B7_Focus_And_Hover_Change_Nothing() => InstalledTheme.Run(_ =>
+    public void B7_Hover_Changes_Nothing() => InstalledTheme.Run(_ =>
     {
         var card = ButtonCard();
         using var scene = new Scene(card);
         scene.Window.Background = Brushes.White;
         var before = Pixel(scene, 195, 40);
 
-        PressKey(scene, PhysicalKey.Tab);
-        Assert.True(card.IsFocused);
-        Assert.False(FocusVisible.GetIsEnabled(card));
-        Assert.False(Has(card, FocusVisible.FocusedPseudoClass));
-        Assert.Equal(before, Pixel(scene, 195, 40));
-
         scene.Window.MouseMove(Centre, RawInputModifiers.None);
+
         Assert.Equal(before, Pixel(scene, 195, 40));
         Assert.Equal(Text450, Solid(card.Foreground));
+    });
+
+    [AvaloniaFact]
+    public void B7_Keyboard_Focus_Shows_And_Goes() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        var other = new Button();
+        using var scene = new Scene(new StackPanel { Children = { card, other } });
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(card.IsFocused);
+        AssertBlend(before, Text450, 0.12, Pixel(scene, 195, 40));
+
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(other.IsFocused);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_Focus_Shows_In_The_Cards_Own_Colour() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        card.Color = "danger";
+        using var scene = new Scene(card);
+        var before = Pixel(scene, 195, 40);
+
+        PressKey(scene, PhysicalKey.Tab);
+
+        Assert.Equal(Colors.White, Solid(card.Foreground));
+        AssertBlend(before, Colors.White, 0.12, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_Focus_Shows_Over_The_Content() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        card.Content = new Border { Background = Brushes.Red };
+        using var scene = new Scene(card);
+        Assert.Equal(Colors.Red, Pixel(scene, 195, 40));
+
+        PressKey(scene, PhysicalKey.Tab);
+
+        AssertBlend(Colors.Red, Text450, 0.12, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_The_Focus_Overlay_Lets_A_Press_Through_To_The_Content() => InstalledTheme.Run(_ =>
+    {
+        var child = new Border { Background = Brushes.Red };
+        var card = ButtonCard();
+        card.Content = child;
+        using var scene = new Scene(card);
+        object? source = null;
+        card.AddHandler(InputElement.PointerPressedEvent, (_, e) => source = e.Source, handledEventsToo: true);
+
+        // With the overlay showing, and rendered, as hit tests read the last frame.
+        PressKey(scene, PhysicalKey.Tab);
+        Pixel(scene, 195, 40);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+
+        Assert.Same(child, source);
+    });
+
+    [AvaloniaFact]
+    public void B7_Pointer_Focus_Does_Not_Show() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        card.Focus(NavigationMethod.Pointer);
+
+        Assert.True(card.IsFocused);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_A_Press_On_The_Card_Clears_It() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(Part<Border>(card, "PART_Focus").IsVisible);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+
+        Assert.True(card.IsFocused);
+        Assert.False(Part<Border>(card, "PART_Focus").IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void B7_A_Press_Elsewhere_Clears_It() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        var below = new Border { Height = 100, Background = Brushes.Transparent };
+        using var scene = new Scene(new StackPanel { Children = { card, below } });
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.NotEqual(before, Pixel(scene, 195, 40));
+
+        scene.Window.MouseDown(new Point(195, 150), MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(new Point(195, 150), MouseButton.Left, RawInputModifiers.None);
+
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    // FOCUS_KEYS, as an item's: a letter ends keyboard mode, and Shift doesn't.
+    [AvaloniaFact]
+    public void B7_Only_A_Key_Outside_The_Focus_Keys_Clears_It() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+        PressKey(scene, PhysicalKey.Tab);
+
+        PressKey(scene, PhysicalKey.ShiftLeft);
+        ReleaseKey(scene, PhysicalKey.ShiftLeft);
+        Assert.NotEqual(before, Pixel(scene, 195, 40));
+
+        PressKey(scene, PhysicalKey.A);
+        ReleaseKey(scene, PhysicalKey.A);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_Button_Going_Off_Clears_It() => InstalledTheme.Run(_ =>
+    {
+        var card = ButtonCard();
+        using var scene = new Scene(card);
+        PressKey(scene, PhysicalKey.Tab);
+        Assert.True(Part<Border>(card, "PART_Focus").IsVisible);
+
+        card.Button = false;
+
+        Assert.False(Part<Border>(card, "PART_Focus").IsVisible);
+    });
+
+    // As an item's: focus-visible marks every surface around the focused element.
+    [AvaloniaFact]
+    public void B7_Focus_On_A_Child_Shows_On_The_Card() => InstalledTheme.Run(_ =>
+    {
+        var child = new Border { Width = 10, Height = 10, Focusable = true };
+        var card = ButtonCard();
+        card.Content = child;
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        child.Focus(NavigationMethod.Tab);
+
+        Assert.True(child.IsFocused);
+        AssertBlend(before, Text450, 0.12, Pixel(scene, 195, 40));
+    });
+
+    [AvaloniaFact]
+    public void B7_A_Plain_Card_Made_Focusable_Does_Not_Show_Focus() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Height = 80, VerticalAlignment = VerticalAlignment.Top, Focusable = true };
+        using var scene = new Scene(card);
+        scene.Window.Background = Brushes.White;
+        var before = Pixel(scene, 195, 40);
+
+        PressKey(scene, PhysicalKey.Tab);
+
+        Assert.True(card.IsFocused);
+        Assert.Equal(before, Pixel(scene, 195, 40));
+    });
+
+    // Ionic's card isn't ion-focusable, so an item around one doesn't react. Here it does, because an item treats any
+    // FocusVisible child as ion-focusable. A button card directly in an item is rare, so this is recorded, not fixed.
+    [AvaloniaFact]
+    public void B7_Known_Gap_An_Item_Around_A_Button_Card_Shows_Focus_Too() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard { Button = true };
+        var item = new AvonicItem { Content = card };
+        using var scene = new Scene(item);
+
+        PressKey(scene, PhysicalKey.Tab);
+
+        Assert.True(card.IsFocused);
+        Assert.True(Has(card, FocusVisible.FocusedPseudoClass));
+        Assert.True(Has(item, FocusVisible.FocusedPseudoClass));
+        Assert.False(item.Focusable);
     });
 
     // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it

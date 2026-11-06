@@ -102,7 +102,8 @@ public class AvonicCard : ContentControl
     }
 
     /// <summary>
-    /// <c>isClickable</c>. Nothing sets <c>ion-focusable</c>, so unlike an item, focus and hover have no state here.
+    /// <c>isClickable</c>. Unlike an item, hover has no state here. Ionic doesn't set <c>ion-focusable</c> on a card, so
+    /// its keyboard focus is invisible. <see cref="FocusVisible"/> is a deliberate difference, to show it.
     /// </summary>
     private void UpdateInteractivity()
     {
@@ -110,6 +111,7 @@ public class AvonicCard : ContentControl
 
         PseudoClasses.Set(":button", clickable);
         Activatable.SetIsEnabled(this, clickable);
+        FocusVisible.SetIsEnabled(this, clickable);
 
         // A <button> takes focus. Behaviour, so it doesn't depend on the theme, which an app can replace. At style
         // priority, as CSS is, so an app's own value wins.

@@ -12,8 +12,8 @@
 > node tools/ionic-ref/render.js ion-card --tap --out docs/components/ion-card/ref-tap --html '<ion-card button><ion-card-content>Button card</ion-card-content></ion-card>'
 > ```
 >
-> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicCardCaptureTests` (headless Skia, 2×) → `avonic-card-page.png` and
-> `avonic-card-press-160ms.png`, copied to [`compare/`](compare/) without the `card-`, as capture tests share the folder.
+> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicCardCaptureTests` (headless Skia, 2×) → `avonic-card-page.png`,
+> `avonic-card-press-160ms.png` and `avonic-card-focus.png`, copied to [`compare/`](compare/) without the `card-`, as capture tests share the folder.
 > Not tried in a real window, so this says nothing about a real display or real touch.
 
 ## Frames
@@ -23,7 +23,7 @@
 | ![](ref/page.png) | ![](compare/avonic-page.png) |
 
 Cards from the top: plain, button, danger, a primary header on a plain card, headings, disabled, and RTL. The Avonic
-scene uses `Spacing="-10"`, for the reason below.
+scene uses `Spacing="-10"`, for the reason in the plan.
 
 And pressed, 160 ms in, where the ripple has the same shape and reach:
 
@@ -37,8 +37,9 @@ And pressed, 160 ms in, where the ripple has the same shape and reach:
   are taller, so a subtitle is 19 high against 16, and a card with a header is 117 against 114. Arial has no weight 500, so
   Chromium draws the title and subtitle in regular, and Avalonia's look bolder. Both ask for 500. Line heights Ionic sets
   are the same: the title is 24, and content lines are 21.
-- **The shadow at 2× and above.** Avalonia applies a shadow's offset and spread in device pixels, and only its blur
-  scales. These are the rows straight below and above a card, on white, against Chromium:
+- **The shadow at 2× and above.** Avalonia doesn't scale a shadow's offset, though it scales its spread and blur. Measured
+  with one of each on its own: an offset of 10 reaches 10 device pixels at 1×, 2× and 3×, a spread of 10 reaches 10, 20 and 30,
+  and a blur of 20 reaches 12, 24 and 35. These are the rows straight below and above a card, on white, against Chromium:
 
   | Scale | | Rows straight below the card | Rows straight above it |
   |---|---|---|---|
@@ -50,9 +51,15 @@ And pressed, 160 ms in, where the ripple has the same shape and reach:
   | 3 | Avonic | 212 221 227 233 239 243 | 247 244 240 235 |
 
   So at 1× it matches, and on a phone's scale the bottom edge is lighter and the top a little darker. It's visible as a
-  softer line under each card. **Known gap.** The token holds CSS's own numbers, so it's right if Avalonia changes. Faking
-  it would need a converter that knows the render scale. See "For you to decide" in the PR.
+  softer line under each card. **Known gap,** accepted as best effort. The token holds CSS's own numbers, so it's right if
+  Avalonia changes. Faking it would need a converter that knows the render scale.
 - **Margins between headings** add up to 4 where CSS collapses them to 2. See the plan.
+
+### Keyboard focus
+
+Not in Ionic, where the two cards look the same. Avonic, with focus on the second:
+
+![](compare/avonic-focus.png)
 
 ## Found here, not by the tests
 
@@ -74,7 +81,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 | 4 | A child's tap clicks too | `in<inner-btn`; a nested card gets one, as does the outer | match, except a child that only stops the first. See below |
 | 5 | Enter on press, Space on release | `enter down` and `space up` | match |
 | 6 | Tab stops | `button`, not `dis`, `disbtn` or plain | match. See below for what's inside a disabled card |
-| 7 | No hover or focus state | `:focus-visible` is true and nothing changes: no class, no colour, no outline | match, including over `SimpleTheme`'s adorner |
+| 7 | Hover and focus | `:focus-visible` is true and nothing changes: no class, no colour, no outline | hover matches, including over `SimpleTheme`'s adorner. **Deliberate difference:** keyboard focus shows the text colour at 0.12. See the frame above |
 | 8 | The ripple's box and colour | `10,210,370,90`, `rgb(115, 115, 115)`, white on danger; found in the host's shadow root first | match |
 | 9 | The box | margin 10, radius 4, three shadows, size 14 | match, except the shadow's offsets above 1× |
 | 10 | Defaults | white, `rgb(115, 115, 115)` | match |
