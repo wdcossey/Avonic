@@ -387,14 +387,15 @@ public class AvonicContent : TemplatedControl
     /// <summary>
     /// <c>width: 100%; height: 100%; contain: size</c>: it fills what it's given and never sizes to its content, so
     /// with no height to fill, in a <see cref="StackPanel"/> or an <c>Auto</c> row, it's zero high, as in Ionic.
+    /// The children still get what's really available, because a parent can arrange it bigger than it measured, as a
+    /// <see cref="ScrollViewer"/> does, and a child measured at zero stays at zero.
     /// </summary>
     protected override Size MeasureOverride(Size availableSize)
     {
-        var size = new Size(
+        base.MeasureOverride(availableSize);
+        return new Size(
             double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width,
             double.IsInfinity(availableSize.Height) ? 0 : availableSize.Height);
-        base.MeasureOverride(size);
-        return size;
     }
 
     /// <inheritdoc/>

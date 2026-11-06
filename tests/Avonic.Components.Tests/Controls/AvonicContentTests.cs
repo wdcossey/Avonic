@@ -2440,6 +2440,51 @@ public class AvonicContentTests
         Assert.Equal(new Rect(0, 0, 164, 18), Box(slot, scene.Window));
     }
 
+    /// <summary>Measures with no height, then arranges at the height it has, as a <see cref="ScrollViewer"/> does.</summary>
+    private sealed class UnboundedHost : Decorator
+    {
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            Child!.Measure(new Size(availableSize.Width, double.PositiveInfinity));
+            return Child.DesiredSize;
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Child!.Arrange(new Rect(finalSize));
+            return finalSize;
+        }
+    }
+
+    // Found in the real window: the sample's pages are in a ScrollViewer, and the fixed slot's button had no height.
+    [AvaloniaFact]
+    public void B29_The_Fixed_Slot_Shows_When_Measured_With_No_Height_Then_Arranged_Bigger()
+    {
+        var slot = new Border
+        {
+            Width = 60,
+            Height = 60,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+        };
+        var content = new AvonicContent { FixedContent = slot };
+        using var scene = new Scene(new UnboundedHost { Child = new Grid { RowDefinitions = new RowDefinitions("*"), Children = { content } } }, 390, 300);
+
+        Assert.Equal(300, content.Bounds.Height);
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(slot, scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B29_Content_Scrolls_When_Measured_With_No_Height_Then_Arranged_Bigger()
+    {
+        var content = new AvonicContent { Content = new Border { Height = 2000 } };
+        using var scene = new Scene(new UnboundedHost { Child = new Grid { RowDefinitions = new RowDefinitions("*"), Children = { content } } }, 390, 300);
+
+        Assert.Equal(300, content.Bounds.Height);
+        Assert.Equal(300, Scroll(content).Viewport.Height);
+        Assert.Equal(2000, Scroll(content).Extent.Height);
+    }
+
     [AvaloniaFact]
     public void B29_An_Apps_Alignment_Places_It()
     {
