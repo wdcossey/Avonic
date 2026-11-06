@@ -59,7 +59,7 @@
                 <Border Name="PART_Native">
                     <Border Name="PART_Clip" ClipToBounds="True">
                         <Panel Background="Transparent">
-                            <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                            <Border Name="PART_Overlay" />
                             <c:AvonicRippleEffect Name="PART_Ripple" />
                             <c:ButtonInner Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
@@ -443,6 +443,7 @@
 
         <!-- :host(.button-outline.ion-color) .button-native, where an invalid border colour is currentColor -->
         <Style Selector="^:fill-outline:ion-color /template/ Border#PART_Native">
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="TextElement.Foreground">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
@@ -459,6 +460,7 @@
 
         <!-- :host(.button-clear.ion-color) .button-native -->
         <Style Selector="^:fill-clear:ion-color /template/ Border#PART_Native">
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="TextElement.Foreground">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />

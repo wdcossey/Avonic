@@ -40,8 +40,14 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
 ## Found by the tests
 
 - **A lost tap.** A quick tap on a button straight after a tap on something else at the same spot, such as this button
-  just before it was enabled, raised neither `Tapped` nor `DoubleTapped`. In Chromium every press clicks. Fixed by going by
-  the click count. `AvonicItem` has the same gap: see the PR.
+  just before it was enabled, raised neither `Tapped` nor `DoubleTapped`. In Chromium every press clicks. `AvonicItem` has the
+  same gap: see the PR.
+
+## Found by the review
+
+- **A click after being disabled mid-press,** a shaky press that did nothing, and a second tap that a child couldn't stop. All
+  three came from using `Tapped`, so the button now tracks the press itself. Each was measured in Chromium first.
+- **Outline and clear on a `Color` painted `Avonic.Button.Background`,** where Ionic sets `background: transparent`. Measured.
 
 ## Behaviours
 
@@ -50,7 +56,7 @@ results were measured in Chromium with `ion-app`.
 
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
-| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click; none for the right button, a release off it, or disabled | match |
+| 1 | A tap clicks on release, every time | `click@tab1` on release, twice for a double click, once for a drag within it or off and back; none for the right button, a release off it, disabled, or a child's `stopPropagation` | match |
 | 2 | Enter on press, Space on release | `enter down: click`, `enter up: nothing`, `space down: nothing`, `space up: click` | match |
 | 3 | A tab stop unless disabled; a press focuses it | Tab from `tab1` skips disabled `tab2` to `tab3`; `ionFocus` before `click` | match |
 | 4 | `IonFocus` and `IonBlur` | On any focus, bubbling; `focused then disabled: ionBlur`, nothing focused | match |
@@ -62,7 +68,7 @@ results were measured in Chromium with `ion-app`.
 | 10 | Outline | Transparent, primary, 2 px primary | match |
 | 11 | Clear | Transparent, primary, no border | match |
 | 12 | `fill="default"` | Black, no background, ignores `color="danger"`; `after` opacity 1 on hover | match |
-| 13 | `Color` | `rgb(197, 0, 15)`; beats `--background` and `--color` (`varsc`) | match |
+| 13 | `Color` | `rgb(197, 0, 15)`; beats `--background` and `--color` (`varsc`); outline and clear stay transparent against `--background` | match |
 | 14 | Unknown `Color` | Transparent, white, keeps its shadow; outline border is current colour; `tokbad` hover colour `rgb(17, 17, 17)` | match |
 | 15 | In a coloured ancestor | None: primary. Unknown: `rgb(197, 0, 15)` | match |
 | 16 | Overlays on a `Color` | Contrast or base, beating `--background-hover`; `after rgb(255, 255, 255) 0.7` pressed | match |

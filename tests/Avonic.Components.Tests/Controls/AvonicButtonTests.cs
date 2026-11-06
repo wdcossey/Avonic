@@ -121,6 +121,8 @@ public class AvonicButtonTests
 
     private static Color Solid(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
 
+    private static void AssertTransparent(IBrush? brush) => Assert.True(brush is null || Solid(brush).A == 0, $"{brush} isn't transparent");
+
     /// <summary>What <c>.button-native</c>'s <c>color</c> resolves to, which is what slotted content inherits.</summary>
     private static Color TextColour(AvonicButton button) => Solid(Native(button).GetValue(TextElement.ForegroundProperty));
 
@@ -365,6 +367,128 @@ public class AvonicButtonTests
     }
 
     [AvaloniaFact]
+    public void B1_Dragging_Within_The_Button_Still_Clicks_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Press(scene, new Point(5, 20));
+        Hover(scene, new Point(95, 20));
+        Release(scene, new Point(95, 20));
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Dragging_Off_And_Back_Still_Clicks_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Press(scene, Centre);
+        Hover(scene, new Point(50, 400));
+        Hover(scene, new Point(60, 20));
+        Release(scene, new Point(60, 20));
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Being_Disabled_During_A_First_Press_Does_Not_Click_Measured()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Press(scene, Centre);
+        button.IsEnabled = false;
+        Release(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_Being_Disabled_And_Enabled_During_A_Press_Does_Not_Click()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Press(scene, Centre);
+        button.IsEnabled = false;
+        button.IsEnabled = true;
+        Release(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Command_That_Stops_Being_Able_To_Execute_During_A_Press_Does_Not_Click()
+    {
+        var clicks = 0;
+        var command = new TestCommand();
+        var button = Boxed();
+        button.Command = command;
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Press(scene, Centre);
+        command.Allowed = false;
+        command.Raise();
+        Release(scene, Centre);
+
+        Assert.Equal(0, clicks);
+        Assert.Equal(0, command.Executed);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Child_That_Handles_The_Press_Stops_Click_Every_Time_Measured()
+    {
+        // Measured: a child's stopPropagation stops it, on one tap and on two quick ones.
+        var clicks = 0;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.PointerPressed += (_, e) => e.Handled = true;
+        var button = Boxed(child);
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        Tap(scene, Centre);
+        Tap(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Press_A_Gesture_Took_Does_Not_Click_On_The_Next_Handled_Press()
+    {
+        var clicks = 0;
+        IPointer? pointer = null;
+        var handle = false;
+        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
+        child.PointerPressed += (_, e) => e.Handled = handle;
+        var button = Boxed(child);
+        var other = new Border { Height = 48, Background = Brushes.Gray };
+        button.Click += (_, _) => clicks++;
+        button.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, RoutingStrategies.Tunnel);
+        using var scene = new Scene(new StackPanel { Children = { button, other } });
+
+        Press(scene, Centre);
+        pointer!.Capture(other);
+        Release(scene, Centre);
+
+        handle = true;
+        Tap(scene, Centre);
+
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
     public void B1_The_Right_Button_Does_Not_Click()
     {
         var clicks = 0;
@@ -506,6 +630,46 @@ public class AvonicButtonTests
     }
 
     [AvaloniaFact]
+    public void B2_A_Second_Release_Does_Not_Click_Again()
+    {
+        var clicks = 0;
+        var button = Boxed();
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+        button.Focus();
+
+        PressKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B2_It_Keeps_The_Keys_It_Uses()
+    {
+        var seen = new List<string>();
+        var button = Boxed();
+        var parent = new StackPanel { Children = { button } };
+        parent.KeyDown += (_, e) => seen.Add("down:" + e.Key);
+        parent.KeyUp += (_, e) => seen.Add("up:" + e.Key);
+        using var scene = new Scene(parent);
+        button.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        PressKey(scene, PhysicalKey.Space);
+        ReleaseKey(scene, PhysicalKey.Space);
+
+        Assert.DoesNotContain("down:Enter", seen);
+        Assert.DoesNotContain("down:Space", seen);
+        Assert.DoesNotContain("up:Space", seen);
+
+        // And not one it doesn't.
+        PressKey(scene, PhysicalKey.A);
+        Assert.Contains("down:A", seen);
+    }
+
+    [AvaloniaFact]
     public void B2_Keys_On_A_Nested_Control_Are_Its_Own()
     {
         var clicks = 0;
@@ -518,21 +682,6 @@ public class AvonicButtonTests
         PressKey(scene, PhysicalKey.Enter);
         PressKey(scene, PhysicalKey.Space);
         ReleaseKey(scene, PhysicalKey.Space);
-
-        Assert.Equal(0, clicks);
-    }
-
-    [AvaloniaFact]
-    public void B2_A_Key_Handled_By_A_Nested_Control_Does_Not_Click()
-    {
-        var clicks = 0;
-        var button = Boxed();
-        button.Click += (_, _) => clicks++;
-        button.AddHandler(InputElement.KeyDownEvent, (_, e) => e.Handled = true, RoutingStrategies.Tunnel);
-        using var scene = new Scene(button);
-        button.Focus();
-
-        PressKey(scene, PhysicalKey.Enter);
 
         Assert.Equal(0, clicks);
     }
@@ -1073,21 +1222,32 @@ public class AvonicButtonTests
     });
 
     [AvaloniaFact]
-    public void B12_Fill_Changes_Are_Followed()
+    public void B12_Fill_Changes_Are_Followed() => InstalledTheme.Run(_ =>
     {
-        var button = Boxed();
-        using var scene = new Scene(button);
+        var button = new AvonicButton { Content = "Text" };
+        var holder = new StackPanel { [TextElement.ForegroundProperty] = Brushes.Green, Children = { button } };
+        using var scene = new Scene(NoTransitions(holder));
 
-        foreach (var (fill, pseudo) in new[] { (ButtonFill.Clear, ":fill-clear"), (ButtonFill.Default, ":fill-default"), (ButtonFill.Outline, ":fill-outline"), (ButtonFill.Solid, ":fill-solid") })
-        {
-            button.Fill = fill;
-            Assert.True(Has(button, pseudo));
-            Assert.Single(new[] { ":fill-clear", ":fill-default", ":fill-outline", ":fill-solid" }, name => Has(button, name));
-        }
+        button.Fill = ButtonFill.Outline;
+        Assert.Equal(new Thickness(2), Native(button).BorderThickness);
+        Assert.Equal(Primary, TextColour(button));
+        Assert.Null(Native(button).Background);
 
+        button.Fill = ButtonFill.Clear;
+        Assert.Equal(default, Native(button).BorderThickness);
+        Assert.Equal(Primary, TextColour(button));
+
+        button.Fill = ButtonFill.Default;
+        Assert.Equal(Colors.Green, TextColour(button));
+
+        button.Fill = ButtonFill.Solid;
+        Assert.Equal(Primary, Solid(Native(button).Background));
+        Assert.Equal(Colors.White, TextColour(button));
+
+        button.Fill = ButtonFill.Clear;
         button.Fill = null;
-        Assert.True(Has(button, ":fill-solid"));
-    }
+        Assert.Equal(Primary, Solid(Native(button).Background));
+    });
 
     // ── Behaviours 13-16: colour ─────────────────────────────────────────────────────────────
 
@@ -1103,11 +1263,11 @@ public class AvonicButtonTests
         Assert.Equal(Colors.White, TextColour(solid));
         Assert.Equal(Colors.White, Solid(Text(solid).Foreground));
 
-        Assert.Null(Native(outline).Background);
+        AssertTransparent(Native(outline).Background);
         Assert.Equal(Danger, TextColour(outline));
         Assert.Equal(Danger, Solid(Native(outline).BorderBrush));
 
-        Assert.Null(Native(clear).Background);
+        AssertTransparent(Native(clear).Background);
         Assert.Equal(Danger, TextColour(clear));
     });
 
@@ -1119,11 +1279,18 @@ public class AvonicButtonTests
         button.Resources["Avonic.Button.Color"] = Brushes.Lime;
         var outline = new AvonicButton { Content = "Text", Color = "danger", Fill = ButtonFill.Outline };
         outline.Resources["Avonic.Button.BorderColor"] = Brushes.Green;
-        using var scene = new Scene(NoTransitions(new StackPanel { Children = { button, outline } }));
+        outline.Resources["Avonic.Button.Background"] = Brushes.Green;
+        var clear = new AvonicButton { Content = "Text", Color = "danger", Fill = ButtonFill.Clear };
+        clear.Resources["Avonic.Button.Background"] = Brushes.Green;
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { button, outline, clear } }));
 
         Assert.Equal(Danger, Solid(Native(button).Background));
         Assert.Equal(Colors.White, TextColour(button));
         Assert.Equal(Danger, Solid(Native(outline).BorderBrush));
+
+        // Measured c and d: background: transparent on outline and clear beats the variable.
+        AssertTransparent(Native(outline).Background);
+        AssertTransparent(Native(clear).Background);
     });
 
     [AvaloniaFact]
@@ -1135,7 +1302,6 @@ public class AvonicButtonTests
             Assert.Null(Native(button).Background);
             Assert.Equal(Colors.White, TextColour(button));
             Assert.NotEqual(default, Native(button).BoxShadow);
-            Assert.True(Has(button, ":ion-color"));
         }
     });
 
@@ -1150,6 +1316,21 @@ public class AvonicButtonTests
         Assert.Equal(Primary, TextColour(outline));
         Assert.Equal(Primary, Solid(Native(outline).BorderBrush));
         Assert.Equal(Primary, TextColour(clear));
+    });
+
+    [AvaloniaTheory]
+    [InlineData(ButtonFill.Solid)]
+    [InlineData(ButtonFill.Outline)]
+    [InlineData(ButtonFill.Clear)]
+    public void B14_An_Unknown_Color_Beats_The_Background_Token_Measured(ButtonFill fill) => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "Text", Color = "nope", Fill = fill };
+        button.Resources["Avonic.Button.Background"] = Brushes.Green;
+        var (_, scene, _) = Themed(button);
+        using (scene)
+        {
+            AssertTransparent(Native(button).Background);
+        }
     });
 
     [AvaloniaFact]
@@ -1331,10 +1512,30 @@ public class AvonicButtonTests
             AssertThickness(15.4, 8, 15.4, 8, Inner(button).Margin);
             Assert.Equal(HorizontalAlignment.Left, button.HorizontalAlignment);
             Assert.Equal(VerticalAlignment.Center, button.VerticalAlignment);
-            Assert.False(Has(button, ":size-small"));
-            Assert.False(Has(button, ":size-large"));
         }
     });
+
+    [AvaloniaFact]
+    public void B18_A_Taller_Button_Centres_Its_Content() => InstalledTheme.Run(_ =>
+    {
+        // Measured tall: stretched by a flex parent to 92, with the content in the middle.
+        var (button, scene, _) = Themed(new AvonicButton { Content = "Text", Height = 92 });
+        using (scene)
+        {
+            Assert.Equal(92, button.Bounds.Height);
+            var box = Box(button, scene.Window);
+            Assert.InRange(Box(Inner(button), scene.Window).Center.Y, box.Center.Y - 1, box.Center.Y + 1);
+        }
+    });
+
+    [AvaloniaFact]
+    public void B18_A_Wider_Button_Centres_Its_Content_On_The_Stub()
+    {
+        var button = Boxed();
+        using var scene = new Scene(button);
+
+        Assert.Equal(new Point(50, 20), Box(Inner(button), scene.Window).Center);
+    }
 
     [AvaloniaFact]
     public void B18_Em_Values_Follow_The_Font_Size() => InstalledTheme.Run(_ =>
@@ -1656,7 +1857,6 @@ public class AvonicButtonTests
         var (button, scene, _) = Themed(new AvonicButton { IconOnlyContent = glyph, Size = size });
         using (scene)
         {
-            Assert.True(Has(button, ":has-icon-only"));
             Assert.Equal(box, button.MinWidth, 2);
             Assert.Equal(box, button.MinHeight, 2);
             AssertThickness(0, 0, 0, 0, Inner(button).Margin);
@@ -1681,18 +1881,20 @@ public class AvonicButtonTests
     });
 
     [AvaloniaFact]
-    public void B24_A_Slot_Change_Updates_It()
+    public void B24_A_Slot_Change_Updates_It() => InstalledTheme.Run(_ =>
     {
-        var button = Boxed();
-        using var scene = new Scene(button);
-        Assert.False(Has(button, ":has-icon-only"));
+        var button = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { button } }));
+        Assert.Equal(36, button.MinHeight);
 
         button.IconOnlyContent = new AvonicIcon { IconName = "heart" };
-        Assert.True(Has(button, ":has-icon-only"));
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(40.04, button.MinHeight, 2);
 
         button.IconOnlyContent = null;
-        Assert.False(Has(button, ":has-icon-only"));
-    }
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(36, button.MinHeight);
+    });
 
     [AvaloniaFact]
     public void B24_Padding_Top_Sets_All_Four_Measured_Onlyv() => InstalledTheme.Run(_ =>
@@ -1762,6 +1964,54 @@ public class AvonicButtonTests
 
         // And in the middle of the height
         Assert.InRange(Box(start, scene.Window).Center.Y, box.Center.Y - 1, box.Center.Y + 1);
+    });
+
+    [AvaloniaFact]
+    public void B25_Text_In_Start_Does_Not_Wrap() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { StartContent = "A long piece of text in the start slot" };
+        using var scene = new Scene(NoTransitions(new StackPanel { Width = 150, HorizontalAlignment = HorizontalAlignment.Left, Children = { button } }));
+
+        // [slot=start] { flex-shrink: 0 }, so it stays on one line and overflows.
+        Assert.Equal(36, button.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B25_Slots_Count_When_Deciding_To_Wrap() => InstalledTheme.Run(_ =>
+    {
+        // Text that just fits with no icons has to wrap once there's one beside it.
+        var text = "A";
+        var fits = new AvonicButton { Content = text };
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { fits } }));
+        while (true)
+        {
+            fits.Content = text + "A";
+            Dispatcher.UIThread.RunJobs();
+            if (fits.Bounds.Height > 36)
+            {
+                break;
+            }
+
+            text += "A";
+        }
+
+        fits.Content = text;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(36, fits.Bounds.Height);
+
+        fits.StartContent = new AvonicIcon { IconName = "heart" };
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(fits.Bounds.Height > 36);
+    });
+
+    [AvaloniaFact]
+    public void B25_A_Tall_Slot_Grows_The_Button() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "Text", StartContent = new Border { Height = 80, Width = 10 } };
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { button } }));
+
+        // 80, and 8 above and below
+        Assert.Equal(96, button.Bounds.Height);
     });
 
     [AvaloniaFact]
@@ -2168,14 +2418,14 @@ public class AvonicButtonTests
     // ── Behaviours 28-32: in an item ─────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B28_In_An_Item_Null_Is_Small_At_Any_Depth()
+    public void B28_In_An_Item_Null_Is_Small_At_Any_Depth() => InstalledTheme.Run(_ =>
     {
-        var direct = new AvonicButton();
-        var deep = new AvonicButton();
-        var standard = new AvonicButton { Size = ButtonSize.Default };
-        var large = new AvonicButton { Size = ButtonSize.Large };
-        var alone = new AvonicButton();
-        using var scene = new Scene(new StackPanel
+        var direct = new AvonicButton { Content = "Text" };
+        var deep = new AvonicButton { Content = "Text" };
+        var standard = new AvonicButton { Content = "Text", Size = ButtonSize.Default };
+        var large = new AvonicButton { Content = "Text", Size = ButtonSize.Large };
+        var alone = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new StackPanel
         {
             Children =
             {
@@ -2185,49 +2435,49 @@ public class AvonicButtonTests
                 new AvonicItem { Content = large },
                 alone,
             },
-        });
+        }));
 
-        Assert.True(Has(direct, ":size-small"));
-        Assert.True(Has(deep, ":size-small"));
-        Assert.False(Has(standard, ":size-small"));
-        Assert.True(Has(large, ":size-large"));
-        Assert.False(Has(alone, ":size-small"));
-        Assert.True(Has(direct, ":in-item"));
-        Assert.False(Has(alone, ":in-item"));
-    }
+        // Measured: 12 directly in a slot, 13 deeper, 14 or 20 when it's set, and 14 outside an item.
+        Assert.Equal(12, direct.FontSize);
+        Assert.Equal(13, deep.FontSize);
+        Assert.Equal(14, standard.FontSize);
+        Assert.Equal(20, large.FontSize);
+        Assert.Equal(14, alone.FontSize);
+    });
 
     [AvaloniaFact]
-    public void B28_Moving_To_An_Item_Follows_It()
+    public void B28_Moving_To_An_Item_Follows_It() => InstalledTheme.Run(_ =>
     {
-        var button = new AvonicButton();
+        var button = new AvonicButton { Content = "Text" };
         var holder = new Border { Child = button };
         var item = new AvonicItem();
-        using var scene = new Scene(new StackPanel { Children = { holder, item } });
-        Assert.False(Has(button, ":size-small"));
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { holder, item } }));
+        Assert.Equal(14, button.FontSize);
 
         holder.Child = null;
         item.Content = button;
         Dispatcher.UIThread.RunJobs();
-        Assert.True(Has(button, ":size-small"));
+        Assert.Equal(12, button.FontSize);
 
         item.Content = null;
         holder.Child = button;
         Dispatcher.UIThread.RunJobs();
-        Assert.False(Has(button, ":size-small"));
-    }
+        Assert.Equal(14, button.FontSize);
+    });
 
     [AvaloniaFact]
-    public void B28_Size_Changes_Are_Followed_In_An_Item()
+    public void B28_Size_Changes_Are_Followed_In_An_Item() => InstalledTheme.Run(_ =>
     {
-        var button = new AvonicButton();
-        using var scene = new Scene(new AvonicItem { Content = button });
+        var button = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new AvonicItem { Content = button }));
+        Assert.Equal(12, button.FontSize);
 
         button.Size = ButtonSize.Default;
-        Assert.False(Has(button, ":size-small"));
+        Assert.Equal(14, button.FontSize);
 
         button.Size = null;
-        Assert.True(Has(button, ":size-small"));
-    }
+        Assert.Equal(12, button.FontSize);
+    });
 
     [AvaloniaFact]
     public void B29_Directly_In_A_Slot_A_Small_Button_Is_Smaller_Still() => InstalledTheme.Run(_ =>
@@ -2649,6 +2899,24 @@ public class AvonicButtonTests
     });
 
     [AvaloniaFact]
+    public void B36_It_Asks_Again_Just_Before_Running()
+    {
+        // CanExecute can go false with no CanExecuteChanged.
+        var clicks = 0;
+        var command = new TestCommand();
+        var button = Boxed();
+        button.Command = command;
+        button.Click += (_, _) => clicks++;
+        using var scene = new Scene(button);
+
+        command.Allowed = false;
+        Tap(scene, Centre);
+
+        Assert.Equal(1, clicks);
+        Assert.Equal(0, command.Executed);
+    }
+
+    [AvaloniaFact]
     public void B36_A_Parameter_Change_Asks_Again()
     {
         var command = new TestCommand();
@@ -2788,37 +3056,42 @@ public class AvonicButtonTests
     });
 
     [AvaloniaFact]
-    public void Strong_Size_Shape_And_Expand_Each_Follow_Changes()
+    public void Strong_Size_Shape_And_Expand_Each_Follow_Changes() => InstalledTheme.Run(_ =>
     {
-        var button = Boxed();
-        using var scene = new Scene(button);
+        var button = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { button } }));
 
         button.Strong = true;
-        Assert.True(Has(button, ":strong"));
-
-        button.Shape = ButtonShape.Round;
-        Assert.True(Has(button, ":shape-round"));
-
-        button.Expand = ButtonExpand.Block;
-        Assert.True(Has(button, ":expand-block"));
-
-        button.Size = ButtonSize.Large;
-        Assert.True(Has(button, ":size-large"));
+        Assert.Equal(FontWeight.Bold, button.FontWeight);
 
         button.Strong = false;
-        Assert.False(Has(button, ":strong"));
+        Assert.Equal(FontWeight.Medium, button.FontWeight);
+
+        button.Shape = ButtonShape.Round;
+        Assert.Equal(new CornerRadius(999), Native(button).CornerRadius);
 
         button.Shape = null;
-        Assert.False(Has(button, ":shape-round"));
+        Assert.Equal(new CornerRadius(4), Native(button).CornerRadius);
+
+        button.Expand = ButtonExpand.Block;
+        Assert.Equal(HorizontalAlignment.Stretch, button.HorizontalAlignment);
 
         button.Expand = ButtonExpand.Full;
-        Assert.False(Has(button, ":expand-block"));
-        Assert.True(Has(button, ":expand-full"));
+        Assert.Equal(HorizontalAlignment.Stretch, button.HorizontalAlignment);
+        Assert.Equal(new CornerRadius(0), Native(button).CornerRadius);
+
+        button.Expand = null;
+        Assert.Equal(HorizontalAlignment.Left, button.HorizontalAlignment);
+
+        button.Size = ButtonSize.Large;
+        Assert.Equal(20, button.FontSize);
 
         button.Size = ButtonSize.Small;
-        Assert.False(Has(button, ":size-large"));
-        Assert.True(Has(button, ":size-small"));
-    }
+        Assert.Equal(13, button.FontSize);
+
+        button.Size = null;
+        Assert.Equal(14, button.FontSize);
+    });
 
     [AvaloniaFact]
     public void Works_On_The_Stub_With_No_Theme()

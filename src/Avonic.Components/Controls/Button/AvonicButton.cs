@@ -283,7 +283,7 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     private bool _inItem;
     private bool _spacePressed;
-    private IPointer? _secondTapPointer;
+    private IPointer? _pressPointer;
     private bool _commandCanExecute = true;
     private bool _commandSubscribed;
     private ContentPresenter?[] _slots = [];
@@ -299,12 +299,13 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     public AvonicButton()
     {
-        AddHandler(TappedEvent, OnTapped);
-
-        // A second quick press raises no Tapped. A native <button> clicks each time, on release, so a finger that
-        // goes down to scroll doesn't activate anything.
-        AddHandler(PointerPressedEvent, OnPointerPressedBeforeSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
+        // A native <button> clicks on release, if the press and the release both landed on it. Tapped doesn't do that:
+        // it has a small movement limit and isn't raised for a second quick press. A child that handles the press
+        // keeps it, as stopPropagation does in Ionic, and as Avalonia's own Button does. This doesn't handle anything,
+        // so an item around it still sees the tap.
+        AddHandler(PointerPressedEvent, OnPointerPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(PointerPressedEvent, OnPointerPressedBubble);
+        AddHandler(PointerReleasedEvent, OnPointerReleasedBubble, RoutingStrategies.Bubble, handledEventsToo: true);
 
         // ion-activatable and ion-focusable, always.
         Activatable.SetIsEnabled(this, true);
@@ -336,7 +337,7 @@ public class AvonicButton : TemplatedControl, IItemControl
         else if (change.Property == IsEffectivelyEnabledProperty && !IsEffectivelyEnabled)
         {
             // Space doesn't need this: disabling takes focus away, which ends it.
-            _secondTapPointer = null;
+            _pressPointer = null;
         }
         else if (change.Property == CommandProperty)
         {
@@ -448,32 +449,28 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    private void OnTapped(object? sender, TappedEventArgs e) => RaiseClick();
-
-    /// <summary>
-    /// Avalonia only raises <c>Tapped</c> for an odd click count. It raises <c>DoubleTapped</c> for an even one, but
-    /// only if the last press had the same source, so a quick press after one that landed on something else raises
-    /// neither. So this goes by the count, which covers both.
-    /// </summary>
-    private void OnPointerPressedBeforeSecondTap(object? sender, PointerPressedEventArgs e)
+    /// <summary>A new press ends the last one, which a gesture may have taken, so its release never came here.</summary>
+    private void OnPointerPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
-        // Another finger going down doesn't end this one's press.
-        if (e.Pointer == _secondTapPointer)
+        if (e.Pointer == _pressPointer)
         {
-            _secondTapPointer = null;
-        }
-
-        if (e.ClickCount % 2 == 0 && e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
-        {
-            _secondTapPointer = e.Pointer;
+            _pressPointer = null;
         }
     }
 
-    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
+    private void OnPointerPressedBubble(object? sender, PointerPressedEventArgs e)
     {
-        if (_secondTapPointer is not null && e.Pointer == _secondTapPointer)
+        if (e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
         {
-            _secondTapPointer = null;
+            _pressPointer = e.Pointer;
+        }
+    }
+
+    private void OnPointerReleasedBubble(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.Pointer == _pressPointer)
+        {
+            _pressPointer = null;
             if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
             {
                 RaiseClick();
@@ -498,7 +495,7 @@ public class AvonicButton : TemplatedControl, IItemControl
     {
         base.OnKeyDown(e);
 
-        if (e.Handled || !ReferenceEquals(e.Source, this))
+        if (!ReferenceEquals(e.Source, this))
         {
             return;
         }
@@ -582,8 +579,6 @@ public class AvonicButton : TemplatedControl, IItemControl
     private sealed class ButtonPeer(AvonicButton owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Button;
-
-        protected override string GetClassNameCore() => nameof(AvonicButton);
 
         /// <summary><c>aria-disabled</c>, and a command that can't execute.</summary>
         protected override bool IsEnabledCore() => owner.IsEffectivelyEnabled;

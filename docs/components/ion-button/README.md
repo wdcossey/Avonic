@@ -125,6 +125,8 @@ The full list is in [PLAN.md](PLAN.md#behaviours). The ones that might surprise 
 - **An unknown `Color`** paints no background and leaves the text as it was, so a solid one is white text on nothing, with a
   shadow. It's what Ionic does. Inside a coloured ancestor it paints that ancestor's base.
 - **A disabled button lets a tap through** to what's behind it, as `pointer-events: none` does.
+- **A press and a release that both land on the button click it,** however far the pointer went between them, unless a child
+  handles `PointerPressed`, which is how to stop it, as `stopPropagation` does in Ionic.
 - **In an item, directly in a slot,** a small button has font 12 and height 25. Nested deeper it has Ionic's plain small values,
   13 and 27.3. A panel directly in a slot counts as the slot.
 

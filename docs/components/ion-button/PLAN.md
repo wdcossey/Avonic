@@ -82,7 +82,7 @@ Each becomes a test.
 
 | # | Behaviour | Source |
 |---|---|---|
-| 1 | A tap raises `Click`, on release, every time, on a second quick tap too, even if the first landed on something else; not on the right button, when disabled, or when released off the button | native `<button>`; measured `mouse click`, `double click`, `right click`, `press, release off` |
+| 1 | A tap raises `Click`, on release, every time: on a second quick tap, after a tap on something else, and after a drag, if the press and release both landed on it. Not on the right button, or disabled, even mid-press, or if a child handled the press | native `<button>`; measured `mouse click`, `double click`, `right click`, `press, release off`, and the drags, a mid-press disable and `stopPropagation` |
 | 2 | Enter clicks on press, and Space on release, if it's still focused. Keys on a nested control are its own | native `<button>`; measured `enter down`, `space up` |
 | 3 | It's a tab stop unless disabled, and a press focuses it | measured `tab from tab1`, `mouse click` |
 | 4 | `IonFocus` and `IonBlur` fire on any focus, including a press, bubble, and don't fire for focus on a nested control. Disabling a focused button blurs it | `onFocus`, `onBlur`; `bubbles: true`; measured `focused then disabled` |
@@ -94,7 +94,7 @@ Each becomes a test.
 | 10 | Fill outline: transparent, primary text, 2 px primary border | measured `outline` |
 | 11 | Fill clear: transparent, primary text, no border | measured `clear` |
 | 12 | `fill="default"`: no background, border or shadow, text inherits, and it ignores `Color`. Its overlay is opaque if only the colour is set | The class `button-default` has no rules; measured `fdef`, `fdefc`, `tokf` |
-| 13 | `Color`: solid paints base and contrast; outline and clear paint base for text and border. A known colour beats `--background` and `--color` | measured `danger*`, `varsc` |
+| 13 | `Color`: solid paints base and contrast; outline and clear paint base for text and border, and are transparent. A colour, even an unknown one, beats `--background`, and a known one beats `--color` | measured `danger*`, `varsc`, `c`, `d`, `e`, `f` |
 | 14 | An unknown `Color`: transparent background, text from `--color`, including state colours; a solid keeps its shadow; an outline's border is the current colour | `var()` invalid at computed time; measured `bad*`, `tokbad` |
 | 15 | An unknown `Color` inside a coloured ancestor paints that ancestor's base, and no `Color` keeps primary | `--ion-color-base` inherits; measured `initemcolbad`, `initemcol` |
 | 16 | On a known `Color`, focus and hover overlays use contrast (solid) or base (outline, clear), beating the overlay tokens, but opacity tokens still apply. Text stays contrast or base through every state | `.ion-color.ion-focused`; measured `tokc` |
@@ -201,15 +201,19 @@ ripple, which a slot can't do here. See the gaps.
 
 ### Interaction
 
-`AvonicItem`'s approach, for the reasons it records: `Tapped` for a first tap, and for a second quick press, a click on
-release if it's inside and the same pointer. Tunnel handlers with `handledEventsToo`, because `Activatable` captures the
-pointer. Clicking on `DoubleTapped` would click on press, so a finger going down to scroll would activate it. It doesn't
-handle `Tapped`, so an item around it still sees the tap, which is what measured `click initembtn` needs.
+A native `<button>` clicks on release if the press and the release both landed on it, and nothing else matters. Measured:
+a drag of 150 px within it clicks, a drag off and back clicks, two quick presses click twice, and disabling it mid-press doesn't.
 
-One difference from the item, found by a test. Avalonia raises `Tapped` for an odd click count, and `DoubleTapped` for an even
-one, but only if the last press had the same source. So a quick press after a tap that landed on something else raises
-neither, and the tap is lost. A disabled button that just became enabled under the finger does this. In Chromium every
-press clicks (measured). So this arms on an even `ClickCount` with the left button, which covers both.
+**This differs from `AvonicItem`, which uses `Tapped`.** `Tapped` has a small movement limit, so a shaky press does nothing.
+It isn't raised for a second quick press, and `DoubleTapped`, which is, also needs the last press to have had the same
+source, so a quick press after a tap that landed on something else is lost. A button tracks the press itself instead: armed in
+a bubbling `PointerPressed`, and a click in `PointerReleased` if it's the same pointer and inside. Clicking on `DoubleTapped`,
+which the item rejected because a finger going down to scroll would activate it, isn't what this does: a gesture that takes the
+pointer means the release never comes here.
+
+**A child that handles `PointerPressed` stops the click,** every time, as `stopPropagation` does in Ionic (measured, on one tap and
+on two quick ones), and as Avalonia's own `Button` does. It doesn't handle anything itself, so an item around it still sees the
+tap, which is what measured `click initembtn` needs.
 
 ### Line height
 
@@ -255,6 +259,7 @@ Avonic-only, and never named like an Ionic member.
 | `href`, `download`, `rel`, `target`, router props, `type`, `form`, `buttonType` aren't declared | Each would be a dead prop |
 | `Avonic.Button.Padding*` is px only | An em default stays relative, and an override is a plain number. Use a binding for a relative one |
 | A row of buttons is a panel, not inline flow | Avalonia has no inline flow |
+| A nested control that handles its press, such as Avalonia's own `Button`, doesn't also click this one, where a click would bubble in a browser | That's how Avalonia's `Button` works, and it's what stops a click here, because `Tapped` comes too late to stop it |
 | A word wider than the button breaks onto more lines, where Chromium's button grows past its parent: 99.6 of 96 (measured `narrow`) | A control can't be measured wider than its parent, and Avalonia 12.1.4 breaks the word even with `WrapWithOverflow`, measured 4 lines |
 | Two block or full buttons in a column are 8 apart, where CSS collapses their margins to 4 | Avalonia has no margin collapsing, as in `ion-label` |
 | Solid's shadow is lighter at 2x: the first row under the button is 205, where Chromium's is 165, and it fades over about the same distance | Avalonia's own shadow rendering, with the same values. At 1x it reads 164 |
