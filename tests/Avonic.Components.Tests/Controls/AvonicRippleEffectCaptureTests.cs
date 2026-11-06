@@ -103,21 +103,12 @@ public class AvonicRippleEffectCaptureTests
         Assert.False(Differs(baseline, released[420]), "ripple should be gone 420 ms after release");
 
         // At 160 ms (60 ms in) the circle has not reached the surface's left edge yet…
-        AssertClose(Surface, PixelAt(press[160], (Pad + 4) * 2, (int)((Pad + H / 2) * 2)), tolerance: 1);
+        AssertClose(Surface, Frames.PixelAt(press[160], (Pad + 4) * 2, (int)((Pad + H / 2) * 2)), tolerance: 1);
         // …and at 320 ms (220 ms in) it tints the whole surface: 16 % primary over #E0E0E0.
-        AssertClose(Blend(Surface, Primary, RippleVisual.MaxOpacity), PixelAt(press[320], (Pad + 4) * 2, (int)((Pad + H / 2) * 2)), tolerance: 3);
+        AssertClose(Blend(Surface, Primary, RippleVisual.MaxOpacity), Frames.PixelAt(press[320], (Pad + 4) * 2, (int)((Pad + H / 2) * 2)), tolerance: 3);
     }
 
     // ── pixel helpers ────────────────────────────────────────────────────────────────────────
-
-    private static unsafe Color PixelAt(WriteableBitmap bitmap, int x, int y)
-    {
-        using var fb = bitmap.Lock();
-        var p = (byte*)fb.Address + y * fb.RowBytes + x * 4;
-        return fb.Format == Avalonia.Platform.PixelFormats.Rgba8888
-            ? Color.FromArgb(p[3], p[0], p[1], p[2])
-            : Color.FromArgb(p[3], p[2], p[1], p[0]);      // Bgra8888
-    }
 
     private static unsafe bool Differs(WriteableBitmap a, WriteableBitmap b)
     {

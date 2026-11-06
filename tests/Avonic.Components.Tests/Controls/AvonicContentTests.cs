@@ -100,15 +100,6 @@ public class AvonicContentTests
         Assert.True(text.Bounds.Height > oneLine.DesiredSize.Height * 1.5, $"{text.Bounds.Height} against one line of {oneLine.DesiredSize.Height}");
     }
 
-    private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
-        return buffer.Format == Avalonia.Platform.PixelFormat.Rgba8888
-            ? Color.FromArgb(pixel[3], pixel[0], pixel[1], pixel[2])
-            : Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
-    }
-
     /// <summary>Records every scroll event at the clock's time.</summary>
     private sealed class Recorder
     {
@@ -262,7 +253,7 @@ public class AvonicContentTests
         using var scene = new Scene(InBox(content));
         Render();
 
-        Assert.Equal(Color.Parse("#0054E9"), PixelAt(scene.Window.CaptureRenderedFrame()!, 200, 200));
+        Assert.Equal(Color.Parse("#0054E9"), Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 200, 200));
     });
 
     [AvaloniaFact]
@@ -2299,16 +2290,16 @@ public class AvonicContentTests
 
         var frame = scene.Window.CaptureRenderedFrame()!;
 
-        Assert.Equal(Colors.Red, PixelAt(frame, 200, 20));
-        Assert.Equal(Colors.Red, PixelAt(frame, 200, 390));
-        Assert.Equal(Colors.White, PixelAt(frame, 200, 410));
+        Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 20));
+        Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 390));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 200, 410));
 
         // And content, scrolled up behind it.
         content.Content = new Border { Height = 1000, Background = Brushes.Lime };
         Settle();
         content.ScrollToPoint(null, 56);
         Render();
-        Assert.Equal(Colors.Lime, PixelAt(scene.Window.CaptureRenderedFrame()!, 200, 20));
+        Assert.Equal(Colors.Lime, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 200, 20));
     });
 
     [AvaloniaFact]

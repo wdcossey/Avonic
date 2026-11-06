@@ -4,6 +4,10 @@ Closes #
 
 `ion-…` → `Avonic…`
 
+## Screenshot
+
+Ionic beside Avonic, through URLs pinned to the commit. Say if it's headless or a real window.
+
 ## Review artefacts
 
 - Plan: `docs/components/<ion-tag>/PLAN.md`

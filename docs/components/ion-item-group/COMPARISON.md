@@ -8,7 +8,7 @@
 >
 > (Chromium, md, 390×844@2x) → [`ref/`](ref/).
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicListCaptureTests.Reference_Page_Item_Group` (headless Skia, 2×) →
-> [`compare/`](compare/). Not tried in a real window.
+> [`compare/`](compare/). Tried in a real window on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware: the `ion-list` page draws as the frames do.
 
 ## Frames
 

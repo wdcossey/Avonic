@@ -9,13 +9,16 @@ namespace Avonic.Components.Tests.Performance;
 
 /// <summary>
 /// The style budget. Avalonia checks every global rule against every element, in any app, even one that uses none of these
-/// controls, at about 27 ns per alternative between commas. Going over means adding fewer rules, or raising a limit here on
+/// controls, at about 30 ns per alternative between commas. Going over means adding fewer rules, or raising a limit here on
 /// purpose and saying so in the PR. See docs/infra/performance/README.md.
 /// </summary>
 public class StyleBudgetTests
 {
     /// <summary>All the alternatives in the theme's global rules.</summary>
     private const int MaxAlternatives = 200;
+
+    /// <summary>Don't raise the limit past this without measuring on a real phone. See the README.</summary>
+    private const int Checkpoint = 600;
 
     /// <summary>Alternatives that get past a <c>TextBlock</c>'s type, the most common element in an app.</summary>
     private const int MaxAlternativesReachingTextBlock = 60;
@@ -34,6 +37,14 @@ public class StyleBudgetTests
 
         Assert.True(total <= MaxAlternatives, $"{total} alternatives, over the budget of {MaxAlternatives}. The largest:{Environment.NewLine}{Report(checks)}");
     });
+
+    [Fact]
+    public void The_Limit_Stays_At_Or_Under_The_Checkpoint()
+    {
+        var limit = MaxAlternatives;
+
+        Assert.True(limit <= Checkpoint, "Stop here, and measure on a real phone before going on. See docs/infra/performance/README.md.");
+    }
 
     [AvaloniaFact]
     public void The_Theme_Stays_Within_The_Budget_For_A_TextBlock() => InstalledTheme.Run(_ =>

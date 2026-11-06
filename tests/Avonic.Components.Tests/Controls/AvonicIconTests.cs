@@ -62,15 +62,6 @@ public sealed class AvonicIconTests : IDisposable
         return scene.Window.CaptureRenderedFrame()!;
     }
 
-    private static unsafe Color PixelAt(WriteableBitmap bitmap, int x, int y)
-    {
-        using var fb = bitmap.Lock();
-        var p = (byte*)fb.Address + y * fb.RowBytes + x * 4;
-        return fb.Format == Avalonia.Platform.PixelFormats.Rgba8888
-            ? Color.FromArgb(p[3], p[0], p[1], p[2])
-            : Color.FromArgb(p[3], p[2], p[1], p[0]);
-    }
-
     private static bool IsBlank(Scene scene)
     {
         var frame = Frame(scene);
@@ -78,7 +69,7 @@ public sealed class AvonicIconTests : IDisposable
         {
             for (var x = 0; x < frame.PixelSize.Width; x += 2)
             {
-                if (PixelAt(frame, x, y) != White)
+                if (Frames.PixelAt(frame, x, y) != White)
                 {
                     return false;
                 }
@@ -358,8 +349,8 @@ public sealed class AvonicIconTests : IDisposable
         var frame = Frame(scene);
 
         Assert.Equal(new Size(24, 24), icon.Bounds.Size);
-        Assert.NotEqual(White, PixelAt(frame, 12, 12));
-        Assert.Equal(White, PixelAt(frame, 40, 40));
+        Assert.NotEqual(White, Frames.PixelAt(frame, 12, 12));
+        Assert.Equal(White, Frames.PixelAt(frame, 40, 40));
     }
 
     [AvaloniaFact]
@@ -399,9 +390,9 @@ public sealed class AvonicIconTests : IDisposable
         using var scene = Show(icon);
         var frame = Frame(scene);
 
-        Assert.Equal(White, PixelAt(frame, 8, 16));
-        Assert.NotEqual(White, PixelAt(frame, 32, 16));
-        Assert.Equal(White, PixelAt(frame, 56, 16));
+        Assert.Equal(White, Frames.PixelAt(frame, 8, 16));
+        Assert.NotEqual(White, Frames.PixelAt(frame, 32, 16));
+        Assert.Equal(White, Frames.PixelAt(frame, 56, 16));
     }
 
     [AvaloniaFact]
@@ -411,8 +402,8 @@ public sealed class AvonicIconTests : IDisposable
         using var scene = Show(icon);
         var frame = Frame(scene);
 
-        Assert.NotEqual(White, PixelAt(frame, 16, 32));
-        Assert.Equal(White, PixelAt(frame, 48, 32));
+        Assert.NotEqual(White, Frames.PixelAt(frame, 16, 32));
+        Assert.Equal(White, Frames.PixelAt(frame, 48, 32));
     }
 
     // contain: strict; overflow: hidden. The line runs well past the viewBox on both sides.
@@ -424,8 +415,8 @@ public sealed class AvonicIconTests : IDisposable
         using var scene = Show(icon);
         var frame = Frame(scene);
 
-        Assert.NotEqual(White, PixelAt(frame, 16, 16));
-        Assert.Equal(White, PixelAt(frame, 48, 16));
+        Assert.NotEqual(White, Frames.PixelAt(frame, 16, 16));
+        Assert.Equal(White, Frames.PixelAt(frame, 48, 16));
     }
 
     // ── Colour ───────────────────────────────────────────────────────────────────────────────
@@ -433,7 +424,7 @@ public sealed class AvonicIconTests : IDisposable
     private static Color Painted(Control content)
     {
         using var scene = Show(content);
-        return PixelAt(Frame(scene), 32, 32);
+        return Frames.PixelAt(Frame(scene), 32, 32);
     }
 
     private static readonly Color Danger = Color.Parse("#c5000f");
@@ -465,7 +456,7 @@ public sealed class AvonicIconTests : IDisposable
 
         icon.Foreground = Brushes.Blue;
 
-        Assert.Equal(Colors.Blue, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Colors.Blue, Frames.PixelAt(Frame(scene), 32, 32));
     }
 
     [AvaloniaFact]
@@ -528,13 +519,13 @@ public sealed class AvonicIconTests : IDisposable
         var icon = Icon(Solid);
         icon.Foreground = Brushes.Lime;
         using var scene = Show(icon);
-        Assert.Equal(Colors.Lime, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Colors.Lime, Frames.PixelAt(Frame(scene), 32, 32));
 
         icon.Color = "danger";
-        Assert.Equal(Danger, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Danger, Frames.PixelAt(Frame(scene), 32, 32));
 
         icon.Color = null;
-        Assert.Equal(Colors.Lime, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Colors.Lime, Frames.PixelAt(Frame(scene), 32, 32));
     });
 
     [AvaloniaFact]
@@ -544,11 +535,11 @@ public sealed class AvonicIconTests : IDisposable
         icon.Color = "danger";
         var scope = new Border { Child = icon };
         using var scene = Show(scope);
-        Assert.Equal(Danger, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Danger, Frames.PixelAt(Frame(scene), 32, 32));
 
         scope.Resources["Avonic.Color.Danger"] = Colors.Lime;
 
-        Assert.Equal(Colors.Lime, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Colors.Lime, Frames.PixelAt(Frame(scene), 32, 32));
     });
 
     // The inherited base doesn't change here, only whether the icon reads it.
@@ -560,11 +551,11 @@ public sealed class AvonicIconTests : IDisposable
         var ancestor = new Border { Child = icon };
         ColorPalette.SetColor(ancestor, "danger");
         using var scene = Show(ancestor);
-        Assert.Equal(Colors.Lime, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Colors.Lime, Frames.PixelAt(Frame(scene), 32, 32));
 
         icon.Color = "nonexistent";
 
-        Assert.Equal(Danger, PixelAt(Frame(scene), 32, 32));
+        Assert.Equal(Danger, Frames.PixelAt(Frame(scene), 32, 32));
     });
 
     // ── RTL: render() ────────────────────────────────────────────────────────────────────────
@@ -574,8 +565,8 @@ public sealed class AvonicIconTests : IDisposable
     {
         using var scene = Show(icon, direction: direction);
         var frame = Frame(scene);
-        var left = PixelAt(frame, 16, 32) != White;
-        var right = PixelAt(frame, 48, 32) != White;
+        var left = Frames.PixelAt(frame, 16, 32) != White;
+        var right = Frames.PixelAt(frame, 48, 32) != White;
         Assert.True(left != right, "Expected paint on exactly one side");
         return right;
     }
@@ -643,11 +634,11 @@ public sealed class AvonicIconTests : IDisposable
     {
         var icon = Icon(LeftHalf);
         using var scene = Show(icon, direction: FlowDirection.RightToLeft);
-        Assert.NotEqual(White, PixelAt(Frame(scene), 16, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 16, 32));
 
         icon.FlipRtl = true;
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 48, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 48, 32));
     }
 
     // Under an LTR parent, the icon's mirror transform doesn't change, so nothing else repaints it.
@@ -657,11 +648,11 @@ public sealed class AvonicIconTests : IDisposable
         var icon = Icon(LeftHalf);
         icon.FlipRtl = true;
         using var scene = Show(icon);
-        Assert.NotEqual(White, PixelAt(Frame(scene), 16, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 16, 32));
 
         icon.FlowDirection = FlowDirection.RightToLeft;
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 48, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 48, 32));
     }
 
     [AvaloniaFact]
@@ -670,11 +661,11 @@ public sealed class AvonicIconTests : IDisposable
         var icon = Icon(LeftHalf);
         icon.FlipRtl = true;
         using var scene = Show(icon);
-        Assert.NotEqual(White, PixelAt(Frame(scene), 16, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 16, 32));
 
         scene.Window.FlowDirection = FlowDirection.RightToLeft;
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 48, 32));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 48, 32));
     }
 
     // ── SVG painting: the browser's defaults ─────────────────────────────────────────────────
@@ -682,7 +673,7 @@ public sealed class AvonicIconTests : IDisposable
     private static Color PaintedAt(string src, int x, int y, int size = 512)
     {
         using var scene = Show(Icon(src, size), size);
-        return PixelAt(Frame(scene), x, y);
+        return Frames.PixelAt(Frame(scene), x, y);
     }
 
     // .ionicon { stroke: currentColor } with SVG's default width of 1.
@@ -920,7 +911,7 @@ public sealed class AvonicIconTests : IDisposable
     {
         using var scene = Show(WithStrokeWidth(Icon(VariableWidthLine, 512), 100), 512);
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 256, 300));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 256, 300));
     }
 
     [AvaloniaFact]
@@ -928,11 +919,11 @@ public sealed class AvonicIconTests : IDisposable
     {
         var scope = WithStrokeWidth(Icon(VariableWidthLine, 512), 8);
         using var scene = Show(scope, 512);
-        Assert.Equal(White, PixelAt(Frame(scene), 256, 280));
+        Assert.Equal(White, Frames.PixelAt(Frame(scene), 256, 280));
 
         scope.Resources[AvonicIcon.StrokeWidthKey] = 100d;
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 256, 280));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 256, 280));
     }
 
     // Measured: chevron-forward stayed at 48px with the variable at 8px.
@@ -942,7 +933,7 @@ public sealed class AvonicIconTests : IDisposable
         var src = Svg("""<path stroke="currentColor" stroke-width="100" d="M0 256H512"/>""");
         using var scene = Show(WithStrokeWidth(Icon(src, 512), 8), 512);
 
-        Assert.NotEqual(White, PixelAt(Frame(scene), 256, 300));
+        Assert.NotEqual(White, Frames.PixelAt(Frame(scene), 256, 300));
     }
 
     [AvaloniaFact]

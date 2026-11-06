@@ -67,5 +67,5 @@ All in [PLAN.md](PLAN.md#deliberate-differences). One is a real gap, which is th
 
 ## Real window
 
-Not run on the sample app in a real window for this control, so it's only been drawn and tested headlessly. The input it
+Tried on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware. The page draws as the frames do. It takes no input, so nothing else was driven. The input it
 adds to the item is one transparent background, and that's covered by `B12`.

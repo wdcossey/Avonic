@@ -126,19 +126,10 @@ public class AvonicButtonTests
     /// <summary>What <c>.button-native</c>'s <c>color</c> resolves to, which is what slotted content inherits.</summary>
     private static Color TextColour(AvonicButton button) => Solid(Native(button).GetValue(TextElement.ForegroundProperty));
 
-    private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
-        return buffer.Format == Avalonia.Platform.PixelFormat.Rgba8888
-            ? Color.FromArgb(pixel[3], pixel[0], pixel[1], pixel[2])
-            : Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
-    }
-
     private static Color Pixel(Scene scene, int x, int y)
     {
         Dispatcher.UIThread.RunJobs();
-        return PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
+        return Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
     }
 
     private static void AssertClose(Color expected, Color actual, int tolerance = 2)
@@ -1903,7 +1894,7 @@ public class AvonicButtonTests
             {
                 for (var x = (int)box.X; x < (int)box.Right; x++)
                 {
-                    if (PixelAt(frame, x, y).R < 128)
+                    if (Frames.PixelAt(frame, x, y).R < 128)
                     {
                         first ??= y;
                         last = y;

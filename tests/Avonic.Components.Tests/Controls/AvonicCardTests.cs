@@ -71,19 +71,10 @@ public class AvonicCardTests
         Dispatcher.UIThread.RunJobs();
     }
 
-    internal static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
-        return buffer.Format == PixelFormat.Rgba8888
-            ? Color.FromArgb(pixel[3], pixel[0], pixel[1], pixel[2])
-            : Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
-    }
-
     private static Color Pixel(Scene scene, int x, int y)
     {
         Dispatcher.UIThread.RunJobs();
-        return PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
+        return Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
     }
 
     private static Color Solid(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
