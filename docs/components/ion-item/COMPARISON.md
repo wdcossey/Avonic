@@ -113,6 +113,11 @@ The sample's `ion-item` page, in a real Windows window with real mouse and keybo
 This found one bug that the headless tests couldn't: the base theme's dashed focus rectangle. Touch hasn't been tried on
 real hardware.
 
+The flex layout, from #71, with `tools/real-window` on Windows at 125%, on 2026-11-06: all 51 checks passed, and the sample's item, note, label and list
+pages draw as the headless frames do. It found nothing new. Nothing it drives depends on the new rows, so it's their frames that say so:
+
+<img src="compare/real-window-layout.png" alt="The sample's ion-item page in a real window" width="300">
+
 ## Deliberate differences
 
 See [PLAN.md](PLAN.md#deliberate-differences).
