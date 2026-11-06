@@ -264,6 +264,21 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D5_Slotted_Content_Keeps_Its_Own_Height_And_Is_Centred() => InstalledTheme.Run(_ =>
+    {
+        // Measured d-slot2: align-items: center, so a span in a slot is its own height, not the row's.
+        var start = new TextBlock { Text = "x" };
+        var end = new TextBlock { Text = "x" };
+        var divider = new AvonicItemDivider { StartContent = start, EndContent = end };
+        using var scene = new Scene(new StackPanel { Children = { divider } });
+
+        Assert.True(start.Bounds.Height < 30);
+        Assert.True(end.Bounds.Height < 30);
+        Assert.InRange(Box(start, divider).Top - (30 - Box(start, divider).Bottom), -1, 1);
+        Assert.InRange(Box(end, divider).Top - (30 - Box(end, divider).Bottom), -1, 1);
+    });
+
+    [AvaloniaFact]
     public void D5_Slotted_Icons_Have_Their_Size_Margins_And_Colour() => InstalledTheme.Run(_ =>
     {
         var start = new AvonicIcon { IconName = "heart" };
@@ -836,6 +851,22 @@ public class AvonicItemDividerTests
 
         Assert.Equal(0, divider.TranslatePoint(default, scene.Window)!.Value.Y);
         Assert.Equal(0, Assert.IsType<TranslateTransform>(divider.RenderTransform).Y);
+    });
+
+    [AvaloniaFact]
+    public void D14_An_Inset_List_Outside_The_Scroller_Does_Not_Stop_It() => Scrolling(() =>
+    {
+        var divider = new AvonicItemDivider { Sticky = true };
+        var rows = new StackPanel { Children = { divider } };
+        foreach (var item in RowItems(12))
+        {
+            rows.Children.Add(item);
+        }
+
+        var scroller = new ScrollViewer { Height = 200, Content = rows };
+        using var scene = new Scene(new AvonicList { Inset = true, Items = { scroller } }, 390, 400);
+
+        Assert.Equal(0, ScrollTo(scroller, 100, divider));
     });
 
     [AvaloniaFact]

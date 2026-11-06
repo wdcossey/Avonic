@@ -91,7 +91,6 @@ public class AvonicList : ItemsControl
         }
 
         _inParent = null;
-        UpdateAfterInset();
     }
 
     /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. ion-list doesn't: only a popover's does.</summary>
