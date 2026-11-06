@@ -22,7 +22,7 @@ Each becomes a test.
 
 | # | Behaviour | Source |
 |---|---|---|
-| 1 | It stacks what's in it, with nothing of its own, and has no height when empty. It works from a template, on the stub | `display: block`; measured `fg`, `g-empty` |
+| 1 | It stacks what's in it, with nothing of its own, and has no height when empty, and it doesn't clip. It works from a template, on the stub | `display: block`; measured `fg`, `g-empty` |
 | 2 | It reads as a group | `role="group"` |
 | 3 | A label in it, even in a header in it, acts as in an item: no margin, it inherits, reads `Avonic.Label.Color`, uses the font token, and `ion-text-nowrap` gives an ellipsis. Its `Color` wins | class `item`; measured `gl`, `gl2`, `gnw`, `ghl` |
 | 4 | Each button item is its own tab stop, and arrow keys don't move focus | measured `t2` |

@@ -51,11 +51,11 @@ Each becomes a test.
 | 5 | Slots: 16 beside the text. Icons: 24, 54% text colour, or the contrast in a colour; start 32 after and end 16 before, 12 above and below; the default slot has the size but no margins; a panel stands for the slot for size and colour; deeper has none of it | `::slotted`; measured `d-slots`, `d-slot2`, `d-icon-def` |
 | 6 | A label has 13 above and 10 below, adding a named slot's 16. A panel stands for the slot. Deeper has none | `::slotted(ion-label)`; measured `d-label`, 40 high |
 | 7 | A label acts as it does in an item: it inherits, reads `Avonic.Label.Color`, its `Color` wins, it uses the font token, and `ion-text-nowrap` gives an ellipsis | The host's class `item` and `:host-context(.item)`; measured `dl`, `dlv`, `dlc`, `dnw` |
-| 8 | A `p` is `#666666`, 14, with 2 below, even in a colour. A panel stands for the slot. Deeper has none | `::slotted(p)`; measured `dp`, `dpc` |
+| 8 | A `p` is `#666666`, 14, with 2 below, even in a colour, keeping a named slot's 16. A panel stands for the slot. Deeper has none | `::slotted(p)`; measured `dp`, `dpc` |
 | 9 | Long text wraps and grows the row | measured `d-long`: 49 |
 | 10 | It clips what overflows it, and the default slot is clipped before the end slot | `overflow: hidden` on the host, inner and wrapper |
 | 11 | RTL mirrors the padding and slots: the start icon at 350, the end one at 16 | measured `d-rtl` |
-| 12 | `Sticky`: stays at the top of the nearest scroller. In a flat list, a later one reaches the top and covers it | `position: sticky; top: 0`; measured `s-flat` |
+| 12 | `Sticky`: stays at the top of the nearest scroller, inside its padding. In a flat list, a later one reaches the top and covers it | `position: sticky; top: 0`; measured `s-flat`, and 30 with a padding of 30 |
 | 13 | It stays in its parent: at the end of a group it's pushed out by the next, with its bottom margin kept. It's never above where it would be | measured `s-group`: −4 at 300, −104 at 400; margins of 8 and 6: −6 at 310 |
 | 14 | In an inset list it doesn't stick, because `overflow: hidden` makes the list its scrollport | measured `s-inset`: −26 at 50 |
 | 15 | Off by default, changes live, and leaves nothing behind | measured `s-non` |
@@ -74,7 +74,7 @@ Avalonia, so the control sets a `TranslateTransform` at style priority. The offs
 
 ```
 natural = where the divider's layout box is, relative to the scroller
-offset  = max(0, min(-natural, parent height - its top in the parent - its height - its bottom margin))
+offset  = max(0, min(scroller's top padding - natural, parent height - its top in the parent - its height - its bottom margin))
 ```
 
 `min` keeps it in its parent, as the sticky containing block does, and `max` stops it going above where it would be.
@@ -112,6 +112,8 @@ and layout rounding makes that 25. The tests found this.
 | **Known gap:** a label in `StartContent` or `EndContent` is as wide as its text, and long text doesn't wrap | The same `Auto` columns as `ion-item`, and `ion-label`'s plan records the same gap |
 | Two things in a slot don't share it by themselves | One child per slot, as for `ion-item`. A panel stands for the slot |
 | An app's own `RenderTransform` stops it sticking | It's the same property. An app that transforms a sticky divider has to wrap it |
+| The end of its parent includes the parent's padding, if that's a `Border` | CSS stops at the content box. `AvonicList` and `AvonicItemGroup` hold it in a `StackPanel`, which has no padding, so it only shows with a padded `Border` directly around a divider |
+| A `ScrollViewer` with a custom template that puts something above its presenter measures from the `ScrollViewer`'s top | Avalonia's base themes don't do this. Reading the presenter did nothing in any test, so it was taken out as a rule that does nothing |
 
 ## Not in this PR
 

@@ -59,6 +59,14 @@
         <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep400Brush}" />
     </Style>
 
+    <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > TextBlock.p">
+        <Setter Property="Margin" Value="0,0,16,2" />
+    </Style>
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_End > TextBlock.p">
+        <Setter Property="Margin" Value="16,0,0,2" />
+    </Style>
+
     <!-- A divider has the class "item", so label.md.css's :host-context(.item) applies. See Label.axaml. -->
     <Style Selector="c|AvonicItemDivider c|AvonicLabel">
         <Setter Property="Foreground">

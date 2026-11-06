@@ -484,6 +484,17 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D8_A_Paragraph_In_A_Named_Slot_Keeps_That_Slots_Margin() => InstalledTheme.Run(_ =>
+    {
+        var start = new TextBlock { Text = "x", Classes = { "p" } };
+        var end = new TextBlock { Text = "x", Classes = { "p" } };
+        using var scene = new Scene(new AvonicItemDivider { StartContent = start, EndContent = end });
+
+        Assert.Equal(new Thickness(0, 0, 16, 2), start.Margin);
+        Assert.Equal(new Thickness(16, 0, 0, 2), end.Margin);
+    });
+
+    [AvaloniaFact]
     public void D8_A_Panel_Stands_For_The_Slot_But_Deeper_Gets_Nothing_And_Other_Text_Nothing() => InstalledTheme.Run(_ =>
     {
         var inPanel = new TextBlock { Text = "x", Classes = { "p" } };
@@ -720,6 +731,23 @@ public class AvonicItemDividerTests
         var divider = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single();
 
         Assert.Equal(0, ScrollTo(scroller, 100, divider));
+    });
+
+    [AvaloniaFact]
+    public void D12_It_Sticks_Inside_The_Scrollers_Padding() => Scrolling(() =>
+    {
+        // Measured: a scroller with padding-top: 30 sticks at 30.
+        var divider = new AvonicItemDivider { Sticky = true };
+        var list = new AvonicList { Items = { divider } };
+        foreach (var item in RowItems(20))
+        {
+            list.Items.Add(item);
+        }
+
+        var scroller = new ScrollViewer { Padding = new Thickness(0, 30, 0, 0), Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+
+        Assert.Equal(30, ScrollTo(scroller, 300, divider));
     });
 
     [AvaloniaFact]

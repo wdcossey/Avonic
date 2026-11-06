@@ -145,20 +145,18 @@ public class AvonicItemDivider : TemplatedControl
             return;
         }
 
-        // An ItemsControl wraps templated content in a presenter as tall as the divider. In the DOM there's no such
-        // box, so what's beside the divider, and what it has to be drawn above, is the presenter's.
-        _inParent = this;
-        while (_inParent.GetVisualParent() is ContentPresenter { TemplatedParent: null } presenter)
-        {
-            _inParent = presenter;
-        }
-
+        // What's beside the divider, and what it has to be drawn above, is the presenter's if it has one.
+        _inParent = AvonicList.ContainerOf(this);
         FindScrollport();
 
         // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.
         _transformFrame = SetValue(RenderTransformProperty, _stickyOffset, BindingPriority.Style);
         _zIndexFrame = _inParent.SetValue(ZIndexProperty, StickyZIndex, BindingPriority.Style);
-        LayoutUpdated += OnLayoutUpdated;
+        if (_scrollViewer is not null)
+        {
+            LayoutUpdated += OnLayoutUpdated;
+        }
+
         UpdateStickyOffset();
     }
 
@@ -196,9 +194,10 @@ public class AvonicItemDivider : TemplatedControl
 
             if (parent.TranslatePoint(new Point(0, top), scrollViewer) is { } natural)
             {
-                // Measured: the border box reaches the top, whatever its margin, but the bottom margin stays in the parent.
+                // Measured: the border box reaches the top of the scroller's padding, whatever its own margin, but the
+                // bottom margin stays in the parent.
                 var toParentEnd = parent.Bounds.Height - top - Bounds.Height - Margin.Bottom;
-                offset = Math.Min(-natural.Y, toParentEnd);
+                offset = Math.Min(scrollViewer.Padding.Top - natural.Y, toParentEnd);
                 offset = Math.Max(offset, 0);
             }
         }

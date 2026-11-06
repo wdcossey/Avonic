@@ -56,11 +56,7 @@ public class AvonicList : ItemsControl
         else if (change.Property == InsetProperty)
         {
             PseudoClasses.Set(":inset", Inset);
-            var index = IndexInSiblings();
-            if (index >= 0 && index + 1 < _siblings!.Count)
-            {
-                ListIn(_siblings[index + 1])?.UpdateAfterInset();
-            }
+            UpdateNextList();
         }
     }
 
@@ -68,20 +64,20 @@ public class AvonicList : ItemsControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // An ItemsControl wraps templated content in a presenter. In the DOM there's no such box.
-        _inParent = this;
-        while (_inParent.GetVisualParent() is ContentPresenter { TemplatedParent: null } presenter)
-        {
-            _inParent = presenter;
-        }
+        _inParent = ContainerOf(this);
 
-        if (_inParent.GetVisualParent() is Panel panel)
+        // A virtualising panel's children are only what's realised, in no set order. Rows there keep their margin,
+        // rather than move as they're recycled.
+        if (_inParent.GetVisualParent() is Panel panel and not VirtualizingPanel)
         {
             _siblings = panel.Children;
             _siblings.CollectionChanged += OnSiblingsChanged;
         }
 
         UpdateAfterInset();
+
+        // A presenter's new list wasn't there to read when the presenter was added.
+        UpdateNextList();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -105,10 +101,34 @@ public class AvonicList : ItemsControl
 
     private void OnSiblingsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateAfterInset();
 
+    /// <summary>
+    /// What's beside a control in a panel. An <see cref="ItemsControl"/> wraps templated content in a presenter
+    /// as tall as the content, and there's no such box in the DOM. A presenter with a <c>TemplatedParent</c> is part of
+    /// a template, such as a <see cref="ScrollViewer"/>'s, so this stops there.
+    /// </summary>
+    internal static Control ContainerOf(Control control)
+    {
+        while (control.GetVisualParent() is ContentPresenter { TemplatedParent: null } presenter)
+        {
+            control = presenter;
+        }
+
+        return control;
+    }
+
     private int IndexInSiblings() => _inParent is null ? -1 : _siblings?.IndexOf(_inParent) ?? -1;
 
     private static AvonicList? ListIn(Control sibling) =>
         (sibling as ContentPresenter)?.Child as AvonicList ?? sibling as AvonicList;
+
+    private void UpdateNextList()
+    {
+        var index = IndexInSiblings();
+        if (index >= 0 && index + 1 < _siblings!.Count)
+        {
+            ListIn(_siblings[index + 1])?.UpdateAfterInset();
+        }
+    }
 
     /// <summary>
     /// <c>.list-inset + ion-list</c>: the list before this one is inset. Avalonia's selectors have no sibling

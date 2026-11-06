@@ -62,6 +62,16 @@ public class AvonicItemGroupTests
     }
 
     [AvaloniaFact]
+    public void G1_It_Does_Not_Clip()
+    {
+        // ion-item-group is only display: block, and a TemplatedControl clips by default.
+        var group = new AvonicItemGroup();
+        using var scene = new Scene(group);
+
+        Assert.False(group.ClipToBounds);
+    }
+
+    [AvaloniaFact]
     public void G1_It_Takes_Another_Panel()
     {
         var group = new AvonicItemGroup

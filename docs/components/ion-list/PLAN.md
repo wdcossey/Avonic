@@ -96,8 +96,8 @@ results that Ionic's own comment doesn't intend: see "For you to decide" in the 
 
 **`.list-inset + ion-list.list-inset` is a pseudoclass.** Avalonia has no sibling combinator, so the control works out
 `:after-inset` from its visual parent's `Children`, and the theme's `^:inset:after-inset` is the rest of the rule. Each list
-listens to that collection, and tells the next list when its own `Inset` changes. An `ItemTemplate` that makes inset lists has a
-presenter around each, so the control looks through those, as a sticky divider does.
+listens to that collection, and tells the next list when its own `Inset` changes or when it arrives. An `ItemTemplate` that
+makes inset lists has a presenter around each, so the control looks through those, as a sticky divider does.
 
 **`role="listitem"` is a style.** `AvonicItem` can't be edited here, and `AutomationProperties.ControlTypeOverride` is
 all it takes. It means the role depends on the theme: see the differences, and "Proposed for shared files" in the PR.
@@ -116,6 +116,7 @@ mechanical.
 | An explicit `Lines` beats a token | The same as `ion-item`'s plan |
 | Margins don't collapse | Avalonia has none. Measured: beside a block with a 30 margin, the gap is 30 in CSS, and 46 here. In a parent with no padding, the parent is 144 high with the 16 outside it in CSS, and 176 here with it inside, though what's in the parent lands in the same place. Between inset lists, the `+` rule means they never meet |
 | `Items`, not `Content` | `core.json` has no slot here, and a list has many children |
+| **Known gap:** inset lists that are themselves rows in a `VirtualizingStackPanel` all keep their top margin, so the gap between them is 32, not 16 | That panel's children are only what's realised, in no set order, so a row's margin would change as it's recycled, and the rows would move while scrolling. Stable and a little wide is the better wrong. `L14_Known_Gap_…` records it |
 
 ## Not in this PR
 

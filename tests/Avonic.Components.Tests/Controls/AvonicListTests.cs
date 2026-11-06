@@ -586,6 +586,48 @@ public class AvonicListTests
     });
 
     [AvaloniaFact]
+    public void L14_A_List_Added_Through_A_Template_Tells_The_Next_One() => Scrolling(() =>
+    {
+        var data = new System.Collections.ObjectModel.ObservableCollection<string> { "b" };
+        var sections = new ItemsControl
+        {
+            ItemsSource = data,
+            ItemTemplate = new FuncDataTemplate<string>((text, _) => new AvonicList { Inset = true, Tag = text }),
+        };
+        using var scene = new Scene(new StackPanel { Children = { sections } });
+        var b = sections.GetVisualDescendants().OfType<AvonicList>().Single();
+        Assert.Equal(16, b.Margin.Top);
+
+        data.Insert(0, "a");
+        Run();
+
+        Assert.Equal(0, b.Margin.Top);
+    });
+
+    [AvaloniaFact]
+    public void L14_Known_Gap_In_A_Virtualising_Panel_Rows_Keep_Their_Margin() => Scrolling(() =>
+    {
+        // Its children are what's realised, in no set order, so a row's margin would change as it's recycled.
+        var sections = new ItemsControl
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = Enumerable.Range(0, 200).ToList(),
+            ItemTemplate = new FuncDataTemplate<int>((_, _) => new AvonicList { Inset = true, Items = { Item() } }),
+        };
+        var scroller = new ScrollViewer { Content = sections };
+        using var scene = new Scene(scroller, 390, 400);
+
+        Assert.All(sections.GetVisualDescendants().OfType<AvonicList>(), list => Assert.Equal(16, list.Margin.Top));
+
+        scroller.Offset = new Vector(0, 2000);
+        Run();
+        scroller.Offset = new Vector(0, 1000);
+        Run();
+
+        Assert.All(sections.GetVisualDescendants().OfType<AvonicList>(), list => Assert.Equal(16, list.Margin.Top));
+    });
+
+    [AvaloniaFact]
     public void L14_A_Change_Reaches_The_Next_List_Only_Through_Its_Neighbour() => InstalledTheme.Run(_ =>
     {
         var first = new AvonicList { Inset = true };
