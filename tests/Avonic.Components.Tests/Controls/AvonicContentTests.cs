@@ -2460,10 +2460,10 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B29_The_Fixed_Slot_Shows_When_Measured_With_No_Height_Then_Arranged_Bigger()
     {
+        // Sized by what's in it, as a button is: a size of its own survives being measured at zero.
         var slot = new Border
         {
-            Width = 60,
-            Height = 60,
+            Child = new Border { Width = 60, Height = 60 },
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Bottom,
         };
