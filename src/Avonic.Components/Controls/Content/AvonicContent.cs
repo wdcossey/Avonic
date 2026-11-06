@@ -452,7 +452,6 @@ public class AvonicContent : TemplatedControl
 
         UpdateAxes();
         UpdateInsets();
-        UpdateOverscroll();
         UpdateFixedPlacement();
         UpdateContainerChild();
         UpdateFixedChild();

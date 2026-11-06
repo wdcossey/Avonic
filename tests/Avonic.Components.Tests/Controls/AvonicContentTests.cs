@@ -248,6 +248,16 @@ public class AvonicContentTests
     });
 
     [AvaloniaFact]
+    public void B4_Color_Really_Paints() => InstalledTheme.Run(_ =>
+    {
+        var content = new AvonicContent { Color = "primary" };
+        using var scene = new Scene(InBox(content));
+        Render();
+
+        Assert.Equal(Color.Parse("#0054E9"), PixelAt(scene.Window.CaptureRenderedFrame()!, 200, 200));
+    });
+
+    [AvaloniaFact]
     public void B5_An_Unknown_Color_Has_No_Background_And_The_Hosts_Text_Color() => InstalledTheme.Run(_ =>
     {
         // Measured bad: transparent, and the text colour the host inherits, not --color.
@@ -405,6 +415,19 @@ public class AvonicContentTests
     });
 
     [AvaloniaFact]
+    public void B7_Padding_Follows_A_Change()
+    {
+        var child = new Border { Height = 100 };
+        var content = new AvonicContent { Content = child };
+        using var scene = new Scene(InBox(content));
+
+        content.Padding = new Thickness(7);
+        Settle();
+
+        Assert.Equal(new Rect(7, 7, 376, 100), Box(child, scene.Window));
+    }
+
+    [AvaloniaFact]
     public void B7_The_Keyboard_Offset_Follows_A_Change()
     {
         var content = Tall();
@@ -437,6 +460,27 @@ public class AvonicContentTests
 
         Assert.True(Container(content).Child!.Bounds.Height > 30);
     }
+
+    private const string LongText = "A very long piece of text that certainly has to wrap around because it does not fit into a phone-sized viewport at all";
+
+    [AvaloniaFact]
+    public void B8_Text_In_The_Fixed_Slot_Wraps_To_The_Host()
+    {
+        var content = new AvonicContent { FixedContent = LongText };
+        using var scene = new Scene(InBox(content));
+
+        Assert.True(Fixed(content).Child!.Bounds.Height > 30);
+        Assert.True(Fixed(content).Child!.Bounds.Width <= 390);
+    }
+
+    [AvaloniaFact]
+    public void B8_Text_In_The_Fixed_Slot_Wraps_With_The_Theme_Too() => InstalledTheme.Run(_ =>
+    {
+        var content = new AvonicContent { FixedContent = LongText };
+        using var scene = new Scene(InBox(content));
+
+        Assert.True(Fixed(content).Child!.Bounds.Height > 30);
+    });
 
     [AvaloniaFact]
     public void B8_An_App_Can_Turn_Wrapping_Off()
@@ -1111,6 +1155,24 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B14_More_Than_120_Ms_Of_Idle_Is_Enough()
+    {
+        // A scroll at 60 is 140 ms old at the tick at 200.
+        using var clock = new TestClock();
+        var content = Tall();
+        content.ScrollEvents = true;
+        var log = new Recorder(content, clock);
+        using var scene = new Scene(InBox(content));
+
+        SetOffset(content, 100);
+        clock.At(60);
+        SetOffset(content, 110);
+        clock.At(1000);
+
+        Assert.Equal(200d, log.Events[^1].At);
+    }
+
+    [AvaloniaFact]
     public void B14_A_Scroll_After_The_End_Starts_Again()
     {
         using var clock = new TestClock();
@@ -1403,6 +1465,29 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B18_The_Old_Watchdog_Does_Not_End_A_New_Scroll_After_Coming_Back()
+    {
+        // The old one would tick at 300, and the new scroll's own at 250 and 350.
+        using var clock = new TestClock();
+        var content = Tall();
+        content.ScrollEvents = true;
+        var log = new Recorder(content, clock);
+        var box = (Panel)InBox(content);
+        using var scene = new Scene(box);
+
+        SetOffset(content, 100);
+        clock.At(40);
+        box.Children.Clear();
+        box.Children.Add(content);
+        Settle();
+        clock.At(150);
+        SetOffset(content, 200);
+        clock.At(1000);
+
+        Assert.Equal(("end", 350d), log.Events[^1]);
+    }
+
+    [AvaloniaFact]
     public void B18_An_Animation_That_Outlives_It_Raises_Nothing_More()
     {
         // A browser's disconnected element doesn't scroll, so no second cycle starts.
@@ -1651,6 +1736,40 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B22_An_Axis_Left_Out_Is_Not_Written_Either_Way()
+    {
+        using var clock = new TestClock();
+        var content = new AvonicContent { ScrollX = true, Content = new Border { Width = 800, Height = 1000 } };
+        using var scene = new Scene(InBox(content));
+
+        content.ScrollToPoint(50, null, 100);
+        clock.At(32);
+        SetOffset(content, 70, Scroll(content).Offset.X);
+        clock.At(48);
+        Assert.Equal(70, Scroll(content).Offset.Y);
+
+        clock.At(200);
+        Assert.Equal(new Vector(50, 70), Scroll(content).Offset);
+    }
+
+    [AvaloniaFact]
+    public void B22_A_Null_Axis_Stays_Where_It_Is_While_The_Other_Eases()
+    {
+        using var clock = new TestClock();
+        var content = new AvonicContent { ScrollX = true, Content = new Border { Width = 800, Height = 1000 } };
+        using var scene = new Scene(InBox(content));
+        SetOffset(content, 40, 20);
+
+        content.ScrollToPoint(null, 100, 100);
+        clock.At(200);
+        Assert.Equal(new Vector(20, 100), Scroll(content).Offset);
+
+        content.ScrollToPoint(50, null, 100);
+        clock.At(400);
+        Assert.Equal(new Vector(50, 100), Scroll(content).Offset);
+    }
+
+    [AvaloniaFact]
     public void B23_Two_At_Once_Both_Run_And_The_Last_Frame_Wins()
     {
         // Measured concurrent: 500 when the first ends, then 100 when the second does.
@@ -1792,6 +1911,31 @@ public class AvonicContentTests
         clock.At(200);
         Assert.Equal(700, Scroll(content).Offset.Y);
         Assert.True(task.IsCompletedSuccessfully);
+    }
+
+    [AvaloniaFact]
+    public void B25_ScrollToBottom_Eases_To_The_Extent_Less_The_Viewport()
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(InBox(content));
+
+        content.ScrollToBottom(100);
+        clock.At(64);
+
+        Assert.Equal(Math.Floor((Math.Pow(48d / 100 - 1, 3) + 1) * 700), Scroll(content).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B25_ScrollToBottom_Leaves_X()
+    {
+        var content = new AvonicContent { ScrollX = true, Content = new Border { Width = 800, Height = 1000 } };
+        using var scene = new Scene(InBox(content));
+        SetOffset(content, 0, 70);
+
+        content.ScrollToBottom();
+
+        Assert.Equal(new Vector(70, 700), Scroll(content).Offset);
     }
 
     [AvaloniaFact]
@@ -2452,6 +2596,17 @@ public class AvonicContentTests
         Assert.Equal("a", ((Border)Container(content).Child!).Tag);
         Assert.Equal("b", ((Border)Fixed(content).Child!).Tag);
     }
+
+    [AvaloniaFact]
+    public void B35_Slots_Take_Templates_With_The_Theme_Too() => InstalledTheme.Run(_ =>
+    {
+        var template = new FuncDataTemplate<string>((text, _) => new Border { Height = 7, Tag = text });
+        var content = new AvonicContent { Content = "a", ContentTemplate = template, FixedContent = "b", FixedContentTemplate = template };
+        using var scene = new Scene(InBox(content));
+
+        Assert.Equal("a", ((Border)Container(content).Child!).Tag);
+        Assert.Equal("b", ((Border)Fixed(content).Child!).Tag);
+    });
 
     [AvaloniaFact]
     public void B36_The_Safe_Area_Tokens_Are_Zero() => InstalledTheme.Run(theme =>
