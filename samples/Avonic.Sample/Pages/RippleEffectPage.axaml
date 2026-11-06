@@ -5,37 +5,37 @@
              x:Class="Avonic.Sample.Pages.RippleEffectPage">
 
     <!-- Mirrors Ionic's ripple-effect docs demo: a `.ion-activatable` surface with an
-         <ion-ripple-effect> inside. Colours are the Ionic md palette (primary #3880ff). -->
+         <ion-ripple-effect> inside. Colours are the palette's. -->
     <StackPanel Margin="16" Spacing="8">
 
         <TextBlock Text="Bounded (default)" FontWeight="SemiBold" />
-        <TextBlock Text="Expands from the press point, clipped to the surface." Foreground="#666" FontSize="13" Margin="0,0,0,8" />
+        <TextBlock Text="Expands from the press point, clipped to the surface." Foreground="#666" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,8" />
         <Border Height="96" Background="#E0E0E0" CornerRadius="4" ClipToBounds="True"
                 b:Activatable.IsEnabled="True">
             <Panel>
-                <c:AvonicRippleEffect Foreground="#3880FF" />
-                <TextBlock Text="Tap me" Foreground="#3880FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <c:AvonicRippleEffect Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                <TextBlock Text="Tap me" Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Panel>
         </Border>
 
         <TextBlock Text="Unbounded" FontWeight="SemiBold" Margin="0,24,0,0" />
-        <TextBlock Text="Expands from the centre and overflows the surface (e.g. icon buttons)." Foreground="#666" FontSize="13" Margin="0,0,0,8" />
+        <TextBlock Text="Expands from the centre and overflows the surface (e.g. icon buttons)." Foreground="#666" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,8" />
         <Border Width="56" Height="56" CornerRadius="28" Background="#E0E0E0" HorizontalAlignment="Left" Margin="24,8"
                 b:Activatable.IsEnabled="True">
             <Panel>
-                <c:AvonicRippleEffect Type="Unbounded" Foreground="#3880FF" />
-                <c:AvonicIcon IconName="heart" Foreground="#3880FF" FontSize="24"
+                <c:AvonicRippleEffect Type="Unbounded" Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                <c:AvonicIcon IconName="heart" Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" FontSize="24"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Panel>
         </Border>
 
         <TextBlock Text="Instant, custom colour" FontWeight="SemiBold" Margin="0,24,0,0" />
-        <TextBlock Text="Activatable.IsInstant skips the 100 ms press defer. Colour comes from Foreground (currentColor)." Foreground="#666" FontSize="13" Margin="0,0,0,8" />
-        <Border Height="64" Background="#EB445A" CornerRadius="4" ClipToBounds="True"
+        <TextBlock Text="Activatable.IsInstant skips the 100 ms press defer. Colour comes from Foreground (currentColor)." Foreground="#666" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,8" />
+        <Border Height="64" Background="{DynamicResource Avonic.Color.DangerBrush}" CornerRadius="4" ClipToBounds="True"
                 b:Activatable.IsEnabled="True" b:Activatable.IsInstant="True">
             <Panel>
-                <c:AvonicRippleEffect Foreground="White" />
-                <TextBlock Text="Danger" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <c:AvonicRippleEffect Foreground="{DynamicResource Avonic.Color.DangerContrastBrush}" />
+                <TextBlock Text="Danger" Foreground="{DynamicResource Avonic.Color.DangerContrastBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Panel>
         </Border>
 

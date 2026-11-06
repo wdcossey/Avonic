@@ -18,8 +18,8 @@ keeps no cache by type, and it visits nested rules whether or not the parent mat
 | Could match the element, such as `c\|Foo > TextBlock` or `:is(Control)` | about 55 ns |
 | A descendant selector on the element, at a depth of 20 | about 385 ns |
 
-Across the real theme it comes to **about 27 ns for each alternative between commas**, whichever kind it is. That's why
-alternatives are what's budgeted. These times are from this machine, and the small differences are close to the noise. The
+Across the real theme it comes to **about 30 ns for each alternative between commas**, whichever kind it is, and 27 to 33 across
+runs. That's why alternatives are what's budgeted. These times are from this machine, and the small differences are close to the noise. The
 counts are exact.
 
 ## The budget
@@ -38,6 +38,11 @@ the limit in that PR and say so in its description, with the new total. The limi
 it's a decision.
 
 A selector with `> :is(Panel) >` is two alternatives for each thing it targets, so it's worth a thought.
+
+**600 alternatives is a checkpoint,** about 18 µs per element, decided in [ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md). A test stops the limit going past it. About 67
+Ionic tags remain, and at today's 10 or so each the library ends near 820, or about 25 µs, so **we expect to reach it, after about 44 more.** When we do, stop, and
+run the benchmark on a real phone, to decide on real numbers. The way out is controls working out their host's state in code, with the theme reading a pseudoclass,
+which removes most of the cost but adds code to every control. Otherwise, raise the checkpoint.
 
 ## The trend
 

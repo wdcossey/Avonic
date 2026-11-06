@@ -107,8 +107,8 @@ public class AvonicCardCaptureTests
         var plainPoint = plain.TranslatePoint(new Point(300, plain.Bounds.Height / 2), scene.Window)!.Value;
         var focusedPoint = focused.TranslatePoint(new Point(300, focused.Bounds.Height / 2), scene.Window)!.Value;
         Assert.NotEqual(
-            AvonicCardTests.PixelAt(frame, (int)plainPoint.X * 2, (int)plainPoint.Y * 2),
-            AvonicCardTests.PixelAt(frame, (int)focusedPoint.X * 2, (int)focusedPoint.Y * 2));
+            Frames.PixelAt(frame, (int)plainPoint.X * 2, (int)plainPoint.Y * 2),
+            Frames.PixelAt(frame, (int)focusedPoint.X * 2, (int)focusedPoint.Y * 2));
     });
 
     // The same scene as ref-tap: a 338 by 47 button card, in a clip 8 larger all round, pressed in the middle.

@@ -104,17 +104,10 @@ public class AvonicItemTests
 
     private static void SettleTransitions() => Dispatcher.UIThread.RunJobs();
 
-    private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        var pixel = (byte*)buffer.Address + y * buffer.RowBytes + x * 4;
-        return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
-    }
-
     private static Color Pixel(Scene scene, int x, int y)
     {
         SettleTransitions();
-        return PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
+        return Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, x, y);
     }
 
     private static Color Solid(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
@@ -590,7 +583,7 @@ public class AvonicItemTests
             double weight = 0, sum = 0;
             for (var x = (int)box.X; x < (int)box.Right; x++)
             {
-                var ink = 255 - PixelAt(frame, x, (int)box.Center.Y).R;
+                var ink = 255 - Frames.PixelAt(frame, x, (int)box.Center.Y).R;
                 weight += ink;
                 sum += ink * (x - box.Center.X);
             }
@@ -709,9 +702,9 @@ public class AvonicItemTests
         var frame = scene.Window.CaptureRenderedFrame()!;
 
         // rgba(0, 0, 0, 0.13) on white is 222.
-        Assert.Equal(255, PixelAt(frame, 8, 47).R);
-        Assert.InRange((int)PixelAt(frame, 24, 47).R, 220, 224);
-        Assert.InRange((int)PixelAt(frame, 8, 96).R, 220, 224);
+        Assert.Equal(255, Frames.PixelAt(frame, 8, 47).R);
+        Assert.InRange((int)Frames.PixelAt(frame, 24, 47).R, 220, 224);
+        Assert.InRange((int)Frames.PixelAt(frame, 8, 96).R, 220, 224);
     });
 
     [AvaloniaFact]
@@ -1963,7 +1956,7 @@ public class AvonicItemTests
         // ion-icon's own colour still wins: 45, 213, 91 is the success base, against a 54% black icon.
         var frame = scene.Window.CaptureRenderedFrame()!;
         var box = Box(own, scene.Window);
-        var pixel = PixelAt(frame, (int)box.Center.X, (int)box.Center.Y);
+        var pixel = Frames.PixelAt(frame, (int)box.Center.X, (int)box.Center.Y);
         Assert.True(pixel.G > pixel.R);
     });
 

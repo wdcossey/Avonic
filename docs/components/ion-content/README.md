@@ -105,6 +105,38 @@ CSS does. Its own `HorizontalAlignment` and `VerticalAlignment` beat that, and a
 As with any token, a value in a control's `Resources` applies to that one control, which is what an inline `style="--padding-top: 10px"` does.
 `Padding` on the control beats the padding tokens, and does what `class="ion-padding"` does in Ionic.
 
+## Filling the safe area
+
+The `Avonic.SafeArea*` keys default to 0, because Avalonia pads the root view itself through `TopLevel.AutoSafeAreaPadding`, and adding the inset
+again would double it. So only an app that turns that off and draws edge to edge needs them, and it fills them in itself.
+
+**No control reads them yet.** `ion-content` doesn't, as Ionic's doesn't, and `AvonicItem` will in [#72](https://github.com/wdcossey/Avonic/issues/72). Until then this
+fills them for your own styles, and leaves your content under the system bars. Run it from your main view, as Avalonia reads the switch from the main view or the
+`TopLevel`, once it's attached, as there's no `TopLevel` before that:
+
+```csharp
+if (TopLevel.GetTopLevel(this) is { InsetsManager: { } insets })
+{
+    TopLevel.SetAutoSafeAreaPadding(this, false);
+    insets.DisplayEdgeToEdgePreference = true;
+
+    void Apply()
+    {
+        var padding = insets.SafeAreaPadding;
+        var resources = Application.Current!.Resources;
+        resources["Avonic.SafeAreaTop"] = padding.Top;
+        resources["Avonic.SafeAreaBottom"] = padding.Bottom;
+        resources["Avonic.SafeAreaLeft"] = padding.Left;
+        resources["Avonic.SafeAreaRight"] = padding.Right;
+    }
+
+    insets.SafeAreaChanged += (_, _) => Apply();
+    Apply();
+}
+```
+
+**This hasn't been tried on a device,** so treat it as a starting point until [#66](https://github.com/wdcossey/Avonic/issues/66) has.
+
 ## What's inherited from Avalonia
 
 The drag and momentum are Avalonia's `ScrollGestureRecognizer`, not a browser's, with its own feel. Its `ScrollViewer` also scrolls a focused child

@@ -73,5 +73,5 @@ item's to fix: a long label in `StartContent` or `EndContent` doesn't wrap, and 
 
 ## Real window
 
-Not run on the sample app in a real window for this control, so it's only been drawn and tested headlessly. The input it
+Tried on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware. The page draws as the frames do. Tab raises a floating label and colours a stacked one, as an item takes focus. The input it
 adds to the item is one transparent background, and that's covered by `B25`.

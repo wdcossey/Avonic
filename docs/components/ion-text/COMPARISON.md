@@ -56,5 +56,5 @@ All in [PLAN.md](PLAN.md#deliberate-differences).
 
 ## Real window
 
-Not run on the sample app in a real window for this control, so it's only been drawn and tested headlessly. The sample
+Tried on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware. The page draws as the frames do. It takes no input, so nothing else was driven. The sample
 page's XAML compiles, including text mixed with spans, and `DiscoveryTests` creates it, but no test compares that page.

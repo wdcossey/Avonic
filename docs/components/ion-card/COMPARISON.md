@@ -14,7 +14,7 @@
 >
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicCardCaptureTests` (headless Skia, 2×) → `avonic-card-page.png`,
 > `avonic-card-press-160ms.png` and `avonic-card-focus.png`, copied to [`compare/`](compare/) without the `card-`, as capture tests share the folder.
-> Not tried in a real window, so this says nothing about a real display or real touch.
+> **In a real window,** on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware: one click counts 1, a double click 2, a touch tap 1, and a touch drag on the card doesn't click, with its ripple gone. Tab shows focus, a letter key clears it, and a click doesn't show it.
 
 ## Frames
 

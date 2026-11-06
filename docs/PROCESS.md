@@ -85,12 +85,17 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 2. Visual: the Avonic rendering (headless screenshot from the test harness or the sample app)
    is placed next to the Ionic `ref/` images. Differences are listed and either fixed or
    recorded as deliberate.
-3. Any gap found here goes back to **Build**. The control does not proceed with open gaps.
+3. A gap found here goes back to **Build**. If it can't be closed, because Avalonia forces it or it's out of the control's reach, it can
+   stand, recorded in `COMPARISON.md` and the README's Known gaps with its measurement and why. `Status: done` means that's been
+   done, not that there are no gaps ([ADR 0002](decisions/0002-decisions-from-the-first-swarm.md)). One an app would notice gets an issue.
 
 ## 4. Review
 
 - `/code-review` on the change, high effort, **twice** — the second pass on the fixed diff.
-  Findings fixed or explicitly waived in the PR description.
+  Findings fixed or explicitly waived in the PR description. Docs and samples alone get one pass.
+- **Prove the tests can fail,** with [`tools/breakage`](../tools/breakage/run.js). A new test for a bug has to fail on that bug.
+- **A PR that changes a component or anything visual has a screenshot** in its description: Ionic's frame beside Avonic's, through
+  URLs pinned to the commit, saying whether it's headless or a real window.
 - **Before calling a batch ready to merge,** run [the real window](../tools/real-window/README.md) and look at its frames. It takes
   over the PC for about a minute, so ask first. It found a bug that 1,486 tests had missed.
 - If `StyleBudgetTests` goes over, the failure lists the largest rules. See whether the commas can go, or raise the limit

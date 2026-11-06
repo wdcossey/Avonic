@@ -5,7 +5,7 @@
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicButtonCaptureTests` (headless Skia, 2×) → [`compare/`](compare/).
 
 The snippet: every fill, colour, shape and size, expand, strong, disabled, slotted icons, icon-only, long text, four items and RTL,
-as `Reference_Page` lays them out. Not tried in a real window: this is headless capture only.
+as `Reference_Page` lays them out. These frames are headless capture. **In a real window,** on Windows at 125%, with `tools/real-window`, on 2026-11-06. Not on real touch hardware: one click counts 1, a double click 2, a shaky click 1, and pressing, dragging off and releasing 0. Enter and Space each count 1, and a touch tap through Windows' touch injection counts 1.
 
 ## Frames
 
