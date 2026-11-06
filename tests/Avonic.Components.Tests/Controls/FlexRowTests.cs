@@ -222,6 +222,18 @@ public class FlexRowTests
     }
 
     [AvaloniaFact]
+    public void A_Flex_Slot_Child_Is_Limited_To_The_Row_When_The_Row_Overflows_Too()
+    {
+        // The boxes alone are wider than the row, so it's shrinking from the start.
+        var word = Text("Antidisestablishmentarianism");
+        word.Margin = new Thickness(0, 0, 16, 0);
+        FlexRow.SetFlex(word, 1);
+        using var scene = InRow(20, out _, new FlexSlot { Content = word }, new Border { Padding = new Thickness(0, 0, 16, 0), [FlexRow.FlexProperty] = 1d });
+
+        Assert.Equal(20, word.Bounds.Width);
+    }
+
+    [AvaloniaFact]
     public void A_Part_With_Flex_Has_No_Minimum()
     {
         var part = new FlexSlot { Content = Text("Antidisestablishmentarianism"), [FlexRow.FlexProperty] = 1d };
@@ -366,12 +378,22 @@ public class FlexRowTests
     [AvaloniaFact]
     public void Text_In_A_Button_Adds_Its_Words_Up() => InstalledTheme.Run(_ =>
     {
-        // Two slots of text in a button, so that adding and taking the largest differ.
-        var button = new AvonicButton { StartContent = "certainly xx", Content = "Antidisestablishmentarianism xx" };
+        // Two slots of text in a button. Adding gives about the two words. Taking the largest leaves one line of the shorter slot as
+        // well, which is far more.
+        const string First = "aa bb cc dd ee ff gg hh ii jj kk ll mm nn";
+        const string Second = "Antidisestablishment xx";
+        var alone = new AvonicButton { StartContent = First, Content = Second };
+        using (new Scene(alone))
+        {
+            alone.Measure(Size.Infinity);
+        }
+
+        var oneLine = alone.DesiredSize.Width;
+        var button = new AvonicButton { StartContent = First, Content = Second };
         var other = Fixed(100);
         using var scene = InRow(100, out var row, button, other);
 
-        Assert.True(other.Bounds.X >= Word("certainly") + Word("Antidisestablishmentarianism") - 40);
+        Assert.InRange(other.Bounds.X, Word("Antidisestablishment"), oneLine * 0.6);
     });
 
     [AvaloniaFact]

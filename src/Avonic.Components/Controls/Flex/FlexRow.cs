@@ -149,8 +149,9 @@ public sealed class FlexRow : Panel
             height = Math.Max(height, item.Child.DesiredSize.Height);
         }
 
-        // No wider than its content, so that an item aligned to the left is as wide as what's in it. Arranged wider, it shares that out.
-        return new Size(Math.Min(availableSize.Width, width), height);
+        // No wider than its content, so that an item aligned to the left is as wide as what's in it. Arranged wider, it shares that
+        // out. Measure clamps this to what's available.
+        return new Size(width, height);
     }
 
     protected override Size ArrangeOverride(Size finalSize)

@@ -223,9 +223,11 @@ public class AvonicItemLayoutTests
     [AvaloniaFact]
     public void F7_A_Squeezed_Label_With_A_Margin_Still_Wraps() => InstalledTheme.Run(_ =>
     {
-        var item = new AvonicItem { Content = new AvonicLabel { Content = "Default", Margin = new Thickness(8, 10) }, EndContent = Label(Long) };
+        // What's in the end slot is short, so the height can only come from the label.
+        var item = new AvonicItem { Content = new AvonicLabel { Content = "Default", Margin = new Thickness(8, 10) }, EndContent = new Border { Width = 342, Height = 10 } };
         using var scene = InScene(item);
 
+        Assert.Equal(0, Part<FlexSlot>(item, "PART_Container").Bounds.Width);
         Assert.True(item.Bounds.Height > 3 * OneLineHeight());
     });
 
