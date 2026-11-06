@@ -98,7 +98,7 @@ already covers.
 | An `AvonicTextSpan` directly in a slot shows its type's name | A slot takes a control. Use `AvonicText`, or put the span in a `TextBlock` |
 | A block in `AvonicText` isn't full width by itself (measured `t-h1` 390) | See the design |
 | **Known gap:** a button item's automation name leaves out words in inlines, whether they're in a span or not, because `AvonicItem` reads `TextBlock.Text`, which is empty when a `TextBlock` has inlines. A native `<button>` names itself from all its text | The fix is in the item, so it's proposed in the PR. Until then, set `AutomationProperties.Name` on the item |
-| **Known gap:** a long `AvonicText` in `StartContent` or `EndContent` doesn't wrap, as with a [note](../ion-note/PLAN.md#deliberate-differences) | Same cause: those slots are `Auto` columns |
+| A long `AvonicText`'s box is as wide as its longest line, as with a [note](../ion-note/PLAN.md#deliberate-differences) | It's aligned left. The text is in the same place |
 
 ## Not in this PR
 

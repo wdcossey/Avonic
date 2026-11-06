@@ -51,12 +51,6 @@ A slot holds one control, so a panel directly in a slot stands for the slot: a n
 the panel stays centred. A vertical `StackPanel` there is centred as a group. Wrap a note in a `Border` to get what
 `<div slot="end"><ion-note>` does in Ionic: 14 px and centred.
 
-## Known gaps
-
-A long note in `StartContent` or `EndContent` doesn't wrap, and the item cuts it off, where Ionic wraps it. Those slots are
-`Auto` columns in the item's template. A long note in the default slot wraps as Ionic's does. See the
-[plan](PLAN.md#deliberate-differences).
-
 ## Extensions
 
 None.

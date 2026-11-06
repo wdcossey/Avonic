@@ -15,6 +15,13 @@
         <Setter Property="Margin" Value="16,0,0,0" />
     </Style>
 
+    <!-- align-items: center on what a panel holds, as the panel stands for the slot and fills it. FlexSlot does this for a
+         slot's own child. It's start or stretch in a stacked, floating or textarea item, where other rules apply. A note
+         has align-self: flex-start, and this has a pseudoclass, so it would beat that. -->
+    <Style Selector="c|AvonicItem:not(:item-label-stacked):not(:item-label-floating):not(:item-textarea) /template/ ContentPresenter > :is(Panel) > :is(Control):not(c|AvonicNote)">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.5em } -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon">
         <Setter Property="Foreground" Value="{DynamicResource Avonic.ItemIconBrush}" />

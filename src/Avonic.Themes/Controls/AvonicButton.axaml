@@ -47,9 +47,8 @@
         </Setter>
         <Setter Property="Margin" Value="2,4" />
         <Setter Property="MinHeight" Value="36" />
-        <!-- display: inline-block; vertical-align: -webkit-baseline-middle -->
+        <!-- display: inline-block. vertical-align: -webkit-baseline-middle is the default in AvonicButton, so that an item's align-items reaches it. -->
         <Setter Property="HorizontalAlignment" Value="Left" />
-        <Setter Property="VerticalAlignment" Value="Center" />
         <!-- cursor: pointer -->
         <Setter Property="Cursor" Value="Hand" />
         <!-- outline: none. The overlay is the focus state, not an adorner. -->

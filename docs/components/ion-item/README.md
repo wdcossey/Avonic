@@ -50,6 +50,18 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 Each slot holds one child. To put several in a slot, wrap them in a panel. Ionic's rules for slotted content apply
 to direct children only, so they don't reach inside the panel, as `::slotted` doesn't.
 
+### Layout
+
+The parts are flex rows, as Ionic's are, and long content in any slot wraps.
+
+- **A label in the start or default slot is `flex: 1`.** So a start label takes half the row, however short it is, and its row is shared with the default slot.
+- **Anything else in a slot is as wide as its content,** down to its longest word. A long one takes all it can, and squeezes the default slot, to nothing if it has to.
+- **What's in a slot is centred,** at the top beside a stacked or floating label, and stretched in a textarea item. A control that sets its own `VerticalAlignment` gets that, as `align-self` does. A note does.
+- **A panel fills its slot,** and what's in it is centred, except a vertical stack, which is a group that's centred as one. So a child with no height of its own collapses, as it does in CSS, and a `Grid` holding a background behind text needs `VerticalAlignment="Stretch"` on the background, or a `Border` around the `Grid`, which isn't a panel.
+- **For a long note and an icon in one slot, use a `Grid` with `*,Auto`.** A horizontal `StackPanel` gives its children all the width they ask for, so they don't wrap.
+
+A squeezed label wraps at every character, which makes its row tall, as Ionic's does.
+
 ### Pseudoclasses
 
 | Ionic | Avonic |
@@ -171,6 +183,9 @@ control's own `src/Avonic.Themes/Styles/<Name>.axaml`:
     <Setter Property="Margin" Value="0,8,16,8" />
 </Style>
 ```
+
+`FlexRow` and `FlexSlot` in `Controls/Flex/` are `display: flex` and `<slot>`, for a host with parts like these. `FlexRow.Flex` is `flex`, as one
+number, so a slotted control's file can say `<Setter Property="c:FlexRow.Flex" Value="1" />`.
 
 `Css.Var`, `Css.Em`, `Css.Box` and `CssUnset` in `Behaviors/Css.cs` translate the CSS values Avalonia has no equivalent
 for. `src/Avonic.Themes/Controls/AvonicItem.axaml` uses all of them.

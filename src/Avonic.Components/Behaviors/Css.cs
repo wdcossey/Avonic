@@ -35,7 +35,7 @@ public static class Css
         AvaloniaProperty.RegisterAttached<StyledElement, double>("Scale", typeof(Css), 1);
 
     /// <summary>
-    /// <c>translateY(50%) scale(0.75)</c>: the values are the element's <c>Bounds</c>, which is what the
+    /// <c>translateY(50%) scale(0.75)</c>: the values are the element's height, which is what the
     /// percentage is of, then <see cref="TranslateYProperty"/> and <see cref="ScaleProperty"/>. Ease those
     /// two, not the result: in CSS a change of size moves the element at once, and only a change of the
     /// percentage eases.
@@ -50,14 +50,14 @@ public static class Css
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (values is not [Rect bounds, double fraction, double scale])
+            if (values is not [double height, double fraction, double scale])
             {
                 return AvaloniaProperty.UnsetValue;
             }
 
             var builder = TransformOperations.CreateBuilder(2);
             builder.AppendScale(scale, scale);
-            builder.AppendTranslate(0, bounds.Height * fraction);
+            builder.AppendTranslate(0, height * fraction);
             return builder.Build();
         }
     }

@@ -69,7 +69,6 @@ Each has a test in `AvonicItemDividerTests`. See the [plan](PLAN.md#behaviours) 
 ## Differences from Ionic
 
 - **Known gap:** in a flat list with a `VirtualizingStackPanel`, a stuck divider's row gets recycled, so it goes. Use a group per section.
-- **Known gap:** a label in `StartContent` or `EndContent` is as wide as its text, and long text doesn't wrap. `ion-item` has the same gap.
 - **An app's own `RenderTransform` stops it sticking.** Wrap it to do both.
 - **`h1`–`h6` have no styles here.** Ionic's come from its global typography: see the [plan](PLAN.md#not-in-this-pr) for the numbers.
 - **A label's `Position` does nothing here.**

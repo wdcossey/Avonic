@@ -200,10 +200,115 @@ Tests use stub controls for both. The first real users are #7, #20–#25 and #45
 
 `Command` isn't included. #10 is where it's decided for buttons, and this control should follow it.
 
+## The flex layout (#71)
+
+The start and end slots were `Auto` columns, so long content was cut off, and a short start label was as wide as its text.
+`item.md.css` has two nested flex rows, and this recreates them.
+
+```
+.item-native  (flex row, overflow: hidden, align-items: center)
+├── slot[start]        display: contents, so its children are the row's items
+└── .item-inner        flex: 1, overflow: hidden, align-self: stretch, padding-end 16
+    ├── .input-wrapper flex: 1, overflow: hidden, align-self: stretch
+    ├── slot[end]
+    └── ion-icon
+```
+
+Everything else is `flex: 0 1 auto`, except `::slotted(ion-label:not([slot=end])) { flex: 1; width: min-content; max-width: 100% }`.
+A `flex: 1` box can't go below its own padding, so `.item-inner` is never under 16.
+
+### What Ionic does
+
+Chromium, md, 390 wide. `W` is the width of the box. The page is [`ref/layout/cases.html`](ref/layout/cases.html), and every box in it is in
+[`cases.txt`](ref/layout/cases.txt), from `node tools/ionic-ref/boxes.js docs/components/ion-item/ref/layout/cases.html`.
+
+| # | Content | Measured |
+|---|---|---|
+| F1 | Label in start, label in default | Start 171 at x=16, inner x=203 W=187, default 171. `(374 - 16 - 16) / 2` |
+| F2 | The same, with a long start label | Start 171 wraps, row 92 high |
+| F3 | Label in start only | Still 171, with an empty inner |
+| F4 | `position="fixed"` in start | 100: `flex: 0 0 100px` wins over `flex: 1` |
+| F5 | `position="stacked"` in start | 179 before its scale of 0.75, with no margin to take off, and inner x=195 |
+| F6 | Long label in end | 342 at x=32, wraps. Default is squeezed to 0 |
+| F7 | A label squeezed to 0 | One character a line, 7 lines for "Default", so the row is 147 high. `max-width: 100%` is what takes its `min-content` away |
+| F8 | Plain text, or a note, squeezed to 0 | It keeps its `min-content`, so one word a line: 55 high for plain text, 53 with a note |
+| F9 | Long start and end labels | Start 171, end 155 |
+| F10 | A word wider than half the row, in a start label | Start 231 (`min-content`), inner takes what's left |
+| F11 | A word wider than the row, in a start label | Start 374 (`max-width: 100%`), breaks in the word, inner is pushed out |
+| F12 | A word wider than the row, in an end label | 662, overflowing, clipped by the host |
+| F13 | `.ion-text-nowrap` in end | 342, as `overflow: hidden` takes its `min-content` away |
+| F14 | Long note in start or end | 342. A label beside it is squeezed to 0 |
+| F15 | Long notes in both | Start 342, end its `min-content` of 42, clipped. Row 185 high |
+| F16 | Icon beside something long, in one row | The icon shrinks with the rest: 15.5 and 14.7 of 24, height unchanged. `contain: strict` means it has no minimum |
+| F17 | Detail icon beside a long end label | Label 330 and icon 10 of 20, for the same reason |
+| F18 | Plain `span`, `ion-text`, or a `div` in end | 342, wraps |
+| F19 | A note beside a tall label | Note at the top, icon centred |
+| F20 | RTL | The same, mirrored |
+| F21 | Divider: label in start | 30, as `::slotted` gives it no `flex` there. A long one is 342 |
+| F22 | Divider: long end content | 342. A default label beside it keeps its 44 |
+
+### Design
+
+| Piece | What it is |
+|---|---|
+| `FlexRow` | A `Panel` running the flexbox algorithm for one row: base sizes, then growing or shrinking with `min-content` as the floor, freezing what hits it. `FlexRow.Flex` is CSS's one-number `flex`: 0 is `flex: initial`, and `n` is `flex: n`. On a slot it's read from the slot's child, as a `<slot>` has no box |
+| `FlexSlot` | A `ContentPresenter` that stands for a `<slot>`, and is still styled as `ContentPresenter`. It always fills the row. `VerticalContentAlignment` is `align-items`. A child that sets its own `VerticalAlignment` has `align-self`. A panel fills the slot, as it stands for it, except a vertical stack, which is a group of its own |
+
+`min-content` can't come from `Measure`, which clamps `DesiredSize` to what's available, so `FlexRow` works it out from the
+one-line sizes it has just measured: a `TextBlock` is its longest word, from a `TextLayout` in `WrapWithOverflow`, something with a
+`Width` is that, a panel adds up or takes the largest, and everything else can't shrink.
+
+**What it costs.** A part with `flex: 1` is measured once, and so is content that fits. A start label is measured on one line and again at its share,
+and looks for its longest word only if its share is less than one line. A row that overflows does too. 300 items, the median of 7, in Release, headless, on this PC. It's three runs each, on the final code, as these move about:
+
+| Rows | Open the page, `v2` (ms) | Open the page, now (ms) | Change of width, `v2` (ms) | Change of width, now (ms) |
+|---|---|---|---|---|
+| A label | 320, 308, 338 | 308, 335, 291 | 76, 70, 78 | 60, 67, 71 |
+| A label and a short note | 424, 342, 362 | 298, 383, 356 | 72, 68, 75 | 58, 52, 63 |
+| Icons and detail | 388, 358, 381 | 396, 386, 355 | 89, 70, 85 | 71, 82, 62 |
+| A start label | 349, 365, 394 | 373, 397, 369 | 63, 65, 68 | 87, 99, 92 |
+| A note that wraps | 386, 402, 438 | 397, 443, 432 | 6, 18, 18 | 113, 114, 113 |
+
+Opening is the same within what it moves by, and so is a change of width, except for two rows. A start label costs about 40% more, as it's measured
+on one line and again at its share. The last row wasn't doing the same thing before, as it didn't wrap: it's about 0.4 ms a row, on a rotation
+rather than a frame. Allocation isn't measured separately. `Resolve` doesn't allocate, and an `Item` is made per child per measure.
+
+### Style budget
+
+| | Alternatives |
+|---|---|
+| `Label.axaml`: stretching the slots, and everything else to the top | -4 |
+| `Note.axaml`: `:has-note`, and the rest of a panel | -2 |
+| `Item.axaml`: the rest of a panel, centred, whatever's in it | +1 |
+| `ItemDivider.axaml`: the same, as a panel fills its slot there too | +1 |
+| `Label.axaml`: `flex: 1` in the default slot. The start slot's rule exists already | +1 |
+| **From 174 to** | **171** |
+
+### Tidying `Styles/Label.axaml`
+
+`h1` and `h2` line heights follow their own size through `Css.Em`, `Css.TranslateScale` binds `Bounds.Height` rather than all of `Bounds`,
+so that moving doesn't run it, and `:position-floating`'s `Css.Scale` of 1 goes, as that's the default.
+
+### Tests
+
+One per row above, in `AvonicItemLayoutTests`, and `FlexRowTests` for the algorithm with sizes that don't depend on a font. The `B8` note
+tests stay, as they say what `:has-note` was for. Two set `Top` on the note's neighbour and expected it to be ignored once the note left,
+which was the bookkeeping. A local `Top` is now `align-self`, as it is on the web, so those two lost that.
+
 ## Deliberate differences
 
 | Difference | Why |
 |---|---|
+| A long note or `AvonicText` is as wide as its longest line, where Ionic's box is 342 | They're aligned left, so a tap beside a short one reaches the item. The text is in the same place, and a tap in the gap reaches the item |
+| A horizontal `StackPanel` in a slot doesn't wrap what's in it | It gives its children infinite width, whatever it's given. Use a `Grid` with `*,Auto` for a long note and an icon in one slot. Ionic's two `slot="end"` elements have no equivalent, as a slot holds one child |
+| A word wider than its box, outside a label, breaks in the word if the box is 64 or wider. In CSS it overflows and is clipped | `TextWrapping.Wrap` breaks it, and looking for `min-content` on every default slot would measure every item twice. Below 64 it does look, as a slot 6 wide would be a row 400 high |
+| A child with no height of its own, directly in a panel in a slot, collapses. So a `Grid` holding a background behind text loses the background | The panel stands for the slot, so its children are centred, as `align-items: center` does in CSS. A panel can't say it's one unit rather than several. `VerticalAlignment="Stretch"` on the child, or a `Border` around the `Grid`, gets it back |
+| Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
+| `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row |
+| A word's width is measured in the `TextBlock`'s own font, so a larger run in its inlines can break at its last letter when it's squeezed down to its longest word | Reading each run would be a layout of its own, for a case this rare |
+| A panel in a slot isn't `flex: 1`, even with a label in it | A panel is one item. Ionic's measured `div` is the same (342 wide). Two `slot="start"` elements, where the label would still be `flex: 1`, have no equivalent, as a slot holds one child |
+| In a parent that gives no width, such as a horizontal `StackPanel`, an item is one line wide | Measured in an `inline-block`, Ionic's `width: min-content` makes it 168 wide and squeezes it, which isn't something to copy |
+| A start label in an `.item-input` is as wide as its text, up to 200. Ionic's is 59 | `width: min-content` with `flex: initial`. Nothing sets `item-input` on `ion-input` any more, measured: a real one leaves the label at 171 |
 | `href`, `download`, `rel`, `target`, router props and `type` aren't declared | Each would be a dead prop |
 | One child per slot | Mapping rule. Wrap several in a panel, as with any Avalonia content. They then don't get `::slotted` rules |
 | An explicit `Lines` beats a token | In CSS, a user's `--inner-border-width` beats `:host(.item-lines-none)`. A token here is a default across the app, so explicit `Lines="None"` should win |

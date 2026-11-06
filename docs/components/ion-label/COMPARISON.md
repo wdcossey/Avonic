@@ -68,8 +68,8 @@ Ionic results were measured in Chromium with `ion-app`. For rules no Ionic 8 com
 
 ## Deliberate differences and known gaps
 
-All in [PLAN.md](PLAN.md#deliberate-differences), measured where they have a number. One is a real gap, which is the
-item's to fix: a long label in `StartContent` or `EndContent` doesn't wrap, and the item cuts it off.
+All in [PLAN.md](PLAN.md#deliberate-differences), measured where they have a number. A long label in `StartContent` or
+`EndContent` was a gap until #71: see [the item's comparison](../ion-item/COMPARISON.md#the-flex-layout).
 
 ## Real window
 

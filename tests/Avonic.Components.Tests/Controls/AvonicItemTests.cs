@@ -1861,7 +1861,7 @@ public class AvonicItemTests
         item.Resources["Avonic.Item.MinHeight"] = 80d;
         using var scene = new Scene(new StackPanel { Children = { item } });
 
-        Assert.Equal(new Thickness(1, 2, 3, 4), Part<Grid>(item, "PART_Layout").Margin);
+        Assert.Equal(new Thickness(1, 2, 3, 4), Part<FlexRow>(item, "PART_Layout").Margin);
         Assert.Equal(new Thickness(5, 6, 7, 8), Inner(item).Padding);
         Assert.Equal(80, Inner(item).MinHeight);
         Assert.Equal(80, Native(item).MinHeight);

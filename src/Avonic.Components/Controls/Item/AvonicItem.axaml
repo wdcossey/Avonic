@@ -10,31 +10,33 @@
                 <Border Name="PART_Native">
                     <Panel Background="Transparent">
                         <Border Name="PART_Overlay" IsHitTestVisible="False" />
-                        <Grid Name="PART_Layout" ColumnDefinitions="Auto,*">
-                            <ContentPresenter Name="PART_Start"
-                                              VerticalAlignment="Center"
-                                              Content="{TemplateBinding StartContent}"
-                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                            <Border Name="PART_Inner" Grid.Column="1">
-                                <Grid ColumnDefinitions="*,Auto,Auto">
-                                    <ContentPresenter Name="PART_Container"
-                                                      VerticalContentAlignment="Center"
-                                                      TextWrapping="Wrap"
-                                                      Content="{TemplateBinding Content}"
-                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                    <ContentPresenter Name="PART_End"
-                                                      Grid.Column="1"
-                                                      VerticalAlignment="Center"
-                                                      Content="{TemplateBinding EndContent}"
-                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        <c:FlexRow Name="PART_Layout">
+                            <c:FlexSlot Name="PART_Start"
+                                        VerticalContentAlignment="Center"
+                                        TextWrapping="Wrap"
+                                        Content="{TemplateBinding StartContent}"
+                                        ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <Border Name="PART_Inner" c:FlexRow.Flex="1">
+                                <c:FlexRow>
+                                    <c:FlexSlot Name="PART_Container"
+                                                c:FlexRow.Flex="1"
+                                                VerticalContentAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                ClipToBounds="True"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                    <c:FlexSlot Name="PART_End"
+                                                VerticalContentAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                Content="{TemplateBinding EndContent}"
+                                                ContentTemplate="{TemplateBinding EndContentTemplate}" />
                                     <c:AvonicIcon Name="PART_DetailIcon"
-                                                  Grid.Column="2"
                                                   VerticalAlignment="Center"
                                                   AutomationProperties.AccessibilityView="Raw"
                                                   Icon="{TemplateBinding DetailIcon}" />
-                                </Grid>
+                                </c:FlexRow>
                             </Border>
-                        </Grid>
+                        </c:FlexRow>
                         <c:AvonicRippleEffect Name="PART_Ripple" />
                     </Panel>
                 </Border>
