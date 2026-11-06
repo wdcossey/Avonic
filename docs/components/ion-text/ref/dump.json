@@ -1,0 +1,615 @@
+{
+  "tag": "ion-text",
+  "snippet": "<div>Some words and <ion-text color=\"primary\">some coloured ones which wrap around with the words either side of them</ion-text> and then some more words after.</div><div>Nested: <ion-text color=\"danger\">red, <ion-text color=\"success\">green</ion-text>, <ion-text>still red</ion-text></ion-text>.</div><ion-text color=\"secondary\"><div>A block</div><div>Another block</div></ion-text><div><ion-text color=\"danger\"><ion-icon name=\"heart\"></ion-icon></ion-text></div><ion-item><ion-text color=\"danger\">In an item</ion-text></ion-item><ion-item color=\"primary\"><ion-text>Follows a primary item</ion-text></ion-item><ion-item color=\"primary\"><ion-text color=\"light\">Light in a primary item</ion-text></ion-item><ion-item><ion-label>In the end slot</ion-label><ion-text slot=\"end\" color=\"danger\">End</ion-text></ion-item><ion-item><ion-label><h2>Heading with <ion-text color=\"danger\">red</ion-text></h2><p>Paragraph with <ion-text color=\"primary\">blue</ion-text> in it</p></ion-label></ion-item>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "color": "primary",
+        "class": "ion-color ion-color-primary md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-primary",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 353.08,
+        "h": 35
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 84, 233)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 84, 233)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 84, 233) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 59.59,
+        "y": 54,
+        "w": 132.52,
+        "h": 17
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-text.ion-color.ion-color-success.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n  <ion-text.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "success",
+        "class": "ion-color ion-color-success md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-success",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 91.61,
+        "y": 54,
+        "w": 40.92,
+        "h": 17
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(45, 213, 91)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(45, 213, 91)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(45, 213, 91) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 141.42,
+        "y": 54,
+        "w": 50.69,
+        "h": 17
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "secondary",
+        "class": "ion-color ion-color-secondary md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-secondary",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 72,
+        "w": 390,
+        "h": 36
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(1, 99, 170)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(1, 99, 170)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(1, 99, 170) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <div>\n  <div>\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 110,
+        "w": 16,
+        "h": 17
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 142.5,
+        "w": 70.27,
+        "h": 18
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "70.2656px",
+        "height": "18px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 190.5,
+        "w": 160.03,
+        "h": 18
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "160.031px",
+        "height": "18px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(255, 255, 255)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(255, 255, 255) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "light",
+        "class": "ion-color ion-color-light md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-light",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 238.5,
+        "w": 157.39,
+        "h": 18
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "157.391px",
+        "height": "18px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(244, 245, 248)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(244, 245, 248)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(244, 245, 248) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "slot": "end",
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 345.53,
+        "y": 286.5,
+        "w": 28.47,
+        "h": 18
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "28.4688px",
+        "height": "18px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px 0px 0px 16px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 112.95,
+        "y": 333,
+        "w": 23.13,
+        "h": 17
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "19.2px",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "color": "primary",
+        "class": "ion-color ion-color-primary md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-primary",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 114.06,
+        "y": 355.19,
+        "w": 26.47,
+        "h": 16
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 84, 233)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 84, 233)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "20px",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 84, 233) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    }
+  ]
+}

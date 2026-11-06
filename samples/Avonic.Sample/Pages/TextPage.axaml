@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.TextPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <TextBlock TextWrapping="Wrap">Some words and <c:AvonicTextSpan Color="primary">some coloured ones which wrap around with the words either side of them</c:AvonicTextSpan> and then some more words after.</TextBlock>
+            <TextBlock TextWrapping="Wrap">Nested: <c:AvonicTextSpan Color="danger">red, <c:AvonicTextSpan Color="success">green</c:AvonicTextSpan>, <c:AvonicTextSpan>still red</c:AvonicTextSpan></c:AvonicTextSpan>.</TextBlock>
+
+            <c:AvonicText Color="secondary">
+                <StackPanel>
+                    <TextBlock Text="A block" />
+                    <TextBlock Text="Another block" />
+                </StackPanel>
+            </c:AvonicText>
+            <c:AvonicText Color="danger">
+                <c:AvonicIcon IconName="heart" />
+            </c:AvonicText>
+
+            <c:AvonicItem>
+                <c:AvonicText Color="danger" Content="In an item" />
+            </c:AvonicItem>
+            <c:AvonicItem Color="primary">
+                <c:AvonicText Content="Follows a primary item" />
+            </c:AvonicItem>
+            <c:AvonicItem Color="primary">
+                <c:AvonicText Color="light" Content="Light in a primary item" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Content="In the end slot" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicText Color="danger" Content="End" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Classes="h2">Heading with <c:AvonicTextSpan Color="danger">red</c:AvonicTextSpan></TextBlock>
+                        <TextBlock Classes="p">Paragraph with <c:AvonicTextSpan Color="primary">blue</c:AvonicTextSpan> in it</TextBlock>
+                    </StackPanel>
+                </c:AvonicLabel>
+            </c:AvonicItem>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

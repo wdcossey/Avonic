@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.NotePage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicNote Content="A note on its own" />
+            <c:AvonicNote Color="danger" Content="A danger note" />
+
+            <c:AvonicItem>
+                <c:AvonicLabel Content="In the end slot" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="Yesterday" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicItem.StartContent>
+                    <c:AvonicNote Content="Start" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicLabel Content="In the start slot" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicNote Content="In the default slot" />
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="A tall row" />
+                        <TextBlock Classes="p" Text="The note stays at the top" />
+                        <TextBlock Classes="p" Text="and the icon stays centred" />
+                    </StackPanel>
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <c:AvonicNote Content="Monday" />
+                        <c:AvonicIcon IconName="star" />
+                    </StackPanel>
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem Color="primary">
+                <c:AvonicLabel Content="A primary item" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="Stays grey" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem Color="primary">
+                <c:AvonicLabel Content="A primary item" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Color="light" Content="Light" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel Position="Stacked" Content="Stacked" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicNote Content="Beside it" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicNote Content="A long note in the default slot wraps and stays at the top of the row, however long it happens to be" />
+            </c:AvonicItem>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
