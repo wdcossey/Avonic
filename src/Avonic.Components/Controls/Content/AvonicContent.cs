@@ -6,9 +6,12 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Metadata;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -108,11 +111,14 @@ public class AvonicContent : TemplatedControl
     private ScrollViewer? _scroll;
     private ContentPresenter? _container;
     private ContentPresenter? _fixed;
+    private ScrollGestureRecognizer? _recognizer;
+    private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
 
     // componentOnReady, for a scroll requested before the first layout.
     private bool _hasLoaded;
+    private bool _wasDetached;
     private TaskCompletionSource? _loaded;
 
     private double _offsetTop;
@@ -241,8 +247,10 @@ public class AvonicContent : TemplatedControl
     }
 
     /// <summary>
-    /// Ionic <c>getScrollElement</c>. It's synchronous, because the template can be applied on demand, where Ionic has
-    /// to wait for the component to load. Null only if a replaced template has no <c>PART_Scroll</c>.
+    /// Ionic <c>getScrollElement</c>. It's synchronous, because once it's in a tree the template can be applied on
+    /// demand, where Ionic has to wait for the component to load. Null before then, because the template comes from a
+    /// theme that it finds through the tree, so not in a constructor, or if a replaced template has no
+    /// <c>PART_Scroll</c>.
     /// </summary>
     public ScrollViewer? GetScrollElement()
     {
@@ -353,10 +361,13 @@ public class AvonicContent : TemplatedControl
         return done.Task;
     }
 
-    /// <summary>Waits for the first layout, so that a scroll requested before it isn't lost to an empty extent.</summary>
+    /// <summary>
+    /// Waits for the first layout, so that a scroll requested before it isn't lost to an empty extent. A control that was
+    /// removed before it came has nothing to wait for, until it's back.
+    /// </summary>
     private async Task<ScrollViewer?> WaitForScrollElement()
     {
-        if (!_hasLoaded)
+        if (!_hasLoaded && (!_wasDetached || VisualRoot is not null))
         {
             _loaded ??= new TaskCompletionSource();
             await _loaded.Task;
@@ -395,11 +406,16 @@ public class AvonicContent : TemplatedControl
         if (_scroll is not null)
         {
             _scroll.PropertyChanged -= OnScrollPropertyChanged;
+            _scroll.TemplateApplied -= OnScrollTemplateApplied;
+            _scroll.RemoveHandler(PointerWheelChangedEvent, OnPassedOver);
+            _scroll.RemoveHandler(KeyDownEvent, OnPassedOver);
         }
 
         if (_container is not null)
         {
             _container.PropertyChanged -= OnContainerPropertyChanged;
+            _container.RemoveHandler(PointerWheelChangedEvent, OnContainerInput);
+            _container.RemoveHandler(KeyDownEvent, OnContainerInput);
         }
 
         if (_fixed is not null)
@@ -415,6 +431,9 @@ public class AvonicContent : TemplatedControl
         if (_scroll is not null)
         {
             _scroll.PropertyChanged += OnScrollPropertyChanged;
+            _scroll.TemplateApplied += OnScrollTemplateApplied;
+            _scroll.AddHandler(PointerWheelChangedEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
+            _scroll.AddHandler(KeyDownEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
         }
@@ -422,6 +441,8 @@ public class AvonicContent : TemplatedControl
         if (_container is not null)
         {
             _container.PropertyChanged += OnContainerPropertyChanged;
+            _container.AddHandler(PointerWheelChangedEvent, OnContainerInput);
+            _container.AddHandler(KeyDownEvent, OnContainerInput);
         }
 
         if (_fixed is not null)
@@ -476,16 +497,32 @@ public class AvonicContent : TemplatedControl
         _queued = false;
         OnScrollEnd();
 
-        // Removed before its first layout: a scroll that was waiting for one has nothing left to wait for.
-        _loaded?.TrySetResult();
-        _loaded = null;
+        _wasDetached = true;
+
+        // Removed before its first layout: a scroll that was waiting for one has nothing left to wait for, unless
+        // this was a move, and it's back by now.
+        if (_loaded is not null)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (VisualRoot is null)
+                {
+                    _loaded?.TrySetResult();
+                    _loaded = null;
+                }
+            }, DispatcherPriority.Background);
+        }
     }
+
+    /// <inheritdoc/>
+    protected override AutomationPeer OnCreateAutomationPeer() => new ContentAutomationPeer(this);
 
     private void OnScrollPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ScrollViewer.OffsetProperty)
         {
-            if (ScrollEvents)
+            // A browser's disconnected element doesn't scroll, and an animation can outlive its control.
+            if (ScrollEvents && VisualRoot is not null)
             {
                 OnScroll();
             }
@@ -493,6 +530,36 @@ public class AvonicContent : TemplatedControl
         else if (e.Property == ScrollViewer.ViewportProperty)
         {
             UpdateOverscroll();
+        }
+    }
+
+    private void OnScrollTemplateApplied(object? sender, TemplateAppliedEventArgs e)
+    {
+        _recognizer = e.NameScope.Find<ScrollContentPresenter>("PART_ContentPresenter")
+            ?.GestureRecognizers.OfType<ScrollGestureRecognizer>().FirstOrDefault();
+        UpdateAxes();
+    }
+
+    /// <summary>
+    /// With no axis on, the wheel and the page keys belong to whatever's outside, as with <c>overflow: hidden</c>. Avalonia's
+    /// presenter and viewer don't ask whether an axis is on, only whether there's somewhere to go, so input is marked handled
+    /// to get past them, and <see cref="OnPassedOver"/> takes that back on the other side.
+    /// </summary>
+    private void OnContainerInput(object? sender, RoutedEventArgs e)
+    {
+        if (!e.Handled && !ScrollX && !ScrollY && e is PointerWheelEventArgs or KeyEventArgs { Key: Key.PageUp or Key.PageDown })
+        {
+            _passedOver = e;
+            e.Handled = true;
+        }
+    }
+
+    private void OnPassedOver(object? sender, RoutedEventArgs e)
+    {
+        if (ReferenceEquals(_passedOver, e))
+        {
+            _passedOver = null;
+            e.Handled = false;
         }
     }
 
@@ -513,9 +580,12 @@ public class AvonicContent : TemplatedControl
     }
 
     /// <summary>
-    /// <c>.scroll-x</c> and <c>.scroll-y</c>. Off is <see cref="ScrollBarVisibility.Disabled"/>, so text wraps to the
-    /// width, where <see cref="ScrollBarVisibility.Hidden"/> measures it as if the width had no end. On is hidden,
-    /// because a phone's scroll bars aren't Ionic's: the template has none.
+    /// <c>.scroll-x</c> and <c>.scroll-y</c>. On is <see cref="ScrollBarVisibility.Hidden"/>, because a phone's scroll
+    /// bars aren't Ionic's: the template has none. Horizontal off is <see cref="ScrollBarVisibility.Disabled"/>, so text
+    /// wraps to the width, where hidden measures it as if the width had no end. Vertical off is still hidden, with no
+    /// gesture, because <c>overflow: hidden</c> is a scroller to a script and keeps its position, where disabled would
+    /// reset it. That takes blocking input by hand, and a drag at an angle can't be blocked with horizontal on, so
+    /// that one combination is disabled.
     /// </summary>
     private void UpdateAxes()
     {
@@ -525,7 +595,8 @@ public class AvonicContent : TemplatedControl
         }
 
         _scroll.SetCurrentValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollX ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
-        _scroll.SetCurrentValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollY ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
+        _scroll.SetCurrentValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollY || !ScrollX ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
+        _recognizer?.SetCurrentValue(ScrollGestureRecognizer.CanVerticallyScrollProperty, ScrollY);
     }
 
     /// <summary><c>.inner-scroll</c>'s and <c>#background-content</c>'s <c>top</c>, <c>bottom</c> and <c>padding</c>.</summary>
@@ -646,6 +717,12 @@ public class AvonicContent : TemplatedControl
         for (Visual? visual = this; visual is not null && visual != page; visual = visual.GetVisualParent())
         {
             top += visual.Bounds.Y;
+
+            // offsetTop doesn't move with an ancestor's scroll.
+            if (visual.GetVisualParent() is ScrollContentPresenter scroller)
+            {
+                top += scroller.Offset.Y;
+            }
         }
 
         top = Math.Max(top, 0);
@@ -768,6 +845,15 @@ public class AvonicContent : TemplatedControl
             DeltaY = currentY - current.StartY,
             CurrentTime = timestamp,
         });
+    }
+
+    private sealed class ContentAutomationPeer(AvonicContent owner) : ControlAutomationPeer(owner)
+    {
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override bool IsContentElementCore() => true;
+
+        protected override bool IsControlElementCore() => true;
     }
 
     private struct ScrollState

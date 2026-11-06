@@ -35,6 +35,8 @@ and RTL with a start padding and an unplaced fixed square.
   Fixed by not giving it those.
 - **Hit tests read the last rendered scene** in the headless platform, so they return null until a render. Tests call `Render()` first.
 
+Code review found more, which are in the PR: a `TextBox` wrapping, a position lost on turning `ScrollY` off, and a peer a screen reader would skip.
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicContentTests`, named after its number. The Ionic results were measured in Chromium with `ion-app`.
@@ -51,7 +53,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 8 | Text wraps | `fitc` 390×54 | match without `ScrollX`. **Deliberate difference** with it |
 | 9 | A child is as high as its content | `blkc` 18 | match |
 | 10 | The wheel moves axes that are on | `y` 0,60; `nn` 0,0; `xx` 30,60; `xo` 30,0 | match |
-| 10 | Script on an axis that's off | `y` `scrollLeft` 50; `nn` `scrollTop` 100, `scrollY false` 100 | **deliberate difference**: stays at 0 |
+| 10 | Script on an axis that's off | `nn` `scrollTop` 100, `scrollY false` 100; `y` `scrollLeft` 50; `xo` `scrollTop` 100 | match for `ScrollY` alone. **Deliberate difference** for `ScrollX` off, and for `ScrollY` off with `ScrollX` on: stays at 0 |
 | 10 | RTL offset | `-100` | **deliberate difference**: `100`, from the start edge |
 | 11 | Wheel at the limit, nested | `[0, 200]`; on a short one `[50, 200]` | match |
 | 12 | Drag, nested | `inner at end` `[0, 200]`; `inner at top` `[100, 0]`; short and `scroll-y=false` move the outer | match |
@@ -63,7 +65,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 17 | Base detail, bubbling | `{isScrolling}`; `bubbles` | match. `cancelable` has no meaning here: nothing reads it |
 | 18 | Removal ends a scroll | `seen` the end before `removed` | match. A waiting `IonScroll` is dropped: **deliberate difference** |
 | 19 | `ScrollEvents` off part-way | From the code: `onScroll` goes, and the watchdog stays | match |
-| 20 | `GetScrollElement` | `part="scroll"` | match, and synchronous |
+| 20 | `GetScrollElement` | `part="scroll"` | match, and synchronous. **Deliberate difference**: null with no tree, where Ionic's waits |
 | 21 | Jumps | `0 sync?` 100 after one await; `31 vs 32`; `null keeps` 40; `past` 700; `neg` 0 | match, and synchronous |
 | 22 | Animation | `frac anim` 100; `timeline 300` eases over about 300 ms after a frame | match. `TestClock` checks the formula exactly, and Chromium's frames can't be compared to the millisecond |
 | 23 | Nothing cancels it | `concurrent` `[500, 100]`; `user during` `[10, 500]`; `detached` done | match |
@@ -76,7 +78,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 30 | Fixed doesn't scroll | `scroll keeps fixed` | match |
 | 31 | Placement, pointer | `after` hit the button; `before` hit the body, order background, slot, scroll | match |
 | 32 | Placement, tab | `after-mb`, `after-f`, `before-f`, `before-mb` | match |
-| 33 | Role | `role="main"` | match, as the `Main` landmark |
+| 33 | Role | `role="main"` | match, as the `Main` landmark. Only checked through the automation peer, not with a screen reader |
 | 34 | Focus scrolls into view | A browser's own | match in kind; Avalonia's minimal scroll |
 | 35 | Templates | — | Avonic only |
 | 36, 37 | Token defaults | `--padding-*` etc. `0px` | match |

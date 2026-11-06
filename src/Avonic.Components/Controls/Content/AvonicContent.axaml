@@ -6,7 +6,8 @@
          recognizer, which is what makes a touch drag scroll. It's here because a base theme's template has
          scroll bars, and TestApp has no base theme. The theme's template uses this one too.
          The recognizer isn't given Offset, Viewport and Extent, as a base theme's is: with those it gives up at
-         the limit, and an outer scroller takes the drag, where overscroll-behavior: contain keeps it here. -->
+         the limit, and an outer scroller takes the drag, where overscroll-behavior: contain keeps it here. The control sets
+         CanVerticallyScroll, because ScrollY can be off while it's still a scroller to a script. -->
     <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
         <Setter Property="Template">
             <ControlTemplate>
@@ -15,7 +16,6 @@
                                         ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
                     <ScrollContentPresenter.GestureRecognizers>
                         <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
-                                                 CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
                                                  IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
                     </ScrollContentPresenter.GestureRecognizers>
                 </ScrollContentPresenter>

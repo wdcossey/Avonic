@@ -564,6 +564,108 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B10_ScrollY_False_Is_Still_A_Scroller_To_A_Script()
+    {
+        // Measured scrollY false: 100. overflow: hidden.
+        var content = new AvonicContent { ScrollY = false, Content = new Border { Height = 1000 } };
+        using var scene = new Scene(InBox(content));
+
+        content.ScrollToPoint(null, 100);
+
+        Assert.Equal(100, Scroll(content).Offset.Y);
+        Assert.Equal(1000, Scroll(content).Extent.Height);
+    }
+
+    [AvaloniaFact]
+    public void B10_Turning_ScrollY_Off_Keeps_The_Position_And_Raises_Nothing()
+    {
+        // Locking a page while a sheet is open.
+        using var clock = new TestClock();
+        var content = Tall();
+        content.ScrollEvents = true;
+        using var scene = new Scene(InBox(content));
+        SetOffset(content, 500);
+        clock.At(1000);
+        var log = new Recorder(content, clock);
+
+        content.ScrollY = false;
+        Settle();
+        Wheel(scene, new Point(100, 100), 60);
+        Assert.Equal(500, Scroll(content).Offset.Y);
+
+        content.ScrollY = true;
+        Settle();
+        Assert.Equal(500, Scroll(content).Offset.Y);
+        clock.At(2000);
+        Assert.Empty(log.Events);
+
+        Wheel(scene, new Point(100, 100), 60);
+        Assert.Equal(560, Scroll(content).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B10_Page_Keys_Scroll_With_ScrollY_On_And_Not_Off()
+    {
+        var target = Focusable("target");
+        var content = new AvonicContent { Content = new StackPanel { Children = { target, new Border { Height = 1000 } } } };
+        var keys = 0;
+        var box = InBox(content);
+        box.AddHandler(InputElement.KeyDownEvent, (object? _, KeyEventArgs _) => keys++);
+        using var scene = new Scene(box);
+        target.Focus();
+        Settle();
+
+        scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
+        Settle();
+        Assert.Equal(300, Scroll(content).Offset.Y);
+        Assert.Equal(0, keys);
+
+        content.ScrollY = false;
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
+        Settle();
+        Assert.Equal(300, Scroll(content).Offset.Y);
+        // It goes on to whatever's outside.
+        Assert.Equal(1, keys);
+    }
+
+    [AvaloniaFact]
+    public void B10_Other_Keys_Are_Left_Alone_With_ScrollY_Off()
+    {
+        var target = Focusable("target");
+        var content = new AvonicContent { ScrollY = false, Content = target };
+        var keys = 0;
+        var box = InBox(content);
+        box.AddHandler(InputElement.KeyDownEvent, (object? _, KeyEventArgs e) => keys++, Avalonia.Interactivity.RoutingStrategies.Bubble);
+        using var scene = new Scene(box);
+        target.Focus();
+        Settle();
+
+        scene.Window.KeyPressQwerty(PhysicalKey.A, RawInputModifiers.None);
+        Settle();
+
+        Assert.Equal(1, keys);
+    }
+
+    [AvaloniaFact]
+    public void B10_A_Handled_Wheel_Stays_Handled_With_ScrollY_Off()
+    {
+        // A child that took the wheel keeps it from an outer scroller.
+        var child = new Border { Height = 1000, Background = Brushes.Gray };
+        child.AddHandler(InputElement.PointerWheelChangedEvent, (object? _, PointerWheelEventArgs e) => e.Handled = true);
+        var inner = new AvonicContent { ScrollY = false, Content = child };
+        var outer = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new Panel { Height = 100, Children = { inner } }, new Border { Height = 1000 } } },
+        };
+        using var scene = new Scene(InBox(outer, 500));
+
+        Wheel(scene, new Point(50, 50), 50);
+
+        Assert.Equal(0, Scroll(outer).Offset.Y);
+    }
+
+    [AvaloniaFact]
     public void B10_The_Axes_Can_Change_At_Runtime()
     {
         var content = new AvonicContent { Content = new Border { Width = 800, Height = 1000 } };
@@ -1301,6 +1403,28 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B18_An_Animation_That_Outlives_It_Raises_Nothing_More()
+    {
+        // A browser's disconnected element doesn't scroll, so no second cycle starts.
+        using var clock = new TestClock();
+        var content = Tall();
+        content.ScrollEvents = true;
+        var log = new Recorder(content, clock);
+        var box = (Panel)InBox(content);
+        using var scene = new Scene(box);
+
+        content.ScrollToPoint(null, 500, 300);
+        clock.At(40);
+        box.Children.Clear();
+        var count = log.Events.Count;
+        Assert.Equal("end", log.Events[^1].Name);
+
+        clock.At(1000);
+
+        Assert.Equal(count, log.Events.Count);
+    }
+
+    [AvaloniaFact]
     public void B18_Removing_It_When_Idle_Raises_Nothing()
     {
         using var clock = new TestClock();
@@ -1347,12 +1471,21 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
-    public void B20_GetScrollElement_Works_Before_It_Is_Shown()
+    public void B20_GetScrollElement_Works_Once_It_Is_In_A_Tree_Before_It_Is_Shown()
     {
-        var scroll = new AvonicContent { Template = new FuncControlTemplate<AvonicContent>((_, scope) =>
-            new ScrollViewer { Name = "PART_Scroll" }.RegisterInNameScope(scope)) }.GetScrollElement();
+        var content = new AvonicContent();
+        var window = new Window { Content = content };
 
-        Assert.NotNull(scroll);
+        Assert.NotNull(content.GetScrollElement());
+
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void B20_GetScrollElement_Is_Null_With_No_Tree_To_Find_A_Theme_In()
+    {
+        // Deliberate, and raised in the PR: Ionic's waits for load, so this is the one thing a synchronous method can't do.
+        Assert.Null(new AvonicContent().GetScrollElement());
     }
 
     [AvaloniaFact]
@@ -1755,6 +1888,46 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B25_Moved_Before_Load_A_Waiting_Scroll_Still_Happens()
+    {
+        var content = Tall();
+        var task = content.ScrollToPoint(null, 100);
+        var first = (Panel)InBox(content);
+        var second = new Panel { Height = 300, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(new StackPanel { Children = { first, second } });
+
+        // Scene settles, so this one has loaded. A fresh one is what's being moved.
+        var moved = Tall();
+        var movedTask = moved.ScrollToPoint(null, 100);
+        first.Children.Clear();
+        first.Children.Add(moved);
+        first.Children.Clear();
+        second.Children.Add(moved);
+        Assert.False(movedTask.IsCompleted);
+        Settle();
+
+        Assert.True(task.IsCompletedSuccessfully);
+        Assert.True(movedTask.IsCompletedSuccessfully);
+        Assert.Equal(100, Scroll(moved).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B25_After_Removal_Before_Load_A_New_Scroll_Does_Not_Wait()
+    {
+        var content = Tall();
+        var box = (Panel)InBox(content);
+        var window = new Window { Content = box };
+        window.Show();
+        box.Children.Clear();
+        Settle();
+
+        Assert.True(content.ScrollToTop().IsCompletedSuccessfully);
+
+        window.Close();
+        Settle();
+    }
+
+    [AvaloniaFact]
     public void B25_A_Scroll_Requested_Before_Load_Happens_On_Load()
     {
         // Measured before attached: not done until it's in the page, then 100.
@@ -1963,6 +2136,36 @@ public class AvonicContentTests
 
         Assert.Equal(new Rect(18, 0, 354, 300), Box(Scroll(content), scene.Window));
         Assert.Equal(new Thickness(0, 18, 0, 182), Container(content).Padding);
+    }
+
+    [AvaloniaFact]
+    public void B26_An_Outer_Scroll_Does_Not_Change_The_Offset()
+    {
+        // offsetTop doesn't move with an ancestor's scroll.
+        var inner = new AvonicContent { Fullscreen = true, Height = 100, VerticalAlignment = VerticalAlignment.Top };
+        var outer = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new Border { Height = 50 }, inner, new Border { Height = 1000 } } },
+        };
+        var page = new Border { Height = 400, VerticalAlignment = VerticalAlignment.Top, Child = outer };
+        page.Classes.Add("ion-page");
+        using var scene = new Scene(page);
+        Assert.Equal(50, Container(inner).Padding.Top);
+
+        SetOffset(outer, 30);
+
+        Assert.Equal(50, Container(inner).Padding.Top);
+    }
+
+    [AvaloniaFact]
+    public void B26_Above_The_Page_The_Offsets_Stop_At_Zero()
+    {
+        // Math.max(..., 0), for a content pushed above its page, or taller than it.
+        var content = new AvonicContent { Fullscreen = true, Height = 500, Margin = new Thickness(0, -20, 0, 0), VerticalAlignment = VerticalAlignment.Top };
+        var page = new Panel { Height = 300, VerticalAlignment = VerticalAlignment.Top, Children = { content } };
+        using var scene = new Scene(page);
+
+        Assert.Equal(default, Container(content).Padding);
     }
 
     [AvaloniaFact]
@@ -2216,6 +2419,10 @@ public class AvonicContentTests
         var peer = ControlAutomationPeer.CreatePeerForElement(content);
 
         Assert.Equal(AutomationLandmarkType.Main, peer.GetLandmarkType());
+        // A control's default peer isn't part of the tree that a screen reader walks.
+        Assert.True(peer.IsControlElement());
+        Assert.True(peer.IsContentElement());
+        Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
     }
 
     [AvaloniaFact]

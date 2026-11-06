@@ -48,7 +48,7 @@ var viewer = content.GetScrollElement();  // the ScrollViewer
 | [x] | `fullscreen` | `Fullscreen` | The background and scroll parts reach the page's edges, and the content's padded back. The page is the closest ancestor with class `ion-page`, or else the parent |
 | [x] | `scrollEvents` | `ScrollEvents` | Off by default, as in Ionic |
 | [x] | `scrollX` | `ScrollX` | On, text doesn't wrap at the viewport unless it's given a width |
-| [x] | `scrollY` | `ScrollY` | Off, a script can't scroll it either, where Ionic's can |
+| [x] | `scrollY` | `ScrollY` | Off, the user can't scroll it and a script can, and it keeps its position, as `overflow: hidden` does. The exception is with `ScrollX` on: see [PLAN.md](PLAN.md#deliberate-differences) |
 
 `disabled` isn't a prop of `ion-content`. `mode` isn't exposed (ADR 0001).
 
@@ -69,7 +69,7 @@ and `IonScrollEnd` when a 100 ms watchdog finds 120 ms of quiet. `event` and `da
 
 | ✓ | Ionic | Avonic |
 |---|---|---|
-| [x] | `getScrollElement()` | `ScrollViewer? GetScrollElement()`, synchronous |
+| [x] | `getScrollElement()` | `ScrollViewer? GetScrollElement()`, synchronous. Null before it's in a tree, so not in a constructor |
 | [x] | `scrollToPoint(x, y, duration?)` | `Task ScrollToPoint(double? x, double? y, double duration = 0)` |
 | [x] | `scrollByPoint(x, y, duration)` | `Task ScrollByPoint(double x, double y, double duration)` |
 | [x] | `scrollToTop(duration?)` | `Task ScrollToTop(double duration = 0)` |

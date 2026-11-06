@@ -36,7 +36,7 @@ Ionic never sets it.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `getScrollElement() => Promise<HTMLElement>` | `ScrollViewer? GetScrollElement()` | Synchronous |
+| [x] | `getScrollElement() => Promise<HTMLElement>` | `ScrollViewer? GetScrollElement()` | Synchronous. Null before it's in a tree |
 | [x] | `scrollByPoint(x, y, duration) => Promise<void>` | `Task ScrollByPoint(double x, double y, double duration)` | |
 | [x] | `scrollToBottom(duration?) => Promise<void>` | `Task ScrollToBottom(double duration = 0)` | |
 | [x] | `scrollToPoint(x, y, duration?) => Promise<void>` | `Task ScrollToPoint(double? x, double? y, double duration = 0)` | |
@@ -102,7 +102,7 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 7 | Padding moves and narrows the content, scrolls with it and counts in the extent. The keyboard offset adds to the bottom, whatever sets the padding. RTL mirrors it | `.inner-scroll`; measured `pa`, `pb`, `kb`, `rtl` |
 | 8 | Long text wraps to the width. A `TextBox` stays on one line unless it asks to wrap | measured `fitc`; an `<input>` |
 | 9 | A child is as high as its content, unless it says otherwise | block flow; measured `blkc` 18 |
-| 10 | The wheel moves only the axes that are on, and they can change at runtime | `.scroll-x`, `.scroll-y`; measured `y`, `nn`, `xx`, `xo` |
+| 10 | The wheel moves only the axes that are on, and they can change at runtime. With `ScrollY` off it's still a scroller to a script and keeps its position, and the wheel and page keys go on to whatever's outside | `.scroll-x`, `.scroll-y`; measured `y`, `nn`, `xx`, `xo`, `scrollY false` |
 | 11 | At its limit it keeps the wheel. If it fits, or with `ScrollY` off, it passes it on | `overscroll-behavior: contain`; measured `nested` |
 | 12 | A touch drag scrolls, on blank content too, on the axes that are on. At its limit a nested one keeps the drag, and if it can't scroll it passes it on. A drag over a button item doesn't click it, and a tap does | `touch-action`, `overscroll-behavior`; measured nested drags, and drag: `activated` false, 0 clicks. Headless touch, not hardware |
 | 13 | `ForceOverscroll` lets content that fits scroll by exactly one pixel, whatever the padding. Long content is unchanged. Null and false do nothing. It needs `ScrollY` | `.overscroll::before`; measured `t` 301, `pd` 301, `l` 1000, `d`, `f`, `nx` |
@@ -110,9 +110,9 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 15 | Scrolls in one frame are one event with the latest position. No change, no event. Content shrinking under the offset is a scroll, and a change of size alone isn't | measured `same tick twice`, `no real change`, `content shrinks` |
 | 16 | The detail: start and delta, velocity smoothed at 0.7/0.3 when the gap is under 100 ms, and reset at a new start | `updateScrollDetail`; measured `steps` |
 | 17 | Start and end carry `IsScrolling`. All three bubble from the content | measured |
-| 18 | Removing it ends a scroll at once. Idle, it raises nothing | `disconnectedCallback`; measured `removed while scrolling` |
+| 18 | Removing it ends a scroll at once, and an animation that outlives it starts nothing new. Idle, it raises nothing | `disconnectedCallback`; measured `removed while scrolling` |
 | 19 | Turning `ScrollEvents` off stops new ones and finishes the current one | `onScroll` goes, the watchdog stays |
-| 20 | `GetScrollElement` is the scroll part, before it's shown too. A template with no parts is safe | `part="scroll"` |
+| 20 | `GetScrollElement` is the scroll part, once it's in a tree, even before it's shown. A template with no parts is safe | `part="scroll"` |
 | 21 | Under 32 ms it jumps, limited to the range. A null coordinate stays | `duration < 32`; measured `31 vs 32`, `null keeps`, `bottom` |
 | 22 | At 32 ms or more: a frame's wait, then a cubic ease-out, floored, from where it was. An axis with no change isn't written | `scrollToPoint`; measured `frac anim` |
 | 23 | Nothing cancels an animation: not a second one, not the user, not removal. Each task finishes | measured `concurrent`, `user during`, `detached` |
@@ -125,7 +125,7 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 30 | It doesn't scroll, and only takes input on its own child | measured `scroll keeps fixed` |
 | 31 | `After` is on top. `Before` is under the scroll part, which takes the pointer | measured `after`, `before`: the hit is the body |
 | 32 | `After` tabs to the content first, and `Before` to the fixed slot first. A change moves it without remaking the child | measured `tab order` |
-| 33 | It's the `Main` landmark | `role="main"`; measured |
+| 33 | It's the `Main` landmark, with a peer that a screen reader's tree includes | `role="main"`; measured |
 | 34 | Focus scrolls a child into view | Avalonia's `ScrollViewer`, as a browser's |
 | 35 | Slots take templates | Mapping rule |
 | 36, 37 | The tokens have Ionic's defaults, and the safe area is 0 | `content.css` |
@@ -136,7 +136,7 @@ The mapping rule is that `Promise<T>` becomes `T` unless it's genuinely async.
 
 | Method | Avonic | Why |
 |---|---|---|
-| `getScrollElement` | Synchronous | Ionic waits for the component to load. Avalonia can apply the template on demand |
+| `getScrollElement` | Synchronous | Ionic waits for the component to load. Avalonia can apply the template on demand once it's in a tree. Before that a theme can't be found, so a constructor gets null, where Ionic's promise would wait. See "For you to decide" in the PR |
 | `scrollToPoint` and the rest | `Task` | Genuinely async with a duration, because the task finishes with the animation, and before the first layout, because there's no extent to scroll in yet |
 
 With no duration, once loaded, the task is already finished and the offset already set, where Ionic has done it after one
@@ -144,7 +144,7 @@ With no duration, once loaded, the task is already finished and the offset alrea
 
 **Before the first layout a scroll waits for `Loaded`,** because Avalonia limits an offset by the last layout, which would lose it.
 Ionic's waits too: measured `before attached`, not finished until it's in the page, then at 100. After that the control doesn't wait
-again, and removing it before it loads finishes a waiting task, so a removed control's task finishes.
+again. Removing it before it loads finishes a waiting task, unless it's a move and it's back by the next idle moment, so a removed control's task finishes.
 
 **A scroll lays out first,** with `UpdateLayout()`. In a browser, reading `scrollHeight` or setting `scrollTop` forces layout. Without this,
 adding content and calling `ScrollToBottom()` goes to the old end. Measured `added then bottom`: 1300 in Ionic.
@@ -187,6 +187,13 @@ and tab order. Moving doesn't detach the child.
 **`IsScrollChainingEnabled` is off,** for `overscroll-behavior: contain`, and Avalonia's handling matches what's measured in `nested`: a
 scroller at its limit keeps the wheel, and one that fits doesn't.
 
+**`ScrollY` off is still `Hidden`, not `Disabled`.** `overflow: hidden` is a scroller to a script and keeps its position, and locking a page while a
+sheet is open is a common use. `Disabled` would collapse the extent and send it to the top. So the control blocks user input instead. The recognizer's
+`CanVerticallyScroll` comes from `ScrollY`. Avalonia's presenter takes the wheel, and its viewer the page keys, whenever there's somewhere to go, without asking
+about the axis, and they can't be skipped from outside. So `PART_Container` marks that input handled to get past them, and `PART_Scroll` takes it back, so it
+carries on to whatever's outside. A drag at an angle can't be blocked that way, because the gesture's handler is in the presenter's constructor, so with
+`ScrollX` on and `ScrollY` off the vertical axis is `Disabled`.
+
 ### What #12 needs from this
 
 - **A `ZIndex` above 0 on the header and footer.** In Ionic `ion-header` and `ion-footer` have `z-index: 10`. With `Fullscreen`, the content
@@ -207,7 +214,11 @@ scroller at its limit keeps the wheel, and one that fits doesn't.
 | With `AvonicConfig.Animated` off, a timed scroll jumps | Measured `animated:false`: Ionic's `scrollToPoint` ignores `animated`, at 264 of 500 after 60 ms. `AvonicConfig.Animated` is documented here as the master switch. See "For you to decide" in the PR |
 | `ScrollX` off means text wraps and a wider child is clipped, with no way to reach it by script | `Disabled` measures at the viewport's width, so text wraps. CSS can have both, and measured `y` reaches `scrollLeft` 50 by script. Avalonia limits a desired size to what's available, so a wider child can't report its width at a finite measure |
 | `ScrollX` on means text doesn't wrap at the viewport, unless it's given a width | `Hidden` measures at infinite width. Measured `fitc` wraps at 390 with `scroll-x`. Same cause |
-| `ScrollY` off means a script can't scroll it either | `Disabled`. Measured `scrollY false`: `overflow: hidden` still takes `scrollTop` 100. `Hidden` would keep that, but the wheel, keys and gestures would all then need blocking separately. It also means `ForceOverscroll` needs `ScrollY`, where measured `sx` has 301 with only `scroll-x`, reachable by script only |
+| With `ScrollX` on and `ScrollY` off, a script can't scroll vertically, and turning `ScrollY` off goes to the top | See the design. Measured `xo` takes `scrollTop` 100. `ForceOverscroll` also needs `ScrollY`, where measured `sx` has 301 with only `scroll-x`, reachable by script only |
+| Turning `ScrollX` off goes back to the start | Same cause as the row above it for `ScrollX` off. In CSS it keeps `scrollLeft` |
+| `GetScrollElement()` is null before it's in a tree | Ionic's promise waits. A theme is found through the tree, so there's no template to apply in a constructor. `ScrollToPoint` and the others do wait, so use those, or read it on `Loaded` |
+| A `Margin` on the control is honoured | Measured from `content.css`: `:host { margin: 0 !important; padding: 0 !important }`. A parent's margin for its child is how Avalonia lays out, so it isn't removed, and `Fullscreen` measures from the margin box's inside |
+| A child's alignment from its own `ControlTheme` loses to the slot's default | Global `Styles` beat a `ControlTheme`, and this is set at style priority, as the project's other slot defaults are. A local value or a `Style` wins. A control like `ion-fab` needs to set its alignment in code or with a style |
 | `Fullscreen` follows the layout at once | Measured `head grows`: Ionic stays at 56 until a window resize and 100 ms after it. Its comment says that's to limit thrashing, and a layout pass here already batches |
 | A wrapper's position counts from the page, whatever's positioned | `offsetTop` is from the nearest positioned ancestor. Avalonia has no such idea. The same in the measured `nest` |
 | A removed and re-added control keeps its scroll position | A browser resets it, measured `afterReattachTop` 0. Avalonia's doesn't, and a page that's been navigated away from and back is better for it |
