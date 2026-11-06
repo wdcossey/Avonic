@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-button's variables. A CssUnset key's default depends on the host's class, and the theme's bindings
+         say what. Any value overrides it, for every class, as setting the variable from outside does. -->
+    <b:CssUnset x:Key="Avonic.Button.Background" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundActivated" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundActivatedOpacity" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundFocused" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundFocusedOpacity" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundHover" />
+    <b:CssUnset x:Key="Avonic.Button.BackgroundHoverOpacity" />
+
+    <b:CssUnset x:Key="Avonic.Button.BorderColor" />
+    <b:CssUnset x:Key="Avonic.Button.BorderRadius" />
+    <b:CssUnset x:Key="Avonic.Button.BorderWidth" />
+    <b:CssUnset x:Key="Avonic.Button.BoxShadow" />
+
+    <b:CssUnset x:Key="Avonic.Button.Color" />
+    <b:CssUnset x:Key="Avonic.Button.ColorActivated" />
+    <b:CssUnset x:Key="Avonic.Button.ColorFocused" />
+    <b:CssUnset x:Key="Avonic.Button.ColorHover" />
+
+    <x:Double x:Key="Avonic.Button.Opacity">1</x:Double>
+
+    <!-- In px. The defaults are in em for some classes, so they're in the theme, with the class. -->
+    <b:CssUnset x:Key="Avonic.Button.PaddingTop" />
+    <b:CssUnset x:Key="Avonic.Button.PaddingBottom" />
+    <b:CssUnset x:Key="Avonic.Button.PaddingStart" />
+    <b:CssUnset x:Key="Avonic.Button.PaddingEnd" />
+
+    <b:CssUnset x:Key="Avonic.Button.RippleColor" />
+
+    <!-- box-shadow 280ms cubic-bezier(.4, 0, .2, 1), background-color 15ms linear, color 15ms linear -->
+    <Transitions x:Key="Avonic.Button.Transition">
+        <BoxShadowsTransition Property="{x:Static Border.BoxShadowProperty}" Duration="0:0:0.28" Easing="0.4,0,0.2,1" />
+        <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.015" />
+        <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.015" />
+    </Transitions>
+
+    <!-- What button.md.css gives those variables per class. Css.Var's values are bindings, so a number needs a
+         key. These aren't Ionic's variables: override the keys above instead. Outline and clear share values. -->
+    <CornerRadius x:Key="Avonic.Button.Md.BorderRadius">4</CornerRadius>
+    <CornerRadius x:Key="Avonic.Button.Md.BorderRadiusRound">999</CornerRadius>
+    <Thickness x:Key="Avonic.Button.Md.BorderWidthOutline">2</Thickness>
+    <x:Double x:Key="Avonic.Button.Md.BackgroundActivatedOpacity">0</x:Double>
+    <x:Double x:Key="Avonic.Button.Md.BackgroundFocusedOpacitySolid">0.24</x:Double>
+    <x:Double x:Key="Avonic.Button.Md.BackgroundFocusedOpacityFlat">0.12</x:Double>
+    <x:Double x:Key="Avonic.Button.Md.BackgroundHoverOpacitySolid">0.08</x:Double>
+    <x:Double x:Key="Avonic.Button.Md.BackgroundHoverOpacityFlat">0.04</x:Double>
+    <BoxShadows x:Key="Avonic.Button.Md.BoxShadowSolid">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
+    <BoxShadows x:Key="Avonic.Button.Md.BoxShadowSolidActivated">0 5 5 -3 #33000000, 0 8 10 1 #24000000, 0 3 14 2 #1F000000</BoxShadows>
+
+</ResourceDictionary>
