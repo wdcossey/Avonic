@@ -20,14 +20,8 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Inner", typeof(Border))]
 [TemplatePart("PART_Container", typeof(ContentPresenter))]
 [TemplatePart("PART_End", typeof(ContentPresenter))]
-public class AvonicItemDivider : TemplatedControl
+public class AvonicItemDivider : TemplatedControl, IItemHost
 {
-    public AvonicItemDivider()
-    {
-        // Ionic's class "item", which label.md.css's :host-context(.item) reads.
-        PseudoClasses.Add(":item");
-    }
-
     /// <summary><c>z-index: 100</c>. There's no variable for it.</summary>
     private const int StickyZIndex = 100;
 

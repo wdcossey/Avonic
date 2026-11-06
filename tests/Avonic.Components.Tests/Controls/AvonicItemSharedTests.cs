@@ -4,6 +4,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -102,6 +103,39 @@ public class AvonicItemSharedTests
     });
 
     [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("divider")]
+    [InlineData("group")]
+    public void An_Apps_Plain_Style_Beats_The_Rules_For_An_Item(string host)
+    {
+        // In CSS an outer style beats a shadow root's :host-context. A rule with a pseudoclass would beat a plain style here.
+        InstalledTheme.Run(_ =>
+        {
+            var label = new AvonicLabel { Content = "x" };
+            Control control = host == "item" ? new AvonicItem { Content = label } : InHost(host, label);
+            var root = new StackPanel { Children = { control } };
+            root.Styles.Add(new Style(x => x.OfType<AvonicLabel>())
+            {
+                Setters = { new Setter(AvonicLabel.ForegroundProperty, Brushes.Red) },
+            });
+            using var scene = new Scene(root);
+
+            Assert.Same(Brushes.Red, label.Foreground);
+        });
+    }
+
+    [AvaloniaFact]
+    public void What_A_Panel_Holds_In_A_Header_Is_Centred() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "x" };
+        var header = new AvonicListHeader { Content = new StackPanel { Orientation = Orientation.Horizontal, Children = { text } } };
+        using var scene = new Scene(new StackPanel { Children = { header } });
+
+        Assert.True(text.Bounds.Height < 30);
+        Assert.InRange(Box(text, header).Y, ((header.Bounds.Height - text.Bounds.Height) / 2) - 1, ((header.Bounds.Height - text.Bounds.Height) / 2) + 1);
+    });
+
+    [AvaloniaTheory]
     [InlineData("divider", true)]
     [InlineData("group", true)]
     [InlineData("header", false)]
@@ -158,14 +192,17 @@ public class AvonicItemSharedTests
     });
 
     [AvaloniaFact]
-    public void An_Icon_In_A_Panel_Has_The_Margin_Of_Its_Slot() => InstalledTheme.Run(_ =>
+    public void An_Icon_In_A_Panel_Is_Where_One_In_A_Slot_Is() => InstalledTheme.Run(_ =>
     {
+        // The panel has the slot's margin, so the icon has only the rest of it. Measured directly in a slot: 16,12 and 350,12, and inner x=72.
         var start = new AvonicIcon { IconName = "star" };
         var end = new AvonicIcon { IconName = "star" };
-        using var scene = new Scene(new AvonicItem { StartContent = PanelOf(start), EndContent = PanelOf(end) });
+        var item = new AvonicItem { StartContent = PanelOf(start), EndContent = PanelOf(end) };
+        using var scene = new Scene(new StackPanel { Children = { item } });
 
-        Assert.Equal(new Thickness(0, 12, 32, 12), start.Margin);
-        Assert.Equal(new Thickness(16, 12, 0, 12), end.Margin);
+        Assert.Equal(new Point(16, 12), Box(start, item).TopLeft);
+        Assert.Equal(new Point(350, 12), Box(end, item).TopLeft);
+        Assert.Equal(72, Box(Part<Border>(item, "PART_Inner"), item).X);
     });
 
     [AvaloniaFact]

@@ -369,12 +369,7 @@ public class AvonicButton : TemplatedControl, IItemControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>As Avalonia's own <c>Button</c> does: a handler that sets <c>Handled</c> stops the command.</summary>
-    private void RaiseClick()
-    {
-        var args = new RoutedEventArgs(ClickEvent, this);
-        RaiseEvent(args);
-        _native?.ExecuteUnless(args);
-    }
+    private void RaiseClick() => _native?.Click(ClickEvent);
 
     protected override void OnGotFocus(FocusChangedEventArgs e)
     {

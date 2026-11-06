@@ -133,7 +133,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `translateY(50%) scale(0.75)` | `Css.TranslateY` `0.5` and `Css.Scale` `0.75`, read by `Css.TranslateScale` with `Bounds.Height` | Ease those two, not the transform: a change of size moves it at once in CSS |
 | CSS specificity | a rule with a pseudoclass or class beats one without, then later beats earlier | Global `Styles` beat a `ControlTheme`, and files in `Styles/` merge in ordinal order |
 | `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c\|AvonicItem:item-input c\|AvonicLabel` |
-| `:host-context(.item)` | `:is(Control):item c\|Foo`, as an item, a divider and a group set `:item`. A list header doesn't | `Styles/Label.axaml` |
+| `:host-context(.item)` | `:is(c\|IItemHost) c\|Foo`, which an item, a divider and a group implement, and a list header doesn't. A type, so that it adds no activators and doesn't rise over an app's plain style, as a pseudoclass would | `Styles/Label.axaml` |
 | `z-index` on a slotted child, over a part outside the slot | The part goes before the slots, as `ZIndex` only sorts siblings | `::slotted(ion-button)` → `PART_Ripple` before `PART_Layout` |
 | A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
 | `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |

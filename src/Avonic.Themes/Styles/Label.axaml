@@ -34,7 +34,7 @@
          up its ancestors, which every TextBlock pays for, in a label or not, so they use '>' here. -->
 
     <!-- :host-context(.item). An item, a divider and a group have that class, and a list header doesn't. -->
-    <Style Selector=":is(Control):item c|AvonicLabel">
+    <Style Selector=":is(c|IItemHost) c|AvonicLabel">
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <!-- color: var(color), with color: initial, so it inherits -->
         <Setter Property="Foreground">
@@ -85,7 +85,7 @@
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
     </Style>
     <!-- text-overflow: ellipsis is on :host-context(.item). overflow: hidden does nothing on an inline box. -->
-    <Style Selector=":is(Control):item c|AvonicLabel.ion-text-nowrap">
+    <Style Selector=":is(c|IItemHost) c|AvonicLabel.ion-text-nowrap">
         <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
         <Setter Property="ClipToBounds" Value="True" />
     </Style>
@@ -176,7 +176,7 @@
     </Style>
 
     <!-- :host(.label-fixed), which doesn't depend on .item, so a list header has it too, as measured. Alone, a label is inline, where none of this applies. -->
-    <Style Selector=":is(Control):item c|AvonicLabel:position-fixed, c|AvonicListHeader c|AvonicLabel:position-fixed">
+    <Style Selector=":is(c|IItemHost) c|AvonicLabel:position-fixed, c|AvonicListHeader c|AvonicLabel:position-fixed">
         <!-- flex: 0 0 100px, measured beating flex: 1. A Width is a minimum in FlexRow, which is flex-shrink: 0. -->
         <Setter Property="c:FlexRow.Flex" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
@@ -187,7 +187,7 @@
 
     <!-- :host(.label-stacked), :host(.label-floating). FlowDirection mirrors the origin, which is .label-rtl. Ionic
          only sets that from document.dir, so a right-to-left subtree differs: see the plan. -->
-    <Style Selector=":is(Control):item c|AvonicLabel:position-stacked, :is(Control):item c|AvonicLabel:position-floating, c|AvonicListHeader c|AvonicLabel:position-stacked, c|AvonicListHeader c|AvonicLabel:position-floating">
+    <Style Selector=":is(c|IItemHost) c|AvonicLabel:position-stacked, :is(c|IItemHost) c|AvonicLabel:position-floating, c|AvonicListHeader c|AvonicLabel:position-stacked, c|AvonicListHeader c|AvonicLabel:position-floating">
         <Setter Property="Margin" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <!-- flex: 1 in a column fills it, whatever item-textarea's align-self says -->

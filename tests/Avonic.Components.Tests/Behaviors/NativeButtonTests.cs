@@ -423,6 +423,84 @@ public class NativeButtonTests
     }
 
     [AvaloniaFact]
+    public void A_Nested_Items_Handled_Click_Stops_The_Card_Around_It()
+    {
+        var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
+        inner.Click += (_, e) => e.Handled = true;
+        var probe = Make("card", inner);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Nested_Cards_Handled_Click_Stops_The_Item_Around_It()
+    {
+        var inner = new AvonicCard { Button = true, Content = "x", Height = 30 };
+        inner.Click += (_, e) => e.Handled = true;
+        var probe = Make("item", inner);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Handled_Click_On_Press_Stops_The_Press_It_Was_In()
+    {
+        var handle = true;
+        var child = StockButton();
+        child.ClickMode = ClickMode.Press;
+        child.Click += (_, e) => e.Handled = handle;
+        var probe = Make("item", child);
+        using var scene = new Scene(probe.Control);
+        var at = CentreOf(child, scene);
+
+        Tap(scene, at);
+        Assert.Equal(0, probe.Clicks);
+
+        handle = false;
+        Tap(scene, at);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Forward_With_No_Tapped_After_It_Does_Not_Swallow_A_Later_Tapped()
+    {
+        // Enter forwards, and no Tapped follows. A child then takes a press, so nothing forwards, and Tapped is still raised.
+        var toggle = new ForwardingStub { Width = 40, Height = 30 };
+        var child = Child();
+        child.PointerPressed += (_, e) => e.Handled = true;
+        var item = new AvonicItem { Button = true, Content = child, EndContent = toggle, Width = 200, Height = 50, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
+        var tapped = 0;
+        var parent = new StackPanel { Children = { item } };
+        parent.Tapped += (_, _) => tapped++;
+        using var scene = new Scene(parent);
+        item.Focus();
+        Settle();
+
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        Assert.Equal(1, toggle.ItemTaps);
+
+        Tap(scene, CentreOf(child, scene));
+
+        Assert.Equal(1, tapped);
+    }
+
+    private sealed class ForwardingStub : Border, IItemControl
+    {
+        public int ItemTaps { get; private set; }
+
+        public ItemControlType ItemControlType => ItemControlType.Toggle;
+
+        public void OnItemTap() => ItemTaps++;
+    }
+
+    [AvaloniaFact]
     public void A_Handled_Click_Only_Stops_That_Press()
     {
         var handle = true;
@@ -637,6 +715,35 @@ public class NativeButtonTests
         Assert.Equal(1, command.Executed);
     }
 
+    [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("card")]
+    public void Automation_Says_A_Command_That_Cannot_Execute_Is_Disabled_And_Does_Not_Invoke(string kind)
+    {
+        var clicks = 0;
+        var probe = Make(kind);
+        probe.Control.AddHandler(kind == "item" ? AvonicItem.ClickEvent : AvonicCard.ClickEvent, (object? _, RoutedEventArgs _) => clicks++);
+        SetCommand(probe.Control, new Command { Can = false });
+        using var scene = new Scene(probe.Control);
+
+        var peer = ControlAutomationPeer.CreatePeerForElement(probe.Control);
+        Assert.False(peer.IsEnabled());
+
+        peer.GetProvider<Avalonia.Automation.Provider.IInvokeProvider>()!.Invoke();
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("card")]
+    public void Automation_Says_It_Is_Disabled_Under_A_Disabled_Parent(string kind)
+    {
+        var probe = Make(kind);
+        using var scene = new Scene(new StackPanel { IsEnabled = false, Children = { probe.Control } });
+
+        Assert.False(ControlAutomationPeer.CreatePeerForElement(probe.Control).IsEnabled());
+    }
+
     // ── S5, S6: automation ───────────────────────────────────────────────────────────────────
 
     private static string? NameOf(Control control) => ControlAutomationPeer.CreatePeerForElement(control).GetName();
@@ -704,6 +811,15 @@ public class NativeButtonTests
         using var scene = new Scene(button);
 
         Assert.Equal("In a run", NameOf(button));
+    }
+
+    [AvaloniaFact]
+    public void S5_A_Plain_Item_Has_No_Name_Of_Its_Own()
+    {
+        var item = new AvonicItem { Content = "Text" };
+        using var scene = new Scene(item);
+
+        Assert.True(string.IsNullOrEmpty(NameOf(item)));
     }
 
     [AvaloniaFact]

@@ -30,6 +30,7 @@ internal sealed class NativeButton
     private Point _start;
     private bool _spacePressed;
     private bool _subscribed;
+    private bool _stoppedDuringPress;
 
     /// <param name="owner">The control.</param>
     /// <param name="activate">A click, or Enter or Space. It's given what the press landed on, or the control for a key.</param>
@@ -48,6 +49,8 @@ internal sealed class NativeButton
         owner.AddHandler(InputElement.PointerReleasedEvent, OnReleased, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(Button.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(AvonicButton.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
+        owner.AddHandler(AvonicItem.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
+        owner.AddHandler(AvonicCard.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(InputElement.KeyDownEvent, OnKeyDown);
         owner.AddHandler(InputElement.KeyUpEvent, OnKeyUp);
         owner.AddHandler(InputElement.LostFocusEvent, OnLostFocus);
@@ -66,18 +69,26 @@ internal sealed class NativeButton
     /// <summary>A control that stops being a button mid-press doesn't finish it.</summary>
     public void Reset()
     {
-        _pointer = null;
-        _source = null;
+        EndPress();
         _spacePressed = false;
     }
 
-    /// <summary>As Avalonia's own <c>Button</c>: a handler that set <c>Handled</c> on the <c>Click</c> stops the command.</summary>
-    public void ExecuteUnless(RoutedEventArgs click)
+    /// <summary>The control's <c>Click</c>, then its command, as Avalonia's own <c>Button</c>: setting <c>Handled</c> stops the command.</summary>
+    public void Click(RoutedEvent<RoutedEventArgs> click)
     {
-        if (!click.Handled && Command is { } command && command.CanExecute(CommandParameter))
+        var args = new RoutedEventArgs(click, _owner);
+        _owner.RaiseEvent(args);
+
+        if (!args.Handled && Command is { } command && command.CanExecute(CommandParameter))
         {
             command.Execute(CommandParameter);
         }
+    }
+
+    private void EndPress()
+    {
+        _pointer = null;
+        _source = null;
     }
 
     // ── A press ──────────────────────────────────────────────────────────────────────────────
@@ -88,20 +99,21 @@ internal sealed class NativeButton
     /// </summary>
     private void OnPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
+        _stoppedDuringPress = false;
         if (e.Pointer == _pointer || !e.Pointer.IsPrimary)
         {
-            _pointer = null;
-            _source = null;
+            EndPress();
         }
     }
 
     /// <summary>
     /// A child that handles the press keeps it, as <c>stopPropagation</c> does, as measured. Not a stock <c>Button</c>, which
-    /// always handles its press, as a native <c>&lt;button&gt;</c> inside clicks both: measured too.
+    /// always handles its press, as a native <c>&lt;button&gt;</c> inside clicks both: measured too. One that clicks on press
+    /// has already had its say.
     /// </summary>
     private void OnPressedBubble(object? sender, PointerPressedEventArgs e)
     {
-        if (e.Pointer.IsPrimary && (!e.Handled || IsInStockButton(e.Source)))
+        if (e.Pointer.IsPrimary && !_stoppedDuringPress && (!e.Handled || IsInStockButton(e.Source)))
         {
             _pointer = e.Pointer;
             _source = e.Source;
@@ -130,8 +142,7 @@ internal sealed class NativeButton
             var moved = e.GetPosition(_owner) - _start;
             if ((moved.X * moved.X) + (moved.Y * moved.Y) > TouchSlop * TouchSlop)
             {
-                _pointer = null;
-                _source = null;
+                EndPress();
             }
         }
     }
@@ -148,8 +159,7 @@ internal sealed class NativeButton
         }
 
         var source = _source;
-        _pointer = null;
-        _source = null;
+        EndPress();
 
         // Not InitialPressMouseButton, which is the last button pressed, not the one released.
         var isLeft = e.GetCurrentPoint(_owner).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased;
@@ -164,14 +174,15 @@ internal sealed class NativeButton
         pointer.Captured is Visual holder && (holder == _owner || _owner.IsVisualAncestorOf(holder));
 
     /// <summary>
-    /// <c>click.stopPropagation()</c>, in a button inside. A child's release comes before this one's, so this is in time.
+    /// <c>click.stopPropagation()</c>, in a button inside. A child's release comes before this one's, so this is in time. A
+    /// <c>Button</c> with <c>ClickMode.Press</c> clicks before this has seen the press, so that's remembered until the next.
     /// </summary>
     private void OnClickInside(object? sender, RoutedEventArgs e)
     {
         if (e.Handled && !ReferenceEquals(e.Source, _owner))
         {
-            _pointer = null;
-            _source = null;
+            EndPress();
+            _stoppedDuringPress = true;
         }
     }
 
@@ -223,8 +234,7 @@ internal sealed class NativeButton
         {
             // A disabled <button> doesn't click, even if it was disabled during the press. Space doesn't need this:
             // disabling takes focus away, which ends it.
-            _pointer = null;
-            _source = null;
+            EndPress();
         }
         else if (e.Property == AvonicButton.CommandProperty)
         {

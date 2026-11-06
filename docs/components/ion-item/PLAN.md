@@ -353,13 +353,15 @@ The item still marks `Tapped` handled after forwarding a tap, for `stopImmediate
 
 | What | How | Evidence |
 |---|---|---|
-| `:item`, on the item, the divider and the group | Ionic's class `item`. `:host-context(.item)` becomes `:is(Control):item c\|AvonicLabel`, which removes the copies in `Styles/ItemDivider.axaml` and `Styles/ItemGroup.axaml` | The classes in S7 |
-| `Position` on a label in a divider, a group and a header | Those rules move to `:item`, and the header's own alternative, as it has no such class. Its presenter becomes a `FlexSlot`, so that a label's `Stretch` reaches it | S7 |
-| Icon rules reach an icon in a panel | The four selectors #60 listed | A panel stands for the slot |
+| `IItemHost`, on the item, the divider and the group | Ionic's class `item`. `:host-context(.item)` becomes `:is(c\|IItemHost) c\|AvonicLabel`, which removes the copies in `Styles/ItemDivider.axaml` and `Styles/ItemGroup.axaml`. #59 proposed a pseudoclass, `:item`. That would raise these rules over an app's own plain `AvonicLabel` style, where CSS has the outer style win, and put an activator on every ancestor of every label. A type does neither | The classes in S7 |
+| `Position` on a label in a divider, a group and a header | Those rules move to `IItemHost`, and the header's own alternative, as it has no such class. Its presenter becomes a `FlexSlot`, so that a label's `Stretch` reaches it | S7 |
+| Icon rules reach an icon in a panel | As #60 listed, except the margins. A panel has the slot's margin already, so the icon's are `0,12,16,12` and `0,12,0,12`, which puts it where one directly in the slot is | A panel stands for the slot |
 | End-slot button margin beside a stacked or floating label | `Styles/Item.axaml` leaves a button out, and `Styles/Button.axaml` says `16,7,2,7` | S8 |
 | Safe area | `Avonic.SafeArea*` move to `Tokens/Global.axaml`. `Css.SafeAreaBox` adds them at the start, the end or both, swapping sides in RTL. The item, as the issue says, and also the divider and the list header, as their CSS has it too and a row that alone ignored a notch would be noticed | `item.md.css`, `item-divider.md.css`, `list-header.md.css` |
 | `Avonic.CardBackgroundBrush` | Unset in `Tokens/Global.axaml`, so a card follows `--ion-item-background`. The dark palette sets it, as Ionic's does | `card.md.css` |
 | `BackgroundSizing` on the native border | `OuterBorderEdge`, if a test measures `rgb(127, 0, 128)` with it and not without | S10 |
+
+A panel in a header fills its `FlexSlot`, so what it holds is centred by a rule, as in an item and a divider.
 
 ### Elsewhere
 
@@ -381,6 +383,8 @@ Each row and rule above has one. In `NativeButtonTests` for the rules, on all th
 | A child with no height of its own, directly in a panel in a slot, collapses. So a `Grid` holding a background behind text loses the background | The panel stands for the slot, so its children are centred, as `align-items: center` does in CSS. A panel can't say it's one unit rather than several. `VerticalAlignment="Stretch"` on the child, or a `Border` around the `Grid`, gets it back |
 | Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
 | `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row |
+| An icon in a panel keeps its 12 above and below beside a stacked label, where one directly in the slot has 7 | Another two alternatives, for something rare |
+| A `TextBox`'s watermark counts in a button item's name while it's showing, as it's drawn text | An input in a `<button>` isn't valid HTML, so there's nothing to measure |
 | A word's width is measured in the `TextBlock`'s own font, so a larger run in its inlines can break at its last letter when it's squeezed down to its longest word | Reading each run would be a layout of its own, for a case this rare |
 | A panel in a slot isn't `flex: 1`, even with a label in it | A panel is one item. Ionic's measured `div` is the same (342 wide). Two `slot="start"` elements, where the label would still be `flex: 1`, have no equivalent, as a slot holds one child |
 | In a parent that gives no width, such as a horizontal `StackPanel`, an item is one line wide | Measured in an `inline-block`, Ionic's `width: min-content` makes it 168 wide and squeezes it, which isn't something to copy |

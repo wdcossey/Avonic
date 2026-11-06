@@ -147,9 +147,7 @@ public class AvonicCard : ContentControl
     {
         if (Button && IsEffectivelyEnabled && !IsInNestedButtonCard(source))
         {
-            var args = new RoutedEventArgs(ClickEvent, this);
-            RaiseEvent(args);
-            _native?.ExecuteUnless(args);
+            _native?.Click(ClickEvent);
         }
     }
 
@@ -179,6 +177,9 @@ public class AvonicCard : ContentControl
         /// <summary>Only a <c>&lt;button&gt;</c> can be invoked. Without one, Ionic renders nothing but a slot.</summary>
         protected override object? GetProviderCore(Type providerType) =>
             providerType == typeof(IInvokeProvider) && !owner.Button ? null : base.GetProviderCore(providerType);
+
+        /// <summary>And a command that can't execute, which the base class wouldn't see.</summary>
+        protected override bool IsEnabledCore() => owner.IsEffectivelyEnabled;
 
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             owner.Button ? AutomationControlType.Button : AutomationControlType.Group;

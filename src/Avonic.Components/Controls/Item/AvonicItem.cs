@@ -31,7 +31,7 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(
     ":lines-default", ":lines-full", ":lines-inset", ":lines-none", ":button", ":ion-activatable",
     ":item-multiple-inputs", ":item-control-needs-pointer-cursor")]
-public class AvonicItem : TemplatedControl
+public class AvonicItem : TemplatedControl, IItemHost
 {
     /// <summary><c>margin-inline-end: -6px</c> on <c>.item-detail-icon</c>. There's no variable for it.</summary>
     private const double DetailIconMarginEnd = -6;
@@ -219,17 +219,16 @@ public class AvonicItem : TemplatedControl
 
     public AvonicItem()
     {
-        // Ionic's class "item", which label.md.css's :host-context(.item) reads.
-        PseudoClasses.Add(":item");
-
         _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
 
-        // stopImmediatePropagation, for what's left of a tap that was forwarded. Tapped comes after the release.
+        // stopImmediatePropagation, for what's left of a tap that was forwarded. Tapped comes after the release, if it comes at all,
+        // so the next press ends it.
         AddHandler(TappedEvent, (_, e) =>
         {
             e.Handled = _forwarded;
             _forwarded = false;
         });
+        AddHandler(PointerPressedEvent, (_, _) => _forwarded = false, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
         UpdateLines();
         UpdateInteractivity();
@@ -456,12 +455,7 @@ public class AvonicItem : TemplatedControl
         }
     }
 
-    private void RaiseClick()
-    {
-        var args = new RoutedEventArgs(ClickEvent, this);
-        RaiseEvent(args);
-        _native?.ExecuteUnless(args);
-    }
+    private void RaiseClick() => _native?.Click(ClickEvent);
 
     // ── ionStyle ─────────────────────────────────────────────────────────────────────────────
 
@@ -506,7 +500,7 @@ public class AvonicItem : TemplatedControl
 
         /// <summary><c>aria-disabled</c>: <c>disabled || childStyles['item-interactive-disabled']</c>.</summary>
         protected override bool IsEnabledCore() =>
-            base.IsEnabledCore() && !owner.PseudoClasses.Contains(":item-interactive-disabled");
+            owner.IsEffectivelyEnabled && !owner.PseudoClasses.Contains(":item-interactive-disabled");
 
         /// <summary>
         /// <c>role="listitem"</c>, where <c>hostContext('ion-list')</c>. A button item stays a button: Ionic has a button inside the
@@ -526,7 +520,8 @@ public class AvonicItem : TemplatedControl
                 return name;
             }
 
-            return AccessibleText.Of(owner);
+            // A plain item has no native button to name, measured, and its children speak for themselves.
+            return owner.Button ? AccessibleText.Of(owner) : name;
         }
 
         protected override bool IsContentElementCore() => owner.Button;
