@@ -9,7 +9,7 @@
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicContentCaptureTests` (headless Skia, 2×) → [`compare/`](compare/).
 > **Real window:** tried on Windows at 125%, with real mouse and keyboard, and touch through Windows' touch injection.
 > **Not on real touch hardware.** See [the frame](compare/real-window.png). It found one bug that headless capture had missed:
-> the sample's pages are in a `ScrollViewer`, which measures with no height and arranges at the viewport's, and the fixed
+> the sample's pages were in a `ScrollViewer`, which measures with no height and arranges at the viewport's, and the fixed
 > slot's button was measured at zero and didn't show. Wheel, drag, flick, `ScrollToTop`, `ScrollToBottom`, `ScrollByPoint`,
 > `Fullscreen` and the scroll events all worked. Momentum ran on, at 0.15 px/ms 800 ms after a slow drag, and hasn't been
 > compared with a real device.

@@ -42,7 +42,7 @@ public partial class MainWindow : Window
     {
         PageTitle.Text = title;
         BackButton.IsVisible = true;
-        Host.Content = new ScrollViewer { Content = page };
+        Host.Content = page;
         ReportTiming(title, page);
     }
 

@@ -45,6 +45,7 @@ tools/ionic-ref/         renders the real Ionic component in headless Chromium (
                          screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/;
                          compare-icons.js compares every icon against it, pixel by pixel
 tools/ionicons/          generates src/Avonic.Components/Icons/ from the ionicons package
+tools/real-window/       drives the real sample window with real input and checks it; takes over the PC, so ask first
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs
 .mcp.json                Claude Code MCP servers: avalonia-docs (Avalonia's hosted Build MCP — docs and API lookup)
 ```
