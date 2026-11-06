@@ -147,14 +147,15 @@ public class FlexRowTests
     {
         var one = Text();
         var other = Text(Long + " " + Long);
-        using var scene = InRow(150, out _, one, other);
+        // Wide enough that each share is more than a word, whatever the font, or a minimum would hold it rather than the proportion.
+        using var scene = InRow(300, out _, one, other);
 
         one.Measure(Size.Infinity);
         other.Measure(Size.Infinity);
         var total = one.DesiredSize.Width + other.DesiredSize.Width;
 
-        Assert.InRange(one.Bounds.Width, (150 * one.DesiredSize.Width / total) - 1, (150 * one.DesiredSize.Width / total) + 1);
-        Assert.InRange(other.Bounds.Right, 149, 151);
+        Assert.InRange(one.Bounds.Width, (300 * one.DesiredSize.Width / total) - 1, (300 * one.DesiredSize.Width / total) + 1);
+        Assert.InRange(other.Bounds.Right, 299, 301);
     }
 
     [AvaloniaFact]
