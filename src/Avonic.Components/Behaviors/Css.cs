@@ -1,6 +1,7 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
+using Avalonia.Media;
 using Avalonia.Media.Transformation;
 
 namespace Avonic.Components.Behaviors;
@@ -25,6 +26,22 @@ public static class Css
 
     /// <summary>Four padding variables, in the order start, top, end, bottom, as a <see cref="Thickness"/>.</summary>
     public static readonly IMultiValueConverter Box = new BoxConverter();
+
+    /// <summary>
+    /// <c>calc(var(--padding-start) + var(--ion-safe-area-left, 0px))</c>: as <see cref="Box"/>, then
+    /// <c>Avonic.SafeAreaLeft</c>, <c>Avonic.SafeAreaRight</c> and the <c>FlowDirection</c>, which swaps them. The
+    /// <c>ConverterParameter</c> says where they're added: <c>Start</c>, <c>End</c> or <c>Both</c>. A <see cref="Thickness"/>
+    /// mirrors with the flow, so its first value is the start edge in both directions.
+    /// </summary>
+    public static readonly IMultiValueConverter SafeAreaBox = new SafeAreaBoxConverter();
+
+    /// <summary>
+    /// <c>line-height: 1</c>. CSS splits a line's leading above and below the text, and Avalonia keeps a line with a
+    /// smaller <c>LineHeight</c> at the top, which puts the text about 3 px low in a 36 px button. So this moves the
+    /// text up by half the leading, without changing its box. The values are the <c>TextBlock</c>'s font family,
+    /// weight, size and line height.
+    /// </summary>
+    public static readonly IMultiValueConverter HalfLeading = new HalfLeadingConverter();
 
     /// <summary>The percentage in <c>translateY(50%)</c>, as a fraction such as <c>0.5</c>. A style can ease it.</summary>
     public static readonly AttachedProperty<double> TranslateYProperty =
@@ -86,6 +103,41 @@ public static class Css
             return values.Count > 0 && values[0] is double size && IsSet(factor)
                 ? size * System.Convert.ToDouble(factor, CultureInfo.InvariantCulture)
                 : AvaloniaProperty.UnsetValue;
+        }
+    }
+
+    private sealed class SafeAreaBoxConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values is not [double start, double top, double end, double bottom, double left, double right, FlowDirection flow])
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var rtl = flow == FlowDirection.RightToLeft;
+            var side = parameter as string;
+            return new Thickness(
+                start + (side is "Start" or "Both" ? (rtl ? right : left) : 0),
+                top,
+                end + (side is "End" or "Both" ? (rtl ? left : right) : 0),
+                bottom);
+        }
+    }
+
+    private sealed class HalfLeadingConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values is not [FontFamily family, FontWeight weight, double fontSize, double lineHeight] || double.IsNaN(lineHeight))
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var metrics = new Typeface(family, weight: weight).GlyphTypeface.Metrics;
+            var natural = (double)metrics.LineSpacing / metrics.DesignEmHeight * fontSize;
+            var halfLeading = (natural - lineHeight) / 2;
+            return new Thickness(0, -halfLeading, 0, halfLeading);
         }
     }
 

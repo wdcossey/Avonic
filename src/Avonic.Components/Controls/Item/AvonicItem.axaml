@@ -10,6 +10,8 @@
                 <Border Name="PART_Native">
                     <Panel Background="Transparent">
                         <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                        <!-- Under the content, as ZIndex only sorts siblings and a slotted button's z-index: 1 has to be over it. See the plan. -->
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
                         <c:FlexRow Name="PART_Layout">
                             <c:FlexSlot Name="PART_Start"
                                         VerticalContentAlignment="Center"
@@ -37,7 +39,6 @@
                                 </c:FlexRow>
                             </Border>
                         </c:FlexRow>
-                        <c:AvonicRippleEffect Name="PART_Ripple" />
                     </Panel>
                 </Border>
             </ControlTemplate>

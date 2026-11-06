@@ -40,8 +40,7 @@ its only template. `PROCESS.md` allows that. Its `Styles` file is only for the l
 
 ## Deliberate differences
 
-None of its own. `A label with Position`, as in [`ion-list-header`'s plan](../ion-list-header/PLAN.md#not-in-this-pr), is the same here:
-measured `gst`, `gfx`.
+None of its own. A label's `Position` works here since #72: measured `gst`, `gfx`.
 
 The default text size outside a host is an open project question. Measured `gl`: a label directly in a group is 16, from the
 page. Avonic's is Avalonia's default, as it is for `ion-label` on its own.

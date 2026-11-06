@@ -76,7 +76,7 @@ key. In Avonic they're private fields that `Fullscreen` sets.
 
 ### Global variables
 
-`--ion-safe-area-*` → `Avonic.SafeAreaTop`, `…Bottom`, `…Left`, `…Right` (`double`, 0), in `Tokens/Content.axaml`.
+`--ion-safe-area-*` → `Avonic.SafeAreaTop`, `…Bottom`, `…Left`, `…Right` (`double`, 0), in `Tokens/Global.axaml` since #72.
 
 `ion-item` deferred these to this control, but **`content.css` doesn't read them**, so `AvonicContent` doesn't either. They're read
 by `ion-item`, `ion-header`, `ion-footer`, `ion-toolbar` and `ion-fab`. They're defined here so that #12 and the item have one
@@ -149,8 +149,8 @@ again. Removing it before it loads finishes a waiting task, unless it's a move a
 **A scroll lays out first,** with `UpdateLayout()`. In a browser, reading `scrollHeight` or setting `scrollTop` forces layout. Without this,
 adding content and calling `ScrollToBottom()` goes to the old end. Measured `added then bottom`: 1300 in Ionic.
 
-**Frames.** `requestAnimationFrame` and `readTask` are `AvonicConfig.Schedule` at 16 ms, so that `TestClock` asserts them exactly. A
-position comes from `AvonicConfig.Now`, so a late frame doesn't slow the scroll, but a 120 Hz screen only gets 60 updates.
+**Frames.** `requestAnimationFrame` and `readTask` are `AvonicConfig.RequestFrame`, since #72, and `TestClock` runs it at 16 ms so that it asserts them exactly. A
+position comes from `AvonicConfig.Now`, so a late frame doesn't slow the scroll.
 
 ## Design
 

@@ -36,6 +36,8 @@
                 <Border Name="PART_Native">
                     <Panel Background="Transparent">
                         <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                        <!-- Under the content, as ZIndex only sorts siblings and a slotted button's z-index: 1 has to be over it. See the plan. -->
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
                         <c:FlexRow Name="PART_Layout">
                             <c:FlexSlot Name="PART_Start"
                                         VerticalContentAlignment="Center"
@@ -63,7 +65,6 @@
                                 </c:FlexRow>
                             </Border>
                         </c:FlexRow>
-                        <c:AvonicRippleEffect Name="PART_Ripple" />
                     </Panel>
                 </Border>
             </ControlTemplate>
@@ -71,6 +72,8 @@
 
         <!-- .item-native -->
         <Style Selector="^ /template/ Border#PART_Native">
+            <!-- background-clip: border-box, so a translucent line shows the item's background, as measured -->
+            <Setter Property="BackgroundSizing" Value="OuterBorderEdge" />
             <Setter Property="MinHeight" Value="{DynamicResource Avonic.Item.MinHeight}" />
             <Setter Property="CornerRadius" Value="{DynamicResource Avonic.Item.BorderRadius}" />
             <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Item.BorderWidth}" />
@@ -93,11 +96,14 @@
         <!-- .item-native's padding. It's on a part inside, because ::after and the ripple cover the padding. -->
         <Style Selector="^ /template/ c|FlexRow#PART_Layout">
             <Setter Property="Margin">
-                <MultiBinding Converter="{x:Static b:Css.Box}">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Item.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Item.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Item.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Item.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -108,11 +114,14 @@
             <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Item.InnerBorderWidth}" />
             <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Item.InnerBoxShadow}" />
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static b:Css.Box}">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Item.InnerPaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Item.InnerPaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Item.InnerPaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Item.InnerPaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
                 </MultiBinding>
             </Setter>
             <Setter Property="BorderBrush">

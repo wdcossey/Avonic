@@ -26,8 +26,6 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Fixed", typeof(ContentPresenter))]
 public class AvonicContent : TemplatedControl
 {
-    /// <summary>Stands in for <c>requestAnimationFrame</c> and <c>readTask</c>, so that timelines run on <see cref="AvonicConfig.Schedule"/>.</summary>
-    internal static readonly TimeSpan FrameInterval = TimeSpan.FromMilliseconds(16);
 
     /// <summary>The <c>setInterval</c> of <c>onScrollStart</c>'s watchdog.</summary>
     internal static readonly TimeSpan WatchDogInterval = TimeSpan.FromMilliseconds(100);
@@ -342,7 +340,7 @@ public class AvonicContent : TemplatedControl
 
             if (easedT < 1)
             {
-                AvonicConfig.Schedule(Step, FrameInterval);
+                AvonicConfig.RequestFrame(element, Step);
             }
             else
             {
@@ -351,11 +349,11 @@ public class AvonicContent : TemplatedControl
         }
 
         // "chill out for a frame first"
-        AvonicConfig.Schedule(() =>
+        AvonicConfig.RequestFrame(element, () =>
         {
             startTime = AvonicConfig.Now().TotalMilliseconds;
             Step();
-        }, FrameInterval);
+        });
 
         return done.Task;
     }
@@ -751,12 +749,12 @@ public class AvonicContent : TemplatedControl
         if (!_queued)
         {
             _queued = true;
-            _frame = AvonicConfig.Schedule(() =>
+            _frame = AvonicConfig.RequestFrame(this, () =>
             {
                 _queued = false;
                 _frame = null;
                 RaiseScroll(shouldStart);
-            }, FrameInterval);
+            });
         }
     }
 

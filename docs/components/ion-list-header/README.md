@@ -50,7 +50,6 @@ Each has a test in `AvonicListHeaderTests`. See the [plan](PLAN.md#behaviours) f
 
 - **One child in the slot,** where Ionic's is a flex row. Use a `Grid`.
 - **An explicit `Lines` beats a token,** as for `ion-item`.
-- **A label's `Position` does nothing here.** Measured in Ionic, a stacked label's transform applies and pushes it out of the row.
 
 ## Extensions
 

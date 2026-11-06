@@ -230,14 +230,13 @@ public partial class ColorTokensTests
         Assert.True(checkedCount > 40, $"Only {checkedCount} fallbacks found: the pattern probably no longer matches");
     }
 
-    // Each falls back to --ion-background-color in Ionic. A card goes through --ion-item-background on
-    // the way, which a brush can't follow; see "A limit of always-defined keys" in the plan.
+    // Each falls back to --ion-background-color in Ionic. A card goes through --ion-item-background on the way, which
+    // its theme's Css.Var follows: see AvonicItemSharedTests.
     [AvaloniaTheory]
     [InlineData("Avonic.OverlayBackgroundColorBrush")]
     [InlineData("Avonic.ItemBackgroundBrush")]
     [InlineData("Avonic.ToolbarBackgroundBrush")]
     [InlineData("Avonic.TabBarBackgroundBrush")]
-    [InlineData("Avonic.CardBackgroundBrush")]
     public void Chained_Tokens_Follow_The_Background(string key) => WithTheme(() =>
     {
         Assert.Equal(Colors.White, BrushColor(key));

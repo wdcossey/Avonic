@@ -340,7 +340,7 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
-    public void B3_A_Second_Quick_Press_That_Slides_Does_Not_Click()
+    public void B3_A_Second_Quick_Press_That_Slides_Still_Clicks_With_A_Mouse()
     {
         var clicks = 0;
         var card = ButtonCard();
@@ -354,7 +354,8 @@ public class AvonicCardTests
         scene.Window.MouseUp(slid, MouseButton.Left, RawInputModifiers.None);
         Dispatcher.UIThread.RunJobs();
 
-        Assert.Equal(1, clicks);
+        // Measured: a mouse has no movement limit. A finger does, in NativeButtonTests.
+        Assert.Equal(2, clicks);
     }
 
     [AvaloniaFact]
@@ -422,7 +423,7 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
-    public void B3_Another_Pointer_Going_Down_Does_Not_End_A_Second_Press()
+    public void B3_A_Second_Finger_Ends_A_Second_Press_Measured()
     {
         var clicks = 0;
         var card = ButtonCard();
@@ -433,9 +434,9 @@ public class AvonicCardTests
         scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
         Dispatcher.UIThread.RunJobs();
 
-        // A second finger, somewhere else, which isn't on any of this press's events.
+        // A second finger, somewhere else, which isn't on any of this press's events. Measured on ion-button.
         card.RaiseEvent(new PointerPressedEventArgs(
-            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true), scene.Window, new Point(60, 20), 0,
+            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, false), scene.Window, new Point(60, 20), 0,
             new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None)
         {
             RoutedEvent = InputElement.PointerPressedEvent,
@@ -444,7 +445,7 @@ public class AvonicCardTests
 
         scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(2, clicks);
+        Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]
@@ -471,7 +472,7 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
-    public void B4_A_Child_That_Handles_The_Tap_Stops_Click()
+    public void B4_A_Child_That_Handles_Tapped_Does_Not_Stop_Click()
     {
         var clicks = 0;
         var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
@@ -483,30 +484,11 @@ public class AvonicCardTests
 
         Tap(scene, Box(child, scene.Window).Center);
 
-        Assert.Equal(0, clicks);
+        Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]
-    public void B4_A_Child_That_Handles_Both_Tap_Events_Stops_Every_Click()
-    {
-        var clicks = 0;
-        var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
-        child.Tapped += (_, e) => e.Handled = true;
-        child.DoubleTapped += (_, e) => e.Handled = true;
-        var card = ButtonCard();
-        card.Content = child;
-        card.Click += (_, _) => clicks++;
-        using var scene = new Scene(card);
-
-        var centre = Box(child, scene.Window).Center;
-        Tap(scene, centre);
-        Tap(scene, centre);
-
-        Assert.Equal(0, clicks);
-    }
-
-    [AvaloniaFact]
-    public void B4_A_Child_That_Takes_The_Press_Still_Clicks_Every_Time()
+    public void B4_A_Child_That_Takes_The_Press_Stops_Click_Every_Time()
     {
         var clicks = 0;
         var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
@@ -520,7 +502,7 @@ public class AvonicCardTests
         Tap(scene, centre);
         Tap(scene, centre);
 
-        Assert.Equal(2, clicks);
+        Assert.Equal(0, clicks);
     }
 
     // Measured outer, inner: a tap on the inner card is one click, which reaches both.

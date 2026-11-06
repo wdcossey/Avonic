@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
 
     <!--
         Ionic's global variables with their md defaults. Most aren't set in Ionic's light CSS and are
@@ -109,7 +110,16 @@
     <SolidColorBrush x:Key="Avonic.ItemBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
     <SolidColorBrush x:Key="Avonic.ToolbarBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
     <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
-    <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColor}" />
+    <!-- var(ion-card-background, var(ion-item-background, ...)) -->
+    <b:CssUnset x:Key="Avonic.CardBackgroundBrush" />
+
+    <!-- ion-safe-area-*, which ion-item, ion-item-divider and ion-list-header read here. Zero is the right default: Avalonia
+         pads its root view by the safe area itself, through TopLevel.AutoSafeAreaPadding. An app that turns that off sets
+         these from InsetsManager.SafeAreaPadding. See docs/components/ion-content/README.md. -->
+    <x:Double x:Key="Avonic.SafeAreaTop">0</x:Double>
+    <x:Double x:Key="Avonic.SafeAreaBottom">0</x:Double>
+    <x:Double x:Key="Avonic.SafeAreaLeft">0</x:Double>
+    <x:Double x:Key="Avonic.SafeAreaRight">0</x:Double>
 
     <!-- ion-font-family (html.md) -->
     <FontFamily x:Key="Avonic.FontFamily">Roboto, Helvetica Neue, sans-serif</FontFamily>

@@ -18,7 +18,17 @@
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <!-- font-size: 0.875rem -->
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="16,0,0,0" />
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                <DynamicResource ResourceKey="Avonic.ListHeader.Md.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.ListHeader.Md.PaddingOther" />
+                <DynamicResource ResourceKey="Avonic.ListHeader.Md.PaddingOther" />
+                <DynamicResource ResourceKey="Avonic.ListHeader.Md.PaddingOther" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
         <Setter Property="Background" Value="{DynamicResource Avonic.ListHeader.Background}" />
         <Setter Property="BorderThickness" Value="{DynamicResource Avonic.ListHeader.BorderWidth}" />
         <Setter Property="BorderBrush">
@@ -42,11 +52,11 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         Padding="{TemplateBinding Padding}">
                     <Border Name="PART_Inner">
-                        <ContentPresenter Name="PART_ContentPresenter"
-                                          VerticalContentAlignment="Center"
-                                          TextWrapping="Wrap"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        <c:FlexSlot Name="PART_ContentPresenter"
+                                VerticalContentAlignment="Center"
+                                TextWrapping="Wrap"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" />
                     </Border>
                 </Border>
             </ControlTemplate>

@@ -10,4 +10,8 @@
     <b:CssUnset x:Key="Avonic.ListHeader.Color" />
     <Thickness x:Key="Avonic.ListHeader.InnerBorderWidth">0</Thickness>
 
+    <!-- The padding on :host, which has no variable, as values so that the safe area can be added to them. -->
+    <x:Double x:Key="Avonic.ListHeader.Md.PaddingStart">16</x:Double>
+    <x:Double x:Key="Avonic.ListHeader.Md.PaddingOther">0</x:Double>
+
 </ResourceDictionary>

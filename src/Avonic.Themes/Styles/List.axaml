@@ -35,10 +35,4 @@
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <!-- role="listitem", where hostContext('ion-list'). A button item stays a button: Ionic has a button inside
-         the listitem, and Avalonia has one peer for both. -->
-    <Style Selector="c|AvonicList c|AvonicItem:not(:button)">
-        <Setter Property="AutomationProperties.ControlTypeOverride" Value="ListItem" />
-    </Style>
-
 </Styles>

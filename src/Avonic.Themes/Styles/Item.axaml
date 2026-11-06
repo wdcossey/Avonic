@@ -23,7 +23,7 @@
     </Style>
 
     <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.5em } -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicIcon">
         <Setter Property="Foreground" Value="{DynamicResource Avonic.ItemIconBrush}" />
         <Setter Property="FontSize">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
@@ -33,21 +33,21 @@
     </Style>
 
     <!-- :host(.ion-color) ::slotted(ion-icon) -->
-    <Style Selector="c|AvonicItem:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <Style Selector="c|AvonicItem:ion-color /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItem:ion-color /template/ ContentPresenter > :is(Panel) > c|AvonicIcon">
         <Setter Property="Foreground" Value="{Binding $parent[c:AvonicItem].Foreground}" />
     </Style>
 
     <!-- ::slotted(ion-icon[slot=start]), with ::slotted(ion-icon[slot]) -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Panel) > c|AvonicIcon">
         <Setter Property="Margin" Value="0,12,32,12" />
     </Style>
     <!-- ::slotted(ion-icon[slot=end]), with ::slotted(ion-icon[slot]) -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItem /template/ ContentPresenter#PART_End > :is(Panel) > c|AvonicIcon">
         <Setter Property="Margin" Value="16,12,0,12" />
     </Style>
 
-    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. -->
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control)">
+    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. A button keeps its own margin at its end, which Styles/Button.axaml says. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton)">
         <Setter Property="Margin" Value="16,7,0,7" />
     </Style>
 

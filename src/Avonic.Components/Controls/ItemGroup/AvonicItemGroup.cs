@@ -10,6 +10,12 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public class AvonicItemGroup : ItemsControl
 {
+    public AvonicItemGroup()
+    {
+        // Ionic's class "item", which label.md.css's :host-context(.item) reads.
+        PseudoClasses.Add(":item");
+    }
+
     /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. ion-item-group doesn't.</summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {

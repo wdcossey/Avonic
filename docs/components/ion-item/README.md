@@ -128,7 +128,16 @@ a variable set by the app would win. [PLAN.md](PLAN.md#deliberate-differences) s
 
 | Member | What it's for |
 |---|---|
-| `Click`, `ClickEvent` | Raised when a `Button` item is tapped or activated by keyboard. A native `<button>` gives Ionic this. `Tapped` works on any item |
+| `Click`, `ClickEvent` | Raised when a `Button` item is clicked or activated by keyboard. A native `<button>` gives Ionic this. `Tapped` works on any item |
+| `Command`, `CommandParameter` | Run on a click, unless a `Click` handler set `Handled`. A command that can't execute disables the item. They do nothing without `Button` |
+
+## Pressing it
+
+The press is a native `<button>`'s, shared with `AvonicButton` and `AvonicCard`:
+
+- **It clicks on release, on every press,** if the press and release both landed on it. With a mouse it can move as far as it likes. A finger that moves more than 15 px is scrolling, not tapping.
+- **A button inside clicks both.** To stop a button in a row from also tapping the row, set `Handled` in its `Click`, which is `click.stopPropagation()`.
+- **A child that handles `PointerPressed` stops the click,** as it stops `AvonicButton`'s. Handling `Tapped` doesn't.
 
 ## For control authors
 

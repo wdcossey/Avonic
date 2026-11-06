@@ -267,14 +267,19 @@ public static class Activatable
     /// <summary>
     /// <c>getRippleEffect</c>: the first ripple below the surface in tree order. Ionic's
     /// <c>querySelector</c> cannot pierce a nested component's shadow root, so the search does not
-    /// descend into another activatable surface.
+    /// descend into another activatable surface. A hidden ripple is one Ionic wouldn't have rendered,
+    /// such as a plain card's inside a button item.
     /// </summary>
     private static AvonicRippleEffect? FindRippleEffect(Visual root)
     {
         foreach (var child in root.GetVisualChildren())
         {
             if (child is AvonicRippleEffect ripple)
-                return ripple;
+            {
+                if (ripple.IsVisible)
+                    return ripple;
+                continue;
+            }
             if (child is Control c && GetIsEnabled(c))
                 continue;
             if (FindRippleEffect(child) is { } nested)

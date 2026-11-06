@@ -12,6 +12,7 @@ internal sealed class TestClock : IDisposable
 {
     private readonly Func<TimeSpan>                       _previousNow      = AvonicConfig.Now;
     private readonly Func<Action, TimeSpan, IDisposable>  _previousSchedule = AvonicConfig.Schedule;
+    private readonly Func<Avalonia.Visual, Action, IDisposable> _previousFrame = AvonicConfig.RequestFrame;
     private readonly List<Scheduled>                      _scheduled        = new();
 
     public TimeSpan Now { get; private set; }
@@ -25,6 +26,7 @@ internal sealed class TestClock : IDisposable
             _scheduled.Add(item);
             return item;
         };
+        AvonicConfig.RequestFrame = (_, callback) => AvonicConfig.Schedule(callback, AvonicConfig.FrameInterval);
     }
 
     /// <summary>Advance to <paramref name="milliseconds"/>, running every callback due on the way.</summary>
@@ -47,6 +49,7 @@ internal sealed class TestClock : IDisposable
     {
         AvonicConfig.Now      = _previousNow;
         AvonicConfig.Schedule = _previousSchedule;
+        AvonicConfig.RequestFrame = _previousFrame;
     }
 
     private sealed class Scheduled(TimeSpan due, Action callback) : IDisposable

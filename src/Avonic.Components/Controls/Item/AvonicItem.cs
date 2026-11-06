@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
@@ -160,6 +161,26 @@ public class AvonicItem : TemplatedControl
         remove => RemoveHandler(ClickEvent, value);
     }
 
+    /// <summary>Avonic extension: runs when a <see cref="Button"/> item clicks. It does nothing on a plain item, which has no native button.</summary>
+    public static readonly StyledProperty<ICommand?> CommandProperty =
+        AvonicButton.CommandProperty.AddOwner<AvonicItem>();
+
+    /// <summary>Avonic extension: the parameter for <see cref="Command"/>.</summary>
+    public static readonly StyledProperty<object?> CommandParameterProperty =
+        AvonicButton.CommandParameterProperty.AddOwner<AvonicItem>();
+
+    public ICommand? Command
+    {
+        get => GetValue(CommandProperty);
+        set => SetValue(CommandProperty, value);
+    }
+
+    public object? CommandParameter
+    {
+        get => GetValue(CommandParameterProperty);
+        set => SetValue(CommandParameterProperty, value);
+    }
+
     /// <summary>
     /// For the theme: <c>margin-inline-start: calc(var(--inner-padding-end) / 2)</c> and
     /// <c>margin-inline-end: -6px</c> on the detail icon.
@@ -185,36 +206,37 @@ public class AvonicItem : TemplatedControl
         ItemControlType.Textarea,
     ];
 
+    private readonly NativeButton? _native;
     private readonly Dictionary<Type, HashSet<string>> _itemStyles = [];
     private readonly HashSet<string> _appliedItemStyles = [];
     private ContentPresenter?[] _slots = [];
     private AvonicIcon? _detailIcon;
     private AvonicRippleEffect? _ripple;
     private bool _multipleInputs;
-    private bool _spacePressed;
-    private object? _secondTapSource;
-    private IPointer? _secondTapPointer;
-    private IPointer? _pressPointer;
+    private bool _forwarded;
     private IDisposable? _focusableFrame;
     private IDisposable? _noInputFrame;
 
     public AvonicItem()
     {
-        AddHandler(TappedEvent, OnTapped);
+        // Ionic's class "item", which label.md.css's :host-context(.item) reads.
+        PseudoClasses.Add(":item");
 
-        // A second quick press raises DoubleTapped, on the press, and no Tapped. A native <button> clicks each
-        // time, on release, so a finger that goes down to scroll doesn't activate anything.
-        AddHandler(PointerPressedEvent, OnPointerPressedBeforeSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(DoubleTappedEvent, (_, e) =>
+        _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
+
+        // stopImmediatePropagation, for what's left of a tap that was forwarded. Tapped comes after the release.
+        AddHandler(TappedEvent, (_, e) =>
         {
-            _secondTapSource = e.Source;
-            _secondTapPointer = _pressPointer;
+            e.Handled = _forwarded;
+            _forwarded = false;
         });
-        AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
         UpdateLines();
         UpdateInteractivity();
     }
+
+    /// <summary>A command only disables a button item. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
+    protected override bool IsEnabledCore => base.IsEnabledCore && (!Button || _native?.CanExecute != false);
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -226,7 +248,8 @@ public class AvonicItem : TemplatedControl
         }
         else if (change.Property == ButtonProperty)
         {
-            _spacePressed = false;
+            _native?.Reset();
+            UpdateIsEffectivelyEnabled();
             UpdateInteractivity();
         }
         else if (change.Property == IsEffectivelyEnabledProperty)
@@ -417,37 +440,11 @@ public class AvonicItem : TemplatedControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    private void OnTapped(object? sender, TappedEventArgs e) => e.Handled = Tap(e.Source);
-
-    private void OnPointerPressedBeforeSecondTap(object? sender, PointerPressedEventArgs e)
+    /// <summary><c>onClick</c>. A disabled <c>&lt;button&gt;</c> doesn't click, even if it was disabled during the press.</summary>
+    private void Tap(object? source)
     {
-        // Another finger going down doesn't end this one's press.
-        if (e.Pointer == _secondTapPointer)
-        {
-            _secondTapSource = null;
-            _secondTapPointer = null;
-        }
-
-        _pressPointer = e.Pointer;
-    }
-
-    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
-    {
-        if (_secondTapSource is { } source && e.Pointer == _secondTapPointer)
-        {
-            _secondTapSource = null;
-            _secondTapPointer = null;
-            if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
-            {
-                Tap(source);
-            }
-        }
-    }
-
-    /// <summary><c>onClick</c>. True if the tap was forwarded, which ends it: <c>stopImmediatePropagation</c>.</summary>
-    private bool Tap(object? source)
-    {
-        if (Button)
+        _forwarded = false;
+        if (Button && IsEffectivelyEnabled)
         {
             RaiseClick();
         }
@@ -455,52 +452,15 @@ public class AvonicItem : TemplatedControl
         if (!_multipleInputs && FirstInteractive() is { } first && !IsOnSlottedControl(source))
         {
             first.OnItemTap();
-            return true;
-        }
-
-        return false;
-    }
-
-    private void RaiseClick() => RaiseEvent(new RoutedEventArgs(ClickEvent, this));
-
-    /// <summary>A native <c>&lt;button&gt;</c>: Enter activates on press, and Space on release.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-
-        if (e.Handled || !Button || !ReferenceEquals(e.Source, this))
-        {
-            return;
-        }
-
-        if (e.Key == Key.Enter)
-        {
-            Tap(this);
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Space)
-        {
-            _spacePressed = true;
-            e.Handled = true;
+            _forwarded = true;
         }
     }
 
-    protected override void OnKeyUp(KeyEventArgs e)
+    private void RaiseClick()
     {
-        base.OnKeyUp(e);
-
-        if (e.Key == Key.Space && _spacePressed)
-        {
-            _spacePressed = false;
-            Tap(this);
-            e.Handled = true;
-        }
-    }
-
-    protected override void OnLostFocus(FocusChangedEventArgs e)
-    {
-        base.OnLostFocus(e);
-        _spacePressed = false;
+        var args = new RoutedEventArgs(ClickEvent, this);
+        RaiseEvent(args);
+        _native?.ExecuteUnless(args);
     }
 
     // ── ionStyle ─────────────────────────────────────────────────────────────────────────────
@@ -548,8 +508,14 @@ public class AvonicItem : TemplatedControl
         protected override bool IsEnabledCore() =>
             base.IsEnabledCore() && !owner.PseudoClasses.Contains(":item-interactive-disabled");
 
+        /// <summary>
+        /// <c>role="listitem"</c>, where <c>hostContext('ion-list')</c>. A button item stays a button: Ionic has a button inside the
+        /// listitem, and Avalonia has one peer for both.
+        /// </summary>
         protected override AutomationControlType GetAutomationControlTypeCore() =>
-            owner.Button ? AutomationControlType.Button : AutomationControlType.Group;
+            owner.Button ? AutomationControlType.Button
+            : owner.GetLogicalAncestors().OfType<AvonicList>().Any() ? AutomationControlType.ListItem
+            : AutomationControlType.Group;
 
         /// <summary>A native button names itself from what's inside it.</summary>
         protected override string? GetNameCore()
@@ -560,8 +526,7 @@ public class AvonicItem : TemplatedControl
                 return name;
             }
 
-            var text = owner.SlottedControls().OfType<TextBlock>().Select(block => block.Text).Where(value => !string.IsNullOrEmpty(value));
-            return string.Join(" ", text);
+            return AccessibleText.Of(owner);
         }
 
         protected override bool IsContentElementCore() => owner.Button;

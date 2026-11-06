@@ -80,7 +80,6 @@ The compare step found this.
 | What | Goes with |
 |---|---|
 | `inListHeader`, which sizes an `ion-button` in a header | `ion-button` (#10): it's that control's `closest()`. Read `button.js` |
-| A label's `Position` here: measured `hst`, a stacked label's transform applies with no item, and pushes it out of the row | `Styles/Label.axaml` only applies those rules in an item, and it isn't this PR's to edit. Docs for `position` say it's for items |
 | `select-popover`'s rule for `ion-list-header` | `ion-select` (#45) |
 | `--ion-safe-area-*` | `ion-content` (#11), as for `ion-item` |
 

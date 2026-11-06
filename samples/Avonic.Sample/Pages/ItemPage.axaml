@@ -43,6 +43,13 @@
                 </c:AvonicItem.EndContent>
             </c:AvonicItem>
 
+            <c:AvonicItem Button="True" Click="OnItemClick">
+                <c:AvonicLabel Content="A button in a button row" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicButton Content="Inside" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
             <c:AvonicItem>
                 <c:AvonicLabel Content="A short label" />
                 <c:AvonicItem.EndContent>

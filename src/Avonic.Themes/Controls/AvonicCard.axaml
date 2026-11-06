@@ -37,6 +37,7 @@
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Card.Background" />
                 <DynamicResource ResourceKey="Avonic.CardBackgroundBrush" />
+                <DynamicResource ResourceKey="Avonic.ItemBackgroundBrush" />
             </MultiBinding>
         </Setter>
         <!-- color: var(color), which is var(ion-card-color, ...) -->

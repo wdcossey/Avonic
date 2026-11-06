@@ -48,12 +48,6 @@ public class AvonicListTests
         Run();
     }
 
-    private static unsafe uint Pixel(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        return ((uint*)(buffer.Address + y * buffer.RowBytes))[x] & 0xFFFFFF;
-    }
-
     /// <summary>TestApp has no base theme, and a ScrollViewer's template comes from one.</summary>
     private static void Scrolling(Action test)
     {
@@ -361,8 +355,8 @@ public class AvonicListTests
         Run();
 
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Assert.Equal(0xFFFFFFu, Pixel(frame, 0, 0));
-        Assert.NotEqual(0xFFFFFFu, Pixel(frame, 8, 8));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 0, 0));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 8, 8));
     });
 
     [AvaloniaFact]
@@ -374,7 +368,7 @@ public class AvonicListTests
         Run();
 
         Assert.Equal(new Thickness(0), list.Margin);
-        Assert.NotEqual(0xFFFFFFu, Pixel(scene.Window.CaptureRenderedFrame()!, 0, 0));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 0, 0));
     });
 
     [AvaloniaFact]
@@ -385,8 +379,8 @@ public class AvonicListTests
         using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { list, new Border { Height = 100 } } });
 
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Assert.NotEqual(0xFFFFFFu, Pixel(frame, 100, 10));
-        Assert.Equal(0xFFFFFFu, Pixel(frame, 100, 30));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 100, 10));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 100, 30));
     });
 
     [AvaloniaFact]

@@ -295,6 +295,82 @@ One per row above, in `AvonicItemLayoutTests`, and `FlexRowTests` for the algori
 tests stay, as they say what `:has-note` was for. Two set `Top` on the note's neighbour and expected it to be ignored once the note left,
 which was the bookkeeping. A local `Top` is now `align-self`, as it is on the web, so those two lost that.
 
+## Shared press handling, `Command` and the rest (#72)
+
+What the first swarm proposed for shared files, which the human accepted. It's a list rather than one feature, so each part is on its own below.
+
+### What Ionic does
+
+Chromium, md, with `ion-app`, from a script in the PR's session. A click is the DOM's `click`.
+
+| # | Input | Measured |
+|---|---|---|
+| S1 | A finger that moves, on `ion-button`, `ion-item button` and `ion-card button` | Clicks at 0, 5, 10 and 14 px of movement, and not at 16, 20 or 40. The same on all three |
+| S2 | A mouse dragged 60 px, on all three | Clicks |
+| S3 | Right and middle button, on an item | No click |
+| S4 | A native `<button>` or `ion-button` in a `button` item | Both click: `nb,nestN` and `ib,nestI` |
+| S5 | Names of a `button` item's native element | `Hello inline words`, from a label with spans. `Text INNER BTN`, with an `ion-button` in it, in the case it's drawn. `Seen`, leaving out `display: none` and `visibility: hidden`. `With icon`. `Lab Not`, with a note. `Aria name` beats them all |
+| S6 | Roles | Host in `ion-list`: `listitem`, a `button` one too, with a `button` inside it. Outside a list: `generic` |
+| S7 | `position` on a label in a divider, a group and a list header | It applies in all three, as `:host(.label-stacked)` doesn't depend on `.item`. Stacked is `matrix(0.75, 0, 0, 0.75, 0, 15)` of a height of 30 in a divider, 9 of 18 in a group, and 22.5 of 45 in a header. Floating is 28.8 of 30, and 43.2 of 45. Fixed is 100 wide. A label alone is inline, so its transform does nothing |
+| S8 | An end-slot `ion-button` beside a stacked or floating label | Margins `16 7 2 7`, y = 7, and `16 4 2 4` beside a plain one |
+| S9 | `z-index` on a slotted `ion-button` | 1 |
+| S10 | A red item's native element with a 50% blue line of 10, on green | The line is `rgb(127, 0, 128)`: red shows through it, so the background reaches under the border |
+
+`ion-button`'s plan already measured that a child's `stopPropagation` stops the click, on one tap and on two quick ones.
+
+### One press behaviour
+
+`Behaviors/NativeButton.cs` is what a native `<button>` does, for `AvonicButton`, `AvonicItem` and `AvonicCard`, which had three copies of it and two different answers. It's internal, as nothing outside the library needs it.
+
+| Behaviour | Rule |
+|---|---|
+| A click | On release, by the left button or a finger, if the press and release both landed on the control and it still holds the pointer. On every press, so a second quick one counts |
+| A mouse | Has no movement limit: S2 |
+| A finger | Has a limit of 15 px, from S1, which ends the press for good. A constant in the code, as it's what Chromium has, not a look |
+| A second finger, a cancelled press, disabled during the press | No click, as `AvonicButton` measured |
+| A child that handles the press | Stops the click, as `stopPropagation` does: `ion-button`'s measurement |
+| A stock `Button` inside | Doesn't count as handling it, though it does: it always handles its press, and S4 says both click |
+| A child's `Click` with `Handled` set | Ends the press, so the item around it doesn't click. It's the real `click.stopPropagation()`, and how an app stops a button in a row from tapping the row |
+| A child that handles `Tapped` | **Doesn't stop it any more.** It used to on an item and a card, for one of two quick taps, which was the recorded gap. `Tapped` isn't what the click comes from now. This is the one change an app could notice |
+| A child that handles the press on a card or an item | **Stops it now,** where it didn't. The same rule as a button, as measured |
+| Enter and Space | Enter on press and Space on release, only with focus on the control itself |
+
+The item still marks `Tapped` handled after forwarding a tap, for `stopImmediatePropagation`.
+
+`Command` and `CommandParameter` are in it too, as extensions, with one property that the item and the card add as owners. They do nothing without `Button`, and a command that can't execute only disables an item or a card that has it.
+
+### The ripple
+
+`FindRippleEffect` skips a hidden ripple, so a button item with a plain card in it keeps its own. #61 said the card's template order and `ZIndex` could then go. They stay: they also make a card find its own ripple before a visible one in its content, as Ionic looks in its shadow root first.
+
+**In a button item the ripple goes under the content, not over it.** Ionic's is over everything except an `ion-button`, at `z-index: 1` (S9). `ZIndex` in Avalonia only sorts siblings, so a slotted button can't rise above something outside its slot. So it's over nothing. The ripple is the text's colour by default, so text looks the same, and it only shows under an icon or a note, or a `--ripple-color` of another colour.
+
+### Automation
+
+`Behaviors/AccessibleText.cs` reads what's drawn, in visual order: words in inlines, a nested button's text as it's drawn (S5), and no hidden text. The item, the card and the button use it. `role="listitem"` moves to the item's peer (S6), so a replaced theme keeps it, and the last rule in `Styles/List.axaml` goes. A button item stays a button: Avalonia has one peer for what Ionic has two of.
+
+### Styles and tokens
+
+| What | How | Evidence |
+|---|---|---|
+| `:item`, on the item, the divider and the group | Ionic's class `item`. `:host-context(.item)` becomes `:is(Control):item c\|AvonicLabel`, which removes the copies in `Styles/ItemDivider.axaml` and `Styles/ItemGroup.axaml` | The classes in S7 |
+| `Position` on a label in a divider, a group and a header | Those rules move to `:item`, and the header's own alternative, as it has no such class. Its presenter becomes a `FlexSlot`, so that a label's `Stretch` reaches it | S7 |
+| Icon rules reach an icon in a panel | The four selectors #60 listed | A panel stands for the slot |
+| End-slot button margin beside a stacked or floating label | `Styles/Item.axaml` leaves a button out, and `Styles/Button.axaml` says `16,7,2,7` | S8 |
+| Safe area | `Avonic.SafeArea*` move to `Tokens/Global.axaml`. `Css.SafeAreaBox` adds them at the start, the end or both, swapping sides in RTL. The item, as the issue says, and also the divider and the list header, as their CSS has it too and a row that alone ignored a notch would be noticed | `item.md.css`, `item-divider.md.css`, `list-header.md.css` |
+| `Avonic.CardBackgroundBrush` | Unset in `Tokens/Global.axaml`, so a card follows `--ion-item-background`. The dark palette sets it, as Ionic's does | `card.md.css` |
+| `BackgroundSizing` on the native border | `OuterBorderEdge`, if a test measures `rgb(127, 0, 128)` with it and not without | S10 |
+
+### Elsewhere
+
+- `AvonicConfig.RequestFrame`, so that `AvonicContent`'s scroll and its `ionScroll` get real frames rather than a 16 ms timer. `TestClock` keeps it at 16 ms.
+- `AvonicButton.HalfLeadingConverter` moves to `Css.HalfLeading`.
+- The tests' own pixel readers call `Frames.PixelAt`.
+
+### Tests
+
+Each row and rule above has one. In `NativeButtonTests` for the rules, on all three controls where they apply, and in each control's tests for the rest. `Tapped` tests that recorded the old rule change to say the new one.
+
 ## Deliberate differences
 
 | Difference | Why |
@@ -315,6 +391,8 @@ which was the bookkeeping. A local `Top` is now `align-self`, as it is on the we
 | `--detail-icon-font-size` is a factor, not a CSS length | So it stays relative to the item, as `1.25em` is |
 | Plain programmatic `Focus()` doesn't show `:ion-focused` | Ionic tracks a global keyboard mode, which starts on. Avalonia reports how focus arrived, which is more exact |
 | Keyboard activation of a nested control doesn't raise the item's `Click` | In a browser the click bubbles. Pointer taps do match. A button nested in a button item is rare |
+| The ripple is under a button item's content, where Ionic's is over all of it except an `ion-button` | `ZIndex` only sorts siblings, so a slotted button can't rise over a part outside its slot. It's the text's colour by default, so only an icon, a note or another `--ripple-color` shows the difference |
+| `requestAnimationFrame` in a hidden window: nothing fires, so a `ScrollToPoint` waits, as a browser's tab does. Outside a window a frame is a 16 ms timer | Avalonia has no frame to wait for there |
 | `Click` is only raised by `Button` items | On the web any element gets `click`. Use `Tapped` for the others |
 
 ## Not in this PR

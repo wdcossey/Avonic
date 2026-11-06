@@ -77,7 +77,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 |---|---|---|---|
 | 1 | `button`: activated, a ripple, a pointer | `ion-activated`, a wave at 160 ms, `cursor: pointer` | match |
 | 2 | Plain: none of it | no native part, no ripple | match. `PART_Native` exists, and does nothing |
-| 3 | Click on release, every time | one each for three quick clicks; none released outside or disabled | match, except a mouse drag. See below |
+| 3 | Click on release, every time | one each for three quick clicks; none released outside or disabled | match, including a mouse drag, since #72 |
 | 4 | A child's tap clicks too | `in<inner-btn`; a nested card gets one, as does the outer | match, except a child that only stops the first. See below |
 | 5 | Enter on press, Space on release | `enter down` and `space up` | match |
 | 6 | Tab stops | `button`, not `dis`, `disbtn` or plain | match. See below for what's inside a disabled card |
@@ -108,10 +108,5 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 
 Measured in Ionic, and recorded in [PLAN.md](PLAN.md#deliberate-differences):
 
-- **A mouse drag within the card.** Ionic clicks (measured: down, move 60 and 130, up, gives `drag<drag`). Avonic gets no
-  `Tapped` past Avalonia's small movement limit, so it doesn't click. Touch is meant to match, as a finger that moves is
-  scrolling in both, but this was only run with a mouse. **Known gap,** shared with `AvonicItem`.
-- **A child that stops the click.** Ionic: two quick taps give none (measured). A child handling `Tapped` stops the
-  first, and has to handle `DoubleTapped` too to stop the second. **Known gap,** shared with `AvonicItem`.
 - **A nested input in a disabled plain card** is still in Ionic's tab order (measured `dis-input`), and isn't in Avonic's.
-- **`--ion-item-background` and `--ion-item-color`** move a card in Ionic (measured `ivar2`), and don't in Avonic.
+- **`--ion-item-color`** moves a card in Ionic (measured `ivar2`), and doesn't in Avonic. `--ion-item-background` does, since #72.

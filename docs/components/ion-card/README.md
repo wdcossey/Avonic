@@ -81,7 +81,7 @@ over its own `Color`. A coloured header keeps its background. This is Ionic's `.
 | `ion-card` `--color` | `Avonic.Card.Color` | brush | Unset → `Avonic.CardColorBrush` |
 | `ion-card-title` `--color` | `Avonic.CardTitle.Color` | brush | Unset → `Avonic.TextColorStep150Brush` |
 | `ion-card-subtitle` `--color` | `Avonic.CardSubtitle.Color` | brush | Unset → `Avonic.TextColorStep450Brush` |
-| `--ion-card-background` | `Avonic.CardBackgroundBrush` | brush | Follows `Avonic.BackgroundColor` |
+| `--ion-card-background` | `Avonic.CardBackgroundBrush` | brush | Unset → `Avonic.ItemBackgroundBrush` |
 | `--ion-card-color` | `Avonic.CardColorBrush` | brush | Follows `Avonic.TextColorStep450` |
 | none: `box-shadow` | `Avonic.Card.BoxShadow` | `BoxShadows` | CSS's three layers. See [COMPARISON.md](COMPARISON.md) for how they draw above 1× |
 
@@ -96,7 +96,7 @@ These are in [PLAN.md](PLAN.md#behaviours), numbered, each with tests named afte
 - **Keyboard focus shows on a `Button` card, which it doesn't in Ionic.** See [Extensions](#extensions).
 - **Cards in a column are 20 apart unless the panel has `Spacing="-10"`,** where CSS collapses their margins to 10. For bound cards, put it on the `StackPanel` in `ItemsPanel`.
 - A tap on a child also clicks a `Button` card. A nested `Button` card raises one `Click` that reaches both.
-- `Click` comes on release, every time, and not with the secondary button.
+- `Click` comes on release, every time, and not with the secondary button. A mouse can move as far as it likes, and a finger 15 px. A child that handles `PointerPressed` stops it, and a button inside that sets `Handled` on its `Click`. Handling `Tapped` doesn't. It's the same press as [`ion-item`'s](../ion-item/README.md#pressing-it).
 
 ## Extensions
 
@@ -104,6 +104,7 @@ Not in Ionic, and named so that they can't collide with it:
 
 - **`Click`** on `AvonicCard`, a routed event. A native `<button>` gives Ionic this for free. It's only raised by a `Button`
   card, so use `Tapped` for others.
+- **`Command`, `CommandParameter`** run on a click, unless a `Click` handler set `Handled`. A command that can't execute disables the card. They do nothing without `Button`.
 
 - **Keyboard focus** on a `Button` card itself shows the text colour at 0.12 over the card, and clears as an item's does. In Ionic it's invisible, which is an accessibility cost. `PART_Focus` is that overlay, and it's only in the theme.
 
@@ -113,6 +114,4 @@ Not in Ionic, and named so that they can't collide with it:
 
 - **An item around a `Button` card, at any depth, also reacts to focus,** where Ionic's doesn't.
 - **The shadow's offset doesn't scale above 1×,** which is Avalonia's rendering and accepted as best effort. See [COMPARISON.md](COMPARISON.md).
-- **A mouse drag within the card** doesn't click, where it does in Ionic. A finger that slides shouldn't click in either, though this was only run with a mouse.
-- **A child that handles `Tapped`** stops only the first of two quick taps. To stop both, handle `DoubleTapped` too.
-- **`--ion-item-background` and `--ion-item-color`** don't move a card. See the [plan](PLAN.md#deliberate-differences).
+- **`--ion-item-color`** doesn't move a card. See the [plan](PLAN.md#deliberate-differences).

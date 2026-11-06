@@ -148,10 +148,6 @@ Avonic-only. None of these exist in Ionic.
 - `ß` stays `ß` where CSS gives `SS`, and `ﬁ` stays where CSS gives `FI`, because .NET maps one character to one.
 - A nested `TextBlock` with its own `FontSize` gets the button's line height, because `TextBlock.LineHeight` inherits as a size.
 - A slotted icon with `Size` set takes its margin from `FontSize`, not its real size. At `IconSize.Large` that's about 4 px.
-- An end-slot button beside a stacked or floating label has a margin of 0 at its end, where Ionic's stays 2, because the
-  item's rule for that state merges later.
-- The item's ripple paints over a button in a button item, where Ionic's `z-index: 1` keeps it under.
-- A button item's automation name doesn't include a nested button's text.
 - Solid's shadow is lighter at 2x than Chromium's: 205 against 165 on the first row under the button.
 
 Not here yet: `ion-buttons` (#12) and `ion-list-header` turn a null `Fill` into clear, and a toolbar has its own colour rules

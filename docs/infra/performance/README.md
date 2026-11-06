@@ -28,7 +28,7 @@ counts are exact.
 
 | Check | Now | Limit |
 |---|---|---|
-| Alternatives in all global rules | 171 | 200 |
+| Alternatives in all global rules | 175 | 200 |
 | Alternatives getting past a `TextBlock`'s type | 50 | 60 |
 | Alternatives getting past the type of any other common element, at most (`Border`) | 18 | 25 |
 | Alternatives that look at every ancestor of a common element | 0 | 0 |
