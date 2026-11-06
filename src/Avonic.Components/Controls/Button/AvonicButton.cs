@@ -295,6 +295,9 @@ public class AvonicButton : TemplatedControl, IItemControl
 
         // A TemplatedControl clips by default, which would cut off .button-native's box-shadow.
         ClipToBoundsProperty.OverrideDefaultValue<AvonicButton>(false);
+
+        // vertical-align: -webkit-baseline-middle. A default, not a theme's value, as FlexSlot would take that for align-self.
+        VerticalAlignmentProperty.OverrideDefaultValue<AvonicButton>(Avalonia.Layout.VerticalAlignment.Center);
     }
 
     public AvonicButton()

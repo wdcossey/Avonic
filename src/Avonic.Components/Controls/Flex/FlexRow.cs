@@ -68,6 +68,9 @@ public sealed class FlexRow : Panel
 
         /// <summary><see cref="Child"/> was last measured on one line, at <see cref="Base"/>.</summary>
         public bool MeasuredOnOneLine { get; set; }
+
+        /// <summary>The width on one line of something that's <c>flex</c>, whose <see cref="Base"/> is 0.</summary>
+        public double OneLine { get; set; }
     }
 
     protected override Size MeasureOverride(Size availableSize)
@@ -105,9 +108,8 @@ public sealed class FlexRow : Panel
             var box = Box(child);
             if (bounded && item.Flex > 0)
             {
-                // max-width: 100% limits the content.
                 item.Base = box;
-                item.Minimum = Math.Min(MinimumOf(child) - box, availableSize.Width) + box;
+                item.OneLine = child.DesiredSize.Width;
             }
             else
             {
@@ -119,6 +121,22 @@ public sealed class FlexRow : Panel
 
         Resolve(availableSize.Width);
 
+        // A flex label's minimum only matters if it got less than one line, and most don't, so most don't look for their words.
+        var again = false;
+        foreach (var item in _items)
+        {
+            if (bounded && !item.IsPart && item.Flex > 0 && item.Minimum is null && item.Size < item.OneLine)
+            {
+                item.Minimum = FlexMinimum(item, availableSize.Width);
+                again = true;
+            }
+        }
+
+        if (again)
+        {
+            Resolve(availableSize.Width);
+        }
+
         double width = 0, height = 0;
         foreach (var item in _items)
         {
@@ -127,11 +145,12 @@ public sealed class FlexRow : Panel
                 item.Child.Measure(new Size(MeasuredWidth(item, oneLine), availableSize.Height));
             }
 
-            width += item.Size;
+            width += bounded ? item.Child.DesiredSize.Width : item.Size;
             height = Math.Max(height, item.Child.DesiredSize.Height);
         }
 
-        return new Size(bounded ? availableSize.Width : width, height);
+        // No wider than its content, so that an item aligned to the left is as wide as what's in it. Arranged wider, it shares that out.
+        return new Size(Math.Min(availableSize.Width, width), height);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
@@ -166,11 +185,11 @@ public sealed class FlexRow : Panel
 
         if (GetFlex(slotted) > 0)
         {
-            return Math.Max(item.Size, 1);
+            return Math.Max(item.Size, Box(item.Child) + 1);
         }
 
         item.Child.Measure(oneLine);
-        return Math.Max(item.Size, MinContent(item.Child));
+        return Math.Max(item.Size, MinimumOf(item.Child));
     }
 
     /// <summary>Section 9.7, "Resolving Flexible Lengths".</summary>
@@ -188,34 +207,54 @@ public sealed class FlexRow : Panel
             return;
         }
 
-        var growing = _items.Sum(item => Math.Max(item.Base, item.Minimum ?? 0)) < width;
+        double hypothetical = 0;
+        foreach (var item in _items)
+        {
+            hypothetical += Math.Max(item.Base, item.Minimum ?? 0);
+        }
+
+        var growing = hypothetical < width;
+        var unfrozen = 0;
 
         foreach (var item in _items)
         {
             // Only what's overflowing needs this, and most rows don't.
             if (!growing && item.Minimum is null)
             {
-                item.Minimum = item.IsPart ? item.Base : MinimumOf(item.Child);
+                item.Minimum = item.IsPart ? item.Base : item.Flex > 0 ? FlexMinimum(item, width) : MinimumOf(item.Child);
             }
 
             item.Size = Math.Max(item.Base, item.Minimum ?? 0);
             item.Frozen = growing ? item.Flex <= 0 : item.Inner <= 0 || item.Size > item.Base;
+            unfrozen += item.Frozen ? 0 : 1;
         }
 
-        while (_items.Any(item => !item.Frozen))
+        while (unfrozen > 0)
         {
-            var unfrozen = _items.Where(item => !item.Frozen).ToList();
-            var free = width - _items.Sum(item => item.Frozen ? item.Size : item.Base);
-            var total = unfrozen.Sum(item => growing ? item.Flex : item.Inner);
+            double free = width, total = 0;
+            foreach (var item in _items)
+            {
+                free -= item.Frozen ? item.Size : item.Base;
+                total += item.Frozen ? 0 : growing ? item.Flex : item.Inner;
+            }
+
+            // Factors that add up to less than 1 only take that much of the free space.
+            var shares = growing ? Math.Max(total, 1) : total;
 
             var violated = false;
-            foreach (var item in unfrozen)
+            foreach (var item in _items)
             {
-                var size = item.Base + (free * (growing ? item.Flex : item.Inner) / total);
+                if (item.Frozen)
+                {
+                    continue;
+                }
+
+                var size = item.Base + (free * (growing ? item.Flex : item.Inner) / shares);
                 item.Size = Math.Max(size, item.Minimum ?? 0);
                 if (item.Size > size)
                 {
                     item.Frozen = true;
+                    unfrozen--;
                     violated = true;
                 }
             }
@@ -225,6 +264,13 @@ public sealed class FlexRow : Panel
                 break;
             }
         }
+    }
+
+    /// <summary>A flex label's minimum, as <c>max-width: 100%</c> limits its content to the row.</summary>
+    private static double FlexMinimum(Item item, double width)
+    {
+        var box = Box(item.Child);
+        return Math.Min(MinimumOf(item.Child) - box, width) + box;
     }
 
     private static double Horizontal(Thickness thickness) => thickness.Left + thickness.Right;

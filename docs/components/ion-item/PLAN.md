@@ -258,8 +258,8 @@ Chromium, md, 390 wide. `W` is the width of the box. The page is [`ref/layout/ca
 one-line sizes it has just measured: a `TextBlock` is its longest word, from a `TextLayout` in `WrapWithOverflow`, something with a
 `Width` is that, a panel adds up or takes the largest, and everything else can't shrink.
 
-**What it costs.** A part with `flex: 1` is measured once, and so is content that fits. A start label is measured on one line, has its longest word
-worked out, and is measured again, and so is a row that overflows. 300 items, the median of 7, in Release, headless, on this PC. It's two runs, as
+**What it costs.** A part with `flex: 1` is measured once, and so is content that fits. A start label is measured on one line and again at its share,
+and looks for its longest word only if its share is less than one line. A row that overflows does too. 300 items, the median of 7, in Release, headless, on this PC. It's two runs, as
 these move about:
 
 | Rows | Open the page, before and after (ms) | Change of width, before and after (ms) |
@@ -313,6 +313,7 @@ which was the bookkeeping. A local `Top` is now `align-self`, as it is on the we
 | A word wider than its box, outside a label, breaks in the word if the box is 64 or wider. In CSS it overflows and is clipped | `TextWrapping.Wrap` breaks it, and looking for `min-content` on every default slot would measure every item twice. Below 64 it does look, as a slot 6 wide would be a row 400 high |
 | A child with no height of its own, directly in a panel in a slot, collapses. So a `Grid` holding a background behind text loses the background | The panel stands for the slot, so its children are centred, as `align-items: center` does in CSS. A panel can't say it's one unit rather than several. `VerticalAlignment="Stretch"` on the child, or a `Border` around the `Grid`, gets it back |
 | Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
+| `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row |
 | A word's width is measured in the `TextBlock`'s own font, so a larger run in its inlines can break at its last letter when it's squeezed down to its longest word | Reading each run would be a layout of its own, for a case this rare |
 | A panel in a slot isn't `flex: 1`, even with a label in it | A panel is one item. Ionic's measured `div` is the same (342 wide). Two `slot="start"` elements, where the label would still be `flex: 1`, have no equivalent, as a slot holds one child |
 | In a parent that gives no width, such as a horizontal `StackPanel`, an item is one line wide | Measured in an `inline-block`, Ionic's `width: min-content` makes it 168 wide and squeezes it, which isn't something to copy |

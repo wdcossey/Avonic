@@ -9,7 +9,8 @@ namespace Avonic.Components.Controls;
 /// A <c>&lt;slot&gt;</c> in a <see cref="FlexRow"/>, styled as a <c>ContentPresenter</c>. A slot has no box, so its child is
 /// the row's item: this fills the row, and <c>VerticalContentAlignment</c> is <c>align-items</c>. A child that sets its own
 /// <c>VerticalAlignment</c> has <c>align-self</c>, which a <c>ContentPresenter</c> would ignore. A panel stands for the slot,
-/// so it fills it too, except a vertical stack, which is a group of its own, as a column in a <c>&lt;div&gt;</c> is.
+/// so it fills it too, except a vertical stack, which is a group of its own, as a column in a <c>&lt;div&gt;</c> is. A control
+/// that's aligned some way by default uses <c>OverrideDefaultValue</c> rather than its theme, as a theme's value counts as set.
 /// </summary>
 public sealed class FlexSlot : ContentPresenter
 {
@@ -47,13 +48,29 @@ public sealed class FlexSlot : ContentPresenter
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        if (Child is { } child && AlignsItself(child))
+        if (Child is not { } child)
         {
-            child.Arrange(new Rect(finalSize).Deflate(Padding + BorderThickness));
             return finalSize;
         }
 
-        return base.ArrangeOverride(finalSize);
+        var inner = new Rect(finalSize).Deflate(Padding + BorderThickness);
+        var height = inner.Height;
+        var y = inner.Y;
+        if (!AlignsItself(child) && VerticalContentAlignment != VerticalAlignment.Stretch)
+        {
+            height = Math.Min(child.DesiredSize.Height, inner.Height);
+            y += VerticalContentAlignment switch
+            {
+                VerticalAlignment.Center => (inner.Height - height) / 2,
+                VerticalAlignment.Bottom => inner.Height - height,
+                _ => 0,
+            };
+        }
+
+        // A slot squeezed below what its content was measured at. overflow: hidden clips it, where a TextBlock arranged narrower
+        // would wrap again, and no longer fit the height it asked for.
+        child.Arrange(new Rect(inner.X, y, Math.Max(inner.Width, child.DesiredSize.Width), height));
+        return finalSize;
     }
 
     private static bool AlignsItself(Control child) =>

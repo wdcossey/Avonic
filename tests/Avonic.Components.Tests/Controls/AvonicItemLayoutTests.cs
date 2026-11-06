@@ -218,6 +218,26 @@ public class AvonicItemLayoutTests
     });
 
     [AvaloniaFact]
+    public void F7_A_Squeezed_Label_With_A_Margin_Still_Wraps() => InstalledTheme.Run(_ =>
+    {
+        var item = new AvonicItem { Content = new AvonicLabel { Content = "Default", Margin = new Thickness(8, 10) }, EndContent = Label(Long) };
+        using var scene = InScene(item);
+
+        Assert.True(item.Bounds.Height > 3 * OneLineHeight());
+    });
+
+    [AvaloniaFact]
+    public void F8_Squeezed_Text_Is_Drawn_Word_By_Word_At_The_Height_It_Asked_For() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "Plain default words", TextWrapping = TextWrapping.Wrap };
+        var item = new AvonicItem { Content = text, EndContent = new Border { Width = 326, Height = 10 } };
+        using var scene = InScene(item);
+
+        AssertNear(OneLine("default"), text.Bounds.Width);
+        Assert.Equal(3, text.TextLayout.TextLines.Count);
+    });
+
+    [AvaloniaFact]
     public void F8_What_Is_Squeezed_Is_Clipped() => InstalledTheme.Run(_ =>
     {
         var content = new TextBlock { Text = "Plain default words", TextWrapping = TextWrapping.Wrap };
@@ -522,6 +542,34 @@ public class AvonicItemLayoutTests
     });
 
     [AvaloniaFact]
+    public void F19_A_Button_Follows_Align_Items() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "x" };
+        var item = new AvonicItem { Content = Label(Long), EndContent = button };
+        using var scene = InScene(item);
+
+        AssertNear((item.Bounds.Height - 1 - button.Bounds.Height) / 2, Box(button, item).Y);
+    });
+
+    [AvaloniaTheory]
+    [InlineData(LabelPosition.Stacked)]
+    [InlineData(LabelPosition.Floating)]
+    public void F19_A_Button_Beside_A_Stacked_Label_Is_At_The_Top(LabelPosition position) => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "x" };
+        var item = new AvonicItem
+        {
+            StartContent = new Border { Width = 10, Height = 100 },
+            Content = new AvonicLabel { Content = "x", Position = position },
+            EndContent = button,
+        };
+        using var scene = InScene(item);
+
+        Assert.True(item.Bounds.Height >= 100);
+        Assert.Equal(7, Box(button, item).Y);
+    });
+
+    [AvaloniaFact]
     public void F19_A_Child_Of_A_Panel_That_Asks_To_Stretch_Does() => InstalledTheme.Run(_ =>
     {
         var line = new Border { Width = 1, VerticalAlignment = VerticalAlignment.Stretch };
@@ -596,6 +644,24 @@ public class AvonicItemLayoutTests
             Assert.True(content.GetVisualDescendants().OfType<TextBlock>().First().Bounds.Height <= OneLineHeight());
         });
     }
+
+    [AvaloniaFact]
+    public void An_Item_Aligned_To_The_Left_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
+    {
+        var item = new AvonicItem { Content = "Short", HorizontalAlignment = HorizontalAlignment.Left };
+        using var scene = InScene(item);
+
+        AssertNear(16 + OneLine("Short") + 16, item.Bounds.Width);
+    });
+
+    [AvaloniaFact]
+    public void A_Divider_Aligned_To_The_Left_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
+    {
+        var divider = new AvonicItemDivider { Content = "Short", HorizontalAlignment = HorizontalAlignment.Left };
+        using var scene = InScene(divider);
+
+        Assert.True(divider.Bounds.Width < 150);
+    });
 
     [AvaloniaFact]
     public void The_Stub_Lays_Out_Without_A_Theme()

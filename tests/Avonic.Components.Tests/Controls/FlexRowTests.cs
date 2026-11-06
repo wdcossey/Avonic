@@ -54,6 +54,44 @@ public class FlexRowTests
     }
 
     [AvaloniaFact]
+    public void Flex_Under_1_Takes_Only_That_Much_Of_The_Free_Space()
+    {
+        var half = new Border { [FlexRow.FlexProperty] = 0.5d };
+        using var scene = InRow(300, out _, half);
+
+        Assert.Equal(150, half.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void Flex_Adding_Up_To_Under_1_Is_Each_Its_Own_Part()
+    {
+        var one = new Border { [FlexRow.FlexProperty] = 0.25d };
+        var other = new Border { [FlexRow.FlexProperty] = 0.5d };
+        using var scene = InRow(400, out _, one, other);
+
+        Assert.Equal(100, one.Bounds.Width);
+        Assert.Equal(200, other.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Row_With_Room_Asks_For_No_More_Than_Its_Content()
+    {
+        var row = new FlexRow { Children = { Fixed(30), new Border { [FlexRow.FlexProperty] = 1d, Child = Fixed(20) } } };
+        row.Measure(new Size(300, 100));
+
+        Assert.Equal(50, row.DesiredSize.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Row_That_Overflows_Asks_For_What_It_Has()
+    {
+        var row = new FlexRow { Children = { Fixed(200), Fixed(200) } };
+        row.Measure(new Size(300, 100));
+
+        Assert.Equal(300, row.DesiredSize.Width);
+    }
+
+    [AvaloniaFact]
     public void A_Flex_Box_Is_Not_Below_Its_Padding_Border_And_Margin()
     {
         var padded = new Border { Padding = new Thickness(16, 0, 8, 0), BorderThickness = new Thickness(1, 0, 2, 0), Margin = new Thickness(3, 0, 4, 0), [FlexRow.FlexProperty] = 1d };
@@ -586,6 +624,32 @@ public class FlexRowTests
 
         Assert.Equal(5, child.Bounds.X);
         Assert.Equal(7, child.Bounds.Y);
+    }
+
+    [AvaloniaFact]
+    public void Padding_Counts_For_A_Child_That_Follows_Align_Items()
+    {
+        var child = new Border { Height = 10 };
+        var slot = new FlexSlot { Content = child, Padding = new Thickness(5, 8, 5, 4), VerticalContentAlignment = VerticalAlignment.Center };
+        using var scene = InRow(100, out _, slot, new Border { Width = 50, Height = 100 });
+
+        Assert.Equal(5, child.Bounds.X);
+        Assert.Equal(47, child.Bounds.Y);
+    }
+
+    [AvaloniaFact]
+    public void A_Squeezed_Slot_Keeps_What_It_Holds_At_The_Width_It_Was_Measured()
+    {
+        var content = Text("Antidisestablishmentarianism");
+        var slot = new FlexSlot { Content = content, ClipToBounds = true, [FlexRow.FlexProperty] = 1d };
+        using var scene = InRow(100, out _, Fixed(100), slot);
+
+        var alone = new TextBlock { Text = "Antidisestablishmentarianism" };
+        alone.Measure(Size.Infinity);
+
+        Assert.Equal(0, slot.Bounds.Width);
+        Assert.Equal(alone.DesiredSize.Width, content.Bounds.Width, 0);
+        Assert.Equal(alone.DesiredSize.Height, content.Bounds.Height);
     }
 
     [AvaloniaFact]
