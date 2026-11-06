@@ -35,8 +35,10 @@ src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS va
   Tokens/Palettes/       merged by the consumer, not the theme (Dark.axaml)
   Styles/                <Styles> files for ::slotted rules, which a ControlTheme can't reach
 src/Avonic/              umbrella NuGet package — references both, no code
-tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step
-samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]
+tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step;
+                                 Performance/ holds the style budget (docs/infra/performance/README.md)
+samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]; a Debug build
+                         shows what each page cost to open (Diagnostics/)
 Directory.Build.targets  generates XamlManifest.Paths from a project's AvonicDiscoveredXaml globs
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
@@ -116,6 +118,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
 | `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |
 | A CSS rule for every descendant, on text | `>`, and `> :is(Panel) >`, not a descendant selector | A rule for a `TextBlock` is checked for every `TextBlock` in the app, and a descendant selector walks up its ancestors |
+| Commas between selectors | Each alternative costs every element in the app about 27 ns, so prefer fewer. `StyleBudgetTests` holds the total | `> :is(Panel) >` is a second alternative for each target |
+| `:host-context(.foo)` in a `ControlTheme` | Not possible: `c\|Host ^` compiles, ignores what's left of `^`, and applies everywhere | Use `Styles/` |
 | `::slotted(ion-foo[slot=start])` | `c\|AvonicHost /template/ ContentPresenter#PART_Start > c\|AvonicFoo`, in `Styles/` | `>` means direct children, as `::slotted` does |
 | `.ion-focusable`, `.ion-focused` | `FocusVisible.IsEnabled`, `:ion-focused` | |
 | `outline: none` | `FocusAdorner` set to `{x:Null}` in the theme | Unset falls back to the base theme's dashed rectangle. It reads null either way, so a test has to check the `AdornerLayer` |

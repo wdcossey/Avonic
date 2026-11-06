@@ -91,6 +91,8 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 
 - `/code-review` on the change, high effort, **twice** — the second pass on the fixed diff.
   Findings fixed or explicitly waived in the PR description.
+- If `StyleBudgetTests` goes over, the failure lists the largest rules. See whether the commas can go, or raise the limit
+  and say so in the PR, with the new total. See [performance](infra/performance/README.md).
 - A human reads `PLAN.md`, `COMPARISON.md` and the diff at the PR, and merges or requests changes.
 
 ## 5. Document

@@ -20,6 +20,10 @@
             </DockPanel>
         </Border>
 
+        <!-- A Debug build fills this in. See Diagnostics/PerformanceMonitor.cs. -->
+        <TextBlock Name="PerformanceLine" DockPanel.Dock="Bottom" IsVisible="False"
+                   FontSize="11" Margin="8,2" TextWrapping="Wrap" />
+
         <ContentControl Name="Host" />
     </DockPanel>
 
