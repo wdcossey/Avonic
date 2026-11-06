@@ -360,11 +360,13 @@ public class AvonicNoteTests
     [AvaloniaFact]
     public void B8_A_Vertical_Stack_Is_A_Group_The_Item_Centres() => InstalledTheme.Run(_ =>
     {
-        var group = new StackPanel { Children = { new AvonicNote { Content = "x" }, new TextBlock { Text = "x" } } };
+        var note = new AvonicNote { Content = "x" };
+        var group = new StackPanel { Children = { note, new TextBlock { Text = "x" } } };
         var item = new AvonicItem { Content = Tall(), EndContent = group };
         using var scene = InScene(item);
 
-        Assert.True(group.Bounds.Height < item.Bounds.Height);
+        // Measured at y = 27.59 in a row of 88. A stretched group would be centred too, with the note at the top.
+        Assert.True(Box(note, item).Y > 5);
         AssertCentred(group, item);
     });
 
