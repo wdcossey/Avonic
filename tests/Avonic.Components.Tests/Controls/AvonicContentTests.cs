@@ -671,6 +671,11 @@ public class AvonicContentTests
         Assert.Equal(300, Scroll(content).Offset.Y);
         // It goes on to whatever's outside.
         Assert.Equal(1, keys);
+
+        scene.Window.KeyPressQwerty(PhysicalKey.PageUp, RawInputModifiers.None);
+        Settle();
+        Assert.Equal(300, Scroll(content).Offset.Y);
+        Assert.Equal(2, keys);
     }
 
     [AvaloniaFact]
@@ -1467,7 +1472,7 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B18_The_Old_Watchdog_Does_Not_End_A_New_Scroll_After_Coming_Back()
     {
-        // The old one would tick at 300, and the new scroll's own at 250 and 350.
+        // The new scroll's own ticks are at 150 and 250. The old one's, if it were still going, are at 100 and 200.
         using var clock = new TestClock();
         var content = Tall();
         content.ScrollEvents = true;
@@ -1480,11 +1485,11 @@ public class AvonicContentTests
         box.Children.Clear();
         box.Children.Add(content);
         Settle();
-        clock.At(150);
+        clock.At(50);
         SetOffset(content, 200);
         clock.At(1000);
 
-        Assert.Equal(("end", 350d), log.Events[^1]);
+        Assert.Equal(("end", 250d), log.Events[^1]);
     }
 
     [AvaloniaFact]
@@ -2053,6 +2058,27 @@ public class AvonicContentTests
         Assert.True(task.IsCompletedSuccessfully);
         Assert.True(movedTask.IsCompletedSuccessfully);
         Assert.Equal(100, Scroll(moved).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B25_Back_In_The_Tree_Before_Load_A_New_Scroll_Waits_Again()
+    {
+        var content = Tall();
+        var box = (Panel)InBox(content);
+        var window = new Window { Content = box };
+        window.Show();
+        box.Children.Clear();
+        box.Children.Add(content);
+
+        var task = content.ScrollToPoint(null, 100);
+        Assert.False(task.IsCompleted);
+
+        Settle();
+        Assert.True(task.IsCompletedSuccessfully);
+        Assert.Equal(100, Scroll(content).Offset.Y);
+
+        window.Close();
+        Settle();
     }
 
     [AvaloniaFact]

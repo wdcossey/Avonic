@@ -6,7 +6,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -450,7 +449,6 @@ public class AvonicContent : TemplatedControl
             _fixed.PropertyChanged += OnFixedPropertyChanged;
         }
 
-        UpdateAxes();
         UpdateInsets();
         UpdateFixedPlacement();
         UpdateContainerChild();
@@ -498,17 +496,14 @@ public class AvonicContent : TemplatedControl
 
         _wasDetached = true;
 
-        // Removed before its first layout: a scroll that was waiting for one has nothing left to wait for, unless
-        // this was a move, and it's back by now.
+        // Removed before its first layout: a scroll that was waiting for one has nothing left to wait for. This runs
+        // after Loaded, so if it was a move and it's back by now, Loaded has already released it, with a real layout.
         if (_loaded is not null)
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (VisualRoot is null)
-                {
-                    _loaded?.TrySetResult();
-                    _loaded = null;
-                }
+                _loaded?.TrySetResult();
+                _loaded = null;
             }, DispatcherPriority.Background);
         }
     }
@@ -546,7 +541,7 @@ public class AvonicContent : TemplatedControl
     /// </summary>
     private void OnContainerInput(object? sender, RoutedEventArgs e)
     {
-        if (!e.Handled && !ScrollX && !ScrollY && e is PointerWheelEventArgs or KeyEventArgs { Key: Key.PageUp or Key.PageDown })
+        if (!ScrollX && !ScrollY)
         {
             _passedOver = e;
             e.Handled = true;

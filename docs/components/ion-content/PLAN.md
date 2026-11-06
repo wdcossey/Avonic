@@ -190,7 +190,7 @@ scroller at its limit keeps the wheel, and one that fits doesn't.
 **`ScrollY` off is still `Hidden`, not `Disabled`.** `overflow: hidden` is a scroller to a script and keeps its position, and locking a page while a
 sheet is open is a common use. `Disabled` would collapse the extent and send it to the top. So the control blocks user input instead. The recognizer's
 `CanVerticallyScroll` comes from `ScrollY`. Avalonia's presenter takes the wheel, and its viewer the page keys, whenever there's somewhere to go, without asking
-about the axis, and they can't be skipped from outside. So `PART_Container` marks that input handled to get past them, and `PART_Scroll` takes it back, so it
+about the axis, and they can't be skipped from outside. So `PART_Container` marks all unhandled wheel and key input handled to get past them, and `PART_Scroll` takes it back, so it
 carries on to whatever's outside. A drag at an angle can't be blocked that way, because the gesture's handler is in the presenter's constructor, so with
 `ScrollX` on and `ScrollY` off the vertical axis is `Disabled`.
 
