@@ -92,6 +92,14 @@ public class AvonicContentTests
 
     private static Color BrushColor(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
 
+    /// <summary>How many lines depends on the machine's font: three here, two on CI. More than one is what wrapping is.</summary>
+    private static void AssertMoreThanOneLine(Control text)
+    {
+        var oneLine = new TextBlock { Text = "x", FontSize = text.GetValue(TextElement.FontSizeProperty), FontFamily = text.GetValue(TextElement.FontFamilyProperty) };
+        oneLine.Measure(Size.Infinity);
+        Assert.True(text.Bounds.Height > oneLine.DesiredSize.Height * 1.5, $"{text.Bounds.Height} against one line of {oneLine.DesiredSize.Height}");
+    }
+
     private static unsafe Color PixelAt(WriteableBitmap frame, int x, int y)
     {
         using var buffer = frame.Lock();
@@ -442,13 +450,13 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B8_Long_Text_Wraps_To_The_Width()
     {
-        // Measured fitc: 390 wide, three lines.
+        // Measured fitc: 390 wide, and more than one line.
         var text = new TextBlock { Text = "A very long piece of text that certainly has to wrap around because it does not fit into a phone-sized viewport at all" };
         var content = new AvonicContent { Content = text };
         using var scene = new Scene(InBox(content));
 
         Assert.Equal(390, text.Bounds.Width);
-        Assert.True(text.Bounds.Height > 30, $"{text.Bounds.Height}");
+        AssertMoreThanOneLine(text);
         Assert.Equal(390, Scroll(content).Extent.Width);
     }
 
@@ -458,7 +466,7 @@ public class AvonicContentTests
         var content = new AvonicContent { Content = "A very long piece of text that certainly has to wrap around because it does not fit into a phone-sized viewport at all" };
         using var scene = new Scene(InBox(content));
 
-        Assert.True(Container(content).Child!.Bounds.Height > 30);
+        AssertMoreThanOneLine(Container(content).Child!);
     }
 
     private const string LongText = "A very long piece of text that certainly has to wrap around because it does not fit into a phone-sized viewport at all";
@@ -469,7 +477,7 @@ public class AvonicContentTests
         var content = new AvonicContent { FixedContent = LongText };
         using var scene = new Scene(InBox(content));
 
-        Assert.True(Fixed(content).Child!.Bounds.Height > 30);
+        AssertMoreThanOneLine(Fixed(content).Child!);
         Assert.True(Fixed(content).Child!.Bounds.Width <= 390);
     }
 
@@ -479,7 +487,7 @@ public class AvonicContentTests
         var content = new AvonicContent { FixedContent = LongText };
         using var scene = new Scene(InBox(content));
 
-        Assert.True(Fixed(content).Child!.Bounds.Height > 30);
+        AssertMoreThanOneLine(Fixed(content).Child!);
     });
 
     [AvaloniaFact]

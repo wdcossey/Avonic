@@ -50,7 +50,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 5 | An unknown `Color` | `bad` transparent, host's colour; `in` `rgb(197, 0, 15)` | match |
 | 6 | The fixed slot keeps what the host inherits | `pf` black on primary; `vf` black with `--color`; `gf` green | match |
 | 7 | Padding, keyboard offset, RTL | `pac` 10,20,350×100; `pb` 1060; `kb` 1050; `rtl` `0 0 10 0` | match |
-| 8 | Text wraps | `fitc` 390×54 | match without `ScrollX`. **Deliberate difference** with it |
+| 8 | Text wraps | `fitc` 390×54 | match without `ScrollX`, though the number of lines follows the font. **Deliberate difference** with it |
 | 9 | A child is as high as its content | `blkc` 18 | match |
 | 10 | The wheel moves axes that are on | `y` 0,60; `nn` 0,0; `xx` 30,60; `xo` 30,0 | match |
 | 10 | Script on an axis that's off | `nn` `scrollTop` 100, `scrollY false` 100; `y` `scrollLeft` 50; `xo` `scrollTop` 100 | match for `ScrollY` alone. **Deliberate difference** for `ScrollX` off, and for `ScrollY` off with `ScrollX` on: stays at 0 |
