@@ -86,7 +86,8 @@ public static class ColorPalette
     /// <summary>
     /// For a text colour binding. An unknown colour leaves <see cref="ContrastProperty"/> null, and a
     /// null <c>Foreground</c> hides the text, so this gives the property its default (black) instead.
-    /// Ionic inherits the parent's colour here, which a style can't do; see the colour system's plan.
+    /// To inherit the parent's colour, as Ionic does, use <c>Css.Var</c> with
+    /// <c>$parent[Control].(TextElement.Foreground)</c> as the last value instead.
     /// </summary>
     public static readonly IValueConverter NullToUnset =
         new FuncValueConverter<object?, object?>(value => value ?? AvaloniaProperty.UnsetValue);

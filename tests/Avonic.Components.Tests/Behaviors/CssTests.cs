@@ -10,6 +10,26 @@ public class CssTests
         converter.Convert(values, typeof(object), parameter, CultureInfo.InvariantCulture);
 
     [Fact]
+    public void TranslateScale_Is_A_Fraction_Of_The_Height_And_Then_A_Scale()
+    {
+        var matrix = Assert.IsType<Avalonia.Media.Transformation.TransformOperations>(
+            Convert(Css.TranslateScale, null, new Rect(5, 5, 100, 40), 0.5, 0.75)).Value;
+
+        // translateY(50%) scale(0.75): the translate isn't scaled.
+        Assert.Equal(0.75, matrix.M11, 3);
+        Assert.Equal(0.75, matrix.M22, 3);
+        Assert.Equal(0, matrix.M31, 3);
+        Assert.Equal(20, matrix.M32, 3);
+    }
+
+    [Fact]
+    public void TranslateScale_Needs_Bounds_And_Both_Values()
+    {
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, null, 0.5, 0.75));
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, new Rect(0, 0, 1, 1), 0.5));
+    }
+
+    [Fact]
     public void Var_Takes_The_First_Value_That_Is_Set() =>
         Assert.Equal("c", Convert(Css.Var, null, new CssUnset(), null, AvaloniaProperty.UnsetValue, "c", "d"));
 

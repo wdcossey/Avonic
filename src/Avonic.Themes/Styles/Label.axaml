@@ -1,0 +1,259 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItem>
+                <c:AvonicLabel Content="Default" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Color="danger" Content="Danger" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Heading" />
+                        <TextBlock Classes="p" Text="Paragraph" />
+                    </StackPanel>
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Position="Stacked" Content="Stacked" />
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of label.md.css and item.md.css's rules for labels, in the order that matters: where CSS
+         uses specificity, here a rule with a pseudoclass or class beats one without, and then later beats
+         earlier. So Item.axaml's stacked end margin already beats the plain end margin below. It's all here, not
+         in a ControlTheme, because nearly every rule depends on an ancestor, and Styles beat a ControlTheme.
+
+         A rule for a TextBlock is checked for every TextBlock in the app. A descendant selector then walks
+         up its ancestors, which every TextBlock pays for, in a label or not, so they use '>' here. -->
+
+    <!-- :host-context(.item) -->
+    <Style Selector="c|AvonicItem c|AvonicLabel">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- color: var(color), with color: initial, so it inherits -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Label.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so it inherits. -->
+    <Style Selector="c|AvonicLabel:ion-color">
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(ion-label), and a panel standing for the slot. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicLabel, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,10,0,10" />
+    </Style>
+    <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,10,16,10" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicLabel">
+        <Setter Property="Margin" Value="16,10,0,10" />
+    </Style>
+    <!-- :host(.item-toggle) ::slotted(ion-label), :host(.item-radio) ::slotted(ion-label) -->
+    <Style Selector="c|AvonicItem:item-toggle /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-radio /template/ ContentPresenter#PART_End > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,10,0,10" />
+    </Style>
+    <Style Selector="c|AvonicItem:item-toggle:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-toggle:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-radio:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-radio:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,7,0,7" />
+    </Style>
+
+    <!-- :host(.ion-text-nowrap), with the global utility class. white-space inherits, and so do these. -->
+    <Style Selector="c|AvonicLabel.ion-text-nowrap">
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+    </Style>
+    <!-- text-overflow: ellipsis is on :host-context(.item). overflow: hidden does nothing on an inline box. -->
+    <Style Selector="c|AvonicItem c|AvonicLabel.ion-text-nowrap">
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <!-- :host(.ion-text-wrap). It inherits, as line-height does, as a size rather than a factor. -->
+    <Style Selector="c|AvonicLabel.ion-text-wrap">
+        <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <!-- It's a factor of each element's own size in CSS, and it doesn't clip. -->
+    <Style Selector="c|AvonicLabel.ion-text-wrap > TextBlock, c|AvonicLabel.ion-text-wrap > :is(Panel) > TextBlock">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(*) h1 etc, with a panel standing for the slot. line-height 1.2 on h1 and h2 is from Ionic's
+         global typography. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+    <Style Selector="c|AvonicLabel > TextBlock.h1, c|AvonicLabel > :is(Panel) > TextBlock.h1">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight" Value="28.8" />
+    </Style>
+    <Style Selector="c|AvonicLabel > TextBlock.h2, c|AvonicLabel > :is(Panel) > TextBlock.h2">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight" Value="19.2" />
+    </Style>
+    <Style Selector="c|AvonicLabel > TextBlock.h3, c|AvonicLabel > TextBlock.h4, c|AvonicLabel > TextBlock.h5, c|AvonicLabel > TextBlock.h6, c|AvonicLabel > :is(Panel) > TextBlock.h3, c|AvonicLabel > :is(Panel) > TextBlock.h4, c|AvonicLabel > :is(Panel) > TextBlock.h5, c|AvonicLabel > :is(Panel) > TextBlock.h6">
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="LineHeight" Value="NaN" />
+    </Style>
+    <Style Selector="c|AvonicLabel > TextBlock.p, c|AvonicLabel > :is(Panel) > TextBlock.p">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="20" />
+        <!-- ::slotted(p), and a panel standing for the slot -->
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep400Brush}" />
+    </Style>
+    <!-- :host(.in-item-color)::slotted(p) -->
+    <Style Selector="c|AvonicItem:ion-color c|AvonicLabel > TextBlock.p, c|AvonicItem:ion-color c|AvonicLabel > :is(Panel) > TextBlock.p">
+        <Setter Property="Foreground" Value="{Binding $parent[c:AvonicLabel].Foreground}" />
+    </Style>
+
+    <!-- :host-context(.item-interactive-disabled:not(.item-multiple-inputs)) -->
+    <Style Selector="c|AvonicItem:item-interactive-disabled:not(:item-multiple-inputs) c|AvonicLabel">
+        <Setter Property="Cursor" Value="Arrow" />
+        <Setter Property="Opacity" Value="0.3" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <!-- :host-context(.item-input) -->
+    <Style Selector="c|AvonicItem:item-input c|AvonicLabel">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="MaxWidth" Value="200" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <!-- :host-context(.item-textarea) { align-self: baseline } -->
+    <Style Selector="c|AvonicItem:item-textarea c|AvonicLabel">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <!-- :host-context(.item-skeleton-text) -->
+    <Style Selector="c|AvonicItem:item-skeleton-text c|AvonicLabel">
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <!-- :host(.label-fixed). Inline outside an item, where none of this applies. -->
+    <Style Selector="c|AvonicItem c|AvonicLabel:position-fixed">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Width" Value="100" />
+        <Setter Property="MinWidth" Value="100" />
+        <Setter Property="MaxWidth" Value="200" />
+    </Style>
+
+    <!-- :host(.label-stacked), :host(.label-floating). FlowDirection mirrors the origin, which is .label-rtl. Ionic
+         only sets that from document.dir, so a right-to-left subtree differs: see the plan. -->
+    <Style Selector="c|AvonicItem c|AvonicLabel:position-stacked, c|AvonicItem c|AvonicLabel:position-floating">
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <!-- flex: 1 in a column fills it, whatever item-textarea's align-self says -->
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="MaxWidth" Value="Infinity" />
+        <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+        <!-- The height tracks at once, as CSS's percentage does. Only TranslateY and Scale ease. -->
+        <Setter Property="RenderTransform">
+            <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <!-- A stacked or floating label fills its slot, in any slot: flex: 1 in the column of .input-wrapper, and
+         align-self: stretch in .item-inner. It's what translateY's percentage is of. A presenter can't tell what's in
+         it, so the slots stretch and anything else goes to the top, which is align-items: start. A panel stays
+         stretched, because it stands for the slot. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter, c|AvonicItem:item-label-floating /template/ ContentPresenter">
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter > :is(Control):not(c|AvonicLabel):not(:is(Panel)), c|AvonicItem:item-label-floating /template/ ContentPresenter > :is(Control):not(c|AvonicLabel):not(:is(Panel))">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <!-- flex: initial, on :host-context(.item-input), takes that away -->
+    <Style Selector="c|AvonicItem:item-input c|AvonicLabel:position-stacked, c|AvonicItem:item-input c|AvonicLabel:position-floating">
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <!-- :host(.label-stacked). Not only in an item, though an inline box can't show the transform. -->
+    <Style Selector="c|AvonicLabel:position-stacked">
+        <Setter Property="b:Css.TranslateY" Value="0.5" />
+        <Setter Property="b:Css.Scale" Value="0.75" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <!-- :host(.label-floating) -->
+    <Style Selector="c|AvonicLabel:position-floating">
+        <Setter Property="b:Css.TranslateY" Value="0.96" />
+        <Setter Property="b:Css.Scale" Value="1" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <!-- :host(.label-no-animate.label-floating) -->
+    <Style Selector="c|AvonicLabel:position-floating:label-no-animate">
+        <Setter Property="Transitions" Value="{x:Null}" />
+    </Style>
+
+    <!-- :host-context(.ion-focused).label-floating, and has-focus, has-placeholder, has-value -->
+    <Style Selector="c|AvonicItem:ion-focused c|AvonicLabel:position-floating, c|AvonicItem:item-has-focus c|AvonicLabel:position-floating, c|AvonicItem:item-has-placeholder:not(:item-input) c|AvonicLabel:position-floating, c|AvonicItem:item-has-value c|AvonicLabel:position-floating">
+        <Setter Property="b:Css.TranslateY" Value="0.5" />
+        <Setter Property="b:Css.Scale" Value="0.75" />
+    </Style>
+
+    <!-- :host-context(.ion-focused).label-stacked:not(.ion-color), and floating, and has-focus -->
+    <Style Selector="c|AvonicItem:ion-focused c|AvonicLabel:position-stacked:not(:ion-color), c|AvonicItem:ion-focused c|AvonicLabel:position-floating:not(:ion-color), c|AvonicItem:item-has-focus c|AvonicLabel:position-stacked:not(:ion-color), c|AvonicItem:item-has-focus c|AvonicLabel:position-floating:not(:ion-color)">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+    </Style>
+
+    <!-- :host-context(.ion-focused.ion-color).label-stacked:not(.ion-color). An unknown colour inherits. -->
+    <Style Selector="c|AvonicItem:ion-focused:ion-color c|AvonicLabel:position-stacked:not(:ion-color), c|AvonicItem:ion-focused:ion-color c|AvonicLabel:position-floating:not(:ion-color), c|AvonicItem:item-has-focus:ion-color c|AvonicLabel:position-stacked:not(:ion-color), c|AvonicItem:item-has-focus:ion-color c|AvonicLabel:position-floating:not(:ion-color)">
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host-context(.ion-invalid.ion-touched).label-stacked:not(.ion-color). var(highlight-color-invalid)
+         isn't set on anything an item is inside, so it's invalid, and the colour inherits. -->
+    <Style Selector="c|AvonicItem.ion-invalid.ion-touched c|AvonicLabel:position-stacked:not(:ion-color), c|AvonicItem.ion-invalid.ion-touched c|AvonicLabel:position-floating:not(:ion-color)">
+        <Setter Property="Foreground" Value="{Binding $parent[Control].(TextElement.Foreground)}" />
+    </Style>
+
+</Styles>

@@ -79,8 +79,10 @@ part's default in a style as well, because a style can't override a value set di
 with nothing behind it, so a solid control loses its background. The one exception is inside a coloured
 ancestor, where the ancestor's values show through.
 
-Text is the one difference from Ionic. It's black rather than inheriting the parent's colour, so on the
-dark palette it's close to invisible; see [PLAN.md](PLAN.md#one-known-difference-text-with-an-unknown-colour).
+Text can differ from Ionic. A control that uses `ColorPalette.NullToUnset` gets black rather than the parent's colour,
+so on the dark palette it's close to invisible; see [PLAN.md](PLAN.md#one-known-difference-text-with-an-unknown-colour).
+To inherit, as Ionic does, use `Css.Var` with `$parent[Control].(TextElement.Foreground)` as the last value.
+[`ion-label`](../../components/ion-label/README.md) does.
 
 ## Tokens
 

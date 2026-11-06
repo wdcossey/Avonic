@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.LabelPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel Content="Default" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Color="danger" Content="Danger" />
+            </c:AvonicItem>
+            <c:AvonicItem Color="primary">
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Text="In a primary item" />
+                        <TextBlock Classes="p" Text="The paragraph follows the item" />
+                    </StackPanel>
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Classes="h1" Text="Heading one" />
+                        <TextBlock Classes="h2" Text="Heading two" />
+                        <TextBlock Classes="h3" Text="Heading three" />
+                        <TextBlock Classes="p" Text="Paragraph" />
+                    </StackPanel>
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel Content="Long text wraps by default, and the item grows to fit it, so nothing is cut off" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Classes="ion-text-wrap"
+                               Content="ion-text-wrap wraps too, with a line height of 1.5, so it's a little more open" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Classes="ion-text-nowrap"
+                               Content="ion-text-nowrap stays on one line, so this long text ends with an ellipsis" />
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicLabel Position="Fixed" Content="Fixed" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Position="Stacked" Content="Stacked" />
+            </c:AvonicItem>
+            <c:AvonicItem Button="True">
+                <Grid RowDefinitions="*,Auto">
+                    <c:AvonicLabel Position="Floating" Content="Floating: Tab here to raise it" />
+                    <TextBlock Grid.Row="1" Text=" " />
+                </Grid>
+            </c:AvonicItem>
+            <c:AvonicItem Button="True">
+                <Grid RowDefinitions="*,Auto">
+                    <c:AvonicLabel Position="Stacked" Content="Stacked: Tab here to colour it" />
+                    <TextBlock Grid.Row="1" Text=" " />
+                </Grid>
+            </c:AvonicItem>
+            <c:AvonicItem FlowDirection="RightToLeft">
+                <c:AvonicLabel Position="Stacked" Content="Right to left" />
+            </c:AvonicItem>
+
+            <c:AvonicLabel Margin="16" Color="success" Content="A label outside an item" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

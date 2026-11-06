@@ -1,6 +1,7 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
+using Avalonia.Media.Transformation;
 
 namespace Avonic.Components.Behaviors;
 
@@ -25,8 +26,41 @@ public static class Css
     /// <summary>Four padding variables, in the order start, top, end, bottom, as a <see cref="Thickness"/>.</summary>
     public static readonly IMultiValueConverter Box = new BoxConverter();
 
+    /// <summary>The percentage in <c>translateY(50%)</c>, as a fraction such as <c>0.5</c>. A style can ease it.</summary>
+    public static readonly AttachedProperty<double> TranslateYProperty =
+        AvaloniaProperty.RegisterAttached<StyledElement, double>("TranslateY", typeof(Css));
+
+    /// <summary>The factor in <c>scale(0.75)</c>. A style can ease it.</summary>
+    public static readonly AttachedProperty<double> ScaleProperty =
+        AvaloniaProperty.RegisterAttached<StyledElement, double>("Scale", typeof(Css), 1);
+
+    /// <summary>
+    /// <c>translateY(50%) scale(0.75)</c>: the values are the element's <c>Bounds</c>, which is what the
+    /// percentage is of, then <see cref="TranslateYProperty"/> and <see cref="ScaleProperty"/>. Ease those
+    /// two, not the result: in CSS a change of size moves the element at once, and only a change of the
+    /// percentage eases.
+    /// </summary>
+    public static readonly IMultiValueConverter TranslateScale = new TranslateScaleConverter();
+
+
     private static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
+
+    private sealed class TranslateScaleConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values is not [Rect bounds, double fraction, double scale])
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var builder = TransformOperations.CreateBuilder(2);
+            builder.AppendScale(scale, scale);
+            builder.AppendTranslate(0, bounds.Height * fraction);
+            return builder.Build();
+        }
+    }
 
     private sealed class VarConverter : IMultiValueConverter
     {
