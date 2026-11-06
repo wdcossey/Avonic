@@ -75,7 +75,7 @@ and `IonScrollEnd` when a 100 ms watchdog finds 120 ms of quiet. `event` and `da
 | [x] | `scrollToTop(duration?)` | `Task ScrollToTop(double duration = 0)` |
 | [x] | `scrollToBottom(duration?)` | `Task ScrollToBottom(double duration = 0)` |
 
-Durations are in milliseconds. Under 32, or with `AvonicConfig.Animated` off, it jumps and the task has already finished. Otherwise it waits a frame
+Durations are in milliseconds. Under 32, it jumps and the task has already finished. `AvonicConfig.Animated` doesn't change this, as Ionic's scroll ignores `animated`. Otherwise it waits a frame
 and eases out, and the task finishes with it. A scroll asked for before the first layout waits for it. Nothing cancels an animation, as in
 Ionic: not a second call, and not the user's finger.
 

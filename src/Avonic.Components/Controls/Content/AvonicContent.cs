@@ -293,10 +293,10 @@ public class AvonicContent : TemplatedControl
     }
 
     /// <summary>
-    /// Ionic <c>scrollToPoint</c>. A null coordinate stays where it is. Below 32 ms, or with
-    /// <see cref="AvonicConfig.Animated"/> off, it jumps at once. Otherwise it waits a frame, then eases out. As in
-    /// Ionic, nothing cancels it: a second call or the user's finger doesn't stop it, and the last write of each frame
-    /// wins.
+    /// Ionic <c>scrollToPoint</c>. A null coordinate stays where it is. Below 32 ms it jumps at once. Otherwise it
+    /// waits a frame, then eases out, even with <see cref="AvonicConfig.Animated"/> off, as Ionic's ignores
+    /// <c>animated</c>. As in Ionic, nothing cancels it: a second call or the user's finger doesn't stop it, and the
+    /// last write of each frame wins.
     /// </summary>
     /// <param name="x">The point on the horizontal axis.</param>
     /// <param name="y">The point on the vertical axis.</param>
@@ -312,7 +312,7 @@ public class AvonicContent : TemplatedControl
         // Setting scrollTop makes a browser lay out, and Avalonia limits an offset by the last layout.
         element.UpdateLayout();
 
-        if (duration < MinAnimatedDuration || !AvonicConfig.Animated)
+        if (duration < MinAnimatedDuration)
         {
             var offset = element.Offset;
             element.SetCurrentValue(ScrollViewer.OffsetProperty, new Vector(x ?? offset.X, y ?? offset.Y));

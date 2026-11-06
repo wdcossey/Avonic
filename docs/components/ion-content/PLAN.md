@@ -116,7 +116,7 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 21 | Under 32 ms it jumps, limited to the range. A null coordinate stays | `duration < 32`; measured `31 vs 32`, `null keeps`, `bottom` |
 | 22 | At 32 ms or more: a frame's wait, then a cubic ease-out, floored, from where it was. An axis with no change isn't written | `scrollToPoint`; measured `frac anim` |
 | 23 | Nothing cancels an animation: not a second one, not the user, not removal. Each task finishes | measured `concurrent`, `user during`, `detached` |
-| 24 | `AvonicConfig.Animated` off makes it jump. Deliberate: see below | measured `animated:false` |
+| 24 | `AvonicConfig.Animated` off changes nothing: it still eases | measured `animated:false`: 264 of 500 after 60 ms |
 | 25 | `ScrollToTop`, `ScrollToBottom` and `ScrollByPoint` go through it. Content added just now counts. Before load, a scroll waits for load | measured `bottom`, `short`, `added then bottom`, `before attached` |
 | 26 | `Fullscreen` takes the background and scroll parts to the page's edges, and pads the content back, so it starts where it would have and can scroll clear. They paint and take input there, unless something with a higher `ZIndex` is on top. The page is the closest `.ion-page`, or else the parent | `readDimensions`, `getPageElement`; measured `fs`, `nest`, `hit at head` |
 | 27 | `Fullscreen` follows a change, and the page's layout, at once | measured `toggle on`, `toggle off`, `head grows` |
@@ -171,7 +171,7 @@ system's plan says isn't planned. The keyboard offset is its own property, an ex
 
 **A text box stays on one line.** `TextBlock.TextWrapping` inherits, and it's on for text, as CSS wraps. A `TextBox` shares the property, so without
 `c|AvonicContent TextBox` in `Styles/Content.axaml` every single-line field in a page would wrap and grow. It's a descendant selector, which the project
-avoids for common types, because it walks ancestors on attach. A text box is rare next to a `TextBlock`, and I haven't measured the cost. It's only in the
+avoids for common types, because it walks ancestors on attach. Measured with and without, alternating, on 5,000 at depth 20 in Release: 104 ms against 104 ms, so no measurable cost. It's only in the
 theme, because a stub's `ControlTheme` can't reach a descendant. `AvonicItem` has the same inherited wrap.
 
 **Behaviour's in the control, at style priority where a child is involved.** A child's `VerticalAlignment` is `Top`, and a fixed child's alignments are
@@ -211,7 +211,6 @@ carries on to whatever's outside. A drag at an angle can't be blocked that way, 
 
 | Difference | Why |
 |---|---|
-| With `AvonicConfig.Animated` off, a timed scroll jumps | Measured `animated:false`: Ionic's `scrollToPoint` ignores `animated`, at 264 of 500 after 60 ms. `AvonicConfig.Animated` is documented here as the master switch. See "For you to decide" in the PR |
 | `ScrollX` off means text wraps and a wider child is clipped, with no way to reach it by script | `Disabled` measures at the viewport's width, so text wraps. CSS can have both, and measured `y` reaches `scrollLeft` 50 by script. Avalonia limits a desired size to what's available, so a wider child can't report its width at a finite measure |
 | `ScrollX` on means text doesn't wrap at the viewport, unless it's given a width | `Hidden` measures at infinite width. Measured `fitc` wraps at 390 with `scroll-x`. Same cause |
 | With `ScrollX` on and `ScrollY` off, a script can't scroll vertically, and turning `ScrollY` off goes to the top | See the design. Measured `xo` takes `scrollTop` 100. `ForceOverscroll` also needs `ScrollY`, where measured `sx` has 301 with only `scroll-x`, reachable by script only |

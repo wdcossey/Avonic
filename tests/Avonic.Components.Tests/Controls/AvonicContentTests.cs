@@ -1855,9 +1855,9 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
-    public void B24_With_Animated_Off_It_Jumps()
+    public void B24_With_Animated_Off_It_Still_Eases()
     {
-        // Deliberate: measured animated:false, Ionic still animates (264 at 60 ms). AvonicConfig.Animated is the master switch.
+        // Measured animated:false: Ionic ignores it, at 264 of 500 after 60 ms.
         using var clock = new TestClock();
         var content = Tall();
         using var scene = new Scene(InBox(content));
@@ -1866,9 +1866,18 @@ public class AvonicContentTests
         try
         {
             var task = content.ScrollToPoint(null, 500, 300);
+            Assert.False(task.IsCompleted);
+            Assert.Equal(0, Scroll(content).Offset.Y);
 
-            Assert.True(task.IsCompletedSuccessfully);
+            clock.At(16);
+            clock.At(160);
+            var eased = Scroll(content).Offset.Y;
+            Assert.InRange(eased, 1, 499);
+            Assert.False(task.IsCompleted);
+
+            clock.At(320);
             Assert.Equal(500, Scroll(content).Offset.Y);
+            Assert.True(task.IsCompletedSuccessfully);
         }
         finally
         {

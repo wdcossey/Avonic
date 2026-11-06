@@ -69,7 +69,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 21 | Jumps | `0 sync?` 100 after one await; `31 vs 32`; `null keeps` 40; `past` 700; `neg` 0 | match, and synchronous |
 | 22 | Animation | `frac anim` 100; `timeline 300` eases over about 300 ms after a frame | match. `TestClock` checks the formula exactly, and Chromium's frames can't be compared to the millisecond |
 | 23 | Nothing cancels it | `concurrent` `[500, 100]`; `user during` `[10, 500]`; `detached` done | match |
-| 24 | `animated: false` | 264 of 500 at 60 ms: Ionic ignores it | **deliberate difference**: it jumps |
+| 24 | `animated: false` | 264 of 500 at 60 ms: Ionic ignores it | match: it still eases |
 | 25 | The other methods | `bottom` 700, `by` 61 from 30 and 30.5, `byNeg` 0; `short` 0; `added then bottom` 1300; `before attached` waits, then 100 | match, except `by`: Chromium rounds to 61, and Avonic keeps 60.5: **deliberate difference** |
 | 26 | `Fullscreen` | `fs` host 466–770, parts 410–810, first child 466, `56`/`40`; `nest` 18/182; `hit at head` the head | match |
 | 27 | `Fullscreen` changes | `toggle on`, `toggle off`; `head grows` 56 until a resize and 100 ms | match for toggles. **Deliberate difference** for the head: it follows at once |
