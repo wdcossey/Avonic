@@ -57,7 +57,7 @@ The parts are flex rows, as Ionic's are, and long content in any slot wraps.
 - **A label in the start or default slot is `flex: 1`.** So a start label takes half the row, however short it is, and its row is shared with the default slot.
 - **Anything else in a slot is as wide as its content,** down to its longest word. A long one takes all it can, and squeezes the default slot, to nothing if it has to.
 - **What's in a slot is centred,** at the top beside a stacked or floating label, and stretched in a textarea item. A control that sets its own `VerticalAlignment` gets that, as `align-self` does. A note does.
-- **A panel fills its slot,** and what's in it is centred, except a vertical stack, which is a group that's centred as one.
+- **A panel fills its slot,** and what's in it is centred, except a vertical stack, which is a group that's centred as one. So a child with no height of its own collapses, as it does in CSS, and a `Grid` holding a background behind text needs `VerticalAlignment="Stretch"` on the background, or a `Border` around the `Grid`, which isn't a panel.
 - **For a long note and an icon in one slot, use a `Grid` with `*,Auto`.** A horizontal `StackPanel` gives its children all the width they ask for, so they don't wrap.
 
 A squeezed label wraps at every character, which makes its row tall, as Ionic's does.

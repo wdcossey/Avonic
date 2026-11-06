@@ -18,6 +18,13 @@ namespace Avonic.Components.Controls;
 public sealed class FlexRow : Panel
 {
     /// <summary>
+    /// Below this, a slot looks for its content's longest word rather than break inside words, and above it the break is what
+    /// happens. CSS looks at every width, but that would measure every row twice, and it's a narrow slot that gets silly: at
+    /// 6 wide it's a character a line and 400 high, and at 64 it's a few lines.
+    /// </summary>
+    private const double NarrowSlot = 64;
+
+    /// <summary>
     /// CSS's one-number <c>flex</c>. 0 is <c>flex: initial</c>, and <c>n</c> is <c>flex: n</c>: grows by <c>n</c>, from a
     /// basis of 0. On a child of a <see cref="FlexSlot"/>, a style can set it, as a <c>&lt;slot&gt;</c> has no box and its
     /// children are the row's items. A part of the template that sets it has <c>overflow: hidden</c>, so no minimum.
@@ -88,22 +95,22 @@ public sealed class FlexRow : Panel
 
             var item = new Item(child)
             {
-                Flex = own > 0 ? own : child is ContentPresenter { Child: { } slotted } ? GetFlex(slotted) : 0,
+                Flex = own > 0 ? own : Slotted(child) is { } slotted ? GetFlex(slotted) : 0,
                 IsPart = own > 0,
             };
             _items.Add(item);
 
+            child.Measure(oneLine);
+
             var box = Box(child);
             if (bounded && item.Flex > 0)
             {
-                // max-width: 100% limits the content, and min-content needs one-line sizes to work from.
-                child.Measure(oneLine);
+                // max-width: 100% limits the content.
                 item.Base = box;
                 item.Minimum = Math.Min(MinimumOf(child) - box, availableSize.Width) + box;
             }
             else
             {
-                child.Measure(oneLine);
                 item.Base = child.DesiredSize.Width;
                 item.Inner = Math.Max(0, item.Base - box);
                 item.MeasuredOnOneLine = true;
@@ -145,25 +152,25 @@ public sealed class FlexRow : Panel
     }
 
     /// <summary>
-    /// What to measure with, which isn't the size when something has been squeezed to nothing. A <c>TextBlock</c> doesn't
-    /// wrap at all at a width of 0, and CSS wraps a label at every character there, as <c>max-width: 100%</c> takes away
-    /// its minimum. Anything else in <c>.input-wrapper</c> keeps its <c>min-content</c>, and <c>overflow: hidden</c> clips it.
+    /// What to measure with, which isn't the size when something has been squeezed. A <c>TextBlock</c> doesn't wrap at all at a
+    /// width of 0, and CSS wraps a label at every character there, as <c>max-width: 100%</c> takes away its minimum. Anything
+    /// else in <c>.input-wrapper</c> keeps its <c>min-content</c>, and <c>overflow: hidden</c> clips it.
     /// </summary>
     private static double MeasuredWidth(Item item, Size oneLine)
     {
         item.Child.ApplyTemplate();
-        if (item.Size >= 1 || item.Child is not ContentPresenter { Child: { } slotted } slot)
+        if (item.Size >= NarrowSlot || Slotted(item.Child) is not { } slotted)
         {
             return item.Size;
         }
 
         if (GetFlex(slotted) > 0)
         {
-            return 1;
+            return Math.Max(item.Size, 1);
         }
 
-        slot.Measure(oneLine);
-        return MinContent(slot);
+        item.Child.Measure(oneLine);
+        return Math.Max(item.Size, MinContent(item.Child));
     }
 
     /// <summary>Section 9.7, "Resolving Flexible Lengths".</summary>
@@ -231,14 +238,17 @@ public sealed class FlexRow : Panel
         _ => 0,
     };
 
-    /// <summary><see cref="OwnBox"/>, and a slotted child's, which is the row's item.</summary>
+    /// <summary>What's in a slot, which is the row's item. A hidden one is <c>display: none</c>, so it isn't one.</summary>
+    private static Control? Slotted(Control child) => child is ContentPresenter { Child: { IsVisible: true } slotted } ? slotted : null;
+
+    /// <summary><see cref="OwnBox"/>, and a slotted child's.</summary>
     private static double Box(Control control) =>
-        OwnBox(control) + (control is ContentPresenter { Child: { } child } ? OwnBox(child) : 0);
+        OwnBox(control) + (Slotted(control) is { } child ? OwnBox(child) : 0);
 
     /// <summary><c>min-width: auto</c> on one of the row's items. Needs it measured on one line first.</summary>
     private static double MinimumOf(Control child)
     {
-        var item = child is ContentPresenter { Child: { } slotted } ? slotted : child;
+        var item = Slotted(child) ?? child;
 
         // contain: strict. Size containment leaves it no minimum, so it shrinks with the rest. Measured.
         if (item is AvonicIcon)
@@ -277,7 +287,9 @@ public sealed class FlexRow : Panel
             return control.DesiredSize.Width;
         }
 
-        var adds = control is FlexRow or ButtonInner or StackPanel { Orientation: Orientation.Horizontal };
+        // Not Grid.ColumnDefinitions: reading it makes the collection, and a Grid measured without one then throws when it arranges.
+        var adds = control is FlexRow or ButtonInner or DockPanel or StackPanel { Orientation: Orientation.Horizontal }
+            || (control is Grid && children.Any(child => Grid.GetColumn(child) > 0));
         var oneLine = adds ? children.Sum(child => child.DesiredSize.Width) : children.Max(child => child.DesiredSize.Width);
         var least = adds ? children.Sum(MinContent) : children.Max(MinContent);
 
@@ -303,7 +315,8 @@ public sealed class FlexRow : Panel
             text.FontSize,
             null,
             textWrapping: TextWrapping.WrapWithOverflow,
-            maxWidth: 1);
+            maxWidth: 1,
+            letterSpacing: text.LetterSpacing);
 
         // Up, so the word isn't a fraction of a pixel too wide for itself and broken at its last letter.
         return Math.Ceiling(layout.Width);

@@ -49,7 +49,7 @@ public sealed class FlexSlot : ContentPresenter
     {
         if (Child is { } child && AlignsItself(child))
         {
-            child.Arrange(new Rect(finalSize));
+            child.Arrange(new Rect(finalSize).Deflate(Padding + BorderThickness));
             return finalSize;
         }
 

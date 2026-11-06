@@ -391,6 +391,68 @@ public class FlexRowTests
         Assert.Equal(width - 15, text.Bounds.Width, 0);
     }
 
+    [AvaloniaFact]
+    public void A_Hidden_Child_Of_A_Slot_Takes_No_Share()
+    {
+        var hidden = new Border { IsVisible = false, Margin = new Thickness(0, 0, 16, 0) };
+        FlexRow.SetFlex(hidden, 1);
+        var slot = new FlexSlot { Content = hidden };
+        var other = new Border { [FlexRow.FlexProperty] = 1d };
+        using var scene = InRow(100, out _, slot, other);
+
+        Assert.Equal(0, slot.Bounds.Width);
+        Assert.Equal(100, other.Bounds.Width);
+
+        hidden.IsVisible = true;
+        Settle();
+
+        Assert.Equal(42, hidden.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Grid_With_Columns_Adds_Its_Minimums_Up()
+    {
+        var grid = new Grid { ColumnDefinitions = new("*,*"), Children = { Text(), Text() } };
+        Grid.SetColumn(grid.Children[1], 1);
+        using var scene = InRow(150, out _, grid, new Border { [FlexRow.FlexProperty] = 1d });
+
+        Assert.Equal(150, grid.Bounds.Width);
+        Assert.True(grid.Children[0].Bounds.Height > 40);
+    }
+
+    [AvaloniaFact]
+    public void A_Grid_With_One_Column_Takes_The_Largest_Minimum()
+    {
+        var grid = new Grid { Children = { Fixed(30), Fixed(40) } };
+        using var scene = InRow(100, out _, grid, Fixed(100));
+
+        Assert.Equal(40, grid.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Dock_Panel_Adds_Its_Minimums_Up()
+    {
+        var first = Fixed(30);
+        DockPanel.SetDock(first, Dock.Left);
+        var dock = new DockPanel { Children = { first, Fixed(40) } };
+        using var scene = InRow(100, out _, dock, Fixed(100));
+
+        Assert.Equal(70, dock.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void Letter_Spacing_Counts_In_The_Longest_Word()
+    {
+        var word = new TextBlock { Text = "Antidisestablishmentarianism", LetterSpacing = 4, TextWrapping = TextWrapping.Wrap };
+        using var scene = InRow(300, out _, Fixed(300), word);
+
+        var alone = new TextBlock { Text = "Antidisestablishmentarianism", LetterSpacing = 4 };
+        alone.Measure(Size.Infinity);
+
+        Assert.InRange(word.Bounds.Width, alone.DesiredSize.Width - 1, alone.DesiredSize.Width + 1);
+        Assert.Equal(alone.DesiredSize.Height, word.Bounds.Height);
+    }
+
     // ── FlexSlot ─────────────────────────────────────────────────────────────────────────────
 
     private static (FlexSlot Slot, Control Child, Scene Scene) InTallSlot(Control child, VerticalAlignment? alignItems = VerticalAlignment.Center)
@@ -513,6 +575,17 @@ public class FlexRowTests
         Settle();
 
         Assert.Equal(0, second.Bounds.Y);
+    }
+
+    [AvaloniaFact]
+    public void Padding_Counts_For_A_Child_That_Aligns_Itself()
+    {
+        var child = new Border { Height = 10, VerticalAlignment = VerticalAlignment.Top };
+        var slot = new FlexSlot { Content = child, Padding = new Thickness(5, 7, 5, 0) };
+        using var scene = InRow(100, out _, slot, new Border { Width = 50, Height = 100 });
+
+        Assert.Equal(5, child.Bounds.X);
+        Assert.Equal(7, child.Bounds.Y);
     }
 
     [AvaloniaFact]

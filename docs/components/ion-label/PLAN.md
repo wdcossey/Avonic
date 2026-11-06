@@ -117,8 +117,8 @@ own, which this is too. A `RenderTransform` doesn't affect layout, as a CSS tran
 the origin, so RTL needs no rule of its own.
 
 **A stacked or floating label fills the height.** The item's theme aligns its slots to the top for these, which is right
-for other content, but a label's `flex: 1` and `align-self: stretch` fill the slot, which `FlexSlot` now does (#71). A presenter can't tell what's in it, so
-`Styles/Label.axaml` stretches the slots and sends anything else to the top, and this doesn't touch the item's files. A
+for other content, but a label's `flex: 1` and `align-self: stretch` fill the slot. Since #71, `FlexSlot` honours the label's own alignment, so
+anything else stays at the top with no rule for it. A
 panel stays stretched, because it stands for the slot. With an input beside it, use `Grid RowDefinitions="*,Auto"`, which is
 what `flex: 1` beside a fixed-height sibling is.
 

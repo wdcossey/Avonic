@@ -258,8 +258,21 @@ Chromium, md, 390 wide. `W` is the width of the box. The page is [`ref/layout/ca
 one-line sizes it has just measured: a `TextBlock` is its longest word, from a `TextLayout` in `WrapWithOverflow`, something with a
 `Width` is that, a panel adds up or takes the largest, and everything else can't shrink.
 
-`Measure` is called once per item in the usual case, as a `Grid`'s `Auto` was. A `flex: 1` box needs no one-line measure, and only
-a row that overflows looks for `min-content`.
+**What it costs.** A part with `flex: 1` is measured once, and so is content that fits. A start label is measured on one line, has its longest word
+worked out, and is measured again, and so is a row that overflows. 300 items, the median of 7, in Release, headless, on this PC. It's two runs, as
+these move about:
+
+| Rows | Open the page, before and after (ms) | Change of width, before and after (ms) |
+|---|---|---|
+| A label | 253, 272 and 247, 291 | 63, 76 and 66, 74 |
+| A label and a short note | 339, 348 and 335, 334 | 60, 73 and 64, 70 |
+| Icons and detail | 360, 338 and 322, 336 | 58, 86 and 73, 87 |
+| A start label | 351, 378 and 345, 436 | 69, 73 and 99, 131 |
+| A note that wraps | 391, 409 and 380, 439 | 20, 13 and 111, 136 |
+
+Opening is the same within what it moves by. A change of width is the same, except that a start label costs about half as much again, for its word. The last
+row wasn't doing the same thing before: it didn't wrap. That's about 0.45 ms a row, on a rotation rather than a frame. Allocation isn't measured
+separately, and caching the longest word waits until a real page shows it matters.
 
 **This replaces the workarounds.** `:has-note` and its 25 lines go, because a note's `VerticalAlignment` now reaches the row. So does
 `Styles/Label.axaml` stretching the item's slots, and the selector ending `:not(c|AvonicLabel):not(:is(Panel))`.
@@ -276,8 +289,9 @@ a replaced theme keeps the layout.
 | `Label.axaml`: stretching the slots, and everything else to the top | -4 |
 | `Note.axaml`: `:has-note`, and the rest of a panel | -2 |
 | `Item.axaml`: the rest of a panel, centred, whatever's in it | +1 |
+| `ItemDivider.axaml`: the same, as a panel fills its slot there too | +1 |
 | `Label.axaml`: `flex: 1` in the default slot. The start slot's rule exists already | +1 |
-| **From 174 to** | **170** |
+| **From 174 to** | **171** |
 
 ### Tidying `Styles/Label.axaml`
 
@@ -296,7 +310,10 @@ which was the bookkeeping. A local `Top` is now `align-self`, as it is on the we
 |---|---|
 | A long note or `AvonicText` is as wide as its longest line, where Ionic's box is 342 | They're aligned left, so a tap beside a short one reaches the item. The text is in the same place, and a tap in the gap reaches the item |
 | A horizontal `StackPanel` in a slot doesn't wrap what's in it | It gives its children infinite width, whatever it's given. Use a `Grid` with `*,Auto` for a long note and an icon in one slot. Ionic's two `slot="end"` elements have no equivalent, as a slot holds one child |
-| A word wider than its box, outside a label, breaks in the word. In CSS it overflows and is clipped | `TextWrapping.Wrap` breaks it, and looking for `min-content` on every default slot would measure every item twice. It's what happened before this, and F8 is handled, as a row 400 high would be noticed |
+| A word wider than its box, outside a label, breaks in the word if the box is 64 or wider. In CSS it overflows and is clipped | `TextWrapping.Wrap` breaks it, and looking for `min-content` on every default slot would measure every item twice. Below 64 it does look, as a slot 6 wide would be a row 400 high |
+| A child with no height of its own, directly in a panel in a slot, collapses. So a `Grid` holding a background behind text loses the background | The panel stands for the slot, so its children are centred, as `align-items: center` does in CSS. A panel can't say it's one unit rather than several. `VerticalAlignment="Stretch"` on the child, or a `Border` around the `Grid`, gets it back |
+| Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
+| A word's width is measured in the `TextBlock`'s own font, so a larger run in its inlines can break at its last letter when it's squeezed down to its longest word | Reading each run would be a layout of its own, for a case this rare |
 | A panel in a slot isn't `flex: 1`, even with a label in it | A panel is one item. Ionic's measured `div` is the same (342 wide). Two `slot="start"` elements, where the label would still be `flex: 1`, have no equivalent, as a slot holds one child |
 | In a parent that gives no width, such as a horizontal `StackPanel`, an item is one line wide | Measured in an `inline-block`, Ionic's `width: min-content` makes it 168 wide and squeezes it, which isn't something to copy |
 | A start label in an `.item-input` is as wide as its text, up to 200. Ionic's is 59 | `width: min-content` with `flex: initial`. Nothing sets `item-input` on `ion-input` any more, measured: a real one leaves the label at 171 |

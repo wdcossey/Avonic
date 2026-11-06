@@ -231,6 +231,26 @@ public class AvonicItemLayoutTests
     });
 
     [AvaloniaFact]
+    public void F8_Plain_Text_In_A_Narrow_Slot_Is_One_Word_A_Line() => InstalledTheme.Run(_ =>
+    {
+        // 16 wide. It's a character a line and about 400 high if it doesn't look for its words.
+        var item = new AvonicItem { Content = "Plain default words", EndContent = new Border { Width = 326, Height = 10 } };
+        using var scene = InScene(item);
+
+        Assert.Equal(16, Part<FlexSlot>(item, "PART_Container").Bounds.Width);
+        Assert.InRange(item.Bounds.Height, 54, 100);
+    });
+
+    [AvaloniaFact]
+    public void F7_A_Label_In_A_Narrow_Slot_Still_Wraps_At_Every_Character() => InstalledTheme.Run(_ =>
+    {
+        var item = new AvonicItem { Content = Label("Default"), EndContent = new Border { Width = 326, Height = 10 } };
+        using var scene = InScene(item);
+
+        Assert.True(item.Bounds.Height > 3 * OneLineHeight());
+    });
+
+    [AvaloniaFact]
     public void F9_Long_Labels_In_Start_And_End() => InstalledTheme.Run(_ =>
     {
         var start = Label(Long);
@@ -502,6 +522,41 @@ public class AvonicItemLayoutTests
     });
 
     [AvaloniaFact]
+    public void F19_A_Child_Of_A_Panel_That_Asks_To_Stretch_Does() => InstalledTheme.Run(_ =>
+    {
+        var line = new Border { Width = 1, VerticalAlignment = VerticalAlignment.Stretch };
+        var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { line } };
+        var item = new AvonicItem { Content = Label(Long), EndContent = end };
+        using var scene = InScene(item);
+
+        Assert.Equal(end.Bounds.Height, line.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void F19_A_Child_Of_A_Panel_With_No_Height_Of_Its_Own_Collapses_As_It_Does_In_CSS() => InstalledTheme.Run(_ =>
+    {
+        var line = new Border { Width = 1 };
+        var end = new StackPanel { Orientation = Orientation.Horizontal, Children = { line } };
+        using var scene = InScene(new AvonicItem { Content = Label(Long), EndContent = end });
+
+        Assert.Equal(0, line.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void F21_What_A_Panel_Holds_In_A_Divider_Is_Centred() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "x" };
+        var divider = new AvonicItemDivider
+        {
+            StartContent = new Border { Width = 10, Height = 100 },
+            EndContent = new StackPanel { Orientation = Orientation.Horizontal, Children = { text } },
+        };
+        using var scene = InScene(divider);
+
+        AssertNear((divider.Bounds.Height - 1 - text.Bounds.Height) / 2, Box(text, divider).Y);
+    });
+
+    [AvaloniaFact]
     public void F21_A_Divider_Start_Label_Is_As_Wide_As_Its_Text() => InstalledTheme.Run(_ =>
     {
         var start = Label("Start");
@@ -565,6 +620,22 @@ public class AvonicItemLayoutTests
         Assert.Equal(390, end.Bounds.Width, 0);
         Assert.True(end.Bounds.Height > OneLineHeight());
     }
+
+    [AvaloniaFact]
+    public void A_Hidden_Start_Label_Takes_No_Share() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicLabel { Content = "Start", IsVisible = false };
+        var item = new AvonicItem { StartContent = start, Content = Label() };
+        using var scene = InScene(item);
+
+        Assert.Equal(374, Inner(item).Bounds.Width);
+        Assert.Equal(16, Box(Inner(item), item).X);
+
+        start.IsVisible = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(171, start.Bounds.Width);
+    });
 
     [AvaloniaFact]
     public void A_Label_That_Moves_Out_Of_Start_Stops_Being_Half() => InstalledTheme.Run(_ =>
