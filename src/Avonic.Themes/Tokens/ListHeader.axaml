@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-list-header's variables, with md defaults from list-header.md.css. A CssUnset key falls back to
+         something else in Ionic: the theme's bindings say what. Any brush overrides it. -->
+    <SolidColorBrush x:Key="Avonic.ListHeader.Background" Color="Transparent" />
+    <b:CssUnset x:Key="Avonic.ListHeader.BorderColor" />
+    <Thickness x:Key="Avonic.ListHeader.BorderWidth">0</Thickness>
+    <b:CssUnset x:Key="Avonic.ListHeader.Color" />
+    <Thickness x:Key="Avonic.ListHeader.InnerBorderWidth">0</Thickness>
+
+</ResourceDictionary>

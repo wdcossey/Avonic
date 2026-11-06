@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicList>
+                <c:AvonicListHeader Content="Default lines" />
+                <c:AvonicItem Content="One" />
+                <c:AvonicItem Content="Two" />
+            </c:AvonicList>
+            <c:AvonicList Inset="True" Lines="Full">
+                <c:AvonicItem Content="Inset, lines full" />
+                <c:AvonicItem Content="The last has no border" />
+            </c:AvonicList>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of list.md.css. What it does to the items is in Styles/List.axaml, because a ControlTheme's
+         styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicList}" TargetType="c:AvonicList">
+        <!-- var(ion-item-background, var(ion-background-color, #fff)) -->
+        <Setter Property="Background" Value="{DynamicResource Avonic.ItemBackgroundBrush}" />
+        <Setter Property="Padding" Value="0,8,0,8" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="{TemplateBinding ClipToBounds}"
+                        Padding="{TemplateBinding Padding}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .list-md.list-inset -->
+        <Style Selector="^:inset">
+            <Setter Property="Margin" Value="16" />
+            <Setter Property="CornerRadius" Value="2" />
+        </Style>
+        <!-- .list-md.list-inset + ion-list.list-inset -->
+        <Style Selector="^:inset:after-inset">
+            <Setter Property="Margin" Value="16,0,16,16" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

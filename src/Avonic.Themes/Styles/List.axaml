@@ -1,0 +1,44 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- list.md.css's rules for the items in a list, at any depth, as its descendant selectors are. Outer styles
+         beat a shadow root's :host rules, and Styles beat a ControlTheme, so these beat the item's own theme.
+         These are in the same order as the CSS, because that decides between nested lists: a list's lines
+         always beat a "none" around it or inside it, and inset beats full. -->
+
+    <!-- .list-md-lines-none .item-lines-default -->
+    <Style Selector="c|AvonicList:lines-none c|AvonicItem:lines-default /template/ Border#PART_Native, c|AvonicList:lines-none c|AvonicItem:lines-default /template/ Border#PART_Inner">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- .list-md-lines-full .item-lines-default -->
+    <Style Selector="c|AvonicList:lines-full c|AvonicItem:lines-default /template/ Border#PART_Native">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="c|AvonicList:lines-full c|AvonicItem:lines-default /template/ Border#PART_Inner">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- .list-md-lines-inset .item-lines-default -->
+    <Style Selector="c|AvonicList:lines-inset c|AvonicItem:lines-default /template/ Border#PART_Native">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="c|AvonicList:lines-inset c|AvonicItem:lines-default /template/ Border#PART_Inner">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- .list-md.list-inset ion-item:not(:only-of-type):last-of-type, and ion-item:only-child. They beat every line
+         rule, an item's own included. Avalonia has no :last-of-type, so this is the last child: see the plan. An
+         ItemsControl wraps templated content in a presenter, so that's the child to ask about. -->
+    <Style Selector="c|AvonicList:inset c|AvonicItem:nth-last-child(1) /template/ Border#PART_Native, c|AvonicList:inset c|AvonicItem:nth-last-child(1) /template/ Border#PART_Inner, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Native, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Inner">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- role="listitem", where hostContext('ion-list'). A button item stays a button: Ionic has a button inside
+         the listitem, and Avalonia has one peer for both. -->
+    <Style Selector="c|AvonicList c|AvonicItem:not(:button)">
+        <Setter Property="AutomationProperties.ControlTypeOverride" Value="ListItem" />
+    </Style>
+
+</Styles>

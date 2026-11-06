@@ -1,0 +1,40 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-item-divider: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemDivider}" TargetType="c:AvonicItemDivider">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- background-clip is border-box, so a translucent border shows the host's background through it. -->
+                <Border Background="{TemplateBinding Background}"
+                        BackgroundSizing="OuterBorderEdge"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <ContentPresenter Name="PART_Start"
+                                          VerticalAlignment="Center"
+                                          Content="{TemplateBinding StartContent}"
+                                          ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                        <Border Name="PART_Inner" Grid.Column="1">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <ContentPresenter Name="PART_Container"
+                                                  VerticalContentAlignment="Center"
+                                                  TextWrapping="Wrap"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                <ContentPresenter Name="PART_End"
+                                                  Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,22 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- A group has the class "item", so label.md.css's :host-context(.item) applies to any label inside it,
+         even in a list header, which on its own has no such class. See Label.axaml. -->
+    <Style Selector="c|AvonicItemGroup c|AvonicLabel">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Label.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <Style Selector="c|AvonicItemGroup c|AvonicLabel.ion-text-nowrap">
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+</Styles>
