@@ -8,8 +8,9 @@
 >
 > (Chromium, md, 390×844@2x) → [`ref/`](ref/). The scrolled frames come from a throwaway script: a scroller 300 high, with a list
 > holding two groups, each a sticky divider and six items, at `scrollTop` 100 and 300.
-> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicListCaptureTests` (headless Skia, 2×) → [`compare/`](compare/). Not tried
-> in a real window.
+> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicListCaptureTests` (headless Skia, 2×) → [`compare/`](compare/). Tried in a real
+> window on Windows at 125%, by wheel and by touch through Windows' touch injection: [the second divider sticks](compare/real-window-sticky.png).
+> The first being pushed away wasn't caught in a frame there, so that rests on the headless frames.
 
 ## Frames
 

@@ -8,7 +8,7 @@
 >
 > (Chromium, md, 390×844@2x) → [`ref/`](ref/).
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicListCaptureTests.Reference_Page_List` (headless Skia, 2×) →
-> [`compare/`](compare/). Not tried in a real window.
+> [`compare/`](compare/). Tried in a real window on Windows at 125%: the page draws as the frames do.
 
 ## Frames
 

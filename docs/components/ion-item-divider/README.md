@@ -40,7 +40,7 @@ scrolling. The design and evidence are in [PLAN.md](PLAN.md), and the comparison
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `color` | `Color` | |
-| [x] | `sticky` | `Sticky` (`bool`) | Needs a `ScrollViewer` around it. It does nothing in an inset list, as in Ionic |
+| [x] | `sticky` | `Sticky` (`bool`) | Needs a `ScrollViewer` around it, and follows the nearest, as CSS follows the nearest scroll container. So one that's not scrolling, inside one that is, stops it. It does nothing in an inset list, as in Ionic |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 
 ### Slots and parts
