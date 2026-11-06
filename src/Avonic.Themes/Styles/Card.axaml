@@ -68,9 +68,15 @@
             </MultiBinding>
         </Setter>
     </Style>
-    <!-- line-height doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+    <!-- It's a factor of each element's own size in CSS, and it doesn't clip, where a TextBlock otherwise clips its
+         descenders to it. -->
     <Style Selector="c|AvonicCardTitle > TextBlock, c|AvonicCardTitle > :is(Panel) > TextBlock">
         <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
     </Style>
 
     <!-- ion-card-subtitle's :host. font-size: 0.875rem, font-weight: 500 -->
@@ -113,6 +119,15 @@
         <Setter Property="Padding" Value="16,13,16,13" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+    <!-- It's a factor of each element's own size in CSS, and it doesn't clip. h1 and the others below beat this. -->
+    <Style Selector="c|AvonicCardContent > TextBlock, c|AvonicCardContent > :is(Panel) > TextBlock">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="LineHeight">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>

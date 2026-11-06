@@ -12,7 +12,8 @@
 > node tools/ionic-ref/render.js ion-card --tap --out docs/components/ion-card/ref-tap --html '<ion-card button><ion-card-content>Button card</ion-card-content></ion-card>'
 > ```
 >
-> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicCardCaptureTests` (headless Skia, 2×) → [`compare/`](compare/).
+> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicCardCaptureTests` (headless Skia, 2×) → `avonic-card-page.png` and
+> `avonic-card-press-160ms.png`, copied to [`compare/`](compare/) without the `card-`, as capture tests share the folder.
 > Not tried in a real window, so this says nothing about a real display or real touch.
 
 ## Frames
@@ -74,7 +75,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 | 5 | Enter on press, Space on release | `enter down` and `space up` | match |
 | 6 | Tab stops | `button`, not `dis`, `disbtn` or plain | match. See below for what's inside a disabled card |
 | 7 | No hover or focus state | `:focus-visible` is true and nothing changes: no class, no colour, no outline | match, including over `SimpleTheme`'s adorner |
-| 8 | The ripple's box and colour | `10,210,370,90`, `rgb(115, 115, 115)`, white on danger | match |
+| 8 | The ripple's box and colour | `10,210,370,90`, `rgb(115, 115, 115)`, white on danger; found in the host's shadow root first | match |
 | 9 | The box | margin 10, radius 4, three shadows, size 14 | match, except the shadow's offsets above 1× |
 | 10 | Defaults | white, `rgb(115, 115, 115)` | match |
 | 11 | Tokens | `cvar`, `ivar1` | match. `ivar2`, the item's variables, is a deliberate difference |
@@ -101,8 +102,8 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 Measured in Ionic, and recorded in [PLAN.md](PLAN.md#deliberate-differences):
 
 - **A mouse drag within the card.** Ionic clicks (measured: down, move 60 and 130, up, gives `drag<drag`). Avonic gets no
-  `Tapped` past Avalonia's small movement limit, so a first press doesn't click, though a second quick press does.
-  Touch isn't affected, as a finger that moves is scrolling in both. **Known gap,** shared with `AvonicItem`.
+  `Tapped` past Avalonia's small movement limit, so it doesn't click. Touch is meant to match, as a finger that moves is
+  scrolling in both, but this was only run with a mouse. **Known gap,** shared with `AvonicItem`.
 - **A child that stops the click.** Ionic: two quick taps give none (measured). A child handling `Tapped` stops the
   first, and has to handle `DoubleTapped` too to stop the second. **Known gap,** shared with `AvonicItem`.
 - **A nested input in a disabled plain card** is still in Ionic's tab order (measured `dis-input`), and isn't in Avonic's.

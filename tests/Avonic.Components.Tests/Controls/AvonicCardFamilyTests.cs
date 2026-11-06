@@ -269,6 +269,24 @@ public class AvonicCardFamilyTests
     });
 
     [AvaloniaFact]
+    public void B18_Text_In_A_Title_Has_Line_Height_From_Its_Own_Size() => InstalledTheme.Run(_ =>
+    {
+        var direct = new TextBlock { Text = "x", FontSize = 40 };
+        var inPanel = new TextBlock { Text = "x", FontSize = 40 };
+        var deeper = new TextBlock { Text = "x", FontSize = 40 };
+        using var scene = Show(
+            new AvonicCardTitle { Content = direct },
+            new AvonicCardTitle { Content = new StackPanel { Children = { inPanel } } },
+            new AvonicCardTitle { Content = new Border { Child = deeper } });
+
+        Assert.Equal(48, direct.LineHeight, 3);
+        Assert.Equal(48, inPanel.LineHeight, 3);
+
+        // Deeper down it inherits the title's, as a size. See the plan.
+        Assert.Equal(24, deeper.LineHeight, 3);
+    });
+
+    [AvaloniaFact]
     public void B18_Title_Does_Not_Clip_Descenders() => InstalledTheme.Run(_ =>
     {
         // A line height far below the font's height, so anything clipped is obvious.
@@ -588,6 +606,27 @@ public class AvonicCardFamilyTests
     });
 
     [AvaloniaFact]
+    public void B24_Text_Has_Line_Height_From_Its_Own_Size_And_Does_Not_Clip() => InstalledTheme.Run(_ =>
+    {
+        var direct = new TextBlock { Text = "x", FontSize = 24 };
+        var inPanel = new TextBlock { Text = "x", FontSize = 24 };
+        var deeper = new TextBlock { Text = "x", FontSize = 24 };
+        using var scene = Show(
+            new AvonicCardContent { Content = direct },
+            new AvonicCardContent { Content = new StackPanel { Children = { inPanel } } },
+            new AvonicCardContent { Content = new Border { Child = deeper } });
+
+        Assert.Equal(36, direct.LineHeight, 3);
+        Assert.Equal(36, inPanel.LineHeight, 3);
+        Assert.False(direct.ClipToBounds);
+        Assert.False(inPanel.ClipToBounds);
+
+        // Deeper down it inherits the content's, as a size. See the plan.
+        Assert.Equal(21, deeper.LineHeight, 3);
+        Assert.True(deeper.ClipToBounds);
+    });
+
+    [AvaloniaFact]
     public void B24_In_A_Coloured_Card_It_Inherits_Contrast() => InstalledTheme.Run(_ =>
     {
         var content = new AvonicCardContent { Content = "x" };
@@ -710,53 +749,59 @@ public class AvonicCardFamilyTests
         Assert.Equal(new Thickness(16, 0, 16, 13), content.Padding);
     });
 
+    private static double Top(AvonicCardContent content)
+    {
+        Dispatcher.UIThread.RunJobs();
+        return content.Padding.Top;
+    }
+
     [AvaloniaFact]
-    public void B25_It_Follows_A_Change()
+    public void B25_It_Follows_A_Change() => InstalledTheme.Run(_ =>
     {
         var content = new AvonicCardContent { Content = "x" };
         var gap = new Border();
         var header = new AvonicCardHeader();
         var panel = new StackPanel { Children = { header, gap, content } };
         using var scene = new Scene(panel);
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(13, Top(content));
 
         panel.Children.Remove(gap);
-        Assert.Contains(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(0, Top(content));
 
         panel.Children.Insert(1, gap);
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(13, Top(content));
 
         panel.Children.Move(2, 1);
-        Assert.Contains(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(0, Top(content));
 
         panel.Children.Move(0, 2);
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
-    }
+        Assert.Equal(13, Top(content));
+    });
 
     [AvaloniaFact]
-    public void B25_Moving_To_Another_Panel_Follows_That_One_And_Forgets_The_Last()
+    public void B25_Moving_To_Another_Panel_Follows_That_One_And_Forgets_The_Last() => InstalledTheme.Run(_ =>
     {
         var content = new AvonicCardContent();
         var from = new StackPanel { Children = { new AvonicCardHeader(), content } };
         var to = new StackPanel();
         using var scene = new Scene(new StackPanel { Children = { from, to } });
-        Assert.Contains(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(0, Top(content));
 
         from.Children.Remove(content);
         to.Children.Add(content);
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(13, Top(content));
 
         // The old panel changing mustn't reach it any more.
         from.Children.Clear();
         from.Children.Add(new AvonicCardHeader());
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
+        Assert.Equal(13, Top(content));
 
         to.Children.Insert(0, new AvonicCardHeader());
-        Assert.Contains(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
-    }
+        Assert.Equal(0, Top(content));
+    });
 
     [AvaloniaFact]
-    public void B25_Detached_It_Stops_Listening()
+    public void B25_Detached_It_Stops_Listening() => InstalledTheme.Run(_ =>
     {
         var content = new AvonicCardContent();
         var header = new AvonicCardHeader();
@@ -770,18 +815,17 @@ public class AvonicCardFamilyTests
         Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
 
         host.Child = panel;
-        Dispatcher.UIThread.RunJobs();
-        Assert.Contains(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
-    }
+        Assert.Equal(0, Top(content));
+    });
 
     [AvaloniaFact]
-    public void B25_Not_In_A_Panel_It_Is_Not_After_Anything()
+    public void B25_Not_In_A_Panel_It_Is_Not_After_Anything() => InstalledTheme.Run(_ =>
     {
         var content = new AvonicCardContent();
         using var scene = new Scene(new Border { Child = content });
 
-        Assert.DoesNotContain(AvonicCardContent.AfterCardHeaderPseudoClass, content.Classes);
-    }
+        Assert.Equal(13, Top(content));
+    });
 
     // ── Behaviour 26: h1-h6 and p ────────────────────────────────────────────────────────────
 

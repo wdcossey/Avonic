@@ -61,7 +61,9 @@ public class AvonicCard : ContentControl
     private bool _spacePressed;
     private object? _secondTapSource;
     private IPointer? _secondTapPointer;
+    private Point _secondTapStart;
     private IPointer? _pressPointer;
+    private Point _pressPosition;
     private IDisposable? _focusableFrame;
 
     public AvonicCard()
@@ -75,6 +77,7 @@ public class AvonicCard : ContentControl
         {
             _secondTapSource = e.Source;
             _secondTapPointer = _pressPointer;
+            _secondTapStart = _pressPosition;
         });
         AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
     }
@@ -138,6 +141,7 @@ public class AvonicCard : ContentControl
         }
 
         _pressPointer = e.Pointer;
+        _pressPosition = e.GetPosition(this);
     }
 
     private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
@@ -147,11 +151,20 @@ public class AvonicCard : ContentControl
             var source = _secondTapSource;
             _secondTapSource = null;
             _secondTapPointer = null;
-            if (new Rect(Bounds.Size).Contains(e.GetPosition(this)))
+            if (IsWithinTap(e))
             {
                 Tap(source);
             }
         }
+    }
+
+    /// <summary>The limit Avalonia gives a first press's <c>Tapped</c>, so a finger that slides doesn't click on either.</summary>
+    private bool IsWithinTap(PointerReleasedEventArgs e)
+    {
+        var size = Application.Current?.PlatformSettings?.GetTapSize(e.Pointer.Type) ?? new Size(4, 4);
+        return new Rect(_secondTapStart, default(Size))
+            .Inflate(new Thickness(size.Width / 2, size.Height / 2))
+            .Contains(e.GetPosition(this));
     }
 
     /// <summary>A disabled <c>&lt;button&gt;</c> doesn't click, even if it was disabled during the press.</summary>

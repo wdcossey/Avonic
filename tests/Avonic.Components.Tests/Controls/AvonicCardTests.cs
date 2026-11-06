@@ -40,7 +40,8 @@ public class AvonicCardTests
     private static T Part<T>(Control host, string name) where T : Control =>
         host.GetVisualDescendants().OfType<T>().First(control => control.Name == name);
 
-    private static AvonicRippleEffect Ripple(AvonicCard card) => Part<AvonicRippleEffect>(card, "PART_Ripple");
+    private static AvonicRippleEffect Ripple(AvonicCard card) =>
+        card.GetVisualDescendants().OfType<AvonicRippleEffect>().First(ripple => ripple.TemplatedParent == card);
     private static Border Native(AvonicCard card) => Part<Border>(card, "PART_Native");
 
     private static bool Has(Control control, string pseudoClass) => control.Classes.Contains(pseudoClass);
@@ -348,6 +349,42 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_That_Slides_Does_Not_Click()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        var slid = new Point(Centre.X + 60, Centre.Y + 10);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(slid, RawInputModifiers.None);
+        scene.Window.MouseUp(slid, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Second_Quick_Press_That_Barely_Moves_Clicks()
+    {
+        var clicks = 0;
+        var card = ButtonCard();
+        card.Click += (_, _) => clicks++;
+        using var scene = new Scene(card);
+        var nudged = new Point(Centre.X + 1, Centre.Y);
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(nudged, RawInputModifiers.None);
+        scene.Window.MouseUp(nudged, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
     public void B3_Another_Pointer_Releasing_Does_Not_Complete_A_Second_Press()
     {
         var clicks = 0;
@@ -381,9 +418,9 @@ public class AvonicCardTests
         scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
         Dispatcher.UIThread.RunJobs();
 
-        // A second finger, which isn't on any of this press's events.
+        // A second finger, somewhere else, which isn't on any of this press's events.
         card.RaiseEvent(new PointerPressedEventArgs(
-            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true), scene.Window, Centre, 0,
+            card, new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true), scene.Window, new Point(60, 20), 0,
             new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None)
         {
             RoutedEvent = InputElement.PointerPressedEvent,
@@ -745,6 +782,48 @@ public class AvonicCardTests
         Assert.Equal(Colors.Lime, Solid(Ripple(token).Foreground));
     });
 
+    // getRippleEffect looks in the host's shadow root first, and a plain child's ripple is hidden.
+    [AvaloniaFact]
+    public void B8_A_Plain_Control_Inside_Does_Not_Take_The_Ripple()
+    {
+        using var clock = new TestClock();
+        var plainCard = new AvonicCard { Height = 30 };
+        var plainItem = new AvonicItem { Content = "x" };
+        var card = ButtonCard();
+        card.Content = new StackPanel { Children = { plainCard, plainItem } };
+        using var scene = new Scene(card);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+
+        Assert.Single(Ripple(card).Ripples);
+        Assert.Empty(Ripple(plainCard).Ripples);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+    }
+
+    [AvaloniaFact]
+    public void B8_The_Ripple_Draws_Over_The_Content() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var card = new AvonicCard
+        {
+            Button = true,
+            Height = 90,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = new Border { Background = Brushes.Red },
+        };
+        using var scene = new Scene(card);
+        Assert.Equal(Colors.Red, Pixel(scene, 195, 50));
+
+        var centre = new Point(195, 55);
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(320);
+        Ripple(card).Tick();
+
+        Assert.NotEqual(Colors.Red, Pixel(scene, 195, 50));
+        scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
+    });
+
     [AvaloniaFact]
     public void B8_The_Ripple_Clips_To_The_Corners() => InstalledTheme.Run(_ =>
     {
@@ -859,6 +938,21 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
+    public void B9_An_Apps_Own_Border_Shows() => InstalledTheme.Run(_ =>
+    {
+        var card = new AvonicCard
+        {
+            Height = 90,
+            VerticalAlignment = VerticalAlignment.Top,
+            BorderBrush = Brushes.Lime,
+            BorderThickness = new Thickness(3),
+        };
+        using var scene = new Scene(card);
+
+        Assert.Equal(Colors.Lime, Pixel(scene, 195, 11));
+    });
+
+    [AvaloniaFact]
     public void B9_The_Template_Follows_The_Cards_Own_Properties_In_The_Theme() => InstalledTheme.Run(_ =>
     {
         var card = new AvonicCard { Height = 90, Background = Brushes.Teal, CornerRadius = new CornerRadius(7) };
@@ -872,6 +966,11 @@ public class AvonicCardTests
         Assert.Equal(Colors.Teal, Solid(Native(card).Background));
         Assert.Equal(new CornerRadius(7), Native(card).CornerRadius);
         Assert.Equal(new CornerRadius(7), Part<Border>(card, "PART_Host").CornerRadius);
+
+        card.BorderBrush = Brushes.Lime;
+        card.BorderThickness = new Thickness(2);
+        Assert.Equal(Colors.Lime, Solid(Native(card).BorderBrush));
+        Assert.Equal(new Thickness(2), Native(card).BorderThickness);
 
         var presenter = Part<ContentPresenter>(card, "PART_ContentPresenter");
         card.Padding = new Thickness(3);

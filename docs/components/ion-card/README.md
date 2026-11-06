@@ -108,6 +108,6 @@ Not in Ionic, and named so that they can't collide with it:
 ## Known gaps
 
 - **The shadow's offset and spread don't scale above 1×.** See [COMPARISON.md](COMPARISON.md).
-- **A mouse drag within the card** doesn't click on a first press, where it does in Ionic. Touch is fine.
+- **A mouse drag within the card** doesn't click, where it does in Ionic. A finger that slides shouldn't click in either, though this was only run with a mouse.
 - **A child that handles `Tapped`** stops only the first of two quick taps. To stop both, handle `DoubleTapped` too.
 - **`--ion-item-background` and `--ion-item-color`** don't move a card. See the [plan](PLAN.md#deliberate-differences).

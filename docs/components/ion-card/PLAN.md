@@ -73,7 +73,7 @@ Each becomes a test, named after its number.
 | 5 | Enter (on press) and Space (on release) act as a tap when the card has focus | native `<button>`; measured `enter down`, `space up` |
 | 6 | A `Button` card is a tab stop; a plain or disabled one isn't | measured tab order |
 | 7 | Hover and keyboard focus change nothing: no overlay, no `:ion-focused`, no outline, no adorner | `.card-native { outline: none }`, no `ion-focusable` class; measured: `:focus-visible` is true, classes and colours are the same |
-| 8 | The ripple fills the card, clips to its corners and uses the current colour, including contrast on a coloured card | `--ripple-color` is undefined, so `color` inherits; measured `10,210,370,90`, `rgb(115, 115, 115)`, `rgb(255, 255, 255)` |
+| 8 | The ripple fills the card, draws over the content, clips to its corners and uses the current colour, including contrast on a coloured card. A plain card or item inside doesn't take it | `--ripple-color` is undefined, so `color` inherits; `getRippleEffect` looks in the host's shadow root first; measured `10,210,370,90`, `rgb(115, 115, 115)`, `rgb(255, 255, 255)` |
 | 9 | Card box: margin 10, radius 4, the three-layer shadow, clipped content, font size 14, the theme's font, text wraps | `card.md.css`; measured |
 | 10 | Card text and background default to `#737373` on the background colour | measured |
 | 11 | `Avonic.Card.Background`, `Avonic.Card.Color` and the global `Avonic.CardBackgroundBrush`, `Avonic.CardColorBrush` apply, with the card's own winning | measured `cvar`, `ivar1` |
@@ -83,13 +83,13 @@ Each becomes a test, named after its number.
 | 15 | Header: padding 16, nothing else of its own. It inherits the text colour and size, in or out of a card | measured `full-h`, `alone-h`, `cvar-h` |
 | 16 | Header `Color` paints base and contrast. An unknown `Color`: transparent, or an ancestor's base, and inherited text | measured `hc-h`, `hb-h`, `d-h` |
 | 17 | A title or subtitle in a header has 8 above it unless it's first, whatever came first, and it follows a change. Nested deeper, none | `::slotted(...:not(:first-child))`; measured `full-s`, `sub1-t`, `div1-t`, `nest1-t` |
-| 18 | Title: size 20, weight 500, line height 1.2 of its own size, `#262626`, without clipping descenders | measured `full-t`, `e-t` |
+| 18 | Title: size 20, weight 500, line height 1.2 of its own size, also for a `TextBlock` directly in it or in a panel with its own size, `#262626`, without clipping descenders | measured `full-t`, `e-t` |
 | 19 | Subtitle: size 14, weight 500, normal line height, `#737373` | measured `full-s` |
 | 20 | `Avonic.CardTitle.Color` and `Avonic.CardSubtitle.Color` set the text | measured `tvar`, `svar` |
 | 21 | Title and subtitle `Color` paints base. An unknown `Color` inherits | `:host(.ion-color)`; measured `tc-t`, `tc-s`, `tb-t`, `tb-s` |
 | 22 | Inside a coloured card or coloured header, at any depth, a header, title or subtitle inherits the text colour, beating its own `Color`. A coloured header keeps its own background. A coloured item doesn't do this | `ion-card.ion-color .ion-inherit-color`, `ion-card-header.ion-color .ion-inherit-color`; measured `danger-t`, `both-t`, `a-h`, `b-t`, `c-t`, `bad-t`, `o-i`, `ii-t` |
 | 23 | Automation: a title is a heading at level 2, and a subtitle at level 3, named by the text inside | `role="heading"`, `aria-level` |
-| 24 | Content: padding 13 and 16, size 14, line height 1.5, inherited text colour, in or out of a card. Text wraps | `card-content.md.css`; measured `co-c`, `alone-c`, `long` |
+| 24 | Content: padding 13 and 16, size 14, line height 1.5 of each `TextBlock`'s own size, directly in it or in a panel, without clipping, inherited text colour, in or out of a card. Text wraps | `card-content.md.css`; measured `co-c`, `alone-c`, `long` |
 | 25 | Content straight after a header has no top padding, in or out of a card, even if the header is hidden, and it follows a change. Anything between them stops it | `ion-card-header + .card-content-md`; measured `full-c`, `adj-c`, `gap-c`, `content after removing the gap`, `after hiding the header` |
 | 26 | `h1`–`h6` and `p`: sizes 24, 16, 14, 14, 14, 14, 14; weight normal; margins; line heights 1.2, or 1.5 for `p`, of their own size, without clipping. Directly in the content or in a panel directly in it | measured `h1`…`p`, `e-p`, `e-h` |
 | 27 | RTL: text starts at the right, and the boxes stay symmetrical | measured `rtl` |
@@ -108,6 +108,13 @@ have no theme of their own, and `Design.PreviewWith` is in the `Styles` file too
 second-press handling, Enter and Space, `Focusable` at style priority, the automation peer. Forwarding to a first
 interactive child and the `IonStyle` handling aren't copied, because Ionic's card has neither. A shared helper is listed
 under "Proposed for shared files" in the PR.
+
+**The ripple is first in the template's panel, with a `ZIndex` to stay on top.** `Activatable` searches depth first and goes into
+controls that aren't activatable, so with the ripple last it found a plain child's hidden ripple, and the card showed
+none. Ionic looks in the host's shadow root first. `AvonicItem` has the same problem with a plain card inside it. See the PR.
+
+**A second quick press uses the same movement limit as a first.** `AvonicItem` only checks that it's released on the item,
+so there a finger sliding on a second press clicks. Here it doesn't, as neither does a first press.
 
 **A nested `Button` card doesn't raise a second `Click`.** A browser has one click, which reaches each card on its way up.
 Here the inner card's `Click` already bubbles through the outer one, so raising another would run its handlers twice.
@@ -154,11 +161,11 @@ descendant selector on a `TextBlock`. `line-height` is a factor, so it's `Css.Em
 | Two cards in a `StackPanel` are 20 apart, where CSS collapses their margins to 10 (measured `gap between siblings`) | Avalonia has no margin collapsing, as `ion-label` records. `Spacing="-10"` on the panel gives 10 |
 | Margins between two headings add up to 4, where CSS collapses them to 2 | The same. `h1` or `h2` followed by `p`, the usual pairs, are 2 in both |
 | `h1`–`h6` and `p` get their rules directly in the content or in a panel directly in it, where Ionic's reach any depth (measured `d-h2`, `d-p`) | A descendant selector on `TextBlock` is checked for every `TextBlock` in the app. `ion-label` measured it at about 13% on attach. Set the values yourself deeper down |
-| A `TextBlock` nested deeper than a panel with its own `FontSize` gets line height 21, not 1.5 of its size | `TextBlock.LineHeight` inherits as a size. The same as `ion-label` |
+| A `TextBlock` nested deeper than a panel with its own `FontSize` gets line height 21, not 1.5 of its size, and can clip. So does a subtitle in the content with its own `FontSize`. In a title, it's 24 rather than 1.2 of its size | `TextBlock.LineHeight` inherits as a size. The same as `ion-label` |
 | `--ion-item-background` and `--ion-item-color` aren't in the fallback (measured `ivar2`: Ionic follows both) | `Avonic.ItemColorBrush` always has a value, following the text colour, where `--ion-item-color` is unset by default, so reading it would turn every card's text black. `Avonic.CardBackgroundBrush` is always set by `Global.axaml` too. See "Proposed for shared files" |
 | A disabled plain card also disables what's inside it, including tab stops (measured: a nested `input` is still in the tab order) | `disabled` is `IsEnabled` by the mapping rule, and that cascades. `pointer-events: none` already stops the pointer in both |
 | `PART_Native` always exists, where Ionic only renders it for `button` and `href` | It carries the clip and the background. With no `Button` nothing differs |
-| **Known gap:** a mouse drag within a `Button` card doesn't click on a first press, past Avalonia's small movement limit, though a second quick press does. Ionic clicks (measured: down, move 60 and 130, up). Touch isn't affected, as a finger that moves is scrolling in both | `Tapped` is what the click comes from, copied from `AvonicItem`, which has this too. The fix is to track press and release directly, which belongs in one shared place. See the PR |
+| **Known gap:** a mouse drag within a `Button` card doesn't click, past Avalonia's small movement limit. Ionic clicks (measured: down, move 60 and 130, up). Touch is meant to match, as a finger that moves is scrolling in both, but this was only run with a mouse | `Tapped` is what the click comes from, copied from `AvonicItem`. The fix is to track press and release directly, which belongs in one shared place. See the PR |
 | **Known gap:** a child that handles `Tapped` stops only the first of two quick taps, and has to handle `DoubleTapped` as well. Ionic stops both (measured) | The same |
 | **Known gap:** above 1× the shadow's offset and spread don't scale, so a card's bottom edge is lighter and its top a little darker. Measured at 3×, straight below a card: 212 against Chromium's 166. At 1× it matches | Avalonia applies them in device pixels. The numbers are in [COMPARISON.md](COMPARISON.md) |
 | Keyboard activation of a nested control doesn't raise the card's `Click` | As on `AvonicItem`. In a browser the click bubbles. Pointer taps do match |

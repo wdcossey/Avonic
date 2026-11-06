@@ -12,16 +12,20 @@
                 <Border Name="PART_Host" CornerRadius="{TemplateBinding CornerRadius}">
                     <Border Name="PART_Native"
                             Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{TemplateBinding CornerRadius}"
                             ClipToBounds="True">
                         <Panel Background="Transparent">
+                            <!-- First, so that Activatable finds it before any ripple in the content, as Ionic looks
+                                 in the host's shadow root first. ZIndex keeps it on top of the content. -->
+                            <c:AvonicRippleEffect Name="PART_Ripple" ZIndex="1" />
                             <ContentPresenter Name="PART_ContentPresenter"
                                               Padding="{TemplateBinding Padding}"
                                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                               Content="{TemplateBinding Content}"
                                               ContentTemplate="{TemplateBinding ContentTemplate}" />
-                            <c:AvonicRippleEffect Name="PART_Ripple" />
                         </Panel>
                     </Border>
                 </Border>
