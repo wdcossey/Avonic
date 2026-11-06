@@ -139,9 +139,8 @@
     </Style>
 
     <!-- .card-content-md h1 etc, with a panel standing for the slot. line-height 1.2 on headings is from Ionic's
-         global typography. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+         global typography. -->
     <Style Selector="c|AvonicCardContent > TextBlock.h1, c|AvonicCardContent > :is(Panel) > TextBlock.h1">
-        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Normal" />
@@ -152,7 +151,6 @@
         </Setter>
     </Style>
     <Style Selector="c|AvonicCardContent > TextBlock.h2, c|AvonicCardContent > :is(Panel) > TextBlock.h2">
-        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,2,0,2" />
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Normal" />
@@ -163,7 +161,6 @@
         </Setter>
     </Style>
     <Style Selector="c|AvonicCardContent > TextBlock.h3, c|AvonicCardContent > TextBlock.h4, c|AvonicCardContent > TextBlock.h5, c|AvonicCardContent > TextBlock.h6, c|AvonicCardContent > :is(Panel) > TextBlock.h3, c|AvonicCardContent > :is(Panel) > TextBlock.h4, c|AvonicCardContent > :is(Panel) > TextBlock.h5, c|AvonicCardContent > :is(Panel) > TextBlock.h6">
-        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,2,0,2" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="Normal" />
@@ -174,7 +171,6 @@
         </Setter>
     </Style>
     <Style Selector="c|AvonicCardContent > TextBlock.p, c|AvonicCardContent > :is(Panel) > TextBlock.p">
-        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="Normal" />

@@ -385,6 +385,30 @@ public class AvonicCardTests
     }
 
     [AvaloniaFact]
+    public void B3_A_Press_After_One_Taken_By_A_Gesture_Clicks_Once()
+    {
+        var clicks = 0;
+        IPointer? pointer = null;
+        var card = ButtonCard();
+        var other = new Border { Height = 48, Background = Brushes.Gray };
+        card.Click += (_, _) => clicks++;
+        card.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, RoutingStrategies.Tunnel);
+        using var scene = new Scene(new StackPanel { Children = { card, other } });
+
+        Tap(scene, Centre);
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        pointer!.Capture(other);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks);
+
+        // In the same place, so the unfinished second press mustn't count as well.
+        Tap(scene, Centre);
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
     public void B3_Another_Pointer_Releasing_Does_Not_Complete_A_Second_Press()
     {
         var clicks = 0;
@@ -800,6 +824,23 @@ public class AvonicCardTests
         Assert.Empty(Ripple(plainCard).Ripples);
         scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
     }
+
+    [AvaloniaFact]
+    public void B8_A_Plain_Control_Inside_Does_Not_Take_The_Ripple_In_The_Theme() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var plainCard = new AvonicCard { Height = 30 };
+        var card = ButtonCard();
+        card.Content = plainCard;
+        using var scene = new Scene(card);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+
+        Assert.Single(Ripple(card).Ripples);
+        Assert.Empty(Ripple(plainCard).Ripples);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+    });
 
     [AvaloniaFact]
     public void B8_The_Ripple_Draws_Over_The_Content() => InstalledTheme.Run(_ =>
