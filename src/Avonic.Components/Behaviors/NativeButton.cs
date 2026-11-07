@@ -123,15 +123,12 @@ internal sealed class NativeButton
 
     // ── A press ──────────────────────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// A new press ends the last one, which a gesture may have taken, so its release never came here. A second finger
-    /// means no click, whichever lifts first, as measured.
-    /// </summary>
+    /// <summary>A new press ends the last one, which a gesture may have taken, so its release never came here.</summary>
     private void OnPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
         _stoppedDuringPress = false;
         _nestedClick = null;
-        if (e.Pointer == _pointer || !e.Pointer.IsPrimary)
+        if (e.Pointer == _pointer)
         {
             EndPress();
         }

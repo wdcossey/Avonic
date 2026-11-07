@@ -620,6 +620,65 @@ public class NativeButtonTests
     }
 
     [AvaloniaFact]
+    public void Its_Own_Click_During_A_Press_Is_Not_Taken_For_One_Inside()
+    {
+        // Enter during a mouse press clicks, and so does the release.
+        var probe = Make("item");
+        using var scene = new Scene(probe.Control);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        Assert.Equal(1, probe.Clicks);
+
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        Assert.Equal(2, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void After_A_Press_On_One_Inside_Its_Own_Key_Still_Raises_Its_Click()
+    {
+        var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
+        var probe = Make("item", inner);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+        Assert.Equal(1, probe.Clicks);
+
+        probe.Control.Focus();
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+
+        Assert.Equal(2, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void One_Inside_That_Clicked_In_A_Press_That_Never_Finished_Is_Forgotten()
+    {
+        var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
+        var probe = Make("item", inner);
+        using var scene = new Scene(probe.Control);
+        var off = new Point(300, 300);
+        var spot = new Point(100, 2);
+
+        // A press on the outer one, a click inside it from automation, and a release off it.
+        scene.Window.MouseDown(spot, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        ControlAutomationPeer.CreatePeerForElement(inner).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>()!.Invoke();
+        Assert.Equal(1, probe.Clicks);
+        scene.Window.MouseMove(off, RawInputModifiers.None);
+        scene.Window.MouseUp(off, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+
+        Tap(scene, spot);
+
+        Assert.Equal(2, probe.Clicks);
+    }
+
+    [AvaloniaFact]
     public void A_Nested_Items_Handled_Click_Stops_The_Card_Around_It()
     {
         var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
@@ -1112,6 +1171,24 @@ public class NativeButtonTests
         Assert.Single(Ripple(item).Ripples);
         Assert.Empty(Ripple(card).Ripples);
         scene.Window.MouseUp(new Point(100, 25), MouseButton.Left, RawInputModifiers.None);
+    }
+
+    [AvaloniaFact]
+    public void A_Hidden_Ripple_Is_Passed_Over_For_A_Visible_One_After_It()
+    {
+        using var clock = new TestClock();
+        var hidden = new AvonicRippleEffect { IsVisible = false };
+        var visible = new AvonicRippleEffect();
+        var surface = new Panel { Width = 200, Height = 50, Background = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Children = { hidden, visible } };
+        Activatable.SetIsEnabled(surface, true);
+        using var scene = new Scene(surface);
+
+        scene.Window.MouseDown(Centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+
+        Assert.Empty(hidden.Ripples);
+        Assert.Single(visible.Ripples);
+        scene.Window.MouseUp(Centre, MouseButton.Left, RawInputModifiers.None);
     }
 
     [AvaloniaFact]

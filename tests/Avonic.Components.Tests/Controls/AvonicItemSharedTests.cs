@@ -203,6 +203,9 @@ public class AvonicItemSharedTests
         Assert.Equal(new Point(16, 12), Box(start, item).TopLeft);
         Assert.Equal(new Point(350, 12), Box(end, item).TopLeft);
         Assert.Equal(72, Box(Part<Border>(item, "PART_Inner"), item).X);
+
+        // Measured with an icon at each end: 262. It is 318 wide from 72, less 16 of padding, 24 of icon and 16 of margin. Doubled, the margin would make it 246.
+        Assert.Equal(262, Part<FlexSlot>(item, "PART_Container").Bounds.Width);
     });
 
     [AvaloniaFact]

@@ -223,11 +223,7 @@ public class AvonicItem : TemplatedControl, IItemHost
 
         // stopImmediatePropagation, for what's left of a tap that was forwarded. Tapped comes after the release, if it comes at all,
         // so the next press ends it.
-        AddHandler(TappedEvent, (_, e) =>
-        {
-            e.Handled = _forwarded;
-            _forwarded = false;
-        });
+        AddHandler(TappedEvent, (_, e) => e.Handled = _forwarded);
         AddHandler(PointerPressedEvent, (_, _) => _forwarded = false, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
         UpdateLines();
@@ -439,11 +435,10 @@ public class AvonicItem : TemplatedControl, IItemHost
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    /// <summary><c>onClick</c>. A disabled <c>&lt;button&gt;</c> doesn't click, even if it was disabled during the press.</summary>
+    /// <summary><c>onClick</c>.</summary>
     private void Tap(object? source)
     {
-        _forwarded = false;
-        if (Button && IsEffectivelyEnabled)
+        if (Button)
         {
             RaiseClick();
         }
@@ -500,7 +495,7 @@ public class AvonicItem : TemplatedControl, IItemHost
 
         /// <summary><c>aria-disabled</c>: <c>disabled || childStyles['item-interactive-disabled']</c>.</summary>
         protected override bool IsEnabledCore() =>
-            owner.IsEffectivelyEnabled && !owner.PseudoClasses.Contains(":item-interactive-disabled");
+            base.IsEnabledCore() && !owner.PseudoClasses.Contains(":item-interactive-disabled");
 
         /// <summary>
         /// <c>role="listitem"</c>, where <c>hostContext('ion-list')</c>. A button item stays a button: Ionic has a button inside the

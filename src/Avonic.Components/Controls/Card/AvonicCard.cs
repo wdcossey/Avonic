@@ -161,9 +161,6 @@ public class AvonicCard : ContentControl
         protected override object? GetProviderCore(Type providerType) =>
             providerType == typeof(IInvokeProvider) && !owner.Button ? null : base.GetProviderCore(providerType);
 
-        /// <summary>And a command that can't execute, which the base class wouldn't see.</summary>
-        protected override bool IsEnabledCore() => owner.IsEffectivelyEnabled;
-
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             owner.Button ? AutomationControlType.Button : AutomationControlType.Group;
 
