@@ -361,7 +361,7 @@ public class AvonicItemTests
     }
 
     [AvaloniaFact]
-    public void B4_A_Child_That_Handles_The_Tap_Stops_Click()
+    public void B4_A_Child_That_Handles_Tapped_Does_Not_Stop_Click()
     {
         var clicks = 0;
         var child = new Border { Width = 60, Height = 30, Background = Brushes.Gray };
@@ -372,7 +372,7 @@ public class AvonicItemTests
 
         Tap(scene, Box(child, scene.Window).Center);
 
-        Assert.Equal(0, clicks);
+        Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]

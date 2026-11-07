@@ -8,7 +8,7 @@ namespace Avonic.Components.Controls;
 /// Ionic <c>ion-item-group</c>: a run of items and dividers that belong together. It has no look of its own. A
 /// sticky <see cref="AvonicItemDivider"/> stays inside its group, and a label in a group acts as it does in an item.
 /// </summary>
-public class AvonicItemGroup : ItemsControl
+public class AvonicItemGroup : ItemsControl, IItemHost
 {
     /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. ion-item-group doesn't.</summary>
     protected override void OnKeyDown(KeyEventArgs e)

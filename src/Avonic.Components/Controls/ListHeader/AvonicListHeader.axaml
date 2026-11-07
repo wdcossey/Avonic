@@ -13,11 +13,11 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         Padding="{TemplateBinding Padding}">
                     <Border Name="PART_Inner">
-                        <ContentPresenter Name="PART_ContentPresenter"
-                                          VerticalContentAlignment="Center"
-                                          TextWrapping="Wrap"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        <c:FlexSlot Name="PART_ContentPresenter"
+                                VerticalContentAlignment="Center"
+                                TextWrapping="Wrap"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" />
                     </Border>
                 </Border>
             </ControlTemplate>

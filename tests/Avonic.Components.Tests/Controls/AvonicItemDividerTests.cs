@@ -43,19 +43,9 @@ public class AvonicItemDividerTests
 
     private static void Run() => Dispatcher.UIThread.RunJobs();
 
-    private static unsafe uint Pixel(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        return ((uint*)(buffer.Address + y * buffer.RowBytes))[x] & 0xFFFFFF;
-    }
-
-    /// <summary>Close to a colour, whichever order the frame's channels are in.</summary>
-    private static bool IsColor(uint pixel, int r, int g, int b)
-    {
-        var (first, second, third) = ((int)(pixel >> 16) & 0xFF, (int)(pixel >> 8) & 0xFF, (int)pixel & 0xFF);
-        return Math.Abs(second - g) <= 2 &&
-            ((Math.Abs(first - r) <= 2 && Math.Abs(third - b) <= 2) || (Math.Abs(first - b) <= 2 && Math.Abs(third - r) <= 2));
-    }
+    /// <summary>Close to a colour.</summary>
+    private static bool IsColor(Color pixel, int r, int g, int b) =>
+        Math.Abs(pixel.R - r) <= 2 && Math.Abs(pixel.G - g) <= 2 && Math.Abs(pixel.B - b) <= 2;
 
     // ── The row ──────────────────────────────────────────────────────────────────────────────
 
@@ -193,8 +183,8 @@ public class AvonicItemDividerTests
         var divider = new AvonicItemDivider { Color = "primary" };
         using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { divider } });
 
-        var row = Pixel(scene.Window.CaptureRenderedFrame()!, 100, 30);
-        Assert.True(IsColor(row, 0, 73, 203), row.ToString("X6"));
+        var row = Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 100, 30);
+        Assert.True(IsColor(row, 0, 73, 203), row.ToString());
     });
 
     [AvaloniaFact]
@@ -561,8 +551,8 @@ public class AvonicItemDividerTests
         using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { divider } });
 
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Assert.NotEqual(0xFFFFFFu, Pixel(frame, 330, 24));
-        Assert.Equal(0xFFFFFFu, Pixel(frame, 340, 24));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 330, 24));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 340, 24));
     });
 
     // ── Sticky ───────────────────────────────────────────────────────────────────────────────
@@ -986,7 +976,7 @@ public class AvonicItemDividerTests
         ScrollTo(scroller, 100, divider);
 
         // The rows are white, and the divider is red, at any point of its top line.
-        Assert.NotEqual(0xFFFFFFu, Pixel(scene.Window.CaptureRenderedFrame()!, 300, 10));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
     });
 
     private static AvonicList FromTemplate() => new()
@@ -1009,7 +999,7 @@ public class AvonicItemDividerTests
 
         Assert.Equal(0, ScrollTo(scroller, 100, divider));
         Assert.Equal(100, Assert.IsType<ContentPresenter>(divider.GetVisualParent()).ZIndex);
-        Assert.NotEqual(0xFFFFFFu, Pixel(scene.Window.CaptureRenderedFrame()!, 300, 10));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
     });
 
     [AvaloniaFact]

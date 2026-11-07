@@ -46,6 +46,27 @@ Each row in the plan has a test in `AvonicItemLayoutTests` named after it, so F1
 | F14, F18 | A long note or `AvonicText` is as wide as its longest line, rather than 342. The text is in the same place |
 | F7, F8, F15 | Same layout, with rows that are taller by the font's line height, as above |
 
+## Shared press handling, `Command` and the rest
+
+From #72. The rows are in [PLAN.md](PLAN.md#shared-press-handling-command-and-the-rest-72). Nothing here is drawn differently, except where a ripple is.
+
+| # | Behaviour | Result |
+|---|---|---|
+| S1 | A finger that moves: clicks at 14, and not at 16 | match, on all three controls |
+| S2 | A mouse dragged 60 px clicks | match, on all three. It was a gap on the item and the card |
+| S3 | Right and middle button don't | match |
+| S4 | A button inside clicks both | match, for a stock `Button` and an `AvonicButton` |
+| S5 | A button item's name | match: `Hello inline words`, `Text INNER BTN`, `Seen`, `Lab Not`, and an explicit name beats them. The case is as it's drawn |
+| S6 | Roles | match, within one peer: a button item in a list is a button, where Ionic has a button inside a list item |
+| S7 | `position` in a divider, a group and a header | match: the same scale, and a move of the same fraction of the height. The heights differ only by the font |
+| S8 | An end button's margins | match: `16 7 2 7` and `16 4 2 4` |
+| S9 | A button is over the ripple | match, and the ripple is under everything else too, where Ionic's is over it: see the plan |
+| S10 | A background under a translucent line | match: `rgb(127, 0, 128)`, within what rounding gives |
+| S11 | A second finger anywhere means no click | match |
+| S12 | Hidden during the press means no click | match |
+| S13 | A button item in a button item clicks each once | match, on all three controls |
+| S14 | A name inside counts, and `aria-hidden` doesn't | match, through `AutomationProperties` |
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicItemTests`, named after its number. The
@@ -117,6 +138,10 @@ The flex layout, from #71, with `tools/real-window` on Windows at 125%, on 2026-
 pages draw as the headless frames do. It found nothing new. Nothing it drives depends on the new rows, so it's their frames that say so:
 
 <img src="compare/real-window-layout.png" alt="The sample's ion-item page in a real window" width="300">
+
+The shared press, from #72, the same way, on 2026-11-07: all 51 checks passed, with real clicks, double clicks, Enter and Space on the button and the card, and injected touch on the button, the card, the item and `ion-content`. It found nothing new. It doesn't drive a finger that slides without a scroller, or a second finger: those are `NativeButtonTests`, with Chromium's numbers. No real touch hardware.
+
+<img src="compare/real-window-shared.png" alt="The sample's ion-item page, with a button in a button row, in a real window" width="300">
 
 ## Deliberate differences
 

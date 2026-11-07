@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
@@ -55,32 +56,34 @@ public class AvonicCard : ContentControl
         remove => RemoveHandler(ClickEvent, value);
     }
 
+    /// <summary>Avonic extension: runs when a <see cref="Button"/> card clicks. It does nothing on a plain card, which has no native button.</summary>
+    public static readonly StyledProperty<ICommand?> CommandProperty =
+        AvonicButton.CommandProperty.AddOwner<AvonicCard>();
+
+    /// <summary>Avonic extension: the parameter for <see cref="Command"/>.</summary>
+    public static readonly StyledProperty<object?> CommandParameterProperty =
+        AvonicButton.CommandParameterProperty.AddOwner<AvonicCard>();
+
+    public ICommand? Command
+    {
+        get => GetValue(CommandProperty);
+        set => SetValue(CommandProperty, value);
+    }
+
+    public object? CommandParameter
+    {
+        get => GetValue(CommandParameterProperty);
+        set => SetValue(CommandParameterProperty, value);
+    }
+
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
+    private NativeButton? _native;
     private AvonicRippleEffect? _ripple;
-    private bool _spacePressed;
-    private object? _secondTapSource;
-    private IPointer? _secondTapPointer;
-    private Point _secondTapStart;
-    private IPointer? _pressPointer;
-    private Point _pressPosition;
     private IDisposable? _focusableFrame;
 
-    public AvonicCard()
-    {
-        AddHandler(TappedEvent, (_, e) => Tap(e.Source));
-
-        // A second quick press raises DoubleTapped, on the press, and no Tapped. A native <button> clicks each
-        // time, on release, so a finger that goes down to scroll doesn't activate anything.
-        AddHandler(PointerPressedEvent, OnPointerPressedBeforeSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(DoubleTappedEvent, (_, e) =>
-        {
-            _secondTapSource = e.Source;
-            _secondTapPointer = _pressPointer;
-            _secondTapStart = _pressPosition;
-        });
-        AddHandler(PointerReleasedEvent, OnPointerReleasedAfterSecondTap, RoutingStrategies.Tunnel, handledEventsToo: true);
-    }
+    /// <summary>A command only disables a button card. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
+    protected override bool IsEnabledCore => base.IsEnabledCore && (!Button || _native?.CanExecute != false);
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -88,7 +91,8 @@ public class AvonicCard : ContentControl
 
         if (change.Property == ButtonProperty)
         {
-            _spacePressed = false;
+            _native?.Reset();
+            UpdateIsEffectivelyEnabled();
             UpdateInteractivity();
         }
     }
@@ -107,6 +111,13 @@ public class AvonicCard : ContentControl
     /// </summary>
     private void UpdateInteractivity()
     {
+        // Most cards are plain, and don't pay for this.
+        if (_native is null && Button)
+        {
+            _native = new NativeButton(this, _ => Tap(), () => Button, UpdateIsEffectivelyEnabled);
+            UpdateIsEffectivelyEnabled();
+        }
+
         var clickable = Button;
 
         PseudoClasses.Set(":button", clickable);
@@ -133,106 +144,13 @@ public class AvonicCard : ContentControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    private void OnPointerPressedBeforeSecondTap(object? sender, PointerPressedEventArgs e)
-    {
-        // Another finger going down doesn't end this one's press.
-        if (e.Pointer == _secondTapPointer)
-        {
-            _secondTapSource = null;
-            _secondTapPointer = null;
-        }
-
-        _pressPointer = e.Pointer;
-        _pressPosition = e.GetPosition(this);
-    }
-
-    private void OnPointerReleasedAfterSecondTap(object? sender, PointerReleasedEventArgs e)
-    {
-        if (_secondTapPointer is not null && e.Pointer == _secondTapPointer)
-        {
-            var source = _secondTapSource;
-            _secondTapSource = null;
-            _secondTapPointer = null;
-            if (IsWithinTap(e))
-            {
-                Tap(source);
-            }
-        }
-    }
-
-    /// <summary>The limit Avalonia gives a first press's <c>Tapped</c>, so a finger that slides doesn't click on either.</summary>
-    private bool IsWithinTap(PointerReleasedEventArgs e)
-    {
-        var size = Application.Current?.PlatformSettings?.GetTapSize(e.Pointer.Type) ?? new Size(4, 4);
-        return new Rect(_secondTapStart, default(Size))
-            .Inflate(new Thickness(size.Width / 2, size.Height / 2))
-            .Contains(e.GetPosition(this));
-    }
-
     /// <summary>A disabled <c>&lt;button&gt;</c> doesn't click, even if it was disabled during the press.</summary>
-    private void Tap(object? source)
+    private void Tap()
     {
-        if (Button && IsEffectivelyEnabled && !IsInNestedButtonCard(source))
+        if (Button && IsEffectivelyEnabled)
         {
-            RaiseEvent(new RoutedEventArgs(ClickEvent, this));
+            _native?.Click(ClickEvent);
         }
-    }
-
-    /// <summary>
-    /// A browser has one click, which reaches each card on its way up. Here a nested card's <see cref="Click"/> already
-    /// bubbles through this one, so raising another would run this card's handlers twice.
-    /// </summary>
-    private bool IsInNestedButtonCard(object? source)
-    {
-        for (var visual = source as Visual; visual is not null && visual != this; visual = visual.GetVisualParent())
-        {
-            if (visual is AvonicCard { Button: true })
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>A native <c>&lt;button&gt;</c>: Enter activates on press, and Space on release.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-
-        if (!Button || !ReferenceEquals(e.Source, this))
-        {
-            return;
-        }
-
-        if (e.Key == Key.Enter)
-        {
-            Tap(this);
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Space)
-        {
-            _spacePressed = true;
-            e.Handled = true;
-        }
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-
-        if (e.Key == Key.Space && _spacePressed)
-        {
-            _spacePressed = false;
-            Tap(this);
-            e.Handled = true;
-        }
-    }
-
-    protected override void OnLostFocus(FocusChangedEventArgs e)
-    {
-        base.OnLostFocus(e);
-        _spacePressed = false;
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
@@ -255,7 +173,7 @@ public class AvonicCard : ContentControl
         protected override string? GetNameCore()
         {
             var name = base.GetNameCore();
-            return string.IsNullOrEmpty(name) && owner.Button ? CardText.Of(owner) : name;
+            return string.IsNullOrEmpty(name) && owner.Button ? AccessibleText.Of(owner) : name;
         }
 
         protected override bool IsContentElementCore() => owner.Button;
@@ -264,7 +182,7 @@ public class AvonicCard : ContentControl
 
         public void Invoke()
         {
-            owner.Tap(owner);
+            owner.Tap();
         }
     }
 }

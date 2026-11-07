@@ -73,18 +73,4 @@
         <Setter Property="Margin" Value="16,0,0,2" />
     </Style>
 
-    <!-- A divider has the class "item", so label.md.css's :host-context(.item) applies. See Label.axaml. -->
-    <Style Selector="c|AvonicItemDivider c|AvonicLabel">
-        <Setter Property="Foreground">
-            <MultiBinding Converter="{x:Static b:Css.Var}">
-                <DynamicResource ResourceKey="Avonic.Label.Color" />
-                <Binding Path="$parent[Control].(TextElement.Foreground)" />
-            </MultiBinding>
-        </Setter>
-    </Style>
-    <Style Selector="c|AvonicItemDivider c|AvonicLabel.ion-text-nowrap">
-        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
-        <Setter Property="ClipToBounds" Value="True" />
-    </Style>
-
 </Styles>

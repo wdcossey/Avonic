@@ -20,7 +20,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Inner", typeof(Border))]
 [TemplatePart("PART_Container", typeof(ContentPresenter))]
 [TemplatePart("PART_End", typeof(ContentPresenter))]
-public class AvonicItemDivider : TemplatedControl
+public class AvonicItemDivider : TemplatedControl, IItemHost
 {
     /// <summary><c>z-index: 100</c>. There's no variable for it.</summary>
     private const int StickyZIndex = 100;

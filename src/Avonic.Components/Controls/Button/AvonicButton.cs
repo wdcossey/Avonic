@@ -271,21 +271,10 @@ public class AvonicButton : TemplatedControl, IItemControl
     /// <summary><c>:host(.button-full:not(.button-round)) .button-native</c>: the first value that's set, with no side borders.</summary>
     public static readonly IMultiValueConverter NoSideBordersConverter = new ButtonNoSideBordersConverter();
 
-    /// <summary>
-    /// <c>line-height: 1</c>. CSS splits a line's leading above and below the text, and Avalonia keeps a line with a
-    /// smaller <c>LineHeight</c> at the top, which puts the text about 3 px low in a 36 px button. So this moves the
-    /// text up by half the leading, without changing its box. The values are the <c>TextBlock</c>'s font family,
-    /// weight, size and line height.
-    /// </summary>
-    public static readonly IMultiValueConverter HalfLeadingConverter = new ButtonHalfLeadingConverter();
-
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
+    private readonly NativeButton? _native;
     private bool _inItem;
-    private bool _spacePressed;
-    private IPointer? _pressPointer;
-    private bool _commandCanExecute = true;
-    private bool _commandSubscribed;
     private ContentPresenter?[] _slots = [];
 
     static AvonicButton()
@@ -302,20 +291,15 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     public AvonicButton()
     {
-        // A native <button> clicks on release, if the press and the release both landed on it. Tapped doesn't do that:
-        // it has a small movement limit and isn't raised for a second quick press. A child that handles the press
-        // keeps it, as stopPropagation does in Ionic, and as Avalonia's own Button does. This doesn't handle anything,
-        // so an item around it still sees the tap.
-        AddHandler(PointerPressedEvent, OnPointerPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(PointerPressedEvent, OnPointerPressedBubble);
-        AddHandler(PointerReleasedEvent, OnPointerReleasedBubble, RoutingStrategies.Bubble, handledEventsToo: true);
+        _native = new NativeButton(this, _ => RaiseClick(), () => true, UpdateIsEffectivelyEnabled);
 
         // ion-activatable and ion-focusable, always.
         Activatable.SetIsEnabled(this, true);
         FocusVisible.SetIsEnabled(this, true);
     }
 
-    protected override bool IsEnabledCore => base.IsEnabledCore && _commandCanExecute;
+    /// <summary>The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
+    protected override bool IsEnabledCore => base.IsEnabledCore && _native?.CanExecute != false;
 
     ItemControlType IItemControl.ItemControlType => ItemControlType.Button;
 
@@ -336,32 +320,6 @@ public class AvonicButton : TemplatedControl, IItemControl
             || change.Property == ExpandProperty || change.Property == StrongProperty || change.Property == IconOnlyContentProperty)
         {
             UpdateClasses();
-        }
-        else if (change.Property == IsEffectivelyEnabledProperty && !IsEffectivelyEnabled)
-        {
-            // Space doesn't need this: disabling takes focus away, which ends it.
-            _pressPointer = null;
-        }
-        else if (change.Property == CommandProperty)
-        {
-            if (_commandSubscribed)
-            {
-                if (change.OldValue is ICommand old)
-                {
-                    old.CanExecuteChanged -= OnCanExecuteChanged;
-                }
-
-                if (change.NewValue is ICommand command)
-                {
-                    command.CanExecuteChanged += OnCanExecuteChanged;
-                }
-            }
-
-            UpdateCanExecute();
-        }
-        else if (change.Property == CommandParameterProperty)
-        {
-            UpdateCanExecute();
         }
     }
 
@@ -384,48 +342,6 @@ public class AvonicButton : TemplatedControl, IItemControl
         // closest('ion-item'). Ionic only looks on first load, but containers get recycled here.
         _inItem = this.FindAncestorOfType<AvonicItem>() is not null;
         UpdateClasses();
-    }
-
-    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToLogicalTree(e);
-
-        if (!_commandSubscribed)
-        {
-            _commandSubscribed = true;
-            if (Command is { } command)
-            {
-                command.CanExecuteChanged += OnCanExecuteChanged;
-            }
-
-            UpdateCanExecute();
-        }
-    }
-
-    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
-    {
-        base.OnDetachedFromLogicalTree(e);
-
-        if (_commandSubscribed)
-        {
-            _commandSubscribed = false;
-            if (Command is { } command)
-            {
-                command.CanExecuteChanged -= OnCanExecuteChanged;
-            }
-        }
-    }
-
-    private void OnCanExecuteChanged(object? sender, EventArgs e) => UpdateCanExecute();
-
-    private void UpdateCanExecute()
-    {
-        var canExecute = Command is not { } command || command.CanExecute(CommandParameter);
-        if (canExecute != _commandCanExecute)
-        {
-            _commandCanExecute = canExecute;
-            UpdateIsEffectivelyEnabled();
-        }
     }
 
     /// <summary><c>render</c>'s host classes. <c>fill</c> also resolves to clear in a toolbar or list header, which goes with those controls.</summary>
@@ -452,96 +368,8 @@ public class AvonicButton : TemplatedControl, IItemControl
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// A new press ends the last one, which a gesture may have taken, so its release never came here. A second finger
-    /// means no click, whichever lifts first, as measured.
-    /// </summary>
-    private void OnPointerPressedTunnel(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.Pointer == _pressPointer || !e.Pointer.IsPrimary)
-        {
-            _pressPointer = null;
-        }
-    }
-
-    private void OnPointerPressedBubble(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.Pointer.IsPrimary)
-        {
-            _pressPointer = e.Pointer;
-        }
-    }
-
-    /// <summary>
-    /// Measured with two mouse buttons: left, then right down, then left up clicks. Left, then a right tap, then left up
-    /// doesn't, and nor does right, then left, then right up, then left up. So releasing any other button ends the press.
-    /// </summary>
-    private void OnPointerReleasedBubble(object? sender, PointerReleasedEventArgs e)
-    {
-        if (e.Pointer != _pressPointer)
-        {
-            return;
-        }
-
-        _pressPointer = null;
-
-        // Not InitialPressMouseButton, which is the last button pressed, not the one released.
-        var isLeft = e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased;
-        if (isLeft && HoldsPointer(e.Pointer) && new Rect(Bounds.Size).Contains(e.GetPosition(this)))
-        {
-            RaiseClick();
-        }
-    }
-
-    /// <summary>A press that lost the pointer was cancelled, as <c>pointercancel</c> does, even if it's released over the button.</summary>
-    private bool HoldsPointer(IPointer pointer) =>
-        pointer.Captured is Visual holder && (holder == this || this.IsVisualAncestorOf(holder));
-
     /// <summary>As Avalonia's own <c>Button</c> does: a handler that sets <c>Handled</c> stops the command.</summary>
-    private void RaiseClick()
-    {
-        var args = new RoutedEventArgs(ClickEvent, this);
-        RaiseEvent(args);
-
-        if (!args.Handled && Command is { } command && command.CanExecute(CommandParameter))
-        {
-            command.Execute(CommandParameter);
-        }
-    }
-
-    /// <summary>A native <c>&lt;button&gt;</c>: Enter activates on press, and Space on release.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-
-        if (!ReferenceEquals(e.Source, this))
-        {
-            return;
-        }
-
-        if (e.Key == Key.Enter)
-        {
-            RaiseClick();
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Space)
-        {
-            _spacePressed = true;
-            e.Handled = true;
-        }
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-
-        if (e.Key == Key.Space && _spacePressed)
-        {
-            _spacePressed = false;
-            RaiseClick();
-            e.Handled = true;
-        }
-    }
+    private void RaiseClick() => _native?.Click(ClickEvent);
 
     protected override void OnGotFocus(FocusChangedEventArgs e)
     {
@@ -560,7 +388,6 @@ public class AvonicButton : TemplatedControl, IItemControl
 
         if (ReferenceEquals(e.Source, this))
         {
-            _spacePressed = false;
             RaiseEvent(new RoutedEventArgs(IonBlurEvent, this));
         }
     }
@@ -584,12 +411,10 @@ public class AvonicButton : TemplatedControl, IItemControl
             }
             else if (slot < _slots.Length && _slots[slot]?.Child is { } child)
             {
-                foreach (var block in child.GetSelfAndLogicalDescendants().OfType<TextBlock>())
+                var nested = AccessibleText.Of(child);
+                if (nested.Length > 0)
                 {
-                    if (!string.IsNullOrEmpty(block.Text))
-                    {
-                        yield return block.Text;
-                    }
+                    yield return nested;
                 }
             }
         }
@@ -701,22 +526,6 @@ public class AvonicButton : TemplatedControl, IItemControl
         {
             var width = values.OfType<Thickness>().FirstOrDefault();
             return new Thickness(0, width.Top, 0, width.Bottom);
-        }
-    }
-
-    private sealed class ButtonHalfLeadingConverter : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (values is not [FontFamily family, FontWeight weight, double fontSize, double lineHeight] || double.IsNaN(lineHeight))
-            {
-                return AvaloniaProperty.UnsetValue;
-            }
-
-            var metrics = new Typeface(family, weight: weight).GlyphTypeface.Metrics;
-            var natural = (double)metrics.LineSpacing / metrics.DesignEmHeight * fontSize;
-            var halfLeading = (natural - lineHeight) / 2;
-            return new Thickness(0, -halfLeading, 0, halfLeading);
         }
     }
 }

@@ -33,15 +33,14 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
   `BoxShadow`. The "Unknown" button gave it away, because its shadow is all it has. The property read the right value, so
   only the frame showed it. Fixed by turning off the host's clip, and giving `overflow: hidden` its own part, with a pixel test.
 - **Text 3 px low.** Avalonia keeps a line with a small `LineHeight` at the top of its height, and CSS splits the leading. Fixed
-  with `HalfLeadingConverter`, with a pixel test.
+  with `Css.HalfLeading`, with a pixel test.
 - **Long text was narrower than Ionic's** and pulled the icons inwards, because Avalonia gives the width of the longest line
   after wrapping, and CSS's shrink-to-fit gives all the room once the text doesn't fit. Fixed in `ButtonInner`.
 
 ## Found by the tests
 
 - **A lost tap.** A quick tap on a button straight after a tap on something else at the same spot, such as this button
-  just before it was enabled, raised neither `Tapped` nor `DoubleTapped`. In Chromium every press clicks. `AvonicItem` has the
-  same gap: see the PR.
+  just before it was enabled, raised neither `Tapped` nor `DoubleTapped`. In Chromium every press clicks. `AvonicItem` shares this press since #72.
 
 ## Found by the review
 
@@ -93,7 +92,7 @@ results were measured in Chromium with `ion-app`.
 | 30 | Margins in a slot | Default 2 and 4; `2 4 16 4`; `16 4 2 4` | match, except beside a stacked label: gap |
 | 31 | The item sees a clickable | `it2`: `item-multiple-inputs`; focus: item also `ion-focused` | match |
 | 32 | In a button item | `click@initembtn itemclick@it9`; disabled: `itemclick@it9<-it9` | match |
-| 33 | Automation | `button "Default"`, `button "Named"`, unnamed icon-only, `button "Favourite"`, `[disabled]` | match, a nested button in a button item's name: gap |
+| 33 | Automation | `button "Default"`, `button "Named"`, unnamed icon-only, `button "Favourite"`, `[disabled]` | match, and a nested button in a button item's name, since #72 |
 | 34 | RTL | At the right, margin 2, start icon on the right | match |
 | 35 | Transitions | `box-shadow, background-color, color`: 0.28 s, 0.015 s, 0.015 s | match |
 | 36 | Extensions | None in Ionic | n/a |

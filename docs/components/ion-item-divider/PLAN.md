@@ -120,7 +120,6 @@ and layout rounding makes that 25. The tests found this.
 |---|---|
 | `h1`–`h6` in a divider. `::slotted(h1)`'s margins are dead in real Ionic: global typography beats them. Measured `dh1` to `dh6`: sizes 26, 24, 22, 20, 18, 16, weight 500, line height 1.2, 16 above except `h1` 20 and `h2` 18, 10 below | Global typography, which has nowhere to live yet. `ion-text` (#8) or a later global style |
 | `::slotted(ion-note)`, `ion-avatar`, `ion-thumbnail`, `ion-button`'s `inItem` | Those controls (#8, #16, #10), in their own `Styles` files. Values are in `item-divider.md.css` |
-| A label's `Position` here: measured `dst`, `dfl`, `dfx`, the transforms and 100 width apply | `Styles/Label.axaml` only applies those rules in an item, and it isn't this PR's to edit. Docs for `position` say it's for items |
 | `--ion-safe-area-*` | `ion-content` (#11), as for `ion-item` |
 
 ## Dependencies

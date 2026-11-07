@@ -1425,6 +1425,31 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B17_The_Scroll_Event_Waits_For_A_Frame()
+    {
+        using var clock = new TestClock();
+        Action? frame = null;
+        AvonicConfig.RequestFrame = (_, callback) =>
+        {
+            frame = callback;
+            return AvonicConfig.Schedule(() => { }, TimeSpan.FromHours(1));
+        };
+        var scrolled = 0;
+        var content = Tall();
+        content.ScrollEvents = true;
+        content.IonScroll += (_, _) => scrolled++;
+        using var scene = new Scene(InBox(content));
+
+        SetOffset(content, 100);
+        clock.At(100);
+        Assert.Equal(0, scrolled);
+
+        Assert.NotNull(frame);
+        frame();
+        Assert.Equal(1, scrolled);
+    }
+
+    [AvaloniaFact]
     public void B18_Removing_It_While_Scrolling_Ends_The_Scroll_At_Once()
     {
         // Measured removed while scrolling: ionScrollEnd is raised before remove() returns.

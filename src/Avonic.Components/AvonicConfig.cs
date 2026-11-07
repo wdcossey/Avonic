@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Threading;
 
 namespace Avonic.Components;
@@ -29,4 +31,36 @@ public static class AvonicConfig
     /// </summary>
     internal static Func<Action, TimeSpan, IDisposable> Schedule { get; set; } =
         static (callback, delay) => DispatcherTimer.RunOnce(callback, delay);
+
+    /// <summary>
+    /// Ionic's <c>requestAnimationFrame</c> and <c>readTask</c>: before the next frame the visual's window draws. Outside a window
+    /// there's no frame to wait for, so it's a timer. Tests substitute one driven by the same manual clock as <see cref="Now"/>.
+    /// </summary>
+    internal static Func<Visual, Action, IDisposable> RequestFrame { get; set; } = static (visual, callback) =>
+    {
+        if (TopLevel.GetTopLevel(visual) is not { } top)
+        {
+            return Schedule(callback, FrameInterval);
+        }
+
+        var frame = new CancellableFrame();
+        top.RequestAnimationFrame(_ =>
+        {
+            if (!frame.IsCancelled)
+            {
+                callback();
+            }
+        });
+        return frame;
+    };
+
+    /// <summary>A frame, for what doesn't have one: a test's clock, and no window.</summary>
+    internal static readonly TimeSpan FrameInterval = TimeSpan.FromMilliseconds(16);
+
+    private sealed class CancellableFrame : IDisposable
+    {
+        public bool IsCancelled { get; private set; }
+
+        public void Dispose() => IsCancelled = true;
+    }
 }

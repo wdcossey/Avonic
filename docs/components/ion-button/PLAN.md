@@ -171,7 +171,7 @@ follow `--padding-top`, and `--padding-start` follows `--padding-end`. Measured 
 
 Five converters for the theme are new, and they live on `AvonicButton` because `Behaviors/` is shared: `PaddingConverter`,
 `ClampConverter` for `clamp(30px, 2.86em, 60px)`, `IconMarginConverter` for a margin in the icon's own em,
-`NoSideBordersConverter` for full width, and `HalfLeadingConverter`, below. `TextTransformConverter` is for the template.
+`NoSideBordersConverter` for full width, and `Css.HalfLeading`, below. `TextTransformConverter` is for the template.
 
 ### Layout
 
@@ -207,7 +207,7 @@ a drag of 150 px within it clicks, a drag off and back clicks, two quick presses
 A second finger means no click, whichever lifts first, and so does a cancelled touch. With two mouse buttons, what counts is
 the order of the releases: if the left is released first, it clicks, and if the other one is, it doesn't. Measured in all four orders.
 
-**This differs from `AvonicItem`, which uses `Tapped`.** `Tapped` has a small movement limit, so a shaky press does nothing.
+**Why not `Tapped`.** Since #72 the item and the card share this, in `Behaviors/NativeButton.cs`. `Tapped` has a small movement limit, so a shaky press does nothing.
 It isn't raised for a second quick press, and `DoubleTapped`, which is, also needs the last press to have had the same
 source, so a quick press after a tap that landed on something else is lost. A button tracks the press itself instead: armed in
 a bubbling `PointerPressed`, and a click in `PointerReleased` if it's the same pointer and inside. Clicking on `DoubleTapped`,
@@ -222,7 +222,7 @@ tap, which is what measured `click initembtn` needs.
 
 `line-height: 1` is `TextBlock.LineHeight` set to the font size, which inherits. It needed two more things, both found by
 looking at the frames: a `TextBlock` clips to its line height, and Avalonia keeps a line with a smaller `LineHeight` at the
-top, where CSS splits the leading above and below. That put text 3 px low in a 36 px button. `HalfLeadingConverter`
+top, where CSS splits the leading above and below. That put text 3 px low in a 36 px button. `Css.HalfLeading`
 works out half the leading from the font's own metrics, and a margin moves the text by that without changing its box.
 
 ### Clipping
@@ -263,7 +263,7 @@ Avonic-only, and never named like an Ionic member.
 | `Avonic.Button.Padding*` is px only | An em default stays relative, and an override is a plain number. Use a binding for a relative one |
 | A row of buttons is a panel, not inline flow | Avalonia has no inline flow |
 | A button in a disabled panel fades to 0.5 too, where a disabled `fieldset` does nothing to an `ion-button` (measured: opacity 1, and it still clicks) | In Avalonia a disabled ancestor disables the control, and it should look it. The exception is a disabled item, which has its own opacity, measured |
-| A nested control that handles its press, such as Avalonia's own `Button`, doesn't also click this one, where a click would bubble in a browser | That's how Avalonia's `Button` works, and it's what stops a click here, because `Tapped` comes too late to stop it |
+| A nested control that handles its press stops the click, except Avalonia's own `Button`, which always does, and a native `<button>` inside clicks both, measured | A handled `Click` from inside stops it too, since #72, which is `click.stopPropagation()` |
 | A word wider than the button breaks onto more lines, where Chromium's button grows past its parent: 99.6 of 96 (measured `narrow`) | A control can't be measured wider than its parent, and Avalonia 12.1.4 breaks the word even with `WrapWithOverflow`, measured 4 lines |
 | Two block or full buttons in a column are 8 apart, where CSS collapses their margins to 4 | Avalonia has no margin collapsing, as in `ion-label` |
 | Solid's shadow is lighter at 2x: the first row under the button is 205, where Chromium's is 165, and it fades over about the same distance | Avalonia's own shadow rendering, with the same values. At 1x it reads 164 |
@@ -279,9 +279,6 @@ Avonic-only, and never named like an Ionic member.
 | `ß` stays `ß` where CSS gives `SS` (measured `ss`), and `ﬁ` stays where CSS gives `FI` | .NET's `ToUpperInvariant` maps one character to one |
 | A nested `TextBlock` with its own `FontSize` gets the button's line height | `TextBlock.LineHeight` inherits as a size, as in `ion-label` |
 | A slotted icon with `Size` set takes its margin from `FontSize`, not its real size | The real size isn't public. At `IconSize.Large` it's about 4 px |
-| An end-slot button beside a stacked or floating label has a 0 margin at the end, where Ionic's stays 2 | `Item.axaml`'s rule for that state has a pseudoclass and merges later. See "Proposed for shared files" in the PR |
-| The item's ripple paints over a button in a button item, where `z-index: 1` keeps it under | A slot can't lift its child above the item's own parts |
-| A button item's automation name doesn't include a nested button's text, measured `"In button item Disabled in button item"` | The item only reads `TextBlock`s logically inside the slot |
 
 ## Not in this PR
 

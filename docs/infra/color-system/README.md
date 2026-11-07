@@ -127,7 +127,6 @@ Override the `Color` key at the application, which updates its brush too:
 ```
 
 Tokens that only have a brush, such as `Avonic.ItemBackgroundBrush`, are overridden by replacing the brush.
-A card doesn't follow an overridden item background, though it does in Ionic, so override both.
 
 **Add a custom colour** by defining its keys, the equivalent of Ionic's `.ion-color-favorite`. `Color="favorite"`
 then works on every control, and `my-brand` maps to `Avonic.Color.MyBrand…`:

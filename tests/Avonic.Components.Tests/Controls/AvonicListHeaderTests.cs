@@ -41,12 +41,6 @@ public class AvonicListHeaderTests
 
     private static void Run() => Dispatcher.UIThread.RunJobs();
 
-    private static unsafe uint Pixel(WriteableBitmap frame, int x, int y)
-    {
-        using var buffer = frame.Lock();
-        return ((uint*)(buffer.Address + y * buffer.RowBytes))[x] & 0xFFFFFF;
-    }
-
     [AvaloniaFact]
     public void H1_It_Has_Its_Minimum_Height_Padding_And_Text_Size() => InstalledTheme.Run(_ =>
     {
@@ -253,8 +247,8 @@ public class AvonicListHeaderTests
         var header = new AvonicListHeader { Color = "primary", Lines = ListHeaderLines.Full };
         using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { header } });
 
-        var pixel = Pixel(scene.Window.CaptureRenderedFrame()!, 100, 45);
-        Assert.Equal(73, (int)(pixel >> 8) & 0xFF, 2d);
+        var pixel = Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 100, 45);
+        Assert.Equal(73, pixel.G, 2d);
     });
 
     [AvaloniaFact]

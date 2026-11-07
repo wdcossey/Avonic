@@ -42,12 +42,15 @@
             </MultiBinding>
         </Setter>
         <Setter Property="Padding">
-            <MultiBinding Converter="{x:Static b:Css.Box}">
-                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingStart" />
-                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingTop" />
-                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingEnd" />
-                <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingBottom" />
-            </MultiBinding>
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Start">
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.ItemDivider.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
         </Setter>
         <Setter Property="Template">
             <ControlTemplate>
@@ -94,11 +97,14 @@
             <Setter Property="MinHeight" Value="30" />
             <Setter Property="ClipToBounds" Value="True" />
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static b:Css.Box}">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingStart" />
                     <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingTop" />
                     <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.ItemDivider.InnerPaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
                 </MultiBinding>
             </Setter>
         </Style>

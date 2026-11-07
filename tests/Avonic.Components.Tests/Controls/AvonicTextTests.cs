@@ -93,17 +93,15 @@ public class AvonicTextTests
     }
 
     /// <summary>How many pixels in a band of rows are nearly this colour, which antialiasing doesn't reach.</summary>
-    private static unsafe int Ink(WriteableBitmap frame, Color color, int top, int bottom)
+    private static int Ink(WriteableBitmap frame, Color color, int top, int bottom)
     {
-        using var buffer = frame.Lock();
         var count = 0;
         for (var y = top; y < bottom; y++)
         {
-            var row = (byte*)buffer.Address + y * buffer.RowBytes;
             for (var x = 0; x < frame.PixelSize.Width; x++)
             {
-                var (r, g, b) = (row[x * 4], row[x * 4 + 1], row[x * 4 + 2]);
-                if (Math.Abs(r - color.R) < 8 && Math.Abs(g - color.G) < 8 && Math.Abs(b - color.B) < 8)
+                var pixel = Frames.PixelAt(frame, x, y);
+                if (Math.Abs(pixel.R - color.R) < 8 && Math.Abs(pixel.G - color.G) < 8 && Math.Abs(pixel.B - color.B) < 8)
                 {
                     count++;
                 }

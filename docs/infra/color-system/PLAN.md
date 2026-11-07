@@ -179,9 +179,8 @@ follow `Avonic.TextColor`. This affects outliers such as toolbar text, tab-bar b
 
 A brush also can't follow another brush, only a `Color`, and a `Color` can't follow anything. So:
 
-- `--ion-card-background`, which falls back through `--ion-item-background` to the background, follows the
-  background directly. Overriding the item background doesn't change cards. Dark sets both to the same value,
-  so the shipped palettes aren't affected.
+- `--ion-card-background`, which falls back through `--ion-item-background` to the background, is unset since #72, and the card's
+  theme follows that with `Css.Var`, as a control's own tokens do. Dark sets both.
 - `--ion-border-color` falls back to `--ion-background-color-step-150` in dark, and `Avonic.BorderColor` is a
   copy of its value. Overriding the step doesn't change borders.
 

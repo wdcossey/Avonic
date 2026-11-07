@@ -1,3 +1,4 @@
+using Avalonia.Media;
 using System.Globalization;
 using Avalonia;
 using Avonic.Components.Behaviors;
@@ -28,6 +29,20 @@ public class CssTests
         Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, null, 0.5, 0.75));
         Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.TranslateScale, null, 1d, 0.5));
     }
+
+    [Theory]
+    [InlineData("Start", FlowDirection.LeftToRight, 11, 2, 3, 4)]
+    [InlineData("End", FlowDirection.LeftToRight, 1, 2, 23, 4)]
+    [InlineData("Both", FlowDirection.LeftToRight, 11, 2, 23, 4)]
+    [InlineData("Start", FlowDirection.RightToLeft, 21, 2, 3, 4)]
+    [InlineData("End", FlowDirection.RightToLeft, 1, 2, 13, 4)]
+    [InlineData("Both", FlowDirection.RightToLeft, 21, 2, 13, 4)]
+    public void SafeAreaBox_Adds_At_The_Side_It_Is_Told_And_Swaps_In_RTL(string side, FlowDirection flow, double start, double top, double end, double bottom) =>
+        Assert.Equal(new Thickness(start, top, end, bottom), Convert(Css.SafeAreaBox, side, 1d, 2d, 3d, 4d, 10d, 20d, flow));
+
+    [Fact]
+    public void SafeAreaBox_Needs_All_Its_Values() =>
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.SafeAreaBox, "Start", 1d, 2d, 3d, 4d));
 
     [Fact]
     public void Var_Takes_The_First_Value_That_Is_Set() =>

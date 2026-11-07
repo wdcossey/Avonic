@@ -31,7 +31,7 @@ shadow root, so they're `Items`.
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `role="list"` on the host | peer, `AutomationControlType.List` | |
-| [x] | `role="listitem"` on an `ion-item` in a list | `AutomationProperties.ControlTypeOverride`, in `Styles/List.axaml` | Not on a button item: see the differences |
+| [x] | `role="listitem"` on an `ion-item` in a list | In `AvonicItem`'s peer, since #72 | Not on a button item: see the differences |
 | [ ] | `in-list` on `ion-item` | — | No stylesheet reads it for an item. `fab-button-in-list` is its own class |
 
 ## Behaviours
@@ -99,8 +99,7 @@ results that Ionic's own comment doesn't intend: see "For you to decide" in the 
 listens to that collection, and tells the next list when its own `Inset` changes or when it arrives. An `ItemTemplate` that
 makes inset lists has a presenter around each, so the control looks through those, as a sticky divider does.
 
-**`role="listitem"` is a style.** `AvonicItem` can't be edited here, and `AutomationProperties.ControlTypeOverride` is
-all it takes. It means the role depends on the theme: see the differences, and "Proposed for shared files" in the PR.
+**`role="listitem"` was a style here,** as `AvonicItem` couldn't be edited. It's in the item's peer since #72, so a replaced theme keeps it.
 
 **`ListLines` isn't `ItemLines`,** though they have the same values. The mapping rule is `<Component><Prop>`, and it's
 mechanical.
