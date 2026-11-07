@@ -346,6 +346,18 @@ The item still marks `Tapped` handled after forwarding a tap, for `stopImmediate
 
 A plain item or card doesn't make one, as most rows have nothing to press: an item makes it when it's a `Button` or has a control to forward to, and a card when it's a `Button`. It's 11 handlers, which measured about 15% on opening a page of plain rows.
 
+**What it costs,** on the same benchmark as the flex layout's, on the final code, three runs each:
+
+| Rows | Open the page, `v2` (ms) | Open the page, now (ms) | Change of width, `v2` (ms) | Change of width, now (ms) |
+|---|---|---|---|---|
+| A label | 298, 284, 287 | 288, 292, 266 | 54, 51, 55 | 70, 59, 63 |
+| A label and a short note | 316, 307, 302 | 329, 337, 339 | 42, 42, 42 | 55, 63, 59 |
+| Icons and detail | 302, 323, 296 | 379, 338, 339 | 62, 53, 57 | 59, 56, 52 |
+| A start label | 356, 346, 348 | 378, 336, 343 | 74, 80, 75 | 89, 82, 82 |
+| A note that wraps | 366, 371, 374 | 385, 394, 376 | 104, 100, 103 | 114, 109, 115 |
+
+Plain rows open as they did. Rows with more in them open about 5 to 10% slower, and a change of width is about 10 to 15 ms slower for 300 rows. I don't have a cause for those: nothing in a measure changed, and a row with a note has no `NativeButton`, so it may be the styles. It isn't large, but it's not explained.
+
 `Command` and `CommandParameter` are in it too, as extensions, with one property that the item and the card add as owners. They do nothing without `Button`, and a command that can't execute only disables an item or a card that has it.
 
 ### The ripple

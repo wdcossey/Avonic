@@ -24,9 +24,7 @@ and RTL.
 - **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines are
   taller: an 11 px line is 15 against 12, so the row beside a stacked label is 58 against 55.
 - **Long in the end slot.** It wraps within 342, as Ionic's does, since #71. As it's aligned left, its box is as wide as its longest line, where Ionic's is 342. The text is in the same place.
-- **The icon in the tall row** is smaller and black, because `Styles/Item.axaml`'s `::slotted(ion-icon)` rules only reach
-  an icon directly in a slot. A note and an icon in one slot have to be in a panel here. That belongs to the item, and it's
-  listed in the PR. The note itself, and the icon's being centred, match.
+- **The icon in the tall row** matches since #72, when the item's `::slotted(ion-icon)` rules came to reach an icon in a panel.
 
 ## Found here, not by the tests
 

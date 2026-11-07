@@ -82,11 +82,6 @@ public class AvonicCard : ContentControl
     private AvonicRippleEffect? _ripple;
     private IDisposable? _focusableFrame;
 
-    public AvonicCard()
-    {
-        _native = new NativeButton(this, _ => Tap(), () => Button, UpdateIsEffectivelyEnabled);
-    }
-
     /// <summary>A command only disables a button card. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
     protected override bool IsEnabledCore => base.IsEnabledCore && (!Button || _native?.CanExecute != false);
 
