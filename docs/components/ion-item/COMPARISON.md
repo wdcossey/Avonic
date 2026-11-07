@@ -139,6 +139,10 @@ pages draw as the headless frames do. It found nothing new. Nothing it drives de
 
 <img src="compare/real-window-layout.png" alt="The sample's ion-item page in a real window" width="300">
 
+The shared press, from #72, the same way, on 2026-11-07: all 51 checks passed, with real clicks, double clicks, Enter and Space on the button and the card, and injected touch on the button, the card, the item and `ion-content`. It found nothing new. It doesn't drive a finger that slides without a scroller, or a second finger: those are `NativeButtonTests`, with Chromium's numbers. No real touch hardware.
+
+<img src="compare/real-window-shared.png" alt="The sample's ion-item page, with a button in a button row, in a real window" width="300">
+
 ## Deliberate differences
 
 See [PLAN.md](PLAN.md#deliberate-differences).
