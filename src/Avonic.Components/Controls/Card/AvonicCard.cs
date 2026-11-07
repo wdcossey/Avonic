@@ -78,7 +78,7 @@ public class AvonicCard : ContentControl
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
-    private readonly NativeButton? _native;
+    private NativeButton? _native;
     private AvonicRippleEffect? _ripple;
     private IDisposable? _focusableFrame;
 
@@ -116,6 +116,13 @@ public class AvonicCard : ContentControl
     /// </summary>
     private void UpdateInteractivity()
     {
+        // Most cards are plain, and don't pay for this.
+        if (_native is null && Button)
+        {
+            _native = new NativeButton(this, _ => Tap(), () => Button, UpdateIsEffectivelyEnabled);
+            UpdateIsEffectivelyEnabled();
+        }
+
         var clickable = Button;
 
         PseudoClasses.Set(":button", clickable);

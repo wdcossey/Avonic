@@ -344,6 +344,8 @@ Chromium, md, with `ion-app`, from a script in the PR's session. A click is the 
 
 The item still marks `Tapped` handled after forwarding a tap, for `stopImmediatePropagation`.
 
+A plain item or card doesn't make one, as most rows have nothing to press: an item makes it when it's a `Button` or has a control to forward to, and a card when it's a `Button`. It's 11 handlers, which measured about 15% on opening a page of plain rows.
+
 `Command` and `CommandParameter` are in it too, as extensions, with one property that the item and the card add as owners. They do nothing without `Button`, and a command that can't execute only disables an item or a card that has it.
 
 ### The ripple

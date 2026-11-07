@@ -206,7 +206,7 @@ public class AvonicItem : TemplatedControl, IItemHost
         ItemControlType.Textarea,
     ];
 
-    private readonly NativeButton? _native;
+    private NativeButton? _native;
     private readonly Dictionary<Type, HashSet<string>> _itemStyles = [];
     private readonly HashSet<string> _appliedItemStyles = [];
     private ContentPresenter?[] _slots = [];
@@ -219,8 +219,6 @@ public class AvonicItem : TemplatedControl, IItemHost
 
     public AvonicItem()
     {
-        _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
-
         // stopImmediatePropagation, for what's left of a tap that was forwarded. Tapped comes after the release, if it comes at all,
         // so the next press ends it.
         AddHandler(TappedEvent, (_, e) => e.Handled = _forwarded);
@@ -351,6 +349,13 @@ public class AvonicItem : TemplatedControl, IItemHost
     /// <summary><c>setMultipleInputs</c>, <c>canActivate</c> and <c>isFocusable</c>.</summary>
     private void UpdateInteractivity()
     {
+        // Most rows are plain, and don't pay for this until they have something to press or to forward to.
+        if (_native is null && (Button || FirstInteractive() is not null))
+        {
+            _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
+            UpdateIsEffectivelyEnabled();
+        }
+
         int covers = 0, inputs = 0, clickables = 0;
         var focusableChild = false;
         foreach (var control in SlottedControls())

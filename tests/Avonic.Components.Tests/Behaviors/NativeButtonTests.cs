@@ -937,6 +937,38 @@ public class NativeButtonTests
         Assert.False(control.IsEffectivelyEnabled);
     }
 
+    [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("card")]
+    public void Becoming_A_Button_In_The_Tree_Listens_To_The_Command(string kind)
+    {
+        var command = new Command();
+        Control control = kind == "item" ? new AvonicItem() : new AvonicCard();
+        SetCommand(control, command);
+        using var scene = new Scene(control);
+
+        control.SetValue(kind == "item" ? AvonicItem.ButtonProperty : AvonicCard.ButtonProperty, true);
+        Assert.True(control.IsEffectivelyEnabled);
+
+        command.Can = false;
+
+        Assert.False(control.IsEffectivelyEnabled);
+    }
+
+    [AvaloniaFact]
+    public void A_Plain_Item_That_Gets_A_Control_Later_Forwards_To_It()
+    {
+        var toggle = new ForwardingStub { Width = 40, Height = 30 };
+        var item = new AvonicItem { Width = 200, Height = 50, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(item);
+
+        item.EndContent = toggle;
+        Settle();
+        Tap(scene, new Point(20, 25));
+
+        Assert.Equal(1, toggle.ItemTaps);
+    }
+
     [AvaloniaFact]
     public void The_Command_Is_Not_Listened_To_Off_The_Tree()
     {

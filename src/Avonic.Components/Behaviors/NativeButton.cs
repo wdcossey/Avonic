@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
 
@@ -62,6 +63,12 @@ internal sealed class NativeButton
         owner.AttachedToLogicalTree += (_, _) => Subscribe();
         owner.DetachedFromLogicalTree += (_, _) => Unsubscribe();
         owner.PropertyChanged += OnOwnerPropertyChanged;
+
+        // Made when it's first needed, which can be after the control's in the tree.
+        if (((ILogical)owner).IsAttachedToLogicalTree)
+        {
+            Subscribe();
+        }
     }
 
     private ICommand? Command => _owner.GetValue(AvonicButton.CommandProperty);
