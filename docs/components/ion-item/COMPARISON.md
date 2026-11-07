@@ -62,6 +62,10 @@ From #72. The rows are in [PLAN.md](PLAN.md#shared-press-handling-command-and-th
 | S8 | An end button's margins | match: `16 7 2 7` and `16 4 2 4` |
 | S9 | A button is over the ripple | match, and the ripple is under everything else too, where Ionic's is over it: see the plan |
 | S10 | A background under a translucent line | match: `rgb(127, 0, 128)`, within what rounding gives |
+| S11 | A second finger anywhere means no click | match |
+| S12 | Hidden during the press means no click | match |
+| S13 | A button item in a button item clicks each once | match, on all three controls |
+| S14 | A name inside counts, and `aria-hidden` doesn't | match, through `AutomationProperties` |
 
 ## Behaviours
 

@@ -196,6 +196,107 @@ public class NativeButtonTests
         Assert.Equal(1, probe.Clicks);
     }
 
+    // ── A second finger, and being hidden ────────────────────────────────────────────────────
+
+    [AvaloniaTheory]
+    [MemberData(nameof(Controls))]
+    public void A_Second_Finger_Anywhere_Means_No_Click(string kind)
+    {
+        var probe = Make(kind);
+        var elsewhere = new Border { Height = 100, Background = Brushes.Gray };
+        using var scene = new Scene(new StackPanel { Children = { probe.Control, elsewhere } });
+        var first = Finger();
+        var second = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, false);
+
+        TouchDown(probe.Control, first, scene, Centre);
+        TouchDown(elsewhere, second, scene, new Point(10, 80));
+        TouchUp(elsewhere, second, scene, new Point(10, 80));
+        TouchUp(probe.Control, first, scene, Centre);
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void One_Finger_Pressing_Again_Is_Not_A_Second_Finger()
+    {
+        var probe = Make("button");
+        using var scene = new Scene(probe.Control);
+        var finger = Finger();
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        TouchUp(probe.Control, finger, scene, Centre);
+        Assert.Equal(1, probe.Clicks);
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        TouchUp(probe.Control, finger, scene, Centre);
+        Assert.Equal(2, probe.Clicks);
+    }
+
+    [AvaloniaTheory]
+    [MemberData(nameof(Controls))]
+    public void Hidden_During_The_Press_Does_Not_Click(string kind)
+    {
+        var probe = Make(kind);
+        using var scene = new Scene(probe.Control);
+        var finger = Finger();
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        probe.Control.IsVisible = false;
+        Settle();
+        TouchUp(probe.Control, finger, scene, Centre);
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Parent_Hidden_During_The_Press_Does_Not_Click()
+    {
+        var probe = Make("item");
+        var parent = new StackPanel { Children = { probe.Control } };
+        using var scene = new Scene(parent);
+        var finger = Finger();
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        parent.IsVisible = false;
+        Settle();
+        TouchUp(probe.Control, finger, scene, Centre);
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaTheory]
+    [MemberData(nameof(Controls))]
+    public void A_Press_That_Opened_A_Context_Menu_Does_Not_Click(string kind)
+    {
+        var probe = Make(kind);
+        using var scene = new Scene(probe.Control);
+        var finger = Finger();
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        var request = new ContextRequestedEventArgs();
+        request.Handled = true;
+        request.RoutedEvent = Control.ContextRequestedEvent;
+        probe.Control.RaiseEvent(request);
+        TouchUp(probe.Control, finger, scene, Centre);
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Long_Press_With_No_Menu_Still_Clicks()
+    {
+        var probe = Make("item");
+        using var scene = new Scene(probe.Control);
+        var finger = Finger();
+
+        TouchDown(probe.Control, finger, scene, Centre);
+        var request = new ContextRequestedEventArgs { RoutedEvent = Control.ContextRequestedEvent };
+        probe.Control.RaiseEvent(request);
+        TouchUp(probe.Control, finger, scene, Centre);
+
+        Assert.Equal(1, probe.Clicks);
+    }
+
     // ── S2, S3: a mouse ──────────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -420,6 +521,102 @@ public class NativeButtonTests
         Tap(scene, CentreOf(child, scene));
 
         Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Repeat_Button_Inside_That_Handles_The_Press_Stops_It()
+    {
+        var repeat = new RepeatButton
+        {
+            Width = 60,
+            Height = 30,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<RepeatButton>((_, _) => new Border { Background = Brushes.Gray }),
+        };
+        var probe = Make("card", repeat);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(repeat, scene));
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Nested_Button_Item_Reaches_Each_Items_Handlers_Once()
+    {
+        var innerClicks = 0;
+        var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
+        inner.Click += (_, _) => innerClicks++;
+        var probe = Make("item", inner);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+
+        Assert.Equal(1, innerClicks);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void A_Nested_AvonicButton_Reaches_Each_Buttons_Handlers_Once()
+    {
+        var innerClicks = 0;
+        var inner = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        inner.Click += (_, _) => innerClicks++;
+        var probe = Make("button", inner);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+
+        Assert.Equal(1, innerClicks);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("card")]
+    [InlineData("button")]
+    public void The_Outer_Command_Runs_For_A_Press_On_One_Of_Its_Own_Kind_Inside(string kind)
+    {
+        var outerCommand = new Command();
+        var innerCommand = new Command();
+        Control inner = kind switch
+        {
+            "item" => new AvonicItem { Button = true, Content = "x", Height = 30 },
+            "card" => new AvonicCard { Button = true, Content = "x", Height = 30 },
+            _ => new AvonicButton { Content = "x", Width = 60, Height = 30 },
+        };
+        SetCommand(inner, innerCommand);
+        var probe = Make(kind, inner);
+        SetCommand(probe.Control, outerCommand);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(inner, scene));
+
+        Assert.Equal(1, innerCommand.Executed);
+        Assert.Equal(1, outerCommand.Executed);
+    }
+
+    [AvaloniaFact]
+    public void A_Key_On_A_Nested_Button_Does_Not_Stop_The_Outer_Ones_Own_Click_Later()
+    {
+        var innerClicks = 0;
+        var inner = new AvonicItem { Button = true, Content = "x", Height = 30 };
+        inner.Click += (_, _) => innerClicks++;
+        var probe = Make("item", inner);
+        using var scene = new Scene(probe.Control);
+
+        inner.Focus();
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        var bubbled = probe.Clicks;
+
+        probe.Control.Focus();
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+
+        Assert.Equal(1, innerClicks);
+        Assert.Equal(bubbled + 1, probe.Clicks);
     }
 
     [AvaloniaFact]
@@ -814,6 +1011,39 @@ public class NativeButtonTests
     }
 
     [AvaloniaFact]
+    public void S5_Something_Inside_With_A_Name_Counts_As_That()
+    {
+        var button = new AvonicButton { IconOnlyContent = new AvonicIcon { IconName = "star" } };
+        AutomationProperties.SetName(button, "Delete");
+        var item = new AvonicItem { Button = true, Content = "Row", EndContent = button };
+        using var scene = new Scene(item);
+
+        Assert.Equal("Row Delete", NameOf(item));
+    }
+
+    [AvaloniaFact]
+    public void S5_A_Name_Replaces_The_Text_Inside_It()
+    {
+        var label = new AvonicLabel { Content = "Row" };
+        AutomationProperties.SetName(label, "Labelled");
+        var item = new AvonicItem { Button = true, Content = label };
+        using var scene = new Scene(item);
+
+        Assert.Equal("Labelled", NameOf(item));
+    }
+
+    [AvaloniaFact]
+    public void S5_Something_Raw_Does_Not_Count()
+    {
+        var secret = new TextBlock { Text = "Secret" };
+        AutomationProperties.SetAccessibilityView(secret, AccessibilityView.Raw);
+        var item = new AvonicItem { Button = true, Content = new StackPanel { Children = { new TextBlock { Text = "Row" }, secret } } };
+        using var scene = new Scene(item);
+
+        Assert.Equal("Row", NameOf(item));
+    }
+
+    [AvaloniaFact]
     public void S5_A_Plain_Item_Has_No_Name_Of_Its_Own()
     {
         var item = new AvonicItem { Content = "Text" };
@@ -849,6 +1079,18 @@ public class NativeButtonTests
         using var scene = new Scene(item);
 
         Assert.Equal(AutomationControlType.Group, ControlAutomationPeer.CreatePeerForElement(item).GetAutomationControlType());
+    }
+
+    [AvaloniaFact]
+    public void Automation_Invoke_On_An_Item_Forwards_As_A_Tap_Does()
+    {
+        var toggle = new ForwardingStub { Width = 40, Height = 30 };
+        var item = new AvonicItem { Button = true, EndContent = toggle };
+        using var scene = new Scene(item);
+
+        ControlAutomationPeer.CreatePeerForElement(item).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>()!.Invoke();
+
+        Assert.Equal(1, toggle.ItemTaps);
     }
 
     // ── The ripple ───────────────────────────────────────────────────────────────────────────

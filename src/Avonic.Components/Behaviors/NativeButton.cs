@@ -21,6 +21,10 @@ internal sealed class NativeButton
     /// <summary>Measured in Chromium: a finger that moved 14 px clicks, and one that moved 16 doesn't. A mouse has no limit.</summary>
     private const double TouchSlop = 15;
 
+    /// <summary>A <see cref="NativeButton"/> clicked inside this one, which is all this needs of the other control's own <c>Click</c>.</summary>
+    private static readonly RoutedEvent<ClickInsideArgs> ClickInsideEvent =
+        RoutedEvent.Register<Control, ClickInsideArgs>("NativeButtonClickInside", RoutingStrategies.Bubble);
+
     private readonly Control _owner;
     private readonly Action<object?> _activate;
     private readonly Func<bool> _takesKeys;
@@ -31,6 +35,8 @@ internal sealed class NativeButton
     private bool _spacePressed;
     private bool _subscribed;
     private bool _stoppedDuringPress;
+    private RoutedEvent? _nestedClick;
+    private TopLevel? _watchedForFingers;
 
     /// <param name="owner">The control.</param>
     /// <param name="activate">A click, or Enter or Space. It's given what the press landed on, or the control for a key.</param>
@@ -47,10 +53,9 @@ internal sealed class NativeButton
         owner.AddHandler(InputElement.PointerPressedEvent, OnPressedBubble, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(InputElement.PointerMovedEvent, OnMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         owner.AddHandler(InputElement.PointerReleasedEvent, OnReleased, RoutingStrategies.Bubble, handledEventsToo: true);
-        owner.AddHandler(Button.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
-        owner.AddHandler(AvonicButton.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
-        owner.AddHandler(AvonicItem.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
-        owner.AddHandler(AvonicCard.ClickEvent, OnClickInside, RoutingStrategies.Bubble, handledEventsToo: true);
+        owner.AddHandler(Button.ClickEvent, OnStockButtonClick, RoutingStrategies.Bubble, handledEventsToo: true);
+        owner.AddHandler(ClickInsideEvent, OnNativeButtonClickInside);
+        owner.AddHandler(Control.ContextRequestedEvent, OnContextRequested, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(InputElement.KeyDownEvent, OnKeyDown);
         owner.AddHandler(InputElement.KeyUpEvent, OnKeyUp);
         owner.AddHandler(InputElement.LostFocusEvent, OnLostFocus);
@@ -73,13 +78,25 @@ internal sealed class NativeButton
         _spacePressed = false;
     }
 
-    /// <summary>The control's <c>Click</c>, then its command, as Avalonia's own <c>Button</c>: setting <c>Handled</c> stops the command.</summary>
+    /// <summary>
+    /// The control's <c>Click</c>, then its command, as Avalonia's own <c>Button</c>: setting <c>Handled</c> stops the command. A
+    /// browser has one click, which reaches each control on its way up. So if one of this type inside has clicked, its
+    /// <c>Click</c> has already been through this control's handlers, and raising another would run them twice.
+    /// </summary>
     public void Click(RoutedEvent<RoutedEventArgs> click)
     {
-        var args = new RoutedEventArgs(click, _owner);
-        _owner.RaiseEvent(args);
+        var handled = false;
+        if (!ReferenceEquals(_nestedClick, click))
+        {
+            var args = new RoutedEventArgs(click, _owner);
+            _owner.RaiseEvent(args);
+            handled = args.Handled;
+        }
 
-        if (!args.Handled && Command is { } command && command.CanExecute(CommandParameter))
+        _nestedClick = null;
+        _owner.RaiseEvent(new ClickInsideArgs(click, handled));
+
+        if (!handled && Command is { } command && command.CanExecute(CommandParameter))
         {
             command.Execute(CommandParameter);
         }
@@ -89,6 +106,19 @@ internal sealed class NativeButton
     {
         _pointer = null;
         _source = null;
+
+        if (_watchedForFingers is { } top)
+        {
+            _watchedForFingers = null;
+            top.RemoveHandler(InputElement.PointerPressedEvent, OnAnyPress);
+        }
+    }
+
+    private sealed class ClickInsideArgs(RoutedEvent click, bool stopped) : RoutedEventArgs(ClickInsideEvent)
+    {
+        public RoutedEvent Click { get; } = click;
+
+        public bool Stopped { get; } = stopped;
     }
 
     // ── A press ──────────────────────────────────────────────────────────────────────────────
@@ -100,6 +130,7 @@ internal sealed class NativeButton
     private void OnPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
         _stoppedDuringPress = false;
+        _nestedClick = null;
         if (e.Pointer == _pointer || !e.Pointer.IsPrimary)
         {
             EndPress();
@@ -118,6 +149,30 @@ internal sealed class NativeButton
             _pointer = e.Pointer;
             _source = e.Source;
             _start = e.GetPosition(_owner);
+
+            // A second finger anywhere means no click, as measured, and this control only sees the ones that land on it.
+            if (_watchedForFingers is null && TopLevel.GetTopLevel(_owner) is { } top)
+            {
+                _watchedForFingers = top;
+                top.AddHandler(InputElement.PointerPressedEvent, OnAnyPress, RoutingStrategies.Tunnel, handledEventsToo: true);
+            }
+        }
+    }
+
+    private void OnAnyPress(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.Pointer != _pointer)
+        {
+            EndPress();
+        }
+    }
+
+    /// <summary>A context menu took the press. A browser that opens one on a long press doesn't click as well. Without one it does, measured.</summary>
+    private void OnContextRequested(object? sender, ContextRequestedEventArgs e)
+    {
+        if (e.Handled)
+        {
+            EndPress();
         }
     }
 
@@ -125,7 +180,8 @@ internal sealed class NativeButton
     {
         for (var visual = source as Visual; visual is not null && visual != _owner; visual = visual.GetVisualParent())
         {
-            if (visual is Button)
+            // Not a RepeatButton, which is a scrollbar's or a spinner's. A browser doesn't click on those.
+            if (visual is Button and not RepeatButton)
             {
                 return true;
             }
@@ -163,7 +219,7 @@ internal sealed class NativeButton
 
         // Not InitialPressMouseButton, which is the last button pressed, not the one released.
         var isLeft = e.GetCurrentPoint(_owner).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased;
-        if (isLeft && HoldsPointer(e.Pointer) && new Rect(_owner.Bounds.Size).Contains(e.GetPosition(_owner)))
+        if (isLeft && _owner.IsEffectivelyVisible && HoldsPointer(e.Pointer) && new Rect(_owner.Bounds.Size).Contains(e.GetPosition(_owner)))
         {
             _activate(source);
         }
@@ -177,13 +233,35 @@ internal sealed class NativeButton
     /// <c>click.stopPropagation()</c>, in a button inside. A child's release comes before this one's, so this is in time. A
     /// <c>Button</c> with <c>ClickMode.Press</c> clicks before this has seen the press, so that's remembered until the next.
     /// </summary>
-    private void OnClickInside(object? sender, RoutedEventArgs e)
+    private void OnStockButtonClick(object? sender, RoutedEventArgs e)
     {
-        if (e.Handled && !ReferenceEquals(e.Source, _owner))
+        if (e.Handled)
         {
-            EndPress();
-            _stoppedDuringPress = true;
+            Stop();
         }
+    }
+
+    private void OnNativeButtonClickInside(object? sender, ClickInsideArgs e)
+    {
+        if (ReferenceEquals(e.Source, _owner))
+        {
+            return;
+        }
+
+        if (e.Stopped)
+        {
+            Stop();
+        }
+        else if (_pointer is not null)
+        {
+            _nestedClick = e.Click;
+        }
+    }
+
+    private void Stop()
+    {
+        EndPress();
+        _stoppedDuringPress = true;
     }
 
     // ── Keys ─────────────────────────────────────────────────────────────────────────────────

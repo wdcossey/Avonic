@@ -530,9 +530,10 @@ public class AvonicItem : TemplatedControl, IItemHost
 
         public void Invoke()
         {
+            // A native button's click is what the host's onClick forwards.
             if (owner.Button && IsEnabled())
             {
-                owner.RaiseClick();
+                owner.Tap(owner);
             }
         }
     }

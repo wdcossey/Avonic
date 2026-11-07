@@ -135,7 +135,7 @@ a variable set by the app would win. [PLAN.md](PLAN.md#deliberate-differences) s
 
 The press is a native `<button>`'s, shared with `AvonicButton` and `AvonicCard`:
 
-- **It clicks on release, on every press,** if the press and release both landed on it. With a mouse it can move as far as it likes. A finger that moves more than 15 px is scrolling, not tapping.
+- **It clicks on release, on every press,** if the press and release both landed on it. With a mouse it can move as far as it likes. A finger that moves more than 15 px is scrolling, not tapping. A second finger anywhere, or a context menu opening, means no click.
 - **A button inside clicks both.** To stop a button in a row from also tapping the row, set `Handled` in its `Click`, which is `click.stopPropagation()`.
 - **A child that handles `PointerPressed` stops the click,** as it stops `AvonicButton`'s. Handling `Tapped` doesn't.
 

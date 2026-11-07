@@ -315,6 +315,11 @@ Chromium, md, with `ion-app`, from a script in the PR's session. A click is the 
 | S8 | An end-slot `ion-button` beside a stacked or floating label | Margins `16 7 2 7`, y = 7, and `16 4 2 4` beside a plain one |
 | S9 | `z-index` on a slotted `ion-button` | 1 |
 | S10 | A red item's native element with a 50% blue line of 10, on green | The line is `rgb(127, 0, 128)`: red shows through it, so the background reaches under the border |
+| S11 | A second finger on something else, lifting in either order | No click |
+| S12 | `display: none` or `visibility: hidden` during the press | No click |
+| S13 | A `button` item in a `button` item | `inner,outer`: one click, which reaches each once |
+| S14 | Names, with something inside labelled | `Row Delete`, from an icon-only `ion-button` with `aria-label`. `Row`, leaving out `aria-hidden`. `Labelled`, where a label's `aria-label` replaces its text |
+| S15 | A finger held for 100 to 1,000 ms | Clicks, in headless Chromium, which opens no context menu. A phone's browser that opens one doesn't click as well, which isn't measured here |
 
 `ion-button`'s plan already measured that a child's `stopPropagation` stops the click, on one tap and on two quick ones.
 
@@ -327,10 +332,12 @@ Chromium, md, with `ion-app`, from a script in the PR's session. A click is the 
 | A click | On release, by the left button or a finger, if the press and release both landed on the control and it still holds the pointer. On every press, so a second quick one counts |
 | A mouse | Has no movement limit: S2 |
 | A finger | Has a limit of 15 px, from S1, which ends the press for good. A constant in the code, as it's what Chromium has, not a look |
-| A second finger, a cancelled press, disabled during the press | No click, as `AvonicButton` measured |
+| A second finger anywhere, a cancelled press, disabled or hidden during the press | No click: S11, S12, and as `AvonicButton` measured. The window is only watched for fingers during a press |
+| A press that opened a context menu | No click. `ContextRequested` that something handled ends it. A long press with no menu still clicks: S15 |
 | A child that handles the press | Stops the click, as `stopPropagation` does: `ion-button`'s measurement |
-| A stock `Button` inside | Doesn't count as handling it, though it does: it always handles its press, and S4 says both click |
-| A child's `Click` with `Handled` set | Ends the press, so the item around it doesn't click. It's the real `click.stopPropagation()`, and how an app stops a button in a row from tapping the row |
+| A stock `Button` inside | Doesn't count as handling it, though it does: it always handles its press, and S4 says both click. A `RepeatButton` does count, as a browser doesn't click on a scrollbar or a spinner |
+| A child's `Click` with `Handled` set | Ends the press, so the item around it doesn't click. It's the real `click.stopPropagation()`, and how an app stops a button in a row from tapping the row. For a stock `Button`, and for anything using this, including a `Button` with `ClickMode.Press`, which clicks before the press reaches here |
+| One of the same type inside clicks | The outer one doesn't raise `Click` again, as the inner one's has been through its handlers, and a browser has one click: S13. Its `Command` still runs |
 | A child that handles `Tapped` | **Doesn't stop it any more.** It used to on an item and a card, for one of two quick taps, which was the recorded gap. `Tapped` isn't what the click comes from now. This is the one change an app could notice |
 | A child that handles the press on a card or an item | **Stops it now,** where it didn't. The same rule as a button, as measured |
 | Enter and Space | Enter on press and Space on release, only with focus on the control itself |
@@ -347,7 +354,7 @@ The item still marks `Tapped` handled after forwarding a tap, for `stopImmediate
 
 ### Automation
 
-`Behaviors/AccessibleText.cs` reads what's drawn, in visual order: words in inlines, a nested button's text as it's drawn (S5), and no hidden text. The item, the card and the button use it. `role="listitem"` moves to the item's peer (S6), so a replaced theme keeps it, and the last rule in `Styles/List.axaml` goes. A button item stays a button: Avalonia has one peer for what Ionic has two of.
+`Behaviors/AccessibleText.cs` reads what's drawn, in visual order: words in inlines, a nested button's text as it's drawn (S5), and no hidden text. Something inside with an `AutomationProperties.Name` counts as that, and something with `AccessibilityView.Raw` doesn't count (S14). The button item, the card and the button use it, and a plain item has no name of its own, as it has no native button. Automation's `Invoke` on an item forwards as a tap does, as a native button's click is what the host forwards. `role="listitem"` moves to the item's peer (S6), so a replaced theme keeps it, and the last rule in `Styles/List.axaml` goes. A button item stays a button: Avalonia has one peer for what Ionic has two of.
 
 ### Styles and tokens
 
@@ -362,6 +369,10 @@ The item still marks `Tapped` handled after forwarding a tap, for `stopImmediate
 | `BackgroundSizing` on the native border | `OuterBorderEdge`, if a test measures `rgb(127, 0, 128)` with it and not without | S10 |
 
 A panel in a header fills its `FlexSlot`, so what it holds is centred by a rule, as in an item and a divider.
+
+### Style budget
+
+From 171 alternatives to 176, with no limit raised. Icons in a panel add four, an end button beside a stacked label two, the header's panel one and a label's `Position` in a header three. The list's role and the copies in `Styles/ItemDivider.axaml` and `Styles/ItemGroup.axaml` take away five. Because the shared rules are a type, they add no activators.
 
 ### Elsewhere
 
@@ -384,6 +395,7 @@ Each row and rule above has one. In `NativeButtonTests` for the rules, on all th
 | Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
 | `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row |
 | An icon in a panel keeps its 12 above and below beside a stacked label, where one directly in the slot has 7 | Another two alternatives, for something rare |
+| A child that handles the press, around a stock `Button`, doesn't stop the click | The press is handled either way, so the two can't be told apart |
 | A `TextBox`'s watermark counts in a button item's name while it's showing, as it's drawn text | An input in a `<button>` isn't valid HTML, so there's nothing to measure |
 | A word's width is measured in the `TextBlock`'s own font, so a larger run in its inlines can break at its last letter when it's squeezed down to its longest word | Reading each run would be a layout of its own, for a case this rare |
 | A panel in a slot isn't `flex: 1`, even with a label in it | A panel is one item. Ionic's measured `div` is the same (342 wide). Two `slot="start"` elements, where the label would still be `flex: 1`, have no equivalent, as a slot holds one child |

@@ -84,7 +84,7 @@ public class AvonicCard : ContentControl
 
     public AvonicCard()
     {
-        _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
+        _native = new NativeButton(this, _ => Tap(), () => Button, UpdateIsEffectivelyEnabled);
     }
 
     /// <summary>A command only disables a button card. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
@@ -143,29 +143,12 @@ public class AvonicCard : ContentControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>A disabled <c>&lt;button&gt;</c> doesn't click, even if it was disabled during the press.</summary>
-    private void Tap(object? source)
+    private void Tap()
     {
-        if (Button && IsEffectivelyEnabled && !IsInNestedButtonCard(source))
+        if (Button && IsEffectivelyEnabled)
         {
             _native?.Click(ClickEvent);
         }
-    }
-
-    /// <summary>
-    /// A browser has one click, which reaches each card on its way up. Here a nested card's <see cref="Click"/> already
-    /// bubbles through this one, so raising another would run this card's handlers twice.
-    /// </summary>
-    private bool IsInNestedButtonCard(object? source)
-    {
-        for (var visual = source as Visual; visual is not null && visual != this; visual = visual.GetVisualParent())
-        {
-            if (visual is AvonicCard { Button: true })
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
@@ -200,7 +183,7 @@ public class AvonicCard : ContentControl
 
         public void Invoke()
         {
-            owner.Tap(owner);
+            owner.Tap();
         }
     }
 }
