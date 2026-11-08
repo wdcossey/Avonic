@@ -45,16 +45,18 @@
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
     </Style>
 
-    <!-- ::slotted(ion-note). A slot holds one child, so a panel directly in it stands for the slot. The margin: 0
-         needs no rule: it loses to ::slotted([slot=end]), which is in Item.axaml, and the default slot has no margin.
-         0.6875rem doesn't depend on the item's size. align-self: flex-start is the rest of it. -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicNote, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicNote">
+    <!-- ::slotted(ion-note), in item.md.css and, word for word, item-divider.md.css. The item and the divider are the
+         IItemHosts with slots; a group has none, so the type covers both at no extra cost. A slot holds one child, so a panel
+         directly in it stands for the slot. The margin: 0 needs no rule: it loses to ::slotted([slot=end]), which is in
+         Item.axaml and ItemDivider.axaml, and the default slot has no margin. 0.6875rem doesn't depend on the host's size.
+         align-self: flex-start is the rest of it. -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter > c|AvonicNote, :is(c|IItemHost) /template/ ContentPresenter > :is(Panel) > c|AvonicNote">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
-    <!-- ::slotted(ion-note[slot]) -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Panel) > c|AvonicNote, c|AvonicItem /template/ ContentPresenter#PART_End > :is(Panel) > c|AvonicNote">
+    <!-- ::slotted(ion-note[slot]), in both files too -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter#PART_Start > c|AvonicNote, :is(c|IItemHost) /template/ ContentPresenter#PART_End > c|AvonicNote, :is(c|IItemHost) /template/ ContentPresenter#PART_Start > :is(Panel) > c|AvonicNote, :is(c|IItemHost) /template/ ContentPresenter#PART_End > :is(Panel) > c|AvonicNote">
         <Setter Property="Padding" Value="0,18,0,10" />
     </Style>
 

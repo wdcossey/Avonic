@@ -754,4 +754,88 @@ public class AvonicNoteTests
         // A mirrored element's origin is its right-hand edge.
         Assert.Equal(16, Box(note, scene.Window).X - note.Bounds.Width, 1);
     });
+
+    // ── 16. In a divider ─────────────────────────────────────────────────────────────────────
+    // item-divider.md.css has item.md.css's two ::slotted(ion-note) rules, word for word. The numbers are from
+    // docs/components/ion-item/ref/layout/cases.txt, row h3, and the divider's own cases.
+
+    [AvaloniaFact]
+    public void B16_In_A_Dividers_Slots_It_Is_11() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicNote { Content = "x" };
+        var main = new AvonicNote { Content = "x" };
+        var end = new AvonicNote { Content = "x" };
+        var inPanel = new AvonicNote { Content = "x" };
+        var deeper = new AvonicNote { Content = "x" };
+        using var scene = InScene(
+            new AvonicItemDivider { StartContent = start, Content = main, EndContent = end },
+            new AvonicItemDivider { FontSize = 30, EndContent = new StackPanel { Children = { inPanel } } },
+            new AvonicItemDivider { EndContent = new Border { Child = deeper } });
+
+        Assert.Equal(11, Text(start).FontSize);
+        Assert.Equal(11, Text(main).FontSize);
+        Assert.Equal(11, Text(end).FontSize);
+        Assert.Equal(11, Text(inPanel).FontSize);
+        Assert.Equal(14, Text(deeper).FontSize);
+    });
+
+    [AvaloniaFact]
+    public void B16_In_A_Dividers_Start_And_End_Slots_It_Has_Padding() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicNote { Content = "x" };
+        var main = new AvonicNote { Content = "x" };
+        var end = new AvonicNote { Content = "x" };
+        var inPanel = new AvonicNote { Content = "x" };
+        using var scene = InScene(
+            new AvonicItemDivider { StartContent = start, Content = main, EndContent = end },
+            new AvonicItemDivider { EndContent = new StackPanel { Children = { inPanel } } });
+
+        foreach (var note in new[] { start, end, inPanel })
+        {
+            Assert.Equal(new Thickness(0, 18, 0, 10), note.Padding);
+            Assert.Equal(28 + Text(note).Bounds.Height, note.Bounds.Height);
+        }
+        Assert.Equal(default, main.Padding);
+    });
+
+    [AvaloniaFact]
+    public void B16_It_Is_At_The_Top_Of_A_Divider_And_The_Rest_Is_Centred() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicNote { Content = "x" };
+        var end = new AvonicNote { Content = "x" };
+        var inPanel = new AvonicNote { Content = "x" };
+        var other = new TextBlock { Text = "x" };
+        var dividerStart = new AvonicItemDivider { StartContent = start, Content = Tall() };
+        var dividerEnd = new AvonicItemDivider { Content = Tall(), EndContent = end };
+        var dividerPanel = new AvonicItemDivider { Content = Tall(), EndContent = new StackPanel { Orientation = Orientation.Horizontal, Children = { inPanel, other } } };
+        using var scene = InScene(dividerStart, dividerEnd, dividerPanel);
+
+        Assert.True(dividerEnd.Bounds.Height >= 90);
+        Assert.Equal(0, Box(start, dividerStart).Y);
+        Assert.Equal(0, Box(end, dividerEnd).Y);
+        Assert.Equal(0, Box(inPanel, dividerPanel).Y);
+        Assert.True(start.Bounds.Height < 50);
+        Assert.True(end.Bounds.Height < 50);
+        Assert.True(inPanel.Bounds.Height < 50);
+        Assert.InRange(Box(other, dividerPanel).Center.Y - dividerPanel.Bounds.Height / 2, -1, 1);
+        Assert.True(other.Bounds.Height < 25);
+    });
+
+    [AvaloniaFact]
+    public void B16_A_Long_Note_In_A_Dividers_End_Slot_Fills_The_Row_From_The_Top() => InstalledTheme.Run(_ =>
+    {
+        // h3: the note is 342 wide and 52 high at x = 32, y = 0, in a divider of 53. Its height is two lines and the padding.
+        // Its box is as wide as its longest line here, not the slot, which is the item's recorded gap for a long note in a slot.
+        var note = new AvonicNote { Content = "A very long note in a divider end slot that certainly has to wrap because it does not fit" };
+        var divider = new AvonicItemDivider { Content = new AvonicLabel { Content = "Default" }, EndContent = note };
+        using var scene = InScene(divider);
+
+        var box = Box(note, divider);
+        Assert.Equal(32, box.X);
+        Assert.Equal(0, box.Y);
+        Assert.InRange(box.Width, 300, 342);
+        Assert.Equal(28 + Text(note).Bounds.Height, box.Height);
+        Assert.Equal(2, Text(note).TextLayout.TextLines.Count);
+        Assert.Equal(box.Height + 1, divider.Bounds.Height);
+    });
 }

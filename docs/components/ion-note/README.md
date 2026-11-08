@@ -41,8 +41,8 @@ The default slot is `Content` and `ContentTemplate`. It has no named slots, part
 Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 - **On its own** it's 14 px and grey, whatever's around it.
-- **Directly in an item's slot** it's 11 px, at the top of the row however tall the row is. In the start or end slot
-  it has 18 above and 10 below, so its text lines up with a one-line label beside it.
+- **Directly in an item's or a divider's slot** it's 11 px, at the top of the row however tall the row is. In the start
+  or end slot it has 18 above and 10 below, so its text lines up with a one-line label beside it.
 - **A coloured item doesn't change it,** so it stays grey on the item's colour, as in Ionic. Set `Color` for a note that
   shows up there.
 - **It's as wide as its text,** and a tap on it doesn't reach the item's first control.

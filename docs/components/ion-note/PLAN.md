@@ -49,6 +49,7 @@ Each becomes a test.
 | 13 | A button item's name includes the note's text | native `<button>` |
 | 14 | RTL: an end note sits at the left, with its margin on the right | measured `rtl`: x = 16, margin-right 16 |
 | 15 | With `.ion-text-nowrap` on it, it's one line. In a label with that class, also with an ellipsis | The global class; `white-space` inherits; measured `nw-n`: 703 wide, cut off by the label's 358 |
+| 16 | In an `AvonicItemDivider`'s slots, 6, 7 and 8 hold too, as `item-divider.md.css` repeats both rules word for word. Added by [#74](https://github.com/wdcossey/Avonic/issues/74) | `::slotted(ion-note)`, `::slotted(ion-note[slot])` in `item-divider.md.css`; measured `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt): 342 × 52 at x = 32, y = 0, in a divider of 53 |
 
 ## Design
 
@@ -95,7 +96,7 @@ types nothing.
 
 | What | Goes with |
 |---|---|
-| `::slotted(ion-note)` in `item-divider.md.css` | `ion-item-divider` (#9): it adds its own rules for the same pseudoclass |
+| `::slotted(ion-note)` in `item-divider.md.css` | Was left to `ion-item-divider` (#9), which left it to this control, so neither had it. [#74](https://github.com/wdcossey/Avonic/issues/74) put it here, as behaviour 16: the two slotted rules match `:is(c\|IItemHost)` instead of `c\|AvonicItem`, which costs no alternatives, as a group has no slots |
 | The default text size outside a host | Not relevant here, because a note sets its own |
 
 ## Dependencies
