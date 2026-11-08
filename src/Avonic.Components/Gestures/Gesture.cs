@@ -47,9 +47,6 @@ public sealed class Gesture : IDisposable
     // release isn't a cancel, as the release is still to reach the element.
     private IPointer? _releasing;
 
-    // The capture left the element during PointerDown, which ended the press.
-    private bool _lostAtPress;
-
     /// <summary>
     /// While a gesture takes the pointer, the gestures that heard the capture lost on the way. Each is checked once the capture has
     /// arrived: a gesture around the one that captured still gets the pointer, and one inside it never will again.
@@ -440,8 +437,6 @@ public sealed class Gesture : IDisposable
         // pointer at a time: a second press is refused by hasStartedPan, and the first stays followed.
         var previous = _tracking;
         _tracking = e.Pointer;
-        _releasing = null;
-        _lostAtPress = false;
         if (!PointerDown(e))
         {
             if (ReferenceEquals(_tracking, e.Pointer))
@@ -453,8 +448,8 @@ public sealed class Gesture : IDisposable
         }
 
         // Ionic adds the press's listeners once pointerDown returns true, so a callback that disabled the gesture during it doesn't
-        // stop the press being followed. A capture that has left the element has ended it.
-        _tracking = _lostAtPress ? null : e.Pointer;
+        // stop the press being followed. After a capture at the press that OnStart took away, nothing more of it reaches the element.
+        _tracking = e.Pointer;
     }
 
     /// <summary>Before the move reaches any recogniser, inside the element or around it, while this gesture is deciding.</summary>
@@ -545,7 +540,6 @@ public sealed class Gesture : IDisposable
             return;
         }
 
-        _lostAtPress = true;
         StopPointerEvents();
         PointerUp(null);
     }

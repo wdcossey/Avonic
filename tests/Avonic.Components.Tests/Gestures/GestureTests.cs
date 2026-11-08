@@ -799,6 +799,35 @@ public class GestureTests
         Assert.IsType<PointerReleasedEventArgs>(seen.Event);
     }
 
+    [AvaloniaFact]
+    public void G10_After_A_Mouse_Release_The_Next_Press_Can_Still_Be_Cancelled()
+    {
+        // A mouse is one pointer for every press, so nothing from one release may linger into the next press.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        using var gesture = Make(box, log);
+        IPointer? pointer = null;
+        box.AddHandler(InputElement.PointerPressedEvent, (_, e) => pointer = e.Pointer, handledEventsToo: true);
+
+        clock.At(1000);
+        Render();
+        scene.Window.MouseDown(new Point(100, 100), MouseButton.Left, RawInputModifiers.None);
+        clock.At(1016);
+        scene.Window.MouseUp(new Point(103, 100), MouseButton.Left, RawInputModifiers.None);
+        clock.At(2000);
+        scene.Window.MouseDown(new Point(100, 100), MouseButton.Left, RawInputModifiers.None);
+        clock.At(2016);
+        scene.Window.MouseMove(new Point(104, 100), RawInputModifiers.LeftMouseButton);
+        clock.At(2032);
+        pointer!.Capture(null);
+        Settle();
+
+        Assert.Equal(["g.canStart", "g.notCaptured", "g.canStart", "g.notCaptured"], log.Names);
+        Assert.Equal(4, log.All[^1].DeltaX);
+    }
+
     // ── G12: disableScroll and blockers ──────────────────────────────────────────────────────
 
     [AvaloniaFact]
