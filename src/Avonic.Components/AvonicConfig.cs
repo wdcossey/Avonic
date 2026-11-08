@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
+using Avonic.Components.Controls;
 
 namespace Avonic.Components;
 
@@ -11,7 +13,15 @@ namespace Avonic.Components;
 /// </summary>
 public static class AvonicConfig
 {
-    /// <summary>Ionic <c>animated</c>: master switch for animations. Default <see langword="true"/>.</summary>
+    /// <summary>
+    /// Ionic <c>animated</c>: whether the ripple shows. Default <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// Not a master switch. In Ionic it turns off the ripple (<c>tap-click</c>) and the transitions of the accordion, the menu,
+    /// <c>ion-nav</c>, <c>ion-router-outlet</c>, overlays and the searchbar, and the skeleton text's shimmer. A spinner, a progress
+    /// bar and a scroll of <c>ion-content</c> don't read it, so <see cref="AvonicSpinner"/>, <see cref="AvonicProgressBar"/> and
+    /// <see cref="AvonicContent"/> keep moving with it off: they're the user's only sign that something is happening.
+    /// </remarks>
     public static bool Animated { get; set; } = true;
 
     /// <summary>
@@ -20,10 +30,31 @@ public static class AvonicConfig
     /// </summary>
     public static bool RippleEffect { get; set; } = true;
 
+    /// <summary>
+    /// Ionic's <c>spinner</c> config: the name of an <see cref="AvonicSpinner"/> that has none. Null is md's default,
+    /// <see cref="SpinnerName.Circular"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read when the spinner renders, as Ionic's <c>getName()</c> reads it in <c>render()</c>: when it's first attached, and at each
+    /// change of its <see cref="AvonicSpinner.SpinnerName"/>, <see cref="AvonicSpinner.Paused"/>,
+    /// <see cref="AvonicSpinner.Duration"/> or <see cref="AvonicSpinner.Color"/>. A change of this alone redraws nothing, and
+    /// neither does a spinner leaving the tree and coming back, or being hidden and shown, as measured in Chromium.
+    /// </remarks>
+    public static SpinnerName? Spinner { get; set; }
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>
     internal static Func<TimeSpan> Now { get; set; } = () => s_clock.Elapsed;
+
+    /// <summary>
+    /// Ionic's <c>now(ev)</c>, <c>ev.timeStamp || Date.now()</c>, for <see cref="Gestures.Gesture"/>: the event's own time, in
+    /// milliseconds, or <see cref="Now"/>'s if it has none. Only differences are used, except by a control that compares
+    /// <see cref="Gestures.GestureDetail.CurrentTime"/> with a later event's <see cref="PointerEventArgs.Timestamp"/>, as
+    /// <c>ion-menu</c> does. Tests substitute <see cref="Now"/>, as headless input's timestamps can't be set.
+    /// </summary>
+    internal static Func<PointerEventArgs, double> EventTime { get; set; } =
+        static ev => ev.Timestamp > 0 ? ev.Timestamp : Now().TotalMilliseconds;
 
     /// <summary>
     /// One-shot scheduler for every Avonic defer (Ionic's <c>setTimeout</c>). Runs on the UI thread.

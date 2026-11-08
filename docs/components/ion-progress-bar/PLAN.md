@@ -106,7 +106,7 @@ Each becomes a test in `AvonicProgressBarTests`.
 | 11 | Right-to-left reverses it, and `Reversed` in RTL puts it back. Nothing else is mirrored: the bar's internals are always LTR | `document.dir === 'rtl' ? !reversed : reversed`, `direction: ltr` |
 | 12 | `Color`: the progress is the base colour, and the track and the dots are the base colour at 0.3. An unknown colour draws nothing. No colour inside a coloured ancestor keeps the defaults | `:host(.ion-color)` rules; `var()` invalid at computed-value time |
 | 13 | Host classes: `:type-determinate` / `:type-indeterminate`, `:reversed` for the effective direction, `:solid` when `Buffer` is exactly 1 | `createColorClasses(...)` |
-| 14 | `AvonicConfig.Animated` off: changes snap, and the stream and the indeterminate bars stand at time 0, as Ionic's `progress-paused` holds them for its own screenshots | `_testing` → `progress-paused`; Avonic's nearest public switch |
+| 14 | `AvonicConfig.Animated` off changes nothing: changes ease, and the stream and the indeterminate bars move (#87, which replaced "changes snap and the animations stand at time 0") | `animated` isn't read by `progress-bar.js` or its CSS. `progress-paused` is for `_testing`, Ionic's private screenshot config, which isn't mapped |
 | 15 | The two keys apply: `Avonic.ProgressBar.Background` to the track and the dots, `Avonic.ProgressBar.ProgressBackground` to the progress, in both types | `--background`, `--progress-background` |
 | 16 | Detaching stops the frame loop; attaching again starts the animations from 0, as a re-created element does. Hiding the bar or an ancestor does the same, as `display: none` does, and a change while hidden doesn't ease. So does attaching while hidden. A hide and show within one frame restarts nothing: Chromium, measured, kept every `currentTime` when `display: none` and back ran in one task, on the bar and on an ancestor, and restarted them at 0 when a frame came between | CSS animations start when the element appears, and stop under `display: none` |
 | 17 | Frames run only while something moves: a transition, the dots showing, or indeterminate. A solid determinate bar costs nothing | Avonic's own: CSS animations cost nothing on the main thread |
@@ -163,8 +163,9 @@ thing in Avalonia is the inherited `FlowDirection`, which an ancestor can also s
 
 A peer of type `ProgressBar` with `IRangeValueProvider`: minimum 0, maximum 1, read-only, `Value` raw. Indeterminate returns
 no range provider, as `aria-valuenow` is dropped, which is also what WPF's `ProgressBarAutomationPeer` does. A change of
-`Value` raises the pattern's value-changed event, and so does a change of type, from or to no value, as `aria-valuenow`
-appears or goes. Name comes from
+`Value` raises the pattern's value-changed event while determinate. A change of type raises nothing, as WPF's progress bar
+raises nothing when it becomes indeterminate: the range pattern appears or goes, and a client reads it when it next looks.
+(Until #87, a change of type raised a value change from or to null.) Name comes from
 `AutomationProperties.Name`, which is `aria-label`.
 
 ### Resource keys
@@ -187,9 +188,9 @@ None. Every member maps to an Ionic prop, part, class or variable.
 | Difference | Why |
 |---|---|
 | Right-to-left is the inherited `FlowDirection`, where Ionic reads only `document.dir`. A `dir="rtl"` ancestor does nothing in Ionic, measured, and an ancestor's `FlowDirection` does here | Avalonia has no document; an app sets `FlowDirection` on its window, which is the same thing, or on a subtree, which Ionic can't. Ionic also reads `document.dir` only when it renders; this follows a change at once |
-| `AvonicConfig.Animated` off holds the stream and the indeterminate bars at time 0 and snaps changes, where Ionic's public `animated` config doesn't touch this control's CSS animations. An indeterminate bar then shows only its track, as both bars are off its left edge at time 0 | `AvonicConfig.Animated` is documented as the master switch for animations, as the ripple and `AvonicContent` read it. Holding at 0 is what Ionic's private `_testing` config does to this control (`progress-paused`). It's read when a behaviour runs, as the config says: turning it back on restarts the frames at the bar's next change, attach or resize |
 | The dot geometry is a constant in Components, not a theme literal | A brush with a bound colour can't be tiled in a template, and the pitch is the animation's period |
 | The dots' edges are anti-aliased, where Chromium draws the gradient's hard stop at 30 % with a harder edge | Rendering, best effort (ADR 0002). Each dot is in the same place and of the same size |
+| A change of type raises no automation event. Chromium may announce `aria-valuenow` appearing or going: not measured, as its platform accessibility events can't be seen from `playwright-core` | The human's decision in #87, to follow WPF's progress bar, which raises none when it becomes indeterminate, rather than a range-value change with a null old or new value, which UIA clients don't expect. The range pattern appears or goes, and a client reads it when it next looks. A value set while indeterminate is read then too |
 
 ## Not in this PR
 

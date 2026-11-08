@@ -115,18 +115,21 @@ public class AvonicProgressBarTests
         Assert.True(range.IsReadOnly);
         Assert.Throws<InvalidOperationException>(() => range.SetValue(0.5));
 
-        // A change of value is announced, and so is aria-valuenow going and coming with the type
+        // A change of value is announced
         var changes = new List<(object? Old, object? New)>();
         peer.PropertyChanged += (_, e) => changes.Add((e.OldValue, e.NewValue));
         f.Bar.Value = 0.6;
         Assert.Equal([(0.4, 0.6)], changes);
 
-        // aria-valuenow is dropped when indeterminate
+        // aria-valuenow is dropped when indeterminate. A change of type, and of value while there's none, raises nothing,
+        // as WPF's progress bar raises nothing when it becomes indeterminate.
         f.Bar.Type = ProgressBarType.Indeterminate;
         Assert.Null(peer.GetProvider<IRangeValueProvider>());
         f.Bar.Value = 0.7;
         f.Bar.Type = ProgressBarType.Determinate;
-        Assert.Equal([(0.4, 0.6), (0.6, null), (null, 0.7)], changes);
+        Assert.Equal(0.7, peer.GetProvider<IRangeValueProvider>()!.Value);
+        f.Bar.Value = 0.8;
+        Assert.Equal([(0.4, 0.6), (0.7, 0.8)], changes);
     });
 
     // ── B2: determinate ──────────────────────────────────────────────────────────────────────
@@ -151,39 +154,42 @@ public class AvonicProgressBarTests
     public void B3_Value_And_Buffer_Are_Clamped_For_Display_Only() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        AvonicConfig.Animated = false;
-        try
+        using var f = new Fixture(new AvonicProgressBar { Value = 1.5, Buffer = -0.5 });
+        var range = ControlAutomationPeer.CreatePeerForElement(f.Bar).GetProvider<IRangeValueProvider>()!;
+
+        // Each change eases over 150 ms, so it's read once it's done
+        void Settle()
         {
-            using var f = new Fixture(new AvonicProgressBar { Value = 1.5, Buffer = -0.5 });
-            var range = ControlAutomationPeer.CreatePeerForElement(f.Bar).GetProvider<IRangeValueProvider>()!;
-
-            AssertSpan((0, W), f.Span("PART_Progress"));
-            AssertSpan((0, 0), f.Span("PART_Track"));
-            Assert.Equal(1.5, range.Value);
-
-            f.Bar.Value = -1;
-            f.Bar.Buffer = 1.5;
-            AssertSpan((0, 0), f.Span("PART_Progress"));
-            AssertSpan((0, W), f.Span("PART_Track"));
-            Assert.Equal(-1, range.Value);
-
-            // clamp() keeps NaN, and scaleX(NaN) is an invalid transform, which style.transform ignores: the scale stays
-            f.Bar.Value = double.NaN;
-            AssertSpan((0, 0), f.Span("PART_Progress"));
-            f.Bar.Buffer = double.NaN;
-            AssertSpan((0, W), f.Span("PART_Track"));
-            f.Bar.Buffer = 0.5;
-            f.Bar.Buffer = double.NaN;
-            AssertSpan((0, 179), f.Span("PART_Track"));
-
-            // and a new element has no transform at all
-            using var created = new Fixture(new AvonicProgressBar { Value = double.NaN });
-            AssertSpan((0, W), created.Span("PART_Progress"));
+            clock.At(clock.Now.TotalMilliseconds + 200);
+            f.Bar.Tick();
         }
-        finally
-        {
-            AvonicConfig.Animated = true;
-        }
+
+        AssertSpan((0, W), f.Span("PART_Progress"));
+        AssertSpan((0, 0), f.Span("PART_Track"));
+        Assert.Equal(1.5, range.Value);
+
+        f.Bar.Value = -1;
+        f.Bar.Buffer = 1.5;
+        Settle();
+        AssertSpan((0, 0), f.Span("PART_Progress"));
+        AssertSpan((0, W), f.Span("PART_Track"));
+        Assert.Equal(-1, range.Value);
+
+        // clamp() keeps NaN, and scaleX(NaN) is an invalid transform, which style.transform ignores: the scale stays
+        f.Bar.Value = double.NaN;
+        Settle();
+        AssertSpan((0, 0), f.Span("PART_Progress"));
+        f.Bar.Buffer = double.NaN;
+        Settle();
+        AssertSpan((0, W), f.Span("PART_Track"));
+        f.Bar.Buffer = 0.5;
+        f.Bar.Buffer = double.NaN;
+        Settle();
+        AssertSpan((0, 179), f.Span("PART_Track"));
+
+        // and a new element has no transform at all
+        using var created = new Fixture(new AvonicProgressBar { Value = double.NaN });
+        AssertSpan((0, W), created.Span("PART_Progress"));
     });
 
     // ── B4: the buffer and its stream ────────────────────────────────────────────────────────
@@ -661,31 +667,39 @@ public class AvonicProgressBarTests
     // ── B14: AvonicConfig.Animated ───────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B14_Animated_Off_Snaps_Changes_And_Stands_The_Animations_At_0() => InstalledTheme.Run(_ =>
+    public void B14_Animated_Off_Changes_Nothing() => InstalledTheme.Run(_ =>
     {
+        // Ionic's animated config doesn't reach this control's CSS: changes still ease, and the stream and the indeterminate
+        // bars still move. They're the user's only sign that something is happening.
         using var clock = new TestClock();
         AvonicConfig.Animated = false;
         try
         {
             using var f = new Fixture(new AvonicProgressBar { Value = 0.2, Buffer = 0.75 });
+            Assert.True(f.Bar.IsFrameLoopRunning);
 
-            f.Bar.Value = 0.8;
-            AssertSpan((0, 0.8 * W), f.Span("PART_Progress"));
-            Assert.False(f.Bar.IsFrameLoopRunning);
-
+            // The stream, at 225 ms: dots at 275, 285, …, as in B5
             clock.At(225);
             f.Bar.Tick();
             var frame = f.Frame();
-            AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 300), 8);
-            AssertWhite(Fixture.PixelAt(frame, 305));
+            AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 285), 8);
+            AssertWhite(Fixture.PixelAt(frame, 280));
 
-            f.Bar.Type = ProgressBarType.Indeterminate;
-            AssertSpan((0, W), f.Span("PART_Track"));
-            clock.At(1000);
+            // A change of value, halfway through its 150 ms
+            clock.At(300);
+            f.Bar.Value = 0.8;
+            clock.At(375);
             f.Bar.Tick();
-            AssertSpan((-355.0, -326.4), f.Span("PART_ProgressPrimary"));
-            AssertSpan((-31.8, -3.2), f.Span("PART_ProgressSecondary"));
-            Assert.False(f.Bar.IsFrameLoopRunning);
+            AssertSpan((0, 0.5 * W), f.Span("PART_Progress"));
+
+            // The indeterminate bars, 1000 ms after the change of type, as in B8
+            clock.At(1000);
+            f.Bar.Type = ProgressBarType.Indeterminate;
+            clock.At(2000);
+            f.Bar.Tick();
+            AssertSpan((-216.2, -109.4), f.Span("PART_ProgressPrimary"));
+            AssertSpan((178.5, 417.9), f.Span("PART_ProgressSecondary"));
+            Assert.True(f.Bar.IsFrameLoopRunning);
         }
         finally
         {
