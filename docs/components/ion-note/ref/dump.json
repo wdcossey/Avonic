@@ -1,6 +1,6 @@
 {
   "tag": "ion-note",
-  "snippet": "<div><ion-note>A note on its own</ion-note></div><div><ion-note color=\"danger\">A danger note</ion-note></div><ion-item><ion-label>In the end slot</ion-label><ion-note slot=\"end\">Yesterday</ion-note></ion-item><ion-item><ion-note slot=\"start\">Start</ion-note><ion-label>In the start slot</ion-label></ion-item><ion-item><ion-note>In the default slot</ion-note></ion-item><ion-item><ion-label><h2>A tall row</h2><p>The note stays at the top</p><p>and the icon stays centred</p></ion-label><ion-note slot=\"end\">Monday</ion-note><ion-icon name=\"star\" slot=\"end\"></ion-icon></ion-item><ion-item color=\"primary\"><ion-label>A primary item</ion-label><ion-note slot=\"end\">Stays grey</ion-note></ion-item><ion-item color=\"primary\"><ion-label>A primary item</ion-label><ion-note slot=\"end\" color=\"light\">Light</ion-note></ion-item><ion-item><ion-label position=\"stacked\">Stacked</ion-label><ion-note slot=\"end\">Beside it</ion-note></ion-item><ion-item><ion-note>A very long note that certainly does not fit on one line of a phone-sized row at all, however small it is, in the default slot</ion-note></ion-item><ion-item><ion-note slot=\"end\">A very long note that certainly does not fit on one line of a phone-sized row at all, however small it is, in the end slot</ion-note></ion-item><div dir=\"rtl\"><ion-item><ion-label>RTL</ion-label><ion-note slot=\"end\">End</ion-note></ion-item></div>",
+  "snippet": "<div><ion-note>A note on its own</ion-note></div><div><ion-note color=\"danger\">A danger note</ion-note></div><ion-item><ion-label>In the end slot</ion-label><ion-note slot=\"end\">Yesterday</ion-note></ion-item><ion-item><ion-note slot=\"start\">Start</ion-note><ion-label>In the start slot</ion-label></ion-item><ion-item><ion-note>In the default slot</ion-note></ion-item><ion-item><ion-label><h2>A tall row</h2><p>The note stays at the top</p><p>and the icon stays centred</p></ion-label><ion-note slot=\"end\">Monday</ion-note><ion-icon name=\"star\" slot=\"end\"></ion-icon></ion-item><ion-item color=\"primary\"><ion-label>A primary item</ion-label><ion-note slot=\"end\">Stays grey</ion-note></ion-item><ion-item color=\"primary\"><ion-label>A primary item</ion-label><ion-note slot=\"end\" color=\"light\">Light</ion-note></ion-item><ion-item><ion-label position=\"stacked\">Stacked</ion-label><ion-note slot=\"end\">Beside it</ion-note></ion-item><ion-item><ion-note>A very long note that certainly does not fit on one line of a phone-sized row at all, however small it is, in the default slot</ion-note></ion-item><ion-item><ion-note slot=\"end\">A very long note that certainly does not fit on one line of a phone-sized row at all, however small it is, in the end slot</ion-note></ion-item><div dir=\"rtl\"><ion-item><ion-label>RTL</ion-label><ion-note slot=\"end\">End</ion-note></ion-item></div><ion-item-divider><ion-label>In a divider</ion-label><ion-note slot=\"end\">Yesterday</ion-note></ion-item-divider><ion-item-divider><ion-label>Default</ion-label><ion-note slot=\"end\">A very long note in a divider end slot that certainly has to wrap because it does not fit</ion-note></ion-item-divider>",
   "viewport": "390x844@2x md",
   "errors": [],
   "elements": [
@@ -595,6 +595,108 @@
         "min-width": "auto",
         "padding": "18px 0px 10px",
         "margin": "0px 16px 0px 0px",
+        "border": "0px none rgb(102, 102, 102)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(102, 102, 102)",
+        "font-size": "11px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(102, 102, 102) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "slot": "end",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 325.47,
+        "y": 568.19,
+        "w": 48.53,
+        "h": 40
+      },
+      "cssVars": {
+        "--color": "#666666"
+      },
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "48.5312px",
+        "height": "40px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "18px 0px 10px",
+        "margin": "0px 0px 0px 16px",
+        "border": "0px none rgb(102, 102, 102)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(102, 102, 102)",
+        "font-size": "11px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(102, 102, 102) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "slot": "end",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 32,
+        "y": 609.19,
+        "w": 342,
+        "h": 52
+      },
+      "cssVars": {
+        "--color": "#666666"
+      },
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "342px",
+        "height": "52px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "18px 0px 10px",
+        "margin": "0px 0px 0px 16px",
         "border": "0px none rgb(102, 102, 102)",
         "border-radius": "0px",
         "background-color": "rgba(0, 0, 0, 0)",
