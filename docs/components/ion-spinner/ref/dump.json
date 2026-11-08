@@ -1,0 +1,922 @@
+{
+  "tag": "ion-spinner",
+  "snippet": "<ion-app style=\"position:static;display:block;contain:none;overflow:visible\"><div style=\"padding:16px;display:flex;flex-direction:column;gap:16px\"><div style=\"display:flex;gap:12px\"><ion-spinner name=\"bubbles\"></ion-spinner><ion-spinner name=\"circles\"></ion-spinner><ion-spinner name=\"circular\"></ion-spinner><ion-spinner name=\"crescent\"></ion-spinner><ion-spinner name=\"dots\"></ion-spinner><ion-spinner name=\"lines\"></ion-spinner><ion-spinner name=\"lines-small\"></ion-spinner><ion-spinner name=\"lines-sharp\"></ion-spinner><ion-spinner name=\"lines-sharp-small\"></ion-spinner></div><div style=\"display:flex;gap:12px\"><ion-spinner></ion-spinner><ion-spinner color=\"danger\" name=\"crescent\"></ion-spinner><ion-spinner color=\"primary\" name=\"lines\"></ion-spinner><ion-spinner color=\"success\" name=\"dots\"></ion-spinner></div><div style=\"display:flex;gap:12px\"><ion-spinner style=\"width:80px;height:80px\"></ion-spinner><ion-spinner name=\"lines\" style=\"width:80px;height:80px\"></ion-spinner><ion-spinner name=\"crescent\" style=\"width:80px;height:80px\"></ion-spinner><ion-spinner name=\"dots\" style=\"width:80px;height:80px\"></ion-spinner></div></div></ion-app><script>customElements.whenDefined(\"ion-spinner\").then(async()=>{const all=[...document.querySelectorAll(\"ion-spinner\")];for(const e of all)await e.componentOnReady();requestAnimationFrame(()=>{for(const e of all)for(const a of e.shadowRoot.getAnimations()){a.pause();a.currentTime=350}})})</script>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "name": "bubbles",
+        "class": "md spinner-bubbles hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-bubbles",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "circles",
+        "class": "md spinner-circles hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-circles",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 56,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "circular",
+        "class": "md spinner-circular hydrated",
+        "role": "progressbar",
+        "style": "animation-duration: 1400ms;"
+      },
+      "classes": [
+        "md",
+        "spinner-circular",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 96,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "crescent",
+        "class": "md spinner-crescent hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-crescent",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 136,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "dots",
+        "class": "md spinner-dots hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-dots",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 176,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "lines",
+        "class": "md spinner-lines hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-lines",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 216,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "name": "lines-small",
+        "class": "md spinner-lines-small hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-lines-small",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 256,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "name": "lines-sharp",
+        "class": "md spinner-lines-sharp hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-lines-sharp",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 296,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "name": "lines-sharp-small",
+        "class": "md spinner-lines-sharp-small hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-lines-sharp-small",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 336,
+        "y": 16,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "class": "md spinner-circular hydrated",
+        "role": "progressbar",
+        "style": "animation-duration: 1400ms;"
+      },
+      "classes": [
+        "md",
+        "spinner-circular",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 60,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "name": "crescent",
+        "class": "ion-color ion-color-danger md spinner-crescent hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "spinner-crescent",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 56,
+        "y": 60,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(197, 0, 15)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(197, 0, 15)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(197, 0, 15) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "color": "primary",
+        "name": "lines",
+        "class": "ion-color ion-color-primary md spinner-lines hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-primary",
+        "md",
+        "spinner-lines",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 96,
+        "y": 60,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 84, 233)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 84, 233)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 84, 233) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "color": "success",
+        "name": "dots",
+        "class": "ion-color ion-color-success md spinner-dots hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-success",
+        "md",
+        "spinner-dots",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 136,
+        "y": 60,
+        "w": 28,
+        "h": 28
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "28px",
+        "height": "28px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(45, 213, 91)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(45, 213, 91)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(45, 213, 91) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "style": "width: 80px; height: 80px; animation-duration: 1400ms;",
+        "class": "md spinner-circular hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-circular",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 104,
+        "w": 80,
+        "h": 80
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "80px",
+        "height": "80px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "lines",
+        "style": "width:80px;height:80px",
+        "class": "md spinner-lines hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-lines",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 108,
+        "y": 104,
+        "w": 80,
+        "h": 80
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "80px",
+        "height": "80px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n    <svg>\n      <line>\n"
+    },
+    {
+      "attributes": {
+        "name": "crescent",
+        "style": "width:80px;height:80px",
+        "class": "md spinner-crescent hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-crescent",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 200,
+        "y": 104,
+        "w": 80,
+        "h": 80
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "80px",
+        "height": "80px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n"
+    },
+    {
+      "attributes": {
+        "name": "dots",
+        "style": "width:80px;height:80px",
+        "class": "md spinner-dots hydrated",
+        "role": "progressbar"
+      },
+      "classes": [
+        "md",
+        "spinner-dots",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 292,
+        "y": 104,
+        "w": 80,
+        "h": 80
+      },
+      "cssVars": {
+        "--color": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "80px",
+        "height": "80px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n    <svg>\n      <circle>\n"
+    }
+  ]
+}

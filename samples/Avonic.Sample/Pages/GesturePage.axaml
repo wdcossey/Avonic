@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.GesturePage">
+
+    <!-- The gesture utility: a sideways gesture on the track, in a content that scrolls. Drag the knob sideways and the page
+         stays still; drag up and down and the gesture gives up, and the page scrolls. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Drag the knob sideways, or the page up and down" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Detail" Text=" " />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <Border Name="Track" Height="72" Margin="16,8" Background="Transparent">
+                <Border Name="Knob" Width="56" Height="56" CornerRadius="28" HorizontalAlignment="Left"
+                        Background="{DynamicResource Avonic.Color.PrimaryBrush}" />
+            </Border>
+            <StackPanel Name="Rows" />
+        </StackPanel>
+    </c:AvonicContent>
+
+</UserControl>
