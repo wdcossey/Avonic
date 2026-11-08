@@ -23,6 +23,7 @@
             <MultiBinding Converter="{x:Static c:BorderRadius.ToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
                 <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
         <!-- display: block, which starts at the left at its own width -->

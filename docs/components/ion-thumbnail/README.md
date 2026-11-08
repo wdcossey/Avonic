@@ -49,4 +49,6 @@ None.
 
 ## Known gaps
 
-None of its own. At `50%`, see [ion-avatar](../ion-avatar/README.md#known-gaps).
+- An app's plain style for `Margin` on every thumbnail doesn't reach one in an item's start or end slot, where Ionic's page rule
+  would beat the slot's. Use a class or set it on the thumbnail. See [PLAN.md](../ion-badge/PLAN.md#deliberate-differences).
+- At `50%`, see [ion-avatar](../ion-avatar/README.md#known-gaps).

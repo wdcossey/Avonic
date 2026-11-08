@@ -54,4 +54,6 @@ None.
 
 - At `50%`, a background on an avatar that isn't square is a stadium, where Ionic's is an ellipse. An image in it is cut to the
   ellipse. A `CornerRadius` has one radius per corner.
+- An app's plain style for `Margin` on every avatar doesn't reach one in an item's start or end slot, where Ionic's page rule
+  would beat the slot's. Use a class or set it on the avatar. See [PLAN.md](../ion-badge/PLAN.md#deliberate-differences).
 - `ion-chip`'s rules for an avatar go with `ion-chip`.

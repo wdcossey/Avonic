@@ -88,7 +88,7 @@ A button item's name includes a badge's text, as a native `<button>`'s does, but
 | A8 | Beside a stacked label: 7 above and below | `.item-label-stacked ::slotted([slot=end])` beats `::slotted(ion-avatar)`; measured `av-stacked` `margin: 7px 0px 7px 16px` |
 | A9 | Centred in a tall row | `align-items: center`; measured `av-tall` y = 24.09 in 88.19 |
 | A10 | `Width` and `Height` on the avatar beat the slot's 40, and the margins stay | measured `av-vars`: 30 × 30, `margin: 8px 16px 8px 0px` |
-| A11 | RTL: a start avatar at the right, with its margin on the left | measured `av-rtl`: x = 334, `margin: 8px 0px 8px 16px` |
+| A11 | RTL: a start avatar at the right, with its margin on the left, and its corners where they were, on the background and the image alike | measured `av-rtl`: x = 334, `margin: 8px 0px 8px 16px`; `border-radius` is physical, so `20px 0 0 0` stays at the top left |
 | A12 | Its size doesn't follow the item's font size | measured `av-sized`: 40 in a 30 px item |
 
 ### Thumbnail
@@ -101,7 +101,7 @@ A button item's name includes a badge's text, as a native `<button>`'s does, but
 | T4 | In an item's or a divider's slot: 56 × 56, 8 above and below, 16 towards the content, so a row of 72. In a panel directly in a slot, 56 with 8 above and below | `::slotted(ion-thumbnail) { --size: 56px }` and the margins; measured `th-start`, `th-end`, `th-def` `margin: 8px 0px`, `item-th-start` 72 high, `th-divider` |
 | T5 | Beside a stacked label: 7 above and below | measured `th-stacked` `margin: 7px 0px 7px 16px` |
 | T6 | `Width` and `Height` on the thumbnail beat the slot's 56 | the inline `style` in `th-vars` |
-| T7 | RTL: a start thumbnail at the right, with its margin on the left | the same rule as `av-rtl` |
+| T7 | RTL: a start thumbnail at the right, with its margin on the left, and its corners where they were | the same rule as `av-rtl` |
 
 ## Design
 
@@ -172,6 +172,8 @@ the panel already has the slot's 16 from `Item.axaml`.
 | A non-square avatar's own background at `50%` is a stadium, where Ionic's is an ellipse (measured `av-wide`: 61.25 × 40) | `CornerRadius` has one radius per corner. The image's clip is an ellipse, which is what's seen with a picture in it |
 | `Avonic.Avatar.BorderRadius` takes a `CornerRadius`, a number, or a string of one to four lengths in px or percentages, where Ionic takes any CSS `border-radius`, `/` and `em` included | There's no Avalonia type for a percentage radius. A string is checked when it's read, and anything else is 0, as an invalid `var()` is |
 | `Avonic.Thumbnail.Size` takes a number, not a string such as `64px` | It's a size, as every other size key is |
+| An app's plain style for `Margin` on every avatar or thumbnail doesn't reach one in an item's start or end slot, where Ionic's `ion-avatar { margin: 0 }` beats `::slotted(ion-avatar[slot=start])` | Those rules have to beat `Styles/Item.axaml`'s rule for any child in a slot whichever file merges first, and Avalonia only orders rules by activators, then by place. With an activator, they also beat a plain rule of the app's. An app sets the margin with a class or a pseudoclass of its own, or on the control |
+| A string radius of a bare number, such as `"8"`, is 8, where CSS's `border-radius: 8` is invalid | The key also takes the number 8, and a string of one means the same |
 | `Avonic.Thumbnail.Size` set anywhere beats the item's 56, as the key is unset by default | The outer tree beats `::slotted` in CSS. A thumbnail that should be 56 only in items sets `Width` and `Height` there |
 | An empty string is empty, as null is | A framework renders no text node for `""` |
 | A badge is a box, not inline, and outside an item it's centred down in what it's given, not on the text's baseline | `vertical-align: baseline` has no equivalent. In an item it's centred, as Ionic's flex item is |

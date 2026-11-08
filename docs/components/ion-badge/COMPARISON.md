@@ -38,6 +38,13 @@ and one thumbnail of 64 at 50%; and an RTL item with an avatar and a badge.
   counted the white of the rounded corners as ink. It now looks inside the corners, and compares the text's height with the
   same text drawn plainly, so that it holds on any font.
 
+## Found in review
+
+- **In RTL, uneven corners moved on the background and not on the image.** A `Border`'s corners are mirrored with the rest of
+  the element, and an `Image` isn't mirrored, where CSS's `border-radius` is physical. The background's corners now swap back.
+- **Deliberate breakage missed four rules,** which won by where their file merges and not by their pseudoclasses: the avatar's
+  file merges before `Styles/Item.axaml`, and the thumbnail's after. Tests now merge each file first and last.
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicBadgeTests`, `AvonicAvatarTests` and
@@ -66,7 +73,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicBad
 | A8 | Beside a stacked label: 7 above and below | `av-stacked` `7px 0px 7px 16px` | match |
 | A9 | Centred in a tall row | `av-tall` y = 24.09 in 88.19 | match |
 | A10 | Its own `Width` and `Height` beat the slot's | `av-vars`: 30 × 30, `8px 16px 8px 0px` | match |
-| A11 | RTL: a start avatar at the right | `av-rtl` x = 334 | match |
+| A11 | RTL: a start avatar at the right, its corners where they were | `av-rtl` x = 334; `border-radius` is physical | match |
 | A12 | Not sized by the item's font | `av-sized` 40 | match |
 | T1 | Alone: 48 × 48 | `thumbnail.css` | match |
 | T2 | An image fills it, cropped from the middle, square | `th-start-img`, `object-fit: cover` | match, by pixel |
@@ -74,7 +81,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicBad
 | T4 | In a slot: 56, 8 above and below, 16 towards the content | `th-start`, `th-end`, `th-def`, rows of 72 and 73, `th-divider` | match |
 | T5 | Beside a stacked label: 7 | `th-stacked` `7px 0px 7px 16px` | match |
 | T6 | Its own `Width` and `Height` beat the slot's | `th-vars` | match |
-| T7 | RTL: at the right | as `av-rtl` | match |
+| T7 | RTL: at the right, its corners where they were | as `av-rtl` | match |
 
 ## Deliberate differences and known gaps
 

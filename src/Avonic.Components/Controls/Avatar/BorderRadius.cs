@@ -10,7 +10,8 @@ namespace Avonic.Components.Controls;
 /// is <c>50%</c>, which no <see cref="CornerRadius"/> can say. The variable's key can hold a <see cref="CornerRadius"/>, a number,
 /// or a string, read as CSS reads <c>border-radius</c>: one to four lengths or percentages, where a percentage is of the box's
 /// width across and of its height down. Anything else is invalid, and an invalid <c>var()</c> leaves <c>border-radius</c> at its
-/// initial value, 0. The values are the key's value, then the element's size, or its <c>Bounds</c>.
+/// initial value, 0. The values are the key's value, then the element's size, or its <c>Bounds</c>, and for
+/// <see cref="ToCornerRadius"/> its <c>FlowDirection</c>.
 /// </summary>
 public static class BorderRadius
 {
@@ -49,7 +50,7 @@ public static class BorderRadius
     /// <summary>
     /// The <c>border-radius</c> shorthand: one to four lengths or percentages, for the top left, top right, bottom right and
     /// bottom left, where two are the top left and bottom right, then the other two, and three leave the bottom left as the top
-    /// right. A length can say <c>px</c>. Anything else, including the <c>/</c> of separate radii down, is invalid.
+    /// right. A length can say <c>px</c>, in any case, as CSS's units are, or nothing, as the key can also be a number. Anything else, including the <c>/</c> of separate radii down, is invalid.
     /// </summary>
     private static Radii Parse(string text, Size size)
     {
@@ -64,7 +65,7 @@ public static class BorderRadius
         {
             var part = parts[i];
             var percent = part.EndsWith('%');
-            var number = percent ? part[..^1] : part.EndsWith("px", StringComparison.Ordinal) ? part[..^2] : part;
+            var number = percent ? part[..^1] : part.EndsWith("px", StringComparison.OrdinalIgnoreCase) ? part[..^2] : part;
             if (!double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) || !IsLength(value))
             {
                 return default;
@@ -110,7 +111,9 @@ public static class BorderRadius
 
     private sealed class CornerRadiusConverter : IMultiValueConverter
     {
-        // A CornerRadius has one radius for each corner, so an elliptical corner takes the smaller of its two.
+        // A CornerRadius has one radius for each corner, so an elliptical corner takes the smaller of its two. CSS's corners
+        // are physical, and a Border's are mirrored in right to left, so they swap sides there. An Image isn't mirrored, so the
+        // clip needs no swap.
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
             if (!TryGetSize(values, out var size))
@@ -120,7 +123,9 @@ public static class BorderRadius
 
             var r = Resolve(values[0], size);
             static double Of(Size corner) => Math.Min(corner.Width, corner.Height);
-            return new CornerRadius(Of(r.TopLeft), Of(r.TopRight), Of(r.BottomRight), Of(r.BottomLeft));
+            return values.Count > 2 && values[2] is FlowDirection.RightToLeft
+                ? new CornerRadius(Of(r.TopRight), Of(r.TopLeft), Of(r.BottomLeft), Of(r.BottomRight))
+                : new CornerRadius(Of(r.TopLeft), Of(r.TopRight), Of(r.BottomRight), Of(r.BottomLeft));
         }
     }
 

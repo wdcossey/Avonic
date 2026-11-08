@@ -220,4 +220,8 @@ public class AvonicThumbnailTests
         // 16 from the right. A mirrored element's origin is its right-hand edge.
         Assert.Equal(390 - 16, Box(thumbnail, scene.Window).X, 1);
     });
+
+    [AvaloniaFact]
+    public void T7_In_RTL_The_Corners_Stay_Where_They_Are() => InstalledTheme.Run(_ =>
+        AssertCornersStayInRtl(() => new AvonicThumbnail(), "Avonic.Thumbnail.BorderRadius"));
 }

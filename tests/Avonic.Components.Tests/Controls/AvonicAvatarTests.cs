@@ -189,6 +189,7 @@ public class AvonicAvatarTests
     [AvaloniaTheory]
     [InlineData("8")]
     [InlineData("8px")]
+    [InlineData("8PX")]
     [InlineData(8.0)]
     public void A3_The_Radius_Can_Be_A_Number_Or_A_Length(object radius) => InstalledTheme.Run(_ =>
     {
@@ -436,6 +437,39 @@ public class AvonicAvatarTests
         // Measured at x = 334, 40 wide. A mirrored element's origin is its right-hand edge.
         Assert.Equal(334 + 40, Box(avatar, scene.Window).X, 1);
     });
+
+    // CSS's corners are physical: border-radius doesn't follow the direction. The image's clip and the background have to agree.
+    [AvaloniaFact]
+    public void A11_In_RTL_The_Corners_Stay_Where_They_Are() => InstalledTheme.Run(_ =>
+        AssertCornersStayInRtl(() => new AvonicAvatar(), "Avonic.Avatar.BorderRadius"));
+
+    internal static void AssertCornersStayInRtl(Func<ContentControl> create, string key)
+    {
+        var picture = create();
+        picture.Content = Picture();
+        var plain = create();
+        plain.Background = new SolidColorBrush(Red);
+        foreach (var control in new[] { picture, plain })
+        {
+            control.Resources[key] = "20px 0 0 0";
+        }
+
+        using var scene = InScene(new StackPanel { FlowDirection = FlowDirection.RightToLeft, Children = { picture, plain } });
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        foreach (var (control, colour) in new[] { (picture, Blue), (plain, Red) })
+        {
+            // The physical top left and top right, in the window, wherever the mirror puts the element's origin.
+            var a = control.TranslatePoint(default, scene.Window)!.Value;
+            var b = control.TranslatePoint(new Point(control.Bounds.Width, control.Bounds.Height), scene.Window)!.Value;
+            var left = (int)Math.Min(a.X, b.X);
+            var right = (int)Math.Max(a.X, b.X);
+            var top = (int)Math.Min(a.Y, b.Y);
+            AssertNear(Colors.White, Frames.PixelAt(frame, left + 2, top + 2));
+            AssertNear(colour, Frames.PixelAt(frame, right - 3, top + 2));
+        }
+    }
 
     // ── 12. The item's size ──────────────────────────────────────────────────────────────────
 
