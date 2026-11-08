@@ -64,6 +64,9 @@ public class AvonicToolbar : TemplatedControl
     private AvonicButtons? _first;
     private AvonicButtons? _last;
 
+    // start, secondary, primary, end: what each slot presents, which is the content or what a template made of it.
+    private ContentPresenter?[] _slots = [];
+
     public string? Color
     {
         get => GetValue(ColorProperty);
@@ -142,6 +145,39 @@ public class AvonicToolbar : TemplatedControl
         }
     }
 
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        foreach (var slot in _slots.OfType<ContentPresenter>())
+        {
+            slot.PropertyChanged -= OnSlotPropertyChanged;
+        }
+
+        _slots =
+        [
+            e.NameScope.Find<ContentPresenter>("PART_Start"),
+            e.NameScope.Find<ContentPresenter>("PART_Secondary"),
+            e.NameScope.Find<ContentPresenter>("PART_Primary"),
+            e.NameScope.Find<ContentPresenter>("PART_End"),
+        ];
+
+        foreach (var slot in _slots.OfType<ContentPresenter>())
+        {
+            slot.PropertyChanged += OnSlotPropertyChanged;
+        }
+
+        UpdateButtonsSlots();
+    }
+
+    private void OnSlotPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            UpdateButtonsSlots();
+        }
+    }
+
     protected override void OnAttachedToLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
@@ -154,10 +190,10 @@ public class AvonicToolbar : TemplatedControl
     /// </summary>
     private void UpdateButtonsSlots()
     {
-        var first = InSlot(StartContent).FirstOrDefault();
-        var last = InSlot(EndContent).LastOrDefault()
-            ?? InSlot(PrimaryContent).LastOrDefault()
-            ?? InSlot(SecondaryContent).LastOrDefault();
+        var first = InSlot(0, StartContent).FirstOrDefault();
+        var last = InSlot(3, EndContent).LastOrDefault()
+            ?? InSlot(2, PrimaryContent).LastOrDefault()
+            ?? InSlot(1, SecondaryContent).LastOrDefault();
 
         if (!ReferenceEquals(first, _first))
         {
@@ -175,7 +211,13 @@ public class AvonicToolbar : TemplatedControl
         _last?.SetSlotClass(":buttons-last-slot", true);
     }
 
-    /// <summary>What has <c>slot="…"</c>: the slot's content, or what a panel there holds, as a panel stands for the slot.</summary>
+    /// <summary>
+    /// What has <c>slot="…"</c>: what the slot presents, or what a panel there holds, as a panel stands for the slot. Before the
+    /// template is applied, the slot's content.
+    /// </summary>
+    private IEnumerable<AvonicButtons> InSlot(int slot, object? content) =>
+        InSlot(slot < _slots.Length && _slots[slot] is { } presenter ? presenter.Child : content);
+
     private static IEnumerable<AvonicButtons> InSlot(object? content) => content switch
     {
         AvonicButtons buttons => [buttons],

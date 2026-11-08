@@ -127,8 +127,9 @@ template made (mapping rule).
 with `position: relative` does. `ion-no-border` is a style class.
 
 **`buttons-first-slot` and `buttons-last-slot` are pseudoclasses the toolbar sets on its `AvonicButtons`,** worked out from
-its slots, a panel in a slot standing for the slot. Ionic works them out once, in `componentWillLoad`. Here they follow the
-slots' content, but not a panel's children changing later, which Ionic doesn't follow either.
+what its slots present, so also an `AvonicButtons` a slot's template made, a panel in a slot standing for the slot. Ionic works
+them out once, in `componentWillLoad`. Here they follow the slots' content, but not a panel's children changing later, which
+Ionic doesn't follow either.
 
 **A button in `AvonicButtons` is told by styles in `Styles/Toolbar.axaml`, not by `AvonicButton`.** `fill` resolving to clear is
 a `Fill` setter at style priority on `c|AvonicButtons c|AvonicButton`, so a `Fill` the app sets wins, and it follows a button
@@ -163,6 +164,7 @@ None.
 | A toolbar's default text size is Avalonia's, where a web page's is 16 | ADR 0002 |
 | `:first-of-type` and `:last-of-type` are the first and last child | Avalonia has no of-type selector (mapping rule). A header or footer holds toolbars |
 | A coloured toolbar nested inside an uncoloured one: its buttons also match the uncoloured toolbar's `in-toolbar` rules, where Ionic's `:not(.in-toolbar-color)` excludes any coloured toolbar above | Avalonia can't say "no ancestor like this". The coloured rules come later in the file, so they win where both set a value; only `Avonic.ToolbarColorBrush`, when an app sets it, reaches such a button's text. A toolbar in a toolbar is rare |
+| A title's ellipsis reaches every `TextBlock` in its content, where CSS's `text-overflow` is on `.toolbar-title` alone, so a block inside it is clipped without one | `TextTrimming` inherits, which is how the `TextBlock` a string makes gets it. A title holds text |
 | `TitleSize.Large` and `HeaderCollapse.Fade` change nothing in md | Faithful: Ionic's md has no rules for them. They're kept so that Ionic markup ports. See "For you to decide" in the PR |
 | An outline button's border in an uncoloured toolbar or in `AvonicButtons` follows its text, and `Avonic.Button.BorderColor` doesn't reach it, even in the button's own `Resources` | Ionic's `in-toolbar` rule takes `var(--color)` before `var(--border-color)`, and `ion-buttons` sets `--border-color: currentColor` on the button, which beats a global value. A `style` on the button itself beats it in Ionic (measured `s4` `#bod`), which a style rule here can't tell from a global key |
 | **Known gap:** with the dark palette, the toolbar's text and the solid button in `AvonicButtons` stay `#424242`, where Ionic's are white, and the border's fallback stays `#C1C4CD` where Ionic's is `#363636` | `Avonic.Toolbar.Md.ColorBrush` and `Avonic.Toolbar.Md.BorderColorBrush` need a line each in `Tokens/Palettes/Dark.axaml`, which is shared, so they're proposed in the PR. Until then an app sets those two keys in its dark resources. Not `Avonic.ToolbarColorBrush`, which Ionic's dark palette doesn't set, and which a button in a toolbar reads before its own colour |

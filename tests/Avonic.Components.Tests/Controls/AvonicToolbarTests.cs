@@ -371,6 +371,19 @@ public class AvonicToolbarTests
         Assert.Equal(new Thickness(0, 0, 4, 0), end.Margin);
     });
 
+    [AvaloniaFact]
+    public void T10_Buttons_A_Template_Makes_Count_Too() => InstalledTheme.Run(_ =>
+    {
+        var template = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => Buttons(new AvonicButton { Content = text }));
+        var toolbar = new AvonicToolbar { StartContent = "Start", StartContentTemplate = template, EndContent = "End", EndContentTemplate = template };
+        using var scene = ToolbarTest.Show(toolbar);
+
+        var made = toolbar.GetVisualDescendants().OfType<AvonicButtons>().ToList();
+        Assert.Equal(2, made.Count);
+        Assert.Equal(new Thickness(4, 0, 0, 0), made[0].Margin);
+        Assert.Equal(new Thickness(0, 0, 4, 0), made[1].Margin);
+    });
+
     // ── H1, F1: stacking ────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
