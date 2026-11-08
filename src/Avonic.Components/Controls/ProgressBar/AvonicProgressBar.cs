@@ -223,15 +223,8 @@ public class AvonicProgressBar : TemplatedControl
         }
         else if (change.Property == BufferProperty)
         {
-            if (Type == ProgressBarType.Determinate)
-            {
-                Ease(_buffer, Display(Buffer));
-            }
-            else
-            {
-                _buffer.Snap(Display(Buffer));
-            }
-
+            // While indeterminate it goes unseen, and the change of type snaps it
+            Ease(_buffer, Display(Buffer));
             UpdatePseudoClasses();
             Update();
         }
@@ -241,9 +234,10 @@ public class AvonicProgressBar : TemplatedControl
         }
     }
 
+    /// <summary>A transition, unless animations are off. One started while detached is snapped when the bar attaches.</summary>
     private void Ease(CssTransition transition, double target)
     {
-        if (_attached && AvonicConfig.Animated)
+        if (AvonicConfig.Animated)
         {
             transition.Start(target, AvonicConfig.Now(), TransitionDuration);
         }

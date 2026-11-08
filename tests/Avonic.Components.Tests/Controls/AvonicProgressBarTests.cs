@@ -156,6 +156,10 @@ public class AvonicProgressBarTests
             AssertSpan((0, 0), f.Span("PART_Progress"));
             AssertSpan((0, W), f.Span("PART_Track"));
             Assert.Equal(-1, range.Value);
+
+            // clamp() keeps NaN, and scaleX(NaN) is an invalid transform, so the progress isn't scaled
+            f.Bar.Value = double.NaN;
+            AssertSpan((0, W), f.Span("PART_Progress"));
         }
         finally
         {
@@ -180,6 +184,7 @@ public class AvonicProgressBarTests
         foreach (var x in new[] { 280.0, 290, 300, 350 })
         {
             AssertColour(PrimaryTrack, Fixture.PixelAt(frame, x), 8);
+            AssertWhite(Fixture.PixelAt(frame, x + 3));
             AssertWhite(Fixture.PixelAt(frame, x + 5));
         }
 
@@ -189,7 +194,9 @@ public class AvonicProgressBarTests
         // The dots are 4.44 px left of 180, 190, …
         frame = f.Frame();
         AssertWhite(Fixture.PixelAt(frame, 190.5));
-        AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 170));
+        // The track is translucent, so a dot under it would show darker
+        AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 165.5));
+        AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 175.5));
     });
 
     // ── B5: the stream moves ─────────────────────────────────────────────────────────────────
@@ -301,6 +308,8 @@ public class AvonicProgressBarTests
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 188.3), 8);
         AssertWhite(Fixture.PixelAt(frame, 193.3));
         AssertWhite(Fixture.PixelAt(frame, 183.3));
+        // The dot at 178.3 is cut where the window begins, at 179, so the translucent track over it stays the same
+        AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 177));
 
         clock.At(150);
         f.Bar.Tick();
@@ -387,6 +396,13 @@ public class AvonicProgressBarTests
         // 225 ms after the render: dots at 185, 195, …
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 195), 8);
         AssertWhite(Fixture.PixelAt(frame, 190));
+
+        // The track is a new element in each render, so a change of buffer in flight doesn't carry over a change of type
+        f.Bar.Buffer = 1;
+        clock.At(1500);
+        f.Bar.Type = ProgressBarType.Indeterminate;
+        f.Bar.Type = ProgressBarType.Determinate;
+        AssertSpan((0, W), f.Span("PART_Track"));
     });
 
     // ── B10: reversed ────────────────────────────────────────────────────────────────────────
