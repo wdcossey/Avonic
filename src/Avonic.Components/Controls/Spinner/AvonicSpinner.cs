@@ -76,7 +76,6 @@ public class AvonicSpinner : Control
     private Pen? _pen;
     private SpinnerConfig? _penConfig;
     private StreamGeometry[]? _fixedArcs;
-    private SpinnerConfig? _fixedArcConfig;
 
     /// <summary>The spinners in a visual tree, which a change of <see cref="Visual.IsVisible"/> anywhere may show or hide.</summary>
     private static readonly HashSet<AvonicSpinner> s_attached = [];
@@ -398,16 +397,11 @@ public class AvonicSpinner : Control
                 }
                 else if (frame.Arcs is { } arcs)
                 {
-                    // crescent's dash is fixed, and only its turn changes, so its arc is built once.
+                    // crescent's dash is fixed, and only its turn changes, so its arc is built once. It's the only fixed one.
                     if (config.Dash is not null)
                     {
-                        if (_fixedArcConfig != config)
-                        {
-                            _fixedArcs = arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
-                            _fixedArcConfig = config;
-                        }
-
-                        foreach (var geometry in _fixedArcs!)
+                        _fixedArcs ??= arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
+                        foreach (var geometry in _fixedArcs)
                         {
                             context.DrawGeometry(null, pen, geometry);
                         }
