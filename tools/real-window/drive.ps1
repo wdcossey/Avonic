@@ -372,6 +372,39 @@ try {
         Check 'a touch tap counts once' ($name -eq 'Clicks: 1') $name
     }
 
+    # Headless tests run the bars on a test clock; this is the real one. The indeterminate bars and the buffer's dots move,
+    # so two frames of the bars a moment apart differ; and a new value eases in.
+    Section 'ion-progress-bar: on the real clock' {
+        Open 'ion-progress-bar'
+        Away
+        function Grab($x, $y, $wd, $ht) {
+            $bmp = New-Object Drawing.Bitmap ([int]$wd), ([int]$ht)
+            $g = [Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen([int]$x, [int]$y, 0, 0, $bmp.Size); $g.Dispose(); $bmp
+        }
+        $w = $win.Current.BoundingRectangle
+        $rtl = (Named $CT::Text 'Right to left').Current.BoundingRectangle
+        $top = [int]($w.Y + 80 * $scale)
+        $ht = [int]($rtl.Y - $top)
+        $a = Grab $w.X $top $w.Width $ht
+        Start-Sleep -Milliseconds 300
+        $b = Grab $w.X $top $w.Width $ht
+        $diff = 0
+        for ($y = 0; $y -lt $ht; $y += 2) { for ($x = 0; $x -lt [int]$w.Width; $x += 3) { if ($a.GetPixel($x, $y).ToArgb() -ne $b.GetPixel($x, $y).ToArgb()) { $diff++ } } }
+        $a.Dispose(); $b.Dispose()
+        Check 'the bars move on their own' ($diff -gt 40) "$diff sampled pixels differ"
+
+        $ease = (Named $CT::Text 'Changes ease*').Current.BoundingRectangle
+        $vx, $vy = Centre (Named $CT::Button 'Value')
+        $by = [int](($ease.Bottom + ($vy - 22 * $scale)) / 2)
+        $bx = [int]($w.X + (16 + 0.3 * ($w.Width / $scale - 32)) * $scale)
+        $before = Pixel $bx $by
+        Click $vx $vy
+        Start-Sleep -Milliseconds 500
+        $after = [Drawing.Color]::FromArgb((Pixel $bx $by))
+        Shot 'ion-progress-bar-value'
+        Check 'a new value fills the bar to it' (($after.ToArgb() -ne $before) -and ($after.B -gt 180) -and ($after.R -lt 80)) ('{0:X8} from {1:X8}' -f $after.ToArgb(), $before)
+    }
+
     # A chip is ion-activatable: hover for a mouse only, and a ripple from a press. Read from a pixel in the chip's padding,
     # left of its label.
     Section 'ion-chip' {
