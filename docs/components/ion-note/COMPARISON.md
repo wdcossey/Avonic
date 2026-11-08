@@ -57,7 +57,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNot
 | 13 | A button item's name includes its text | native `<button>` | match |
 | 14 | RTL | an end note at x = 16, with its margin on the right | match |
 | 15 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with the class on the note or on a label. See the plan |
-| 16 | In a divider's slots: 6, 7 and 8 again, from `item-divider.md.css` | `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt): 342 × 52 at x = 32, y = 0, in a divider of 53 | match, since [#74](https://github.com/wdcossey/Avonic/issues/74). Before it, 14 px and centred |
+| 16 | In a divider's slots: 6, 7 and 8 again, from `item-divider.md.css` | Elements 13 and 14 in [`ref/`](ref/README.md): 11 px, padding `18px 0 10px`, margin `0 0 0 16px`; the long one 342 × 52 at x = 32, y = 0, in a divider of 53. The same as `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt) | match, since [#74](https://github.com/wdcossey/Avonic/issues/74). Before it, 14 px and centred. The height is 58 in 59 here, from Segoe UI's taller lines, as for the stacked row above; the width is the longest line, as in the end slot |
 
 ## Deliberate differences and known gaps
 

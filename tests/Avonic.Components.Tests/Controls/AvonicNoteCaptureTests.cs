@@ -87,7 +87,7 @@ public class AvonicNoteCaptureTests
         var longEnd = (AvonicNote)((AvonicItem)page.Children[10]).EndContent!;
         Assert.InRange(longEnd.Bounds.Width, 300, 342);
 
-        // h3 in docs/components/ion-item/ref/layout/cases.txt: 342 wide at y = 0 in a divider of 53. The same width gap as the item's.
+        // Element 14 in docs/components/ion-note/ref/README.md: 342 wide at y = 0 in a divider of 53. The same width gap as the item's.
         var inDivider = (AvonicNote)((AvonicItemDivider)page.Children[13]).EndContent!;
         Assert.InRange(inDivider.Bounds.Width, 300, 342);
         Assert.Equal(0, inDivider.TranslatePoint(default, page.Children[13])!.Value.Y);

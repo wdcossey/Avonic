@@ -46,7 +46,8 @@
     </Style>
 
     <!-- ::slotted(ion-note), in item.md.css and, word for word, item-divider.md.css. The item and the divider are the
-         IItemHosts with slots; a group has none, so the type covers both at no extra cost. A slot holds one child, so a panel
+         IItemHosts with slots; a group has none, so the type covers both at no extra cost. An app's own IItemHost with slots
+         of those names gets them too, on purpose: implementing it says "treat me as an item". A slot holds one child, so a panel
          directly in it stands for the slot. The margin: 0 needs no rule: it loses to ::slotted([slot=end]), which is in
          Item.axaml and ItemDivider.axaml, and the default slot has no margin. 0.6875rem doesn't depend on the host's size.
          align-self: flex-start is the rest of it. -->

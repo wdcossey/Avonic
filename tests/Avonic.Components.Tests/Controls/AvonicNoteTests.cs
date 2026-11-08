@@ -756,8 +756,8 @@ public class AvonicNoteTests
     });
 
     // ── 16. In a divider ─────────────────────────────────────────────────────────────────────
-    // item-divider.md.css has item.md.css's two ::slotted(ion-note) rules, word for word. The numbers are from
-    // docs/components/ion-item/ref/layout/cases.txt, row h3, and the divider's own cases.
+    // item-divider.md.css has item.md.css's two ::slotted(ion-note) rules, word for word. The numbers are elements 13 and 14
+    // in docs/components/ion-note/ref/README.md, and row h3 in docs/components/ion-item/ref/layout/cases.txt has the same.
 
     [AvaloniaFact]
     public void B16_In_A_Dividers_Slots_It_Is_11() => InstalledTheme.Run(_ =>
@@ -824,8 +824,9 @@ public class AvonicNoteTests
     [AvaloniaFact]
     public void B16_A_Long_Note_In_A_Dividers_End_Slot_Fills_The_Row_From_The_Top() => InstalledTheme.Run(_ =>
     {
-        // h3: the note is 342 wide and 52 high at x = 32, y = 0, in a divider of 53. Its height is two lines and the padding.
-        // Its box is as wide as its longest line here, not the slot, which is the item's recorded gap for a long note in a slot.
+        // Element 14: the note is 342 wide and 52 high at x = 32, y = 0, in a divider of 53. Its height is two lines and the
+        // padding, so it follows the font: 58 with Segoe UI. Its box is as wide as its longest line here, not the slot, which is
+        // the item's recorded gap for a long note in a slot.
         var note = new AvonicNote { Content = "A very long note in a divider end slot that certainly has to wrap because it does not fit" };
         var divider = new AvonicItemDivider { Content = new AvonicLabel { Content = "Default" }, EndContent = note };
         using var scene = InScene(divider);
