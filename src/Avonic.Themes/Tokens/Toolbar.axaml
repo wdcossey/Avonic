@@ -29,6 +29,9 @@
     <SolidColorBrush x:Key="Avonic.Toolbar.Md.ColorBrush" Color="#424242" />
     <SolidColorBrush x:Key="Avonic.Toolbar.Md.BorderColorBrush" Color="#C1C4CD" />
 
+    <!-- The host's own padding, apart from the safe area. Not Ionic's variable: a value for Css.SafeAreaBox. -->
+    <x:Double x:Key="Avonic.Toolbar.Md.NoPadding">0</x:Double>
+
     <!-- What buttons.md.css gives a button in ion-buttons: border-radius 2px, or 50% when it's clear and icon-only, which
          is 48 square. -->
     <CornerRadius x:Key="Avonic.Buttons.Md.ButtonBorderRadius">2</CornerRadius>

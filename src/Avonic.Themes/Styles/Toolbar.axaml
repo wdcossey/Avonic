@@ -11,26 +11,32 @@
          ControlTheme. Within this file, later beats earlier. A button's own Avonic.Button.* keys stay first, as they do in
          Styles/Button.axaml for an item. -->
 
-    <!-- ion-header ion-toolbar:first-of-type { padding-top: var(ion-safe-area-top) } -->
-    <Style Selector="c|AvonicHeader > c|AvonicToolbar:nth-child(1)">
+    <!-- ion-header ion-toolbar:first-of-type { padding-top: var(ion-safe-area-top) }, also for a toolbar a template made -->
+    <Style Selector="c|AvonicHeader > c|AvonicToolbar:nth-child(1), c|AvonicHeader > ContentPresenter:nth-child(1) > c|AvonicToolbar">
         <Setter Property="Padding">
-            <MultiBinding Converter="{x:Static c:AvonicToolbar.SafeAreaPadding}" ConverterParameter="Top">
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
-                <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
             </MultiBinding>
         </Setter>
     </Style>
 
-    <!-- ion-footer.footer-toolbar-padding ion-toolbar:last-of-type { padding-bottom: var(ion-safe-area-bottom) } -->
-    <Style Selector="c|AvonicFooter > c|AvonicToolbar:nth-last-child(1)">
+    <!-- ion-footer.footer-toolbar-padding ion-toolbar:last-of-type { padding-bottom: var(ion-safe-area-bottom) }, also for a toolbar a template made -->
+    <Style Selector="c|AvonicFooter > c|AvonicToolbar:nth-last-child(1), c|AvonicFooter > ContentPresenter:nth-last-child(1) > c|AvonicToolbar">
         <Setter Property="Padding">
-            <MultiBinding Converter="{x:Static c:AvonicToolbar.SafeAreaPadding}" ConverterParameter="Bottom">
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
-                <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
             </MultiBinding>
         </Setter>
     </Style>
@@ -62,6 +68,13 @@
          an invalid list, so the text inherits. -->
     <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:fill-outline:activated:not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="Background" Value="{DynamicResource Avonic.ToolbarBackgroundBrush}" />
+    </Style>
+
+    <!-- An outline button's border in a toolbar follows its text: .button-outline.in-toolbar… { border-color:
+         var(ion-toolbar-color, var(color, …)) }, which is its text colour, and ion-buttons' border-color: currentColor. In a
+         coloured toolbar, outside ion-buttons, both are its own colour. -->
+    <Style Selector="c|AvonicToolbar c|AvonicButton:fill-outline:not(:ion-color) /template/ Border#PART_Native">
+        <Setter Property="BorderBrush" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
     </Style>
 
     <!-- ion-button's inToolbar is closest('ion-buttons'): with no fill it's clear. A Fill the app sets wins.
@@ -172,20 +185,12 @@
     </Style>
 
     <!-- ::slotted(*) .button-clear and .button-outline { color: initial }: color: var(color) is invalid, so the text
-         inherits the toolbar's, in every state. Outline's border is currentColor. -->
+         inherits the toolbar's, in every state. -->
     <Style Selector="c|AvonicButtons c|AvonicButton:fill-clear, c|AvonicButtons c|AvonicButton:fill-outline">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />
                 <Binding Path="$parent[Control].(TextElement.Foreground)" />
-            </MultiBinding>
-        </Setter>
-    </Style>
-    <Style Selector="c|AvonicButtons c|AvonicButton:fill-outline /template/ Border#PART_Native">
-        <Setter Property="BorderBrush">
-            <MultiBinding Converter="{x:Static b:Css.Var}">
-                <DynamicResource ResourceKey="Avonic.Button.BorderColor" />
-                <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
     </Style>

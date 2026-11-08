@@ -24,6 +24,11 @@
             </ControlTemplate>
         </Setter>
 
+        <!-- .header-md.header-collapse-condense { display: none } -->
+        <Style Selector="^:collapse-condense">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
         <!-- .header-md.ion-no-border { box-shadow: none } -->
         <Style Selector="^.ion-no-border /template/ Border#PART_Native">
             <Setter Property="BoxShadow" Value="none" />

@@ -57,9 +57,14 @@
             </MultiBinding>
         </Setter>
         <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Toolbar.BorderWidth}" />
-        <!-- padding-right: var(ion-safe-area-right); padding-left: var(ion-safe-area-left). Physical sides. -->
+        <!-- padding-right: var(ion-safe-area-right); padding-left: var(ion-safe-area-left). Physical sides, which
+             Css.SafeAreaBox swaps in RTL. -->
         <Setter Property="Padding">
-            <MultiBinding Converter="{x:Static c:AvonicToolbar.SafeAreaPadding}">
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
                 <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
@@ -82,7 +87,7 @@
                             ClipToBounds="True"
                             KeyboardNavigation.TabNavigation="Local">
                         <Border.Padding>
-                            <MultiBinding Converter="{x:Static c:AvonicToolbar.LogicalPadding}">
+                            <MultiBinding Converter="{x:Static b:Css.Box}">
                                 <DynamicResource ResourceKey="Avonic.Toolbar.PaddingStart" />
                                 <DynamicResource ResourceKey="Avonic.Toolbar.PaddingTop" />
                                 <DynamicResource ResourceKey="Avonic.Toolbar.PaddingEnd" />

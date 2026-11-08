@@ -488,6 +488,52 @@ public class AvonicToolbarTests
         Assert.Equal(new Rect(0, 0, 390, 56), ToolbarTest.Box(Container(last), last));
     });
 
+    [AvaloniaFact]
+    public void H3_F2_Toolbars_A_Template_Makes_Get_The_Safe_Area_Too() => InstalledTheme.Run(_ =>
+    {
+        var template = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new AvonicToolbar { Content = text });
+        var header = new AvonicHeader { ItemsSource = new[] { "One", "Two" }, ItemTemplate = template };
+        var footer = new AvonicFooter { ItemsSource = new[] { "Three", "Four" }, ItemTemplate = template };
+        var page = new StackPanel
+        {
+            Children = { header, footer },
+            Resources = { ["Avonic.SafeAreaTop"] = 20d, ["Avonic.SafeAreaBottom"] = 10d },
+        };
+        using var scene = new Scene(page);
+
+        var heights = page.GetVisualDescendants().OfType<AvonicToolbar>().Select(toolbar => toolbar.Bounds.Height);
+        Assert.Equal([76d, 56d, 56d, 66d], heights);
+    });
+
+    // ── H5: collapse ────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void H5_A_Condense_Header_Is_Hidden_And_No_Banner_In_Md() => InstalledTheme.Run(_ =>
+    {
+        var header = new AvonicHeader { Collapse = HeaderCollapse.Condense, Items = { new AvonicToolbar { Content = "Large" } } };
+        using var scene = ToolbarTest.Show(header);
+
+        // .header-md.header-collapse-condense { display: none }; getRoleType gives none.
+        Assert.False(header.IsVisible);
+        Assert.Null(ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
+
+        header.Collapse = null;
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(header.IsVisible);
+        Assert.Equal(AutomationLandmarkType.Banner, ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
+    });
+
+    [AvaloniaFact]
+    public void H5_A_Fade_Header_Looks_Like_The_Default_In_Md() => InstalledTheme.Run(_ =>
+    {
+        var header = new AvonicHeader { Collapse = HeaderCollapse.Fade, Items = { new AvonicToolbar { Content = "Fade" } } };
+        using var scene = ToolbarTest.Show(header);
+
+        Assert.True(header.IsVisible);
+        Assert.Equal(56, header.Bounds.Height);
+        Assert.Equal(AutomationLandmarkType.Banner, ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
+    });
+
     // ── H4, F3: landmarks ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

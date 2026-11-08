@@ -1,12 +1,9 @@
-using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
-using Avalonia.Data.Converters;
-using Avalonia.Media;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -63,16 +60,6 @@ public class AvonicToolbar : TemplatedControl
 
     public static readonly StyledProperty<IDataTemplate?> EndContentTemplateProperty =
         AvaloniaProperty.Register<AvonicToolbar, IDataTemplate?>(nameof(EndContentTemplate));
-
-    /// <summary>
-    /// For the theme: <c>padding-left</c> and <c>padding-right</c> from the safe area, which are physical sides, so they swap
-    /// in RTL, where Avalonia mirrors a margin. The values are the left, the right and the <c>FlowDirection</c>, then
-    /// optionally the side the parameter names, <c>Top</c> or <c>Bottom</c>, for a header's or footer's toolbar.
-    /// </summary>
-    public static readonly IMultiValueConverter SafeAreaPadding = new SafeAreaPaddingConverter();
-
-    /// <summary>For the theme: the four <c>--padding-*</c> variables, start, top, end and bottom, as a <c>Thickness</c>.</summary>
-    public static readonly IMultiValueConverter LogicalPadding = new LogicalPaddingConverter();
 
     private AvonicButtons? _first;
     private AvonicButtons? _last;
@@ -195,29 +182,4 @@ public class AvonicToolbar : TemplatedControl
         Panel panel => panel.Children.OfType<AvonicButtons>(),
         _ => [],
     };
-
-    private sealed class SafeAreaPaddingConverter : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (values is not [double left, double right, FlowDirection flow, ..])
-            {
-                return AvaloniaProperty.UnsetValue;
-            }
-
-            var extra = values is [_, _, _, double value] ? value : 0;
-            var top = parameter as string == "Top" ? extra : 0;
-            var bottom = parameter as string == "Bottom" ? extra : 0;
-            var rtl = flow == FlowDirection.RightToLeft;
-            return new Thickness(rtl ? right : left, top, rtl ? left : right, bottom);
-        }
-    }
-
-    private sealed class LogicalPaddingConverter : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
-            values is [double start, double top, double end, double bottom]
-                ? new Thickness(start, top, end, bottom)
-                : AvaloniaProperty.UnsetValue;
-    }
 }

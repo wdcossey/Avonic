@@ -318,6 +318,25 @@ public class AvonicToolbarButtonsTests
         Assert.Equal(Colors.White, Text(inColour));
     });
 
+    [AvaloniaFact]
+    public void B9_An_Outline_Border_Follows_The_Toolbar_Colour_Token() => InstalledTheme.Run(_ =>
+    {
+        var loose = new AvonicButton { Content = "Loose", Fill = ButtonFill.Outline };
+        var inColour = new AvonicButton { Content = "In colour", Fill = ButtonFill.Outline };
+        var page = new StackPanel
+        {
+            Children = { new AvonicToolbar { Content = loose }, new AvonicToolbar { Color = "danger", Content = inColour } },
+            Resources = { ["Avonic.ToolbarColorBrush"] = Brushes.Red },
+        };
+        using var scene = new Scene(page);
+
+        Assert.Equal(Colors.Red, Text(loose));
+        Assert.Equal(Colors.Red, ToolbarTest.Solid(Native(loose).BorderBrush));
+
+        // in-toolbar-color: its own primary, outside ion-buttons.
+        Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Native(inColour).BorderBrush));
+    });
+
     // ── B10: outline pressed ────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
