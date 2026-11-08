@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-spinner's one variable, color: var(color). Unset, it's invalid, so the colour inherits. Any brush overrides it.
+         Ionic's color prop beats it, as :host(.ion-color) is the later rule. -->
+    <b:CssUnset x:Key="Avonic.Spinner.Color" />
+
+</ResourceDictionary>
