@@ -34,7 +34,7 @@ methods on any of them.
 | [x] | badge `--padding-end` | `Avonic.Badge.PaddingEnd` | double | 4 |
 | [x] | badge `--padding-bottom` | `Avonic.Badge.PaddingBottom` | double | 4 |
 | [x] | badge `--padding-start` | `Avonic.Badge.PaddingStart` | double | 4 |
-| [x] | avatar `--border-radius` | `Avonic.Avatar.BorderRadius` | `CornerRadius`, double, or a string such as `50%` | `50%` |
+| [x] | avatar `--border-radius` | `Avonic.Avatar.BorderRadius` | `CornerRadius`, double, or a string as CSS writes `border-radius` | `50%` |
 | [x] | thumbnail `--border-radius` | `Avonic.Thumbnail.BorderRadius` | same | `0` |
 | [x] | thumbnail `--size` | `Avonic.Thumbnail.Size` | double | Unset → `Avonic.Thumbnail.Md.Size`, 48, or `Avonic.Thumbnail.Md.SizeInItem`, 56, in an item's slot |
 
@@ -44,8 +44,8 @@ that's a literal in the theme, and `::slotted(ion-avatar) { width: 40px; height:
 `Styles/Avatar.axaml`. `--size` is only `ion-thumbnail`'s.
 
 `--border-radius` is `50%` in Ionic, which no Avalonia `CornerRadius` can say, and an app sets it in px as often as not. So
-the key takes either: a `CornerRadius` (or a plain number) is used as it is, and a string ending in `%` is that fraction of
-the box. The converter is `BorderRadius`, in `Controls/Avatar/`, and both controls read it the same way.
+the key takes either: a `CornerRadius` (or a plain number) is used as it is, and a string is read as CSS reads the
+`border-radius` shorthand, one to four lengths or percentages, a percentage being of the box's width across and its height down. The converter is `BorderRadius`, in `Controls/Avatar/`, and both controls read it the same way.
 
 `--size` is 48 on the host and 56 from the item's `::slotted(ion-thumbnail)`. A page rule `ion-thumbnail { --size: 30px }`
 beats the item's `::slotted` rule, as the outer tree wins in CSS scoping, so the key is unset by default and the theme's
@@ -113,7 +113,7 @@ its host: `item.md.css` has no `::slotted(ion-badge)` rule, and the slot margins
 any child, which `Styles/Item.axaml` already has. The one global rule, in `Styles/Badge.axaml`, is `line-height: 1` on the
 text, which has to reach the `TextBlock` the presenter makes, and a `ControlTheme` can't (checked: `^ /template/
 ContentPresenter > TextBlock` doesn't apply to it). That `TextBlock`'s logical parent is the badge, as an app's own would be,
-so the rule is `c|AvonicBadge > TextBlock`, one alternative. It follows `Styles/Button.axaml`: `ClipToBounds="False"` and half the
+so the rule is `c|AvonicBadge > TextBlock`, and the same through a panel. It follows `Styles/Button.axaml`: `ClipToBounds="False"` and half the
 leading as a margin, through `Css.HalfLeading`.
 
 **An empty badge hides itself in code,** at style priority, so that it survives a replaced theme and an app's `IsVisible`
@@ -123,6 +123,9 @@ too. `FlexRow` already treats a hidden child as `display: none`, so an empty bad
 **It clips,** as `contain: content` does, which is a `ContentControl`'s default. Its text isn't cut, as the half leading keeps
 it inside. It's centred down by default (`OverrideDefaultValue`, not the theme, as `FlexSlot` would take a theme's value
 for `align-self`), so it never stretches to a taller line, as an inline-block doesn't.
+
+**`line-height: 1` is set on the text, not inherited from the badge,** as Avalonia's `LineHeight` inherits as a size and CSS's as a
+factor: a `TextBlock` of 20 in a badge has a line of 20, and the badge is 27 high, as in CSS. A panel directly in the badge stands for it.
 
 **The badge's text size is 13 whatever the host's,** because `0.8125rem` is of the root, not the parent (measured
 `end-sized`: 20 high in a 30 px item). So it's a literal `FontSize`, not `Css.Em`.
@@ -167,7 +170,8 @@ the panel already has the slot's 16 from `Item.axaml`.
 | Difference | Why |
 |---|---|
 | A non-square avatar's own background at `50%` is a stadium, where Ionic's is an ellipse (measured `av-wide`: 61.25 × 40) | `CornerRadius` has one radius per corner. The image's clip is an ellipse, which is what's seen with a picture in it |
-| `Avonic.Avatar.BorderRadius` takes a `CornerRadius`, a number or a `50%` string, where Ionic takes any CSS length | There's no Avalonia type for a percentage radius. A string is checked when it's read |
+| `Avonic.Avatar.BorderRadius` takes a `CornerRadius`, a number, or a string of one to four lengths in px or percentages, where Ionic takes any CSS `border-radius`, `/` and `em` included | There's no Avalonia type for a percentage radius. A string is checked when it's read, and anything else is 0, as an invalid `var()` is |
+| `Avonic.Thumbnail.Size` takes a number, not a string such as `64px` | It's a size, as every other size key is |
 | `Avonic.Thumbnail.Size` set anywhere beats the item's 56, as the key is unset by default | The outer tree beats `::slotted` in CSS. A thumbnail that should be 56 only in items sets `Width` and `Height` there |
 | An empty string is empty, as null is | A framework renders no text node for `""` |
 | A badge is a box, not inline, and outside an item it's centred down in what it's given, not on the text's baseline | `vertical-align: baseline` has no equivalent. In an item it's centred, as Ionic's flex item is |

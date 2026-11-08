@@ -23,10 +23,9 @@
     <ControlTheme x:Key="{x:Type c:AvonicBadge}" TargetType="c:AvonicBadge">
         <!-- font-family: var(ion-font-family, inherit) -->
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
-        <!-- font-size: 0.8125rem, of the root, so not of the parent; font-weight: bold; line-height: 1 -->
+        <!-- font-size: 0.8125rem, of the root, so not of the parent; font-weight: bold. line-height: 1 is in Styles/Badge.axaml. -->
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="TextBlock.LineHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}" />
         <Setter Property="Padding">
             <MultiBinding Converter="{x:Static b:Css.Box}">
                 <DynamicResource ResourceKey="Avonic.Badge.PaddingStart" />

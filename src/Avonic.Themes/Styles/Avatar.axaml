@@ -22,7 +22,7 @@
         <Setter Property="Clip">
             <MultiBinding Converter="{x:Static c:BorderRadius.ToClip}">
                 <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
-                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
     </Style>

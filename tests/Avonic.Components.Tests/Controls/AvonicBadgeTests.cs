@@ -133,6 +133,18 @@ public class AvonicBadgeTests
     });
 
     [AvaloniaFact]
+    public void B1_Its_Line_Height_Is_Of_Each_Texts_Own_Size() => InstalledTheme.Run(_ =>
+    {
+        var large = new AvonicBadge { Content = new TextBlock { Text = "9", FontSize = 20 } };
+        var inPanel = new AvonicBadge { Content = new StackPanel { Orientation = Orientation.Horizontal, Children = { new TextBlock { Text = "9" } } } };
+        using var scene = InScene(large, inPanel);
+
+        // line-height: 1 inherits as a factor, so text of 20 has a line of 20: 3 + 20 + 4. A panel in it stands for it.
+        Assert.Equal(27, large.Bounds.Height);
+        Assert.Equal(20, inPanel.Bounds.Height);
+    });
+
+    [AvaloniaFact]
     public void B1_In_A_Row_With_Something_Taller_It_Keeps_Its_Height() => InstalledTheme.Run(_ =>
     {
         var badge = new AvonicBadge { Content = "22" };

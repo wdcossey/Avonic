@@ -6,10 +6,12 @@
     <!-- The rest of badge.md.css is in Controls/AvonicBadge.axaml. item.md.css has no rule for a badge: in a slot it has the
          slot's own margins, which Styles/Item.axaml and Styles/ItemDivider.axaml give any child. -->
 
-    <!-- line-height: 1. A TextBlock clips to its line height, which is the font size here, and keeps the line at the top.
-         CSS's line-height never clips and splits the leading. The text's logical parent is the badge, whether it's the
-         TextBlock the presenter makes for a string or one of the app's. -->
-    <Style Selector="c|AvonicBadge > TextBlock">
+    <!-- line-height: 1, which is of each line's own font size, so it's set here and not inherited from the badge as a size. A
+         TextBlock clips to its line height and keeps the line at the top, where CSS's line-height never clips and splits the
+         leading. The text's logical parent is the badge, whether it's the TextBlock the presenter makes for a string or one of
+         the app's. A panel directly in it stands for it. -->
+    <Style Selector="c|AvonicBadge > TextBlock, c|AvonicBadge > :is(Panel) > TextBlock">
+        <Setter Property="LineHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}" />
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin">
             <MultiBinding Converter="{x:Static b:Css.HalfLeading}">

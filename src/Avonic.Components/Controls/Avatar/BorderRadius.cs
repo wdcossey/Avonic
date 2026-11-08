@@ -8,10 +8,9 @@ namespace Avonic.Components.Controls;
 /// <summary>
 /// <c>border-radius: var(--border-radius)</c>, for <see cref="AvonicAvatar"/> and <see cref="AvonicThumbnail"/>, whose default
 /// is <c>50%</c>, which no <see cref="CornerRadius"/> can say. The variable's key can hold a <see cref="CornerRadius"/>, a number,
-/// or a string: a percentage such as <c>50%</c>, which is that fraction of the box's width across and of its height down, as in
-/// CSS, or anything <see cref="CornerRadius.Parse"/> reads, with or without <c>px</c>. Anything else is invalid, and an invalid
-/// <c>var()</c> leaves <c>border-radius</c> at its initial value, 0. The values are the key's value, then the element's
-/// <c>Bounds</c>.
+/// or a string, read as CSS reads <c>border-radius</c>: one to four lengths or percentages, where a percentage is of the box's
+/// width across and of its height down. Anything else is invalid, and an invalid <c>var()</c> leaves <c>border-radius</c> at its
+/// initial value, 0. The values are the key's value, then the element's size, or its <c>Bounds</c>.
 /// </summary>
 public static class BorderRadius
 {
@@ -31,44 +30,56 @@ public static class BorderRadius
 
     private static Radii Resolve(object? value, Size size)
     {
-        if (value is string text && text.Trim() is { Length: > 1 } trimmed && trimmed.EndsWith('%')
-            && double.TryParse(trimmed[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var percent) && percent >= 0)
-        {
-            var corner = new Size(size.Width * percent / 100, size.Height * percent / 100);
-            return Clamp(new Radii(corner, corner, corner, corner), size);
-        }
+        static Size Round(double radius) => new(radius, radius);
 
-        var radius = Parse(value);
-        return Clamp(new Radii(
-            new Size(radius.TopLeft, radius.TopLeft),
-            new Size(radius.TopRight, radius.TopRight),
-            new Size(radius.BottomRight, radius.BottomRight),
-            new Size(radius.BottomLeft, radius.BottomLeft)), size);
+        var radii = value switch
+        {
+            CornerRadius r when IsLength(r.TopLeft) && IsLength(r.TopRight) && IsLength(r.BottomRight) && IsLength(r.BottomLeft) =>
+                new Radii(Round(r.TopLeft), Round(r.TopRight), Round(r.BottomRight), Round(r.BottomLeft)),
+            double r when IsLength(r) => new Radii(Round(r), Round(r), Round(r), Round(r)),
+            int r when r >= 0 => new Radii(Round(r), Round(r), Round(r), Round(r)),
+            string text => Parse(text, size),
+            _ => default,
+        };
+        return Clamp(radii, size);
     }
 
-    private static CornerRadius Parse(object? value)
+    private static bool IsLength(double value) => double.IsFinite(value) && value >= 0;
+
+    /// <summary>
+    /// The <c>border-radius</c> shorthand: one to four lengths or percentages, for the top left, top right, bottom right and
+    /// bottom left, where two are the top left and bottom right, then the other two, and three leave the bottom left as the top
+    /// right. A length can say <c>px</c>. Anything else, including the <c>/</c> of separate radii down, is invalid.
+    /// </summary>
+    private static Radii Parse(string text, Size size)
     {
-        switch (value)
+        var parts = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length is 0 or > 4)
         {
-            case CornerRadius radius:
-                return radius;
-            case double number when number >= 0:
-                return new CornerRadius(number);
-            case int number when number >= 0:
-                return new CornerRadius(number);
-            case string text:
-                try
-                {
-                    var radius = CornerRadius.Parse(text.Replace("px", "", StringComparison.Ordinal));
-                    return radius is { TopLeft: >= 0, TopRight: >= 0, BottomRight: >= 0, BottomLeft: >= 0 } ? radius : default;
-                }
-                catch (FormatException)
-                {
-                    return default;
-                }
-            default:
-                return default;
+            return default;
         }
+
+        var corners = new Size[parts.Length];
+        for (var i = 0; i < parts.Length; i++)
+        {
+            var part = parts[i];
+            var percent = part.EndsWith('%');
+            var number = percent ? part[..^1] : part.EndsWith("px", StringComparison.Ordinal) ? part[..^2] : part;
+            if (!double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) || !IsLength(value))
+            {
+                return default;
+            }
+
+            corners[i] = percent ? new Size(size.Width * value / 100, size.Height * value / 100) : new Size(value, value);
+        }
+
+        return corners.Length switch
+        {
+            1 => new Radii(corners[0], corners[0], corners[0], corners[0]),
+            2 => new Radii(corners[0], corners[1], corners[0], corners[1]),
+            3 => new Radii(corners[0], corners[1], corners[2], corners[1]),
+            _ => new Radii(corners[0], corners[1], corners[2], corners[3]),
+        };
     }
 
     /// <summary>CSS scales every radius down by the same factor when two on one side would overlap.</summary>
@@ -93,7 +104,7 @@ public static class BorderRadius
 
     private static bool TryGetSize(IList<object?> values, out Size size)
     {
-        size = values.Count > 1 && values[1] is Rect bounds ? bounds.Size : default;
+        size = values.Count > 1 ? values[1] switch { Size s => s, Rect bounds => bounds.Size, _ => default } : default;
         return values.Count > 0;
     }
 

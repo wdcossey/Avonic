@@ -39,8 +39,8 @@ public class AvonicThumbnailTests
         // Cover: 72 × 48, with 12 cut from each side. The bar is at 45, the circle at 6, and the corners are the picture's.
         AssertNear(Green, Pixel(scene, thumbnail, 45, 24));
         AssertNear(Yellow, Pixel(scene, thumbnail, 6, 24));
-        AssertNear(Blue, Pixel(scene, thumbnail, 1, 1));
-        AssertNear(Blue, Pixel(scene, thumbnail, 46, 46));
+        AssertNear(Blue, Pixel(scene, thumbnail, 0, 0));
+        AssertNear(Blue, Pixel(scene, thumbnail, 47, 47));
     });
 
     [AvaloniaFact]

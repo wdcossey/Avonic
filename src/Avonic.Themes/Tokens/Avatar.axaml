@@ -1,8 +1,8 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ion-avatar's one variable, from avatar.md.css. It takes a CornerRadius, a number, or a string such as 50%, which is
-         of the box's size, as in CSS. See BorderRadius in Avonic.Components. -->
+    <!-- ion-avatar's one variable, from avatar.md.css. It takes a CornerRadius, a number, or a string as CSS writes
+         border-radius, such as 50%, which is of the box's size. See BorderRadius in Avonic.Components. -->
     <x:String x:Key="Avonic.Avatar.BorderRadius">50%</x:String>
 
 </ResourceDictionary>

@@ -176,6 +176,34 @@ public class AvonicAvatarTests
         AssertNear(Blue, Pixel(scene, avatar, 1, 1));
     });
 
+    [AvaloniaTheory]
+    [InlineData("8px 0", 8, 0, 8, 0)]
+    [InlineData("8 4 2", 8, 4, 2, 4)]
+    [InlineData("1px 2px 3px 4px", 1, 2, 3, 4)]
+    [InlineData("50% 0", 32, 0, 32, 0)]
+    [InlineData("8px / 4px", 0, 0, 0, 0)]
+    [InlineData("1 2 3 4 5", 0, 0, 0, 0)]
+    [InlineData("Infinity", 0, 0, 0, 0)]
+    [InlineData("-4px", 0, 0, 0, 0)]
+    public void A3_A_String_Is_Read_As_CSS_Reads_Border_Radius(string radius, double topLeft, double topRight, double bottomRight, double bottomLeft) => InstalledTheme.Run(_ =>
+    {
+        var avatar = new AvonicAvatar();
+        avatar.Resources["Avonic.Avatar.BorderRadius"] = radius;
+        using var scene = InScene(avatar);
+
+        Assert.Equal(new CornerRadius(topLeft, topRight, bottomRight, bottomLeft), avatar.CornerRadius);
+    });
+
+    [AvaloniaFact]
+    public void A3_A_Radius_That_Is_Not_Finite_Is_None() => InstalledTheme.Run(_ =>
+    {
+        var avatar = new AvonicAvatar();
+        avatar.Resources["Avonic.Avatar.BorderRadius"] = double.PositiveInfinity;
+        using var scene = InScene(avatar);
+
+        Assert.Equal(default, avatar.CornerRadius);
+    });
+
     // ── 4. A background ──────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -188,6 +216,16 @@ public class AvonicAvatarTests
         Assert.Equal(new CornerRadius(32), avatar.CornerRadius);
         AssertNear(Blue, Pixel(scene, avatar, 32, 32));
         AssertNear(Colors.White, Pixel(scene, avatar, 3, 3));
+    });
+
+    [AvaloniaFact]
+    public void A4_On_A_Wide_Avatar_The_Background_Takes_The_Smaller_Radius() => InstalledTheme.Run(_ =>
+    {
+        var avatar = new AvonicAvatar { Width = 80, Height = 40, Background = new SolidColorBrush(Blue) };
+        using var scene = InScene(avatar);
+
+        // CSS draws an ellipse of 40 by 20 (measured av-wide). One radius per corner can only be the smaller, a stadium.
+        Assert.Equal(new CornerRadius(20), avatar.CornerRadius);
     });
 
     // ── 5. Other content ─────────────────────────────────────────────────────────────────────

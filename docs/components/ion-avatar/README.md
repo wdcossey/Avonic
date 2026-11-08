@@ -31,8 +31,8 @@ It has no properties, events or methods of its own. The default slot is `Content
 |---|---|---|---|
 | [x] | `--border-radius` | `Avonic.Avatar.BorderRadius` | `50%` |
 
-The key takes a `CornerRadius`, a number, or a string: a percentage, which is of the avatar's size, or a length such as `8px`.
-Anything else is no radius. Put it in one avatar's `Resources` to change only that avatar.
+The key takes a `CornerRadius`, a number, or a string as CSS writes `border-radius`: one to four lengths or percentages, such as
+`8px 0`, where a percentage is of the avatar's size. Anything else is no radius. Put it in one avatar's `Resources` to change only that avatar.
 
 ## Behaviours
 

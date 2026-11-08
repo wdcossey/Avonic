@@ -28,8 +28,8 @@ It has no properties, events or methods of its own. The default slot is `Content
 | [x] | `--size` | `Avonic.Thumbnail.Size` | Unset, so it's `Avonic.Thumbnail.Md.Size`, 48, or `Avonic.Thumbnail.Md.SizeInItem`, 56, in an item's slot |
 | [x] | `--border-radius` | `Avonic.Thumbnail.BorderRadius` | 0 |
 
-The radius takes a `CornerRadius`, a number, or a string: a percentage, which is of the thumbnail's size, or a length such as
-`8px`. Anything else is no radius. Put a key in one thumbnail's `Resources` to change only that thumbnail. `Avonic.Thumbnail.Size`
+The radius takes a `CornerRadius`, a number, or a string as CSS writes `border-radius`: one to four lengths or percentages, where a
+percentage is of the thumbnail's size. Anything else is no radius. The size takes a number. Put a key in one thumbnail's `Resources` to change only that thumbnail. `Avonic.Thumbnail.Size`
 set anywhere wins in an item too, as a page's rule beats the item's `::slotted` one in CSS.
 
 ## Behaviours

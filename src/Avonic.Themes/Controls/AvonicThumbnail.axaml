@@ -33,7 +33,7 @@
         <Setter Property="CornerRadius">
             <MultiBinding Converter="{x:Static c:BorderRadius.ToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />
-                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
         <!-- display: block, which starts at the left at its own width -->
