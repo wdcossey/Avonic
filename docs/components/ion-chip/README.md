@@ -30,7 +30,7 @@ The design and evidence are in [PLAN.md](PLAN.md), and the comparison with real 
 ### Content
 
 `core.json` lists no slot, and the default slot holds several children, so they're `Items`, as an `ItemsControl`'s are
-([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). A string is a child too. The chip is an `ItemsControl`, so
+([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). A string is a child too, shown as text, and like a text node it isn't counted for the first and last child's margins. The chip is an `ItemsControl`, so
 it also has `ItemsSource` and `ItemTemplate`, and an icon made by the template is slotted too. It has no events, methods or parts in Ionic. Its template has `PART_Native`
 (`Border`: background, border, radius, clip) and `PART_Ripple`.
 
@@ -57,7 +57,7 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **A press** activates it after 100 ms, or at once on a quick tap, with a ripple in the text colour, clipped to the radius.
 - **With a mouse or pen**, hover shows 0.16, or 0.04 on an outline and 0.12 on a colour, and still shows while pressed, as in
   Ionic. A finger shows the press: 0.2, 0.08 or 0.16.
-- **It isn't a tab stop,** and a click leaves focus where it was. Set `Focusable="True"`, as `tabindex` would, and any focus,
+- **It isn't a tab stop,** and a click doesn't focus it: focus stays where it was, where Chromium would move it to the page. Set `Focusable="True"`, as `tabindex` would, and any focus,
   a click's too, shows the hover values. No focus rectangle.
 - **A slotted icon** is 1.43 em, so 20, at 0.54 of the text colour or the chip's shade. The first child has margins −4 at the
   start and 8 at the end, the last 8 and −4, so a leading icon sits 8 from the edge. One nested deeper gets none of it.

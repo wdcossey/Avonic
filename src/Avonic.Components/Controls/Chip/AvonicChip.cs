@@ -50,8 +50,9 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         // ion-activatable, always. Not ion-focusable: the chip takes focus only if an app makes it focusable, as tabindex does.
         Activatable.SetIsEnabled(this, true);
 
-        // :first-child and :last-child follow the children as they come and go.
-        Items.CollectionChanged += (_, _) => _childIndexChanged?.Invoke(this, ChildIndexChangedEventArgs.ChildIndexesReset);
+        // :first-child and :last-child follow the children as they come and go. A slot's own index changes after this, when the
+        // panel moves it, which the overrides below raise.
+        Items.CollectionChanged += (_, _) => RaiseChildIndexesReset();
     }
 
     public string? Color
@@ -70,13 +71,44 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<FlexSlot>(item, out recycleKey);
 
-    protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey) => new FlexSlot();
-
-    /// <summary><c>align-items: center</c>: the slot's content alignment, at style priority, so that an app's value wins.</summary>
-    protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
+    /// <summary>
+    /// <c>align-items: center</c>: the slot's content alignment, at style priority, so that an app's value wins. Once, when it's
+    /// made, so the frame lasts as long as the slot does, however often it's reused.
+    /// </summary>
+    protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
-        base.PrepareContainerForItemOverride(container, item, index);
-        container.SetValue(ContentPresenter.VerticalContentAlignmentProperty, VerticalAlignment.Center, BindingPriority.Style);
+        var slot = new FlexSlot();
+        slot.SetValue(ContentPresenter.VerticalContentAlignmentProperty, VerticalAlignment.Center, BindingPriority.Style);
+        return slot;
+    }
+
+    protected override void ContainerForItemPreparedOverride(Control container, object? item, int index)
+    {
+        base.ContainerForItemPreparedOverride(container, item, index);
+        RaiseChildIndexesReset();
+    }
+
+    protected override void ContainerIndexChangedOverride(Control container, int oldIndex, int newIndex)
+    {
+        base.ContainerIndexChangedOverride(container, oldIndex, newIndex);
+        RaiseChildIndexesReset();
+    }
+
+    protected override void ClearContainerForItemOverride(Control container)
+    {
+        base.ClearContainerForItemOverride(container);
+        RaiseChildIndexesReset();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        // A string is text, or an element once a template makes one of it.
+        if (change.Property == ItemTemplateProperty)
+        {
+            RaiseChildIndexesReset();
+        }
     }
 
     /// <summary>
@@ -101,24 +133,42 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     }
 
     /// <summary>
-    /// <c>:nth-child</c> for a slotted control, which is the chip's logical child but not its container: the item's index.
+    /// <c>:nth-child</c> for a slotted control, which is the chip's logical child but not its container: its item's index.
     /// <see cref="ItemsControl"/> gives only a container's, so a child held in a <see cref="FlexSlot"/> would match nothing. A
-    /// slot is counted by its item too, and not by <see cref="ItemsControl.IndexFromContainer"/>, which is still the old index
-    /// when <see cref="ItemsControl.Items"/> raises its change, as the panel moves its containers afterwards. Two equal values
-    /// in <see cref="ItemsControl.ItemsSource"/> both count as the first.
+    /// slot made from a template is counted by its container's index. CSS counts elements, not text, so a string with no
+    /// <see cref="ItemsControl.ItemTemplate"/>, which is a text node in Ionic, isn't counted, and isn't a child itself.
     /// </summary>
-    int IChildIndexProvider.GetChildIndex(ILogical child) => child switch
-    {
-        _ when ItemsView.IndexOf(child) is >= 0 and var index => index,
-        ContentPresenter { Content: { } item } => ItemsView.IndexOf(item),
-        _ => -1,
-    };
+    int IChildIndexProvider.GetChildIndex(ILogical child) =>
+        ElementIndex(child is ContentPresenter slot && IndexFromContainer(slot) is >= 0 and var index ? index : ItemsView.IndexOf(child));
 
     bool IChildIndexProvider.TryGetTotalCount(out int count)
     {
-        count = ItemsView.Count;
+        count = ItemsView.Count(IsElement);
         return true;
     }
+
+    private bool IsElement(object? item) => item is not string || ItemTemplate is not null;
+
+    private int ElementIndex(int itemIndex)
+    {
+        if (itemIndex < 0 || itemIndex >= ItemsView.Count || !IsElement(ItemsView[itemIndex]))
+        {
+            return -1;
+        }
+
+        var elements = 0;
+        for (var i = 0; i < itemIndex; i++)
+        {
+            if (IsElement(ItemsView[i]))
+            {
+                elements++;
+            }
+        }
+
+        return elements;
+    }
+
+    private void RaiseChildIndexesReset() => _childIndexChanged?.Invoke(this, ChildIndexChangedEventArgs.ChildIndexesReset);
 
     event EventHandler<ChildIndexChangedEventArgs>? IChildIndexProvider.ChildIndexChanged
     {

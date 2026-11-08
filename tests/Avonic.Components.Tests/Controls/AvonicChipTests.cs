@@ -627,7 +627,7 @@ public class AvonicChipTests
     // ── Behaviour 10: focus ──────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B10_It_Is_Not_A_Tab_Stop_And_A_Click_Leaves_Focus_Where_It_Was() => InstalledTheme.Run(_ =>
+    public void B10_It_Is_Not_A_Tab_Stop_And_A_Click_Does_Not_Focus_It() => InstalledTheme.Run(_ =>
     {
         var before = new Button { Content = "before" };
         var chip = Chip(Box());
@@ -642,6 +642,9 @@ public class AvonicChipTests
         scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
         scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
         Dispatcher.UIThread.RunJobs();
+        Assert.False(chip.IsFocused);
+
+        // Chromium moves focus to the body, as for a click on anything that can't take it, and Avalonia leaves it: deliberate.
         Assert.True(after.IsFocused);
     });
 
@@ -899,6 +902,47 @@ public class AvonicChipTests
         Assert.Equal(default, pin.Margin);
         Assert.Equal(new Thickness(-4, -4, 8, -4), Icon(0).Margin);
         Assert.Equal(new Thickness(8, -4, -4, -4), Icon(2).Margin);
+    });
+
+    [AvaloniaFact]
+    public void B12_Equal_Values_From_A_Template_Are_Still_First_And_Last() => InstalledTheme.Run(_ =>
+    {
+        var chip = new AvonicChip
+        {
+            ItemsSource = new[] { "star", "star" },
+            ItemTemplate = new FuncDataTemplate<string>((name, _) => new AvonicIcon { IconName = name }),
+        };
+        using var scene = Themed(chip);
+
+        AvonicIcon Icon(int index) => Assert.IsType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(index)).Child);
+
+        Assert.Equal(new Thickness(-4, -4, 8, -4), Icon(0).Margin);
+        Assert.Equal(new Thickness(8, -4, -4, -4), Icon(1).Margin);
+    });
+
+    [AvaloniaFact]
+    public void B12_Text_Is_Not_A_Child_So_An_Icon_Beside_It_Is_First_And_Last() => InstalledTheme.Run(_ =>
+    {
+        // An icon then text: the icon is the only element, so the last child's margins win.
+        var icon = new AvonicIcon { IconName = "pin" };
+        var chip = Chip(icon, "Text");
+        var before = new AvonicIcon { IconName = "pin" };
+        var after = new AvonicIcon { IconName = "close-circle" };
+        var both = Chip(before, "Text", after);
+        var templated = new AvonicChip
+        {
+            ItemsSource = new object[] { "pin", "text" },
+            ItemTemplate = new FuncDataTemplate<string>((name, _) => name == "pin" ? new AvonicIcon { IconName = name } : new TextBlock { Text = name }),
+        };
+        using var scene = Themed(chip, both, templated);
+
+        Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), before.Margin);
+        Assert.Equal(new Thickness(8, -4, -4, -4), after.Margin);
+
+        // Made by a template, a string is an element.
+        var first = Assert.IsType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(templated.ContainerFromIndex(0)).Child);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), first.Margin);
     });
 
     [AvaloniaFact]

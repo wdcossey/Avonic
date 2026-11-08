@@ -57,7 +57,7 @@ Each becomes a test. The ids are the chips in the measurement scene.
 | 7 | Activatable: `:activated` on press, after 100 ms or at once on a quick tap, and a bounded ripple from the press point in the current colour, as big as the padding box and clipped by the radius. Off with `AvonicConfig.RippleEffect` | `ion-activatable`, md ripple; measured ripple `type: bounded`, `rgba(0, 0, 0, 0.87)` at 0.16, 68.36 by 32; 68.36 by 30 inside an outline's border; `c` shade; `vc` `rgb(0, 128, 0)`; `cu` `rgb(0, 0, 0)`; `quickTap` activated |
 | 8 | Activated background, with a finger: plain 0.2, outline 0.08, colour 0.16 with or without outline, and an app's `--background` stays | `.ion-activated`; measured by touch `p`, `o`, `c`, `co`, `vb` |
 | 9 | Hover, mouse and pen only: plain 0.16, outline 0.04, colour 0.12 with or without outline. It beats a press: a mouse press shows the hover value, not the activated one | `@media (any-hover: hover)`, after `.ion-activated` in file order at equal specificity; measured `p` press 0.16, `o` 0.04, `c` 0.12; mobile `any-hover: none` |
-| 10 | Not a tab stop and a click leaves focus where it was. With `Focusable="True"` (`tabindex`) it is one, and any focus, keyboard or mouse, shows plain 0.16, outline 0.04, colour 0.12, with no focus adorner. Hover on a focused chip is the same 0.16 | `:host(:focus)`, not `ion-focusable`, which the chip doesn't have; measured `clickPlainFocus` active `BODY`, `tab`, `tabc`, `tabo`, `tabFocusAfterClick`, `outline: none` |
+| 10 | Not a tab stop, and a click doesn't focus it. With `Focusable="True"` (`tabindex`) it is one, and any focus, keyboard or mouse, shows plain 0.16, outline 0.04, colour 0.12, with no focus adorner. Hover on a focused chip is the same 0.16 | `:host(:focus)`, not `ion-focusable`, which the chip doesn't have; measured `clickPlainFocus` active `BODY`, `tab`, `tabc`, `tabo`, `tabFocusAfterClick`, `outline: none` |
 | 11 | `Avonic.Chip.Background` beats hover, focus and press on a plain chip; an outline chip ignores it; a coloured chip ignores it and `Avonic.Chip.Color`. `Avonic.Chip.Color` colours the text and the ripple | measured `vb` red through every state, `vbs` from a stylesheet, `vbo` transparent with 0.04 states, `vbc`, `vc` ripple green |
 | 12 | A slotted icon: 1.4285714286 em of the chip, so 20; colour `rgba(0, 0, 0, 0.54)` unless the chip has a colour, when it's the shade. First child: margin −4 start, 8 end, −4 top and bottom, so it's at x + 8. Last child: 8 start, −4 end. An only child takes the last child's. A nested icon gets none of it. RTL mirrors | `::slotted(ion-icon)`; measured `i`, `il`, `io` 48 wide with the icon at + 20, `ic`, `ideep` 14 and 0.87, `bigfont` still 20, `rtl` |
 | 13 | A long label: the chip grows to its container and the label wraps; an icon beside it shrinks, as `contain: strict` leaves it no minimum | `inline-flex`, `flex-shrink: 1`; measured `long` 350 by 44, label 2 lines; `longi` icon 14.03 wide |
@@ -78,7 +78,11 @@ A control in `Items` stays the chip's logical child, not the slot's, so `::slott
 counts only containers, so a control held in a slot is at index −1 and matches nothing. The first build had the rules on the
 presenter, `ContentPresenter:nth-child(1) > c|AvonicIcon`, and none of them applied; the compare step showed black 14 px
 icons with no margins. So the chip implements `IChildIndexProvider` again: a child's index is its item's, and a change to
-`Items` raises a reset, so that the margins follow children as they come and go.
+`Items` raises a reset, so that the margins follow children as they come and go. A slot made by an `ItemTemplate` is counted
+by its container's index, and the chip raises the reset again when a container is prepared, moved or cleared, as the panel
+moves its containers after `Items` raises its change. CSS counts elements, not text nodes, so a string with no
+`ItemTemplate` isn't counted: `<ion-icon>` then text gives the icon the last child's margins, as it's the only element, and so does text then `<ion-icon>`: measured `-4px -4px -4px 8px` for both. A
+string made into a control by a template is one.
 
 `FlexRow` already does the rest: a label shrinks to its longest word and wraps, and an `AvonicIcon` has no minimum, as
 `contain: strict` gives it none, measured `longi`. The theme sets `TextBlock.TextWrapping="Wrap"`, as `white-space: normal`
@@ -132,6 +136,12 @@ fills the panel inside the border, as `position: absolute` fills the padding box
 1 px wider per icon than Ionic's (the only icon chip measured 49, against 48). Chromium's layout units keep 20. The theme
 writes `1.42857142857`, a hair under, which gives 20 at 14 and 40 at 28.
 
+### A label
+
+`chip.md.css` has no `::slotted(ion-label)` rule, and `label.md.css`'s rules are all `:host-context(.item)` and the like, which a
+chip isn't. So a label in a chip has no rule of its own: it inherits the chip's colour, size and font, as `AvonicLabel` does
+outside an item, and `Styles/Chip.axaml` has only the icon's rules. Measured `p`: the label is 14 px in `rgba(0, 0, 0, 0.87)`, `display: block`, `flex: 0 1 auto`.
+
 ### Disabled
 
 `opacity: 0.4` on `:disabled`. A disabled control takes no input in Avalonia and lets a tap through to what's behind, as
@@ -154,11 +164,11 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 
 | Difference | Why |
 |---|---|
+| A click on a chip leaves focus where it was, where Chromium moves it to the body (measured `clickPlainFocus`: active `BODY`) | A click on what can't take focus leaves it alone in Avalonia, for every control. Clearing it would be the chip reaching outside itself |
 | A disabled ancestor fades the chip to 0.4 too, where a disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | `VerticalAlignment` is `Center`, where a flex parent stretches an Ionic chip (measured `tall`, 72) | Set `VerticalAlignment="Stretch"`; the children stay centred |
-| A string child counts as a child for `:first-child` and `:last-child`, where a text node doesn't in CSS | Every item is in a presenter. `<ion-icon>` then text then `<ion-icon>` (`ib2`) still gives both icons their margins, as the icons are first and last either way |
 | A chip in an item's start or end slot has margin `0,0,16,0` or `16,0,0,0`, where Ionic keeps the chip's 4 on the other three sides (measured `initemend`: `4 4 4 16`) | `Styles/Item.axaml`'s slot rule sets all four sides for any control, and merges after this control's file. 4 px at the outer edge; see the proposal in the PR |
-| The chip is an `ItemsControl`, so it also has `ItemsSource` and `ItemTemplate` | As `AvonicList`. Nothing Ionic is shadowed. A control made from the template is the slot's logical child, so each slotted rule has a second alternative, `c\|AvonicChip > ContentPresenter > c\|AvonicIcon`, as `AvonicList` has for its templated items, and the chip counts a slot by its item |
+| The chip is an `ItemsControl`, so it also has `ItemsSource` and `ItemTemplate` | As `AvonicList`. Nothing Ionic is shadowed. A control made from the template is the slot's logical child, so each slotted rule has a second alternative, `c\|AvonicChip > ContentPresenter > c\|AvonicIcon`, as `AvonicList` has for its templated items, and the chip counts a slot by its container's index |
 
 ## Known gaps
 

@@ -61,8 +61,11 @@ The first chip pressed with a mouse at its centre, 160 ms in, as `render.js --ta
 - **Automation called the chip a list,** as an `ItemsControl`'s own peer does. Chromium gives it no role. It has its own peer now,
   a `Group`. The draft's docs said it reported nothing, which was wrong.
 - **An icon made by an `ItemTemplate` wasn't slotted,** as it's the slot's logical child, not the chip's. Each rule has a second
-  alternative for it now, and the chip counts a slot by its item: the container's own index is still the old one when `Items`
-  raises its change, which a test that inserts at the front shows.
+  alternative for it now, and the chip counts a slot by its container's index, raising the reset again when the panel prepares,
+  moves or clears a container, as the index is still the old one when `Items` raises its change: a test that inserts at the front
+  shows it. Counting by item, as the first fix did, made two equal values from an `ItemsSource` both the first child.
+- **A string counted as a child,** so an icon then text gave the icon the first child's margins, where CSS counts only elements and
+  the icon is also the last child. The chip doesn't count a string now, unless an `ItemTemplate` makes a control of it.
 
 ## Found by deliberate breakage
 
@@ -87,7 +90,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | 7 | Activatable, with a ripple | `ion-activated` after 100 ms, or at once on a quick tap; a bounded ripple in the current colour, the padding box, clipped by the radius | match |
 | 8 | Activated, with a finger | Plain 0.2, outline 0.08, colour 0.16 with or without outline | match |
 | 9 | Hover, with a mouse | Plain 0.16, outline 0.04, colour 0.12; a mouse press shows hover's | match |
-| 10 | Focus | Not a tab stop, and a click leaves focus where it was. With `tabindex`: 0.16, 0.04, 0.12 for any focus, no outline | match, with `Focusable="True"` for `tabindex` |
+| 10 | Focus | Not a tab stop, and a click doesn't focus it, but moves focus to the body. With `tabindex`: 0.16, 0.04, 0.12 for any focus, no outline | match, with `Focusable="True"` for `tabindex`. A click leaves focus where it was: deliberate |
 | 11 | The variables | `--background` beats every state on a plain chip; outline and colour ignore it, and colour ignores `--color` | match |
 | 12 | A slotted icon | 20, `rgba(0, 0, 0, 0.54)` or the shade; first `−4 8`, last `8 −4`, only child as last, 48 wide; nested gets none; RTL mirrors | match |
 | 13 | Long content | 366 by 44, label wrapped; an icon beside it shrinks to 11.72 | match in shape: the full width, and the icon shrinks |
@@ -98,9 +101,9 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 
 | Difference | Measured | Why |
 |---|---|---|
+| A click leaves focus where it was | `clickPlainFocus`: Chromium moves it to the body | A click on what can't take focus leaves it alone in Avalonia, for every control |
 | A disabled ancestor fades the chip to 0.4 | A disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | A flex parent doesn't stretch it | `tall`: 64 high in a 72 flex row, label centred | `VerticalAlignment` is `Center`, for `vertical-align: middle`. Set `Stretch` for a stretched chip, and the children stay centred |
-| A string counts for `:first-child` | A text node doesn't in CSS | Every item is in a slot. `<ion-icon>`, text, `<ion-icon>` still gives both icons their margins |
 | In an item's start or end slot, its margin is `0,0,16,0` or `16,0,0,0` | `initemend`: `4px 4px 4px 16px` | `Styles/Item.axaml` sets all four sides for any control in the slot, and merges after this file. See the PR's proposal |
 | The icon's factor is `1.42857142857` | Chromium: 20 | 14 × `1.4285714286` rounds up to 21 in Avalonia's layout |
 
