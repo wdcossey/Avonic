@@ -87,6 +87,12 @@
                     <c:AvonicButton Content="Action" Size="Default" />
                 </c:AvonicItem.EndContent>
             </c:AvonicItem>
+            <c:AvonicListHeader>
+                <Grid ColumnDefinitions="*,Auto">
+                    <c:AvonicLabel Content="In a list header, it's clear" />
+                    <c:AvonicButton Grid.Column="1" Content="More" />
+                </Grid>
+            </c:AvonicListHeader>
             <c:AvonicItemDivider Content="In a divider too">
                 <c:AvonicItemDivider.StartContent>
                     <c:AvonicButton Content="Start" />

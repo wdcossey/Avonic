@@ -3329,6 +3329,95 @@ public class AvonicButtonTests
         Assert.Null(Slot(button, "PART_Content").Child);
     });
 
+    // ── Behaviour 37: in a list header ──────────────────────────────────────────────────────
+
+    /// <summary>Transparent: a clear button has no background, and that's null here.</summary>
+    private static void AssertClear(AvonicButton button)
+    {
+        var background = Native(button).Background;
+        Assert.True(background is null || Solid(background).A == 0, $"background {background}");
+        Assert.Equal(0, Native(button).BoxShadow.Count);
+        Assert.Equal(default, Native(button).BorderThickness);
+    }
+
+    private static Scene InListHeaders(params Control[] contents)
+    {
+        var panel = new StackPanel();
+        panel.Children.AddRange(contents.Select(content => new AvonicListHeader { Content = content }));
+        return new Scene(NoTransitions(panel));
+    }
+
+    // closest('ion-list-header'), at any depth: fill resolves to clear. Measured none and deep: transparent, primary text, no
+    // shadow, 36 high with margin 4 2.
+    [AvaloniaFact]
+    public void B37_In_A_List_Header_No_Fill_Is_Clear_At_Any_Depth() => InstalledTheme.Run(_ =>
+    {
+        var direct = new AvonicButton { Content = "None" };
+        var deeper = new AvonicButton { Content = "Deep" };
+        using var scene = InListHeaders(direct, new Grid { Children = { deeper } });
+
+        foreach (var button in new[] { direct, deeper })
+        {
+            AssertClear(button);
+            Assert.Equal(Primary, TextColour(button));
+            Assert.Equal(36, button.MinHeight);
+            Assert.Equal(new Thickness(2, 4), button.Margin);
+        }
+    });
+
+    // Measured solid, outline and outside: a fill it's given wins, and a button outside a header stays solid.
+    [AvaloniaFact]
+    public void B37_A_Fill_It_Is_Given_Wins_And_Outside_It_Stays_Solid() => InstalledTheme.Run(_ =>
+    {
+        var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
+        var outline = new AvonicButton { Content = "Outline", Fill = ButtonFill.Outline };
+        var outside = new AvonicButton { Content = "Outside" };
+        using var scene = new Scene(NoTransitions(new StackPanel
+        {
+            Children = { new AvonicListHeader { Content = solid }, new AvonicListHeader { Content = outline }, outside },
+        }));
+
+        Assert.Equal(Primary, Solid(Native(solid).Background));
+        Assert.Equal(Colors.White, TextColour(solid));
+        Assert.Equal(3, Native(solid).BoxShadow.Count);
+        Assert.Equal(new Thickness(2), Native(outline).BorderThickness);
+        Assert.Equal(Primary, Solid(Native(outline).BorderBrush));
+        Assert.Equal(Primary, Solid(Native(outside).Background));
+    });
+
+    // Measured incolor: in a danger header a clear button's text stays primary, as the header's colour doesn't reach it.
+    [AvaloniaFact]
+    public void B37_In_A_Coloured_Header_It_Stays_Primary() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "InColor" };
+        using var scene = new Scene(NoTransitions(new AvonicListHeader { Color = "danger", Content = button }));
+
+        AssertClear(button);
+        Assert.Equal(Primary, TextColour(button));
+    });
+
+    // Ionic reads closest() once, on first load. Here it's read on every attach, as inItem is, so a moved or recycled button
+    // follows where it is.
+    [AvaloniaFact]
+    public void B37_Moving_Into_And_Out_Of_A_Header_Follows() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "A" };
+        var header = new AvonicListHeader();
+        var outside = new StackPanel { Children = { button } };
+        using var scene = new Scene(NoTransitions(new StackPanel { Children = { header, outside } }));
+        Assert.Equal(Primary, Solid(Native(button).Background));
+
+        outside.Children.Remove(button);
+        header.Content = button;
+        Dispatcher.UIThread.RunJobs();
+        AssertClear(button);
+
+        header.Content = null;
+        outside.Children.Add(button);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(Primary, Solid(Native(button).Background));
+    });
+
     // ── The theme's host ─────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

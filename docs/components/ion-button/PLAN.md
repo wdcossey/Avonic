@@ -15,7 +15,7 @@ variable with a different default per class maps to one key. Measurements are fr
 | [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner` |
 | [x] | `disabled` | `IsEnabled` | Mapping rule |
 | [x] | `expand` | `Expand` (`ButtonExpand?`) | `Block`, `Full`; null is the default |
-| [x] | `fill` | `Fill` (`ButtonFill?`) | `Clear`, `Default`, `Outline`, `Solid`; null resolves to solid. To clear in `ion-buttons` and `ion-list-header`: goes with #12 |
+| [x] | `fill` | `Fill` (`ButtonFill?`) | `Clear`, `Default`, `Outline`, `Solid`; null resolves to solid. To clear in `ion-buttons` (#12) and `ion-list-header` (#98) |
 | [x] | `shape` | `Shape` (`ButtonShape?`) | `Round`; null is the default |
 | [x] | `size` | `Size` (`ButtonSize?`) | `Default`, `Large`, `Small`; null is small inside an item |
 | [x] | `strong` | `Strong` (`bool`) | |
@@ -118,6 +118,7 @@ Each becomes a test.
 | 34 | RTL mirrors the slots and margins | measured `rtl` |
 | 35 | Transitions: box shadow eases over 280 ms, background and colour over 15 ms, and the token overrides them | measured `tr` |
 | 36 | Extensions: `Command`, `CommandParameter`, `TextTransform` | See below |
+| 37 | In a list header, at any depth, a null `Fill` is clear. A set `Fill` wins, and the header's `Color` doesn't reach it | `inListHeader`, `closest`; measured `none`, `deep`, `solid`, `outline`, `incolor`, `outside` (#98) |
 
 ## Design
 
@@ -287,7 +288,7 @@ Avonic-only, and never named like an Ionic member.
 | What | Goes with |
 |---|---|
 | `inToolbar`: `fill` null → clear; `rippleType` unbounded for clear and icon-only; `in-toolbar`, `in-toolbar-color`, `in-buttons` and their colour rules | #12 (`ion-buttons`), and the pseudoclasses in #89. See the [README](README.md#in-a-toolbar) |
-| `inListHeader`: `fill` null → clear | `ion-list-header` |
+| `inListHeader`: `fill` null → clear | `ion-list-header`. Done in #98, behaviour 37 |
 | `closest('ion-item-divider')` for `inItem` | `ion-item-divider`. Done in the follow-up to #88 |
 | `:host(.button-outline.ion-activated.ion-color) .button-native` | Nothing: it sets `background: transparent` where it already is |
 | The default text size outside a host | Open project question. A button sets its own, so it isn't affected |

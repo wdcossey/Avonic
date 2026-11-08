@@ -96,3 +96,4 @@ results were measured in Chromium with `ion-app`.
 | 34 | RTL | At the right, margin 2, start icon on the right | match |
 | 35 | Transitions | `box-shadow, background-color, color`: 0.28 s, 0.015 s, 0.015 s | match |
 | 36 | Extensions | None in Ionic | n/a |
+| 37 | In a list header | `none`, `deep`: clear, primary text, 36 high, margin 4 2; `solid`, `outline` keep theirs; `incolor`: primary in a danger header; `outside`: solid | match. Avonic follows a move, as for an item |

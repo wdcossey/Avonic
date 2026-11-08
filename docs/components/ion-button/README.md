@@ -44,7 +44,7 @@ Avalonia has no inline flow, so a row of buttons is a horizontal `StackPanel` or
 | [x] | `color` | `Color` | See the [colour system](../../infra/color-system/README.md) |
 | [x] | `disabled` | `IsEnabled` | |
 | [x] | `expand` | `Expand` | `Block`, `Full`, or null |
-| [x] | `fill` | `Fill` | `Clear`, `Default`, `Outline`, `Solid`, or null, which is solid. `Default` is a class with no rules: no background, inherited text, and it ignores `Color`, as measured |
+| [x] | `fill` | `Fill` | `Clear`, `Default`, `Outline`, `Solid`, or null, which is solid, or clear in an `AvonicButtons` or an `AvonicListHeader`. `Default` is a class with no rules: no background, inherited text, and it ignores `Color`, as measured |
 | [x] | `shape` | `Shape` | `Round`, or null |
 | [x] | `size` | `Size` | `Default`, `Large`, `Small`, or null, which is small inside an item or a divider |
 | [x] | `strong` | `Strong` | |
@@ -175,4 +175,8 @@ shows less there. Until the button renders, it keeps the uncoloured toolbar's ru
 button directly in the toolbar shows it, white where it would stay transparent. They follow the visual tree, so a button in a flyout opened from a toolbar isn't
 in it, as a popover's content isn't inside the toolbar in Ionic's DOM.
 
-Not here yet: `ion-list-header` turns a null `Fill` into clear.
+## In a list header
+
+A null `Fill` is clear inside an `AvonicListHeader`, at any depth, as Ionic's `closest('ion-list-header')` makes it. A `Fill` you
+set wins. The header's `Color` doesn't reach it: in a danger header its text stays primary, measured. Ionic reads it once, on
+first load; here it's read each time the button is attached, as for an item, so a moved button follows.
