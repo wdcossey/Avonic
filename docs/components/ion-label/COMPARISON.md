@@ -14,9 +14,8 @@ fixed, stacked, stacked and focused, floating (pushed out of its row, in both), 
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines
-  are taller, so rows that grow with their text are too: the primary row is 65 against 61, and the headings row is
-  121 against 113, of which 4 is the difference below.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), so every row is the height Ionic's is, the
+  primary row 62, except the headings row, 118 against 113, which is the difference below.
 - **Margins between headings** add up to 4 where CSS collapses them to 2. See the plan.
 - **RTL,** the last row. The reference sets `dir` on a `div`, and Ionic's `label-rtl` only reads `document.dir`, so its
   text shrinks to the left, ending at x = 284. With `dir` on the document, Ionic measures 105.5 to 374, which is what

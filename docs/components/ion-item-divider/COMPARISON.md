@@ -33,8 +33,8 @@ Sticky, scrolled 300: the second group's divider pushes it out, 4 above the top.
 |---|---|
 | ![](compare/ionic-sticky-300.png) | ![](compare/avonic-sticky-300.png) |
 
-**Match,** apart from **text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's
-lines are taller, so rows that grow with their text are too. A row with a label is 13 + its line + 10 + 1.
+**Match.** Text is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)). A row with a label is 13 + its line + 10 + 1,
+and a line of 14 px text is 16.4, which Chromium rounds to 16, so such a row is 40.5 here against 40.
 
 ## Behaviours
 

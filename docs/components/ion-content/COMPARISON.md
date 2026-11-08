@@ -27,7 +27,7 @@ and RTL with a start padding and an unplaced fixed square.
 **Match,** apart from these visible differences:
 
 - **Text size.** A web page's default is 16 and Avalonia's is 14, so the bare text is smaller. An open project question, left as it is. The rows are in items,
-  which set 16 themselves, and match. Fonts also differ: Roboto isn't installed on this machine.
+  which set 16 themselves, and match.
 - **Half a pixel per row.** Avonic's rows are at 200.5, 281, 361.5 and so on, where the scene asks for 200, 280, 360. It's Avalonia's `Grid` at a scale of 2:
   plain `Border`s get 200.5 and 80.5 too, so it's the capture's layout and not this control.
 

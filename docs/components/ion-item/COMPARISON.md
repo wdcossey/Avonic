@@ -12,9 +12,7 @@
 Rows from the top: default lines, full, none, a button with detail, slotted icons, danger, primary, disabled and RTL.
 **Match.** Row heights are identical, at 48, 49, 48, 48, 49, 48, 48, 48 and 49.
 
-The text is the one visible difference. Roboto isn't installed on this machine, so each renderer takes its own
-fallback: Arial in Chromium and Segoe UI in Avalonia. That also moves the text by about 1 px, as they have different
-metrics. Icons and borders are in the same places.
+Text, icons and borders are in the same places. Both sides draw text from the same Roboto files since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)).
 
 ## The flex layout
 
@@ -23,15 +21,17 @@ From #71. The rows from the top are in [PLAN.md](PLAN.md#the-flex-layout-71). Io
 
 ![](compare/side-layout.png)
 
-**Match,** with every box in the same place. The rows are taller here only because Segoe UI's lines are, at 21.3 against Arial's 18:
+**Match,** with every box in the same place. Both sides draw text from the same Roboto files since #100, so rows that grow with their
+text are within 1.5 of Ionic's. Chromium rounds a line's ascent and descent each to a whole pixel, so a line of 16 px text is 19 there
+and 18.75 here, and one of 14 px is 16 there and 16.4 here:
 
 | Row | Ionic | Avonic |
 |---|---|---|
-| A long start label, three lines | 74 | 84 |
-| Squeezed default label, seven lines | 147 | 170 |
-| Plain text squeezed, three lines | 55 | 65 |
-| Divider, one line | 40 | 43 |
-| Long divider start or end, two lines | 56 | 61.5 |
+| A long start label, three lines | 77 | 76.5 |
+| Squeezed default label, seven lines | 154 | 152.5 |
+| Plain text squeezed, three lines | 58 | 57.5 |
+| Divider, one line | 40 | 40.5 |
+| Long divider start or end, two lines | 56 | 57 |
 | Everything else | 48 | 48 |
 
 One row differs for another reason. A stacked label in start beside a plain one is 55 in this page, and was 48 in another: two labels report
@@ -44,7 +44,7 @@ Each row in the plan has a test in `AvonicItemLayoutTests` named after it, so F1
 | # | Difference |
 |---|---|
 | F14, F18 | A long note or `AvonicText` is as wide as its longest line, rather than 342. The text is in the same place |
-| F7, F8, F15 | Same layout, with rows that are taller by the font's line height, as above |
+| F7, F8, F15 | Same layout, with rows within 1.5 px, as above |
 
 ## Shared press handling, `Command` and the rest
 

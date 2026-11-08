@@ -16,7 +16,7 @@
       "rect": {
         "x": 12,
         "y": 12,
-        "w": 68.36,
+        "w": 68.8,
         "h": 32
       },
       "cssVars": {
@@ -27,7 +27,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "68.3594px",
+        "width": "68.7969px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -68,9 +68,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 88.36,
+        "x": 88.8,
         "y": 12,
-        "w": 70.36,
+        "w": 69.91,
         "h": 32
       },
       "cssVars": {
@@ -81,7 +81,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "70.3594px",
+        "width": "69.9062px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -123,9 +123,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 166.72,
+        "x": 166.7,
         "y": 12,
-        "w": 78.48,
+        "w": 78.03,
         "h": 32
       },
       "cssVars": {
@@ -136,7 +136,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "78.4844px",
+        "width": "78.0312px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -180,7 +180,7 @@
       "rect": {
         "x": 12,
         "y": 52,
-        "w": 72.23,
+        "w": 72.38,
         "h": 32
       },
       "cssVars": {
@@ -191,7 +191,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "72.2344px",
+        "width": "72.375px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -235,9 +235,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 92.23,
+        "x": 92.38,
         "y": 52,
-        "w": 70.36,
+        "w": 69.91,
         "h": 32
       },
       "cssVars": {
@@ -248,7 +248,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "70.3594px",
+        "width": "69.9062px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -290,9 +290,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 170.59,
+        "x": 170.28,
         "y": 52,
-        "w": 93.92,
+        "w": 92.58,
         "h": 32
       },
       "cssVars": {
@@ -303,7 +303,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "93.9219px",
+        "width": "92.5781px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -344,7 +344,7 @@
       "rect": {
         "x": 12,
         "y": 92,
-        "w": 105.59,
+        "w": 107.42,
         "h": 32
       },
       "cssVars": {
@@ -355,7 +355,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "105.594px",
+        "width": "107.422px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -394,9 +394,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 125.59,
+        "x": 127.42,
         "y": 92,
-        "w": 101.72,
+        "w": 101.38,
         "h": 32
       },
       "cssVars": {
@@ -407,7 +407,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "101.719px",
+        "width": "101.375px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",
@@ -446,7 +446,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 235.31,
+        "x": 236.8,
         "y": 92,
         "w": 48,
         "h": 32
@@ -550,9 +550,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 279.8,
+        "x": 282.02,
         "y": 184,
-        "w": 98.2,
+        "w": 95.98,
         "h": 32
       },
       "cssVars": {
@@ -563,7 +563,7 @@
         "display": "flex",
         "position": "relative",
         "box-sizing": "border-box",
-        "width": "98.2031px",
+        "width": "95.9844px",
         "height": "32px",
         "min-height": "32px",
         "min-width": "auto",

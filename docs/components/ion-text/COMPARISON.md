@@ -19,9 +19,9 @@
 Rows from the top: a sentence that wraps, nested spans, a box around two blocks, a box around an icon, in an item, plain in a
 primary item, light in a primary item, in the end slot, and spans in a label's `h2` and `p`.
 
-**Match,** apart from text. Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI,
-so the lines are taller and the words fall a little differently, though the three lines of the sentence break in the same
-places here.
+**Match,** apart from the box around an icon, which is 20 high in Chromium and 16 here: an inline icon sits on the line's
+baseline there, with the descent of the block's 16 px text below it. Text is drawn from the same Roboto files on both sides since
+#100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), and the sentence breaks in the same places.
 
 ## Found here, not by the tests
 

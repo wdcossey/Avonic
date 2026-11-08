@@ -33,10 +33,9 @@ And pressed, 160 ms in, where the ripple has the same shape and reach:
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines
-  are taller, so a subtitle is 19 high against 16, and a card with a header is 117 against 114. Arial has no weight 500, so
-  Chromium draws the title and subtitle in regular, and Avalonia's look bolder. Both ask for 500. Line heights Ionic sets
-  are the same: the title is 24, and content lines are 21.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)). A card with a header is 114.5 high against 114:
+  the subtitle's line of 14 px text is 16.4, which Chromium rounds to 16. Line heights Ionic sets are the same: the title is 24,
+  and content lines are 21.
 - **The shadow at 2× and above.** Avalonia doesn't scale a shadow's offset, though it scales its spread and blur. Measured
   with one of each on its own: an offset of 10 reaches 10 device pixels at 1×, 2× and 3×, a spread of 10 reaches 10, 20 and 30,
   and a blur of 20 reaches 12, 24 and 35. These are the rows straight below and above a card, on white, against Chromium:

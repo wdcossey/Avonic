@@ -72,10 +72,9 @@ title; text in the default slot; RTL; and a footer.
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Arial has no weight 500, so
-  Chromium draws the titles and buttons in regular, and Avalonia's look bolder. Both ask for 500. Segoe UI's lines are taller: a
-  title is 27 high against 23, and a small one 20 against 17. Widths differ with the font: Edit is 49 wide against 51.25, so the
-  header's title part is 233 against 230.75.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)),
+  at weight 500 for titles and buttons. A title is 24 high in both and a small one 18, and Edit is 49 wide against 48.72, so the
+  header's title part is 233 against 233.28.
 - **The ellipsis.** Chromium draws `…` after a space it keeps, and Avalonia trims to the last character that fits. Both end inside the
   title's 20 of padding.
 
@@ -85,23 +84,23 @@ title; text in the default slot; RTL; and a footer.
 |---|---|
 | ![](ref/page-dark.png) | ![](compare/avonic-page-dark.png) |
 
-`s6`: the same page with Ionic's dark palette merged, `Tokens/Palettes/Dark.axaml` on the Avonic side. **Match,** apart from the font
-and the ellipsis, as above. Measured: every uncoloured toolbar's `--color` `#ffffff` and `--border-color` `#363636` on `#1f1f1f`, the
+`s6`: the same page with Ionic's dark palette merged, `Tokens/Palettes/Dark.axaml` on the Avonic side. **Match,** apart from the
+ellipsis, as above. Measured: every uncoloured toolbar's `--color` `#ffffff` and `--border-color` `#363636` on `#1f1f1f`, the
 title white, a solid button in `ion-buttons` `rgb(31, 31, 31)` on white, outline and clear white. A border shows only with a width,
 which md's is not; with `--border-width: 0 0 1px` it's `rgb(54, 54, 54)`. The header's shadow is the same as in light.
 
-Boxes in `s1`, Ionic against Avonic (Avonic's are whole pixels, as layout rounding is on at 1×):
+Boxes in `s1`, Ionic against Avonic (Avonic's are whole pixels, as layout rounding is on at 1×), both in Roboto since #100:
 
 | | Ionic | Avonic |
 |---|---|---|
 | Header | 0,0 390×56 | 0,0 390×56 |
 | Its start buttons, the menu | 4,4 48×48 | 4,4 48×48 |
-| Its content part, the title | 52 to 282.75 | 52 to 285 |
-| Its end buttons | 282.75,4 103.25×48 | 285,4 101×48 |
-| Edit | 284.75,12 51.25×32 | 287,12 49×32 |
-| Primary toolbar: content, secondary, primary | 0–248.58, 248.58–296.58, 296.58–386 | 0–252, 252–300, 300–386 |
-| Danger toolbar's buttons | 4,124 227.67×32 | 4,124 217×32 |
-| RTL: start, end | 317.19 and 4 | 320 and 4 |
+| Its content part, the title | 52 to 285.28 | 52 to 285 |
+| Its end buttons | 285.28,4 100.72×48 | 285,4 101×48 |
+| Edit | 287.28,12 48.72×32 | 287,12 49×32 |
+| Primary toolbar: content, secondary, primary | 0–251.72, 251.72–299.72, 299.72–386 | 0–251, 251–299, 299–386 |
+| Danger toolbar's buttons | 4,124 216.5×32 | 4,124 217×32 |
+| RTL: start, end | 319.27 and 4 | 318 and 4 |
 | Footer | 0,504 390×56 | 0,504 390×56 |
 
 ## Behaviours
@@ -112,8 +111,8 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicToo
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
 | T1 | The box | `s1` 390×56, `rgb(66, 66, 66)` on white, padding 0 | match |
-| T2 | md's slot order | `s1`: start 4–52, content 52–282.75, end 282.75–386; secondary 248.58–296.58 after the content, primary 296.58–386 | match, with widths depending on the font |
-| T3 | RTL | start at 317.19, end at 4 | match |
+| T2 | md's slot order | `s1`: start 4–52, content 52–285.28, end 285.28–386; secondary 251.72–299.72 after the content, primary 299.72–386 | match, to within a pixel |
+| T3 | RTL | start at 319.27, end at 4 | match, at 318 |
 | T4 | Tab order | `s3`: `sta, sec, def, pri, end`, though secondary is drawn after the content | match |
 | T5 | Long title | ends with an ellipsis inside its padding | match. See the ellipsis above |
 | T6 | `color` | primary `rgb(0, 84, 233)` with white text; transparent and inherited for an unknown one | match |
@@ -131,12 +130,12 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicToo
 | F1 | A footer stacks, with the shadow | `s1`, `s2` `#f`: the same three shadows | match |
 | F2 | Bottom safe area | `s2` `#t6` 66 high, `#t5` 56 | match, also for a toolbar a template made |
 | F3 | Landmark | `role="contentinfo"` | match, as `ContentInfo` |
-| Ti1 | Title | 20, 500, letter spacing 0.25 (0.0125 em), padding 0 20, `nowrap`, 23 high, inherits `rgb(66, 66, 66)` | match, 27 high in Segoe UI |
-| Ti2 | Small | 15, 400, letter spacing 0.1875, `white-space: normal`, 17 high | match, 20 high |
+| Ti1 | Title | 20, 500, letter spacing 0.25 (0.0125 em), padding 0 20, `nowrap`, 24 high, inherits `rgb(66, 66, 66)` | match |
+| Ti2 | Small | 15, 400, letter spacing 0.1875, `white-space: normal`, 18 high | match |
 | Ti3 | Large | the same as the default in md; host class `title-large` | match, with `:size-large` (and `:size-default`, `:size-small`) and no md rule on it |
 | Ti4 | Title `color` | `tertiary` `rgb(96, 48, 255)` | match |
 | B1 | Clear by default in `ion-buttons` | `s1` menu, Edit: `button-clear`; `s2` `#loose`: `button-solid`, 36 high, margin 4 2 | match |
-| B2 | In `ion-buttons` | Edit 51.25×32, padding 3 8, margin 0 2, radius 2, no shadow even solid (`s1` danger solid) | match |
+| B2 | In `ion-buttons` | Edit 48.72×32, padding 3 8, margin 0 2, radius 2, no shadow even solid (`s1` danger solid) | match |
 | B3 | Icon-only | clear: 48×48, padding 12, radius 50%, icon 25.2; solid (`s2` `#ioo`): 41.19×32, padding 0 8 | match |
 | B4 | Start and end icons | `s2` `#ic1` 19.6 with 5.88 after; `#ic2` 19.6 with 7.84 before | match |
 | B5 | Uncoloured toolbar | clear and outline `rgb(66, 66, 66)`, outline's border too; solid `rgb(66, 66, 66)` behind white text; `success` clear keeps `rgb(45, 213, 91)` | match |

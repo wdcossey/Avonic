@@ -21,8 +21,8 @@ and RTL.
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines are
-  taller: an 11 px line is 15 against 12, so the row beside a stacked label is 58 against 55.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), and every row in an item is the height Ionic's
+  is. A note on its own is 16.5 high here and 19 in Chromium, where it's inline in a block whose line is that of 16 px text.
 - **Long in the end slot.** It wraps within 342, as Ionic's does, since #71. As it's aligned left, its box is as wide as its longest line, where Ionic's is 342. The text is in the same place.
 - **The icon in the tall row** matches since #72, when the item's `::slotted(ion-icon)` rules came to reach an icon in a panel.
 

@@ -198,7 +198,6 @@ The chip's automation peer stays a `Group`, as Chromium gives a chip no role, an
 
 | Gap | Why |
 |---|---|
-| Roboto isn't installed here, so Chromium's text is Arial and Avalonia's is Segoe UI | Fonts, as every control so far |
 | Content that can't shrink is clipped at the container's width, where Ionic's chip grows past it (measured `nw`: 308.84 in 200) | Avalonia arranges a child within its space |
 
 ## Not in this PR

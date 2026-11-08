@@ -18,8 +18,8 @@
 
 Rows from the top: default, full, inset, none, primary, danger with a full line, an unknown colour, a label, long text, and RTL with an inset line.
 
-**Match.** The first eight rows' heights are the same: 45, 46, 45, 45, 45, 46, 45 and 45, measured on both. The one visible
-difference is **text:** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI.
+**Match.** The first eight rows' heights are the same: 45, 46, 45, 45, 45, 46, 45 and 45, measured on both. Text is drawn
+from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)).
 
 ## Behaviours
 
