@@ -1,0 +1,40 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="16">
+            <c:AvonicSpinner />
+            <c:AvonicSpinner SpinnerName="Lines" />
+            <c:AvonicSpinner SpinnerName="Dots" Color="danger" />
+            <c:AvonicSpinner SpinnerName="Crescent" Color="primary" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of spinner.css's host rules. The spinner draws itself, so it has no template: what's inside its
+         shadow DOM is the definition of each name, which no app can reach, and lives in Avonic.Components. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSpinner}" TargetType="c:AvonicSpinner">
+        <!-- :host { width: 28px; height: 28px }, which an app can restyle -->
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <!-- color: var(color), which inherits when it isn't set -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Spinner.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+
+        <!-- :host(.ion-color) { color: var(ion-color-base) }. An unknown colour makes it invalid, so it inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

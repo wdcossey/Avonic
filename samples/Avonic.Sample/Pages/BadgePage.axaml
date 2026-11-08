@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.BadgePage">
+
+    <UserControl.Resources>
+        <!-- A picture to show in avatars and thumbnails: 120 × 80, wider than they are, so that the crop shows. -->
+        <DrawingImage x:Key="Picture">
+            <DrawingGroup>
+                <GeometryDrawing Brush="#0054E9" Geometry="M0,0 H120 V80 H0 Z" />
+                <GeometryDrawing Brush="#FFC409">
+                    <GeometryDrawing.Geometry>
+                        <EllipseGeometry Center="30,40" RadiusX="24" RadiusY="24" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#2DD55B" Geometry="M70,10 H110 V70 H70 Z" />
+            </DrawingGroup>
+        </DrawingImage>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="16,8" Spacing="4">
+                <c:AvonicBadge Content="22" />
+                <c:AvonicBadge Color="danger" Content="99+" />
+                <c:AvonicBadge Color="success" Content="New" />
+                <c:AvonicBadge Color="warning" Content="!" />
+                <c:AvonicBadge Color="dark" Content="Dark" />
+            </StackPanel>
+
+            <c:AvonicItem>
+                <c:AvonicLabel Content="Inbox" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicBadge Content="22" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicItem.StartContent>
+                    <c:AvonicBadge Color="danger" Content="3" />
+                </c:AvonicItem.StartContent>
+                <c:AvonicLabel Content="A badge at the start" />
+            </c:AvonicItem>
+            <c:AvonicItem Color="primary">
+                <c:AvonicLabel Content="A primary item" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicBadge Color="light" Content="Light" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItem>
+                <c:AvonicItem.StartContent>
+                    <c:AvonicAvatar>
+                        <Image Source="{StaticResource Picture}" />
+                    </c:AvonicAvatar>
+                </c:AvonicItem.StartContent>
+                <c:AvonicLabel Content="An avatar at the start" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel Content="An avatar at the end" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicAvatar>
+                        <Image Source="{StaticResource Picture}" />
+                    </c:AvonicAvatar>
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicItem.StartContent>
+                    <c:AvonicThumbnail>
+                        <Image Source="{StaticResource Picture}" />
+                    </c:AvonicThumbnail>
+                </c:AvonicItem.StartContent>
+                <c:AvonicLabel Content="A thumbnail at the start" />
+                <c:AvonicItem.EndContent>
+                    <c:AvonicBadge Content="New" Color="success" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+
+            <c:AvonicItemDivider>
+                <c:AvonicItemDivider.StartContent>
+                    <c:AvonicAvatar>
+                        <Image Source="{StaticResource Picture}" />
+                    </c:AvonicAvatar>
+                </c:AvonicItemDivider.StartContent>
+                <c:AvonicLabel Content="In a divider" />
+            </c:AvonicItemDivider>
+
+            <StackPanel Orientation="Horizontal" Margin="16" Spacing="16">
+                <c:AvonicAvatar VerticalAlignment="Top">
+                    <Image Source="{StaticResource Picture}" />
+                </c:AvonicAvatar>
+                <c:AvonicThumbnail VerticalAlignment="Top">
+                    <Image Source="{StaticResource Picture}" />
+                </c:AvonicThumbnail>
+                <c:AvonicAvatar VerticalAlignment="Top">
+                    <c:AvonicAvatar.Resources>
+                        <CornerRadius x:Key="Avonic.Avatar.BorderRadius">8</CornerRadius>
+                    </c:AvonicAvatar.Resources>
+                    <Image Source="{StaticResource Picture}" />
+                </c:AvonicAvatar>
+                <c:AvonicAvatar VerticalAlignment="Top" Background="#0054E9" Foreground="White">
+                    <TextBlock Text="JD" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </c:AvonicAvatar>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
