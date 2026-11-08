@@ -1,8 +1,11 @@
+using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -503,8 +506,23 @@ public class AvonicChipTests
         scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
     });
 
-    [AvaloniaFact]
-    public void B7_The_Ripple_Paints_Over_The_Children()
+    /// <summary>On the stub, or in the theme, whose template is its own.</summary>
+    private static void StubOrTheme(bool themed, Action test)
+    {
+        if (themed)
+        {
+            InstalledTheme.Run(_ => test());
+        }
+        else
+        {
+            test();
+        }
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void B7_The_Ripple_Paints_Over_The_Children(bool themed) => StubOrTheme(themed, () =>
     {
         var chip = Bare();
         using var scene = new Scene(chip);
@@ -513,10 +531,12 @@ public class AvonicChipTests
         var panel = Assert.IsAssignableFrom<Panel>(ripple.GetVisualParent());
         var presenter = panel.Children.OfType<ItemsPresenter>().Single();
         Assert.True(ripple.ZIndex > presenter.ZIndex);
-    }
+    });
 
-    [AvaloniaFact]
-    public void B7_The_Chips_Ripple_Is_Found_Before_One_In_A_Child()
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void B7_The_Chips_Ripple_Is_Found_Before_One_In_A_Child(bool themed) => StubOrTheme(themed, () =>
     {
         var inner = new AvonicRippleEffect();
         var child = new Border { Width = 40, Height = 16, Background = Brushes.Blue, Child = inner };
@@ -530,6 +550,22 @@ public class AvonicChipTests
         Assert.Single(Ripple(chip).Ripples);
         Assert.Empty(inner.Ripples);
         scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
+    });
+
+    [AvaloniaFact]
+    public void B7_It_Is_A_Plain_Group_To_Automation()
+    {
+        var chip = Bare(new AvonicLabel { Content = "Label" });
+        using var scene = new Scene(chip);
+
+        var peer = ControlAutomationPeer.CreatePeerForElement(chip);
+        Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
+        Assert.False(peer.IsContentElement());
+        Assert.True(peer.IsEnabled());
+
+        // aria-disabled
+        chip.IsEnabled = false;
+        Assert.False(peer.IsEnabled());
     }
 
     // ── Behaviour 8: activated, with a finger ────────────────────────────────────────────────
@@ -838,6 +874,34 @@ public class AvonicChipTests
     });
 
     [AvaloniaFact]
+    public void B12_Icons_From_An_Item_Template_Are_Slotted_Too() => InstalledTheme.Run(_ =>
+    {
+        var names = new ObservableCollection<string> { "pin", "star" };
+        var chip = new AvonicChip
+        {
+            ItemsSource = names,
+            ItemTemplate = new FuncDataTemplate<string>((name, _) => new AvonicIcon { IconName = name }),
+        };
+        using var scene = Themed(chip);
+
+        AvonicIcon Icon(int index) => Assert.IsType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(index)).Child);
+
+        Assert.Equal(20, Icon(0).FontSize, 3);
+        AssertRgba(Colors.Black, 0.54, Icon(0).Foreground);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), Icon(0).Margin);
+        Assert.Equal(new Thickness(8, -4, -4, -4), Icon(1).Margin);
+
+        // The first moves to the middle, and the new one is first, as soon as it's added.
+        var pin = Icon(0);
+        names.Insert(0, "heart");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(pin, Icon(1));
+        Assert.Equal(default, pin.Margin);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), Icon(0).Margin);
+        Assert.Equal(new Thickness(8, -4, -4, -4), Icon(2).Margin);
+    });
+
+    [AvaloniaFact]
     public void B12_RTL_Mirrors_The_Icons() => InstalledTheme.Run(_ =>
     {
         var first = new AvonicIcon { IconName = "pin" };
@@ -882,6 +946,21 @@ public class AvonicChipTests
         Assert.Equal(382, chip.Bounds.Width, 0.5);
         Assert.True(chip.Bounds.Height > 40, $"{chip.Bounds.Height} is one line");
     });
+
+    [AvaloniaFact]
+    public void B13_On_The_Stub_Too_Content_Shrinks_To_The_Space()
+    {
+        var text = new TextBlock
+        {
+            Text = "A long piece of text that has to wrap because it does not fit on one line of a phone, not even close",
+            TextWrapping = TextWrapping.Wrap,
+        };
+        var chip = Bare(text);
+        using var scene = new Scene(chip);
+
+        Assert.Equal(390, chip.Bounds.Width, 0.5);
+        Assert.True(text.Bounds.Height > text.FontSize * 2, $"{text.Bounds.Height} is one line");
+    }
 
     // ── Behaviour 14: keys ───────────────────────────────────────────────────────────────────
 

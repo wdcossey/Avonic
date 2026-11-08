@@ -31,7 +31,7 @@ The design and evidence are in [PLAN.md](PLAN.md), and the comparison with real 
 
 `core.json` lists no slot, and the default slot holds several children, so they're `Items`, as an `ItemsControl`'s are
 ([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). A string is a child too. The chip is an `ItemsControl`, so
-it also has `ItemsSource` and `ItemTemplate`. It has no events, methods or parts in Ionic. Its template has `PART_Native`
+it also has `ItemsSource` and `ItemTemplate`, and an icon made by the template is slotted too. It has no events, methods or parts in Ionic. Its template has `PART_Native`
 (`Border`: background, border, radius, clip) and `PART_Ripple`.
 
 The children sit in a row, centred, and the chip is as wide as they are, or as wide as there's room for when they don't fit,
@@ -74,7 +74,6 @@ None.
 
 | Gap | Why |
 |---|---|
-| Automation: a chip reports no role and no disabled state | Chromium gives it no role either, only its text |
 | A chip in an item's start or end slot has 0 margin on the other three sides, where Ionic keeps 4 | `ion-item`'s slot rule sets all four sides. Proposed in the PR |
 | An avatar child isn't sized | `ion-avatar` is #16; its rule goes in `Styles/Chip.axaml` when it exists |
 | A disabled panel fades the chip, and a flex parent doesn't stretch it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |

@@ -61,7 +61,7 @@ Each becomes a test. The ids are the chips in the measurement scene.
 | 11 | `Avonic.Chip.Background` beats hover, focus and press on a plain chip; an outline chip ignores it; a coloured chip ignores it and `Avonic.Chip.Color`. `Avonic.Chip.Color` colours the text and the ripple | measured `vb` red through every state, `vbs` from a stylesheet, `vbo` transparent with 0.04 states, `vbc`, `vc` ripple green |
 | 12 | A slotted icon: 1.4285714286 em of the chip, so 20; colour `rgba(0, 0, 0, 0.54)` unless the chip has a colour, when it's the shade. First child: margin −4 start, 8 end, −4 top and bottom, so it's at x + 8. Last child: 8 start, −4 end. An only child takes the last child's. A nested icon gets none of it. RTL mirrors | `::slotted(ion-icon)`; measured `i`, `il`, `io` 48 wide with the icon at + 20, `ic`, `ideep` 14 and 0.87, `bigfont` still 20, `rtl` |
 | 13 | A long label: the chip grows to its container and the label wraps; an icon beside it shrinks, as `contain: strict` leaves it no minimum | `inline-flex`, `flex-shrink: 1`; measured `long` 350 by 44, label 2 lines; `longi` icon 14.03 wide |
-| 14 | Keys do nothing: no Enter or Space, and arrows don't move focus between what's inside | A plain element. An `ItemsControl` would move focus with the arrows |
+| 14 | Keys do nothing: no Enter or Space, and arrows don't move focus between what's inside | A plain element. Nothing in the chip does this: an `ItemsControl` moves focus with the arrows only between focusable containers in a navigable panel, and a `FlexSlot` in a `FlexRow` is neither. The first build overrode `OnKeyDown` for it, and breaking that changed nothing, even with a `StackPanel`, so it went |
 
 ## Design
 
@@ -87,7 +87,8 @@ inherits, so a string child wraps too.
 `display: inline-flex` sizes to fit: as wide as its content on one line, or as the space there is when that's too narrow.
 Measured at the space, Avalonia's wrapped text reports its longest line, which left the long chip 15 px narrower than
 Ionic's 366. So the chip measures its content on one line first, and takes the whole width when it doesn't fit, or more if
-something in it can't shrink, as `min-content` does. The button had the same, and fixed it in `ButtonInner`.
+the chip's arrange is clamped to the space anyway, so content that can't shrink is clipped there either way. The button had the
+same, and fixed it in `ButtonInner`. Only a chip that doesn't fit is measured twice.
 
 `display: inline-flex` is `HorizontalAlignment="Left"`. `vertical-align: middle` is the control's default
 `VerticalAlignment`, `Center`, by `OverrideDefaultValue`, as `AvonicButton` does, so that a slot's `align-items` still reaches
@@ -136,6 +137,11 @@ writes `1.42857142857`, a hair under, which gives 20 at 14 and 40 at 28.
 `opacity: 0.4` on `:disabled`. A disabled control takes no input in Avalonia and lets a tap through to what's behind, as
 `pointer-events: none` does. `aria-disabled` is what the automation peer reports as `IsEnabled`.
 
+### Automation
+
+Chromium gives a chip no role, only its text, as a plain element. An `ItemsControl`'s own peer would call it a list, so the
+chip has its own, a `Group` that isn't a content element, as a plain `AvonicCard` is. Its children have their own peers.
+
 ## Extensions
 
 None. Ionic's chip has no click of its own: an app listens to the host's DOM `click`, which a plain element raises on a
@@ -152,13 +158,12 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 | `VerticalAlignment` is `Center`, where a flex parent stretches an Ionic chip (measured `tall`, 72) | Set `VerticalAlignment="Stretch"`; the children stay centred |
 | A string child counts as a child for `:first-child` and `:last-child`, where a text node doesn't in CSS | Every item is in a presenter. `<ion-icon>` then text then `<ion-icon>` (`ib2`) still gives both icons their margins, as the icons are first and last either way |
 | A chip in an item's start or end slot has margin `0,0,16,0` or `16,0,0,0`, where Ionic keeps the chip's 4 on the other three sides (measured `initemend`: `4 4 4 16`) | `Styles/Item.axaml`'s slot rule sets all four sides for any control, and merges after this control's file. 4 px at the outer edge; see the proposal in the PR |
-| The chip is an `ItemsControl`, so it also has `ItemsSource` and `ItemTemplate` | As `AvonicList`. Nothing Ionic is shadowed |
+| The chip is an `ItemsControl`, so it also has `ItemsSource` and `ItemTemplate` | As `AvonicList`. Nothing Ionic is shadowed. A control made from the template is the slot's logical child, so each slotted rule has a second alternative, `c\|AvonicChip > ContentPresenter > c\|AvonicIcon`, as `AvonicList` has for its templated items, and the chip counts a slot by its item |
 
 ## Known gaps
 
 | Gap | Why |
 |---|---|
-| Automation: Chromium gives the chip no role, just its text, and Avalonia's default peer for an `ItemsControl` reports nothing either | Nothing to map; a chip's `aria-disabled` isn't reported |
 | Roboto isn't installed here, so Chromium's text is Arial and Avalonia's is Segoe UI | Fonts, as every control so far |
 
 ## Not in this PR

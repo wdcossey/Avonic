@@ -1,9 +1,9 @@
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avonic.Components.Behaviors;
@@ -19,7 +19,8 @@ namespace Avonic.Components.Controls;
 /// Each is held in a <see cref="FlexSlot"/>, as a <c>&lt;slot&gt;</c>'s child is in an item, for <c>align-items</c>. A control
 /// is still the chip's logical child, so the theme's <c>::slotted</c> rules are <c>c|AvonicChip &gt; c|X</c>, and the chip
 /// counts its children for <c>:nth-child</c> by item, not by container, as an <see cref="ItemsControl"/> otherwise counts a
-/// wrapped child as no child at all.
+/// wrapped child as no child at all. One made from <see cref="ItemsControl.ItemTemplate"/> is the slot's logical child, so
+/// the rules also have <c>c|AvonicChip &gt; ContentPresenter &gt; c|X</c>.
 /// </remarks>
 [TemplatePart("PART_Native", typeof(Border))]
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
@@ -96,18 +97,22 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
             return oneLine;
         }
 
-        // Content that can't shrink that far still overflows, as min-content does.
-        var wrapped = base.MeasureOverride(availableSize);
-        return wrapped.WithWidth(Math.Max(wrapped.Width, availableSize.Width));
+        return base.MeasureOverride(availableSize).WithWidth(availableSize.Width);
     }
 
     /// <summary>
     /// <c>:nth-child</c> for a slotted control, which is the chip's logical child but not its container: the item's index.
-    /// <see cref="ItemsControl"/> gives only a container's, so a child held in a <see cref="FlexSlot"/> would match nothing.
+    /// <see cref="ItemsControl"/> gives only a container's, so a child held in a <see cref="FlexSlot"/> would match nothing. A
+    /// slot is counted by its item too, and not by <see cref="ItemsControl.IndexFromContainer"/>, which is still the old index
+    /// when <see cref="ItemsControl.Items"/> raises its change, as the panel moves its containers afterwards. Two equal values
+    /// in <see cref="ItemsControl.ItemsSource"/> both count as the first.
     /// </summary>
-    int IChildIndexProvider.GetChildIndex(ILogical child) => child is Control control
-        ? ItemsView.IndexOf(control) is >= 0 and var index ? index : IndexFromContainer(control)
-        : -1;
+    int IChildIndexProvider.GetChildIndex(ILogical child) => child switch
+    {
+        _ when ItemsView.IndexOf(child) is >= 0 and var index => index,
+        ContentPresenter { Content: { } item } => ItemsView.IndexOf(item),
+        _ => -1,
+    };
 
     bool IChildIndexProvider.TryGetTotalCount(out int count)
     {
@@ -121,8 +126,19 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         remove => _childIndexChanged -= value;
     }
 
-    /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. A chip is a plain element, and doesn't.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
+    protected override AutomationPeer OnCreateAutomationPeer() => new ChipAutomationPeer(this);
+
+    /// <summary>
+    /// A plain element to Chromium, with no role, where an <see cref="ItemsControl"/>'s own peer would call it a list. Its
+    /// children speak for themselves, and <c>aria-disabled</c> is the peer's <c>IsEnabled</c>.
+    /// </summary>
+    private sealed class ChipAutomationPeer(AvonicChip owner) : ControlAutomationPeer(owner)
     {
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override bool IsContentElementCore() => false;
+
+        protected override bool IsControlElementCore() => true;
     }
+
 }

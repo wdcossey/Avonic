@@ -56,6 +56,22 @@ The first chip pressed with a mouse at its centre, 160 ms in, as `render.js --ta
   line. CSS's shrink-to-fit takes all the room once the content doesn't fit on one line. Fixed in the chip's measure, as
   `ButtonInner` does for the button.
 
+## Found by the review
+
+- **Automation called the chip a list,** as an `ItemsControl`'s own peer does. Chromium gives it no role. It has its own peer now,
+  a `Group`. The draft's docs said it reported nothing, which was wrong.
+- **An icon made by an `ItemTemplate` wasn't slotted,** as it's the slot's logical child, not the chip's. Each rule has a second
+  alternative for it now, and the chip counts a slot by its item: the container's own index is still the old one when `Items`
+  raises its change, which a test that inserts at the front shows.
+
+## Found by deliberate breakage
+
+- **The `OnKeyDown` override did nothing.** It was there to stop an `ItemsControl` moving focus with the arrows, and they don't move
+  it without it, as nothing in a `FlexSlot` is a focusable container. Removed. The keys test stays, for the behaviour.
+- **Letting content that can't shrink overflow did nothing,** as the arrange clamps to the space anyway. Removed.
+- **Three template changes went unseen,** as their tests ran on the stub only: the ripple under the children, the ripple after
+  them, and the stub's row. The ripple tests run on both now, and there's a layout test on the stub.
+
 ## Behaviours
 
 The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChipTests`, named after its number.
@@ -76,6 +92,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | 12 | A slotted icon | 20, `rgba(0, 0, 0, 0.54)` or the shade; first `−4 8`, last `8 −4`, only child as last, 48 wide; nested gets none; RTL mirrors | match |
 | 13 | Long content | 366 by 44, label wrapped; an icon beside it shrinks to 11.72 | match in shape: the full width, and the icon shrinks |
 | 14 | Keys | Nothing: no click on Enter or Space, no arrow navigation | match |
+| — | Automation | No role, only its text; `aria-disabled` | match: a `Group`, not a content element, disabled when it is |
 
 ## Deliberate differences
 
@@ -91,6 +108,5 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 
 | Gap | Why |
 |---|---|
-| Automation: Chromium gives a chip no role, only its text, and Avalonia's default peer for an `ItemsControl` reports nothing either, so `aria-disabled` isn't reported | Nothing to map it to |
 | Fonts | Roboto isn't installed, as for every control so far |
 | `::slotted(ion-avatar)` | `ion-avatar` doesn't exist yet (#16) |
