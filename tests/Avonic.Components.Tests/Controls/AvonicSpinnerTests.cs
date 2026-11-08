@@ -641,6 +641,22 @@ public class AvonicSpinnerTests
         Assert.Equal([":name-lines-sharp-small"], Names(f.Spinner));
         Assert.Equal(1, f.Spinner.Opacity);
 
+        // Each name is Ionic's own.
+        var ionic = new[] { "bubbles", "circles", "circular", "crescent", "dots", "lines", "lines-small", "lines-sharp", "lines-sharp-small" };
+        foreach (var name in Enum.GetValues<SpinnerName>())
+        {
+            f.Spinner.SpinnerName = name;
+            Assert.Equal([":name-" + ionic[(int)name]], Names(f.Spinner));
+        }
+
+        // Hidden, so with no animations, a new name is still its class, and one that's never been shown has one.
+        f.Spinner.IsVisible = false;
+        f.Spinner.SpinnerName = SpinnerName.Crescent;
+        Assert.Equal([":name-crescent"], Names(f.Spinner));
+        f.Spinner.IsVisible = true;
+        f.Spinner.SpinnerName = SpinnerName.LinesSharpSmall;
+        Assert.Equal([":name-circular"], Names(new AvonicSpinner()));
+
         // 'spinner-paused': paused || _testing, where Animated off stands in for _testing.
         Assert.Equal(default, f.Spinner.Margin);
         f.Spinner.Paused = true;
