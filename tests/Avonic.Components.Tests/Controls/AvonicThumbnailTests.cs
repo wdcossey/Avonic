@@ -190,6 +190,13 @@ public class AvonicThumbnailTests
         Assert.Equal(new Size(56, 56), thumbnail.Bounds.Size);
     });
 
+    // The thumbnail's file merges after Item.axaml, where the avatar's merges before it, so the same rules have to hold either way.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void T4_T5_The_Slot_Rules_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
+        InMergeOrder("Thumbnail.axaml", first, () => AssertSlotMargins(() => new AvonicThumbnail { Content = Picture() }));
+
     // ── 6. Its own size ──────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

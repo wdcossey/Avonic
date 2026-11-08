@@ -3,9 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avonic.Components.Controls;
+using Avonic.Themes;
 
 namespace Avonic.Components.Tests.Controls;
 
@@ -71,6 +73,57 @@ public class AvonicAvatarTests
             new TextBlock { Text = "Three", Height = 30 },
         },
     };
+
+    /// <summary>
+    /// Runs a test with one of the theme's Styles files merged before every other one, or after. Files merge in ordinal order, so
+    /// a rule that beats Item.axaml's only by coming after it would hold in one control's file and not in another's.
+    /// </summary>
+    internal static void InMergeOrder(string file, bool first, Action test)
+    {
+        var app = Application.Current!;
+        var theme = new AvonicTheme();
+        var source = new Uri($"avares://Avonic.Themes/Styles/{file}");
+        var include = theme.OfType<StyleInclude>().Single(include => include.Source == source);
+        theme.Remove(include);
+        if (first)
+        {
+            theme.Insert(theme.IndexOf(theme.OfType<StyleInclude>().First()), include);
+        }
+        else
+        {
+            theme.Add(include);
+        }
+
+        app.Styles.Add(theme);
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            test();
+        }
+        finally
+        {
+            app.Styles.Remove(theme);
+        }
+    }
+
+    /// <summary>The margins of a start, an end, and an end beside a stacked and a floating label, in an item.</summary>
+    internal static void AssertSlotMargins(Func<Control> create)
+    {
+        var start = create();
+        var end = create();
+        var stacked = create();
+        var floating = create();
+        using var scene = InScene(
+            new AvonicItem { StartContent = start, Content = "x" },
+            new AvonicItem { Content = "x", EndContent = end },
+            new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked }, EndContent = stacked },
+            new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Floating }, EndContent = floating });
+
+        Assert.Equal(new Thickness(0, 8, 16, 8), start.Margin);
+        Assert.Equal(new Thickness(16, 8, 0, 8), end.Margin);
+        Assert.Equal(new Thickness(16, 7, 0, 7), stacked.Margin);
+        Assert.Equal(new Thickness(16, 7, 0, 7), floating.Margin);
+    }
 
     // ── 1. Alone ─────────────────────────────────────────────────────────────────────────────
 
@@ -336,6 +389,14 @@ public class AvonicAvatarTests
         Assert.Equal(new Thickness(16, 7, 0, 7), avatar.Margin);
         Assert.Equal(new Size(40, 40), avatar.Bounds.Size);
     });
+
+    // In CSS, the slot rules for an avatar beat the item's by specificity, not by where they come. Here the avatar's file merges
+    // before Item.axaml, so its rules for an end slot have to beat the item's by a pseudoclass, and still leave a stacked item's 7.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void A6_A8_The_Slot_Rules_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
+        InMergeOrder("Avatar.axaml", first, () => AssertSlotMargins(() => new AvonicAvatar { Content = Picture() }));
 
     // ── 9. A tall row ────────────────────────────────────────────────────────────────────────
 
