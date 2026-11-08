@@ -307,6 +307,28 @@ public class AvonicToolbarButtonsTests
         Assert.Equal(new Thickness(8, 3), Padding(round));
     });
 
+    [AvaloniaFact]
+    public void B8_A_Full_Button_Keeps_Its_Square_Corners() => InstalledTheme.Run(_ =>
+    {
+        var full = new AvonicButton { Content = "Full", Fill = ButtonFill.Solid, Expand = ButtonExpand.Full };
+        using var scene = InToolbar(null, full);
+
+        // :host(.button-full:not(.button-round)) .button-native { border-radius: 0 } beats ion-buttons' --border-radius.
+        Assert.Equal(new CornerRadius(0), Native(full).CornerRadius);
+    });
+
+    [AvaloniaFact]
+    public void B5_Solid_In_Buttons_Outside_A_Toolbar() => InstalledTheme.Run(_ =>
+    {
+        // ion-buttons' own rules, without a toolbar's in-toolbar ones: color var(ion-toolbar-background), background #424242.
+        var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
+        var page = new StackPanel { Children = { Buttons(solid) }, Resources = { ["Avonic.ToolbarBackgroundBrush"] = Brushes.Yellow } };
+        using var scene = new Scene(page);
+
+        Assert.Equal(Colors.Yellow, Text(solid));
+        Assert.Equal(ToolbarTest.Toolbar, ToolbarTest.Solid(Native(solid).Background));
+    });
+
     // ── B9: Avonic.ToolbarColorBrush ────────────────────────────────────────────────────────
 
     [AvaloniaFact]

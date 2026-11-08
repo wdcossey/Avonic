@@ -134,17 +134,6 @@ public class AvonicToolbar : TemplatedControl
         set => SetValue(EndContentTemplateProperty, value);
     }
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-
-        if (change.Property == StartContentProperty || change.Property == SecondaryContentProperty
-            || change.Property == PrimaryContentProperty || change.Property == EndContentProperty)
-        {
-            UpdateButtonsSlots();
-        }
-    }
-
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -170,6 +159,7 @@ public class AvonicToolbar : TemplatedControl
         UpdateButtonsSlots();
     }
 
+    // A slot's content changing changes what it presents, so this follows StartContent and the rest too.
     private void OnSlotPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ContentPresenter.ChildProperty)

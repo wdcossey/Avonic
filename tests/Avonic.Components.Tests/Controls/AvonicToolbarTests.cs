@@ -372,6 +372,20 @@ public class AvonicToolbarTests
     });
 
     [AvaloniaFact]
+    public void T10_A_New_Start_Takes_The_4_From_The_Old() => InstalledTheme.Run(_ =>
+    {
+        AvonicButtons old = Buttons(new AvonicButton { Content = "Old" }), replacement = Buttons(new AvonicButton { Content = "New" });
+        var toolbar = new AvonicToolbar { StartContent = old };
+        using var scene = ToolbarTest.Show(toolbar);
+        Assert.Equal(new Thickness(4, 0, 0, 0), old.Margin);
+
+        toolbar.StartContent = replacement;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(new Thickness(0), old.Margin);
+        Assert.Equal(new Thickness(4, 0, 0, 0), replacement.Margin);
+    });
+
+    [AvaloniaFact]
     public void T10_Buttons_A_Template_Makes_Count_Too() => InstalledTheme.Run(_ =>
     {
         var template = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => Buttons(new AvonicButton { Content = text }));
@@ -461,6 +475,42 @@ public class AvonicToolbarTests
         Assert.True(Pixel(frame, 195, 58).R < 235, "the content covered the header's shadow");
     });
 
+    [AvaloniaFact]
+    public void B2_Buttons_Do_Not_Clip_What_Overflows_Them() => InstalledTheme.Run(_ =>
+    {
+        // ion-buttons has no overflow: hidden, so a child drawn past it shows. This one is 20 high and 10 of it is above.
+        var child = new Border { Width = 20, Height = 20, Margin = new Thickness(0, -10, 0, 0), Background = Brushes.Red };
+        var buttons = new AvonicButtons { Margin = new Thickness(0, 20, 0, 0), Items = { child } };
+        using var scene = new Scene(new StackPanel { Children = { buttons } });
+        scene.Window.Background = Brushes.White;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(20, ToolbarTest.Box(buttons, scene.Window).Y);
+        using var frame = scene.Window.CaptureRenderedFrame()!;
+        var above = Pixel(frame, (int)ToolbarTest.Box(child, scene.Window).Center.X, 15);
+        Assert.True(above.G < 50, $"above the buttons is {above}, so they clipped their child");
+    });
+
+    [AvaloniaFact]
+    public void T2_The_Container_Clips_At_The_Safe_Area() => InstalledTheme.Run(_ =>
+    {
+        // .toolbar-container { overflow: hidden }, inside the host's padding, which is the safe area.
+        var wide = new Border { Width = 300, Height = 20, Background = Brushes.Red };
+        var toolbar = new AvonicToolbar
+        {
+            Width = 200, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left, StartContent = wide,
+            Resources = { ["Avonic.SafeAreaRight"] = 30d, ["Avonic.ToolbarBackgroundBrush"] = Brushes.White },
+        };
+        using var scene = new Scene(new StackPanel { Children = { toolbar } });
+        scene.Window.Background = Brushes.White;
+        Dispatcher.UIThread.RunJobs();
+
+        using var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.True(Pixel(frame, 160, 28).G < 50, "the content isn't drawn");
+        var inPadding = Pixel(frame, 185, 28);
+        Assert.True(inPadding.G > 200, $"the safe area is {inPadding}, so the container didn't clip");
+    });
+
     private static Color Pixel(WriteableBitmap frame, int x, int y)
     {
         using var buffer = frame.Lock();
@@ -477,12 +527,19 @@ public class AvonicToolbarTests
     public void H3_The_First_Toolbar_In_A_Header_Has_The_Top_Safe_Area() => InstalledTheme.Run(_ =>
     {
         AvonicToolbar first = new() { Content = "One" }, second = new() { Content = "Two" };
-        var header = new AvonicHeader { Items = { first, second }, Resources = { ["Avonic.SafeAreaTop"] = 20d } };
+        var header = new AvonicHeader
+        {
+            Items = { first, second },
+            Resources = { ["Avonic.SafeAreaTop"] = 20d, ["Avonic.SafeAreaLeft"] = 7d, ["Avonic.SafeAreaRight"] = 5d },
+        };
         using var scene = ToolbarTest.Show(header);
+
+        // Measured s2 #t1: padding 20 5 0 7, keeping the sides.
+        Assert.Equal(new Thickness(7, 20, 5, 0), first.Padding);
 
         // Measured: 76 high, the container at 20, the background from 0. The second toolbar has none.
         Assert.Equal(76, first.Bounds.Height);
-        Assert.Equal(new Rect(0, 20, 390, 56), ToolbarTest.Box(Container(first), first));
+        Assert.Equal(new Rect(7, 20, 378, 56), ToolbarTest.Box(Container(first), first));
         Assert.Equal(new Rect(0, 0, 390, 76), ToolbarTest.Box(Background(first), first));
         Assert.Equal(56, second.Bounds.Height);
         Assert.Equal(132, header.Bounds.Height);
@@ -492,13 +549,20 @@ public class AvonicToolbarTests
     public void F2_The_Last_Toolbar_In_A_Footer_Has_The_Bottom_Safe_Area() => InstalledTheme.Run(_ =>
     {
         AvonicToolbar first = new() { Content = "One" }, last = new() { Content = "Two" };
-        var footer = new AvonicFooter { Items = { first, last }, Resources = { ["Avonic.SafeAreaBottom"] = 10d } };
+        var footer = new AvonicFooter
+        {
+            Items = { first, last },
+            Resources = { ["Avonic.SafeAreaBottom"] = 10d, ["Avonic.SafeAreaLeft"] = 7d, ["Avonic.SafeAreaRight"] = 5d },
+        };
         using var scene = ToolbarTest.Show(footer);
+
+        // Measured s2 #t6: padding 0 5 10 7.
+        Assert.Equal(new Thickness(7, 0, 5, 10), last.Padding);
 
         // Measured: 66 high, the container at the top.
         Assert.Equal(56, first.Bounds.Height);
         Assert.Equal(66, last.Bounds.Height);
-        Assert.Equal(new Rect(0, 0, 390, 56), ToolbarTest.Box(Container(last), last));
+        Assert.Equal(new Rect(7, 0, 378, 56), ToolbarTest.Box(Container(last), last));
     });
 
     [AvaloniaFact]

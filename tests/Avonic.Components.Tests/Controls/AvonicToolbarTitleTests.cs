@@ -47,6 +47,16 @@ public class AvonicToolbarTitleTests
     });
 
     [AvaloniaFact]
+    public void Ti1_A_Taller_Title_Centres_Its_Text() => InstalledTheme.Run(_ =>
+    {
+        // :host { display: flex; align-items: center }
+        var title = new AvonicTitle { Content = "Tall", Height = 56 };
+        using var scene = ToolbarTest.Show(title);
+
+        ToolbarTest.Near(28, ToolbarTest.Box(Text(title), title).Center.Y, 1);
+    });
+
+    [AvaloniaFact]
     public void Ti1_The_Title_Inherits_The_Text_Colour() => InstalledTheme.Run(_ =>
     {
         var title = new AvonicTitle { Content = "Primary" };

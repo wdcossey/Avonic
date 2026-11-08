@@ -101,7 +101,7 @@
         </Style>
     </Style>
 
-    <!-- ::slotted(*) .button-has-icon-only { padding-top: 0; padding-bottom: 0 }, ::slotted(*) ion-icon[slot=icon-only] { font-size: 1.8em; margin: 0 } -->
+    <!-- ::slotted(*) .button-has-icon-only { padding-top: 0; padding-bottom: 0 }, ::slotted(*) ion-icon[slot=icon-only] { font-size: 1.8em; margin: 0 }. A button's icon-only icon has no margin anyway. -->
     <Style Selector="c|AvonicButtons c|AvonicButton:has-icon-only">
         <Setter Property="MinHeight" Value="32" />
         <Style Selector="^ /template/ c|ButtonInner#PART_Inner">
@@ -116,7 +116,6 @@
             </Setter>
         </Style>
         <Style Selector="^ /template/ ContentPresenter#PART_IconOnly > c|AvonicIcon">
-            <Setter Property="Margin" Value="0" />
             <Setter Property="FontSize">
                 <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.8">
                     <Binding Path="$parent[c:AvonicButton].FontSize" />
@@ -125,8 +124,9 @@
         </Style>
     </Style>
 
-    <!-- ::slotted(*) ion-button:not(.button-round) { border-radius: 2px } -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:not(:shape-round) /template/ Border#PART_Native">
+    <!-- ::slotted(*) ion-button:not(.button-round) { border-radius: 2px }. With no pseudoclass, on purpose: the theme's
+         rules for a round button and a full one have one, so they win, as button.md.css's border-radius beats this variable. -->
+    <Style Selector="c|AvonicButtons c|AvonicButton /template/ Border#PART_Native">
         <Setter Property="CornerRadius">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.BorderRadius" />
