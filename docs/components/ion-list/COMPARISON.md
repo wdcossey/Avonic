@@ -20,7 +20,7 @@ Lists from the top: default lines with a header, lines full with an item's own n
 inset with a button, a colour and a last item, then an inset list straight after it.
 
 **Match.** The five lists' heights are the same: 157, 113, 112, 160 and 64, measured on both, and the capture test holds them.
-The one visible difference is **text:** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI.
+Text is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)).
 
 ## Behaviours
 

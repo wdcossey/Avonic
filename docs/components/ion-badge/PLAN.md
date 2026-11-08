@@ -183,7 +183,6 @@ the panel already has the slot's 16 from `Item.axaml`.
 | An empty string is empty, as null is | A framework renders no text node for `""` |
 | A badge is a box, not inline, and outside an item it's centred down in what it's given, not on the text's baseline | `vertical-align: baseline` has no equivalent. In an item it's centred, as Ionic's flex item is |
 | A badge wider than its parent is cut at the parent's width, where Ionic's runs off the page (measured `alone-long`: 547.09 in 390) | Avalonia gives a child no more than the space it has |
-| Text: Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI | The badge stays 20 high either way, as `line-height: 1` is of the font size |
 
 ## Not in this PR
 

@@ -222,32 +222,33 @@ A `flex: 1` box can't go below its own padding, so `.item-inner` is never under 
 ### What Ionic does
 
 Chromium, md, 390 wide. `W` is the width of the box. The page is [`ref/layout/cases.html`](ref/layout/cases.html), and every box in it is in
-[`cases.txt`](ref/layout/cases.txt), from `node tools/ionic-ref/boxes.js docs/components/ion-item/ref/layout/cases.html`.
+[`cases.txt`](ref/layout/cases.txt), from `node tools/ionic-ref/boxes.js docs/components/ion-item/ref/layout/cases.html`. Since #100 it's
+measured with the Roboto files the tests use, which changed the numbers that depend on text: F2, F7, F8, F10, F12, F15, F16, F21 and F22.
 
 | # | Content | Measured |
 |---|---|---|
 | F1 | Label in start, label in default | Start 171 at x=16, inner x=203 W=187, default 171. `(374 - 16 - 16) / 2` |
-| F2 | The same, with a long start label | Start 171 wraps, row 92 high |
+| F2 | The same, with a long start label | Start 171 wraps, row 96 high |
 | F3 | Label in start only | Still 171, with an empty inner |
 | F4 | `position="fixed"` in start | 100: `flex: 0 0 100px` wins over `flex: 1` |
 | F5 | `position="stacked"` in start | 179 before its scale of 0.75, with no margin to take off, and inner x=195 |
 | F6 | Long label in end | 342 at x=32, wraps. Default is squeezed to 0 |
-| F7 | A label squeezed to 0 | One character a line, 7 lines for "Default", so the row is 147 high. `max-width: 100%` is what takes its `min-content` away |
-| F8 | Plain text, or a note, squeezed to 0 | It keeps its `min-content`, so one word a line: 55 high for plain text, 53 with a note |
+| F7 | A label squeezed to 0 | One character a line, 7 lines for "Default", so the row is 154 high. `max-width: 100%` is what takes its `min-content` away |
+| F8 | Plain text, or a note, squeezed to 0 | It keeps its `min-content`, so one word a line: 58 high for plain text, 55 with a note |
 | F9 | Long start and end labels | Start 171, end 155 |
-| F10 | A word wider than half the row, in a start label | Start 231 (`min-content`), inner takes what's left |
+| F10 | A word wider than half the row, in a start label | Start 236.6 (`min-content`), inner takes what's left |
 | F11 | A word wider than the row, in a start label | Start 374 (`max-width: 100%`), breaks in the word, inner is pushed out |
-| F12 | A word wider than the row, in an end label | 662, overflowing, clipped by the host |
+| F12 | A word wider than the row, in an end label | 677.7, overflowing, clipped by the host |
 | F13 | `.ion-text-nowrap` in end | 342, as `overflow: hidden` takes its `min-content` away |
 | F14 | Long note in start or end | 342. A label beside it is squeezed to 0 |
-| F15 | Long notes in both | Start 342, end its `min-content` of 42, clipped. Row 185 high |
-| F16 | Icon beside something long, in one row | The icon shrinks with the rest: 15.5 and 14.7 of 24, height unchanged. `contain: strict` means it has no minimum |
+| F15 | Long notes in both | Start 342, end its `min-content` of 41.8, clipped. Row 198 high |
+| F16 | Icon beside something long, in one row | The icon shrinks with the rest: 15.5 and 14.6 of 24, height unchanged. `contain: strict` means it has no minimum |
 | F17 | Detail icon beside a long end label | Label 330 and icon 10 of 20, for the same reason |
 | F18 | Plain `span`, `ion-text`, or a `div` in end | 342, wraps |
 | F19 | A note beside a tall label | Note at the top, icon centred |
 | F20 | RTL | The same, mirrored |
-| F21 | Divider: label in start | 30, as `::slotted` gives it no `flex` there. A long one is 342 |
-| F22 | Divider: long end content | 342. A default label beside it keeps its 44 |
+| F21 | Divider: label in start | 30.2, as `::slotted` gives it no `flex` there. A long one is 342 |
+| F22 | Divider: long end content | 342. A default label beside it keeps its 44.8 |
 
 ### Design
 

@@ -23,8 +23,8 @@ and one thumbnail of 64 at 50%; and an RTL item with an avatar and a badge.
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Badges are 20 high in
-  both, as `line-height: 1` is of the font size, but a little wider or narrower with the font: "Default slot" is 80 against 78.8.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), and every row in an item is the
+  same height to within half a pixel.
 - **The first line** is shorter in Avonic, as its text is Avalonia's default size, where a page's is 16
   ([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). Every row below sits a little higher for it.
 - **The line under the RTL item** reaches the left edge in Ionic, and stops 16 short of it in Avonic. That's `ion-item`'s

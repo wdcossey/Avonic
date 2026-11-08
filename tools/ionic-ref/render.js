@@ -16,6 +16,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { chromium } = require('playwright-core');
+// The same Roboto files as the tests and the sample, so that text measures the same on both sides.
+const roboto = require('../fonts/roboto/roboto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
@@ -86,7 +88,7 @@ const cssVars = comp ? [...new Set(comp.styles.map(s => s.name))] : CSS_VARS_OUT
 
 // ── tiny static server rooted at the repo so the ESM bundle can lazy-load its chunks ───────
 const MIME = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.html': 'text/html',
-               '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff' };
+               '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', ...roboto.MIME };
 const bodyWrap = has('--bare')
     ? `<div id="stage">${snippet}</div>`
     : `<ion-app><ion-content><div id="stage" style="padding:16px">${snippet}</div></ion-content></ion-app>`;
@@ -94,6 +96,7 @@ const pageHtml = `<!doctype html>
 <html mode="md"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="/node_modules/@ionic/core/css/ionic.bundle.css">
+${roboto.LINK}
 <script>window.Ionic = { config: { mode: 'md' } };</script>
 <script type="module" src="/node_modules/@ionic/core/dist/ionic/ionic.esm.js"></script>
 <style>html,body{margin:0;height:100%;background:var(--ion-background-color,#fff)}</style>
@@ -128,6 +131,7 @@ const server = http.createServer((req, res) => {
         const els = [...document.querySelectorAll(t)];
         return els.length > 0 && els.every(e => e.classList.contains('hydrated'));
     }, tag, { timeout: 20000 });
+    await roboto.loadRoboto(page);
     await page.waitForTimeout(300);
 
     const LAYOUT = ['display', 'position', 'box-sizing', 'width', 'height', 'min-height', 'min-width', 'padding', 'margin',

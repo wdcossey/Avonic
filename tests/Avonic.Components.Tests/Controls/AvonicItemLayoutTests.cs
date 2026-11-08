@@ -12,7 +12,8 @@ namespace Avonic.Components.Tests.Controls;
 
 /// <summary>
 /// The numbers are from real ion-item in Chromium, at 390 px wide, under "The flex layout" in docs/components/ion-item/PLAN.md.
-/// Each is named after its row there. They don't depend on a font, except where a test says so.
+/// Each is named after its row there. They don't depend on a font, except where a test says so, and then it's Roboto, from
+/// tools/fonts/roboto/, on both sides.
 /// </summary>
 public class AvonicItemLayoutTests
 {
@@ -34,9 +35,13 @@ public class AvonicItemLayoutTests
 
     private static Scene InScene(Control host) => new(new StackPanel { Children = { host } });
 
+    /// <summary>The theme's font, Roboto, that the labels are drawn in, or the default one without the theme, as the stubs are.</summary>
+    private static FontFamily ThemeFont =>
+        Application.Current!.TryFindResource("Avonic.FontFamily", out var font) && font is FontFamily family ? family : FontFamily.Default;
+
     private static double OneLine(string text, double fontSize = 16)
     {
-        var block = new TextBlock { Text = text, FontSize = fontSize };
+        var block = new TextBlock { Text = text, FontSize = fontSize, FontFamily = ThemeFont };
         block.Measure(Size.Infinity);
         return block.DesiredSize.Width;
     }
@@ -189,14 +194,14 @@ public class AvonicItemLayoutTests
         var item = new AvonicItem { Content = Label("Default"), EndContent = Label(Long) };
         using var scene = InScene(item);
 
-        // 147 in Chromium, as seven lines of 18 with its margins. Lines are taller here, as the font differs.
-        var line = OneLineHeight();
-        AssertNear((7 * line) + 21, item.Bounds.Height, 8);
+        // 154 in Chromium, as seven lines of 19 with its margins. 153 here, as a line is 18.75: Chromium rounds a line's
+        // ascent and descent each to a whole pixel. Either passes, and nothing else does.
+        AssertNear(153.5, item.Bounds.Height, 0.5);
     });
 
     private static double OneLineHeight()
     {
-        var block = new TextBlock { Text = "x", FontSize = 16 };
+        var block = new TextBlock { Text = "x", FontSize = 16, FontFamily = ThemeFont };
         block.Measure(Size.Infinity);
         return block.DesiredSize.Height;
     }
@@ -207,8 +212,8 @@ public class AvonicItemLayoutTests
         var item = new AvonicItem { Content = "Plain default words", EndContent = Note() };
         using var scene = InScene(item);
 
-        // 55 in Chromium, as three lines of 18. Character by character would be 19 lines.
-        Assert.InRange(item.Bounds.Height, 54, 100);
+        // 58 in Chromium, and here, as three lines of 19 and the margins. Character by character would be 19 lines.
+        AssertNear(58, item.Bounds.Height);
     });
 
     [AvaloniaFact]
@@ -217,7 +222,8 @@ public class AvonicItemLayoutTests
         var item = new AvonicItem { Content = Note("Note default words"), EndContent = Note() };
         using var scene = InScene(item);
 
-        Assert.InRange(item.Bounds.Height, 48, 100);
+        // 55 in Chromium, and here.
+        AssertNear(55, item.Bounds.Height);
     });
 
     [AvaloniaFact]
@@ -432,12 +438,14 @@ public class AvonicItemLayoutTests
         var item = new AvonicItem { Content = Label(), EndContent = end, Detail = true };
         using var scene = InScene(item);
 
-        // 330 and 10 in Chromium, in proportion to the label's length on one line, which depends on the font.
+        // In proportion to the label's length on one line: 330.5 and 9.5 in Chromium, 331 and 10 here.
         var text = OneLine(Long);
         var overflow = text + 16 + 22 - 358;
         var icon = Part<AvonicIcon>(item, "PART_DetailIcon");
         AssertNear(20 - (20 * overflow / (text + 20)), icon.Bounds.Width);
         AssertNear(text - (text * overflow / (text + 20)), end.Bounds.Width);
+        AssertNear(9.5, icon.Bounds.Width);
+        AssertNear(330.5, end.Bounds.Width);
     });
 
     [AvaloniaFact]

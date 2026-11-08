@@ -19,7 +19,7 @@
       "rect": {
         "x": 2,
         "y": 4,
-        "w": 98.64,
+        "w": 92.92,
         "h": 36
       },
       "cssVars": {
@@ -51,7 +51,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "98.6406px",
+        "width": "92.9219px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -87,14 +87,14 @@
           "rect": {
             "x": 2,
             "y": 4,
-            "w": 98.64,
+            "w": 92.92,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "98.6406px",
+            "width": "92.9219px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -138,9 +138,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 104.64,
+        "x": 98.92,
         "y": 4,
-        "w": 101.34,
+        "w": 97.38,
         "h": 36
       },
       "cssVars": {
@@ -172,7 +172,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "101.344px",
+        "width": "97.375px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -206,16 +206,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 104.64,
+            "x": 98.92,
             "y": 4,
-            "w": 101.34,
+            "w": 97.38,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "101.344px",
+            "width": "97.375px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -259,9 +259,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 209.98,
+        "x": 200.3,
         "y": 4,
-        "w": 81.67,
+        "w": 77.69,
         "h": 36
       },
       "cssVars": {
@@ -293,7 +293,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "81.6719px",
+        "width": "77.6875px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -327,16 +327,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 209.98,
+            "x": 200.3,
             "y": 4,
-            "w": 81.67,
+            "w": 77.69,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "81.6719px",
+            "width": "77.6875px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -384,7 +384,7 @@
       "rect": {
         "x": 2,
         "y": 48,
-        "w": 95.72,
+        "w": 90.3,
         "h": 36
       },
       "cssVars": {
@@ -416,7 +416,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "95.7188px",
+        "width": "90.2969px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -452,14 +452,14 @@
           "rect": {
             "x": 2,
             "y": 48,
-            "w": 95.72,
+            "w": 90.3,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "95.7188px",
+            "width": "90.2969px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -506,9 +506,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 101.72,
+        "x": 96.3,
         "y": 48,
-        "w": 101.34,
+        "w": 97.38,
         "h": 36
       },
       "cssVars": {
@@ -540,7 +540,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "101.344px",
+        "width": "97.375px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -574,16 +574,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 101.72,
+            "x": 96.3,
             "y": 48,
-            "w": 101.34,
+            "w": 97.38,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "101.344px",
+            "width": "97.375px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -630,9 +630,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 207.06,
+        "x": 197.67,
         "y": 48,
-        "w": 81.67,
+        "w": 77.69,
         "h": 36
       },
       "cssVars": {
@@ -664,7 +664,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "81.6719px",
+        "width": "77.6875px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -698,16 +698,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 207.06,
+            "x": 197.67,
             "y": 48,
-            "w": 81.67,
+            "w": 77.69,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "81.6719px",
+            "width": "77.6875px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -755,7 +755,7 @@
       "rect": {
         "x": 2,
         "y": 92,
-        "w": 110.55,
+        "w": 106.44,
         "h": 36
       },
       "cssVars": {
@@ -787,7 +787,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "110.547px",
+        "width": "106.438px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -823,14 +823,14 @@
           "rect": {
             "x": 2,
             "y": 92,
-            "w": 110.55,
+            "w": 106.44,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "110.547px",
+            "width": "106.438px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -874,9 +874,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 116.55,
+        "x": 112.44,
         "y": 92,
-        "w": 134.23,
+        "w": 127.41,
         "h": 36
       },
       "cssVars": {
@@ -908,7 +908,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "134.234px",
+        "width": "127.406px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -942,16 +942,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 116.55,
+            "x": 112.44,
             "y": 92,
-            "w": 134.23,
+            "w": 127.41,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "134.234px",
+            "width": "127.406px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -998,7 +998,7 @@
       "rect": {
         "x": 2,
         "y": 136,
-        "w": 107.53,
+        "w": 102.89,
         "h": 36
       },
       "cssVars": {
@@ -1030,7 +1030,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "107.531px",
+        "width": "102.891px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -1066,14 +1066,14 @@
           "rect": {
             "x": 2,
             "y": 136,
-            "w": 107.53,
+            "w": 102.89,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "107.531px",
+            "width": "102.891px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -1119,9 +1119,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 113.53,
+        "x": 108.89,
         "y": 136,
-        "w": 122.56,
+        "w": 118.59,
         "h": 36
       },
       "cssVars": {
@@ -1153,7 +1153,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "122.562px",
+        "width": "118.594px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -1187,16 +1187,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 113.53,
+            "x": 108.89,
             "y": 136,
-            "w": 122.56,
+            "w": 118.59,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "122.562px",
+            "width": "118.594px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -1243,7 +1243,7 @@
       "rect": {
         "x": 2,
         "y": 194.34,
-        "w": 69.91,
+        "w": 69.3,
         "h": 27.3
       },
       "cssVars": {
@@ -1275,7 +1275,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "69.9062px",
+        "width": "69.2969px",
         "height": "27.2969px",
         "min-height": "27.3px",
         "min-width": "0px",
@@ -1311,14 +1311,14 @@
           "rect": {
             "x": 2,
             "y": 194.34,
-            "w": 69.91,
+            "w": 69.3,
             "h": 27.3
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "69.9062px",
+            "width": "69.2969px",
             "height": "27.2969px",
             "min-height": "27.3px",
             "min-width": "0px",
@@ -1363,9 +1363,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 75.91,
+        "x": 75.3,
         "y": 190,
-        "w": 98.64,
+        "w": 92.92,
         "h": 36
       },
       "cssVars": {
@@ -1397,7 +1397,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "98.6406px",
+        "width": "92.9219px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -1431,16 +1431,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 75.91,
+            "x": 75.3,
             "y": 190,
-            "w": 98.64,
+            "w": 92.92,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "98.6406px",
+            "width": "92.9219px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -1485,9 +1485,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 178.55,
+        "x": 172.22,
         "y": 180,
-        "w": 113.81,
+        "w": 107.77,
         "h": 56
       },
       "cssVars": {
@@ -1519,7 +1519,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "113.812px",
+        "width": "107.766px",
         "height": "56px",
         "min-height": "56px",
         "min-width": "0px",
@@ -1553,16 +1553,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 178.55,
+            "x": 172.22,
             "y": 180,
-            "w": 113.81,
+            "w": 107.77,
             "h": 56
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "113.812px",
+            "width": "107.766px",
             "height": "56px",
             "min-height": "56px",
             "min-width": "0px",
@@ -2098,7 +2098,7 @@
       "rect": {
         "x": 2,
         "y": 408,
-        "w": 95.72,
+        "w": 91.17,
         "h": 36
       },
       "cssVars": {
@@ -2130,7 +2130,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "95.7188px",
+        "width": "91.1719px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -2166,14 +2166,14 @@
           "rect": {
             "x": 2,
             "y": 408,
-            "w": 95.72,
+            "w": 91.17,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "95.7188px",
+            "width": "91.1719px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -2219,9 +2219,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 101.72,
+        "x": 97.17,
         "y": 408,
-        "w": 106.75,
+        "w": 101.83,
         "h": 36
       },
       "cssVars": {
@@ -2253,7 +2253,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "106.75px",
+        "width": "101.828px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -2287,16 +2287,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 101.72,
+            "x": 97.17,
             "y": 408,
-            "w": 106.75,
+            "w": 101.83,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "106.75px",
+            "width": "101.828px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -2341,7 +2341,7 @@
       "rect": {
         "x": 2,
         "y": 452,
-        "w": 98.48,
+        "w": 96.41,
         "h": 36
       },
       "cssVars": {
@@ -2373,7 +2373,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "98.4844px",
+        "width": "96.4062px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -2409,14 +2409,14 @@
           "rect": {
             "x": 2,
             "y": 452,
-            "w": 98.48,
+            "w": 96.41,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "98.4844px",
+            "width": "96.4062px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -2459,9 +2459,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 104.48,
+        "x": 102.41,
         "y": 452,
-        "w": 83.66,
+        "w": 81.08,
         "h": 36
       },
       "cssVars": {
@@ -2493,7 +2493,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "83.6562px",
+        "width": "81.0781px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -2527,16 +2527,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 104.48,
+            "x": 102.41,
             "y": 452,
-            "w": 83.66,
+            "w": 81.08,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "83.6562px",
+            "width": "81.0781px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -2579,9 +2579,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 192.14,
+        "x": 187.48,
         "y": 452,
-        "w": 112.7,
+        "w": 110.44,
         "h": 36
       },
       "cssVars": {
@@ -2613,7 +2613,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "112.703px",
+        "width": "110.438px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -2647,16 +2647,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 192.14,
+            "x": 187.48,
             "y": 452,
-            "w": 112.7,
+            "w": 110.44,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "112.703px",
+            "width": "110.438px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -3312,7 +3312,7 @@
       "rect": {
         "x": 18,
         "y": 627,
-        "w": 63.42,
+        "w": 62.13,
         "h": 25
       },
       "cssVars": {
@@ -3344,7 +3344,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "63.4219px",
+        "width": "62.125px",
         "height": "25px",
         "min-height": "25px",
         "min-width": "auto",
@@ -3380,14 +3380,14 @@
           "rect": {
             "x": 18,
             "y": 627,
-            "w": 63.42,
+            "w": 62.13,
             "h": 25
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "63.4219px",
+            "width": "62.125px",
             "height": "25px",
             "min-height": "25px",
             "min-width": "0px",
@@ -3434,7 +3434,7 @@
       "rect": {
         "x": 18,
         "y": 675.5,
-        "w": 56.2,
+        "w": 54.42,
         "h": 25
       },
       "cssVars": {
@@ -3466,7 +3466,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "56.2031px",
+        "width": "54.4219px",
         "height": "25px",
         "min-height": "25px",
         "min-width": "auto",
@@ -3502,14 +3502,14 @@
           "rect": {
             "x": 18,
             "y": 675.5,
-            "w": 56.2,
+            "w": 54.42,
             "h": 25
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "56.2031px",
+            "width": "54.4219px",
             "height": "25px",
             "min-height": "25px",
             "min-width": "0px",
@@ -3554,9 +3554,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 330.13,
+        "x": 332.33,
         "y": 675,
-        "w": 41.88,
+        "w": 39.67,
         "h": 25
       },
       "cssVars": {
@@ -3588,7 +3588,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "41.875px",
+        "width": "39.6719px",
         "height": "25px",
         "min-height": "25px",
         "min-width": "auto",
@@ -3622,16 +3622,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 330.13,
+            "x": 332.33,
             "y": 675,
-            "w": 41.88,
+            "w": 39.67,
             "h": 25
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "41.875px",
+            "width": "39.6719px",
             "height": "25px",
             "min-height": "25px",
             "min-width": "0px",
@@ -3677,9 +3677,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 273.36,
+        "x": 279.08,
         "y": 717.5,
-        "w": 98.64,
+        "w": 92.92,
         "h": 36
       },
       "cssVars": {
@@ -3711,7 +3711,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "98.6406px",
+        "width": "92.9219px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "auto",
@@ -3745,16 +3745,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 273.36,
+            "x": 279.08,
             "y": 717.5,
-            "w": 98.64,
+            "w": 92.92,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "98.6406px",
+            "width": "92.9219px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",
@@ -3920,9 +3920,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 288.83,
+        "x": 290.59,
         "y": 812,
-        "w": 99.17,
+        "w": 97.41,
         "h": 36
       },
       "cssVars": {
@@ -3954,7 +3954,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "99.1719px",
+        "width": "97.4062px",
         "height": "36px",
         "min-height": "36px",
         "min-width": "0px",
@@ -3988,16 +3988,16 @@
             "button-native"
           ],
           "rect": {
-            "x": 288.83,
+            "x": 290.59,
             "y": 812,
-            "w": 99.17,
+            "w": 97.41,
             "h": 36
           },
           "computed": {
             "display": "flex",
             "position": "relative",
             "box-sizing": "border-box",
-            "width": "99.1719px",
+            "width": "97.4062px",
             "height": "36px",
             "min-height": "36px",
             "min-width": "0px",

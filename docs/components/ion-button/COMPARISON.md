@@ -19,8 +19,7 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI, which have different
-  widths, so a button with text is a little narrower here. Heights don't depend on the font.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), so buttons with text are as wide as Ionic's.
 - **Block and full buttons in a column** are 8 apart where CSS collapses their margins to 4. There are three such pairs in the
   scene, so everything below them sits 12 px lower in the frame. Avalonia has no margin collapsing.
 - **Solid's shadow is lighter at 2x.** Reading the column under the first button, from its edge: Chromium 165, 179, 204, 221,

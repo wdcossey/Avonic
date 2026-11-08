@@ -46,7 +46,7 @@ Each becomes a test.
 | 5 | The label raises `IonStyle` when it attaches and when `Position` changes, so the item gets `:item-label` and `:item-label-<position>` | `emitStyle`; measured `chg` |
 | 6 | Not inside a range | `inRange` |
 | 7 | Margins in an item: default slot `0 10`, start `0 10 16 10`, end `16 10 0 10`, or `16 7 0 7` beside a stacked or floating label, and no end margin-start in a toggle or radio item. Nested deeper, none | `::slotted(ion-label)`; measured `start`, `end`, `ea` |
-| 8 | Long text wraps and grows the item | measured `long`: 75 high, three 18 px lines |
+| 8 | Long text wraps and grows the item | measured `long`: 78 high, three 19 px lines (in Roboto, since #100) |
 | 9 | `.ion-text-nowrap`: one line, an ellipsis, clipped, including `h2` and `p` inside | measured `nowrap`, `nw-h2`, `nw-p` |
 | 10 | `.ion-text-wrap`: line height 1.5 of each element's own size, without clipping, except where `h1`–`h6` and `p` set their own | measured `wrap`, `wrap-h` |
 | 11 | `h1`–`h6` and `p`: sizes 24, 16, 14, 14, 14, 14, 14; weight normal; margins, and line heights 28.8, 19.2, normal, 20 | measured `heads` |

@@ -15,7 +15,7 @@
       "rect": {
         "x": 8,
         "y": 8,
-        "w": 22.47,
+        "w": 22.92,
         "h": 20
       },
       "cssVars": {
@@ -30,7 +30,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "22.4688px",
+        "width": "22.9219px",
         "height": "20px",
         "min-height": "0px",
         "min-width": "10px",
@@ -71,9 +71,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 34.92,
+        "x": 34.89,
         "y": 8,
-        "w": 30.06,
+        "w": 30.02,
         "h": 20
       },
       "cssVars": {
@@ -88,7 +88,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "30.0625px",
+        "width": "30.0156px",
         "height": "20px",
         "min-height": "0px",
         "min-width": "10px",
@@ -129,9 +129,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 69.44,
+        "x": 68.88,
         "y": 8,
-        "w": 34.73,
+        "w": 33.75,
         "h": 20
       },
       "cssVars": {
@@ -146,7 +146,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "34.7344px",
+        "width": "33.75px",
         "height": "20px",
         "min-height": "0px",
         "min-width": "10px",
@@ -187,9 +187,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 108.63,
+        "x": 106.59,
         "y": 8,
-        "w": 32.56,
+        "w": 30.58,
         "h": 20
       },
       "cssVars": {
@@ -204,7 +204,7 @@
         "display": "inline-block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "32.5625px",
+        "width": "30.5781px",
         "height": "20px",
         "min-height": "0px",
         "min-width": "10px",
@@ -298,9 +298,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 351.53,
+        "x": 351.08,
         "y": 53.5,
-        "w": 22.47,
+        "w": 22.92,
         "h": 20
       },
       "cssVars": {
@@ -315,7 +315,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "22.4688px",
+        "width": "22.9219px",
         "height": "20px",
         "min-height": "auto",
         "min-width": "10px",
@@ -359,7 +359,7 @@
       "rect": {
         "x": 16,
         "y": 102,
-        "w": 15.23,
+        "w": 15.47,
         "h": 20
       },
       "cssVars": {
@@ -374,7 +374,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "15.2344px",
+        "width": "15.4688px",
         "height": "20px",
         "min-height": "auto",
         "min-width": "10px",
@@ -413,9 +413,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 331.3,
+        "x": 333.5,
         "y": 149.5,
-        "w": 42.7,
+        "w": 40.5,
         "h": 20
       },
       "cssVars": {
@@ -430,7 +430,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "42.7031px",
+        "width": "40.5px",
         "height": "20px",
         "min-height": "auto",
         "min-width": "10px",
@@ -472,9 +472,9 @@
         "hydrated"
       ],
       "rect": {
-        "x": 334.23,
+        "x": 336.41,
         "y": 197.5,
-        "w": 39.77,
+        "w": 37.59,
         "h": 20
       },
       "cssVars": {
@@ -489,7 +489,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "39.7656px",
+        "width": "37.5938px",
         "height": "20px",
         "min-height": "auto",
         "min-width": "10px",
@@ -530,7 +530,7 @@
       "rect": {
         "x": 16,
         "y": 730.69,
-        "w": 15.23,
+        "w": 15.47,
         "h": 20
       },
       "cssVars": {
@@ -545,7 +545,7 @@
         "display": "block",
         "position": "static",
         "box-sizing": "border-box",
-        "width": "15.2344px",
+        "width": "15.4688px",
         "height": "20px",
         "min-height": "auto",
         "min-width": "10px",

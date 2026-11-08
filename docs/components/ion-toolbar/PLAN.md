@@ -72,8 +72,8 @@ Each becomes a test, named after its number.
 |---|---|---|
 | **Toolbar** | | |
 | T1 | 56 high at least, the full width, `#424242` text on the background colour, no padding of its own | `toolbar.md.css`; measured `#t1` 390×56, `rgb(66,66,66)` on `#fff` |
-| T2 | md's slot order: start, the default slot, secondary, primary, end. The default slot's part takes what's left and can shrink to 0; everything is centred vertically | `order: 2, 3, 4, 5, 6`; `.toolbar-content { flex: 1; min-width: 0 }`; measured `#t1`: start 4–52, content 52–282.75, end 282.75–386; `#t2`: content 0–248.58, secondary 248.58–296.58, primary 296.58–386 |
-| T3 | RTL mirrors it: start on the right | measured `#t9`: start at 317.19, end at 4 |
+| T2 | md's slot order: start, the default slot, secondary, primary, end. The default slot's part takes what's left and can shrink to 0; everything is centred vertically | `order: 2, 3, 4, 5, 6`; `.toolbar-content { flex: 1; min-width: 0 }`; measured `#t1`: start 4–52, content 52–285.28, end 285.28–386; `#t2`: content 0–251.72, secondary 251.72–299.72, primary 299.72–386 (in Roboto, since #100) |
+| T3 | RTL mirrors it: start on the right | measured `#t9`: start at 319.27, end at 4 (in Roboto, since #100) |
 | T4 | The keyboard goes through the slots in Ionic's slot order, start, secondary, default, primary, end, whatever the visual order | the shadow tree's slot order; measured with Tab on `s3`: `sta, sec, def, pri, end` |
 | T5 | A long title ends with an ellipsis inside what's left | `.toolbar-title`; measured `#tlong` |
 | T6 | `Color` paints the background base and the text contrast. An unknown `Color` leaves the background transparent and the text inherited | `:host(.ion-color)`; measured `#t2`, `#t3` |
@@ -93,13 +93,13 @@ Each becomes a test, named after its number.
 | F2 | The last toolbar in a footer gets `Avonic.SafeAreaBottom` as bottom padding, also when a template made it | `.footer-toolbar-padding ion-toolbar:last-of-type`; measured `s2` `#t6` 66 high |
 | F3 | Automation: a footer is the content-info landmark | `role="contentinfo"`; measured |
 | **Title** | | |
-| Ti1 | 20 at weight 500, letter spacing 0.0125 em, 20 either side, one line ending in an ellipsis, filling the toolbar's content part, centred, inheriting the text colour | `title.md.css`; measured `#ti1`: 52–282.75, text 72–262.75, 23 high |
-| Ti2 | `Size="Small"`: 15 at normal weight, and it wraps | `:host(.title-small)`; measured `#tsmall` 17 high, `white-space: normal` |
+| Ti1 | 20 at weight 500, letter spacing 0.0125 em, 20 either side, one line ending in an ellipsis, filling the toolbar's content part, centred, inheriting the text colour | `title.md.css`; measured `#ti1`: 52–285.28, text 72–265.28, 24 high (in Roboto, since #100) |
+| Ti2 | `Size="Small"`: 15 at normal weight, and it wraps | `:host(.title-small)`; measured `#tsmall` 18 high (in Roboto, since #100), `white-space: normal` |
 | Ti3 | `Size="Large"` looks like the default in md. The title has Ionic's `title-*` class as `:size-default`, `:size-small` or `:size-large` | measured `#tlarge`; `title-${size}` |
 | Ti4 | `Color` paints base. Unknown inherits. `Avonic.Title.Color` sets the text | `:host(.ion-color)` |
 | **Buttons, and a button in them** | | |
 | B1 | A button in `AvonicButtons`, at any depth, with no `Fill` is clear. A `Fill` it's given wins. A button in a toolbar outside `AvonicButtons` stays solid | `fill = this.inToolbar ? 'clear' : 'solid'`, `inToolbar = closest('ion-buttons')`; measured `#menu` clear, `s2` `#loose` solid 36 high |
-| B2 | The buttons sit in a row, centred. Each is 32 high at least, padded 8 and 3, 2 apart from its neighbours with no margin above, 2 round, with no shadow, even solid | `buttons.md.css`; measured `#edit` 51.25×32, `#psolid` |
+| B2 | The buttons sit in a row, centred. Each is 32 high at least, padded 8 and 3, 2 apart from its neighbours with no margin above, 2 round, with no shadow, even solid | `buttons.md.css`; measured `#edit` 48.72×32 (in Roboto, since #100), `#psolid` |
 | B3 | Icon-only and clear: 48×48, padded 12, round, no margin, an icon of 1.8 em (25.2), and the unbounded ripple. Icon-only and solid: 32 high, padded 8 and 0 | measured `#menu`, `s2` `#ioo` 41.19×32; `rippleType` |
 | B4 | An icon at the start of a button is 1.4 em with 0.3 em after it, and at the end 1.4 em with 0.4 em before it | measured `s2` `#ic1` 19.6, margin 5.88; `#ic2` 7.84 |
 | B5 | In an uncoloured toolbar: clear and outline take the toolbar's text colour, and so does outline's border; solid is the toolbar's text colour behind its background colour. A button's own `Color` wins | measured `#t4`: `rgb(66,66,66)`; solid `rgb(66,66,66)` behind white; `#pclear` green |

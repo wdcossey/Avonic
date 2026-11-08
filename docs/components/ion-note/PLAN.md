@@ -49,7 +49,7 @@ Each becomes a test.
 | 13 | A button item's name includes the note's text | native `<button>` |
 | 14 | RTL: an end note sits at the left, with its margin on the right | measured `rtl`: x = 16, margin-right 16 |
 | 15 | With `.ion-text-nowrap` on it, it's one line. In a label with that class, also with an ellipsis | The global class; `white-space` inherits; measured `nw-n`: 703 wide, cut off by the label's 358 |
-| 16 | In an `AvonicItemDivider`'s slots, 6, 7 and 8 hold too, as `item-divider.md.css` repeats both rules word for word. Added by [#74](https://github.com/wdcossey/Avonic/issues/74) | `::slotted(ion-note)`, `::slotted(ion-note[slot])` in `item-divider.md.css`; measured as elements 13 and 14 in [`ref/`](ref/README.md): 11 px, padding `18px 0 10px`, the long one 342 × 52 at x = 32, y = 0, in a divider of 53. `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt) has the same numbers |
+| 16 | In an `AvonicItemDivider`'s slots, 6, 7 and 8 hold too, as `item-divider.md.css` repeats both rules word for word. Added by [#74](https://github.com/wdcossey/Avonic/issues/74) | `::slotted(ion-note)`, `::slotted(ion-note[slot])` in `item-divider.md.css`; measured as elements 13 and 14 in [`ref/`](ref/README.md): 11 px, padding `18px 0 10px`, the long one 342 × 54 at x = 32, y = 0, in a divider of 55 (in Roboto, since #100). `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt) has the same numbers |
 
 ## Design
 

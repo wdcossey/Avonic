@@ -46,7 +46,8 @@ public class AvonicRippleEffectCaptureTests
                     ripple,
                     new TextBlock
                     {
-                        Text = "Tap me", Foreground = new SolidColorBrush(Primary), FontSize = 16,
+                        // Roboto, as the page's text is in Chromium, where html.md sets it on everything.
+                        Text = "Tap me", Foreground = new SolidColorBrush(Primary), FontSize = 16, FontFamily = new FontFamily("Roboto"),
                         HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
                     },
                 },

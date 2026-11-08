@@ -21,8 +21,8 @@ and RTL.
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines are
-  taller: an 11 px line is 15 against 12, so the row beside a stacked label is 58 against 55.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), and every row in an item is the height Ionic's
+  is. A note on its own is 16.5 high here and 19 in Chromium, where it's inline in a block whose line is that of 16 px text.
 - **Long in the end slot.** It wraps within 342, as Ionic's does, since #71. As it's aligned left, its box is as wide as its longest line, where Ionic's is 342. The text is in the same place.
 - **The icon in the tall row** matches since #72, when the item's `::slotted(ion-icon)` rules came to reach an icon in a panel.
 
@@ -57,7 +57,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicNot
 | 13 | A button item's name includes its text | native `<button>` | match |
 | 14 | RTL | an end note at x = 16, with its margin on the right | match |
 | 15 | In a nowrap label | `white-space: nowrap`, cut off by the label | match, with the class on the note or on a label. See the plan |
-| 16 | In a divider's slots: 6, 7 and 8 again, from `item-divider.md.css` | Elements 13 and 14 in [`ref/`](ref/README.md): 11 px, padding `18px 0 10px`, margin `0 0 0 16px`; the long one 342 × 52 at x = 32, y = 0, in a divider of 53. The same as `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt) | match, since [#74](https://github.com/wdcossey/Avonic/issues/74). Before it, 14 px and centred. The height is 58 in 59 here, from Segoe UI's taller lines, as for the stacked row above; the width is the longest line, as in the end slot |
+| 16 | In a divider's slots: 6, 7 and 8 again, from `item-divider.md.css` | Elements 13 and 14 in [`ref/`](ref/README.md): 11 px, padding `18px 0 10px`, margin `0 0 0 16px`; the long one 342 × 54 at x = 32, y = 0, in a divider of 55. The same as `h3` in [`ion-item`'s cases](../ion-item/ref/layout/cases.txt) | match, since [#74](https://github.com/wdcossey/Avonic/issues/74). Before it, 14 px and centred. The height is 54 in 55 here too; the width is the longest line, as in the end slot |
 
 ## Deliberate differences and known gaps
 

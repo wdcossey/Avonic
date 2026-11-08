@@ -14,9 +14,8 @@ fixed, stacked, stacked and focused, floating (pushed out of its row, in both), 
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's lines
-  are taller, so rows that grow with their text are too: the primary row is 65 against 61, and the headings row is
-  121 against 113, of which 4 is the difference below.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), so every row is the height Ionic's is, the
+  primary row 62, except the headings row, 118 against 113, which is the difference below.
 - **Margins between headings** add up to 4 where CSS collapses them to 2. See the plan.
 - **RTL,** the last row. The reference sets `dir` on a `div`, and Ionic's `label-rtl` only reads `document.dir`, so its
   text shrinks to the left, ending at x = 284. With `dir` on the document, Ionic measures 105.5 to 374, which is what
@@ -44,7 +43,7 @@ Ionic results were measured in Chromium with `ion-app`. For rules no Ionic 8 com
 | 5 | `ionStyle` on attach and on a position change | `item-label`, `item-label-stacked`, 48 → 55 → 48 | match. See below for a moved label |
 | 6 | Not inside a range | `inRange` | match, against a stub range |
 | 7 | Margins per slot | `0 10`, `0 10 16 10`, `16 10 0 10`, or `16 7 0 7` beside a stacked label | match |
-| 8 | Long text wraps and grows the item | 3 lines of 18, row 75 | match. The height depends on the font |
+| 8 | Long text wraps and grows the item | 3 lines of 19, row 78 | match. Avalonia's lines are 18.75 |
 | 9 | `ion-text-nowrap` | one line, ellipsis, `overflow: hidden`, also on `h2` and `p` | match |
 | 10 | `ion-text-wrap` | 24 per line, 48 for 32 px text; `h2` 19.2 and `p` 20 keep theirs | match, except a sized `TextBlock` deeper than a panel. See the plan |
 | 11 | `h1`–`h6`, `p` | 24, 16, 14, 14, 14, 14, 14; weight 400; 28.8, 19.2, normal, 20 | match directly or in a panel, but not deeper. See the plan. Layout rounding makes a 19.2 line 20 high |

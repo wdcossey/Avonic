@@ -37,9 +37,9 @@ The first chip pressed with a mouse at its centre, 160 ms in, as `render.js --ta
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI. Segoe UI's line is 19 px at 14,
-  against Arial's 16, so an outline chip, whose border adds 2, is 33 high rather than 32, and the long chip's two lines are 49.5 high
-  rather than 44. Everything below them sits a little lower. With a child of a known height the box is exact, which the tests check.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)). A line of 14 px text is 16.4 high, which Chromium
+  rounds to 16, so the long chip's two lines are 45 high here against 44. The other chips are 32, as in Ionic. With a child of a
+  known height the box is exact, which the tests check.
 - **The press frame's ripple is smaller.** Both are the same ripple, from `ion-ripple-effect`, which is done. `render.js` names a
   frame for when it asks for the screenshot, and taking it isn't instant, so Chromium's most likely shows a later moment. Not measured. The hover background under it,
   0.16, is the same, as hover beats a press: measured.
@@ -56,7 +56,7 @@ takes the item's stacked class away: `ion-item` keeps one set of `ionStyle` clas
 
 **Match.** The chips are at x = 20, `4px 16px 4px 4px`, and end at 370, `4px 4px 4px 16px`, in the item and the divider, and
 `7px 4px 7px 16px` beside the stacked label, which the tests check. Before #88 they were at x = 16 with no top or bottom margin.
-The avatar and thumbnail are where they were. The text is a little lower, from the fonts, as above.
+The avatar and thumbnail are where they were, and every row is the height Ionic's is.
 
 ## Found here, not by the tests
 
@@ -139,7 +139,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 |---|---|---|---|
 | 1 | A row as wide as its content | 68.36 by 32 for `Default`; padding 12 and 6, min-height 32, margin 4, radius 16, 14 px; children centred | match, with the font's width |
 | 2 | Plain | `rgba(0, 0, 0, 0.12)` behind `rgba(0, 0, 0, 0.87)` | match |
-| 3 | Outline | Transparent, `1px solid rgba(0, 0, 0, 0.32)`, 70.36 by 32 | match. 33 high with Segoe UI's line, above |
+| 3 | Outline | Transparent, `1px solid rgba(0, 0, 0, 0.32)`, 70.36 by 32 | match |
 | 4 | `Color` | `rgba(0, 84, 233, 0.08)` behind `rgb(0, 74, 205)`; outline transparent with `rgba(0, 84, 233, 0.32)`; danger icon `rgb(173, 0, 13)` | match |
 | 5 | Unknown `Color` | Transparent, the text inherited, an outline's border the current colour; inside a coloured ancestor, its base and shade | match |
 | 6 | Disabled | 0.4; a tap reaches what's behind it; not activated | match. A disabled panel fades it too: deliberate, as the button |
@@ -171,6 +171,5 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 
 | Gap | Why |
 |---|---|
-| Fonts | Roboto isn't installed, as for every control so far |
 | `::slotted(ion-avatar)` in a chip | Not in this PR or #88; it goes in `Styles/Chip.axaml` |
 | Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container's width | `nw`: 308.84 wide in a 200 px container, past its edge | Avalonia arranges a child within the space it has, so the chip can't overflow its parent. Letting its measure overflow changed nothing, as deliberate breakage showed |

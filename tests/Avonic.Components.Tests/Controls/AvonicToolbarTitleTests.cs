@@ -34,8 +34,9 @@ public class AvonicToolbarTitleTests
         var end = ToolbarTest.Box((Control)toolbar.EndContent!, toolbar);
         Assert.Equal(52, box.X);
         ToolbarTest.Near(end.X, box.Right);
-        // As high as its line, which is 23 in Chromium's Arial and 27 in Avalonia's Segoe UI, as Roboto isn't installed.
+        // As high as its line, which is 24 in Chromium and here.
         Assert.Equal(Text(title).Bounds.Height, box.Height);
+        Assert.Equal(24, box.Height);
         ToolbarTest.Near(28, box.Center.Y, 1);
         Assert.Equal(new Thickness(20, 0), title.Padding);
         Assert.Equal(72, ToolbarTest.Box(Text(title), toolbar).X);

@@ -20,7 +20,7 @@ From the top: a list of two groups, a label directly in a group, and an inset li
 
 **Match,** apart from these visible differences:
 
-- **Text.** Roboto isn't installed on this machine, so Chromium uses Arial and Avalonia uses Segoe UI.
+- **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)).
 - **A label directly in a group** is 16 in Ionic, from the page, and smaller here, at Avalonia's default. That's the open
   question of the default text size outside a host. The list after it starts higher for the same reason.
 
