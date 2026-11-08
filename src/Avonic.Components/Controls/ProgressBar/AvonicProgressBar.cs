@@ -101,6 +101,10 @@ public class AvonicProgressBar : TemplatedControl
 
     public AvonicProgressBar()
     {
+        // :host(.progress-bar-reversed) { transform: scaleX(-1) }. At style priority, so that an app's transform replaces it,
+        // as an outer stylesheet's does in CSS. Bound once, here, before any style applies: of two values at one priority the
+        // later wins, so a frame made when the bar is reversed would beat an app's style that was already there.
+        Bind(RenderTransformProperty, _reversal, BindingPriority.Style);
         UpdatePseudoClasses();
     }
 
@@ -126,7 +130,7 @@ public class AvonicProgressBar : TemplatedControl
     private TimeSpan _renderedAt;
     private IDisposable? _frame;
     private readonly List<Visual> _hiddenBy = [];
-    private IDisposable? _reversedFrame;
+    private readonly ReversalTransform _reversal = new();
     private ProgressBarAutomationPeer? _peer;
 
     /// <summary>Whether a frame is requested: only while something moves.</summary>
@@ -206,6 +210,12 @@ public class AvonicProgressBar : TemplatedControl
                 visual.PropertyChanged += OnHiddenVisualChanged;
                 _hiddenBy.Add(visual);
             }
+        }
+
+        // Nothing in the chain is hidden, so the effective visibility hasn't caught up yet: look again next frame
+        if (_hiddenBy.Count == 0)
+        {
+            _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
         }
     }
 
@@ -291,6 +301,12 @@ public class AvonicProgressBar : TemplatedControl
         {
             UpdatePseudoClasses();
         }
+        else if (change.Property == IsVisibleProperty && _attached && !change.GetNewValue<bool>())
+        {
+            // Hidden itself: stop now, rather than at the next frame, so a quick hide and show still restarts it
+            StopFrames();
+            WaitUntilShown();
+        }
     }
 
     /// <summary>
@@ -319,17 +335,7 @@ public class AvonicProgressBar : TemplatedControl
         var reversed = IsEffectivelyReversed;
         PseudoClasses.Set(":reversed", reversed);
 
-        // :host(.progress-bar-reversed) { transform: scaleX(-1) }. At style priority, so that an app's transform replaces it,
-        // as an outer stylesheet's does in CSS.
-        if (reversed && _reversedFrame is null)
-        {
-            _reversedFrame = SetValue(RenderTransformProperty, new ScaleTransform(-1, 1), BindingPriority.Style);
-        }
-        else if (!reversed && _reversedFrame is not null)
-        {
-            _reversedFrame.Dispose();
-            _reversedFrame = null;
-        }
+        _reversal.Set(reversed);
     }
 
     // ── Frames ───────────────────────────────────────────────────────────────────────────────
@@ -553,5 +559,44 @@ internal sealed class CssTransition
         {
             Snap(to);
         }
+    }
+}
+
+/// <summary>
+/// <c>scaleX(-1)</c> while the bar is reversed, and nothing otherwise, so that the binding gives way to whatever else sets the
+/// transform. One binding for the bar's life, so that it keeps its place among the styles.
+/// </summary>
+internal sealed class ReversalTransform : IObservable<BindingValue<ITransform?>>
+{
+    private readonly List<IObserver<BindingValue<ITransform?>>> _observers = [];
+    private bool _reversed;
+
+    public void Set(bool reversed)
+    {
+        if (reversed == _reversed)
+        {
+            return;
+        }
+
+        _reversed = reversed;
+        foreach (var observer in _observers.ToArray())
+        {
+            observer.OnNext(Current);
+        }
+    }
+
+    private BindingValue<ITransform?> Current =>
+        _reversed ? new ScaleTransform(-1, 1) : BindingValue<ITransform?>.Unset;
+
+    public IDisposable Subscribe(IObserver<BindingValue<ITransform?>> observer)
+    {
+        _observers.Add(observer);
+        observer.OnNext(Current);
+        return new Unsubscriber(_observers, observer);
+    }
+
+    private sealed class Unsubscriber(List<IObserver<BindingValue<ITransform?>>> observers, IObserver<BindingValue<ITransform?>> observer) : IDisposable
+    {
+        public void Dispose() => observers.Remove(observer);
     }
 }

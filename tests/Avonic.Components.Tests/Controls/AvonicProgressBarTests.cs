@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -468,6 +469,29 @@ public class AvonicProgressBarTests
         AssertSpan((0, 107.4), f.Span("PART_Progress"));
     });
 
+    [AvaloniaFact]
+    public void B10_An_Apps_Style_Transform_Against_A_Later_Reversal() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        using var f = new Fixture(new AvonicProgressBar { Value = 0.3 });
+        f.Window.Styles.Add(new Avalonia.Styling.Style(x => x.OfType<AvonicProgressBar>())
+        {
+            Setters = { new Avalonia.Styling.Setter(Visual.RenderTransformProperty, new TranslateTransform(0, 0)) },
+        });
+        Dispatcher.UIThread.RunJobs();
+
+        f.Bar.Reversed = true;
+        AssertSpan((0, 107.4), f.Span("PART_Progress"));
+        f.Bar.Reversed = false;
+        f.Bar.Reversed = true;
+        AssertSpan((0, 107.4), f.Span("PART_Progress"));
+
+        // and with the app's style gone, the reversal shows
+        f.Window.Styles.RemoveAt(f.Window.Styles.Count - 1);
+        Dispatcher.UIThread.RunJobs();
+        AssertSpan((250.6, 358), f.Span("PART_Progress"));
+    });
+
     // ── B11: right to left ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -680,9 +704,17 @@ public class AvonicProgressBarTests
         f.Bar.Tick();
         AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
 
+        // Hiding and showing the bar itself within one frame restarts it too
+        clock.At(1300);
+        f.Bar.IsVisible = false;
+        f.Bar.IsVisible = true;
+        clock.At(1550);
+        f.Bar.Tick();
+        AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+
         // and a change made while hidden doesn't ease
         f.Bar.IsVisible = false;
-        clock.At(1500);
+        clock.At(1600);
         f.Bar.Type = ProgressBarType.Determinate;
         f.Bar.IsVisible = true;
         AssertSpan((0, 0.3 * W), f.Span("PART_Progress"));
