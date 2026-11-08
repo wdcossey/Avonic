@@ -193,8 +193,9 @@
     </Style>
 
     <!-- ::slotted(*) .button-clear and .button-outline { color: initial }: color: var(color) is invalid, so the text
-         inherits the toolbar's, in every state. A button that's neither solid nor default is one of the two. -->
-    <Style Selector="c|AvonicButton:in-buttons:not(:fill-solid):not(:fill-default)">
+         inherits the toolbar's, in every state. Not solid: a default button's text inherits anyway, as the
+         theme's rule for it gives the same. -->
+    <Style Selector="c|AvonicButton:in-buttons:not(:fill-solid)">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />

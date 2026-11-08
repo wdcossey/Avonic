@@ -415,6 +415,24 @@ public class AvonicToolbarTests
     });
 
     [AvaloniaFact]
+    public void T11_Each_Type_Of_Child_Keeps_What_It_Said() => InstalledTheme.Run(_ =>
+    {
+        // childrenStyles is a map by tag name, merged at render: a label doesn't replace the title's.
+        var toolbar = new AvonicToolbar
+        {
+            StartContent = new AvonicLabel { Content = "Label" },
+            Content = new AvonicTitle { Content = "Title", Size = TitleSize.Large },
+        };
+        var page = new StackPanel { Children = { toolbar } };
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-large", Visual.OpacityProperty, 0.25));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-label", Avalonia.Layout.Layoutable.MarginProperty, new Thickness(3)));
+        using var scene = ToolbarTest.Show(page);
+
+        Assert.Equal(0.25, toolbar.Opacity);
+        Assert.Equal(new Thickness(3), toolbar.Margin);
+    });
+
+    [AvaloniaFact]
     public void T11_The_Toolbar_Stops_Ion_Style_So_An_Item_Around_It_Hears_Nothing() => InstalledTheme.Run(_ =>
     {
         // childrenStyle calls stopPropagation: a label in a toolbar in an item isn't the item's label.
