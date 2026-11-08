@@ -61,7 +61,24 @@
                 <c:AvonicIcon IconName="close-circle" />
             </c:AvonicChip>
 
+            <!-- Click, an extension: every tap counts, a quick second one too. -->
+            <WrapPanel>
+                <c:AvonicChip Name="FilterChip" Click="OnFilterClick">
+                    <c:AvonicIcon IconName="funnel" />
+                    <c:AvonicLabel Content="Filter: off" />
+                </c:AvonicChip>
+                <TextBlock Name="ClickCount" Text="0 clicks" VerticalAlignment="Center" Margin="8,0" />
+            </WrapPanel>
+
             <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicChip>
+                            <c:AvonicLabel Content="Start" />
+                        </c:AvonicChip>
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicLabel Content="A chip at the start" />
+                </c:AvonicItem>
                 <c:AvonicItem>
                     <c:AvonicLabel Content="In an item" />
                     <c:AvonicItem.EndContent>
@@ -70,6 +87,14 @@
                         </c:AvonicChip>
                     </c:AvonicItem.EndContent>
                 </c:AvonicItem>
+                <c:AvonicItemDivider>
+                    <c:AvonicLabel Content="In a divider" />
+                    <c:AvonicItemDivider.EndContent>
+                        <c:AvonicChip>
+                            <c:AvonicLabel Content="Chip" />
+                        </c:AvonicChip>
+                    </c:AvonicItemDivider.EndContent>
+                </c:AvonicItemDivider>
             </c:AvonicList>
         </StackPanel>
     </ScrollViewer>

@@ -43,6 +43,9 @@ Everything is listed and measured in [PLAN.md](../ion-badge/PLAN.md#avatar). In 
   a `Background` on it follows the radius.
 - **In an item's or a divider's slot** it's 40 × 40, with 8 above and below and 16 towards the content, so a row of 56. Beside a
   stacked label it's 7 above and below. Its own `Width` and `Height` beat the 40. A panel directly in a slot stands for the slot.
+  An app's plain `Margin` style beats the slot's, as a page's rule beats `::slotted` in CSS, except beside a stacked or
+  floating label, where the slot's 7 has an activator. The rules are in the theme's
+  `Styles/Item.axaml` and `Styles/ItemDivider.axaml`, as they're in `item.md.css`.
 
 `ion-img` doesn't exist yet ([#17](https://github.com/wdcossey/Avonic/issues/17)). Its PR adds the same rule for itself.
 
@@ -54,6 +57,4 @@ None.
 
 - At `50%`, a background on an avatar that isn't square is a stadium, where Ionic's is an ellipse. An image in it is cut to the
   ellipse. A `CornerRadius` has one radius per corner.
-- An app's plain style for `Margin` on every avatar doesn't reach one in an item's start or end slot, where Ionic's page rule
-  would beat the slot's. Use a class or set it on the avatar. See [PLAN.md](../ion-badge/PLAN.md#deliberate-differences).
 - `ion-chip`'s rules for an avatar go with `ion-chip`.

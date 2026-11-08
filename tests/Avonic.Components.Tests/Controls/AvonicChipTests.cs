@@ -1102,4 +1102,346 @@ public class AvonicChipTests
         scene.Window.KeyReleaseQwerty(PhysicalKey.Space, RawInputModifiers.None);
         scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
     }
+
+    // ── Behaviour 15: in an item's or a divider's slot ───────────────────────────────────────
+
+    /// <summary>
+    /// A chip in each slot of an item and a divider, and beside a stacked and a floating label. Measured: 4px 16px 4px 4px at
+    /// the start, 4px 4px 4px 16px at the end, in both, 4px in the default slot, and 7px 4px 7px 16px beside a stacked or
+    /// floating label, whose rule sets only the top and bottom.
+    /// </summary>
+    private static void AssertSlotMargins()
+    {
+        var itemStart = Chip("S");
+        var itemEnd = Chip("E");
+        var main = Chip("M");
+        var dividerStart = Chip("S");
+        var dividerEnd = Chip("E");
+        var stacked = Chip("E");
+        var floating = Chip("E");
+        using var scene = Themed(
+            new AvonicItem { StartContent = itemStart, Content = "x", EndContent = itemEnd },
+            new AvonicItem { Content = main },
+            new AvonicItemDivider { StartContent = dividerStart, Content = "x", EndContent = dividerEnd },
+            new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked }, EndContent = stacked },
+            new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Floating }, EndContent = floating });
+
+        Assert.Equal(new Thickness(4, 4, 16, 4), itemStart.Margin);
+        Assert.Equal(new Thickness(16, 4, 4, 4), itemEnd.Margin);
+        Assert.Equal(new Thickness(4), main.Margin);
+        Assert.Equal(new Thickness(4, 4, 16, 4), dividerStart.Margin);
+        Assert.Equal(new Thickness(16, 4, 4, 4), dividerEnd.Margin);
+        Assert.Equal(new Thickness(16, 7, 4, 7), stacked.Margin);
+        Assert.Equal(new Thickness(16, 7, 4, 7), floating.Margin);
+    }
+
+    [AvaloniaFact]
+    public void B15_In_A_Slot_It_Keeps_Its_Own_4_On_The_Sides_The_Slot_Does_Not_Set() => InstalledTheme.Run(_ => AssertSlotMargins());
+
+    [AvaloniaFact]
+    public void B15_In_A_Panel_In_A_Slot_It_Keeps_Its_4_And_The_Panel_Has_The_Slots_16() => InstalledTheme.Run(_ =>
+    {
+        var chip = Chip("P");
+        var panel = new StackPanel { Children = { chip } };
+        using var scene = Themed(new AvonicItem { StartContent = panel, Content = "x" });
+
+        // Measured c-panel: 4px all round.
+        Assert.Equal(new Thickness(4), chip.Margin);
+        Assert.Equal(new Thickness(0, 0, 16, 0), panel.Margin);
+    });
+
+    // The rules are in Item.axaml and ItemDivider.axaml, after the rule for any child in a slot. A plain rule in Chip.axaml would
+    // lose to it merged first and win merged last, so this fails with the rules back there.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B15_The_Slot_Rules_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
+        AvonicAvatarTests.InMergeOrder("Chip.axaml", first, AssertSlotMargins);
+
+    // Measured c-app: a page's .app-margin { margin: 3px } is 3px in the start slot, as a page's rule beats ::slotted.
+    [AvaloniaFact]
+    public void B15_An_Apps_Plain_Margin_Style_Beats_The_Slots() => InstalledTheme.Run(_ =>
+        AvonicAvatarTests.WithAppMargin<AvonicChip>(new Thickness(3), () => AvonicAvatarTests.AssertMarginInEverySlot(() => Chip("x"), new Thickness(3))));
+
+    // ── Extension: Click ─────────────────────────────────────────────────────────────────────
+
+    private static (AvonicChip Chip, Func<int> Clicks) Clicked(params object[] items)
+    {
+        var clicks = 0;
+        var chip = Bare(items);
+        chip.Click += (_, _) => clicks++;
+        return (chip, () => clicks);
+    }
+
+    private static void Click(Scene scene, Point point)
+    {
+        scene.Window.MouseDown(point, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(point, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    private static void Touch(Scene scene, Point down, Point up)
+    {
+        using var finger = scene.Window.TouchBegin(down, RawInputModifiers.None);
+        if (up != down)
+        {
+            scene.Window.TouchMove(finger, up, RawInputModifiers.None);
+        }
+
+        scene.Window.TouchEnd(finger, up, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    [AvaloniaFact]
+    public void E1_A_Mouse_Click_Raises_Click_On_Release()
+    {
+        var (chip, clicks) = Clicked();
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, clicks());
+
+        scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks());
+    }
+
+    // Measured: a click then a double click is 3 clicks and 1 dblclick. Avalonia's second quick press is DoubleTapped, not
+    // Tapped, which is why the chip has Click.
+    [AvaloniaFact]
+    public void E1_A_Quick_Second_Click_Counts_Where_Tapped_Does_Not()
+    {
+        var (chip, clicks) = Clicked();
+        var taps = 0;
+        chip.Tapped += (_, _) => taps++;
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        Click(scene, centre);
+        Click(scene, centre);
+        Click(scene, centre);
+
+        Assert.Equal(3, clicks());
+        Assert.True(taps < 3, $"Tapped was raised {taps} times, so it no longer shows what Click is for.");
+    }
+
+    // Measured: two quick taps with a finger are 2 clicks.
+    [AvaloniaFact]
+    public void E1_Two_Quick_Taps_With_A_Finger_Click_Twice()
+    {
+        var (chip, clicks) = Clicked();
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        Touch(scene, centre, centre);
+        Touch(scene, centre, centre);
+
+        Assert.Equal(2, clicks());
+    }
+
+    // Measured: a finger that moved 14 px clicks, and one that moved 16 doesn't.
+    [AvaloniaTheory]
+    [InlineData(14, 1)]
+    [InlineData(16, 0)]
+    public void E1_A_Finger_That_Moves_Too_Far_Does_Not_Click(double moved, int expected)
+    {
+        var (chip, clicks) = Clicked(Box(100));
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        Touch(scene, centre, new Point(centre.X + moved, centre.Y));
+
+        Assert.Equal(expected, clicks());
+    }
+
+    // Measured: a mouse dragged off and back clicks, and one released off doesn't.
+    [AvaloniaFact]
+    public void E1_A_Mouse_Has_No_Movement_Limit_But_Has_To_Be_Released_On_The_Chip()
+    {
+        var (chip, clicks) = Clicked();
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(Away, RawInputModifiers.None);
+        scene.Window.MouseMove(centre, RawInputModifiers.None);
+        scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks());
+
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseMove(Away, RawInputModifiers.None);
+        scene.Window.MouseUp(Away, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, clicks());
+    }
+
+    [AvaloniaFact]
+    public void E1_A_Child_That_Handles_The_Press_Stops_The_Click()
+    {
+        var child = new Border { Width = 40, Height = 16, Background = Brushes.Gray };
+        child.PointerPressed += (_, e) => e.Handled = true;
+        var (chip, clicks) = Clicked(child, Box());
+        using var scene = new Scene(chip);
+
+        Click(scene, Centre(child, scene));
+        Assert.Equal(0, clicks());
+
+        // The press on the rest of the chip still clicks.
+        Click(scene, new Point(Bounds(chip, scene.Window).Right - 14, Centre(chip, scene).Y));
+        Assert.Equal(1, clicks());
+    }
+
+    // Measured: a disabled chip doesn't click, and nor does one disabled during the press.
+    [AvaloniaFact]
+    public void E1_Disabled_Does_Not_Click()
+    {
+        var (chip, clicks) = Clicked();
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        chip.IsEnabled = false;
+        scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, centre);
+        Touch(scene, centre, centre);
+
+        Assert.Equal(0, clicks());
+    }
+
+    // Measured: Enter and Space on a focused chip don't click it, as there's no native button.
+    [AvaloniaFact]
+    public void E1_Enter_And_Space_Do_Not_Click()
+    {
+        var (chip, clicks) = Clicked();
+        chip.Focusable = true;
+        using var scene = new Scene(chip);
+        chip.Focus();
+
+        PressKey(scene, PhysicalKey.Enter);
+        PressKey(scene, PhysicalKey.Space);
+
+        Assert.True(chip.IsFocused);
+        Assert.Equal(0, clicks());
+    }
+
+    [AvaloniaFact]
+    public void E1_Click_Bubbles_From_The_Chip()
+    {
+        var chip = Bare();
+        var holder = new StackPanel { Children = { chip } };
+        object? source = null;
+        holder.AddHandler(AvonicChip.ClickEvent, (_, e) => source = e.Source);
+        using var scene = new Scene(holder);
+
+        Click(scene, Centre(chip, scene));
+
+        Assert.Same(chip, source);
+    }
+
+    private sealed class Command : System.Windows.Input.ICommand
+    {
+        private bool _can = true;
+
+        public List<object?> Parameters { get; } = [];
+
+        public bool Can
+        {
+            get => _can;
+            set
+            {
+                _can = value;
+                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public event EventHandler? CanExecuteChanged;
+
+        public bool CanExecute(object? parameter) => _can;
+
+        public void Execute(object? parameter) => Parameters.Add(parameter);
+    }
+
+    [AvaloniaFact]
+    public void E2_A_Click_Runs_The_Command_With_Its_Parameter_Unless_Handled()
+    {
+        var command = new Command();
+        var chip = Bare();
+        chip.Command = command;
+        chip.CommandParameter = "filter";
+        using var scene = new Scene(chip);
+        var centre = Centre(chip, scene);
+
+        Click(scene, centre);
+        Touch(scene, centre, centre);
+        Assert.Equal(["filter", "filter"], command.Parameters);
+
+        chip.Click += (_, e) => e.Handled = true;
+        Click(scene, centre);
+        Assert.Equal(2, command.Parameters.Count);
+    }
+
+    // A screen reader's activation is a DOM click in a browser. A disabled chip takes none.
+    [AvaloniaFact]
+    public void E1_Automation_Invoke_Clicks_And_Runs_The_Command_Unless_Disabled()
+    {
+        var command = new Command();
+        var (chip, clicks) = Clicked();
+        chip.Command = command;
+        using var scene = new Scene(chip);
+        var invoke = Assert.IsAssignableFrom<Avalonia.Automation.Provider.IInvokeProvider>(ControlAutomationPeer.CreatePeerForElement(chip).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>());
+
+        invoke.Invoke();
+        Assert.Equal(1, clicks());
+        Assert.Single(command.Parameters);
+
+        chip.IsEnabled = false;
+        invoke.Invoke();
+        Assert.Equal(1, clicks());
+        Assert.Single(command.Parameters);
+    }
+
+    // Chromium offers a click action only on an element with a click listener, so a chip that only shows a tag offers none.
+    [AvaloniaFact]
+    public void E1_Only_A_Chip_With_A_Click_Handler_Or_A_Command_Can_Be_Invoked()
+    {
+        var plain = Bare();
+        var handled = Bare();
+        void OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+        }
+
+        handled.Click += OnClick;
+        var commanded = Bare();
+        commanded.Command = new Command();
+        using var scene = new Scene(new StackPanel { Children = { plain, handled, commanded } });
+
+        static object? Invoke(Control control) =>
+            ControlAutomationPeer.CreatePeerForElement(control).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>();
+
+        Assert.Null(Invoke(plain));
+        Assert.NotNull(Invoke(handled));
+        Assert.NotNull(Invoke(commanded));
+
+        handled.Click -= OnClick;
+        Assert.Null(Invoke(handled));
+    }
+
+    [AvaloniaFact]
+    public void E2_A_Command_That_Cannot_Execute_Disables_The_Chip() => InstalledTheme.Run(_ =>
+    {
+        var command = new Command { Can = false };
+        var chip = Chip("x");
+        chip.Command = command;
+        using var scene = Themed(chip);
+
+        Assert.False(chip.IsEffectivelyEnabled);
+        Assert.Equal(0.4, chip.Opacity, 3);
+
+        command.Can = true;
+        Assert.True(chip.IsEffectivelyEnabled);
+    });
 }

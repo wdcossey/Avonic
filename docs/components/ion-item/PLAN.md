@@ -139,7 +139,9 @@ per control:
 
 `>` follows the logical parent, which is the presenter, so this matches direct children only, as `::slotted` does.
 A spike confirmed that a nested icon doesn't match. This is a small change to `AvonicTheme` and the auto-discovery
-docs, and later controls need it too, because rules like `::slotted(ion-avatar)` go in their own file.
+docs, and later controls need it too. (Rules like `::slotted(ion-avatar)` were to go in their own control's file. Those
+that set `Margin` are in `Styles/Item.axaml` instead, after the rule for any child in a slot, since #88: see the README's
+"Slotted styles".)
 
 **Finding slotted controls.** A presenter's `ChildProperty` change is `slotchange`. The presenter holds the child's
 logical parent, so the host's logical descendants don't include it. The item scans each presenter's `Child`.

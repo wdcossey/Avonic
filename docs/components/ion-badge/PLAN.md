@@ -45,7 +45,7 @@ that's a literal in the theme, and `::slotted(ion-avatar) { width: 40px; height:
 
 `--border-radius` is `50%` in Ionic, which no Avalonia `CornerRadius` can say, and an app sets it in px as often as not. So
 the key takes either: a `CornerRadius` (or a plain number) is used as it is, and a string is read as CSS reads the
-`border-radius` shorthand, one to four lengths or percentages, a percentage being of the box's width across and its height down. The converter is `BorderRadius`, in `Controls/Avatar/`, and both controls read it the same way.
+`border-radius` shorthand, one to four lengths or percentages, a percentage being of the box's width across and its height down. The converter is `BorderRadius`, in `Behaviors/` beside `Css` (moved from `Controls/Avatar/` in #88), and both controls read it the same way.
 
 `--size` is 48 on the host and 56 from the item's `::slotted(ion-thumbnail)`. A page rule `ion-thumbnail { --size: 30px }`
 beats the item's `::slotted` rule, as the outer tree wins in CSS scoping, so the key is unset by default and the theme's
@@ -90,6 +90,7 @@ A button item's name includes a badge's text, as a native `<button>`'s does, but
 | A10 | `Width` and `Height` on the avatar beat the slot's 40, and the margins stay | measured `av-vars`: 30 × 30, `margin: 8px 16px 8px 0px` |
 | A11 | RTL: a start avatar at the right, with its margin on the left, and its corners where they were, on the background and the image alike | measured `av-rtl`: x = 334, `margin: 8px 0px 8px 16px`; `border-radius` is physical, so `20px 0 0 0` stays at the top left |
 | A12 | Its size doesn't follow the item's font size | measured `av-sized`: 40 in a 30 px item |
+| A13 | An app's plain `Margin` style beats the slots' margins, in every slot but an end beside a stacked or floating label (#88) | A page's rule beats `::slotted`; measured `a-app`: `margin: 3px` in an end slot |
 
 ### Thumbnail
 
@@ -102,6 +103,7 @@ A button item's name includes a badge's text, as a native `<button>`'s does, but
 | T5 | Beside a stacked label: 7 above and below | measured `th-stacked` `margin: 7px 0px 7px 16px` |
 | T6 | `Width` and `Height` on the thumbnail beat the slot's 56 | the inline `style` in `th-vars` |
 | T7 | RTL: a start thumbnail at the right, with its margin on the left, and its corners where they were | the same rule as `av-rtl` |
+| T8 | An app's plain `Margin` style beats the slots' margins, in every slot (#88) | as A13 |
 
 ## Design
 
@@ -135,7 +137,7 @@ background, which is what an invalid `var()` does to `background`. The text is `
 `Foreground`, which is `color` inheriting.
 
 **Avatar and thumbnail are a presenter.** Its `CornerRadius` comes from the key through
-`BorderRadius.ToCornerRadius`, with its own `Bounds` for a percentage, and its `Background` is the control's, so an avatar
+`Behaviors/BorderRadius.ToCornerRadius`, with its own `Bounds` for a percentage, and its `Background` is the control's, so an avatar
 with a background and initials is round, as `av-bg` is. It doesn't clip its content: the host has no `overflow: hidden`,
 and only `::slotted(img)` has the radius. So `Styles/Avatar.axaml` gives an `Image` child `Stretch="UniformToFill"`, which
 is `object-fit: cover` with the crop from the middle (checked by pixel), and a `Clip` from `BorderRadius.ToClip`, with the
@@ -144,23 +146,26 @@ which is CSS's ellipse exactly. Corners of different sizes are a path, scaled do
 CSS does. An invalid value is 0, as an invalid `var()` leaves `border-radius` at its initial value. `AvonicImg` doesn't exist yet (#17); when it does, its PR adds `c|AvonicAvatar >
 c|AvonicImg` and the thumbnail's to its own file, as rules for a control that doesn't exist go in that control's file.
 
-**The slotted rules need an activator.** `Styles/Item.axaml`'s `::slotted([slot=start])` sets the whole `Margin` on any
-child, so a plain `c|AvonicAvatar` rule for `0,8,16,8` would win or lose by file order: `Avatar.axaml` merges before
-`Item.axaml` and `Thumbnail.axaml` after it. CSS resolves this by specificity, which Avalonia doesn't have: a rule with a
-pseudoclass beats one without. So:
+**The slotted rules are in the hosts' files** (since #88; this PR first had them in `Avatar.axaml` and `Thumbnail.axaml`,
+with an activator). `Styles/Item.axaml`'s `::slotted([slot=start])` sets the whole `Margin` on any child, where CSS sets one
+side, so a plain `c|AvonicAvatar` rule for `0,8,16,8` in the avatar's file would win or lose by file order: `Avatar.axaml`
+merges before `Item.axaml` and `Thumbnail.axaml` after it. CSS resolves it by specificity, which Avalonia doesn't have. An
+activator (`:in-item`, as this PR first had) beats it whatever the order, but also beats an app's plain `Margin` style,
+where a page's rule beats `::slotted` in CSS. So the rules are in `Item.axaml` and `ItemDivider.axaml`, as they're in
+`item.md.css` and `item-divider.md.css`, after the rule for any child, with no activator:
 
-- `::slotted(ion-avatar)`, the 40 and the 8 above and below, has no activator, as only the default slot and a panel take its
-  margin, and nothing else sets theirs.
-- `::slotted(ion-avatar[slot=start])` uses `:in-item`, which the avatar and the thumbnail set when an `IItemHost` is around
-  them, as `AvonicButton` sets Ionic's own `in-item`. It's an activator on the control itself, not its ancestors.
-- `::slotted(ion-avatar[slot=end])` is `:is(c|IItemHost):not(:item-label-stacked):not(:item-label-floating)`. In CSS,
-  `:host(.item-label-stacked) ::slotted([slot=end])` beats it, with 7 above and below, and this leaves those items to that
-  rule. The `:not`s are its activator. With none, `Avatar.axaml`'s rule would lose to `Item.axaml`'s `16,0,0,0`, which comes later; with
-  `:in-item` instead, `Thumbnail.axaml`'s 8 would beat `Item.axaml`'s stacked 7, by coming later.
+- `::slotted(ion-avatar)`, the 40 and the 8 above and below, in any slot and in a panel directly in one.
+- `::slotted(ion-avatar[slot=start])`, `0,8,16,8`, and `[slot=end]`, `16,8,0,8`, after it. Beside a stacked or floating
+  label, `Item.axaml`'s rule for any end child, which has a pseudoclass, beats the end one with 7 above and below, as
+  `:host(.item-label-stacked) ::slotted([slot=end])` does in CSS.
+- The thumbnail's, with `Css.Var` of `Avonic.Thumbnail.Size` and `Avonic.Thumbnail.Md.SizeInItem` for the size.
 
-**One alternative covers the item and the divider:** `:is(c|IItemHost) /template/ ContentPresenter#PART_Start > ...`,
-checked to match both. `item-divider.md.css` has the same avatar and thumbnail rules as `item.md.css`, word for word, and
-the divider's own file left them for these controls. A group is an `IItemHost` with no presenters, so it costs nothing there.
+An app's `c|AvonicAvatar { Margin }` now beats them, as in CSS (measured `a-app`: 3px all round in an end slot), and the tests
+merge `Avatar.axaml` and `Thumbnail.axaml` first and last, so a rule put back there fails in one of the two.
+
+**Each host has its own copy.** `item-divider.md.css` has the same avatar and thumbnail rules as `item.md.css`, word for
+word, and this PR first wrote them once, against `:is(c|IItemHost)`. A rule written once can't come after both hosts' rules
+for any child, as those are in two files, so it would hold for one host only by file order. It costs 8 alternatives more.
 
 **A panel directly in a slot stands for the slot,** as in `ion-note`: an avatar in one is 40 with 8 above and below, and
 the panel already has the slot's 16 from `Item.axaml`.
@@ -172,7 +177,7 @@ the panel already has the slot's 16 from `Item.axaml`.
 | A non-square avatar's own background at `50%` is a stadium, where Ionic's is an ellipse (measured `av-wide`: 61.25 × 40) | `CornerRadius` has one radius per corner. The image's clip is an ellipse, which is what's seen with a picture in it |
 | `Avonic.Avatar.BorderRadius` takes a `CornerRadius`, a number, or a string of one to four lengths in px or percentages, where Ionic takes any CSS `border-radius`, `/` and `em` included | There's no Avalonia type for a percentage radius. A string is checked when it's read, and anything else is 0, as an invalid `var()` is |
 | `Avonic.Thumbnail.Size` takes a number, not a string such as `64px` | It's a size, as every other size key is |
-| An app's plain style for `Margin` on every avatar or thumbnail doesn't reach one in an item's start or end slot, where Ionic's `ion-avatar { margin: 0 }` beats `::slotted(ion-avatar[slot=start])` | Those rules have to beat `Styles/Item.axaml`'s rule for any child in a slot whichever file merges first, and Avalonia only orders rules by activators, then by place. With an activator, they also beat a plain rule of the app's. An app sets the margin with a class or a pseudoclass of its own, or on the control |
+| Beside a stacked or floating label, an app's plain `Margin` style loses to the slot's `16,7,0,7`, where a page's rule wins in Ionic (measured for a chip, `c-appstacked`) | `Styles/Item.axaml`'s rule there depends on the item's state, a pseudoclass, which is an activator, and that beats a plain style |
 | A string radius of a bare number, such as `"8"`, is 8, where CSS's `border-radius: 8` is invalid | The key also takes the number 8, and a string of one means the same |
 | `Avonic.Thumbnail.Size` set anywhere beats the item's 56, as the key is unset by default | The outer tree beats `::slotted` in CSS. A thumbnail that should be 56 only in items sets `Width` and `Height` there |
 | An empty string is empty, as null is | A framework renders no text node for `""` |

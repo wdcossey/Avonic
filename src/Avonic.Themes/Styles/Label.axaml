@@ -27,7 +27,7 @@
 
     <!-- A translation of label.md.css and item.md.css's rules for labels, in the order that matters: where CSS
          uses specificity, here a rule with a pseudoclass or class beats one without, and then later beats
-         earlier. So Item.axaml's stacked end margin already beats the plain end margin below. It's all here, not
+         earlier. So the toggle's and radio's margins below beat Item.axaml's plain ones. It's here, not
          in a ControlTheme, because nearly every rule depends on an ancestor, and Styles beat a ControlTheme.
 
          A rule for a TextBlock is checked for every TextBlock in the app. A descendant selector then walks
@@ -55,22 +55,12 @@
         </Setter>
     </Style>
 
-    <!-- ::slotted(ion-label), and a panel standing for the slot. -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicLabel, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
-        <Setter Property="Margin" Value="0,10,0,10" />
-    </Style>
-    <!-- ::slotted(ion-label:not([slot=end])) { flex: 1 }, here and in the rule for the start slot. max-width: 100% is in
-         FlexRow, as it limits the minimum. -->
+    <!-- ::slotted(ion-label), and its margins in the start and end slots, are in Item.axaml, after the rule for any child in a
+         slot, which they have to follow whatever order the files merge in. -->
+    <!-- ::slotted(ion-label:not([slot=end])) { flex: 1 }, here and in Item.axaml's rule for the start slot. max-width: 100% is
+         in FlexRow, as it limits the minimum. -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Container > c|AvonicLabel">
         <Setter Property="c:FlexRow.Flex" Value="1" />
-    </Style>
-    <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicLabel">
-        <Setter Property="c:FlexRow.Flex" Value="1" />
-        <Setter Property="Margin" Value="0,10,16,10" />
-    </Style>
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicLabel">
-        <Setter Property="Margin" Value="16,10,0,10" />
     </Style>
     <!-- :host(.item-toggle) ::slotted(ion-label), :host(.item-radio) ::slotted(ion-label) -->
     <Style Selector="c|AvonicItem:item-toggle /template/ ContentPresenter#PART_End > c|AvonicLabel, c|AvonicItem:item-radio /template/ ContentPresenter#PART_End > c|AvonicLabel">

@@ -4,8 +4,13 @@
         xmlns:c="using:Avonic.Components.Controls">
 
     <!-- item.md.css's ::slotted rules. A slotted control's logical parent is the presenter, so '>' means
-         direct children only, as ::slotted does. Rules for controls that don't exist yet go in those
-         controls' own files. -->
+         direct children only, as ::slotted does.
+
+         The rule for any child in a slot sets the whole Margin, where CSS sets one side. So a control's own margin rules in a
+         slot are here, after it, with no activator: they beat it by coming later in this file, whatever order the files
+         merge in, and an app's plain style beats them, as a page's rule beats ::slotted in CSS. A rule in the control's own
+         file would win or lose by where that file merges, and one with an activator would beat the app's style too. The
+         button's are still in Button.axaml, with :in-item, which is the button's own change to make. -->
 
     <!-- ::slotted([slot=start]), ::slotted([slot=end]) -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Control)">
@@ -13,6 +18,63 @@
     </Style>
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > :is(Control)">
         <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+
+    <!-- ::slotted(ion-avatar) { width: 40px; height: 40px }, and ::slotted(ion-avatar) { margin-top: 8px; margin-bottom: 8px }.
+         A slot holds one child, so a panel directly in it stands for the slot, and the panel has the slot's 16 already. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicAvatar, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicAvatar">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Margin" Value="0,8,0,8" />
+    </Style>
+    <!-- ::slotted(ion-thumbnail) { size: 56px }, and the same 8. The size key, set anywhere, still wins, as a rule outside the
+         shadow tree beats ::slotted. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicThumbnail, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicThumbnail">
+        <Setter Property="Width">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Size" />
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Md.SizeInItem" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Height">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Size" />
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Md.SizeInItem" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Margin" Value="0,8,0,8" />
+    </Style>
+    <!-- ::slotted(ion-avatar[slot=start]), ::slotted(ion-thumbnail[slot=start]). Beside a stacked or floating label, the rule
+         for any end child further down beats the end one with 7 above and below, as it does in CSS. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicAvatar, c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicThumbnail">
+        <Setter Property="Margin" Value="0,8,16,8" />
+    </Style>
+    <!-- ::slotted(ion-avatar[slot=end]), ::slotted(ion-thumbnail[slot=end]) -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicAvatar, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicThumbnail">
+        <Setter Property="Margin" Value="16,8,0,8" />
+    </Style>
+
+    <!-- A chip has no rule in item.md.css: ::slotted([slot=start]) sets its inline end, and its own margin of 4 stays on the other
+         three sides. Measured 4px 16px 4px 4px at the start and 4px 4px 4px 16px at the end. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicChip">
+        <Setter Property="Margin" Value="4,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicChip">
+        <Setter Property="Margin" Value="16,4,4,4" />
+    </Style>
+
+    <!-- ::slotted(ion-label), and a panel standing for the slot. The rest of a label's rules are in Label.axaml. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicLabel, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,10,0,10" />
+    </Style>
+    <!-- ::slotted([slot=start]) and ::slotted([slot=end]). An attribute beats a tag, so these win. The start one is also
+         ::slotted(ion-label:not([slot=end])) { flex: 1 }, which Label.axaml gives a label in the default slot. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicLabel">
+        <Setter Property="c:FlexRow.Flex" Value="1" />
+        <Setter Property="Margin" Value="0,10,16,10" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicLabel">
+        <Setter Property="Margin" Value="16,10,0,10" />
     </Style>
 
     <!-- align-items: center on what a panel holds, as the panel stands for the slot and fills it. FlexSlot does this for a
@@ -57,6 +119,11 @@
     <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. A button keeps its own margin at its end, which Styles/Button.axaml says. -->
     <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton)">
         <Setter Property="Margin" Value="16,7,0,7" />
+    </Style>
+    <!-- That rule sets the top and bottom, and a chip keeps its own 4 at its end: measured 7px 4px 7px 16px. Both depend on
+         the item's state, which only an activator can, so they also beat an app's plain style, where a page's rule wins in CSS. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicChip, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicChip">
+        <Setter Property="Margin" Value="16,7,4,7" />
     </Style>
 
 </Styles>

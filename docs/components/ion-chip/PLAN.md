@@ -62,6 +62,7 @@ Each becomes a test. The ids are the chips in the measurement scene.
 | 12 | A slotted icon: 1.4285714286 em of the chip, so 20; colour `rgba(0, 0, 0, 0.54)` unless the chip has a colour, when it's the shade. First child: margin −4 start, 8 end, −4 top and bottom, so it's at x + 8. Last child: 8 start, −4 end. An only child takes the last child's. A nested icon gets none of it. RTL mirrors | `::slotted(ion-icon)`; measured `i`, `il`, `io` 48 wide with the icon at + 20, `ic`, `ideep` 14 and 0.87, `bigfont` still 20, `rtl` |
 | 13 | A long label: the chip grows to its container and the label wraps; an icon beside it shrinks, as `contain: strict` leaves it no minimum | `inline-flex`, `flex-shrink: 1`; measured `long` 350 by 44, label 2 lines; `longi` icon 14.03 wide |
 | 14 | Keys do nothing: no Enter or Space, and arrows don't move focus between what's inside | A plain element. Nothing in the chip does this: an `ItemsControl` moves focus with the arrows only between focusable containers in a navigable panel, and a `FlexSlot` in a `FlexRow` is neither. The first build overrode `OnKeyDown` for it, and breaking that changed nothing, even with a `StackPanel`, so it went |
+| 15 | In an item's or a divider's start or end slot, the slot sets the side towards the content, and the chip keeps its own 4 on the other three; beside a stacked or floating label, 7 above and below and its 4 at the end. A panel in a slot keeps it at 4. An app's plain `Margin` style beats all of it but the stacked one (#88) | `::slotted([slot=start])` sets `margin-inline-end` only; measured `c-start` `4px 16px 4px 4px`, `c-end` and `dc-end` `4px 4px 4px 16px`, `c-stacked` and `c-floating` `7px 4px 7px 16px` (with plain text in the chip: an `ion-label` in it takes the item's stacked class away, as `ion-item` keys `ionStyle` by tag), `c-panel` `4px`, `c-app` `3px` |
 
 ## Design
 
@@ -156,11 +157,32 @@ chip has its own, a `Group` that isn't a content element, as a plain `AvonicCard
 
 ## Extensions
 
-None. Ionic's chip has no click of its own: an app listens to the host's DOM `click`, which a plain element raises on a
-press and release on it, measured: a click, a double click and a drag within it click once each, and a drag off doesn't.
-Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased` is exact. A `Click` extension through
-`NativeButton`, as the card's button mode has, is for the human to decide: it would be the first on a control with no native
-`<button>`.
+Added in #88, which the human decided on 2026-11-08.
+
+**`Click`.** Ionic's chip has no click of its own: an app listens to the host's DOM `click`. Avalonia's `Tapped` is the nearest
+built-in, but a second quick tap raises `DoubleTapped` and no `Tapped`, so a filter chip tapped twice quickly loses the second.
+`Click` goes through `Behaviors/NativeButton`, as the card's button mode does, so it's the same click: on the release of every
+press on the chip, measured on a chip (`clicky`):
+
+| Input | Chromium | `Click` |
+|---|---|---|
+| A click, then a double click | 3 `click`, 1 `dblclick` | 3 |
+| Two quick taps with a finger | 2 | 2 |
+| A finger that moved 14 px, 16 px | 1, 0 | 1, 0 |
+| A mouse dragged off and back, released off | 1, 0 | 1, 0 |
+| A disabled chip | 0 | 0, and 0 if it's disabled during the press |
+| Enter or Space on a focused chip | 0 (and the chip takes no focus without `tabindex`) | 0: `NativeButton` takes no keys here |
+
+The rest is `NativeButton`'s, measured for a native button in `ion-item`'s plan: only the left button, a second finger
+anywhere means no click, a context menu cancels it, and a child that handles the press, or a handled `Click` from a button
+inside, stops it. `Behaviors/NativeButtonTests` runs all of it on the chip too.
+
+**`Command` and `CommandParameter`,** as on `AvonicButton`, `AvonicItem` and `AvonicCard`: `AddOwner` of the button's, run
+after `Click` unless a handler set `Handled`, and a command that can't execute disables the chip, which then fades to 0.4.
+They follow because `NativeButton` already reads them, an MVVM app has no other way to bind a filter chip, and every other
+control with a `Click` here has them. The chip is always clickable, so unlike the card's they always apply.
+
+The chip's automation peer stays a `Group`, as Chromium gives a chip no role, and gains `Invoke`, which raises `Click`, when the chip has a `Click` handler of its own or a `Command`, as Chromium offers a click action only on an element with a listener: a screen reader's activation is a DOM `click` in a browser, and without it a command-bound chip couldn't be activated by one, as it takes no keys. A disabled chip doesn't answer it.
 
 ## Deliberate differences
 
@@ -170,7 +192,6 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 | A parent taller than the chip centres it, where an inline chip sits at the top of its line (measured `blk`: `y` 4 in a 100 px block) | The same `Center`, which lines chips of different heights up in a row, as `vertical-align: middle` does. Avalonia has no line box. Set `Top` |
 | A disabled ancestor fades the chip to 0.4 too, where a disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | `VerticalAlignment` is `Center`, where a flex parent stretches an Ionic chip (measured `tall`, 72) | Set `VerticalAlignment="Stretch"`; the children stay centred |
-| A chip in an item's start or end slot has margin `0,0,16,0` or `16,0,0,0`, where Ionic keeps the chip's 4 on the other three sides (measured `initemend`: `4 4 4 16`) | `Styles/Item.axaml`'s slot rule sets all four sides for any control, and merges after this control's file. 4 px at the outer edge; see the proposal in the PR |
 | The chip is an `ItemsControl`, so it also has `ItemsSource` and `ItemTemplate` | As `AvonicList`. Nothing Ionic is shadowed. A control made from the template is the slot's logical child, so each slotted rule has a second alternative, `c\|AvonicChip > ContentPresenter > c\|AvonicIcon`, as `AvonicList` has for its templated items, and the chip counts a slot by its container's index |
 
 ## Known gaps
@@ -184,10 +205,10 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 
 | What | Goes with |
 |---|---|
-| `::slotted(ion-avatar)`: `flex-shrink: 0`, 1.7142857143 em square (24 at 14); first child margin `−8 8 −4 −4`, last child `8 −8 −4 −4` | `ion-avatar` (#16), as `c\|AvonicChip > c\|AvonicAvatar` rules in `Styles/Chip.axaml` once the type exists, with the same care over the factor's rounding. `flex-shrink: 0` is `ClipToBounds` unset and a size of its own, which `FlexRow` doesn't shrink |
+| `::slotted(ion-avatar)`: `flex-shrink: 0`, 1.7142857143 em square (24 at 14); first child margin `−8 8 −4 −4`, last child `8 −8 −4 −4` | A PR of its own, now that `ion-avatar` is done, as `c\|AvonicChip > c\|AvonicAvatar` rules in `Styles/Chip.axaml`, with the same care over the factor's rounding. `flex-shrink: 0` is `ClipToBounds` unset and a size of its own, which `FlexRow` doesn't shrink |
 | `:host(.toolbar-searchbar) ::slotted(ion-chip)` | `ion-toolbar` |
 
 ## Dependencies
 
 `ion-icon` and `ion-ripple-effect` are done, and so are `Activatable`, `ColorPalette`, `Css`, `FlexRow` and `FlexSlot`.
-`ion-avatar` is in progress (#16).
+`ion-avatar` is done (#16). `NativeButton` gives `Click` (#88).

@@ -18,13 +18,17 @@ namespace Avonic.Components.Tests.Behaviors;
 
 /// <summary>
 /// What a native button does, on each control that has one. The numbers are from Chromium, under "Shared press handling" in
-/// docs/components/ion-item/PLAN.md.
+/// docs/components/ion-item/PLAN.md. The chip has no native button, but the DOM click an app listens to on it is the same click,
+/// measured in docs/components/ion-chip/PLAN.md, with no keys.
 /// </summary>
 public class NativeButtonTests
 {
     private static readonly Point Centre = new(100, 25);
 
-    public static TheoryData<string> Controls() => ["button", "item", "card"];
+    public static TheoryData<string> Controls() => ["button", "item", "card", "chip"];
+
+    /// <summary>The ones Enter and Space click. A chip has no native button, and a focused one doesn't click on a key.</summary>
+    public static TheoryData<string> KeyControls() => ["button", "item", "card"];
 
     private sealed class Probe(Control control, Func<int> clicks)
     {
@@ -49,6 +53,16 @@ public class NativeButtonTests
                 var item = new AvonicItem { Button = true, Content = child };
                 item.Click += (_, _) => clicks++;
                 control = item;
+                break;
+            case "chip":
+                var chip = new AvonicChip();
+                if (child is not null)
+                {
+                    chip.Items.Add(child);
+                }
+
+                chip.Click += (_, _) => clicks++;
+                control = chip;
                 break;
             default:
                 var card = new AvonicCard { Button = true, Content = child };
@@ -135,6 +149,8 @@ public class NativeButtonTests
     [InlineData("item", 16, 0)]
     [InlineData("card", 14, 1)]
     [InlineData("card", 16, 0)]
+    [InlineData("chip", 14, 1)]
+    [InlineData("chip", 16, 0)]
     public void S1_A_Finger_That_Moves_Too_Far_Does_Not_Click(string kind, double moved, int clicks)
     {
         var probe = Make(kind);
@@ -352,6 +368,8 @@ public class NativeButtonTests
     [InlineData("item", MouseButton.Middle)]
     [InlineData("card", MouseButton.Right)]
     [InlineData("card", MouseButton.Middle)]
+    [InlineData("chip", MouseButton.Right)]
+    [InlineData("chip", MouseButton.Middle)]
     public void S3_Only_The_Left_Button_Clicks(string kind, MouseButton button)
     {
         var probe = Make(kind);
@@ -776,7 +794,7 @@ public class NativeButtonTests
     // ── Keys ─────────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
-    [MemberData(nameof(Controls))]
+    [MemberData(nameof(KeyControls))]
     public void Enter_Clicks_On_Press_And_Space_On_Release(string kind)
     {
         var probe = Make(kind);
@@ -874,7 +892,7 @@ public class NativeButtonTests
     {
         var probe = Make(kind);
         probe.Control.AddHandler(
-            kind switch { "button" => AvonicButton.ClickEvent, "item" => AvonicItem.ClickEvent, _ => AvonicCard.ClickEvent },
+            kind switch { "button" => AvonicButton.ClickEvent, "item" => AvonicItem.ClickEvent, "chip" => AvonicChip.ClickEvent, _ => AvonicCard.ClickEvent },
             (object? _, RoutedEventArgs e) => e.Handled = true);
         var command = new Command();
         SetCommand(probe.Control, command);

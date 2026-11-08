@@ -426,8 +426,7 @@ public class AvonicLabelTests
 
     // ── 7. Margins ───────────────────────────────────────────────────────────────────────────
 
-    [AvaloniaFact]
-    public void B7_Margins_In_Each_Slot() => InstalledTheme.Run(_ =>
+    private static void AssertSlotMargins()
     {
         var main = new AvonicLabel { Content = "x" };
         var start = new AvonicLabel { Content = "x" };
@@ -438,7 +437,23 @@ public class AvonicLabelTests
         Assert.Equal(new Thickness(0, 10, 0, 10), main.Margin);
         Assert.Equal(new Thickness(0, 10, 16, 10), start.Margin);
         Assert.Equal(new Thickness(16, 10, 0, 10), end.Margin);
-    });
+    }
+
+    [AvaloniaFact]
+    public void B7_Margins_In_Each_Slot() => InstalledTheme.Run(_ => AssertSlotMargins());
+
+    // They're in Item.axaml, after the rule for any child in a slot. Back in Label.axaml, they'd lose to it merged first.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B7_The_Slot_Margins_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
+        AvonicAvatarTests.InMergeOrder("Label.axaml", first, AssertSlotMargins);
+
+    // A page's rule beats ::slotted, as measured for a chip and an avatar: an app's plain style wins in every slot.
+    [AvaloniaFact]
+    public void B7_An_Apps_Plain_Margin_Style_Beats_The_Slots() => InstalledTheme.Run(_ =>
+        AvonicAvatarTests.WithAppMargin<AvonicLabel>(new Thickness(3), () =>
+            AvonicAvatarTests.AssertMarginInEverySlot(() => new AvonicLabel { Content = "x" }, new Thickness(3))));
 
     [AvaloniaFact]
     public void B7_No_Margin_Alone() => InstalledTheme.Run(_ =>
