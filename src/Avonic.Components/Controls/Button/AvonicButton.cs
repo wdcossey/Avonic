@@ -30,7 +30,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
 [PseudoClasses(
     ":fill-clear", ":fill-default", ":fill-outline", ":fill-solid", ":size-large", ":size-small", ":shape-round",
-    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-item", ":in-toolbar", ":in-toolbar-color", ":in-buttons")]
+    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-toolbar", ":in-toolbar-color", ":in-buttons")]
 public class AvonicButton : TemplatedControl, IItemControl
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -341,11 +341,11 @@ public class AvonicButton : TemplatedControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // closest('ion-item'). Ionic only looks on first load, but containers get recycled here. The hostContext classes are
+        // closest('ion-item') || closest('ion-item-divider'). Ionic only looks on first load, but containers get recycled here. The hostContext classes are
         // read again here too, where Ionic keeps a moved button's until its next render, measured: a moved button is attached
         // again here, and its old place may be gone. A container a virtualizing panel recycles stays attached, so a toolbar
         // color bound to its item shows at the button's next render, as a toolbar's color set later does in Ionic.
-        _inItem = this.FindAncestorOfType<AvonicItem>() is not null;
+        _inItem = this.FindAncestorOfType<AvonicItem>() is not null || this.FindAncestorOfType<AvonicItemDivider>() is not null;
         UpdateClasses();
     }
 
@@ -376,7 +376,6 @@ public class AvonicButton : TemplatedControl, IItemControl
         PseudoClasses.Set(":expand-full", Expand == ButtonExpand.Full);
         PseudoClasses.Set(":strong", Strong);
         PseudoClasses.Set(":has-icon-only", IconOnlyContent is not null);
-        PseudoClasses.Set(":in-item", _inItem);
     }
 
     /// <summary>

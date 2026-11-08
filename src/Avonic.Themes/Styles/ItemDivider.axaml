@@ -64,6 +64,15 @@
         <Setter Property="Margin" Value="16,4,4,4" />
     </Style>
 
+    <!-- A button keeps its own 2px 4px on the sides the slot doesn't set, as in an item. Measured 4px 16px 4px 2px at the start
+         and 4px 2px 4px 16px at the end. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicButton">
+        <Setter Property="Margin" Value="2,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicButton">
+        <Setter Property="Margin" Value="16,4,2,4" />
+    </Style>
+
     <!-- ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54); font-size: 1.7142857143em }, and a panel
          standing for the slot. -->
     <Style Selector="c|AvonicItemDivider /template/ ContentPresenter#PART_Start > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_Container > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter#PART_End > c|AvonicIcon, c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > c|AvonicIcon">

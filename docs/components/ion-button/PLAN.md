@@ -109,9 +109,9 @@ Each becomes a test.
 | 25 | Start and end don't shrink for long text, and sit at the edges of the centred group | measured `longic`, `blockic` |
 | 26 | Disabled: opacity 0.5, no input, and a tap goes through to what's behind. In a disabled item it stays 1, or 0.5 if it's disabled itself, inside the item's 0.3 | `pointer-events: none`; measured `dis`, `initembtnd`, `inside`, `both` |
 | 27 | Tokens: every variable applies, per side for padding, and `--opacity` is on the native part | measured `vars`, `varsr`, `varso` |
-| 28 | In an item, `Size` null means small; `Size="Default"` stays standard; at any depth | `inItem`, `closest`; measured `initem`, `initemd`, `initemdeep` |
+| 28 | In an item or a divider, `Size` null means small; `Size="Default"` stays standard; at any depth. A divider has no rule for a small button, so it has the plain 13 and 27.3 | `inItem`, `closest`; measured `initem`, `initemd`, `initemdeep`, and in a divider `ds`, `de`, `dm` (follow-up to #88) |
 | 29 | Directly in an item's slot, a small button: font 12, 25 high, padding 0.6 em and 2, including icon-only, whose min width follows at 25.92 and icon at 14.77. Deeper, the plain small values | `::slotted(.button-small)`; measured `initem`, `initemo`, `initemssm`, `initemdeep` |
-| 30 | Margins in an item: default slot 2 and 4; start 2, 4, 16, 4; end 16, 4, 2, 4 | `::slotted([slot=…])`; measured `initems`, `initeme` |
+| 30 | Margins in an item and a divider: default slot 2 and 4; start 2, 4, 16, 4; end 16, 4, 2, 4. An app's plain `Margin` style beats them, except beside a stacked or floating label | `::slotted([slot=…])`; measured `initems`, `initeme`, and `ds`, `de`, `ias`, `das`, `sae` (follow-up to #88) |
 | 31 | The item treats it as a clickable: two buttons are multiple inputs, and its focus shows on the item | `setMultipleInputs`, `ion-focusable`; measured `it2`, `item while button focused` |
 | 32 | A tap on a button in a button item clicks both. On a disabled one, only the item | measured `click initembtn`, `click initembtnd` |
 | 33 | Automation: a button, named by its text in its original case, or `AutomationProperties.Name`. An icon gives no name. Can be invoked unless disabled | measured aria tree: `"Default"`, `"Named"`, unnamed icon-only, `"Favourite"` |
@@ -192,7 +192,9 @@ horizontal panel or a `WrapPanel`.
 
 `Styles/` files merge in ordinal order, so `Button.axaml` comes before `Item.axaml`, and the item's plain
 `ContentPresenter#PART_End > :is(Control)` would win over a plain rule here. A rule with a pseudoclass beats one without,
-so the margin rules target `c|AvonicButton:in-item`, which the control sets. It's Ionic's `inItem`.
+so the margin rules targeted `c|AvonicButton:in-item`, which the control set. (Since the follow-up to #88 they're plain rules
+in `Item.axaml` and `ItemDivider.axaml`, after the rule for any child, so an app's plain style beats them, and `:in-item` is
+gone: Ionic's `inItem` only picks the size.)
 
 `closest` in `componentWillLoad` is once only. Here it's every time it attaches, as `AvonicLabel` does for its report,
 because recycled containers are normal in Avalonia.
@@ -286,7 +288,7 @@ Avonic-only, and never named like an Ionic member.
 |---|---|
 | `inToolbar`: `fill` null → clear; `rippleType` unbounded for clear and icon-only; `in-toolbar`, `in-toolbar-color`, `in-buttons` and their colour rules | #12 (`ion-buttons`), and the pseudoclasses in #89. See the [README](README.md#in-a-toolbar) |
 | `inListHeader`: `fill` null → clear | `ion-list-header` |
-| `closest('ion-item-divider')` for `inItem` | `ion-item-divider` |
+| `closest('ion-item-divider')` for `inItem` | `ion-item-divider`. Done in the follow-up to #88 |
 | `:host(.button-outline.ion-activated.ion-color) .button-native` | Nothing: it sets `background: transparent` where it already is |
 | The default text size outside a host | Open project question. A button sets its own, so it isn't affected |
 

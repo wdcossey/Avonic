@@ -625,7 +625,7 @@ public class AvonicToolbarButtonsTests
     public void B11_A_Moved_Button_Reads_Where_It_Is_When_Attached() => InstalledTheme.Run(_ =>
     {
         // Deliberately not Ionic, which keeps a moved button's classes until its next render (measured): read again when
-        // it's attached, as :in-item is, for a recycled container.
+        // it's attached, as inItem is, for a recycled container.
         var button = new AvonicButton { Content = "Moved" };
         var plain = new StackPanel { Children = { button } };
         var coloured = new StackPanel();

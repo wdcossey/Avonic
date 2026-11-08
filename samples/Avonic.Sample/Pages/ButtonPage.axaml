@@ -87,6 +87,14 @@
                     <c:AvonicButton Content="Action" Size="Default" />
                 </c:AvonicItem.EndContent>
             </c:AvonicItem>
+            <c:AvonicItemDivider Content="In a divider too">
+                <c:AvonicItemDivider.StartContent>
+                    <c:AvonicButton Content="Start" />
+                </c:AvonicItemDivider.StartContent>
+                <c:AvonicItemDivider.EndContent>
+                    <c:AvonicButton Content="End" />
+                </c:AvonicItemDivider.EndContent>
+            </c:AvonicItemDivider>
 
             <c:AvonicButton Content="Right to left" FlowDirection="RightToLeft">
                 <c:AvonicButton.StartContent>
