@@ -83,7 +83,7 @@ results were measured in Chromium with `ion-app`.
 | 21 | Text | 500, 700 strong, 0.84 spacing, uppercase, line height 14, no kerning | match, `ß` differs |
 | 22 | Long text | 386 wide, 4 lines, 72 high, centred | match in shape. A word wider than the button breaks where Chromium's grows: deliberate |
 | 23 | Slotted icons | 18.9, margins −5.67 and 5.67, 5.67 and −3.78, no input | match |
-| 24 | Icon-only | 40.04 with 22.4; 28.08 with 16; 50 with 28; `--padding-top: 5px` sets all four | match |
+| 24 | Icon-only | 40.04 with 22.4; 28.08 with 16; 50 with 28; `--padding-top: 5px` sets all four | match. Laid out at 2x, 40.04 is 40.5, as Avalonia rounds a measured size up to the next device pixel, where Chromium's box is 40 (found in review of #98) |
 | 25 | Start and end | 11.73 and 357.48 in long text; beside the text in a block | match |
 | 26 | Disabled | 0.5; `click dis: nothing`, hit goes to what's behind; in a disabled item 1, or 0.5 if it's disabled too | match. A disabled panel fades it too: deliberate |
 | 27 | Tokens | `vars`, `varsr`, `varso`, and `varss` drawing no border | match |
