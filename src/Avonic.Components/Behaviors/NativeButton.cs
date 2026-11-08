@@ -11,7 +11,8 @@ namespace Avonic.Components.Behaviors;
 
 /// <summary>
 /// What a native <c>&lt;button&gt;</c> does, for the controls that have one in Ionic's shadow root: a click on release, Enter
-/// and Space, and <c>Command</c>, which follows Avalonia's own <c>Button</c>. See <c>docs/components/ion-item/PLAN.md</c>.
+/// and Space, and <c>Command</c>, which follows Avalonia's own <c>Button</c>. See <c>docs/components/ion-item/PLAN.md</c>. The
+/// chip, which has none, uses it with no keys for the plain DOM <c>click</c>, which a press raises the same way.
 /// </summary>
 /// <remarks>
 /// It tracks the press and release itself. <c>Tapped</c> has a small movement limit even for a mouse, and isn't raised for a

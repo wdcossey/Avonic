@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Automation.Peers;
+using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
@@ -118,7 +119,10 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     /// <summary>A command that can't execute disables the chip. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
     protected override bool IsEnabledCore => base.IsEnabledCore && _native?.CanExecute != false;
 
-    /// <summary>A disabled chip doesn't click, even if it was disabled during the press, as <c>pointer-events: none</c> stops it.</summary>
+    /// <summary>
+    /// A click from a press or from automation. <see cref="NativeButton"/> already ends a press that the chip is disabled during;
+    /// this is for automation's <c>Invoke</c>, which a disabled chip doesn't answer, as a disabled element takes no click.
+    /// </summary>
     private void OnNativeClick()
     {
         if (IsEffectivelyEnabled)
@@ -241,15 +245,18 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
 
     /// <summary>
     /// A plain element to Chromium, with no role, where an <see cref="ItemsControl"/>'s own peer would call it a list. Its
-    /// children speak for themselves, and <c>aria-disabled</c> is the peer's <c>IsEnabled</c>.
+    /// children speak for themselves, and <c>aria-disabled</c> is the peer's <c>IsEnabled</c>. <c>Invoke</c> is a screen
+    /// reader's activation, which in a browser is a DOM <c>click</c> on the element, so it raises <see cref="Click"/>.
     /// </summary>
-    private sealed class ChipAutomationPeer(AvonicChip owner) : ControlAutomationPeer(owner)
+    private sealed class ChipAutomationPeer(AvonicChip owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
 
         protected override bool IsContentElementCore() => false;
 
         protected override bool IsControlElementCore() => true;
+
+        public void Invoke() => owner.OnNativeClick();
     }
 
 }

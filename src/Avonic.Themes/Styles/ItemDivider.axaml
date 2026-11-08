@@ -23,7 +23,8 @@
         <Setter Property="Margin" Value="16,0,0,0" />
     </Style>
 
-    <!-- ::slotted(ion-avatar) and ::slotted(ion-thumbnail), word for word item.md.css's. A slot holds one child, so a panel
+    <!-- ::slotted(ion-avatar) and ::slotted(ion-thumbnail), which are word for word item.md.css's. They're a copy of Item.axaml's,
+         not one rule for both hosts, as one rule can't come after both hosts' rules for any child. A slot holds one child, so a panel
          directly in it stands for the slot, and the panel has the slot's 16 already. -->
     <Style Selector="c|AvonicItemDivider /template/ ContentPresenter > c|AvonicAvatar, c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > c|AvonicAvatar">
         <Setter Property="Width" Value="40" />

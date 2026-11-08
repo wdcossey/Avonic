@@ -9,7 +9,8 @@
          The rule for any child in a slot sets the whole Margin, where CSS sets one side. So a control's own margin rules in a
          slot are here, after it, with no activator: they beat it by coming later in this file, whatever order the files
          merge in, and an app's plain style beats them, as a page's rule beats ::slotted in CSS. A rule in the control's own
-         file would win or lose by where that file merges, and one with an activator would beat the app's style too. -->
+         file would win or lose by where that file merges, and one with an activator would beat the app's style too. The
+         button's are still in Button.axaml, with :in-item, which is the button's own change to make. -->
 
     <!-- ::slotted([slot=start]), ::slotted([slot=end]) -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Control)">

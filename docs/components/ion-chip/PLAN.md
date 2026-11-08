@@ -182,7 +182,7 @@ after `Click` unless a handler set `Handled`, and a command that can't execute d
 They follow because `NativeButton` already reads them, an MVVM app has no other way to bind a filter chip, and every other
 control with a `Click` here has them. The chip is always clickable, so unlike the card's they always apply.
 
-The chip's automation peer stays a `Group`, with no `Invoke`: Chromium gives a chip no role.
+The chip's automation peer stays a `Group`, as Chromium gives a chip no role, and gains `Invoke`, which raises `Click`: a screen reader's activation is a DOM `click` in a browser, and without it a command-bound chip couldn't be activated by one, as it takes no keys. A disabled chip doesn't answer it.
 
 ## Deliberate differences
 

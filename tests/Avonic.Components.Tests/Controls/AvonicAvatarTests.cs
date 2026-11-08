@@ -110,7 +110,7 @@ public class AvonicAvatarTests
     }
 
     /// <summary>
-    /// The margins of a start and an end in an item and in a divider, and of an end beside a stacked and a floating label, in an
+    /// The margins of a start and an end in an item and in a divider, of the default slot and a panel in a divider, and of an end beside a stacked and a floating label, in an
     /// item. Measured in Chromium, the same for an avatar and a thumbnail.
     /// </summary>
     internal static void AssertSlotMargins(Func<Control> create)
@@ -119,12 +119,15 @@ public class AvonicAvatarTests
         var end = create();
         var dividerStart = create();
         var dividerEnd = create();
+        var dividerMain = create();
+        var dividerPanel = create();
         var stacked = create();
         var floating = create();
         using var scene = InScene(
             new AvonicItem { StartContent = start, Content = "x" },
             new AvonicItem { Content = "x", EndContent = end },
             new AvonicItemDivider { StartContent = dividerStart, Content = "x", EndContent = dividerEnd },
+            new AvonicItemDivider { StartContent = new StackPanel { Children = { dividerPanel } }, Content = dividerMain },
             new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked }, EndContent = stacked },
             new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Floating }, EndContent = floating });
 
@@ -132,6 +135,8 @@ public class AvonicAvatarTests
         Assert.Equal(new Thickness(16, 8, 0, 8), end.Margin);
         Assert.Equal(new Thickness(0, 8, 16, 8), dividerStart.Margin);
         Assert.Equal(new Thickness(16, 8, 0, 8), dividerEnd.Margin);
+        Assert.Equal(new Thickness(0, 8, 0, 8), dividerMain.Margin);
+        Assert.Equal(new Thickness(0, 8, 0, 8), dividerPanel.Margin);
         Assert.Equal(new Thickness(16, 7, 0, 7), stacked.Margin);
         Assert.Equal(new Thickness(16, 7, 0, 7), floating.Margin);
     }

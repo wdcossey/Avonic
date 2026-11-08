@@ -1384,6 +1384,26 @@ public class AvonicChipTests
         Assert.Equal(2, command.Parameters.Count);
     }
 
+    // A screen reader's activation is a DOM click in a browser. A disabled chip takes none.
+    [AvaloniaFact]
+    public void E1_Automation_Invoke_Clicks_And_Runs_The_Command_Unless_Disabled()
+    {
+        var command = new Command();
+        var (chip, clicks) = Clicked();
+        chip.Command = command;
+        using var scene = new Scene(chip);
+        var invoke = Assert.IsAssignableFrom<Avalonia.Automation.Provider.IInvokeProvider>(ControlAutomationPeer.CreatePeerForElement(chip));
+
+        invoke.Invoke();
+        Assert.Equal(1, clicks());
+        Assert.Single(command.Parameters);
+
+        chip.IsEnabled = false;
+        invoke.Invoke();
+        Assert.Equal(1, clicks());
+        Assert.Single(command.Parameters);
+    }
+
     [AvaloniaFact]
     public void E2_A_Command_That_Cannot_Execute_Disables_The_Chip() => InstalledTheme.Run(_ =>
     {

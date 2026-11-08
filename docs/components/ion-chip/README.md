@@ -73,7 +73,7 @@ Ionic's chip has no click of its own: an app listens to the element's own DOM `c
 
 | Member | What |
 |---|---|
-| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
+| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Automation's `Invoke`, a screen reader's activation, does. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
 | `Command`, `CommandParameter` | Run after `Click`, unless a handler set `Handled`. A command that can't execute disables the chip, as on `AvonicButton` |
 
 ```xml
@@ -89,4 +89,5 @@ Ionic's chip has no click of its own: an app listens to the element's own DOM `c
 | An avatar child isn't sized | `chip.md.css`'s `::slotted(ion-avatar)`; it goes in `Styles/Chip.axaml`, in a PR of its own |
 | A disabled panel fades the chip, a flex parent doesn't stretch it, and a taller parent centres it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |
 | Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container, where Ionic's chip grows past it | Avalonia arranges a child within its space |
+| A chip whose margin an app changes in a `ControlTheme` still has 4 on the other three sides in an item's or a divider's slot, where a CSS `:host` margin would follow | The slot rules are a `Style`, which beats any `ControlTheme`, and Avalonia can't set one side of a `Margin`. A plain `Style` for the margin beats them, as a page's rule does in CSS |
 | Not tried in a real window | Headless capture only |
