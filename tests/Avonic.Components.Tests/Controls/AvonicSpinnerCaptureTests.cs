@@ -20,6 +20,65 @@ public class AvonicSpinnerCaptureTests
     [AvaloniaFact]
     public void Reference_Page() => InstalledTheme.Run(_ =>
     {
+        var frame = Render();
+        Save(frame, "avonic-ion-spinner-page.png");
+
+        // The large circular spinner's arc, at 350 ms, is over the bottom: dash 50.5 from 7.5 along, 21° to 166°.
+        // Its centre is at (16 + 40, 16 + 28 + 16 + 28 + 16 + 40) px, r 33.3 px, at 2×.
+        var centre = new Point(56, 144);
+        Assert.True(Frames.PixelAt(frame, (int)(centre.X * 2), (int)((centre.Y + 33) * 2)).R < 64);
+        Assert.True(Frames.PixelAt(frame, (int)(centre.X * 2), (int)((centre.Y - 33) * 2)).R > 192);
+    });
+
+    // Ionic's spinner doesn't read the animated config, so with it off the page at 350 ms is the same frame, every byte.
+    [AvaloniaFact]
+    public void Reference_Page_With_Animated_Off_Is_The_Same_Frame() => InstalledTheme.Run(_ =>
+    {
+        var expected = Render();
+        AvonicConfig.Animated = false;
+        try
+        {
+            var frame = Render();
+            Save(frame, "avonic-ion-spinner-page-animated-off.png");
+            AssertSameFrame(expected, frame);
+        }
+        finally
+        {
+            AvonicConfig.Animated = true;
+        }
+    });
+
+    private static void Save(WriteableBitmap frame, string name)
+    {
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
+        {
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, name), PngBitmapEncoderOptions.Default);
+        }
+    }
+
+    /// <summary>Every byte of two frames, row by row, as a frame's rows may be padded.</summary>
+    private static unsafe void AssertSameFrame(WriteableBitmap expected, WriteableBitmap actual)
+    {
+        using var a = expected.Lock();
+        using var b = actual.Lock();
+        Assert.Equal(a.Size, b.Size);
+        var differing = 0;
+        for (var y = 0; y < a.Size.Height; y++)
+        {
+            var rowA = new ReadOnlySpan<byte>((byte*)a.Address + y * a.RowBytes, a.Size.Width * 4);
+            var rowB = new ReadOnlySpan<byte>((byte*)b.Address + y * b.RowBytes, b.Size.Width * 4);
+            if (!rowA.SequenceEqual(rowB))
+            {
+                differing++;
+            }
+        }
+
+        Assert.True(differing == 0, $"{differing} rows differ");
+    }
+
+    private static WriteableBitmap Render()
+    {
         using var clock = new TestClock();
 
         static StackPanel Row(params AvonicSpinner[] spinners)
@@ -60,17 +119,6 @@ public class AvonicSpinnerCaptureTests
         Dispatcher.UIThread.RunJobs();
         clock.At(350);
         Dispatcher.UIThread.RunJobs();
-        var frame = scene.Window.CaptureRenderedFrame()!;
-        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
-        {
-            Directory.CreateDirectory(dir);
-            frame.Save(Path.Combine(dir, "avonic-ion-spinner-page.png"), PngBitmapEncoderOptions.Default);
-        }
-
-        // The large circular spinner's arc, at 350 ms, is over the bottom: dash 50.5 from 7.5 along, 21° to 166°.
-        // Its centre is at (16 + 40, 16 + 28 + 16 + 28 + 16 + 40) px, r 33.3 px, at 2×.
-        var centre = new Point(56, 144);
-        Assert.True(Frames.PixelAt(frame, (int)(centre.X * 2), (int)((centre.Y + 33) * 2)).R < 64);
-        Assert.True(Frames.PixelAt(frame, (int)(centre.X * 2), (int)((centre.Y - 33) * 2)).R > 192);
-    });
+        return scene.Window.CaptureRenderedFrame()!;
+    }
 }

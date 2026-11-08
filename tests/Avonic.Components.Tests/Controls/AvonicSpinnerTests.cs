@@ -16,7 +16,7 @@ using Avonic.Components.Controls;
 namespace Avonic.Components.Tests.Controls;
 
 /// <summary>
-/// Behaviours B1–B19 from docs/components/ion-spinner/PLAN.md, read from Ionic's spinner.js, spinner-configs.js and
+/// Behaviours B1–B20 from docs/components/ion-spinner/PLAN.md, read from Ionic's spinner.js, spinner-configs.js and
 /// spinner.css. Every expected number is what Chromium computed for real Ionic at that instant, with the animations
 /// seeked there, not a value worked out from this implementation.
 /// </summary>
@@ -545,37 +545,26 @@ public class AvonicSpinnerTests
     // ── B17: AvonicConfig.Animated ───────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B17_Animated_Off_Pauses_It_And_On_Again_Carries_On()
+    public void B17_Animated_Off_Changes_Nothing_And_It_Keeps_Turning()
     {
+        // spinner.js doesn't read animated, which reaches tap-click and Ionic's transitions only. It's the user's only sign
+        // that something is happening, so it keeps moving.
         AvonicConfig.Animated = false;
         try
         {
             using var f = new Fixture(SpinnerName.Lines);
-            Assert.False(f.Spinner.IsRequestingFrames);
-            Assert.True(f.Spinner.IsWatchingAnimated);
-            Near(1, f.At(400)[0].Opacity);
-
-            // Turned back on, it carries on at its next look, every 250 ms, here at 500, with no change of property.
-            Assert.Equal(250, AvonicSpinner.AnimatedCheckInterval.TotalMilliseconds);
-            AvonicConfig.Animated = true;
-            f.At(500);
             Assert.True(f.Spinner.IsRequestingFrames);
-            Near(0.9, f.At(600)[0].Opacity);
+            Assert.DoesNotContain(":paused", f.Spinner.Classes);
+            Near(0.75, f.At(250)[0].Opacity);
+            Assert.True(f.Spinner.IsRequestingFrames);
 
-            // Switched off while running, it stops at the next frame, and asks for no more.
-            AvonicConfig.Animated = false;
-            f.At(1000);
-            Assert.False(f.Spinner.IsRequestingFrames);
-            var frozen = f.Spinner.CurrentFrame()[0].Opacity;
-            Near(frozen, f.At(1600)[0].Opacity);
-
-            // Paused by the app as well, it doesn't look at all, and stays paused when animations come back.
-            f.Spinner.Paused = true;
+            // Turned on and off again while it runs, it carries on at its own time, with no pause.
             AvonicConfig.Animated = true;
-            f.At(2500);
-            Assert.False(f.Spinner.IsRequestingFrames);
-            Assert.False(f.Spinner.IsWatchingAnimated);
-            Near(frozen, f.Spinner.CurrentFrame()[0].Opacity);
+            f.At(300);
+            AvonicConfig.Animated = false;
+            Near(0.4, f.At(600)[0].Opacity);
+            Assert.True(f.Spinner.IsRequestingFrames);
+            Assert.DoesNotContain(":paused", f.Spinner.Classes);
         }
         finally
         {
@@ -657,25 +646,87 @@ public class AvonicSpinnerTests
         f.Spinner.SpinnerName = SpinnerName.LinesSharpSmall;
         Assert.Equal([":name-circular"], Names(new AvonicSpinner()));
 
-        // 'spinner-paused': paused || _testing, where Animated off stands in for _testing.
+        // 'spinner-paused': paused || _testing. _testing is Ionic's own, for its screenshots, and has no equivalent.
         Assert.Equal(default, f.Spinner.Margin);
         f.Spinner.Paused = true;
         Assert.Equal(new Thickness(3), f.Spinner.Margin);
         f.Spinner.Paused = false;
         Assert.Equal(default, f.Spinner.Margin);
+    }
 
-        AvonicConfig.Animated = false;
+    // ── B20: AvonicConfig.Spinner ────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B20_Config_Spinner_Names_A_Spinner_With_None_Read_At_Each_Render()
+    {
+        // Measured in Chromium, with Ionic.config.set('spinner', ...): getName() is this.name || config.get('spinner'), read in
+        // render(), which runs when the element is first connected and at each change of a prop. A change of the config
+        // alone, a move, or a hide and show reads nothing.
+        using var clock = new TestClock();
         try
         {
-            f.At(100);
-            Assert.Equal(new Thickness(3), f.Spinner.Margin);
-            AvonicConfig.Animated = true;
-            f.At(400);
-            Assert.Equal(default, f.Spinner.Margin);
+            AvonicConfig.Spinner = SpinnerName.Dots;
+            var spinner = new AvonicSpinner { Width = 28, Height = 28 };
+            var named = new AvonicSpinner { SpinnerName = SpinnerName.Lines, Width = 28, Height = 28 };
+            var host = new StackPanel { Children = { spinner, named } };
+
+            // Before its first render it has the class that render would give it, as B19's new spinner has
+            Assert.Contains(":name-dots", spinner.Classes);
+
+            // Created while it's dots, and connected once it's crescent: the first render reads crescent
+            AvonicConfig.Spinner = SpinnerName.Crescent;
+            using var scene = new Scene(host);
+            Assert.Equal(SpinnerName.Crescent, spinner.ResolvedName);
+            Assert.Contains(":name-crescent", spinner.Classes);
+            Assert.Single(spinner.CurrentFrame());
+            Assert.Equal(SpinnerName.Lines, named.ResolvedName);
+
+            AvonicConfig.Spinner = SpinnerName.Bubbles;
+            clock.At(100);
+            host.Children.Remove(spinner);
+            Dispatcher.UIThread.RunJobs();
+            host.Children.Insert(0, spinner);
+            Dispatcher.UIThread.RunJobs();
+            spinner.IsVisible = false;
+            spinner.IsVisible = true;
+            clock.At(200);
+            Assert.Equal(SpinnerName.Crescent, spinner.ResolvedName);
+            Assert.Contains(":name-crescent", spinner.Classes);
+            Assert.Single(spinner.CurrentFrame());
+
+            // A change of a prop renders bubbles: new keyframes, so new animations, from where it's paused, at 0
+            spinner.Paused = true;
+            Assert.Equal(SpinnerName.Bubbles, spinner.ResolvedName);
+            Assert.Equal([":name-bubbles", ":paused"], spinner.Classes.Where(c => c.StartsWith(':')).Order(StringComparer.Ordinal));
+            var frame = spinner.CurrentFrame();
+            Assert.Equal(9, frame.Count);
+            Near(1, frame[0].Scale);
+
+            AvonicConfig.Spinner = SpinnerName.LinesSmall;
+            spinner.Duration = 500;
+            Assert.Equal(SpinnerName.LinesSmall, spinner.ResolvedName);
+            AvonicConfig.Spinner = SpinnerName.Circles;
+            spinner.Color = "danger";
+            Assert.Equal(SpinnerName.Circles, spinner.ResolvedName);
+            Assert.Contains(":name-circles", spinner.Classes);
+
+            // A name of its own wins, and clearing it reads the config
+            AvonicConfig.Spinner = SpinnerName.Dots;
+            named.Paused = true;
+            Assert.Equal(SpinnerName.Lines, named.ResolvedName);
+            named.SpinnerName = null;
+            Assert.Equal(SpinnerName.Dots, named.ResolvedName);
+            Assert.Equal(3, named.CurrentFrame().Count);
+
+            // No config is md's default
+            AvonicConfig.Spinner = null;
+            spinner.Paused = false;
+            Assert.Equal(SpinnerName.Circular, spinner.ResolvedName);
+            Assert.Single(spinner.CurrentFrame());
         }
         finally
         {
-            AvonicConfig.Animated = true;
+            AvonicConfig.Spinner = null;
         }
     }
 

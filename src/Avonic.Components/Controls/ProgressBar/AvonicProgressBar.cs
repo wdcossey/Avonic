@@ -292,7 +292,6 @@ public class AvonicProgressBar : TemplatedControl
             _buffer.Snap(Display(Buffer));
             Ease(_lead, LeadTarget);
             UpdatePseudoClasses();
-            _peer?.RaiseTypeChanged();
             Update();
         }
         else if (change.Property == ValueProperty)
@@ -315,12 +314,13 @@ public class AvonicProgressBar : TemplatedControl
     }
 
     /// <summary>
-    /// A transition, unless animations are off or the bar hasn't been drawn since it attached or showed. One started while
-    /// the bar is detached or hidden is snapped when it attaches or shows, as both restart it.
+    /// A transition, unless the bar hasn't been drawn since it attached or showed. One started while the bar is detached or
+    /// hidden is snapped when it attaches or shows, as both restart it. <see cref="AvonicConfig.Animated"/> doesn't stop it, as
+    /// Ionic's <c>animated</c> doesn't reach this control's CSS.
     /// </summary>
     private void Ease(CssTransition transition, double target)
     {
-        if (AvonicConfig.Animated && _firstFrame is null)
+        if (_firstFrame is null)
         {
             transition.Start(target, AvonicConfig.Now(), TransitionDuration);
         }
@@ -370,10 +370,10 @@ public class AvonicProgressBar : TemplatedControl
 
         var now = AvonicConfig.Now();
         var running = _attached && IsEffectivelyVisible;
-        var animated = AvonicConfig.Animated && running;
 
-        // AvonicConfig.Animated off stands the animations at time 0, as Ionic's progress-paused does.
-        var elapsed = animated ? now - _renderedAt : TimeSpan.Zero;
+        // The animations run whatever AvonicConfig.Animated says, as Ionic's animated config doesn't reach them: they're the
+        // user's only sign that something is happening. Detached or hidden, nothing shows, and attaching or showing restarts them.
+        var elapsed = now - _renderedAt;
         var width = _root.Bounds.Width;
         var moving = running && (_lead.IsRunning(now) || _buffer.IsRunning(now));
         var determinate = Type == ProgressBarType.Determinate;
@@ -395,7 +395,7 @@ public class AvonicProgressBar : TemplatedControl
             }
 
             // Only while the dots show. Their phase is measured from the render, so they come back where Ionic's would be.
-            moving |= animated && buffer < 1;
+            moving |= running && buffer < 1;
         }
         else
         {
@@ -407,7 +407,7 @@ public class AvonicProgressBar : TemplatedControl
             var (secondaryTranslate, secondaryScale) = IndeterminateKeyframes.Secondary(t);
             SetSpan(_primary, IndeterminateKeyframes.PrimaryLeft + primaryTranslate, primaryScale, width, track);
             SetSpan(_secondary, IndeterminateKeyframes.SecondaryLeft + secondaryTranslate, secondaryScale, width, track);
-            moving |= animated;
+            moving |= running;
         }
 
         if (moving)
@@ -457,7 +457,8 @@ public class AvonicProgressBar : TemplatedControl
 
     /// <summary>
     /// <c>role="progressbar"</c>, <c>aria-valuemin="0"</c>, <c>aria-valuemax="1"</c>, and <c>aria-valuenow</c> the raw value
-    /// when determinate. Indeterminate has no value, so no range.
+    /// when determinate. Indeterminate has no value, so no range. A change of type raises no event, as WPF's progress bar
+    /// raises none when it becomes indeterminate: the range appears or goes, and a client reads it when it next looks.
     /// </summary>
     protected override AutomationPeer OnCreateAutomationPeer() => _peer = new ProgressBarAutomationPeer(this);
 
@@ -490,16 +491,6 @@ public class AvonicProgressBar : TemplatedControl
             {
                 RaisePropertyChangedEvent(RangeValuePatternIdentifiers.ValueProperty, oldValue, newValue);
             }
-        }
-
-        /// <summary><c>aria-valuenow</c> appears or goes with a change of type.</summary>
-        public void RaiseTypeChanged()
-        {
-            var determinate = owner.Type == ProgressBarType.Determinate;
-            RaisePropertyChangedEvent(
-                RangeValuePatternIdentifiers.ValueProperty,
-                determinate ? null : owner.Value,
-                determinate ? owner.Value : null);
         }
     }
 }

@@ -34,6 +34,9 @@ The point is that the PRs can merge in any order without a conflict.
   Say the new total in the PR, and expect a conflict to resolve.
 - **The reference render:** use `node tools/ionic-ref/render.js <ion-tag> --bare --html '...'`, and record the exact command at the top of
   `COMPARISON.md`. Don't add to `DEFAULT_HTML`.
+- **Use only your own temp folder,** for scripts, renders, clean clones and breakage copies. Whoever starts the batch names one for
+  each agent, after its issue (`<tag>-<issue>-agent`); if you weren't given one, make one by that name in your session's temp
+  directory. Two agents that shared one overwrote each other's clean clones.
 - **Stage only your own files.** `.idea/` stays untracked. Never `git add -A` from the root without checking.
 - **Don't open a real window.** It takes over the human's PC, and whoever runs the batch does that with `tools/real-window`. Compare with headless
   capture only, and say "not tried in a real window" in the PR.
@@ -95,6 +98,13 @@ These are mistakes this project has already made, so don't repeat them.
 - **An XML comment can't contain `--`,** so write CSS variables without the dashes in `.axaml` comments.
 - **`x:Static` can't take `x:Key`. `TemplatedParent` isn't allowed under comma selectors:** use `$parent[...]`. A transition's property in a dictionary needs `{x:Static ...}`.
 - **The sample's base theme is `SimpleTheme`,** and `TestApp` has none, so anything from a base theme only shows up in a test that adds it.
+- **A `ContentPresenter` with a `ContentTemplate` builds from it even when the content is a control.** A template for another type, such
+  as strings, then shows the control's type name in a `TextBlock`. An `ItemsControl` that wraps controls in containers has to clear
+  the template for them. See `AvonicChip.PrepareContainerForItemOverride`.
+- **Of two values at one priority, the later wins.** A style-priority frame made when a state turns on beats an app's style that was
+  already there. Bind once, in the constructor, and push the value through it: see `ReversalTransform` in `AvonicProgressBar`.
+- **An invisible control isn't measured, so its template isn't applied.** Anything that starts on attach and needs the template has to
+  wait for it to be shown.
 
 ## Review and PR
 
