@@ -385,6 +385,12 @@ public class AvonicSpinnerTests
         f.Host.IsVisible = true;
         Assert.True(f.Spinner.IsRequestingFrames);
         Near(0.95, f.At(650)[0].Opacity);
+
+        // A window that's hidden isn't display: none. A hidden page doesn't cancel its animations.
+        f.Window.Hide();
+        f.Window.Show();
+        Dispatcher.UIThread.RunJobs();
+        Near(0.9, f.At(700)[0].Opacity);
     }
 
     // ── B12: colour ──────────────────────────────────────────────────────────────────────────
@@ -530,6 +536,7 @@ public class AvonicSpinnerTests
         {
             using var f = new Fixture(SpinnerName.Lines);
             Assert.False(f.Spinner.IsRequestingFrames);
+            Assert.True(f.Spinner.IsWatchingAnimated);
             Near(1, f.At(400)[0].Opacity);
 
             // Turned back on, it carries on at its next look, every 250 ms, here at 500, with no change of property.
@@ -551,6 +558,7 @@ public class AvonicSpinnerTests
             AvonicConfig.Animated = true;
             f.At(2500);
             Assert.False(f.Spinner.IsRequestingFrames);
+            Assert.False(f.Spinner.IsWatchingAnimated);
             Near(frozen, f.Spinner.CurrentFrame()[0].Opacity);
         }
         finally
@@ -602,5 +610,13 @@ public class AvonicSpinnerTests
         // bubbles at 0 ms: bubble 0, at 3 o'clock, is full size and opaque.
         var bubbles = Draw(SpinnerName.Bubbles, 0);
         Assert.True(Ink(bubbles, 64 + 41, 64) > 250);
+
+        // A new colour on a stroked spinner that's already drawn: the stroke follows it.
+        var lit = new AvonicSpinner { SpinnerName = SpinnerName.Crescent, Width = 128, Height = 128, Paused = true, Foreground = Brushes.Black };
+        using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { lit } }, 128, 128);
+        Capture(scene.Window);
+        lit.Foreground = Brushes.Red;
+        var red = Frames.PixelAt(Capture(scene.Window), 64, 116);
+        Assert.True(red.R > 200 && red.G < 60, $"expected red, got {red}");
     }
 }

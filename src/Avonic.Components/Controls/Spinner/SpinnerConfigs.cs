@@ -117,13 +117,12 @@ internal static class SpinnerConfigs
         return new SpinnerElement(32 * Math.Cos(angle), 32 * Math.Sin(angle), dur * index / total - dur, 0);
     }
 
-    /// <summary><c>lines</c> and <c>lines-small</c>: <c>rotate(360/n·i ± 180)</c>, delay <c>dur·i/n − dur</c>.</summary>
+    /// <summary>
+    /// The spokes: <c>rotate(360/n·i ± 180)</c>, delay <c>dur·i/n − dur</c>. <c>lines-sharp</c> and
+    /// <c>lines-sharp-small</c> write it as <c>rotate(30i ± 180)</c> with <c>i &lt; 6</c>, which is the same for 12.
+    /// </summary>
     private static SpinnerElement Spoke(double dur, int index, int total) =>
         new(0, 0, dur * index / total - dur, 360.0 / total * index + (index < total / 2.0 ? 180 : -180));
-
-    /// <summary><c>lines-sharp</c> and <c>lines-sharp-small</c>: <c>rotate(30i ± 180)</c>, delay <c>dur·i/n − dur</c>.</summary>
-    private static SpinnerElement SharpSpoke(double dur, int index, int total) =>
-        new(0, 0, dur * index / total - dur, 30 * index + (index < 6 ? 180 : -180));
 
     private static readonly SpinnerConfig Bubbles = new()
     {
@@ -182,14 +181,14 @@ internal static class SpinnerConfigs
     {
         Dur = 1000, Count = 12, IsLine = true, Animation = SpinnerAnimation.FadeOut,
         Y1 = 17, Y2 = 29, StrokeWidth = LinesSharpStrokeWidth, LineCap = PenLineCap.Round,
-        Element = SharpSpoke,
+        Element = Spoke,
     };
 
     private static readonly SpinnerConfig LinesSharpSmall = new()
     {
         Dur = 1000, Count = 12, IsLine = true, Animation = SpinnerAnimation.FadeOut,
         Y1 = 12, Y2 = 20, StrokeWidth = LinesSharpStrokeWidth, LineCap = PenLineCap.Round,
-        Element = SharpSpoke,
+        Element = Spoke,
     };
 
     /// <summary>The config for <paramref name="name"/>.</summary>

@@ -84,7 +84,7 @@ From [PLAN.md](PLAN.md), each a test in `AvonicSpinnerTests`:
    circle, `ease-in-out` in each half.
 9. `Paused` freezes it, and clearing it carries on.
 10. A change of name keeps the elements that keep their keyframes, and starts the rest again, as Ionic's re-render does.
-11. Leaving the tree, or being hidden, which is `IsVisible` false on it or an ancestor, stops it, and coming back starts again.
+11. Leaving the tree, or being hidden, which is `IsVisible` false on it or an ancestor below the window, stops it, and coming back starts again. Hiding the window doesn't, as a hidden page doesn't.
 12. The colour inherits, follows `Color`, and follows `Avonic.Spinner.Color`, and an app's own `Foreground` beats both.
 13. 28 px square, scaling by the smaller side.
 14. Not mirrored right to left.

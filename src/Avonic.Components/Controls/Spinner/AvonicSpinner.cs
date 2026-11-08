@@ -75,6 +75,8 @@ public class AvonicSpinner : Control
 
     private Pen? _pen;
     private SpinnerConfig? _penConfig;
+    private StreamGeometry[]? _fixedArcs;
+    private SpinnerConfig? _fixedArcConfig;
 
     /// <summary>The spinners in a visual tree, which a change of <see cref="Visual.IsVisible"/> anywhere may show or hide.</summary>
     private static readonly HashSet<AvonicSpinner> s_attached = [];
@@ -92,14 +94,16 @@ public class AvonicSpinner : Control
         DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
 
         // Hiding the spinner or an ancestor is CSS's display: none, which cancels its animations.
-        IsVisibleProperty.Changed.Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs<bool>>(_ =>
+        // A window that's hidden isn't: a page that's hidden doesn't cancel its animations. UpdateLive changes nothing in
+        // the set, so it's walked as it is.
+        IsVisibleProperty.Changed.Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs<bool>>(e =>
         {
-            if (s_attached.Count == 0)
+            if (s_attached.Count == 0 || e.Sender is TopLevel)
             {
                 return;
             }
 
-            foreach (var spinner in s_attached.ToArray())
+            foreach (var spinner in s_attached)
             {
                 spinner.UpdateLive();
             }
@@ -155,6 +159,9 @@ public class AvonicSpinner : Control
     /// <summary>Whether a frame has been asked for: only while attached, shown and running, as a CSS animation costs nothing otherwise.</summary>
     internal bool IsRequestingFrames => _frame is not null;
 
+    /// <summary>Whether it's paused only by <see cref="AvonicConfig.Animated"/>, and looking now and then to see if it's back on.</summary>
+    internal bool IsWatchingAnimated => _animatedCheck is not null;
+
     /// <summary>Every element at this instant on <see cref="AvonicConfig.Now"/>.</summary>
     internal IReadOnlyList<SpinnerElementFrame> CurrentFrame()
     {
@@ -194,9 +201,26 @@ public class AvonicSpinner : Control
         UpdateLive();
     }
 
+    /// <summary>
+    /// Whether it and every ancestor below the window are visible. Not <see cref="Visual.IsEffectivelyVisible"/>, which
+    /// counts the window too.
+    /// </summary>
+    private bool IsShown()
+    {
+        for (Visual? visual = this; visual is not null and not TopLevel; visual = visual.GetVisualParent())
+        {
+            if (!visual.IsVisible)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void UpdateLive()
     {
-        var live = _attached && IsVisible && this.GetVisualAncestors().All(ancestor => ancestor.IsVisible);
+        var live = _attached && IsShown();
         if (live == _live)
         {
             return;
@@ -256,7 +280,12 @@ public class AvonicSpinner : Control
         var now = AvonicConfig.Now();
         if (ShouldPause)
         {
-            _pausedAt ??= now;
+            if (_pausedAt is null)
+            {
+                _pausedAt = now;
+                InvalidateVisual();
+            }
+
             StopFrames();
 
             // Paused only because animations are off: look again now and then, without drawing, so that turning them back
@@ -281,9 +310,8 @@ public class AvonicSpinner : Control
             }
 
             RequestFrame();
+            InvalidateVisual();
         }
-
-        InvalidateVisual();
     }
 
     private void RequestFrame() => _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
@@ -370,9 +398,26 @@ public class AvonicSpinner : Control
                 }
                 else if (frame.Arcs is { } arcs)
                 {
-                    foreach (var arc in arcs)
+                    // crescent's dash is fixed, and only its turn changes, so its arc is built once.
+                    if (config.Dash is not null)
                     {
-                        context.DrawGeometry(null, pen, Arc(config.Center, config.Radius, arc));
+                        if (_fixedArcConfig != config)
+                        {
+                            _fixedArcs = arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
+                            _fixedArcConfig = config;
+                        }
+
+                        foreach (var geometry in _fixedArcs!)
+                        {
+                            context.DrawGeometry(null, pen, geometry);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var arc in arcs)
+                        {
+                            context.DrawGeometry(null, pen, Arc(config.Center, config.Radius, arc));
+                        }
                     }
                 }
                 else
