@@ -139,8 +139,10 @@ Ionic doesn't follow either.
 **A button in `AvonicButtons` is told by styles in `Styles/Toolbar.axaml`, which read pseudoclasses `AvonicButton` works out.**
 Since #89 the button sets `:in-toolbar`, `:in-toolbar-color` and `:in-buttons`, as `button.js`'s `hostContext` does, at each
 render and when it's attached (see [ion-button](../ion-button/README.md#in-a-toolbar)), so the rules don't look at its ancestors.
-`fill` resolving to clear is a `Fill` setter on `c|AvonicButton:in-buttons`, so a `Fill` the app sets wins, and it follows a
-button moving in or out, where Ionic only looks once. The rules from `buttons.md.css`'s `:host-context(.ion-color)` still look
+`fill` resolving to clear is a `Fill` setter on `c|AvonicButton:in-buttons`, so a `Fill` the app sets on the button wins, and
+it follows a button moving in or out, where Ionic only looks once. With a pseudoclass, these rules beat an app's plain
+`c|AvonicButton` style, as `buttons.md.css`'s scoped `ion-button` rules beat an app's plain `ion-button` rule in CSS; an app's
+rule with a class or pseudoclass, later, wins. The rules from `buttons.md.css`'s `:host-context(.ion-color)` still look
 for a coloured toolbar, `c|AvonicToolbar:ion-color c|AvonicButton:in-buttons`, because they're plain CSS in Ionic and follow the
 toolbar's colour at once (measured `s7`). Every other rule is on the button's parts, as `Styles/Button.axaml` does for an
 item. The theme's rules for a fill or a size have a pseudoclass, which beats a global rule without one, so each rule here

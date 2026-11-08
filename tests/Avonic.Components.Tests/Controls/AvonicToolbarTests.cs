@@ -458,11 +458,14 @@ public class AvonicToolbarTests
     [AvaloniaFact]
     public void T11_The_Toolbar_Stops_Ion_Style_So_An_Item_Around_It_Hears_Nothing() => InstalledTheme.Run(_ =>
     {
-        // childrenStyle calls stopPropagation: a label in a toolbar in an item isn't the item's label.
-        var item = new AvonicItem { Content = new AvonicToolbar { Content = new AvonicLabel { Content = "In a toolbar" } } };
-        using var scene = ToolbarTest.Show(item);
+        // childrenStyle calls stopPropagation: a stacked label in a toolbar in an item doesn't make it a stacked label's item,
+        // which is 55 high at least. Beside it, one that is.
+        var inToolbar = new AvonicItem { Content = new AvonicToolbar { Content = new AvonicLabel { Content = "In a toolbar", Position = LabelPosition.Stacked } } };
+        var direct = new AvonicItem { Content = new AvonicLabel { Content = "Direct", Position = LabelPosition.Stacked } };
+        using var scene = ToolbarTest.Show(new StackPanel { Children = { inToolbar, direct } });
 
-        Assert.DoesNotContain(":item-label", item.Classes);
+        Assert.Equal(55, ToolbarTest.Part<Border>(direct, "PART_Native").MinHeight);
+        Assert.NotEqual(55, ToolbarTest.Part<Border>(inToolbar, "PART_Native").MinHeight);
     });
 
     // ── T9: the safe area's sides ───────────────────────────────────────────────────────────

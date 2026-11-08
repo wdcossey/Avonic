@@ -160,7 +160,9 @@ None.
 - **`AvonicButtons` in a coloured item,** not a toolbar, doesn't take the coloured-toolbar rules, where Ionic's
   `:host-context(.ion-color)` takes any coloured ancestor.
 - **A button that moves** reads where it is when it's attached, where Ionic keeps its old classes until its next render. A
-  recycled container that stays attached keeps them until its button's next render, as Ionic would.
+  recycled container that stays attached keeps them until its button's next render, as Ionic would, and so does a toolbar whose
+  `Color` binding resolves after its buttons are attached, such as from a `DataContext` set later. See
+  [ion-button](../ion-button/README.md#in-a-toolbar).
 - **A header's first toolbar has to be its first child,** and a footer's last its last, to get the safe area. Ionic finds the first
   toolbar among other children, and inside a wrapper.
 - **A footer's bottom safe area stays while the keyboard is open,** where Ionic drops it. It needs the keyboard's state, which

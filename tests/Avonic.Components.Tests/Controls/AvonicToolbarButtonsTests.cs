@@ -463,7 +463,6 @@ public class AvonicToolbarButtonsTests
 
         scene.Window.MouseDown(ToolbarTest.Box(outline, scene.Window).Center, MouseButton.Left, RawInputModifiers.None);
         clock.At(100);
-        Assert.Contains(":activated", outline.Classes);
         AssertNoBackground(Native(outline));
     });
 

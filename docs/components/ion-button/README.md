@@ -166,7 +166,10 @@ They're read at each render, as Ionic does, and here a render is a change of `Fi
 `IconOnlyContent`, `Color` or `IsEnabled`. So a toolbar's `Color` set later shows at the button's next render, as measured in
 Ionic. They're also read when the button is attached, where Ionic keeps a moved button's until its next render (measured), because
 a moved button's old place may be gone. A container a virtualizing panel recycles stays attached, so a toolbar `Color` bound to
-its item also waits for the button's next render. They follow the visual tree, so a button in a flyout opened from a toolbar isn't
+its item also waits for the button's next render, and so does a toolbar `Color` whose binding only resolves after the buttons are
+attached, such as from a `DataContext` set later. Ionic's frameworks usually set the attribute before the first render, so it
+shows less there. Until the button renders, it keeps the uncoloured toolbar's rules: with the default tokens, only a pressed outline
+button directly in the toolbar shows it, white where it would stay transparent. They follow the visual tree, so a button in a flyout opened from a toolbar isn't
 in it, as a popover's content isn't inside the toolbar in Ionic's DOM.
 
 Not here yet: `ion-list-header` turns a null `Fill` into clear.
