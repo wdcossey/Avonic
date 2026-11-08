@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-chip's variables. chip.md.css sets background itself for each state, so a value set here beats every state
+         on a plain chip, as a variable set from outside beats the :host rules that set it. A CssUnset key leaves the
+         states to the theme, which reads the Md keys below. -->
+    <b:CssUnset x:Key="Avonic.Chip.Background" />
+    <b:CssUnset x:Key="Avonic.Chip.Color" />
+
+    <!-- rgba(var(ion-text-color-rgb), n), which has no variable of its own. These aren't Ionic's variables: override
+         the keys above instead. -->
+    <SolidColorBrush x:Key="Avonic.Chip.Md.Background" Color="{DynamicResource Avonic.TextColor}" Opacity="0.12" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.BackgroundFocused" Color="{DynamicResource Avonic.TextColor}" Opacity="0.16" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.BackgroundActivated" Color="{DynamicResource Avonic.TextColor}" Opacity="0.2" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.BackgroundHover" Color="{DynamicResource Avonic.TextColor}" Opacity="0.16" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.Color" Color="{DynamicResource Avonic.TextColor}" Opacity="0.87" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.OutlineBorderColor" Color="{DynamicResource Avonic.TextColor}" Opacity="0.32" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.OutlineBackgroundFocused" Color="{DynamicResource Avonic.TextColor}" Opacity="0.04" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.OutlineBackgroundActivated" Color="{DynamicResource Avonic.TextColor}" Opacity="0.08" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.OutlineBackgroundHover" Color="{DynamicResource Avonic.TextColor}" Opacity="0.04" />
+    <SolidColorBrush x:Key="Avonic.Chip.Md.IconColor" Color="{DynamicResource Avonic.TextColor}" Opacity="0.54" />
+
+</ResourceDictionary>
