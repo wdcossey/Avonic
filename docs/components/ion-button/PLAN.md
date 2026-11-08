@@ -284,7 +284,7 @@ Avonic-only, and never named like an Ionic member.
 
 | What | Goes with |
 |---|---|
-| `inToolbar`: `fill` null → clear; `rippleType` unbounded for clear and icon-only; `in-toolbar`, `in-toolbar-color`, `in-buttons` and their colour rules | #12 (`ion-buttons`), and the toolbar's issue |
+| `inToolbar`: `fill` null → clear; `rippleType` unbounded for clear and icon-only; `in-toolbar`, `in-toolbar-color`, `in-buttons` and their colour rules | #12 (`ion-buttons`), and the pseudoclasses in #89. See the [README](README.md#in-a-toolbar) |
 | `inListHeader`: `fill` null → clear | `ion-list-header` |
 | `closest('ion-item-divider')` for `inItem` | `ion-item-divider` |
 | `:host(.button-outline.ion-activated.ion-color) .button-native` | Nothing: it sets `background: transparent` where it already is |

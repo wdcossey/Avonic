@@ -120,4 +120,13 @@
     <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="#1F1F1F" />
     <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="#1E1E1E" />
 
+    <!-- toolbar.md.css's color and border-color fall back to ion-text-color, #ffffff, and ion-border-color, which isn't set,
+         then ion-background-color-step-150, #363636. Ionic's dark palette sets ion-text-color, where its light one leaves it
+         unset; here Avonic.TextColor and Avonic.BorderColor are always set, black and 13% black in light, so only dark can
+         follow them, and Tokens/Toolbar.axaml keeps Ionic's literals for light. Avonic.BorderColor stands for ion-border-color,
+         which the toolbar reads first, and is step 150 in dark. The color is also a solid button's background in ion-buttons
+         (buttons.md.css). -->
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.ColorBrush" Color="{DynamicResource Avonic.TextColor}" />
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.BorderColorBrush" Color="{DynamicResource Avonic.BorderColor}" />
+
 </ResourceDictionary>

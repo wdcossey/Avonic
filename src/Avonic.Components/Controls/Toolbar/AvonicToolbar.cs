@@ -20,8 +20,13 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_ContentPresenter", typeof(ContentPresenter))]
 [TemplatePart("PART_Primary", typeof(ContentPresenter))]
 [TemplatePart("PART_End", typeof(ContentPresenter))]
+[PseudoClasses(":toolbar-title-default", ":toolbar-title-small", ":toolbar-title-large")]
 public class AvonicToolbar : TemplatedControl
 {
+    /// <summary>What <see cref="OnIonStyle"/> has been told, per type of child, and the keys it has set.</summary>
+    private readonly Dictionary<Type, HashSet<string>> _childStyles = [];
+    private readonly HashSet<string> _appliedChildStyles = [];
+
     /// <summary>Ionic <c>color</c>.</summary>
     public static readonly StyledProperty<string?> ColorProperty =
         ColorPalette.ColorProperty.AddOwner<AvonicToolbar>();
@@ -134,6 +139,11 @@ public class AvonicToolbar : TemplatedControl
         set => SetValue(EndContentTemplateProperty, value);
     }
 
+    public AvonicToolbar()
+    {
+        AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -193,6 +203,35 @@ public class AvonicToolbar : TemplatedControl
 
         _first?.SetSlotClass(":buttons-first-slot", true);
         _last?.SetSlotClass(":buttons-last-slot", true);
+    }
+
+    /// <summary>
+    /// <c>childrenStyle</c>: it stops the event, and each true key becomes <c>:toolbar-key</c>, kept per type of child, as Ionic's
+    /// by tag name. A title gives <c>:toolbar-title-default</c>, <c>-small</c> or <c>-large</c>. md has no rules on them.
+    /// </summary>
+    private void OnIonStyle(object? sender, IonStyleEventArgs e)
+    {
+        e.Handled = true;
+        if (e.Source is null)
+        {
+            return;
+        }
+
+        _childStyles[e.Source.GetType()] = e.Styles.Where(style => style.Value).Select(style => style.Key).ToHashSet();
+
+        var styles = _childStyles.Values.SelectMany(keys => keys).ToHashSet();
+        foreach (var removed in _appliedChildStyles.Except(styles))
+        {
+            PseudoClasses.Remove(":toolbar-" + removed);
+        }
+
+        foreach (var added in styles.Except(_appliedChildStyles))
+        {
+            PseudoClasses.Add(":toolbar-" + added);
+        }
+
+        _appliedChildStyles.Clear();
+        _appliedChildStyles.UnionWith(styles);
     }
 
     /// <summary>

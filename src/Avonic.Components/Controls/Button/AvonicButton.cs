@@ -30,7 +30,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
 [PseudoClasses(
     ":fill-clear", ":fill-default", ":fill-outline", ":fill-solid", ":size-large", ":size-small", ":shape-round",
-    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-item")]
+    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-item", ":in-toolbar", ":in-toolbar-color", ":in-buttons")]
 public class AvonicButton : TemplatedControl, IItemControl
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -316,8 +316,10 @@ public class AvonicButton : TemplatedControl, IItemControl
     {
         base.OnPropertyChanged(change);
 
+        // Ionic renders again when any of its props changes, color and disabled too, and reads hostContext then.
         if (change.Property == FillProperty || change.Property == SizeProperty || change.Property == ShapeProperty
-            || change.Property == ExpandProperty || change.Property == StrongProperty || change.Property == IconOnlyContentProperty)
+            || change.Property == ExpandProperty || change.Property == StrongProperty || change.Property == IconOnlyContentProperty
+            || change.Property == ColorProperty || change.Property == IsEnabledProperty)
         {
             UpdateClasses();
         }
@@ -339,7 +341,10 @@ public class AvonicButton : TemplatedControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // closest('ion-item'). Ionic only looks on first load, but containers get recycled here.
+        // closest('ion-item'). Ionic only looks on first load, but containers get recycled here. The hostContext classes are
+        // read again here too, where Ionic keeps a moved button's until its next render, measured: a moved button is attached
+        // again here, and its old place may be gone. A container a virtualizing panel recycles stays attached, so a toolbar
+        // color bound to its item shows at the button's next render, as a toolbar's color set later does in Ionic.
         _inItem = this.FindAncestorOfType<AvonicItem>() is not null;
         UpdateClasses();
     }
@@ -347,6 +352,14 @@ public class AvonicButton : TemplatedControl, IItemControl
     /// <summary><c>render</c>'s host classes. <c>fill</c> also resolves to clear in a toolbar or list header, which goes with those controls.</summary>
     private void UpdateClasses()
     {
+        // hostContext('ion-toolbar'), hostContext('ion-toolbar[color]') and hostContext('ion-buttons'): any ancestor, read at
+        // each render, so a toolbar's color changing later shows at the button's next render, as measured. First, because
+        // :in-buttons gives a Fill, which comes back here: the classes below then read the Fill it gave.
+        var (inToolbar, inToolbarColor, inButtons) = HostContext();
+        PseudoClasses.Set(":in-toolbar", inToolbar);
+        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        PseudoClasses.Set(":in-buttons", inButtons);
+
         var fill = Fill ?? ButtonFill.Solid;
         PseudoClasses.Set(":fill-clear", fill == ButtonFill.Clear);
         PseudoClasses.Set(":fill-default", fill == ButtonFill.Default);
@@ -364,6 +377,29 @@ public class AvonicButton : TemplatedControl, IItemControl
         PseudoClasses.Set(":strong", Strong);
         PseudoClasses.Set(":has-icon-only", IconOnlyContent is not null);
         PseudoClasses.Set(":in-item", _inItem);
+    }
+
+    /// <summary>
+    /// <c>ion-toolbar[color]</c> is any toolbar with a color attribute, even an empty one, and need not be the nearest toolbar.
+    /// Outside the tree, nothing.
+    /// </summary>
+    private (bool InToolbar, bool InToolbarColor, bool InButtons) HostContext()
+    {
+        bool inToolbar = false, inToolbarColor = false, inButtons = false;
+        foreach (var ancestor in this.GetVisualAncestors())
+        {
+            if (ancestor is AvonicToolbar toolbar)
+            {
+                inToolbar = true;
+                inToolbarColor |= toolbar.Color is not null;
+            }
+            else if (ancestor is AvonicButtons)
+            {
+                inButtons = true;
+            }
+        }
+
+        return (inToolbar, inToolbarColor, inButtons);
     }
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────

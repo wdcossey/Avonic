@@ -150,5 +150,26 @@ Avonic-only. None of these exist in Ionic.
 - A slotted icon with `Size` set takes its margin from `FontSize`, not its real size. At `IconSize.Large` that's about 4 px.
 - Solid's shadow is lighter at 2x than Chromium's: 205 against 165 on the first row under the button.
 
-Not here yet: `ion-buttons` (#12) and `ion-list-header` turn a null `Fill` into clear, and a toolbar has its own colour rules
-and an unbounded ripple.
+## In a toolbar
+
+`AvonicButtons` (#12) turns a null `Fill` into clear, and a toolbar has its own colour rules and an unbounded ripple. They're in
+[`ion-toolbar`](../ion-toolbar/README.md), and they read three pseudoclasses the button works out itself, as `button.js`'s
+`hostContext` does (#89):
+
+| Ionic class | Pseudoclass | True when |
+|---|---|---|
+| `in-toolbar` | `:in-toolbar` | Any `AvonicToolbar` is a visual ancestor |
+| `in-toolbar-color` | `:in-toolbar-color` | Any `AvonicToolbar` around it has a `Color`, even an empty one, as `ion-toolbar[color]` matches. Not only the nearest |
+| `in-buttons` | `:in-buttons` | Any `AvonicButtons` is a visual ancestor |
+
+They're read at each render, as Ionic does, and here a render is a change of `Fill`, `Size`, `Shape`, `Expand`, `Strong`,
+`IconOnlyContent`, `Color` or `IsEnabled`. So a toolbar's `Color` set later shows at the button's next render, as measured in
+Ionic. They're also read when the button is attached, where Ionic keeps a moved button's until its next render (measured), because
+a moved button's old place may be gone. A container a virtualizing panel recycles stays attached, so a toolbar `Color` bound to
+its item also waits for the button's next render, and so does a toolbar `Color` whose binding only resolves after the buttons are
+attached, such as from a `DataContext` set later. Ionic's frameworks usually set the attribute before the first render, so it
+shows less there. Until the button renders, it keeps the uncoloured toolbar's rules: with the default tokens, only a pressed outline
+button directly in the toolbar shows it, white where it would stay transparent. They follow the visual tree, so a button in a flyout opened from a toolbar isn't
+in it, as a popover's content isn't inside the toolbar in Ionic's DOM.
+
+Not here yet: `ion-list-header` turns a null `Fill` into clear.

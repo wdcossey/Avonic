@@ -18,8 +18,8 @@ the plain toolbar's solid and `success` buttons. Throwaway measuring scripts sta
 |---|---|---|---|---|
 | [x] | toolbar | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner` |
 | [x] | title | `color` | `Color` | |
-| [x] | title | `size` | `Size` (`TitleSize?`: `Large`, `Small`) | Null is Ionic's `default`. `Small` has md rules. `Large` has none in md, so it looks like the default, as measured (`#tlarge`); its rules are all in `title.ios.css` |
-| [x] | header | `collapse` | `Collapse` (`HeaderCollapse?`: `Condense`, `Fade`) | `checkCollapsibleHeader` does nothing unless ios, but md CSS has `.header-md.header-collapse-condense { display: none }` and `getRoleType` gives it no role: it's the header an ios page puts in its content for the large title, and md hides it. `Fade` has no md rule, so it looks like the default |
+| [x] | title | `size` | `Size` (`TitleSize?`: `Large`, `Small`) | Null is Ionic's `default`. `Small` has md rules. `Large` has none in md, so it looks like the default, as measured (`#tlarge`); its rules are all in `title.ios.css`. Kept, with Ionic's host class as a pseudoclass (`title-large` → `:size-large`, and `:size-default`, `:size-small`) and no md rule on it (#89) |
+| [x] | header | `collapse` | `Collapse` (`HeaderCollapse?`: `Condense`, `Fade`) | `checkCollapsibleHeader` does nothing unless ios, but md CSS has `.header-md.header-collapse-condense { display: none }` and `getRoleType` gives it no role: it's the header an ios page puts in its content for the large title, and md hides it. `Fade` has no md rule, so it looks like the default. Kept, with Ionic's host class as a pseudoclass (`header-collapse-fade` → `:collapse-fade`, and `:collapse-none`, `:collapse-condense`) and no md rule on it (#89) |
 | [ ] | header, footer | `translucent` | — | Not applicable: only ios renders `.header-background`, and md has no `header-translucent` rule |
 | [ ] | footer | `collapse` | — | Not applicable: `checkCollapsibleFooter` returns unless ios, and md has no `footer-collapse-fade` rule |
 | [ ] | buttons | `collapse` | — | Not applicable: `buttons-collapse` only has rules in ios CSS, for the collapsible large title |
@@ -37,8 +37,10 @@ the plain toolbar's solid and `success` buttons. Throwaway measuring scripts sta
 | [x] | title | (default slot, not in `core.json`) | `Content`, as a `ContentControl` |
 | [x] | header, footer, buttons | (default slot, not in `core.json`) | `Items`: they hold many children and `core.json` lists no slot, so `ItemsControl` (mapping rule, ADR 0002) |
 
-No events or methods on any of them. `ion-title`'s `ionStyle` is internal, and only tells the toolbar the title's size for
-`toolbar-title-*` classes, which have rules in ios CSS only, so it isn't raised.
+No events or methods on any of them. `ion-title`'s `ionStyle` is internal, and tells the toolbar the title's size for its
+`toolbar-title-*` classes, which have rules in ios CSS only. Since #89 it's raised, on attach and when `Size` changes, and the
+toolbar turns each true key into `:toolbar-<key>`, kept per type of child, and stops the event, as `childrenStyle` does: a title
+gives `:toolbar-title-default`, `-small` or `-large`, and a label `:toolbar-label`. md has no rules on them; an app can style them.
 
 ### CSS variables
 
@@ -79,19 +81,21 @@ Each becomes a test, named after its number.
 | T8 | The global `Avonic.ToolbarBackgroundBrush`, `Avonic.ToolbarColorBrush` and `Avonic.ToolbarBorderColorBrush` apply, and the toolbar's own variables beat them | `var(--ion-toolbar-*, …)` |
 | T9 | The safe area's left and right are padding on the host, physical sides, with the background under them | `padding-left/right: var(--ion-safe-area-*)`; measured `s2` `#t1`: padding `20 5 0 7`, container at 7 |
 | T10 | The first `AvonicButtons` in the start slot gets 4 at its start, and the last one in end, or else primary, or else secondary, gets 4 at its end. Only one of each | `componentWillLoad`; `::slotted(.buttons-first-slot)`; measured `#b1`, `#b2`, `#b4`, `s2` `#bs1`/`#bs2`/`#be1`/`#be2` |
+| T11 | A child's `ionStyle` becomes `:toolbar-<key>` on the toolbar, kept per type of child, and goes no further. A title says its size when it's attached and when `Size` changes | `childrenStyle`, `title.js` `emitStyle`; measured `toolbar-title-default`, `-small`, `-large` in `s1` |
+| T12 | With the dark palette, the text is `#FFFFFF` and the border `#363636`, following `Avonic.TextColor` and `Avonic.BorderColor`, and so is a solid button's background in `AvonicButtons` | `dark.always.css`'s `.md` block sets `--ion-text-color`; `--border-color` falls back through `--ion-border-color` to `--ion-background-color-step-150`; measured `s6` |
 | **Header and footer** | | |
 | H1 | A header stacks its toolbars, full width, as tall as they are | measured `s2` `#h`: 390×132 |
 | H2 | md's three-layer shadow below it, drawn over what comes after, as `z-index: 10` does. `Classes="ion-no-border"` removes it | `header.md.css`; measured `#h` box-shadow, `s2` `#h` none |
 | H3 | The first toolbar in a header gets `Avonic.SafeAreaTop` as top padding, with the background under it, also when a template made it | `ion-header ion-toolbar:first-of-type`; measured `s2` `#t1` 76 high |
 | H4 | Automation: a header is the banner landmark | `role="banner"` (`getRoleType`); measured |
-| H5 | `Collapse="Condense"` hides the header and drops its landmark. `Fade` looks like the default | `.header-md.header-collapse-condense`; `getRoleType(…, isCondensed, 'md')` |
+| H5 | `Collapse="Condense"` hides the header and drops its landmark. `Fade` looks like the default. The header has Ionic's `header-collapse-*` class as `:collapse-none`, `:collapse-condense` or `:collapse-fade` | `.header-md.header-collapse-condense`; `getRoleType(…, isCondensed, 'md')`; `header-collapse-${collapse}` |
 | F1 | A footer stacks its toolbars, with the same shadow, which `ion-no-border` removes | `footer.md.css`; measured `#f` |
 | F2 | The last toolbar in a footer gets `Avonic.SafeAreaBottom` as bottom padding, also when a template made it | `.footer-toolbar-padding ion-toolbar:last-of-type`; measured `s2` `#t6` 66 high |
 | F3 | Automation: a footer is the content-info landmark | `role="contentinfo"`; measured |
 | **Title** | | |
 | Ti1 | 20 at weight 500, letter spacing 0.0125 em, 20 either side, one line ending in an ellipsis, filling the toolbar's content part, centred, inheriting the text colour | `title.md.css`; measured `#ti1`: 52–282.75, text 72–262.75, 23 high |
 | Ti2 | `Size="Small"`: 15 at normal weight, and it wraps | `:host(.title-small)`; measured `#tsmall` 17 high, `white-space: normal` |
-| Ti3 | `Size="Large"` looks like the default in md | measured `#tlarge` |
+| Ti3 | `Size="Large"` looks like the default in md. The title has Ionic's `title-*` class as `:size-default`, `:size-small` or `:size-large` | measured `#tlarge`; `title-${size}` |
 | Ti4 | `Color` paints base. Unknown inherits. `Avonic.Title.Color` sets the text | `:host(.ion-color)` |
 | **Buttons, and a button in them** | | |
 | B1 | A button in `AvonicButtons`, at any depth, with no `Fill` is clear. A `Fill` it's given wins. A button in a toolbar outside `AvonicButtons` stays solid | `fill = this.inToolbar ? 'clear' : 'solid'`, `inToolbar = closest('ion-buttons')`; measured `#menu` clear, `s2` `#loose` solid 36 high |
@@ -104,6 +108,7 @@ Each becomes a test, named after its number.
 | B8 | A round button keeps its full rounding and the toolbar's padding, and a full one its square corners | measured `s2` `#rnd`: 999, `3px 8px`; `:host(.button-full:not(.button-round)) .button-native { border-radius: 0 }` beats the variable `ion-buttons` sets |
 | B9 | With `Avonic.ToolbarColorBrush` set, a button in an uncoloured toolbar, in `AvonicButtons` or not, takes it as text, and as its border if it's outline, and a solid one as its background with `Avonic.ToolbarBackgroundBrush` as text. Not a button with its own `Color`, nor in a coloured toolbar | `:host(.in-toolbar:not(.ion-color):not(.in-toolbar-color))` |
 | B10 | An outline button in an uncoloured toolbar has `Avonic.ToolbarBackgroundBrush` as its background while pressed | `:host(.button-outline.ion-activated.in-toolbar…)`, `var(--ion-toolbar-background, var(--color))`; see the deliberate differences for the light palette |
+| B11 | `in-toolbar-color` is any toolbar around the button with a `color` attribute, even an empty one: a plain toolbar inside a coloured one and a coloured one inside a plain one both have it. It's read at the button's render, so a toolbar's `color` set later shows at the button's next render; the `ion-buttons` rules for a coloured toolbar follow at once, as they're plain CSS | `hostContext('ion-toolbar[color]', el)` in `render`; measured `s5`, and `s7` for a color set later |
 
 ## Design
 
@@ -131,9 +136,15 @@ what its slots present, so also an `AvonicButtons` a slot's template made, a pan
 them out once, in `componentWillLoad`. Here they follow the slots' content, but not a panel's children changing later, which
 Ionic doesn't follow either.
 
-**A button in `AvonicButtons` is told by styles in `Styles/Toolbar.axaml`, not by `AvonicButton`.** `fill` resolving to clear is
-a `Fill` setter at style priority on `c|AvonicButtons c|AvonicButton`, so a `Fill` the app sets wins, and it follows a button
-moving in or out, where Ionic only looks once. Every other rule is on the button's parts, as `Styles/Button.axaml` does for an
+**A button in `AvonicButtons` is told by styles in `Styles/Toolbar.axaml`, which read pseudoclasses `AvonicButton` works out.**
+Since #89 the button sets `:in-toolbar`, `:in-toolbar-color` and `:in-buttons`, as `button.js`'s `hostContext` does, at each
+render and when it's attached (see [ion-button](../ion-button/README.md#in-a-toolbar)), so the rules don't look at its ancestors.
+`fill` resolving to clear is a `Fill` setter on `c|AvonicButton:in-buttons`, so a `Fill` the app sets on the button wins, and
+it follows a button moving in or out, where Ionic only looks once. With a pseudoclass, these rules beat an app's plain
+`c|AvonicButton` style, as `buttons.md.css`'s scoped `ion-button` rules beat an app's plain `ion-button` rule in CSS; an app's
+rule with a class or pseudoclass, later, wins. The rules from `buttons.md.css`'s `:host-context(.ion-color)` still look
+for a coloured toolbar, `c|AvonicToolbar:ion-color c|AvonicButton:in-buttons`, because they're plain CSS in Ionic and follow the
+toolbar's colour at once (measured `s7`). Every other rule is on the button's parts, as `Styles/Button.axaml` does for an
 item. The theme's rules for a fill or a size have a pseudoclass, which beats a global rule without one, so each rule here
 has one that's always true for its case (`:has-icon-only` or `:not(:has-icon-only)`, a fill), and then beats the theme because
 global styles beat a `ControlTheme`. A button's `Avonic.Button.*` keys stay first in each value, as they do for an item.
@@ -163,12 +174,14 @@ None.
 | A header in a menu stays a banner | Ionic makes it `none`. No `ion-menu` yet |
 | A toolbar's default text size is Avalonia's, where a web page's is 16 | ADR 0002 |
 | `:first-of-type` and `:last-of-type` are the first and last child | Avalonia has no of-type selector (mapping rule). A header or footer holds toolbars |
-| A coloured toolbar nested inside an uncoloured one: its buttons also match the uncoloured toolbar's `in-toolbar` rules, where Ionic's `:not(.in-toolbar-color)` excludes any coloured toolbar above | Avalonia can't say "no ancestor like this". The coloured rules come later in the file, so they win where both set a value; only `Avonic.ToolbarColorBrush`, when an app sets it, reaches such a button's text. A toolbar in a toolbar is rare |
+| A moved button reads `in-toolbar`, `in-toolbar-color` and `in-buttons` again when it's attached, where Ionic keeps a moved button's classes until its next render | Measured `s7`. A moved button's old place may be gone, and `:in-item` already does this. Before #89 a coloured toolbar inside a plain one also took the plain one's rules; now the button works out `in-toolbar-color` itself, and both nestings are exact |
+| While a toolbar's `Color` has been set and the buttons in its `AvonicButtons` haven't rendered since, a solid one's background is the coloured toolbar's contrast at once, where Ionic's stays `--ion-toolbar-color` until the button renders | Only shows with `Avonic.ToolbarColorBrush` set. Both rules set the same `Background`, and the coloured one comes later, as it must for every state that isn't stale. Its text is `Avonic.ToolbarBackgroundBrush`, the next row's difference |
+| `buttons.md.css`'s `:host-context(.ion-color)` is any coloured ancestor of `ion-buttons`, such as a coloured item. Here it's a coloured toolbar only | Measured `s5` `#g`: solid in `ion-buttons` in a danger item is danger on white. Unchanged since #12 |
+| A clear or outline button in `AvonicButtons` keeps the toolbar's text when focused, hovered or pressed, even when an app sets `Avonic.Button.ColorFocused`, `ColorHover` or `ColorActivated` | Measured `s8` `#clr`: Ionic's `--color: initial` makes the button inherit the host's own `color`, which those set. The rule here sets `Foreground` with a pseudoclass, which beats the theme's state rules. Unchanged since #12; a rule per state would cost three alternatives |
 | A title's ellipsis reaches every `TextBlock` in its content, where CSS's `text-overflow` is on `.toolbar-title` alone, so a block inside it is clipped without one | `TextTrimming` inherits, which is how the `TextBlock` a string makes gets it. A title holds text |
-| `TitleSize.Large` and `HeaderCollapse.Fade` change nothing in md | Faithful: Ionic's md has no rules for them. They're kept so that Ionic markup ports. See "For you to decide" in the PR |
+| `TitleSize.Large` and `HeaderCollapse.Fade` change nothing in md | Faithful: Ionic's md has no rules for them. Kept, decided in #89, so that Ionic's values map across mechanically, each with Ionic's host class as a pseudoclass (`:size-large`, `:collapse-fade`) and no md rule on it. An app can style them, as it could the class in Ionic |
 | An outline button's border in an uncoloured toolbar or in `AvonicButtons` follows its text, and `Avonic.Button.BorderColor` doesn't reach it, even in the button's own `Resources` | Ionic's `in-toolbar` rule takes `var(--color)` before `var(--border-color)`, and `ion-buttons` sets `--border-color: currentColor` on the button, which beats a global value. A `style` on the button itself beats it in Ionic (measured `s4` `#bod`), which a style rule here can't tell from a global key |
-| **Known gap:** with the dark palette, the toolbar's text and the solid button in `AvonicButtons` stay `#424242`, where Ionic's are white, and the border's fallback stays `#C1C4CD` where Ionic's is `#363636` | `Avonic.Toolbar.Md.ColorBrush` and `Avonic.Toolbar.Md.BorderColorBrush` need a line each in `Tokens/Palettes/Dark.axaml`, which is shared, so they're proposed in the PR. Until then an app sets those two keys in its dark resources. Not `Avonic.ToolbarColorBrush`, which Ionic's dark palette doesn't set, and which a button in a toolbar reads before its own colour |
-| `Avonic.ToolbarBackgroundBrush` is always set, where Ionic's light palette leaves `--ion-toolbar-background` unset. Two rules read it before a fallback: a pressed outline button directly in an uncoloured toolbar, and a solid one's text there. So in the light palette, a pressed outline button is white, where Ionic's fills with its own colour, primary, with primary text (measured `s4` `#lo`), and one in `AvonicButtons` is white where Ionic's is transparent (`#bo`, `#bo2` on a tinted toolbar). With the dark palette, or an app that sets the key, they match | The key is in `Tokens/Global.axaml`, which is shared, and the toolbar's own background reads it as set. Making it unset in the light palette is proposed in the PR. A solid button's text is white either way unless an app sets `Avonic.Button.Color` |
+| `Avonic.ToolbarBackgroundBrush` is always set, decided in #89, where Ionic's light palette leaves `--ion-toolbar-background` unset. Two rules read it before a fallback: a pressed outline button directly in an uncoloured toolbar, and a solid one's text there. So in the light palette, a pressed outline button is white, where Ionic's fills with its own colour, primary, with primary text (measured `s4` `#lo`), and one in `AvonicButtons` is white where Ionic's is transparent (`#bo`, `#bo2` on a tinted toolbar). With the dark palette, or an app that sets the key, they match | Kept on purpose: unsetting it would match Ionic, which fills a pressed loose outline button with primary and hides its text while pressed, which looks accidental. A solid button's text is white either way unless an app sets `Avonic.Button.Color` |
 
 ## Not in this PR
 
