@@ -564,6 +564,23 @@ public class AvonicToolbarButtonsTests
     });
 
     [AvaloniaFact]
+    public void B11_The_Buttons_Rules_For_A_Coloured_Toolbar_Follow_It_At_Once() => InstalledTheme.Run(_ =>
+    {
+        // :host-context(.ion-color) in buttons.md.css is plain CSS, so it doesn't wait for the button to render. Measured s7
+        // #bs: its text danger at once. Without a toolbar colour token, its background is the contrast at once too.
+        var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
+        var toolbar = new AvonicToolbar { StartContent = Buttons(solid) };
+        using var scene = ToolbarTest.Show(toolbar);
+        NoTransitions(solid);
+        Assert.Equal(ToolbarTest.Toolbar, ToolbarTest.Solid(Native(solid).Background));
+
+        toolbar.Color = "danger";
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(ToolbarTest.Danger, ToolbarTest.Solid(solid.Foreground));
+        Assert.Equal(Colors.White, ToolbarTest.Solid(Native(solid).Background));
+    });
+
+    [AvaloniaFact]
     public void B11_Color_And_Disabled_Render_Again_Too() => InstalledTheme.Run(_ =>
     {
         // Every prop renders in Ionic, color and disabled too.
