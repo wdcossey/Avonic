@@ -220,9 +220,10 @@ public class AvonicAvatarTests
         var end = new AvonicAvatar { Content = Picture() };
         var main = new AvonicAvatar { Content = Picture() };
         var itemStart = new AvonicItem { StartContent = start, Content = "x" };
-        using var scene = InScene(itemStart, new AvonicItem { Content = "x", EndContent = end }, new AvonicItem { Content = main });
+        var itemEnd = new AvonicItem { Content = "x", EndContent = end };
+        using var scene = InScene(itemStart, itemEnd, new AvonicItem { Content = main });
 
-        // Measured margin: 8px 16px 8px 0px, 8px 0px 8px 16px and 8px 0px, and a row of 56.
+        // Measured margin: 8px 16px 8px 0px, 8px 0px 8px 16px and 8px 0px, and rows of 56, and 57 with the inner border under the end slot.
         Assert.Equal(new Thickness(0, 8, 16, 8), start.Margin);
         Assert.Equal(new Thickness(16, 8, 0, 8), end.Margin);
         Assert.Equal(new Thickness(0, 8, 0, 8), main.Margin);
@@ -232,7 +233,9 @@ public class AvonicAvatarTests
         }
 
         Assert.Equal(56, itemStart.Bounds.Height);
+        Assert.Equal(57, itemEnd.Bounds.Height);
         Assert.Equal(16, Box(start, itemStart).X);
+        Assert.Equal(334, Box(end, itemEnd).X);
     });
 
     [AvaloniaFact]

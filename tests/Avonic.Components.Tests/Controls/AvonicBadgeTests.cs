@@ -86,26 +86,15 @@ public class AvonicBadgeTests
         Assert.Equal(20, badge.Bounds.Height);
     });
 
-    [AvaloniaFact]
-    public void B1_The_Text_Is_Not_Cut_And_Sits_In_The_Middle() => InstalledTheme.Run(_ =>
+    /// <summary>The rows of a box, at 2x, with a pixel in them that 's ink, not counting the outermost columns.</summary>
+    private static List<int> InkRows(Avalonia.Media.Imaging.WriteableBitmap frame, Rect box, int inset, Func<Color, bool> ink)
     {
-        var badge = new AvonicBadge { Content = "22" };
-        using var scene = InScene(badge);
-        scene.Window.Background = Brushes.White;
-        scene.Window.SetRenderScaling(2);
-        Dispatcher.UIThread.RunJobs();
-        var frame = scene.Window.CaptureRenderedFrame()!;
-
-        // The rows with white ink in them, at 2x, inside the blue. A line kept at the top of a 13 px line sits low and is cut.
-        var box = Box(badge, scene.Window);
-        var height = (int)(box.Height * 2);
         var rows = new List<int>();
-        for (var y = 0; y < height; y++)
+        for (var y = 0; y < (int)(box.Height * 2); y++)
         {
-            for (var x = (int)(box.X * 2) + 4; x < (int)(box.Right * 2) - 4; x++)
+            for (var x = (int)(box.X * 2) + inset; x < (int)(box.Right * 2) - inset; x++)
             {
-                var pixel = Frames.PixelAt(frame, x, (int)(box.Y * 2) + y);
-                if (pixel.R > 200 && pixel.G > 200)
+                if (ink(Frames.PixelAt(frame, x, (int)(box.Y * 2) + y)))
                 {
                     rows.Add(y);
                     break;
@@ -113,9 +102,33 @@ public class AvonicBadgeTests
             }
         }
 
+        return rows;
+    }
+
+    [AvaloniaFact]
+    public void B1_The_Text_Is_Not_Cut_And_Sits_In_The_Middle() => InstalledTheme.Run(_ =>
+    {
+        var badge = new AvonicBadge { Content = "22" };
+        var plain = new TextBlock { Text = "22", Foreground = Brushes.Black, HorizontalAlignment = HorizontalAlignment.Left };
+        using var scene = InScene(badge, plain);
+        plain.FontFamily = Text(badge).FontFamily;
+        plain.FontSize = 13;
+        plain.FontWeight = FontWeight.Bold;
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        // White ink inside the blue, clear of the rounded corners, which show the white behind. A line kept at the top of a 13 px
+        // line sits low, and a TextBlock that clips to it cuts the bottom off: the same text drawn plainly says how tall it is.
+        var box = Box(badge, scene.Window);
+        var rows = InkRows(frame, box, 9, pixel => pixel.R > 200 && pixel.G > 200);
+        var reference = InkRows(frame, Box(plain, scene.Window), 0, pixel => pixel.R < 128);
+
         Assert.NotEmpty(rows);
+        Assert.InRange(rows.Max() - rows.Min() - (reference.Max() - reference.Min()), -1, 1);
         var above = rows.Min();
-        var below = height - 1 - rows.Max();
+        var below = (int)(box.Height * 2) - 1 - rows.Max();
         Assert.InRange(above - below, -3, 3);
     });
 
