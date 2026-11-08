@@ -21,6 +21,12 @@ At 1000 ms, the top 250 px of each. Ionic on the left, Avonic on the right:
 
 ![Ionic and Avonic side by side](compare/side.png)
 
+With `AvonicConfig.Animated` off (#87), the page at 1000 ms is the same frame, every byte, as
+`AvonicProgressBarCaptureTests.Reference_Page_With_Animated_Off_Is_The_Same_Frame` asserts, since Ionic's `animated` doesn't
+reach this control. Its frame is byte for byte [`compare/avonic-page.png`](compare/avonic-page.png). The top 250 px of each, Ionic on the left:
+
+![Ionic, left, and Avonic with Animated off, right, at 1000 ms](compare/side-animated-off.png)
+
 | Ionic, paused at 1000 ms | Avonic, at 1000 ms on `TestClock` |
 |---|---|
 | ![](ref/page-1000ms.png) | ![](compare/avonic-page.png) |

@@ -30,6 +30,12 @@ The frames of two running animations are never in phase, so both sides are stopp
 
 Ionic on the left, Avonic on the right: [Ionic's page](ref/page.png), [Avonic's](compare/avonic-page.png).
 
+With `AvonicConfig.Animated` off (#87), the same page at 350 ms is the same frame, every byte, as
+`AvonicSpinnerCaptureTests.Reference_Page_With_Animated_Off_Is_The_Same_Frame` asserts, since Ionic's spinner doesn't read
+`animated`. Its frame is byte for byte [`compare/avonic-page.png`](compare/avonic-page.png). The top 200 px of each, Ionic on the left:
+
+![Ionic, left, and Avonic with Animated off, right, at 350 ms](compare/side-animated-off.png)
+
 Measured on the two 2× frames, the box of every pixel darker than half, and the sum of the ink:
 
 | Region | Ionic | Avonic |
