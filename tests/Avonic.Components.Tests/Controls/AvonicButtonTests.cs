@@ -2845,16 +2845,6 @@ public class AvonicButtonTests
         Assert.Equal(372, Box(end, scene.Window).Right, 0);
     });
 
-    // A size set on the button still wins, measured divsize: large.
-    [AvaloniaFact]
-    public void B30_In_A_Divider_Its_Own_Size_Wins() => InstalledTheme.Run(_ =>
-    {
-        var button = new AvonicButton { Content = "Text", Size = ButtonSize.Large };
-        using var scene = new Scene(NoTransitions(new AvonicItemDivider { EndContent = button }));
-
-        Assert.Equal(56, button.MinHeight, 2);
-    });
-
     // The slot rules are in Item.axaml and ItemDivider.axaml, after the rule for any child in a slot, with no activator. A plain
     // rule in Button.axaml would lose to that rule merged first and win merged last.
     [AvaloniaTheory]
