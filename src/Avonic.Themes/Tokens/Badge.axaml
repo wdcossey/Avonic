@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-badge's variables, with md defaults from badge.md.css. The colours fall back to the primary colour and its
+         contrast in Ionic: the bindings in Controls/AvonicBadge.axaml say so. Any brush overrides them. -->
+    <b:CssUnset x:Key="Avonic.Badge.Background" />
+    <b:CssUnset x:Key="Avonic.Badge.Color" />
+
+    <!-- The shared block says 3 8 3 8, and md's block after it says 3 4 4 4, which wins. -->
+    <x:Double x:Key="Avonic.Badge.PaddingTop">3</x:Double>
+    <x:Double x:Key="Avonic.Badge.PaddingEnd">4</x:Double>
+    <x:Double x:Key="Avonic.Badge.PaddingBottom">4</x:Double>
+    <x:Double x:Key="Avonic.Badge.PaddingStart">4</x:Double>
+
+</ResourceDictionary>

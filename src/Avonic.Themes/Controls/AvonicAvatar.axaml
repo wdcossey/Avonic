@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.PrimaryBrush}" />
+            <c:AvonicItem Content="In an item">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicAvatar Background="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                </c:AvonicItem.StartContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of avatar.md.css's host. The image inside, and the sizes in an item, are in Styles/Avatar.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicAvatar}" TargetType="c:AvonicAvatar">
+        <!-- width: 64px; height: 64px. There's no variable for them in md. -->
+        <Setter Property="Width" Value="64" />
+        <Setter Property="Height" Value="64" />
+        <!-- border-radius: var(border-radius), which is 50% -->
+        <Setter Property="CornerRadius">
+            <MultiBinding Converter="{x:Static c:BorderRadius.ToCornerRadius}">
+                <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
+                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- display: block, which starts at the left at its own width -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

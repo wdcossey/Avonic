@@ -1,0 +1,88 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <c:AvonicBadge Content="22" />
+                <c:AvonicBadge Color="danger" Content="99+" />
+                <c:AvonicBadge Color="success" Content="New" />
+            </StackPanel>
+            <c:AvonicItem Content="In an item">
+                <c:AvonicItem.EndContent>
+                    <c:AvonicBadge Content="22" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of badge.md.css. Nothing in it depends on where the badge is, so it's all here. Styles/Badge.axaml has
+         line-height for the text, which a ControlTheme can't reach. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBadge}" TargetType="c:AvonicBadge">
+        <!-- font-family: var(ion-font-family, inherit) -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.8125rem, of the root, so not of the parent; font-weight: bold; line-height: 1 -->
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="TextBlock.LineHeight" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}" />
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.Badge.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.Badge.PaddingTop" />
+                <DynamicResource ResourceKey="Avonic.Badge.PaddingEnd" />
+                <DynamicResource ResourceKey="Avonic.Badge.PaddingBottom" />
+            </MultiBinding>
+        </Setter>
+        <!-- min-width: 10px, with box-sizing: border-box -->
+        <Setter Property="MinWidth" Value="10" />
+        <Setter Property="CornerRadius" Value="4" />
+        <!-- background: var(background), which is var(ion-color-primary) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Badge.Background" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- color: var(color), which is var(ion-color-primary-contrast) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Badge.Color" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- display: inline-block, so as wide as its text; text-align: center; white-space: nowrap. contain: content clips
+             what overflows, as a ContentControl does. -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color). An unknown colour makes var(ion-color-base) invalid, so there's no background, and the text
+             inherits. In a coloured item, the item's values show through, as they inherit in CSS. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

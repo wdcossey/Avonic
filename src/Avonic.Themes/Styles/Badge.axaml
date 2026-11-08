@@ -1,0 +1,24 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The rest of badge.md.css is in Controls/AvonicBadge.axaml. item.md.css has no rule for a badge: in a slot it has the
+         slot's own margins, which Styles/Item.axaml and Styles/ItemDivider.axaml give any child. -->
+
+    <!-- line-height: 1. A TextBlock clips to its line height, which is the font size here, and keeps the line at the top.
+         CSS's line-height never clips and splits the leading. The text's logical parent is the badge, whether it's the
+         TextBlock the presenter makes for a string or one of the app's. -->
+    <Style Selector="c|AvonicBadge > TextBlock">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Margin">
+            <MultiBinding Converter="{x:Static b:Css.HalfLeading}">
+                <Binding Path="FontFamily" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FontWeight" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="LineHeight" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+</Styles>
