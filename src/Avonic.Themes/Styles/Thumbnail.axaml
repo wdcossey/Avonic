@@ -1,0 +1,62 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItem Content="Thumbnail at the start">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicThumbnail Background="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                </c:AvonicItem.StartContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- thumbnail.css's ::slotted rules, and the rules for a thumbnail in item.md.css and, word for word, item-divider.md.css.
+         The rest of thumbnail.css is in Controls/AvonicThumbnail.axaml. ion-img's ::slotted rule goes with ion-img. -->
+
+    <!-- ::slotted(img) { border-radius: var(border-radius); width: 100%; height: 100%; object-fit: cover; overflow: hidden }.
+         UniformToFill is cover, cropped from the middle. The image fills the thumbnail, as a ContentPresenter stretches it. -->
+    <Style Selector="c|AvonicThumbnail > Image">
+        <Setter Property="Stretch" Value="UniformToFill" />
+        <Setter Property="Clip">
+            <MultiBinding Converter="{x:Static c:BorderRadius.ToClip}">
+                <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />
+                <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(ion-thumbnail) { size: 56px; margin-top: 8px; margin-bottom: 8px }. The size key, set anywhere, still wins,
+         as a rule outside the shadow tree beats ::slotted. The item and the divider are the IItemHosts with slots; a group has
+         none. A slot holds one child, so a panel directly in it stands for the slot, and the panel has the slot's 16 already. -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter > c|AvonicThumbnail, :is(c|IItemHost) /template/ ContentPresenter > :is(Panel) > c|AvonicThumbnail">
+        <Setter Property="Width">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Size" />
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Md.SizeInItem" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Height">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Size" />
+                <DynamicResource ResourceKey="Avonic.Thumbnail.Md.SizeInItem" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Margin" Value="0,8,0,8" />
+    </Style>
+
+    <!-- ::slotted(ion-thumbnail[slot=start]). It beats the hosts' ::slotted([slot=start]) by its attribute in CSS, and by a
+         pseudoclass here, whatever order the files merge in. -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter#PART_Start > c|AvonicThumbnail:in-item">
+        <Setter Property="Margin" Value="0,8,16,8" />
+    </Style>
+
+    <!-- ::slotted(ion-thumbnail[slot=end]). Beside a stacked or floating label, the item's own rule for any end child wins in
+         CSS, with 7 above and below, so this leaves it alone there. Its :not is what beats ::slotted([slot=end]). -->
+    <Style Selector=":is(c|IItemHost):not(:item-label-stacked):not(:item-label-floating) /template/ ContentPresenter#PART_End > c|AvonicThumbnail">
+        <Setter Property="Margin" Value="16,8,0,8" />
+    </Style>
+
+</Styles>

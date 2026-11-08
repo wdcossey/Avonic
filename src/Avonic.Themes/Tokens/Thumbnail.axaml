@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-thumbnail's variables, from thumbnail.css. The radius takes a CornerRadius, a number, or a string as CSS writes
+         border-radius, such as 50%, which is of the box's size. See BorderRadius in Avonic.Components. -->
+    <CornerRadius x:Key="Avonic.Thumbnail.BorderRadius">0</CornerRadius>
+
+    <!-- size is 48 on the host, and an item's or a divider's slot sets it to 56. A rule outside the shadow tree beats
+         ::slotted, so setting this key, anywhere, wins in a slot too. Unset, the theme falls back to one of the two below. -->
+    <b:CssUnset x:Key="Avonic.Thumbnail.Size" />
+    <x:Double x:Key="Avonic.Thumbnail.Md.Size">48</x:Double>
+    <x:Double x:Key="Avonic.Thumbnail.Md.SizeInItem">56</x:Double>
+
+</ResourceDictionary>

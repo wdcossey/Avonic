@@ -1,0 +1,51 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItem Content="Avatar at the start">
+                <c:AvonicItem.StartContent>
+                    <c:AvonicAvatar Background="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                </c:AvonicItem.StartContent>
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- avatar.md.css's ::slotted rules, and the rules for an avatar in item.md.css and, word for word, item-divider.md.css.
+         The rest of avatar.md.css is in Controls/AvonicAvatar.axaml. ion-img's ::slotted rule goes with ion-img. -->
+
+    <!-- ::slotted(img) { border-radius: var(border-radius); width: 100%; height: 100%; object-fit: cover; overflow: hidden }.
+         UniformToFill is cover, cropped from the middle. The image fills the avatar, as a ContentPresenter stretches it. -->
+    <Style Selector="c|AvonicAvatar > Image">
+        <Setter Property="Stretch" Value="UniformToFill" />
+        <Setter Property="Clip">
+            <MultiBinding Converter="{x:Static c:BorderRadius.ToClip}">
+                <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
+                <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- ::slotted(ion-avatar) { width: 40px; height: 40px; margin-top: 8px; margin-bottom: 8px }. The item and the divider are
+         the IItemHosts with slots; a group has none. A slot holds one child, so a panel directly in it stands for the slot, and
+         the panel has the slot's 16 already. -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter > c|AvonicAvatar, :is(c|IItemHost) /template/ ContentPresenter > :is(Panel) > c|AvonicAvatar">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Margin" Value="0,8,0,8" />
+    </Style>
+
+    <!-- ::slotted(ion-avatar[slot=start]). It beats the hosts' ::slotted([slot=start]) by its attribute in CSS, and by a
+         pseudoclass here, whatever order the files merge in. -->
+    <Style Selector=":is(c|IItemHost) /template/ ContentPresenter#PART_Start > c|AvonicAvatar:in-item">
+        <Setter Property="Margin" Value="0,8,16,8" />
+    </Style>
+
+    <!-- ::slotted(ion-avatar[slot=end]). Beside a stacked or floating label, the item's own rule for any end child wins in
+         CSS, with 7 above and below, so this leaves it alone there. Its :not is what beats ::slotted([slot=end]). -->
+    <Style Selector=":is(c|IItemHost):not(:item-label-stacked):not(:item-label-floating) /template/ ContentPresenter#PART_End > c|AvonicAvatar">
+        <Setter Property="Margin" Value="16,8,0,8" />
+    </Style>
+
+</Styles>
