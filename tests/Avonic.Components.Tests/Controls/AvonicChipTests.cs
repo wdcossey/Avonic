@@ -902,6 +902,35 @@ public class AvonicChipTests
         Assert.Equal(default, pin.Margin);
         Assert.Equal(new Thickness(-4, -4, 8, -4), Icon(0).Margin);
         Assert.Equal(new Thickness(8, -4, -4, -4), Icon(2).Margin);
+
+        // Taken away again, the first is first once more.
+        names.RemoveAt(0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(pin, Icon(0));
+        Assert.Equal(new Thickness(-4, -4, 8, -4), pin.Margin);
+    });
+
+    [AvaloniaFact]
+    public void B12_A_Template_Set_Later_Makes_Text_A_Child() => InstalledTheme.Run(_ =>
+    {
+        var icon = new AvonicIcon { IconName = "close-circle" };
+        var chip = Chip("pin", icon);
+        using var scene = Themed(chip);
+        Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
+
+        // The string is an icon now, so the other is the last child, not the only one.
+        chip.ItemTemplate = new FuncDataTemplate<string>((name, _) => new AvonicIcon { IconName = name });
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(icon, Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(1)).Child);
+        Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
+        var first = Assert.IsType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(0)).Child);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), first.Margin);
+
+        // And text again without it.
+        chip.ItemTemplate = null;
+        Dispatcher.UIThread.RunJobs();
+        Assert.IsNotType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(0)).Child);
+        Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
     });
 
     [AvaloniaFact]

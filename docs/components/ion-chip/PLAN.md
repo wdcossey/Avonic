@@ -79,8 +79,9 @@ counts only containers, so a control held in a slot is at index −1 and matches
 presenter, `ContentPresenter:nth-child(1) > c|AvonicIcon`, and none of them applied; the compare step showed black 14 px
 icons with no margins. So the chip implements `IChildIndexProvider` again: a child's index is its item's, and a change to
 `Items` raises a reset, so that the margins follow children as they come and go. A slot made by an `ItemTemplate` is counted
-by its container's index, and the chip raises the reset again when a container is prepared, moved or cleared, as the panel
-moves its containers after `Items` raises its change. CSS counts elements, not text nodes, so an item shown as its text, a
+by its container's index, and the chip raises the reset again when a container's index changes, as the panel moves its
+containers after `Items` raises its change. A control's slot has no `ItemTemplate`, so that it shows the control itself, as a
+stock `ItemsControl` does by not wrapping it: a presenter with a template builds from it even for a control. CSS counts elements, not text nodes, so an item shown as its text, a
 string or any other value with no template, or any item through `DisplayMemberBinding`, isn't counted: `<ion-icon>` then text gives the icon the last child's margins, as it's the only element, and so does text then `<ion-icon>`: measured `-4px -4px -4px 8px` for both. A
 string made into a control by a template is one, whether it's the `ItemTemplate` or a `DataTemplate` around the chip: the chip
 asks for one as the slot does, with `FindDataTemplate`.

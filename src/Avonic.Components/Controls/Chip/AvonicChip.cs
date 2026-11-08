@@ -52,7 +52,7 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         Activatable.SetIsEnabled(this, true);
 
         // :first-child and :last-child follow the children as they come and go. A slot's own index changes after this, when the
-        // panel moves it, which the overrides below raise.
+        // panel moves it, which ContainerIndexChangedOverride raises. A new template or DisplayMemberBinding remakes the slots.
         Items.CollectionChanged += (_, _) => RaiseChildIndexesReset();
     }
 
@@ -83,33 +83,24 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         return slot;
     }
 
-    protected override void ContainerForItemPreparedOverride(Control container, object? item, int index)
+    /// <summary>
+    /// A control is shown as itself, as it is in an <see cref="ItemsControl"/> that doesn't wrap it. The slot is given
+    /// <see cref="ItemsControl.ItemTemplate"/> for every item, and a presenter with a template builds its content from it even
+    /// when it's a control, so a template for strings would show the control's type name.
+    /// </summary>
+    protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
     {
-        base.ContainerForItemPreparedOverride(container, item, index);
-        RaiseChildIndexesReset();
+        base.PrepareContainerForItemOverride(container, item, index);
+        if (item is Control)
+        {
+            container.ClearValue(ContentPresenter.ContentTemplateProperty);
+        }
     }
 
     protected override void ContainerIndexChangedOverride(Control container, int oldIndex, int newIndex)
     {
         base.ContainerIndexChangedOverride(container, oldIndex, newIndex);
         RaiseChildIndexesReset();
-    }
-
-    protected override void ClearContainerForItemOverride(Control container)
-    {
-        base.ClearContainerForItemOverride(container);
-        RaiseChildIndexesReset();
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-
-        // An item is text, or an element once a template makes one of it.
-        if (change.Property == ItemTemplateProperty || change.Property == DisplayMemberBindingProperty)
-        {
-            RaiseChildIndexesReset();
-        }
     }
 
     /// <summary>

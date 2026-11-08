@@ -70,7 +70,7 @@ The first:
 The second:
 
 - **Two equal values from an `ItemsSource` both counted as the first child,** as the first fix counted a slot by its item. The chip
-  counts a slot by its container's index now, and raises the reset again when the panel prepares, moves or clears a container, as
+  counts a slot by its container's index now, and raises the reset again when the panel moves a container, as
   the index is still the old one when `Items` raises its change: a test that inserts at the front shows it.
 - **A string counted as a child,** so an icon then text gave the icon the first child's margins, where CSS counts only elements and
   the icon is the last child too: measured `-4px -4px -4px 8px`.
@@ -82,6 +82,10 @@ The third:
 - **Only a string was text.** A number, or any value with no template, is shown as its text too, as is an item through
   `DisplayMemberBinding`, and a string that a `DataTemplate` around the chip makes into an icon is an element. The chip asks for the
   template as the slot does now. Tests: `B12_Any_Value_Shown_As_Text_Is_Not_A_Child`, `B12_A_String_That_A_Data_Template_Makes_An_Icon_Is_A_Child`.
+- **A control among templated items showed its type name.** Found by the test written for the item above: the chip gives every
+  slot the `ItemTemplate`, and a presenter with a template builds from it even for a control, so a control among strings with a
+  template for strings was a `TextBlock` reading `Avonic.Components.Controls.AvonicIcon`. A control's slot has no template now,
+  as a control in a stock `ItemsControl` is its own container. Test: `B12_A_Template_Set_Later_Makes_Text_A_Child`.
 - **A chip in a parent taller than it is centred,** where an inline chip sits at the top of its line, measured below. Recorded as a
   deliberate difference.
 - **Content that can't shrink is clipped at the container,** where Ionic's chip grows past it, measured below. Recorded as a gap.
@@ -102,6 +106,11 @@ Waived, with the reason:
 - **The `OnKeyDown` override did nothing.** It was there to stop an `ItemsControl` moving focus with the arrows, and they don't move
   it without it, as nothing in a `FlexSlot` is a focusable container. Removed. The keys test stays, for the behaviour.
 - **Letting content that can't shrink overflow did nothing,** as the arrange clamps to the space anyway. Removed.
+- **Four of the five places the chip raised its index reset did nothing on their own,** the second review's fix. Breaking them in
+  pairs showed what each covers: the change to `Items`, for a control, whose index is its item's, and a slot's own index change,
+  for a templated one, are enough, and each has a test that fails without it. Raising it again when a slot is prepared or cleared,
+  or when `ItemTemplate` changes, which remakes the slots anyway, did nothing, so they're gone. A test for a template set later and
+  for a templated item taken away stays.
 - **Three template changes went unseen,** as their tests ran on the stub only: the ripple under the children, the ripple after
   them, and the stub's row. The ripple tests run on both now, and there's a layout test on the stub.
 
