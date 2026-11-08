@@ -135,7 +135,13 @@ None.
 
 - **The dark palette** leaves the toolbar's text and a solid button in `AvonicButtons` `#424242` where Ionic's are white, and the
   border's fallback `#C1C4CD` where Ionic's is `#363636`. Two lines in `Tokens/Palettes/Dark.axaml` would fix it, and are proposed in
-  the PR. Until then, set `Avonic.ToolbarColorBrush` with the dark palette.
+  the PR. Until then, set `Avonic.Toolbar.Md.ColorBrush` to white and `Avonic.Toolbar.Md.BorderColorBrush` to `#363636` beside the
+  dark palette. Not `Avonic.ToolbarColorBrush`, which also recolours every uncoloured button in a toolbar, as `--ion-toolbar-color` does.
+- **A pressed outline button in an uncoloured toolbar is white** (`Avonic.ToolbarBackgroundBrush`), where Ionic's light palette fills
+  one directly in the toolbar with its own colour and leaves one in `AvonicButtons` transparent. Ionic does what Avonic does once
+  `--ion-toolbar-background` is set, as the dark palette does. See the [plan](PLAN.md#deliberate-differences).
+- **A header's first toolbar has to be its first child,** and a footer's last its last, to get the safe area. Ionic finds the first
+  toolbar among other children, and inside a wrapper.
 - **A footer's bottom safe area stays while the keyboard is open,** where Ionic drops it. It needs the keyboard's state, which
   headless tests can't open.
 - **A coloured toolbar inside an uncoloured one:** its buttons also match the outer toolbar's rules, which only shows when an app

@@ -70,10 +70,11 @@
         <Setter Property="Background" Value="{DynamicResource Avonic.ToolbarBackgroundBrush}" />
     </Style>
 
-    <!-- An outline button's border in a toolbar follows its text: .button-outline.in-toolbar… { border-color:
-         var(ion-toolbar-color, var(color, …)) }, which is its text colour, and ion-buttons' border-color: currentColor. In a
-         coloured toolbar, outside ion-buttons, both are its own colour. -->
-    <Style Selector="c|AvonicToolbar c|AvonicButton:fill-outline:not(:ion-color) /template/ Border#PART_Native">
+    <!-- An outline button's border follows its text: in an uncoloured toolbar, .button-outline.in-toolbar… { border-color:
+         var(ion-toolbar-color, var(color, …)) }, which is its text colour; in ion-buttons, border-color: currentColor, or the
+         coloured toolbar's contrast, which is its text too. Directly in a coloured toolbar it keeps its own border colour,
+         measured. -->
+    <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:fill-outline:not(:ion-color) /template/ Border#PART_Native, c|AvonicButtons c|AvonicButton:fill-outline /template/ Border#PART_Native">
         <Setter Property="BorderBrush" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
     </Style>
 
@@ -239,9 +240,17 @@
     <!-- ::slotted(*) .button { background-hover: currentColor }, and background-focused: currentColor for each fill. In a
          coloured toolbar they're its contrast, which is the text colour too. They're set on the button, so they beat an
          app's global Avonic.Button.BackgroundHover and BackgroundFocused, as they do here. One rule for both: the overlay
-         only shows when the theme raises its opacity, and activated's is 0 in md. A button's own colour keeps its own. -->
+         only shows when the theme raises its opacity. A button's own colour keeps its own. Activated is below. -->
     <Style Selector="c|AvonicButtons c|AvonicButton:not(:ion-color) /template/ Border#PART_Overlay">
         <Setter Property="Background" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
+    </Style>
+
+    <!-- ::slotted(*) .button-solid, .button-outline and .button-clear { background-activated: transparent }, set on the
+         button, so it beats an app's Avonic.Button.BackgroundActivated. Activated comes after hover and focus in
+         button.md.css, so it wins while hovered or focused too. A button's own colour has its own hover and focus rules, which
+         are more specific. -->
+    <Style Selector="c|AvonicButtons c|AvonicButton:activated:not(:ion-color):not(:fill-default) /template/ Border#PART_Overlay">
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <!-- .ion-color ion-buttons .button-solid { background-focused: var(ion-color-shade); background-hover: var(ion-color-base) } -->

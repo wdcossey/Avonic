@@ -20,6 +20,12 @@
 >   <ion-toolbar><ion-buttons slot="end"><ion-button id="end">End</ion-button></ion-buttons><ion-buttons slot="primary"><ion-button id="pri">Pri</ion-button></ion-buttons><ion-button id="def">Def</ion-button><ion-buttons slot="secondary"><ion-button id="sec">Sec</ion-button></ion-buttons><ion-buttons slot="start"><ion-button id="sta">Sta</ion-button></ion-buttons></ion-toolbar><ion-toolbar color="primary"><ion-buttons slot="start"><ion-button id="cclear">C</ion-button><ion-button id="csolid" fill="solid">S</ion-button></ion-buttons></ion-toolbar>
 >   ```
 >
+> - **`s4`**, pressed with the mouse held down for 200 ms:
+>
+>   ```html
+>   <ion-toolbar><ion-button id="lo" fill="outline">Loose</ion-button><ion-buttons slot="end"><ion-button id="bo" fill="outline">In</ion-button></ion-buttons></ion-toolbar><ion-toolbar style="--background:#ffe0b0"><ion-buttons slot="start"><ion-button id="bo2" fill="outline">Tinted</ion-button><ion-button id="bc2">Clear</ion-button></ion-buttons></ion-toolbar><ion-toolbar color="danger"><ion-button id="lod" fill="outline" style="--border-color:green">Loose</ion-button><ion-buttons slot="end"><ion-button id="bod" fill="outline" style="--border-color:green">In</ion-button></ion-buttons></ion-toolbar>
+>   ```
+>
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicToolbarCaptureTests.Reference_Page` (headless Skia, 2×, text at 16 as on
 > a web page) → `avonic-toolbar-page.png`, copied to [`compare/avonic-page.png`](compare/avonic-page.png). **Headless only. Not tried in a
 > real window,** and not on touch hardware.
@@ -91,17 +97,20 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicToo
 | B3 | Icon-only | clear: 48×48, padding 12, radius 50%, icon 25.2; solid (`s2` `#ioo`): 41.19×32, padding 0 8 | match |
 | B4 | Start and end icons | `s2` `#ic1` 19.6 with 5.88 after; `#ic2` 19.6 with 7.84 before | match |
 | B5 | Uncoloured toolbar | clear and outline `rgb(66, 66, 66)`, outline's border too; solid `rgb(66, 66, 66)` behind white text; `success` clear keeps `rgb(45, 213, 91)` | match |
-| B6 | Coloured toolbar | danger: clear and outline white, outline's border white; solid white behind `rgb(197, 0, 15)` | match |
-| B7 | Focus overlays | `s3`: clear `rgb(66, 66, 66)` at 0.12; in primary, clear white at 0.12 and solid `rgb(0, 74, 205)` at 0.24 | match |
+| B6 | Coloured toolbar | danger: clear and outline white, outline's border white; solid white behind `rgb(197, 0, 15)`. `s4` `#lod`, directly in danger: its own green border, primary text | match. The second was found in review |
+| B7 | Focus overlays | `s3`: clear `rgb(66, 66, 66)` at 0.12; in primary, clear white at 0.12 and solid `rgb(0, 74, 205)` at 0.24. Pressed, `--background-activated: transparent` | match. Pressed, found in review |
 | B8 | Round | `s2` `#rnd`: radius 999, padding 3 8 | match |
 | B9 | `--ion-toolbar-color` | `button.md.css`'s `.in-toolbar` rules | match, except a coloured toolbar inside a plain one. See the plan |
-| B10 | Pressed outline | `.button-outline.ion-activated.in-toolbar` | match |
+| B10 | Pressed outline | `s4`: `#lo` directly in a toolbar fills with `rgb(0, 84, 233)`, its text the same; `#bo` and `#bo2` in `ion-buttons` stay transparent. All because `--ion-toolbar-background` is unset in the light palette | **deliberate difference:** Avonic's `Avonic.ToolbarBackgroundBrush` is always set, so all three are white, as Ionic's are with the key set. See the plan |
 
 ## Known differences
 
 Recorded with their reasons in [PLAN.md](PLAN.md#deliberate-differences). The ones an app would notice:
 
 - **The dark palette** leaves the toolbar's text and a solid button in `AvonicButtons` `#424242`, where Ionic's are white, until
-  `Tokens/Palettes/Dark.axaml` gets two lines, which are proposed in the PR. An app sets `Avonic.ToolbarColorBrush` meanwhile.
+  `Tokens/Palettes/Dark.axaml` gets two lines, which are proposed in the PR. An app sets `Avonic.Toolbar.Md.ColorBrush` and
+  `Avonic.Toolbar.Md.BorderColorBrush` meanwhile.
 - **The footer's bottom safe area** stays while the keyboard is open.
+- **A pressed outline button in an uncoloured toolbar** is white, where Ionic's light palette fills one directly in the toolbar with
+  primary and leaves one in `ion-buttons` transparent, as B10 says.
 - **The keyboard's order** comes from `TabIndex` on the slots, so an app's own `TabIndex` only orders things within a slot.

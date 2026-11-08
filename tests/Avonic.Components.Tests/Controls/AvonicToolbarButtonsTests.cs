@@ -275,6 +275,25 @@ public class AvonicToolbarButtonsTests
         Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Overlay(colouredSolid).Background));
     });
 
+    [AvaloniaFact]
+    public void B7_Pressed_In_Buttons_The_Overlay_Is_Transparent() => InstalledTheme.Run(_ =>
+    {
+        var clear = new AvonicButton { Content = "Clear" };
+        var page = new StackPanel
+        {
+            Children = { new AvonicToolbar { StartContent = Buttons(clear) } },
+
+            // background-activated: transparent is set on the button by ion-buttons, so an app's value doesn't reach it.
+            Resources = { ["Avonic.Button.BackgroundActivated"] = Brushes.Red, ["Avonic.Button.BackgroundActivatedOpacity"] = 1d },
+        };
+        using var scene = new Scene(page);
+        using var clock = new TestClock();
+
+        scene.Window.MouseDown(ToolbarTest.Box(clear, scene.Window).Center, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+        Assert.Equal(0, ToolbarTest.Solid(Overlay(clear).Background).A);
+    });
+
     // ── B8: round ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -335,6 +354,24 @@ public class AvonicToolbarButtonsTests
 
         // in-toolbar-color: its own primary, outside ion-buttons.
         Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Native(inColour).BorderBrush));
+    });
+
+    [AvaloniaFact]
+    public void B6_Directly_In_A_Coloured_Toolbar_An_Outline_Keeps_Its_Own_Border() => InstalledTheme.Run(_ =>
+    {
+        var loose = new AvonicButton { Content = "Loose", Fill = ButtonFill.Outline };
+        var inButtons = new AvonicButton { Content = "In", Fill = ButtonFill.Outline };
+        var page = new StackPanel
+        {
+            Children = { new AvonicToolbar { Color = "danger", Content = loose, EndContent = Buttons(inButtons) } },
+            Resources = { ["Avonic.Button.BorderColor"] = Brushes.Green },
+        };
+        using var scene = new Scene(page);
+
+        // Measured s4 #lod: its own border-color, with primary text. In ion-buttons it's the contrast, as its text is.
+        Assert.Equal(Colors.Green, ToolbarTest.Solid(Native(loose).BorderBrush));
+        Assert.Equal(ToolbarTest.Primary, Text(loose));
+        Assert.Equal(Colors.White, ToolbarTest.Solid(Native(inButtons).BorderBrush));
     });
 
     // ── B10: outline pressed ────────────────────────────────────────────────────────────────
