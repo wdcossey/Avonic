@@ -46,7 +46,7 @@ Avalonia has no inline flow, so a row of buttons is a horizontal `StackPanel` or
 | [x] | `expand` | `Expand` | `Block`, `Full`, or null |
 | [x] | `fill` | `Fill` | `Clear`, `Default`, `Outline`, `Solid`, or null, which is solid. `Default` is a class with no rules: no background, inherited text, and it ignores `Color`, as measured |
 | [x] | `shape` | `Shape` | `Round`, or null |
-| [x] | `size` | `Size` | `Default`, `Large`, `Small`, or null, which is small inside an item |
+| [x] | `size` | `Size` | `Default`, `Large`, `Small`, or null, which is small inside an item or a divider |
 | [x] | `strong` | `Strong` | |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [ ] | `buttonType` | — | Not applicable: it only renames the host classes |
@@ -130,6 +130,9 @@ The full list is in [PLAN.md](PLAN.md#behaviours). The ones that might surprise 
   handles `PointerPressed`, which is how to stop it, as `stopPropagation` does in Ionic.
 - **In an item, directly in a slot,** a small button has font 12 and height 25. Nested deeper it has Ionic's plain small values,
   13 and 27.3. A panel directly in a slot counts as the slot.
+- **In an item divider** it's small too, as Ionic's `inItem` looks for either, but with the plain small values, 13 and 27.3, as
+  a divider has no rule for a small button. In a start or end slot of either, it keeps its own 2 and 4 on the sides the slot
+  doesn't set, and an app's plain `Margin` style beats that, as in CSS, except beside a stacked or floating label.
 
 ## Extensions
 

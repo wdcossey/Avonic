@@ -61,20 +61,6 @@
         <Setter Property="Opacity" Value="1" />
     </Style>
 
-    <!-- item.md.css's ::slotted([slot=start]) and ::slotted([slot=end]) set one side, and the button's own margin
-         stays on the other three. Item.axaml's rule sets all four and merges after this file, but it has no
-         pseudoclass, and these do. -->
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicButton:in-item">
-        <Setter Property="Margin" Value="2,4,16,4" />
-    </Style>
-    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicButton:in-item">
-        <Setter Property="Margin" Value="16,4,2,4" />
-    </Style>
-    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating, which set the top and bottom. Measured 16 7 2 7. -->
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicButton:in-item, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicButton:in-item">
-        <Setter Property="Margin" Value="16,7,2,7" />
-    </Style>
-
     <!-- item.md.css's ::slotted(.button-small). A panel directly in a slot stands for the slot. -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicButton:size-small, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicButton:size-small">
         <Setter Property="MinHeight" Value="25" />

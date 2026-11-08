@@ -9,8 +9,7 @@
          The rule for any child in a slot sets the whole Margin, where CSS sets one side. So a control's own margin rules in a
          slot are here, after it, with no activator: they beat it by coming later in this file, whatever order the files
          merge in, and an app's plain style beats them, as a page's rule beats ::slotted in CSS. A rule in the control's own
-         file would win or lose by where that file merges, and one with an activator would beat the app's style too. The
-         button's are still in Button.axaml, with :in-item, which is the button's own change to make. -->
+         file would win or lose by where that file merges, and one with an activator would beat the app's style too. -->
 
     <!-- ::slotted([slot=start]), ::slotted([slot=end]) -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > :is(Control)">
@@ -61,6 +60,15 @@
     </Style>
     <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicChip">
         <Setter Property="Margin" Value="16,4,4,4" />
+    </Style>
+
+    <!-- A button has no rule in item.md.css either, and its own 2px 4px stays on the other three sides. Measured 4px 16px 4px 2px
+         at the start and 4px 2px 4px 16px at the end. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicButton">
+        <Setter Property="Margin" Value="2,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicButton">
+        <Setter Property="Margin" Value="16,4,2,4" />
     </Style>
 
     <!-- ::slotted(ion-label), and a panel standing for the slot. The rest of a label's rules are in Label.axaml. -->
@@ -116,14 +124,18 @@
         <Setter Property="Margin" Value="0,12,0,12" />
     </Style>
 
-    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. A button keeps its own margin at its end, which Styles/Button.axaml says. -->
-    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton)">
+    <!-- :host(.item-label-stacked) ::slotted([slot=end]), and floating. Its specificity beats an icon's 12. -->
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control)">
         <Setter Property="Margin" Value="16,7,0,7" />
     </Style>
-    <!-- That rule sets the top and bottom, and a chip keeps its own 4 at its end: measured 7px 4px 7px 16px. Both depend on
-         the item's state, which only an activator can, so they also beat an app's plain style, where a page's rule wins in CSS. -->
+    <!-- That rule sets the top and bottom, and a chip keeps its own 4 at its end, and a button its 2: measured 7px 4px 7px 16px
+         and 7px 2px 7px 16px. These depend on the item's state, which only an activator can, so they also beat an app's plain
+         style, where a page's rule wins in CSS. -->
     <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicChip, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicChip">
         <Setter Property="Margin" Value="16,7,4,7" />
+    </Style>
+    <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicButton, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicButton">
+        <Setter Property="Margin" Value="16,7,2,7" />
     </Style>
 
 </Styles>

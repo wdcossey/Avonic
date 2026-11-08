@@ -200,8 +200,8 @@ It beats the rule for any child by coming later in the same file, whatever order
 the item's state, a pseudoclass, and an activator beats a plain style. In the control's own file it would win or lose by where
 that file merges, and with an activator it would beat the app's style too. The avatar's, the thumbnail's, the chip's and the
 label's are there. A chip has no rule in `item.md.css`: its own 4 stays on the other three sides, so its rule is `4,4,16,4`
-at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. `Styles/Button.axaml` still
-beats it with `:in-item`; the button is its own control's change. A rule that doesn't set `Margin`, such as a note's size
+at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. A button's own 2 and 4 stay the same
+way: `2,4,16,4`, `16,4,2,4` and `16,7,2,7`. A rule that doesn't set `Margin`, such as a note's size
 or a label's `flex: 1` in the default slot, can stay in the control's own file, as nothing in the host's file fights it.
 
 `FlexRow` and `FlexSlot` in `Controls/Flex/` are `display: flex` and `<slot>`, for a host with parts like these. `FlexRow.Flex` is `flex`, as one

@@ -2815,6 +2815,84 @@ public class AvonicButtonTests
         Assert.Equal(372, Box(end, scene.Window).Right, 0);
     });
 
+    // closest('ion-item-divider') counts too. Measured divs, dive and divm: small, 27.3 high, at x = 18 and ending at 372,
+    // as in an item, with 4px 16px 4px 2px at the start, 4px 2px 4px 16px at the end and 4px 2px in the default slot. A
+    // divider has no ::slotted(.button-small) rule, so it stays 27.3 high where an item's is 25.
+    [AvaloniaFact]
+    public void B30_In_A_Divider_It_Is_Small_With_The_Same_Margins() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicButton { Content = "Text" };
+        var end = new AvonicButton { Content = "Text" };
+        var main = new AvonicButton { Content = "Text" };
+        using var scene = new Scene(NoTransitions(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItemDivider { StartContent = start, Content = "x", EndContent = end },
+                new AvonicItemDivider { Content = main },
+            },
+        }));
+
+        Assert.All(new[] { start, end, main }, button =>
+        {
+            Assert.Equal(13, button.FontSize);
+            Assert.Equal(27.3, button.MinHeight, 2);
+        });
+        Assert.Equal(new Thickness(2, 4, 16, 4), start.Margin);
+        Assert.Equal(new Thickness(16, 4, 2, 4), end.Margin);
+        Assert.Equal(new Thickness(2, 4), main.Margin);
+        Assert.Equal(18, Box(start, scene.Window).X, 0);
+        Assert.Equal(372, Box(end, scene.Window).Right, 0);
+    });
+
+    // A size set on the button still wins, measured divsize: large.
+    [AvaloniaFact]
+    public void B30_In_A_Divider_Its_Own_Size_Wins() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicButton { Content = "Text", Size = ButtonSize.Large };
+        using var scene = new Scene(NoTransitions(new AvonicItemDivider { EndContent = button }));
+
+        Assert.Equal(56, button.MinHeight, 2);
+    });
+
+    // The slot rules are in Item.axaml and ItemDivider.axaml, after the rule for any child in a slot, with no activator. A plain
+    // rule in Button.axaml would lose to that rule merged first and win merged last.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B30_The_Slot_Rules_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
+        AvonicAvatarTests.InMergeOrder("Button.axaml", first, () =>
+        {
+            var itemStart = new AvonicButton { Content = "Text" };
+            var itemEnd = new AvonicButton { Content = "Text" };
+            var dividerStart = new AvonicButton { Content = "Text" };
+            var dividerEnd = new AvonicButton { Content = "Text" };
+            var stacked = new AvonicButton { Content = "Text" };
+            using var scene = new Scene(NoTransitions(new StackPanel
+            {
+                Children =
+                {
+                    new AvonicItem { StartContent = itemStart, Content = "x", EndContent = itemEnd },
+                    new AvonicItemDivider { StartContent = dividerStart, Content = "x", EndContent = dividerEnd },
+                    new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked }, EndContent = stacked },
+                },
+            }));
+
+            Assert.Equal(new Thickness(2, 4, 16, 4), itemStart.Margin);
+            Assert.Equal(new Thickness(16, 4, 2, 4), itemEnd.Margin);
+            Assert.Equal(new Thickness(2, 4, 16, 4), dividerStart.Margin);
+            Assert.Equal(new Thickness(16, 4, 2, 4), dividerEnd.Margin);
+            Assert.Equal(new Thickness(16, 7, 2, 7), stacked.Margin);
+        });
+
+    // Measured itemapp and divapp: a page's .app { margin: 3px } is 3px in the start and end slots of both, as a page's rule
+    // beats ::slotted. Beside a stacked label it wins too (stackedapp), and here it doesn't: that rule needs the item's state,
+    // which is an activator, as for every control in that slot.
+    [AvaloniaFact]
+    public void B30_An_Apps_Plain_Margin_Style_Beats_The_Slots() => InstalledTheme.Run(_ =>
+        AvonicAvatarTests.WithAppMargin<AvonicButton>(new Thickness(3), () =>
+            AvonicAvatarTests.AssertMarginInEverySlot(() => new AvonicButton { Content = "Text" }, new Thickness(3))));
+
     [AvaloniaFact]
     public void B31_Two_Buttons_Are_Multiple_Inputs_To_The_Item()
     {
