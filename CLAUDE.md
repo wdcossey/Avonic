@@ -185,9 +185,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | A text node beside slotted elements | Not counted for `:nth-child`: the host's `IChildIndexProvider` skips an item shown as its text | `AvonicChip` |
 | A host that wraps every item in a slot | Clear `ContentTemplate` on the slot for a control, as a stock `ItemsControl` doesn't wrap a control | `AvonicChip` |
 | A CSS transition on a value the control computes | A transition on `AvonicConfig`'s clock, from the value shown, with CSS's reversing shortening factor, and none before the control's first frame | `AvonicProgressBar`'s progress and track (`transition: transform 150ms linear`) |
-| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar` |
-| A slot order that differs from the DOM's (flex `order`) | The template puts the slots in visual order, and each slot is its own tab group, with a `TabIndex` in DOM order | `AvonicToolbar`'s md order |
-| A value of a string union that no md rule styles | Kept, doing nothing, as in Ionic, so that Ionic's values map across; the control's README says so | `TitleSize.Large`, `HeaderCollapse.Fade` |
+| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar`. `AvonicSpinner` differs: it restarts on any show |
+| A slot order that differs from the DOM's (flex `order`) | The template puts the slots in visual order, and each slot is its own tab group, with a `TabIndex` in DOM order, inside a container with `KeyboardNavigation.TabNavigation="Local"` so that the indexes don't mix with the window's | `AvonicToolbar`'s md order, `PART_Container` |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.

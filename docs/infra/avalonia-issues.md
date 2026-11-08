@@ -65,12 +65,15 @@ it as best effort. It hasn't been tried in a real window.
 
 ## `ScrollGestureRecognizer` has no axis lock
 
-**Seen in tests, and the cause not read.** A touch drag 6 px down, at 30° from horizontal, scrolls a `ScrollViewer` vertically,
-where browsers lock a drag to its main axis. Between Ionic's `maxAngle` and 45°, Avalonia scrolls where Chromium does neither. Found
-by the gesture utility (#4, PR #83). An axis lock on the recogniser would match browsers.
+**Read, not tested.** The recogniser starts a scroll at 5 px on its own axis, with no lock to the drag's main axis, so a touch drag
+at 30° from horizontal that has moved 6 px down scrolls a vertical `ScrollViewer`. Chromium locks a touch scroll to its main axis, and
+scrolls a vertical scroller only for a drag nearer vertical than horizontal. Avonic's gesture utility hides it in most cases, by
+deciding first; it shows for a drag between 40° and 45° near a sideways gesture, which scrolls here and doesn't in Chromium. From the
+design of the gesture utility (#4, PR #83), in `docs/infra/gesture/PLAN.md`. An axis lock on the recogniser would match browsers.
 
 ## `Visual.IsEffectivelyVisibleChanged` is internal
 
-**Read, not reported.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective
-visibility, and has to watch `IsVisibleProperty.Changed` for every visual in the app. Found by `ion-spinner` (#15, PR #82). Making the
-event public would let it subscribe for each instance.
+**Checked by reflection.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective
+visibility. `AvonicSpinner` watches `IsVisibleProperty.Changed` for every visual in the app; `AvonicProgressBar` finds out on its next
+frame, then watches the hidden visuals in its own chain. Found by `ion-spinner` (#15, PR #82). Making the event public would let a
+control subscribe for itself.
