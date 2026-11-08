@@ -295,8 +295,13 @@ public class GestureScrollTests
         // The inner one captures at 16 px; the outer one is refused at 40, and the drag goes on upwards.
         var finger = page.Drag(-48, 0);
         page.Drag(0, -200, finger: finger, from: page.At);
-        page.Lift(finger);
 
+        // The outer one giving up doesn't let recognisers back on while the inner one has the pointer.
+        Assert.Contains("outer.notCaptured", page.Log.Names);
+        var pointer = Assert.IsType<Pointer>(page.Log.All.Last(seen => seen.Name == "inner.onMove").Event!.Pointer);
+        Assert.True(pointer.IsGestureRecognitionSkipped);
+
+        page.Lift(finger);
         Assert.Contains("outer.notCaptured", page.Log.Names);
         Assert.Equal("inner.onEnd", page.Log.All[^1].Name);
         Assert.Equal(0, page.ScrollTop);

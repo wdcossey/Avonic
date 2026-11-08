@@ -4,8 +4,8 @@ namespace Avonic.Components.Gestures;
 
 /// <summary>
 /// Ionic's <c>GestureDetail</c>. One object per gesture, updated in place and passed to every callback, as Ionic's is, so copy
-/// what you need to keep. Positions are in the top level's coordinates, as <c>pageX</c> is the page's. Times are milliseconds on
-/// Avonic's clock, and velocities pixels per millisecond.
+/// what you need to keep. Positions are in the top level's coordinates, as <c>pageX</c> is the page's. Times are milliseconds, the
+/// events' own <see cref="PointerEventArgs.Timestamp"/>, as Ionic's are <c>ev.timeStamp</c>, and velocities pixels per millisecond.
 /// </summary>
 public sealed class GestureDetail
 {

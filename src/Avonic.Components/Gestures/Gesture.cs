@@ -25,6 +25,7 @@ public sealed class Gesture : IDisposable
     private readonly GestureDetail _detail = new();
     private readonly PanRecognizer _pan;
     private readonly GestureDelegate _gesture;
+    private readonly Action _fireOnMove;
 
     private bool _hasCapturedPan;
     private bool _hasStartedPan;
@@ -39,6 +40,16 @@ public sealed class Gesture : IDisposable
     private IDisposable? _frame;
     private bool _destroyed;
 
+    // Counts the presses that started, so that an OnWillStart settling after a later press has started doesn't start that one.
+    private int _press;
+
+    // The pointer whose release is on its way, from the tunnel phase: a child letting go of the capture while it handles the
+    // release isn't a cancel, as the release is still to reach the element.
+    private IPointer? _releasing;
+
+    // The capture left the element during PointerDown, which ended the press.
+    private bool _lostAtPress;
+
     /// <summary>
     /// While a gesture takes the pointer, the gestures that heard the capture lost on the way. Each is checked once the capture has
     /// arrived: a gesture around the one that captured still gets the pointer, and one inside it never will again.
@@ -51,6 +62,7 @@ public sealed class Gesture : IDisposable
         _el = config.Element ?? throw new ArgumentNullException(nameof(config), "GestureConfig.Element is required.");
         _pan = new PanRecognizer(config.Direction, config.Threshold, config.MaxAngle);
         _gesture = GestureController.Instance.CreateGesture(config.GestureName, config.GesturePriority, config.DisableScroll);
+        _fireOnMove = FireOnMove;
     }
 
     /// <summary>Ionic <c>createGesture(config)</c>. The gesture starts disabled.</summary>
@@ -102,6 +114,7 @@ public sealed class Gesture : IDisposable
             _el.RemoveHandler(InputElement.PointerPressedEvent, OnPressed);
             _el.RemoveHandler(InputElement.PointerMovedEvent, OnPreviewMoved);
             _el.RemoveHandler(InputElement.PointerMovedEvent, OnMoved);
+            _el.RemoveHandler(InputElement.PointerReleasedEvent, OnPreviewReleased);
             _el.RemoveHandler(InputElement.PointerReleasedEvent, OnReleased);
             _el.RemoveHandler(InputElement.PointerCaptureLostEvent, OnCaptureLost);
             _attached = false;
@@ -158,6 +171,7 @@ public sealed class Gesture : IDisposable
         }
 
         _hasStartedPan = true;
+        _press++;
         if (_config.Threshold == 0)
         {
             if (TryToCapturePan(ev))
@@ -184,7 +198,7 @@ public sealed class Gesture : IDisposable
             {
                 _isMoveQueued = true;
                 CalcGestureData(_detail, ev);
-                _frame = AvonicConfig.RequestFrame(_el, FireOnMove);
+                _frame = AvonicConfig.RequestFrame(_el, _fireOnMove);
             }
 
             return;
@@ -254,12 +268,12 @@ public sealed class Gesture : IDisposable
             }
         }
 
-        RecognitionHold.Captured(this, ev);
+        RecognitionHold.Captured(ev);
         _held = null;
 
         if (_config.OnWillStart is { } onWillStart && onWillStart(_detail) is { } willStart)
         {
-            AwaitWillStart(willStart);
+            AwaitWillStart(willStart, _press);
         }
         else
         {
@@ -269,11 +283,15 @@ public sealed class Gesture : IDisposable
         return true;
     }
 
-    /// <summary>Ionic's <c>onWillStart(detail).then(fireOnStart)</c>. A faulted task is rethrown on the UI thread, and doesn't start.</summary>
-    private async void AwaitWillStart(Task willStart)
+    /// <summary>
+    /// Ionic's <c>onWillStart(detail).then(fireOnStart)</c>. A faulted task is rethrown on the UI thread, and doesn't start. Unlike
+    /// Ionic's, it doesn't start after <see cref="Destroy"/>, or once another press has started: Ionic's would fire that press's
+    /// <c>onStart</c> early, and let its moves through before its own <c>onWillStart</c> settles.
+    /// </summary>
+    private async void AwaitWillStart(Task willStart, int press)
     {
         await willStart;
-        if (!_destroyed)
+        if (!_destroyed && press == _press)
         {
             FireOnStart();
         }
@@ -402,6 +420,7 @@ public sealed class Gesture : IDisposable
         _el.AddHandler(InputElement.PointerPressedEvent, OnPressed, RoutingStrategies.Bubble, handledEventsToo: true);
         _el.AddHandler(InputElement.PointerMovedEvent, OnPreviewMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         _el.AddHandler(InputElement.PointerMovedEvent, OnMoved, RoutingStrategies.Bubble, handledEventsToo: true);
+        _el.AddHandler(InputElement.PointerReleasedEvent, OnPreviewReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
         _el.AddHandler(InputElement.PointerReleasedEvent, OnReleased, RoutingStrategies.Bubble, handledEventsToo: true);
         _el.AddHandler(InputElement.PointerCaptureLostEvent, OnCaptureLost, handledEventsToo: true);
         _attached = true;
@@ -412,11 +431,30 @@ public sealed class Gesture : IDisposable
 
     private void OnPressed(object? sender, PointerPressedEventArgs e)
     {
-        // One pointer at a time: a second press is refused by hasStartedPan.
-        if (_listening && PointerDown(e))
+        if (!_listening)
         {
-            _tracking = e.Pointer;
+            return;
         }
+
+        // Followed during PointerDown, so that the capture moving away during a capture at the press, in OnStart, is a cancel. One
+        // pointer at a time: a second press is refused by hasStartedPan, and the first stays followed.
+        var previous = _tracking;
+        _tracking = e.Pointer;
+        _releasing = null;
+        _lostAtPress = false;
+        if (!PointerDown(e))
+        {
+            if (ReferenceEquals(_tracking, e.Pointer))
+            {
+                _tracking = previous;
+            }
+
+            return;
+        }
+
+        // Ionic adds the press's listeners once pointerDown returns true, so a callback that disabled the gesture during it doesn't
+        // stop the press being followed. A capture that has left the element has ended it.
+        _tracking = _lostAtPress ? null : e.Pointer;
     }
 
     /// <summary>Before the move reaches any recogniser, inside the element or around it, while this gesture is deciding.</summary>
@@ -444,8 +482,17 @@ public sealed class Gesture : IDisposable
         }
     }
 
+    private void OnPreviewReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (ReferenceEquals(e.Pointer, _tracking))
+        {
+            _releasing = e.Pointer;
+        }
+    }
+
     private void OnReleased(object? sender, PointerReleasedEventArgs e)
     {
+        _releasing = null;
         if (!ReferenceEquals(e.Pointer, _tracking))
         {
             return;
@@ -487,11 +534,18 @@ public sealed class Gesture : IDisposable
             return;
         }
 
-        if (pointer.Captured is Visual next && (ReferenceEquals(next, _el) || _el.IsVisualAncestorOf(next)))
+        if (pointer.Captured is Visual holder && (ReferenceEquals(holder, _el) || _el.IsVisualAncestorOf(holder)))
         {
             return;
         }
 
+        // A child letting go as it handles the release: the release itself is still to arrive.
+        if (pointer.Captured is null && ReferenceEquals(pointer, _releasing))
+        {
+            return;
+        }
+
+        _lostAtPress = true;
         StopPointerEvents();
         PointerUp(null);
     }

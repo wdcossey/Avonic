@@ -44,8 +44,9 @@ public sealed class GestureConfig
     public Func<GestureDetail, bool>? CanStart { get; init; }
 
     /// <summary>
-    /// Ionic <c>onWillStart</c>: awaited after the capture, before <see cref="OnStart"/>. Moves are dropped until it completes, and
-    /// a release before then fires nothing.
+    /// Ionic <c>onWillStart</c>: awaited after the capture, before <see cref="OnStart"/>. Moves are dropped until it completes. A
+    /// release before then fires nothing at the release, and <see cref="OnStart"/> still fires when the task completes, as Ionic's
+    /// does, unless the gesture was destroyed or another press has started since.
     /// </summary>
     public Func<GestureDetail, Task>? OnWillStart { get; init; }
 

@@ -44,13 +44,19 @@ internal static class RecognitionHold
     }
 
     /// <summary>
-    /// A gesture captured <paramref name="e"/>'s pointer: no recogniser gets it until the press ends. This matters for a capture at
-    /// the press, which goes on to the recognisers around the element; a capture on a move has already ended every recogniser on the
-    /// route, by letting the pointer go.
+    /// A gesture captured <paramref name="e"/>'s pointer: no recogniser gets it until the press ends, whatever the other gestures
+    /// holding it do. This matters for a capture at the press, which goes on to the recognisers around the element; a capture on a
+    /// move has already ended every recogniser on the route, by letting the pointer go, and keeps them off for the rest of the press.
     /// </summary>
-    public static void Captured(Gesture gesture, PointerEventArgs e)
+    public static void Captured(PointerEventArgs e)
     {
-        Release(gesture, e.Pointer);
+        // The holds are dropped, so that a gesture still holding the pointer, which will be refused at its threshold, can't clear
+        // the flag when it gives up.
+        if (e.Pointer is Pointer p)
+        {
+            s_entries.Remove(p);
+        }
+
         e.PreventGestureRecognition();
     }
 

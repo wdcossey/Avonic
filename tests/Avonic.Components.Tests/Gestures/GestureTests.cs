@@ -741,6 +741,64 @@ public class GestureTests
         Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
     }
 
+    [AvaloniaFact]
+    public void G10_A_Capture_At_The_Press_Taken_Away_In_OnStart_Ends_The_Gesture()
+    {
+        using var clock = new GestureClock();
+        var box = Box(200, 100);
+        var other = Box(100, 100);
+        other.HorizontalAlignment = HorizontalAlignment.Right;
+        using var scene = new Scene(new Panel { Width = 390, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Children = { box, other } });
+        var log = new Log(clock);
+        var takeAway = true;
+        using var gesture = Gesture.Create(new GestureConfig
+        {
+            Element = box,
+            GestureName = "g",
+            Threshold = 0,
+            OnStart = detail =>
+            {
+                log.Add("g.onStart", detail);
+                if (takeAway)
+                {
+                    detail.Event!.Pointer.Capture(other);
+                }
+            },
+            OnEnd = detail => log.Add("g.onEnd", detail),
+            NotCaptured = detail => log.Add("g.notCaptured", detail),
+        });
+        gesture.Enable();
+
+        // The cancel comes before onStart has returned, so, as Ionic's pointerUp does then, it fires nothing, and lets go.
+        new Finger(scene, clock).Down(100, 50, 1000).Move(120, 50, 1016).Up(120, 50, 1032);
+        Assert.Equal(["g.onStart"], log.Names);
+        Assert.False(GestureController.Instance.IsCaptured);
+
+        takeAway = false;
+        new Finger(scene, clock).Down(100, 50, 2000).Up(100, 50, 2016);
+        Assert.Equal(["g.onStart", "g.onStart", "g.onEnd"], log.Names);
+    }
+
+    [AvaloniaFact]
+    public void G10_A_Child_Letting_Go_As_It_Handles_The_Release_Is_Still_The_Release()
+    {
+        using var clock = new GestureClock();
+        var child = Box(100, 50);
+        var box = Box(200, 100);
+        box.Child = child;
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        using var gesture = Make(box, log);
+        child.AddHandler(InputElement.PointerReleasedEvent, (_, e) => e.Pointer.Capture(null), handledEventsToo: true);
+
+        new Finger(scene, clock).Down(50, 25, 1000).Move(53, 25, 1016).Up(55, 26, 1032);
+
+        Assert.Equal(["g.canStart", "g.notCaptured"], log.Names);
+        var seen = log.Single("g.notCaptured");
+        AssertSeen(seen, 1032, (50, 25, 1000), (55, 26, 1032), (5, 1), (0.126875, 0.04375));
+        Assert.IsType<PointerReleasedEventArgs>(seen.Event);
+    }
+
     // ── G12: disableScroll and blockers ──────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -1034,6 +1092,42 @@ public class GestureTests
     }
 
     [AvaloniaFact]
+    public void G1_Disabling_In_OnStart_At_The_Press_Ends_It_And_Its_Moves_Decide_Nothing()
+    {
+        // As Ionic's: enable(false) before onStart has returned gives no onEnd. pointerDown returns true, so the press is still
+        // followed; its pan recogniser was never started, so the moves detect nothing, and the release, uncaptured, is notCaptured.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        Gesture? gesture = null;
+        gesture = Gesture.Create(new GestureConfig
+        {
+            Element = box,
+            GestureName = "g",
+            Threshold = 0,
+            OnStart = detail =>
+            {
+                log.Add("g.onStart", detail);
+                gesture!.Enable(false);
+            },
+            OnMove = detail => log.Add("g.onMove", detail),
+            OnEnd = detail => log.Add("g.onEnd", detail),
+            NotCaptured = detail => log.Add("g.notCaptured", detail),
+        });
+        gesture.Enable();
+
+        using (gesture)
+        {
+            new Finger(scene, clock).Down(100, 100, 1000).Move(140, 120, 1016).Move(180, 140, 1032).Up(180, 140, 1048);
+            clock.At(1100);
+
+            Assert.Equal(["g.onStart", "g.notCaptured"], log.Names);
+            Assert.False(GestureController.Instance.IsCaptured);
+        }
+    }
+
+    [AvaloniaFact]
     public void G16_Destroy_Drops_A_Move_Queued_For_The_Next_Frame()
     {
         // A deviation: Ionic's queued frame still calls onMove after destroy(), on a control that may have gone.
@@ -1067,6 +1161,40 @@ public class GestureTests
         Settle();
 
         Assert.Equal(["g.canStart"], log.Names);
+    }
+
+    [AvaloniaFact]
+    public void G13_An_OnWillStart_Settling_After_The_Next_Press_Started_Does_Not_Start_That_Press()
+    {
+        // A deviation: Ionic's first promise fires onStart during the second press, and lets its moves through before its own
+        // onWillStart settles.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        var tasks = new List<TaskCompletionSource>();
+        using var gesture = Make(box, log, onWillStart: _ =>
+        {
+            var task = new TaskCompletionSource();
+            tasks.Add(task);
+            return task.Task;
+        });
+
+        new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016).Up(120, 100, 1032);
+        var second = new Finger(scene, clock).Down(100, 100, 2000).Move(120, 100, 2016);
+        tasks[0].SetResult();
+        Settle();
+        second.Move(130, 100, 2032);
+        clock.At(2048);
+        Assert.Equal(["g.canStart", "g.canStart"], log.Names);
+
+        tasks[1].SetResult();
+        Settle();
+        second.Move(140, 100, 2064);
+        clock.At(2080);
+        second.Up(140, 100, 2096);
+
+        Assert.Equal(["g.canStart", "g.canStart", "g.onStart", "g.onMove", "g.onEnd"], log.Names);
     }
 
     [AvaloniaFact]

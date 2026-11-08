@@ -175,7 +175,8 @@ decide before most gestures and cancel them, so:
 - **When the gesture aborts** (wrong direction, or lost the priority contest), and no other gesture on that pointer is still
   undecided, the flag is cleared, unless it was set before any gesture held it: by the app, or by a gesture that captured at the
   press. A gesture that captured on a move has ended every recogniser on the route already, by letting the pointer go. The recogniser has been tracking since the press, so the next move scrolls, from the press point less its 5 px.
-- **When it captures,** the flag stays, through `PreventGestureRecognition`.
+- **When it captures,** the flag stays, through `PreventGestureRecognition`, and the other gestures' holds on the pointer are
+  dropped, so that one around it giving up later can't clear it.
 - A gesture that doesn't start (`canStart` false, controller refused, disabled) touches nothing, and the scroller behaves as if the
   gesture weren't there.
 
@@ -244,6 +245,17 @@ Nothing visual: no theme, tokens or styles.
   refused press does, so the next press works. A deliberate difference, tested by `G8_A_Threshold_Zero_Gesture_That_Loses_At_The_Press_Can_Start_Again`.
 - **`destroy()` with a move queued, or `onWillStart` pending.** Ionic's frame still calls `onMove`, and the promise `onStart`, on a
   control that may have gone. Avonic's `Destroy()` cancels both.
+- **`onWillStart` settling once the next press has started.** Ionic's `fireOnStart` runs then, in the middle of the second press:
+  `onStart` for a press that has ended, and `hasFiredStart` set, so the second press's moves reach `onMove` before its own
+  `onWillStart` settles, and its `onStart` fires later. Avonic drops the first one's, tested by
+  `G13_An_OnWillStart_Settling_After_The_Next_Press_Started_Does_Not_Start_That_Press`. One settling after its own release, with no
+  press since, still fires `onStart`, as Ionic's does.
+- **A child letting go of the pointer while it handles the release.** Avalonia raises `PointerCaptureLost` then, before the release
+  reaches `Element`. It isn't a cancel: a tunnelling handler notes the release on its way, and the release is the end, with its
+  position. Ionic has no capture, so there's nothing to differ from.
+- **`Enable(false)` or `Destroy()` while captured** ends the gesture, but leaves Avalonia's capture on `Element`, and recognisers off
+  the pointer, until the release. Ionic holds no capture, but the browser has already decided that touch: one that went sideways
+  never scrolls (C3).
 - **A cancel's detail.** Ionic's `touchcancel` recalculates from the cancel's touch; `PointerCaptureLost` has no position, so the
   detail is the last move's, as `enable(false)`'s is.
 - **Pointer events of a second finger** are ignored while one is tracked. Ionic reads whichever finger moved, which is a bug there,

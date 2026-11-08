@@ -60,7 +60,7 @@ its end callback.
 | `disableScroll` | `DisableScroll`: `GestureController.IsScrollDisabled` from the capture to the release |
 | `blurOnStart` | `BlurOnStart`: clears the focus before `OnStart` |
 | `canStart(detail): boolean` | `Func<GestureDetail, bool>? CanStart`. `false` ignores the press, with no `NotCaptured` |
-| `onWillStart(detail): Promise<void>` | `Func<GestureDetail, Task>? OnWillStart`. Moves are dropped until it completes, and a release before then fires nothing; `OnStart` still fires when it completes. A null task is a completed one. A faulted task is rethrown on the UI thread, and `OnStart` doesn't fire |
+| `onWillStart(detail): Promise<void>` | `Func<GestureDetail, Task>? OnWillStart`. Moves are dropped until it completes, and a release before then fires nothing; `OnStart` still fires when it completes, unless another press has started since. A null task is a completed one. A faulted task is rethrown on the UI thread, and `OnStart` doesn't fire |
 | `onStart`, `onMove`, `onEnd`, `notCaptured` | `Action<GestureDetail>?` `OnStart`, `OnMove`, `OnEnd`, `NotCaptured` |
 | `passive` | Not here: an Avalonia listener can't be passive, and a captured gesture already keeps the scroller off the pointer. To stop something else seeing an event, set `detail.Event.Handled` |
 | `GestureDetail` | `GestureDetail`, one object updated in place: `Type` (`"pan"`), `StartX`, `StartY`, `StartTime`, `CurrentX`, `CurrentY`, `CurrentTime`, `DeltaX`, `DeltaY`, `VelocityX`, `VelocityY`, `Event` (`PointerEventArgs?`), and `Data`, which a control sets |
@@ -95,6 +95,9 @@ frame; the others are dropped, not merged.
   more of the pointer, so it's `NotCaptured` at once.
 - **Losing the capture** to anything outside `Element` (another element, the platform cancelling the touch, `Element` leaving the
   tree) is Ionic's `touchcancel`: `OnEnd` if captured, `NotCaptured` if not, with the last move's detail, as there's no position.
+  A child inside `Element` that lets go of the pointer as it handles the release isn't a cancel: the release still arrives.
+  `Enable(false)` or `Destroy()` mid-drag leaves the pointer with `Element` until the release, as a touch that went sideways in
+  Chromium never scrolls.
 - **A `ScrollViewer` waits** while a gesture on the pointer decides. Avalonia's `ScrollGestureRecognizer` starts at 5 px, before most
   thresholds, with no axis lock, so a gesture's first undecided move sets `Pointer.IsGestureRecognitionSkipped` before any recogniser
   sees it, inside `Element` or around it. If every gesture gives up, the flag is cleared and the scroller, which has tracked the press, scrolls from the
@@ -121,5 +124,6 @@ Avalonia gives the pointer to one owner, the gesture. `ion-refresher` decides in
 - **A second finger's moves are ignored** while one is tracked. Ionic reads `changedTouches[0]` of whichever finger moved.
 - **Deviations,** each in [PLAN.md](PLAN.md): a threshold-0 gesture that loses at the press can start again, where Ionic's never does;
   a cancel's detail is the last move's; a gesture inside the one that captures is `NotCaptured` at the capture, not at its threshold;
-  `Destroy()` cancels a queued `OnMove` and a pending `OnStart`, which Ionic's doesn't.
+  `Destroy()` cancels a queued `OnMove` and a pending `OnStart`, which Ionic's doesn't; an `OnWillStart` that settles once
+  another press has started doesn't start that press, where Ionic's fires `onStart` in the middle of it.
 - Not tried in a real window, or on a phone.
