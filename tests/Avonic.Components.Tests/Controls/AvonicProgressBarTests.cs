@@ -360,6 +360,8 @@ public class AvonicProgressBarTests
         var frame = f.Frame();
         AssertColour(Primary, Fixture.PixelAt(frame, 300));
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 100));
+        // overflow: hidden. The secondary bar goes on to 421, past the host's end at 358
+        AssertWhite(Fixture.PixelAt(frame, 365));
     });
 
     // ── B9: a change of type ─────────────────────────────────────────────────────────────────
