@@ -10,11 +10,11 @@ and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
 <c:AvonicListHeader Color="primary" Lines="Full" Content="A colour, and a full line" />
 
-<!-- A label and something else. The star is what Ionic's flex: 1 1 auto does. -->
+<!-- A label and something else. The star is what Ionic's flex: 1 1 auto does. A button with no Fill is clear here. -->
 <c:AvonicListHeader>
     <Grid ColumnDefinitions="*,Auto">
         <c:AvonicLabel Content="Recent" />
-        <Button Grid.Column="1" Content="More" />
+        <c:AvonicButton Grid.Column="1" Content="More" />
     </Grid>
 </c:AvonicListHeader>
 ```
