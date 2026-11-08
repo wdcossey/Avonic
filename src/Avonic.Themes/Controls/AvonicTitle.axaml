@@ -1,0 +1,73 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Title" />
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Small title" Size="Small" />
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Coloured" Color="tertiary" />
+            </c:AvonicToolbar>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of title.md.css. Its look doesn't depend on what it's in, as the colour inherits. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTitle}" TargetType="c:AvonicTitle">
+        <!-- padding-inline: 20px; font-size: 1.25rem; font-weight: 500; letter-spacing: 0.0125em -->
+        <Setter Property="Padding" Value="20,0" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextBlock.LetterSpacing">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.0125">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- display: flex; align-items: center -->
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <!-- .toolbar-title: white-space: nowrap; overflow: hidden; text-overflow: ellipsis. They inherit, so a string's TextBlock follows. -->
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <!-- color: var(color), with color: initial, which is invalid, so it inherits -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Title.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color) { color: var(ion-color-base) }. An unknown colour inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.title-small): font-size 0.9375rem, font-weight normal, and the text wraps -->
+        <Style Selector="^:size-small">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-toolbar's variables. A CssUnset key falls back as Ionic's var() does; any value overrides it. -->
+    <b:CssUnset x:Key="Avonic.Toolbar.Background" />
+    <b:CssUnset x:Key="Avonic.Toolbar.Color" />
+    <b:CssUnset x:Key="Avonic.Toolbar.BorderColor" />
+    <Thickness x:Key="Avonic.Toolbar.BorderWidth">0</Thickness>
+    <x:Double x:Key="Avonic.Toolbar.MinHeight">56</x:Double>
+    <x:Double x:Key="Avonic.Toolbar.Opacity">1</x:Double>
+    <x:Double x:Key="Avonic.Toolbar.PaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.Toolbar.PaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.Toolbar.PaddingStart">0</x:Double>
+    <x:Double x:Key="Avonic.Toolbar.PaddingEnd">0</x:Double>
+
+    <!-- ion-title's color. Unset, the title inherits, as color: var(color) is invalid with color: initial. -->
+    <b:CssUnset x:Key="Avonic.Title.Color" />
+
+    <!-- ion-toolbar-color and ion-toolbar-border-color, which Ionic leaves unset. ion-toolbar-color has to stay unset: a
+         button in a toolbar takes it before its own colour (button.md.css, .in-toolbar). ion-toolbar-background is
+         Avonic.ToolbarBackgroundBrush, in Global.axaml. -->
+    <b:CssUnset x:Key="Avonic.ToolbarColorBrush" />
+    <b:CssUnset x:Key="Avonic.ToolbarBorderColorBrush" />
+
+    <!-- The literal fallbacks of toolbar.md.css. Ionic leaves ion-text-color and ion-border-color unset, where here
+         Avonic.TextColor and Avonic.BorderColor always have a value, so these don't follow them. Not Ionic's variables:
+         override the keys above instead. -->
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.ColorBrush" Color="#424242" />
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.BorderColorBrush" Color="#C1C4CD" />
+
+    <!-- The host's own padding, apart from the safe area. Not Ionic's variable: a value for Css.SafeAreaBox. -->
+    <x:Double x:Key="Avonic.Toolbar.Md.NoPadding">0</x:Double>
+
+    <!-- What buttons.md.css gives a button in ion-buttons: border-radius 2px, or 50% when it's clear and icon-only, which
+         is 48 square. -->
+    <CornerRadius x:Key="Avonic.Buttons.Md.ButtonBorderRadius">2</CornerRadius>
+    <CornerRadius x:Key="Avonic.Buttons.Md.ButtonBorderRadiusIconOnly">24</CornerRadius>
+
+    <!-- header.md.css and footer.md.css hard-code the shadow, with no variable. It needs colours, which rule 5 keeps here. -->
+    <BoxShadows x:Key="Avonic.Header.BoxShadow">0 2 4 -1 #33000000, 0 4 5 0 #24000000, 0 1 10 0 #1F000000</BoxShadows>
+    <BoxShadows x:Key="Avonic.Footer.BoxShadow">0 2 4 -1 #33000000, 0 4 5 0 #24000000, 0 1 10 0 #1F000000</BoxShadows>
+
+</ResourceDictionary>
