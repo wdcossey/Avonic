@@ -62,3 +62,18 @@ which rules can ever match a type would remove most of that. An idea, not a bug.
 last letter cut off on each full line, headlessly with Skia at 2×. It's a plain `Border` and `TextBlock`, with no Avonic control, at 155 wide
 and 11 px, where the layout reports a width of 154.25 and the box is 155. `ClipToBounds` being on by default is what shows it. Avonic accepts
 it as best effort. It hasn't been tried in a real window.
+
+## `ScrollGestureRecognizer` has no axis lock
+
+**Read, not tested.** The recogniser starts a scroll at 5 px on its own axis, with no lock to the drag's main axis, so a touch drag
+at 30° from horizontal that has moved 6 px down scrolls a vertical `ScrollViewer`. Chromium locks a touch scroll to its main axis, and
+scrolls a vertical scroller only for a drag nearer vertical than horizontal. Avonic's gesture utility hides it in most cases, by
+deciding first; it shows for a drag between 40° and 45° near a sideways gesture, which scrolls here and doesn't in Chromium. From the
+design of the gesture utility (#4, PR #83), in `docs/infra/gesture/PLAN.md`. An axis lock on the recogniser would match browsers.
+
+## `Visual.IsEffectivelyVisibleChanged` is internal
+
+**Checked by reflection.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective
+visibility. `AvonicSpinner` watches `IsVisibleProperty.Changed` for every visual in the app; `AvonicProgressBar` finds out on its next
+frame, then watches the hidden visuals in its own chain. Found by `ion-spinner` (#15, PR #82). Making the event public would let a
+control subscribe for itself.
