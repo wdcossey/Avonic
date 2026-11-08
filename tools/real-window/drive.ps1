@@ -519,6 +519,37 @@ try {
         Check 'and the gesture gives it up, calling NotCaptured' ((FirstText 'Not captured') -and ($up -like 'delta 0, -*')) "$((Texts | Select-Object -First 3) -join ' | ')"
     }
 
+    # A button in a header's toolbar is still a native button and ion-activatable: a click and a touch tap each count once,
+    # and a mouse over it shows md's hover, which goes when it leaves. The sample's Edit button reports in the footer.
+    Section 'ion-toolbar: a button in the header' {
+        Open 'ion-toolbar'
+        Away
+        Start-Sleep -Milliseconds 400
+        $edit = Named $CT::Button 'Edit'
+        $x, $y = Centre $edit
+        $b = $edit.Current.BoundingRectangle
+        # In the button's padding, left of its label.
+        $hx = [int]($b.X + 3 * $scale)
+        $plain = Pixel $hx $y
+
+        Guard
+        [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 400
+        $hover = Pixel $hx $y
+        Shot 'ion-toolbar-hover'
+        Check 'a mouse over it shows the hover' ($hover -ne $plain) ('{0:X8} against {1:X8}' -f $hover, $plain)
+        Press; Start-Sleep -Milliseconds 50; Release; Start-Sleep -Milliseconds 300
+        Check 'a click counts once' ([bool](FirstText 'Edit tapped 1 time')) "$((Texts | Where-Object { $_ -like 'Edit tapped*' -or $_ -eq 'Footer' }) -join ' | ')"
+        Away
+        Start-Sleep -Milliseconds 1200
+        $gone = Pixel $hx $y
+        Check 'the hover and the ripple go once it leaves' ($gone -eq $plain) ('{0:X8} against {1:X8}' -f $gone, $plain)
+
+        Tap $x $y
+        Start-Sleep -Milliseconds 300
+        Check 'a touch tap counts once' ([bool](FirstText 'Edit tapped 2 times')) "$((Texts | Where-Object { $_ -like 'Edit tapped*' }) -join ' | ')"
+        Away
+    }
+
     Check 'the app is still running' (-not $p.HasExited)
 }
 finally {
