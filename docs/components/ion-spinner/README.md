@@ -124,4 +124,6 @@ offsets and timings are each name's definition, which no Ionic app can reach, so
 
 ## Known gaps
 
+- **The config is read at a prop's change,** where Stencil renders at the next frame, so in Ionic a config set just after the
+  change still counts. Here every change applies at once. Set `AvonicConfig.Spinner` before. See [COMPARISON.md](COMPARISON.md).
 - **Not tried in a real window.** Compared headless at 350 ms; see [COMPARISON.md](COMPARISON.md).

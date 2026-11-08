@@ -372,8 +372,8 @@ public class AvonicProgressBar : TemplatedControl
         var running = _attached && IsEffectivelyVisible;
 
         // The animations run whatever AvonicConfig.Animated says, as Ionic's animated config doesn't reach them: they're the
-        // user's only sign that something is happening
-        var elapsed = running ? now - _renderedAt : TimeSpan.Zero;
+        // user's only sign that something is happening. Detached or hidden, nothing shows, and attaching or showing restarts them.
+        var elapsed = now - _renderedAt;
         var width = _root.Bounds.Width;
         var moving = running && (_lead.IsRunning(now) || _buffer.IsRunning(now));
         var determinate = Type == ProgressBarType.Determinate;

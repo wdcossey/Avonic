@@ -100,7 +100,7 @@ public class AvonicSpinner : Control
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicSpinner>(VerticalAlignment.Top);
 
         // A change of a prop re-renders it in Ionic, which reads config.spinner again in getName()
-        SpinnerNameProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.ChangeName());
+        SpinnerNameProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
         PausedProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
         DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
         ColorProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
@@ -222,8 +222,9 @@ public class AvonicSpinner : Control
     }
 
     /// <summary>
-    /// What a re-render reads: the name, from <c>getName()</c>, and <c>paused</c>. A name from <see cref="AvonicConfig.Spinner"/>
-    /// that has changed since the last render is a change of name.
+    /// What a re-render reads: the name, from <c>getName()</c>, and <c>paused</c>. A name that has changed since the last render,
+    /// from <see cref="SpinnerName"/> or <see cref="AvonicConfig.Spinner"/>, is a change of name. At once, where Stencil renders at
+    /// the next frame, as every change of a prop here applies at once.
     /// </summary>
     private void Rerender()
     {
@@ -277,10 +278,11 @@ public class AvonicSpinner : Control
             return;
         }
 
-        // An element that's inserted, or shown again, gets new animations, which start from the beginning.
+        // An element that's inserted, or shown again, gets new animations, which start from the beginning. An old pause goes
+        // with the old animations, and UpdatePlayState pauses the new ones if it's paused.
         var now = AvonicConfig.Now();
         _starts = Enumerable.Repeat(now, _config.Count).ToArray();
-        _pausedAt = Paused ? now : null;
+        _pausedAt = null;
         UpdatePlayState();
     }
 

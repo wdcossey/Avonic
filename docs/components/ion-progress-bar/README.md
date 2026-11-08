@@ -82,6 +82,8 @@ Each is in the [plan](PLAN.md#deliberate-differences), with its measurement.
 
 - **Right-to-left is the inherited `FlowDirection`,** so an ancestor set right to left reverses the bar. Ionic reads only
   `document.dir`, and a `dir="rtl"` ancestor does nothing there, measured.
+- **A change of type raises no automation event,** as WPF's progress bar raises none, by the decision in #87. A value set while
+  indeterminate is announced by nothing, and read when a client next looks. What Chromium announces wasn't measured.
 - **The dots' edges are anti-aliased,** where Chromium draws the gradient's hard stop. Each dot is in the same place and of the
   same size.
 - **In a toolbar,** Ionic places the bar at the bottom with `::slotted(ion-progress-bar)`. That goes with `ion-toolbar`.

@@ -670,6 +670,9 @@ public class AvonicSpinnerTests
             var named = new AvonicSpinner { SpinnerName = SpinnerName.Lines, Width = 28, Height = 28 };
             var host = new StackPanel { Children = { spinner, named } };
 
+            // Before its first render it has the class that render would give it, as B19's new spinner has
+            Assert.Contains(":name-dots", spinner.Classes);
+
             // Created while it's dots, and connected once it's crescent: the first render reads crescent
             AvonicConfig.Spinner = SpinnerName.Crescent;
             using var scene = new Scene(host);

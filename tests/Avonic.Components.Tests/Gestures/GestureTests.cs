@@ -1076,6 +1076,39 @@ public class GestureTests
     }
 
     [AvaloniaFact]
+    public void G5_An_Event_With_No_Timestamp_Takes_The_Clocks_Time()
+    {
+        // Ionic's now(ev) is ev.timeStamp || Date.now(): an event with none is timed by the clock.
+        var eventTime = AvonicConfig.EventTime;
+        using var clock = new TestClock();
+        AvonicConfig.EventTime = eventTime;
+        var box = Box();
+        using var scene = new Scene(box);
+        var seen = new List<double>();
+        using var gesture = Gesture.Create(new GestureConfig
+        {
+            Element = box,
+            GestureName = "g",
+            OnStart = detail => seen.Add(detail.StartTime),
+            OnEnd = detail => seen.Add(detail.CurrentTime),
+        });
+        gesture.Enable();
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        var pressed = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed);
+        var moving = new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.Other);
+        var released = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased);
+
+        clock.At(500);
+        box.RaiseEvent(new PointerPressedEventArgs(box, finger, scene.Window, new Point(100, 100), 0, pressed, KeyModifiers.None));
+        clock.At(516);
+        box.RaiseEvent(new PointerEventArgs(InputElement.PointerMovedEvent, box, finger, scene.Window, new Point(120, 100), 0, moving, KeyModifiers.None));
+        clock.At(532);
+        box.RaiseEvent(new PointerReleasedEventArgs(box, finger, scene.Window, new Point(120, 100), 0, released, KeyModifiers.None, MouseButton.Left));
+
+        Assert.Equal([516, 532], seen);
+    }
+
+    [AvaloniaFact]
     public void G1_Disabling_In_CanStart_Follows_That_Press_To_Its_End_And_Ignores_The_Next_Until_Enabled()
     {
         // Measured: Ionic's listeners for the press are added after canStart, so they follow it.

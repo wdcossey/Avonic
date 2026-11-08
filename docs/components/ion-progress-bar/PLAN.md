@@ -190,6 +190,7 @@ None. Every member maps to an Ionic prop, part, class or variable.
 | Right-to-left is the inherited `FlowDirection`, where Ionic reads only `document.dir`. A `dir="rtl"` ancestor does nothing in Ionic, measured, and an ancestor's `FlowDirection` does here | Avalonia has no document; an app sets `FlowDirection` on its window, which is the same thing, or on a subtree, which Ionic can't. Ionic also reads `document.dir` only when it renders; this follows a change at once |
 | The dot geometry is a constant in Components, not a theme literal | A brush with a bound colour can't be tiled in a template, and the pitch is the animation's period |
 | The dots' edges are anti-aliased, where Chromium draws the gradient's hard stop at 30 % with a harder edge | Rendering, best effort (ADR 0002). Each dot is in the same place and of the same size |
+| A change of type raises no automation event. Chromium may announce `aria-valuenow` appearing or going: not measured, as its platform accessibility events can't be seen from `playwright-core` | The human's decision in #87, to follow WPF's progress bar, which raises none when it becomes indeterminate, rather than a range-value change with a null old or new value, which UIA clients don't expect. The range pattern appears or goes, and a client reads it when it next looks. A value set while indeterminate is read then too |
 
 ## Not in this PR
 

@@ -125,6 +125,8 @@ runtime, reading each spinner's `spinner-*` class and its count of `svg`s 100 ms
 | Config `lines-small`, then `color = 'danger'` | `lines-small`, 8 |
 | A class added, after config `lines-sharp` | still `lines-small` |
 | Created at `circles`, appended once the config is `dots` | `dots` |
+| `paused = true`, then config `bubbles` in the same task | `bubbles`: the render is at the next frame |
+| Config `lines`, `paused = false`, then config `crescent` in a `setTimeout` 0 | `crescent` |
 
 A spinner with `name="lines"` stayed `lines` throughout, and setting its `name` to `undefined` once the config was `circles`
 gave `circles`. `B20` asserts the same steps.
@@ -140,6 +142,7 @@ other way round: `_testing` reaches `animated`, not `animated` the spinner.
 
 | Difference | Why | Measurement |
 |---|---|---|
+| A prop's change reads `AvonicConfig.Spinner` at once | Stencil renders at the next frame, so in Ionic a config set after the change, in the same task or the next, still counts, measured: `paused = true` then `config.set('spinner', 'bubbles')` drew bubbles, and so did a set in a `setTimeout` 0 after the change. Here every change of a prop applies at once, as `Paused` and `SpinnerName` already did, so the config is read then. Set it before | the two steps at the end of the table above |
 | No `_testing` | Ionic's private config for its own screenshot tests, which pauses every spinner. Avonic's tests have `TestClock` instead | `'spinner-paused': self.paused \|\| config.getBoolean('_testing')` |
 | A name outside the nine can't be set | `SpinnerName` is an enum. Ionic falls back to `lines` for an unknown string, and so does a cast out of range here | `SPINNERS[spinnerName] ?? SPINNERS['lines']` |
 | A duration that isn't finite is the default | `Infinity > 10` is true in JS, so Ionic writes `animation-duration: Infinityms` and, for the staggered names, `animation-delay: NaNms`, neither valid CSS. Read from the source, not measured: the browser drops both, so the stylesheet's `1s` applies with no stagger, or `0s` for `circular`. Avonic uses the name's own duration and stagger, rather than copy what a bad value happens to do | — |
