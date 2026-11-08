@@ -36,7 +36,7 @@ None in Ionic, none here.
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `.spinner-<name>` | `:name-<name>` | By the mapping rule for a host class from a prop, as `ion-icon`'s `icon-small` is `:size-small`: `:name-bubbles` … `:name-lines-sharp-small`, for `getName()`, so `:name-circular` with no name. Ionic's own styles use it only inside the shadow DOM, which is drawn in code here, so the theme doesn't select it, but an app's `ion-spinner.spinner-lines { … }` can, as `c\|AvonicSpinner:name-lines` |
-| [x] | `.spinner-paused` | `:paused` | `paused \|\| _testing`, with `AvonicConfig.Animated` off for `_testing`, so it follows `Animated` at the spinner's next look, as the timeline does |
+| [x] | `.spinner-paused` | `:paused` | `paused`. Ionic's `_testing` isn't mapped. (Until #87, `AvonicConfig.Animated` off stood in for it) |
 | [x] | `.ion-color`, `.ion-color-<name>` | `:ion-color` | From `ColorPalette` |
 | [ ] | `.md`, `.ios` | — | Not applicable (ADR 0001) |
 
@@ -50,8 +50,8 @@ None in Ionic, none here.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `config.get('spinner')` | — | **Proposed for `AvonicConfig`**, a shared file this PR may not edit. See "Default name" |
-| [x] | `config.getBoolean('_testing')` | `AvonicConfig.Animated == false` | Ionic's test hook pauses every spinner. The brief asks the spinner to honour `Animated`, which Ionic's `spinner.js` doesn't read, so `Animated` stands in for `_testing`: off means paused. Recorded as a deliberate difference |
+| [x] | `config.get('spinner')` | `AvonicConfig.Spinner` | Added in #87. See "Default name" |
+| [ ] | `config.getBoolean('_testing')` | — | Not applicable: Ionic's test hook, which pauses every spinner. Until #87, `AvonicConfig.Animated` off stood in for it, which the human reversed: `spinner.js` doesn't read `animated`, and a spinner is the user's only sign that something is happening |
 
 ## The nine spinners, from `spinner-configs.js` and `spinner.css`
 
@@ -137,9 +137,10 @@ Each becomes a test in `AvonicSpinnerTests`, named after its number.
 | 14 | Not mirrored in RTL | `top`/`left` by design, and the `transform-origin: calc(100% - center)` rules are invalid; measured identical matrices and positions under `dir="rtl"` |
 | 15 | `role="progressbar"`; not focusable; sits at the start and top of its slot, as an inline block does | `render`; `display: inline-block` |
 | 16 | Frames are requested while attached and running, and not while paused, and each one redraws | the equivalent of a CSS animation's cost |
-| 17 | `AvonicConfig.Animated` off pauses it, at its next frame. Back on, it carries on: a spinner paused only by it looks again every 250 ms, without drawing, as `AvonicConfig`'s switches may change at runtime | `_testing`, see above |
+| 17 | `AvonicConfig.Animated` off changes nothing: it keeps turning (#87, which replaced "off pauses it") | `spinner.js` doesn't read `animated` |
 | 18 | It draws that frame, in its colour: each shape where the maths says, at its opacity | the frames are drawn in `Render`, so this is the pixels |
 | 19 | The host has a class for its name and one for paused, which an app's style can select | `render`'s `class`; measured `md spinner-circular` with no name |
+| 20 | `AvonicConfig.Spinner` names a spinner with none, read when it's first attached and at each change of a prop, not when only the config changes or it's moved, hidden or shown (#87) | `getName()` in `render()`; measured, see COMPARISON |
 
 ## Avalonia mapping
 
@@ -157,14 +158,14 @@ Each becomes a test in `AvonicSpinnerTests`, named after its number.
 
 ## Default name
 
-`getName()` is `this.name || config.get('spinner')`, then `'circular'` on md. `AvonicConfig` is the home of Ionic's
-global config, and a shared file this PR may not edit, so the config step isn't implemented here. The control resolves
-`SpinnerName ?? SpinnerName.Circular`, and the PR proposes the one-line config entry and the one-line read. Listed
-under "For you to decide".
+`getName()` is `this.name || config.get('spinner')`, then `'circular'` on md. In #87 the config became
+`AvonicConfig.Spinner`, and the control resolves `SpinnerName ?? AvonicConfig.Spinner ?? SpinnerName.Circular`. Ionic calls
+`getName()` in `render()`, so the config is read when the spinner is first attached and at each change of a prop, as
+measured (see [COMPARISON.md](COMPARISON.md)): behaviour 20.
 
 ## Extensions
 
-None. `AvonicConfig.Animated` pausing the spinner is a deliberate difference, not a new member.
+None.
 
 ## Dependencies
 
@@ -176,6 +177,6 @@ None. `AvonicConfig.Animated` pausing the spinner is a deliberate difference, no
 |---|---|
 | Control | `src/Avonic.Components/Controls/Spinner/AvonicSpinner.cs`, `SpinnerName.cs`, `SpinnerConfigs.cs`, `SpinnerFrame.cs`. No stub `.axaml`: it draws itself and has no template, as `AvonicIcon` doesn't |
 | Theme | `src/Avonic.Themes/Controls/AvonicSpinner.axaml` (size and colour, with `Design.PreviewWith`), `src/Avonic.Themes/Tokens/Spinner.axaml` |
-| Tests | `tests/Avonic.Components.Tests/Controls/AvonicSpinnerTests.cs` (1–19), `AvonicSpinnerCaptureTests.cs` (frames at known phases for the compare step) |
+| Tests | `tests/Avonic.Components.Tests/Controls/AvonicSpinnerTests.cs` (1–20), `AvonicSpinnerCaptureTests.cs` (frames at known phases for the compare step) |
 | Sample | `samples/Avonic.Sample/Pages/SpinnerPage.axaml*`, `[SamplePage("ion-spinner", Order = 15)]` |
 | Docs | this plan, `COMPARISON.md`, `README.md` |

@@ -52,7 +52,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
-| 1 | Host, and accessibility | 358 × 4, `overflow: hidden`; `role="progressbar"`, min 0, max 1, `aria-valuenow` raw, gone when indeterminate | match. `ProgressBar` peer with a read-only range |
+| 1 | Host, and accessibility | 358 × 4, `overflow: hidden`; `role="progressbar"`, min 0, max 1, `aria-valuenow` raw, gone when indeterminate | match. `ProgressBar` peer with a read-only range. A change of type raises no event, as WPF's doesn't (#87) |
 | 2 | Progress from the left | 0.25 → 0..89.5 | match |
 | 3 | Clamped for display only | 1.5 draws 358 and reports 1.5; −1 draws 0 | match. NaN keeps the scale, from the CSSOM, not measured |
 | 4 | The buffer, and the dots after it | track 0..268.5 at 0.75; dot centres at 280, 290, … at time 0 | match |
@@ -65,7 +65,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 | 11 | RTL | `document.dir="rtl"` reverses; `reversed` puts it back | match, through the inherited `FlowDirection`. See the plan |
 | 12 | Colour | danger: progress `rgb(197, 0, 15)`, track and dots at 0.3 | match. An unknown colour draws nothing, from the CSS |
 | 13 | Host classes | `progress-bar-determinate`, `-indeterminate`, `-reversed`, `-solid` | match, as pseudoclasses |
-| 14 | `AvonicConfig.Animated` off | `progress-paused` holds the animations | a deliberate difference. See the plan |
+| 14 | `AvonicConfig.Animated` off | `animated: false` doesn't reach this control's CSS: it eases and moves | match (#87): it eases and moves |
 | 15 | The two keys | `--background`, `--progress-background` | match |
 | 16 | Detach and attach, hide and show | a re-created element starts its animations at 0, and `display: none` stops them | match. Measured: `display: none` and back in one task keeps every `currentTime`, on the bar or an ancestor, and across a frame restarts them at 0 |
 | 17 | Frames only while something moves | — | Avonic's own |

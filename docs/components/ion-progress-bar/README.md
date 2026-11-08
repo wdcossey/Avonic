@@ -63,7 +63,13 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
   appeared or changed type, as CSS animations start when the element does.
 - **Right-to-left reverses the bar,** and `Reversed` puts it back, as `document.dir` does in Ionic. The bar's own parts are always
   laid out left to right.
-- **`AvonicConfig.Animated` off** snaps the changes and stands the stream and the indeterminate bars at their start.
+- **`AvonicConfig.Animated` doesn't stop it.** Ionic's `animated` config reaches the ripple (`tap-click`) and the transitions of
+  the accordion, the menu, `ion-nav`, `ion-router-outlet`, overlays and the searchbar, and the skeleton text's shimmer, not
+  this control's CSS. A progress bar is the user's only sign that something is happening, so with it off the changes still
+  ease, and the stream and the indeterminate bars still move.
+- **To automation** it's a `ProgressBar` with a read-only range from 0 to 1, whose value is the raw `Value`, and which
+  announces a change of it. Indeterminate, it has no range, as `aria-valuenow` goes. A change of type raises no event, as
+  WPF's progress bar raises none when it becomes indeterminate.
 - **Frames run only while something moves.** A determinate bar with no buffer is still.
 
 ## Extensions
@@ -76,8 +82,6 @@ Each is in the [plan](PLAN.md#deliberate-differences), with its measurement.
 
 - **Right-to-left is the inherited `FlowDirection`,** so an ancestor set right to left reverses the bar. Ionic reads only
   `document.dir`, and a `dir="rtl"` ancestor does nothing there, measured.
-- **`AvonicConfig.Animated` off** stands the stream and the indeterminate bars at time 0, as Ionic's private `progress-paused`
-  does. Ionic's public `animated` config doesn't stop them. An indeterminate bar then shows only its track.
 - **The dots' edges are anti-aliased,** where Chromium draws the gradient's hard stop. Each dot is in the same place and of the
   same size.
 - **In a toolbar,** Ionic places the bar at the bottom with `::slotted(ion-progress-bar)`. That goes with `ion-toolbar`.

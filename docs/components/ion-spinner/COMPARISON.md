@@ -98,20 +98,47 @@ re-inserts a spinner, reading `currentTime` before and after.
 | 14 | RTL | not mirrored | not mirrored | match |
 | 15 | `role="progressbar"`, inline-block, whole box takes input | | `ProgressBar` peer, `Left` / `Top`, transparent box | match |
 | 16 | Frames only while running | a paused CSS animation costs nothing | no frame requested | match |
-| 17 | `AvonicConfig.Animated` off pauses it | `_testing` pauses it | `Animated` stands in for `_testing` | deliberate difference |
+| 17 | `AvonicConfig.Animated` off | `animated: false` leaves it turning: `spinner.js` doesn't read it | keeps turning | match (#87) |
 | 18 | It draws the frame | | pixels at the measured places | match |
 | 19 | Host classes | `spinner-<name>`, `spinner-paused` | `:name-<name>`, `:paused` | match |
+| 20 | `config.spinner` | read in `render()`: at the first connect and each change of a prop, measured below | `AvonicConfig.Spinner`, read at the first attach and each change of `SpinnerName`, `Paused`, `Duration` or `Color` | match (#87) |
+
+### Measured: when `config.spinner` is read (#87)
+
+In Chromium, with `window.Ionic = { config: { mode: 'md', spinner: 'dots' } }` and `Ionic.config.set('spinner', ...)` at
+runtime, reading each spinner's `spinner-*` class and its count of `svg`s 100 ms after each step:
+
+| Step | Spinner with no name |
+|---|---|
+| Started with `dots` | `spinner-dots`, 3 `svg`s |
+| Config set to `crescent`, nothing else | still `dots` |
+| Removed and inserted again | still `dots` |
+| `display: none`, then shown | still `dots` |
+| `paused = true` | `crescent`, 1 `svg` |
+| Config `bubbles`, then `duration = 500` | `bubbles`, 9 |
+| Config `lines-small`, then `color = 'danger'` | `lines-small`, 8 |
+| A class added, after config `lines-sharp` | still `lines-small` |
+| Created at `circles`, appended once the config is `dots` | `dots` |
+
+A spinner with `name="lines"` stayed `lines` throughout, and setting its `name` to `undefined` once the config was `circles`
+gave `circles`. `B20` asserts the same steps.
+
+### Measured: what `animated` reaches (#87)
+
+`grep -r "getBoolean('animated'" node_modules/@ionic/core/dist/collection`, and `config.get('animated'`, in `@ionic/core` 8.8.1:
+`utils/tap-click` (the ripple), `accordion`, `menu`, `nav`, `router-outlet`, `searchbar`, `skeleton-text` and `utils/overlays`.
+Not `spinner`, `progress-bar` or `content`. `ionic-global.js` sets `animated` to false when `_testing` is on, which is the
+other way round: `_testing` reaches `animated`, not `animated` the spinner.
 
 ## Deliberate differences
 
 | Difference | Why | Measurement |
 |---|---|---|
-| `AvonicConfig.Animated` off pauses every spinner | Ionic's spinner doesn't read `animated`. It reads `_testing`, a private config for its own screenshot tests, which pauses it. The brief asks the spinner to honour `Animated`, and pausing is what an app turning animations off wants | `'spinner-paused': self.paused \|\| config.getBoolean('_testing')` |
-| No `config.spinner` | `getName()` reads `config.get('spinner')` before the mode default. `AvonicConfig` is a shared file this PR may not edit, so it's proposed in the PR, not implemented. A spinner with no name is `circular`, which is what an app with no config gets | — |
+| No `_testing` | Ionic's private config for its own screenshot tests, which pauses every spinner. Avonic's tests have `TestClock` instead | `'spinner-paused': self.paused \|\| config.getBoolean('_testing')` |
 | A name outside the nine can't be set | `SpinnerName` is an enum. Ionic falls back to `lines` for an unknown string, and so does a cast out of range here | `SPINNERS[spinnerName] ?? SPINNERS['lines']` |
 | A duration that isn't finite is the default | `Infinity > 10` is true in JS, so Ionic writes `animation-duration: Infinityms` and, for the staggered names, `animation-delay: NaNms`, neither valid CSS. Read from the source, not measured: the browser drops both, so the stylesheet's `1s` applies with no stagger, or `0s` for `circular`. Avonic uses the name's own duration and stagger, rather than copy what a bad value happens to do | — |
 | `circular`'s `svg` doesn't turn | Not a difference: Chromium doesn't turn it either, as the matrices show. Recorded because the keyframes read as if it did | `matrix(1, 0, 0, 1, 0, 0)` at 12 instants |
 
 ## Gaps
 
-None found in the comparison. The config entry above is a gap only in that it's waiting on a shared file.
+None found in the comparison.
