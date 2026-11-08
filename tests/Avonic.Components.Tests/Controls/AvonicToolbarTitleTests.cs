@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless.XUnit;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -106,14 +107,23 @@ public class AvonicToolbarTitleTests
         var plain = new AvonicTitle { Content = "Title" };
         var page = new StackPanel { Children = { new AvonicToolbar { Content = large }, new AvonicToolbar { Content = plain } } };
         page.Styles.Add(ToolbarTest.AppStyle<AvonicTitle>(":size-large", Visual.OpacityProperty, 0.25));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicTitle>(":size-default", Layoutable.MarginProperty, new Thickness(3)));
         using var scene = new Scene(page);
 
+        // And title-default with no size.
         Assert.Equal(0.25, large.Opacity);
+        Assert.Equal(new Thickness(0), large.Margin);
         Assert.Equal(1, plain.Opacity);
+        Assert.Equal(new Thickness(3), plain.Margin);
 
         large.Size = TitleSize.Small;
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
         Assert.Equal(1, large.Opacity);
+        Assert.Equal(new Thickness(0), large.Margin);
+
+        large.Size = null;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.Equal(new Thickness(3), large.Margin);
     });
 
     // ── Ti4 ─────────────────────────────────────────────────────────────────────────────────

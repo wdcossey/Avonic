@@ -143,7 +143,8 @@
     </Style>
 
     <!-- ::slotted(*) .button-has-icon-only.button-clear: 48 square, padding 12, border-radius 50%, no margin. And
-         rippleType: unbounded for a clear, icon-only button in ion-buttons. -->
+         rippleType: unbounded for a clear, icon-only button in ion-buttons. A full one that isn't round keeps button.md.css's
+         border-radius 0, which beats the variable, measured. -->
     <Style Selector="c|AvonicButton:in-buttons:has-icon-only:fill-clear">
         <Setter Property="Margin" Value="0" />
         <Setter Property="Width" Value="48" />
@@ -159,7 +160,7 @@
                 </MultiBinding>
             </Setter>
         </Style>
-        <Style Selector="^ /template/ Border#PART_Native">
+        <Style Selector="^:not(:expand-full:not(:shape-round)) /template/ Border#PART_Native">
             <Setter Property="CornerRadius">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.Button.BorderRadius" />
@@ -193,9 +194,9 @@
     </Style>
 
     <!-- ::slotted(*) .button-clear and .button-outline { color: initial }: color: var(color) is invalid, so the text
-         inherits the toolbar's, in every state. Not solid: a default button's text inherits anyway, as the
-         theme's rule for it gives the same. -->
-    <Style Selector="c|AvonicButton:in-buttons:not(:fill-solid)">
+         inherits the toolbar's, in every state. Not default, which keeps its own hover, focus and pressed colours, as
+         buttons.md.css has no rule for it. -->
+    <Style Selector="c|AvonicButton:in-buttons:not(:fill-solid):not(:fill-default)">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />

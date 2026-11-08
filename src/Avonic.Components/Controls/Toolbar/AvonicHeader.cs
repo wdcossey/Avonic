@@ -12,7 +12,7 @@ namespace Avonic.Components.Controls;
 /// removes. The first toolbar's top padding is <c>Avonic.SafeAreaTop</c>. It holds many children and Ionic lists no slot, so
 /// it's an <see cref="ItemsControl"/>. See <c>docs/components/ion-toolbar/README.md</c>.
 /// </summary>
-[PseudoClasses(":collapse-condense", ":collapse-fade")]
+[PseudoClasses(":collapse-none", ":collapse-condense", ":collapse-fade")]
 public class AvonicHeader : ItemsControl
 {
     /// <summary>
@@ -33,6 +33,11 @@ public class AvonicHeader : ItemsControl
         ClipToBoundsProperty.OverrideDefaultValue<AvonicHeader>(false);
     }
 
+    public AvonicHeader()
+    {
+        PseudoClasses.Set(":collapse-none", true);
+    }
+
     public HeaderCollapse? Collapse
     {
         get => GetValue(CollapseProperty);
@@ -48,7 +53,9 @@ public class AvonicHeader : ItemsControl
             var condense = Collapse == HeaderCollapse.Condense;
             PseudoClasses.Set(":collapse-condense", condense);
 
-            // header-collapse-fade. Only ios has rules for it, but it's the host class an app can style, as in Ionic.
+            // header-collapse-none and header-collapse-fade. md has no rules for them, but they're the host classes an app can
+            // style, as in Ionic.
+            PseudoClasses.Set(":collapse-none", Collapse is null);
             PseudoClasses.Set(":collapse-fade", Collapse == HeaderCollapse.Fade);
 
             // getRoleType: role="none" for a condensed header in md, as its large title is never shown. At style priority,

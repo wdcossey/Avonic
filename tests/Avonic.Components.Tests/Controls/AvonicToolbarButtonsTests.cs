@@ -318,6 +318,31 @@ public class AvonicToolbarButtonsTests
     });
 
     [AvaloniaFact]
+    public void B8_A_Full_Clear_Icon_Only_Button_Is_Square_And_A_Round_One_A_Circle() => InstalledTheme.Run(_ =>
+    {
+        // Measured: border-radius 0 on a full one, as button.md.css's beats ion-buttons' 50%, and 50% when it's round too.
+        var full = new AvonicButton { IconOnlyContent = new AvonicIcon { IconName = "star" }, Expand = ButtonExpand.Full };
+        var round = new AvonicButton { IconOnlyContent = new AvonicIcon { IconName = "star" }, Expand = ButtonExpand.Full, Shape = ButtonShape.Round };
+        using var scene = InToolbar(null, full, round);
+
+        Assert.Equal(new CornerRadius(0), Native(full).CornerRadius);
+        Assert.Equal(new CornerRadius(24), Native(round).CornerRadius);
+        Assert.Equal(new Size(48, 48), full.Bounds.Size);
+    });
+
+    [AvaloniaFact]
+    public void B5_A_Default_Button_In_Buttons_Keeps_Its_Focused_Colour() => InstalledTheme.Run(_ =>
+    {
+        // buttons.md.css has no rule for button-default, so an app's color-focused reaches it. Measured #def2: orange.
+        var button = new AvonicButton { Content = "Default", Fill = ButtonFill.Default };
+        var page = new StackPanel { Children = { Buttons(button) }, Resources = { ["Avonic.Button.ColorFocused"] = Brushes.Orange } };
+        using var scene = new Scene(page);
+
+        ToolbarTest.PressKey(scene, PhysicalKey.Tab);
+        Assert.Equal(Colors.Orange, ToolbarTest.Solid(button.Foreground));
+    });
+
+    [AvaloniaFact]
     public void B5_Solid_In_Buttons_Outside_A_Toolbar() => InstalledTheme.Run(_ =>
     {
         // ion-buttons' own rules, without a toolbar's in-toolbar ones: color var(ion-toolbar-background), background #424242.

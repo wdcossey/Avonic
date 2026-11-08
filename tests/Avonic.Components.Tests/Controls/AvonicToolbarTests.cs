@@ -7,8 +7,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
-using Avalonia.Media;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -361,6 +362,28 @@ public class AvonicToolbarTests
     }));
 
     [AvaloniaFact]
+    public void T10_In_The_Dark_Palette_The_Toolbar_Follows_The_Text_And_Border_Colours() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        // var(ion-text-color) and var(ion-border-color, …), which dark leaves to an app to change.
+        var app = Application.Current!;
+        app.Resources["Avonic.TextColor"] = Colors.Orange;
+        app.Resources["Avonic.BorderColor"] = Colors.Purple;
+        try
+        {
+            var toolbar = new AvonicToolbar { Content = "x" };
+            using var scene = ToolbarTest.Show(toolbar);
+
+            Assert.Equal(Colors.Orange, ToolbarTest.Solid(toolbar.Foreground));
+            Assert.Equal(Colors.Purple, ToolbarTest.Solid(Background(toolbar).BorderBrush));
+        }
+        finally
+        {
+            app.Resources.Remove("Avonic.TextColor");
+            app.Resources.Remove("Avonic.BorderColor");
+        }
+    }));
+
+    [AvaloniaFact]
     public void T10_The_Dark_Palette_Still_Gives_Way_To_The_Toolbar_Tokens() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
     {
         var toolbar = new AvonicToolbar
@@ -425,7 +448,7 @@ public class AvonicToolbarTests
         };
         var page = new StackPanel { Children = { toolbar } };
         page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-large", Visual.OpacityProperty, 0.25));
-        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-label", Avalonia.Layout.Layoutable.MarginProperty, new Thickness(3)));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-label", Layoutable.MarginProperty, new Thickness(3)));
         using var scene = ToolbarTest.Show(page);
 
         Assert.Equal(0.25, toolbar.Opacity);
@@ -750,14 +773,19 @@ public class AvonicToolbarTests
         var plain = new AvonicHeader { Items = { new AvonicToolbar { Content = "Plain" } } };
         var page = new StackPanel { Children = { fade, plain } };
         page.Styles.Add(ToolbarTest.AppStyle<AvonicHeader>(":collapse-fade", Visual.OpacityProperty, 0.25));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicHeader>(":collapse-none", Layoutable.MarginProperty, new Thickness(3)));
         using var scene = ToolbarTest.Show(page);
 
+        // And header-collapse-none with no collapse.
         Assert.Equal(0.25, fade.Opacity);
+        Assert.Equal(new Thickness(0), fade.Margin);
         Assert.Equal(1, plain.Opacity);
+        Assert.Equal(new Thickness(3), plain.Margin);
 
         fade.Collapse = null;
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(1, fade.Opacity);
+        Assert.Equal(new Thickness(3), fade.Margin);
     });
 
     // ── H4, F3: landmarks ───────────────────────────────────────────────────────────────────
