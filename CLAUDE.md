@@ -28,6 +28,9 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes)
+  Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
+                         blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
+                         waiting (docs/infra/gesture/README.md)
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -175,6 +178,16 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `overflow: hidden` beside `box-shadow` | a part of its own inside the `Border`: a `Border`'s `ClipToBounds` clips its own shadow, and a `TemplatedControl` clips by default, so turn that off | `PART_Clip`, `ClipToBoundsProperty.OverrideDefaultValue` |
 | `line-height: 1` | `TextBlock.LineHeight` as `Css.Em`, `ClipToBounds="False"`, and half the leading as a margin, because Avalonia keeps a short line at the top | `Css.HalfLeading` |
 | `text-transform` | a property, applied to strings through the template's converter | `TextTransform` |
+| `border-radius` with a percentage | a key that takes a `CornerRadius`, a number or a CSS string, read by `BorderRadius.ToCornerRadius` and `.ToClip` with the element's size | `--border-radius: 50%` on `ion-avatar`. Corners are physical, so the `CornerRadius` swaps in RTL |
+| `object-fit: cover` | `Stretch="UniformToFill"` | `::slotted(img)` in `ion-avatar` |
+| A shape drawn by animated SVG in the shadow DOM | Drawn in code from the same config, on `AvonicConfig`'s clock, with constants in `Avonic.Components` | `ion-spinner`'s nine names |
+| `createGesture`, `GESTURE_CONTROLLER` | `Gesture.Create(GestureConfig)`, `GestureController.Instance`; `ionGestureCaptured` → `IonGestureCaptured` | Capturing takes Avalonia's pointer capture, which cancels a pressed `Button` or `Activatable` surface; losing it outside the element is `touchcancel` |
+| A text node beside slotted elements | Not counted for `:nth-child`: the host's `IChildIndexProvider` skips an item shown as its text | `AvonicChip` |
+| A host that wraps every item in a slot | Clear `ContentTemplate` on the slot for a control, as a stock `ItemsControl` doesn't wrap a control | `AvonicChip` |
+| A CSS transition on a value the control computes | A transition on `AvonicConfig`'s clock, from the value shown, with CSS's reversing shortening factor, and none before the control's first frame | `AvonicProgressBar`'s progress and track (`transition: transform 150ms linear`) |
+| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar` |
+| A slot order that differs from the DOM's (flex `order`) | The template puts the slots in visual order, and each slot is its own tab group, with a `TabIndex` in DOM order | `AvonicToolbar`'s md order |
+| A value of a string union that no md rule styles | Kept, doing nothing, as in Ionic, so that Ionic's values map across; the control's README says so | `TitleSize.Large`, `HeaderCollapse.Fade` |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.

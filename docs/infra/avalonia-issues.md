@@ -62,3 +62,15 @@ which rules can ever match a type would remove most of that. An idea, not a bug.
 last letter cut off on each full line, headlessly with Skia at 2×. It's a plain `Border` and `TextBlock`, with no Avonic control, at 155 wide
 and 11 px, where the layout reports a width of 154.25 and the box is 155. `ClipToBounds` being on by default is what shows it. Avonic accepts
 it as best effort. It hasn't been tried in a real window.
+
+## `ScrollGestureRecognizer` has no axis lock
+
+**Seen in tests, and the cause not read.** A touch drag 6 px down, at 30° from horizontal, scrolls a `ScrollViewer` vertically,
+where browsers lock a drag to its main axis. Between Ionic's `maxAngle` and 45°, Avalonia scrolls where Chromium does neither. Found
+by the gesture utility (#4, PR #83). An axis lock on the recogniser would match browsers.
+
+## `Visual.IsEffectivelyVisibleChanged` is internal
+
+**Read, not reported.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective
+visibility, and has to watch `IsVisibleProperty.Changed` for every visual in the app. Found by `ion-spinner` (#15, PR #82). Making the
+event public would let it subscribe for each instance.
