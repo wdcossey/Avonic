@@ -4,6 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Reactive;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -57,7 +59,25 @@ public class AvonicSpinner : Control
     private TimeSpan? _pausedAt;
 
     private IDisposable? _frame;
+
+    /// <summary>While paused only by <see cref="AvonicConfig.Animated"/>, the next look at it.</summary>
+    private IDisposable? _animatedCheck;
+
+    /// <summary>How often a spinner paused by <see cref="AvonicConfig.Animated"/> looks to see if it's back on.</summary>
+    internal static readonly TimeSpan AnimatedCheckInterval = TimeSpan.FromMilliseconds(250);
     private bool _attached;
+
+    /// <summary>
+    /// Whether the animations exist: attached and shown. CSS's <c>display: none</c>, on the spinner or an ancestor, cancels
+    /// them, as leaving the document does, and showing it again starts new ones.
+    /// </summary>
+    private bool _live;
+
+    private Pen? _pen;
+    private SpinnerConfig? _penConfig;
+
+    /// <summary>The spinners in a visual tree, which a change of <see cref="Visual.IsVisible"/> anywhere may show or hide.</summary>
+    private static readonly HashSet<AvonicSpinner> s_attached = [];
 
     static AvonicSpinner()
     {
@@ -70,6 +90,20 @@ public class AvonicSpinner : Control
         SpinnerNameProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.ChangeName());
         PausedProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
         DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
+
+        // Hiding the spinner or an ancestor is CSS's display: none, which cancels its animations.
+        IsVisibleProperty.Changed.Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs<bool>>(_ =>
+        {
+            if (s_attached.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var spinner in s_attached.ToArray())
+            {
+                spinner.UpdateLive();
+            }
+        }));
     }
 
     /// <inheritdoc cref="ColorProperty"/>
@@ -118,7 +152,7 @@ public class AvonicSpinner : Control
     /// <summary>The duration being used, in milliseconds.</summary>
     internal double EffectiveDuration => SpinnerFrame.EffectiveDuration(_config, Duration);
 
-    /// <summary>Whether a frame has been asked for: only while attached and running, as a CSS animation costs nothing paused.</summary>
+    /// <summary>Whether a frame has been asked for: only while attached, shown and running, as a CSS animation costs nothing otherwise.</summary>
     internal bool IsRequestingFrames => _frame is not null;
 
     /// <summary>Every element at this instant on <see cref="AvonicConfig.Now"/>.</summary>
@@ -148,20 +182,39 @@ public class AvonicSpinner : Control
     {
         base.OnAttachedToVisualTree(e);
         _attached = true;
-
-        // An element that's inserted gets new animations, which start from the beginning.
-        var now = AvonicConfig.Now();
-        _config = SpinnerConfigs.Get(ResolvedName);
-        _starts = Enumerable.Repeat(now, _config.Count).ToArray();
-        _pausedAt = ShouldPause ? now : null;
-        UpdatePlayState();
+        s_attached.Add(this);
+        UpdateLive();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
         _attached = false;
-        StopFrames();
+        s_attached.Remove(this);
+        UpdateLive();
+    }
+
+    private void UpdateLive()
+    {
+        var live = _attached && IsVisible && this.GetVisualAncestors().All(ancestor => ancestor.IsVisible);
+        if (live == _live)
+        {
+            return;
+        }
+
+        _live = live;
+        if (!live)
+        {
+            StopFrames();
+            return;
+        }
+
+        // An element that's inserted, or shown again, gets new animations, which start from the beginning.
+        var now = AvonicConfig.Now();
+        _config = SpinnerConfigs.Get(ResolvedName);
+        _starts = Enumerable.Repeat(now, _config.Count).ToArray();
+        _pausedAt = ShouldPause ? now : null;
+        UpdatePlayState();
     }
 
     /// <summary>
@@ -173,7 +226,7 @@ public class AvonicSpinner : Control
     {
         var previous = _config;
         _config = SpinnerConfigs.Get(ResolvedName);
-        if (_attached)
+        if (_live)
         {
             var now = _pausedAt ?? AvonicConfig.Now();
             var starts = new TimeSpan[_config.Count];
@@ -195,7 +248,7 @@ public class AvonicSpinner : Control
     /// </summary>
     private void UpdatePlayState()
     {
-        if (!_attached)
+        if (!_live)
         {
             return;
         }
@@ -205,6 +258,13 @@ public class AvonicSpinner : Control
         {
             _pausedAt ??= now;
             StopFrames();
+
+            // Paused only because animations are off: look again now and then, without drawing, so that turning them back
+            // on carries on, as AvonicConfig's switches may change at runtime.
+            if (!Paused)
+            {
+                _animatedCheck ??= AvonicConfig.Schedule(OnAnimatedCheck, AnimatedCheckInterval);
+            }
         }
         else
         {
@@ -231,7 +291,7 @@ public class AvonicSpinner : Control
     private void OnFrame()
     {
         _frame = null;
-        if (!_attached)
+        if (!_live)
         {
             return;
         }
@@ -246,10 +306,18 @@ public class AvonicSpinner : Control
         RequestFrame();
     }
 
+    private void OnAnimatedCheck()
+    {
+        _animatedCheck = null;
+        UpdatePlayState();
+    }
+
     private void StopFrames()
     {
         _frame?.Dispose();
         _frame = null;
+        _animatedCheck?.Dispose();
+        _animatedCheck = null;
     }
 
     // ── Drawing ──────────────────────────────────────────────────────────────────────────────
@@ -284,7 +352,7 @@ public class AvonicSpinner : Control
 
         var config = _config;
         var fill = config.Fill ? color : null;
-        var pen = config.StrokeWidth > 0 ? new Pen(color, config.StrokeWidth, lineCap: config.LineCap) : null;
+        var pen = PenFor(color, config);
 
         foreach (var frame in CurrentFrame())
         {
@@ -313,6 +381,23 @@ public class AvonicSpinner : Control
                 }
             }
         }
+    }
+
+    /// <summary>The stroke, kept while the colour and the name stay the same, as it's drawn every frame.</summary>
+    private Pen? PenFor(IBrush color, SpinnerConfig config)
+    {
+        if (config.StrokeWidth <= 0)
+        {
+            return null;
+        }
+
+        if (_pen is null || !ReferenceEquals(_pen.Brush, color) || _penConfig != config)
+        {
+            _pen = new Pen(color, config.StrokeWidth, lineCap: config.LineCap);
+            _penConfig = config;
+        }
+
+        return _pen;
     }
 
     /// <summary>

@@ -131,13 +131,13 @@ Each becomes a test in `AvonicSpinnerTests`, named after its number.
 | 8 | `circular` doesn't turn; its arc grows from a point at 3 o'clock to 100 units by half time, then runs off the end of the circle, `ease-in-out` in each half | measured at every phase above |
 | 9 | `Paused` freezes the phase, and clearing it continues from there, not from 0 | `animation-play-state`; measured `currentTime` 216.6 before and after a 300 ms pause, then 299.9 |
 | 10 | A change of name re-renders the same `svg`s in order. One that's kept with the same keyframes carries on; a new one, or one whose keyframes change, starts again | Stencil reuses unkeyed children by position, and a CSS animation whose name doesn't change carries on. Measured 100 ms after a change made 400 ms in: `lines` → `lines-small` all 517 ms; `circles` → `lines` all 517; `lines` → `lines-sharp` the first 8 at 517 and the other 4 at 83; `dots` → `bubbles`, `bubbles` → `circles`, `crescent` ↔ `circular` all 83 |
-| 11 | Leaving the tree stops the frames; coming back starts from 0 | a re-inserted element's animations restart |
+| 11 | Leaving the tree, or being hidden, stops the frames; coming back, or being shown, starts from 0. `IsVisible` false on the spinner or an ancestor is CSS's `display: none` | a re-inserted element's animations restart; measured `currentTime` null while `display: none` on the host or an ancestor, then 100 ms after showing it 100 ms later |
 | 12 | The colour is `Foreground`: `Color` paints the palette's base, an unknown colour inherits, `Avonic.Spinner.Color` sets it, and the default inherits | measured `rgb(197, 0, 15)`, `rgb(0, 0, 0)`, `rgb(18, 52, 86)`, `rgb(1, 2, 3)` |
 | 13 | 28 px square by default. A set size scales the drawing by the smaller side, centred, and the offsets by each axis | measured 56×28 |
 | 14 | Not mirrored in RTL | `top`/`left` by design, and the `transform-origin: calc(100% - center)` rules are invalid; measured identical matrices and positions under `dir="rtl"` |
 | 15 | `role="progressbar"`; not focusable; sits at the start and top of its slot, as an inline block does | `render`; `display: inline-block` |
 | 16 | Frames are requested while attached and running, and not while paused, and each one redraws | the equivalent of a CSS animation's cost |
-| 17 | `AvonicConfig.Animated` off pauses it. It's read when the spinner renders, on attach or a change of property, as `render` reads `_testing`, and on each frame | `_testing`, see above |
+| 17 | `AvonicConfig.Animated` off pauses it, at its next frame. Back on, it carries on: a spinner paused only by it looks again every 250 ms, without drawing, as `AvonicConfig`'s switches may change at runtime | `_testing`, see above |
 | 18 | It draws that frame, in its colour: each shape where the maths says, at its opacity | the frames are drawn in `Render`, so this is the pixels |
 
 ## Avalonia mapping

@@ -364,6 +364,29 @@ public class AvonicSpinnerTests
         Near(0.95, f.At(450)[0].Opacity);    // measured: a re-inserted spinner's animations start again
     }
 
+    [AvaloniaFact]
+    public void B11_Being_Hidden_Stops_The_Frames_And_Being_Shown_Starts_Again()
+    {
+        using var f = new Fixture(SpinnerName.Lines);
+        f.At(300);
+
+        // IsVisible is CSS's display: none, on the spinner or an ancestor. Measured: hidden, the animations are gone, and
+        // shown again 100 ms later, they're 100 ms in.
+        f.Spinner.IsVisible = false;
+        Assert.False(f.Spinner.IsRequestingFrames);
+        f.At(400);
+        f.Spinner.IsVisible = true;
+        Assert.True(f.Spinner.IsRequestingFrames);
+        Near(0.9, f.At(500)[0].Opacity);
+
+        f.Host.IsVisible = false;
+        Assert.False(f.Spinner.IsRequestingFrames);
+        f.At(600);
+        f.Host.IsVisible = true;
+        Assert.True(f.Spinner.IsRequestingFrames);
+        Near(0.95, f.At(650)[0].Opacity);
+    }
+
     // ── B12: colour ──────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -500,7 +523,7 @@ public class AvonicSpinnerTests
     // ── B17: AvonicConfig.Animated ───────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B17_Animated_Off_Pauses_It()
+    public void B17_Animated_Off_Pauses_It_And_On_Again_Carries_On()
     {
         AvonicConfig.Animated = false;
         try
@@ -509,18 +532,26 @@ public class AvonicSpinnerTests
             Assert.False(f.Spinner.IsRequestingFrames);
             Near(1, f.At(400)[0].Opacity);
 
-            // Read again when it renders, as Ionic reads _testing.
+            // Turned back on, it carries on at its next look, every 250 ms, here at 500, with no change of property.
+            Assert.Equal(250, AvonicSpinner.AnimatedCheckInterval.TotalMilliseconds);
             AvonicConfig.Animated = true;
-            f.Spinner.Duration = 1000;
+            f.At(500);
             Assert.True(f.Spinner.IsRequestingFrames);
-            Near(0.9, f.At(500)[0].Opacity);
+            Near(0.9, f.At(600)[0].Opacity);
 
-            // And on a frame: switched off while running, it stops there.
+            // Switched off while running, it stops at the next frame, and asks for no more.
             AvonicConfig.Animated = false;
-            f.At(520);
+            f.At(1000);
             Assert.False(f.Spinner.IsRequestingFrames);
             var frozen = f.Spinner.CurrentFrame()[0].Opacity;
-            Near(frozen, f.At(900)[0].Opacity);
+            Near(frozen, f.At(1600)[0].Opacity);
+
+            // Paused by the app as well, it doesn't look at all, and stays paused when animations come back.
+            f.Spinner.Paused = true;
+            AvonicConfig.Animated = true;
+            f.At(2500);
+            Assert.False(f.Spinner.IsRequestingFrames);
+            Near(frozen, f.Spinner.CurrentFrame()[0].Opacity);
         }
         finally
         {

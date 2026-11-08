@@ -93,9 +93,6 @@ internal static class SpinnerConfigs
 {
     // ── spinner.css ──────────────────────────────────────────────────────────────────────────
 
-    /// <summary><c>:host { width: 28px; height: 28px }</c>. The theme sets it; this is for the docs and tests.</summary>
-    internal const double Size = 28;
-
     /// <summary><c>:host(.spinner-lines) line, :host(.spinner-lines-small) line { stroke-width: 7px }</c>.</summary>
     internal const double LinesStrokeWidth = 7;
 

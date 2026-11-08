@@ -176,7 +176,10 @@ internal static class SpinnerFrame
     /// <summary><c>ease-in-out</c>, which is <c>cubic-bezier(0.42, 0, 0.58, 1)</c>.</summary>
     public static double EaseInOut(double x) => CubicBezier(0.42, 0, 0.58, 1, x);
 
-    /// <summary>A CSS <c>cubic-bezier()</c>: the <c>y</c> at which the curve reaches <paramref name="x"/>.</summary>
+    /// <summary>
+    /// A CSS <c>cubic-bezier()</c>: the <c>y</c> at which the curve reaches <paramref name="x"/>. Not Avalonia's
+    /// <c>SplineEasing</c>, which is about 2e-3 out: it gives a dash of 5.0477 at 100 ms, where Chromium computes 5.04952.
+    /// </summary>
     internal static double CubicBezier(double x1, double y1, double x2, double y2, double x)
     {
         if (x <= 0) return 0;
