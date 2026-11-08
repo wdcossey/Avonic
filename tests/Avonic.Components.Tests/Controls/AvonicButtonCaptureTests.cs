@@ -74,6 +74,50 @@ public class AvonicButtonCaptureTests
         Assert.True(page.Bounds.Height > 0);
     });
 
+    // The rows of the Chromium page measured for a button in a list header (#98): no fill, solid, deeper, in a danger header,
+    // outline, and one outside a header. A header's slot is a flex row, so a label and a button go in a Grid here.
+    [AvaloniaFact]
+    public void Capture_In_A_List_Header() => InstalledTheme.Run(_ =>
+    {
+        static AvonicListHeader Header(Control button, string? color = null)
+        {
+            Grid.SetColumn(button, 1);
+            return new AvonicListHeader
+            {
+                Color = color,
+                Content = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), Children = { new AvonicLabel { Content = "Header" }, button } },
+            };
+        }
+
+        var page = new StackPanel
+        {
+            Children =
+            {
+                Header(new AvonicButton { Content = "None" }),
+                Header(new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid }),
+                Header(new Border { Child = new AvonicButton { Content = "Deep" } }),
+                Header(new AvonicButton { Content = "InColor" }, "danger"),
+                Header(new AvonicButton { Content = "Outline", Fill = ButtonFill.Outline }),
+                new AvonicButton { Content = "Outside", HorizontalAlignment = HorizontalAlignment.Left },
+            },
+        };
+        page.Resources["Avonic.Button.Transition"] = new Transitions();
+
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
+        {
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, "avonic-button-list-header.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+        }
+
+        Assert.True(page.Bounds.Height > 0);
+    });
+
     // The rows of the Chromium page measured for a button in a divider: an item with a start and an end, a divider with both,
     // one in a divider's default slot, and a large one at a divider's end.
     [AvaloniaFact]
