@@ -372,6 +372,55 @@ try {
         Check 'a touch tap counts once' ($name -eq 'Clicks: 1') $name
     }
 
+    # The sample's knob is a sideways gesture on a track, in a content that scrolls: a sideways drag moves the knob and
+    # leaves the page, and a drag up the track leaves the knob and scrolls the page, as a pan with direction x does in Ionic.
+    Section 'gesture: sideways on a page that scrolls' {
+        Open 'gesture'
+        function Blue($x, $y) { $c = [Drawing.Color]::FromArgb((Pixel $x $y)); ($c.B -gt 180) -and ($c.R -lt 90) -and ($c.G -lt 150) }
+        function RowY { (Named $CT::Text 'Row 5').Current.BoundingRectangle.Y }
+        $w = $win.Current.BoundingRectangle
+        $kx = [int]($w.X + 44 * $scale)   # the knob's centre: 16 of margin and half its 56
+        $from = [int](Named $CT::Text 'Drag the knob*').Current.BoundingRectangle.Bottom
+        $to = [int](Named $CT::Text 'Row 1').Current.BoundingRectangle.Y
+        $ky = $null
+        for ($y = $from; $y -lt $to -and -not $ky; $y += 2) { if (Blue $kx $y) { $ky = $y + [int](28 * $scale) } }
+        if (-not $ky) { throw "The knob isn't between the status and the rows" }
+        $rowY = RowY
+        $move = [int](150 * $scale)
+
+        Guard
+        [void][RealInput]::SetCursorPos($kx, $ky); Start-Sleep -Milliseconds 150
+        Press
+        for ($i = 1; $i -le 15; $i++) { Start-Sleep -Milliseconds 16; [void][RealInput]::SetCursorPos(($kx + [int]($move * $i / 15)), ($ky + [int](4 * $i / 15))) }
+        Start-Sleep -Milliseconds 80
+        Release; Start-Sleep -Milliseconds 300
+        Shot 'gesture-mouse-drag'
+        Check 'a mouse drag sideways starts and ends the gesture' ([bool](FirstText 'Ended')) ((Texts | Select-Object -First 3) -join ' | ')
+        Check 'the knob follows the mouse' ((Blue ($kx + $move) $ky) -and -not (Blue $kx $ky))
+        Check 'the page stays put under the mouse' ((RowY) -eq $rowY) "$(RowY) against $rowY"
+
+        $x0 = $kx + $move
+        $back = [int](100 * $scale)
+        TouchDown $x0 $ky
+        for ($i = 1; $i -le 15; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove(($x0 - [int]($back * $i / 15)), $ky) }
+        Start-Sleep -Milliseconds 80
+        TouchUp ($x0 - $back) $ky; Start-Sleep -Milliseconds 300
+        Shot 'gesture-touch-drag'
+        $detail = FirstText 'delta *'
+        Check 'a touch drag sideways ends the gesture, moving back' ((FirstText 'Ended') -and ($detail -like 'delta -*')) $detail
+        Check 'the knob follows the finger' ((Blue ($x0 - $back) $ky) -and -not (Blue ($x0 + [int](20 * $scale)) $ky))
+        Check 'the page stays put under the finger' ((RowY) -eq $rowY) "$(RowY) against $rowY"
+
+        $kx2 = $x0 - $back
+        Drag $kx2 $ky (-300)
+        Start-Sleep -Milliseconds 1500
+        Shot 'gesture-touch-up'
+        Check 'a touch drag up the track scrolls the page' ((RowY) -lt ($rowY - 150)) "$(RowY) against $rowY"
+        # Ionic's abortGesture calls notCaptured, with the detail at the moment the pan was detected.
+        $up = FirstText 'delta *'
+        Check 'and the gesture gives it up, calling NotCaptured' ((FirstText 'Not captured') -and ($up -like 'delta 0, -*')) "$((Texts | Select-Object -First 3) -join ' | ')"
+    }
+
     Check 'the app is still running' (-not $p.HasExited)
 }
 finally {
