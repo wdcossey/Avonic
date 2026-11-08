@@ -12,7 +12,8 @@
 > script, so that the two sides are in phase.
 >
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicProgressBarCaptureTests` (headless Skia, 2×), with `TestClock` at
-> 1000 ms → [`compare/`](compare/). Measurements for the behaviours came from separate scenes of one bar, 358 wide.
+> 1000 ms. It writes `avonic-progress-bar-page.png`, as capture tests share the folder, which is copied to
+> [`compare/avonic-page.png`](compare/avonic-page.png); `compare/side.png` is the top 250 px of each, side by side. Measurements for the behaviours came from separate scenes of one bar, 358 wide.
 
 ## Frames
 
@@ -49,20 +50,20 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 |---|---|---|---|
 | 1 | Host, and accessibility | 358 × 4, `overflow: hidden`; `role="progressbar"`, min 0, max 1, `aria-valuenow` raw, gone when indeterminate | match. `ProgressBar` peer with a read-only range |
 | 2 | Progress from the left | 0.25 → 0..89.5 | match |
-| 3 | Clamped for display only | 1.5 draws 358 and reports 1.5; −1 draws 0 | match. NaN draws unscaled, from the CSS, not measured |
+| 3 | Clamped for display only | 1.5 draws 358 and reports 1.5; −1 draws 0 | match. NaN keeps the scale, from the CSSOM, not measured |
 | 4 | The buffer, and the dots after it | track 0..268.5 at 0.75; dot centres at 280, 290, … at time 0 | match |
 | 5 | The stream | 10 px left every 450 ms; `buffering` at 1567 ms when a bar at buffer 1 for a second gets 0.5 | match |
 | 6 | Value transitions | 150 ms linear; a new target restarts from the value shown; going back is shortened | match |
 | 7 | Buffer transitions | the window moves, the circles stay at −10 | match |
 | 8 | Indeterminate | the spans at 125 ms steps in [PLAN.md](PLAN.md#measured) | match, within 0.5 px, at all eight times and at 3000 ms |
-| 9 | A change of type | the kept element eases, the bars and the stream start at 0 | match |
+| 9 | A change of type | the kept element eases, the bars and the stream start at 0; 67 ms in, the track at 208.8 and the secondary bar at −17.6..6.7 | match, within 1 px |
 | 10 | Reversed | progress 250.6..358, track 143.2..358, dots 0..143.2 | match, and the stream runs right |
 | 11 | RTL | `document.dir="rtl"` reverses; `reversed` puts it back | match, through the inherited `FlowDirection`. See the plan |
 | 12 | Colour | danger: progress `rgb(197, 0, 15)`, track and dots at 0.3 | match. An unknown colour draws nothing, from the CSS |
 | 13 | Host classes | `progress-bar-determinate`, `-indeterminate`, `-reversed`, `-solid` | match, as pseudoclasses |
 | 14 | `AvonicConfig.Animated` off | `progress-paused` holds the animations | a deliberate difference. See the plan |
 | 15 | The two keys | `--background`, `--progress-background` | match |
-| 16 | Detach and attach | a re-created element starts its animations at 0 | match |
+| 16 | Detach and attach, hide and show | a re-created element starts its animations at 0, and `display: none` stops them | match. Hiding is from the CSS spec, not measured |
 | 17 | Frames only while something moves | — | Avonic's own |
 
 ## Deliberate differences and known gaps

@@ -25,9 +25,10 @@
                 <Panel>
                     <c:ProgressBarStream Name="PART_Stream" />
                     <Border Name="PART_Track" />
-                    <Border Name="PART_Progress" />
-                    <Border Name="PART_ProgressPrimary" />
-                    <Border Name="PART_ProgressSecondary" />
+                    <!-- .progress and .progress-indeterminate, which Ionic paints alike -->
+                    <Border Name="PART_Progress" Classes="progress" />
+                    <Border Name="PART_ProgressPrimary" Classes="progress" />
+                    <Border Name="PART_ProgressSecondary" Classes="progress" />
                 </Panel>
             </ControlTemplate>
         </Setter>
@@ -41,13 +42,7 @@
         </Style>
 
         <!-- .progress, .progress-indeterminate { background: var(progress-background) } -->
-        <Style Selector="^ /template/ Border#PART_Progress">
-            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
-        </Style>
-        <Style Selector="^ /template/ Border#PART_ProgressPrimary">
-            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
-        </Style>
-        <Style Selector="^ /template/ Border#PART_ProgressSecondary">
+        <Style Selector="^ /template/ Border.progress">
             <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
         </Style>
 
@@ -64,13 +59,7 @@
         </Style>
 
         <!-- :host(.ion-color) .progress, :host(.ion-color) .progress-indeterminate { background: var(ion-color-base) } -->
-        <Style Selector="^:ion-color /template/ Border#PART_Progress">
-            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
-        </Style>
-        <Style Selector="^:ion-color /template/ Border#PART_ProgressPrimary">
-            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
-        </Style>
-        <Style Selector="^:ion-color /template/ Border#PART_ProgressSecondary">
+        <Style Selector="^:ion-color /template/ Border.progress">
             <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
         </Style>
     </ControlTheme>

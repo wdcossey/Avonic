@@ -99,11 +99,6 @@ public class AvonicProgressBar : TemplatedControl
         set => SetValue(BufferProperty, value);
     }
 
-    static AvonicProgressBar()
-    {
-        FocusableProperty.OverrideDefaultValue<AvonicProgressBar>(false);
-    }
-
     public AvonicProgressBar()
     {
         UpdatePseudoClasses();
@@ -130,6 +125,7 @@ public class AvonicProgressBar : TemplatedControl
     private bool _attached;
     private TimeSpan _renderedAt;
     private IDisposable? _frame;
+    private readonly List<Visual> _hiddenBy = [];
     private IDisposable? _reversedFrame;
     private ProgressBarAutomationPeer? _peer;
 
@@ -140,12 +136,19 @@ public class AvonicProgressBar : TemplatedControl
     internal bool IsEffectivelyReversed => FlowDirection == FlowDirection.RightToLeft ? !Reversed : Reversed;
 
     /// <summary>
-    /// <c>clamp(0, value, 1)</c>. NaN stays NaN in Ionic, which makes <c>scaleX(NaN)</c> an invalid transform, so the
-    /// part is drawn untransformed: at 1.
+    /// <c>clamp(0, value, 1)</c>, for an element Ionic creates. NaN stays NaN in <c>clamp</c>, and <c>scaleX(NaN)</c> is an
+    /// invalid transform, so a new element is drawn untransformed: at 1.
     /// </summary>
     private static double Display(double value) => double.IsNaN(value) ? 1 : Math.Clamp(value, 0, 1);
 
-    private double LeadTarget => Type == ProgressBarType.Determinate ? Display(Value) : 1;
+    /// <summary>
+    /// The same for an element Ionic keeps: setting <c>style.transform</c> to an invalid value is ignored, so NaN keeps the
+    /// scale it had, measured as the inline style staying.
+    /// </summary>
+    private static double Display(double value, CssTransition kept) =>
+        double.IsNaN(value) && !double.IsNaN(kept.Target) ? kept.Target : Display(value);
+
+    private double LeadTarget => Type == ProgressBarType.Determinate ? Display(Value, _lead) : 1;
 
     // ── Lifecycle ────────────────────────────────────────────────────────────────────────────
 
@@ -181,18 +184,73 @@ public class AvonicProgressBar : TemplatedControl
         _attached = true;
 
         // A first render, or a re-created element: nothing eases, and the animations start at 0.
+        Restart();
+    }
+
+    /// <summary>
+    /// <c>display: none</c>, on the bar or an ancestor, stops an element's CSS animations, and showing it starts them again
+    /// from 0. Avalonia doesn't tell a control when an ancestor hides or shows it, so a frame that finds the bar hidden stops
+    /// the frames and watches <see cref="Visual.IsVisible"/> on whatever in its chain is hidden, until all of it shows.
+    /// </summary>
+    private void WaitUntilShown()
+    {
+        if (_hiddenBy.Count > 0)
+        {
+            return;
+        }
+
+        for (var visual = (Visual?)this; visual is not null; visual = visual.GetVisualParent())
+        {
+            if (!visual.IsVisible)
+            {
+                visual.PropertyChanged += OnHiddenVisualChanged;
+                _hiddenBy.Add(visual);
+            }
+        }
+    }
+
+    private void OnHiddenVisualChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property != IsVisibleProperty || !_hiddenBy.TrueForAll(visual => visual.IsVisible))
+        {
+            return;
+        }
+
+        StopWaiting();
+        Restart();
+    }
+
+    private void StopWaiting()
+    {
+        foreach (var visual in _hiddenBy)
+        {
+            visual.PropertyChanged -= OnHiddenVisualChanged;
+        }
+
+        _hiddenBy.Clear();
+    }
+
+    private void Restart()
+    {
+        StopWaiting();
         _renderedAt = AvonicConfig.Now();
         _lead.Snap(LeadTarget);
-        _buffer.Snap(Display(Buffer));
+        _buffer.Snap(Display(Buffer, _buffer));
         Update();
+    }
+
+    private void StopFrames()
+    {
+        _frame?.Dispose();
+        _frame = null;
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
         _attached = false;
-        _frame?.Dispose();
-        _frame = null;
+        StopFrames();
+        StopWaiting();
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)
@@ -213,6 +271,7 @@ public class AvonicProgressBar : TemplatedControl
             _buffer.Snap(Display(Buffer));
             Ease(_lead, LeadTarget);
             UpdatePseudoClasses();
+            _peer?.RaiseTypeChanged();
             Update();
         }
         else if (change.Property == ValueProperty)
@@ -224,7 +283,7 @@ public class AvonicProgressBar : TemplatedControl
         else if (change.Property == BufferProperty)
         {
             // While indeterminate it goes unseen, and the change of type snaps it
-            Ease(_buffer, Display(Buffer));
+            Ease(_buffer, Display(Buffer, _buffer));
             UpdatePseudoClasses();
             Update();
         }
@@ -234,10 +293,13 @@ public class AvonicProgressBar : TemplatedControl
         }
     }
 
-    /// <summary>A transition, unless animations are off. One started while detached is snapped when the bar attaches.</summary>
+    /// <summary>
+    /// A transition, unless animations are off or the bar is hidden. One started while detached is snapped when the bar
+    /// attaches.
+    /// </summary>
     private void Ease(CssTransition transition, double target)
     {
-        if (AvonicConfig.Animated)
+        if (AvonicConfig.Animated && IsEffectivelyVisible)
         {
             transition.Start(target, AvonicConfig.Now(), TransitionDuration);
         }
@@ -289,12 +351,13 @@ public class AvonicProgressBar : TemplatedControl
         }
 
         var now = AvonicConfig.Now();
-        var animated = AvonicConfig.Animated && _attached;
+        var running = _attached && IsEffectivelyVisible;
+        var animated = AvonicConfig.Animated && running;
 
         // AvonicConfig.Animated off stands the animations at time 0, as Ionic's progress-paused does.
         var elapsed = animated ? now - _renderedAt : TimeSpan.Zero;
         var width = _root.Bounds.Width;
-        var moving = _attached && (_lead.IsRunning(now) || _buffer.IsRunning(now));
+        var moving = running && (_lead.IsRunning(now) || _buffer.IsRunning(now));
         var determinate = Type == ProgressBarType.Determinate;
 
         SetVisible(_progress, determinate);
@@ -318,18 +381,24 @@ public class AvonicProgressBar : TemplatedControl
         }
         else
         {
-            SetScale(_track, _lead.At(now));
+            // The two bars are inside the track in Ionic, so the track's ease after a change of type scales them too
+            var track = _lead.At(now);
+            SetScale(_track, track);
             var t = Fraction(elapsed, IndeterminateDuration);
             var (primaryTranslate, primaryScale) = IndeterminateKeyframes.Primary(t);
             var (secondaryTranslate, secondaryScale) = IndeterminateKeyframes.Secondary(t);
-            SetSpan(_primary, IndeterminateKeyframes.PrimaryLeft + primaryTranslate, primaryScale, width);
-            SetSpan(_secondary, IndeterminateKeyframes.SecondaryLeft + secondaryTranslate, secondaryScale, width);
+            SetSpan(_primary, IndeterminateKeyframes.PrimaryLeft + primaryTranslate, primaryScale, width, track);
+            SetSpan(_secondary, IndeterminateKeyframes.SecondaryLeft + secondaryTranslate, secondaryScale, width, track);
             moving |= animated;
         }
 
         if (moving)
         {
             _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
+        }
+        else if (_attached && !IsEffectivelyVisible)
+        {
+            WaitUntilShown();
         }
     }
 
@@ -355,13 +424,14 @@ public class AvonicProgressBar : TemplatedControl
 
     /// <summary>
     /// An indeterminate bar: a div at <c>left: offset × W</c>, which <c>translateX</c> moves, holding a span of the same width
-    /// that <c>scaleX</c> scales about its centre. As one matrix about the top left: x′ = s·x + (1 − s)·W/2 + offset·W.
+    /// that <c>scaleX</c> scales about its centre, all inside the track, scaled by <paramref name="track"/> from its left. As
+    /// one matrix about the top left: x′ = k·(s·x + (1 − s)·W/2 + offset·W).
     /// </summary>
-    private static void SetSpan(Control? part, double offset, double scale, double width)
+    private static void SetSpan(Control? part, double offset, double scale, double width, double track)
     {
         if (part?.RenderTransform is MatrixTransform transform)
         {
-            transform.Matrix = new Matrix(scale, 0, 0, 1, (1 - scale) * width / 2 + offset * width, 0);
+            transform.Matrix = new Matrix(track * scale, 0, 0, 1, track * ((1 - scale) * width / 2 + offset * width), 0);
         }
     }
 
@@ -376,10 +446,6 @@ public class AvonicProgressBar : TemplatedControl
     private sealed class ProgressBarAutomationPeer(AvonicProgressBar owner) : ControlAutomationPeer(owner), IRangeValueProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ProgressBar;
-
-        protected override bool IsContentElementCore() => true;
-
-        protected override bool IsControlElementCore() => true;
 
         protected override object? GetProviderCore(Type providerType) =>
             providerType == typeof(IRangeValueProvider) && owner.Type == ProgressBarType.Indeterminate
@@ -407,6 +473,16 @@ public class AvonicProgressBar : TemplatedControl
                 RaisePropertyChangedEvent(RangeValuePatternIdentifiers.ValueProperty, oldValue, newValue);
             }
         }
+
+        /// <summary><c>aria-valuenow</c> appears or goes with a change of type.</summary>
+        public void RaiseTypeChanged()
+        {
+            var determinate = owner.Type == ProgressBarType.Determinate;
+            RaisePropertyChangedEvent(
+                RangeValuePatternIdentifiers.ValueProperty,
+                determinate ? null : owner.Value,
+                determinate ? owner.Value : null);
+        }
     }
 }
 
@@ -416,12 +492,15 @@ public class AvonicProgressBar : TemplatedControl
 /// </summary>
 internal sealed class CssTransition
 {
-    private double _from;
-    private double _to;
+    private double _from = double.NaN;
+    private double _to = double.NaN;
     private TimeSpan _start;
     private TimeSpan _duration;
     private double _reversingStart;
     private double _shortening = 1;
+
+    /// <summary>The value it's going to, or NaN before the first render.</summary>
+    public double Target => _to;
 
     public void Snap(double value)
     {

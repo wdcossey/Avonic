@@ -114,9 +114,18 @@ public class AvonicProgressBarTests
         Assert.True(range.IsReadOnly);
         Assert.Throws<InvalidOperationException>(() => range.SetValue(0.5));
 
+        // A change of value is announced, and so is aria-valuenow going and coming with the type
+        var changes = new List<(object? Old, object? New)>();
+        peer.PropertyChanged += (_, e) => changes.Add((e.OldValue, e.NewValue));
+        f.Bar.Value = 0.6;
+        Assert.Equal([(0.4, 0.6)], changes);
+
         // aria-valuenow is dropped when indeterminate
         f.Bar.Type = ProgressBarType.Indeterminate;
         Assert.Null(peer.GetProvider<IRangeValueProvider>());
+        f.Bar.Value = 0.7;
+        f.Bar.Type = ProgressBarType.Determinate;
+        Assert.Equal([(0.4, 0.6), (0.6, null), (null, 0.7)], changes);
     });
 
     // ── B2: determinate ──────────────────────────────────────────────────────────────────────
@@ -157,9 +166,18 @@ public class AvonicProgressBarTests
             AssertSpan((0, W), f.Span("PART_Track"));
             Assert.Equal(-1, range.Value);
 
-            // clamp() keeps NaN, and scaleX(NaN) is an invalid transform, so the progress isn't scaled
+            // clamp() keeps NaN, and scaleX(NaN) is an invalid transform, which style.transform ignores: the scale stays
             f.Bar.Value = double.NaN;
-            AssertSpan((0, W), f.Span("PART_Progress"));
+            AssertSpan((0, 0), f.Span("PART_Progress"));
+            f.Bar.Buffer = double.NaN;
+            AssertSpan((0, W), f.Span("PART_Track"));
+            f.Bar.Buffer = 0.5;
+            f.Bar.Buffer = double.NaN;
+            AssertSpan((0, 179), f.Span("PART_Track"));
+
+            // and a new element has no transform at all
+            using var created = new Fixture(new AvonicProgressBar { Value = double.NaN });
+            AssertSpan((0, W), created.Span("PART_Progress"));
         }
         finally
         {
@@ -376,6 +394,11 @@ public class AvonicProgressBarTests
         // and the bars start at 0
         clock.At(1000);
         f.Bar.Type = ProgressBarType.Indeterminate;
+        // Measured 67 ms in: the track at 208.8, and the secondary bar inside it, scaled with it, at -17.6..6.7
+        clock.At(1067);
+        f.Bar.Tick();
+        AssertSpan((0, 208.8), f.Span("PART_Track"), 1);
+        AssertSpan((-17.6, 6.7), f.Span("PART_ProgressSecondary"), 1);
         clock.At(1075);
         f.Bar.Tick();
         AssertSpan((0, 223.75), f.Span("PART_Track"));
@@ -496,6 +519,13 @@ public class AvonicProgressBarTests
         frame = f.Frame();
         AssertColour(danger, Fixture.PixelAt(frame, 300));
         AssertColour(dangerTrack, Fixture.PixelAt(frame, 100));
+
+        // At 1500 the primary bar is at 102.7..277.5, and the secondary one is past the end
+        clock.At(1500);
+        f.Bar.Tick();
+        frame = f.Frame();
+        AssertColour(danger, Fixture.PixelAt(frame, 200));
+        AssertColour(dangerTrack, Fixture.PixelAt(frame, 50));
     });
 
     [AvaloniaFact]
@@ -630,6 +660,32 @@ public class AvonicProgressBarTests
         clock.At(1250);
         f.Bar.Tick();
         AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+    });
+
+    [AvaloniaFact]
+    public void B16_Hiding_Stops_The_Frames_And_Showing_Starts_The_Animations_From_0() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        using var f = new Fixture(new AvonicProgressBar { Type = ProgressBarType.Indeterminate, Value = 0.3 });
+
+        // display: none on an ancestor stops the animations, as on the bar
+        f.Host.IsVisible = false;
+        clock.At(500);
+        Assert.False(f.Bar.IsFrameLoopRunning);
+
+        clock.At(1000);
+        f.Host.IsVisible = true;
+        Assert.True(f.Bar.IsFrameLoopRunning);
+        clock.At(1250);
+        f.Bar.Tick();
+        AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+
+        // and a change made while hidden doesn't ease
+        f.Bar.IsVisible = false;
+        clock.At(1500);
+        f.Bar.Type = ProgressBarType.Determinate;
+        f.Bar.IsVisible = true;
+        AssertSpan((0, 0.3 * W), f.Span("PART_Progress"));
     });
 
     // ── B17: frames only while something moves ──────────────────────────────────────────────
