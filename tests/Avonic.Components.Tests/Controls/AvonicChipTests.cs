@@ -983,9 +983,13 @@ public class AvonicChipTests
         var bound = new AvonicIcon { IconName = "pin" };
         var member = Chip(bound, new Uri("https://example.com/"));
         member.DisplayMemberBinding = new Avalonia.Data.Binding(nameof(Uri.Host));
+
+        // DisplayMemberBinding beats a data template around the chip, as the slot is given it as its own template.
+        member.DataTemplates.Add(new FuncDataTemplate<Uri>((uri, _) => new AvonicIcon { IconName = "globe" }));
         using var scene = Themed(number, member);
 
         Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
+        Assert.IsNotType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(member.ContainerFromIndex(1)).Child);
         Assert.Equal(new Thickness(8, -4, -4, -4), bound.Margin);
     });
 

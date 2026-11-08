@@ -146,7 +146,6 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     /// </summary>
     private bool IsElement(object? item) => item switch
     {
-        null => false,
         Control => true,
         _ when ItemTemplate is null && DisplayMemberBinding is not null => false,
         _ => this.FindDataTemplate(item, ItemTemplate) is not null,

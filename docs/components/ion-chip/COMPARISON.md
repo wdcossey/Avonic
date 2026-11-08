@@ -111,6 +111,9 @@ Waived, with the reason:
   for a templated one, are enough, and each has a test that fails without it. Raising it again when a slot is prepared or cleared,
   or when `ItemTemplate` changes, which remakes the slots anyway, did nothing, so they're gone. A test for a template set later and
   for a templated item taken away stays.
+- **Two of the third review's lines went unseen.** A null item was already no element, as no template is found for it, so
+  that shortcut is gone. `DisplayMemberBinding` only matters when a data template around the chip would match the item, as the
+  slot takes the display member's template first, so its test has one now.
 - **Three template changes went unseen,** as their tests ran on the stub only: the ripple under the children, the ripple after
   them, and the stub's row. The ripple tests run on both now, and there's a layout test on the stub.
 
