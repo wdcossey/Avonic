@@ -195,8 +195,8 @@ public class AvonicItemLayoutTests
         using var scene = InScene(item);
 
         // 154 in Chromium, as seven lines of 19 with its margins. 153 here, as a line is 18.75: Chromium rounds a line's
-        // ascent and descent each to a whole pixel.
-        AssertNear(154, item.Bounds.Height);
+        // ascent and descent each to a whole pixel. Either passes, and nothing else does.
+        AssertNear(153.5, item.Bounds.Height, 0.5);
     });
 
     private static double OneLineHeight()

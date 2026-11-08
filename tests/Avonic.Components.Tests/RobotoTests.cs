@@ -125,6 +125,11 @@ public class RobotoTests
         Assert.True(glyphs.PlatformTypeface.TryGetStream(out var stream), $"{glyphs.FamilyName} has no stream");
         using (stream)
         {
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
             var drawn = SHA256.HashData(stream);
             var committed = SHA256.HashData(File.ReadAllBytes(RepoFile("tools", "fonts", "roboto", file)));
             Assert.True(drawn.SequenceEqual(committed), $"Drew with {glyphs.FamilyName} {glyphs.Weight}, not tools/fonts/roboto/{file}");

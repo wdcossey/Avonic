@@ -17,7 +17,8 @@ const MIME = { '.ttf': 'font/ttf' };
 /** Loads every face, and throws unless each one loaded from roboto.css. */
 async function loadRoboto(page) {
     const found = await page.evaluate(async weights => {
-        await Promise.all(weights.map(w => document.fonts.load(`${w} 16px Roboto`)));
+        // A face that fails to load rejects, so settle them all and let the check below say which.
+        await Promise.allSettled(weights.map(w => document.fonts.load(`${w} 16px Roboto`)));
         await document.fonts.ready;
         return {
             sheet: [...document.styleSheets].some(s => (s.href || '').endsWith('/tools/fonts/roboto/roboto.css')),

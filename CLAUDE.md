@@ -51,8 +51,8 @@ tools/ionic-ref/         renders the real Ionic component in headless Chromium (
                          compare-icons.js compares every icon against it, pixel by pixel; side.js puts two
                          frames side by side
 tools/ionicons/          generates src/Avonic.Components/Icons/ from the ionicons package
-tools/fonts/roboto/      Roboto 400, 500 and 700 (OFL): the sample and the tests embed it (Avonic.Sample.Roboto), and the Chromium
-                         tools load it, so that text measures the same on both sides. The libraries don't ship it
+tools/fonts/roboto/      Roboto 400, 500 and 700 (OFL): the sample and the tests embed it (Avonic.Sample.Roboto), and render.js and
+                         boxes.js load it, so that text measures the same on both sides. The libraries don't ship it
 tools/breakage/          breaks each behaviour in a copy of the repo, and checks that a test notices
 tools/real-window/       drives the real sample window with real input and checks it; takes over the PC, so ask first
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs; infra/swarm-brief.md
