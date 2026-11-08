@@ -55,7 +55,7 @@ None in Ionic, none here.
 |---|---|---|---|
 | [x] | `.ion-color` | `:ion-color` | From `ColorPalette` |
 | [x] | `.spinner-<name>` | `:name-<name>` | `:name-bubbles` … `:name-lines-sharp-small`, for the name it draws, so `:name-circular` with no name |
-| [x] | `.spinner-paused` | `:paused` | While `Paused`, or while `AvonicConfig.Animated` is off |
+| [x] | `.spinner-paused` | `:paused` | While `Paused`, or while `AvonicConfig.Animated` is off. `Animated` has no change notice, so a change of it reaches `:paused` at the spinner's next look, within 250 ms while it's shown, and when it's next shown otherwise |
 
 ### CSS variables
 
