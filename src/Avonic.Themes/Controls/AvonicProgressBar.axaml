@@ -1,0 +1,78 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White" Spacing="20" Margin="16">
+            <c:AvonicProgressBar Value="0.25" />
+            <c:AvonicProgressBar Value="0.3" Buffer="0.6" />
+            <c:AvonicProgressBar Value="0.3" Buffer="0.6" Reversed="True" />
+            <c:AvonicProgressBar Value="0.5" Buffer="0.75" Color="danger" />
+            <c:AvonicProgressBar Type="Indeterminate" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of progress-bar.md.css. The control moves the parts; this only paints them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicProgressBar}" TargetType="c:AvonicProgressBar">
+        <!-- height: 4px. There's no variable for it. -->
+        <Setter Property="Height" Value="4" />
+        <!-- overflow: hidden; contain: strict -->
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- In Ionic's z-order: the stream (z 0), the track (z 1), then the progress and the two indeterminate bars (z 2) -->
+                <Panel>
+                    <c:ProgressBarStream Name="PART_Stream" />
+                    <Border Name="PART_Track" />
+                    <Border Name="PART_Progress" />
+                    <Border Name="PART_ProgressPrimary" />
+                    <Border Name="PART_ProgressSecondary" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .progress-buffer-bar { background: var(background) }, and the .buffer-circles gradient in the same variable -->
+        <Style Selector="^ /template/ Border#PART_Track">
+            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.Background}" />
+        </Style>
+        <Style Selector="^ /template/ c|ProgressBarStream#PART_Stream">
+            <Setter Property="Fill" Value="{DynamicResource Avonic.ProgressBar.Background}" />
+        </Style>
+
+        <!-- .progress, .progress-indeterminate { background: var(progress-background) } -->
+        <Style Selector="^ /template/ Border#PART_Progress">
+            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_ProgressPrimary">
+            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_ProgressSecondary">
+            <Setter Property="Background" Value="{DynamicResource Avonic.ProgressBar.ProgressBackground}" />
+        </Style>
+
+        <!-- :host(.ion-color) .progress-buffer-bar { background: rgba(var(ion-color-base-rgb), 0.3) }, and the circles -->
+        <Style Selector="^:ion-color /template/ Border#PART_Track">
+            <Setter Property="Background"
+                    Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self},
+                                    Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.3}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ c|ProgressBarStream#PART_Stream">
+            <Setter Property="Fill"
+                    Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self},
+                                    Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.3}" />
+        </Style>
+
+        <!-- :host(.ion-color) .progress, :host(.ion-color) .progress-indeterminate { background: var(ion-color-base) } -->
+        <Style Selector="^:ion-color /template/ Border#PART_Progress">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_ProgressPrimary">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_ProgressSecondary">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

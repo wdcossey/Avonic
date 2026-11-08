@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!--
+        Functional stub for ion-progress-bar: structure only, so nothing is drawn. Every part fills the panel, in Ionic's
+        z-order: the stream (z 0), the track (z 1), then the progress and the two indeterminate bars (z 2). The control
+        sets which show and their transforms. The look is in Avonic.Themes/Controls/AvonicProgressBar.axaml.
+    -->
+    <ControlTheme x:Key="{x:Type c:AvonicProgressBar}" TargetType="c:AvonicProgressBar">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:ProgressBarStream Name="PART_Stream" />
+                    <Border Name="PART_Track" />
+                    <Border Name="PART_Progress" />
+                    <Border Name="PART_ProgressPrimary" />
+                    <Border Name="PART_ProgressSecondary" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
