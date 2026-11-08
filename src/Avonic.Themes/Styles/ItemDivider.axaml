@@ -8,8 +8,9 @@
          own files. -->
 
     <!-- align-items: center on what a panel holds, as the panel stands for the slot and fills it. FlexSlot does this for a
-         slot's own child. -->
-    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > :is(Control)">
+         slot's own child. A note has align-self: flex-start, in Note.axaml, which only wins by coming later in the merge, so
+         leave it out here, as Item.axaml does. -->
+    <Style Selector="c|AvonicItemDivider /template/ ContentPresenter > :is(Panel) > :is(Control):not(c|AvonicNote)">
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 

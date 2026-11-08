@@ -63,6 +63,19 @@
             <c:AvonicItem>
                 <c:AvonicNote Content="A long note in the default slot wraps and stays at the top of the row, however long it happens to be" />
             </c:AvonicItem>
+
+            <c:AvonicItemDivider>
+                <c:AvonicLabel Content="In a divider" />
+                <c:AvonicItemDivider.EndContent>
+                    <c:AvonicNote Content="Yesterday" />
+                </c:AvonicItemDivider.EndContent>
+            </c:AvonicItemDivider>
+            <c:AvonicItemDivider>
+                <c:AvonicLabel Content="Default" />
+                <c:AvonicItemDivider.EndContent>
+                    <c:AvonicNote Content="A very long note in a divider end slot that certainly has to wrap because it does not fit" />
+                </c:AvonicItemDivider.EndContent>
+            </c:AvonicItemDivider>
         </StackPanel>
     </ScrollViewer>
 

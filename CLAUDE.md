@@ -134,6 +134,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | CSS specificity | a rule with a pseudoclass or class beats one without, then later beats earlier | Global `Styles` beat a `ControlTheme`, and files in `Styles/` merge in ordinal order |
 | `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c\|AvonicItem:item-input c\|AvonicLabel` |
 | `:host-context(.item)` | `:is(c\|IItemHost) c\|Foo`, which an item, a divider and a group implement, and a list header doesn't. A type, so that it adds no activators and doesn't rise over an app's plain style, as a pseudoclass would | `Styles/Label.axaml` |
+| A `::slotted(ion-foo)` rule that `item.md.css` and `item-divider.md.css` both have, word for word | `:is(c\|IItemHost) /template/ ContentPresenter > c\|AvonicFoo`, one rule for both hosts, in `Styles/Foo.axaml`. A group has no slots, so it costs nothing there | `::slotted(ion-note)` → `Styles/Note.axaml` |
 | `z-index` on a slotted child, over a part outside the slot | The part goes before the slots, as `ZIndex` only sorts siblings | `::slotted(ion-button)` → `PART_Ripple` before `PART_Layout` |
 | A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
 | `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |
