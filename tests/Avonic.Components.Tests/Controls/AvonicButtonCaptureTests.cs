@@ -74,6 +74,38 @@ public class AvonicButtonCaptureTests
         Assert.True(page.Bounds.Height > 0);
     });
 
+    // The rows of the Chromium page measured for a button in a divider: an item with a start and an end, a divider with both,
+    // one in a divider's default slot, and a large one at a divider's end.
+    [AvaloniaFact]
+    public void Capture_In_A_Divider() => InstalledTheme.Run(_ =>
+    {
+        var page = new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { StartContent = new AvonicButton { Content = "Text" }, Content = new AvonicLabel { Content = "x" }, EndContent = new AvonicButton { Content = "Text" } },
+                new AvonicItemDivider { StartContent = new AvonicButton { Content = "Text" }, Content = new AvonicLabel { Content = "x" }, EndContent = new AvonicButton { Content = "Text" } },
+                new AvonicItemDivider { Content = new AvonicButton { Content = "Text" } },
+                new AvonicItemDivider { EndContent = new AvonicButton { Content = "Text", Size = ButtonSize.Large } },
+            },
+        };
+        page.Resources["Avonic.Button.Transition"] = new Transitions();
+
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
+        {
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, "avonic-button-divider.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+        }
+
+        Assert.True(page.Bounds.Height > 0);
+    });
+
     // The same scene and states as Ionic's, for docs/components/ion-button/compare/states.png.
     [AvaloniaTheory]
     [InlineData(ButtonFill.Solid, 0)]

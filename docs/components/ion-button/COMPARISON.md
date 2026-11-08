@@ -87,9 +87,9 @@ results were measured in Chromium with `ion-app`.
 | 25 | Start and end | 11.73 and 357.48 in long text; beside the text in a block | match |
 | 26 | Disabled | 0.5; `click dis: nothing`, hit goes to what's behind; in a disabled item 1, or 0.5 if it's disabled too | match. A disabled panel fades it too: deliberate |
 | 27 | Tokens | `vars`, `varsr`, `varso`, and `varss` drawing no border | match |
-| 28 | Null is small in an item | `initem`, `initemdeep` small; `initemd` isn't | match. Avonic follows a move to another item, deliberately |
+| 28 | Null is small in an item or a divider | `initem`, `initemdeep` small; `initemd` isn't; in a divider `ds`, `de`, `dm` small, with the plain 13 and 27.3, and `dl` large | match. Avonic follows a move to another item, deliberately |
 | 29 | Directly in a slot | 12, 25, 7.2 and 2; icon-only 29.14 by 25, icon 14.77; deeper 13, 27.3 | match |
-| 30 | Margins in a slot | Default 2 and 4; `2 4 16 4`; `16 4 2 4` | match, except beside a stacked label: gap |
+| 30 | Margins in a slot | Default 2 and 4; `2 4 16 4`; `16 4 2 4`, in an item and a divider; a page's `margin: 3px` wins in both (`ias`, `iae`, `das`, `dae`) and beside a stacked label (`sae`) | match, except an app's style beside a stacked label: gap |
 | 31 | The item sees a clickable | `it2`: `item-multiple-inputs`; focus: item also `ion-focused` | match |
 | 32 | In a button item | `click@initembtn itemclick@it9`; disabled: `itemclick@it9<-it9` | match |
 | 33 | Automation | `button "Default"`, `button "Named"`, unnamed icon-only, `button "Favourite"`, `[disabled]` | match, and a nested button in a button item's name, since #72 |

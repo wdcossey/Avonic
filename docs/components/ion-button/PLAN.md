@@ -192,7 +192,9 @@ horizontal panel or a `WrapPanel`.
 
 `Styles/` files merge in ordinal order, so `Button.axaml` comes before `Item.axaml`, and the item's plain
 `ContentPresenter#PART_End > :is(Control)` would win over a plain rule here. A rule with a pseudoclass beats one without,
-so the margin rules target `c|AvonicButton:in-item`, which the control sets. It's Ionic's `inItem`.
+so the margin rules targeted `c|AvonicButton:in-item`, which the control set. (Since the follow-up to #88 they're plain rules
+in `Item.axaml` and `ItemDivider.axaml`, after the rule for any child, so an app's plain style beats them, and `:in-item` is
+gone: Ionic's `inItem` only picks the size.)
 
 `closest` in `componentWillLoad` is once only. Here it's every time it attaches, as `AvonicLabel` does for its report,
 because recycled containers are normal in Avalonia.
@@ -286,7 +288,7 @@ Avonic-only, and never named like an Ionic member.
 |---|---|
 | `inToolbar`: `fill` null → clear; `rippleType` unbounded for clear and icon-only; `in-toolbar`, `in-toolbar-color`, `in-buttons` and their colour rules | #12 (`ion-buttons`), and the pseudoclasses in #89. See the [README](README.md#in-a-toolbar) |
 | `inListHeader`: `fill` null → clear | `ion-list-header` |
-| `closest('ion-item-divider')` for `inItem` | `ion-item-divider` |
+| `closest('ion-item-divider')` for `inItem` | `ion-item-divider`. Done in the follow-up to #88 |
 | `:host(.button-outline.ion-activated.ion-color) .button-native` | Nothing: it sets `background: transparent` where it already is |
 | The default text size outside a host | Open project question. A button sets its own, so it isn't affected |
 

@@ -30,7 +30,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
 [PseudoClasses(
     ":fill-clear", ":fill-default", ":fill-outline", ":fill-solid", ":size-large", ":size-small", ":shape-round",
-    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-item", ":in-toolbar", ":in-toolbar-color", ":in-buttons")]
+    ":expand-block", ":expand-full", ":strong", ":has-icon-only", ":in-toolbar", ":in-toolbar-color", ":in-buttons")]
 public class AvonicButton : TemplatedControl, IItemControl
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -376,7 +376,6 @@ public class AvonicButton : TemplatedControl, IItemControl
         PseudoClasses.Set(":expand-full", Expand == ButtonExpand.Full);
         PseudoClasses.Set(":strong", Strong);
         PseudoClasses.Set(":has-icon-only", IconOnlyContent is not null);
-        PseudoClasses.Set(":in-item", _inItem);
     }
 
     /// <summary>
