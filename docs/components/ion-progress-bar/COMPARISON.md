@@ -63,7 +63,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 | 13 | Host classes | `progress-bar-determinate`, `-indeterminate`, `-reversed`, `-solid` | match, as pseudoclasses |
 | 14 | `AvonicConfig.Animated` off | `progress-paused` holds the animations | a deliberate difference. See the plan |
 | 15 | The two keys | `--background`, `--progress-background` | match |
-| 16 | Detach and attach, hide and show | a re-created element starts its animations at 0, and `display: none` stops them | match. Hiding is from the CSS spec, not measured |
+| 16 | Detach and attach, hide and show | a re-created element starts its animations at 0, and `display: none` stops them | match. Measured: `display: none` and back in one task keeps every `currentTime`, on the bar or an ancestor, and across a frame restarts them at 0 |
 | 17 | Frames only while something moves | — | Avonic's own |
 
 ## Deliberate differences and known gaps

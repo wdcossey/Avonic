@@ -69,3 +69,15 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 ## Extensions
 
 None.
+
+## Known gaps and deliberate differences
+
+Each is in the [plan](PLAN.md#deliberate-differences), with its measurement.
+
+- **Right-to-left is the inherited `FlowDirection`,** so an ancestor set right to left reverses the bar. Ionic reads only
+  `document.dir`, and a `dir="rtl"` ancestor does nothing there, measured.
+- **`AvonicConfig.Animated` off** stands the stream and the indeterminate bars at time 0, as Ionic's private `progress-paused`
+  does. Ionic's public `animated` config doesn't stop them. An indeterminate bar then shows only its track.
+- **The dots' edges are anti-aliased,** where Chromium draws the gradient's hard stop. Each dot is in the same place and of the
+  same size.
+- **In a toolbar,** Ionic places the bar at the bottom with `::slotted(ion-progress-bar)`. That goes with `ion-toolbar`.

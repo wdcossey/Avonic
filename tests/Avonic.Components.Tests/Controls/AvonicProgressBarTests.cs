@@ -203,6 +203,9 @@ public class AvonicProgressBarTests
         foreach (var x in new[] { 280.0, 290, 300, 350 })
         {
             AssertColour(PrimaryTrack, Fixture.PixelAt(frame, x), 8);
+            // 2.12 either side of the centre, so the pixels from x - 2 to x + 2 are covered
+            AssertColour(PrimaryTrack, Fixture.PixelAt(frame, x + 1), 8);
+            AssertColour(PrimaryTrack, Fixture.PixelAt(frame, x - 2), 8);
             AssertWhite(Fixture.PixelAt(frame, x + 3));
             AssertWhite(Fixture.PixelAt(frame, x + 5));
         }
@@ -400,6 +403,8 @@ public class AvonicProgressBarTests
         f.Bar.Tick();
         AssertSpan((0, 208.8), f.Span("PART_Track"), 1);
         AssertSpan((-17.6, 6.7), f.Span("PART_ProgressSecondary"), 1);
+        // and the primary bar, at its time-0 span of -355.0..-326.4, scaled with the track by 0.585
+        AssertSpan((-207.7, -190.9), f.Span("PART_ProgressPrimary"), 1);
         clock.At(1075);
         f.Bar.Tick();
         AssertSpan((0, 223.75), f.Span("PART_Track"));
@@ -480,6 +485,14 @@ public class AvonicProgressBarTests
         });
         Dispatcher.UIThread.RunJobs();
 
+        f.Bar.Reversed = true;
+        AssertSpan((0, 107.4), f.Span("PART_Progress"));
+
+        // and when the bar arrives after the style, as it does in an app
+        f.Bar.Reversed = false;
+        f.Host.Children.Remove(f.Bar);
+        f.Host.Children.Add(f.Bar);
+        Dispatcher.UIThread.RunJobs();
         f.Bar.Reversed = true;
         AssertSpan((0, 107.4), f.Span("PART_Progress"));
         f.Bar.Reversed = false;
@@ -687,6 +700,35 @@ public class AvonicProgressBarTests
     });
 
     [AvaloniaFact]
+    public void B16_A_Bar_Attached_While_Hidden_Starts_Its_Animations_When_Shown() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+
+        // Hidden itself: Avalonia doesn't measure it, so it has no template yet
+        using (var f = new Fixture(new AvonicProgressBar { Type = ProgressBarType.Indeterminate, IsVisible = false }))
+        {
+            clock.At(1300);
+            Assert.False(f.Bar.IsFrameLoopRunning);
+            f.Bar.IsVisible = true;
+            clock.At(1550);
+            f.Bar.Tick();
+            AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+        }
+
+        // Inside a hidden ancestor
+        var around = new Border { IsVisible = false };
+        using (var f = new Fixture(new AvonicProgressBar { Type = ProgressBarType.Indeterminate }, around))
+        {
+            clock.At(2800);
+            Assert.False(f.Bar.IsFrameLoopRunning);
+            around.IsVisible = true;
+            clock.At(3050);
+            f.Bar.Tick();
+            AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+        }
+    });
+
+    [AvaloniaFact]
     public void B16_Hiding_Stops_The_Frames_And_Showing_Starts_The_Animations_From_0() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
@@ -704,13 +746,16 @@ public class AvonicProgressBarTests
         f.Bar.Tick();
         AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
 
-        // Hiding and showing the bar itself within one frame restarts it too
+        // Hiding and showing within one frame, the bar or an ancestor, restarts nothing: measured in Chromium, where
+        // display: none and back in one task leave every animation's currentTime as it was, as no style change sees it
         clock.At(1300);
         f.Bar.IsVisible = false;
         f.Bar.IsVisible = true;
-        clock.At(1550);
+        f.Host.IsVisible = false;
+        f.Host.IsVisible = true;
+        clock.At(1500);
         f.Bar.Tick();
-        AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
+        AssertSpan((19.6, 215.0), f.Span("PART_ProgressSecondary"));
 
         // and a change made while hidden doesn't ease
         f.Bar.IsVisible = false;

@@ -193,8 +193,10 @@ public class AvonicProgressBar : TemplatedControl
 
     /// <summary>
     /// <c>display: none</c>, on the bar or an ancestor, stops an element's CSS animations, and showing it starts them again
-    /// from 0. Avalonia doesn't tell a control when an ancestor hides or shows it, so a frame that finds the bar hidden stops
-    /// the frames and watches <see cref="Visual.IsVisible"/> on whatever in its chain is hidden, until all of it shows.
+    /// from 0. Avalonia doesn't tell a control when an ancestor hides or shows it, so a frame that finds the bar hidden, or an
+    /// attach while it's hidden, stops the frames and watches <see cref="Visual.IsVisible"/> on whatever in its chain is
+    /// hidden, until all of it shows. A hide and show between two frames isn't seen, as in Chromium, measured, where no
+    /// style change sees it.
     /// </summary>
     private void WaitUntilShown()
     {
@@ -210,12 +212,6 @@ public class AvonicProgressBar : TemplatedControl
                 visual.PropertyChanged += OnHiddenVisualChanged;
                 _hiddenBy.Add(visual);
             }
-        }
-
-        // Nothing in the chain is hidden, so the effective visibility hasn't caught up yet: look again next frame
-        if (_hiddenBy.Count == 0)
-        {
-            _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
         }
     }
 
@@ -301,21 +297,15 @@ public class AvonicProgressBar : TemplatedControl
         {
             UpdatePseudoClasses();
         }
-        else if (change.Property == IsVisibleProperty && _attached && !change.GetNewValue<bool>())
-        {
-            // Hidden itself: stop now, rather than at the next frame, so a quick hide and show still restarts it
-            StopFrames();
-            WaitUntilShown();
-        }
     }
 
     /// <summary>
-    /// A transition, unless animations are off or the bar is hidden. One started while detached is snapped when the bar
-    /// attaches.
+    /// A transition, unless animations are off. One started while the bar is detached or hidden is snapped when it attaches
+    /// or shows, as both restart it.
     /// </summary>
     private void Ease(CssTransition transition, double target)
     {
-        if (AvonicConfig.Animated && IsEffectivelyVisible)
+        if (AvonicConfig.Animated)
         {
             transition.Start(target, AvonicConfig.Now(), TransitionDuration);
         }
@@ -353,6 +343,13 @@ public class AvonicProgressBar : TemplatedControl
     {
         if (_root is null)
         {
+            // Attached while it or an ancestor is hidden: Avalonia doesn't measure it, so it has no template yet, and showing
+            // it has to start the animations then
+            if (_attached && !IsEffectivelyVisible)
+            {
+                WaitUntilShown();
+            }
+
             return;
         }
 

@@ -17,8 +17,7 @@
     <ControlTheme x:Key="{x:Type c:AvonicProgressBar}" TargetType="c:AvonicProgressBar">
         <!-- height: 4px. There's no variable for it. -->
         <Setter Property="Height" Value="4" />
-        <!-- overflow: hidden; contain: strict -->
-        <Setter Property="ClipToBounds" Value="True" />
+        <!-- overflow: hidden; contain: strict. A TemplatedControl clips by default, so there's nothing to set. -->
         <Setter Property="Template">
             <ControlTemplate>
                 <!-- In Ionic's z-order: the stream (z 0), the track (z 1), then the progress and the two indeterminate bars (z 2) -->
