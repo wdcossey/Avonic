@@ -99,7 +99,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicToo
 | B5 | Uncoloured toolbar | clear and outline `rgb(66, 66, 66)`, outline's border too; solid `rgb(66, 66, 66)` behind white text; `success` clear keeps `rgb(45, 213, 91)` | match |
 | B6 | Coloured toolbar | danger: clear and outline white, outline's border white; solid white behind `rgb(197, 0, 15)`. `s4` `#lod`, directly in danger: its own green border, primary text | match. The second was found in review |
 | B7 | Focus overlays | `s3`: clear `rgb(66, 66, 66)` at 0.12; in primary, clear white at 0.12 and solid `rgb(0, 74, 205)` at 0.24. Pressed, `--background-activated: transparent` | match. Pressed, found in review |
-| B8 | Round | `s2` `#rnd`: radius 999, padding 3 8 | match |
+| B8 | Round, and full | `s2` `#rnd`: radius 999, padding 3 8; a full button's `border-radius: 0` beats `--border-radius` | match. The full one was found by deliberate breakage |
 | B9 | `--ion-toolbar-color` | `button.md.css`'s `.in-toolbar` rules | match, except a coloured toolbar inside a plain one. See the plan |
 | B10 | Pressed outline | `s4`: `#lo` directly in a toolbar fills with `rgb(0, 84, 233)`, its text the same; `#bo` and `#bo2` in `ion-buttons` stay transparent. All because `--ion-toolbar-background` is unset in the light palette | **deliberate difference:** Avonic's `Avonic.ToolbarBackgroundBrush` is always set, so all three are white, as Ionic's are with the key set. See the plan |
 

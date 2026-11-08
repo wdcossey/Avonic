@@ -168,12 +168,6 @@ public class AvonicToolbar : TemplatedControl
         }
     }
 
-    protected override void OnAttachedToLogicalTree(Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToLogicalTree(e);
-        UpdateButtonsSlots();
-    }
-
     /// <summary>
     /// <c>componentWillLoad</c>: <c>buttons-first-slot</c> on the first <c>ion-buttons</c> in the start slot, and
     /// <c>buttons-last-slot</c> on the last in the end slot, or else primary, or else secondary.
