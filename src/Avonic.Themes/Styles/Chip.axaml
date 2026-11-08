@@ -1,0 +1,33 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="using:Avonic.Components.Behaviors"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- chip.md.css's ::slotted rules. A control in a chip's Items is its logical child, though it's held in a FlexSlot, so '>'
+         means direct children only, as ::slotted does, and the chip counts it for :first-child. One made by an ItemTemplate is
+         the slot's child, which is the second alternative. The rules for ion-avatar go here once it exists (#16). -->
+
+    <!-- ::slotted(ion-icon) { font-size: 1.4285714286em }. A hair under, as 14 times that is 20.0000000004, which layout
+         rounding takes up to 21, where Chromium's layout units keep 20: measured. -->
+    <Style Selector="c|AvonicChip > c|AvonicIcon, c|AvonicChip > ContentPresenter > c|AvonicIcon">
+        <Setter Property="FontSize">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.42857142857">
+                <Binding Path="$parent[c:AvonicChip].FontSize" />
+            </MultiBinding>
+        </Setter>
+    </Style>
+
+    <!-- :host(:not(.ion-color)) ::slotted(ion-icon) { color: rgba(ion-text-color-rgb, 0.54) }. On a coloured chip it inherits the shade. -->
+    <Style Selector="c|AvonicChip:not(:ion-color) > c|AvonicIcon, c|AvonicChip:not(:ion-color) > ContentPresenter > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Chip.Md.IconColor}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon:first-child), then ::slotted(ion-icon:last-child), which wins on an only child: measured. -->
+    <Style Selector="c|AvonicChip > c|AvonicIcon:nth-child(1), c|AvonicChip > ContentPresenter:nth-child(1) > c|AvonicIcon">
+        <Setter Property="Margin" Value="-4,-4,8,-4" />
+    </Style>
+    <Style Selector="c|AvonicChip > c|AvonicIcon:nth-last-child(1), c|AvonicChip > ContentPresenter:nth-last-child(1) > c|AvonicIcon">
+        <Setter Property="Margin" Value="8,-4,-4,-4" />
+    </Style>
+
+</Styles>

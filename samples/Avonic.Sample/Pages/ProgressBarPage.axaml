@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ProgressBarPage">
+
+    <!-- The same bars as the reference render at the top of docs/components/ion-progress-bar/COMPARISON.md, then one to play with. -->
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="20">
+            <c:AvonicProgressBar Value="0.25" />
+            <c:AvonicProgressBar Value="0.5" />
+            <c:AvonicProgressBar Value="1" />
+            <c:AvonicProgressBar Value="0.3" Buffer="0.6" />
+            <c:AvonicProgressBar Value="0.3" Buffer="0.6" Reversed="True" />
+            <c:AvonicProgressBar Value="0.5" Buffer="0.75" Color="danger" />
+            <c:AvonicProgressBar Value="0.5" Color="success" />
+            <c:AvonicProgressBar Type="Indeterminate" />
+            <c:AvonicProgressBar Type="Indeterminate" Color="warning" />
+            <c:AvonicProgressBar Type="Indeterminate" Reversed="True" />
+
+            <TextBlock Text="Right to left" FontWeight="SemiBold" Margin="0,8,0,0" />
+            <c:AvonicProgressBar Value="0.3" Buffer="0.6" FlowDirection="RightToLeft" />
+
+            <TextBlock Text="Changes ease over 150 ms" FontWeight="SemiBold" Margin="0,8,0,0" />
+            <c:AvonicProgressBar Name="Playground" Value="0.2" Buffer="0.4" />
+            <WrapPanel>
+                <c:AvonicButton Content="Value" Click="OnValue" />
+                <c:AvonicButton Content="Buffer" Click="OnBuffer" />
+                <c:AvonicButton Content="Type" Click="OnType" />
+                <c:AvonicButton Content="Reversed" Click="OnReversed" />
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

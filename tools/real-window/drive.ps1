@@ -372,6 +372,153 @@ try {
         Check 'a touch tap counts once' ($name -eq 'Clicks: 1') $name
     }
 
+    # Headless tests run the bars on a test clock; this is the real one. The indeterminate bars and the buffer's dots move,
+    # so two frames of the bars a moment apart differ; and a new value eases in.
+    Section 'ion-progress-bar: on the real clock' {
+        Open 'ion-progress-bar'
+        Away
+        function Grab($x, $y, $wd, $ht) {
+            $bmp = New-Object Drawing.Bitmap ([int]$wd), ([int]$ht)
+            $g = [Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen([int]$x, [int]$y, 0, 0, $bmp.Size); $g.Dispose(); $bmp
+        }
+        $w = $win.Current.BoundingRectangle
+        $rtl = (Named $CT::Text 'Right to left').Current.BoundingRectangle
+        $top = [int]($w.Y + 80 * $scale)
+        $ht = [int]($rtl.Y - $top)
+        $a = Grab $w.X $top $w.Width $ht
+        Start-Sleep -Milliseconds 300
+        $b = Grab $w.X $top $w.Width $ht
+        $diff = 0
+        for ($y = 0; $y -lt $ht; $y += 2) { for ($x = 0; $x -lt [int]$w.Width; $x += 3) { if ($a.GetPixel($x, $y).ToArgb() -ne $b.GetPixel($x, $y).ToArgb()) { $diff++ } } }
+        $a.Dispose(); $b.Dispose()
+        Check 'the bars move on their own' ($diff -gt 40) "$diff sampled pixels differ"
+
+        $ease = (Named $CT::Text 'Changes ease*').Current.BoundingRectangle
+        $vx, $vy = Centre (Named $CT::Button 'Value')
+        $by = [int](($ease.Bottom + ($vy - 22 * $scale)) / 2)
+        $bx = [int]($w.X + (16 + 0.3 * ($w.Width / $scale - 32)) * $scale)
+        $before = Pixel $bx $by
+        Click $vx $vy
+        Start-Sleep -Milliseconds 500
+        $after = [Drawing.Color]::FromArgb((Pixel $bx $by))
+        Shot 'ion-progress-bar-value'
+        Check 'a new value fills the bar to it' (($after.ToArgb() -ne $before) -and ($after.B -gt 180) -and ($after.R -lt 80)) ('{0:X8} from {1:X8}' -f $after.ToArgb(), $before)
+    }
+
+    # A chip is ion-activatable: hover for a mouse only, and a ripple from a press. Read from a pixel in the chip's padding,
+    # left of its label.
+    Section 'ion-chip' {
+        Open 'ion-chip'
+        Away
+        Start-Sleep -Milliseconds 400
+        function Inside($label) {
+            $b = (Named $CT::Text $label).Current.BoundingRectangle
+            if (-not $b -or $b.Width -le 0) { throw "No chip labelled $label" }
+            [int]($b.X - 6 * $scale), [int]($b.Y + $b.Height / 2), [int]($b.X + $b.Width / 2)
+        }
+        $px, $py, $cx = Inside 'Default'
+        $plain = Pixel $px $py
+
+        Guard
+        [void][RealInput]::SetCursorPos($cx, $py); Start-Sleep -Milliseconds 400
+        $hover = Pixel $px $py
+        Check 'a mouse over it shows the hover' ($hover -ne $plain) ('{0:X8}' -f $hover)
+        Press; Start-Sleep -Milliseconds 250
+        $pressed = Pixel $px $py
+        Shot 'ion-chip-pressed'
+        Release
+        Check 'a press shows more than the hover' (($pressed -ne $hover) -and ($pressed -ne $plain)) ('{0:X8}' -f $pressed)
+        Away
+        Start-Sleep -Milliseconds 1200
+        $gone = Pixel $px $py
+        Check 'the ripple and the hover go after it' ($gone -eq $plain) ('{0:X8} against {1:X8}' -f $gone, $plain)
+
+        # A touch tap shows the ripple. Not checked while held: with injected touch, nothing shows until the finger moves or
+        # lifts, though Activatable lights up 100 ms after a press. Nor afterwards: Windows moves the cursor to the touch
+        # point and, in about half the runs, promotes the touch to a mouse move a second later, which hovers the chip.
+        TouchDown $cx $py; Start-Sleep -Milliseconds 120
+        [RealInput]::TouchMove($cx, $py); Start-Sleep -Milliseconds 40
+        TouchUp $cx $py
+        $seen = $false
+        for ($i = 0; $i -lt 12 -and -not $seen; $i++) { Start-Sleep -Milliseconds 50; $seen = (Pixel $px $py) -ne $plain }
+        Check 'a touch tap shows the ripple' $seen
+        Away
+        Start-Sleep -Milliseconds 1500
+
+        # Unlike the card, a chip has no ion-focusable: Ionic styles :host(:focus), so once an app makes it focusable, any
+        # focus shows, a click's included, and a key doesn't clear it (measured in Chromium: clickPlainFocus, tabFocusAfterClick).
+        $fx, $fy, $fcx = Inside 'Focusable'
+        $unfocused = Pixel $fx $fy
+        Click $fcx $fy
+        Away
+        Start-Sleep -Milliseconds 1200
+        Shot 'ion-chip-after-click'
+        $clicked = Pixel $fx $fy
+        Check 'a click on a focusable chip shows its focus' ($clicked -ne $unfocused) ('{0:X8}' -f $clicked)
+        Key 'a'
+        Start-Sleep -Milliseconds 300
+        $p1 = Pixel $fx $fy
+        Check 'a letter key leaves it' (($p1 -eq $clicked) -and ($p1 -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p1, $clicked)
+        Key '{TAB}'
+        Start-Sleep -Milliseconds 300
+        $p2 = Pixel $fx $fy
+        Check 'Tab away clears it' (($p2 -eq $unfocused) -and ($clicked -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p2, $unfocused)
+        Key '+{TAB}'
+        Start-Sleep -Milliseconds 300
+        Shot 'ion-chip-keyboard-focus'
+        $p3 = Pixel $fx $fy
+        Check 'and Shift+Tab back shows it' (($p3 -eq $clicked) -and ($p3 -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p3, $clicked)
+    }
+
+    # The sample's knob is a sideways gesture on a track, in a content that scrolls: a sideways drag moves the knob and
+    # leaves the page, and a drag up the track leaves the knob and scrolls the page, as a pan with direction x does in Ionic.
+    Section 'gesture: sideways on a page that scrolls' {
+        Open 'gesture'
+        function Blue($x, $y) { $c = [Drawing.Color]::FromArgb((Pixel $x $y)); ($c.B -gt 180) -and ($c.R -lt 90) -and ($c.G -lt 150) }
+        function RowY { (Named $CT::Text 'Row 5').Current.BoundingRectangle.Y }
+        $w = $win.Current.BoundingRectangle
+        $kx = [int]($w.X + 44 * $scale)   # the knob's centre: 16 of margin and half its 56
+        $from = [int](Named $CT::Text 'Drag the knob*').Current.BoundingRectangle.Bottom
+        $to = [int](Named $CT::Text 'Row 1').Current.BoundingRectangle.Y
+        $ky = $null
+        for ($y = $from; $y -lt $to -and -not $ky; $y += 2) { if (Blue $kx $y) { $ky = $y + [int](28 * $scale) } }
+        if (-not $ky) { throw "The knob isn't between the status and the rows" }
+        $rowY = RowY
+        $move = [int](150 * $scale)
+
+        Guard
+        [void][RealInput]::SetCursorPos($kx, $ky); Start-Sleep -Milliseconds 150
+        Press
+        for ($i = 1; $i -le 15; $i++) { Start-Sleep -Milliseconds 16; [void][RealInput]::SetCursorPos(($kx + [int]($move * $i / 15)), ($ky + [int](4 * $i / 15))) }
+        Start-Sleep -Milliseconds 80
+        Release; Start-Sleep -Milliseconds 300
+        Shot 'gesture-mouse-drag'
+        Check 'a mouse drag sideways starts and ends the gesture' ([bool](FirstText 'Ended')) ((Texts | Select-Object -First 3) -join ' | ')
+        Check 'the knob follows the mouse' ((Blue ($kx + $move) $ky) -and -not (Blue $kx $ky))
+        Check 'the page stays put under the mouse' ((RowY) -eq $rowY) "$(RowY) against $rowY"
+
+        $x0 = $kx + $move
+        $back = [int](100 * $scale)
+        TouchDown $x0 $ky
+        for ($i = 1; $i -le 15; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove(($x0 - [int]($back * $i / 15)), $ky) }
+        Start-Sleep -Milliseconds 80
+        TouchUp ($x0 - $back) $ky; Start-Sleep -Milliseconds 300
+        Shot 'gesture-touch-drag'
+        $detail = FirstText 'delta *'
+        Check 'a touch drag sideways ends the gesture, moving back' ((FirstText 'Ended') -and ($detail -like 'delta -*')) $detail
+        Check 'the knob follows the finger' ((Blue ($x0 - $back) $ky) -and -not (Blue ($x0 + [int](20 * $scale)) $ky))
+        Check 'the page stays put under the finger' ((RowY) -eq $rowY) "$(RowY) against $rowY"
+
+        $kx2 = $x0 - $back
+        Drag $kx2 $ky (-300)
+        Start-Sleep -Milliseconds 1500
+        Shot 'gesture-touch-up'
+        Check 'a touch drag up the track scrolls the page' ((RowY) -lt ($rowY - 150)) "$(RowY) against $rowY"
+        # Ionic's abortGesture calls notCaptured, with the detail at the moment the pan was detected.
+        $up = FirstText 'delta *'
+        Check 'and the gesture gives it up, calling NotCaptured' ((FirstText 'Not captured') -and ($up -like 'delta 0, -*')) "$((Texts | Select-Object -First 3) -join ' | ')"
+    }
+
     Check 'the app is still running' (-not $p.HasExited)
 }
 finally {

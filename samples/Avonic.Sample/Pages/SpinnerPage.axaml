@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SpinnerPage">
+
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="16">
+            <TextBlock Text="Every name" />
+            <WrapPanel ItemSpacing="12" LineSpacing="12">
+                <c:AvonicSpinner SpinnerName="Bubbles" />
+                <c:AvonicSpinner SpinnerName="Circles" />
+                <c:AvonicSpinner SpinnerName="Circular" />
+                <c:AvonicSpinner SpinnerName="Crescent" />
+                <c:AvonicSpinner SpinnerName="Dots" />
+                <c:AvonicSpinner SpinnerName="Lines" />
+                <c:AvonicSpinner SpinnerName="LinesSmall" />
+                <c:AvonicSpinner SpinnerName="LinesSharp" />
+                <c:AvonicSpinner SpinnerName="LinesSharpSmall" />
+            </WrapPanel>
+
+            <TextBlock Text="With no name, md's default: circular" />
+            <c:AvonicSpinner />
+
+            <TextBlock Text="Colours" />
+            <WrapPanel ItemSpacing="12" LineSpacing="12">
+                <c:AvonicSpinner Color="primary" />
+                <c:AvonicSpinner Color="secondary" SpinnerName="Crescent" />
+                <c:AvonicSpinner Color="tertiary" SpinnerName="Dots" />
+                <c:AvonicSpinner Color="success" SpinnerName="Lines" />
+                <c:AvonicSpinner Color="warning" SpinnerName="Bubbles" />
+                <c:AvonicSpinner Color="danger" SpinnerName="Circles" />
+                <c:AvonicSpinner Color="medium" SpinnerName="LinesSharp" />
+                <c:AvonicSpinner Color="dark" SpinnerName="LinesSmall" />
+            </WrapPanel>
+
+            <TextBlock Text="Paused" />
+            <c:AvonicSpinner SpinnerName="Lines" Paused="{Binding #PauseToggle.IsChecked}" />
+            <CheckBox Name="PauseToggle" Content="Paused" />
+
+            <TextBlock Text="Duration 3000 ms" />
+            <c:AvonicSpinner SpinnerName="Crescent" Duration="3000" />
+
+            <TextBlock Text="Larger, 56 px" />
+            <WrapPanel ItemSpacing="12">
+                <c:AvonicSpinner Width="56" Height="56" />
+                <c:AvonicSpinner Width="56" Height="56" SpinnerName="Lines" />
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-chip: structure only. The look is in Avonic.Themes. The children are a flex row, as
+         display: inline-flex is, and the transparent panel is what makes the whole box take input, as Ionic's host does.
+         The ripple is first, so that Activatable finds it before any ripple in the children, as Ionic looks in the shadow
+         root first, and ZIndex keeps it over them, as it comes after the slot there. -->
+    <ControlTheme x:Key="{x:Type c:AvonicChip}" TargetType="c:AvonicChip">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:FlexRow />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel Background="Transparent">
+                        <c:AvonicRippleEffect Name="PART_Ripple" ZIndex="1" />
+                        <ItemsPresenter Name="PART_ItemsPresenter"
+                                        Margin="{TemplateBinding Padding}"
+                                        ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

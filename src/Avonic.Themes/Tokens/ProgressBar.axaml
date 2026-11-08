@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ion-progress-bar's variables, with their md defaults. -->
+
+    <!-- background: rgba(var(ion-color-primary-rgb), 0.3). The track, and the stream's dots. -->
+    <SolidColorBrush x:Key="Avonic.ProgressBar.Background" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.3" />
+
+    <!-- progress-background: var(ion-color-primary). The progress, and the two indeterminate bars. -->
+    <SolidColorBrush x:Key="Avonic.ProgressBar.ProgressBackground" Color="{DynamicResource Avonic.Color.Primary}" />
+
+</ResourceDictionary>
