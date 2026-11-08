@@ -568,8 +568,9 @@ public class AvonicLabelTests
 
         Assert.True(label.Bounds.Height >= single.Bounds.Height * 2);
         Assert.Equal(358, label.Bounds.Width);
-        // Measured: 54 + 20 of margin + 1 of border = 75.
+        // Measured: three lines of 19, 57, + 20 of margin + 1 of border = 78. Avalonia's lines are 18.75.
         Assert.Equal(label.Bounds.Height + 21, item.Bounds.Height);
+        Assert.InRange(item.Bounds.Height, 77, 78);
     });
 
     [AvaloniaFact]

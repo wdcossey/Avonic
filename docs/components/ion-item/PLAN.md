@@ -223,7 +223,7 @@ A `flex: 1` box can't go below its own padding, so `.item-inner` is never under 
 
 Chromium, md, 390 wide. `W` is the width of the box. The page is [`ref/layout/cases.html`](ref/layout/cases.html), and every box in it is in
 [`cases.txt`](ref/layout/cases.txt), from `node tools/ionic-ref/boxes.js docs/components/ion-item/ref/layout/cases.html`. Since #100 it's
-measured with the Roboto files the tests use, which changed the numbers that depend on text: F2, F7, F8, F10, F12, F15, F21 and F22.
+measured with the Roboto files the tests use, which changed the numbers that depend on text: F2, F7, F8, F10, F12, F15, F16, F21 and F22.
 
 | # | Content | Measured |
 |---|---|---|

@@ -23,7 +23,8 @@ From #71. The rows from the top are in [PLAN.md](PLAN.md#the-flex-layout-71). Io
 
 **Match,** with every box in the same place. Both sides draw text from the same Roboto files since #100, so rows that grow with their
 text are within 1.5 of Ionic's. Chromium rounds a line's ascent and descent each to a whole pixel, so a line of 16 px text is 19 there
-and 18.75 here, and one of 14 px is 16 there and 16.4 here:
+and 18.75 here, and one of 14 px is 16 there and 16.4 here. Avonic's are from this frame, at a scale of 2, where layout rounds to
+half a pixel; at 1, as the tests run, the seven lines are 153 and the three 58:
 
 | Row | Ionic | Avonic |
 |---|---|---|

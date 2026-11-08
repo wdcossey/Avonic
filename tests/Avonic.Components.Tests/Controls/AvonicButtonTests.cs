@@ -1859,9 +1859,9 @@ public class AvonicButtonTests
     [AvaloniaFact]
     public void B21_There_Is_No_Kerning() => InstalledTheme.Run(_ =>
     {
-        // Arial kerns AV tightly, so this text is narrower when kerning is on.
-        var theme = new AvonicButton { Content = "AVAVAVAVAVAV", FontFamily = new FontFamily("Arial") };
-        var kerned = new AvonicButton { Content = "AVAVAVAVAVAV", FontFamily = new FontFamily("Arial") };
+        // Roboto kerns AV tightly, so this text is narrower when kerning is on. The committed file, so it's the same on any machine.
+        var theme = new AvonicButton { Content = "AVAVAVAVAVAV", FontFamily = new FontFamily("Roboto") };
+        var kerned = new AvonicButton { Content = "AVAVAVAVAVAV", FontFamily = new FontFamily("Roboto") };
         kerned.SetValue(TextElement.FontFeaturesProperty, new FontFeatureCollection());
         using var scene = new Scene(NoTransitions(new StackPanel { Children = { theme, kerned } }));
 
@@ -1884,7 +1884,7 @@ public class AvonicButtonTests
     public void B21_Text_Is_Centred_In_The_Box() => InstalledTheme.Run(_ =>
     {
         // The middle of the ink, which a line kept at the top of its height puts about 3 px low.
-        var (button, scene, _) = Themed(new AvonicButton { Content = "HHH", FontFamily = new FontFamily("Arial"), Fill = ButtonFill.Clear });
+        var (button, scene, _) = Themed(new AvonicButton { Content = "HHH", FontFamily = new FontFamily("Roboto"), Fill = ButtonFill.Clear });
         using (scene)
         {
             var box = Box(button, scene.Window);
