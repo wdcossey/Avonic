@@ -38,8 +38,8 @@ public class AvonicSpinner : Control
         AvaloniaProperty.Register<AvonicSpinner, double?>(nameof(Duration));
 
     /// <summary>
-    /// Ionic's <c>name</c>, renamed because <see cref="StyledElement.Name"/> already exists. Null is md's default,
-    /// <see cref="Controls.SpinnerName.Circular"/>.
+    /// Ionic's <c>name</c>, renamed because <see cref="StyledElement.Name"/> already exists. Null is
+    /// <see cref="AvonicConfig.Spinner"/>, and if that's null too, md's default, <see cref="Controls.SpinnerName.Circular"/>.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> SpinnerNameProperty =
         AvaloniaProperty.Register<AvonicSpinner, SpinnerName?>(nameof(SpinnerName));
@@ -54,7 +54,10 @@ public class AvonicSpinner : Control
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
-    private SpinnerConfig _config = SpinnerConfigs.Get(Controls.SpinnerName.Circular);
+    /// <summary>The name <see cref="GetName"/> gave at the last render, which a re-render compares with. <see cref="_config"/> is its config.</summary>
+    internal SpinnerName ResolvedName { get; private set; }
+
+    private SpinnerConfig _config;
 
     /// <summary>When each element's animation began, moved on by the time spent paused, as a CSS animation's start time is.</summary>
     private TimeSpan[] _starts = [];
@@ -63,13 +66,10 @@ public class AvonicSpinner : Control
     private TimeSpan? _pausedAt;
 
     private IDisposable? _frame;
-
-    /// <summary>While paused only by <see cref="AvonicConfig.Animated"/>, the next look at it.</summary>
-    private IDisposable? _animatedCheck;
-
-    /// <summary>How often a spinner paused by <see cref="AvonicConfig.Animated"/> looks to see if it's back on.</summary>
-    internal static readonly TimeSpan AnimatedCheckInterval = TimeSpan.FromMilliseconds(250);
     private bool _attached;
+
+    /// <summary>Whether it's been attached, which is Ionic's first render. Attaching again isn't a render, measured.</summary>
+    private bool _rendered;
 
     /// <summary>
     /// Whether the animations exist: attached and shown. CSS's <c>display: none</c>, on the spinner or an ancestor, cancels
@@ -102,9 +102,11 @@ public class AvonicSpinner : Control
         HorizontalAlignmentProperty.OverrideDefaultValue<AvonicSpinner>(HorizontalAlignment.Left);
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicSpinner>(VerticalAlignment.Top);
 
-        SpinnerNameProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.ChangeName());
-        PausedProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
-        DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
+        // A change of a prop re-renders it in Ionic, which reads config.spinner again in getName()
+        SpinnerNameProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
+        PausedProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
+        DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
+        ColorProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.Rerender());
 
         // Hiding the spinner or an ancestor is CSS's display: none, which cancels its animations.
         // A window that's hidden isn't: a page that's hidden doesn't cancel its animations. A visual outside a tree can't
@@ -130,6 +132,8 @@ public class AvonicSpinner : Control
 
     public AvonicSpinner()
     {
+        ResolvedName = GetName();
+        _config = SpinnerConfigs.Get(ResolvedName);
         UpdatePseudoClasses();
     }
 
@@ -170,9 +174,6 @@ public class AvonicSpinner : Control
 
     // ── For tests ────────────────────────────────────────────────────────────────────────────
 
-    /// <summary><c>getName()</c>: the name, or md's default.</summary>
-    internal SpinnerName ResolvedName => SpinnerName ?? Controls.SpinnerName.Circular;
-
     /// <summary>The config being drawn.</summary>
     internal SpinnerConfig Config => _config;
 
@@ -181,9 +182,6 @@ public class AvonicSpinner : Control
 
     /// <summary>Whether a frame has been asked for: only while attached, shown and running, as a CSS animation costs nothing otherwise.</summary>
     internal bool IsRequestingFrames => _frame is not null;
-
-    /// <summary>Whether it's paused only by <see cref="AvonicConfig.Animated"/>, and looking now and then to see if it's back on.</summary>
-    internal bool IsWatchingAnimated => _animatedCheck is not null;
 
     /// <summary>Every element at this instant on <see cref="AvonicConfig.Now"/>.</summary>
     internal IReadOnlyList<SpinnerElementFrame> CurrentFrame()
@@ -203,17 +201,41 @@ public class AvonicSpinner : Control
     // ── Timeline ─────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Ionic's <c>paused</c>, or Avonic's <see cref="AvonicConfig.Animated"/> off, which stands in for Ionic's
-    /// <c>_testing</c> config: <c>'spinner-paused': self.paused || config.getBoolean('_testing')</c>.
+    /// Ionic's <c>getName()</c>: <c>this.name || config.get('spinner')</c>, or md's default. Read at each render, as there.
     /// </summary>
-    private bool ShouldPause => Paused || !AvonicConfig.Animated;
+    private SpinnerName GetName() => SpinnerName ?? AvonicConfig.Spinner ?? Controls.SpinnerName.Circular;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         _attached = true;
         s_attached.Add(this);
+
+        // Ionic's first render is when the element is first connected, so the name is read again then
+        if (!_rendered)
+        {
+            _rendered = true;
+            Rerender();
+        }
+
         UpdateLive();
+    }
+
+    /// <summary>
+    /// What a re-render reads: the name, from <c>getName()</c>, and <c>paused</c>. A name that has changed since the last render,
+    /// from <see cref="SpinnerName"/> or <see cref="AvonicConfig.Spinner"/>, is a change of name. At once, where Stencil renders at
+    /// the next frame, as every change of a prop here applies at once.
+    /// </summary>
+    private void Rerender()
+    {
+        if (GetName() != ResolvedName)
+        {
+            ChangeName();
+        }
+        else
+        {
+            UpdatePlayState();
+        }
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -256,11 +278,11 @@ public class AvonicSpinner : Control
             return;
         }
 
-        // An element that's inserted, or shown again, gets new animations, which start from the beginning.
+        // An element that's inserted, or shown again, gets new animations, which start from the beginning. An old pause goes
+        // with the old animations, and UpdatePlayState pauses the new ones if it's paused.
         var now = AvonicConfig.Now();
-        _config = SpinnerConfigs.Get(ResolvedName);
         _starts = Enumerable.Repeat(now, _config.Count).ToArray();
-        _pausedAt = ShouldPause ? now : null;
+        _pausedAt = null;
         UpdatePlayState();
     }
 
@@ -272,6 +294,7 @@ public class AvonicSpinner : Control
     private void ChangeName()
     {
         var previous = _config;
+        ResolvedName = GetName();
         _config = SpinnerConfigs.Get(ResolvedName);
         UpdatePseudoClasses();
         if (_live)
@@ -290,10 +313,7 @@ public class AvonicSpinner : Control
         InvalidateVisual();
     }
 
-    /// <summary>
-    /// Pauses or resumes. Read when the spinner renders, as Ionic's <c>render</c> reads <c>paused</c> and
-    /// <c>_testing</c>, and on each frame.
-    /// </summary>
+    /// <summary>Pauses or resumes, as Ionic's <c>render</c> reads <c>paused</c>.</summary>
     private void UpdatePlayState()
     {
         UpdatePseudoClasses();
@@ -303,7 +323,7 @@ public class AvonicSpinner : Control
         }
 
         var now = AvonicConfig.Now();
-        if (ShouldPause)
+        if (Paused)
         {
             if (_pausedAt is null)
             {
@@ -312,13 +332,6 @@ public class AvonicSpinner : Control
             }
 
             StopFrames();
-
-            // Paused only because animations are off: look again now and then, without drawing, so that turning them back
-            // on carries on, as AvonicConfig's switches may change at runtime.
-            if (!Paused)
-            {
-                _animatedCheck ??= AvonicConfig.Schedule(OnAnimatedCheck, AnimatedCheckInterval);
-            }
         }
         else
         {
@@ -340,8 +353,8 @@ public class AvonicSpinner : Control
     }
 
     /// <summary>
-    /// <c>spinner-&lt;name&gt;</c> for the name <c>getName()</c> gives, and <c>spinner-paused</c> for
-    /// <c>paused || _testing</c>, where <see cref="AvonicConfig.Animated"/> off stands in for <c>_testing</c>.
+    /// <c>spinner-&lt;name&gt;</c> for the name <c>getName()</c> gave, and <c>spinner-paused</c> for <c>paused</c>. Ionic's
+    /// <c>_testing</c>, a private config for its own screenshot tests, has no equivalent.
     /// </summary>
     private void UpdatePseudoClasses()
     {
@@ -351,7 +364,7 @@ public class AvonicSpinner : Control
             PseudoClasses.Set(s_nameClasses[i], i == name);
         }
 
-        PseudoClasses.Set(":paused", ShouldPause);
+        PseudoClasses.Set(":paused", Paused);
     }
 
     private void RequestFrame() => _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
@@ -364,28 +377,14 @@ public class AvonicSpinner : Control
             return;
         }
 
-        if (ShouldPause)
-        {
-            UpdatePlayState();
-            return;
-        }
-
         InvalidateVisual();
         RequestFrame();
-    }
-
-    private void OnAnimatedCheck()
-    {
-        _animatedCheck = null;
-        UpdatePlayState();
     }
 
     private void StopFrames()
     {
         _frame?.Dispose();
         _frame = null;
-        _animatedCheck?.Dispose();
-        _animatedCheck = null;
     }
 
     // ── Drawing ──────────────────────────────────────────────────────────────────────────────

@@ -23,7 +23,18 @@ xmlns:c="using:Avonic.Components.Controls"
 the enum `SpinnerName`: `Bubbles`, `Circles`, `Circular`, `Crescent`, `Dots`, `Lines`, `LinesSmall`, `LinesSharp`,
 `LinesSharpSmall`, for Ionic's `bubbles` … `lines-sharp-small`.
 
-**With no name it's `Circular`,** md's default.
+**With no name it's `AvonicConfig.Spinner`,** Ionic's `spinner` config, and if that's null too, `Circular`, md's default.
+As in Ionic, the config is read when the spinner renders: when it's first attached, and at each change of `SpinnerName`,
+`Paused`, `Duration` or `Color`. Setting the config alone redraws nothing, and neither does moving a spinner or hiding and
+showing it, as measured in Chromium. So set it at startup, before any spinner is shown:
+
+```csharp
+AvonicConfig.Spinner = SpinnerName.Dots;
+```
+
+**`AvonicConfig.Animated` doesn't stop it.** Ionic's `animated` config reaches the ripple (`tap-click`) and the transitions
+of the accordion, the menu, `ion-nav`, `ion-router-outlet`, overlays and the searchbar, and the skeleton text's shimmer, not
+`spinner.js`. A spinner is the user's only sign that something is happening, so it keeps turning. To stop one, set `Paused`.
 
 **It sits at the start of its parent.** It's `inline-block` in Ionic, so it doesn't stretch. It defaults to
 `HorizontalAlignment="Left"` and `VerticalAlignment="Top"`, so set `Center` to centre it.
@@ -55,7 +66,7 @@ None in Ionic, none here.
 |---|---|---|---|
 | [x] | `.ion-color` | `:ion-color` | From `ColorPalette` |
 | [x] | `.spinner-<name>` | `:name-<name>` | `:name-bubbles` … `:name-lines-sharp-small`, for the name it draws, so `:name-circular` with no name |
-| [x] | `.spinner-paused` | `:paused` | While `Paused`, or while `AvonicConfig.Animated` is off. `Animated` has no change notice, so a change of it reaches `:paused` at the spinner's next look, within 250 ms while it's shown, and when it's next shown otherwise |
+| [x] | `.spinner-paused` | `:paused` | While `Paused`. Ionic also adds it for `_testing`, below |
 
 ### CSS variables
 
@@ -67,14 +78,15 @@ None in Ionic, none here.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `spinner` | — | Not yet: `AvonicConfig` is a shared file. Proposed in the PR. A spinner with no name is `circular` |
-| [x] | `_testing` | `AvonicConfig.Animated` off | Pauses every spinner at its next frame. Turned back on, a spinner carries on within 250 ms |
+| [x] | `spinner` | `AvonicConfig.Spinner` (`SpinnerName?`) | The name of a spinner with none. Read at each render, as above. Null is `Circular` |
+| [ ] | `_testing` | — | Not applicable: a private config for Ionic's own screenshot tests, which pauses every spinner |
+| [ ] | `animated` | — | Not read, as in Ionic. `AvonicConfig.Animated` off leaves spinners turning |
 
 ## Behaviours
 
 From [PLAN.md](PLAN.md), each a test in `AvonicSpinnerTests`:
 
-1. With no name it's `circular`.
+1. With no name it's `circular`, or the name `AvonicConfig.Spinner` gives (20).
 2. Each name has exactly its elements from `spinner-configs.js`, with `spinner.css`'s strokes, caps and fills.
 3. Each name has its own duration.
 4. A duration over 10 ms replaces it, and a change keeps the elapsed time.
@@ -91,9 +103,11 @@ From [PLAN.md](PLAN.md), each a test in `AvonicSpinnerTests`:
 14. Not mirrored right to left.
 15. A progress bar to automation, not focusable, at the start of its parent, and its whole box takes input.
 16. Frames are asked for only while it runs, and each one redraws.
-17. `AvonicConfig.Animated` off pauses it, and on again carries on.
+17. `AvonicConfig.Animated` off changes nothing: it keeps turning, as Ionic's spinner doesn't read `animated`.
 18. It draws that frame, in its colour.
 19. The host has a class for its name and one for paused, which an app's style can select.
+20. `AvonicConfig.Spinner` names a spinner that has none, read when it's first attached and at each change of a prop, and not
+    when only the config changes, or when it's moved, or hidden and shown.
 
 ## Extensions
 
@@ -110,5 +124,6 @@ offsets and timings are each name's definition, which no Ionic app can reach, so
 
 ## Known gaps
 
-- **`config.spinner`** isn't read, as `AvonicConfig` is shared. Waiting on the proposal in the PR.
+- **The config is read at a prop's change,** where Stencil renders at the next frame, so in Ionic a config set just after the
+  change still counts. Here every change applies at once. Set `AvonicConfig.Spinner` before. See [COMPARISON.md](COMPARISON.md).
 - **Not tried in a real window.** Compared headless at 350 ms; see [COMPARISON.md](COMPARISON.md).

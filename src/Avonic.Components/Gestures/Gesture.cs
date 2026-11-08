@@ -133,18 +133,9 @@ public sealed class Gesture : IDisposable
 
     // ── index.js ─────────────────────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Ionic's <c>now(ev)</c>, <c>ev.timeStamp || Date.now()</c>: the event's own time, in milliseconds, or the clock's if it has
-    /// none. Only differences are used, except by a control that compares <see cref="GestureDetail.CurrentTime"/> with a later
-    /// event's <see cref="PointerEventArgs.Timestamp"/>, as <c>ion-menu</c> does. Tests substitute the clock, as headless input's
-    /// timestamps can't be set.
-    /// </summary>
-    internal static Func<PointerEventArgs, double> EventTime { get; set; } =
-        static ev => ev.Timestamp > 0 ? ev.Timestamp : AvonicConfig.Now().TotalMilliseconds;
-
     private bool PointerDown(PointerPressedEventArgs ev)
     {
-        var timeStamp = EventTime(ev);
+        var timeStamp = AvonicConfig.EventTime(ev);
         if (_hasStartedPan || !_hasFiredStart)
         {
             return false;
@@ -370,7 +361,7 @@ public sealed class Gesture : IDisposable
         UpdateDetail(ev, detail);
         var currentX = detail.CurrentX;
         var currentY = detail.CurrentY;
-        var timestamp = detail.CurrentTime = EventTime(ev);
+        var timestamp = detail.CurrentTime = AvonicConfig.EventTime(ev);
         var timeDelta = timestamp - prevT;
         if (timeDelta > 0 && timeDelta < 100)
         {

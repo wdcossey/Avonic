@@ -71,7 +71,8 @@ its end callback.
 | `body.backdrop-no-scroll` | `ScrollDisabledChanged`, raised when `IsScrollDisabled` changes |
 
 Positions are in the top level's coordinates, as Ionic's `pageX` is the page's. Times are the events' own `Timestamp`, in
-milliseconds, as Ionic's are `ev.timeStamp`, and velocities pixels per millisecond: `0.7` of the last move's speed and `0.3` of what it was, leaving out moves
+milliseconds, as Ionic's are `ev.timeStamp`, through `AvonicConfig.EventTime` (internal), which `TestClock` swaps along with
+`AvonicConfig.Now`, as headless input's timestamps can't be set. Velocities are pixels per millisecond: `0.7` of the last move's speed and `0.3` of what it was, leaving out moves
 0 ms or 100 ms or more after the last. `OnMove` runs once a frame, through `AvonicConfig.RequestFrame`, with the first move of the
 frame; the others are dropped, not merged.
 
