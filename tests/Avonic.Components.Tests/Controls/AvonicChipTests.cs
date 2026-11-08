@@ -946,6 +946,33 @@ public class AvonicChipTests
     });
 
     [AvaloniaFact]
+    public void B12_Any_Value_Shown_As_Text_Is_Not_A_Child() => InstalledTheme.Run(_ =>
+    {
+        // A number is shown as its text, as a string is, and so is an item through DisplayMemberBinding.
+        var icon = new AvonicIcon { IconName = "pin" };
+        var number = Chip(icon, 42);
+        var bound = new AvonicIcon { IconName = "pin" };
+        var member = Chip(bound, new Uri("https://example.com/"));
+        member.DisplayMemberBinding = new Avalonia.Data.Binding(nameof(Uri.Host));
+        using var scene = Themed(number, member);
+
+        Assert.Equal(new Thickness(8, -4, -4, -4), icon.Margin);
+        Assert.Equal(new Thickness(8, -4, -4, -4), bound.Margin);
+    });
+
+    [AvaloniaFact]
+    public void B12_A_String_That_A_Data_Template_Makes_An_Icon_Is_A_Child() => InstalledTheme.Run(_ =>
+    {
+        // The template is found around the chip, as the slot finds it, not given as its ItemTemplate.
+        var chip = new AvonicChip { ItemsSource = new object[] { "pin", new AvonicLabel { Content = "Text" } } };
+        chip.DataTemplates.Add(new FuncDataTemplate<string>((name, _) => new AvonicIcon { IconName = name }));
+        using var scene = Themed(chip);
+
+        var icon = Assert.IsType<AvonicIcon>(Assert.IsAssignableFrom<ContentPresenter>(chip.ContainerFromIndex(0)).Child);
+        Assert.Equal(new Thickness(-4, -4, 8, -4), icon.Margin);
+    });
+
+    [AvaloniaFact]
     public void B12_RTL_Mirrors_The_Icons() => InstalledTheme.Run(_ =>
     {
         var first = new AvonicIcon { IconName = "pin" };

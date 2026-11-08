@@ -30,7 +30,7 @@ The design and evidence are in [PLAN.md](PLAN.md), and the comparison with real 
 ### Content
 
 `core.json` lists no slot, and the default slot holds several children, so they're `Items`, as an `ItemsControl`'s are
-([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). A string is a child too, shown as text, and like a text node it isn't counted for the first and last child's margins. The chip is an `ItemsControl`, so
+([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). A string is a child too, shown as text, and like a text node it isn't counted for the first and last child's margins, nor is any value shown as its text. One a template makes into a control is counted. The chip is an `ItemsControl`, so
 it also has `ItemsSource` and `ItemTemplate`, and an icon made by the template is slotted too. It has no events, methods or parts in Ionic. Its template has `PART_Native`
 (`Border`: background, border, radius, clip) and `PART_Ripple`.
 
@@ -76,5 +76,6 @@ None.
 |---|---|
 | A chip in an item's start or end slot has 0 margin on the other three sides, where Ionic keeps 4 | `ion-item`'s slot rule sets all four sides. Proposed in the PR |
 | An avatar child isn't sized | `ion-avatar` is #16; its rule goes in `Styles/Chip.axaml` when it exists |
-| A disabled panel fades the chip, and a flex parent doesn't stretch it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |
+| A disabled panel fades the chip, a flex parent doesn't stretch it, and a taller parent centres it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |
+| Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container, where Ionic's chip grows past it | Avalonia arranges a child within its space |
 | Not tried in a real window | Headless capture only |

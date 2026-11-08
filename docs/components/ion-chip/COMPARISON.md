@@ -56,16 +56,46 @@ The first chip pressed with a mouse at its centre, 160 ms in, as `render.js --ta
   line. CSS's shrink-to-fit takes all the room once the content doesn't fit on one line. Fixed in the chip's measure, as
   `ButtonInner` does for the button.
 
-## Found by the review
+## Found by the reviews
+
+Three passes of `/code-review` at high effort, the second on the first's fixes and the third on the second's.
+
+The first:
 
 - **Automation called the chip a list,** as an `ItemsControl`'s own peer does. Chromium gives it no role. It has its own peer now,
   a `Group`. The draft's docs said it reported nothing, which was wrong.
 - **An icon made by an `ItemTemplate` wasn't slotted,** as it's the slot's logical child, not the chip's. Each rule has a second
-  alternative for it now, and the chip counts a slot by its container's index, raising the reset again when the panel prepares,
-  moves or clears a container, as the index is still the old one when `Items` raises its change: a test that inserts at the front
-  shows it. Counting by item, as the first fix did, made two equal values from an `ItemsSource` both the first child.
+  alternative for it now.
+
+The second:
+
+- **Two equal values from an `ItemsSource` both counted as the first child,** as the first fix counted a slot by its item. The chip
+  counts a slot by its container's index now, and raises the reset again when the panel prepares, moves or clears a container, as
+  the index is still the old one when `Items` raises its change: a test that inserts at the front shows it.
 - **A string counted as a child,** so an icon then text gave the icon the first child's margins, where CSS counts only elements and
-  the icon is also the last child. The chip doesn't count a string now, unless an `ItemTemplate` makes a control of it.
+  the icon is the last child too: measured `-4px -4px -4px 8px`.
+- **A click was documented as leaving focus where it was,** where Chromium moves it to the body. It's a deliberate difference now.
+- **The slot's alignment pushed a new value frame each time the slot was reused.** It's set once, when the slot is made.
+
+The third:
+
+- **Only a string was text.** A number, or any value with no template, is shown as its text too, as is an item through
+  `DisplayMemberBinding`, and a string that a `DataTemplate` around the chip makes into an icon is an element. The chip asks for the
+  template as the slot does now. Tests: `B12_Any_Value_Shown_As_Text_Is_Not_A_Child`, `B12_A_String_That_A_Data_Template_Makes_An_Icon_Is_A_Child`.
+- **A chip in a parent taller than it is centred,** where an inline chip sits at the top of its line, measured below. Recorded as a
+  deliberate difference.
+- **Content that can't shrink is clipped at the container,** where Ionic's chip grows past it, measured below. Recorded as a gap.
+
+Waived, with the reason:
+
+- **The chip measures twice when its content doesn't fit on one line,** and **wraps every child in a slot,** which is why it has to
+  count its children itself. Both would be better in `FlexRow`, as a max-content size and an `align-items` of its own, which is a
+  shared file, so it's proposed in the PR. The shrink-to-fit measure is the same as `ButtonInner`'s, another control's file, and
+  belongs in the same place.
+- **One insert raises a reset for each container it moves,** each of which counts every child again. A chip holds a few children,
+  so it's a few dozen comparisons. Coalescing them would leave the margins stale until the dispatcher ran.
+- **The theme repeats the stub's template,** as every control here does. **`Avonic.Chip.Md.IconColor` has the same value as
+  `Avonic.ItemIconBrush`,** and stays the chip's own, so that restyling an item's icons doesn't restyle a chip's.
 
 ## Found by deliberate breakage
 
@@ -104,6 +134,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | A click leaves focus where it was | `clickPlainFocus`: Chromium moves it to the body | A click on what can't take focus leaves it alone in Avalonia, for every control |
 | A disabled ancestor fades the chip to 0.4 | A disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | A flex parent doesn't stretch it | `tall`: 64 high in a 72 flex row, label centred | `VerticalAlignment` is `Center`, for `vertical-align: middle`. Set `Stretch` for a stretched chip, and the children stay centred |
+| A parent taller than the chip centres it | `blk`: in a 100 px block, at the top, `y` 4 inside it | The same `Center`, which lines chips of different heights up in a row, as `vertical-align: middle` does. Avalonia has no line box, so one value can't do both. Set `Top` |
 | In an item's start or end slot, its margin is `0,0,16,0` or `16,0,0,0` | `initemend`: `4px 4px 4px 16px` | `Styles/Item.axaml` sets all four sides for any control in the slot, and merges after this file. See the PR's proposal |
 | The icon's factor is `1.42857142857` | Chromium: 20 | 14 × `1.4285714286` rounds up to 21 in Avalonia's layout |
 
@@ -113,3 +144,4 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 |---|---|
 | Fonts | Roboto isn't installed, as for every control so far |
 | `::slotted(ion-avatar)` | `ion-avatar` doesn't exist yet (#16) |
+| Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container's width | `nw`: 308.84 wide in a 200 px container, past its edge | Avalonia arranges a child within the space it has, so the chip can't overflow its parent. Letting its measure overflow changed nothing, as deliberate breakage showed |

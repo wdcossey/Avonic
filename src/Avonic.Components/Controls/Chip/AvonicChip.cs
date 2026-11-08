@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
@@ -104,8 +105,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     {
         base.OnPropertyChanged(change);
 
-        // A string is text, or an element once a template makes one of it.
-        if (change.Property == ItemTemplateProperty)
+        // An item is text, or an element once a template makes one of it.
+        if (change.Property == ItemTemplateProperty || change.Property == DisplayMemberBindingProperty)
         {
             RaiseChildIndexesReset();
         }
@@ -135,8 +136,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     /// <summary>
     /// <c>:nth-child</c> for a slotted control, which is the chip's logical child but not its container: its item's index.
     /// <see cref="ItemsControl"/> gives only a container's, so a child held in a <see cref="FlexSlot"/> would match nothing. A
-    /// slot made from a template is counted by its container's index. CSS counts elements, not text, so a string with no
-    /// <see cref="ItemsControl.ItemTemplate"/>, which is a text node in Ionic, isn't counted, and isn't a child itself.
+    /// slot made from a template is counted by its container's index. CSS counts elements, not text, so an item shown as its
+    /// text, which is a text node in Ionic, isn't counted, and isn't a child itself.
     /// </summary>
     int IChildIndexProvider.GetChildIndex(ILogical child) =>
         ElementIndex(child is ContentPresenter slot && IndexFromContainer(slot) is >= 0 and var index ? index : ItemsView.IndexOf(child));
@@ -147,7 +148,18 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         return true;
     }
 
-    private bool IsElement(object? item) => item is not string || ItemTemplate is not null;
+    /// <summary>
+    /// An element, as CSS counts children: a control, or an item that a template makes into one, from
+    /// <see cref="ItemsControl.ItemTemplate"/> or the <see cref="Control.DataTemplates"/> around the chip, as the slot finds it.
+    /// An item with none, or with <see cref="ItemsControl.DisplayMemberBinding"/>, is shown as its text, a text node in Ionic.
+    /// </summary>
+    private bool IsElement(object? item) => item switch
+    {
+        null => false,
+        Control => true,
+        _ when ItemTemplate is null && DisplayMemberBinding is not null => false,
+        _ => this.FindDataTemplate(item, ItemTemplate) is not null,
+    };
 
     private int ElementIndex(int itemIndex)
     {

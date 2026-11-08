@@ -80,9 +80,10 @@ presenter, `ContentPresenter:nth-child(1) > c|AvonicIcon`, and none of them appl
 icons with no margins. So the chip implements `IChildIndexProvider` again: a child's index is its item's, and a change to
 `Items` raises a reset, so that the margins follow children as they come and go. A slot made by an `ItemTemplate` is counted
 by its container's index, and the chip raises the reset again when a container is prepared, moved or cleared, as the panel
-moves its containers after `Items` raises its change. CSS counts elements, not text nodes, so a string with no
-`ItemTemplate` isn't counted: `<ion-icon>` then text gives the icon the last child's margins, as it's the only element, and so does text then `<ion-icon>`: measured `-4px -4px -4px 8px` for both. A
-string made into a control by a template is one.
+moves its containers after `Items` raises its change. CSS counts elements, not text nodes, so an item shown as its text, a
+string or any other value with no template, or any item through `DisplayMemberBinding`, isn't counted: `<ion-icon>` then text gives the icon the last child's margins, as it's the only element, and so does text then `<ion-icon>`: measured `-4px -4px -4px 8px` for both. A
+string made into a control by a template is one, whether it's the `ItemTemplate` or a `DataTemplate` around the chip: the chip
+asks for one as the slot does, with `FindDataTemplate`.
 
 `FlexRow` already does the rest: a label shrinks to its longest word and wraps, and an `AvonicIcon` has no minimum, as
 `contain: strict` gives it none, measured `longi`. The theme sets `TextBlock.TextWrapping="Wrap"`, as `white-space: normal`
@@ -165,6 +166,7 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 | Difference | Why |
 |---|---|
 | A click on a chip leaves focus where it was, where Chromium moves it to the body (measured `clickPlainFocus`: active `BODY`) | A click on what can't take focus leaves it alone in Avalonia, for every control. Clearing it would be the chip reaching outside itself |
+| A parent taller than the chip centres it, where an inline chip sits at the top of its line (measured `blk`: `y` 4 in a 100 px block) | The same `Center`, which lines chips of different heights up in a row, as `vertical-align: middle` does. Avalonia has no line box. Set `Top` |
 | A disabled ancestor fades the chip to 0.4 too, where a disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | `VerticalAlignment` is `Center`, where a flex parent stretches an Ionic chip (measured `tall`, 72) | Set `VerticalAlignment="Stretch"`; the children stay centred |
 | A chip in an item's start or end slot has margin `0,0,16,0` or `16,0,0,0`, where Ionic keeps the chip's 4 on the other three sides (measured `initemend`: `4 4 4 16`) | `Styles/Item.axaml`'s slot rule sets all four sides for any control, and merges after this control's file. 4 px at the outer edge; see the proposal in the PR |
@@ -175,6 +177,7 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 | Gap | Why |
 |---|---|
 | Roboto isn't installed here, so Chromium's text is Arial and Avalonia's is Segoe UI | Fonts, as every control so far |
+| Content that can't shrink is clipped at the container's width, where Ionic's chip grows past it (measured `nw`: 308.84 in 200) | Avalonia arranges a child within its space |
 
 ## Not in this PR
 
