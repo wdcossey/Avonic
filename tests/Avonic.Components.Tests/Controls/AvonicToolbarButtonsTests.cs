@@ -419,4 +419,142 @@ public class AvonicToolbarButtonsTests
         clock.At(100);
         Assert.Equal(Colors.Yellow, ToolbarTest.Solid(Native(outline).Background));
     });
+
+    // ── B11: hostContext ────────────────────────────────────────────────────────────────────
+    //
+    // With Avonic.ToolbarColorBrush set, as an app sets ion-toolbar-color, .in-toolbar:not(.in-toolbar-color) shows: a solid
+    // button is that colour. Measured with --ion-toolbar-color: red. A button with no toolbar colour is its own: white on primary.
+
+    private static StackPanel WithToolbarColour(params Control[] children)
+    {
+        var page = new StackPanel { Resources = { ["Avonic.ToolbarColorBrush"] = Brushes.Red } };
+        page.Children.AddRange(children);
+        return page;
+    }
+
+    private static void AssertOwnSolid(AvonicButton button)
+    {
+        Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Native(button).Background));
+        Assert.Equal(Colors.White, Text(button));
+    }
+
+    private static void AssertToolbarSolid(AvonicButton button) => Assert.Equal(Colors.Red, ToolbarTest.Solid(Native(button).Background));
+
+    /// <summary>The theme eases the background over 15 ms, on real time here, so a change is read at its end.</summary>
+    private static void NoTransitions(params AvonicButton[] buttons)
+    {
+        foreach (var button in buttons)
+        {
+            Native(button).Transitions = [];
+        }
+    }
+
+    [AvaloniaFact]
+    public void B11_A_Plain_Toolbar_Inside_A_Coloured_One_Is_Still_In_A_Coloured_Toolbar() => InstalledTheme.Run(_ =>
+    {
+        // hostContext('ion-toolbar[color]') is any toolbar around the button, not the nearest. Measured #nest and #co.
+        var solid = new AvonicButton { Content = "Solid" };
+        var outline = new AvonicButton { Content = "Outline", Fill = ButtonFill.Outline };
+        var inner = new AvonicToolbar { Content = new StackPanel { Children = { solid, outline } } };
+        using var scene = new Scene(WithToolbarColour(new AvonicToolbar { Color = "danger", Content = inner }));
+
+        AssertOwnSolid(solid);
+        Assert.Equal(ToolbarTest.Primary, Text(outline));
+        Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Native(outline).BorderBrush));
+    });
+
+    [AvaloniaFact]
+    public void B11_A_Coloured_Toolbar_Inside_A_Plain_One_Is_A_Coloured_Toolbar() => InstalledTheme.Run(_ =>
+    {
+        // Measured #nest2.
+        var solid = new AvonicButton { Content = "Solid" };
+        var inner = new AvonicToolbar { Color = "danger", Content = solid };
+        using var scene = new Scene(WithToolbarColour(new AvonicToolbar { Content = inner }));
+
+        AssertOwnSolid(solid);
+    });
+
+    [AvaloniaFact]
+    public void B11_An_Empty_Color_Is_Still_A_Color_Attribute() => InstalledTheme.Run(_ =>
+    {
+        // ion-toolbar[color] matches color="", which gives no ion-color class. Measured #e.
+        var solid = new AvonicButton { Content = "Solid" };
+        var plain = new AvonicButton { Content = "Plain" };
+        using var scene = new Scene(WithToolbarColour(new AvonicToolbar { Color = "", Content = solid }, new AvonicToolbar { Content = plain }));
+
+        AssertOwnSolid(solid);
+        AssertToolbarSolid(plain);
+    });
+
+    [AvaloniaFact]
+    public void B11_A_Toolbars_Color_Set_Later_Shows_At_The_Buttons_Next_Render() => InstalledTheme.Run(_ =>
+    {
+        // Measured: hostContext is read in render, and a toolbar's color doesn't render its buttons, so they keep in-toolbar
+        // without in-toolbar-color until a prop of theirs changes.
+        var loose = new AvonicButton { Content = "Loose" };
+        var clear = new AvonicButton { Content = "Clear" };
+        var toolbar = new AvonicToolbar { Content = loose, EndContent = Buttons(clear) };
+        using var scene = new Scene(WithToolbarColour(toolbar));
+        NoTransitions(loose, clear);
+        AssertToolbarSolid(loose);
+        Assert.Equal(Colors.Red, Text(clear));
+
+        toolbar.Color = "danger";
+        Dispatcher.UIThread.RunJobs();
+        AssertToolbarSolid(loose);
+        Assert.Equal(Colors.Red, Text(clear));
+
+        loose.Size = ButtonSize.Small;
+        clear.Strong = true;
+        Dispatcher.UIThread.RunJobs();
+        AssertOwnSolid(loose);
+        Assert.Equal(Colors.White, Text(clear));
+
+        // And back, at the next render.
+        toolbar.Color = null;
+        loose.Shape = ButtonShape.Round;
+        Dispatcher.UIThread.RunJobs();
+        AssertToolbarSolid(loose);
+    });
+
+    [AvaloniaFact]
+    public void B11_Color_And_Disabled_Render_Again_Too() => InstalledTheme.Run(_ =>
+    {
+        // Every prop renders in Ionic, color and disabled too.
+        var coloured = new AvonicButton { Content = "Coloured" };
+        var disabled = new AvonicButton { Content = "Disabled" };
+        var toolbar = new AvonicToolbar { Content = new StackPanel { Children = { coloured, disabled } } };
+        using var scene = new Scene(WithToolbarColour(toolbar));
+        NoTransitions(coloured, disabled);
+
+        toolbar.Color = "danger";
+        Dispatcher.UIThread.RunJobs();
+        AssertToolbarSolid(coloured);
+        AssertToolbarSolid(disabled);
+
+        coloured.Color = "success";
+        coloured.Color = null;
+        disabled.IsEnabled = false;
+        Dispatcher.UIThread.RunJobs();
+        AssertOwnSolid(coloured);
+        AssertOwnSolid(disabled);
+    });
+
+    [AvaloniaFact]
+    public void B11_A_Moved_Button_Reads_Where_It_Is_When_Attached() => InstalledTheme.Run(_ =>
+    {
+        // Deliberately not Ionic, which keeps a moved button's classes until its next render (measured): read again when
+        // it's attached, as :in-item is, for a recycled container.
+        var button = new AvonicButton { Content = "Moved" };
+        var plain = new StackPanel { Children = { button } };
+        var coloured = new StackPanel();
+        using var scene = new Scene(WithToolbarColour(new AvonicToolbar { Content = plain }, new AvonicToolbar { Color = "danger", Content = coloured }));
+        NoTransitions(button);
+        AssertToolbarSolid(button);
+
+        plain.Children.Remove(button);
+        coloured.Children.Add(button);
+        Dispatcher.UIThread.RunJobs();
+        AssertOwnSolid(button);
+    });
 }

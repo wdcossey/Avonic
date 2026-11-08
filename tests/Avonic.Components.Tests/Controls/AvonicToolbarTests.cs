@@ -8,7 +8,9 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -49,6 +51,30 @@ internal static class ToolbarTest
     {
         Dispatcher.UIThread.RunJobs();
         scene.Window.CaptureRenderedFrame();
+    }
+
+    /// <summary>An app's own rule, such as <c>c|AvonicTitle:size-large { Opacity: 0.25 }</c>.</summary>
+    public static Style AppStyle<T>(string pseudoClass, AvaloniaProperty property, object value) where T : Control =>
+        new(selector => selector.OfType<T>().Class(pseudoClass)) { Setters = { new Setter(property, value) } };
+
+    /// <summary>Ionic's dark palette merged into the app, as an app does, while <paramref name="test"/> runs.</summary>
+    public static void InDark(Action test)
+    {
+        var app = Application.Current!;
+        var dark = new ResourceInclude(new Uri("avares://Avonic.Themes/"))
+        {
+            Source = new Uri("avares://Avonic.Themes/Tokens/Palettes/Dark.axaml"),
+        };
+        app.Resources.MergedDictionaries.Add(dark);
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            test();
+        }
+        finally
+        {
+            app.Resources.MergedDictionaries.Remove(dark);
+        }
     }
 
     public static void PressKey(Scene scene, PhysicalKey key)
@@ -309,6 +335,93 @@ public class AvonicToolbarTests
         Assert.Equal(Colors.Yellow, ToolbarTest.Solid(Background(own).Background));
         Assert.Equal(Colors.Purple, ToolbarTest.Solid(own.Foreground));
         Assert.Equal(Colors.Green, ToolbarTest.Solid(Background(own).BorderBrush));
+    });
+
+    // ── T10: the dark palette ───────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void T10_In_The_Dark_Palette_The_Text_Is_White_And_The_Border_Step_150() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        var title = new AvonicTitle { Content = "Title" };
+        var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
+        var clear = new AvonicButton { Content = "Clear" };
+        var toolbar = new AvonicToolbar { StartContent = Buttons(solid, clear), Content = title };
+        using var scene = ToolbarTest.Show(toolbar);
+
+        // Measured with dark.always.css: color #ffffff (ion-text-color), border-color #363636 (ion-background-color-step-150),
+        // on #1f1f1f. A solid button in ion-buttons is the toolbar's text colour, with the toolbar's background as its text.
+        Assert.Equal(Colors.White, ToolbarTest.Solid(toolbar.Foreground));
+        Assert.Equal(Colors.White, ToolbarTest.Solid(title.Foreground));
+        Assert.Equal(Color.Parse("#363636"), ToolbarTest.Solid(Background(toolbar).BorderBrush));
+        Assert.Equal(Color.Parse("#1F1F1F"), ToolbarTest.Solid(Background(toolbar).Background));
+        var native = ToolbarTest.Part<Border>(solid, "PART_Native");
+        Assert.Equal(Colors.White, ToolbarTest.Solid(native.Background));
+        Assert.Equal(Color.Parse("#1F1F1F"), ToolbarTest.Solid(TextElement.GetForeground(native)));
+        Assert.Equal(Colors.White, ToolbarTest.Solid(TextElement.GetForeground(ToolbarTest.Part<Border>(clear, "PART_Native"))));
+    }));
+
+    [AvaloniaFact]
+    public void T10_The_Dark_Palette_Still_Gives_Way_To_The_Toolbar_Tokens() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        var toolbar = new AvonicToolbar
+        {
+            Content = "x",
+            Resources = { ["Avonic.ToolbarColorBrush"] = Brushes.Red, ["Avonic.ToolbarBorderColorBrush"] = Brushes.Blue },
+        };
+        using var scene = ToolbarTest.Show(toolbar);
+
+        Assert.Equal(Colors.Red, ToolbarTest.Solid(toolbar.Foreground));
+        Assert.Equal(Colors.Blue, ToolbarTest.Solid(Background(toolbar).BorderBrush));
+    }));
+
+    // ── T11: ionStyle ───────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void T11_A_Title_Gives_The_Toolbar_Its_Size_As_A_Host_Class() => InstalledTheme.Run(_ =>
+    {
+        // toolbar-title-default, -small and -large, as measured in Chromium. md has no rule on them, but an app's can.
+        var title = new AvonicTitle { Content = "Title", Size = TitleSize.Large };
+        var toolbar = new AvonicToolbar { Content = title };
+        var page = new StackPanel { Children = { toolbar } };
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-large", Visual.OpacityProperty, 0.25));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-small", Visual.OpacityProperty, 0.5));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-default", Visual.OpacityProperty, 0.75));
+        using var scene = ToolbarTest.Show(page);
+        Assert.Equal(0.25, toolbar.Opacity);
+
+        // sizeChanged emits again, and the toolbar drops what the title said before.
+        title.Size = TitleSize.Small;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0.5, toolbar.Opacity);
+
+        title.Size = null;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0.75, toolbar.Opacity);
+    });
+
+    [AvaloniaFact]
+    public void T11_A_Title_Added_Later_Tells_The_Toolbar() => InstalledTheme.Run(_ =>
+    {
+        // connectedCallback emits.
+        var toolbar = new AvonicToolbar();
+        var page = new StackPanel { Children = { toolbar } };
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-large", Visual.OpacityProperty, 0.25));
+        using var scene = ToolbarTest.Show(page);
+        Assert.Equal(1, toolbar.Opacity);
+
+        toolbar.Content = new AvonicTitle { Content = "Title", Size = TitleSize.Large };
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0.25, toolbar.Opacity);
+    });
+
+    [AvaloniaFact]
+    public void T11_The_Toolbar_Stops_Ion_Style_So_An_Item_Around_It_Hears_Nothing() => InstalledTheme.Run(_ =>
+    {
+        // childrenStyle calls stopPropagation: a label in a toolbar in an item isn't the item's label.
+        var item = new AvonicItem { Content = new AvonicToolbar { Content = new AvonicLabel { Content = "In a toolbar" } } };
+        using var scene = ToolbarTest.Show(item);
+
+        Assert.DoesNotContain(":item-label", item.Classes);
     });
 
     // ── T9: the safe area's sides ───────────────────────────────────────────────────────────
@@ -609,6 +722,24 @@ public class AvonicToolbarTests
         Assert.True(header.IsVisible);
         Assert.Equal(56, header.Bounds.Height);
         Assert.Equal(AutomationLandmarkType.Banner, ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
+    });
+
+    [AvaloniaFact]
+    public void H5_A_Fade_Header_Has_Ionics_Host_Class_For_An_App_To_Style() => InstalledTheme.Run(_ =>
+    {
+        // header-collapse-fade, as measured in Chromium. md has no rule on it, but an app's can.
+        var fade = new AvonicHeader { Collapse = HeaderCollapse.Fade, Items = { new AvonicToolbar { Content = "Fade" } } };
+        var plain = new AvonicHeader { Items = { new AvonicToolbar { Content = "Plain" } } };
+        var page = new StackPanel { Children = { fade, plain } };
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicHeader>(":collapse-fade", Visual.OpacityProperty, 0.25));
+        using var scene = ToolbarTest.Show(page);
+
+        Assert.Equal(0.25, fade.Opacity);
+        Assert.Equal(1, plain.Opacity);
+
+        fade.Collapse = null;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, fade.Opacity);
     });
 
     // ── H4, F3: landmarks ───────────────────────────────────────────────────────────────────

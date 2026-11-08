@@ -120,4 +120,10 @@
     <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="#1F1F1F" />
     <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="#1E1E1E" />
 
+    <!-- toolbar.md.css's color and border-color fall back to ion-text-color and ion-background-color-step-150, which dark
+         sets and light leaves unset, so the literal fallbacks in Tokens/Toolbar.axaml change here. The color is also a solid
+         button's background in ion-buttons (buttons.md.css). -->
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.ColorBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Avonic.Toolbar.Md.BorderColorBrush" Color="#363636" />
+
 </ResourceDictionary>

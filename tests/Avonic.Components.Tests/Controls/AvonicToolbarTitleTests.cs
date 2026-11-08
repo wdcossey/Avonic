@@ -98,6 +98,24 @@ public class AvonicToolbarTitleTests
         Assert.Equal(Text(plain).TextWrapping, Text(large).TextWrapping);
     });
 
+    [AvaloniaFact]
+    public void Ti3_Large_Has_Ionics_Host_Class_For_An_App_To_Style() => InstalledTheme.Run(_ =>
+    {
+        // title-large, as measured in Chromium. md has no rule on it, but an app's can.
+        var large = new AvonicTitle { Content = "Title", Size = TitleSize.Large };
+        var plain = new AvonicTitle { Content = "Title" };
+        var page = new StackPanel { Children = { new AvonicToolbar { Content = large }, new AvonicToolbar { Content = plain } } };
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicTitle>(":size-large", Visual.OpacityProperty, 0.25));
+        using var scene = new Scene(page);
+
+        Assert.Equal(0.25, large.Opacity);
+        Assert.Equal(1, plain.Opacity);
+
+        large.Size = TitleSize.Small;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, large.Opacity);
+    });
+
     // ── Ti4 ─────────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

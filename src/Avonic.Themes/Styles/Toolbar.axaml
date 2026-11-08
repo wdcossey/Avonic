@@ -6,6 +6,12 @@
     <!-- What a header or footer does to its toolbars, what ion-buttons does to the buttons in it (buttons.md.css), and what
          button.md.css does to a button in a toolbar (.in-toolbar). A ControlTheme can't reach any of them.
 
+         The button works out :in-toolbar, :in-toolbar-color and :in-buttons itself, as Ionic's hostContext does, so these
+         rules don't look at its ancestors. The ones from button.md.css follow its classes, which it reads when it renders:
+         a toolbar's color set later shows at the button's next render, as in Ionic. The ones from buttons.md.css's
+         host-context(.ion-color) are plain CSS in Ionic, which follows the toolbar's color at once, so they still look for
+         a coloured toolbar.
+
          A button's theme sets most of these in rules with a pseudoclass, which beat a global rule without one. So each rule
          here has a pseudoclass that's always true for its case, and then beats the theme, as global styles beat a
          ControlTheme. Within this file, later beats earlier. A button's own Avonic.Button.* keys stay first, as they do in
@@ -42,8 +48,8 @@
     </Style>
 
     <!-- .in-toolbar:not(.ion-color):not(.in-toolbar-color) .button-native { color: var(ion-toolbar-color, var(color)) }. Any
-         button in a toolbar, in ion-buttons or not. -->
-    <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:not(:ion-color) /template/ Border#PART_Native">
+         button in a toolbar, in ion-buttons or not, with no coloured toolbar around it at any depth. -->
+    <Style Selector="c|AvonicButton:in-toolbar:not(:in-toolbar-color):not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="TextElement.Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
@@ -53,7 +59,7 @@
     </Style>
 
     <!-- .button-solid.in-toolbar…: background var(ion-toolbar-color, var(background)), color var(ion-toolbar-background, var(color)) -->
-    <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:fill-solid:not(:ion-color) /template/ Border#PART_Native">
+    <Style Selector="c|AvonicButton:fill-solid:in-toolbar:not(:in-toolbar-color):not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
@@ -66,7 +72,7 @@
 
     <!-- .button-outline.ion-activated.in-toolbar… { background: var(ion-toolbar-background, …) }. Its color falls back to
          an invalid list, so the text inherits. -->
-    <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:fill-outline:activated:not(:ion-color) /template/ Border#PART_Native">
+    <Style Selector="c|AvonicButton:fill-outline:activated:in-toolbar:not(:in-toolbar-color):not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="Background" Value="{DynamicResource Avonic.ToolbarBackgroundBrush}" />
     </Style>
 
@@ -74,19 +80,20 @@
          var(ion-toolbar-color, var(color, …)) }, which is its text colour; in ion-buttons, border-color: currentColor, or the
          coloured toolbar's contrast, which is its text too. Directly in a coloured toolbar it keeps its own border colour,
          measured. -->
-    <Style Selector="c|AvonicToolbar:not(:ion-color) c|AvonicButton:fill-outline:not(:ion-color) /template/ Border#PART_Native, c|AvonicButtons c|AvonicButton:fill-outline /template/ Border#PART_Native">
+    <Style Selector="c|AvonicButton:fill-outline:in-toolbar:not(:in-toolbar-color):not(:ion-color) /template/ Border#PART_Native, c|AvonicButton:fill-outline:in-buttons /template/ Border#PART_Native">
         <Setter Property="BorderBrush" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
     </Style>
 
     <!-- ion-button's inToolbar is closest('ion-buttons'): with no fill it's clear. A Fill the app sets wins.
-         ::slotted(*) ion-button { margin: 0 2px } -->
-    <Style Selector="c|AvonicButtons c|AvonicButton">
+         ::slotted(*) ion-button { margin: 0 2px }. The rules for ion-buttons are plain CSS in Ionic, which follows a moved
+         button at once. :in-buttons does too, as the button reads it again when it's attached. -->
+    <Style Selector="c|AvonicButton:in-buttons">
         <Setter Property="Fill" Value="Clear" />
         <Setter Property="Margin" Value="2,0" />
     </Style>
 
     <!-- ::slotted(*) ion-button { padding: 3px 8px; min-height: 32px } -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:not(:has-icon-only)">
+    <Style Selector="c|AvonicButton:in-buttons:not(:has-icon-only)">
         <Setter Property="MinHeight" Value="32" />
         <Style Selector="^ /template/ c|ButtonInner#PART_Inner">
             <Setter Property="Margin">
@@ -102,7 +109,7 @@
     </Style>
 
     <!-- ::slotted(*) .button-has-icon-only { padding-top: 0; padding-bottom: 0 }, ::slotted(*) ion-icon[slot=icon-only] { font-size: 1.8em; margin: 0 }. A button's icon-only icon has no margin anyway. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:has-icon-only">
+    <Style Selector="c|AvonicButton:in-buttons:has-icon-only">
         <Setter Property="MinHeight" Value="32" />
         <Style Selector="^ /template/ c|ButtonInner#PART_Inner">
             <Setter Property="Margin">
@@ -124,9 +131,9 @@
         </Style>
     </Style>
 
-    <!-- ::slotted(*) ion-button:not(.button-round) { border-radius: 2px }. With no pseudoclass, on purpose: the theme's
-         rules for a round button and a full one have one, so they win, as button.md.css's border-radius beats this variable. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton /template/ Border#PART_Native">
+    <!-- ::slotted(*) ion-button:not(.button-round) { border-radius: 2px }. Not for a full button either: button.md.css's
+         border-radius on it beats this variable, where the theme's rule for it would lose to this one. -->
+    <Style Selector="c|AvonicButton:in-buttons:not(:shape-round):not(:expand-full) /template/ Border#PART_Native">
         <Setter Property="CornerRadius">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.BorderRadius" />
@@ -137,7 +144,7 @@
 
     <!-- ::slotted(*) .button-has-icon-only.button-clear: 48 square, padding 12, border-radius 50%, no margin. And
          rippleType: unbounded for a clear, icon-only button in ion-buttons. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:has-icon-only:fill-clear">
+    <Style Selector="c|AvonicButton:in-buttons:has-icon-only:fill-clear">
         <Setter Property="Margin" Value="0" />
         <Setter Property="Width" Value="48" />
         <Setter Property="Height" Value="48" />
@@ -166,7 +173,7 @@
     </Style>
 
     <!-- ::slotted(*) ion-icon[slot=start] { margin-inline-end: 0.3em; font-size: 1.4em }, in the icon's own em -->
-    <Style Selector="c|AvonicButtons c|AvonicButton /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+    <Style Selector="c|AvonicButton:in-buttons /template/ ContentPresenter#PART_Start > c|AvonicIcon">
         <Setter Property="Margin" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.IconMarginConverter}, ConverterParameter='0,0.3'}" />
         <Setter Property="FontSize">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.4">
@@ -176,7 +183,7 @@
     </Style>
 
     <!-- ::slotted(*) ion-icon[slot=end] { margin-inline-start: 0.4em; font-size: 1.4em } -->
-    <Style Selector="c|AvonicButtons c|AvonicButton /template/ ContentPresenter#PART_End > c|AvonicIcon">
+    <Style Selector="c|AvonicButton:in-buttons /template/ ContentPresenter#PART_End > c|AvonicIcon">
         <Setter Property="Margin" Value="{Binding FontSize, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicButton.IconMarginConverter}, ConverterParameter='0.4,0'}" />
         <Setter Property="FontSize">
             <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.4">
@@ -186,8 +193,8 @@
     </Style>
 
     <!-- ::slotted(*) .button-clear and .button-outline { color: initial }: color: var(color) is invalid, so the text
-         inherits the toolbar's, in every state. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:fill-clear, c|AvonicButtons c|AvonicButton:fill-outline">
+         inherits the toolbar's, in every state. A button that's neither solid nor default is one of the two. -->
+    <Style Selector="c|AvonicButton:in-buttons:not(:fill-solid):not(:fill-default)">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />
@@ -197,7 +204,7 @@
     </Style>
 
     <!-- ::slotted(*) .button-solid { color: var(ion-toolbar-background, …); background: var(ion-toolbar-color, var(ion-text-color, #424242)); box-shadow: none } -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:fill-solid">
+    <Style Selector="c|AvonicButton:in-buttons:fill-solid">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />
@@ -208,7 +215,7 @@
             <Setter Property="BoxShadow" Value="none" />
         </Style>
     </Style>
-    <Style Selector="c|AvonicButtons c|AvonicButton:fill-solid:not(:ion-color) /template/ Border#PART_Native">
+    <Style Selector="c|AvonicButton:in-buttons:fill-solid:not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
@@ -220,7 +227,7 @@
 
     <!-- .ion-color ion-buttons .button-solid { background: var(ion-color-contrast); color: var(ion-color-base) }: in a
          coloured toolbar. The colour's variables inherit from it, as ColorPalette's do. -->
-    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButtons c|AvonicButton:fill-solid">
+    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid">
         <Setter Property="Foreground">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Color" />
@@ -228,7 +235,7 @@
             </MultiBinding>
         </Setter>
     </Style>
-    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButtons c|AvonicButton:fill-solid:not(:ion-color) /template/ Border#PART_Native">
+    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid:not(:ion-color) /template/ Border#PART_Native">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.Background" />
@@ -241,7 +248,7 @@
          coloured toolbar they're its contrast, which is the text colour too. They're set on the button, so they beat an
          app's global Avonic.Button.BackgroundHover and BackgroundFocused, as they do here. One rule for both: the overlay
          only shows when the theme raises its opacity. A button's own colour keeps its own. Activated is below. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:not(:ion-color) /template/ Border#PART_Overlay">
+    <Style Selector="c|AvonicButton:in-buttons:not(:ion-color) /template/ Border#PART_Overlay">
         <Setter Property="Background" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
     </Style>
 
@@ -249,12 +256,12 @@
          button, so it beats an app's Avonic.Button.BackgroundActivated. Activated comes after hover and focus in
          button.md.css, so it wins while hovered or focused too. A button's own colour has its own hover and focus rules, which
          are more specific. -->
-    <Style Selector="c|AvonicButtons c|AvonicButton:activated:not(:ion-color):not(:fill-default) /template/ Border#PART_Overlay">
+    <Style Selector="c|AvonicButton:in-buttons:activated:not(:ion-color):not(:fill-default) /template/ Border#PART_Overlay">
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <!-- .ion-color ion-buttons .button-solid { background-focused: var(ion-color-shade); background-hover: var(ion-color-base) } -->
-    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButtons c|AvonicButton:fill-solid:ion-focused:not(:ion-color) /template/ Border#PART_Overlay">
+    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid:ion-focused:not(:ion-color) /template/ Border#PART_Overlay">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.BackgroundFocused" />
@@ -262,7 +269,7 @@
             </MultiBinding>
         </Setter>
     </Style>
-    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButtons c|AvonicButton:fill-solid:ion-hover:not(:ion-color) /template/ Border#PART_Overlay">
+    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid:ion-hover:not(:ion-color) /template/ Border#PART_Overlay">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.BackgroundHover" />

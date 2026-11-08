@@ -102,4 +102,28 @@ public class AvonicToolbarCaptureTests
         // The header, eight toolbars and the footer, each 56 high, as measured.
         Assert.Equal(Enumerable.Repeat(56d, 10), page.Children.Select(child => child.Bounds.Height));
     });
+
+    // The same page with Ionic's dark palette, for the frame in COMPARISON.md: css/palettes/dark.always.css on the Ionic side.
+    [AvaloniaFact]
+    public void Reference_Page_Dark() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        var page = ReferencePage();
+        TextElement.SetFontSize(page, 16);
+
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = new SolidColorBrush(Color.Parse("#121212"));
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
+        {
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, "avonic-toolbar-page-dark.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+        }
+
+        // The first toolbar's text, measured #ffffff in dark.
+        var header = (AvonicHeader)page.Children[0];
+        Assert.Equal(Colors.White, ToolbarTest.Solid(((AvonicToolbar)header.Items[0]!).Foreground));
+    }));
 }
