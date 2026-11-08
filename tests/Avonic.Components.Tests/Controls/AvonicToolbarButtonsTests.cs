@@ -87,11 +87,10 @@ public class AvonicToolbarButtonsTests
         var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
         using var scene = InToolbar(null, edit, small, solid);
 
-        // Measured #edit: 51.25 × 32 at y 12, margin 0 2, padding 3px 8px, radius 2.
+        // Measured #edit: 48.72 × 32 at y 12, margin 0 2, padding 3px 8px, radius 2. 49 here, as layout rounds it.
         Assert.Equal(32, edit.Bounds.Height);
         ToolbarTest.Near(12, ToolbarTest.Box(edit, scene.Window).Y);
-        // The text's width differs with the font: Arial in Chromium, Segoe UI here.
-        ToolbarTest.Near(51.25, edit.Bounds.Width, 3);
+        ToolbarTest.Near(48.72, edit.Bounds.Width);
         Assert.Equal(new Thickness(2, 0), edit.Margin);
         Assert.Equal(new Thickness(8, 3), Padding(edit));
         Assert.Equal(new CornerRadius(2), Native(edit).CornerRadius);

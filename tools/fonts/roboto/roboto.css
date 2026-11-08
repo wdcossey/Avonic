@@ -1,0 +1,10 @@
+/* Roboto for the Chromium tools, from the files the tests and the sample embed. See README.md.
+   The overrides are the files' own hhea ascender, descender and line gap over 2048 units, which Avalonia uses, and Chromium does
+   on Android, Linux and macOS. Chromium on Windows uses the OS/2 win metrics instead, which make line-height: normal 21 at 16px
+   rather than 18.75. */
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 400; src: url("Roboto-Regular.ttf") format("truetype");
+             ascent-override: 92.7734375%; descent-override: 24.4140625%; line-gap-override: 0%; }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 500; src: url("Roboto-Medium.ttf") format("truetype");
+             ascent-override: 92.7734375%; descent-override: 24.4140625%; line-gap-override: 0%; }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 700; src: url("Roboto-Bold.ttf") format("truetype");
+             ascent-override: 92.7734375%; descent-override: 24.4140625%; line-gap-override: 0%; }

@@ -830,9 +830,9 @@ public class AvonicNoteTests
     [AvaloniaFact]
     public void B16_A_Long_Note_In_A_Dividers_End_Slot_Fills_The_Row_From_The_Top() => InstalledTheme.Run(_ =>
     {
-        // Element 14: the note is 342 wide and 52 high at x = 32, y = 0, in a divider of 53. Its height is two lines and the
-        // padding, so it follows the font: 58 with Segoe UI. Its box is as wide as its longest line here, not the slot, which is
-        // the item's recorded gap for a long note in a slot.
+        // Element 14: the note is 342 wide and 54 high at x = 32, y = 0, in a divider of 55. Its height is two lines and the
+        // padding, so it follows the font, which is Roboto on both sides: 54 here too. Its box is as wide as its longest line
+        // here, not the slot, which is the item's recorded gap for a long note in a slot.
         var note = new AvonicNote { Content = "A very long note in a divider end slot that certainly has to wrap because it does not fit" };
         var divider = new AvonicItemDivider { Content = new AvonicLabel { Content = "Default" }, EndContent = note };
         using var scene = InScene(divider);
@@ -842,6 +842,7 @@ public class AvonicNoteTests
         Assert.Equal(0, box.Y);
         Assert.InRange(box.Width, 300, 342);
         Assert.Equal(28 + Text(note).Bounds.Height, box.Height);
+        Assert.Equal(54, box.Height);
         Assert.Equal(2, Text(note).TextLayout.TextLines.Count);
         Assert.Equal(box.Height + 1, divider.Bounds.Height);
     });

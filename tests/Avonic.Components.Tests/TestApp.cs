@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Headless;
 using Avonic.Components;
+using Avonic.Sample;
 
 [assembly: AvaloniaTestApplication(typeof(Avonic.Components.Tests.TestApp))]
 
@@ -15,6 +16,7 @@ public class TestApp : Application
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<TestApp>()
             .UseSkia()
+            .WithRoboto()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
 
     public override void Initialize()

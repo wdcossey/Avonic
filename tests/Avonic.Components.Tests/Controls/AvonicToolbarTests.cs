@@ -124,16 +124,17 @@ public class AvonicToolbarTests
         var toolbar = new AvonicToolbar { StartContent = start, Content = new AvonicTitle { Content = "Header" }, EndContent = end };
         using var scene = ToolbarTest.Show(toolbar);
 
-        // Measured: start 4–52, content 52–282.75, end 282.75–386, the icon button 48 high at 4, Edit 32 high at 12.
+        // Measured: start 4–52, content 52–285.28, end 285.28–386, the icon button 48 high at 4, Edit 32 high at 12.
         var startBox = ToolbarTest.Box(start, toolbar);
         var content = ToolbarTest.Box(ContentPart(toolbar), toolbar);
         var endBox = ToolbarTest.Box(end, toolbar);
         Assert.Equal(new Rect(4, 4, 48, 48), startBox);
         ToolbarTest.Near(52, content.X);
         ToolbarTest.Near(endBox.X, content.Right);
+        ToolbarTest.Near(285.28, content.Right);
         ToolbarTest.Near(386, endBox.Right);
         ToolbarTest.Near(12, ToolbarTest.Box(edit, toolbar).Y);
-        ToolbarTest.Near(103.25, endBox.Width, 3);
+        ToolbarTest.Near(100.72, endBox.Width);
     });
 
     [AvaloniaFact]
@@ -147,12 +148,13 @@ public class AvonicToolbarTests
         };
         using var scene = ToolbarTest.Show(toolbar);
 
-        // Measured: content 0–248.58, secondary 248.58–296.58, primary 296.58–386.
+        // Measured: content 0–251.72, secondary 251.72–299.72, primary 299.72–386. Avonic's are whole pixels.
         var content = ToolbarTest.Box(ContentPart(toolbar), toolbar);
         var secondaryBox = ToolbarTest.Box(secondary, toolbar);
         var primaryBox = ToolbarTest.Box(primary, toolbar);
         Assert.Equal(0, content.X);
         ToolbarTest.Near(secondaryBox.X, content.Right);
+        ToolbarTest.Near(251.72, secondaryBox.X, 1);
         Assert.Equal(48, secondaryBox.Width);
         ToolbarTest.Near(primaryBox.X, secondaryBox.Right);
         ToolbarTest.Near(386, primaryBox.Right);
