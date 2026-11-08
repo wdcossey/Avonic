@@ -48,7 +48,8 @@
 >   ```
 >
 > - **`s8`**, for review findings: a full clear icon-only button in `ion-buttons`, round and not; and with `ion-button { --color-focused: orange }`
->   and `ion-focused` added, a default and a clear button in `ion-buttons` in a toolbar, and a default one in `ion-buttons` alone:
+>   and `ion-focused` added, a default and a clear button in `ion-buttons` in a toolbar, and a default one in `ion-buttons` alone;
+>   and, in a desktop context for hover, a solid button in `ion-buttons` in a primary toolbar, hovered and then pressed:
 >
 >   ```html
 >   <ion-toolbar><ion-buttons slot="start"><ion-button id="full" expand="full"><ion-icon slot="icon-only" name="star"></ion-icon></ion-button><ion-button id="fullround" expand="full" shape="round"><ion-icon slot="icon-only" name="star"></ion-icon></ion-button><ion-button id="def" fill="default">Default</ion-button><ion-button id="clr">Clear</ion-button></ion-buttons></ion-toolbar><ion-buttons><ion-button id="def2" fill="default">Default</ion-button></ion-buttons>
@@ -140,7 +141,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicToo
 | B4 | Start and end icons | `s2` `#ic1` 19.6 with 5.88 after; `#ic2` 19.6 with 7.84 before | match |
 | B5 | Uncoloured toolbar | clear and outline `rgb(66, 66, 66)`, outline's border too; solid `rgb(66, 66, 66)` behind white text; `success` clear keeps `rgb(45, 213, 91)` | match |
 | B6 | Coloured toolbar | danger: clear and outline white, outline's border white; solid white behind `rgb(197, 0, 15)`. `s4` `#lod`, directly in danger: its own green border, primary text | match. The second was found in review |
-| B7 | Focus overlays | `s3`: clear `rgb(66, 66, 66)` at 0.12; in primary, clear white at 0.12 and solid `rgb(0, 74, 205)` at 0.24. Pressed, `--background-activated: transparent` | match. Pressed, found in review |
+| B7 | Focus overlays | `s3`: clear `rgb(66, 66, 66)` at 0.12; in primary, clear white at 0.12 and solid `rgb(0, 74, 205)` at 0.24. Pressed, `--background-activated: transparent` `s8`, in a desktop context: a solid one in `ion-buttons` in a primary toolbar, hovered, `rgb(0, 84, 233)` at 0.08, and pressed while hovered, transparent | match. Pressed, found in review. Pressed while hovered, by deliberate breakage in #89 |
 | B8 | Round, and full | `s2` `#rnd`: radius 999, padding 3 8; a full button's `border-radius: 0` beats `--border-radius`. `s8`: a full clear icon-only one is 48×48 with radius 0, and 50% when it's round too | match. The full one was found by deliberate breakage, and the icon-only one by review in #89 |
 | B9 | `--ion-toolbar-color` | `button.md.css`'s `.in-toolbar` rules | match |
 | B11 | `hostContext` | `s5`: `in-toolbar-color` on `#c`, `#co` (plain inside danger), `#d`, `#do` (danger inside plain) and `#e` (`color=""`), each its own white on primary, with `--ion-toolbar-color: red` too (`s7` `#nest`, `#nest2`). `s7`: after `#t1.color = 'danger'`, `#loose` stays red and `#bc`'s text red until each renders, then primary, and white; `#bs`'s text is danger at once (`:host-context(.ion-color)`). A moved `#h` keeps `in-toolbar-color`, and `#k` moved into `ion-buttons` gets none of the classes, until each renders | match (#89), except that a moved button reads them when it's attached, and a stale solid button in `ion-buttons` takes the coloured toolbar's background at once. See the plan |

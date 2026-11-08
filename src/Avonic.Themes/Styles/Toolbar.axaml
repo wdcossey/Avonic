@@ -262,20 +262,14 @@
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
-    <!-- .ion-color ion-buttons .button-solid { background-focused: var(ion-color-shade); background-hover: var(ion-color-base) } -->
+    <!-- .ion-color ion-buttons .button-solid { background-focused: var(ion-color-shade); background-hover: var(ion-color-base) }.
+         The hover is the text colour, which the rule above for any button in ion-buttons already gives, so it has no rule of
+         its own: one after the pressed rule would beat it while hovered and pressed, where button.md.css's activated wins. -->
     <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid:ion-focused:not(:ion-color) /template/ Border#PART_Overlay">
         <Setter Property="Background">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.Button.BackgroundFocused" />
                 <Binding Path="(b:ColorPalette.Shade)" RelativeSource="{RelativeSource Self}" />
-            </MultiBinding>
-        </Setter>
-    </Style>
-    <Style Selector="c|AvonicToolbar:ion-color c|AvonicButton:in-buttons:fill-solid:ion-hover:not(:ion-color) /template/ Border#PART_Overlay">
-        <Setter Property="Background">
-            <MultiBinding Converter="{x:Static b:Css.Var}">
-                <DynamicResource ResourceKey="Avonic.Button.BackgroundHover" />
-                <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
             </MultiBinding>
         </Setter>
     </Style>

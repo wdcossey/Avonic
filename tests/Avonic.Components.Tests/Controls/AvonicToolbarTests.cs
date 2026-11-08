@@ -407,19 +407,23 @@ public class AvonicToolbarTests
         var toolbar = new AvonicToolbar { Content = title };
         var page = new StackPanel { Children = { toolbar } };
         page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-large", Visual.OpacityProperty, 0.25));
-        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-small", Visual.OpacityProperty, 0.5));
-        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-default", Visual.OpacityProperty, 0.75));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-small", Layoutable.MarginProperty, new Thickness(3)));
+        page.Styles.Add(ToolbarTest.AppStyle<AvonicToolbar>(":toolbar-title-default", Layoutable.MinWidthProperty, 77d));
         using var scene = ToolbarTest.Show(page);
         Assert.Equal(0.25, toolbar.Opacity);
+        Assert.Equal(new Thickness(0), toolbar.Margin);
 
         // sizeChanged emits again, and the toolbar drops what the title said before.
         title.Size = TitleSize.Small;
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(0.5, toolbar.Opacity);
+        Assert.Equal(1, toolbar.Opacity);
+        Assert.Equal(new Thickness(3), toolbar.Margin);
+        Assert.Equal(0, toolbar.MinWidth);
 
         title.Size = null;
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(0.75, toolbar.Opacity);
+        Assert.Equal(new Thickness(0), toolbar.Margin);
+        Assert.Equal(77, toolbar.MinWidth);
     });
 
     [AvaloniaFact]

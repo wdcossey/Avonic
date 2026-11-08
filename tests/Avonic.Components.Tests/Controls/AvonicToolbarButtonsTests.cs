@@ -294,6 +294,24 @@ public class AvonicToolbarButtonsTests
         Assert.Equal(0, ToolbarTest.Solid(Overlay(clear).Background).A);
     });
 
+    [AvaloniaFact]
+    public void B7_Hovered_And_Pressed_In_A_Coloured_Toolbar_A_Solid_Ones_Overlay_Is_Transparent() => InstalledTheme.Run(_ =>
+    {
+        // background-activated: transparent, and button.md.css's activated rule comes after its hover rule.
+        var solid = new AvonicButton { Content = "Solid", Fill = ButtonFill.Solid };
+        using var scene = new Scene(new StackPanel { Children = { new AvonicToolbar { Color = "primary", StartContent = Buttons(solid) } } });
+        using var clock = new TestClock();
+        var centre = ToolbarTest.Box(solid, scene.Window).Center;
+
+        scene.Window.MouseMove(centre, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(ToolbarTest.Primary, ToolbarTest.Solid(Overlay(solid).Background));
+
+        scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+        Assert.Equal(0, ToolbarTest.Solid(Overlay(solid).Background).A);
+    });
+
     // ── B8: round ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
