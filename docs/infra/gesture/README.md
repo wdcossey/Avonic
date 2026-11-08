@@ -60,7 +60,7 @@ its end callback.
 | `disableScroll` | `DisableScroll`: `GestureController.IsScrollDisabled` from the capture to the release |
 | `blurOnStart` | `BlurOnStart`: clears the focus before `OnStart` |
 | `canStart(detail): boolean` | `Func<GestureDetail, bool>? CanStart`. `false` ignores the press, with no `NotCaptured` |
-| `onWillStart(detail): Promise<void>` | `Func<GestureDetail, Task>? OnWillStart`. Moves are dropped until it completes, and a release before then fires nothing; `OnStart` still fires when it completes. A faulted task is rethrown on the UI thread, and `OnStart` doesn't fire |
+| `onWillStart(detail): Promise<void>` | `Func<GestureDetail, Task>? OnWillStart`. Moves are dropped until it completes, and a release before then fires nothing; `OnStart` still fires when it completes. A null task is a completed one. A faulted task is rethrown on the UI thread, and `OnStart` doesn't fire |
 | `onStart`, `onMove`, `onEnd`, `notCaptured` | `Action<GestureDetail>?` `OnStart`, `OnMove`, `OnEnd`, `NotCaptured` |
 | `passive` | Not here: an Avalonia listener can't be passive, and a captured gesture already keeps the scroller off the pointer. To stop something else seeing an event, set `detail.Event.Handled` |
 | `GestureDetail` | `GestureDetail`, one object updated in place: `Type` (`"pan"`), `StartX`, `StartY`, `StartTime`, `CurrentX`, `CurrentY`, `CurrentTime`, `DeltaX`, `DeltaY`, `VelocityX`, `VelocityY`, `Event` (`PointerEventArgs?`), and `Data`, which a control sets |
@@ -70,8 +70,8 @@ its end callback.
 | `ionGestureCaptured` on `document` | `GestureController.Instance.IonGestureCaptured`, with `GestureCapturedEventArgs.GestureName` |
 | `body.backdrop-no-scroll` | `ScrollDisabledChanged`, raised when `IsScrollDisabled` changes |
 
-Positions are in the top level's coordinates, as Ionic's `pageX` is the page's. Times are milliseconds on Avonic's clock
-(`AvonicConfig.Now`), and velocities pixels per millisecond: `0.7` of the last move's speed and `0.3` of what it was, leaving out moves
+Positions are in the top level's coordinates, as Ionic's `pageX` is the page's. Times are the events' own `Timestamp`, in
+milliseconds, as Ionic's are `ev.timeStamp`, and velocities pixels per millisecond: `0.7` of the last move's speed and `0.3` of what it was, leaving out moves
 0 ms or 100 ms or more after the last. `OnMove` runs once a frame, through `AvonicConfig.RequestFrame`, with the first move of the
 frame; the others are dropped, not merged.
 
@@ -96,8 +96,8 @@ frame; the others are dropped, not merged.
 - **Losing the capture** to anything outside `Element` (another element, the platform cancelling the touch, `Element` leaving the
   tree) is Ionic's `touchcancel`: `OnEnd` if captured, `NotCaptured` if not, with the last move's detail, as there's no position.
 - **A `ScrollViewer` waits** while a gesture on the pointer decides. Avalonia's `ScrollGestureRecognizer` starts at 5 px, before most
-  thresholds, with no axis lock, so each undecided move sets `Pointer.IsGestureRecognitionSkipped` before any recogniser sees it, inside
-  `Element` or around it. If every gesture gives up, the flag is cleared and the scroller, which has tracked the press, scrolls from the
+  thresholds, with no axis lock, so a gesture's first undecided move sets `Pointer.IsGestureRecognitionSkipped` before any recogniser
+  sees it, inside `Element` or around it. If every gesture gives up, the flag is cleared and the scroller, which has tracked the press, scrolls from the
   next move. A captured gesture keeps the scroller off the pointer until the release. A mouse never drags a `ScrollViewer`.
 
 | Drag on a horizontal gesture inside a scroller | Ionic in Chromium | Avonic |
@@ -120,5 +120,6 @@ Avalonia gives the pointer to one owner, the gesture. `ion-refresher` decides in
 - **One controller per process,** where Ionic's is one per document: two windows dragging at once would arbitrate with each other.
 - **A second finger's moves are ignored** while one is tracked. Ionic reads `changedTouches[0]` of whichever finger moved.
 - **Deviations,** each in [PLAN.md](PLAN.md): a threshold-0 gesture that loses at the press can start again, where Ionic's never does;
-  a cancel's detail is the last move's; a gesture inside the one that captures is `NotCaptured` at the capture, not at its threshold.
+  a cancel's detail is the last move's; a gesture inside the one that captures is `NotCaptured` at the capture, not at its threshold;
+  `Destroy()` cancels a queued `OnMove` and a pending `OnStart`, which Ionic's doesn't.
 - Not tried in a real window, or on a phone.

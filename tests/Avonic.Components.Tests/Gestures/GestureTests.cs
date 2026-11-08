@@ -40,7 +40,29 @@ public class GestureTests
             $"{Name} t={At} start=({StartX},{StartY},{StartTime}) cur=({CurrentX},{CurrentY},{CurrentTime}) delta=({DeltaX},{DeltaY}) v=({VelocityX},{VelocityY})";
     }
 
-    internal sealed class Log(TestClock clock)
+    /// <summary>
+    /// The test clock, and the gesture's event times taken from it, as headless input's timestamps can't be set. The default, the
+    /// events' own timestamps, has its own test.
+    /// </summary>
+    internal sealed class GestureClock : IDisposable
+    {
+        private readonly TestClock _clock = new();
+        private readonly Func<PointerEventArgs, double> _previous = Gesture.EventTime;
+
+        public GestureClock() => Gesture.EventTime = _ => AvonicConfig.Now().TotalMilliseconds;
+
+        public TimeSpan Now => _clock.Now;
+
+        public TimeSpan At(double milliseconds) => _clock.At(milliseconds);
+
+        public void Dispose()
+        {
+            Gesture.EventTime = _previous;
+            _clock.Dispose();
+        }
+    }
+
+    internal sealed class Log(GestureClock clock)
     {
         public List<Seen> All { get; } = [];
 
@@ -122,7 +144,7 @@ public class GestureTests
     }
 
     /// <summary>A finger on the window, each event at its own time on the clock.</summary>
-    internal sealed class Finger(Scene scene, TestClock clock)
+    internal sealed class Finger(Scene scene, GestureClock clock)
     {
         private IHeadlessTouchPointer? _pointer;
 
@@ -170,7 +192,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G1_A_Gesture_Starts_Disabled_And_Enable_Turns_It_On()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -187,7 +209,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G1_Disabling_A_Captured_Gesture_Ends_It_With_The_Last_Detail_And_Ignores_The_Rest_Of_The_Press()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -212,7 +234,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G2_Nothing_Below_The_Threshold_And_At_It_The_Start_Resets_To_The_Capturing_Move()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -239,7 +261,7 @@ public class GestureTests
     [InlineData(180 - 41, false)]
     public void G3_Within_MaxAngle_Of_The_Axis_Captures_Either_Way_Along_It(double degrees, bool captures)
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -260,7 +282,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G3_A_Smaller_MaxAngle_Refuses_What_The_Default_Takes()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -276,7 +298,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G3_The_Wrong_Axis_Aborts_At_Once_And_The_Rest_Of_The_Press_Is_Ignored()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -291,7 +313,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G3_Leftward_Along_X_Counts()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -308,7 +330,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G3_Direction_Y_With_Its_Own_Threshold()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -330,7 +352,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G4_G5_Threshold_Zero_Captures_At_The_Press_And_OnMove_Takes_The_First_Move_Of_Each_Frame()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -359,7 +381,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G5_A_Move_At_The_Same_Time_And_One_After_100_Ms_Leave_The_Velocity_Alone()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -375,7 +397,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G6_A_Release_Before_The_Threshold_Is_NotCaptured_At_The_Release()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -392,7 +414,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G6_A_Mouse_Works_As_A_Finger_Does()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -416,7 +438,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G7_CanStart_False_Ignores_The_Press_With_No_NotCaptured()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -430,7 +452,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G7_While_One_Gesture_Is_Captured_Another_Is_Asked_CanStart_And_Then_Refused()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var a = Box(150, 200);
         var b = Box(150, 200);
         b.HorizontalAlignment = HorizontalAlignment.Right;
@@ -453,7 +475,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G8_The_Lower_Priority_Reaching_Its_Threshold_First_Loses_And_The_Higher_Captures_Later()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var inner = Box(200, 200);
         var outer = new Border { Width = 390, Height = 300, Background = Brushes.Transparent, Child = inner, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
         using var scene = new Scene(outer);
@@ -471,7 +493,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G8_On_A_Tie_The_Gesture_Created_Later_Wins()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var inner = Box(200, 200);
         var outer = new Border { Width = 390, Height = 300, Background = Brushes.Transparent, Child = inner, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
         using var scene = new Scene(outer);
@@ -488,7 +510,7 @@ public class GestureTests
     public void G8_A_Threshold_Zero_Gesture_That_Loses_At_The_Press_Can_Start_Again()
     {
         // A deviation: Ionic leaves hasStartedPan set here, and the gesture never starts again until it's disabled.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var inner = Box(200, 200);
         var outer = new Border { Width = 390, Height = 300, Background = Brushes.Transparent, Child = inner, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
         using var scene = new Scene(outer);
@@ -508,7 +530,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G9_Capturing_Takes_The_Pointer_From_A_Pressed_Button_And_Moves_Outside_Keep_Arriving()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var clicks = 0;
         // TestApp has no base theme, so the button gets a template that takes input.
         var button = new Button
@@ -548,7 +570,7 @@ public class GestureTests
     public void G9_Capturing_Cancels_The_Pressed_Activatable_Surface(string where)
     {
         // Ionic's ionGestureCaptured reaches tap-click's cancelActive, whichever surface is active.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box(200, 100);
         Control root = box;
         Control surface = box;
@@ -588,7 +610,7 @@ public class GestureTests
     public void G9_An_Outer_Gesture_Still_Deciding_Is_Not_Cancelled_By_The_Handoff()
     {
         // Ionic's outer gesture keeps getting moves, and gives up when the controller refuses it at its own threshold.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var inner = Box(200, 200);
         var outer = new Border { Width = 390, Height = 300, Background = Brushes.Transparent, Child = inner, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
         using var scene = new Scene(outer);
@@ -613,7 +635,7 @@ public class GestureTests
     {
         // The pointer is the outer element's, so the inner one gets no more of it. Ionic's inner gesture goes on getting moves, and
         // is refused at its own threshold: the same callback, sooner.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var inner = Box(200, 200);
         var outer = new Border { Width = 390, Height = 300, Background = Brushes.Transparent, Child = inner, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
         using var scene = new Scene(outer);
@@ -635,7 +657,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G10_Another_Element_Taking_The_Pointer_Ends_A_Captured_Gesture_With_OnEnd()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box(200, 100);
         var other = Box(100, 100);
         other.HorizontalAlignment = HorizontalAlignment.Right;
@@ -661,7 +683,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G10_The_Platform_Cancelling_The_Touch_Ends_An_Undecided_Gesture_With_NotCaptured()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box(200, 100);
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -686,7 +708,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G10_The_Element_Leaving_The_Tree_Ends_The_Gesture()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box(200, 100);
         var holder = new Panel { Children = { box } };
         using var scene = new Scene(holder);
@@ -704,7 +726,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G10_A_Child_Capturing_On_Its_Own_Press_Is_The_Same_Press()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var child = Box(100, 50);
         var box = Box(200, 100);
         box.Child = child;
@@ -724,7 +746,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G12_DisableScroll_Disables_Scroll_From_The_Capture_To_The_Release()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -751,7 +773,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G12_Without_DisableScroll_Capturing_Leaves_Scroll_Alone()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -766,7 +788,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G12_A_Blocker_Disables_A_Gesture_By_Name_And_Scroll_While_Blocked()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -794,7 +816,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G12_A_Blocker_Of_Another_Name_Leaves_A_Gesture_Alone()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -812,7 +834,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G13_OnStart_Waits_For_OnWillStart_And_A_Release_Before_Then_Fires_Nothing()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -837,7 +859,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G13_A_Completed_OnWillStart_Starts_At_Once()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -856,7 +878,7 @@ public class GestureTests
     [InlineData(false)]
     public void G14_BlurOnStart_Clears_The_Focus_Before_OnStart(bool blur)
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var focused = new TextBox { Width = 100, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom };
         var box = Box();
         using var scene = new Scene(new Panel { Children = { box, focused } });
@@ -883,7 +905,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G15_IonGestureCaptured_Is_Raised_With_The_Name_And_IsCaptured_Holds_To_The_Release()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -915,7 +937,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G16_Destroy_Lets_Go_Of_The_Controller_And_Stops_Listening()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -936,7 +958,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G16_A_Second_Finger_While_One_Is_Tracked_Is_Ignored()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var log = new Log(clock);
@@ -952,9 +974,100 @@ public class GestureTests
     }
 
     [AvaloniaFact]
+    public void G5_Times_Are_The_Events_Own_Timestamps()
+    {
+        // Ionic's now(ev) is ev.timeStamp. The clock stands still here, so only the events' times can give a velocity.
+        using var clock = new TestClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var seen = new List<GestureDetail>();
+        double startTime = 0;
+        using var gesture = Gesture.Create(new GestureConfig
+        {
+            Element = box,
+            GestureName = "g",
+            OnStart = detail => startTime = detail.StartTime,
+            OnEnd = seen.Add,
+        });
+        gesture.Enable();
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        var pressed = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed);
+        var moving = new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.Other);
+        var released = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased);
+
+        box.RaiseEvent(new PointerPressedEventArgs(box, finger, scene.Window, new Point(100, 100), 1000, pressed, KeyModifiers.None));
+        box.RaiseEvent(new PointerEventArgs(InputElement.PointerMovedEvent, box, finger, scene.Window, new Point(120, 100), 1016, moving, KeyModifiers.None));
+        box.RaiseEvent(new PointerReleasedEventArgs(box, finger, scene.Window, new Point(120, 100), 1032, released, KeyModifiers.None, MouseButton.Left));
+
+        Assert.Equal(1016, startTime);
+        var end = Assert.Single(seen);
+        Assert.Equal(1032, end.CurrentTime);
+        Assert.Equal(0.2625, end.VelocityX, 6);
+    }
+
+    [AvaloniaFact]
+    public void G1_Disabling_In_CanStart_Follows_That_Press_To_Its_End_And_Ignores_The_Next_Until_Enabled()
+    {
+        // Measured: Ionic's listeners for the press are added after canStart, so they follow it.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        Gesture? gesture = null;
+        gesture = Make(box, log, canStart: _ =>
+        {
+            gesture!.Enable(false);
+            return true;
+        });
+
+        using (gesture)
+        {
+            new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016).Up(120, 100, 1032);
+            new Finger(scene, clock).Down(100, 100, 2000).Up(100, 100, 2016);
+            Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
+            AssertSeen(log.Single("g.onEnd"), 1032, (120, 100, 1016), (120, 100, 1032), (0, 0), (0.2625, 0));
+
+            gesture.Enable();
+            new Finger(scene, clock).Down(100, 100, 3000).Up(100, 100, 3016);
+            Assert.Equal(["g.canStart", "g.onStart", "g.onEnd", "g.canStart", "g.notCaptured"], log.Names);
+        }
+    }
+
+    [AvaloniaFact]
+    public void G16_Destroy_Drops_A_Move_Queued_For_The_Next_Frame()
+    {
+        // A deviation: Ionic's queued frame still calls onMove after destroy(), on a control that may have gone.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        var gesture = Make(box, log);
+
+        new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016).Move(130, 100, 1032);
+        gesture.Destroy();
+        clock.At(1100);
+
+        Assert.Equal(["g.canStart", "g.onStart"], log.Names);
+    }
+
+    [AvaloniaFact]
+    public void G13_An_OnWillStart_With_No_Task_Starts_At_Once()
+    {
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        using var gesture = Make(box, log, onWillStart: _ => null!);
+
+        new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016).Up(120, 100, 1032);
+
+        Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
+    }
+
+    [AvaloniaFact]
     public void G16_Data_Set_In_CanStart_Reaches_The_Callbacks_And_Is_Not_Cleared_By_The_Next_Press()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var box = Box();
         using var scene = new Scene(box);
         var seen = new List<object?>();
@@ -982,7 +1095,7 @@ public class GestureTests
     [AvaloniaFact]
     public void G16_The_Gesture_Follows_A_Press_On_A_Child_That_Handles_It()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var child = Box(100, 50);
         child.PointerPressed += (_, e) => e.Handled = true;
         child.PointerMoved += (_, e) => e.Handled = true;

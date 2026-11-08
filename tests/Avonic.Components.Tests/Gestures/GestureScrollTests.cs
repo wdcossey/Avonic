@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -19,7 +20,7 @@ public class GestureScrollTests
     /// <summary>A row 60 high at 300, in a content 2,300 high, in a window 844 high.</summary>
     private sealed class Page : IDisposable
     {
-        public Page(TestClock clock, bool simpleScrollViewer = false, bool rowOutside = false)
+        public Page(GestureClock clock, bool simpleScrollViewer = false, bool rowOutside = false)
         {
             Clock = clock;
             Row = new Border { Height = 60, Background = Brushes.Transparent };
@@ -47,7 +48,7 @@ public class GestureScrollTests
             Log = new Log(clock);
         }
 
-        public TestClock Clock { get; }
+        public GestureClock Clock { get; }
 
         public Border Row { get; }
 
@@ -110,7 +111,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void C1_A_Sideways_Drag_Pans_And_Does_Not_Scroll()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, threshold: 5);
 
@@ -123,7 +124,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void C2_An_Upward_Drag_Scrolls_And_The_Gesture_Is_NotCaptured_At_Its_Threshold()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log);
 
@@ -140,7 +141,7 @@ public class GestureScrollTests
     [InlineData(true)]
     public void C3_C9_Sideways_Then_Up_Never_Scrolls_And_The_Gesture_Follows(bool simpleScrollViewer)
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         var styles = Application.Current!.Styles;
         var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
         if (simpleScrollViewer)
@@ -172,7 +173,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void C4_Up_Then_Sideways_Scrolls_And_The_Gesture_Ignores_The_Rest()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, threshold: 5);
 
@@ -191,7 +192,7 @@ public class GestureScrollTests
     public void C5_A_Drag_Within_MaxAngle_Pans_And_Does_Not_Scroll_Even_After_The_Scroller_Would_Have_Started(double degrees, double threshold)
     {
         // In 2 px steps, the vertical movement passes Avalonia's 5 px before the gesture's threshold.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, threshold: threshold);
 
@@ -205,7 +206,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void C6_A_Drag_Past_MaxAngle_Scrolls()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, threshold: 5);
 
@@ -220,7 +221,7 @@ public class GestureScrollTests
     public void C10_A_Captured_Y_Gesture_In_A_Y_Scroller_Has_The_Pointer_To_Itself()
     {
         // A deliberate difference: Ionic's passive gesture and Chromium's scroll both run. Avalonia gives a pointer to one owner.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, direction: GestureDirection.Y);
 
@@ -235,7 +236,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void A_Gesture_That_Does_Not_Start_Leaves_The_Scroller_Alone()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         using var gesture = Make(page.Row, page.Log, threshold: 20, canStart: _ => false);
 
@@ -249,7 +250,7 @@ public class GestureScrollTests
     public void A_Scroller_Inside_The_Element_Waits_For_The_Gesture_From_The_First_Move()
     {
         // ion-menu's gesture is on the document, around the content.
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock, rowOutside: true);
         using var gesture = Make(page.Outer!, page.Log);
 
@@ -264,7 +265,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void Two_Gestures_Deciding_Hold_The_Scroller_Until_Both_Give_Up()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         var inner = new Border { Background = Brushes.Transparent, Height = 60 };
         page.Row.Child = inner;
@@ -284,7 +285,7 @@ public class GestureScrollTests
     [AvaloniaFact]
     public void A_Captured_Gesture_Keeps_The_Scroller_Off_After_A_Gesture_Around_It_Gives_Up()
     {
-        using var clock = new TestClock();
+        using var clock = new GestureClock();
         using var page = new Page(clock);
         var inner = new Border { Background = Brushes.Transparent, Height = 60 };
         page.Row.Child = inner;
@@ -298,6 +299,38 @@ public class GestureScrollTests
 
         Assert.Contains("outer.notCaptured", page.Log.Names);
         Assert.Equal("inner.onEnd", page.Log.All[^1].Name);
+        Assert.Equal(0, page.ScrollTop);
+    }
+
+    [AvaloniaFact]
+    public void A_Gesture_Captured_At_The_Press_Keeps_The_Scroller_Around_It_Off_The_Press()
+    {
+        // ion-reorder-group's gesture: threshold 0, along the scroller's own axis.
+        using var clock = new GestureClock();
+        using var page = new Page(clock);
+        using var gesture = Make(page.Row, page.Log, direction: GestureDirection.Y, threshold: 0);
+
+        var finger = page.Drag(0, -150);
+        clock.At(page.At + 16);
+        page.Lift(finger);
+
+        Assert.Equal(-150, page.Log.All.Last(seen => seen.Name == "g.onMove").DeltaY);
+        Assert.Equal("g.onEnd", page.Log.All[^1].Name);
+        Assert.Equal(0, page.ScrollTop);
+    }
+
+    [AvaloniaFact]
+    public void A_Gesture_That_Gives_Up_Leaves_An_Apps_Own_PreventGestureRecognition_Alone()
+    {
+        using var clock = new GestureClock();
+        using var page = new Page(clock);
+        using var gesture = Make(page.Row, page.Log);
+        // After the scroller has seen the press, the app keeps recognisers off this pointer.
+        page.Root.AddHandler(InputElement.PointerPressedEvent, (_, e) => e.PreventGestureRecognition(), handledEventsToo: true);
+
+        page.Lift(page.Drag(0, -150));
+
+        Assert.Equal(["g.canStart", "g.notCaptured"], page.Log.Names);
         Assert.Equal(0, page.ScrollTop);
     }
 }
