@@ -1,0 +1,173 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <WrapPanel Width="390">
+            <c:AvonicChip>
+                <c:AvonicLabel Content="Default" />
+            </c:AvonicChip>
+            <c:AvonicChip Outline="True">
+                <c:AvonicLabel Content="Outline" />
+            </c:AvonicChip>
+            <c:AvonicChip Color="primary">
+                <c:AvonicLabel Content="Primary" />
+            </c:AvonicChip>
+            <c:AvonicChip Color="primary" Outline="True">
+                <c:AvonicLabel Content="Primary outline" />
+            </c:AvonicChip>
+            <c:AvonicChip IsEnabled="False">
+                <c:AvonicLabel Content="Disabled" />
+            </c:AvonicChip>
+            <c:AvonicChip>
+                <c:AvonicIcon IconName="pin" />
+                <c:AvonicLabel Content="Icon" />
+            </c:AvonicChip>
+        </WrapPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of chip.md.css. Its state rules have equal specificity within each kind of chip, in the order focus,
+         activated, hover, and so does everything here with a pseudoclass: later beats earlier. So the rules are in three
+         groups, plain, outline and colour, each later than the one it beats in CSS by specificity. Slotted children are in
+         Styles/Chip.axaml, because a ControlTheme's styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicChip}" TargetType="c:AvonicChip">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <!-- white-space: normal inherits -->
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="CornerRadius" Value="16" />
+        <!-- display: inline-flex. vertical-align: middle is the default in AvonicChip, so that a slot's align-items reaches it. -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none. The background is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- color: var(color) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Chip.Color" />
+                <DynamicResource ResourceKey="Avonic.Chip.Md.Color" />
+            </MultiBinding>
+        </Setter>
+        <!-- background: var(background) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Chip.Background" />
+                <DynamicResource ResourceKey="Avonic.Chip.Md.Background" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:FlexRow />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- overflow: hidden, with the radius. position: absolute puts the ripple in the padding box, inside the border. -->
+                <Border Name="PART_Native"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel Background="Transparent">
+                        <!-- After the slot in Ionic's shadow root, so over the children, and found first by Activatable. -->
+                        <c:AvonicRippleEffect Name="PART_Ripple" ZIndex="1" />
+                        <ItemsPresenter Name="PART_ItemsPresenter"
+                                        Margin="{TemplateBinding Padding}"
+                                        ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.chip-disabled). A disabled control already takes no input and lets it through. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- :host(:focus), :host(.ion-activated) and :host(:hover) set the variable, so a value for it beats them all. -->
+        <Style Selector="^:focus">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Chip.Background" />
+                    <DynamicResource ResourceKey="Avonic.Chip.Md.BackgroundFocused" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:activated">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Chip.Background" />
+                    <DynamicResource ResourceKey="Avonic.Chip.Md.BackgroundActivated" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- After activated, so hover beats a mouse press, by file order: measured. -->
+        <Style Selector="^:ion-hover">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Chip.Background" />
+                    <DynamicResource ResourceKey="Avonic.Chip.Md.BackgroundHover" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.chip-outline). It sets background, not the variable, so the variable does nothing here: measured. -->
+        <Style Selector="^:outline">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Chip.Md.OutlineBorderColor}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <!-- :host(.chip-outline:not(.ion-color):focus), and the rest. The colour group below beats these on a coloured chip. -->
+        <Style Selector="^:outline:focus">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Chip.Md.OutlineBackgroundFocused}" />
+        </Style>
+        <Style Selector="^:outline:activated">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Chip.Md.OutlineBackgroundActivated}" />
+        </Style>
+        <Style Selector="^:outline:ion-hover">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Chip.Md.OutlineBackgroundHover}" />
+        </Style>
+
+        <!-- :host(.ion-color). An unknown colour makes rgba() invalid, so the background is transparent, and
+             var(ion-color-shade) invalid, so the text inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.08}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Shade)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.chip-outline) beats .ion-color's background, and :host(.chip-outline.ion-color) has the border. An invalid
+             rgba() leaves border-color at its initial value, currentcolor: measured. -->
+        <Style Selector="^:ion-color:outline">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.BaseColor)" RelativeSource="{RelativeSource Self}" Converter="{x:Static b:ColorPalette.WithAlpha}" ConverterParameter="0.32" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-color:focus), :host(.ion-color.ion-activated), :host(.ion-color:hover): they beat .chip-outline's
+             transparent by specificity, so a coloured outline chip shows them. -->
+        <Style Selector="^:ion-color:focus">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.12}" />
+        </Style>
+        <Style Selector="^:ion-color:activated">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.16}" />
+        </Style>
+        <Style Selector="^:ion-color:ion-hover">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.12}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

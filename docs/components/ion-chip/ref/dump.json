@@ -1,0 +1,596 @@
+{
+  "tag": "ion-chip",
+  "snippet": "<ion-app style=\"position:static;display:block;contain:none;overflow:visible\"><div style=\"padding:8px\"><div style=\"display:flex;align-items:center\"><ion-chip><ion-label>Default</ion-label></ion-chip><ion-chip outline><ion-label>Outline</ion-label></ion-chip><ion-chip disabled><ion-label>Disabled</ion-label></ion-chip></div><div style=\"display:flex;align-items:center\"><ion-chip color=\"primary\"><ion-label>Primary</ion-label></ion-chip><ion-chip color=\"primary\" outline><ion-label>Outline</ion-label></ion-chip><ion-chip color=\"danger\"><ion-icon name=\"heart\"></ion-icon><ion-label>Danger</ion-label></ion-chip></div><div style=\"display:flex;align-items:center\"><ion-chip><ion-icon name=\"pin\"></ion-icon><ion-label>Icon start</ion-label></ion-chip><ion-chip><ion-label>Icon end</ion-label><ion-icon name=\"close-circle\"></ion-icon></ion-chip><ion-chip><ion-icon name=\"star\"></ion-icon></ion-chip></div><div style=\"display:flex;align-items:center\"><ion-chip><ion-label>A long label that has to wrap because it does not fit on one line of a phone</ion-label></ion-chip></div><div dir=\"rtl\" style=\"display:flex;align-items:center\"><ion-chip><ion-icon name=\"pin\"></ion-icon><ion-label>RTL</ion-label><ion-icon name=\"close-circle\"></ion-icon></ion-chip></div></div></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 12,
+        "y": 12,
+        "w": 68.36,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "68.3594px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "outline": "",
+        "class": "md chip-outline ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "chip-outline",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 88.36,
+        "y": 12,
+        "w": 70.36,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "70.3594px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "1px solid rgba(0, 0, 0, 0.32)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "disabled": "",
+        "aria-disabled": "true",
+        "class": "md chip-disabled ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "chip-disabled",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 166.72,
+        "y": 12,
+        "w": 78.48,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "78.4844px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "0.4",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "none",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "default"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "color": "primary",
+        "class": "ion-color ion-color-primary md ion-activatable hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-primary",
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 12,
+        "y": 52,
+        "w": 72.23,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "72.2344px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgb(0, 74, 205)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 84, 233, 0.08)",
+        "color": "rgb(0, 74, 205)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 74, 205) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "color": "primary",
+        "outline": "",
+        "class": "ion-color ion-color-primary md chip-outline ion-activatable hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-primary",
+        "md",
+        "chip-outline",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 92.23,
+        "y": 52,
+        "w": 70.36,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "70.3594px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "1px solid rgba(0, 84, 233, 0.32)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 74, 205)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 74, 205) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "color": "danger",
+        "class": "ion-color ion-color-danger md ion-activatable hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 170.59,
+        "y": 52,
+        "w": 93.92,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "93.9219px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgb(173, 0, 13)",
+        "border-radius": "16px",
+        "background-color": "rgba(197, 0, 15, 0.08)",
+        "color": "rgb(173, 0, 13)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(173, 0, 13) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 12,
+        "y": 92,
+        "w": 105.59,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "105.594px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 125.59,
+        "y": 92,
+        "w": 101.72,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "101.719px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n"
+    },
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 235.31,
+        "y": 92,
+        "w": 48,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "48px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n"
+    },
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 12,
+        "y": 132,
+        "w": 366,
+        "h": 44
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "366px",
+        "height": "44px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "class": "md ion-activatable hydrated"
+      },
+      "classes": [
+        "md",
+        "ion-activatable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 279.8,
+        "y": 184,
+        "w": 98.2,
+        "h": 32
+      },
+      "cssVars": {
+        "--background": "rgba(0, 0, 0, 0.12)",
+        "--color": "rgba(0, 0, 0, 0.87)"
+      },
+      "host": {
+        "display": "flex",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "98.2031px",
+        "height": "32px",
+        "min-height": "32px",
+        "min-width": "auto",
+        "padding": "6px 12px",
+        "margin": "4px",
+        "border": "0px none rgba(0, 0, 0, 0.87)",
+        "border-radius": "16px",
+        "background-color": "rgba(0, 0, 0, 0.12)",
+        "color": "rgba(0, 0, 0, 0.87)",
+        "font-size": "14px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "hidden",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgba(0, 0, 0, 0.87) none 0px",
+        "cursor": "pointer"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n    <ion-ripple-effect.md.hydrated>\n      #shadow-root\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n  <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-icon.md.hydrated>\n    #shadow-root\n      <div.icon-inner>\n        <svg>\n          <path>\n"
+    }
+  ]
+}
