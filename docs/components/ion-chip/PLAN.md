@@ -69,15 +69,25 @@ Each becomes a test. The ids are the chips in the measurement scene.
 
 `display: inline-flex; align-items: center` with any children is a `FlexRow` as the `ItemsPanel`, with each item in a
 `FlexSlot`, which is what a `<slot>`'s child is in an item. The chip makes the containers itself (`NeedsContainerOverride`
-and `CreateContainerForItemOverride`), so every child, a control or a string, is in a presenter, and `::slotted(x)` is
-`c|AvonicChip > ContentPresenter > c|X` in `Styles/Chip.axaml`, as it is for an item. `:first-child` is
-`ContentPresenter:nth-child(1) > c|AvonicIcon`, because the presenter is the chip's child, and the chip is the index
-provider. `align-items: center` is the slot's `VerticalContentAlignment`, set in code at style priority when the container
-is prepared: a theme can't reach a container, and the item's stub sets the same on its slots.
+and `CreateContainerForItemOverride`), so every child, a control or a string, is in a slot. `align-items: center` is the
+slot's `VerticalContentAlignment`, set in code at style priority when the container is prepared: a theme can't reach a
+container, and the item's stub sets the same on its slots.
+
+A control in `Items` stays the chip's logical child, not the slot's, so `::slotted(x)` is `c|AvonicChip > c|X` in
+`Styles/Chip.axaml`. `:first-child` is `:nth-child(1)` on the child, and that needs the chip to count it: an `ItemsControl`
+counts only containers, so a control held in a slot is at index −1 and matches nothing. The first build had the rules on the
+presenter, `ContentPresenter:nth-child(1) > c|AvonicIcon`, and none of them applied; the compare step showed black 14 px
+icons with no margins. So the chip implements `IChildIndexProvider` again: a child's index is its item's, and a change to
+`Items` raises a reset, so that the margins follow children as they come and go.
 
 `FlexRow` already does the rest: a label shrinks to its longest word and wraps, and an `AvonicIcon` has no minimum, as
 `contain: strict` gives it none, measured `longi`. The theme sets `TextBlock.TextWrapping="Wrap"`, as `white-space: normal`
 inherits, so a string child wraps too.
+
+`display: inline-flex` sizes to fit: as wide as its content on one line, or as the space there is when that's too narrow.
+Measured at the space, Avalonia's wrapped text reports its longest line, which left the long chip 15 px narrower than
+Ionic's 366. So the chip measures its content on one line first, and takes the whole width when it doesn't fit, or more if
+something in it can't shrink, as `min-content` does. The button had the same, and fixed it in `ButtonInner`.
 
 `display: inline-flex` is `HorizontalAlignment="Left"`. `vertical-align: middle` is the control's default
 `VerticalAlignment`, `Center`, by `OverrideDefaultValue`, as `AvonicButton` does, so that a slot's `align-items` still reaches
@@ -115,6 +125,12 @@ with `ZIndex="1"`, as `AvonicCard` has it, so that `Activatable` finds it before
 the shadow root. Its colour is `currentColor`, which `Foreground` inherits; there's no `--ripple-color` on a chip. It
 fills the panel inside the border, as `position: absolute` fills the padding box, and `PART_Native` clips it to the radius.
 
+### The icon's size
+
+`1.4285714286em` of 14 is 20.0000000004, which Avalonia's layout rounding takes up to 21, so every chip with an icon was
+1 px wider per icon than Ionic's (the only icon chip measured 49, against 48). Chromium's layout units keep 20. The theme
+writes `1.42857142857`, a hair under, which gives 20 at 14 and 40 at 28.
+
 ### Disabled
 
 `opacity: 0.4` on `:disabled`. A disabled control takes no input in Avalonia and lets a tap through to what's behind, as
@@ -149,7 +165,7 @@ Avalonia's `Tapped` on the control is the nearest built-in, and `PointerReleased
 
 | What | Goes with |
 |---|---|
-| `::slotted(ion-avatar)`: `flex-shrink: 0`, 1.7142857143 em square (24 at 14); first child margin `−8 8 −4 −4`, last child `8 −8 −4 −4` | `ion-avatar` (#16), as `c\|AvonicChip > ContentPresenter > c\|AvonicAvatar` rules in `Styles/Chip.axaml`, once the type exists |
+| `::slotted(ion-avatar)`: `flex-shrink: 0`, 1.7142857143 em square (24 at 14); first child margin `−8 8 −4 −4`, last child `8 −8 −4 −4` | `ion-avatar` (#16), as `c\|AvonicChip > c\|AvonicAvatar` rules in `Styles/Chip.axaml` once the type exists, with the same care over the factor's rounding. `flex-shrink: 0` is `ClipToBounds` unset and a size of its own, which `FlexRow` doesn't shrink |
 | `:host(.toolbar-searchbar) ::slotted(ion-chip)` | `ion-toolbar` |
 
 ## Dependencies
