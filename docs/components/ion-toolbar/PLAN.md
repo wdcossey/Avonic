@@ -2,9 +2,11 @@
 
 Five controls in one PR: `AvonicHeader`, `AvonicFooter`, `AvonicToolbar`, `AvonicTitle` and `AvonicButtons`. They only make
 sense together, so they share this folder; `ion-header/`, `ion-footer/`, `ion-title/` and `ion-buttons/` hold a short README
-each that points here. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, with the scene at the top of
-[COMPARISON.md](COMPARISON.md) (`#id`s) or the extra scenes listed there (`s2`, `s3`). Throwaway measuring scripts stayed
-outside the repo.
+each that points here. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, with the scenes listed at the top
+of [COMPARISON.md](COMPARISON.md): `s1`, the reference render, and `s2` and `s3`, whose elements have `id`s. In `s1`, `#t1` to
+`#t10` are its toolbars from the top (`#t5` is `#tsmall`, `#t6` `#tlarge`, `#t7` `#tlong`), `#b1`… its `ion-buttons` in order,
+`#ti1` its first title, `#h` and `#f` its header and footer, `#menu` and `#edit` the header's buttons, and `#psolid` and `#pclear`
+the plain toolbar's solid and `success` buttons. Throwaway measuring scripts stayed outside the repo.
 
 ## Fidelity checklist
 
