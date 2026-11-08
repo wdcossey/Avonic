@@ -95,7 +95,9 @@ frame; the others are dropped, not merged.
   more of the pointer, so it's `NotCaptured` at once.
 - **Losing the capture** to anything outside `Element` (another element, the platform cancelling the touch, `Element` leaving the
   tree) is Ionic's `touchcancel`: `OnEnd` if captured, `NotCaptured` if not, with the last move's detail, as there's no position.
-  A child inside `Element` that lets go of the pointer as it handles the release isn't a cancel: the release still arrives.
+  A child inside `Element` that lets go of the pointer as it handles the release isn't a cancel: the release still arrives. A
+  cancel that a callback causes, `OnStart` giving the pointer to something else, takes effect once the callback returns, as a
+  browser's `touchcancel` can't arrive in the middle of one.
   `Enable(false)` or `Destroy()` mid-drag leaves the pointer with `Element` until the release, as a touch that went sideways in
   Chromium never scrolls.
 - **A `ScrollViewer` waits** while a gesture on the pointer decides. Avalonia's `ScrollGestureRecognizer` starts at 5 px, before most

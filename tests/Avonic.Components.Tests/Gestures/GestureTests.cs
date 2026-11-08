@@ -741,8 +741,10 @@ public class GestureTests
         Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
     }
 
-    [AvaloniaFact]
-    public void G10_A_Capture_At_The_Press_Taken_Away_In_OnStart_Ends_The_Gesture()
+    [AvaloniaTheory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void G10_The_Capture_Taken_Away_In_OnStart_Ends_The_Gesture_Once_OnStart_Returns(double threshold)
     {
         using var clock = new GestureClock();
         var box = Box(200, 100);
@@ -755,7 +757,7 @@ public class GestureTests
         {
             Element = box,
             GestureName = "g",
-            Threshold = 0,
+            Threshold = threshold,
             OnStart = detail =>
             {
                 log.Add("g.onStart", detail);
@@ -769,14 +771,14 @@ public class GestureTests
         });
         gesture.Enable();
 
-        // The cancel comes before onStart has returned, so, as Ionic's pointerUp does then, it fires nothing, and lets go.
+        // A browser's touchcancel can't come in the middle of onStart, so the cancel waits for it to return, and is an onEnd.
         new Finger(scene, clock).Down(100, 50, 1000).Move(120, 50, 1016).Up(120, 50, 1032);
-        Assert.Equal(["g.onStart"], log.Names);
+        Assert.Equal(["g.onStart", "g.onEnd"], log.Names);
         Assert.False(GestureController.Instance.IsCaptured);
 
         takeAway = false;
-        new Finger(scene, clock).Down(100, 50, 2000).Up(100, 50, 2016);
-        Assert.Equal(["g.onStart", "g.onStart", "g.onEnd"], log.Names);
+        new Finger(scene, clock).Down(100, 50, 2000).Move(120, 50, 2016).Up(120, 50, 2032);
+        Assert.Equal(["g.onStart", "g.onEnd", "g.onStart", "g.onEnd"], log.Names);
     }
 
     [AvaloniaFact]

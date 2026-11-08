@@ -47,6 +47,11 @@ public sealed class Gesture : IDisposable
     // release isn't a cancel, as the release is still to reach the element.
     private IPointer? _releasing;
 
+    // Inside PointerDown or PointerMove, whose callbacks may move the capture. A cancel then waits until they return, as a browser's
+    // touchcancel can't arrive in the middle of a callback.
+    private bool _deciding;
+    private bool _cancelPending;
+
     /// <summary>
     /// While a gesture takes the pointer, the gestures that heard the capture lost on the way. Each is checked once the capture has
     /// arrived: a gesture around the one that captured still gets the pointer, and one inside it never will again.
@@ -437,8 +442,21 @@ public sealed class Gesture : IDisposable
         // pointer at a time: a second press is refused by hasStartedPan, and the first stays followed.
         var previous = _tracking;
         _tracking = e.Pointer;
-        if (!PointerDown(e))
+        _cancelPending = false;
+        bool started;
+        _deciding = true;
+        try
         {
+            started = PointerDown(e);
+        }
+        finally
+        {
+            _deciding = false;
+        }
+
+        if (!started)
+        {
+            _cancelPending = false;
             if (ReferenceEquals(_tracking, e.Pointer))
             {
                 _tracking = previous;
@@ -448,8 +466,9 @@ public sealed class Gesture : IDisposable
         }
 
         // Ionic adds the press's listeners once pointerDown returns true, so a callback that disabled the gesture during it doesn't
-        // stop the press being followed. After a capture at the press that OnStart took away, nothing more of it reaches the element.
+        // stop the press being followed.
         _tracking = e.Pointer;
+        ApplyPendingCancel(e.Pointer);
     }
 
     /// <summary>Before the move reaches any recogniser, inside the element or around it, while this gesture is deciding.</summary>
@@ -471,9 +490,30 @@ public sealed class Gesture : IDisposable
 
     private void OnMoved(object? sender, PointerEventArgs e)
     {
-        if (ReferenceEquals(e.Pointer, _tracking))
+        if (!ReferenceEquals(e.Pointer, _tracking))
+        {
+            return;
+        }
+
+        _deciding = true;
+        try
         {
             PointerMove(e);
+        }
+        finally
+        {
+            _deciding = false;
+        }
+
+        ApplyPendingCancel(e.Pointer);
+    }
+
+    private void ApplyPendingCancel(IPointer pointer)
+    {
+        if (_cancelPending)
+        {
+            _cancelPending = false;
+            CaptureMoved(pointer);
         }
     }
 
@@ -537,6 +577,12 @@ public sealed class Gesture : IDisposable
         // A child letting go as it handles the release: the release itself is still to arrive.
         if (pointer.Captured is null && ReferenceEquals(pointer, _releasing))
         {
+            return;
+        }
+
+        if (_deciding)
+        {
+            _cancelPending = true;
             return;
         }
 

@@ -250,6 +250,10 @@ Nothing visual: no theme, tokens or styles.
   `onWillStart` settles, and its `onStart` fires later. Avonic drops the first one's, tested by
   `G13_An_OnWillStart_Settling_After_The_Next_Press_Started_Does_Not_Start_That_Press`. One settling after its own release, with no
   press since, still fires `onStart`, as Ionic's does.
+- **A cancel raised inside a callback.** Avalonia raises `PointerCaptureLost` synchronously, so `OnStart` giving the pointer to
+  another element would cancel the gesture before `onStart` has returned, when Ionic's `pointerUp` fires nothing, and leave it
+  captured or let go with no end. A browser's `touchcancel` can't arrive then, so a cancel during the press or a move waits until
+  it returns, and is an `onEnd`. Tested at thresholds 0 and 10 by `G10_The_Capture_Taken_Away_In_OnStart_Ends_The_Gesture_Once_OnStart_Returns`.
 - **A child letting go of the pointer while it handles the release.** Avalonia raises `PointerCaptureLost` then, before the release
   reaches `Element`. It isn't a cancel: a tunnelling handler notes the release on its way, and the release is the end, with its
   position. Ionic has no capture, so there's nothing to differ from.
