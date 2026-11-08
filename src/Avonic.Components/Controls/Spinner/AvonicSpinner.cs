@@ -54,6 +54,9 @@ public class AvonicSpinner : Control
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
+    /// <summary>The name <see cref="GetName"/> gave at the last render, which a re-render compares with. <see cref="_config"/> is its config.</summary>
+    internal SpinnerName ResolvedName { get; private set; }
+
     private SpinnerConfig _config;
 
     /// <summary>When each element's animation began, moved on by the time spent paused, as a CSS animation's start time is.</summary>
@@ -170,9 +173,6 @@ public class AvonicSpinner : Control
     }
 
     // ── For tests ────────────────────────────────────────────────────────────────────────────
-
-    /// <summary>The name <see cref="GetName"/> gave at the last render.</summary>
-    internal SpinnerName ResolvedName { get; private set; }
 
     /// <summary>The config being drawn.</summary>
     internal SpinnerConfig Config => _config;

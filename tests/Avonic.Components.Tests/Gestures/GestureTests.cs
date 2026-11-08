@@ -1043,11 +1043,8 @@ public class GestureTests
     [AvaloniaFact]
     public void G5_Times_Are_The_Events_Own_Timestamps()
     {
-        // Ionic's now(ev) is ev.timeStamp. The clock stands still here, so only the events' times can give a velocity. The
-        // test clock times events by itself, so this puts back the default it replaced.
-        var eventTime = AvonicConfig.EventTime;
-        using var clock = new TestClock();
-        AvonicConfig.EventTime = eventTime;
+        // Ionic's now(ev) is ev.timeStamp. The clock stands still here, so only the events' times can give a velocity.
+        using var clock = new TestClock(timesEvents: false);
         var box = Box();
         using var scene = new Scene(box);
         var seen = new List<GestureDetail>();
@@ -1079,9 +1076,7 @@ public class GestureTests
     public void G5_An_Event_With_No_Timestamp_Takes_The_Clocks_Time()
     {
         // Ionic's now(ev) is ev.timeStamp || Date.now(): an event with none is timed by the clock.
-        var eventTime = AvonicConfig.EventTime;
-        using var clock = new TestClock();
-        AvonicConfig.EventTime = eventTime;
+        using var clock = new TestClock(timesEvents: false);
         var box = Box();
         using var scene = new Scene(box);
         var seen = new List<double>();

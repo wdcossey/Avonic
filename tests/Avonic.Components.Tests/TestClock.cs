@@ -7,7 +7,7 @@ namespace Avonic.Components.Tests;
 /// and <see cref="AvonicConfig.EventTime"/> for the lifetime of the test, so every Avonic timeline — ripple animation,
 /// tap-click defers, frames and a gesture's event times — is asserted exactly instead of approximately. Advancing the clock
 /// with <see cref="At"/> fires each scheduled callback at its own due time, in order. A gesture's events are timed by this
-/// clock, as headless input's timestamps can't be set.
+/// clock, as headless input's timestamps can't be set, unless <c>timesEvents</c> is false.
 /// </summary>
 internal sealed class TestClock : IDisposable
 {
@@ -19,7 +19,8 @@ internal sealed class TestClock : IDisposable
 
     public TimeSpan Now { get; private set; }
 
-    public TestClock()
+    /// <param name="timesEvents">Whether a gesture's events are timed by this clock. False keeps their own timestamps.</param>
+    public TestClock(bool timesEvents = true)
     {
         AvonicConfig.Now      = () => Now;
         AvonicConfig.Schedule = (callback, delay) =>
@@ -29,7 +30,10 @@ internal sealed class TestClock : IDisposable
             return item;
         };
         AvonicConfig.RequestFrame = (_, callback) => AvonicConfig.Schedule(callback, AvonicConfig.FrameInterval);
-        AvonicConfig.EventTime = _ => Now.TotalMilliseconds;
+        if (timesEvents)
+        {
+            AvonicConfig.EventTime = _ => Now.TotalMilliseconds;
+        }
     }
 
     /// <summary>Advance to <paramref name="milliseconds"/>, running every callback due on the way.</summary>
