@@ -405,6 +405,71 @@ try {
         Check 'a new value fills the bar to it' (($after.ToArgb() -ne $before) -and ($after.B -gt 180) -and ($after.R -lt 80)) ('{0:X8} from {1:X8}' -f $after.ToArgb(), $before)
     }
 
+    # A chip is ion-activatable: hover for a mouse only, and a ripple from a press. Read from a pixel in the chip's padding,
+    # left of its label.
+    Section 'ion-chip' {
+        Open 'ion-chip'
+        Away
+        Start-Sleep -Milliseconds 400
+        function Inside($label) {
+            $b = (Named $CT::Text $label).Current.BoundingRectangle
+            if (-not $b -or $b.Width -le 0) { throw "No chip labelled $label" }
+            [int]($b.X - 6 * $scale), [int]($b.Y + $b.Height / 2), [int]($b.X + $b.Width / 2)
+        }
+        $px, $py, $cx = Inside 'Default'
+        $plain = Pixel $px $py
+
+        Guard
+        [void][RealInput]::SetCursorPos($cx, $py); Start-Sleep -Milliseconds 400
+        $hover = Pixel $px $py
+        Check 'a mouse over it shows the hover' ($hover -ne $plain) ('{0:X8}' -f $hover)
+        Press; Start-Sleep -Milliseconds 250
+        $pressed = Pixel $px $py
+        Shot 'ion-chip-pressed'
+        Release
+        Check 'a press shows more than the hover' (($pressed -ne $hover) -and ($pressed -ne $plain)) ('{0:X8}' -f $pressed)
+        Away
+        Start-Sleep -Milliseconds 1200
+        $gone = Pixel $px $py
+        Check 'the ripple and the hover go after it' ($gone -eq $plain) ('{0:X8} against {1:X8}' -f $gone, $plain)
+
+        # A touch tap shows the ripple. Not checked while held: with injected touch, nothing shows until the finger moves or
+        # lifts, though Activatable lights up 100 ms after a press. Nor afterwards: Windows moves the cursor to the touch
+        # point and, in about half the runs, promotes the touch to a mouse move a second later, which hovers the chip.
+        TouchDown $cx $py; Start-Sleep -Milliseconds 120
+        [RealInput]::TouchMove($cx, $py); Start-Sleep -Milliseconds 40
+        TouchUp $cx $py
+        $seen = $false
+        for ($i = 0; $i -lt 12 -and -not $seen; $i++) { Start-Sleep -Milliseconds 50; $seen = (Pixel $px $py) -ne $plain }
+        Check 'a touch tap shows the ripple' $seen
+        Away
+        Start-Sleep -Milliseconds 1500
+
+        # Unlike the card, a chip has no ion-focusable: Ionic styles :host(:focus), so once an app makes it focusable, any
+        # focus shows, a click's included, and a key doesn't clear it (measured in Chromium: clickPlainFocus, tabFocusAfterClick).
+        $fx, $fy, $fcx = Inside 'Focusable'
+        $unfocused = Pixel $fx $fy
+        Click $fcx $fy
+        Away
+        Start-Sleep -Milliseconds 1200
+        Shot 'ion-chip-after-click'
+        $clicked = Pixel $fx $fy
+        Check 'a click on a focusable chip shows its focus' ($clicked -ne $unfocused) ('{0:X8}' -f $clicked)
+        Key 'a'
+        Start-Sleep -Milliseconds 300
+        $p1 = Pixel $fx $fy
+        Check 'a letter key leaves it' (($p1 -eq $clicked) -and ($p1 -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p1, $clicked)
+        Key '{TAB}'
+        Start-Sleep -Milliseconds 300
+        $p2 = Pixel $fx $fy
+        Check 'Tab away clears it' (($p2 -eq $unfocused) -and ($clicked -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p2, $unfocused)
+        Key '+{TAB}'
+        Start-Sleep -Milliseconds 300
+        Shot 'ion-chip-keyboard-focus'
+        $p3 = Pixel $fx $fy
+        Check 'and Shift+Tab back shows it' (($p3 -eq $clicked) -and ($p3 -ne $unfocused)) ('{0:X8} against {1:X8}' -f $p3, $clicked)
+    }
+
     # The sample's knob is a sideways gesture on a track, in a content that scrolls: a sideways drag moves the knob and
     # leaves the page, and a drag up the track leaves the knob and scrolls the page, as a pan with direction x does in Ionic.
     Section 'gesture: sideways on a page that scrolls' {

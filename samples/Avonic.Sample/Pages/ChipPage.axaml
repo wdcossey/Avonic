@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ChipPage">
+
+    <ScrollViewer>
+        <StackPanel Margin="8">
+            <WrapPanel>
+                <c:AvonicChip>
+                    <c:AvonicLabel Content="Default" />
+                </c:AvonicChip>
+                <c:AvonicChip Outline="True">
+                    <c:AvonicLabel Content="Outline" />
+                </c:AvonicChip>
+                <c:AvonicChip IsEnabled="False">
+                    <c:AvonicLabel Content="Disabled" />
+                </c:AvonicChip>
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicChip Color="primary">
+                    <c:AvonicLabel Content="Primary" />
+                </c:AvonicChip>
+                <c:AvonicChip Color="primary" Outline="True">
+                    <c:AvonicLabel Content="Outline" />
+                </c:AvonicChip>
+                <c:AvonicChip Color="danger">
+                    <c:AvonicIcon IconName="heart" />
+                    <c:AvonicLabel Content="Danger" />
+                </c:AvonicChip>
+                <c:AvonicChip Color="success" Outline="True">
+                    <c:AvonicIcon IconName="checkmark-circle" />
+                    <c:AvonicLabel Content="Success" />
+                </c:AvonicChip>
+            </WrapPanel>
+
+            <WrapPanel>
+                <c:AvonicChip>
+                    <c:AvonicIcon IconName="pin" />
+                    <c:AvonicLabel Content="Icon start" />
+                </c:AvonicChip>
+                <c:AvonicChip>
+                    <c:AvonicLabel Content="Icon end" />
+                    <c:AvonicIcon IconName="close-circle" />
+                </c:AvonicChip>
+                <c:AvonicChip>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicChip>
+                <c:AvonicChip Focusable="True">
+                    <c:AvonicLabel Content="Focusable" />
+                </c:AvonicChip>
+            </WrapPanel>
+
+            <c:AvonicChip>
+                <c:AvonicLabel Content="A long label wraps, and the chip grows to the width of the page and no further" />
+            </c:AvonicChip>
+
+            <c:AvonicChip FlowDirection="RightToLeft">
+                <c:AvonicIcon IconName="pin" />
+                <c:AvonicLabel Content="RTL" />
+                <c:AvonicIcon IconName="close-circle" />
+            </c:AvonicChip>
+
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="In an item" />
+                    <c:AvonicItem.EndContent>
+                        <c:AvonicChip>
+                            <c:AvonicLabel Content="Chip" />
+                        </c:AvonicChip>
+                    </c:AvonicItem.EndContent>
+                </c:AvonicItem>
+            </c:AvonicList>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
