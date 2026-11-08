@@ -280,4 +280,24 @@ public class GestureScrollTests
         page.Lift(finger);
         Assert.True(page.ScrollTop > 30, $"{page.ScrollTop}");
     }
+
+    [AvaloniaFact]
+    public void A_Captured_Gesture_Keeps_The_Scroller_Off_After_A_Gesture_Around_It_Gives_Up()
+    {
+        using var clock = new TestClock();
+        using var page = new Page(clock);
+        var inner = new Border { Background = Brushes.Transparent, Height = 60 };
+        page.Row.Child = inner;
+        using var outer = Make(page.Row, page.Log, name: "outer", threshold: 40);
+        using var first = Make(inner, page.Log, name: "inner", threshold: 10);
+
+        // The inner one captures at 16 px; the outer one is refused at 40, and the drag goes on upwards.
+        var finger = page.Drag(-48, 0);
+        page.Drag(0, -200, finger: finger, from: page.At);
+        page.Lift(finger);
+
+        Assert.Contains("outer.notCaptured", page.Log.Names);
+        Assert.Equal("inner.onEnd", page.Log.All[^1].Name);
+        Assert.Equal(0, page.ScrollTop);
+    }
 }

@@ -952,6 +952,34 @@ public class GestureTests
     }
 
     [AvaloniaFact]
+    public void G16_Data_Set_In_CanStart_Reaches_The_Callbacks_And_Is_Not_Cleared_By_The_Next_Press()
+    {
+        using var clock = new TestClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var seen = new List<object?>();
+        var presses = 0;
+        using var gesture = Gesture.Create(new GestureConfig
+        {
+            Element = box,
+            GestureName = "g",
+            CanStart = detail =>
+            {
+                seen.Add(detail.Data);
+                detail.Data ??= $"set at press {++presses}";
+                return true;
+            },
+            OnEnd = detail => seen.Add(detail.Data),
+        });
+        gesture.Enable();
+
+        new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016).Up(120, 100, 1032);
+        new Finger(scene, clock).Down(100, 100, 2000).Up(100, 100, 2016);
+
+        Assert.Equal([null, "set at press 1", "set at press 1"], seen);
+    }
+
+    [AvaloniaFact]
     public void G16_The_Gesture_Follows_A_Press_On_A_Child_That_Handles_It()
     {
         using var clock = new TestClock();
