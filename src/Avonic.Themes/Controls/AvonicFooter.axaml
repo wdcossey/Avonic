@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Height="120">
+            <c:AvonicFooter>
+                <c:AvonicToolbar>
+                    <c:AvonicTitle Content="Footer" />
+                </c:AvonicToolbar>
+            </c:AvonicFooter>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of footer.md.css. What it does to its toolbars is in Styles/Toolbar.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicFooter}" TargetType="c:AvonicFooter">
+        <!-- position: relative; z-index: 10, so the shadow draws over what comes after it -->
+        <Setter Property="ZIndex" Value="10" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" BoxShadow="{DynamicResource Avonic.Footer.BoxShadow}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .footer-md.ion-no-border { box-shadow: none } -->
+        <Style Selector="^.ion-no-border /template/ Border#PART_Native">
+            <Setter Property="BoxShadow" Value="none" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

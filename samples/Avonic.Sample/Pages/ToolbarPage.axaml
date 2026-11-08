@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ToolbarPage">
+
+    <!-- A page: a header above the content and a footer below it. The header's and footer's ZIndex keeps their shadows
+         over the content. -->
+    <Grid RowDefinitions="Auto,*,Auto">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="menu" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="Toolbar" />
+                <c:AvonicToolbar.EndContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton Content="Edit" Click="OnEditClick" />
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="search" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.EndContent>
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <StackPanel Spacing="16" Margin="0,16">
+                <c:AvonicToolbar Color="primary">
+                    <c:AvonicTitle Content="Primary, md's slot order" />
+                    <c:AvonicToolbar.SecondaryContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton>
+                                <c:AvonicButton.IconOnlyContent>
+                                    <c:AvonicIcon IconName="star" />
+                                </c:AvonicButton.IconOnlyContent>
+                            </c:AvonicButton>
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.SecondaryContent>
+                    <c:AvonicToolbar.PrimaryContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="Primary" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.PrimaryContent>
+                </c:AvonicToolbar>
+
+                <c:AvonicToolbar Color="danger">
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="Solid" Fill="Solid" />
+                            <c:AvonicButton Content="Outline" Fill="Outline" />
+                            <c:AvonicButton Content="Clear" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                </c:AvonicToolbar>
+
+                <c:AvonicToolbar>
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="Solid" Fill="Solid" />
+                            <c:AvonicButton Content="Outline" Fill="Outline" />
+                            <c:AvonicButton Content="Clear" Color="success" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                </c:AvonicToolbar>
+
+                <c:AvonicToolbar>
+                    <c:AvonicTitle Content="A small title wraps onto a second line when it runs out of room" Size="Small" />
+                </c:AvonicToolbar>
+
+                <c:AvonicToolbar>
+                    <c:AvonicTitle Content="A title that is far too long to fit in the toolbar on one line" Color="tertiary" />
+                </c:AvonicToolbar>
+
+                <c:AvonicToolbar FlowDirection="RightToLeft">
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="Start" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                    <c:AvonicTitle Content="RTL" />
+                    <c:AvonicToolbar.EndContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="End" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.EndContent>
+                </c:AvonicToolbar>
+            </StackPanel>
+        </c:AvonicContent>
+
+        <c:AvonicFooter Grid.Row="2">
+            <c:AvonicToolbar>
+                <c:AvonicTitle x:Name="Status" Content="Footer" Size="Small" />
+            </c:AvonicToolbar>
+        </c:AvonicFooter>
+    </Grid>
+
+</UserControl>

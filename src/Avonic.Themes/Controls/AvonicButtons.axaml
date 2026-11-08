@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicToolbar Width="390">
+            <c:AvonicToolbar.StartContent>
+                <c:AvonicButtons>
+                    <c:AvonicButton Content="Clear" />
+                    <c:AvonicButton Content="Solid" Fill="Solid" />
+                    <c:AvonicButton Content="Outline" Fill="Outline" />
+                </c:AvonicButtons>
+            </c:AvonicToolbar.StartContent>
+        </c:AvonicToolbar>
+    </Design.PreviewWith>
+
+    <!-- A translation of buttons.md.css's own rules, and toolbar.md.css's for the first and last ion-buttons. What it does
+         to the buttons in it is in Styles/Toolbar.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicButtons}" TargetType="c:AvonicButtons">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ::slotted(.buttons-first-slot) { margin-inline-start: 4px } -->
+        <Style Selector="^:buttons-first-slot">
+            <Setter Property="Margin" Value="4,0,0,0" />
+        </Style>
+
+        <!-- ::slotted(.buttons-last-slot) { margin-inline-end: 4px } -->
+        <Style Selector="^:buttons-last-slot">
+            <Setter Property="Margin" Value="0,0,4,0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

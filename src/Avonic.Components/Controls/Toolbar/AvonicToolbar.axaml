@@ -1,0 +1,63 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-toolbar: structure only. The look is in Avonic.Themes. The slots are in md's visual order,
+         start, default, secondary, primary, end, as FlexRow has no order. Each slot is a tab group with its index in Ionic's
+         slot order, start, secondary, default, primary, end, inside a container that's a group itself, so the keyboard
+         follows the slots as it does in a browser, and the indices only count inside the toolbar. -->
+    <ControlTheme x:Key="{x:Type c:AvonicToolbar}" TargetType="c:AvonicToolbar">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Background"
+                            IsHitTestVisible="False"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" />
+                    <Border Name="PART_Container"
+                            Margin="{TemplateBinding Padding}"
+                            ClipToBounds="True"
+                            KeyboardNavigation.TabNavigation="Local">
+                        <c:FlexRow>
+                            <c:FlexSlot Name="PART_Start"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="1"
+                                        Content="{TemplateBinding StartContent}"
+                                        ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <Border Name="PART_Content"
+                                    c:FlexRow.Flex="1"
+                                    KeyboardNavigation.TabNavigation="Local"
+                                    KeyboardNavigation.TabIndex="3">
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Border>
+                            <c:FlexSlot Name="PART_Secondary"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="2"
+                                        Content="{TemplateBinding SecondaryContent}"
+                                        ContentTemplate="{TemplateBinding SecondaryContentTemplate}" />
+                            <c:FlexSlot Name="PART_Primary"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="4"
+                                        Content="{TemplateBinding PrimaryContent}"
+                                        ContentTemplate="{TemplateBinding PrimaryContentTemplate}" />
+                            <c:FlexSlot Name="PART_End"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="5"
+                                        Content="{TemplateBinding EndContent}"
+                                        ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        </c:FlexRow>
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

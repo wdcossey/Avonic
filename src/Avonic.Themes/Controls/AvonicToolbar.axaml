@@ -1,0 +1,147 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicHeader>
+                <c:AvonicToolbar>
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton>
+                                <c:AvonicButton.IconOnlyContent>
+                                    <c:AvonicIcon IconName="menu" />
+                                </c:AvonicButton.IconOnlyContent>
+                            </c:AvonicButton>
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                    <c:AvonicTitle Content="Header" />
+                    <c:AvonicToolbar.EndContent>
+                        <c:AvonicButtons>
+                            <c:AvonicButton Content="Edit" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.EndContent>
+                </c:AvonicToolbar>
+            </c:AvonicHeader>
+            <c:AvonicToolbar Color="primary">
+                <c:AvonicTitle Content="Primary" />
+            </c:AvonicToolbar>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of toolbar.md.css. The slots are in md's order in the template. What the toolbar does to buttons, and a
+         header or footer to it, is in Styles/Toolbar.axaml, because a ControlTheme's styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicToolbar}" TargetType="c:AvonicToolbar">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- color: var(color), with color: var(ion-toolbar-color, var(ion-text-color, #424242)) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Toolbar.Color" />
+                <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.ColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- background: var(ion-toolbar-background, var(ion-background-color, #fff)), drawn by .toolbar-background -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Toolbar.Background" />
+                <DynamicResource ResourceKey="Avonic.ToolbarBackgroundBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="BorderBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Toolbar.BorderColor" />
+                <DynamicResource ResourceKey="Avonic.ToolbarBorderColorBrush" />
+                <DynamicResource ResourceKey="Avonic.Toolbar.Md.BorderColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.Toolbar.BorderWidth}" />
+        <!-- padding-right: var(ion-safe-area-right); padding-left: var(ion-safe-area-left). Physical sides. -->
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static c:AvonicToolbar.SafeAreaPadding}">
+                <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <!-- .toolbar-background: absolute over the padding box, under the content, taking no input -->
+                    <Border Name="PART_Background"
+                            IsHitTestVisible="False"
+                            Opacity="{DynamicResource Avonic.Toolbar.Opacity}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" />
+                    <!-- .toolbar-container: padding, min-height, overflow: hidden, align-items: center -->
+                    <Border Name="PART_Container"
+                            Margin="{TemplateBinding Padding}"
+                            MinHeight="{DynamicResource Avonic.Toolbar.MinHeight}"
+                            ClipToBounds="True"
+                            KeyboardNavigation.TabNavigation="Local">
+                        <Border.Padding>
+                            <MultiBinding Converter="{x:Static c:AvonicToolbar.LogicalPadding}">
+                                <DynamicResource ResourceKey="Avonic.Toolbar.PaddingStart" />
+                                <DynamicResource ResourceKey="Avonic.Toolbar.PaddingTop" />
+                                <DynamicResource ResourceKey="Avonic.Toolbar.PaddingEnd" />
+                                <DynamicResource ResourceKey="Avonic.Toolbar.PaddingBottom" />
+                            </MultiBinding>
+                        </Border.Padding>
+                        <!-- order: start 2, content 3, secondary 4, primary 5, end 6. TabIndex keeps the slot order. -->
+                        <c:FlexRow>
+                            <c:FlexSlot Name="PART_Start"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="1"
+                                        Content="{TemplateBinding StartContent}"
+                                        ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <!-- .toolbar-content { flex: 1; min-width: 0; max-width: 100% } -->
+                            <Border Name="PART_Content"
+                                    c:FlexRow.Flex="1"
+                                    KeyboardNavigation.TabNavigation="Local"
+                                    KeyboardNavigation.TabIndex="3">
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Border>
+                            <c:FlexSlot Name="PART_Secondary"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="2"
+                                        Content="{TemplateBinding SecondaryContent}"
+                                        ContentTemplate="{TemplateBinding SecondaryContentTemplate}" />
+                            <c:FlexSlot Name="PART_Primary"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="4"
+                                        Content="{TemplateBinding PrimaryContent}"
+                                        ContentTemplate="{TemplateBinding PrimaryContentTemplate}" />
+                            <c:FlexSlot Name="PART_End"
+                                        VerticalContentAlignment="Center"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        KeyboardNavigation.TabIndex="5"
+                                        Content="{TemplateBinding EndContent}"
+                                        ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        </c:FlexRow>
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color) { color: var(ion-color-contrast) }, and its background var(ion-color-base). An unknown colour
+             makes them invalid: the background goes transparent, or an ancestor's base, and the text inherits. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
