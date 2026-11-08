@@ -64,7 +64,7 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **Keys do nothing:** no click on Enter or Space, and the arrows don't move focus between the children.
 - **In an item's or a divider's slot** the slot sets the side towards the content, 16, and the chip keeps its own 4 on the
   other three, so `4,4,16,4` at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. An
-  app's plain `Margin` style beats it, as a page's rule beats `::slotted`. The rules are in the theme's `Styles/Item.axaml`
+  app's plain `Margin` style beats it, as a page's rule beats `::slotted`, except beside a stacked or floating label. The rules are in the theme's `Styles/Item.axaml`
   and `Styles/ItemDivider.axaml`, after the item's rule for any child in a slot.
 
 ## Extensions
@@ -73,7 +73,7 @@ Ionic's chip has no click of its own: an app listens to the element's own DOM `c
 
 | Member | What |
 |---|---|
-| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Automation's `Invoke`, a screen reader's activation, does. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
+| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Automation's `Invoke`, a screen reader's activation, does, on a chip with a `Click` handler of its own or a `Command`, as Chromium offers a click action only on an element with a listener. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
 | `Command`, `CommandParameter` | Run after `Click`, unless a handler set `Handled`. A command that can't execute disables the chip, as on `AvonicButton` |
 
 ```xml
@@ -89,5 +89,6 @@ Ionic's chip has no click of its own: an app listens to the element's own DOM `c
 | An avatar child isn't sized | `chip.md.css`'s `::slotted(ion-avatar)`; it goes in `Styles/Chip.axaml`, in a PR of its own |
 | A disabled panel fades the chip, a flex parent doesn't stretch it, and a taller parent centres it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |
 | Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container, where Ionic's chip grows past it | Avalonia arranges a child within its space |
+| Beside a stacked or floating label, the slot's `16,7,4,7` beats an app's plain `Margin` style, where Ionic's page rule wins (measured `c-appstacked`: 3) | That rule depends on the item's state, a pseudoclass, which is an activator, and an activator beats a plain style. Every control in that slot has this, as before. Use a class or a pseudoclass of the app's own |
 | A chip whose margin an app changes in a `ControlTheme` still has 4 on the other three sides in an item's or a divider's slot, where a CSS `:host` margin would follow | The slot rules are a `Style`, which beats any `ControlTheme`, and Avalonia can't set one side of a `Margin`. A plain `Style` for the margin beats them, as a page's rule does in CSS |
 | Not tried in a real window | Headless capture only |

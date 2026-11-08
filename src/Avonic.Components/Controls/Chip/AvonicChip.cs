@@ -59,8 +59,17 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
 
     public event EventHandler<RoutedEventArgs>? Click
     {
-        add => AddHandler(ClickEvent, value);
-        remove => RemoveHandler(ClickEvent, value);
+        add
+        {
+            AddHandler(ClickEvent, value);
+            _clickHandlers++;
+        }
+
+        remove
+        {
+            RemoveHandler(ClickEvent, value);
+            _clickHandlers = Math.Max(0, _clickHandlers - 1);
+        }
     }
 
     /// <summary>
@@ -89,6 +98,7 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private readonly NativeButton _native;
+    private int _clickHandlers;
     private EventHandler<ChildIndexChangedEventArgs>? _childIndexChanged;
 
     public AvonicChip()
@@ -246,7 +256,9 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     /// <summary>
     /// A plain element to Chromium, with no role, where an <see cref="ItemsControl"/>'s own peer would call it a list. Its
     /// children speak for themselves, and <c>aria-disabled</c> is the peer's <c>IsEnabled</c>. <c>Invoke</c> is a screen
-    /// reader's activation, which in a browser is a DOM <c>click</c> on the element, so it raises <see cref="Click"/>.
+    /// reader's activation, which in a browser is a DOM <c>click</c> on the element, so it raises <see cref="Click"/>. Chromium
+    /// offers that click only on an element something listens to, so a chip offers <c>Invoke</c> only with a <see cref="Click"/>
+    /// handler of its own or a <see cref="Command"/>, and a chip that only shows a tag isn't read out as something to activate.
     /// </summary>
     private sealed class ChipAutomationPeer(AvonicChip owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
@@ -255,6 +267,9 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         protected override bool IsContentElementCore() => false;
 
         protected override bool IsControlElementCore() => true;
+
+        protected override object? GetProviderCore(Type providerType) =>
+            providerType == typeof(IInvokeProvider) && owner._clickHandlers == 0 && owner.Command is null ? null : base.GetProviderCore(providerType);
 
         public void Invoke() => owner.OnNativeClick();
     }

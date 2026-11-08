@@ -1392,7 +1392,7 @@ public class AvonicChipTests
         var (chip, clicks) = Clicked();
         chip.Command = command;
         using var scene = new Scene(chip);
-        var invoke = Assert.IsAssignableFrom<Avalonia.Automation.Provider.IInvokeProvider>(ControlAutomationPeer.CreatePeerForElement(chip));
+        var invoke = Assert.IsAssignableFrom<Avalonia.Automation.Provider.IInvokeProvider>(ControlAutomationPeer.CreatePeerForElement(chip).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>());
 
         invoke.Invoke();
         Assert.Equal(1, clicks());
@@ -1402,6 +1402,32 @@ public class AvonicChipTests
         invoke.Invoke();
         Assert.Equal(1, clicks());
         Assert.Single(command.Parameters);
+    }
+
+    // Chromium offers a click action only on an element with a click listener, so a chip that only shows a tag offers none.
+    [AvaloniaFact]
+    public void E1_Only_A_Chip_With_A_Click_Handler_Or_A_Command_Can_Be_Invoked()
+    {
+        var plain = Bare();
+        var handled = Bare();
+        void OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+        }
+
+        handled.Click += OnClick;
+        var commanded = Bare();
+        commanded.Command = new Command();
+        using var scene = new Scene(new StackPanel { Children = { plain, handled, commanded } });
+
+        static object? Invoke(Control control) =>
+            ControlAutomationPeer.CreatePeerForElement(control).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>();
+
+        Assert.Null(Invoke(plain));
+        Assert.NotNull(Invoke(handled));
+        Assert.NotNull(Invoke(commanded));
+
+        handled.Click -= OnClick;
+        Assert.Null(Invoke(handled));
     }
 
     [AvaloniaFact]

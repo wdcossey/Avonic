@@ -120,7 +120,8 @@
     <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton), c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > :is(Control):not(c|AvonicButton)">
         <Setter Property="Margin" Value="16,7,0,7" />
     </Style>
-    <!-- That rule sets the top and bottom, and a chip keeps its own 4 at its end: measured 7px 4px 7px 16px. -->
+    <!-- That rule sets the top and bottom, and a chip keeps its own 4 at its end: measured 7px 4px 7px 16px. Both depend on
+         the item's state, which only an activator can, so they also beat an app's plain style, where a page's rule wins in CSS. -->
     <Style Selector="c|AvonicItem:item-label-stacked /template/ ContentPresenter#PART_End > c|AvonicChip, c|AvonicItem:item-label-floating /template/ ContentPresenter#PART_End > c|AvonicChip">
         <Setter Property="Margin" Value="16,7,4,7" />
     </Style>

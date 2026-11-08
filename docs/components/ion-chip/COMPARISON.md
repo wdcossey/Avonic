@@ -151,7 +151,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | 12 | A slotted icon | 20, `rgba(0, 0, 0, 0.54)` or the shade; first `−4 8`, last `8 −4`, only child as last, 48 wide; nested gets none; RTL mirrors | match |
 | 13 | Long content | 366 by 44, label wrapped; an icon beside it shrinks to 11.72 | match in shape: the full width, and the icon shrinks |
 | 14 | Keys | Nothing: no click on Enter or Space, no arrow navigation | match |
-| 15 | In a slot | `4px 16px 4px 4px` at the start, `4px 4px 4px 16px` at the end, in an item and a divider; `7px 4px 7px 16px` beside a stacked or floating label; 4 in a panel; a page's `margin: 3px` beats it | match (#88) |
+| 15 | In a slot | `4px 16px 4px 4px` at the start, `4px 4px 4px 16px` at the end, in an item and a divider; `7px 4px 7px 16px` beside a stacked or floating label; 4 in a panel; a page's `margin: 3px` beats it | match (#88), but beside a stacked label the app's style loses: deliberate, below |
 | E1 | `Click`, an extension | The DOM `click`: 3 for a click then a double click, 2 for two quick taps, 1 for a finger moved 14 and 0 for 16, 1 for a mouse dragged off and back, 0 released off, 0 disabled, 0 for Enter and Space | match (#88). `Tapped` would miss the quick second press |
 | E2 | `Command`, an extension | Nothing in Ionic | runs after `Click` unless it's handled; one that can't execute disables the chip |
 | — | Automation | No role, only its text; `aria-disabled` | match: a `Group`, not a content element, disabled when it is |
@@ -164,6 +164,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | A disabled ancestor fades the chip to 0.4 | A disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | A flex parent doesn't stretch it | `tall`: 64 high in a 72 flex row, label centred | `VerticalAlignment` is `Center`, for `vertical-align: middle`. Set `Stretch` for a stretched chip, and the children stay centred |
 | A parent taller than the chip centres it | `blk`: in a 100 px block, at the top, `y` 4 inside it | The same `Center`, which lines chips of different heights up in a row, as `vertical-align: middle` does. Avalonia has no line box, so one value can't do both. Set `Top` |
+| Beside a stacked or floating label, an app's plain `Margin` style loses to the slot's `16,7,4,7` | `c-appstacked`: a page's `margin: 3px` is 3 | The slot's rule depends on the item's state, a pseudoclass, which is an activator, and that beats a plain style. As for every control in that slot |
 | The icon's factor is `1.42857142857` | Chromium: 20 | 14 × `1.4285714286` rounds up to 21 in Avalonia's layout |
 
 ## Gaps

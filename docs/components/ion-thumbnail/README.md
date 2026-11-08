@@ -40,7 +40,8 @@ Everything is listed and measured in [PLAN.md](../ion-badge/PLAN.md#thumbnail). 
 - **An `Image` in it fills it,** cropped from the middle, with square corners, or cut to the radius. Anything else in it isn't cut.
 - **In an item's or a divider's slot** it's 56 × 56, with 8 above and below and 16 towards the content, so a row of 72. Beside a
   stacked label it's 7 above and below. Its own `Width` and `Height` beat the 56. A panel directly in a slot stands for the slot.
-  An app's plain `Margin` style beats the slot's, as a page's rule beats `::slotted` in CSS. The rules are in the theme's
+  An app's plain `Margin` style beats the slot's, as a page's rule beats `::slotted` in CSS, except beside a stacked or
+  floating label, where the slot's 7 has an activator. The rules are in the theme's
   `Styles/Item.axaml` and `Styles/ItemDivider.axaml`, as they're in `item.md.css`.
 
 `ion-img` doesn't exist yet ([#17](https://github.com/wdcossey/Avonic/issues/17)). Its PR adds the same rule for itself.

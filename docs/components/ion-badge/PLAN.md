@@ -90,7 +90,7 @@ A button item's name includes a badge's text, as a native `<button>`'s does, but
 | A10 | `Width` and `Height` on the avatar beat the slot's 40, and the margins stay | measured `av-vars`: 30 × 30, `margin: 8px 16px 8px 0px` |
 | A11 | RTL: a start avatar at the right, with its margin on the left, and its corners where they were, on the background and the image alike | measured `av-rtl`: x = 334, `margin: 8px 0px 8px 16px`; `border-radius` is physical, so `20px 0 0 0` stays at the top left |
 | A12 | Its size doesn't follow the item's font size | measured `av-sized`: 40 in a 30 px item |
-| A13 | An app's plain `Margin` style beats the slots' margins, in every slot (#88) | A page's rule beats `::slotted`; measured `a-app`: `margin: 3px` in an end slot |
+| A13 | An app's plain `Margin` style beats the slots' margins, in every slot but an end beside a stacked or floating label (#88) | A page's rule beats `::slotted`; measured `a-app`: `margin: 3px` in an end slot |
 
 ### Thumbnail
 
@@ -177,6 +177,7 @@ the panel already has the slot's 16 from `Item.axaml`.
 | A non-square avatar's own background at `50%` is a stadium, where Ionic's is an ellipse (measured `av-wide`: 61.25 × 40) | `CornerRadius` has one radius per corner. The image's clip is an ellipse, which is what's seen with a picture in it |
 | `Avonic.Avatar.BorderRadius` takes a `CornerRadius`, a number, or a string of one to four lengths in px or percentages, where Ionic takes any CSS `border-radius`, `/` and `em` included | There's no Avalonia type for a percentage radius. A string is checked when it's read, and anything else is 0, as an invalid `var()` is |
 | `Avonic.Thumbnail.Size` takes a number, not a string such as `64px` | It's a size, as every other size key is |
+| Beside a stacked or floating label, an app's plain `Margin` style loses to the slot's `16,7,0,7`, where a page's rule wins in Ionic (measured for a chip, `c-appstacked`) | `Styles/Item.axaml`'s rule there depends on the item's state, a pseudoclass, which is an activator, and that beats a plain style |
 | A string radius of a bare number, such as `"8"`, is 8, where CSS's `border-radius: 8` is invalid | The key also takes the number 8, and a string of one means the same |
 | `Avonic.Thumbnail.Size` set anywhere beats the item's 56, as the key is unset by default | The outer tree beats `::slotted` in CSS. A thumbnail that should be 56 only in items sets `Width` and `Height` there |
 | An empty string is empty, as null is | A framework renders no text node for `""` |

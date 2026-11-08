@@ -196,7 +196,8 @@ margin in a slot is a rule of its own, **in `Styles/Item.axaml`, after that one,
 ```
 
 It beats the rule for any child by coming later in the same file, whatever order the files merge in, and an app's plain
-`Margin` style beats it, as a page's rule beats `::slotted` in CSS. In the control's own file it would win or lose by where
+`Margin` style beats it, as a page's rule beats `::slotted` in CSS. Not beside a stacked or floating label: that rule depends on
+the item's state, a pseudoclass, and an activator beats a plain style. In the control's own file it would win or lose by where
 that file merges, and with an activator it would beat the app's style too. The avatar's, the thumbnail's, the chip's and the
 label's are there. A chip has no rule in `item.md.css`: its own 4 stays on the other three sides, so its rule is `4,4,16,4`
 at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. `Styles/Button.axaml` still
