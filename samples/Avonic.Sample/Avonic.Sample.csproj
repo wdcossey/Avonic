@@ -18,7 +18,7 @@
 
   <!-- Roboto, for the sample and the tests, from the files the Chromium tools load: see Roboto.cs and tools/fonts/roboto/README.md. -->
   <ItemGroup>
-    <AvaloniaResource Include="..\..\tools\fonts\roboto\*.ttf" Link="Fonts\Roboto\%(Filename)%(Extension)" />
+    <AvaloniaResource Include="../../tools/fonts/roboto/*.ttf" Link="Fonts/Roboto/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
