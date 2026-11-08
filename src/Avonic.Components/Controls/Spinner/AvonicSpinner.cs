@@ -80,7 +80,6 @@ public class AvonicSpinner : Control
     private Pen? _pen;
     private SpinnerConfig? _penConfig;
     private StreamGeometry[]? _fixedArcs;
-    private SpinnerConfig? _fixedArcsConfig;
 
     /// <summary>
     /// Ionic's host classes <c>spinner-&lt;name&gt;</c>, as <c>:name-&lt;name&gt;</c>, by the rule for a host class from a
@@ -439,14 +438,11 @@ public class AvonicSpinner : Control
                 }
                 else if (frame.Arcs is { } arcs)
                 {
-                    // crescent's dash is fixed, and only its turn changes, so its arc is built once for its config.
+                    // crescent's dash is fixed, and only its turn changes, so its arc is built once. It's the only fixed
+                    // one, so the geometry needs no key: one would be a rule that nothing can break.
                     if (config.Dash is not null)
                     {
-                        if (_fixedArcs is null || _fixedArcsConfig != config)
-                        {
-                            _fixedArcs = arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
-                            _fixedArcsConfig = config;
-                        }
+                        _fixedArcs ??= arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
 
                         foreach (var geometry in _fixedArcs)
                         {

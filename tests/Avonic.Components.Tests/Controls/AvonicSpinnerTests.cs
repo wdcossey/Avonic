@@ -367,6 +367,17 @@ public class AvonicSpinnerTests
         Dispatcher.UIThread.RunJobs();
         Assert.True(f.Spinner.IsRequestingFrames);
         Near(0.95, f.At(450)[0].Opacity);    // measured: a re-inserted spinner's animations start again
+
+        // Paused when it left, and running by the time it's back: new animations, from 0, not shifted by the old pause.
+        f.Spinner.Paused = true;
+        f.At(500);
+        f.Host.Children.Remove(f.Spinner);
+        Dispatcher.UIThread.RunJobs();
+        f.Spinner.Paused = false;
+        f.At(600);
+        f.Host.Children.Add(f.Spinner);
+        Dispatcher.UIThread.RunJobs();
+        Near(0.95, f.At(650)[0].Opacity);
     }
 
     [AvaloniaFact]
@@ -572,6 +583,34 @@ public class AvonicSpinnerTests
         }
     }
 
+    [AvaloniaFact]
+    public void B18_A_Change_Redraws_It_Between_Frames_And_While_Paused()
+    {
+        using var clock = new TestClock();
+        var spinner = new AvonicSpinner { SpinnerName = SpinnerName.Lines, Duration = 100, Width = 128, Height = 128, Foreground = Brushes.Black };
+        using var scene = new Scene(new StackPanel { Background = Brushes.White, Children = { spinner } }, 128, 128);
+
+        static int Ink(WriteableBitmap frame, int x, int y) => 255 - Frames.PixelAt(frame, x, y).R;
+
+        // Line 0, at 12 o'clock, on a 100 ms cycle: at 240, a frame, its opacity is 0.6. Paused at 248, before the next
+        // frame, it shows 248, at 0.52.
+        clock.At(240);
+        Near(0.6 * 255, Ink(Capture(scene.Window), 64, 24), 3);
+        clock.At(248);
+        spinner.Paused = true;
+        Near(0.52 * 255, Ink(Capture(scene.Window), 64, 24), 3);
+
+        // Paused, a new duration is a new phase of the same 248 ms: 0.752 of a 1000 ms cycle.
+        spinner.Duration = 1000;
+        Near(0.752 * 255, Ink(Capture(scene.Window), 64, 24), 3);
+
+        // Paused, a new name is drawn, with its own stroke: lines-sharp's line 0 keeps its time, 8 px wide, not lines' 14.
+        spinner.SpinnerName = SpinnerName.LinesSharp;
+        var sharp = Capture(scene.Window);
+        Near(0.752 * 255, Ink(sharp, 64, 20), 3);
+        Assert.Equal(0, Ink(sharp, 69, 20));
+    }
+
     // ── B19: host classes ────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -667,6 +706,9 @@ public class AvonicSpinnerTests
         // bubbles at 0 ms: bubble 0, at 3 o'clock, is full size and opaque.
         var bubbles = Draw(SpinnerName.Bubbles, 0);
         Assert.True(Ink(bubbles, 64 + 41, 64) > 250);
+
+        // Bubble 1, at (24.5 %, 20.6 %), is scaled to a ninth, r 10 / 9 px, about its own centre, so 4.6 px from it is clear.
+        Assert.Equal(0, Ink(bubbles, 100, 90));
 
         // A new colour on a stroked spinner that's already drawn: the stroke follows it.
         var lit = new AvonicSpinner { SpinnerName = SpinnerName.Crescent, Width = 128, Height = 128, Paused = true, Foreground = Brushes.Black };
