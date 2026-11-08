@@ -334,12 +334,16 @@ try {
         # Where a stuck divider's text is, in the window: below the header, and above anything else in the page.
         function DividerY { (Named $CT::Text "The next group's divider").Current.BoundingRectangle.Y - $win.Current.BoundingRectangle.Y }
         function IsStuck($y) { $y -ge 0 -and $y -le (130 * $scale) }
+        # Stays put, to a pixel. With Roboto's 18.75 lines a row's top isn't a whole pixel, and at a scale such as 125% UI
+        # Automation rounds the stuck divider to 92 one time and 91 the next, where the screen draws the same pixels (compared:
+        # rows 0 to 130 of both frames are identical). One that doesn't stick moves by a wheel notch, 50 px or more.
+        function Same($a, $b) { [math]::Abs($a - $b) -le 1 }
         Wheel 20
         Shot 'ion-list-stuck'
         $first = DividerY
         Wheel 2
         $second = DividerY
-        Check 'a divider sticks under the wheel' ((IsStuck $first) -and $first -eq $second) "$first, then $second"
+        Check 'a divider sticks under the wheel' ((IsStuck $first) -and (Same $first $second)) "$first, then $second"
         Open 'ion-list'
         Drag $cx ([int]($w.Y + $w.Height * 0.8)) (-600) 20 16
         Start-Sleep -Milliseconds 1500
@@ -350,7 +354,7 @@ try {
         Start-Sleep -Milliseconds 1500
         $second = DividerY
         Shot 'ion-list-stuck-touch'
-        Check 'a divider sticks under touch' ((IsStuck $first) -and $first -eq $second) "$first, then $second"
+        Check 'a divider sticks under touch' ((IsStuck $first) -and (Same $first $second)) "$first, then $second"
     }
 
     Section 'ion-label: Tab' {
