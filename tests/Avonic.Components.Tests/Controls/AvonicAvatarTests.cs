@@ -3,9 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 using Avonic.Themes;
 
@@ -106,23 +109,63 @@ public class AvonicAvatarTests
         }
     }
 
-    /// <summary>The margins of a start, an end, and an end beside a stacked and a floating label, in an item.</summary>
+    /// <summary>
+    /// The margins of a start and an end in an item and in a divider, and of an end beside a stacked and a floating label, in an
+    /// item. Measured in Chromium, the same for an avatar and a thumbnail.
+    /// </summary>
     internal static void AssertSlotMargins(Func<Control> create)
     {
         var start = create();
         var end = create();
+        var dividerStart = create();
+        var dividerEnd = create();
         var stacked = create();
         var floating = create();
         using var scene = InScene(
             new AvonicItem { StartContent = start, Content = "x" },
             new AvonicItem { Content = "x", EndContent = end },
+            new AvonicItemDivider { StartContent = dividerStart, Content = "x", EndContent = dividerEnd },
             new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked }, EndContent = stacked },
             new AvonicItem { Content = new AvonicLabel { Content = "x", Position = LabelPosition.Floating }, EndContent = floating });
 
         Assert.Equal(new Thickness(0, 8, 16, 8), start.Margin);
         Assert.Equal(new Thickness(16, 8, 0, 8), end.Margin);
+        Assert.Equal(new Thickness(0, 8, 16, 8), dividerStart.Margin);
+        Assert.Equal(new Thickness(16, 8, 0, 8), dividerEnd.Margin);
         Assert.Equal(new Thickness(16, 7, 0, 7), stacked.Margin);
         Assert.Equal(new Thickness(16, 7, 0, 7), floating.Margin);
+    }
+
+    /// <summary>
+    /// Runs a test with an app's own plain style for <c>Margin</c> on every <typeparamref name="T"/>, after the theme, as an
+    /// app's <c>Styles</c> are. In CSS a page's <c>ion-avatar { margin: 3px }</c> beats every <c>::slotted</c> rule, measured.
+    /// </summary>
+    internal static void WithAppMargin<T>(Thickness margin, Action test) where T : Control
+    {
+        var style = new Style(selector => selector.OfType<T>()) { Setters = { new Setter(Layoutable.MarginProperty, margin) } };
+        var styles = Application.Current!.Styles;
+        styles.Add(style);
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            test();
+        }
+        finally
+        {
+            styles.Remove(style);
+        }
+    }
+
+    /// <summary>The margin of a control in the start, end and default slots of an item, and the start and end of a divider.</summary>
+    internal static void AssertMarginInEverySlot(Func<Control> create, Thickness expected)
+    {
+        var controls = Enumerable.Range(0, 5).Select(_ => create()).ToArray();
+        using var scene = InScene(
+            new AvonicItem { StartContent = controls[0], Content = "x", EndContent = controls[1] },
+            new AvonicItem { Content = controls[2] },
+            new AvonicItemDivider { StartContent = controls[3], Content = "x", EndContent = controls[4] });
+
+        Assert.All(controls, control => Assert.Equal(expected, control.Margin));
     }
 
     // ── 1. Alone ─────────────────────────────────────────────────────────────────────────────
@@ -391,13 +434,22 @@ public class AvonicAvatarTests
         Assert.Equal(new Size(40, 40), avatar.Bounds.Size);
     });
 
-    // In CSS, the slot rules for an avatar beat the item's by specificity, not by where they come. Here the avatar's file merges
-    // before Item.axaml, so its rules for an end slot have to beat the item's by a pseudoclass, and still leave a stacked item's 7.
+    // In CSS, the slot rules for an avatar beat the item's by specificity, not by where they come. Here they're in Item.axaml and
+    // ItemDivider.axaml, after the rule for any child. A plain rule back in Avatar.axaml would lose to that rule merged first,
+    // and win merged last; one with an activator would beat an app's style, which A13 checks.
     [AvaloniaTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void A6_A8_The_Slot_Rules_Hold_Whatever_Order_The_Files_Merge_In(bool first) =>
         InMergeOrder("Avatar.axaml", first, () => AssertSlotMargins(() => new AvonicAvatar { Content = Picture() }));
+
+    // ── 13. An app's own style ───────────────────────────────────────────────────────────────
+
+    // Measured a-app: a page's margin: 3px on an avatar in an item's end slot is 3px all round, as a page's rule beats every
+    // ::slotted one, so it's the same in every slot.
+    [AvaloniaFact]
+    public void A13_An_Apps_Plain_Margin_Style_Beats_The_Slots() => InstalledTheme.Run(_ =>
+        WithAppMargin<AvonicAvatar>(new Thickness(3), () => AssertMarginInEverySlot(() => new AvonicAvatar { Content = Picture() }, new Thickness(3))));
 
     // ── 9. A tall row ────────────────────────────────────────────────────────────────────────
 

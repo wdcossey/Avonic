@@ -44,6 +44,20 @@ The first chip pressed with a mouse at its centre, 160 ms in, as `render.js --ta
   frame for when it asks for the screenshot, and taking it isn't instant, so Chromium's most likely shows a later moment. Not measured. The hover background under it,
   0.16, is the same, as hover beats a press: measured.
 
+### In a slot (#88)
+
+A chip, an avatar and a thumbnail in an item's start and end slots, chips in a divider's, and a chip beside a stacked label,
+Ionic on the left. Ionic side: `node tools/ionic-ref/render.js ion-chip --bare --html '…' --out docs/components/ion-chip/ref-slots`,
+with the exact command in [`ref-slots/README.md`](ref-slots/README.md). Avonic side: `AvonicChipCaptureTests.Slots_Page`, saved
+as [`compare/avonic-slots.png`](compare/avonic-slots.png). The chips have plain text in them, not an `ion-label`, which in an item
+takes the item's stacked class away: `ion-item` keeps one set of `ionStyle` classes per tag, and the chip's label is the last.
+
+![](compare/slots-side.png)
+
+**Match.** The chips are at x = 20, `4px 16px 4px 4px`, and end at 370, `4px 4px 4px 16px`, in the item and the divider, and
+`7px 4px 7px 16px` beside the stacked label, which the tests check. Before #88 they were at x = 16 with no top or bottom margin.
+The avatar and thumbnail are where they were. The text is a little lower, from the fonts, as above.
+
 ## Found here, not by the tests
 
 - **No slotted icon rule applied at all.** The previous draft had the rules as `ContentPresenter:nth-child(1) > c|AvonicIcon`, and
@@ -137,6 +151,9 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | 12 | A slotted icon | 20, `rgba(0, 0, 0, 0.54)` or the shade; first `−4 8`, last `8 −4`, only child as last, 48 wide; nested gets none; RTL mirrors | match |
 | 13 | Long content | 366 by 44, label wrapped; an icon beside it shrinks to 11.72 | match in shape: the full width, and the icon shrinks |
 | 14 | Keys | Nothing: no click on Enter or Space, no arrow navigation | match |
+| 15 | In a slot | `4px 16px 4px 4px` at the start, `4px 4px 4px 16px` at the end, in an item and a divider; `7px 4px 7px 16px` beside a stacked or floating label; 4 in a panel; a page's `margin: 3px` beats it | match (#88) |
+| E1 | `Click`, an extension | The DOM `click`: 3 for a click then a double click, 2 for two quick taps, 1 for a finger moved 14 and 0 for 16, 1 for a mouse dragged off and back, 0 released off, 0 disabled, 0 for Enter and Space | match (#88). `Tapped` would miss the quick second press |
+| E2 | `Command`, an extension | Nothing in Ionic | runs after `Click` unless it's handled; one that can't execute disables the chip |
 | — | Automation | No role, only its text; `aria-disabled` | match: a `Group`, not a content element, disabled when it is |
 
 ## Deliberate differences
@@ -147,7 +164,6 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | A disabled ancestor fades the chip to 0.4 | A disabled `fieldset` does nothing to an `ion-chip` | A disabled ancestor disables the control in Avalonia, and it should look it, as `ion-button` recorded |
 | A flex parent doesn't stretch it | `tall`: 64 high in a 72 flex row, label centred | `VerticalAlignment` is `Center`, for `vertical-align: middle`. Set `Stretch` for a stretched chip, and the children stay centred |
 | A parent taller than the chip centres it | `blk`: in a 100 px block, at the top, `y` 4 inside it | The same `Center`, which lines chips of different heights up in a row, as `vertical-align: middle` does. Avalonia has no line box, so one value can't do both. Set `Top` |
-| In an item's start or end slot, its margin is `0,0,16,0` or `16,0,0,0` | `initemend`: `4px 4px 4px 16px` | `Styles/Item.axaml` sets all four sides for any control in the slot, and merges after this file. See the PR's proposal |
 | The icon's factor is `1.42857142857` | Chromium: 20 | 14 × `1.4285714286` rounds up to 21 in Avalonia's layout |
 
 ## Gaps
@@ -155,5 +171,5 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicChi
 | Gap | Why |
 |---|---|
 | Fonts | Roboto isn't installed, as for every control so far |
-| `::slotted(ion-avatar)` | `ion-avatar` doesn't exist yet (#16) |
+| `::slotted(ion-avatar)` in a chip | Not in this PR or #88; it goes in `Styles/Chip.axaml` |
 | Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container's width | `nw`: 308.84 wide in a 200 px container, past its edge | Avalonia arranges a child within the space it has, so the chip can't overflow its parent. Letting its measure overflow changed nothing, as deliberate breakage showed |

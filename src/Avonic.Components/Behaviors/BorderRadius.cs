@@ -2,8 +2,9 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using Avonic.Components.Controls;
 
-namespace Avonic.Components.Controls;
+namespace Avonic.Components.Behaviors;
 
 /// <summary>
 /// <c>border-radius: var(--border-radius)</c>, for <see cref="AvonicAvatar"/> and <see cref="AvonicThumbnail"/>, whose default

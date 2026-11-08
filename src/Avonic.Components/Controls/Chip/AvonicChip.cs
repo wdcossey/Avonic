@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
@@ -5,6 +6,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avonic.Components.Behaviors;
@@ -44,12 +46,57 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         OutlineProperty.Changed.AddClassHandler<AvonicChip>((chip, _) => chip.PseudoClasses.Set(":outline", chip.Outline));
     }
 
+    // ── Extensions ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Avonic extension: the chip was clicked, on the release of every press on it, as the DOM <c>click</c> an Ionic app listens
+    /// to on the chip. Not on a key, as a chip has no native button: measured, Enter and Space don't click it.
+    /// <see cref="InputElement.Tapped"/> misses a second quick tap, which is <see cref="InputElement.DoubleTapped"/> instead.
+    /// </summary>
+    public static readonly RoutedEvent<RoutedEventArgs> ClickEvent =
+        RoutedEvent.Register<AvonicChip, RoutedEventArgs>(nameof(Click), RoutingStrategies.Bubble);
+
+    public event EventHandler<RoutedEventArgs>? Click
+    {
+        add => AddHandler(ClickEvent, value);
+        remove => RemoveHandler(ClickEvent, value);
+    }
+
+    /// <summary>
+    /// Avonic extension: runs when the chip clicks, unless a <see cref="Click"/> handler set <c>Handled</c>. One that can't
+    /// execute disables the chip, as it does a <see cref="Button"/>.
+    /// </summary>
+    public static readonly StyledProperty<ICommand?> CommandProperty =
+        AvonicButton.CommandProperty.AddOwner<AvonicChip>();
+
+    /// <summary>Avonic extension: the parameter for <see cref="Command"/>.</summary>
+    public static readonly StyledProperty<object?> CommandParameterProperty =
+        AvonicButton.CommandParameterProperty.AddOwner<AvonicChip>();
+
+    public ICommand? Command
+    {
+        get => GetValue(CommandProperty);
+        set => SetValue(CommandProperty, value);
+    }
+
+    public object? CommandParameter
+    {
+        get => GetValue(CommandParameterProperty);
+        set => SetValue(CommandParameterProperty, value);
+    }
+
+    // ── State ────────────────────────────────────────────────────────────────────────────────
+
+    private readonly NativeButton _native;
     private EventHandler<ChildIndexChangedEventArgs>? _childIndexChanged;
 
     public AvonicChip()
     {
         // ion-activatable, always. Not ion-focusable: the chip takes focus only if an app makes it focusable, as tabindex does.
         Activatable.SetIsEnabled(this, true);
+
+        // The DOM click on release, with no keys. It handles nothing, so Tapped and the rest still reach the app.
+        _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled);
 
         // :first-child and :last-child follow the children as they come and go. A slot's own index changes after this, when the
         // panel moves it, which ContainerIndexChangedOverride raises. A new template or DisplayMemberBinding remakes the slots.
@@ -66,6 +113,18 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     {
         get => GetValue(OutlineProperty);
         set => SetValue(OutlineProperty, value);
+    }
+
+    /// <summary>A command that can't execute disables the chip. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
+    protected override bool IsEnabledCore => base.IsEnabledCore && _native?.CanExecute != false;
+
+    /// <summary>A disabled chip doesn't click, even if it was disabled during the press, as <c>pointer-events: none</c> stops it.</summary>
+    private void OnNativeClick()
+    {
+        if (IsEffectivelyEnabled)
+        {
+            _native.Click(ClickEvent);
+        }
     }
 
     /// <summary>Every child is slotted, a control or not, so that the theme's rules reach each the same way.</summary>

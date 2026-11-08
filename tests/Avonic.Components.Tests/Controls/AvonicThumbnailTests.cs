@@ -224,4 +224,11 @@ public class AvonicThumbnailTests
     [AvaloniaFact]
     public void T7_In_RTL_The_Corners_Stay_Where_They_Are() => InstalledTheme.Run(_ =>
         AssertCornersStayInRtl(() => new AvonicThumbnail(), "Avonic.Thumbnail.BorderRadius"));
+
+    // ── 8. An app's own style ────────────────────────────────────────────────────────────────
+
+    // A page's rule beats every ::slotted one, as measured for an avatar (a-app) and a chip (c-app).
+    [AvaloniaFact]
+    public void T8_An_Apps_Plain_Margin_Style_Beats_The_Slots() => InstalledTheme.Run(_ =>
+        WithAppMargin<AvonicThumbnail>(new Thickness(3), () => AssertMarginInEverySlot(() => new AvonicThumbnail { Content = Picture() }, new Thickness(3))));
 }

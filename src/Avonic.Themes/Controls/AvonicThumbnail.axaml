@@ -14,7 +14,8 @@
         </StackPanel>
     </Design.PreviewWith>
 
-    <!-- A translation of thumbnail.css's host. The image inside, and the sizes in an item, are in Styles/Thumbnail.axaml. -->
+    <!-- A translation of thumbnail.css's host. The image inside is in Styles/Thumbnail.axaml, and the size and margins in an
+         item's or a divider's slot are in Styles/Item.axaml and Styles/ItemDivider.axaml, as they're in item.md.css. -->
     <ControlTheme x:Key="{x:Type c:AvonicThumbnail}" TargetType="c:AvonicThumbnail">
         <!-- width: var(size); height: var(size), where size is 48 -->
         <Setter Property="Width">
@@ -31,7 +32,7 @@
         </Setter>
         <!-- border-radius: var(border-radius), which is 0 -->
         <Setter Property="CornerRadius">
-            <MultiBinding Converter="{x:Static c:BorderRadius.ToCornerRadius}">
+            <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />
                 <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />

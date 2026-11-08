@@ -183,15 +183,25 @@ works out which control is the first interactive one again, so raise this when a
 
 ### Slotted styles
 
-Rules like `::slotted(ion-avatar)` are in `item.md.css`, and their controls don't exist yet. Each goes in that
-control's own `src/Avonic.Themes/Styles/<Name>.axaml`:
+`::slotted([slot=start])` and `::slotted([slot=end])` set one side in CSS, and the rest of a slotted control's margin stays.
+Here `Styles/Item.axaml` sets the whole `Margin` for any child in a slot, as Avalonia has no single side. So a control's own
+margin in a slot is a rule of its own, **in `Styles/Item.axaml`, after that one, with no activator**, and the same in
+`Styles/ItemDivider.axaml` for a divider:
 
 ```xml
-<!-- ::slotted(ion-avatar[slot=start]) { margin-inline-end: 16px } -->
-<Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicAvatar">
+<!-- ::slotted(ion-avatar[slot=start]) { margin-inline-end: 16px }, with its 8 above and below -->
+<Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicAvatar, c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicThumbnail">
     <Setter Property="Margin" Value="0,8,16,8" />
 </Style>
 ```
+
+It beats the rule for any child by coming later in the same file, whatever order the files merge in, and an app's plain
+`Margin` style beats it, as a page's rule beats `::slotted` in CSS. In the control's own file it would win or lose by where
+that file merges, and with an activator it would beat the app's style too. The avatar's, the thumbnail's, the chip's and the
+label's are there. A chip has no rule in `item.md.css`: its own 4 stays on the other three sides, so its rule is `4,4,16,4`
+at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. `Styles/Button.axaml` still
+beats it with `:in-item`; the button is its own control's change. A rule that doesn't set `Margin`, such as a note's size
+or a label's `flex: 1` in the default slot, can stay in the control's own file, as nothing in the host's file fights it.
 
 `FlexRow` and `FlexSlot` in `Controls/Flex/` are `display: flex` and `<slot>`, for a host with parts like these. `FlexRow.Flex` is `flex`, as one
 number, so a slotted control's file can say `<Setter Property="c:FlexRow.Flex" Value="1" />`.

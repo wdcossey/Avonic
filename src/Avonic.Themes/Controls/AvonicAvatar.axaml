@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
                     xmlns:c="using:Avonic.Components.Controls">
 
     <Design.PreviewWith>
@@ -13,14 +14,15 @@
         </StackPanel>
     </Design.PreviewWith>
 
-    <!-- A translation of avatar.md.css's host. The image inside, and the sizes in an item, are in Styles/Avatar.axaml. -->
+    <!-- A translation of avatar.md.css's host. The image inside is in Styles/Avatar.axaml, and the size and margins in an
+         item's or a divider's slot are in Styles/Item.axaml and Styles/ItemDivider.axaml, as they're in item.md.css. -->
     <ControlTheme x:Key="{x:Type c:AvonicAvatar}" TargetType="c:AvonicAvatar">
         <!-- width: 64px; height: 64px. There's no variable for them in md. -->
         <Setter Property="Width" Value="64" />
         <Setter Property="Height" Value="64" />
         <!-- border-radius: var(border-radius), which is 50% -->
         <Setter Property="CornerRadius">
-            <MultiBinding Converter="{x:Static c:BorderRadius.ToCornerRadius}">
+            <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
                 <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />

@@ -62,20 +62,31 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **A slotted icon** is 1.43 em, so 20, at 0.54 of the text colour or the chip's shade. The first child has margins −4 at the
   start and 8 at the end, the last 8 and −4, so a leading icon sits 8 from the edge. One nested deeper gets none of it.
 - **Keys do nothing:** no click on Enter or Space, and the arrows don't move focus between the children.
-
-There's no click in Ionic's chip: an app listens to the element's own `click`, which every press and release on it raises.
-Here `Tapped` is the nearest, though a second quick tap raises `DoubleTapped` instead, and `PointerReleased` sees every one.
+- **In an item's or a divider's slot** the slot sets the side towards the content, 16, and the chip keeps its own 4 on the
+  other three, so `4,4,16,4` at the start and `16,4,4,4` at the end, and `16,7,4,7` beside a stacked or floating label. An
+  app's plain `Margin` style beats it, as a page's rule beats `::slotted`. The rules are in the theme's `Styles/Item.axaml`
+  and `Styles/ItemDivider.axaml`, after the item's rule for any child in a slot.
 
 ## Extensions
 
-None.
+Ionic's chip has no click of its own: an app listens to the element's own DOM `click`. These stand for it.
+
+| Member | What |
+|---|---|
+| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
+| `Command`, `CommandParameter` | Run after `Click`, unless a handler set `Handled`. A command that can't execute disables the chip, as on `AvonicButton` |
+
+```xml
+<c:AvonicChip Click="OnFilterClick" Command="{Binding ToggleFilter}" CommandParameter="recent">
+    <c:AvonicLabel Content="Recent" />
+</c:AvonicChip>
+```
 
 ## Known gaps
 
 | Gap | Why |
 |---|---|
-| A chip in an item's start or end slot has 0 margin on the other three sides, where Ionic keeps 4 | `ion-item`'s slot rule sets all four sides. Proposed in the PR |
-| An avatar child isn't sized | `ion-avatar` is #16; its rule goes in `Styles/Chip.axaml` when it exists |
+| An avatar child isn't sized | `chip.md.css`'s `::slotted(ion-avatar)`; it goes in `Styles/Chip.axaml`, in a PR of its own |
 | A disabled panel fades the chip, a flex parent doesn't stretch it, and a taller parent centres it | Deliberate; see [COMPARISON.md](COMPARISON.md#deliberate-differences) |
 | Content that can't shrink, such as a label with `ion-text-nowrap`, is clipped at the container, where Ionic's chip grows past it | Avalonia arranges a child within its space |
 | Not tried in a real window | Headless capture only |
