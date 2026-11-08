@@ -1150,10 +1150,12 @@ public class GestureTests
 
         using (gesture)
         {
-            new Finger(scene, clock).Down(100, 100, 1000).Move(140, 120, 1016).Move(180, 140, 1032).Up(180, 140, 1048);
+            // Along x, far from the window's origin, so that a recogniser that hadn't waited for its start would take these moves as a pan.
+            new Finger(scene, clock).Down(300, 20, 1000).Move(340, 20, 1016).Move(380, 20, 1032).Up(380, 20, 1048);
             clock.At(1100);
 
             Assert.Equal(["g.onStart", "g.notCaptured"], log.Names);
+            Assert.IsType<PointerReleasedEventArgs>(log.Single("g.notCaptured").Event);
             Assert.False(GestureController.Instance.IsCaptured);
         }
     }
