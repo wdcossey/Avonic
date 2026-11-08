@@ -221,6 +221,27 @@ public class AvonicProgressBarTests
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 175.5));
     });
 
+    [AvaloniaFact]
+    public void B4_A_Template_Applied_Again_At_The_Same_Size_Ends_The_Dots_At_The_Buffer() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        using var f = new Fixture(new AvonicProgressBar { Value = 0.3 });
+
+        // Buffer 1: nothing moves, so no frame puts it right
+        var template = f.Bar.Template;
+        f.Bar.Template = null;
+        f.Window.UpdateLayout();
+        f.Bar.Template = template;
+        f.Window.UpdateLayout();
+        Assert.False(f.Bar.IsFrameLoopRunning);
+
+        // No dots under the track: a dot at 280 would show darker
+        var frame = f.Frame();
+        AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 280));
+        AssertSpan((0, W), f.Span("PART_Track"));
+        AssertSpan((0, 0.3 * W), f.Span("PART_Progress"));
+    });
+
     // ── B5: the stream moves ─────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -284,16 +305,35 @@ public class AvonicProgressBarTests
     });
 
     [AvaloniaFact]
+    public void B6_A_Value_Set_Before_The_First_Frame_Does_Not_Ease() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        using var f = new Fixture(new AvonicProgressBar());
+
+        // Measured: a value set in the task that appends the bar is drawn at once, and one set a frame later eases from 0
+        f.Bar.Value = 0.6;
+        AssertSpan((0, 0.6 * W), f.Span("PART_Progress"));
+        Assert.False(f.Bar.IsFrameLoopRunning);
+
+        clock.At(20);
+        f.Bar.Value = 0.2;
+        clock.At(95);
+        f.Bar.Tick();
+        AssertSpan((0, 0.4 * W), f.Span("PART_Progress"));
+    });
+
+    [AvaloniaFact]
     public void B6_An_Interrupted_Change_Continues_From_Where_It_Is_And_A_Reversal_Is_Shortened() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         using var f = new Fixture(new AvonicProgressBar { Value = 0.2 });
 
         // Another target: a fresh 150 ms from the value shown, measured as 42.4 px per 33 ms from 167.2
+        clock.At(100);
         f.Bar.Value = 0.8;
-        clock.At(75);
+        clock.At(175);
         f.Bar.Value = 1;
-        clock.At(150);
+        clock.At(250);
         f.Bar.Tick();
         AssertSpan((0, 0.75 * W), f.Span("PART_Progress"));
 
@@ -320,12 +360,14 @@ public class AvonicProgressBarTests
         using var clock = new TestClock();
         using var f = new Fixture(new AvonicProgressBar { Value = 0.1, Buffer = 0.75 });
 
+        // One period of the stream after the render, so that the dots are where they began
+        clock.At(450);
         f.Bar.Buffer = 0.25;
-        clock.At(75);
+        clock.At(525);
         f.Bar.Tick();
         AssertSpan((0, 0.5 * W), f.Span("PART_Track"));
 
-        // The window moves, the dots don't: 75 ms streams them 1.67 px left of 190, 200, …
+        // The window moves, the dots don't: 75 ms more streams them 1.67 px left of 190, 200, …
         var frame = f.Frame();
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 188.3), 8);
         AssertWhite(Fixture.PixelAt(frame, 193.3));
@@ -333,7 +375,7 @@ public class AvonicProgressBarTests
         // The dot at 178.3 is cut where the window begins, at 179, so the translucent track over it stays the same
         AssertColour(PrimaryTrack, Fixture.PixelAt(frame, 177));
 
-        clock.At(150);
+        clock.At(600);
         f.Bar.Tick();
         AssertSpan((0, 0.25 * W), f.Span("PART_Track"));
     });

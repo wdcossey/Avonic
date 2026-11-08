@@ -58,7 +58,7 @@ The height of 4 is a literal in the theme, as Ionic has no variable for it. `--b
 Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 - **A change of `Value` or `Buffer` eases** over 150 ms, linearly, as Ionic's `transition` does, and an interrupted one
-  carries on from where it is. Not on the first render.
+  carries on from where it is. Not before the bar's first frame, as Stencil renders a new element at the next frame.
 - **The dots stream left** by 10 px every 450 ms, and the indeterminate bars loop every 2 s, both from the moment the bar
   appeared or changed type, as CSS animations start when the element does.
 - **Right-to-left reverses the bar,** and `Reversed` puts it back, as `document.dir` does in Ionic. The bar's own parts are always

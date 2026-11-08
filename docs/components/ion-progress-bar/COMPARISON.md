@@ -39,6 +39,10 @@ The plan said a change of type re-renders without a transition. Measuring it whi
 keeps the first `div` and changes its class, so the progress becomes the indeterminate track and eases from 89.5 to 358 over
 150 ms, and back. The plan, the control and `B9` were changed to match.
 
+The second review found that a value set just after the bar attached eased from 0. Measured in Chromium: a value set in the
+task that appends `ion-progress-bar` is drawn at once, and one set a frame or more later eases from 0. So a change before the
+bar's first frame doesn't ease, with `B6`.
+
 The reversing shortening factor was also measured, not assumed: going back to 0.2 from 0.45 of the way took about 67 ms in
 Chromium, so it's in `CssTransition`, with `B6`.
 
@@ -53,7 +57,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 | 3 | Clamped for display only | 1.5 draws 358 and reports 1.5; −1 draws 0 | match. NaN keeps the scale, from the CSSOM, not measured |
 | 4 | The buffer, and the dots after it | track 0..268.5 at 0.75; dot centres at 280, 290, … at time 0 | match |
 | 5 | The stream | 10 px left every 450 ms; `buffering` at 1567 ms when a bar at buffer 1 for a second gets 0.5 | match |
-| 6 | Value transitions | 150 ms linear; a new target restarts from the value shown; going back is shortened | match |
+| 6 | Value transitions | 150 ms linear; a new target restarts from the value shown; going back is shortened; a value set in the task that appends the bar isn't eased, and one a frame later is | match |
 | 7 | Buffer transitions | the window moves, the circles stay at −10 | match |
 | 8 | Indeterminate | the spans at 125 ms steps in [PLAN.md](PLAN.md#measured) | match, within 0.5 px, at all eight times and at 3000 ms |
 | 9 | A change of type | the kept element eases, the bars and the stream start at 0; 67 ms in, the track at 208.8 and the secondary bar at −17.6..6.7 | match, within 1 px |

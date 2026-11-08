@@ -129,6 +129,7 @@ public class AvonicProgressBar : TemplatedControl
     private bool _attached;
     private TimeSpan _renderedAt;
     private IDisposable? _frame;
+    private IDisposable? _firstFrame;
     private readonly List<Visual> _hiddenBy = [];
     private readonly ReversalTransform _reversal = new();
     private ProgressBarAutomationPeer? _peer;
@@ -167,7 +168,19 @@ public class AvonicProgressBar : TemplatedControl
 
         // :host { direction: ltr }. The parts are laid out left to right whatever the app's direction, and right-to-left
         // reverses the bar through IsEffectivelyReversed instead, as Ionic's progress-bar-reversed does.
+        if (_root is not null)
+        {
+            _root.SizeChanged -= OnRootSizeChanged;
+        }
+
         _root = this.GetVisualChildren().OfType<Control>().FirstOrDefault();
+        if (_root is not null)
+        {
+            // The parts are placed in px from its width, which is 0 until it's arranged, even when a template is applied
+            // again at the bar's own size
+            _root.SizeChanged += OnRootSizeChanged;
+        }
+
         _root?.SetValue(FlowDirectionProperty, FlowDirection.LeftToRight, BindingPriority.Template);
 
         foreach (var part in new[] { _track, _progress, _primary, _secondary })
@@ -240,6 +253,10 @@ public class AvonicProgressBar : TemplatedControl
     {
         StopWaiting();
         _renderedAt = AvonicConfig.Now();
+
+        // Stencil's first render is at the next frame, so a change before it is drawn without a transition, measured
+        _firstFrame?.Dispose();
+        _firstFrame = AvonicConfig.RequestFrame(this, () => _firstFrame = null);
         _lead.Snap(LeadTarget);
         _buffer.Snap(Display(Buffer, _buffer));
         Update();
@@ -256,14 +273,12 @@ public class AvonicProgressBar : TemplatedControl
         base.OnDetachedFromVisualTree(e);
         _attached = false;
         StopFrames();
+        _firstFrame?.Dispose();
+        _firstFrame = null;
         StopWaiting();
     }
 
-    protected override void OnSizeChanged(SizeChangedEventArgs e)
-    {
-        base.OnSizeChanged(e);
-        Update();
-    }
+    private void OnRootSizeChanged(object? sender, SizeChangedEventArgs e) => Update();
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -300,12 +315,12 @@ public class AvonicProgressBar : TemplatedControl
     }
 
     /// <summary>
-    /// A transition, unless animations are off. One started while the bar is detached or hidden is snapped when it attaches
-    /// or shows, as both restart it.
+    /// A transition, unless animations are off or the bar hasn't been drawn since it attached or showed. One started while
+    /// the bar is detached or hidden is snapped when it attaches or shows, as both restart it.
     /// </summary>
     private void Ease(CssTransition transition, double target)
     {
-        if (AvonicConfig.Animated)
+        if (AvonicConfig.Animated && _firstFrame is null)
         {
             transition.Start(target, AvonicConfig.Now(), TransitionDuration);
         }
