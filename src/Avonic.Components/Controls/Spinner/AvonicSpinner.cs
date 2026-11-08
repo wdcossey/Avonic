@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Metadata;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Reactive;
@@ -18,6 +19,9 @@ namespace Avonic.Components.Controls;
 /// configs, on <see cref="AvonicConfig"/>'s clock, so it has no template. Its size, 28 px square, and its colour are in
 /// the theme. See <c>docs/components/ion-spinner/README.md</c>.
 /// </remarks>
+[PseudoClasses(
+    ":name-bubbles", ":name-circles", ":name-circular", ":name-crescent", ":name-dots",
+    ":name-lines", ":name-lines-small", ":name-lines-sharp", ":name-lines-sharp-small", ":paused")]
 public class AvonicSpinner : Control
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -76,6 +80,17 @@ public class AvonicSpinner : Control
     private Pen? _pen;
     private SpinnerConfig? _penConfig;
     private StreamGeometry[]? _fixedArcs;
+    private SpinnerConfig? _fixedArcsConfig;
+
+    /// <summary>
+    /// Ionic's host classes <c>spinner-&lt;name&gt;</c>, as <c>:name-&lt;name&gt;</c>, by the rule for a host class from a
+    /// prop, indexed by <see cref="Controls.SpinnerName"/>.
+    /// </summary>
+    private static readonly string[] s_nameClasses =
+    [
+        ":name-bubbles", ":name-circles", ":name-circular", ":name-crescent", ":name-dots",
+        ":name-lines", ":name-lines-small", ":name-lines-sharp", ":name-lines-sharp-small",
+    ];
 
     /// <summary>The spinners in a visual tree, which a change of <see cref="Visual.IsVisible"/> anywhere may show or hide.</summary>
     private static readonly HashSet<AvonicSpinner> s_attached = [];
@@ -93,20 +108,30 @@ public class AvonicSpinner : Control
         DurationProperty.Changed.AddClassHandler<AvonicSpinner>((spinner, _) => spinner.UpdatePlayState());
 
         // Hiding the spinner or an ancestor is CSS's display: none, which cancels its animations.
-        // A window that's hidden isn't: a page that's hidden doesn't cancel its animations. UpdateLive changes nothing in
-        // the set, so it's walked as it is.
+        // A window that's hidden isn't: a page that's hidden doesn't cancel its animations. A visual outside a tree can't
+        // be an attached spinner's ancestor. Something shown can only start a spinner that's stopped, and something hidden
+        // only stop one that runs, so the rest aren't walked. UpdateLive changes nothing in the set, so it's walked as it is.
         IsVisibleProperty.Changed.Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs<bool>>(e =>
         {
-            if (s_attached.Count == 0 || e.Sender is TopLevel)
+            if (s_attached.Count == 0 || e.Sender is TopLevel || e.Sender is not Visual sender || !sender.IsAttachedToVisualTree())
             {
                 return;
             }
 
+            var shown = e.NewValue.GetValueOrDefault();
             foreach (var spinner in s_attached)
             {
-                spinner.UpdateLive();
+                if (spinner._live != shown)
+                {
+                    spinner.UpdateLive();
+                }
             }
         }));
+    }
+
+    public AvonicSpinner()
+    {
+        UpdatePseudoClasses();
     }
 
     /// <inheritdoc cref="ColorProperty"/>
@@ -249,6 +274,7 @@ public class AvonicSpinner : Control
     {
         var previous = _config;
         _config = SpinnerConfigs.Get(ResolvedName);
+        UpdatePseudoClasses();
         if (_live)
         {
             var now = _pausedAt ?? AvonicConfig.Now();
@@ -271,6 +297,7 @@ public class AvonicSpinner : Control
     /// </summary>
     private void UpdatePlayState()
     {
+        UpdatePseudoClasses();
         if (!_live)
         {
             return;
@@ -311,6 +338,21 @@ public class AvonicSpinner : Control
             RequestFrame();
             InvalidateVisual();
         }
+    }
+
+    /// <summary>
+    /// <c>spinner-&lt;name&gt;</c> for the name <c>getName()</c> gives, and <c>spinner-paused</c> for
+    /// <c>paused || _testing</c>, where <see cref="AvonicConfig.Animated"/> off stands in for <c>_testing</c>.
+    /// </summary>
+    private void UpdatePseudoClasses()
+    {
+        var name = (int)ResolvedName;
+        for (var i = 0; i < s_nameClasses.Length; i++)
+        {
+            PseudoClasses.Set(s_nameClasses[i], i == name);
+        }
+
+        PseudoClasses.Set(":paused", ShouldPause);
     }
 
     private void RequestFrame() => _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
@@ -397,10 +439,15 @@ public class AvonicSpinner : Control
                 }
                 else if (frame.Arcs is { } arcs)
                 {
-                    // crescent's dash is fixed, and only its turn changes, so its arc is built once. It's the only fixed one.
+                    // crescent's dash is fixed, and only its turn changes, so its arc is built once for its config.
                     if (config.Dash is not null)
                     {
-                        _fixedArcs ??= arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
+                        if (_fixedArcs is null || _fixedArcsConfig != config)
+                        {
+                            _fixedArcs = arcs.Select(arc => Arc(config.Center, config.Radius, arc)).ToArray();
+                            _fixedArcsConfig = config;
+                        }
+
                         foreach (var geometry in _fixedArcs)
                         {
                             context.DrawGeometry(null, pen, geometry);

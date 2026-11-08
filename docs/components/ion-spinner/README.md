@@ -54,7 +54,8 @@ None in Ionic, none here.
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `.ion-color` | `:ion-color` | From `ColorPalette` |
-| [ ] | `.spinner-<name>`, `.spinner-paused` | — | Not added: only Ionic's own shadow DOM rules use them, and those are drawn in code here. See the PR's "For you to decide" |
+| [x] | `.spinner-<name>` | `:name-<name>` | `:name-bubbles` … `:name-lines-sharp-small`, for the name it draws, so `:name-circular` with no name |
+| [x] | `.spinner-paused` | `:paused` | While `Paused`, or while `AvonicConfig.Animated` is off |
 
 ### CSS variables
 
@@ -92,6 +93,7 @@ From [PLAN.md](PLAN.md), each a test in `AvonicSpinnerTests`:
 16. Frames are asked for only while it runs, and each one redraws.
 17. `AvonicConfig.Animated` off pauses it, and on again carries on.
 18. It draws that frame, in its colour.
+19. The host has a class for its name and one for paused, which an app's style can select.
 
 ## Extensions
 

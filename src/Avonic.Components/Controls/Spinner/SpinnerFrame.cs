@@ -46,8 +46,9 @@ internal static class SpinnerFrame
     internal const double CircularGap = 200;
 
     /// <summary>
-    /// <c>typeof duration === 'number' &amp;&amp; duration &gt; 10 ? duration : spinner.dur</c>. A non-finite number isn't
-    /// a valid <c>animation-duration</c> either, so it's the default too.
+    /// <c>typeof duration === 'number' &amp;&amp; duration &gt; 10 ? duration : spinner.dur</c>. A non-finite number is
+    /// the default too, where Ionic writes <c>Infinityms</c>, which the browser drops for the stylesheet's own: a
+    /// deliberate difference, in COMPARISON.md.
     /// </summary>
     public static double EffectiveDuration(SpinnerConfig config, double? duration) =>
         duration is { } value && double.IsFinite(value) && value > SpinnerConfigs.MinimumDuration ? value : config.Dur;
@@ -104,9 +105,9 @@ internal static class SpinnerFrame
                 break;
         }
 
-        if (config.Dash is { } dash)
+        if (config.FixedArcs is { } fixedArcs)
         {
-            arcs = Dashes(2 * Math.PI * config.Radius, dash.Dash, dash.Gap, dash.Offset);
+            arcs = fixedArcs;
         }
 
         return new SpinnerElementFrame(element.Left, element.Top, opacity, scale, rotation, arcs)

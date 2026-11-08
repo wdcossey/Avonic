@@ -9,13 +9,14 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avonic.Components.Controls;
 
 namespace Avonic.Components.Tests.Controls;
 
 /// <summary>
-/// Behaviours B1–B18 from docs/components/ion-spinner/PLAN.md, read from Ionic's spinner.js, spinner-configs.js and
+/// Behaviours B1–B19 from docs/components/ion-spinner/PLAN.md, read from Ionic's spinner.js, spinner-configs.js and
 /// spinner.css. Every expected number is what Chromium computed for real Ionic at that instant, with the animations
 /// seeked there, not a value worked out from this implementation.
 /// </summary>
@@ -184,6 +185,10 @@ public class AvonicSpinnerTests
         // duration="10" is ignored: crescent's own 750 ms. duration="11" counts.
         using (var f = new Fixture(SpinnerName.Crescent, duration: 10)) Near(48, f.At(100)[0].Rotation);
         using (var f = new Fixture(SpinnerName.Crescent, duration: 11)) Near(360 * (100 / 11.0 % 1), f.At(100)[0].Rotation);
+
+        // Infinity is over 10, but Infinityms isn't a valid animation-duration. It's the name's own here (see COMPARISON.md),
+        // not a spinner that never moves.
+        using (var f = new Fixture(SpinnerName.Crescent, duration: double.PositiveInfinity)) Near(48, f.At(100)[0].Rotation);
 
         // A change on a running animation keeps its currentTime (measured 350 → 400 over 50 ms), so the phase is elapsed / new.
         using (var f = new Fixture(SpinnerName.Crescent))
@@ -560,6 +565,58 @@ public class AvonicSpinnerTests
             Assert.False(f.Spinner.IsRequestingFrames);
             Assert.False(f.Spinner.IsWatchingAnimated);
             Near(frozen, f.Spinner.CurrentFrame()[0].Opacity);
+        }
+        finally
+        {
+            AvonicConfig.Animated = true;
+        }
+    }
+
+    // ── B19: host classes ────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B19_The_Host_Has_A_Class_For_Its_Name_And_For_Paused()
+    {
+        using var f = new Fixture();
+        Assert.Equal(1, f.Spinner.Opacity);
+        f.Window.Styles.Add(new Style(x => x.OfType<AvonicSpinner>().Class(":name-dots"))
+        {
+            Setters = { new Setter(Visual.OpacityProperty, 0.5) },
+        });
+        f.Window.Styles.Add(new Style(x => x.OfType<AvonicSpinner>().Class(":paused"))
+        {
+            Setters = { new Setter(Layoutable.MarginProperty, new Thickness(3)) },
+        });
+
+        Dispatcher.UIThread.RunJobs();
+
+        static string[] Names(AvonicSpinner s) => s.Classes.Where(c => c.StartsWith(":name-", StringComparison.Ordinal)).ToArray();
+
+        // render(): 'spinner-' + getName(), measured spinner-circular with no name, so an app's ion-spinner.spinner-dots
+        // selects only the dots.
+        Assert.Equal([":name-circular"], Names(f.Spinner));
+        f.Spinner.SpinnerName = SpinnerName.Dots;
+        Assert.Equal([":name-dots"], Names(f.Spinner));
+        Assert.Equal(0.5, f.Spinner.Opacity);
+        f.Spinner.SpinnerName = SpinnerName.LinesSharpSmall;
+        Assert.Equal([":name-lines-sharp-small"], Names(f.Spinner));
+        Assert.Equal(1, f.Spinner.Opacity);
+
+        // 'spinner-paused': paused || _testing, where Animated off stands in for _testing.
+        Assert.Equal(default, f.Spinner.Margin);
+        f.Spinner.Paused = true;
+        Assert.Equal(new Thickness(3), f.Spinner.Margin);
+        f.Spinner.Paused = false;
+        Assert.Equal(default, f.Spinner.Margin);
+
+        AvonicConfig.Animated = false;
+        try
+        {
+            f.At(100);
+            Assert.Equal(new Thickness(3), f.Spinner.Margin);
+            AvonicConfig.Animated = true;
+            f.At(400);
+            Assert.Equal(default, f.Spinner.Margin);
         }
         finally
         {

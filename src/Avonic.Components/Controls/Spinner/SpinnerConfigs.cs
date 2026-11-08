@@ -82,6 +82,12 @@ internal sealed class SpinnerConfig
     /// <summary>A fixed <c>stroke-dasharray</c> (dash, gap) and <c>stroke-dashoffset</c>, or none.</summary>
     public (double Dash, double Gap, double Offset)? Dash { get; init; }
 
+    private IReadOnlyList<SpinnerArc>? _fixedArcs;
+
+    /// <summary>The stretches of the circle that <see cref="Dash"/> draws, worked out once, as they never change.</summary>
+    public IReadOnlyList<SpinnerArc>? FixedArcs =>
+        Dash is { } dash ? _fixedArcs ??= SpinnerFrame.Dashes(2 * Math.PI * Radius, dash.Dash, dash.Gap, dash.Offset) : null;
+
     /// <summary>
     /// The config's <c>fn(dur, index, total)</c>: where <c>svg</c> <paramref name="index"/> sits and when it starts.
     /// </summary>

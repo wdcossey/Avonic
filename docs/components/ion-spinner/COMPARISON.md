@@ -100,6 +100,7 @@ re-inserts a spinner, reading `currentTime` before and after.
 | 16 | Frames only while running | a paused CSS animation costs nothing | no frame requested | match |
 | 17 | `AvonicConfig.Animated` off pauses it | `_testing` pauses it | `Animated` stands in for `_testing` | deliberate difference |
 | 18 | It draws the frame | | pixels at the measured places | match |
+| 19 | Host classes | `spinner-<name>`, `spinner-paused` | `:name-<name>`, `:paused` | match |
 
 ## Deliberate differences
 
@@ -107,9 +108,8 @@ re-inserts a spinner, reading `currentTime` before and after.
 |---|---|---|
 | `AvonicConfig.Animated` off pauses every spinner | Ionic's spinner doesn't read `animated`. It reads `_testing`, a private config for its own screenshot tests, which pauses it. The brief asks the spinner to honour `Animated`, and pausing is what an app turning animations off wants | `'spinner-paused': self.paused \|\| config.getBoolean('_testing')` |
 | No `config.spinner` | `getName()` reads `config.get('spinner')` before the mode default. `AvonicConfig` is a shared file this PR may not edit, so it's proposed in the PR, not implemented. A spinner with no name is `circular`, which is what an app with no config gets | — |
-| No `:name-<name>` or `:spinner-paused` pseudoclass | The host classes are only used by Ionic's own rules inside the shadow DOM, which is drawn in code here. Tests assert what they do. An app's `ion-spinner.spinner-lines { … }` is the one use left, listed for the human | — |
 | A name outside the nine can't be set | `SpinnerName` is an enum. Ionic falls back to `lines` for an unknown string, and so does a cast out of range here | `SPINNERS[spinnerName] ?? SPINNERS['lines']` |
-| A duration that isn't finite is the default | `Infinity > 10` is true in JS, but `animation-duration: Infinityms` isn't valid CSS, so the browser uses the stylesheet's `1s`, or `0s` for `circular`. Avonic uses the name's own | — |
+| A duration that isn't finite is the default | `Infinity > 10` is true in JS, so Ionic writes `animation-duration: Infinityms` and, for the staggered names, `animation-delay: NaNms`, neither valid CSS. Read from the source, not measured: the browser drops both, so the stylesheet's `1s` applies with no stagger, or `0s` for `circular`. Avonic uses the name's own duration and stagger, rather than copy what a bad value happens to do | — |
 | `circular`'s `svg` doesn't turn | Not a difference: Chromium doesn't turn it either, as the matrices show. Recorded because the keyframes read as if it did | `matrix(1, 0, 0, 1, 0, 0)` at 12 instants |
 
 ## Gaps

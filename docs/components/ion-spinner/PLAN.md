@@ -35,8 +35,8 @@ None in Ionic, none here.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `.spinner-<name>` | — | Not added. Ionic's own styles use it only inside the shadow DOM, which is drawn in code here, so the theme doesn't need it, and tests assert what it does, not the class. An app's `ion-spinner.spinner-lines { … }` would need it: under "For you to decide" |
-| [ ] | `.spinner-paused` | — | Not added, for the same reason: what it does, `animation-play-state: paused`, is the control's own timeline |
+| [x] | `.spinner-<name>` | `:name-<name>` | By the mapping rule for a host class from a prop, as `ion-icon`'s `icon-small` is `:size-small`: `:name-bubbles` … `:name-lines-sharp-small`, for `getName()`, so `:name-circular` with no name. Ionic's own styles use it only inside the shadow DOM, which is drawn in code here, so the theme doesn't select it, but an app's `ion-spinner.spinner-lines { … }` can, as `c\|AvonicSpinner:name-lines` |
+| [x] | `.spinner-paused` | `:paused` | `paused \|\| _testing`, with `AvonicConfig.Animated` off for `_testing`, so it follows `Animated` at the spinner's next look, as the timeline does |
 | [x] | `.ion-color`, `.ion-color-<name>` | `:ion-color` | From `ColorPalette` |
 | [ ] | `.md`, `.ios` | — | Not applicable (ADR 0001) |
 
@@ -139,6 +139,7 @@ Each becomes a test in `AvonicSpinnerTests`, named after its number.
 | 16 | Frames are requested while attached and running, and not while paused, and each one redraws | the equivalent of a CSS animation's cost |
 | 17 | `AvonicConfig.Animated` off pauses it, at its next frame. Back on, it carries on: a spinner paused only by it looks again every 250 ms, without drawing, as `AvonicConfig`'s switches may change at runtime | `_testing`, see above |
 | 18 | It draws that frame, in its colour: each shape where the maths says, at its opacity | the frames are drawn in `Render`, so this is the pixels |
+| 19 | The host has a class for its name and one for paused, which an app's style can select | `render`'s `class`; measured `md spinner-circular` with no name |
 
 ## Avalonia mapping
 
@@ -175,6 +176,6 @@ None. `AvonicConfig.Animated` pausing the spinner is a deliberate difference, no
 |---|---|
 | Control | `src/Avonic.Components/Controls/Spinner/AvonicSpinner.cs`, `SpinnerName.cs`, `SpinnerConfigs.cs`, `SpinnerFrame.cs`. No stub `.axaml`: it draws itself and has no template, as `AvonicIcon` doesn't |
 | Theme | `src/Avonic.Themes/Controls/AvonicSpinner.axaml` (size and colour, with `Design.PreviewWith`), `src/Avonic.Themes/Tokens/Spinner.axaml` |
-| Tests | `tests/Avonic.Components.Tests/Controls/AvonicSpinnerTests.cs` (1–18), `AvonicSpinnerCaptureTests.cs` (frames at known phases for the compare step) |
+| Tests | `tests/Avonic.Components.Tests/Controls/AvonicSpinnerTests.cs` (1–19), `AvonicSpinnerCaptureTests.cs` (frames at known phases for the compare step) |
 | Sample | `samples/Avonic.Sample/Pages/SpinnerPage.axaml*`, `[SamplePage("ion-spinner", Order = 15)]` |
 | Docs | this plan, `COMPARISON.md`, `README.md` |
