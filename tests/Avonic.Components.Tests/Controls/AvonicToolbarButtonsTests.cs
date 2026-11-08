@@ -445,6 +445,28 @@ public class AvonicToolbarButtonsTests
         Assert.Equal(Colors.Yellow, ToolbarTest.Solid(Native(outline).Background));
     });
 
+    [AvaloniaFact]
+    public void B10_Not_In_A_Plain_Toolbar_Inside_A_Coloured_One() => InstalledTheme.Run(_ =>
+    {
+        // :host(.button-outline.ion-activated.in-toolbar:not(.ion-color):not(.in-toolbar-color)): the coloured toolbar around
+        // it gives in-toolbar-color.
+        var outline = new AvonicButton { Content = "Outline", Fill = ButtonFill.Outline };
+        var inner = new AvonicToolbar { Content = outline };
+        var page = new StackPanel
+        {
+            Children = { new AvonicToolbar { Color = "danger", Content = inner } },
+            Resources = { ["Avonic.ToolbarBackgroundBrush"] = Brushes.Yellow },
+        };
+        using var scene = new Scene(page);
+        using var clock = new TestClock();
+        Native(outline).Transitions = [];
+
+        scene.Window.MouseDown(ToolbarTest.Box(outline, scene.Window).Center, MouseButton.Left, RawInputModifiers.None);
+        clock.At(100);
+        Assert.Contains(":activated", outline.Classes);
+        AssertNoBackground(Native(outline));
+    });
+
     // ── B11: hostContext ────────────────────────────────────────────────────────────────────
     //
     // With Avonic.ToolbarColorBrush set, as an app sets ion-toolbar-color, .in-toolbar:not(.in-toolbar-color) shows: a solid
