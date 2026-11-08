@@ -271,7 +271,7 @@ Avonic-only, and never named like an Ionic member.
 | Two block or full buttons in a column are 8 apart, where CSS collapses their margins to 4 | Avalonia has no margin collapsing, as in `ion-label` |
 | Solid's shadow is lighter at 2x: the first row under the button is 205, where Chromium's is 165, and it fades over about the same distance | Avalonia's own shadow rendering, with the same values. At 1x it reads 164 |
 | `VerticalAlignment` is `Center`, where a flex parent stretches an Ionic button (measured `tall`, 92) | Set `VerticalAlignment="Stretch"`; content stays centred |
-| A button moved to another item follows the new one | Ionic only checks on first load. Recycled containers are normal in Avalonia |
+| A button moved to another item, or into or out of a list header, follows where it is | Ionic only checks on first load. Recycled containers are normal in Avalonia |
 | Plain programmatic `Focus()` doesn't show `:ion-focused` | As `ion-item`: Avalonia reports how focus arrived |
 
 ## Known gaps

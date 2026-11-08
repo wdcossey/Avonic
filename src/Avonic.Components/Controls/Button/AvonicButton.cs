@@ -43,7 +43,7 @@ public class AvonicButton : TemplatedControl, IItemControl
     public static readonly StyledProperty<ButtonExpand?> ExpandProperty =
         AvaloniaProperty.Register<AvonicButton, ButtonExpand?>(nameof(Expand));
 
-    /// <summary>Ionic <c>fill</c>. Null is <see cref="ButtonFill.Solid"/>.</summary>
+    /// <summary>Ionic <c>fill</c>. Null is <see cref="ButtonFill.Solid"/>, or <see cref="ButtonFill.Clear"/> in a list header; <c>AvonicButtons</c> sets <c>Clear</c> itself.</summary>
     public static readonly StyledProperty<ButtonFill?> FillProperty =
         AvaloniaProperty.Register<AvonicButton, ButtonFill?>(nameof(Fill));
 

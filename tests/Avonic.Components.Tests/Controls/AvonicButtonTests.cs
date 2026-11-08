@@ -3396,8 +3396,8 @@ public class AvonicButtonTests
         Assert.Equal(Primary, TextColour(button));
     });
 
-    // Ionic reads closest() once, on first load. Here it's read on every attach, as inItem is, so a moved or recycled button
-    // follows where it is.
+    // A deliberate deviation, recorded in the plan: Ionic reads closest() once, on first load. Here it's read on every attach,
+    // as inItem is, so a moved or recycled button follows where it is.
     [AvaloniaFact]
     public void B37_Moving_Into_And_Out_Of_A_Header_Follows() => InstalledTheme.Run(_ =>
     {
