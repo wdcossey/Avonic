@@ -119,6 +119,17 @@ public class AvonicBadgeTests
         Assert.InRange(above - below, -3, 3);
     });
 
+    [AvaloniaFact]
+    public void B1_In_A_Row_With_Something_Taller_It_Keeps_Its_Height() => InstalledTheme.Run(_ =>
+    {
+        var badge = new AvonicBadge { Content = "22" };
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Children = { badge, new Border { Width = 10, Height = 60 } } };
+        using var scene = new Scene(row);
+
+        // An inline-block on a line never stretches to it.
+        Assert.Equal(20, badge.Bounds.Height);
+    });
+
     // ── 2. Color ─────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

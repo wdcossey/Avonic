@@ -43,6 +43,16 @@ public class AvonicThumbnailTests
         AssertNear(Blue, Pixel(scene, thumbnail, 46, 46));
     });
 
+    [AvaloniaFact]
+    public void T2_Content_Larger_Than_It_Is_Not_Cut() => InstalledTheme.Run(_ =>
+    {
+        var thumbnail = new AvonicThumbnail { Content = new Border { Background = new SolidColorBrush(Red), Width = 100, Height = 20 } };
+        using var scene = InScene(thumbnail);
+
+        // overflow: visible on the host.
+        AssertNear(Red, Pixel(scene, thumbnail, 70, 24));
+    });
+
     // ── 3. The tokens ────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
