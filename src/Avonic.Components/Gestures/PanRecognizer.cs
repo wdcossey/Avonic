@@ -11,7 +11,6 @@ internal sealed class PanRecognizer(GestureDirection direction, double thresh, d
     private readonly double _threshold = thresh * thresh;
     private double _startX;
     private double _startY;
-    private bool _dirty;
     private int _isPan;
 
     public void Start(double x, double y)
@@ -19,17 +18,15 @@ internal sealed class PanRecognizer(GestureDirection direction, double thresh, d
         _startX = x;
         _startY = y;
         _isPan = 0;
-        _dirty = true;
     }
 
-    /// <summary>True once, at the move that reaches the threshold; <see cref="IsGesture"/> then says whether it was along the axis.</summary>
+    /// <summary>
+    /// True at the move that reaches the threshold; <see cref="IsGesture"/> then says whether it was along the axis. Ionic's
+    /// recogniser also keeps a <c>dirty</c> flag so that it decides only once, but the gesture never asks again after a decision:
+    /// it captures, and moves take the captured path, or it aborts and stops listening. So the flag is left out.
+    /// </summary>
     public bool Detect(double x, double y)
     {
-        if (!_dirty)
-        {
-            return false;
-        }
-
         var deltaX = x - _startX;
         var deltaY = y - _startY;
         var distance = deltaX * deltaX + deltaY * deltaY;
@@ -53,7 +50,6 @@ internal sealed class PanRecognizer(GestureDirection direction, double thresh, d
             _isPan = 0;
         }
 
-        _dirty = false;
         return true;
     }
 

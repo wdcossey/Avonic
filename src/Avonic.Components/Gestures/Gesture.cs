@@ -97,7 +97,6 @@ public sealed class Gesture : IDisposable
 
         _destroyed = true;
         _gesture.Destroy();
-        EnablePointerEvents(false);
         if (_attached)
         {
             _el.RemoveHandler(InputElement.PointerPressedEvent, OnPressed);

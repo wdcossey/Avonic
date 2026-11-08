@@ -1051,6 +1051,25 @@ public class GestureTests
     }
 
     [AvaloniaFact]
+    public void G16_Destroy_While_OnWillStart_Is_Pending_Never_Starts()
+    {
+        // A deviation: Ionic's promise still calls onStart after destroy(), on a control that may have gone.
+        using var clock = new GestureClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        var willStart = new TaskCompletionSource();
+        var gesture = Make(box, log, onWillStart: _ => willStart.Task);
+
+        new Finger(scene, clock).Down(100, 100, 1000).Move(120, 100, 1016);
+        gesture.Destroy();
+        willStart.SetResult();
+        Settle();
+
+        Assert.Equal(["g.canStart"], log.Names);
+    }
+
+    [AvaloniaFact]
     public void G13_An_OnWillStart_With_No_Task_Starts_At_Once()
     {
         using var clock = new GestureClock();
