@@ -72,11 +72,14 @@ again.
 - **The focus ring.** Chromium draws its own focus ring (`outline: auto`) on a checkbox focused from the keyboard; Ionic doesn't
   style it. Avonic leaves `FocusAdorner` to the base theme, which draws its own on keyboard focus. The same rule, a different ring.
 - **Inline layout.** As above, the few pixels a line box adds around an `inline-block` aren't there.
-- **`aria-invalid`.** Avalonia's automation has no invalid state, so it isn't exposed; the error text is the help text.
+- **`aria-invalid`.** Avalonia's automation has no invalid state, so it isn't exposed. The error text is the help text, and its
+  change raises the help text's property-changed event, which is what a screen reader announces.
 - **`name` and the form.** The hidden `<input>` exists for form submission, which Avalonia doesn't have; `value` is still in
   `IonChange`.
-- **A label's text changed later.** Ionic reads `textContent` when it renders, which a change inside the label doesn't cause; Avonic
-  reads it when `Content` changes, so a control whose text changes later is read at its next change too. The same in both.
+- **A label's text changed later.** Ionic reads `textContent` when it renders, which a change inside the label doesn't cause, so
+  text coming into an empty label shows at the next change of a prop. Avonic reads it at the same moments, and at each measure too,
+  which a shown label's text changing causes, so a label emptied later hides at once. A hidden label isn't measured, so text coming
+  into it waits for a prop, as in Ionic.
 
 ## The mark, zoomed
 
