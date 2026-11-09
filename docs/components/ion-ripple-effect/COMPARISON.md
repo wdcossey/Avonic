@@ -30,7 +30,7 @@ Each row is a test in `AvonicRippleEffectTests` (B) or `ActivatableTests` (A).
 | B3 | `initialSize = ⌊max(w,h)·0.5⌋`, `finalScale = maxRadius / initialSize`, `maxRadius = hypot + 10` (bounded) / `maxDim` (unbounded) | match |
 | B4 | Origin = press point (bounded) / centre (unbounded); circle top-left = origin − size/2 | match |
 | B5 | Drifts toward centre: `translateEnd = (w/2 − x, h/2 − y)` | match |
-| B6 | Expand 225 ms cubic-bezier(.4,0,.2,1); fade-in 75 ms linear to 0.16 | match (`SplineEasing(0.4,0,0.2,1)`) |
+| B6 | Expand 225 ms cubic-bezier(.4,0,.2,1); fade-in 75 ms linear to 0.16 | match (`CubicBezierEasing(0.4,0,0.2,1)`, Chromium's solver; `SplineEasing` until the P1 roll-up) |
 | B7 | Colour = `currentColor` | match — fill is the inherited `Foreground` |
 | B8 | Release cannot take effect before 325 ms | match |
 | B9 | Fade-out 150 ms linear; removed 200 ms after it starts | match |

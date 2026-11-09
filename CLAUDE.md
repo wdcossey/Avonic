@@ -22,19 +22,22 @@ Ionic implementation before writing a line, and you build and test before every 
 ```
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
-  Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template
+  Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template; MinContent, the
+                         min-content width both FlexRow and the grid's RowPanel use
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
                          AccessibleText = what a browser names a button from; Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
-                         BorderRadius = border-radius with percentages, for themes)
+                         BorderRadius = border-radius with percentages, for themes;
+                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
   Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back),
                          hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md)
-  Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock, CubicBezierEasing, cubic-bezier.js
+  Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
+                         as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -223,7 +226,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | A text node beside slotted elements | Not counted for `:nth-child`: the host's `IChildIndexProvider` skips an item shown as its text | `AvonicChip` |
 | A host that wraps every item in a slot | Clear `ContentTemplate` on the slot for a control, as a stock `ItemsControl` doesn't wrap a control | `AvonicChip` |
 | A CSS transition on a value the control computes | A transition on `AvonicConfig`'s clock, from the value shown, with CSS's reversing shortening factor, and none before the control's first frame | `AvonicProgressBar`'s progress and track (`transition: transform 150ms linear`) |
-| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar`. `AvonicSpinner` differs: it restarts on any show |
+| `cubic-bezier(…)` on a CSS transition or animation | `CubicBezierEasing`, and `Easing="{a:CubicBezier 0.4, 0, 0.2, 1}"` in XAML, not `Easing="0.4,0,0.2,1"`, which Avalonia reads as its `SplineEasing`, about 2e-3 out | `ion-label`'s float, `ion-button`'s shadow, the ripple |
+| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar`, `AvonicImg`, `AvonicSkeletonText`, with `HiddenChainWatcher`. `AvonicSpinner` differs: it restarts on any show |
 | `IntersectionObserver` with no `rootMargin` | `EffectiveViewportChanged`, listened to only while waiting, an edge counting. Ask for an arrange when starting, as a new listener hears nothing until a layout pass; watch the hidden chain, as showing raises nothing; check again after a pass that changed the size. A viewport of no width and no height intersects nothing | `AvonicImg` |
 | An `<img src>` | `AvonicImg.Loader`, internal: `http(s)`, `data:` base64, `avares:`, `file:`, paths, read and decoded on the thread pool; tests replace it | `ion-img` |
 | What a browser draws for an `<img>` with no picture (the broken-image icon, the alt text, the box) | Parts of the template, which the control shows when Chromium shows its own, measured; the icon as path data in the theme, Avonic's own drawing, with `Avonic.<Name>.*Brush` keys. An inline icon is an empty inline space with the icon drawn over it, as an embedded control with a resource is measured during the render | `AvonicImg`'s `PART_Alt`, `PART_Broken` |

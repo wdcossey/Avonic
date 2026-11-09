@@ -109,7 +109,7 @@ isn't a number) — with an offset and a shift, all as fractions of the row. Whe
 An offset is a margin at the start, counted when the line breaks. A shift is added when arranging, so it moves nothing else.
 Columns on a line are arranged as tall as the line, so a column's own `VerticalAlignment` is `align-self`, with no code.
 `min-content` is worked out as `FlexRow` does it, from the text's longest word, because `Measure` clamps to what's available
-and can't report it. `FlexRow`'s is private, so `RowPanel` has a copy, and the PR proposes sharing it. Each child is measured
+and can't report it. `FlexRow`'s was private, so `RowPanel` had a copy; since the P1 roll-up both call `MinContent`. Each child is measured
 on one line and then at its width, except a sized column, which only needs its width.
 
 **The viewport is the `TopLevel`'s client width.** `matchMedia` and `@media (min-width)` read the window's width, whatever the

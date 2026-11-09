@@ -77,3 +77,11 @@ design of the gesture utility (#4, PR #83), in `docs/infra/gesture/PLAN.md`. An 
 visibility. `AvonicSpinner` watches `IsVisibleProperty.Changed` for every visual in the app; `AvonicProgressBar` finds out on its next
 frame, then watches the hidden visuals in its own chain. Found by `ion-spinner` (#15, PR #82). Making the event public would let a
 control subscribe for itself.
+
+## `SplineEasing` is about 2e-3 out of CSS's `cubic-bezier`
+
+**Measured, and the cause not read.** The same curve, `cubic-bezier(0.42, 0, 0.58, 1)`, gives a spinner's dash of 5.0477 at 100 ms
+through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.com/wdcossey/Avonic/issues/92)). Avonic's
+`CubicBezierEasing` solves it as Chromium's `UnitBezier` does, Newton's method then bisection to 1e-7, and is within 3e-8 of
+`Element.animate` in Chromium 141. `SplineEasing` also isn't specified for a control point's y outside 0..1, which CSS allows
+(`ion-progress-bar`'s keyframes have 1.38179). Small, but it shows in a pixel comparison of a curve's middle.
