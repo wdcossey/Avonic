@@ -499,6 +499,49 @@ public class AvonicImgTests
         Assert.Equal(new Size(64, 64), Part<Control>(img, "PART_Broken").Bounds.Size);
     });
 
+    [AvaloniaFact]
+    public void B18_A_Height_Given_Later_Shows_The_Empty_Box_And_Taking_It_Away_Hides_It() => InstalledTheme.Run(_ =>
+    {
+        var img = new AvonicImg { HorizontalAlignment = HorizontalAlignment.Left, Width = 120 };
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+        Assert.False(Part<Control>(img, "PART_Broken").IsVisible);
+
+        img.Height = 60;
+        Layout(scene);
+        Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
+        Assert.Equal(new Size(120, 60), Part<Control>(img, "PART_Broken").Bounds.Size);
+
+        img.Height = double.NaN;
+        Layout(scene);
+        Assert.False(Part<Control>(img, "PART_Broken").IsVisible);
+        Assert.Equal(0, img.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B18_A_Load_With_No_Src_After_A_Failure_Is_No_Src_Again_Not_A_Failure() => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "missing.png" };
+        var wrap = new Panel { Children = { img } };
+        using var scene = new Scene(Page(wrap));
+        Layout(scene);
+        loader.Fail(0);
+        Layout(scene);
+        Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
+
+        // A watch that's still waiting when the src is taken away loads nothing: an <img> without a src, which isn't broken
+        wrap.IsVisible = false;
+        img.Src = "b.png";
+        img.Src = null;
+        Layout(scene);
+        wrap.IsVisible = true;
+        Layout(scene);
+        Assert.Single(loader.Requests);
+        Assert.False(Part<Control>(img, "PART_Broken").IsVisible);
+        Assert.Equal(0, img.Bounds.Height);
+    });
+
     // ── 9. Failure ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
