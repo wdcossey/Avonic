@@ -127,6 +127,8 @@ None.
 | Difference | Why |
 |---|---|
 | A skeleton in place of text in a label isn't in an `<h3>` or a `<p>`, so it doesn't get their margins: 2 px above and below an `h3` in a label | Avalonia's `h3` is a `TextBlock`, which can't hold a control. An app adds the margin |
+| Two bars one above the other in a `StackPanel` are 18 apart, where CSS collapses the 4 below one and the 4 above the next, so they're 14 apart (measured `s1`, `s2`) | Avalonia has no margin collapsing. An app that wants 14 sets the next one's `Margin` to `0,0,0,4` |
+| A bar with a `Width` and no `HorizontalAlignment` is centred, where a block with a width starts at the left | Avalonia's `Stretch` centres what's narrower than its slot, for every control. An app sets `HorizontalAlignment="Left"` |
 | `width: 80%` has no equivalent; an app sets `Width`, or uses a `Grid`'s star columns | Avalonia has no percentages |
 | `in-media` and the config are read at the first attach, which is Ionic's first render; a skeleton made but never attached has neither | Avalonia has no render before attach |
 

@@ -1,0 +1,73 @@
+# ion-img — Comparison against the web component
+
+> Ionic side (Chromium, md, 390×844@2x) → [`ref/`](ref/). The exact command:
+>
+> ```
+> node tools/ionic-ref/render.js ion-img --bare --html '<div style="padding:16px"><ion-img src="/docs/components/ion-img/picture.png" alt="Four quarters"></ion-img><ion-img alt="No src yet" style="margin-top:16px"></ion-img><ion-img src="/docs/components/ion-img/missing.png" alt="A picture that failed" style="margin-top:16px"></ion-img><div style="display:flex;gap:16px;margin-top:16px;align-items:flex-start"><ion-avatar><ion-img src="/docs/components/ion-img/picture.png"></ion-img></ion-avatar><ion-thumbnail><ion-img src="/docs/components/ion-img/picture.png"></ion-img></ion-thumbnail><ion-img src="/docs/components/ion-img/picture.png" style="width:120px;height:120px;background:#eee"></ion-img></div></div><ion-list><ion-item><ion-thumbnail slot="start"><ion-img src="/docs/components/ion-img/picture.png"></ion-img></ion-thumbnail><ion-label>In an item</ion-label></ion-item></ion-list>'
+> ```
+>
+> [`picture.png`](picture.png) is the 300 × 200 picture of four quarters the measuring scripts served, and `missing.png` is a
+> 404, which is `ref/dump.json`'s one console error. The behaviours were measured by throwaway `playwright-core` scripts that
+> served the same picture with a delay, a 404 and a file that isn't a picture: see [PLAN.md](PLAN.md#measured).
+>
+> Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicImgCaptureTests` (headless Skia, 2×), with `FakeLoader` giving the
+> same picture, drawn by `TestPicture`, and failing `missing.png`. It writes `avonic-img-page.png`, as capture tests share the
+> folder, which is copied to [`compare/avonic-page.png`](compare/avonic-page.png).
+
+## Frames
+
+The top 570 px of each. Ionic on the left, Avonic on the right:
+
+![Ionic and Avonic side by side](compare/side.png)
+
+| Ionic | Avonic |
+|---|---|
+| ![](ref/page.png) | ![](compare/avonic-page.png) |
+
+From the top: the picture at the page's width, an `ion-img` with no `src`, one whose `src` is a 404, then one in an avatar, one in
+a thumbnail and one in a 120 × 120 box with a grey background, and one in a thumbnail in an item.
+
+**Match, but for Chromium's broken-image icon.** The picture is 358 × 238.66 on both, contained in the 120 box at 120 × 80 in the
+middle, and covers the avatar (cut to a circle), the thumbnail and the item's thumbnail, cropped from the middle. The alt texts are
+19 high, in the inherited 16 px Roboto. Chromium draws its broken-image icon before them, 16 px wide; Avonic doesn't, so the text
+starts 16 px further left: a deliberate difference, as the icon is Chromium's artwork.
+
+## Behaviours
+
+The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicImgTests` or `AvonicImgLoaderTests`, named after its
+number.
+
+| # | Behaviour | Ionic | Result |
+|---|---|---|---|
+| 1 | Loads when it intersects the viewport | `ionImgWillLoad` at the first observer callback, then `ionImgDidLoad` | match: `IonImgWillLoad` after the first layout pass, `IonImgDidLoad` when the picture is shown |
+| 2 | The viewport's edge, no margin | in an `ion-content` 844 high: 843 and 844 load, 845 waits for a scroll of 1 px | match, in a `ScrollViewer` 844 high at the same three, and in an `AvonicContent` scrolled to it |
+| 3 | Clipped by an ancestor | outside a 100 wide `overflow: hidden` box: no; on its edge: yes | match, with `ClipToBounds` |
+| 4 | Hidden | `display: none`: no load; shown: loads | match, on an ancestor, and on itself after a layout |
+| 5 | Removed before it loaded | loads when attached again | match |
+| 6 | Once | `removeIO()` after `load()` | match: it stops listening |
+| 7 | Size | 358 × 238.66, contained and centred in a box of its own size, at the top of a taller one | match. 239 at a scale of 1, as Avalonia rounds layout to whole pixels |
+| 8 | Before and while loading | alt text, 19 high; with no alt, 0; nothing while a first picture loads | match, without the icon |
+| 9 | Failure | `ionError`, no `ionImgDidLoad`, the alt text | match. A failure with no alt is 0 high here, where Chromium draws a 24 high grey box: a deliberate difference |
+| 10 | A change of `src` | `ionImgWillLoad`; the old picture stays until the new one loads | match, and the alt text when the new one fails |
+| 11 | Two changes in a row | only the last one's `ionImgDidLoad` | match, and the first request is cancelled |
+| 12 | `src` to `undefined`, or none at first | nothing; the picture stays | match |
+| 13 | Automation | `<img alt>`: an image named by `alt`; `alt=""` is decorative | match, from the HTML spec, not measured |
+| 14 | In an avatar or a thumbnail | `::slotted(ion-img)`: fills, covers, the avatar's circle | match. Not deeper down, as `::slotted` is a direct child |
+| 15 | Bubbling | `bubbles: true` | match |
+| 16 | The loader | the browser's | Avonic's own: `http(s)`, `data:` in base64, `avares:`, `file:` and paths. SVG doesn't load: a deliberate difference |
+| 17 | Decoding | `decoding="async"` | match: on the thread pool |
+
+## Found here, not by the tests
+
+The plan's first listener check assumed `EffectiveViewportChanged` would come by itself. Measuring it showed a new listener on a
+laid-out tree hears nothing until something asks for a layout, and a shown control hears nothing at all. Both are in the plan's
+design, and `B4_Hidden_Itself_After_It_Was_Laid_Out_It_Does_Not_Load_And_Shown_It_Does` and `B12_With_No_Src_At_First…` fail
+without the fix.
+
+## Deliberate differences and known gaps
+
+All in [PLAN.md](PLAN.md#deliberate-differences).
+
+## Real window
+
+Not tried in a real window. The frames above are headless.
