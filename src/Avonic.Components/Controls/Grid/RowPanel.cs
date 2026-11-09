@@ -207,8 +207,9 @@ public sealed class RowPanel : Panel
     private static void Prepare(Item item, double width, bool bounded)
     {
         var column = item.Column;
-        var margins = MinContent.Horizontal(item.Child.Margin) + (item.Child is ContentPresenter { Child: { } inner } ? MinContent.Horizontal(inner.Margin) : 0);
-        var flex = column is null ? FlexRow.GetFlex(item.Child is ContentPresenter { Child: { } slotted } ? slotted : item.Child) : 0;
+        var slotted = MinContent.Slotted(item.Child);
+        var margins = MinContent.Horizontal(item.Child.Margin) + (slotted is null ? 0 : MinContent.Horizontal(slotted.Margin));
+        var flex = column is null ? FlexRow.GetFlex(slotted ?? item.Child) : 0;
         var kind = column?.Kind ?? (flex > 0 ? ColumnKind.Grow : ColumnKind.Content);
 
         item.Lead = bounded && column is not null ? column.OffsetFraction * width : 0;

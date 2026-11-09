@@ -3079,7 +3079,8 @@ public class AvonicButtonTests
         {
             var shadow = Assert.IsAssignableFrom<Transitions>(Native(button).Transitions).OfType<BoxShadowsTransition>().Single();
 
-            // cubic-bezier(.4, 0, .2, 1), measured in Chromium 141 with Element.animate, at 40 and 160 of 225 ms.
+            // cubic-bezier(.4, 0, .2, 1) at an input progress of 40/225 and 160/225, the points measured for the ripple in Chromium 141
+            // with Element.animate. The curve, not this transition's timeline.
             Assert.Equal(0.09974292315785675, shadow.Easing.Ease(40.0 / 225), 1e-6);
             Assert.Equal(0.9434380803962631, shadow.Easing.Ease(160.0 / 225), 1e-6);
         }

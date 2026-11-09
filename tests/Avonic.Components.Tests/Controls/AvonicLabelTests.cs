@@ -1187,7 +1187,8 @@ public class AvonicLabelTests
         clock.At(1000);
         Dispatcher.UIThread.RunJobs();
 
-        // cubic-bezier(.4, 0, .2, 1), measured in Chromium 141 with Element.animate, at 40 and 160 of 225 ms.
+        // cubic-bezier(.4, 0, .2, 1) at an input progress of 40/225 and 160/225, the points measured for the ripple in Chromium 141
+        // with Element.animate. The curve, not this transition's timeline.
         var easings = floating.Transitions!.Concat(stacked.Transitions!).Select(transition => ((TransitionBase)transition).Easing).ToList();
         Assert.Equal(4, easings.Count);
         Assert.All(easings, easing =>

@@ -179,4 +179,21 @@ public class MinContentTests
         Assert.Equal(MinContent.Of(label), MinContent.OfItem(label));
         Assert.True(MinContent.OfItem(label) > 0);
     }
+
+    [AvaloniaFact]
+    public void A_Wrapping_Row_Leaves_Out_A_Hidden_Column_It_Did_Not_Measure()
+    {
+        var hidden = Text("cccccccccccc dd");
+        var container = new ContentPresenter { Content = hidden };
+        var row = new RowPanel { Children = { Text("aaaa bb"), container } };
+        using var scene = OneLine(row);
+        Assert.True(container.DesiredSize.Width > Alone("cccccccccccc"));
+
+        // display: none, as a column an ItemTemplate hid in its container is. The row skips it, so its size is the old one.
+        hidden.IsVisible = false;
+        row.InvalidateMeasure();
+        row.Measure(Size.Infinity);
+
+        Assert.Equal(Alone("aaaa"), MinContent.Of(row), 1d);
+    }
 }

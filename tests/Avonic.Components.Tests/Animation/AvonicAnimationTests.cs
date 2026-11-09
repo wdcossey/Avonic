@@ -753,4 +753,12 @@ public class AvonicAnimationTests
         Assert.Equal(1, easing.Ease(2));
         Assert.Null(CubicBezierEasing.ParseCss("linear"));
     }
+
+    [AvaloniaFact]
+    public void A8_The_CubicBezier_Markup_Extension_Is_A_CubicBezierEasing()
+    {
+        var easing = new CubicBezierExtension(0.4, 0, 0.2, 1).ProvideValue(null!);
+
+        Assert.Equal((0.4, 0d, 0.2, 1d), (easing.X1, easing.Y1, easing.X2, easing.Y2));
+    }
 }

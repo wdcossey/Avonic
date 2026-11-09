@@ -76,10 +76,12 @@ internal static class MinContent
             return control.DesiredSize.Width;
         }
 
-        // ion-row wraps, so its narrowest is its widest item's narrowest, however wide it was on one line.
+        // ion-row wraps, so its narrowest is its widest item's narrowest, however wide it was on one line. A container whose
+        // column is hidden is display: none, and the row didn't measure it, so its size is stale.
         if (control is RowPanel)
         {
-            return Horizontal(control.Margin) + Math.Max(control.MinWidth, children.Max(Of));
+            var widest = children.Where(child => child is not ContentPresenter { Child.IsVisible: false }).Select(Of).DefaultIfEmpty(0).Max();
+            return Horizontal(control.Margin) + Math.Max(control.MinWidth, widest);
         }
 
         // Not Grid.ColumnDefinitions: reading it makes the collection, and a Grid measured without one then throws when it arranges.

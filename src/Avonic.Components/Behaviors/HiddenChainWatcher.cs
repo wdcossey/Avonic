@@ -9,6 +9,10 @@ namespace Avonic.Components.Behaviors;
 /// Avalonia doesn't tell a control when an ancestor hides or shows it. A hide and show that happen before a control next looks
 /// aren't seen, as in Chromium, where no style change sees them.
 /// </summary>
+/// <remarks>
+/// It watches what was hidden when <see cref="Watch"/> found it. Something in the chain hidden after that isn't watched, so the
+/// callback can come while the visual is still hidden: each control's callback looks again, and watches again if it is.
+/// </remarks>
 internal sealed class HiddenChainWatcher(Action onShown) : IDisposable
 {
     private readonly List<Visual> _hiddenBy = [];
