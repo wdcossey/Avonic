@@ -101,12 +101,13 @@ public class AvonicProgressBar : TemplatedControl
 
     public AvonicProgressBar()
     {
+        _hiddenChain = new HiddenChainWatcher(Restart);
+
         // :host(.progress-bar-reversed) { transform: scaleX(-1) }. At style priority, so that an app's transform replaces it,
         // as an outer stylesheet's does in CSS. Bound once, here, before any style applies: of two values at one priority the
         // later wins, so a frame made when the bar is reversed would beat an app's style that was already there.
         Bind(RenderTransformProperty, _reversal, BindingPriority.Style);
         UpdatePseudoClasses();
-        _hiddenChain = new HiddenChainWatcher(Restart);
     }
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
