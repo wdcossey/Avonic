@@ -40,21 +40,21 @@ public abstract class AvonicOverlay : TemplatedControl
     public static readonly StyledProperty<AnimationBuilder?> LeaveAnimationProperty =
         AvaloniaProperty.Register<AvonicOverlay, AnimationBuilder?>(nameof(LeaveAnimation));
 
-    /// <summary>Ionic <c>willPresent</c>.</summary>
-    public static readonly RoutedEvent<RoutedEventArgs> IonWillPresentEvent =
-        RoutedEvent.Register<AvonicOverlay, RoutedEventArgs>(nameof(IonWillPresent), RoutingStrategies.Bubble);
+    /// <summary>Ionic <c>willPresent</c>, the generic event of every overlay. Each control adds its own <c>Ion&lt;Name&gt;WillPresent</c>.</summary>
+    public static readonly RoutedEvent<RoutedEventArgs> WillPresentEvent =
+        RoutedEvent.Register<AvonicOverlay, RoutedEventArgs>(nameof(WillPresent), RoutingStrategies.Bubble);
 
-    /// <summary>Ionic <c>didPresent</c>.</summary>
-    public static readonly RoutedEvent<RoutedEventArgs> IonDidPresentEvent =
-        RoutedEvent.Register<AvonicOverlay, RoutedEventArgs>(nameof(IonDidPresent), RoutingStrategies.Bubble);
+    /// <summary>Ionic <c>didPresent</c>, the generic event of every overlay. Each control adds its own <c>Ion&lt;Name&gt;DidPresent</c>.</summary>
+    public static readonly RoutedEvent<RoutedEventArgs> DidPresentEvent =
+        RoutedEvent.Register<AvonicOverlay, RoutedEventArgs>(nameof(DidPresent), RoutingStrategies.Bubble);
 
-    /// <summary>Ionic <c>willDismiss</c>.</summary>
-    public static readonly RoutedEvent<OverlayEventArgs> IonWillDismissEvent =
-        RoutedEvent.Register<AvonicOverlay, OverlayEventArgs>(nameof(IonWillDismiss), RoutingStrategies.Bubble);
+    /// <summary>Ionic <c>willDismiss</c>, the generic event of every overlay. Each control adds its own <c>Ion&lt;Name&gt;WillDismiss</c>.</summary>
+    public static readonly RoutedEvent<OverlayEventArgs> WillDismissEvent =
+        RoutedEvent.Register<AvonicOverlay, OverlayEventArgs>(nameof(WillDismiss), RoutingStrategies.Bubble);
 
-    /// <summary>Ionic <c>didDismiss</c>.</summary>
-    public static readonly RoutedEvent<OverlayEventArgs> IonDidDismissEvent =
-        RoutedEvent.Register<AvonicOverlay, OverlayEventArgs>(nameof(IonDidDismiss), RoutingStrategies.Bubble);
+    /// <summary>Ionic <c>didDismiss</c>, the generic event of every overlay. Each control adds its own <c>Ion&lt;Name&gt;DidDismiss</c>.</summary>
+    public static readonly RoutedEvent<OverlayEventArgs> DidDismissEvent =
+        RoutedEvent.Register<AvonicOverlay, OverlayEventArgs>(nameof(DidDismiss), RoutingStrategies.Bubble);
 
     /// <summary>Ionic's <c>lastOverlayIndex</c>, for the whole process, as Ionic's is for the page.</summary>
     private static int s_lastOverlayIndex;
@@ -104,28 +104,28 @@ public abstract class AvonicOverlay : TemplatedControl
         set => SetValue(LeaveAnimationProperty, value);
     }
 
-    public event EventHandler<RoutedEventArgs>? IonWillPresent
+    public event EventHandler<RoutedEventArgs>? WillPresent
     {
-        add => AddHandler(IonWillPresentEvent, value);
-        remove => RemoveHandler(IonWillPresentEvent, value);
+        add => AddHandler(WillPresentEvent, value);
+        remove => RemoveHandler(WillPresentEvent, value);
     }
 
-    public event EventHandler<RoutedEventArgs>? IonDidPresent
+    public event EventHandler<RoutedEventArgs>? DidPresent
     {
-        add => AddHandler(IonDidPresentEvent, value);
-        remove => RemoveHandler(IonDidPresentEvent, value);
+        add => AddHandler(DidPresentEvent, value);
+        remove => RemoveHandler(DidPresentEvent, value);
     }
 
-    public event EventHandler<OverlayEventArgs>? IonWillDismiss
+    public event EventHandler<OverlayEventArgs>? WillDismiss
     {
-        add => AddHandler(IonWillDismissEvent, value);
-        remove => RemoveHandler(IonWillDismissEvent, value);
+        add => AddHandler(WillDismissEvent, value);
+        remove => RemoveHandler(WillDismissEvent, value);
     }
 
-    public event EventHandler<OverlayEventArgs>? IonDidDismiss
+    public event EventHandler<OverlayEventArgs>? DidDismiss
     {
-        add => AddHandler(IonDidDismissEvent, value);
-        remove => RemoveHandler(IonDidDismissEvent, value);
+        add => AddHandler(DidDismissEvent, value);
+        remove => RemoveHandler(DidDismissEvent, value);
     }
 
     /// <summary>Ionic <c>overlayIndex</c>: given when it's attached, from 1. Its <c>ZIndex</c> is <see cref="ZIndexBase"/> plus this.</summary>
@@ -200,11 +200,11 @@ public abstract class AvonicOverlay : TemplatedControl
         return await DismissCore(data, role);
     }
 
-    /// <summary>Ionic <c>onWillDismiss()</c>: the detail of the next <see cref="IonWillDismiss"/>.</summary>
-    public Task<OverlayEventDetail> OnWillDismiss() => NextEvent(IonWillDismissEvent);
+    /// <summary>Ionic <c>onWillDismiss()</c>: the detail of the next <see cref="WillDismiss"/>.</summary>
+    public Task<OverlayEventDetail> OnWillDismiss() => NextEvent(WillDismissEvent);
 
-    /// <summary>Ionic <c>onDidDismiss()</c>: the detail of the next <see cref="IonDidDismiss"/>, once the overlay has gone.</summary>
-    public Task<OverlayEventDetail> OnDidDismiss() => NextEvent(IonDidDismissEvent);
+    /// <summary>Ionic <c>onDidDismiss()</c>: the detail of the next <see cref="DidDismiss"/>, once the overlay has gone.</summary>
+    public Task<OverlayEventDetail> OnDidDismiss() => NextEvent(DidDismissEvent);
 
     /// <summary>Ionic's <c>onIonBackdropTap</c>: an <see cref="AvonicBackdrop"/> in it was tapped.</summary>
     protected virtual void OnBackdropTap() => DismissFromInput(OverlayRoles.Backdrop);
@@ -228,9 +228,9 @@ public abstract class AvonicOverlay : TemplatedControl
         }
 
         _presented = true;
-        RaiseEvent(new RoutedEventArgs(IonWillPresentEvent, this));
+        RaiseEvent(new RoutedEventArgs(WillPresentEvent, this));
         await OverlayAnimation(EnterAnimation ?? MdEnterAnimation);
-        RaiseEvent(new RoutedEventArgs(IonDidPresentEvent, this));
+        RaiseEvent(new RoutedEventArgs(DidPresentEvent, this));
 
         // Focus is left where it is if it's already inside.
         if (KeyboardClose && (Focused(topLevel) is not { } focused || !OverlayHost.Contains(this, focused)))
@@ -252,13 +252,13 @@ public abstract class AvonicOverlay : TemplatedControl
         {
             // Not clickable during the dismiss: pointer-events: none.
             _noPointer = SetValue(IsHitTestVisibleProperty, false, BindingPriority.Animation);
-            RaiseEvent(new OverlayEventArgs(IonWillDismissEvent, data, role));
+            RaiseEvent(new OverlayEventArgs(WillDismissEvent, data, role));
             if (role != OverlayRoles.Gesture)
             {
                 await OverlayAnimation(LeaveAnimation ?? MdLeaveAnimation);
             }
 
-            RaiseEvent(new OverlayEventArgs(IonDidDismissEvent, data, role));
+            RaiseEvent(new OverlayEventArgs(DidDismissEvent, data, role));
             didDismiss = true;
         }
         finally
@@ -325,7 +325,7 @@ public abstract class AvonicOverlay : TemplatedControl
     }
 
     /// <summary>
-    /// The second half: after <see cref="IonDidDismiss"/>, give focus back unless something has it by then. Ionic awaits
+    /// The second half: after <see cref="DidDismiss"/>, give focus back unless something has it by then. Ionic awaits
     /// <c>onDidDismiss()</c>, so it runs once the overlay has gone, as a continuation, and never if the dismiss failed before the
     /// event, whose promise then never resolves. Forgotten either way, so a later dismiss can't use it.
     /// </summary>

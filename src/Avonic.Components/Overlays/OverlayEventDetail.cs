@@ -7,7 +7,7 @@ namespace Avonic.Components.Overlays;
 /// <param name="Role">Ionic <c>role</c>, such as <see cref="OverlayRoles.Backdrop"/>.</param>
 public sealed record OverlayEventDetail(object? Data, string? Role);
 
-/// <summary>The arguments of <see cref="AvonicOverlay.IonWillDismissEvent"/> and <see cref="AvonicOverlay.IonDidDismissEvent"/>: Ionic's <c>detail</c>.</summary>
+/// <summary>The arguments of <see cref="AvonicOverlay.WillDismissEvent"/> and <see cref="AvonicOverlay.DidDismissEvent"/>: Ionic's <c>detail</c>.</summary>
 public sealed class OverlayEventArgs : RoutedEventArgs
 {
     public OverlayEventArgs(RoutedEvent routedEvent, object? data, string? role)

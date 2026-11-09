@@ -85,10 +85,10 @@ public class AvonicOverlayTests
         public T Watch<T>(T overlay, string name = "")
             where T : AvonicOverlay
         {
-            overlay.IonWillPresent += (_, _) => Log.Add($"{name}willPresent@{Clock.Now.TotalMilliseconds}");
-            overlay.IonDidPresent += (_, _) => Log.Add($"{name}didPresent@{Clock.Now.TotalMilliseconds}");
-            overlay.IonWillDismiss += (_, e) => Log.Add($"{name}willDismiss({e.Data},{e.Role})@{Clock.Now.TotalMilliseconds}");
-            overlay.IonDidDismiss += (_, e) => Log.Add($"{name}didDismiss({e.Data},{e.Role})@{Clock.Now.TotalMilliseconds}");
+            overlay.WillPresent += (_, _) => Log.Add($"{name}willPresent@{Clock.Now.TotalMilliseconds}");
+            overlay.DidPresent += (_, _) => Log.Add($"{name}didPresent@{Clock.Now.TotalMilliseconds}");
+            overlay.WillDismiss += (_, e) => Log.Add($"{name}willDismiss({e.Data},{e.Role})@{Clock.Now.TotalMilliseconds}");
+            overlay.DidDismiss += (_, e) => Log.Add($"{name}didDismiss({e.Data},{e.Role})@{Clock.Now.TotalMilliseconds}");
             return overlay;
         }
 
@@ -158,7 +158,7 @@ public class AvonicOverlayTests
         using var stage = new Stage();
         var overlay = stage.Watch(new TestOverlay(TestOverlay.Button("Inside")));
         var visibleAtWillPresent = true;
-        overlay.IonWillPresent += (_, _) => visibleAtWillPresent = overlay.IsVisible;
+        overlay.WillPresent += (_, _) => visibleAtWillPresent = overlay.IsVisible;
 
         var presented = overlay.Present(stage.Window);
 
@@ -421,8 +421,8 @@ public class AvonicOverlayTests
     {
         using var stage = new Stage();
         var overlay = new TestOverlay();
-        overlay.IonWillDismiss += (_, e) => e.Handled = true;
-        overlay.IonDidDismiss += (_, e) => e.Handled = true;
+        overlay.WillDismiss += (_, e) => e.Handled = true;
+        overlay.DidDismiss += (_, e) => e.Handled = true;
         overlay.Present(stage.Window);
         stage.At(200);
         var will = overlay.OnWillDismiss();
@@ -451,7 +451,7 @@ public class AvonicOverlayTests
     {
         using var stage = new Stage();
         var overlay = new TestOverlay();
-        overlay.IonWillDismiss += (_, _) => throw new InvalidOperationException("an app's handler");
+        overlay.WillDismiss += (_, _) => throw new InvalidOperationException("an app's handler");
         overlay.Present(stage.Window);
         stage.At(200);
         var previous = Avalonia.Logging.Logger.Sink;
@@ -600,7 +600,7 @@ public class AvonicOverlayTests
         stage.At(200);
 
         // During its willPresent it's still overlay-hidden, so Escape reaches the one under it, as in Ionic.
-        top.IonWillPresent += (_, _) => stage.Key(PhysicalKey.Escape);
+        top.WillPresent += (_, _) => stage.Key(PhysicalKey.Escape);
         top.Present(stage.Window);
         stage.At(600);
         Assert.Contains(stage.Log, entry => entry.StartsWith("under didDismiss(,backdrop)", StringComparison.Ordinal));
@@ -707,7 +707,7 @@ public class AvonicOverlayTests
         stage.Opener.Focus();
         overlay.Present(stage.Window);
         stage.At(200);
-        overlay.IonWillDismiss += (_, _) => stage.Other.Focus();
+        overlay.WillDismiss += (_, _) => stage.Other.Focus();
 
         overlay.Dismiss();
         stage.At(400);
@@ -723,7 +723,7 @@ public class AvonicOverlayTests
         overlay.Present(stage.Window);
         stage.At(200);
         var throws = true;
-        overlay.IonWillDismiss += (_, _) =>
+        overlay.WillDismiss += (_, _) =>
         {
             if (throws)
             {
@@ -760,7 +760,7 @@ public class AvonicOverlayTests
 
         var inside = TestOverlay.Button("Inside");
         var overlay = new TestOverlay(inside);
-        overlay.IonDidPresent += (_, _) => inside.Focus();
+        overlay.DidPresent += (_, _) => inside.Focus();
         overlay.Present(stage.Window);
         stage.At(600);
         Assert.Same(inside, stage.Focused);
@@ -771,7 +771,7 @@ public class AvonicOverlayTests
     {
         using var stage = new Stage();
         var overlay = new TestOverlay { KeyboardClose = false };
-        overlay.IonWillPresent += (_, _) => stage.Text.Focus();
+        overlay.WillPresent += (_, _) => stage.Text.Focus();
         overlay.Present(stage.Window);
         Assert.Same(stage.Text, stage.Focused);
         stage.At(200);
@@ -779,7 +779,7 @@ public class AvonicOverlayTests
         stage.At(400);
 
         var closing = new TestOverlay();
-        closing.IonWillPresent += (_, _) => stage.Text.Focus();
+        closing.WillPresent += (_, _) => stage.Text.Focus();
         closing.Present(stage.Window);
         Assert.Null(stage.Focused);
     }

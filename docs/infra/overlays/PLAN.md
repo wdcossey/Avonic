@@ -164,8 +164,8 @@ only some have is a protected member the control overrides, as no property may b
 | `present(): Promise<void>` | `Task Present()`; `Task Present(TopLevel)` |
 | `dismiss(data?, role?): Promise<boolean>` | `Task<bool> Dismiss(object? data = null, string? role = null)` |
 | `onWillDismiss<T>()`, `onDidDismiss<T>()`: `Promise<OverlayEventDetail<T>>` | `Task<OverlayEventDetail> OnWillDismiss()`, `OnDidDismiss()`; `OverlayEventDetail(object? Data, string? Role)` |
-| `willPresent`, `didPresent`, `willDismiss`, `didDismiss` (the shorthand events every overlay has) | routed events `IonWillPresent`, `IonDidPresent`, `IonWillDismiss`, `IonDidDismiss` (`OverlayEventArgs` with `Data`, `Role`), bubbling. Named by the issue; see "For you to decide" in the PR |
-| `ionAlertDidPresent` and the rest | Not here: each overlay control registers its own, in its issue |
+| `willPresent`, `didPresent`, `willDismiss`, `didDismiss`, the generic set every overlay has in `core.json` | routed events `WillPresentEvent`, `DidPresentEvent`, `WillDismissEvent`, `DidDismissEvent` and the CLR events `WillPresent`, `DidPresent`, `WillDismiss`, `DidDismiss` (`OverlayEventArgs` with `Data`, `Role`), bubbling: the mechanical rule, which keeps an event's own name, and these have no `ion` prefix. No member of Avalonia's base types has these names. The human decided this at the PR |
+| `ionAlertWillPresent`, `ionModalDidDismiss` and the rest, the per-control set | Not here: each overlay control adds its own `Ion<Name>WillPresent`, `Ion<Name>DidPresent`, `Ion<Name>WillDismiss` and `Ion<Name>DidDismiss` when it's built, raised with the generic ones |
 | `backdropDismiss` (not on toast) | `protected virtual bool BackdropDismissEnabled`, `false`; the control declares the property and returns it |
 | `md.enter.js` / `md.leave.js` | `protected abstract AnimationBuilder MdEnterAnimation`, `MdLeaveAnimation`; `protected virtual object? AnimationOptions` |
 | z-index base | `protected virtual int ZIndexBase`, 20000 |
@@ -181,7 +181,7 @@ The overlay is `Focusable` and not a tab stop (`tabindex="-1"`), and hidden (`Is
 
 **Async.** `Present`, `Dismiss`, `OnWillDismiss`, `OnDidDismiss` and `Play` are tasks that complete on Avalonia's dispatcher, with
 their continuations run asynchronously, as a promise's are: a handler awaiting `OnDidDismiss()` runs after `Dismiss` has removed the
-overlay, as Ionic's `restoreElementFocus` does. Everything up to the first frame is synchronous, as in Ionic: `IonWillPresent` is
+overlay, as Ionic's `restoreElementFocus` does. Everything up to the first frame is synchronous, as in Ionic: `WillPresent` is
 raised inside `Present()`.
 
 **The focus trap** is Ionic's `trapKeyboardFocus`, on the host: a `GotFocus` handler on the `TopLevel` (bubbling, handled events
@@ -257,17 +257,17 @@ for keys and pointers. Each one has to fail without its behaviour.
 
 | # | Behaviour | Source |
 |---|---|---|
-| O1 | `Present()` adds the overlay to the `TopLevel`'s overlay layer, hidden until its animation starts, full size, following the window's size; `IonWillPresent` at once, the animation's first values before the first frame, `IonDidPresent` when it finishes, then `Present()` completes; `EnterAnimation` and `LeaveAnimation` replace md's, and every builder gets `AnimationOptions` | `present`, L1 |
-| O2 | `Animated` false, or `AvonicConfig.Animated` false: the same events, `IonDidPresent` at the next frame; the end values are shown | `overlayAnimation`, L6 |
-| O3 | `Present()` while presented does nothing; two at once raise `IonWillPresent` once | L5 |
-| O4 | `Dismiss(data, role)`: `IonWillDismiss` with them, the leave animation, `IonDidDismiss`, the overlay removed, the enter animation's held values gone, `true`; `false` when not presented; no leave animation for the `gesture` role; presented again, it's above what came since | `dismiss`, L3 |
+| O1 | `Present()` adds the overlay to the `TopLevel`'s overlay layer, hidden until its animation starts, full size, following the window's size; `WillPresent` at once, the animation's first values before the first frame, `DidPresent` when it finishes, then `Present()` completes; `EnterAnimation` and `LeaveAnimation` replace md's, and every builder gets `AnimationOptions` | `present`, L1 |
+| O2 | `Animated` false, or `AvonicConfig.Animated` false: the same events, `DidPresent` at the next frame; the end values are shown | `overlayAnimation`, L6 |
+| O3 | `Present()` while presented does nothing; two at once raise `WillPresent` once | L5 |
+| O4 | `Dismiss(data, role)`: `WillDismiss` with them, the leave animation, `DidDismiss`, the overlay removed, the enter animation's held values gone, `true`; `false` when not presented; no leave animation for the `gesture` role; presented again, it's above what came since | `dismiss`, L3 |
 | O5 | `OnWillDismiss()` and `OnDidDismiss()` complete with the next event's data and role, after the overlay has gone | `eventMethod` |
-| O6 | `Dismiss()` during the enter animation waits for `IonDidPresent` | `lockController`, L4 |
+| O6 | `Dismiss()` during the enter animation waits for `DidPresent` | `lockController`, L4 |
 | O7 | The overlay can't be hit during its dismiss | `pointer-events: none` |
 | O8 | Stacking: `ZIndex` is the base plus a counter from 1, so the later is above, and hit tests reach it | `prepareOverlay`, S1 |
 | O9 | Escape and hardware back dismiss the top overlay with the `backdrop` role when it allows it; not when it doesn't, even with one under it that does, nor during its leave animation, nor when a control inside has handled Escape; back is marked handled only when it dismisses, and a back the app has handled is left alone | `connectListeners`, E1 to E3 |
 | O10 | A backdrop tap in the overlay dismisses it with the `backdrop` role when it's tappable; not during the enter animation, when the backdrop has `pointer-events: none` | `onIonBackdropTap`, B1 |
-| O11 | Focus: blurred at present, given back after the dismiss if nothing has focus, not if something does; the overlay takes focus after `IonDidPresent` with `KeyboardClose`, not without, nor when focus is already inside; a focused `TextBox` is blurred as the animation starts; an overlay that doesn't steal focus leaves it; a dismiss that failed gives no focus back, then or after a later present | `restoreElementFocus`, `keyboardClose`, F1, F6 |
+| O11 | Focus: blurred at present, given back after the dismiss if nothing has focus, not if something does; the overlay takes focus after `DidPresent` with `KeyboardClose`, not without, nor when focus is already inside; a focused `TextBox` is blurred as the animation starts; an overlay that doesn't steal focus leaves it; a dismiss that failed gives no focus back, then or after a later present | `restoreElementFocus`, `keyboardClose`, F1, F6 |
 | O12 | The trap, shadow variant: Tab and Shift+Tab cycle inside; focus given to something behind moves inside, to the last if the first was where it came from; to the overlay itself with nothing focusable, skipping what isn't a tab stop; a popup opened from inside is inside, in both variants | `trapShadowFocus`, F4, F5 |
 | O13 | The trap, scoped variant: Tab wraps through the sentinels; focus behind it is left alone | `trapScopedFocus`, F2, F3 |
 | O14 | The trap: only the top overlay that steals focus traps; focus moving into one that doesn't goes back to the last focus; one with the trap disabled traps nothing | `trapKeyboardFocus` |
@@ -312,7 +312,7 @@ What the overlay issues get from this, and what each still has to add.
 | Not here | Why | Who needs it |
 |---|---|---|
 | Controllers (`alertController.create`, `dismiss(data, role, id)`, `getTop`) | Each overlay's issue; `getPresentedOverlay` is in the host, internal, for them | all |
-| Per-control events (`ionAlertDidPresent`, and the rest), `htmlAttributes`, `cssClass` | A control's own; `cssClass` is `Classes` | all |
+| Per-control events: `Ion<Name>WillPresent`, `Ion<Name>DidPresent`, `Ion<Name>WillDismiss`, `Ion<Name>DidDismiss` (`ionAlertWillPresent` → `IonAlertWillPresent`, and the rest), raised with the base's generic `WillPresent` and the rest; `htmlAttributes`, `cssClass` | A control's own; `cssClass` is `Classes` | all |
 | `isOpen`, `trigger`, inline overlays, `delegate`, `keepContentsMounted` | They teleport a control that's in a page to the root; Avalonia's logical tree has to be worked out for it | all, modal and popover |
 | `canDismiss` with a handler | The modal's | modal |
 | Root `aria-hidden` and `inert` (`setRootAriaHidden`), and `backdrop-no-scroll` on the body | Needs the app root, #65; the gesture controller's `IsScrollDisabled` is where no-scroll goes | all |

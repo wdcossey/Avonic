@@ -53,7 +53,7 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `Present()`, `Present(TopLevel)` | `present()` | shows it in the application's top level, or the one given |
 | `Dismiss(data, role)` | `dismiss()` | `true` if it dismissed |
 | `OnWillDismiss()`, `OnDidDismiss()` | the same | the next event's `OverlayEventDetail(Data, Role)` |
-| `IonWillPresent`, `IonDidPresent`, `IonWillDismiss`, `IonDidDismiss` | `willPresent` and the rest | routed events, bubbling; the dismiss ones carry `Data` and `Role` |
+| `WillPresent`, `DidPresent`, `WillDismiss`, `DidDismiss` | `willPresent` and the rest | routed events, bubbling; the dismiss ones carry `Data` and `Role` |
 | `BackdropDismissEnabled` | `backdropDismiss` | protected; `false` |
 | `StealsFocus` | not a toast | protected; `true`. False: no blur, no focus given back, no trap |
 | `FocusTrapEnabled` | not `ion-disable-focus-trap` | protected; `true` |
@@ -63,17 +63,18 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `OnBackdropTap()` | `onIonBackdropTap` | protected; dismisses with `OverlayRoles.Backdrop` |
 | `OverlayRoles.Backdrop`, `.Gesture`, `.IsCancel()` | `BACKDROP`, `GESTURE`, `isCancel` | `Gesture` skips the leave animation |
 
-Per-control events (`IonAlertDidPresent` and the rest), controllers, `isOpen`, `trigger` and inline overlays are each overlay's
+Per-control events (each overlay adds its own `Ion<Name>WillPresent`, `Ion<Name>DidPresent`, `Ion<Name>WillDismiss` and
+`Ion<Name>DidDismiss`, as `ionAlertWillPresent` → `IonAlertWillPresent`, raised with the base's generic ones), controllers, `isOpen`, `trigger` and inline overlays are each overlay's
 issue: see [PLAN.md](PLAN.md#deferred).
 
 ## What it does, in short
 
 - **Where**: in a panel of Avonic's in the `TopLevel`'s `OverlayLayer`, the window's size, below Avalonia's popups. A top level
   without one (a template with no `VisualLayerManager`) throws. `ZIndex` is the base plus a counter from 1, given at each present.
-- **Present**: blurs the focused element (unless `StealsFocus` is false), `IonWillPresent`, shows the overlay and plays the enter
-  animation, with a duration of 0 if `Animated` or `AvonicConfig.Animated` is false, `IonDidPresent`, then focuses the overlay with
+- **Present**: blurs the focused element (unless `StealsFocus` is false), `WillPresent`, shows the overlay and plays the enter
+  animation, with a duration of 0 if `Animated` or `AvonicConfig.Animated` is false, `DidPresent`, then focuses the overlay with
   `KeyboardClose`, unless focus is already inside.
-- **Dismiss**: not hit-testable, `IonWillDismiss`, the leave animation (not for `gesture`), `IonDidDismiss`, every animation it
+- **Dismiss**: not hit-testable, `WillDismiss`, the leave animation (not for `gesture`), `DidDismiss`, every animation it
   played destroyed, hidden and removed; focus given back to what had it at present, if nothing has it now.
 - **Top overlay**: the last presented that's showing. Escape and `TopLevel.BackRequested` (Android's back, Alt+Left, the mouse's
   back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. An Escape a
