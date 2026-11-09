@@ -204,8 +204,7 @@ public class AvonicSkeletonText : TemplatedControl
 
         if (!IsEffectivelyVisible)
         {
-            // display: none stops it, and showing it starts it again from 0
-            StopFrames();
+            // display: none stops it: this frame requests no other. Showing it starts it again from 0.
             WaitUntilShown();
             return;
         }
