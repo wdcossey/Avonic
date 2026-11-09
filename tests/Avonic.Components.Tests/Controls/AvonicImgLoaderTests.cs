@@ -67,6 +67,9 @@ public class AvonicImgLoaderTests
         Assert.Equal(new PixelSize(8, 6), Load("data:image/png;base64," + base64).PixelSize);
         Assert.Equal(new PixelSize(8, 6), Load("DATA:image/png;BASE64," + base64).PixelSize);
         Fails("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>");
+
+        // Without ;base64 the text is the bytes, as a browser reads it, so base64 text there isn't a picture
+        Fails("data:image/png," + base64);
         Fails("data:image/png;base64");
     }
 
@@ -157,8 +160,9 @@ public class AvonicImgLoaderTests
                     }
 
                     var found = requestLine.Split(' ') is [_, "/picture.png", ..];
-                    var body = found ? png : Encoding.ASCII.GetBytes("not found");
-                    var head = $"HTTP/1.1 {(found ? "200 OK" : "404 Not Found")}\r\nContent-Type: {(found ? "image/png" : "text/plain")}\r\n" +
+                    // A 404 with a picture in it, so that only its status can fail it
+                    var body = png;
+                    var head = $"HTTP/1.1 {(found ? "200 OK" : "404 Not Found")}\r\nContent-Type: image/png\r\n" +
                                $"Content-Length: {body.Length}\r\nConnection: close\r\n\r\n";
                     await stream.WriteAsync(Encoding.ASCII.GetBytes(head));
                     await stream.WriteAsync(body);

@@ -36,11 +36,6 @@ internal static class ImgLoader
 
     private static async Task<byte[]> ReadAsync(string src, CancellationToken cancellationToken)
     {
-        if (src.Length == 0)
-        {
-            throw new ArgumentException("An empty src loads nothing, as in a browser.", nameof(src));
-        }
-
         if (src.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
         {
             var comma = src.IndexOf(',');
@@ -79,6 +74,7 @@ internal static class ImgLoader
             }
         }
 
-        return await File.ReadAllBytesAsync(Path.GetFullPath(src), cancellationToken).ConfigureAwait(false);
+        // A path, relative to the working directory. An empty one throws, as Chromium fails src=""
+        return await File.ReadAllBytesAsync(src, cancellationToken).ConfigureAwait(false);
     }
 }

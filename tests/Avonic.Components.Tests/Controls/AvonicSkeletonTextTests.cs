@@ -77,6 +77,17 @@ public class AvonicSkeletonTextTests
         Assert.Equal(36, page.Children[2].Bounds.Y);
     });
 
+    [AvaloniaFact]
+    public void B1_In_A_Taller_Box_It_Stays_10_High_At_The_Top() => InstalledTheme.Run(_ =>
+    {
+        var skeleton = new AvonicSkeletonText();
+        var tall = new Panel { MinHeight = 50, Children = { skeleton } };
+        using var scene = Show(Page(tall));
+
+        // A block with height auto: at the top, as in a div that something else makes taller
+        Assert.Equal(new Rect(0, 4, 358, 10), skeleton.Bounds);
+    });
+
     // ── 2. height: inherit ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

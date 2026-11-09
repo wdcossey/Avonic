@@ -277,6 +277,21 @@ public class AvonicImgTests
         Assert.Equal(Colors.White, Frames.PixelAt(frame, 50, 170));
     });
 
+    [AvaloniaFact]
+    public void B7_In_A_Taller_Box_It_Is_At_The_Top_As_Tall_As_The_Picture()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        using var scene = new Scene(Page(new Panel { MinHeight = 400, Children = { img } }));
+        Layout(scene);
+        loader.Finish(0, 300, 200);
+        Layout(scene);
+
+        // A block with height auto, at the top of a div that something else makes taller
+        Assert.Equal(0, img.Bounds.Y);
+        Assert.Equal(238.67, img.Bounds.Height, 0.5);
+    }
+
     // ── 8. Before and while loading ──────────────────────────────────────────────────────────
 
     [AvaloniaFact]
