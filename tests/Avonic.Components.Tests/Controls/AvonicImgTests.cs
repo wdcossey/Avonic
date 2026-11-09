@@ -535,7 +535,9 @@ public class AvonicImgTests
         var late = TestPicture.Create(300, 200);
         // From another thread, as a real fetch finishes, so that its continuation waits for the UI thread. A thread of its own,
         // as Task.Wait can run a task that hasn't started inline, here, which would run the continuation at once
-        var finisher = new Thread(() => loader.Requests[0].Completion.SetResult(late));
+        // Taken here, as an exception on that thread would end the test run, not fail the test
+        var completion = Assert.Single(loader.Requests).Completion;
+        var finisher = new Thread(() => completion.TrySetResult(late));
         finisher.Start();
         finisher.Join();
         img.Src = "b.png";
