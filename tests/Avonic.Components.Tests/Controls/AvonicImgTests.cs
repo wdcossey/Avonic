@@ -93,6 +93,22 @@ public class AvonicImgTests
         Assert.Same(img.Picture, Part<Image>(img, "PART_Image").Source);
     }
 
+    [AvaloniaFact]
+    public void B1_A_Src_Given_To_A_Laid_Out_Image_Loads_With_Nothing_Else_Asking_For_A_Layout()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg();
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+
+        // Only the dispatcher's own work, as in an app where nothing else changes: the observer's first callback still comes
+        img.Src = "a.png";
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Single(loader.Requests);
+    }
+
     // ── 2. The viewport's edge, in a scroller, with no margin ────────────────────────────────
 
     [AvaloniaTheory]
