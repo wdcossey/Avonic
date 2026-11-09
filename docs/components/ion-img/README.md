@@ -62,6 +62,27 @@ a `Height` or an avatar's or a thumbnail's, so that the broken-image box fills i
 
 The icon's shape is path data in the theme, `Avonic.Img.Md.BrokenImageIcon`, 16 × 16.
 
+### Replacing the broken-image icon
+
+Avonic ships its own drawing and no other artwork for this, so a different icon is the app's to choose. The theme draws
+`Avonic.Img.Md.BrokenImageIcon` as a 1 px outline at its own size. A filled icon, drawn on a grid of any size, needs one
+style in the app, which beats the theme. For example, ionicons' `alert-circle`, from `node_modules/ionicons/dist/svg/alert-circle.svg`:
+
+```xml
+<Style Selector="c|AvonicImg /template/ Path.broken-image"
+       xmlns:c="using:Avonic.Components.Controls">
+  <Setter Property="Data" Value="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48m0 319.91a20 20 0 1 1 20-20 20 20 0 0 1-20 20m21.72-201.15-5.74 122a16 16 0 0 1-32 0l-5.74-121.94v-.05a21.74 21.74 0 1 1 43.44 0Z" />
+  <Setter Property="Fill" Value="{DynamicResource Avonic.Img.BrokenImageBrush}" />
+  <Setter Property="Stroke" Value="{x:Null}" />
+  <Setter Property="Stretch" Value="Uniform" />
+</Style>
+```
+
+`Stretch="Uniform"` scales the icon's grid (512 here) into the 16 × 16 space, and the brush keeps it in the danger colour. Any
+single-colour icon made of filled paths works the same way, such as Carbon's `no-image` (32 × 32, Apache-2.0); both were
+checked in a headless frame. An outline ionicon, such as `alert-circle-outline`, doesn't: its lines are 32-unit strokes on the
+512 grid, which a 1 px pen at 16 px can't reproduce, so use its filled variant. It costs the app one global style.
+
 ## Behaviours
 
 Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
