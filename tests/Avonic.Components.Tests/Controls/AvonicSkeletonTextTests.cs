@@ -377,6 +377,20 @@ public class AvonicSkeletonTextTests
     // ── 10. Frames ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
+    public void B10_Removed_While_Hidden_It_Stops_Watching() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var skeleton = new AvonicSkeletonText { Animated = true };
+        var wrap = new Panel { IsVisible = false, Children = { skeleton } };
+        using var scene = Show(Page(wrap));
+        Assert.True(skeleton.IsWaitingUntilShown);
+
+        // Out of the document, what was around it holds nothing of it.
+        wrap.Children.Remove(skeleton);
+        Assert.False(skeleton.IsWaitingUntilShown);
+    });
+
+    [AvaloniaFact]
     public void B10_Detaching_Stops_The_Frames_And_Attaching_Restarts_The_Band() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();

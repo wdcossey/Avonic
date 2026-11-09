@@ -89,6 +89,9 @@ public class AvonicSkeletonText : TemplatedControl
     /// <summary>Whether a frame is requested: only while the band moves.</summary>
     internal bool IsFrameLoopRunning => _frame is not null;
 
+    /// <summary>Whether it waits for something hidden in its chain to show.</summary>
+    internal bool IsWaitingUntilShown => _hiddenChain.IsWaiting;
+
     /// <summary>Where the gradient's tile starts, in the host's space, as <c>background-position</c> puts it now.</summary>
     internal double ShimmerOffset { get; private set; }
 

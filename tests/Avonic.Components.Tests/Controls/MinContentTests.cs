@@ -182,19 +182,14 @@ public class MinContentTests
     }
 
     [AvaloniaFact]
-    public void A_Wrapping_Row_Leaves_Out_A_Hidden_Column_It_Did_Not_Measure()
+    public void Something_With_Nothing_Inside_Keeps_Its_Size()
     {
-        var hidden = Text("cccccccccccc dd");
-        var container = new ContentPresenter { Content = hidden };
-        var row = new RowPanel { Children = { Text("aaaa bb"), container } };
+        // Nothing in it can wrap, so it can't shrink: a replaced element, or an empty box with a minimum.
+        var empty = new Border { MinWidth = 30, Height = 10 };
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Children = { Text("aaaa bb"), empty } };
         using var scene = OneLine(row);
-        Assert.True(container.DesiredSize.Width > Alone("cccccccccccc"));
 
-        // display: none, as a column an ItemTemplate hid in its container is. The row skips it, so its size is the old one.
-        hidden.IsVisible = false;
-        row.InvalidateMeasure();
-        row.Measure(Size.Infinity);
-
-        Assert.Equal(Alone("aaaa"), MinContent.Of(row), 1d);
+        Assert.Equal(30, MinContent.Of(empty));
+        Assert.Equal(Alone("aaaa") + 30, MinContent.Of(row), 1d);
     }
 }

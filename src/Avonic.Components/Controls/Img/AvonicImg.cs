@@ -122,6 +122,9 @@ public class AvonicImg : TemplatedControl
     /// chain, and checks again after the layout that follows.
     /// </summary>
     private readonly HiddenChainWatcher _hiddenChain;
+
+    /// <summary>Whether it waits for something hidden in its chain to show.</summary>
+    internal bool IsWaitingUntilShown => _hiddenChain.IsWaiting;
     private bool _checkAfterLayout;
     private bool _inCallback;
 

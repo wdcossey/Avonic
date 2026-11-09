@@ -145,6 +145,9 @@ public class AvonicProgressBar : TemplatedControl
     /// <summary>Whether a frame is requested: only while something moves.</summary>
     internal bool IsFrameLoopRunning => _frame is not null;
 
+    /// <summary>Whether it waits for something hidden in its chain to show.</summary>
+    internal bool IsWaitingUntilShown => _hiddenChain.IsWaiting;
+
     /// <summary>Whether the bar is drawn mirrored: Ionic's <c>progress-bar-reversed</c>.</summary>
     internal bool IsEffectivelyReversed => FlowDirection == FlowDirection.RightToLeft ? !Reversed : Reversed;
 

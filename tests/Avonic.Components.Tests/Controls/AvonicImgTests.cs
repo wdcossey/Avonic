@@ -247,6 +247,25 @@ public class AvonicImgTests
         Assert.Single(loader.Requests);
     }
 
+    [AvaloniaFact]
+    public void B4_Removed_While_Hidden_It_Stops_Watching()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        var hidden = new Panel { IsVisible = false, Children = { img } };
+        var page = Page(hidden);
+        using var scene = new Scene(page);
+        Layout(scene);
+        Assert.True(img.IsWaitingUntilShown);
+
+        // Out of the document, showing what was around it loads nothing, and holds nothing of it.
+        hidden.Children.Remove(img);
+        Assert.False(img.IsWaitingUntilShown);
+        hidden.IsVisible = true;
+        Layout(scene);
+        Assert.Empty(loader.Requests);
+    }
+
     // ── 5. Detached before it loaded ─────────────────────────────────────────────────────────
 
     [AvaloniaFact]
