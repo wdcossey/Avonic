@@ -48,7 +48,7 @@ number.
 | 7 | Size | 358 × 238.66, contained and centred in a box of its own size, at the top of a taller one | match. 239 at a scale of 1, as Avalonia rounds layout to whole pixels |
 | 8 | Before and while loading | alt text, 19 high; with no alt, 0; nothing while a first picture loads | match, without the icon |
 | 9 | Failure | `ionError`, no `ionImgDidLoad`, the alt text | match. A failure with no alt is 0 high here, where Chromium draws a 24 high grey box: a deliberate difference |
-| 10 | A change of `src` | `ionImgWillLoad`; the old picture stays until the new one loads | match, and the alt text when the new one fails |
+| 10 | A change of `src` | `ionImgWillLoad`; the old picture stays until the new one loads; one set by an `ionImgWillLoad` handler is dropped | match, and the alt text when the new one fails |
 | 11 | Two changes in a row | only the last one's `ionImgDidLoad` | match, and the first request is cancelled |
 | 12 | `src` to `undefined`, or none at first | nothing; the picture stays | match |
 | 13 | Automation | `<img alt>`: an image named by `alt`; `alt=""` is decorative | match, from the HTML spec, not measured |

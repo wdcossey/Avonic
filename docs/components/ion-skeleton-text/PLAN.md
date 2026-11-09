@@ -59,6 +59,7 @@ below. `animated` sweeps a lighter band across it, once a second. In an avatar o
 | Global `animated: false` at start | No `skeleton-text-animated`. `config.set('animated', true)` later: still none, until `animated` changes: false then true gives it. `config.set('animated', false)` then removing it and appending it again: it keeps the class. So the config is read when it renders, as the mapping row for global config says: the first attach and each change of `animated` |
 | `in-media` | Moved out of a thumbnail: keeps `in-media` (and is 390 × 10 with no margin). One appended outside and moved into a thumbnail: no `in-media`. So it's read at render too |
 | Animations | One, `shimmer`, 1000 ms |
+| Right to left | With `dir="rtl"`, at 250 ms, the same pixels from the left as left to right: `background-position` and `to right` are physical |
 
 ## Behaviours
 
@@ -70,7 +71,7 @@ Each becomes a test in `AvonicSkeletonTextTests`.
 | 2 | A parent with a height gives it that height; its own `Height` and `Width` win | `height: inherit`; measured `s3`, `s8`, `s10` |
 | 3 | Background `rgba(text, 0.065)`; `BackgroundRgb` changes the colour; `Background` replaces it | `--background`, `--background-rgb`; measured |
 | 4 | Radius 0, or the parent's; `BorderRadius` sets it, a percentage of its own size included | `border-radius: var(--border-radius, inherit)`; measured `s4`, `s5`, `av` |
-| 5 | `Animated`: the band moves left to right, 800 px a second, linear, from −400 at the start, in the `BackgroundRgb` colour; `Background` is ignored | `:host(.skeleton-text-animated)`, `@keyframes shimmer`; measured at 0, 250, 500 and 750 ms |
+| 5 | `Animated`: the band moves left to right, 800 px a second, linear, from −400 at the start, in the `BackgroundRgb` colour, in right-to-left too; `Background` is ignored | `:host(.skeleton-text-animated)`, `@keyframes shimmer`; measured at 0, 250, 500 and 750 ms |
 | 6 | `AvonicConfig.Animated` off when it first attaches, or when `Animated` changes, keeps it still; turning the config on later changes nothing until `Animated` changes | `config.getBoolean('animated', true)` in `render()`; measured |
 | 7 | In an `AvonicAvatar` or `AvonicThumbnail`, at any depth, when it first attaches: no margin, and it fills the box, a circle in an avatar. Moved later, it keeps what it had | `:host(.in-media)`, `hostContext`; measured |
 | 8 | It raises `IonStyle` `{ skeleton-text: true }` once, before it first renders, so an item clips its label | `componentWillLoad`; measured |
@@ -92,7 +93,9 @@ Each becomes a test in `AvonicSkeletonTextTests`.
 part, `PART_Shimmer`, as a `LinearGradientBrush` from 0 to 800 in absolute units, repeating, which is `background-size: 800px`
 and `background-repeat: repeat`. The part is 800 wider than the host, and the control moves it with a `RenderTransform` from
 `AvonicConfig`'s clock, so that the tile's origin is at `−400 + 800 t` modulo 800, as the keyframes put it. Nothing is
-re-measured by a frame. The part's parent clips to the host's corners. The 800, the keyframes and the second are constants in
+re-measured by a frame. The part's parent clips to the host's corners. The part is left to right whatever the app's direction,
+as the gradient and its position are physical in CSS, and in right-to-left its transform moves it the other way, as Avalonia lays
+it out from the right and mirrors its transform. The 800, the keyframes and the second are constants in
 the control, `ShimmerTile`, `ShimmerFrom` and `ShimmerDuration`; the gradient's stops and alphas are the theme's.
 
 The frames follow `AvonicProgressBar`'s: one is requested only while it moves, and the time is measured from when it started.
@@ -116,7 +119,8 @@ the parent's.
 
 The 10 px line, the 4 px margins, the gradient's stops (8 %, 18 %, 33 %) and alphas (0.065, 0.135), and the 800 px tile have no
 variable, so they're literals in the theme. `AvonicSkeletonText.Rgba`, a converter on the control, makes `rgba(var(--a,
-var(--b)), n)` from the keys: the first that's set, at the alpha in its parameter.
+var(--b)), n)` from the keys: the first that's set, a `Color` or a solid brush's colour, at the alpha in its parameter.
+`AvonicSkeletonText.BackgroundOrRgba` gives the `Background` key if it's set, and that otherwise.
 
 ## Extensions
 

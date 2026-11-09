@@ -65,6 +65,7 @@ its own: `display: block`, the picture as wide as its parent, and as tall as its
 | Two changes in a row | Two `ionImgWillLoad`s, and only the last one's `ionImgDidLoad`: the first request's result is dropped |
 | `src` set to `undefined` | Nothing: no event, and the picture stays |
 | The same `src` again | Nothing |
+| A `src` set by an `ionImgWillLoad` handler | Dropped: one request, for the first, and its `ionImgDidLoad`. `load()` raises the event, the watcher starts a new observer, and `removeIO()` then disconnects it |
 | `src=""` | `ionImgWillLoad`, then `ionError` (17 ms later) |
 | Not an image, or a 404 | `ionError` |
 
@@ -83,14 +84,14 @@ Each becomes a test in `AvonicImgTests`.
 | 7 | Loaded: as wide as its parent and as tall as the picture's aspect ratio, 358 × 238.66; in a box of its own size, contained and centred | `img.css`; measured |
 | 8 | No picture yet, or none: the alt text in the inherited font and colour, 19 high at 16 px; with no `Alt`, nothing, 0 high. Loading a first picture: nothing, 0 high | Chromium's `<img>`; measured |
 | 9 | A failure (a missing file, not an image, an empty `Src`, a 404) raises `IonError` and no `IonImgDidLoad`, and shows the alt text | `onError`; measured |
-| 10 | A change of `Src` watches again: `IonImgWillLoad`, the old picture stays until the new one is shown, then `IonImgDidLoad`; or `IonError` and the alt text | `srcChanged`; measured |
+| 10 | A change of `Src` watches again: `IonImgWillLoad`, the old picture stays until the new one is shown, then `IonImgDidLoad`; or `IonError` and the alt text. The old picture is freed. One set by an `IonImgWillLoad` handler is dropped, and a layout a handler causes loads nothing more | `srcChanged`, `load()` before `removeIO()`; measured |
 | 11 | Two changes in a row: only the last one's result is shown or raised | measured |
 | 12 | `Src` set to null after a picture: nothing happens, and the picture stays. Null at first: no event, until one is set | `if (this.src === undefined) return`; measured |
 | 13 | Automation: an `Image`, named by `Alt` | `<img alt>` |
-| 14 | In an `AvonicAvatar` or `AvonicThumbnail`: fills it, covers it, and is cut to its radius | `::slotted(ion-img)` in `avatar.md.css` and `thumbnail.css` |
+| 14 | In an `AvonicAvatar` or `AvonicThumbnail`: fills it, covers it, and is cut to its radius, whose corners are physical in right-to-left | `::slotted(ion-img)` in `avatar.md.css` and `thumbnail.css` |
 | 15 | The events bubble | `bubbles: true` |
 | 16 | The loader: a file path, a `file:` URI, a `data:` URI in base64, an `avares:` asset and `http:` (from a server on the loopback) each load; anything else, or a picture that doesn't decode, fails | Avonic's own: see "Loading" |
-| 17 | The picture is decoded off the UI thread | `decoding="async"` |
+| 17 | The picture is read and decoded off the UI thread | `decoding="async"` |
 
 ## Design
 
@@ -115,6 +116,10 @@ Three differences from an observer have to be made up for:
 
 The intersection counts edges, as `isIntersecting` does: `viewport.X ≤ width`, `0 ≤ viewport.Right`, and the same down.
 
+The callback calls `load()` and then `removeIO()`, as Ionic does, so a `Src` that an `IonImgWillLoad` handler sets starts a watch
+that `removeIO()` ends, as measured. Where a handler causes a layout, Avalonia would call back again during the callback, which an
+observer never does, so the control ignores a viewport change while it's in its own callback.
+
 ### Loading
 
 Avalonia has no loader for an `http(s)` `src`, and the conservative choice is no new package, as a `.csproj` is a shared file.
@@ -122,14 +127,14 @@ Avalonia has no loader for an `http(s)` `src`, and the conservative choice is no
 
 | `Src` | How |
 |---|---|
-| `http:`, `https:` | One shared `HttpClient`; a status that isn't success fails |
+| `http:`, `https:` | One shared `HttpClient`, which sends a `User-Agent` and an `Accept` for pictures, as a browser does, since some servers refuse a request without one; a status that isn't success fails |
 | `data:…;base64,…` | Decoded from the URI. Not base64: fails |
 | `avares:` | `AssetLoader.Open` |
 | `file:`, or anything that isn't an absolute URI | A file, relative to the working directory |
 | `""`, or any other scheme | Fails, as Chromium fails `src=""` |
 
-The bytes are decoded into a `Bitmap` on the thread pool, as `decoding="async"` does it off the main thread, and the result
-comes back to the UI thread. A newer `Src` drops an older result. Whatever Avalonia's `Bitmap` decodes loads: PNG, JPEG, WebP,
+The bytes are read and decoded into a `Bitmap` on the thread pool, as `decoding="async"` does it off the main thread, and the
+result comes back to the UI thread. A newer `Src` drops an older result, and a picture that's replaced is disposed. Whatever Avalonia's `Bitmap` decodes loads: PNG, JPEG, WebP,
 GIF's first frame, BMP. SVG doesn't, so it fails: see "Deliberate differences".
 
 The loader is `AvonicImg.Loader`, an internal `Func<string, CancellationToken, Task<Bitmap>>` on the control, in its own folder,
@@ -155,7 +160,8 @@ template has `PART_Image` and a `TextBlock` for the alt text, and the control sh
 `::slotted(ion-img)` is the avatar's and the thumbnail's, so it would go in a `Styles/` file, but the style budget is at its limit,
 and those two rules would add two alternatives that every element in an app pays for. So the control works out `:in-avatar` and
 `:in-thumbnail` from its parent when it's attached, as `::slotted` matches a direct child, and its `ControlTheme` gives it the
-cover, the fill and the clip there, at no cost to anything else. A theme rule also loses to an app's style, as `::slotted` loses
+cover, the fill and the clip there, at no cost to anything else. The clip is on `PART_Image`, which Avalonia doesn't mirror in
+right-to-left, so a radius that isn't the same at every corner stays where CSS puts it. A theme rule also loses to an app's style, as `::slotted` loses
 to an outer stylesheet.
 
 ### Resource keys

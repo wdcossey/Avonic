@@ -21,7 +21,7 @@
         <Setter Property="Height" Value="{Binding $parent[Control].Height}" />
         <!-- background: var(background), which is rgba(var(background-rgb, var(ion-text-color-rgb)), 0.065) -->
         <Setter Property="Background">
-            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.065">
+            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.BackgroundOrRgba}" ConverterParameter="0.065">
                 <DynamicResource ResourceKey="Avonic.SkeletonText.Background" />
                 <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
                 <DynamicResource ResourceKey="Avonic.TextColor" />

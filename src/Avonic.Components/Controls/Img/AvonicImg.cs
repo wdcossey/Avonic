@@ -112,6 +112,7 @@ public class AvonicImg : TemplatedControl
     private Rect? _viewport;
     private readonly List<Visual> _hiddenBy = [];
     private bool _checkAfterLayout;
+    private bool _inCallback;
 
     /// <summary>The picture shown, which stays while another loads, as an <c>&lt;img&gt;</c>'s does.</summary>
     private Bitmap? _bitmap;
@@ -263,10 +264,15 @@ public class AvonicImg : TemplatedControl
         Check();
     }
 
-    /// <summary>The observer's callback: if it intersects now, <c>load()</c> and <c>removeIO()</c>.</summary>
+    /// <summary>
+    /// The observer's callback: if it intersects now, <c>load()</c> and <c>removeIO()</c>, in that order, as Ionic has them. So a
+    /// <see cref="Src"/> set by an <see cref="IonImgWillLoad"/> handler starts a watch that <c>removeIO()</c> then ends, and only
+    /// the first loads, as measured in Chromium. A layout that a handler causes doesn't come back in here, as no observer calls
+    /// back during its own callback.
+    /// </summary>
     private void Check()
     {
-        if (!_watching || !_attached || _viewport is not { } viewport)
+        if (_inCallback || !_watching || !_attached || _viewport is not { } viewport)
         {
             return;
         }
@@ -280,7 +286,16 @@ public class AvonicImg : TemplatedControl
 
         if (Intersects(viewport, Bounds.Size))
         {
-            Load();
+            _inCallback = true;
+            try
+            {
+                Load();
+            }
+            finally
+            {
+                _inCallback = false;
+            }
+
             RemoveIO();
         }
     }
@@ -353,14 +368,14 @@ public class AvonicImg : TemplatedControl
 
         if (src is null)
         {
-            _bitmap = null;
+            Show(null);
         }
 
         _loading = src is not null;
         UpdateParts();
         RaiseEvent(new RoutedEventArgs(IonImgWillLoadEvent, this));
 
-        // After the event, as a fetch can finish at once, and a handler can have set another src, which has started its own
+        // After the event, as a fetch can finish at once. A src a handler sets doesn't start one: see Check.
         if (src is not null && generation == _generation)
         {
             _cancel = new CancellationTokenSource();
@@ -393,9 +408,20 @@ public class AvonicImg : TemplatedControl
 
         _loading = false;
         _cancel = null;
+        Show(bitmap);
+        RaiseEvent(new RoutedEventArgs(bitmap is null ? IonErrorEvent : IonImgDidLoadEvent, this));
+    }
+
+    /// <summary>Shows a picture, or none, and frees the one it replaces, which nothing else holds.</summary>
+    private void Show(Bitmap? bitmap)
+    {
+        var old = _bitmap;
         _bitmap = bitmap;
         UpdateParts();
-        RaiseEvent(new RoutedEventArgs(bitmap is null ? IonErrorEvent : IonImgDidLoadEvent, this));
+        if (old is not null && !ReferenceEquals(old, bitmap))
+        {
+            old.Dispose();
+        }
     }
 
     /// <summary>

@@ -25,18 +25,13 @@ public partial class ImgPage : UserControl
     {
         InitializeComponent();
 
-        First.Src = DataUri(300, 200, 0);
-        InAvatar.Src = DataUri(300, 200, 1);
-        InThumbnail.Src = DataUri(300, 200, 2);
-
-        var file = Path.Combine(Path.GetTempPath(), "avonic-sample-img.png");
-        File.WriteAllBytes(file, Png(120, 120, 3));
-        FromFile.Src = file;
-
         for (var i = 0; i < 20; i++)
         {
-            More.Children.Add(new AvonicImg { Src = DataUri(300, 150, i), Alt = $"Picture {i + 1}", Tag = $"picture {i + 1}" });
+            More.Children.Add(new AvonicImg { Alt = $"Picture {i + 1}", Tag = $"picture {i + 1}" });
         }
+
+        // The pictures are drawn and encoded off the UI thread, so that the page opens at once, with the alt texts until then
+        _ = DrawPicturesAsync();
 
         Page.AddHandler(AvonicImg.IonImgWillLoadEvent, (_, e) => Say(e, "starts to load"));
         Page.AddHandler(AvonicImg.IonImgDidLoadEvent, (_, e) =>
@@ -45,6 +40,25 @@ public partial class ImgPage : UserControl
             Say(e, "has loaded");
         });
         Page.AddHandler(AvonicImg.IonErrorEvent, (_, e) => Say(e, "failed"));
+    }
+
+    private async Task DrawPicturesAsync()
+    {
+        var file = Path.Combine(Path.GetTempPath(), "avonic-sample-img.png");
+        var (first, avatar, thumbnail, more) = await Task.Run(() =>
+        {
+            File.WriteAllBytes(file, Png(120, 120, 3));
+            return (DataUri(300, 200, 0), DataUri(300, 200, 1), DataUri(300, 200, 2), Enumerable.Range(0, 20).Select(i => DataUri(300, 150, i)).ToList());
+        });
+
+        First.Src = first;
+        InAvatar.Src = avatar;
+        InThumbnail.Src = thumbnail;
+        FromFile.Src = file;
+        for (var i = 0; i < more.Count; i++)
+        {
+            ((AvonicImg)More.Children[i]).Src = more[i];
+        }
     }
 
     private void Say(RoutedEventArgs e, string what)

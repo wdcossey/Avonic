@@ -4,7 +4,7 @@ using Avalonia.Platform;
 namespace Avonic.Components.Controls;
 
 /// <summary>
-/// What a browser does for an <c>&lt;img src&gt;</c>, for <see cref="AvonicImg"/>: reads the bytes, and decodes them off the UI
+/// What a browser does for an <c>&lt;img src&gt;</c>, for <see cref="AvonicImg"/>: reads the bytes and decodes them, off the UI
 /// thread, as <c>decoding="async"</c> does. Anything that fails throws, which is <c>ionError</c>.
 /// </summary>
 /// <remarks>
@@ -19,15 +19,23 @@ namespace Avonic.Components.Controls;
 /// </remarks>
 internal static class ImgLoader
 {
-    private static readonly Lazy<HttpClient> s_http = new(() => new HttpClient());
-
-    public static async Task<Bitmap> LoadAsync(string src, CancellationToken cancellationToken)
+    /// <summary>
+    /// One client for every image, which says what it is and what it takes, as a browser does: some servers turn away a request
+    /// with no <c>User-Agent</c>.
+    /// </summary>
+    private static readonly Lazy<HttpClient> s_http = new(() =>
     {
-        var bytes = await ReadAsync(src, cancellationToken).ConfigureAwait(false);
-        return await Task.Run(() => Decode(bytes), cancellationToken).ConfigureAwait(false);
-    }
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("Avonic (+https://github.com/wdcossey/Avonic)");
+        client.DefaultRequestHeaders.Accept.ParseAdd("image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5");
+        return client;
+    });
 
-    /// <summary>Decodes the bytes, on the thread pool. Tests wrap it to see which thread it runs on.</summary>
+    /// <summary>Reads and decodes <paramref name="src"/> on the thread pool, so that nothing of it runs on the caller's thread.</summary>
+    public static Task<Bitmap> LoadAsync(string src, CancellationToken cancellationToken) =>
+        Task.Run(async () => Decode(await ReadAsync(src, cancellationToken).ConfigureAwait(false)), cancellationToken);
+
+    /// <summary>Decodes the bytes. Tests wrap it to see which thread it runs on.</summary>
     internal static Func<byte[], Bitmap> Decode { get; set; } = static bytes =>
     {
         using var stream = new MemoryStream(bytes, writable: false);

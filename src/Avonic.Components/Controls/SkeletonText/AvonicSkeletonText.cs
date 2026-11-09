@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -94,6 +95,10 @@ public class AvonicSkeletonText : TemplatedControl
             // The tile repeats every 800 px, so a part 800 wider than the host, moved left by up to 800, always covers it
             _shimmer.Margin = new Thickness(0, 0, -ShimmerTile, 0);
             _shimmer.RenderTransform = _shimmerTransform = new TranslateTransform();
+
+            // background-position and linear-gradient(to right) are physical: in right-to-left the band still runs from the
+            // left, so the part isn't mirrored
+            _shimmer.SetValue(FlowDirectionProperty, FlowDirection.LeftToRight, BindingPriority.Template);
         }
 
         Update();
@@ -129,7 +134,11 @@ public class AvonicSkeletonText : TemplatedControl
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == AnimatedProperty && _rendered)
+        if (change.Property == FlowDirectionProperty)
+        {
+            Update();
+        }
+        else if (change.Property == AnimatedProperty && _rendered)
         {
             // Stencil renders again: the config and the context are read again, and the class going and coming back
             // restarts the animation
@@ -201,9 +210,11 @@ public class AvonicSkeletonText : TemplatedControl
         ShimmerOffset = ShimmerFrom + (ShimmerTo - ShimmerFrom) * t;
         if (_shimmerTransform is not null)
         {
-            // The part starts at the host's left, so it's moved to the tile's place, less whole tiles, between −800 and 0
+            // The tile's place, less whole tiles. The part starts at the host's left and reaches 800 past its right, so it's
+            // moved back a tile. In right-to-left it's laid out from the right, reaching 800 past the left, and its transform
+            // moves it in the mirrored space, so it's moved the other way, from there.
             var offset = (ShimmerOffset % ShimmerTile + ShimmerTile) % ShimmerTile;
-            _shimmerTransform.X = offset - ShimmerTile;
+            _shimmerTransform.X = FlowDirection == FlowDirection.RightToLeft ? -offset : offset - ShimmerTile;
         }
 
         _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
@@ -254,11 +265,16 @@ public class AvonicSkeletonText : TemplatedControl
     // ── Converters for the theme ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>rgba(var(--a, var(--b)), n)</c>: the first value that's set, a <see cref="Color"/>, at the alpha in the
-    /// <c>ConverterParameter</c>, rounded to a byte as Chromium rounds it, for a <see cref="Color"/> or a brush. A brush that's
-    /// set before it, <c>--background</c>, is given as it is.
+    /// <c>rgba(var(--a, var(--b)), n)</c>: the first value that's set, a <see cref="Color"/> or a solid brush's colour, at the
+    /// alpha in the <c>ConverterParameter</c>, rounded to a byte as Chromium rounds it, as a <see cref="Color"/> or a brush.
     /// </summary>
     public static readonly IMultiValueConverter Rgba = new RgbaConverter();
+
+    /// <summary>
+    /// <c>background: var(--background)</c>, where <c>--background</c> is <c>rgba(var(--background-rgb, …), n)</c> unless it's
+    /// set: the first value, a brush, if it's set, or else <see cref="Rgba"/> of the others.
+    /// </summary>
+    public static readonly IMultiValueConverter BackgroundOrRgba = new BackgroundConverter();
 
     /// <summary>
     /// <c>border-radius: var(--border-radius, inherit)</c>: the values are the key, the parent's <see cref="CornerRadius"/>, the
@@ -270,23 +286,31 @@ public class AvonicSkeletonText : TemplatedControl
     private static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
 
+    private sealed class BackgroundConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
+            values.Count > 0 && IsSet(values[0])
+                ? values[0]
+                : Rgba.Convert(values.Skip(1).ToList(), targetType, parameter, culture);
+    }
+
     private sealed class RgbaConverter : IMultiValueConverter
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            var value = values.FirstOrDefault(IsSet);
-            if (value is IBrush brush)
+            var color = values.FirstOrDefault(IsSet) switch
             {
-                return brush;
-            }
-
-            if (value is not Color color)
+                Color value => value,
+                ISolidColorBrush brush => brush.Color,
+                _ => (Color?)null,
+            };
+            if (color is not { } rgb)
             {
                 return AvaloniaProperty.UnsetValue;
             }
 
             var alpha = parameter is null ? 1 : System.Convert.ToDouble(parameter, CultureInfo.InvariantCulture);
-            var result = Color.FromArgb((byte)Math.Round(Math.Clamp(alpha, 0, 1) * 255), color.R, color.G, color.B);
+            var result = Color.FromArgb((byte)Math.Round(Math.Clamp(alpha, 0, 1) * 255), rgb.R, rgb.G, rgb.B);
             return typeof(IBrush).IsAssignableFrom(targetType) ? new ImmutableSolidColorBrush(result) : result;
         }
     }

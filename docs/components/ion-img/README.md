@@ -65,7 +65,8 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **A failure** raises `IonError` and shows the alt text.
 - **A change of `Src`** loads again, with `IonImgWillLoad`, as soon as it's in view. Of two quick changes only the last one's
   picture shows. Set to null, it changes nothing, and the picture stays, as in Ionic.
-- **The picture is decoded off the UI thread,** as `decoding="async"` does.
+- **The picture is read and decoded off the UI thread,** as `decoding="async"` does, and a picture that's replaced is freed.
+- **A web request says what it is,** with a `User-Agent` and an `Accept` for pictures, as some servers refuse one that doesn't.
 
 ## Extensions
 

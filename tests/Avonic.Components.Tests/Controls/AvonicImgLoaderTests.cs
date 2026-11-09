@@ -138,7 +138,8 @@ public class AvonicImgLoaderTests
         }
     }
 
-    /// <summary>A server on the loopback that answers <c>/picture.png</c> with a PNG and anything else with a 404.</summary>
+    /// <summary>A server on the loopback that answers <c>/picture.png</c> with a PNG, anything else with a 404, and a request with no
+    /// <c>User-Agent</c> with a 403.</summary>
     private sealed class LoopbackServer : IDisposable
     {
         private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
@@ -155,14 +156,17 @@ public class AvonicImgLoaderTests
                     await using var stream = client.GetStream();
                     using var reader = new StreamReader(stream, Encoding.ASCII, leaveOpen: true);
                     var requestLine = await reader.ReadLineAsync() ?? "";
-                    while (!string.IsNullOrEmpty(await reader.ReadLineAsync()))
+                    var named = false;
+                    while (await reader.ReadLineAsync() is { Length: > 0 } header)
                     {
+                        named |= header.StartsWith("User-Agent:", StringComparison.OrdinalIgnoreCase);
                     }
 
-                    var found = requestLine.Split(' ') is [_, "/picture.png", ..];
+                    // As some servers do, a request that doesn't say what it is gets a 403
+                    var found = named && requestLine.Split(' ') is [_, "/picture.png", ..];
                     // A 404 with a picture in it, so that only its status can fail it
                     var body = png;
-                    var head = $"HTTP/1.1 {(found ? "200 OK" : "404 Not Found")}\r\nContent-Type: image/png\r\n" +
+                    var head = $"HTTP/1.1 {(found ? "200 OK" : named ? "404 Not Found" : "403 Forbidden")}\r\nContent-Type: image/png\r\n" +
                                $"Content-Length: {body.Length}\r\nConnection: close\r\n\r\n";
                     await stream.WriteAsync(Encoding.ASCII.GetBytes(head));
                     await stream.WriteAsync(body);

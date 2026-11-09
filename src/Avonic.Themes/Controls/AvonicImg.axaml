@@ -28,9 +28,15 @@
 
         <!-- ::slotted(ion-img) in avatar.md.css and thumbnail.css: border-radius: var(border-radius); width: 100%;
              height: 100%; object-fit: cover; overflow: hidden. Here, not in Styles/, as the control works out where it is: see
-             docs/components/ion-img/PLAN.md. UniformToFill is cover, cropped from the middle. -->
-        <Style Selector="^:in-avatar">
+             docs/components/ion-img/PLAN.md. UniformToFill is cover, cropped from the middle. The clip is on the Image, which
+             Avalonia doesn't mirror in right-to-left, so its corners are physical, as CSS's are. -->
+        <Style Selector="^:in-avatar, ^:in-thumbnail">
             <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:in-avatar /template/ Image#PART_Image, ^:in-thumbnail /template/ Image#PART_Image">
+            <Setter Property="Stretch" Value="UniformToFill" />
+        </Style>
+        <Style Selector="^:in-avatar /template/ Image#PART_Image">
             <Setter Property="Clip">
                 <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
                     <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
@@ -38,17 +44,13 @@
                 </MultiBinding>
             </Setter>
         </Style>
-        <Style Selector="^:in-thumbnail">
-            <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Style Selector="^:in-thumbnail /template/ Image#PART_Image">
             <Setter Property="Clip">
                 <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
                     <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />
                     <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
-        </Style>
-        <Style Selector="^:in-avatar /template/ Image#PART_Image, ^:in-thumbnail /template/ Image#PART_Image">
-            <Setter Property="Stretch" Value="UniformToFill" />
         </Style>
     </ControlTheme>
 

@@ -58,8 +58,9 @@ moves it with its `RenderTransform`, so a theme only paints it, in a tile 800 wi
 | [x] | `--border-radius` | `Avonic.SkeletonText.BorderRadius` | `CssUnset`: the parent's radius. A `CornerRadius`, a number or a CSS string such as `50%` |
 
 The 10 px line, the 4 px margins, and the band's stops (8 %, 18 %, 33 %), alphas (0.065, 0.135) and 800 px tile are literals in the
-theme, as Ionic has no variables for them. `AvonicSkeletonText.Rgba` and `AvonicSkeletonText.RadiusOrInherit` are the converters
-the theme uses for `rgba(var(…), n)` and `var(--border-radius, inherit)`.
+theme, as Ionic has no variables for them. `AvonicSkeletonText.Rgba`, `AvonicSkeletonText.BackgroundOrRgba` and
+`AvonicSkeletonText.RadiusOrInherit` are the converters the theme uses for `rgba(var(…), n)`, `var(--background)` and
+`var(--border-radius, inherit)`.
 
 ## Behaviours
 
@@ -67,7 +68,8 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 - **10 high, with 4 above and below, as wide as its parent,** whatever the font, or the height of a parent that has one, as
   `height: inherit` does.
-- **The shimmer** moves a lighter band across it, 800 px a second, from the same place on every bar that starts together.
+- **The shimmer** moves a lighter band across it, 800 px a second, from the same place on every bar that starts together, from
+  left to right in right-to-left too, as in CSS.
 - **`AvonicConfig.Animated` off keeps it still,** if it's off when the bar is first attached or when `Animated` changes, as
   Ionic reads `animated` from its config when it renders. Ionic's `animated` reaches skeleton text, so this one is read.
 - **In an avatar or a thumbnail,** at any depth, it fills the box with no margin, and takes the avatar's circle.

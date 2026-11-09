@@ -53,7 +53,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicSke
 | 2 | `height: inherit` | 50 in a parent 50 high; its own 100 × 30 | match, through the parent's `Height` |
 | 3 | Background | `rgba(0, 0, 0, 0.067)`; `--background-rgb` red; `--background` beats it | match, 17/255 on both |
 | 4 | Radius | 0; 12 from a parent with 12; `--border-radius: 6px` | match. 6 is drawn at 5 on a bar 10 high on both, and reported as 5 here, as `BorderRadius` clamps it |
-| 5 | The shimmer | the red channel at x 0, 32, 64, 100, 144, 200, 264, 300, 357 at four times; `--background` ignored | match within 1 |
+| 5 | The shimmer | the red channel at x 0, 32, 64, 100, 144, 200, 264, 300, 357 at four times, and in RTL at 250 ms; `--background` ignored | match within 1 |
 | 6 | The global config | read at render: the first attach and a change of `animated` | match |
 | 7 | In an avatar or a thumbnail | `in-media`: no margin, fills, the avatar's circle; read at render | match |
 | 8 | `ionStyle` | `{"skeleton-text":true}`, and the item's label clips | match, once |

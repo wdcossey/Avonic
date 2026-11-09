@@ -392,6 +392,56 @@ public class AvonicImgTests
         Assert.Equal(["willLoad", "didLoad", "willLoad", "didLoad"], events);
         Assert.Same(loader.Requests[1].Picture, img.Picture);
         Assert.Equal(358, img.Bounds.Height);
+
+        // The old picture is freed, and the new one is drawn
+        Assert.Throws<ObjectDisposedException>(() => ((WriteableBitmap)first!).Lock().Dispose());
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(TestPicture.Red, Frames.PixelAt(frame, 16 + 50, 16 + 50));
+        Assert.Equal(TestPicture.Yellow, Frames.PixelAt(frame, 16 + 300, 16 + 300));
+    }
+
+    [AvaloniaFact]
+    public void B10_A_Src_Set_By_A_WillLoad_Handler_Is_Dropped_And_The_First_Loads()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        var events = Record(img);
+        img.IonImgWillLoad += (_, _) =>
+        {
+            if (img.Src == "a.png")
+            {
+                img.Src = "b.png";
+            }
+        };
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+        Layout(scene);
+
+        // Measured: load() then removeIO(), which ends the watch the new src started, so the first one loads
+        Assert.Equal("a.png", Assert.Single(loader.Requests).Src);
+        Assert.False(img.IsWatching);
+        loader.Finish(0);
+        Assert.Equal(["willLoad", "didLoad"], events);
+    }
+
+    [AvaloniaFact]
+    public void B10_A_Layout_Caused_By_A_WillLoad_Handler_Loads_Nothing_More()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png", Alt = "Alt" };
+        var events = Record(img);
+        Scene? scene = null;
+        img.IonImgWillLoad += (_, _) =>
+        {
+            img.Margin = new Thickness(0, 1, 0, 0);
+            scene?.Window.UpdateLayout();
+        };
+        using (scene = new Scene(Page(img)))
+        {
+            Layout(scene);
+            Assert.Equal(["willLoad"], events);
+            Assert.Single(loader.Requests);
+        }
     }
 
     [AvaloniaFact]
@@ -568,6 +618,28 @@ public class AvonicImgTests
 
         // ::slotted is a direct child only: one inside a panel in a thumbnail is contained, 48 × 32, at the top
         Assert.Equal(new Size(48, 32), nested.Bounds.Size);
+    });
+
+    [AvaloniaFact]
+    public void B14_In_Right_To_Left_A_Round_Top_Left_Corner_Stays_At_The_Top_Left() => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        var thumbnail = new AvonicThumbnail { Content = img, VerticalAlignment = VerticalAlignment.Top };
+        var page = new Panel { Background = Brushes.White, FlowDirection = FlowDirection.RightToLeft, Children = { thumbnail } };
+        page.Resources["Avonic.Thumbnail.BorderRadius"] = "20px 0 0 0";
+        using var scene = new Scene(page, 390, 200);
+        Layout(scene);
+        loader.Finish(0, 300, 200);
+        Layout(scene);
+
+        // border-radius is physical: the round corner is at the top left in right-to-left too
+        var a = img.TranslatePoint(new Point(0, 0), scene.Window)!.Value;
+        var b = img.TranslatePoint(new Point(48, 0), scene.Window)!.Value;
+        var left = (int)Math.Min(a.X, b.X);
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, left + 1, 1));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, left + 46, 1));
     });
 
     // ── 15. Bubbling ─────────────────────────────────────────────────────────────────────────

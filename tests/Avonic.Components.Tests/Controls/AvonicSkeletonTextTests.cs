@@ -197,13 +197,33 @@ public class AvonicSkeletonTextTests
     });
 
     [AvaloniaFact]
+    public void B5_In_Right_To_Left_The_Band_Still_Runs_From_The_Left() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var skeleton = new AvonicSkeletonText { Animated = true, Height = 20 };
+        var page = Page(skeleton);
+        page.FlowDirection = FlowDirection.RightToLeft;
+        using var scene = Show(page);
+        clock.At(250);
+        skeleton.Tick();
+
+        // Measured in Chromium with dir=rtl at 250 ms: the same as left to right, from the left: background-position is physical
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        var y = (int)skeleton.TranslatePoint(new Point(0, 10), scene.Window)!.Value.Y;
+        var row = new[] { 0, 32, 64, 100, 300, 357 }.Select(x => (int)Frames.PixelAt(frame, 16 + x, y).R).ToArray();
+        Assert.All(row.Zip(new[] { 229, 234, 238, 238, 238, 238 }), pair => Assert.InRange(pair.First, pair.Second - 1, pair.Second + 1));
+    });
+
+    [AvaloniaFact]
     public void B5_Animated_It_Ignores_The_Background_Key_And_Reads_The_Rgb() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         var skeleton = new AvonicSkeletonText { Animated = true, Height = 20 };
         var panel = new Panel { Children = { skeleton } };
         panel.Resources["Avonic.SkeletonText.Background"] = new SolidColorBrush(Colors.Blue);
-        panel.Resources["Avonic.SkeletonText.BackgroundRgb"] = Color.FromRgb(255, 0, 0);
+        // As a brush, as most of Avonic's colour keys are: its colour is read
+        panel.Resources["Avonic.SkeletonText.BackgroundRgb"] = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         using var scene = Show(Page(panel));
         clock.At(500);
         skeleton.Tick();
