@@ -116,7 +116,8 @@ public class MinContentTests
     [AvaloniaFact]
     public void A_Hidden_Child_Takes_Nothing()
     {
-        var hidden = Text("cccccccccccc");
+        // display: none: not even its own minimum width.
+        var hidden = new Border { MinWidth = 50, Child = Text("cccccccccccc") };
         hidden.IsVisible = false;
         var row = new StackPanel { Orientation = Orientation.Horizontal, Children = { Text("aaaa bb"), hidden } };
         using var scene = OneLine(row);
