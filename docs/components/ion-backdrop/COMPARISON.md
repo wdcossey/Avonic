@@ -40,6 +40,9 @@ the default cursor when not tappable, transparent when not visible.
 - **`preventDefault()`** has nothing to prevent on a `div`, so nothing here does it.
 - **`touch-action: none`, `contain: strict`, `transform: translateZ(0)`**: no counterpart. An overlay isn't in a `ScrollViewer`, and
   the other two are hints to the browser's renderer.
+- **A `Tapped` handler on the backdrop itself** doesn't run with `StopPropagation`: Avalonia runs a class's handlers before an
+  instance's on the same element, so the backdrop has handled it first, where `stopPropagation()` leaves the target's own
+  listeners alone. Listen for `IonBackdropTap`, or add the handler with `handledEventsToo`.
 - **A second quick tap** is Avalonia's `DoubleTapped`, not `Tapped`, so a parent's `Tapped` handler hears one of two quick taps
   with `StopPropagation` false. `IonBackdropTap` comes for both, as `NativeButton` tracks the press itself.
 

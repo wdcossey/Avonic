@@ -426,6 +426,24 @@ public class AvonicAnimationTests
     }
 
     [AvaloniaFact]
+    public void A4_Playing_A_Running_Animation_Again_Does_Not_Rewind_It()
+    {
+        using var clock = new TestClock();
+        var (scene, element) = Stage();
+        using var _ = scene;
+        var animation = AvonicAnimation.Create().AddElement(element).FromTo("opacity", 0, 1).Duration(100);
+        var first = animation.Play();
+        At(clock, 48);
+
+        var second = animation.Play();
+        Near(0.48, element.Opacity);
+        At(clock, 64);
+        Near(0.64, element.Opacity);
+        At(clock, 112);
+        Assert.True(first.IsCompleted && second.IsCompleted);
+    }
+
+    [AvaloniaFact]
     public void A4_A_Duration_Set_While_Running_Applies_At_Once()
     {
         using var clock = new TestClock();

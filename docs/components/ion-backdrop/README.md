@@ -51,4 +51,6 @@ pseudoclasses `:backdrop-hide` (transparent) and `:backdrop-no-tappable` (the de
 
 - Opacity is blended one level of 255 differently from Chromium (253 against 252 at 0.01, 174 against 173 at 0.32). Measured in
   [COMPARISON.md](COMPARISON.md).
+- With `StopPropagation`, a `Tapped` handler on the backdrop itself needs `handledEventsToo`, as the backdrop's class handler runs
+  first. `IonBackdropTap` is the event to listen for.
 - Not tried in a real window.

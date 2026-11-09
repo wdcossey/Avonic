@@ -107,7 +107,7 @@ internal sealed class OverlayHost : Panel
     {
         if (e.Key == Key.Escape && GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
         {
-            _ = top.Dismiss(null, OverlayRoles.Backdrop);
+            top.DismissFromInput(OverlayRoles.Backdrop);
         }
     }
 
@@ -120,7 +120,7 @@ internal sealed class OverlayHost : Panel
         if (GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
         {
             e.Handled = true;
-            _ = top.Dismiss(null, OverlayRoles.Backdrop);
+            top.DismissFromInput(OverlayRoles.Backdrop);
         }
     }
 
@@ -152,7 +152,7 @@ internal sealed class OverlayHost : Panel
         }
         else if (IsInToast(target))
         {
-            FocusElementInOverlay(last.LastFocus, last, method);
+            FocusElementInContext(last.LastFocus, last, method);
         }
         else
         {
@@ -188,7 +188,7 @@ internal sealed class OverlayHost : Panel
         }
         else if (IsInToast(target))
         {
-            FocusElementInOverlay(last.LastFocus, last, method);
+            FocusElementInContext(last.LastFocus, last, method);
         }
         else
         {
@@ -203,7 +203,7 @@ internal sealed class OverlayHost : Panel
         }
     }
 
-    private IInputElement? Focused => _topLevel.FocusManager?.GetFocusedElement();
+    private IInputElement? Focused => AvonicOverlay.Focused(_topLevel);
 
     /// <summary>Ionic's <c>target.tagName === 'ION-TOAST'</c>: a toast's own content is retargeted to it by its shadow root.</summary>
     private static bool IsInToast(IInputElement target) =>
@@ -228,7 +228,7 @@ internal sealed class OverlayHost : Panel
     private static void FocusLastDescendant(Visual container, AvonicOverlay fallback, NavigationMethod method) =>
         FocusElementInContext(Focusables(container).LastOrDefault(), fallback, method);
 
-    /// <summary>Ionic <c>focusElementInContext</c>: the element, with its navigation method so a Tab wrap shows the ring, else the fallback.</summary>
+    /// <summary>Ionic <c>focusElementInContext</c>, and <c>focusElementInOverlay</c>, which is the same: the element, with its navigation method so a Tab wrap shows the ring, else the fallback.</summary>
     private static void FocusElementInContext(IInputElement? element, AvonicOverlay fallback, NavigationMethod method)
     {
         if (element is not null)
@@ -240,8 +240,4 @@ internal sealed class OverlayHost : Panel
             fallback.Focus();
         }
     }
-
-    /// <summary>Ionic <c>focusElementInOverlay</c>.</summary>
-    private static void FocusElementInOverlay(IInputElement? element, AvonicOverlay overlay, NavigationMethod method) =>
-        FocusElementInContext(element, overlay, method);
 }

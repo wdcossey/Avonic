@@ -391,6 +391,63 @@ public class AvonicOverlayTests
     }
 
     [AvaloniaFact]
+    public void O5_OnDidDismiss_Completes_Even_When_A_Handler_Has_Handled_The_Event()
+    {
+        using var stage = new Stage();
+        var overlay = new TestOverlay();
+        overlay.IonWillDismiss += (_, e) => e.Handled = true;
+        overlay.IonDidDismiss += (_, e) => e.Handled = true;
+        overlay.Present(stage.Window);
+        stage.At(200);
+        var will = overlay.OnWillDismiss();
+        var did = overlay.OnDidDismiss();
+
+        overlay.Dismiss("d", "r");
+        stage.At(400);
+        Assert.Equal(new OverlayEventDetail("d", "r"), will.Result);
+        Assert.Equal(new OverlayEventDetail("d", "r"), did.Result);
+    }
+
+    private sealed class ErrorSink : Avalonia.Logging.ILogSink
+    {
+        public List<string> Errors { get; } = [];
+
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Error;
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) => Errors.Add(messageTemplate);
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues) =>
+            Errors.Add(messageTemplate + string.Join(",", propertyValues));
+    }
+
+    [AvaloniaFact]
+    public void O10_A_Dismiss_From_Input_That_Fails_Is_Logged_As_Ionic_Logs_It()
+    {
+        using var stage = new Stage();
+        var overlay = new TestOverlay();
+        overlay.IonWillDismiss += (_, _) => throw new InvalidOperationException("an app's handler");
+        overlay.Present(stage.Window);
+        stage.At(200);
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            stage.Click(new Point(20, 20));
+            stage.At(400);
+            // The continuation runs on the thread pool.
+            SpinWait.SpinUntil(() => sink.Errors.Count > 0, TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+
+        Assert.Contains(sink.Errors, e => e.Contains("an app's handler", StringComparison.Ordinal));
+        Assert.Null(overlay.GetVisualParent());
+    }
+
+    [AvaloniaFact]
     public void O7_It_Cannot_Be_Hit_During_Its_Dismiss()
     {
         using var stage = new Stage();
@@ -875,7 +932,7 @@ public class AvonicOverlayTests
             nonPublic: true)!;
 
     [AvaloniaFact]
-    public void O15_Present_Uses_The_Applications_Top_Level()
+    public async Task O15_Present_Uses_The_Applications_Top_Level()
     {
         using var stage = new Stage();
         var desktop = DesktopLifetime();
@@ -886,7 +943,9 @@ public class AvonicOverlayTests
 
         // TestApp has no lifetime, so Present() has nowhere to go.
         Assert.Null(Application.Current!.ApplicationLifetime);
-        Assert.Throws<InvalidOperationException>(() => { _ = new TestOverlay().Present(); });
+        // In its task, as Present(TopLevel)'s failures are.
+        var present = new TestOverlay().Present();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => present);
     }
 
     [AvaloniaFact]

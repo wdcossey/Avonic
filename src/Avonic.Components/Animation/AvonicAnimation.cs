@@ -713,6 +713,12 @@ public sealed class AvonicAnimation
 
         internal void Play()
         {
+            // Web Animations' play() does nothing to an animation that's already playing.
+            if (_playing)
+            {
+                return;
+            }
+
             if (_holdTime >= EndTime && !double.IsInfinity(EndTime))
             {
                 _holdTime = 0;

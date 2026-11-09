@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Logging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
@@ -166,8 +167,10 @@ public abstract class AvonicOverlay : TemplatedControl
 
     /// <summary>Ionic <c>present()</c>, in the application's top level: a desktop's active window, else its main one; a single view's.</summary>
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
-    public Task Present() => Present(OverlayHost.TopLevelOf(Application.Current?.ApplicationLifetime) ?? throw new InvalidOperationException(
-        "There's no TopLevel to present the overlay in: the application has no desktop or single-view lifetime. Use Present(TopLevel)."));
+    public Task Present() => OverlayHost.TopLevelOf(Application.Current?.ApplicationLifetime) is { } topLevel
+        ? Present(topLevel)
+        : Task.FromException(new InvalidOperationException(
+            "There's no TopLevel to present the overlay in: the application has no desktop or single-view lifetime. Use Present(TopLevel)."));
 
     /// <summary>Ionic <c>present()</c>, in <paramref name="topLevel"/>. An Avonic extension, for an app with several windows.</summary>
     public async Task Present(TopLevel topLevel)
@@ -204,7 +207,18 @@ public abstract class AvonicOverlay : TemplatedControl
     public Task<OverlayEventDetail> OnDidDismiss() => NextEvent(IonDidDismissEvent);
 
     /// <summary>Ionic's <c>onIonBackdropTap</c>: an <see cref="AvonicBackdrop"/> in it was tapped.</summary>
-    protected virtual void OnBackdropTap() => _ = Dismiss(null, OverlayRoles.Backdrop);
+    protected virtual void OnBackdropTap() => DismissFromInput(OverlayRoles.Backdrop);
+
+    /// <summary>
+    /// A dismiss that input started, which nothing awaits: a backdrop tap, Escape, the back button. An exception in it is logged,
+    /// as Ionic's <c>dismiss</c> logs one with <c>printIonError</c>, rather than lost in a task no one reads.
+    /// </summary>
+    internal void DismissFromInput(string role) =>
+        Dismiss(null, role).ContinueWith(
+            task => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's dismiss failed: {Exception}", task.Exception!.InnerException),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted,
+            TaskScheduler.Default);
 
     private async Task PresentCore(TopLevel topLevel)
     {
@@ -335,7 +349,7 @@ public abstract class AvonicOverlay : TemplatedControl
         }
     }
 
-    private static IInputElement? Focused(TopLevel topLevel) => topLevel.FocusManager?.GetFocusedElement();
+    internal static IInputElement? Focused(TopLevel topLevel) => topLevel.FocusManager?.GetFocusedElement();
 
     private static void Blur(TopLevel topLevel) => (topLevel.FocusManager as FocusManager)?.Focus(null);
 
@@ -348,7 +362,8 @@ public abstract class AvonicOverlay : TemplatedControl
             RemoveHandler(routedEvent, handler!);
             next.TrySetResult(e.Detail);
         };
-        AddHandler(routedEvent, handler);
+        // Every handled one too: Ionic's listener hears the event whatever another did with it.
+        AddHandler(routedEvent, handler, RoutingStrategies.Bubble, handledEventsToo: true);
         return next.Task;
     }
 }
