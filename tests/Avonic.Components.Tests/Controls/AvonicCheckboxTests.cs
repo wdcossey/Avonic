@@ -123,10 +123,10 @@ public class AvonicCheckboxTests
     // ── B1: a click anywhere toggles once ──────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B1_A_Click_On_The_Box_Toggles_And_Raises_IonChange()
+    public void B1_A_Click_On_The_Box_Toggles_And_Raises_IonChange() => InstalledTheme.Run(_ =>
     {
         var box = new AvonicCheckbox { Content = "Label" };
-        using var scene = Plain(box);
+        using var scene = Themed(box);
         var changes = Changes(box);
 
         Click(scene, Centre(Box(box), scene));
@@ -140,7 +140,7 @@ public class AvonicCheckboxTests
         Assert.False(box.Checked);
         Assert.Equal(2, changes.Count);
         Assert.False(changes[1].Checked);
-    }
+    });
 
     [AvaloniaFact]
     public void B1_A_Click_On_The_Label_Toggles_Once()
@@ -241,6 +241,24 @@ public class AvonicCheckboxTests
         Click(scene, Centre(box, scene));
         Assert.True(model.Accepted);
 
+        model.Accepted = false;
+        Assert.False(box.Checked);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Click_Keeps_A_One_Way_Binding()
+    {
+        var model = new Model();
+        var box = new AvonicCheckbox { Content = "Label" };
+        box.Bind(AvonicCheckbox.CheckedProperty, new Binding(nameof(Model.Accepted)) { Source = model, Mode = BindingMode.OneWay });
+        using var scene = Plain(box);
+
+        Click(scene, Centre(box, scene));
+        Assert.True(box.Checked);
+        Assert.False(model.Accepted);
+
+        // The binding is still there, as a click sets the current value and not a local one.
+        model.Accepted = true;
         model.Accepted = false;
         Assert.False(box.Checked);
     }
@@ -908,6 +926,117 @@ public class AvonicCheckboxTests
         Assert.Equal(new Size(18, 18), box.Bounds.Size);
         Assert.Equal(default, Part<Control>(box, "PART_NativeWrapper").Margin);
     });
+
+    [AvaloniaFact]
+    public void B18_Text_That_Comes_Later_Shows_The_Label() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock();
+        var box = new AvonicCheckbox { Content = text };
+        using var scene = Themed(box);
+        Assert.False(Label(box).IsVisible);
+
+        // Ionic reads textContent at its next render, which a change of a prop causes.
+        text.Text = "Loaded";
+        box.Checked = true;
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Label(box).IsVisible);
+
+        // A shown label's text changing measures it again.
+        text.Text = "";
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Label(box).IsVisible);
+    });
+
+    private sealed record Choice(string Name);
+
+    [AvaloniaFact]
+    public void B18_Data_Counts_As_What_Its_Template_Makes() => InstalledTheme.Run(_ =>
+    {
+        var icon = new AvonicCheckbox
+        {
+            Content = new Choice("Heart"),
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Choice>((_, _) => new AvonicIcon { IconName = "heart" }),
+        };
+        var named = new AvonicCheckbox
+        {
+            Content = new Choice("Heart"),
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Choice>((choice, _) => new TextBlock { Text = choice.Name }),
+        };
+        using var scene = Themed(icon, named);
+
+        Assert.False(Label(icon).IsVisible);
+        Assert.True(Label(named).IsVisible);
+    });
+
+    /// <summary>Measures its child with all the room in the world, and then arranges it narrower.</summary>
+    private sealed class Squeeze : Decorator
+    {
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            Child!.Measure(Size.Infinity);
+            return new Size(150, Child.DesiredSize.Height);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Child!.Arrange(new Rect(0, 0, 150, finalSize.Height));
+            return finalSize;
+        }
+    }
+
+    [AvaloniaFact]
+    public void B10_A_Stacked_Label_Arranged_Narrower_Than_Measured_Is_Trimmed_To_It() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox
+        {
+            Content = "A stacked label much longer than its host",
+            LabelPlacement = CheckboxLabelPlacement.Stacked,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+        };
+        using var scene = Themed(new Squeeze { Child = box });
+
+        var text = box.GetVisualDescendants().OfType<TextBlock>().First(block => block.Text == "A stacked label much longer than its host");
+        Assert.Equal(200, Label(box).Bounds.Width, 0.5);
+        Assert.InRange(text.DesiredSize.Width, 0, 200.5);
+    });
+
+    [AvaloniaFact]
+    public void B15_Hidden_Half_Way_The_Mark_Ends_Its_Transition()
+    {
+        using var clock = new TestClock();
+        var box = new AvonicCheckbox { Content = "Label" };
+        using var scene = Plain(box);
+        clock.At(16);
+
+        box.Checked = true;
+        clock.At(48);
+        box.IsVisible = false;
+        clock.At(64);
+
+        Assert.Equal(0, Mark(box).DashOffset);
+    }
+
+    [AvaloniaFact]
+    public void B25_Becoming_Invalid_Tells_Automation_The_New_Description()
+    {
+        var box = new AvonicCheckbox { Content = "Label", HelperText = "Helper", ErrorText = "Error" };
+        using var scene = Plain(box);
+        var peer = ControlAutomationPeer.CreatePeerForElement(box);
+        var raised = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.HelpTextProperty)
+            {
+                raised.Add(e.NewValue);
+            }
+        };
+
+        box.Classes.Add("ion-touched");
+        box.Classes.Add("ion-invalid");
+        box.Classes.Remove("ion-invalid");
+
+        Assert.Equal(["Error", "Helper"], raised);
+    }
 
     // ── B25, B26: automation ─────────────────────────────────────────────────────────────────
 

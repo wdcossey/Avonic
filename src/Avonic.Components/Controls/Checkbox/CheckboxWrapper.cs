@@ -56,7 +56,7 @@ public sealed class CheckboxWrapper : Panel
     /// <summary>The label's width on one line: its <c>max-content</c>.</summary>
     private double _labelWidth;
 
-    /// <summary>The width the label was last measured at, in a row: infinite unless it had to shrink.</summary>
+    /// <summary>The width the label was last measured at: infinite unless it had to shrink.</summary>
     private double _labelSpace = double.PositiveInfinity;
 
     private bool Stacked => LabelPlacement == CheckboxLabelPlacement.Stacked;
@@ -81,9 +81,11 @@ public sealed class CheckboxWrapper : Panel
             var limit = availableSize.Width / ScaleOf(label);
             label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             _labelWidth = label.DesiredSize.Width;
+            _labelSpace = double.PositiveInfinity;
             if (_labelWidth > limit)
             {
                 label.Measure(new Size(limit, double.PositiveInfinity));
+                _labelSpace = limit;
             }
 
             var width = Math.Max(_labelWidth, box.Width);
@@ -118,6 +120,12 @@ public sealed class CheckboxWrapper : Panel
         if (Stacked)
         {
             var labelWidth = Math.Min(_labelWidth, finalSize.Width / ScaleOf(label));
+            if (labelWidth < _labelSpace && labelWidth < _labelWidth)
+            {
+                label.Measure(new Size(labelWidth, double.PositiveInfinity));
+                _labelSpace = labelWidth;
+            }
+
             var labelHeight = label.DesiredSize.Height;
 
             // justify-content on the column: space-between unless set. The column is as tall as both, unless something stretches it.

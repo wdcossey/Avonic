@@ -23,11 +23,10 @@
                             </Panel>
                         </StackPanel>
                         <Panel Name="PART_NativeWrapper">
-                            <Border Name="PART_Container" Width="18" Height="18" BorderThickness="2" BorderBrush="{TemplateBinding Foreground}">
+                            <Border Name="PART_Container">
                                 <c:CheckboxMark Name="PART_Mark"
                                                 Checked="{TemplateBinding Checked}"
-                                                Indeterminate="{TemplateBinding Indeterminate}"
-                                                Stroke="{TemplateBinding Foreground}" />
+                                                Indeterminate="{TemplateBinding Indeterminate}" />
                             </Border>
                         </Panel>
                     </c:CheckboxWrapper>

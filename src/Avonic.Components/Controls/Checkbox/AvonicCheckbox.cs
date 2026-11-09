@@ -108,6 +108,8 @@ public class AvonicCheckbox : ContentControl, IItemControl
     private TextBlock? _helper;
     private TextBlock? _error;
     private IDisposable? _firstFrame;
+    private bool _invalid;
+    private string? _hint;
     private IDisposable? _requiredFrame;
     private CheckboxAutomationPeer? _peer;
 
@@ -123,7 +125,14 @@ public class AvonicCheckbox : ContentControl, IItemControl
         _ = new NativeButton(this, _ => OnClick(), () => false, () => { });
 
         // The MutationObserver on class, for ion-touched and ion-invalid.
-        Classes.CollectionChanged += (_, _) => UpdateHint();
+        // Pseudoclasses are in the same list, so only a change of the two classes counts.
+        Classes.CollectionChanged += (_, _) =>
+        {
+            if (IsInvalid != _invalid)
+            {
+                UpdateHint();
+            }
+        };
 
         UpdateChecked();
         UpdatePlacement();
@@ -223,6 +232,13 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         base.OnPropertyChanged(change);
 
+        // Ionic renders again when any of its props changes, and reads the label's textContent then.
+        if (change.Property.OwnerType == typeof(AvonicCheckbox) || change.Property == ContentProperty
+            || change.Property == ColorProperty || change.Property == IsEnabledProperty)
+        {
+            UpdateLabel();
+        }
+
         if (change.Property == CheckedProperty || change.Property == IndeterminateProperty)
         {
             UpdateChecked();
@@ -242,10 +258,6 @@ public class AvonicCheckbox : ContentControl, IItemControl
         else if (change.Property == HelperTextProperty || change.Property == ErrorTextProperty)
         {
             UpdateHint();
-        }
-        else if (change.Property == ContentProperty)
-        {
-            UpdateLabel();
         }
         else if (change.Property == RequiredProperty)
         {
@@ -336,13 +348,22 @@ public class AvonicCheckbox : ContentControl, IItemControl
         PseudoClasses.Set(":alignment-center", Alignment == CheckboxAlignment.Center);
     }
 
-    /// <summary><c>label-text-wrapper-hidden</c>: <c>el.textContent === ''</c>, read at render.</summary>
+    /// <summary>
+    /// <c>label-text-wrapper-hidden</c>: <c>el.textContent === ''</c>, which Ionic reads at each render, so text that comes later
+    /// shows at the next change of a prop, as there. Here at each measure too, which a change of a shown label's text causes.
+    /// </summary>
     private void UpdateLabel()
     {
-        if (_label is not null)
+        if (_label is not null && TextContent(Content).Length > 0 is var shown && _label.IsVisible != shown)
         {
-            _label.IsVisible = TextContent(Content).Length > 0;
+            _label.IsVisible = shown;
         }
+    }
+
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        UpdateLabel();
+        return base.MeasureOverride(availableSize);
     }
 
     /// <summary>
@@ -352,7 +373,16 @@ public class AvonicCheckbox : ContentControl, IItemControl
     /// </summary>
     private void UpdateHint()
     {
-        var invalid = IsInvalid;
+        var invalid = _invalid = IsInvalid;
+
+        // aria-describedby changes with it, which a screen reader announces.
+        var hint = HintText();
+        if (hint != _hint)
+        {
+            _peer?.RaiseHelpTextChanged(_hint, hint);
+            _hint = hint;
+        }
+
         if (_bottom is not null)
         {
             _bottom.IsVisible = !string.IsNullOrEmpty(HelperText) || !string.IsNullOrEmpty(ErrorText);
@@ -372,8 +402,14 @@ public class AvonicCheckbox : ContentControl, IItemControl
     }
 
     /// <summary><c>textContent</c>: every piece of text inside, shown or not. An object shown as its text counts as text.</summary>
-    private static string TextContent(object? content)
+    private string TextContent(object? content)
     {
+        // Something that isn't a control is in the DOM as what its template makes, or as its text.
+        if (content is not (null or string or Control) && _content?.Child is { } made)
+        {
+            content = made;
+        }
+
         var text = new StringBuilder();
         Collect(content, text);
         return text.ToString();
@@ -489,6 +525,9 @@ public class AvonicCheckbox : ContentControl, IItemControl
 
         public void RaiseToggleStateChanged(ToggleState old, ToggleState now) =>
             RaisePropertyChangedEvent(TogglePatternIdentifiers.ToggleStateProperty, old, now);
+
+        public void RaiseHelpTextChanged(string? old, string? now) =>
+            RaisePropertyChangedEvent(AutomationElementIdentifiers.HelpTextProperty, old, now);
 
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.CheckBox;
 

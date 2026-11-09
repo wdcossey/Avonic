@@ -44,9 +44,9 @@ public sealed class CheckboxMark : Control
     public static readonly StyledProperty<IBrush?> StrokeProperty =
         AvaloniaProperty.Register<CheckboxMark, IBrush?>(nameof(Stroke));
 
-    /// <summary><c>stroke-width</c>: <c>--checkmark-width</c>, in view box units.</summary>
+    /// <summary><c>stroke-width</c>: <c>--checkmark-width</c>, in view box units. SVG's own default is 1.</summary>
     public static readonly StyledProperty<double> StrokeThicknessProperty =
-        AvaloniaProperty.Register<CheckboxMark, double>(nameof(StrokeThickness), 3);
+        AvaloniaProperty.Register<CheckboxMark, double>(nameof(StrokeThickness), 1);
 
     private bool _shown;
     private TimeSpan? _start;
@@ -149,6 +149,13 @@ public sealed class CheckboxMark : Control
         _frame = null;
         if (_start is not { } start)
         {
+            return;
+        }
+
+        // display: none cancels a running transition, which ends it.
+        if (!IsEffectivelyVisible)
+        {
+            Snap();
             return;
         }
 
