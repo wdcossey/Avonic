@@ -116,10 +116,29 @@ public class AvonicOverlayTests
     }
 
     /// <summary>The backdrop under a point, if what the hit test finds there is in one.</summary>
+    /// <remarks>
+    /// Rendered until two hit tests agree: the scene a hit test reads can lag a tick behind, more so on a loaded machine, as a
+    /// clean clone's first run showed.
+    /// </remarks>
     private static AvonicBackdrop? BackdropAt(Stage stage, Point point)
     {
+        AvonicBackdrop? Hit() => ((Visual?)stage.Window.InputHitTest(point))?.FindAncestorOfType<AvonicBackdrop>(includeSelf: true);
+
         stage.Render();
-        return ((Visual?)stage.Window.InputHitTest(point))?.FindAncestorOfType<AvonicBackdrop>(includeSelf: true);
+        var found = Hit();
+        for (var i = 0; i < 5; i++)
+        {
+            stage.Render();
+            var again = Hit();
+            if (ReferenceEquals(again, found))
+            {
+                break;
+            }
+
+            found = again;
+        }
+
+        return found;
     }
 
     /// <summary>A task's result, which it has to have already: reading one that never completes would block the UI thread for good.</summary>
