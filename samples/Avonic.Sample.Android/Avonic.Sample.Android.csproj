@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The sample's Android head: MainActivity and the Application class, and the sample itself from Avonic.Sample. It's not in
+    Avonic.sln, so that building and testing the solution don't need the android workload; CI's android job builds it. See
+    docs/infra/android/README.md for building, installing and what to check on a device.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Avalonia 12 supports net10.0 alone on Android. -->
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion>
+    <IsPackable>false</IsPackable>
+    <ApplicationId>io.github.wdcossey.avonic.sample</ApplicationId>
+    <ApplicationTitle>Avonic</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <!-- The assemblies go in the APK in a Debug build too, so that `adb install` alone is enough: fast deployment would need the
+         device during the build. -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Avonic.Sample\Avonic.Sample.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -45,3 +45,30 @@ jobs:
         with:
           name: test-results
           path: TestResults
+
+  # The sample's Android head (docs/infra/android/README.md). It isn't in Avonic.sln, so that the job above and a local build don't
+  # need the android workload; this job builds the debug APK beside it, so that the head can't break unnoticed. The runner has the
+  # Android SDK and a JDK.
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Android workload
+        run: dotnet workload install android
+
+      # The platform and build tools this workload wants, if the runner's SDK doesn't have them yet.
+      - name: Android SDK packages
+        run: dotnet build samples/Avonic.Sample.Android -t:InstallAndroidDependencies -f net10.0-android -p:AndroidSdkDirectory="$ANDROID_HOME" -p:AcceptAndroidSDKLicenses=True
+
+      - name: Build the APK
+        run: dotnet build samples/Avonic.Sample.Android --configuration Debug -p:AndroidSdkDirectory="$ANDROID_HOME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: avonic-sample-apk
+          path: samples/Avonic.Sample.Android/bin/Debug/net10.0-android/*-Signed.apk
