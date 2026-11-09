@@ -1,0 +1,193 @@
+{
+  "tag": "ion-grid",
+  "snippet": "<style>ion-col{background-color:#135d54;border:solid 1px #fff;color:#fff;text-align:center}</style><ion-grid><ion-row><ion-col>1 of 3</ion-col><ion-col>2 of 3</ion-col><ion-col>3 of 3</ion-col></ion-row><ion-row><ion-col size=\"6\">size 6</ion-col><ion-col>rest</ion-col><ion-col size=\"3\">size 3</ion-col></ion-row><ion-row><ion-col size=\"auto\">auto content</ion-col><ion-col>rest</ion-col></ion-row><ion-row><ion-col size=\"3\" offset=\"3\">offset 3</ion-col><ion-col size=\"3\">size 3</ion-col></ion-row><ion-row><ion-col size=\"9\" push=\"3\">push 3</ion-col><ion-col size=\"3\" pull=\"9\">pull 9</ion-col></ion-row><ion-row><ion-col>Supercalifragilisticexpialidocious</ion-col><ion-col>b</ion-col><ion-col>c</ion-col></ion-row><ion-row><ion-col size=\"6\">A column whose text wraps onto a second line</ion-col><ion-col>stretched</ion-col></ion-row><ion-row><ion-col size=\"8\">8</ion-col><ion-col size=\"8\">8 wraps</ion-col></ion-row></ion-grid><ion-grid class=\"ion-no-padding\"><ion-row><ion-col>ion-no-padding</ion-col><ion-col>ion-no-padding</ion-col></ion-row></ion-grid><ion-grid dir=\"rtl\"><ion-row><ion-col size=\"6\">size 6</ion-col><ion-col>rest</ion-col><ion-col size=\"3\">size 3</ion-col></ion-row></ion-grid>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 308
+      },
+      "cssVars": {
+        "--ion-grid-padding": "",
+        "--ion-grid-padding-lg": "",
+        "--ion-grid-padding-md": "",
+        "--ion-grid-padding-sm": "",
+        "--ion-grid-padding-xl": "",
+        "--ion-grid-padding-xs": "",
+        "--ion-grid-width": "",
+        "--ion-grid-width-lg": "",
+        "--ion-grid-width-md": "",
+        "--ion-grid-width-sm": "",
+        "--ion-grid-width-xl": "",
+        "--ion-grid-width-xs": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "308px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "5px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "class": "ion-no-padding md hydrated"
+      },
+      "classes": [
+        "ion-no-padding",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 308,
+        "w": 390,
+        "h": 21
+      },
+      "cssVars": {
+        "--ion-grid-padding": "",
+        "--ion-grid-padding-lg": "",
+        "--ion-grid-padding-md": "",
+        "--ion-grid-padding-sm": "",
+        "--ion-grid-padding-xl": "",
+        "--ion-grid-padding-xs": "",
+        "--ion-grid-width": "",
+        "--ion-grid-width-lg": "",
+        "--ion-grid-width-md": "",
+        "--ion-grid-width-sm": "",
+        "--ion-grid-width-xl": "",
+        "--ion-grid-width-xs": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "21px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n"
+    },
+    {
+      "attributes": {
+        "dir": "rtl",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 329,
+        "w": 390,
+        "h": 41
+      },
+      "cssVars": {
+        "--ion-grid-padding": "",
+        "--ion-grid-padding-lg": "",
+        "--ion-grid-padding-md": "",
+        "--ion-grid-padding-sm": "",
+        "--ion-grid-padding-xl": "",
+        "--ion-grid-padding-xs": "",
+        "--ion-grid-width": "",
+        "--ion-grid-width-lg": "",
+        "--ion-grid-width-md": "",
+        "--ion-grid-width-sm": "",
+        "--ion-grid-width-xl": "",
+        "--ion-grid-width-xs": ""
+      },
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "41px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "5px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-row.md.hydrated>\n    #shadow-root\n      <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n    <ion-col.md.hydrated>\n      #shadow-root\n        <slot name=\"\">\n"
+    }
+  ]
+}

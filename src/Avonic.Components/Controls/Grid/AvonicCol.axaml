@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-col: structure only. The padding is in Avonic.Themes, and RowPanel lays it out. Text wraps, as it does in a
+         browser. -->
+    <ControlTheme x:Key="{x:Type c:AvonicCol}" TargetType="c:AvonicCol">
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <!-- What a column holds is a block: as wide as the column, and at the top. -->
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

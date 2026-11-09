@@ -1,0 +1,231 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicGrid Background="{DynamicResource Avonic.Color.LightBrush}">
+                <c:AvonicRow>
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Content="1 of 3" />
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.MediumBrush}" Content="2 of 3" />
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Content="3 of 3" />
+                </c:AvonicRow>
+                <c:AvonicRow>
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Size="6" Content="size 6" />
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.MediumBrush}" Content="rest" />
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Size="auto" Content="auto" />
+                </c:AvonicRow>
+                <c:AvonicRow>
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Size="3" Offset="3" Content="offset 3" />
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.MediumBrush}" Size="3" Push="3" Content="push 3" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+            <c:AvonicGrid Fixed="True" Classes="ion-no-padding" Background="{DynamicResource Avonic.Color.LightBrush}">
+                <c:AvonicRow>
+                    <c:AvonicCol Background="{DynamicResource Avonic.Color.LightShadeBrush}" Content="Fixed, no padding" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of grid.css. Each media query is a breakpoint pseudoclass, which the grid sets from that width
+         of the viewport up, so a later rule wins as the later query does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicGrid}" TargetType="c:AvonicGrid">
+        <!-- flex: 1, for when the grid is in a flex row, as in an item's slot -->
+        <Setter Property="c:FlexRow.Flex" Value="1" />
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                <DynamicResource ResourceKey="Avonic.GridPaddingXs" />
+                <DynamicResource ResourceKey="Avonic.GridPadding" />
+                <DynamicResource ResourceKey="Avonic.Grid.Md.Padding" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- @media (min-width: 576px) -->
+        <Style Selector="^:breakpoint-sm">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridPaddingSm" />
+                    <DynamicResource ResourceKey="Avonic.GridPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.Padding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (min-width: 768px) -->
+        <Style Selector="^:breakpoint-md">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridPaddingMd" />
+                    <DynamicResource ResourceKey="Avonic.GridPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.Padding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (min-width: 992px) -->
+        <Style Selector="^:breakpoint-lg">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridPaddingLg" />
+                    <DynamicResource ResourceKey="Avonic.GridPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.Padding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (min-width: 1200px) -->
+        <Style Selector="^:breakpoint-xl">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridPaddingXl" />
+                    <DynamicResource ResourceKey="Avonic.GridPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.Padding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .grid-fixed: width, and max-width: 100%, centred by margin: auto. A stretched control with a MaxWidth is that. -->
+        <Style Selector="^:fixed">
+            <Setter Property="MaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.GridWidthXs" />
+                    <DynamicResource ResourceKey="Avonic.GridWidth" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.WidthXs" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fixed:breakpoint-sm">
+            <Setter Property="MaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.GridWidthSm" />
+                    <DynamicResource ResourceKey="Avonic.GridWidth" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.WidthSm" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fixed:breakpoint-md">
+            <Setter Property="MaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.GridWidthMd" />
+                    <DynamicResource ResourceKey="Avonic.GridWidth" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.WidthMd" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fixed:breakpoint-lg">
+            <Setter Property="MaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.GridWidthLg" />
+                    <DynamicResource ResourceKey="Avonic.GridWidth" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.WidthLg" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fixed:breakpoint-xl">
+            <Setter Property="MaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.GridWidthXl" />
+                    <DynamicResource ResourceKey="Avonic.GridWidth" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.WidthXl" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .ion-no-padding, from padding.css, which beats the media queries. The grid takes it off its columns itself. -->
+        <Style Selector="^.ion-no-padding">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </ControlTheme>
+
+    <!-- row.css is display: flex and flex-wrap: wrap, which RowPanel is. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRow}" TargetType="c:AvonicRow">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A translation of col.css. RowPanel does the flex part, from what the column works out. -->
+    <ControlTheme x:Key="{x:Type c:AvonicCol}" TargetType="c:AvonicCol">
+        <Setter Property="MinHeight" Value="1" />
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <!-- What a column holds is a block: as wide as the column, and at the top. -->
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                <DynamicResource ResourceKey="Avonic.GridColumnPaddingXs" />
+                <DynamicResource ResourceKey="Avonic.GridColumnPadding" />
+                <DynamicResource ResourceKey="Avonic.Grid.Md.ColumnPadding" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:breakpoint-sm">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridColumnPaddingSm" />
+                    <DynamicResource ResourceKey="Avonic.GridColumnPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.ColumnPadding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:breakpoint-md">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridColumnPaddingMd" />
+                    <DynamicResource ResourceKey="Avonic.GridColumnPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.ColumnPadding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:breakpoint-lg">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridColumnPaddingLg" />
+                    <DynamicResource ResourceKey="Avonic.GridColumnPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.ColumnPadding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:breakpoint-xl">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:GridCss.Padding}">
+                    <DynamicResource ResourceKey="Avonic.GridColumnPaddingXl" />
+                    <DynamicResource ResourceKey="Avonic.GridColumnPadding" />
+                    <DynamicResource ResourceKey="Avonic.Grid.Md.ColumnPadding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

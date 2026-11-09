@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.GridPage">
+
+    <!-- Ionic's own demo style for a grid, so the columns show. -->
+    <UserControl.Styles>
+        <Style Selector="c|AvonicCol">
+            <Setter Property="Background" Value="#135D54" />
+            <Setter Property="BorderBrush" Value="White" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.caption">
+            <Setter Property="Margin" Value="10,16,10,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <StackPanel TextElement.FontSize="16">
+            <TextBlock Classes="caption" Text="Columns with no size share the row." />
+            <c:AvonicGrid>
+                <c:AvonicRow>
+                    <c:AvonicCol Content="1 of 3" />
+                    <c:AvonicCol Content="2 of 3" />
+                    <c:AvonicCol Content="3 of 3" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="Sizes are out of 12. Auto is as wide as its content." />
+            <c:AvonicGrid>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="6" Content="size 6" />
+                    <c:AvonicCol Content="rest" />
+                    <c:AvonicCol Size="3" Content="size 3" />
+                </c:AvonicRow>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="auto" Content="auto" />
+                    <c:AvonicCol Content="rest" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="Offset, push and pull." />
+            <c:AvonicGrid>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="3" Offset="3" Content="offset 3" />
+                    <c:AvonicCol Size="3" Content="size 3" />
+                </c:AvonicRow>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="9" Push="3" Content="push 3" />
+                    <c:AvonicCol Size="3" Pull="9" Content="pull 9" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="Per breakpoint: full width on a phone, halves from sm (576), thirds from md (768), quarters from lg (992). Widen the window." />
+            <c:AvonicGrid>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="12" SizeSm="6" SizeMd="4" SizeLg="3" Content="A" />
+                    <c:AvonicCol Size="12" SizeSm="6" SizeMd="4" SizeLg="3" Content="B" />
+                    <c:AvonicCol Size="12" SizeSm="6" SizeMd="4" SizeLg="3" Content="C" />
+                    <c:AvonicCol Size="12" SizeSm="6" SizeMd="4" SizeLg="3" Content="D" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="Columns on a line are as tall as the tallest, unless they align themselves." />
+            <c:AvonicGrid>
+                <c:AvonicRow>
+                    <c:AvonicCol Content="A column whose text wraps onto more than one line" />
+                    <c:AvonicCol Content="stretched" />
+                    <c:AvonicCol VerticalAlignment="Center" Content="centred" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="A fixed grid with no padding, and six columns." />
+            <c:AvonicGrid Fixed="True" Classes="ion-no-padding">
+                <c:AvonicGrid.Resources>
+                    <x:Double x:Key="Avonic.GridColumns">6</x:Double>
+                </c:AvonicGrid.Resources>
+                <c:AvonicRow>
+                    <c:AvonicCol Size="2" Content="2 of 6" />
+                    <c:AvonicCol Size="4" Content="4 of 6" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+
+            <TextBlock Classes="caption" Text="Right to left." />
+            <c:AvonicGrid FlowDirection="RightToLeft">
+                <c:AvonicRow>
+                    <c:AvonicCol Size="6" Content="size 6" />
+                    <c:AvonicCol Size="3" Offset="3" Content="offset 3" />
+                </c:AvonicRow>
+            </c:AvonicGrid>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
