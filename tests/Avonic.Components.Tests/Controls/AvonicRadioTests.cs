@@ -552,6 +552,43 @@ public class AvonicRadioTests
         Assert.False(group.ClipToBounds);
     });
 
+    // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it underneath, as
+    // the sample has it. FocusAdorner reads null either way, so only the layer shows what's drawn.
+    [AvaloniaFact]
+    public void R9_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var before = new Button { Content = "Before" };
+                var radio = Radio("a");
+                var group = Group(radio);
+                var other = new Button { Content = "After" };
+                using var scene = Show(new StackPanel { Children = { before, group, other } });
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(radio)!;
+                before.Focus();
+                Dispatcher.UIThread.RunJobs();
+
+                Press(scene, PhysicalKey.Tab);
+                Assert.True(radio.IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                Press(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
     // ── R10: automation ──────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -841,10 +878,27 @@ public class AvonicRadioTests
         using var scene = Show(new StackPanel { Children = { plain, justified, aligned } });
 
         Assert.Equal(76, plain.Bounds.Width, 0.5);
+        // cursor: pointer
+        Assert.Equal(StandardCursorType.Hand.ToString(), plain.Cursor?.ToString());
         // measured n6: 390 wide, the ring right after the label
         Assert.Equal(390, justified.Bounds.Width, 0.5);
         Assert.Equal(56, Layout(justified).Ring.X, 0.5);
         Assert.Equal(390, aligned.Bounds.Width, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void V5_Alone_End_Puts_16_Between_The_Ring_And_The_Label_And_Stacked_16_Below_The_Label() => InstalledTheme.Run(_ =>
+    {
+        var end = Radio("a");
+        end.LabelPlacement = RadioLabelPlacement.End;
+        var stacked = Radio("b");
+        stacked.LabelPlacement = RadioLabelPlacement.Stacked;
+        using var scene = Show(new StackPanel { Children = { end, stacked } });
+
+        Assert.Equal(76, end.Bounds.Width, 0.5);
+        Assert.Equal(36, Layout(end).Label.X, 0.5);
+        Assert.Equal(new Size(40, 19 + 16 + 20), stacked.Bounds.Size);
+        Assert.Equal(35, Layout(stacked).Ring.Y, 0.5);
     });
 
     [AvaloniaFact]

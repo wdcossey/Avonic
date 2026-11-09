@@ -197,14 +197,9 @@ public class AvonicRadioGroup : ItemsControl
         _ => value.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance)?.GetValue(value),
     };
 
-    /// <summary><c>onClick</c>, for a click on one of the group's radios.</summary>
+    /// <summary><c>onClick</c>, for a click on one of the group's radios, which has checked that it's enabled.</summary>
     internal void OnRadioClick(AvonicRadio radio)
     {
-        if (!radio.IsEffectivelyEnabled)
-        {
-            return;
-        }
-
         if (!Equals(radio.Value, Value))
         {
             SetCurrentValue(ValueProperty, radio.Value);
