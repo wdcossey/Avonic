@@ -533,8 +533,11 @@ public class AvonicImgTests
 
         // a's picture is ready, but its continuation hasn't run when b takes over: it finished before it could be cancelled
         var late = TestPicture.Create(300, 200);
-        // From the thread pool, as a real fetch finishes, so that its continuation waits for the UI thread
-        Task.Run(() => loader.Requests[0].Completion.SetResult(late)).Wait();
+        // From another thread, as a real fetch finishes, so that its continuation waits for the UI thread. A thread of its own,
+        // as Task.Wait can run a task that hasn't started inline, here, which would run the continuation at once
+        var finisher = new Thread(() => loader.Requests[0].Completion.SetResult(late));
+        finisher.Start();
+        finisher.Join();
         img.Src = "b.png";
         scene.Window.UpdateLayout();
         Assert.Equal("b.png", loader.Requests[1].Src);
