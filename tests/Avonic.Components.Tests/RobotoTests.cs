@@ -49,6 +49,17 @@ public class RobotoTests
         AssertDrawnWith(Text(badge, "22"), FontWeight.Bold, "Roboto-Bold.ttf");
     });
 
+    // Ionic sets its font on html, so all of an app's text is Roboto. A plain TextBlock, outside any Avonic control, is
+    // Roboto too, so a test's own text measures the same on Windows and CI's Ubuntu.
+    [AvaloniaFact]
+    public void Text_Outside_The_Theme_Is_Roboto_Too()
+    {
+        var plain = new TextBlock { Text = "Plain" };
+        using var scene = new Scene(new StackPanel { Children = { plain } });
+
+        AssertDrawnWith(plain, FontWeight.Normal, "Roboto-Regular.ttf");
+    }
+
     /// <summary>
     /// The Chromium side can't run here, as CI has no Chromium, so this reads what it loads. <c>roboto.js</c> checks at run time
     /// that every face loaded, and this checks that each face is the file of its weight, with that file's own line metrics, and

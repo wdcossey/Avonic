@@ -566,7 +566,8 @@ public class AvonicLabelTests
         var item = new AvonicItem { Content = label };
         using var scene = InScene(new AvonicItem { Content = single }, item);
 
-        Assert.True(label.Bounds.Height >= single.Bounds.Height * 2);
+        // Wraps: more than one line. Not twice a single line's height, which layout rounding makes 15 for Roboto's 14.06 at 12 px, where two lines are 29.
+        Assert.True(label.Bounds.Height > single.Bounds.Height * 1.5, $"{label.Bounds.Height} against {single.Bounds.Height}");
         Assert.Equal(358, label.Bounds.Width);
         // Measured: three lines of 19, 57, + 20 of margin + 1 of border = 78. Avalonia's lines are 18.75.
         Assert.Equal(label.Bounds.Height + 21, item.Bounds.Height);
@@ -580,7 +581,8 @@ public class AvonicLabelTests
         var label = new AvonicLabel { Content = Long };
         using var scene = InScene(single, label);
 
-        Assert.True(label.Bounds.Height >= single.Bounds.Height * 2);
+        // Wraps: more than one line. Not twice a single line's height, which layout rounding makes 15 for Roboto's 14.06 at 12 px, where two lines are 29.
+        Assert.True(label.Bounds.Height > single.Bounds.Height * 1.5, $"{label.Bounds.Height} against {single.Bounds.Height}");
     });
 
     [AvaloniaFact]
@@ -590,7 +592,8 @@ public class AvonicLabelTests
         var label = new AvonicLabel { Content = new TextBlock { Text = Long } };
         using var scene = InScene(single, label);
 
-        Assert.True(label.Bounds.Height >= single.Bounds.Height * 2);
+        // Wraps: more than one line. Not twice a single line's height, which layout rounding makes 15 for Roboto's 14.06 at 12 px, where two lines are 29.
+        Assert.True(label.Bounds.Height > single.Bounds.Height * 1.5, $"{label.Bounds.Height} against {single.Bounds.Height}");
     }
 
     // ── 9. .ion-text-nowrap ──────────────────────────────────────────────────────────────────
