@@ -57,7 +57,7 @@ internal sealed class SampleOverlay : AvonicOverlay
     private readonly OverlaysPage _page;
     private readonly AvonicBackdrop _backdrop = new();
     private readonly Border _box;
-    private readonly TextBlock _title = new() { FontSize = 20, FontWeight = FontWeight.Medium };
+    private readonly TextBlock _title = new() { FontSize = 20, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap };
 
     public SampleOverlay(OverlaysPage page)
     {
