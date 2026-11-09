@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avonic.Components;
 using Avonic.Components.Controls;
 using Avonic.Sample.Diagnostics;
 using Avonic.Themes;
@@ -68,15 +69,30 @@ public partial class StyleCostRunnerTests
         Assert.Equal(index, styles.IndexOf(theme));
     });
 
-    // The functional templates stay without the theme, so a host inside an Avonic control isn't taken out of the window.
+    // The functional templates stay without the theme, so a host inside an Avonic control isn't taken out of the window. As in the
+    // sample, the theme is the only source of templates here: the test app's own copy of them is taken out for the test.
     [AvaloniaFact]
-    public void A_Host_Inside_An_Avonic_Control_Stays_Attached() => InstalledTheme.Run(_ =>
+    public void A_Host_Inside_An_Avonic_Control_Stays_Attached()
     {
-        var host = new Panel();
-        using var scene = new Scene(new AvonicContent { Content = new StackPanel { Children = { host } } });
+        var styles = Application.Current!.Styles;
+        var own = styles.OfType<AvonicComponentsStyles>().Single();
+        var at = styles.IndexOf(own);
+        styles.RemoveAt(at);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var host = new Panel();
+                using var scene = new Scene(new AvonicContent { Content = new StackPanel { Children = { host } } });
 
-        Assert.Matches(RowShape(), Wait(Runner(host).Run()));
-    });
+                Assert.Matches(RowShape(), Wait(Runner(host).Run()));
+            });
+        }
+        finally
+        {
+            styles.Insert(at, own);
+        }
+    }
 
     [AvaloniaFact]
     public void The_Theme_Goes_Back_When_A_Round_Throws() => InstalledTheme.Run(theme =>
