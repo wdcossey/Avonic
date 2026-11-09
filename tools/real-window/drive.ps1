@@ -5,7 +5,7 @@
 # Windows only, and PowerShell 5.1 or later: powershell -ExecutionPolicy Bypass -File tools\real-window\drive.ps1
 param(
     # The sample to run. Build it first. A Debug build also has the performance line to check.
-    [string]$Exe = (Join-Path $PSScriptRoot '..\..\samples\Avonic.Sample\bin\Debug\net10.0\Avonic.Sample.exe'),
+    [string]$Exe = (Join-Path $PSScriptRoot '..\..\samples\Avonic.Sample.Desktop\bin\Debug\net10.0\Avonic.Sample.Desktop.exe'),
     # Where the frames go. By default a new folder for each run, so that an old frame can't pass for a new one.
     [string]$Out = (Join-Path ([IO.Path]::GetTempPath()) ('avonic-real-window\' + (Get-Date -Format 'yyyyMMdd-HHmmss')))
 )

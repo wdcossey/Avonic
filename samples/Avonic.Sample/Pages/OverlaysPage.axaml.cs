@@ -24,10 +24,14 @@ public partial class OverlaysPage : UserControl
         Present.Click += (_, _) => Show(new SampleOverlay(this));
         PresentLocked.Click += (_, _) => Show(new SampleOverlay(this) { BackdropDismiss = false });
         PresentStill.Click += (_, _) => Show(new SampleOverlay(this) { Animated = false });
+        PresentFromApp.Click += (_, _) => Show(new SampleOverlay(this), throughApp: true);
     }
 
-    /// <summary>Presents an overlay, and says what it was dismissed with.</summary>
-    internal async void Show(SampleOverlay overlay)
+    /// <summary>
+    /// Presents an overlay, and says what it was dismissed with. <paramref name="throughApp"/> presents it with no
+    /// <see cref="TopLevel"/>, so that the application's lifetime finds one, and says so if it can't.
+    /// </summary>
+    internal async void Show(SampleOverlay overlay, bool throughApp = false)
     {
         if (TopLevel.GetTopLevel(this) is not { } top)
         {
@@ -36,7 +40,16 @@ public partial class OverlaysPage : UserControl
 
         overlay.Number = ++_presented;
         var dismissed = overlay.OnDidDismiss();
-        await overlay.Present(top);
+        try
+        {
+            await (throughApp ? overlay.Present() : overlay.Present(top));
+        }
+        catch (InvalidOperationException error)
+        {
+            Status.Text = $"Overlay {overlay.Number} wasn't presented: {error.Message}";
+            return;
+        }
+
         Status.Text = $"Overlay {overlay.Number} presented";
         var detail = await dismissed;
         Status.Text = $"Overlay {overlay.Number} dismissed, role {detail.Role ?? "none"}";

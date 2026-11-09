@@ -59,6 +59,15 @@ as an app has them. Times are µs per element. A row can go straight in the tabl
 |---|---|---|---|---|---|
 | 2026-11-06 | 18 | 98 | 174 | 18.5 to 24.2 (+5.6) | 2.2 to 8.0 (+5.8) |
 
+### On a phone
+
+A phone can't run the test, so the sample's **device** page runs the same thing in the app (`Diagnostics/StyleCostRunner.cs`): the
+same trees, rounds and row, from `Diagnostics/StyleCost.cs`, which the test uses too. It takes the app's `AvonicTheme` out of
+`Application.Styles` and puts it back, attaches into the page and lays out. So its times include the sample's `SimpleTheme`, which the
+test's don't, and **a phone's row is compared with a desktop row from the same page**, in the desktop sample's Release build, not with
+the rows above. It says when a row isn't for the table: a Debug build, or Avalonia's diagnostics on. How to run it on the Pixel is in
+[the Android docs](../android/README.md#on-the-device). None has been run yet.
+
 ## In a Debug build
 
 The sample shows a line along the bottom when a page opens:
@@ -89,5 +98,5 @@ trace.
 - **`render` can read low,** if a page opens within a frame of the last one, because its own render pass hasn't happened yet.
 - **Only style checks are budgeted.** A slow control, layout or animation wouldn't show here. The line in the sample is how
   to spot those.
-- **The numbers are from one desktop PC.** Nothing has been measured on a phone.
+- **The numbers are from one desktop PC.** Nothing has been measured on a phone yet, though the sample can now do it.
 - **`ItemsControl`, virtualising and scrolling** haven't been measured. These are all times to attach.

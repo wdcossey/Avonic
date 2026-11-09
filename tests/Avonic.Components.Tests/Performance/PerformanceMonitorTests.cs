@@ -125,8 +125,9 @@ public class PerformanceMonitorTests
         try
         {
             Dispatcher.UIThread.RunJobs();
-            var line = window.FindControl<TextBlock>("PerformanceLine")!;
-            var index = (StackPanel)window.FindControl<ContentControl>("Host")!.Content!;
+            var shell = window.FindControl<Avonic.Sample.SampleShell>("Shell")!;
+            var line = shell.FindControl<TextBlock>("PerformanceLine")!;
+            var index = (StackPanel)shell.FindControl<ContentControl>("Host")!.Content!;
             var open = index.Children.OfType<Button>().First(b => (string?)b.Content == "ion-card");
             Assert.False(line.IsVisible);
 
@@ -140,7 +141,7 @@ public class PerformanceMonitorTests
             Assert.False(line.IsVisible);
 #endif
 
-            var back = window.FindControl<Button>("BackButton")!;
+            var back = shell.FindControl<Button>("BackButton")!;
             back.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
             Assert.False(line.IsVisible);
