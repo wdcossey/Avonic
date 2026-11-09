@@ -341,17 +341,17 @@ public class AvonicToggle : ContentControl, IItemControl
         }
     }
 
-    /// <summary><c>onKeyDown</c>: Space, on every key down, repeats too. Enter does nothing.</summary>
+    /// <summary>
+    /// <c>onKeyDown</c>: Space, on every key down, repeats too. Enter does nothing. Ionic checks <c>disabled</c> here too, for a
+    /// toggle an app has made focusable while disabled; Avalonia gives a disabled control neither focus nor keys.
+    /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
         if (e.Key == Key.Space && !e.Handled)
         {
             e.Handled = true;
-            if (IsEffectivelyEnabled)
-            {
-                ToggleChecked();
-            }
+            ToggleChecked();
         }
     }
 

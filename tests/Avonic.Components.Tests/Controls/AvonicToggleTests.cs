@@ -347,6 +347,30 @@ public class AvonicToggleTests
     }
 
     [AvaloniaFact]
+    public void T04_Disabled_Mid_Drag_It_Flips_No_More()
+    {
+        var (toggle, scene) = Stub();
+        using var _ = scene;
+        using var clock = new TestClock();
+        var changes = Changes.Of(toggle);
+        var start = Centre(Track(toggle), scene);
+        var finger = new GestureTests.Finger(scene, clock);
+
+        finger.Down(start.X, start.Y, 0).Move(start.X + 5, start.Y, 20).Move(start.X + 16, start.Y, 40);
+        clock.At(60);
+        Assert.Single(changes.All);
+
+        // disabledChanged: gesture.enable(false), which ends the drag.
+        toggle.IsEnabled = false;
+        Settle();
+        finger.Move(start.X - 20, start.Y, 60);
+        clock.At(80);
+        finger.Up(start.X - 20, start.Y, 80);
+        Assert.Single(changes.All);
+        Assert.DoesNotContain(":activated", toggle.Classes);
+    }
+
+    [AvaloniaFact]
     public void T04_Disabled_The_Toggle_Fades_To_0_38_As_A_Group() => InstalledTheme.Run(_ =>
     {
         var toggle = new AvonicToggle { Content = "Disabled", IsEnabled = false };
@@ -732,12 +756,53 @@ public class AvonicToggleTests
         AssertBox(0, top + Label(aligned).Bounds.Height + 16, 36, 14, Bounds(Track(aligned), scene.Window));
     });
 
+    [AvaloniaFact]
+    public void T16_Alignment_Start_Puts_A_Row_At_The_Top_And_Justify_Packs_A_Tall_Stacked_Column() => InstalledTheme.Run(_ =>
+    {
+        var row = new AvonicToggle { Content = "Top", Alignment = ToggleAlignment.Start };
+        var between = new AvonicToggle { Content = "Between", LabelPlacement = ToggleLabelPlacement.Stacked, Height = 120 };
+        var start = new AvonicToggle { Content = "Start", LabelPlacement = ToggleLabelPlacement.Stacked, Justify = ToggleJustify.Start, Height = 120 };
+        var end = new AvonicToggle { Content = "End", LabelPlacement = ToggleLabelPlacement.Stacked, Justify = ToggleJustify.End, Height = 120 };
+        using var scene = Themed(new StackPanel { Children = { new AvonicItem { Content = row }, between, start, end } });
+
+        // align-items: start: the track's wrapper at the top of the 47 px row, the label 10 down by its margin.
+        AssertBox(338, 0, 36, 14, Bounds(Track(row), scene.Window));
+        Assert.InRange(Bounds(Label(row), scene.Window).Y, 9.5, 10.5);
+
+        // A column taller than its content: space-between puts the track at the bottom, start right under the label, end
+        // both at the bottom.
+        var labelHeight = Label(between).Bounds.Height + 16;
+        Assert.InRange(Bounds(Track(between), scene.Window).Bottom - Bounds(between, scene.Window).Y, 119.5, 120.5);
+        Assert.InRange(Bounds(Track(start), scene.Window).Y - Bounds(start, scene.Window).Y, labelHeight - 0.5, labelHeight + 0.5);
+        Assert.InRange(Bounds(Track(end), scene.Window).Bottom - Bounds(end, scene.Window).Y, 119.5, 120.5);
+        Assert.InRange(Bounds(Track(end), scene.Window).Y - Bounds(end, scene.Window).Y, 120 - 14 - 0.5, 120 - 14 + 0.5);
+        Assert.InRange(Label(end).Bounds.Y, 120 - 14 - labelHeight - 0.5, 120 - 14 - labelHeight + 0.5);
+    });
+
+    [AvaloniaFact]
+    public void T15_A_Long_Stacked_Label_Is_Up_To_A_Third_Wider_Than_The_Row_And_Scales_Back_To_It() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle
+        {
+            Content = "A stacked label that is much too long to fit on one line across the whole of the row of an item",
+            LabelPlacement = ToggleLabelPlacement.Stacked,
+        };
+        using var scene = InItems(toggle);
+
+        // max-width: calc(100% / 0.75), then scale(0.75) from the middle: the label's box is 358 / 0.75, drawn 358 wide. A
+        // trimmed TextBlock is as wide as what it draws, up to the ellipsis, where CSS's box is the max-width: a few pixels less.
+        var drawn = Bounds(Label(toggle), scene.Window);
+        Assert.InRange(Label(toggle).Bounds.Width, 358 / 0.75 - 6, 358 / 0.75 + 0.5);
+        Assert.InRange(drawn.Width, 358 - 4.5, 358 + 0.5);
+        Assert.InRange(drawn.Center.X, 194.5, 195.5);
+    });
+
     // ── 17: inline ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
     public void T17_Outside_An_Item_It_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
     {
-        var bare = new AvonicToggle();
+        var bare = new AvonicToggle { Margin = new Thickness(10) };
         var labelled = new AvonicToggle { Content = "Alone" };
         using var scene = Themed(new StackPanel { Children = { bare, labelled } });
 
@@ -745,10 +810,9 @@ public class AvonicToggleTests
         Assert.Equal(new Size(36, 14), bare.Bounds.Size);
         Assert.InRange(labelled.Bounds.Width, Label(labelled).Bounds.Width + 16 + 36 - 0.5, Label(labelled).Bounds.Width + 16 + 36 + 0.5);
 
-        // The handle hangs 3 px over a bare toggle, and isn't clipped: its top is white, not the page under a clip.
-        Assert.False(bare.ClipToBounds);
-        var handle = Bounds(Handle(bare), scene.Window);
-        Assert.InRange(handle.Y, -3.5, -2.5);
+        // The handle hangs 3 px over a bare toggle, and isn't clipped: on black, the row above the toggle is the handle's white.
+        scene.Window.Background = Brushes.Black;
+        AssertClose(Colors.White, Pixel(scene, 20, 8), 8);
     });
 
     // ── 18: a long label ─────────────────────────────────────────────────────────────────────
