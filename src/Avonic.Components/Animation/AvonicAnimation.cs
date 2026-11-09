@@ -724,9 +724,10 @@ public sealed class AvonicAnimation
                 _holdTime = 0;
             }
 
+            // Its values are already shown: by the first play's initialization, a seek, or a pause, as a paused Web Animation
+            // shows its own.
             _playing = true;
             _startTime = null;
-            Apply(_holdTime);
             RequestFrame();
         }
 

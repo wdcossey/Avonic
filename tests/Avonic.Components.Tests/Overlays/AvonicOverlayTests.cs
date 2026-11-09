@@ -122,6 +122,13 @@ public class AvonicOverlayTests
         return ((Visual?)stage.Window.InputHitTest(point))?.FindAncestorOfType<AvonicBackdrop>(includeSelf: true);
     }
 
+    /// <summary>A task's result, which it has to have already: reading one that never completes would block the UI thread for good.</summary>
+    private static T Done<T>(Task<T> task)
+    {
+        Assert.True(task.IsCompletedSuccessfully, $"the task is {task.Status}");
+        return task.Result;
+    }
+
     private static OverlayLayer Layer(Visual overlay) => (OverlayLayer)overlay.GetVisualParent()!.GetVisualParent()!;
 
     // ── O1: present ──────────────────────────────────────────────────────────────────────────
@@ -279,7 +286,7 @@ public class AvonicOverlayTests
 
         stage.At(400);
         Assert.Equal("didDismiss(d,r)@352", stage.Log[^1]);
-        Assert.True(dismissed.Result);
+        Assert.True(Done(dismissed));
     }
 
     // ── O4, O5, O7: dismiss ──────────────────────────────────────────────────────────────────
@@ -302,7 +309,7 @@ public class AvonicOverlayTests
 
         stage.At(376);
         Assert.Equal("didDismiss(42,ok)@376", stage.Log[^1]);
-        Assert.True(dismissed.Result);
+        Assert.True(Done(dismissed));
         Assert.Null(overlay.GetVisualParent());
         Assert.False(overlay.IsVisible);
         // Every animation is destroyed: the stub's backdrop has no theme, so its own opacity is 1.
@@ -318,15 +325,15 @@ public class AvonicOverlayTests
         var overlay = stage.Watch(new TestOverlay());
         var never = overlay.Dismiss();
         Stage.Settle();
-        Assert.False(never.Result);
+        Assert.False(Done(never));
 
         overlay.Present(stage.Window);
         stage.At(200);
         var first = overlay.Dismiss();
         var second = overlay.Dismiss();
         stage.At(400);
-        Assert.True(first.Result);
-        Assert.False(second.Result);
+        Assert.True(Done(first));
+        Assert.False(Done(second));
         Assert.Single(stage.Log, entry => entry.StartsWith("didDismiss", StringComparison.Ordinal));
     }
 
@@ -377,11 +384,11 @@ public class AvonicOverlayTests
 
         overlay.Dismiss("data", "role");
         Stage.Settle();
-        Assert.Equal(new OverlayEventDetail("data", "role"), will.Result);
+        Assert.Equal(new OverlayEventDetail("data", "role"), Done(will));
         Assert.False(did.IsCompleted);
 
         stage.At(400);
-        Assert.Equal(new OverlayEventDetail("data", "role"), did.Result);
+        Assert.Equal(new OverlayEventDetail("data", "role"), Done(did));
         Assert.Null(parentWhenDid);
 
         // The next one, not the last.
@@ -404,8 +411,8 @@ public class AvonicOverlayTests
 
         overlay.Dismiss("d", "r");
         stage.At(400);
-        Assert.Equal(new OverlayEventDetail("d", "r"), will.Result);
-        Assert.Equal(new OverlayEventDetail("d", "r"), did.Result);
+        Assert.Equal(new OverlayEventDetail("d", "r"), Done(will));
+        Assert.Equal(new OverlayEventDetail("d", "r"), Done(did));
     }
 
     private sealed class ErrorSink : Avalonia.Logging.ILogSink
