@@ -2,16 +2,19 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using Avonic.Components;
 using Avonic.Themes;
 
 namespace Avonic.Sample.Diagnostics;
 
 /// <summary>
 /// The style benchmark in a running app, for a phone, which can't run the test: <see cref="StyleCost"/>'s trees attached to
-/// <paramref name="host"/> and laid out, alternating without and with the app's <see cref="AvonicTheme"/>, which it takes out of
-/// <c>Application.Styles</c> and puts back where it was. One attach at a time on the dispatcher, so that the app keeps drawing and
-/// Android doesn't call it not responding. Its times include the app's own base theme, so compare its rows with a row from this
-/// runner on desktop, not with the headless test's.
+/// <paramref name="host"/> and laid out, alternating without and with the app's <see cref="AvonicTheme"/>. Without it means
+/// <see cref="AvonicComponentsStyles"/> alone, the functional templates the theme layers over, in the theme's place, as the
+/// test's app has: so Avonic's controls keep a template, and anything inside one stays attached. The theme goes back where it was.
+/// One attach at a time on the dispatcher, so that the app keeps drawing and Android doesn't call it not responding. Give it a host
+/// outside Avonic's controls (the shell's), so that its ancestors are the same both ways. Its times include the app's own base
+/// theme, so compare its rows with a row from this runner on desktop, not with the headless test's.
 /// </summary>
 public sealed class StyleCostRunner(
     Panel host,
@@ -41,6 +44,7 @@ public sealed class StyleCostRunner(
         var theme = styles.OfType<AvonicTheme>().FirstOrDefault()
                     ?? throw new InvalidOperationException("The app has no AvonicTheme in Application.Styles to take out and put back.");
         var census = StyleCensus.Count(theme);
+        var stubs = new AvonicComponentsStyles();
         var cells = new List<string>();
         var total = warmUpRounds + rounds;
         for (var kind = 0; kind < _kinds.Count; kind++)
@@ -51,7 +55,7 @@ public sealed class StyleCostRunner(
             {
                 progress?.Report($"Column {kind + 1} of {_kinds.Count}, round {round + 1} of {total}");
                 var index = styles.IndexOf(theme);
-                styles.RemoveAt(index);
+                styles[index] = stubs;
                 double plain;
                 try
                 {
@@ -61,7 +65,7 @@ public sealed class StyleCostRunner(
                 }
                 finally
                 {
-                    styles.Insert(index, theme);
+                    styles[index] = theme;
                 }
 
                 await Settle();

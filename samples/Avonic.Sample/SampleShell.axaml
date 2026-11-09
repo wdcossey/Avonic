@@ -22,6 +22,10 @@
         <TextBlock Name="PerformanceLine" DockPanel.Dock="Bottom" IsVisible="False"
                    FontSize="11" Margin="8,2" TextWrapping="Wrap" />
 
+        <!-- Where the device page's style benchmark attaches its trees: outside Avonic's controls, so that its ancestors are
+             the same with and without the theme, laid out, and clipped so that drawing them costs nothing. -->
+        <Panel Name="BenchmarkHost" DockPanel.Dock="Bottom" Height="1" ClipToBounds="True" IsHitTestVisible="False" />
+
         <ContentControl Name="Host" />
     </DockPanel>
 

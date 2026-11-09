@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Platform;
+using Avalonia.Reactive;
 
 namespace Avonic.Sample;
 
@@ -77,11 +78,12 @@ public static class SafeAreaMode
     }
 
     /// <summary>
-    /// Pads the shell's <paramref name="header"/> by the top, left and right keys, and <paramref name="bottom"/> by the bottom one, as
-    /// long as the result isn't disposed. They're 0 unless Ionic's way is on. The page between isn't padded, as <c>ion-content</c>
-    /// isn't: items pad their own sides.
+    /// Pads the shell's <paramref name="header"/> by the top, left and right keys, its page <paramref name="list"/> by the left,
+    /// right and bottom ones, and <paramref name="bottom"/> by the bottom one, as long as the result isn't disposed. They're 0 unless
+    /// Ionic's way is on. A page isn't padded, as <c>ion-content</c> isn't: items pad their own sides. The sides are physical, as the
+    /// shell is left to right.
     /// </summary>
-    public static IDisposable PadShell(Control shell, Border header, Control bottom)
+    public static IDisposable PadShell(Control shell, Border header, ScrollViewer list, Control bottom)
     {
         double top = 0, left = 0, right = 0, below = 0;
         var baseMargin = bottom.Margin;
@@ -89,11 +91,12 @@ public static class SafeAreaMode
         void Apply()
         {
             header.Padding = new Thickness(left, top, right, 0);
+            list.Padding = new Thickness(left, 0, right, below);
             bottom.Margin = new Thickness(baseMargin.Left + left, baseMargin.Top, baseMargin.Right + right, baseMargin.Bottom + below);
         }
 
         IDisposable Watch(string key, Action<double> set) =>
-            shell.GetResourceObservable(key).Subscribe(new Observer(value =>
+            shell.GetResourceObservable(key).Subscribe(new AnonymousObserver<object?>(value =>
             {
                 set(value is double d ? d : 0);
                 Apply();
@@ -115,21 +118,9 @@ public static class SafeAreaMode
             }
 
             header.Padding = default;
+            list.Padding = default;
             bottom.Margin = baseMargin;
         });
-    }
-
-    private sealed class Observer(Action<object?> next) : IObserver<object?>
-    {
-        public void OnNext(object? value) => next(value);
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
     }
 
     private sealed class Unsubscribe(Action action) : IDisposable

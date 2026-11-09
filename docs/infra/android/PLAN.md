@@ -88,6 +88,10 @@ shape: 5,000 elements at a depth of 20, `TextBlock` then `Border`, 4 warm-up rou
 theme, the median in µs per element, written as a row for the table. The tree, the counts, the median and the row move into the sample's
 `Diagnostics/`, and the test uses them, so the two can't drift.
 
+Without the theme means `AvonicComponentsStyles`, the functional templates, in `AvonicTheme`'s place, as the test's app has. Taking the
+theme out alone would take every Avonic control's template with it, and anything inside one out of the window. The trees go in a panel in
+the shell, outside Avonic's controls, so that their ancestors are the same both ways (both found by the first review).
+
 What differs, and is said beside any row it gives: the runner attaches into the live app, under the sample's `SimpleTheme`, and lays out,
 where the test shows a headless window per round under the test app's styles. So **a phone's row is compared with a desktop row from the same
 runner**, not with the headless test's. The device page runs it a round at a time on the dispatcher, so that the app stays responsive and

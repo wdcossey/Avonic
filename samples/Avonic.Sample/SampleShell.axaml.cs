@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Reactive;
 
 namespace Avonic.Sample;
 
@@ -20,17 +21,11 @@ public partial class SampleShell : UserControl
     private IDisposable? _back;
     private IDisposable? _safeArea;
 
+    private readonly ScrollViewer _index;
+
     public SampleShell()
     {
         InitializeComponent();
-        ShowIndex();
-    }
-
-    /// <summary>Whether a page is shown, rather than the list.</summary>
-    public bool IsShowingPage => BackButton.IsVisible;
-
-    private void ShowIndex()
-    {
         var list = new StackPanel { Margin = new(16) };
         foreach (var (title, create) in Pages)
         {
@@ -43,10 +38,23 @@ public partial class SampleShell : UserControl
             list.Children.Add(button);
         }
 
+        // It scrolls, as a phone may be shorter than the list.
+        _index = new ScrollViewer { Content = list };
+        ShowIndex();
+    }
+
+    /// <summary>Whether a page is shown, rather than the list.</summary>
+    public bool IsShowingPage => BackButton.IsVisible;
+
+    /// <summary>Where the device page's benchmark attaches its trees.</summary>
+    public Panel BenchmarkArea => BenchmarkHost;
+
+    private void ShowIndex()
+    {
         PerformanceLine.IsVisible = false;
         PageTitle.Text = "Avonic";
         BackButton.IsVisible = false;
-        Host.Content = list;
+        Host.Content = _index;
     }
 
     private void ShowPage(string title, Control page)
@@ -64,8 +72,8 @@ public partial class SampleShell : UserControl
         base.OnAttachedToVisualTree(e);
         _topLevel = TopLevel.GetTopLevel(this);
         // After every handler on the route, so that an overlay's, which is added when the first one is presented, comes first.
-        _back = TopLevel.BackRequestedEvent.RouteFinished.Subscribe(new BackObserver(this));
-        _safeArea = SafeAreaMode.PadShell(this, Header, PerformanceLine);
+        _back = TopLevel.BackRequestedEvent.RouteFinished.Subscribe(new AnonymousObserver<RoutedEventArgs>(OnBackRequestFinished));
+        _safeArea = SafeAreaMode.PadShell(this, Header, _index, PerformanceLine);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -93,19 +101,6 @@ public partial class SampleShell : UserControl
 
         e.Handled = true;
         ShowIndex();
-    }
-
-    private sealed class BackObserver(SampleShell shell) : IObserver<RoutedEventArgs>
-    {
-        public void OnNext(RoutedEventArgs value) => shell.OnBackRequestFinished(value);
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
     }
 
     // Only called in a Debug build. A Release build still compiles them, so CI sees them.

@@ -3,7 +3,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avonic.Components.Controls;
 using Avonic.Sample.Diagnostics;
+using Avonic.Themes;
 
 namespace Avonic.Components.Tests.Sample;
 
@@ -50,20 +52,30 @@ public partial class StyleCostRunnerTests
     {
         var styles = Application.Current!.Styles;
         var index = styles.IndexOf(theme);
-        var seen = new List<bool>();
+        var seen = new List<string>();
         var host = new Panel();
         using var scene = new Scene(host);
         Control Make()
         {
-            seen.Add(styles.Contains(theme));
+            seen.Add(styles[index] switch { AvonicTheme => "theme", AvonicComponentsStyles => "stubs", _ => "?" });
             return new Border();
         }
 
         // Two rounds, one of them to warm up, of one element each, for one column.
         Wait(new StyleCostRunner(host, elements: 1, depth: 0, warmUpRounds: 1, rounds: 1, kinds: [Make]).Run());
 
-        Assert.Equal([false, true, false, true], seen);
+        Assert.Equal(["stubs", "theme", "stubs", "theme"], seen);
         Assert.Equal(index, styles.IndexOf(theme));
+    });
+
+    // The functional templates stay without the theme, so a host inside an Avonic control isn't taken out of the window.
+    [AvaloniaFact]
+    public void A_Host_Inside_An_Avonic_Control_Stays_Attached() => InstalledTheme.Run(_ =>
+    {
+        var host = new Panel();
+        using var scene = new Scene(new AvonicContent { Content = new StackPanel { Children = { host } } });
+
+        Assert.Matches(RowShape(), Wait(Runner(host).Run()));
     });
 
     [AvaloniaFact]

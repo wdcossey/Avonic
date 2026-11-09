@@ -9,6 +9,8 @@ using Avalonia.VisualTree;
 using Avonic.Components.Controls;
 using Avonic.Components.Tests.Overlays;
 using Avonic.Sample;
+using Avonic.Sample.Diagnostics;
+using Avonic.Sample.Pages;
 
 namespace Avonic.Components.Tests.Sample;
 
@@ -39,13 +41,16 @@ public class SampleShellTests
 
         public Window Window => Scene.Window;
 
-        public void OpenAPage()
+        public ScrollViewer Index => Assert.IsType<ScrollViewer>(Shell.FindControl<ContentControl>("Host")!.Content);
+
+        public void Open(Func<Button, bool> which)
         {
-            var index = (StackPanel)Shell.FindControl<ContentControl>("Host")!.Content!;
-            index.Children.OfType<Button>().First().RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ((StackPanel)Index.Content!).Children.OfType<Button>().First(which).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Settle();
             Assert.True(Shell.IsShowingPage);
         }
+
+        public void OpenAPage() => Open(_ => true);
 
         /// <summary>What Avalonia does for the platform's back: raises it on the <see cref="TopLevel"/>, and reads <c>Handled</c>.</summary>
         public bool Back(Interactive? from = null)
@@ -71,7 +76,7 @@ public class SampleShellTests
 
         Assert.True(stage.Back());
         Assert.False(stage.Shell.IsShowingPage);
-        Assert.IsType<StackPanel>(stage.Shell.FindControl<ContentControl>("Host")!.Content);
+        Assert.Same(stage.Index, stage.Shell.FindControl<ContentControl>("Host")!.Content);
     }
 
     // Unhandled, Android goes back from the activity, and leaves the app.
@@ -169,7 +174,7 @@ public class SampleShellTests
     }
 
     [AvaloniaFact]
-    public void The_Header_Pads_Itself_By_The_Safe_Area_And_The_Bottom_Line_By_Its_Bottom()
+    public void The_Header_And_The_List_Pad_Themselves_By_The_Safe_Area_And_The_Bottom_Line_By_Its_Bottom()
     {
         using var stage = new Stage();
         var header = stage.Shell.FindControl<Border>("Header")!;
@@ -183,6 +188,7 @@ public class SampleShellTests
         try
         {
             Settle();
+            Assert.Equal(new Thickness(10, 0, 20, 40), stage.Index.Padding);
             Assert.Equal(new Thickness(10, 30, 20, 0), header.Padding);
             Assert.Equal(56 + 30, header.Bounds.Height);
             Assert.Equal(new Thickness(18, 2, 28, 42), line.Margin);
@@ -194,7 +200,19 @@ public class SampleShellTests
 
         Settle();
         Assert.Equal(default, header.Padding);
+        Assert.Equal(default, stage.Index.Padding);
         Assert.Equal(new Thickness(8, 2), line.Margin);
+    }
+
+    // A phone can be shorter than the list.
+    [AvaloniaFact]
+    public void The_List_Scrolls()
+    {
+        using var stage = new Stage();
+        stage.Window.Height = 200;
+        Settle();
+
+        Assert.True(stage.Index.Extent.Height > stage.Index.Viewport.Height);
     }
 
     [AvaloniaFact]
@@ -239,11 +257,9 @@ public class SampleShellTests
     {
         using var stage = new Stage();
         stage.Window.SetRenderScaling(2);
-        var index = (StackPanel)stage.Shell.FindControl<ContentControl>("Host")!.Content!;
-        index.Children.OfType<Button>().Single(b => Equals(b.Content, "device")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        Settle();
+        stage.Open(b => Equals(b.Content, "device"));
 
-        var page = Assert.IsType<Avonic.Sample.Pages.DevicePage>(stage.Shell.FindControl<ContentControl>("Host")!.Content);
+        var page = Assert.IsType<DevicePage>(stage.Shell.FindControl<ContentControl>("Host")!.Content);
         Assert.Equal("No insets on this platform, so the switch does nothing.", page.FindControl<TextBlock>("Insets")!.Text);
         Assert.Contains(" × ", page.FindControl<TextBlock>("Screen")!.Text, StringComparison.Ordinal);
 
@@ -254,6 +270,36 @@ public class SampleShellTests
         }
 
         Frames.Save(stage.Window.CaptureRenderedFrame()!, "avonic-sample-device-page.png");
+    });
+
+    // From the button, through the shell's host, with small counts: the whole path a phone takes, under the installed theme.
+    [AvaloniaFact]
+    public void The_Device_Page_Runs_The_Benchmark_And_Shows_The_Row() => InstalledTheme.Run(_ =>
+    {
+        var make = DevicePage.MakeBenchmark;
+        DevicePage.MakeBenchmark = host => new StyleCostRunner(host, elements: 10, depth: 2, warmUpRounds: 0, rounds: 1);
+        try
+        {
+            using var stage = new Stage();
+            stage.Open(b => Equals(b.Content, "device"));
+            var page = (DevicePage)stage.Shell.FindControl<ContentControl>("Host")!.Content!;
+            var row = page.FindControl<TextBox>("BenchmarkRow")!;
+
+            page.FindControl<AvonicButton>("RunBenchmark")!.RaiseEvent(new RoutedEventArgs(AvonicButton.ClickEvent));
+            var until = DateTime.UtcNow.AddSeconds(30);
+            while (!row.IsVisible && DateTime.UtcNow < until)
+            {
+                Settle();
+            }
+
+            Assert.True(row.IsVisible, page.FindControl<TextBlock>("BenchmarkStatus")!.Text);
+            Assert.StartsWith("| ", row.Text, StringComparison.Ordinal);
+            Assert.Empty(stage.Shell.BenchmarkArea.Children);
+        }
+        finally
+        {
+            DevicePage.MakeBenchmark = make;
+        }
     });
 
     /// <summary>The test clock a millisecond at a time, so that an overlay's animation runs to its end.</summary>

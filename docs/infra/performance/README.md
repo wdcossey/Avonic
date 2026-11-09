@@ -62,8 +62,9 @@ as an app has them. Times are µs per element. A row can go straight in the tabl
 ### On a phone
 
 A phone can't run the test, so the sample's **device** page runs the same thing in the app (`Diagnostics/StyleCostRunner.cs`): the
-same trees, rounds and row, from `Diagnostics/StyleCost.cs`, which the test uses too. It takes the app's `AvonicTheme` out of
-`Application.Styles` and puts it back, attaches into the page and lays out. So its times include the sample's `SimpleTheme`, which the
+same trees, rounds and row, from `Diagnostics/StyleCost.cs`, which the test uses too. Without the theme means
+`AvonicComponentsStyles` in the app's `AvonicTheme`'s place, as the test's app has, so that Avonic's controls keep a template. It
+attaches into a panel in the shell, outside Avonic's controls, so that a tree's ancestors are the same both ways, and lays out. So its times include the sample's `SimpleTheme`, which the
 test's don't, and **a phone's row is compared with a desktop row from the same page**, in the desktop sample's Release build, not with
 the rows above. It says when a row isn't for the table: a Debug build, or Avalonia's diagnostics on. How to run it on the Pixel is in
 [the Android docs](../android/README.md#on-the-device). None has been run yet.

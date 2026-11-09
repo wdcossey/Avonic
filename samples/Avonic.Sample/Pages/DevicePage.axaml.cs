@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Platform;
+using Avalonia.VisualTree;
 using Avonic.Sample.Diagnostics;
 
 namespace Avonic.Sample.Pages;
@@ -16,6 +17,9 @@ public partial class DevicePage : UserControl
 {
     /// <summary>What a benchmark row starts with in the log, to find it there.</summary>
     public const string LogPrefix = "AvonicBenchmark";
+
+    /// <summary>Makes the benchmark for a host: the table's counts, unless a test makes it smaller.</summary>
+    public static Func<Panel, StyleCostRunner> MakeBenchmark { get; set; } = host => new StyleCostRunner(host);
 
     private TopLevel? _topLevel;
     private IInsetsManager? _insets;
@@ -110,11 +114,18 @@ public partial class DevicePage : UserControl
 
     private async Task Benchmark()
     {
+        // The shell's host, outside Avonic's controls, so that a tree's ancestors are the same with and without the theme.
+        if (this.FindAncestorOfType<SampleShell>() is not { } shell)
+        {
+            BenchmarkStatus.Text = "Stopped: the benchmark runs from the sample's own list, in its shell.";
+            return;
+        }
+
         RunBenchmark.IsEnabled = false;
         BenchmarkRow.IsVisible = false;
         try
         {
-            var row = await new StyleCostRunner(BenchmarkHost).Run(new Progress<string>(text => BenchmarkStatus.Text = text));
+            var row = await MakeBenchmark(shell.BenchmarkArea).Run(new Progress<string>(text => BenchmarkStatus.Text = text));
             var caveat = StyleCostRunner.WhyNotForTheTable();
             BenchmarkStatus.Text = caveat is null
                 ? $"Done. The row is from this runner on {RuntimeInformation.OSDescription}: compare it with this runner on desktop."
@@ -123,9 +134,11 @@ public partial class DevicePage : UserControl
             BenchmarkRow.IsVisible = true;
             Console.WriteLine($"{LogPrefix} {RuntimeInformation.OSDescription} {(caveat is null ? "" : $"(not for the table: {caveat}) ")}{row}");
         }
-        catch (InvalidOperationException error)
+        catch (Exception error)
         {
-            BenchmarkStatus.Text = $"Stopped: {error.Message}";
+            // Shown and logged rather than thrown: an exception out of an async click would end the app on a phone.
+            BenchmarkStatus.Text = $"Stopped: {error.GetType().Name}: {error.Message}";
+            Console.WriteLine($"{LogPrefix} stopped: {error}");
         }
         finally
         {

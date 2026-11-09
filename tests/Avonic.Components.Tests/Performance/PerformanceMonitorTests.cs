@@ -127,7 +127,7 @@ public class PerformanceMonitorTests
             Dispatcher.UIThread.RunJobs();
             var shell = window.FindControl<Avonic.Sample.SampleShell>("Shell")!;
             var line = shell.FindControl<TextBlock>("PerformanceLine")!;
-            var index = (StackPanel)shell.FindControl<ContentControl>("Host")!.Content!;
+            var index = (StackPanel)((ScrollViewer)shell.FindControl<ContentControl>("Host")!.Content!).Content!;
             var open = index.Children.OfType<Button>().First(b => (string?)b.Content == "ion-card");
             Assert.False(line.IsVisible);
 

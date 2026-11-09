@@ -96,7 +96,7 @@ the PC: `adb exec-out screencap -p > shot.png`. A recording: `adb shell screenre
    single-view lifetime's `MainView` finds it. It should present like the others, and the status should say "Overlay N presented". If it says
    "wasn't presented", record the message.
 7. **The benchmark.** Install the Release build, open the device page, and tap **Run the style benchmark**. It takes several minutes, and
-   the page flickers while the theme comes off and on: leave the phone alone, screen on. Copy the row from the page, or from the log line
+   the page flickers while the theme's templates come off and on: leave the phone alone, screen on. Copy the row from the page, or from the log line
    starting `AvonicBenchmark`. For a row to compare it with, run the same thing in the desktop sample's Release build on the PC
    (`dotnet run --project samples/Avonic.Sample.Desktop -c Release`, device page), as the phone's row includes the sample's base theme and a
    real layout, where the test's doesn't. Add both rows to the trend in [performance](../performance/README.md), saying which machine.

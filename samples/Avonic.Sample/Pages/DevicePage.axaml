@@ -49,14 +49,12 @@
             <c:AvonicItem>
                 <c:AvonicLabel>
                     <TextBlock Name="BenchmarkStatus" TextWrapping="Wrap"
-                               Text="5,000 elements at a depth of 20, 25 rounds and 4 to warm up, without and with the theme. The page flickers while the theme comes off and on." />
+                               Text="5,000 elements at a depth of 20, 25 rounds and 4 to warm up, without and with the theme. The page flickers while the theme's templates come off and on." />
                 </c:AvonicLabel>
             </c:AvonicItem>
             <c:AvonicButton Name="RunBenchmark" Content="Run the style benchmark" Margin="16,8,16,0" />
             <TextBox Name="BenchmarkRow" IsReadOnly="True" TextWrapping="Wrap" Margin="16,8" IsVisible="False"
                      AutomationProperties.Name="Benchmark row" />
-            <!-- Where the benchmark attaches its trees: laid out, and clipped so that drawing them costs nothing. -->
-            <Panel Name="BenchmarkHost" Height="1" ClipToBounds="True" IsHitTestVisible="False" />
         </StackPanel>
     </c:AvonicContent>
 
