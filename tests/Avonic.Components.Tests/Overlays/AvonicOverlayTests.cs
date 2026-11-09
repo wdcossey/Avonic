@@ -591,6 +591,23 @@ public class AvonicOverlayTests
     }
 
     [AvaloniaFact]
+    public void O9_An_Overlay_Is_Not_The_Top_Until_Its_Animation_Starts()
+    {
+        using var stage = new Stage();
+        var under = stage.Watch(new TestOverlay(), "under ");
+        var top = stage.Watch(new TestOverlay(), "top ");
+        under.Present(stage.Window);
+        stage.At(200);
+
+        // During its willPresent it's still overlay-hidden, so Escape reaches the one under it, as in Ionic.
+        top.IonWillPresent += (_, _) => stage.Key(PhysicalKey.Escape);
+        top.Present(stage.Window);
+        stage.At(600);
+        Assert.Contains(stage.Log, entry => entry.StartsWith("under didDismiss(,backdrop)", StringComparison.Ordinal));
+        Assert.DoesNotContain(stage.Log, entry => entry.StartsWith("top willDismiss", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
     public void O9_The_Back_Button_Dismisses_The_Top_Overlay_And_Is_Handled_Only_Then()
     {
         using var stage = new Stage();

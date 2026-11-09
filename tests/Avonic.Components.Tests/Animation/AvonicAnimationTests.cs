@@ -689,6 +689,21 @@ public class AvonicAnimationTests
     }
 
     [AvaloniaFact]
+    public void A7_A_Horizontal_Percentage_Is_Of_The_Width()
+    {
+        using var clock = new TestClock();
+        var (scene, element) = Stage();
+        using var _ = scene;
+        AvonicAnimation.Create().AddElement(element).FromTo("transform", "translateX(-50%)", "translateX(10%)").Duration(100).Play();
+
+        At(clock, 0);
+        Assert.Equal(-100, Transform(element).M31, 6);
+        At(clock, 48);
+        // 48% of the way from -100 to 20 of a 200 px width.
+        Assert.Equal(-100 + 0.48 * 120, Transform(element).M31, 6);
+    }
+
+    [AvaloniaFact]
     public void A7_None_Interpolates_With_The_Others_Identity()
     {
         using var clock = new TestClock();
