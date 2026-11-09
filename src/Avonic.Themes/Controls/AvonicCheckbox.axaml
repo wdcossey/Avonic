@@ -1,0 +1,240 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicCheckbox Content="Label start" />
+            <c:AvonicCheckbox Content="Checked" Checked="True" />
+            <c:AvonicCheckbox Content="Indeterminate" Indeterminate="True" />
+            <c:AvonicCheckbox Content="Label end" LabelPlacement="End" />
+            <c:AvonicCheckbox Content="Fixed label that is long" LabelPlacement="Fixed" />
+            <c:AvonicCheckbox Content="Stacked" LabelPlacement="Stacked" Checked="True" />
+            <c:AvonicCheckbox Content="Space between, danger" Justify="SpaceBetween" Color="danger" Checked="True" />
+            <c:AvonicCheckbox Content="Disabled" Checked="True" IsEnabled="False" />
+            <c:AvonicCheckbox Content="With helper" HelperText="Helper text" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of checkbox.md.css. Everything here is the checkbox's own, its host classes and its shadow parts, so it's
+         all in this ControlTheme: :in-item is hostContext('ion-item'), and :slot-start and :slot-end are [slot]. Margins in CSS
+         are per side, and a Thickness is all four, so a rule that sets one side repeats the others it meets. -->
+    <ControlTheme x:Key="{x:Type c:AvonicCheckbox}" TargetType="c:AvonicCheckbox">
+        <!-- The page's font, which the host inherits from body: 16, where Avalonia's default is 14. -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="16" />
+        <!-- display: inline-block -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <!-- .checkbox-wrapper -->
+                    <c:CheckboxWrapper Name="PART_Wrapper"
+                                       LabelPlacement="{TemplateBinding LabelPlacement}"
+                                       Justify="{TemplateBinding Justify}"
+                                       Alignment="{TemplateBinding Alignment}">
+                        <!-- .label-text-wrapper: text-overflow: ellipsis; white-space: nowrap; overflow: hidden -->
+                        <StackPanel Name="PART_Label"
+                                    ClipToBounds="True"
+                                    TextBlock.TextWrapping="NoWrap"
+                                    TextBlock.TextTrimming="CharacterEllipsis">
+                            <ContentPresenter Name="PART_Content"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <!-- .checkbox-bottom: padding-top: 4px; font-size: 0.75rem; white-space: normal -->
+                            <Panel Name="PART_Bottom" Margin="0,4,0,0" TextElement.FontSize="12">
+                                <!-- color: var(ion-color-step-700, var(ion-text-color-step-300)) -->
+                                <TextBlock Name="PART_HelperText"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource Avonic.TextColorStep300Brush}" />
+                                <!-- color: var(ion-color-danger) -->
+                                <TextBlock Name="PART_ErrorText"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource Avonic.Color.DangerBrush}" />
+                            </Panel>
+                        </StackPanel>
+                        <!-- .native-wrapper -->
+                        <Panel Name="PART_NativeWrapper" VerticalAlignment="Center">
+                            <!-- .checkbox-icon, the SVG: box-sizing: border-box, so the view box fills what the border leaves -->
+                            <Border Name="PART_Container"
+                                    Width="{DynamicResource Avonic.Checkbox.Size}"
+                                    Height="{DynamicResource Avonic.Checkbox.Size}"
+                                    BorderThickness="{DynamicResource Avonic.Checkbox.BorderWidth}"
+                                    BorderBrush="{DynamicResource Avonic.Checkbox.BorderColor}">
+                                <!-- The SVG's overflow: hidden clips the stroke to the view box. -->
+                                <c:CheckboxMark Name="PART_Mark"
+                                                ClipToBounds="True"
+                                                Checked="{TemplateBinding Checked}"
+                                                Indeterminate="{TemplateBinding Indeterminate}"
+                                                StrokeThickness="{DynamicResource Avonic.Checkbox.CheckmarkWidth}" />
+                            </Border>
+                        </Panel>
+                    </c:CheckboxWrapper>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .checkbox-icon's background and radius, and the path's stroke. In styles, as a binding set in the template is a local
+             value, which no state's rule would beat. -->
+        <Style Selector="^ /template/ Border#PART_Container">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.CheckboxBackground" />
+                    <DynamicResource ResourceKey="Avonic.ItemBackgroundBrush" />
+                </MultiBinding>
+            </Setter>
+            <!-- border-radius: calc(var(size) * .125) -->
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                        <DynamicResource ResourceKey="Avonic.Checkbox.BorderRadius" />
+                        <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.125">
+                            <DynamicResource ResourceKey="Avonic.Checkbox.Size" />
+                        </MultiBinding>
+                    </MultiBinding>
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ c|CheckboxMark#PART_Mark">
+            <Setter Property="Stroke">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.CheckmarkColor" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- transition: var(transition) on the box, from the first frame, as CSS doesn't transition a first style. -->
+        <Style Selector="^:drawn /template/ Border#PART_Container">
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Checkbox.Transition}" />
+        </Style>
+
+        <!-- The justify and alignment classes make the host display: block. -->
+        <Style Selector="^:justify-start, ^:justify-end, ^:justify-space-between, ^:alignment-start, ^:alignment-center">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
+        <!-- :host(.in-item): flex: 1 1 0; width: 100%; height: 100% -->
+        <Style Selector="^:in-item">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="c:FlexRow.Flex" Value="1" />
+        </Style>
+        <!-- height: 100% only resolves in the default slot, which the item stretches. A start or end slot centres it. -->
+        <Style Selector="^:in-item:not(:slot-start):not(:slot-end)">
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <!-- :host([slot=start]), :host([slot=end]): flex: initial; width: auto -->
+        <Style Selector="^:slot-start, ^:slot-end">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="c:FlexRow.Flex" Value="0" />
+        </Style>
+
+        <!-- The label's margins, by placement. start and fixed: 16 at the end; end: 16 at the start; stacked: 16 below. -->
+        <Style Selector="^ /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,0,16,0" />
+        </Style>
+        <Style Selector="^:label-placement-end /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        <!-- flex: 0 0 100px; width: 100px; min-width: 100px; max-width: 200px -->
+        <Style Selector="^:label-placement-fixed /template/ StackPanel#PART_Label">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="MaxWidth" Value="200" />
+        </Style>
+        <!-- transform: scale(0.75), and max-width: calc(100% / 0.75), which the wrapper reads from Css.Scale. The origin is the
+             centre unless an alignment is set. text-align: center on the wrapper. -->
+        <Style Selector="^:label-placement-stacked /template/ c|CheckboxWrapper#PART_Wrapper">
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="b:Css.Scale" Value="0.75" />
+            <Setter Property="RenderTransform" Value="scale(0.75)" />
+        </Style>
+        <Style Selector="^:label-placement-stacked:alignment-start /template/ StackPanel#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+        </Style>
+        <Style Selector="^:label-placement-stacked:alignment-center /template/ StackPanel#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="50%,0%" />
+        </Style>
+        <!-- :host(.checkbox-label-placement-stacked) .checkbox-bottom: font-size: 1rem -->
+        <Style Selector="^:label-placement-stacked /template/ Panel#PART_Bottom">
+            <Setter Property="TextElement.FontSize" Value="16" />
+        </Style>
+
+        <!-- :host(.in-item) .label-text-wrapper: 10 above and below; stacked, 10 above and 16 below. -->
+        <Style Selector="^:in-item /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,10,16,10" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-end /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="16,10,0,10" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-stacked /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,10,0,16" />
+        </Style>
+        <!-- :host(.in-item:not(.checkbox-label-placement-stacked):not([slot])) .native-wrapper: 10 above and below; stacked, 10 below. -->
+        <Style Selector="^:in-item:not(:label-placement-stacked):not(:slot-start):not(:slot-end) /template/ Panel#PART_NativeWrapper">
+            <Setter Property="Margin" Value="0,10" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-stacked /template/ Panel#PART_NativeWrapper">
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+
+        <!-- :host(.checkbox-checked) .checkbox-icon, :host(.checkbox-indeterminate) .checkbox-icon. The border has no transition. -->
+        <Style Selector="^:checked /template/ Border#PART_Container, ^:indeterminate /template/ Border#PART_Container">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.BorderColorChecked" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.CheckboxBackgroundChecked" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color) sets the three to the colour's base and contrast. An unknown colour leaves them invalid: the
+             background transparent, the border its initial currentcolor, and no stroke. -->
+        <Style Selector="^:ion-color:checked /template/ Border#PART_Container, ^:ion-color:indeterminate /template/ Border#PART_Container">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.BorderColorChecked" />
+                    <Binding Path="$parent[c:AvonicCheckbox].(b:ColorPalette.Base)" />
+                    <Binding Path="$parent[c:AvonicCheckbox].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.CheckboxBackgroundChecked" />
+                    <Binding Path="$parent[c:AvonicCheckbox].(b:ColorPalette.Base)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-color /template/ c|CheckboxMark#PART_Mark">
+            <Setter Property="Stroke">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Checkbox.CheckmarkColor" />
+                    <Binding Path="$parent[c:AvonicCheckbox].(b:ColorPalette.Contrast)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.checkbox-disabled): the label at 0.38 and the box at 0.63. A disabled control already takes no input. -->
+        <Style Selector="^:disabled /template/ StackPanel#PART_Label">
+            <Setter Property="Opacity" Value="0.38" />
+        </Style>
+        <Style Selector="^:disabled /template/ Panel#PART_NativeWrapper">
+            <Setter Property="Opacity" Value="0.63" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
