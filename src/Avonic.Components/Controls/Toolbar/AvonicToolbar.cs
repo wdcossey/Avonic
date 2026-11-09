@@ -23,9 +23,8 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(":toolbar-title-default", ":toolbar-title-small", ":toolbar-title-large")]
 public class AvonicToolbar : TemplatedControl
 {
-    /// <summary>What <see cref="OnIonStyle"/> has been told, per type of child, and the keys it has set.</summary>
-    private readonly Dictionary<Type, HashSet<string>> _childStyles = [];
-    private readonly HashSet<string> _appliedChildStyles = [];
+    /// <summary>What <see cref="OnIonStyle"/> has been told, per type of child.</summary>
+    private readonly IonStyleClasses _childStyles = new(":toolbar-");
 
     /// <summary>Ionic <c>color</c>.</summary>
     public static readonly StyledProperty<string?> ColorProperty =
@@ -209,30 +208,7 @@ public class AvonicToolbar : TemplatedControl
     /// <c>childrenStyle</c>: it stops the event, and each true key becomes <c>:toolbar-key</c>, kept per type of child, as Ionic's
     /// by tag name. A title gives <c>:toolbar-title-default</c>, <c>-small</c> or <c>-large</c>. md has no rules on them.
     /// </summary>
-    private void OnIonStyle(object? sender, IonStyleEventArgs e)
-    {
-        e.Handled = true;
-        if (e.Source is null)
-        {
-            return;
-        }
-
-        _childStyles[e.Source.GetType()] = e.Styles.Where(style => style.Value).Select(style => style.Key).ToHashSet();
-
-        var styles = _childStyles.Values.SelectMany(keys => keys).ToHashSet();
-        foreach (var removed in _appliedChildStyles.Except(styles))
-        {
-            PseudoClasses.Remove(":toolbar-" + removed);
-        }
-
-        foreach (var added in styles.Except(_appliedChildStyles))
-        {
-            PseudoClasses.Add(":toolbar-" + added);
-        }
-
-        _appliedChildStyles.Clear();
-        _appliedChildStyles.UnionWith(styles);
-    }
+    private void OnIonStyle(object? sender, IonStyleEventArgs e) => _childStyles.Apply(PseudoClasses, e);
 
     /// <summary>
     /// What has <c>slot="…"</c>: what the slot presents, or what a panel there holds, as a panel stands for the slot. Before the

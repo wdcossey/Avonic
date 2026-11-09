@@ -75,7 +75,7 @@ label has one, and its host makes the content a logical child, so an item's auto
 it, and `c|AvonicLabel > TextBlock.p` is `::slotted(p)` with no `/template/`. The whole box takes input, because a tap
 on its blank part hits the label in Ionic, so the stub's default `Background` is transparent.
 
-**The look is all in `Styles/Label.axaml`, with no control theme in `Avonic.Themes`.** Nearly every rule depends on an
+**The look is all in `Styles/Label.axaml` (but its default, start and end slot margins, which are in `Styles/Item.axaml` since #88), with no control theme in `Avonic.Themes`.** Nearly every rule depends on an
 ancestor, and a `ControlTheme` can't select by ancestor. The rest can't go in a theme either, because `Styles` beat a
 `ControlTheme`, and `:host(.ion-color)` has to beat `:host-context(.item)`. One file in CSS order keeps that visible.
 The stub holds the template, and `Design.PreviewWith` goes in the `Styles` file.

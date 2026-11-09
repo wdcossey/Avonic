@@ -21,7 +21,7 @@ public class AvonicSpinnerCaptureTests
     public void Reference_Page() => InstalledTheme.Run(_ =>
     {
         var frame = Render();
-        Save(frame, "avonic-ion-spinner-page.png");
+        Frames.Save(frame, "avonic-ion-spinner-page.png");
 
         // The large circular spinner's arc, at 350 ms, is over the bottom: dash 50.5 from 7.5 along, 21° to 166°.
         // Its centre is at (16 + 40, 16 + 28 + 16 + 28 + 16 + 40) px, r 33.3 px, at 2×.
@@ -39,43 +39,14 @@ public class AvonicSpinnerCaptureTests
         try
         {
             var frame = Render();
-            Save(frame, "avonic-ion-spinner-page-animated-off.png");
-            AssertSameFrame(expected, frame);
+            Frames.Save(frame, "avonic-ion-spinner-page-animated-off.png");
+            Frames.AssertSameFrame(expected, frame);
         }
         finally
         {
             AvonicConfig.Animated = true;
         }
     });
-
-    private static void Save(WriteableBitmap frame, string name)
-    {
-        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
-        {
-            Directory.CreateDirectory(dir);
-            frame.Save(Path.Combine(dir, name), PngBitmapEncoderOptions.Default);
-        }
-    }
-
-    /// <summary>Every byte of two frames, row by row, as a frame's rows may be padded.</summary>
-    private static unsafe void AssertSameFrame(WriteableBitmap expected, WriteableBitmap actual)
-    {
-        using var a = expected.Lock();
-        using var b = actual.Lock();
-        Assert.Equal(a.Size, b.Size);
-        var differing = 0;
-        for (var y = 0; y < a.Size.Height; y++)
-        {
-            var rowA = new ReadOnlySpan<byte>((byte*)a.Address + y * a.RowBytes, a.Size.Width * 4);
-            var rowB = new ReadOnlySpan<byte>((byte*)b.Address + y * b.RowBytes, b.Size.Width * 4);
-            if (!rowA.SequenceEqual(rowB))
-            {
-                differing++;
-            }
-        }
-
-        Assert.True(differing == 0, $"{differing} rows differ");
-    }
 
     private static WriteableBitmap Render()
     {

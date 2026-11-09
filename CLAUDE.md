@@ -27,7 +27,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          AccessibleText = what a browser names a button from; Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
-                         Css = var(), em, padding and transform values for themes)
+                         Css = var(), em, padding and transform values for themes;
+                         BorderRadius = border-radius with percentages, for themes)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
@@ -139,7 +140,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | CSS specificity | a rule with a pseudoclass or class beats one without, then later beats earlier | Global `Styles` beat a `ControlTheme`, and files in `Styles/` merge in ordinal order |
 | `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c\|AvonicItem:item-input c\|AvonicLabel` |
 | `:host-context(.item)` | `:is(c\|IItemHost) c\|Foo`, which an item, a divider and a group implement, and a list header doesn't. A type, so that it adds no activators and doesn't rise over an app's plain style, as a pseudoclass would | `Styles/Label.axaml` |
-| A `::slotted(ion-foo)` rule that `item.md.css` and `item-divider.md.css` both have, word for word | `:is(c\|IItemHost) /template/ ContentPresenter > c\|AvonicFoo`, one rule for both hosts, in `Styles/Foo.axaml`. A group has no slots, so it costs nothing there | `::slotted(ion-note)` → `Styles/Note.axaml` |
+| A `::slotted(ion-foo)` rule that `item.md.css` and `item-divider.md.css` both have, word for word | `:is(c\|IItemHost) /template/ ContentPresenter > c\|AvonicFoo`, one rule for both hosts, in `Styles/Foo.axaml`, unless it sets `Margin`: then a copy in `Styles/Item.axaml` and `Styles/ItemDivider.axaml` each, after the host's rule for any child. A group has no slots, so it costs nothing there | `::slotted(ion-note)` → `Styles/Note.axaml`; `::slotted(ion-avatar)` → `Item.axaml` and `ItemDivider.axaml` |
+| `::slotted([slot=start])` setting one side, beside a slotted control's own margin | A rule for that control in the host's `Styles/` file, after the host's rule for any child, with no activator, so an app's plain style wins. Tests merge the control's file first and last, and add an app's plain style | `Item.axaml`: a chip's `4,4,16,4`, an avatar's `0,8,16,8`. Beside a stacked label the rule needs an activator, and the app's style loses: record it |
 | `z-index` on a slotted child, over a part outside the slot | The part goes before the slots, as `ZIndex` only sorts siblings | `::slotted(ion-button)` → `PART_Ripple` before `PART_Layout` |
 | A class the app sets | a style class of the same name | `class="ion-text-wrap"` → `Classes="ion-text-wrap"` |
 | `<h1>`…`<h6>`, `<p>` | `TextBlock` with that style class | `<TextBlock Classes="h2" />` |
@@ -150,9 +152,11 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `.ion-focusable`, `.ion-focused` | `FocusVisible.IsEnabled`, `:ion-focused` | |
 | `outline: none` | `FocusAdorner` set to `{x:Null}` in the theme | Unset falls back to the base theme's dashed rectangle. It reads null either way, so a test has to check the `AdornerLayer` |
 | `.ion-activatable:hover` | `:ion-hover`, from `Activatable`, for mouse and pen only | not `:pointerover`, which also applies during a touch |
-| A native `<button>`, with no Ionic member | `Behaviors/NativeButton`, and an extension `Click`, not `IonClick` | On release, every press. A mouse has no movement limit, and a finger has 15 px. A child that handles the press stops it, except a stock `Button`, and so does a handled `Click` from inside. A child's `Tapped` doesn't |
-| Binding a button-like control to a command, with no Ionic member | extensions `Command`, `CommandParameter`, following Avalonia's `Button` | on `AvonicButton`, and `AddOwner` on `AvonicItem` and `AvonicCard`, where they need `Button` |
+| A native `<button>`, with no Ionic member | `Behaviors/NativeButton`, and an extension `Click`, not `IonClick` | On release, every press, and an element's own DOM `click`, with no keys: `AvonicChip`. A mouse has no movement limit, and a finger has 15 px. A child that handles the press stops it, except a stock `Button`, and so does a handled `Click` from inside. A child's `Tapped` doesn't |
+| Binding a button-like control to a command, with no Ionic member | extensions `Command`, `CommandParameter`, following Avalonia's `Button` | on `AvonicButton`, and `AddOwner` on `AvonicItem`, `AvonicCard` and `AvonicChip`, where they need `Button`; always on the chip |
 | string-union prop `'a' \| 'b'` | enum `<Component><Prop>` | `ion-ripple-effect` `type` → `RippleEffectType { Bounded, Unbounded }` |
+| A value of a string union that no md rule styles | Kept, with Ionic's host class as its pseudoclass, and no md rule on it | `TitleSize.Large` → `:size-large`; `HeaderCollapse.Fade` → `:collapse-fade` |
+| A prop that resolves differently by context (`fill = inToolbar ? clear : solid`) | A setter in `Styles/` on the pseudoclass for that context, so a value set on the control wins and its own pseudoclasses follow | `c\|AvonicButton:in-buttons { Fill: Clear }` |
 | visual constant with **no** CSS variable | a literal in the theme, so that it can be restyled | a card's margin of 10 |
 | a constant a control's code needs | a constant in `Avonic.Components` | ripple opacity 0.16, 225 ms expand |
 | `:last-of-type` | `:nth-last-child(1)`, and `ContentPresenter:nth-last-child(1) > c\|AvonicFoo` for templated items | Not of-type: Avalonia has no such selector |
@@ -160,6 +164,8 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `.foo + .bar` | a pseudoclass the control works out from its parent's `Children` | `.list-inset + ion-list.list-inset` → `:after-inset`; `ion-card-header + .card-content-md` → `:after-card-header` |
 | `position: sticky` | `RenderTransform` from `LayoutUpdated` at style priority, in the control | `AvonicItemDivider.Sticky`. It follows the nearest `ScrollViewer`, as CSS follows the nearest scroll container |
 | `background-clip: border-box` under a translucent border | `BackgroundSizing="OuterBorderEdge"` | CSS's default, not Avalonia's |
+| `hostContext('ion-foo', el)` in `render` | A pseudoclass the control works out from its visual ancestors when it's attached and when one of its own props changes, as Ionic reads it at render. Rules read the pseudoclass, not the ancestor | `AvonicButton`'s `:in-toolbar`, `:in-toolbar-color`, `:in-buttons` |
+| `ionStyle` to a host other than an item | The host turns each true key into `:<host>-<key>`, kept per type of child, and handles the event, as Ionic's `stopPropagation`. `IonStyleClasses` does it | `AvonicToolbar`'s `:toolbar-title-large` |
 | `role` from `hostContext` | The peer, if the control is yours. `AutomationProperties.ControlTypeOverride` in `Styles/` otherwise | `AvonicItem` in a list → `ListItem` |
 | `role="heading"`, `aria-level` | `AutomationProperties.HeadingLevelProperty.OverrideDefaultValue<T>(n)`, with a peer of type `Text` | `ion-card-title` → 2 |
 | An element that's inline in a sentence | An `Inline` beside the control, `Avonic<Name>Span : Span`, in a `TextBlock` | `ion-text` → `AvonicText` and `AvonicTextSpan` |
@@ -173,6 +179,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `ion-foo.ion-color .ion-inherit-color` | `c\|Foo:ion-color c\|Bar`, with `Foreground` bound to `$parent[Control].(TextElement.Foreground)` | after `:ion-color`, which it beats |
 | `--ion-safe-area-top` | `Avonic.SafeAreaTop` (`double`), 0 by default, as Avalonia pads its root view itself. The app fills them | also `Bottom`, `Left`, `Right`. `calc(var(--padding-start) + var(--ion-safe-area-left))` → `Css.SafeAreaBox`, which swaps sides in RTL. The item, the divider and the list header read them |
 | `requestAnimationFrame`, `readTask` | `AvonicConfig.RequestFrame` | `TestClock` runs it at 16 ms, so that it asserts the timeline |
+| Ionic's global config (`config.get('foo')`) | A static property on `AvonicConfig`, read when Ionic reads it: in `render()`, that's the first attach and each change of a prop | `spinner` → `AvonicConfig.Spinner` |
 | `overflow: hidden` on a scroller's vertical axis | `Hidden`, with input blocked in the control, not `Disabled`, which resets the position | `ScrollY="False"` |
 | `position: absolute` with no inset, on a slot's child | the child's alignments, at style priority, so an app's value wins | `slot="fixed"` → `Left`, `Top` |
 | `--foo` with a different default per host class | key set to `<b:CssUnset />`, default from an `Avonic.<Name>.Md.*` key as `Css.Var`'s last value | `--background-hover-opacity` → `Avonic.Button.Md.BackgroundHoverOpacitySolid` |
