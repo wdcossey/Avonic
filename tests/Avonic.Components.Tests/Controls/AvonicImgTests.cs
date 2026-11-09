@@ -446,19 +446,21 @@ public class AvonicImgTests
     {
         using var loader = new FakeLoader();
         var img = new AvonicImg { Src = "a.png", Alt = "Alt" };
+        var wrap = new Panel { IsVisible = false, Children = { img } };
         var events = Record(img);
-        Scene? scene = null;
+        using var scene = new Scene(Page(wrap));
+        Layout(scene);
+
+        // Shown, it loads from the check after the layout, and the handler moves it and lays it out again, at once
         img.IonImgWillLoad += (_, _) =>
         {
-            img.Margin = new Thickness(0, 1, 0, 0);
-            scene?.Window.UpdateLayout();
+            img.Margin = new Thickness(0, events.Count, 0, 0);
+            scene.Window.UpdateLayout();
         };
-        using (scene = new Scene(Page(img)))
-        {
-            Layout(scene);
-            Assert.Equal(["willLoad"], events);
-            Assert.Single(loader.Requests);
-        }
+        wrap.IsVisible = true;
+        Layout(scene);
+        Assert.Equal(["willLoad"], events);
+        Assert.Single(loader.Requests);
     }
 
     [AvaloniaFact]
@@ -519,6 +521,29 @@ public class AvonicImgTests
     }
 
     // ── 12. A null src ───────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B11_A_Picture_That_Arrives_After_A_Change_Is_Dropped()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        var events = Record(img);
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+
+        // a's picture is ready, but its continuation hasn't run when b takes over: it finished before it could be cancelled
+        var late = TestPicture.Create(300, 200);
+        // From the thread pool, as a real fetch finishes, so that its continuation waits for the UI thread
+        Task.Run(() => loader.Requests[0].Completion.SetResult(late)).Wait();
+        img.Src = "b.png";
+        scene.Window.UpdateLayout();
+        Assert.Equal("b.png", loader.Requests[1].Src);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(["willLoad", "willLoad"], events);
+        Assert.Null(img.Picture);
+        Assert.Throws<ObjectDisposedException>(() => late.Lock().Dispose());
+    }
 
     [AvaloniaFact]
     public void B11_A_Change_While_Another_Loads_Keeps_The_Picture_Shown_And_Raises_No_Error()
