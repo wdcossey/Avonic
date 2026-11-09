@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SkeletonTextPage">
+
+    <!-- The list from Ionic's skeleton-text docs, as in the reference render at the top of
+         docs/components/ion-skeleton-text/COMPARISON.md, then the plain bars. Percent widths are fixed widths here. -->
+    <ScrollViewer>
+        <StackPanel Name="Page">
+            <c:AvonicList>
+                <c:AvonicListHeader>
+                    <c:AvonicSkeletonText Animated="True" Width="80" HorizontalAlignment="Left" />
+                </c:AvonicListHeader>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicThumbnail>
+                            <c:AvonicSkeletonText Animated="True" />
+                        </c:AvonicThumbnail>
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicLabel>
+                        <StackPanel>
+                            <c:AvonicSkeletonText Animated="True" Width="228.8" HorizontalAlignment="Left" Margin="0,6,0,6" />
+                            <c:AvonicSkeletonText Animated="True" Width="171.6" HorizontalAlignment="Left" />
+                            <c:AvonicSkeletonText Animated="True" Width="85.8" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </c:AvonicLabel>
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicAvatar>
+                            <c:AvonicSkeletonText Animated="True" />
+                        </c:AvonicAvatar>
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicLabel>
+                        <c:AvonicSkeletonText Animated="True" />
+                    </c:AvonicLabel>
+                </c:AvonicItem>
+            </c:AvonicList>
+
+            <StackPanel Margin="16">
+                <TextBlock Text="Not animated" FontWeight="SemiBold" />
+                <c:AvonicSkeletonText />
+                <c:AvonicSkeletonText Width="200" HorizontalAlignment="Left" />
+                <TextBlock Text="Animated" FontWeight="SemiBold" Margin="0,8,0,0" />
+                <c:AvonicSkeletonText Name="Toggled" Animated="True" />
+                <c:AvonicButton Content="Animated on or off" Click="OnToggle" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

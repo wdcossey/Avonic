@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White" Margin="16" Spacing="8">
+            <c:AvonicImg Alt="A picture that hasn't loaded" />
+            <c:AvonicAvatar>
+                <c:AvonicImg Alt="In an avatar" />
+            </c:AvonicAvatar>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of img.css. ion-img has no variables: it's a block as wide as its parent, with the picture in it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicImg}" TargetType="c:AvonicImg">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <!-- img { display: block; width: 100%; height: 100%; object-fit: inherit }, and the host's object-fit: contain.
+                         As wide as the host, and as tall as the picture's aspect ratio makes it, centred in a box of its own size. -->
+                    <Image Name="PART_Image" Stretch="Uniform" IsVisible="False" />
+                    <!-- A browser's alt text, in the inherited font and colour -->
+                    <TextBlock Name="PART_Alt" Text="{TemplateBinding Alt}" IsVisible="False" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ::slotted(ion-img) in avatar.md.css and thumbnail.css: border-radius: var(border-radius); width: 100%;
+             height: 100%; object-fit: cover; overflow: hidden. Here, not in Styles/, as the control works out where it is: see
+             docs/components/ion-img/PLAN.md. UniformToFill is cover, cropped from the middle. The clip is on the Image, which
+             Avalonia doesn't mirror in right-to-left, so its corners are physical, as CSS's are. Cover fills the box by itself: it
+             measures to the whole of it, so height: 100% needs nothing more. -->
+        <Style Selector="^:in-avatar /template/ Image#PART_Image, ^:in-thumbnail /template/ Image#PART_Image">
+            <Setter Property="Stretch" Value="UniformToFill" />
+        </Style>
+        <Style Selector="^:in-avatar /template/ Image#PART_Image">
+            <Setter Property="Clip">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
+                    <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-thumbnail /template/ Image#PART_Image">
+            <Setter Property="Clip">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
+                    <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

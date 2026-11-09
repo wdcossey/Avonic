@@ -1,0 +1,102 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White" Margin="16">
+            <c:AvonicSkeletonText />
+            <c:AvonicSkeletonText Width="200" HorizontalAlignment="Left" />
+            <c:AvonicSkeletonText Animated="True" />
+            <c:AvonicAvatar>
+                <c:AvonicSkeletonText Animated="True" />
+            </c:AvonicAvatar>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of skeleton-text.css. The control moves the band; this paints it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSkeletonText}" TargetType="c:AvonicSkeletonText">
+        <!-- margin-top: 4px; margin-bottom: 4px. There's no variable for them. -->
+        <Setter Property="Margin" Value="0,4" />
+        <!-- height: inherit: a parent with a height gives it that height, and auto leaves it to the line inside -->
+        <Setter Property="Height" Value="{Binding $parent[Control].Height}" />
+        <!-- background: var(background), which is rgba(var(background-rgb, var(ion-text-color-rgb)), 0.065) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.BackgroundOrRgba}" ConverterParameter="0.065">
+                <DynamicResource ResourceKey="Avonic.SkeletonText.Background" />
+                <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
+                <DynamicResource ResourceKey="Avonic.TextColor" />
+            </MultiBinding>
+        </Setter>
+        <!-- border-radius: var(border-radius, inherit). The parent's radius is its visual parent's, 0 on a panel, as on a div. -->
+        <Setter Property="CornerRadius">
+            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.RadiusOrInherit}">
+                <DynamicResource ResourceKey="Avonic.SkeletonText.BorderRadius" />
+                <Binding Path="$parent[Control].(Border.CornerRadius)" />
+                <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Background"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <!-- The band: linear-gradient(to right, rgba(rgb, 0.065) 8%, rgba(rgb, 0.135) 18%, rgba(rgb, 0.065) 33%),
+                             in a tile of background-size 800px, which repeats. The control makes the part 800 wider than the
+                             host and moves it, as background-position moves the tile. -->
+                        <Border Name="PART_Shimmer" IsVisible="False">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="800,0" SpreadMethod="Repeat">
+                                    <GradientStop Offset="0.08">
+                                        <GradientStop.Color>
+                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.065">
+                                                <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
+                                                <DynamicResource ResourceKey="Avonic.TextColor" />
+                                            </MultiBinding>
+                                        </GradientStop.Color>
+                                    </GradientStop>
+                                    <GradientStop Offset="0.18">
+                                        <GradientStop.Color>
+                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.135">
+                                                <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
+                                                <DynamicResource ResourceKey="Avonic.TextColor" />
+                                            </MultiBinding>
+                                        </GradientStop.Color>
+                                    </GradientStop>
+                                    <GradientStop Offset="0.33">
+                                        <GradientStop.Color>
+                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.065">
+                                                <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
+                                                <DynamicResource ResourceKey="Avonic.TextColor" />
+                                            </MultiBinding>
+                                        </GradientStop.Color>
+                                    </GradientStop>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <!-- span { display: inline-block } holding a no-break space, at line-height: 10px, whatever the font -->
+                        <Panel Height="10" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.skeleton-text-animated) { background: linear-gradient(…) }, which replaces the plain background -->
+        <Style Selector="^:animated">
+            <Setter Property="Background" Value="{x:Null}" />
+        </Style>
+        <Style Selector="^:animated /template/ Border#PART_Shimmer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- :host(.in-media) { margin: 0; height: 100% }: it fills an avatar or a thumbnail -->
+        <Style Selector="^:in-media">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Height" Value="NaN" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
