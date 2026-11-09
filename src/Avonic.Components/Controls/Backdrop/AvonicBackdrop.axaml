@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-backdrop: structure only. The look is in Avonic.Themes/Controls/AvonicBackdrop.axaml. It fills its parent, as
+         inset: 0 does, and the transparent panel makes the whole of it take a tap whatever its background, as a div does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBackdrop}" TargetType="c:AvonicBackdrop">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <Border Name="PART_Background" Background="{TemplateBinding Background}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

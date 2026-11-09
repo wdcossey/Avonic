@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="200">
+            <TextBlock Text="Under the backdrop" Margin="16" />
+            <!-- As an overlay's enter animation leaves it: the backdrop opacity. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of backdrop.md.css. touch-action: none, contain: strict and translateZ(0) have nothing to do here: an
+         overlay isn't in a ScrollViewer, and the other two are hints to the browser's renderer. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBackdrop}" TargetType="c:AvonicBackdrop">
+        <!-- opacity: 0.01. An overlay's enter animation takes it to its backdrop opacity, Avonic.BackdropOpacity. -->
+        <Setter Property="Opacity" Value="0.01" />
+        <!-- background-color: var(ion-backdrop-color, #000) -->
+        <Setter Property="Background" Value="{DynamicResource Avonic.BackdropColorBrush}" />
+        <!-- z-index: 2, over the overlay's parts before it and under its wrapper's 10 -->
+        <Setter Property="ZIndex" Value="2" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <Border Name="PART_Background" Background="{TemplateBinding Background}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- backdrop-hide: background: transparent. Transparent, not null, so that it still takes the tap. -->
+        <Style Selector="^:backdrop-hide">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <!-- backdrop-no-tappable: cursor: auto -->
+        <Style Selector="^:backdrop-no-tappable">
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

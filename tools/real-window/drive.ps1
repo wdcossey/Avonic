@@ -554,6 +554,56 @@ try {
         Away
     }
 
+    # The overlay system's test vehicle (#5): present with a real click, then Escape, a click on the backdrop, the backdrop that
+    # can't dismiss, Tab staying inside, and two stacked. The status line says what each overlay was dismissed with.
+    Section 'overlays: present, Escape, backdrop, focus trap, stacking' {
+        Open 'overlays'
+        function PresentWith($name) {
+            $x, $y = Centre (Named $CT::Button $name)
+            Click $x $y
+            Start-Sleep -Milliseconds 500
+        }
+        $w = $win.Current.BoundingRectangle
+        # Above the box, which is in the middle: the backdrop.
+        $bx = [int]($w.X + 20 * $scale)
+        $by = [int]($w.Y + $w.Height * 0.15)
+
+        PresentWith 'Present an overlay'
+        Shot 'overlays-presented'
+        Check 'a click presents the overlay' ([bool](WaitForText 'Overlay 1 presented')) ((Texts | Select-Object -First 4) -join ' | ')
+        Key '{ESC}' 600
+        Check 'Escape dismisses it with the backdrop role' ([bool](WaitForText 'Overlay 1 dismissed, role backdrop')) (FirstText 'Overlay 1*')
+
+        PresentWith 'Present an overlay'
+        Click $bx $by
+        Start-Sleep -Milliseconds 500
+        Check 'a click on the backdrop dismisses it' ([bool](WaitForText 'Overlay 2 dismissed, role backdrop')) (FirstText 'Overlay 2*')
+
+        PresentWith "Present one the backdrop can't dismiss"
+        Click $bx $by
+        Key '{ESC}' 600
+        Check "the backdrop and Escape don't dismiss one that doesn't allow it" ([bool](FirstText 'Overlay 3 presented')) (FirstText 'Overlay 3*')
+        1..4 | ForEach-Object { Key '{TAB}' 200 }
+        $focused = $AE::FocusedElement.Current.Name
+        Check 'Tab stays inside the overlay' ($focused -in @('Stack another', 'Dismiss', '')) $focused
+        Shot 'overlays-trapped'
+        $x, $y = Centre (Named $CT::Button 'Dismiss')
+        Click $x $y
+        Start-Sleep -Milliseconds 500
+        Check 'its own button dismisses it' ([bool](WaitForText 'Overlay 3 dismissed, role cancel')) (FirstText 'Overlay 3*')
+
+        PresentWith 'Present an overlay'
+        $x, $y = Centre (Named $CT::Button 'Stack another')
+        Click $x $y
+        Start-Sleep -Milliseconds 500
+        Shot 'overlays-stacked'
+        Check 'a second overlay stacks on the first' ([bool](WaitForText 'Overlay 5 presented')) ((Texts | Where-Object { $_ -like 'Overlay*' }) -join ' | ')
+        Key '{ESC}' 600
+        Key '{ESC}' 600
+        Check 'Escape dismisses the top one, then the next' ([bool](WaitForText 'Overlay 4 dismissed, role backdrop')) (FirstText 'Overlay 4*')
+        Away
+    }
+
     Check 'the app is still running' (-not $p.HasExited)
 }
 finally {
