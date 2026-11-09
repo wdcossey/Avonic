@@ -164,7 +164,7 @@ template has `PART_Image` and a `TextBlock` for the alt text, and the control sh
 `::slotted(ion-img)` is the avatar's and the thumbnail's, so it would go in a `Styles/` file, but the style budget is at its limit,
 and those two rules would add two alternatives that every element in an app pays for. So the control works out `:in-avatar` and
 `:in-thumbnail` from its parent when it's attached, as `::slotted` matches a direct child, and its `ControlTheme` gives it the
-cover, the fill and the clip there, at no cost to anything else. The clip is on `PART_Image`, which Avalonia doesn't mirror in
+cover, which fills the box, and the clip there, at no cost to anything else. The clip is on `PART_Image`, which Avalonia doesn't mirror in
 right-to-left, so a radius that isn't the same at every corner stays where CSS puts it. A theme rule also loses to an app's style, as `::slotted` loses
 to an outer stylesheet.
 
