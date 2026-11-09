@@ -22,16 +22,22 @@ Ionic implementation before writing a line, and you build and test before every 
 ```
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
-  Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template
+  Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template; MinContent, the
+                         min-content width both FlexRow and the grid's RowPanel use
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
                          AccessibleText = what a browser names a button from; Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
-                         BorderRadius = border-radius with percentages, for themes)
+                         BorderRadius = border-radius with percentages, for themes;
+                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
+  Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back),
+                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md)
+  Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
+                         as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -86,6 +92,23 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-button` | `AvonicButton` (+ `ButtonInner`, its template's inner part; `Command`, `TextTransform` as extensions) | done — [docs](docs/components/ion-button/README.md) |
 | `ion-content` | `AvonicContent` | done — [docs](docs/components/ion-content/README.md) |
 | `ion-card` | `AvonicCard`, `AvonicCardHeader`, `AvonicCardTitle`, `AvonicCardSubtitle`, `AvonicCardContent` | done — [docs](docs/components/ion-card/README.md) |
+| `ion-header` | `AvonicHeader` | done — [docs](docs/components/ion-header/README.md) |
+| `ion-footer` | `AvonicFooter` | done — [docs](docs/components/ion-footer/README.md) |
+| `ion-toolbar` | `AvonicToolbar` | done — [docs](docs/components/ion-toolbar/README.md) |
+| `ion-title` | `AvonicTitle` | done — [docs](docs/components/ion-title/README.md) |
+| `ion-buttons` | `AvonicButtons` | done — [docs](docs/components/ion-buttons/README.md) |
+| `ion-grid` | `AvonicGrid` | done — [docs](docs/components/ion-grid/README.md) |
+| `ion-row` | `AvonicRow` (+ `RowPanel`, the row's panel) | done — [docs](docs/components/ion-grid/README.md) |
+| `ion-col` | `AvonicCol` | done — [docs](docs/components/ion-grid/README.md) |
+| `ion-spinner` | `AvonicSpinner` (`AvonicConfig.Spinner` = Ionic's `spinner` config) | done — [docs](docs/components/ion-spinner/README.md) |
+| `ion-badge` | `AvonicBadge` | done — [docs](docs/components/ion-badge/README.md) |
+| `ion-avatar` | `AvonicAvatar` | done — [docs](docs/components/ion-avatar/README.md) |
+| `ion-thumbnail` | `AvonicThumbnail` | done — [docs](docs/components/ion-thumbnail/README.md) |
+| `ion-img` | `AvonicImg` | done — [docs](docs/components/ion-img/README.md) |
+| `ion-skeleton-text` | `AvonicSkeletonText` | done — [docs](docs/components/ion-skeleton-text/README.md) |
+| `ion-progress-bar` | `AvonicProgressBar` | done — [docs](docs/components/ion-progress-bar/README.md) |
+| `ion-chip` | `AvonicChip` (+ `Click`, from `Behaviors.NativeButton`, and `Command`, as extensions) | done — [docs](docs/components/ion-chip/README.md) |
+| `ion-backdrop` | `AvonicBackdrop` (with the [overlay system](docs/infra/overlays/README.md)) | done — [docs](docs/components/ion-backdrop/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
 each priority tier, not by the control's own PR, so a recently finished control may be missing. For
@@ -174,6 +197,10 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `align-items` on a flex row | `VerticalContentAlignment` on its `FlexSlot`s | `.item-label-stacked` → `Top` |
 | `align-self` on a slotted child | Its `VerticalAlignment`, which `FlexSlot` honours once it's set | `ion-note` → `Top`. A control aligned some way by default uses `OverrideDefaultValue`, not its theme, whose value counts as set: `AvonicButton`, `AvonicIcon` |
 | `overflow: hidden` on a flex item | `ClipToBounds` set on it, as `FlexRow` reads it to take the minimum away | `.ion-text-nowrap`. A `TemplatedControl` clips by default, and that doesn't count |
+| `@media (min-width: …)`, `matchMedia` | Cumulative pseudoclasses `:breakpoint-sm`, `:breakpoint-md`, `:breakpoint-lg`, `:breakpoint-xl`, each set from that width of the `TopLevel`'s client width up (a popup's: the `TopLevel` it belongs to), so a theme's later rule wins as the later query does | `ion-grid`'s padding; `ion-col`'s sizes per breakpoint |
+| `display: flex; flex-wrap: wrap` around columns | `RowPanel`, which reads what each `AvonicCol` works out from its props | `ion-row` |
+| A `:host(.foo)` rule that sets CSS variables for what's inside | A `ResourceDictionary` the control merges into its own `Resources` while the class is on, so an app's own key there still wins | `ion-grid.ion-no-padding` → the six `Avonic.GridColumnPadding*` keys at 0 |
+| `width: Npx; max-width: 100%; margin: auto` | `MaxWidth` on a stretched control | `ion-grid[fixed]` |
 | A slotted child with no height of its own, in a panel | It collapses, as `align-items: center` does in CSS. `VerticalAlignment="Stretch"` on it fills the panel | A background behind text: put the `Grid` in a `Border`, which isn't a panel |
 | `::slotted(ion-foo:not(:first-child))` | `c\|Host > :is(Panel) > c\|Foo:not(:nth-child(1))` | a panel stands for the slot |
 | `ion-foo.ion-color .ion-inherit-color` | `c\|Foo:ion-color c\|Bar`, with `Foreground` bound to `$parent[Control].(TextElement.Foreground)` | after `:ion-color`, which it beats |
@@ -191,10 +218,24 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `object-fit: cover` | `Stretch="UniformToFill"` | `::slotted(img)` in `ion-avatar` |
 | A shape drawn by animated SVG in the shadow DOM | Drawn in code from the same config, on `AvonicConfig`'s clock, with constants in `Avonic.Components` | `ion-spinner`'s nine names |
 | `createGesture`, `GESTURE_CONTROLLER` | `Gesture.Create(GestureConfig)`, `GestureController.Instance`; `ionGestureCaptured` → `IonGestureCaptured` | Capturing takes Avalonia's pointer capture, which cancels a pressed `Button` or `Activatable` surface; losing it outside the element is `touchcancel` |
+| An overlay (`present`, `dismiss`, `onDidDismiss`) | A control deriving from `AvonicOverlay`; what only some overlays have is a protected override | `backdropDismiss` → the property, and `BackdropDismissEnabled` returning it |
+| `createAnimation()` | `AvonicAnimation.Create()`, members in PascalCase; CSS values as strings, `var()` read from the resource by the builder | `.fromTo('opacity', 0.01, 'var(--backdrop-opacity)')` → `.FromTo("opacity", 0.01, backdropOpacity)` |
+| `Promise<T>` of an overlay | `Task<T>`, completing on the dispatcher with continuations run asynchronously, as a promise's | `onDidDismiss()` → `OnDidDismiss()` |
+| An overlay's generic `willPresent`, `didPresent`, `willDismiss`, `didDismiss` | `WillPresent`, `DidPresent`, `WillDismiss`, `DidDismiss` on `AvonicOverlay`; each control adds its per-control `Ion<Name>WillPresent` set | `ion<Name>WillPresent` → `Ion<Name>WillPresent`, from the first overlay control (P3) |
+| `ionBackButton` at a priority | `TopLevel.BackRequested`, handled when acted on, until `ion-app` (#65) brings the registry | an overlay's 100 |
 | A text node beside slotted elements | Not counted for `:nth-child`: the host's `IChildIndexProvider` skips an item shown as its text | `AvonicChip` |
 | A host that wraps every item in a slot | Clear `ContentTemplate` on the slot for a control, as a stock `ItemsControl` doesn't wrap a control | `AvonicChip` |
 | A CSS transition on a value the control computes | A transition on `AvonicConfig`'s clock, from the value shown, with CSS's reversing shortening factor, and none before the control's first frame | `AvonicProgressBar`'s progress and track (`transition: transform 150ms linear`) |
-| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar`. `AvonicSpinner` differs: it restarts on any show |
+| `cubic-bezier(…)` on a CSS transition or animation | `CubicBezierEasing`, and `Easing="{a:CubicBezier 0.4, 0, 0.2, 1}"` in XAML, not `Easing="0.4,0,0.2,1"`, which Avalonia reads as its `SplineEasing`, about 2e-3 out | `ion-label`'s float, `ion-button`'s shadow, the ripple |
+| `display: none` on the control or an ancestor stops its CSS animations | Stop the frames when a frame finds it hidden, and restart from 0 when every hidden visual in its chain shows. A hide and show between two frames restarts nothing, as in Chromium | `AvonicProgressBar`, `AvonicSkeletonText`, with `HiddenChainWatcher`. `AvonicSpinner` differs: it restarts on any show |
+| `IntersectionObserver` with no `rootMargin` | `EffectiveViewportChanged`, listened to only while waiting, an edge counting. Ask for an arrange when starting, as a new listener hears nothing until a layout pass; watch the hidden chain with `HiddenChainWatcher`, as showing raises nothing; check again after a pass that changed the size. A viewport of no width and no height intersects nothing | `AvonicImg` |
+| An `<img src>` | `AvonicImg.Loader`, internal: `http(s)`, `data:` base64, `avares:`, `file:`, paths, read and decoded on the thread pool; tests replace it | `ion-img` |
+| What a browser draws for an `<img>` with no picture (the broken-image icon, the alt text, the box) | Parts of the template, which the control shows when Chromium shows its own, measured; the icon as path data in the theme, Avonic's own drawing, with `Avonic.<Name>.*Brush` keys. An inline icon is an empty inline space with the icon drawn over it, as an embedded control with a resource is measured during the render | `AvonicImg`'s `PART_Alt`, `PART_Broken` |
+| `background-position` animated over a repeating gradient | A part one tile wider than the host, painted by the theme, moved by its `RenderTransform` on `AvonicConfig`'s clock. Physical in RTL: the part is left to right, and its move is mirrored | `AvonicSkeletonText`'s `PART_Shimmer` |
+| `height: inherit` | `Height` bound to `$parent[Control].Height` in the theme | `AvonicSkeletonText` |
+| `border-radius: inherit` | `$parent[Control].(Border.CornerRadius)`, which a panel doesn't have, so 0 | `AvonicSkeletonText.RadiusOrInherit` |
+| `::slotted(ion-foo)` in another control's CSS, when the style budget is tight | A pseudoclass the child works out from its `Parent` when it's attached, and rules in its own `ControlTheme`, which cost nothing elsewhere and lose to an app's style as `::slotted` does | `AvonicImg`'s `:in-avatar`, `:in-thumbnail` |
+| Vertical margins between blocks collapse | Not in Avalonia: a `StackPanel` adds both. Record it; an app sets one side | `AvonicSkeletonText` |
 | A slot order that differs from the DOM's (flex `order`) | The template puts the slots in visual order, and each slot is its own tab group, with a `TabIndex` in DOM order, inside a container with `KeyboardNavigation.TabNavigation="Local"` so that the indexes don't mix with the window's | `AvonicToolbar`'s md order, `PART_Container` |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate

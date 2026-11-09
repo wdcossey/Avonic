@@ -1177,6 +1177,28 @@ public class AvonicLabelTests
     });
 
     [AvaloniaFact]
+    public void B17_Its_Transitions_Ease_On_Chromiums_Curve() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var floating = new AvonicLabel { Content = "x", Position = LabelPosition.Floating };
+        var stacked = new AvonicLabel { Content = "x", Position = LabelPosition.Stacked };
+        using var scene = InScene(new AvonicItem { Content = floating }, new AvonicItem { Content = stacked });
+
+        clock.At(1000);
+        Dispatcher.UIThread.RunJobs();
+
+        // cubic-bezier(.4, 0, .2, 1) at an input progress of 40/225 and 160/225, the points measured for the ripple in Chromium 141
+        // with Element.animate. The curve, not this transition's timeline.
+        var easings = floating.Transitions!.Concat(stacked.Transitions!).Select(transition => ((TransitionBase)transition).Easing).ToList();
+        Assert.Equal(4, easings.Count);
+        Assert.All(easings, easing =>
+        {
+            Assert.Equal(0.09974292315785675, easing.Ease(40.0 / 225), 1e-6);
+            Assert.Equal(0.9434380803962631, easing.Ease(160.0 / 225), 1e-6);
+        });
+    });
+
+    [AvaloniaFact]
     public void B17_A_Change_Of_Size_Moves_It_At_Once() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();

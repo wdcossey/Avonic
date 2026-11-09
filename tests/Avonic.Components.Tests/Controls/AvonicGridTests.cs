@@ -123,6 +123,37 @@ public class AvonicGridTests
     });
 
     [AvaloniaFact]
+    public void B2_A_Templated_Columns_Margin_Is_Outside_Its_Width() => InstalledTheme.Run(_ =>
+    {
+        // flex: 0 0 50% is the border box, so a margin makes the two too wide for one line, as it does a column of the row's own.
+        var row = new AvonicRow
+        {
+            ItemsSource = new[] { "a", "b" },
+            ItemTemplate = new FuncDataTemplate<string>((text, _) => new AvonicCol { Size = "6", Margin = new Thickness(10, 0, 10, 0), Content = text }),
+        };
+        using var scene = Show(Grid(row));
+
+        var columns = row.GetVisualDescendants().OfType<AvonicCol>().ToList();
+        Near(190, Width(columns[0]));
+        Near(15, X(columns[1], scene));
+        Near(Box(columns[0], scene.Window).Bottom, Box(columns[1], scene.Window).Y);
+    });
+
+    [AvaloniaFact]
+    public void B2_A_Templated_Item_That_Grows_Fills_The_Row() => InstalledTheme.Run(_ =>
+    {
+        // Not a column: flex: 0 1 auto, unless it has a flex of its own, as a grid's flex: 1 does.
+        var row = new AvonicRow
+        {
+            ItemsSource = new[] { "a" },
+            ItemTemplate = new FuncDataTemplate<string>((_, _) => new Border { Height = 10, [FlexRow.FlexProperty] = 1d }),
+        };
+        using var scene = Show(Grid(row));
+
+        Near(380, Width(row.GetVisualDescendants().OfType<Border>().Single(border => border.Height == 10)));
+    });
+
+    [AvaloniaFact]
     public void B2_A_Change_Of_Size_Lays_The_Row_Out_Again() => InstalledTheme.Run(_ =>
     {
         AvonicCol changed = Col("4."), rest = Col();

@@ -136,8 +136,8 @@ translucent.
 
 Ionic's are CSS, so they run on the compositor and can't be observed. Here they're one frame loop on
 `AvonicConfig.RequestFrame`, which `TestClock` drives at 16 ms, so a test can ask for 1000 ms and compare against the
-measured span. Each segment of the keyframes is a CSS `cubic-bezier`, solved for x as Chromium does (bisection and Newton on
-the unit Bézier), because Avalonia's `SplineEasing` isn't specified for a control point outside 0..1, and the last secondary
+measured span. Each segment of the keyframes is a CSS `cubic-bezier`, solved for x as Chromium does (Newton's method, then bisection, on
+the unit Bézier; `CubicBezierEasing` since the P1 roll-up), because Avalonia's `SplineEasing` isn't specified for a control point outside 0..1, and the last secondary
 segment has `y = 1.38179`.
 
 The transitions are on the same clock: a target, the value shown, and the time the change began. Interrupting one starts a

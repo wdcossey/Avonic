@@ -860,4 +860,18 @@ public class FlexRowTests
 
         Assert.Equal("styled", slot.Tag);
     }
+
+    [AvaloniaFact]
+    public void A_Wrapping_Row_In_It_Shrinks_To_Its_Widest_Items_Narrowest()
+    {
+        // ion-row is flex-wrap: wrap, so its min-content is its widest item's, not what it was on one line less its widest.
+        var widest = Text("cccccc d");
+        var row = new RowPanel { Children = { Text("aaaa bb"), widest } };
+        using var scene = InRow(150, out _, Fixed(140), row);
+        Settle();
+
+        var word = new TextBlock { Text = "cccccc" };
+        word.Measure(Size.Infinity);
+        Assert.Equal(word.DesiredSize.Width, row.Bounds.Width, 1d);
+    }
 }

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avonic.Components.Animation;
 
 namespace Avonic.Components.Controls;
 
@@ -45,6 +46,9 @@ internal static class SpinnerFrame
     /// <summary><c>spinner-circular-inner</c>'s gap, which is longer than the circle, so there's never a second dash.</summary>
     internal const double CircularGap = 200;
 
+    /// <summary><c>ease-in-out</c>, which is <c>cubic-bezier(0.42, 0, 0.58, 1)</c>, as Chromium solves it.</summary>
+    private static readonly CubicBezierEasing EaseInOut = new(0.42, 0, 0.58, 1);
+
     /// <summary>
     /// <c>typeof duration === 'number' &amp;&amp; duration &gt; 10 ? duration : spinner.dur</c>. A non-finite number is
     /// the default too, where Ionic writes <c>Infinityms</c>, which the browser drops for the stylesheet's own: a
@@ -90,13 +94,13 @@ internal static class SpinnerFrame
                 // 0% 1px, 200px / 0px; 50% 100px, 200px / −15px; 100% 100px, 200px / −125px. ease-in-out in each half.
                 if (progress < 0.5)
                 {
-                    var eased = EaseInOut(progress / 0.5);
+                    var eased = EaseInOut.Ease(progress / 0.5);
                     dashArray = 1 + 99 * eased;
                     dashOffset = -15 * eased;
                 }
                 else
                 {
-                    var eased = EaseInOut((progress - 0.5) / 0.5);
+                    var eased = EaseInOut.Ease((progress - 0.5) / 0.5);
                     dashArray = 100;
                     dashOffset = -15 - 110 * eased;
                 }
@@ -172,45 +176,6 @@ internal static class SpinnerFrame
         }
 
         return arcs;
-    }
-
-    /// <summary><c>ease-in-out</c>, which is <c>cubic-bezier(0.42, 0, 0.58, 1)</c>.</summary>
-    public static double EaseInOut(double x) => CubicBezier(0.42, 0, 0.58, 1, x);
-
-    /// <summary>
-    /// A CSS <c>cubic-bezier()</c>: the <c>y</c> at which the curve reaches <paramref name="x"/>. Not Avalonia's
-    /// <c>SplineEasing</c>, which is about 2e-3 out: it gives a dash of 5.0477 at 100 ms, where Chromium computes 5.04952.
-    /// </summary>
-    internal static double CubicBezier(double x1, double y1, double x2, double y2, double x)
-    {
-        if (x <= 0) return 0;
-        if (x >= 1) return 1;
-
-        static double Sample(double a, double b, double t) => ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
-        static double Slope(double a, double b, double t) => 3 * (1 - 3 * b + 3 * a) * t * t + 2 * (3 * b - 6 * a) * t + 3 * a;
-
-        // Newton's method, then bisection if it doesn't settle, as browsers do.
-        var t = x;
-        for (var i = 0; i < 8; i++)
-        {
-            var error = Sample(x1, x2, t) - x;
-            if (Math.Abs(error) < 1e-9) return Sample(y1, y2, t);
-            var slope = Slope(x1, x2, t);
-            if (Math.Abs(slope) < 1e-9) break;
-            t -= error / slope;
-        }
-
-        double low = 0, high = 1;
-        t = x;
-        for (var i = 0; i < 64; i++)
-        {
-            var value = Sample(x1, x2, t);
-            if (Math.Abs(value - x) < 1e-9) break;
-            if (value < x) low = t; else high = t;
-            t = (low + high) / 2;
-        }
-
-        return Sample(y1, y2, t);
     }
 
     private static double Frac(double value) => value - Math.Floor(value);

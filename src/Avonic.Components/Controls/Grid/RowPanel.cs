@@ -1,10 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
-using Avalonia.Controls.Primitives;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -115,7 +111,7 @@ public sealed class RowPanel : Panel
                 child.Measure(oneLine);
             }
 
-            var item = new Item(child, column) { MaxContent = oneLineNeeded ? child.DesiredSize.Width : 0, Box = Box(child) };
+            var item = new Item(child, column) { MaxContent = oneLineNeeded ? child.DesiredSize.Width : 0, Box = MinContent.Box(child) };
             Prepare(item, width, bounded);
             _items.Add(item);
         }
@@ -131,7 +127,7 @@ public sealed class RowPanel : Panel
             {
                 if (item.HasContentMinimum && item.Minimum is null && item.Size < item.MaxContent - Tolerance)
                 {
-                    item.Minimum = Math.Min(Math.Max(item.Box, MinimumOf(item.Child)), item.Maximum);
+                    item.Minimum = Math.Min(Math.Max(item.Box, MinContent.OfItem(item.Child)), item.Maximum);
                     again = true;
                 }
             }
@@ -211,8 +207,9 @@ public sealed class RowPanel : Panel
     private static void Prepare(Item item, double width, bool bounded)
     {
         var column = item.Column;
-        var margins = Horizontal(item.Child.Margin) + (item.Child is ContentPresenter { Child: { } inner } ? Horizontal(inner.Margin) : 0);
-        var flex = column is null ? FlexRow.GetFlex(item.Child is ContentPresenter { Child: { } slotted } ? slotted : item.Child) : 0;
+        var slotted = MinContent.Slotted(item.Child);
+        var margins = MinContent.Horizontal(item.Child.Margin) + (slotted is null ? 0 : MinContent.Horizontal(slotted.Margin));
+        var flex = column is null ? FlexRow.GetFlex(slotted ?? item.Child) : 0;
         var kind = column?.Kind ?? (flex > 0 ? ColumnKind.Grow : ColumnKind.Content);
 
         item.Lead = bounded && column is not null ? column.OffsetFraction * width : 0;
@@ -391,102 +388,4 @@ public sealed class RowPanel : Panel
     /// <summary>A column, or a column an <c>ItemTemplate</c> made, which its container wraps.</summary>
     private static AvonicCol? ColumnIn(Control child) =>
         child as AvonicCol ?? (child as ContentPresenter)?.Child as AvonicCol;
-
-    private static double Horizontal(Thickness thickness) => thickness.Left + thickness.Right;
-
-    // What follows is FlexRow's min-content, which is private there. Sharing it is proposed in the PR.
-
-    /// <summary>What a box of width 0 still takes: margin, padding and borders.</summary>
-    private static double OwnBox(Control control) => Horizontal(control.Margin) + control switch
-    {
-        ContentPresenter presenter => Horizontal(presenter.Padding) + Horizontal(presenter.BorderThickness),
-        Border border => Horizontal(border.Padding) + Horizontal(border.BorderThickness),
-        TemplatedControl templated => Horizontal(templated.Padding) + Horizontal(templated.BorderThickness),
-        _ => 0,
-    };
-
-    /// <summary><see cref="OwnBox"/>, and a wrapped column's.</summary>
-    private static double Box(Control control) =>
-        OwnBox(control) + (control is ContentPresenter { Child: { } child } ? OwnBox(child) : 0);
-
-    /// <summary><c>min-width: auto</c> on one of the row's items. Needs it measured on one line first.</summary>
-    private static double MinimumOf(Control child)
-    {
-        var item = (child as ContentPresenter)?.Child ?? child;
-
-        // contain: strict. Size containment leaves it no minimum.
-        if (item is AvonicIcon)
-        {
-            return Box(child);
-        }
-
-        // overflow: hidden, which also takes it away. A TemplatedControl clips by default, so only a set value counts.
-        if (item.ClipToBounds && item.IsSet(ClipToBoundsProperty))
-        {
-            return Box(child);
-        }
-
-        return MinContent(child);
-    }
-
-    /// <summary>
-    /// CSS's <c>min-content</c>, from the one-line sizes just measured, because <c>Measure</c> clamps to what's available
-    /// and so can't report it. Text can wrap, and nothing else can shrink.
-    /// </summary>
-    private static double MinContent(Control control)
-    {
-        if (!double.IsNaN(control.Width))
-        {
-            return control.DesiredSize.Width;
-        }
-
-        if (control is TextBlock text)
-        {
-            return Math.Min(control.DesiredSize.Width, Horizontal(text.Margin) + Horizontal(text.Padding) + LongestWord(text));
-        }
-
-        var children = control.GetVisualChildren().OfType<Control>().Where(child => child.IsVisible).ToList();
-        if (children.Count == 0)
-        {
-            return control.DesiredSize.Width;
-        }
-
-        // A row wraps, so its narrowest is its widest item's narrowest, however wide it was on one line.
-        if (control is RowPanel)
-        {
-            return Horizontal(control.Margin) + Math.Max(control.MinWidth, children.Max(MinContent));
-        }
-
-        // Not Grid.ColumnDefinitions: reading it makes the collection, and a Grid measured without one then throws when it arranges.
-        var adds = control is FlexRow or ButtonInner or DockPanel or StackPanel { Orientation: Orientation.Horizontal }
-            || (control is Grid && children.Any(child => Grid.GetColumn(child) > 0));
-        var oneLine = adds ? children.Sum(child => child.DesiredSize.Width) : children.Max(child => child.DesiredSize.Width);
-        var least = adds ? children.Sum(MinContent) : children.Max(MinContent);
-
-        return Math.Max(Horizontal(control.Margin) + control.MinWidth, control.DesiredSize.Width - oneLine + least);
-    }
-
-    private static double LongestWord(TextBlock text)
-    {
-        if (text.TextWrapping == TextWrapping.NoWrap)
-        {
-            return double.PositiveInfinity;
-        }
-
-        var content = text.Inlines is { Count: > 0 } inlines ? inlines.Text : text.Text;
-        if (string.IsNullOrEmpty(content))
-        {
-            return 0;
-        }
-
-        using var layout = new TextLayout(
-            content,
-            new Typeface(text.FontFamily, text.FontStyle, text.FontWeight, text.FontStretch),
-            text.FontSize,
-            null,
-            textWrapping: TextWrapping.WrapWithOverflow,
-            maxWidth: 1,
-            letterSpacing: text.LetterSpacing);
-        return layout.Width;
-    }
 }

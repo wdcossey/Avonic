@@ -118,7 +118,7 @@ the parent's.
 | `Avonic.SkeletonText.BorderRadius` | `CornerRadius`, number or CSS string | `CssUnset` |
 
 The 10 px line, the 4 px margins, the gradient's stops (8 %, 18 %, 33 %) and alphas (0.065, 0.135), and the 800 px tile have no
-variable, so they're literals in the theme. `AvonicSkeletonText.Rgba`, a converter on the control, makes `rgba(var(--a,
+variable, so they're literals in the theme. `AvonicSkeletonText.Rgba`, a converter on the control (since the P1 roll-up, `Css.Rgba`), makes `rgba(var(--a,
 var(--b)), n)` from the keys: the first that's set, a `Color` or a solid brush's colour, at the alpha in its parameter.
 `AvonicSkeletonText.BackgroundOrRgba` gives the `Background` key if it's set, and that otherwise.
 

@@ -6,7 +6,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media.Imaging;
-using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -102,6 +102,8 @@ public class AvonicImg : TemplatedControl
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicImg>(VerticalAlignment.Top);
     }
 
+    public AvonicImg() => _hiddenChain = new HiddenChainWatcher(RequestCheck);
+
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private Image? _image;
@@ -114,7 +116,15 @@ public class AvonicImg : TemplatedControl
     /// <summary>Ionic's <c>io</c>: whether it's waiting to come into the viewport.</summary>
     private bool _watching;
     private Rect? _viewport;
-    private readonly List<Visual> _hiddenBy = [];
+
+    /// <summary>
+    /// <c>display: none</c> never intersects, and showing it moves nothing, so the viewport raises nothing: this watches the
+    /// chain, and checks again after the layout that follows.
+    /// </summary>
+    private readonly HiddenChainWatcher _hiddenChain;
+
+    /// <summary>Whether it waits for something hidden in its chain to show.</summary>
+    internal bool IsWaitingUntilShown => _hiddenChain.IsWaiting;
     private bool _checkAfterLayout;
     private bool _inCallback;
 
@@ -169,7 +179,7 @@ public class AvonicImg : TemplatedControl
         base.OnDetachedFromVisualTree(e);
         _attached = false;
         _viewport = null;
-        StopWaiting();
+        _hiddenChain.Dispose();
         StopCheckAfterLayout();
     }
 
@@ -230,7 +240,7 @@ public class AvonicImg : TemplatedControl
 
         _watching = false;
         EffectiveViewportChanged -= OnEffectiveViewportChanged;
-        StopWaiting();
+        _hiddenChain.Dispose();
         StopCheckAfterLayout();
     }
 
@@ -295,7 +305,7 @@ public class AvonicImg : TemplatedControl
         if (!IsEffectivelyVisible)
         {
             // display: none never intersects. Showing it moves nothing, so the viewport raises nothing: watch the chain.
-            WaitUntilShown();
+            _hiddenChain.Watch(this);
             return;
         }
 
@@ -324,48 +334,6 @@ public class AvonicImg : TemplatedControl
         (viewport.Width > 0 || viewport.Height > 0)
         && viewport.X <= size.Width && viewport.Right >= 0
         && viewport.Y <= size.Height && viewport.Bottom >= 0;
-
-    /// <summary>
-    /// Avalonia doesn't tell a control when an ancestor shows it, so this watches <see cref="Visual.IsVisible"/> on whatever in
-    /// its chain is hidden, as <see cref="AvonicProgressBar"/> does, and checks again after the layout that follows.
-    /// </summary>
-    private void WaitUntilShown()
-    {
-        if (_hiddenBy.Count > 0)
-        {
-            return;
-        }
-
-        for (var visual = (Visual?)this; visual is not null; visual = visual.GetVisualParent())
-        {
-            if (!visual.IsVisible)
-            {
-                visual.PropertyChanged += OnHiddenVisualChanged;
-                _hiddenBy.Add(visual);
-            }
-        }
-    }
-
-    private void OnHiddenVisualChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != IsVisibleProperty || !_hiddenBy.TrueForAll(visual => visual.IsVisible))
-        {
-            return;
-        }
-
-        StopWaiting();
-        RequestCheck();
-    }
-
-    private void StopWaiting()
-    {
-        foreach (var visual in _hiddenBy)
-        {
-            visual.PropertyChanged -= OnHiddenVisualChanged;
-        }
-
-        _hiddenBy.Clear();
-    }
 
     // ── Loading ──────────────────────────────────────────────────────────────────────────────
 

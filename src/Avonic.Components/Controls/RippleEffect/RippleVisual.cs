@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avonic.Components.Animation;
 
 namespace Avonic.Components.Controls;
 
@@ -30,7 +31,8 @@ internal sealed class RippleVisual : Control
 
     internal const double MaxOpacity = 0.16;
 
-    internal static readonly Easing ExpandEasing = new SplineEasing(0.4, 0, 0.2, 1);
+    /// <summary><c>cubic-bezier(0.4, 0, 0.2, 1)</c>, as Chromium solves it.</summary>
+    internal static readonly Easing ExpandEasing = new CubicBezierEasing(0.4, 0, 0.2, 1);
 
     // ── Fill (Ionic: background-color: currentColor) ─────────────────────────────────────────
 

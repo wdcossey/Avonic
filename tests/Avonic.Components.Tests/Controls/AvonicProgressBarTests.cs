@@ -419,6 +419,35 @@ public class AvonicProgressBarTests
             Assert.False(f.Part<Control>("PART_Stream").IsVisible);
         });
 
+    public static TheoryData<double, double, double, double, double> IndeterminateKeyframesInChromium => new()
+    {
+        // ms, then each @keyframes on its own: primary translate and scale, secondary translate and scale. Measured in Chromium
+        // 141 on a 1000 px div with the animation paused at that time, from the computed matrix, to 6 significant digits.
+        { 150, 0, 0.08, 0.0767909, 0.18934 },
+        { 450, 0.00234143, 0.08, 0.330892, 0.507843 },
+        { 700, 0.102803, 0.08, 0.562444, 0.67412 },
+        { 900, 0.330221, 0.195012, 0.764087, 0.727005 },
+        { 1150, 0.776323, 0.470057, 1.05102, 0.424187 },
+        { 1300, 1.06673, 0.622173, 1.20934, 0.211456 },
+        { 1500, 1.48268, 0.488471, 1.38658, 0.0750113 },
+        { 1750, 1.8625, 0.206343, 1.5316, 0.0374888 },
+        { 1950, 1.99512, 0.0865124, 1.5929, 0.0669281 },
+    };
+
+    [Theory]
+    [MemberData(nameof(IndeterminateKeyframesInChromium))]
+    public void B8_Each_Keyframe_Eases_As_Chromium_Solves_Its_Cubic_Bezier(double ms, double primaryTranslate, double primaryScale, double secondaryTranslate, double secondaryScale)
+    {
+        var primary = IndeterminateKeyframes.Primary(ms / 2000);
+        var secondary = IndeterminateKeyframes.Secondary(ms / 2000);
+
+        // Avalonia's SplineEasing is about 2e-3 out.
+        Assert.Equal(primaryTranslate, primary.Translate, 2e-5);
+        Assert.Equal(primaryScale, primary.Scale, 2e-5);
+        Assert.Equal(secondaryTranslate, secondary.Translate, 2e-5);
+        Assert.Equal(secondaryScale, secondary.Scale, 2e-5);
+    }
+
     [AvaloniaFact]
     public void B8_Indeterminate_Paints_The_Bars_Over_The_Track() => InstalledTheme.Run(_ =>
     {
@@ -782,6 +811,21 @@ public class AvonicProgressBarTests
             f.Bar.Tick();
             AssertSpan((-14.8, 91.2), f.Span("PART_ProgressSecondary"));
         }
+    });
+
+    [AvaloniaFact]
+    public void B16_Removed_While_Hidden_It_Stops_Watching() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var around = new Border { IsVisible = false };
+        using var f = new Fixture(new AvonicProgressBar { Type = ProgressBarType.Indeterminate }, around);
+        Assert.True(f.Bar.IsWaitingUntilShown);
+
+        // Out of the document, showing what was around it starts nothing, and holds nothing of it.
+        f.Host.Children.Remove(f.Bar);
+        Assert.False(f.Bar.IsWaitingUntilShown);
+        around.IsVisible = true;
+        Assert.False(f.Bar.IsFrameLoopRunning);
     });
 
     [AvaloniaFact]

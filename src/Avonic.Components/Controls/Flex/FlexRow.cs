@@ -1,10 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
-using Avalonia.Controls.Primitives;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -89,7 +84,7 @@ public sealed class FlexRow : Panel
             var own = GetFlex(child);
             if (bounded && own > 0)
             {
-                _items.Add(new Item(child) { Flex = own, IsPart = true, Base = OwnBox(child) });
+                _items.Add(new Item(child) { Flex = own, IsPart = true, Base = MinContent.OwnBox(child) });
                 continue;
             }
 
@@ -98,14 +93,14 @@ public sealed class FlexRow : Panel
 
             var item = new Item(child)
             {
-                Flex = own > 0 ? own : Slotted(child) is { } slotted ? GetFlex(slotted) : 0,
+                Flex = own > 0 ? own : MinContent.Slotted(child) is { } slotted ? GetFlex(slotted) : 0,
                 IsPart = own > 0,
             };
             _items.Add(item);
 
             child.Measure(oneLine);
 
-            var box = Box(child);
+            var box = MinContent.Box(child);
             if (bounded && item.Flex > 0)
             {
                 item.Base = box;
@@ -179,18 +174,18 @@ public sealed class FlexRow : Panel
     private static double MeasuredWidth(Item item, Size oneLine)
     {
         item.Child.ApplyTemplate();
-        if (item.Size >= NarrowSlot || Slotted(item.Child) is not { } slotted)
+        if (item.Size >= NarrowSlot || MinContent.Slotted(item.Child) is not { } slotted)
         {
             return item.Size;
         }
 
         if (GetFlex(slotted) > 0)
         {
-            return Math.Max(item.Size, Box(item.Child) + 1);
+            return Math.Max(item.Size, MinContent.Box(item.Child) + 1);
         }
 
         item.Child.Measure(oneLine);
-        return Math.Max(item.Size, MinimumOf(item.Child));
+        return Math.Max(item.Size, MinContent.OfItem(item.Child));
     }
 
     /// <summary>Section 9.7, "Resolving Flexible Lengths".</summary>
@@ -222,7 +217,7 @@ public sealed class FlexRow : Panel
             // Only what's overflowing needs this, and most rows don't.
             if (!growing && item.Minimum is null)
             {
-                item.Minimum = item.IsPart ? item.Base : item.Flex > 0 ? FlexMinimum(item, width) : MinimumOf(item.Child);
+                item.Minimum = item.IsPart ? item.Base : item.Flex > 0 ? FlexMinimum(item, width) : MinContent.OfItem(item.Child);
             }
 
             item.Size = Math.Max(item.Base, item.Minimum ?? 0);
@@ -270,100 +265,7 @@ public sealed class FlexRow : Panel
     /// <summary>A flex label's minimum, as <c>max-width: 100%</c> limits its content to the row.</summary>
     private static double FlexMinimum(Item item, double width)
     {
-        var box = Box(item.Child);
-        return Math.Min(MinimumOf(item.Child) - box, width) + box;
-    }
-
-    private static double Horizontal(Thickness thickness) => thickness.Left + thickness.Right;
-
-    /// <summary>What a box of width 0 still takes: margin, padding and borders.</summary>
-    private static double OwnBox(Control control) => Horizontal(control.Margin) + control switch
-    {
-        ContentPresenter presenter => Horizontal(presenter.Padding) + Horizontal(presenter.BorderThickness),
-        Border border => Horizontal(border.Padding) + Horizontal(border.BorderThickness),
-        TemplatedControl templated => Horizontal(templated.Padding) + Horizontal(templated.BorderThickness),
-        _ => 0,
-    };
-
-    /// <summary>What's in a slot, which is the row's item. A hidden one is <c>display: none</c>, so it isn't one.</summary>
-    private static Control? Slotted(Control child) => child is ContentPresenter { Child: { IsVisible: true } slotted } ? slotted : null;
-
-    /// <summary><see cref="OwnBox"/>, and a slotted child's.</summary>
-    private static double Box(Control control) =>
-        OwnBox(control) + (Slotted(control) is { } child ? OwnBox(child) : 0);
-
-    /// <summary><c>min-width: auto</c> on one of the row's items. Needs it measured on one line first.</summary>
-    private static double MinimumOf(Control child)
-    {
-        var item = Slotted(child) ?? child;
-
-        // contain: strict. Size containment leaves it no minimum, so it shrinks with the rest. Measured.
-        if (item is AvonicIcon)
-        {
-            return Box(child);
-        }
-
-        // overflow: hidden, which also takes it away. A TemplatedControl clips by default, so only a set value counts.
-        if (item.ClipToBounds && item.IsSet(ClipToBoundsProperty))
-        {
-            return Box(child);
-        }
-
-        return MinContent(child);
-    }
-
-    /// <summary>
-    /// CSS's <c>min-content</c>, from the one-line sizes just measured, because <c>Measure</c> clamps to what's available
-    /// and so can't report it. Text can wrap, and nothing else can shrink.
-    /// </summary>
-    private static double MinContent(Control control)
-    {
-        if (!double.IsNaN(control.Width))
-        {
-            return control.DesiredSize.Width;
-        }
-
-        if (control is TextBlock text)
-        {
-            return Math.Min(control.DesiredSize.Width, Horizontal(text.Margin) + Horizontal(text.Padding) + LongestWord(text));
-        }
-
-        var children = control.GetVisualChildren().OfType<Control>().Where(child => child.IsVisible).ToList();
-        if (children.Count == 0)
-        {
-            return control.DesiredSize.Width;
-        }
-
-        // Not Grid.ColumnDefinitions: reading it makes the collection, and a Grid measured without one then throws when it arranges.
-        var adds = control is FlexRow or ButtonInner or DockPanel or StackPanel { Orientation: Orientation.Horizontal }
-            || (control is Grid && children.Any(child => Grid.GetColumn(child) > 0));
-        var oneLine = adds ? children.Sum(child => child.DesiredSize.Width) : children.Max(child => child.DesiredSize.Width);
-        var least = adds ? children.Sum(MinContent) : children.Max(MinContent);
-
-        return Math.Max(Horizontal(control.Margin) + control.MinWidth, control.DesiredSize.Width - oneLine + least);
-    }
-
-    private static double LongestWord(TextBlock text)
-    {
-        if (text.TextWrapping == TextWrapping.NoWrap)
-        {
-            return double.PositiveInfinity;
-        }
-
-        var content = text.Inlines is { Count: > 0 } inlines ? inlines.Text : text.Text;
-        if (string.IsNullOrEmpty(content))
-        {
-            return 0;
-        }
-
-        using var layout = new TextLayout(
-            content,
-            new Typeface(text.FontFamily, text.FontStyle, text.FontWeight, text.FontStretch),
-            text.FontSize,
-            null,
-            textWrapping: TextWrapping.WrapWithOverflow,
-            maxWidth: 1,
-            letterSpacing: text.LetterSpacing);
-        return layout.Width;
+        var box = MinContent.Box(item.Child);
+        return Math.Min(MinContent.OfItem(item.Child) - box, width) + box;
     }
 }

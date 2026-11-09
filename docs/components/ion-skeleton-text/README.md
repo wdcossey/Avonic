@@ -58,7 +58,7 @@ moves it with its `RenderTransform`, so a theme only paints it, in a tile 800 wi
 | [x] | `--border-radius` | `Avonic.SkeletonText.BorderRadius` | `CssUnset`: the parent's radius. A `CornerRadius`, a number or a CSS string such as `50%` |
 
 The 10 px line, the 4 px margins, and the band's stops (8 %, 18 %, 33 %), alphas (0.065, 0.135) and 800 px tile are literals in the
-theme, as Ionic has no variables for them. `AvonicSkeletonText.Rgba`, `AvonicSkeletonText.BackgroundOrRgba` and
+theme, as Ionic has no variables for them. `Css.Rgba`, `AvonicSkeletonText.BackgroundOrRgba` and
 `AvonicSkeletonText.RadiusOrInherit` are the converters the theme uses for `rgba(var(…), n)`, `var(--background)` and
 `var(--border-radius, inherit)`.
 

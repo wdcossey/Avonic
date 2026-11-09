@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:c="using:Avonic.Components.Controls">
+                    xmlns:c="using:Avonic.Components.Controls"
+                    xmlns:b="using:Avonic.Components.Behaviors">
 
     <Design.PreviewWith>
         <StackPanel Width="390" Background="White" Margin="16">
@@ -51,7 +52,7 @@
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="800,0" SpreadMethod="Repeat">
                                     <GradientStop Offset="0.08">
                                         <GradientStop.Color>
-                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.065">
+                                            <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="0.065">
                                                 <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
                                                 <DynamicResource ResourceKey="Avonic.TextColor" />
                                             </MultiBinding>
@@ -59,7 +60,7 @@
                                     </GradientStop>
                                     <GradientStop Offset="0.18">
                                         <GradientStop.Color>
-                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.135">
+                                            <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="0.135">
                                                 <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
                                                 <DynamicResource ResourceKey="Avonic.TextColor" />
                                             </MultiBinding>
@@ -67,7 +68,7 @@
                                     </GradientStop>
                                     <GradientStop Offset="0.33">
                                         <GradientStop.Color>
-                                            <MultiBinding Converter="{x:Static c:AvonicSkeletonText.Rgba}" ConverterParameter="0.065">
+                                            <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="0.065">
                                                 <DynamicResource ResourceKey="Avonic.SkeletonText.BackgroundRgb" />
                                                 <DynamicResource ResourceKey="Avonic.TextColor" />
                                             </MultiBinding>
