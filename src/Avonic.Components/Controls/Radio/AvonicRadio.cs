@@ -85,6 +85,8 @@ public class AvonicRadio : ContentControl, IItemControl
     private bool _checked;
     private Control? _label;
     private IDisposable? _tabStopFrame;
+    private IDisposable? _activatableFrame;
+    private IDisposable? _focusableFrame;
 
     static AvonicRadio()
     {
@@ -275,8 +277,12 @@ public class AvonicRadio : ContentControl, IItemControl
         var slot = (Parent as ContentPresenter)?.Name;
         PseudoClasses.Set(":slot-start", inItem && slot == "PART_Start");
         PseudoClasses.Set(":slot-end", inItem && slot == "PART_End");
-        Activatable.SetIsEnabled(this, !inItem);
-        FocusVisible.SetIsEnabled(this, !inItem);
+
+        // At style priority, as the classes are, so an app's own value wins.
+        _activatableFrame?.Dispose();
+        _activatableFrame = SetValue(Activatable.IsEnabledProperty, !inItem, BindingPriority.Style);
+        _focusableFrame?.Dispose();
+        _focusableFrame = SetValue(FocusVisible.IsEnabledProperty, !inItem, BindingPriority.Style);
     }
 
     private void UpdateClasses()
@@ -322,7 +328,7 @@ public class AvonicRadio : ContentControl, IItemControl
 
     /// <summary>
     /// <c>role="radio"</c>, <c>aria-checked</c> and <c>aria-disabled</c>, named from the label, as a browser names a radio from
-    /// its content. Selecting it is a screen reader's activation, which is a DOM <c>click</c>.
+    /// its content. Selecting an unchecked radio is a screen reader's activation, which is a DOM <c>click</c>.
     /// </summary>
     private sealed class RadioAutomationPeer(AvonicRadio owner) : ControlAutomationPeer(owner), ISelectionItemProvider
     {
@@ -338,9 +344,16 @@ public class AvonicRadio : ContentControl, IItemControl
 
         public ISelectionProvider? SelectionContainer => null;
 
-        public void Select() => owner.Click();
+        /// <summary>Selecting a selected radio leaves it so, where a click on it could clear the group's value.</summary>
+        public void Select()
+        {
+            if (!owner.IsChecked)
+            {
+                owner.Click();
+            }
+        }
 
-        public void AddToSelection() => owner.Click();
+        public void AddToSelection() => Select();
 
         public void RemoveFromSelection()
         {

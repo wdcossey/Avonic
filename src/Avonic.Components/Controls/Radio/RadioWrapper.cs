@@ -6,7 +6,8 @@ namespace Avonic.Components.Controls;
 /// <summary>
 /// <c>.radio-wrapper</c> in <c>ion-radio</c>'s shadow root: a flex line of two children, the label and the native wrapper, in
 /// that order, as <c>radio.md.css</c> lays them out for each placement, <c>justify</c> and <c>alignment</c>. Only that: two
-/// children, the label shrinking to nothing and the radio keeping its size, as <c>overflow: hidden</c> gives the label no minimum.
+/// children, the label shrinking to nothing and the radio keeping its size, as <c>overflow: hidden</c> gives the label no minimum,
+/// except a fixed label, which keeps its width.
 /// Avalonia mirrors it in RTL, as it does any panel, so it lays out left to right. See <c>docs/components/ion-radio/PLAN.md</c>.
 /// </summary>
 public sealed class RadioWrapper : Panel
@@ -53,6 +54,8 @@ public sealed class RadioWrapper : Panel
 
     private bool Stacked => LabelPlacement == RadioLabelPlacement.Stacked;
 
+    private bool Fixed => LabelPlacement == RadioLabelPlacement.Fixed;
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var native = Measure(Native, availableSize);
@@ -63,7 +66,9 @@ public sealed class RadioWrapper : Panel
             return new Size(Math.Min(Math.Max(label.Width, native.Width), availableSize.Width), label.Height + native.Height);
         }
 
-        var row = Measure(Label, availableSize.WithWidth(Math.Max(0, availableSize.Width - native.Width)));
+        // flex: 0 0 100px: a fixed label never shrinks, and the line overflows.
+        var labelSpace = Fixed ? double.PositiveInfinity : Math.Max(0, availableSize.Width - native.Width);
+        var row = Measure(Label, availableSize.WithWidth(labelSpace));
         return new Size(row.Width + native.Width, Math.Max(row.Height, native.Height));
     }
 
@@ -83,7 +88,9 @@ public sealed class RadioWrapper : Panel
             return finalSize;
         }
 
-        var labelWidth = hasLabel ? Math.Min(label!.DesiredSize.Width, Math.Max(0, finalSize.Width - nativeSize.Width)) : 0;
+        var labelWidth = !hasLabel ? 0
+            : Fixed ? label!.DesiredSize.Width
+            : Math.Min(label!.DesiredSize.Width, Math.Max(0, finalSize.Width - nativeSize.Width));
         var reversed = LabelPlacement == RadioLabelPlacement.End;
 
         // In visual order, left to right: row-reverse puts the radio first.

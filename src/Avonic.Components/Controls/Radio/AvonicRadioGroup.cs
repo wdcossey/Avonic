@@ -6,6 +6,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
@@ -57,9 +58,9 @@ public class AvonicRadioGroup : ItemsControl
     public static readonly StyledProperty<string?> HelperTextProperty =
         AvaloniaProperty.Register<AvonicRadioGroup, string?>(nameof(HelperText));
 
-    /// <summary>Ionic <c>value</c>. Null is <c>undefined</c>: nothing is checked.</summary>
+    /// <summary>Ionic <c>value</c>. Null is <c>undefined</c>: nothing is checked. Two-way by default, as the user changes it.</summary>
     public static readonly StyledProperty<object?> ValueProperty =
-        AvaloniaProperty.Register<AvonicRadioGroup, object?>(nameof(Value));
+        AvaloniaProperty.Register<AvonicRadioGroup, object?>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
     // ── Events ───────────────────────────────────────────────────────────────────────────────
 
@@ -86,6 +87,10 @@ public class AvonicRadioGroup : ItemsControl
     {
         // overflow: visible, for a focused radio's circle at the edge. A TemplatedControl clips by default.
         ClipToBoundsProperty.OverrideDefaultValue<AvonicRadioGroup>(false);
+
+        // Tab moves through what's inside, as in a page: an ItemsControl is one tab stop that remembers the last one focused, which
+        // would skip a button in an item and come back to a radio that's no longer the choice.
+        KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue<AvonicRadioGroup>(KeyboardNavigationMode.Continue);
 
         ValueProperty.Changed.AddClassHandler<AvonicRadioGroup>((group, _) => group.OnValueChanged());
         HelperTextProperty.Changed.AddClassHandler<AvonicRadioGroup>((group, _) => group.UpdateHint());
@@ -186,6 +191,8 @@ public class AvonicRadioGroup : ItemsControl
     {
         Func<object?, object?, bool> compareWith => compareWith(current, compare),
         string property => Equals(Read(current, property), Read(compare, property)),
+        // Array.isArray(compareValue) ? compareValue.includes(currentValue)
+        _ when compare is IList values => values.Cast<object?>().Any(value => Equals(value, current)),
         _ => Equals(current, compare),
     };
 

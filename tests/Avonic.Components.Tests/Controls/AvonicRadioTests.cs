@@ -283,6 +283,19 @@ public class AvonicRadioTests
         Assert.False(Checked(a));
     }
 
+    [AvaloniaFact]
+    public void R3_A_Radio_Whose_Value_Is_An_Array_Is_Checked_When_It_Holds_The_Groups()
+    {
+        var both = Radio(new[] { "a", "b" });
+        var other = Radio(new[] { "c" });
+        var group = Group(both, other);
+        group.Value = "b";
+        using var scene = Show(group);
+
+        Assert.True(Checked(both));
+        Assert.False(Checked(other));
+    }
+
     // ── R4: a unique value ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -448,6 +461,45 @@ public class AvonicRadioTests
         Assert.True(a.IsTabStop);
     }
 
+    [AvaloniaFact]
+    public void R7_Tab_Goes_On_From_The_Checked_Radio_To_A_Button_In_The_Group()
+    {
+        var before = new Button { Content = "Before" };
+        var a = Radio("a");
+        var inside = new Button { Content = "Inside" };
+        var after = new Button { Content = "After" };
+        var group = Group(a, Radio("b"), inside);
+        group.Value = "a";
+        using var scene = Show(new StackPanel { Children = { before, group, after } });
+
+        before.Focus();
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(a.IsFocused);
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(inside.IsFocused);
+    }
+
+    [AvaloniaFact]
+    public void R7_Tab_Comes_Back_To_The_Choice_Not_To_The_Radio_Last_Focused()
+    {
+        var before = new Button { Content = "Before" };
+        var a = Radio("a");
+        var c = Radio("c");
+        var group = Group(a, Radio("b"), c);
+        group.Value = "a";
+        using var scene = Show(new StackPanel { Children = { before, group } });
+
+        before.Focus();
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(a.IsFocused);
+        group.Value = "c";
+        Press(scene, PhysicalKey.Tab, RawInputModifiers.Shift);
+        Assert.True(before.IsFocused);
+
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(c.IsFocused);
+    }
+
     // ── R8: in an item ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -461,6 +513,18 @@ public class AvonicRadioTests
         Assert.True(FocusVisible.GetIsEnabled(alone));
         Assert.False(Activatable.GetIsEnabled(inside));
         Assert.False(FocusVisible.GetIsEnabled(inside));
+    }
+
+    [AvaloniaFact]
+    public void R8_An_Apps_Own_Activatable_And_FocusVisible_Win()
+    {
+        var radio = Radio("a");
+        Activatable.SetIsEnabled(radio, false);
+        FocusVisible.SetIsEnabled(radio, false);
+        using var scene = Show(radio);
+
+        Assert.False(Activatable.GetIsEnabled(radio));
+        Assert.False(FocusVisible.GetIsEnabled(radio));
     }
 
     [AvaloniaFact]
@@ -621,6 +685,22 @@ public class AvonicRadioTests
         Selection(b).Select();
         Assert.Equal("b", group.Value);
         Assert.Equal(["b"], changes);
+    }
+
+    [AvaloniaFact]
+    public void R10_Selecting_The_Checked_Radio_Leaves_It_Checked()
+    {
+        var a = Radio("a");
+        var group = Group(a);
+        group.AllowEmptySelection = true;
+        group.Value = "a";
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        Selection(a).Select();
+        Selection(a).AddToSelection();
+        Assert.Equal("a", group.Value);
+        Assert.Empty(changes);
     }
 
     [AvaloniaFact]
@@ -793,6 +873,18 @@ public class AvonicRadioTests
         Assert.Equal(100, label.Width, 0.5);
         AssertBox(338, 13.5, 20, 20, ring);
         Assert.Equal(TextTrimming.CharacterEllipsis, radio.GetVisualDescendants().OfType<TextBlock>().Single().TextTrimming);
+    });
+
+    [AvaloniaFact]
+    public void V5_A_Fixed_Label_Keeps_Its_100_In_A_Narrow_Line() => InstalledTheme.Run(_ =>
+    {
+        var radio = new AvonicRadio { Value = "e", Content = Box(200), LabelPlacement = RadioLabelPlacement.Fixed, Justify = RadioJustify.Start };
+        using var scene = Show(new Border { Width = 90, HorizontalAlignment = HorizontalAlignment.Left, Child = radio });
+
+        // flex: 0 0 100px: the label stays 100, and the ring overflows after it
+        var (label, ring) = Layout(radio);
+        Assert.Equal(100, label.Width, 0.5);
+        Assert.Equal(116, ring.X, 0.5);
     });
 
     [AvaloniaFact]
@@ -989,6 +1081,39 @@ public class AvonicRadioTests
         Assert.Null(group.Value);
         Assert.Equal([null], changes);
         Assert.False(Checked(a));
+    }
+
+    private sealed class Choice : System.ComponentModel.INotifyPropertyChanged
+    {
+        private object? _value;
+
+        public object? Value
+        {
+            get => _value;
+            set
+            {
+                _value = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Value)));
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    [AvaloniaFact]
+    public void G1_A_Bound_Value_Hears_The_Users_Choice()
+    {
+        var model = new Choice { Value = "a" };
+        var b = Radio("b");
+        var group = Group(Radio("a"), b);
+        group.Bind(AvonicRadioGroup.ValueProperty, new Avalonia.Data.Binding(nameof(Choice.Value)) { Source = model });
+        using var scene = Show(group);
+
+        Click(scene, b);
+        Assert.Equal("b", model.Value);
+
+        model.Value = "a";
+        Assert.False(Checked(b));
     }
 
     [AvaloniaFact]
