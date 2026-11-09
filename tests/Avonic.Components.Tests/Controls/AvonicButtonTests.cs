@@ -3072,6 +3072,20 @@ public class AvonicButtonTests
     });
 
     [AvaloniaFact]
+    public void B35_The_Shadow_Eases_On_Chromiums_Curve() => InstalledTheme.Run(_ =>
+    {
+        var (button, scene, _) = Themed(transitions: true);
+        using (scene)
+        {
+            var shadow = Assert.IsAssignableFrom<Transitions>(Native(button).Transitions).OfType<BoxShadowsTransition>().Single();
+
+            // cubic-bezier(.4, 0, .2, 1), measured in Chromium 141 with Element.animate, at 40 and 160 of 225 ms.
+            Assert.Equal(0.09974292315785675, shadow.Easing.Ease(40.0 / 225), 1e-6);
+            Assert.Equal(0.9434380803962631, shadow.Easing.Ease(160.0 / 225), 1e-6);
+        }
+    });
+
+    [AvaloniaFact]
     public void B35_The_Shadow_Eases() => InstalledTheme.Run(_ =>
     {
         var (button, scene, centre) = Themed(transitions: true);

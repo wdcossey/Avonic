@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-button's variables. A CssUnset key's default depends on the host's class, and the theme's bindings
@@ -34,7 +35,18 @@
 
     <!-- box-shadow 280ms cubic-bezier(.4, 0, .2, 1), background-color 15ms linear, color 15ms linear -->
     <Transitions x:Key="Avonic.Button.Transition">
-        <BoxShadowsTransition Property="{x:Static Border.BoxShadowProperty}" Duration="0:0:0.28" Easing="0.4,0,0.2,1" />
+        <BoxShadowsTransition Property="{x:Static Border.BoxShadowProperty}" Duration="0:0:0.28">
+            <BoxShadowsTransition.Easing>
+                <a:CubicBezierEasing>
+                    <x:Arguments>
+                        <x:Double>0.4</x:Double>
+                        <x:Double>0</x:Double>
+                        <x:Double>0.2</x:Double>
+                        <x:Double>1</x:Double>
+                    </x:Arguments>
+                </a:CubicBezierEasing>
+            </BoxShadowsTransition.Easing>
+        </BoxShadowsTransition>
         <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.015" />
         <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.015" />
     </Transitions>

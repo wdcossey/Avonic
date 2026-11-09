@@ -141,6 +141,23 @@ public class AvonicRippleEffectTests
     // ── B7: currentColor — fill inherits the parent's Foreground ────────────────────────────
 
     [AvaloniaFact]
+    public void B6_Expands_On_Chromiums_Curve()
+    {
+        using var clock = new TestClock();
+        using var f = new Fixture();
+        f.Ripple.AddRipple(120, 48);
+        var r = Assert.Single(f.Ripple.Ripples);
+
+        // cubic-bezier(.4, 0, .2, 1) over 225 ms, measured in Chromium 141 with Element.animate at 40, 100 and 160 ms.
+        clock.At(40); f.Ripple.Tick();
+        Assert.Equal(0.09974292315785675, r.Progress, 1e-6);
+        clock.At(100); f.Ripple.Tick();
+        Assert.Equal(0.6952348401197365, r.Progress, 1e-6);
+        clock.At(160); f.Ripple.Tick();
+        Assert.Equal(0.9434380803962631, r.Progress, 1e-6);
+    }
+
+    [AvaloniaFact]
     public void B7_Fill_Is_The_Inherited_Foreground()
     {
         using var clock = new TestClock();

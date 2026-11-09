@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:a="using:Avonic.Components.Animation"
         xmlns:b="using:Avonic.Components.Behaviors"
         xmlns:c="using:Avonic.Components.Controls">
 
@@ -204,7 +205,18 @@
         <Setter Property="b:Css.Scale" Value="0.75" />
         <Setter Property="Transitions">
             <Transitions>
-                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15">
+                    <BrushTransition.Easing>
+                        <a:CubicBezierEasing>
+                            <x:Arguments>
+                                <x:Double>0.4</x:Double>
+                                <x:Double>0</x:Double>
+                                <x:Double>0.2</x:Double>
+                                <x:Double>1</x:Double>
+                            </x:Arguments>
+                        </a:CubicBezierEasing>
+                    </BrushTransition.Easing>
+                </BrushTransition>
             </Transitions>
         </Setter>
     </Style>
@@ -214,9 +226,42 @@
         <Setter Property="b:Css.TranslateY" Value="0.96" />
         <Setter Property="Transitions">
             <Transitions>
-                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
-                <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
-                <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="0.4,0,0.2,1" />
+                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15">
+                    <BrushTransition.Easing>
+                        <a:CubicBezierEasing>
+                            <x:Arguments>
+                                <x:Double>0.4</x:Double>
+                                <x:Double>0</x:Double>
+                                <x:Double>0.2</x:Double>
+                                <x:Double>1</x:Double>
+                            </x:Arguments>
+                        </a:CubicBezierEasing>
+                    </BrushTransition.Easing>
+                </BrushTransition>
+                <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15">
+                    <DoubleTransition.Easing>
+                        <a:CubicBezierEasing>
+                            <x:Arguments>
+                                <x:Double>0.4</x:Double>
+                                <x:Double>0</x:Double>
+                                <x:Double>0.2</x:Double>
+                                <x:Double>1</x:Double>
+                            </x:Arguments>
+                        </a:CubicBezierEasing>
+                    </DoubleTransition.Easing>
+                </DoubleTransition>
+                <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15">
+                    <DoubleTransition.Easing>
+                        <a:CubicBezierEasing>
+                            <x:Arguments>
+                                <x:Double>0.4</x:Double>
+                                <x:Double>0</x:Double>
+                                <x:Double>0.2</x:Double>
+                                <x:Double>1</x:Double>
+                            </x:Arguments>
+                        </a:CubicBezierEasing>
+                    </DoubleTransition.Easing>
+                </DoubleTransition>
             </Transitions>
         </Setter>
     </Style>
