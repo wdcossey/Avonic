@@ -1,0 +1,228 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicRadioGroup Value="b" HelperText="Helper text">
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="a" Content="Apple" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="b" Content="Banana" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="c" Content="Cherry" IsEnabled="False" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="d" Content="Label at the end" LabelPlacement="End" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="e" Content="Stacked" LabelPlacement="Stacked" />
+                </c:AvonicItem>
+            </c:AvonicRadioGroup>
+            <c:AvonicRadioGroup Value="x" Margin="16">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <c:AvonicRadio Value="y" />
+                    <c:AvonicRadio Value="x" />
+                    <c:AvonicRadio Value="x" Color="success" />
+                    <c:AvonicRadio Value="x" IsEnabled="False" />
+                </StackPanel>
+            </c:AvonicRadioGroup>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of radio.css and radio.md.css. The structure is the stub's: the label and the native wrapper in a
+         RadioWrapper, which does .radio-wrapper's flex line. Where CSS adds the margins of two rules to one box, a rule here
+         sets the whole Margin, so the combinations are written out. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRadio}" TargetType="c:AvonicRadio">
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- :host(:focus) { outline: none }. ion-focused draws the circle instead. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <c:RadioWrapper Name="PART_Wrapper"
+                                    LabelPlacement="{TemplateBinding LabelPlacement}"
+                                    Justify="{TemplateBinding Justify}"
+                                    Alignment="{TemplateBinding Alignment}">
+                        <!-- .label-text-wrapper: one line, an ellipsis, overflow: hidden -->
+                        <ContentPresenter Name="PART_Label"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          TextWrapping="NoWrap"
+                                          TextBlock.TextTrimming="CharacterEllipsis"
+                                          ClipToBounds="True" />
+                        <!-- .native-wrapper -->
+                        <Panel Name="PART_Native">
+                            <!-- .radio-icon: 1.25rem, border 0.125rem solid -->
+                            <Border Name="PART_Container"
+                                    Width="20"
+                                    Height="20"
+                                    BorderThickness="2"
+                                    BorderBrush="{DynamicResource Avonic.Radio.Color}">
+                                <Border.CornerRadius>
+                                    <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                                        <DynamicResource ResourceKey="Avonic.Radio.BorderRadius" />
+                                        <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                                        <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                                    </MultiBinding>
+                                </Border.CornerRadius>
+                                <!-- .radio-inner: calc(50% + border-width) of the 16 inside the border, centred by the flex
+                                     container, from scale3d(0, 0, 0) -->
+                                <Border Name="PART_Mark"
+                                        Width="10"
+                                        Height="10"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource Avonic.Radio.ColorChecked}">
+                                    <Border.CornerRadius>
+                                        <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                                            <DynamicResource ResourceKey="Avonic.Radio.InnerBorderRadius" />
+                                            <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                                        </MultiBinding>
+                                    </Border.CornerRadius>
+                                    <Border.RenderTransform>
+                                        <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                                            <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                                        </MultiBinding>
+                                    </Border.RenderTransform>
+                                    <!-- transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1) -->
+                                    <Border.Transitions>
+                                        <Transitions>
+                                            <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                                        </Transitions>
+                                    </Border.Transitions>
+                                </Border>
+                            </Border>
+                            <!-- .ion-focused .radio-icon::after: 36 by 36, position: absolute with no inset, so centred where the
+                                 flex container would put it, over the ring. The negative margin keeps it out of the layout. -->
+                            <Border Name="PART_Focus"
+                                    Width="36"
+                                    Height="36"
+                                    Margin="-8"
+                                    IsVisible="False"
+                                    IsHitTestVisible="False"
+                                    Background="{DynamicResource Avonic.Color.PrimaryTintBrush}"
+                                    Opacity="0.2">
+                                <Border.CornerRadius>
+                                    <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                                        <DynamicResource ResourceKey="Avonic.Radio.InnerBorderRadius" />
+                                        <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                                        <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                                    </MultiBinding>
+                                </Border.CornerRadius>
+                            </Border>
+                        </Panel>
+                    </c:RadioWrapper>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- display: block, with justify or alignment, and width: 100% in an item. flex: 1 1 0 and height: 100% in an item, and
+             :host([slot=start]), :host([slot=end]) { flex: initial }. -->
+        <Style Selector="^:justify-start, ^:justify-end, ^:justify-space-between, ^:alignment-start, ^:alignment-center">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:in-item">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="c:FlexRow.Flex" Value="1" />
+        </Style>
+        <!-- There, height: 100% is of a height that isn't definite, so it's auto, and the slot centres it: measured 39 high. -->
+        <Style Selector="^:in-item:slot-start, ^:in-item:slot-end">
+            <Setter Property="c:FlexRow.Flex" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- The label's margins: the placement's sides, and 10 above and below in an item -->
+        <Style Selector="^:label-placement-start /template/ ContentPresenter#PART_Label, ^:label-placement-fixed /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="0,0,16,0" />
+        </Style>
+        <Style Selector="^:label-placement-end /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-start /template/ ContentPresenter#PART_Label, ^:in-item:label-placement-fixed /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="0,10,16,10" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-end /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="16,10,0,10" />
+        </Style>
+
+        <!-- .radio-label-placement-fixed: flex: 0 0 100px -->
+        <Style Selector="^:label-placement-fixed /template/ ContentPresenter#PART_Label">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="MinWidth" Value="100" />
+        </Style>
+
+        <!-- .radio-label-placement-stacked: above, scaled from its centre, 16 below it; from its top with alignment -->
+        <Style Selector="^:label-placement-stacked /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="RenderTransform" Value="scale(0.75)" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-stacked /template/ ContentPresenter#PART_Label">
+            <Setter Property="Margin" Value="0,10,0,16" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-stacked /template/ Panel#PART_Native">
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+        <!-- transform-origin: left top, which RTL mirrors to right top -->
+        <Style Selector="^:label-placement-stacked:alignment-start /template/ ContentPresenter#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+        </Style>
+        <Style Selector="^:label-placement-stacked:alignment-center /template/ ContentPresenter#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="50%,0%" />
+        </Style>
+
+        <!-- .radio-inner { transform: scale3d(0, 0, 0) }. A style, as Css.Scale has no accessors for an attribute. -->
+        <Style Selector="^ /template/ Border#PART_Mark">
+            <Setter Property="b:Css.Scale" Value="0" />
+        </Style>
+
+        <!-- .radio-checked -->
+        <Style Selector="^:checked /template/ Border#PART_Container">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Radio.ColorChecked}" />
+        </Style>
+        <Style Selector="^:checked /template/ Border#PART_Mark">
+            <Setter Property="b:Css.Scale" Value="1" />
+        </Style>
+
+        <!-- :host(.ion-color) .radio-inner, and the ring when checked. An unknown colour makes var(ion-color-base) invalid: the
+             mark is transparent, and the ring the current colour. -->
+        <Style Selector="^:ion-color /template/ Border#PART_Mark">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-color:checked /template/ Border#PART_Container">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicRadio].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .radio-disabled. A disabled control already takes no input and lets it through, as pointer-events: none does. -->
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_Label">
+            <Setter Property="Opacity" Value="0.38" />
+        </Style>
+        <Style Selector="^:disabled /template/ Panel#PART_Native">
+            <Setter Property="Opacity" Value="0.63" />
+        </Style>
+
+        <!-- .ion-focused .radio-icon::after -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Focus">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

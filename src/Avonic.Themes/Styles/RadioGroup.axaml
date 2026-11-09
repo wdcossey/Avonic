@@ -1,0 +1,12 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- item.js: inList = hostContext('ion-list') && !hostContext('ion-radio-group'), so an item in a group has no listitem role,
+         even in a list. The item's peer is a group outside a list, and a button item stays a button. A descendant selector
+         whose target is an item, so only items walk up. -->
+    <Style Selector="c|AvonicRadioGroup c|AvonicItem:not(:button)">
+        <Setter Property="AutomationProperties.ControlTypeOverride" Value="Group" />
+    </Style>
+
+</Styles>
