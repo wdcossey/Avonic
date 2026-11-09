@@ -33,13 +33,25 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#1](https://github.com/wdcossey/Avonic/issues/1) | infra: auto-discovery of templates, tokens and sample pages | **done** — [docs](infra/auto-discovery/README.md) · [plan](infra/auto-discovery/PLAN.md) |
 | [#2](https://github.com/wdcossey/Avonic/issues/2) | infra: colour system (Ionic palette, global `--ion-*` tokens, the `color` prop) | **done** — [docs](infra/color-system/README.md) · [plan](infra/color-system/PLAN.md) |
 | [#3](https://github.com/wdcossey/Avonic/issues/3) | `ion-icon` (all of ionicons bundled) | **done** — [docs](components/ion-icon/README.md) · [comparison](components/ion-icon/COMPARISON.md) |
+| [#4](https://github.com/wdcossey/Avonic/issues/4) | infra: gesture utility (`createGesture`, the gesture controller) | **done** — [docs](infra/gesture/README.md) |
+| [#5](https://github.com/wdcossey/Avonic/issues/5) | infra: overlay system and `createAnimation`, and `ion-backdrop` | **done** — [docs](infra/overlays/README.md) |
 | [#6](https://github.com/wdcossey/Avonic/issues/6) | `ion-item` | **done** — [docs](components/ion-item/README.md) |
 | [#7](https://github.com/wdcossey/Avonic/issues/7) | `ion-label` | **done** — [docs](components/ion-label/README.md) |
 | [#8](https://github.com/wdcossey/Avonic/issues/8) | `ion-note`, `ion-text` | **done** — [docs](components/ion-note/README.md) |
 | [#9](https://github.com/wdcossey/Avonic/issues/9) | `ion-list`, `ion-list-header`, `ion-item-divider`, `ion-item-group` | **done** — [docs](components/ion-list/README.md) |
 | [#10](https://github.com/wdcossey/Avonic/issues/10) | `ion-button` | **done** — [docs](components/ion-button/README.md) |
 | [#11](https://github.com/wdcossey/Avonic/issues/11) | `ion-content` | **done** — [docs](components/ion-content/README.md) |
+| [#12](https://github.com/wdcossey/Avonic/issues/12) | `ion-header`, `ion-footer`, `ion-toolbar`, `ion-title`, `ion-buttons` | **done** — [docs](components/ion-toolbar/README.md) |
 | [#13](https://github.com/wdcossey/Avonic/issues/13) | `ion-card` family | **done** — [docs](components/ion-card/README.md) |
+| [#14](https://github.com/wdcossey/Avonic/issues/14) | `ion-grid`, `ion-row`, `ion-col` | **done** — [docs](components/ion-grid/README.md) |
+| [#15](https://github.com/wdcossey/Avonic/issues/15) | `ion-spinner` | **done** — [docs](components/ion-spinner/README.md) |
+| [#16](https://github.com/wdcossey/Avonic/issues/16) | `ion-badge`, `ion-avatar`, `ion-thumbnail` | **done** — [docs](components/ion-badge/README.md) |
+| [#17](https://github.com/wdcossey/Avonic/issues/17) | `ion-img`, `ion-skeleton-text` | **done** — [docs](components/ion-img/README.md) |
+| [#18](https://github.com/wdcossey/Avonic/issues/18) | `ion-progress-bar` | **done** — [docs](components/ion-progress-bar/README.md) |
+| [#19](https://github.com/wdcossey/Avonic/issues/19) | `ion-chip` | **done** — [docs](components/ion-chip/README.md) |
+| [#71](https://github.com/wdcossey/Avonic/issues/71) | `ion-item`: a flex-like layout for long content | **done** — [docs](components/ion-item/README.md) |
+| [#72](https://github.com/wdcossey/Avonic/issues/72) | `ion-item`: shared press handling, `Command`, ripple and automation | **done** — [docs](components/ion-item/README.md) |
+| [#100](https://github.com/wdcossey/Avonic/issues/100) | infra: Roboto on both sides, for the tests, the tools and the sample | **done** — [docs](infra/roboto/README.md) |
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 
