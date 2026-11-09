@@ -141,11 +141,9 @@
         <Style Selector="^:label-placement-end /template/ StackPanel#PART_Label">
             <Setter Property="Margin" Value="16,0,0,0" />
         </Style>
-        <!-- flex: 0 0 100px; width: 100px; min-width: 100px; max-width: 200px -->
+        <!-- flex: 0 0 100px; width: 100px. Its min-width: 100px and max-width: 200px don't change a width of 100. -->
         <Style Selector="^:label-placement-fixed /template/ StackPanel#PART_Label">
             <Setter Property="Width" Value="100" />
-            <Setter Property="MinWidth" Value="100" />
-            <Setter Property="MaxWidth" Value="200" />
         </Style>
         <!-- transform: scale(0.75), and max-width: calc(100% / 0.75), which the wrapper reads from Css.Scale. The origin is the
              centre unless an alignment is set. text-align: center on the wrapper. -->

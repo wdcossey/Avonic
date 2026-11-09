@@ -168,9 +168,9 @@ public sealed class CheckboxMark : Control
 
     public override void Render(DrawingContext context)
     {
-        // opacity: 0 while hidden, and nothing of the dash is left at an offset of 30.
+        // Hidden is an offset of 30, which leaves nothing of the dash, as opacity: 0 does.
         var visible = DashLength - DashOffset;
-        if (!_shown || visible <= 0 || Stroke is not { } stroke || Bounds.Width <= 0 || Bounds.Height <= 0)
+        if (visible <= 0 || Stroke is not { } stroke || Bounds.Width <= 0 || Bounds.Height <= 0)
         {
             return;
         }

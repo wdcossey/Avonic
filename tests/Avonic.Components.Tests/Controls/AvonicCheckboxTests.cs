@@ -516,6 +516,10 @@ public class AvonicCheckboxTests
         AssertClose(Colors.White, Pixel(scene, tickBox, In(5, 16.2).X, In(5, 16.2).Y), 40);
         AssertClose(Primary, Pixel(scene, tickBox, In(12, 20).X, In(12, 20).Y), 10);
 
+        // 3 units wide is 1.75: 1.2 off the line's centre is outside it.
+        var off = In(15.45, 11.94) + new Vector(1.2 * Math.Sqrt(0.5), 1.2 * Math.Sqrt(0.5));
+        AssertClose(Primary, Pixel(scene, tickBox, off.X, off.Y), 30);
+
         AssertClose(Colors.White, Pixel(scene, barBox, In(12, 12).X, In(12, 12).Y), 40);
         AssertClose(Colors.White, Pixel(scene, barBox, In(4, 12).X, In(4, 12).Y), 40);
         AssertClose(Primary, Pixel(scene, barBox, In(15.45, 11.94).X, In(15.45, 11.94).Y - 3), 10);
@@ -619,12 +623,16 @@ public class AvonicCheckboxTests
         var keyed = new AvonicCheckbox { Content = "Keyed", Color = "danger", Checked = true };
         keyed.Resources["Avonic.Checkbox.CheckboxBackgroundChecked"] = Brushes.Green;
         var unknown = new AvonicCheckbox { Content = "Unknown", Color = "nope", Checked = true };
-        using var scene = Themed(danger, keyed, unknown);
+        var warning = new AvonicCheckbox { Content = "Warning", Color = "warning", Checked = true };
+        using var scene = Themed(danger, keyed, unknown, warning);
 
         AssertClose(Danger, Solid(Box(danger).Background));
         AssertClose(Danger, Solid(Box(danger).BorderBrush));
         AssertClose(Colors.White, Solid(Mark(danger).Stroke));
         Assert.Equal(Brushes.Green, Box(keyed).Background);
+
+        // The mark is the colour's contrast, which for warning is black.
+        AssertClose(Colors.Black, Solid(Mark(warning).Stroke));
 
         // var(ion-color-base) is invalid: no background, and no stroke.
         Assert.Null(Box(unknown).Background);
@@ -774,6 +782,132 @@ public class AvonicCheckboxTests
 
         Assert.False(box.Checked);
     }
+
+    [AvaloniaFact]
+    public void B15_Half_Way_Only_The_Start_Of_The_Tick_Is_Drawn() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var box = new AvonicCheckbox();
+        using var scene = Themed(box);
+        clock.At(16);
+        Dispatcher.UIThread.RunJobs();
+        Box(box).Transitions = null;
+
+        box.Checked = true;
+        clock.At(160);
+        Dispatcher.UIThread.RunJobs();
+
+        // 54 ms into the 90 after the delay: an offset of 12 leaves 18 units, the short stroke, 9, and 9 of the long one, which
+        // ends at (22.79, 4.59).
+        Assert.Equal(12, Mark(box).DashOffset, 6);
+        static Point In(double x, double y) => new(2 + x * 14 / 24, 2 + y * 14 / 24);
+        AssertClose(Colors.White, Pixel(scene, Box(box), In(5, 16.2).X, In(5, 16.2).Y), 40);
+        AssertClose(Primary, Pixel(scene, Box(box), In(19.5, 7.9).X, In(19.5, 7.9).Y), 10);
+    });
+
+    [AvaloniaFact]
+    public void B7_The_Host_Shows_A_Pointer() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Label" };
+        using var scene = Themed(box);
+
+        Assert.Equal(new Cursor(StandardCursorType.Hand).ToString(), box.Cursor?.ToString());
+    });
+
+    [AvaloniaFact]
+    public void B7_A_Change_Of_Placement_Lays_It_Out_Again() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Label start" };
+        using var scene = Themed(box);
+
+        box.LabelPlacement = CheckboxLabelPlacement.End;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(0, Bounds(Box(box), scene.Window).X, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B10_A_Taller_Stacked_Host_Puts_Them_By_Justify() => InstalledTheme.Run(_ =>
+    {
+        var between = new AvonicCheckbox { Content = "Between", LabelPlacement = CheckboxLabelPlacement.Stacked, Height = 100 };
+        var start = new AvonicCheckbox { Content = "Start", LabelPlacement = CheckboxLabelPlacement.Stacked, Justify = CheckboxJustify.Start, Height = 100 };
+        var end = new AvonicCheckbox { Content = "End", LabelPlacement = CheckboxLabelPlacement.Stacked, Justify = CheckboxJustify.End, Height = 100 };
+        using var scene = Themed(between, start, end);
+
+        // justify-content on the column: space-between by default.
+        Assert.Equal(82, Box(between).TranslatePoint(default, between)!.Value.Y, 0.5);
+        Assert.Equal(35, Box(start).TranslatePoint(default, start)!.Value.Y, 0.5);
+        Assert.Equal(82, Box(end).TranslatePoint(default, end)!.Value.Y, 0.5);
+        Assert.Equal(100 - 18 - 16 - 19, Label(end).Bounds.Y, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B10_Stacked_Text_Is_Centred() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "A long stacked label", LabelPlacement = CheckboxLabelPlacement.Stacked, HelperText = "Short" };
+        using var scene = Themed(box);
+
+        Assert.Equal(TextAlignment.Center, Helper(box).TextAlignment);
+    });
+
+    [AvaloniaFact]
+    public void B12_Alignment_Center_Scales_A_Stacked_Label_From_Its_Top() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Stacked", LabelPlacement = CheckboxLabelPlacement.Stacked, Alignment = CheckboxAlignment.Center };
+        using var scene = Themed(box);
+
+        // transform-origin: center top: 7.16 in, and at the top.
+        AssertBox(7.16 + (390 - 57.28) / 2, 0, 42.96, 14.25, Bounds(Label(box), scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void B18_Text_In_A_Content_Control_Or_In_Inlines_Counts() => InstalledTheme.Run(_ =>
+    {
+        var label = new AvonicCheckbox { Content = new AvonicLabel { Content = "In a label" } };
+        var inlines = new AvonicCheckbox { Content = new TextBlock { Inlines = [new Avalonia.Controls.Documents.Run("In a run")] } };
+        using var scene = Themed(label, inlines);
+
+        Assert.True(Label(label).IsVisible);
+        Assert.True(Label(inlines).IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void B21_A_Long_Label_In_An_Item_Leaves_The_Box_Its_Place() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "A label in an item that is far too long to fit on one line beside its box" };
+        var item = new AvonicItem { Content = box };
+        using var scene = Themed(item);
+
+        AssertBox(356, 14.5, 18, 18, Bounds(Box(box), item));
+        Assert.Equal(358 - 18 - 16, Label(box).Bounds.Width, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B21_The_Margins_In_An_Item_Make_A_Taller_Row() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicCheckbox { Content = "In an item, helper", HelperText = "Helper text" };
+        var end = new AvonicCheckbox { Content = "In an item, end", HelperText = "Helper text", LabelPlacement = CheckboxLabelPlacement.End };
+        var top = new AvonicCheckbox { Content = "At the top", Alignment = CheckboxAlignment.Start };
+        using var scene = Themed(new AvonicItem { Content = start }, new AvonicItem { Content = end }, new AvonicItem { Content = top });
+
+        // Measured i5: 57 high, the label 10 down. At the start of the cross axis, the box keeps its 10 above.
+        Assert.Equal(57, start.Bounds.Height, 0.6);
+        Assert.Equal(57, end.Bounds.Height, 0.6);
+        Assert.Equal(10, Bounds(Label(start), start).Y, 0.5);
+        Assert.Equal(10, Box(top).TranslatePoint(default, top)!.Value.Y, 0.5);
+        Assert.Equal(10, Bounds(Label(top), top).Y, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B22_In_An_End_Slot_It_Is_Its_Own_Size_Too() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox();
+        var item = new AvonicItem { Content = new AvonicLabel { Content = "End slot" }, EndContent = box };
+        using var scene = Themed(item);
+
+        Assert.Equal(new Size(18, 18), box.Bounds.Size);
+        Assert.Equal(default, Part<Control>(box, "PART_NativeWrapper").Margin);
+    });
 
     // ── B25, B26: automation ─────────────────────────────────────────────────────────────────
 
