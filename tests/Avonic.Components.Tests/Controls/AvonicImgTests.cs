@@ -498,8 +498,9 @@ public class AvonicImgTests
         Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
         Assert.Equal(new Size(64, 64), Part<Control>(img, "PART_Broken").Bounds.Size);
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 1, 1));
-        Assert.NotEqual(Colors.White, PixelIn(frame, img, scene.Window, 32, 0));
+        // The left border at mid-height is inside the circle, and at the top quarter it's outside it
+        Assert.NotEqual(Colors.White, PixelIn(frame, img, scene.Window, 0, 32));
+        Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 0, 10));
     });
 
     [AvaloniaFact]
@@ -511,7 +512,7 @@ public class AvonicImgTests
         using var scene = new Scene(page);
         Layout(scene);
 
-        // The icon's line is at least its height, so the icon stays inside the image
+        // The icon's height holds the line open, so the icon stays inside the image
         Assert.Equal(16, img.Bounds.Height);
     });
 

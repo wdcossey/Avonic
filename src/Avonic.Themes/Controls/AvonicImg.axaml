@@ -30,8 +30,7 @@
                          Chromium: the icon at the top left, the text from x 16. The line keeps an empty 16 by 16 space for it, and the
                          icon is drawn over that space, as an embedded control with a resource of its own is measured during the render, which
                          Avalonia refuses. -->
-                    <!-- At least the icon's height, as the icon's line is in Chromium, at any font size -->
-                    <Panel Name="PART_Alt" MinHeight="16" IsVisible="False">
+                    <Panel Name="PART_Alt" IsVisible="False">
                         <!-- The space has no height, so the line keeps the text's height, 19 at 16 px, as Chromium's does. No white space
                              between the two inlines, which XAML would make a space. -->
                         <TextBlock TextWrapping="Wrap"><InlineUIContainer><Border Width="16" Height="0" /></InlineUIContainer><Run Text="{TemplateBinding Alt}" /></TextBlock>
