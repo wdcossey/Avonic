@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!--
+        Functional stub for ion-skeleton-text: structure only, so nothing is drawn. The host's background, clipped to its
+        corners, and PART_Shimmer inside it, which the theme paints with the band and the control moves. The look is in
+        Avonic.Themes/Controls/AvonicSkeletonText.axaml.
+    -->
+    <ControlTheme x:Key="{x:Type c:AvonicSkeletonText}" TargetType="c:AvonicSkeletonText">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Background"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <Border Name="PART_Shimmer" IsVisible="False" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

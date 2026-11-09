@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!--
+        Functional stub for ion-img: structure only. PART_Image is the <img>, whose picture the control sets, and PART_Alt
+        the alt text a browser shows where there's no picture; the control shows one or the other. The look is in
+        Avonic.Themes/Controls/AvonicImg.axaml.
+    -->
+    <ControlTheme x:Key="{x:Type c:AvonicImg}" TargetType="c:AvonicImg">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <Image Name="PART_Image" IsVisible="False" />
+                    <TextBlock Name="PART_Alt" Text="{TemplateBinding Alt}" IsVisible="False" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

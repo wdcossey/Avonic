@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ImgPage">
+
+    <!-- The pictures are made by the page, as data: URIs and a file, so that it works offline; one comes from the web. Each
+         loads only when it scrolls into view, and the log at the top says when. -->
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="16,8" Background="#F2F2F2">
+            <TextBlock Name="Log" Text="Scroll down: each picture loads as it comes into view." TextWrapping="Wrap" />
+        </Border>
+        <ScrollViewer>
+            <StackPanel Name="Page" Margin="16" Spacing="16">
+                <TextBlock Text="A data: URI" FontWeight="SemiBold" />
+                <c:AvonicImg Name="First" Alt="Four quarters" />
+
+                <TextBlock Text="No src yet: the alt text" FontWeight="SemiBold" />
+                <c:AvonicImg Alt="A picture that hasn't been given a src" />
+
+                <TextBlock Text="A src that fails: IonError and the alt text" FontWeight="SemiBold" />
+                <c:AvonicImg Src="avares://Avonic.Sample/Missing.png" Alt="A picture that failed to load" />
+
+                <TextBlock Text="In an avatar and a thumbnail" FontWeight="SemiBold" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <c:AvonicAvatar>
+                        <c:AvonicImg Name="InAvatar" Alt="In an avatar" />
+                    </c:AvonicAvatar>
+                    <c:AvonicThumbnail>
+                        <c:AvonicImg Name="InThumbnail" Alt="In a thumbnail" />
+                    </c:AvonicThumbnail>
+                </StackPanel>
+
+                <TextBlock Text="In an item" FontWeight="SemiBold" />
+                <c:AvonicItem Content="A file on disk">
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicThumbnail>
+                            <c:AvonicImg Name="FromFile" Alt="From a file" />
+                        </c:AvonicThumbnail>
+                    </c:AvonicItem.StartContent>
+                </c:AvonicItem>
+
+                <TextBlock Text="From the web (needs a connection)" FontWeight="SemiBold" />
+                <c:AvonicImg Src="https://docs-demo.ionic.io/assets/madison.jpg" Alt="The Madison, from Ionic's docs" />
+
+                <TextBlock Text="Twenty more, below the fold" FontWeight="SemiBold" />
+                <StackPanel Name="More" Spacing="16" />
+
+                <TextBlock Text="Change the first one's src" FontWeight="SemiBold" />
+                <c:AvonicButton Content="Next picture" Click="OnNext" />
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+
+</UserControl>

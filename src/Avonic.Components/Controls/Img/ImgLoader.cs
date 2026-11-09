@@ -1,0 +1,84 @@
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+
+namespace Avonic.Components.Controls;
+
+/// <summary>
+/// What a browser does for an <c>&lt;img src&gt;</c>, for <see cref="AvonicImg"/>: reads the bytes, and decodes them off the UI
+/// thread, as <c>decoding="async"</c> does. Anything that fails throws, which is <c>ionError</c>.
+/// </summary>
+/// <remarks>
+/// <list type="table">
+/// <item><term><c>http:</c>, <c>https:</c></term><description>One shared <see cref="HttpClient"/>; a status that isn't success fails.</description></item>
+/// <item><term><c>data:…;base64,…</c></term><description>Decoded from the URI. Not base64 fails.</description></item>
+/// <item><term><c>avares:</c></term><description>An app's own asset, through <see cref="AssetLoader"/>.</description></item>
+/// <item><term><c>file:</c>, or a path</term><description>A file. A relative path is relative to the working directory.</description></item>
+/// <item><term><c>""</c>, or another scheme</term><description>Fails, as Chromium fails <c>src=""</c>.</description></item>
+/// </list>
+/// Whatever Avalonia's <see cref="Bitmap"/> decodes loads: PNG, JPEG, WebP, BMP, a GIF's first frame. SVG doesn't.
+/// </remarks>
+internal static class ImgLoader
+{
+    private static readonly Lazy<HttpClient> s_http = new(() => new HttpClient());
+
+    public static async Task<Bitmap> LoadAsync(string src, CancellationToken cancellationToken)
+    {
+        var bytes = await ReadAsync(src, cancellationToken).ConfigureAwait(false);
+        return await Task.Run(() => Decode(bytes), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Decodes the bytes, on the thread pool. Tests wrap it to see which thread it runs on.</summary>
+    internal static Func<byte[], Bitmap> Decode { get; set; } = static bytes =>
+    {
+        using var stream = new MemoryStream(bytes, writable: false);
+        return new Bitmap(stream);
+    };
+
+    private static async Task<byte[]> ReadAsync(string src, CancellationToken cancellationToken)
+    {
+        if (src.Length == 0)
+        {
+            throw new ArgumentException("An empty src loads nothing, as in a browser.", nameof(src));
+        }
+
+        if (src.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+        {
+            var comma = src.IndexOf(',');
+            if (comma < 0 || !src.AsSpan(0, comma).EndsWith(";base64", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new NotSupportedException("Only a data: URI in base64 is read.");
+            }
+
+            return Convert.FromBase64String(Uri.UnescapeDataString(src[(comma + 1)..]));
+        }
+
+        if (Uri.TryCreate(src, UriKind.Absolute, out var uri))
+        {
+            switch (uri.Scheme)
+            {
+                case "http":
+                case "https":
+                {
+                    using var response = await s_http.Value
+                        .GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                        .ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+                }
+                case "avares":
+                {
+                    await using var asset = AssetLoader.Open(uri);
+                    using var copy = new MemoryStream();
+                    await asset.CopyToAsync(copy, cancellationToken).ConfigureAwait(false);
+                    return copy.ToArray();
+                }
+                case "file":
+                    return await File.ReadAllBytesAsync(uri.LocalPath, cancellationToken).ConfigureAwait(false);
+                default:
+                    throw new NotSupportedException($"An image can't be loaded from a {uri.Scheme}: URI.");
+            }
+        }
+
+        return await File.ReadAllBytesAsync(Path.GetFullPath(src), cancellationToken).ConfigureAwait(false);
+    }
+}
