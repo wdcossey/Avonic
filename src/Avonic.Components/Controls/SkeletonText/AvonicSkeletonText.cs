@@ -7,7 +7,6 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Immutable;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -67,7 +66,11 @@ public class AvonicSkeletonText : TemplatedControl
     }
 
     /// <summary>The frame callback is made once, not at every frame.</summary>
-    public AvonicSkeletonText() => _onFrame = OnFrame;
+    public AvonicSkeletonText()
+    {
+        _onFrame = OnFrame;
+        _hiddenChain = new HiddenChainWatcher(Restart);
+    }
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
@@ -78,7 +81,9 @@ public class AvonicSkeletonText : TemplatedControl
     private bool _animated;
     private TimeSpan _startedAt;
     private IDisposable? _frame;
-    private readonly List<Visual> _hiddenBy = [];
+
+    /// <summary>A frame that finds it hidden watches its chain, and showing it starts the band again from 0.</summary>
+    private readonly HiddenChainWatcher _hiddenChain;
     private readonly Action _onFrame;
 
     /// <summary>Whether a frame is requested: only while the band moves.</summary>
@@ -131,7 +136,7 @@ public class AvonicSkeletonText : TemplatedControl
         base.OnDetachedFromVisualTree(e);
         _attached = false;
         StopFrames();
-        StopWaiting();
+        _hiddenChain.Dispose();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -155,7 +160,7 @@ public class AvonicSkeletonText : TemplatedControl
             else if (!_animated)
             {
                 StopFrames();
-                StopWaiting();
+                _hiddenChain.Dispose();
             }
         }
     }
@@ -175,7 +180,7 @@ public class AvonicSkeletonText : TemplatedControl
 
     private void Restart()
     {
-        StopWaiting();
+        _hiddenChain.Dispose();
         _startedAt = AvonicConfig.Now();
         Update();
     }
@@ -205,7 +210,7 @@ public class AvonicSkeletonText : TemplatedControl
         if (!IsEffectivelyVisible)
         {
             // display: none stops it: this frame requests no other. Showing it starts it again from 0.
-            WaitUntilShown();
+            _hiddenChain.Watch(this);
             return;
         }
 
@@ -224,59 +229,11 @@ public class AvonicSkeletonText : TemplatedControl
         _frame ??= AvonicConfig.RequestFrame(this, _onFrame);
     }
 
-    /// <summary>
-    /// Avalonia doesn't tell a control when an ancestor hides or shows it, so a frame that finds it hidden watches
-    /// <see cref="Visual.IsVisible"/> on whatever in its chain is hidden, until all of it shows, as <see cref="AvonicProgressBar"/>
-    /// does. A hide and show between two frames isn't seen, as in Chromium.
-    /// </summary>
-    private void WaitUntilShown()
-    {
-        if (_hiddenBy.Count > 0)
-        {
-            return;
-        }
-
-        for (var visual = (Visual?)this; visual is not null; visual = visual.GetVisualParent())
-        {
-            if (!visual.IsVisible)
-            {
-                visual.PropertyChanged += OnHiddenVisualChanged;
-                _hiddenBy.Add(visual);
-            }
-        }
-    }
-
-    private void OnHiddenVisualChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != IsVisibleProperty || !_hiddenBy.TrueForAll(visual => visual.IsVisible))
-        {
-            return;
-        }
-
-        Restart();
-    }
-
-    private void StopWaiting()
-    {
-        foreach (var visual in _hiddenBy)
-        {
-            visual.PropertyChanged -= OnHiddenVisualChanged;
-        }
-
-        _hiddenBy.Clear();
-    }
-
     // ── Converters for the theme ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>rgba(var(--a, var(--b)), n)</c>: the first value that's set, a <see cref="Color"/> or a solid brush's colour, at the
-    /// alpha in the <c>ConverterParameter</c>, rounded to a byte as Chromium rounds it, as a <see cref="Color"/> or a brush.
-    /// </summary>
-    public static readonly IMultiValueConverter Rgba = new RgbaConverter();
-
-    /// <summary>
     /// <c>background: var(--background)</c>, where <c>--background</c> is <c>rgba(var(--background-rgb, …), n)</c> unless it's
-    /// set: the first value, a brush, if it's set, or else <see cref="Rgba"/> of the others.
+    /// set: the first value, a brush, if it's set, or else <see cref="Css.Rgba"/> of the others.
     /// </summary>
     public static readonly IMultiValueConverter BackgroundOrRgba = new BackgroundConverter();
 
@@ -287,36 +244,12 @@ public class AvonicSkeletonText : TemplatedControl
     /// </summary>
     public static readonly IMultiValueConverter RadiusOrInherit = new RadiusOrInheritConverter();
 
-    private static bool IsSet(object? value) =>
-        value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
-
     private sealed class BackgroundConverter : IMultiValueConverter
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
-            values.Count > 0 && IsSet(values[0])
+            values.Count > 0 && Css.IsSet(values[0])
                 ? values[0]
-                : Rgba.Convert(values.Skip(1).ToList(), targetType, parameter, culture);
-    }
-
-    private sealed class RgbaConverter : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
-        {
-            var color = values.FirstOrDefault(IsSet) switch
-            {
-                Color value => value,
-                ISolidColorBrush brush => brush.Color,
-                _ => (Color?)null,
-            };
-            if (color is not { } rgb)
-            {
-                return AvaloniaProperty.UnsetValue;
-            }
-
-            var alpha = parameter is null ? 1 : System.Convert.ToDouble(parameter, CultureInfo.InvariantCulture);
-            var result = Color.FromArgb((byte)Math.Round(Math.Clamp(alpha, 0, 1) * 255), rgb.R, rgb.G, rgb.B);
-            return typeof(IBrush).IsAssignableFrom(targetType) ? new ImmutableSolidColorBrush(result) : result;
-        }
+                : Css.Rgba.Convert(values.Skip(1).ToList(), targetType, parameter, culture);
     }
 
     private sealed class RadiusOrInheritConverter : IMultiValueConverter
@@ -328,7 +261,7 @@ public class AvonicSkeletonText : TemplatedControl
                 return AvaloniaProperty.UnsetValue;
             }
 
-            if (IsSet(values[0]))
+            if (Css.IsSet(values[0]))
             {
                 return BorderRadius.ToCornerRadius.Convert([values[0], values[2], values[3]], targetType, parameter, culture);
             }

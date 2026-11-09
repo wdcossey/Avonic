@@ -82,4 +82,49 @@ public class CssTests
     [Fact]
     public void Box_With_A_Missing_Value_Is_Unset() =>
         Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.Box, null, 1d, 2d, 3d, AvaloniaProperty.UnsetValue));
+
+    [Fact]
+    public void Rgba_Takes_The_First_Set_Colour_At_The_Alpha_Rounded_To_A_Byte() =>
+        // 0.065 × 255 = 16.575, which Chromium rounds to 17.
+        Assert.Equal(Color.FromArgb(17, 1, 2, 3), Convert(Css.Rgba, "0.065", new CssUnset(), null, AvaloniaProperty.UnsetValue, Color.FromRgb(1, 2, 3), Colors.Red));
+
+    [Fact]
+    public void Rgba_Reads_A_Solid_Brush_And_Replaces_Its_Alpha() =>
+        Assert.Equal(Color.FromArgb(51, 10, 20, 30), Convert(Css.Rgba, "0.2", new SolidColorBrush(Color.FromArgb(200, 10, 20, 30), 0.5)));
+
+    [Fact]
+    public void Rgba_Without_A_Parameter_Is_Opaque() =>
+        Assert.Equal(Color.FromArgb(255, 1, 2, 3), Convert(Css.Rgba, null, Color.FromArgb(10, 1, 2, 3)));
+
+    [Fact]
+    public void Rgba_Clamps_The_Alpha() =>
+        Assert.Equal(Color.FromArgb(255, 1, 2, 3), Convert(Css.Rgba, "1.5", Color.FromRgb(1, 2, 3)));
+
+    [Fact]
+    public void Rgba_Gives_A_Brush_To_A_Brush()
+    {
+        var brush = Assert.IsAssignableFrom<ISolidColorBrush>(
+            Css.Rgba.Convert([Color.FromRgb(1, 2, 3)], typeof(IBrush), "0.5", CultureInfo.InvariantCulture));
+
+        Assert.Equal(Color.FromArgb(128, 1, 2, 3), brush.Color);
+        Assert.Equal(1, brush.Opacity);
+    }
+
+    [Fact]
+    public void Rgba_Of_Something_That_Is_Not_A_Colour_Is_Unset()
+    {
+        // rgba(var(--a), n) with --a a gradient is invalid, even with a colour after it, as var() takes the first that's set.
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.Rgba, "0.5", new LinearGradientBrush(), Color.FromRgb(1, 2, 3)));
+        Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.Rgba, "0.5", new CssUnset(), null));
+    }
+
+    [Fact]
+    public void IsSet_Is_False_For_Null_Unset_And_CssUnset_Only()
+    {
+        Assert.False(Css.IsSet(null));
+        Assert.False(Css.IsSet(AvaloniaProperty.UnsetValue));
+        Assert.False(Css.IsSet(new CssUnset()));
+        Assert.True(Css.IsSet(0d));
+        Assert.True(Css.IsSet(string.Empty));
+    }
 }

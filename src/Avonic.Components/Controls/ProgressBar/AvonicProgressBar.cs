@@ -106,6 +106,7 @@ public class AvonicProgressBar : TemplatedControl
         // later wins, so a frame made when the bar is reversed would beat an app's style that was already there.
         Bind(RenderTransformProperty, _reversal, BindingPriority.Style);
         UpdatePseudoClasses();
+        _hiddenChain = new HiddenChainWatcher(Restart);
     }
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
@@ -130,7 +131,13 @@ public class AvonicProgressBar : TemplatedControl
     private TimeSpan _renderedAt;
     private IDisposable? _frame;
     private IDisposable? _firstFrame;
-    private readonly List<Visual> _hiddenBy = [];
+
+    /// <summary>
+    /// <c>display: none</c>, on the bar or an ancestor, stops an element's CSS animations, and showing it starts them again
+    /// from 0. So a frame that finds the bar hidden, or an attach while it's hidden, stops the frames and watches its chain
+    /// until it shows. A hide and show between two frames isn't seen, as in Chromium, measured, where no style change sees it.
+    /// </summary>
+    private readonly HiddenChainWatcher _hiddenChain;
     private readonly ReversalTransform _reversal = new();
     private ProgressBarAutomationPeer? _peer;
 
@@ -204,54 +211,9 @@ public class AvonicProgressBar : TemplatedControl
         Restart();
     }
 
-    /// <summary>
-    /// <c>display: none</c>, on the bar or an ancestor, stops an element's CSS animations, and showing it starts them again
-    /// from 0. Avalonia doesn't tell a control when an ancestor hides or shows it, so a frame that finds the bar hidden, or an
-    /// attach while it's hidden, stops the frames and watches <see cref="Visual.IsVisible"/> on whatever in its chain is
-    /// hidden, until all of it shows. A hide and show between two frames isn't seen, as in Chromium, measured, where no
-    /// style change sees it.
-    /// </summary>
-    private void WaitUntilShown()
-    {
-        if (_hiddenBy.Count > 0)
-        {
-            return;
-        }
-
-        for (var visual = (Visual?)this; visual is not null; visual = visual.GetVisualParent())
-        {
-            if (!visual.IsVisible)
-            {
-                visual.PropertyChanged += OnHiddenVisualChanged;
-                _hiddenBy.Add(visual);
-            }
-        }
-    }
-
-    private void OnHiddenVisualChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != IsVisibleProperty || !_hiddenBy.TrueForAll(visual => visual.IsVisible))
-        {
-            return;
-        }
-
-        StopWaiting();
-        Restart();
-    }
-
-    private void StopWaiting()
-    {
-        foreach (var visual in _hiddenBy)
-        {
-            visual.PropertyChanged -= OnHiddenVisualChanged;
-        }
-
-        _hiddenBy.Clear();
-    }
-
     private void Restart()
     {
-        StopWaiting();
+        _hiddenChain.Dispose();
         _renderedAt = AvonicConfig.Now();
 
         // Stencil's first render is at the next frame, so a change before it is drawn without a transition, measured
@@ -275,7 +237,7 @@ public class AvonicProgressBar : TemplatedControl
         StopFrames();
         _firstFrame?.Dispose();
         _firstFrame = null;
-        StopWaiting();
+        _hiddenChain.Dispose();
     }
 
     private void OnRootSizeChanged(object? sender, SizeChangedEventArgs e) => Update();
@@ -362,7 +324,7 @@ public class AvonicProgressBar : TemplatedControl
             // it has to start the animations then
             if (_attached && !IsEffectivelyVisible)
             {
-                WaitUntilShown();
+                _hiddenChain.Watch(this);
             }
 
             return;
@@ -416,7 +378,7 @@ public class AvonicProgressBar : TemplatedControl
         }
         else if (_attached && !IsEffectivelyVisible)
         {
-            WaitUntilShown();
+            _hiddenChain.Watch(this);
         }
     }
 

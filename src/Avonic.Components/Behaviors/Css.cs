@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Avalonia.Media.Transformation;
 
 namespace Avonic.Components.Behaviors;
@@ -59,9 +60,38 @@ public static class Css
     /// </summary>
     public static readonly IMultiValueConverter TranslateScale = new TranslateScaleConverter();
 
+    /// <summary>
+    /// <c>rgba(var(--a, var(--b)), n)</c>: the first value that's set, a <see cref="Color"/> or a solid brush's colour, at the
+    /// alpha in the <c>ConverterParameter</c>, rounded to a byte as Chromium rounds it, as a <see cref="Color"/> or a brush. As
+    /// with <c>rgba()</c>, the alpha replaces any in the colour, and with no parameter it's opaque. A first set value that's
+    /// neither, such as a gradient, is an invalid <c>rgba()</c>, so it gives nothing.
+    /// </summary>
+    public static readonly IMultiValueConverter Rgba = new RgbaConverter();
 
-    private static bool IsSet(object? value) =>
+    /// <summary>Whether a value from a <c>{DynamicResource}</c> or a binding counts as set: not null, unset or <see cref="CssUnset"/>.</summary>
+    internal static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
+
+    private sealed class RgbaConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            var color = values.FirstOrDefault(IsSet) switch
+            {
+                Color value => value,
+                ISolidColorBrush brush => brush.Color,
+                _ => (Color?)null,
+            };
+            if (color is not { } rgb)
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var alpha = parameter is null ? 1 : System.Convert.ToDouble(parameter, CultureInfo.InvariantCulture);
+            var result = Color.FromArgb((byte)Math.Round(Math.Clamp(alpha, 0, 1) * 255), rgb.R, rgb.G, rgb.B);
+            return typeof(IBrush).IsAssignableFrom(targetType) ? new ImmutableSolidColorBrush(result) : result;
+        }
+    }
 
     private sealed class TranslateScaleConverter : IMultiValueConverter
     {
