@@ -1162,7 +1162,9 @@ public class AvonicRadioTests
         using var scene = Show(group);
         button.Focus(NavigationMethod.Tab);
 
+        // An ItemsControl would move focus between its containers: Ionic's group doesn't.
         Press(scene, PhysicalKey.ArrowDown);
+        Assert.True(button.IsFocused);
         Press(scene, PhysicalKey.Space);
         Assert.Equal("a", group.Value);
         Assert.Empty(changes);
