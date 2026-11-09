@@ -23,6 +23,7 @@ public partial class DevicePage : UserControl
 
     private TopLevel? _topLevel;
     private IInsetsManager? _insets;
+    private CancellationTokenSource? _benchmark;
 
     public DevicePage()
     {
@@ -74,6 +75,8 @@ public partial class DevicePage : UserControl
 
         _insets = null;
         _topLevel = null;
+        // Leaving the page stops a run, with the theme back.
+        _benchmark?.Cancel();
     }
 
     private void OnSafeAreaChanged(object? sender, SafeAreaChangedArgs e) => ShowInsets();
@@ -123,9 +126,10 @@ public partial class DevicePage : UserControl
 
         RunBenchmark.IsEnabled = false;
         BenchmarkRow.IsVisible = false;
+        using var cancel = _benchmark = new CancellationTokenSource();
         try
         {
-            var row = await MakeBenchmark(shell.BenchmarkArea).Run(new Progress<string>(text => BenchmarkStatus.Text = text));
+            var row = await MakeBenchmark(shell.BenchmarkArea).Run(new Progress<string>(text => BenchmarkStatus.Text = text), cancel.Token);
             var caveat = StyleCostRunner.WhyNotForTheTable();
             BenchmarkStatus.Text = caveat is null
                 ? $"Done. The row is from this runner on {RuntimeInformation.OSDescription}: compare it with this runner on desktop."
@@ -133,6 +137,10 @@ public partial class DevicePage : UserControl
             BenchmarkRow.Text = row;
             BenchmarkRow.IsVisible = true;
             Console.WriteLine($"{LogPrefix} {RuntimeInformation.OSDescription} {(caveat is null ? "" : $"(not for the table: {caveat}) ")}{row}");
+        }
+        catch (OperationCanceledException)
+        {
+            BenchmarkStatus.Text = "Stopped: the page was left.";
         }
         catch (Exception error)
         {
@@ -142,6 +150,7 @@ public partial class DevicePage : UserControl
         }
         finally
         {
+            _benchmark = null;
             RunBenchmark.IsEnabled = true;
         }
     }

@@ -74,7 +74,8 @@ docs/                    PROCESS, ROADMAP, decisions, per-component plan/compari
 A control adds only its own files; templates, tokens and sample pages are auto-discovered
 ([convention](docs/infra/auto-discovery/README.md)).
 
-Stack: libraries target **net8.0**; tests target **net10.0** (xunit v3 needs the SDK's apphost);
+Stack: libraries target **net8.0**; tests and the sample target **net10.0** (xunit v3 needs the SDK's apphost, and Avalonia 12
+on Android needs net10.0), the Android head **net10.0-android**;
 built with the **.NET 10 SDK** (`global.json`). **Avalonia 12.1.4**, **xunit v3** — versions are
 central in `Directory.Packages.props`; warnings are errors. Solution file is `Avonic.sln`
 (classic format — `.slnx` needs SDK 9.0.200+).

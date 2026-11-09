@@ -47,6 +47,7 @@ public partial class OverlaysPage : UserControl
         catch (InvalidOperationException error)
         {
             Status.Text = $"Overlay {overlay.Number} wasn't presented: {error.Message}";
+            _presented--;
             return;
         }
 

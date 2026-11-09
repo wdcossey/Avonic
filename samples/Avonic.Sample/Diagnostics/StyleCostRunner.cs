@@ -26,6 +26,9 @@ public sealed class StyleCostRunner(
 {
     private readonly IReadOnlyList<Func<Control>> _kinds = kinds ?? StyleCost.Kinds;
 
+    // The theme is the app's, so one run at a time.
+    private static bool s_running;
+
     /// <summary>Whether a row from here can go in the table: a Release build, with Avalonia's diagnostics off.</summary>
     public static string? WhyNotForTheTable()
     {
@@ -36,9 +39,31 @@ public sealed class StyleCostRunner(
 #endif
     }
 
-    /// <summary>Runs it, and gives the row for the table.</summary>
-    /// <exception cref="InvalidOperationException">The app has no <see cref="AvonicTheme"/> in its styles, or the host went away.</exception>
-    public async Task<string> Run(IProgress<string>? progress = null)
+    /// <summary>Runs it, and gives the row for the table. <paramref name="cancel"/> stops it between attaches, with the theme back.</summary>
+    /// <exception cref="InvalidOperationException">
+    /// Another run is going, the app has no <see cref="AvonicTheme"/> in its styles, or the host went away.
+    /// </exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancel"/> stopped it.</exception>
+    public async Task<string> Run(IProgress<string>? progress = null, CancellationToken cancel = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(rounds, 1);
+        if (s_running)
+        {
+            throw new InvalidOperationException("A benchmark is already running.");
+        }
+
+        s_running = true;
+        try
+        {
+            return await RunCore(progress, cancel);
+        }
+        finally
+        {
+            s_running = false;
+        }
+    }
+
+    private async Task<string> RunCore(IProgress<string>? progress, CancellationToken cancel)
     {
         var styles = Application.Current!.Styles;
         var theme = styles.OfType<AvonicTheme>().FirstOrDefault()
@@ -53,6 +78,7 @@ public sealed class StyleCostRunner(
             var with = new List<double>();
             for (var round = 0; round < total; round++)
             {
+                cancel.ThrowIfCancellationRequested();
                 progress?.Report($"Column {kind + 1} of {_kinds.Count}, round {round + 1} of {total}");
                 var index = styles.IndexOf(theme);
                 styles[index] = stubs;

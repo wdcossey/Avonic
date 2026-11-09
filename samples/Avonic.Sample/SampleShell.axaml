@@ -24,7 +24,7 @@
 
         <!-- Where the device page's style benchmark attaches its trees: outside Avonic's controls, so that its ancestors are
              the same with and without the theme, laid out, and clipped so that drawing them costs nothing. -->
-        <Panel Name="BenchmarkHost" DockPanel.Dock="Bottom" Height="1" ClipToBounds="True" IsHitTestVisible="False" />
+        <Panel Name="BenchmarkHost" DockPanel.Dock="Bottom" Height="0" ClipToBounds="True" IsHitTestVisible="False" />
 
         <ContentControl Name="Host" />
     </DockPanel>

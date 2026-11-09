@@ -302,6 +302,46 @@ public class SampleShellTests
         }
     });
 
+    // Back during a run: the page goes, and so does the run, with the theme back where it was. The back comes from inside the
+    // run's first attach, as the dispatcher would run the whole of it in one go here.
+    [AvaloniaFact]
+    public void Leaving_The_Device_Page_Stops_Its_Benchmark() => InstalledTheme.Run(theme =>
+    {
+        var make = DevicePage.MakeBenchmark;
+        var styles = Application.Current!.Styles;
+        using var stage = new Stage();
+        var index = styles.IndexOf(theme);
+        var attaches = 0;
+        Control Build()
+        {
+            if (++attaches == 1)
+            {
+                Assert.True(stage.Back());
+            }
+
+            return new Border();
+        }
+
+        DevicePage.MakeBenchmark = host => new StyleCostRunner(host, elements: 1, depth: 0, warmUpRounds: 0, rounds: 100, kinds: [Build]);
+        try
+        {
+            stage.Open(b => Equals(b.Content, "device"));
+            var page = (DevicePage)stage.Shell.FindControl<ContentControl>("Host")!.Content!;
+
+            page.FindControl<AvonicButton>("RunBenchmark")!.RaiseEvent(new RoutedEventArgs(AvonicButton.ClickEvent));
+            Settle();
+
+            Assert.False(stage.Shell.IsShowingPage);
+            Assert.Equal("Stopped: the page was left.", page.FindControl<TextBlock>("BenchmarkStatus")!.Text);
+            Assert.Equal(2, attaches);
+            Assert.Same(theme, styles[index]);
+        }
+        finally
+        {
+            DevicePage.MakeBenchmark = make;
+        }
+    });
+
     /// <summary>The test clock a millisecond at a time, so that an overlay's animation runs to its end.</summary>
     private static void Run(TestClock clock, double ms)
     {

@@ -115,5 +115,6 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
   instead, so that the single-view branch is tried. An app that follows Avalonia's docs has to call `Present(TopLevel)`. Reported, not
   changed here.
 - **CI's `android` job** hasn't run before this PR.
-- **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation and resizing itself, so
-  that's only after the system kills it in the background, or with "Don't keep activities" on.
+- **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation, resizing, display
+  size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then the safe-area switch also keeps
+  following the old activity's insets until it's turned off and on.

@@ -120,6 +120,60 @@ public partial class StyleCostRunnerTests
         Assert.Equal(index, styles.IndexOf(theme));
     });
 
+    // The theme is the app's, so a second run, as from the device page opened again, waits its turn.
+    [AvaloniaFact]
+    public void A_Second_Run_While_One_Is_Going_Is_Refused() => InstalledTheme.Run(theme =>
+    {
+        var styles = Application.Current!.Styles;
+        var index = styles.IndexOf(theme);
+        var host = new Panel();
+        using var scene = new Scene(host);
+
+        var first = Runner(host).Run();
+        var second = Runner(host).Run();
+
+        Assert.Contains("already running", Assert.Throws<InvalidOperationException>(() => Wait(second)).Message, StringComparison.Ordinal);
+        Assert.Matches(RowShape(), Wait(first));
+        Assert.Matches(RowShape(), Wait(Runner(host).Run()));
+        Assert.Equal(index, styles.IndexOf(theme));
+    });
+
+    [AvaloniaFact]
+    public void Cancelling_Stops_It_With_The_Theme_Back() => InstalledTheme.Run(theme =>
+    {
+        var styles = Application.Current!.Styles;
+        var index = styles.IndexOf(theme);
+        var host = new Panel();
+        using var scene = new Scene(host);
+        using var cancel = new CancellationTokenSource();
+        var attaches = 0;
+        Control Make()
+        {
+            if (++attaches == 3)
+            {
+                cancel.Cancel();
+            }
+
+            return new Border();
+        }
+
+        var run = new StyleCostRunner(host, elements: 1, depth: 0, warmUpRounds: 1, rounds: 5, kinds: [Make]).Run(cancel: cancel.Token);
+
+        Assert.ThrowsAny<OperationCanceledException>(() => Wait(run));
+        Assert.Equal(4, attaches);
+        Assert.Equal(index, styles.IndexOf(theme));
+        Assert.Same(theme, styles[index]);
+    });
+
+    [AvaloniaFact]
+    public void No_Measured_Rounds_Is_Refused_Before_It_Starts() => InstalledTheme.Run(_ =>
+    {
+        var host = new Panel();
+        using var scene = new Scene(host);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => Wait(Runner(host, rounds: 0).Run()));
+    });
+
     [AvaloniaFact]
     public void An_App_With_No_Avonic_Theme_Is_Told_So()
     {
