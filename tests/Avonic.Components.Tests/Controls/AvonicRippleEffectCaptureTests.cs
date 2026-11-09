@@ -97,11 +97,11 @@ public class AvonicRippleEffectCaptureTests
         }
 
         // Nothing before the 100 ms defer; a growing circle; full coverage; gone after removal.
-        Assert.False(Differs(baseline, press[0]),    "nothing should render at press");
-        Assert.False(Differs(baseline, press[60]),   "nothing should render before the 100 ms defer");
-        Assert.True(Differs(baseline, press[160]),   "ripple should be visible at 160 ms");
-        Assert.True(Differs(press[160], press[320]), "ripple should keep expanding between 160 and 320 ms");
-        Assert.False(Differs(baseline, released[420]), "ripple should be gone 420 ms after release");
+        Assert.False(Frames.DifferingRows(baseline, press[0]) > 0,    "nothing should render at press");
+        Assert.False(Frames.DifferingRows(baseline, press[60]) > 0,   "nothing should render before the 100 ms defer");
+        Assert.True(Frames.DifferingRows(baseline, press[160]) > 0,   "ripple should be visible at 160 ms");
+        Assert.True(Frames.DifferingRows(press[160], press[320]) > 0, "ripple should keep expanding between 160 and 320 ms");
+        Assert.False(Frames.DifferingRows(baseline, released[420]) > 0, "ripple should be gone 420 ms after release");
 
         // At 160 ms (60 ms in) the circle has not reached the surface's left edge yet…
         AssertClose(Surface, Frames.PixelAt(press[160], (Pad + 4) * 2, (int)((Pad + H / 2) * 2)), tolerance: 1);
@@ -110,14 +110,6 @@ public class AvonicRippleEffectCaptureTests
     }
 
     // ── pixel helpers ────────────────────────────────────────────────────────────────────────
-
-    private static unsafe bool Differs(WriteableBitmap a, WriteableBitmap b)
-    {
-        using var fa = a.Lock();
-        using var fb = b.Lock();
-        var bytes = fa.RowBytes * fa.Size.Height;
-        return !new ReadOnlySpan<byte>((void*)fa.Address, bytes).SequenceEqual(new ReadOnlySpan<byte>((void*)fb.Address, bytes));
-    }
 
     private static Color Blend(Color under, Color over, double alpha) => Color.FromRgb(
         (byte)Math.Round(under.R + (over.R - under.R) * alpha),

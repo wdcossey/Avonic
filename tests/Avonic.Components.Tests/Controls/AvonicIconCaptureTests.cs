@@ -35,15 +35,6 @@ public class AvonicIconCaptureTests
         return false;
     }
 
-    private static void Save(WriteableBitmap frame, string name)
-    {
-        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
-        {
-            Directory.CreateDirectory(dir);
-            frame.Save(Path.Combine(dir, name), PngBitmapEncoderOptions.Default);
-        }
-    }
-
     // The layout has to match tools/ionic-ref/compare-icons.js.
     [AvaloniaFact]
     public void Every_Icon_Paints()
@@ -65,7 +56,7 @@ public class AvonicIconCaptureTests
         scene.Window.SetRenderScaling(Scale);
         Dispatcher.UIThread.RunJobs();
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Save(frame, "icons-avonic.png");
+        Frames.Save(frame, "icons-avonic.png");
 
         var blank = names.Where((_, i) => !HasInk(frame, i % Cols * Cell * Scale, i / Cols * Cell * Scale, Cell * Scale)).ToList();
         Assert.Empty(blank);
@@ -116,7 +107,7 @@ public class AvonicIconCaptureTests
         scene.Window.SetRenderScaling(2);
         Dispatcher.UIThread.RunJobs();
         var frame = scene.Window.CaptureRenderedFrame()!;
-        Save(frame, "avonic-page.png");
+        Frames.Save(frame, "avonic-page.png");
 
         Assert.True(HasInk(frame, 0, 0, 200));
     });

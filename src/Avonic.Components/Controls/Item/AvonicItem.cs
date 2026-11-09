@@ -207,8 +207,7 @@ public class AvonicItem : TemplatedControl, IItemHost
     ];
 
     private NativeButton? _native;
-    private readonly Dictionary<Type, HashSet<string>> _itemStyles = [];
-    private readonly HashSet<string> _appliedItemStyles = [];
+    private readonly IonStyleClasses _itemStyles = new(":item-");
     private ContentPresenter?[] _slots = [];
     private AvonicIcon? _detailIcon;
     private AvonicRippleEffect? _ripple;
@@ -462,30 +461,11 @@ public class AvonicItem : TemplatedControl, IItemHost
     /// <summary><c>itemStyle</c>: each true key becomes <c>:item-key</c>, kept per type of child, as Ionic's by tag name.</summary>
     private void OnIonStyle(object? sender, IonStyleEventArgs e)
     {
-        e.Handled = true;
-        if (e.Source is null)
+        if (_itemStyles.Apply(PseudoClasses, e))
         {
-            return;
+            // forceUpdate: Ionic re-renders, which also works out the first interactive control again.
+            UpdateInteractivity();
         }
-
-        _itemStyles[e.Source.GetType()] = e.Styles.Where(style => style.Value).Select(style => style.Key).ToHashSet();
-
-        var styles = _itemStyles.Values.SelectMany(keys => keys).ToHashSet();
-        foreach (var removed in _appliedItemStyles.Except(styles))
-        {
-            PseudoClasses.Remove(":item-" + removed);
-        }
-
-        foreach (var added in styles.Except(_appliedItemStyles))
-        {
-            PseudoClasses.Add(":item-" + added);
-        }
-
-        _appliedItemStyles.Clear();
-        _appliedItemStyles.UnionWith(styles);
-
-        // forceUpdate: Ionic re-renders, which also works out the first interactive control again.
-        UpdateInteractivity();
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
