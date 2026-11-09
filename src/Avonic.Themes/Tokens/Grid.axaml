@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The global grid variables, which grid.css and col.css read. Ionic leaves them all unset, and each falls back
+         to the breakpoint's own, then the general one, then a length. Set one in any ancestor's Resources, as a CSS
+         variable is set on any ancestor. Lengths, as doubles. -->
+    <b:CssUnset x:Key="Avonic.GridPadding" />
+    <b:CssUnset x:Key="Avonic.GridPaddingXs" />
+    <b:CssUnset x:Key="Avonic.GridPaddingSm" />
+    <b:CssUnset x:Key="Avonic.GridPaddingMd" />
+    <b:CssUnset x:Key="Avonic.GridPaddingLg" />
+    <b:CssUnset x:Key="Avonic.GridPaddingXl" />
+
+    <!-- The width of a fixed grid -->
+    <b:CssUnset x:Key="Avonic.GridWidth" />
+    <b:CssUnset x:Key="Avonic.GridWidthXs" />
+    <b:CssUnset x:Key="Avonic.GridWidthSm" />
+    <b:CssUnset x:Key="Avonic.GridWidthMd" />
+    <b:CssUnset x:Key="Avonic.GridWidthLg" />
+    <b:CssUnset x:Key="Avonic.GridWidthXl" />
+
+    <b:CssUnset x:Key="Avonic.GridColumnPadding" />
+    <b:CssUnset x:Key="Avonic.GridColumnPaddingXs" />
+    <b:CssUnset x:Key="Avonic.GridColumnPaddingSm" />
+    <b:CssUnset x:Key="Avonic.GridColumnPaddingMd" />
+    <b:CssUnset x:Key="Avonic.GridColumnPaddingLg" />
+    <b:CssUnset x:Key="Avonic.GridColumnPaddingXl" />
+
+    <!-- The number of columns. Unset is col.js's 12. -->
+    <b:CssUnset x:Key="Avonic.GridColumns" />
+
+    <!-- The var() fallbacks in grid.css and col.css. Infinity is width: 100%, as a fixed grid is a MaxWidth. -->
+    <x:Double x:Key="Avonic.Grid.Md.Padding">5</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.ColumnPadding">5</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.WidthXs">Infinity</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.WidthSm">540</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.WidthMd">720</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.WidthLg">960</x:Double>
+    <x:Double x:Key="Avonic.Grid.Md.WidthXl">1140</x:Double>
+
+</ResourceDictionary>
