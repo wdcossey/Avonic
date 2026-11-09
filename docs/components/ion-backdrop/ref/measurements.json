@@ -1,0 +1,239 @@
+{
+ "ionic": "8.8.1 md, headless Chromium 390x844, in ion-app; a 200x100 backdrop over a button in a div with click, pointerdown and pointerup listeners (M1-M5); a 300x300 one for the touch drags",
+ "bp-style": {
+  "opacity": "0.01",
+  "bg": "rgb(0, 0, 0)",
+  "cursor": "pointer",
+  "z": "2",
+  "pos": "absolute",
+  "aria": "true",
+  "touch": "none",
+  "pe": "auto",
+  "box": "{\"x\":20,\"y\":20,\"width\":200,\"height\":100,\"top\":20,\"right\":220,\"bottom\":120,\"left\":20}"
+ },
+ "bp-hidden": {
+  "bg": "rgba(0, 0, 0, 0)",
+  "opacity": "0.01",
+  "cls": "md hydrated backdrop-hide"
+ },
+ "bp-untappable": {
+  "cursor": "auto",
+  "cls": "md hydrated backdrop-no-tappable"
+ },
+ "bp-input": [
+  {
+   "tappable": true,
+   "stop": true,
+   "how": "mouse",
+   "log": "wrapdown wrapup tap:false:true"
+  },
+  {
+   "tappable": true,
+   "stop": true,
+   "how": "touch",
+   "log": "wrapdown wrapup tap:false:true"
+  },
+  {
+   "tappable": true,
+   "stop": true,
+   "how": "mousedrag",
+   "log": "wrapdown wrapup tap:false:true"
+  },
+  {
+   "tappable": true,
+   "stop": true,
+   "how": "touchdrag",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": true,
+   "stop": false,
+   "how": "mouse",
+   "log": "wrapdown wrapup tap:false:true wrapclick:false"
+  },
+  {
+   "tappable": true,
+   "stop": false,
+   "how": "touch",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": true,
+   "stop": false,
+   "how": "mousedrag",
+   "log": "wrapdown wrapup tap:false:true wrapclick:false"
+  },
+  {
+   "tappable": true,
+   "stop": false,
+   "how": "touchdrag",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": true,
+   "how": "mouse",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": true,
+   "how": "touch",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": true,
+   "how": "mousedrag",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": true,
+   "how": "touchdrag",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": false,
+   "how": "mouse",
+   "log": "wrapdown wrapup wrapclick:false"
+  },
+  {
+   "tappable": false,
+   "stop": false,
+   "how": "touch",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "tappable": false,
+   "stop": false,
+   "how": "mousedrag",
+   "log": "wrapdown wrapup wrapclick:false"
+  },
+  {
+   "tappable": false,
+   "stop": false,
+   "how": "touchdrag",
+   "log": "wrapdown wrapup"
+  },
+  {
+   "touchDrag": 10,
+   "log": "wrapdown wrapup"
+  },
+  {
+   "touchDrag": 14,
+   "log": "wrapdown wrapup tap:false:true"
+  },
+  {
+   "touchDrag": 16,
+   "log": "wrapdown wrapup"
+  },
+  {
+   "touchDrag": 20,
+   "log": "wrapdown wrapup"
+  }
+ ],
+ "bp-touch-drags": [
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 0,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 0,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 0,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 5,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 10,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 14,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 15,
+   "log": "tap"
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 16,
+   "log": ""
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 20,
+   "log": ""
+  },
+  {
+   "stopPropagation": true,
+   "touchMovedPx": 40,
+   "log": ""
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 0,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 0,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 0,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 5,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 10,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 14,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 15,
+   "log": "tap wrapclick"
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 16,
+   "log": ""
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 20,
+   "log": ""
+  },
+  {
+   "stopPropagation": false,
+   "touchMovedPx": 40,
+   "log": ""
+  }
+ ]
+}

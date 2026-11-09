@@ -1,0 +1,218 @@
+# Raw output of the measurement scripts behind docs/infra/overlays/PLAN.md (Ionic 8.8.1, md, headless Chromium 390x844, in ion-app)
+
+## Lifecycle (L1-L6), animated, then with the global animated: false
+=== animated
+{
+ "zBefore": "40001",
+ "idx": 1,
+ "hiddenBefore": true,
+ "inApp": "ION-APP",
+ "afterPresent": {
+  "z": "40001",
+  "bdOpacity": "0.32",
+  "bdTappable": true,
+  "active": "ION-LOADING",
+  "anims": [
+   "finished:both"
+  ]
+ },
+ "inDomAfter": false,
+ "again": false,
+ "log": [
+  "present() returned@0.0",
+  "ionLoadingWillPresent@0.2f0 bubbles=true",
+  "willPresent@0.3f0 bubbles=true",
+  "ionLoadingDidPresent@215.8f12 bubbles=true",
+  "didPresent@215.8f12 bubbles=true",
+  "present resolved@216.4f12",
+  "ionLoadingWillDismiss@0.3f0 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "willDismiss@0.3f0 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "onWillDismiss resolved {\"data\":{\"a\":1},\"role\":\"ok\"}@0.4",
+  "ionLoadingDidDismiss@216.5f13 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "didDismiss@216.5f13 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "onDidDismiss resolved {\"data\":{\"a\":1},\"role\":\"ok\"}@217.0",
+  "dismiss resolved true@217.0f13"
+ ],
+ "lock": [
+  "ionLoadingWillPresent@0",
+  "ionLoadingDidPresent@217",
+  "ionLoadingWillDismiss@217",
+  "ionLoadingDidDismiss@417",
+  "dismiss result true@417"
+ ],
+ "presentTwiceWillPresentCount": 1
+}
+=== config animated false
+{
+ "zBefore": "40001",
+ "idx": 1,
+ "hiddenBefore": true,
+ "inApp": "ION-APP",
+ "afterPresent": {
+  "z": "40001",
+  "bdOpacity": "0.32",
+  "bdTappable": true,
+  "active": "ION-LOADING",
+  "anims": [
+   "finished:both"
+  ]
+ },
+ "inDomAfter": false,
+ "again": false,
+ "log": [
+  "present() returned@0.0",
+  "ionLoadingWillPresent@0.2f0 bubbles=true",
+  "willPresent@0.2f0 bubbles=true",
+  "ionLoadingDidPresent@4.2f0 bubbles=true",
+  "didPresent@4.2f0 bubbles=true",
+  "present resolved@5.2f0",
+  "ionLoadingWillDismiss@0.1f0 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "willDismiss@0.1f0 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "onWillDismiss resolved {\"data\":{\"a\":1},\"role\":\"ok\"}@0.2",
+  "ionLoadingDidDismiss@15.4f1 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "didDismiss@15.4f1 {\"data\":{\"a\":1},\"role\":\"ok\"} bubbles=true",
+  "onDidDismiss resolved {\"data\":{\"a\":1},\"role\":\"ok\"}@15.8",
+  "dismiss resolved true@15.8f1"
+ ],
+ "lock": [
+  "ionLoadingWillPresent@0",
+  "ionLoadingDidPresent@15",
+  "ionLoadingWillDismiss@16",
+  "ionLoadingDidDismiss@32",
+  "dismiss result true@32"
+ ],
+ "presentTwiceWillPresentCount": 1
+}
+
+## Focus, Escape, stacking, backdrop (F1-F6, E1-E3, S1, B1)
+{
+ "alertDuringPresent": "BODY.backdrop-no-scroll",
+ "alertAfterPresent": "DIV.alert-wrapper.ion-overlay-wrapper",
+ "alertTabs": [
+  "BUTTON.alert-button.ion-focusable",
+  "BUTTON.alert-button.ion-focusable",
+  "BUTTON.alert-button.ion-focusable",
+  "BUTTON.alert-button.ion-focusable",
+  "S:BUTTON.alert-button.ion-focusable",
+  "S:DIV.alert-wrapper.ion-overlay-wrapper",
+  "S:BUTTON.alert-button.ion-focusable",
+  "S:BUTTON.alert-button.ion-focusable"
+ ],
+ "alertProgrammaticOutside": "BUTTON#other",
+ "alertEsc": [
+  "{\"role\":\"backdrop\"}"
+ ],
+ "afterAlertDismiss": "BUTTON#other",
+ "modalAfterPresent": "ION-MODAL#ion-overlay-2.md.modal-default",
+ "modalTabs": [
+  "BUTTON#m1",
+  "BUTTON#m2",
+  "BUTTON#m1",
+  "BUTTON#m2",
+  "S:BUTTON#m1",
+  "S:BUTTON#m2",
+  "S:BUTTON#m1"
+ ],
+ "modalProgrammaticOutside": "BUTTON#m2",
+ "zs": [
+  "20002",
+  "20003",
+  2,
+  3
+ ],
+ "escWithTopNotDismissable": [
+  true,
+  true
+ ],
+ "escWithToastOnTop": {
+  "modal": true,
+  "toast": true
+ },
+ "escModal": false,
+ "afterModal": "BUTTON#opener",
+ "focusMovedDuringDismiss": "BUTTON#other",
+ "backdropTap": {
+  "role": "backdrop"
+ }
+}
+
+## Web Animations values at frame-aligned local times (ms), on a 200x300 element: o = opacity, sx = scale x, tx/ty = translation
+## alert enter
+  {"t":0,"o":0.01,"sx":0.9,"tx":0,"ty":0}
+  {"t":32,"o":0.102319,"sx":0.909325,"tx":0,"ty":0}
+  {"t":80,"o":0.561736,"sx":0.955731,"tx":0,"ty":0}
+  {"t":112,"o":0.86861,"sx":0.986728,"tx":0,"ty":0}
+  {"t":144,"o":0.996953,"sx":0.999692,"tx":0,"ty":0}
+  {"t":160,"o":1,"sx":1,"tx":0,"ty":0}
+## action-sheet enter
+  {"t":0,"o":1,"sx":1,"tx":0,"ty":300}
+  {"t":48,"o":1,"sx":1,"tx":0,"ty":219.68}
+  {"t":96,"o":1,"sx":1,"tx":0,"ty":100.87}
+  {"t":208,"o":1,"sx":1,"tx":0,"ty":15.8117}
+  {"t":400,"o":1,"sx":1,"tx":0,"ty":0}
+## modal leave
+  {"t":48,"o":0.925564,"sx":1,"tx":0,"ty":2.6035}
+  {"t":96,"o":0.724577,"sx":1,"tx":0,"ty":10.7242}
+  {"t":144,"o":0.400144,"sx":1,"tx":0,"ty":23.8326}
+## timing alternate x2 delay 50 ease fill none
+  {"t":0,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":16,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":80,"o":0.513315,"sx":1,"tx":0,"ty":0}
+  {"t":128,"o":0.970068,"sx":1,"tx":0,"ty":0}
+  {"t":144,"o":0.998007,"sx":1,"tx":0,"ty":0}
+  {"t":160,"o":0.994316,"sx":1,"tx":0,"ty":0}
+  {"t":240,"o":0.094796,"sx":1,"tx":0,"ty":0}
+  {"t":256,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":304,"o":1,"sx":1,"tx":0,"ty":0}
+## timing alternate x2 delay 50 ease fill backwards
+  {"t":0,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":16,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":80,"o":0.513315,"sx":1,"tx":0,"ty":0}
+  {"t":128,"o":0.970068,"sx":1,"tx":0,"ty":0}
+  {"t":144,"o":0.998007,"sx":1,"tx":0,"ty":0}
+  {"t":160,"o":0.994316,"sx":1,"tx":0,"ty":0}
+  {"t":240,"o":0.094796,"sx":1,"tx":0,"ty":0}
+  {"t":256,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":304,"o":1,"sx":1,"tx":0,"ty":0}
+## timing alternate x2 delay 50 ease fill forwards
+  {"t":0,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":16,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":80,"o":0.513315,"sx":1,"tx":0,"ty":0}
+  {"t":128,"o":0.970068,"sx":1,"tx":0,"ty":0}
+  {"t":144,"o":0.998007,"sx":1,"tx":0,"ty":0}
+  {"t":160,"o":0.994316,"sx":1,"tx":0,"ty":0}
+  {"t":240,"o":0.094796,"sx":1,"tx":0,"ty":0}
+  {"t":256,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":304,"o":0,"sx":1,"tx":0,"ty":0}
+## timing alternate x2 delay 50 ease fill both
+  {"t":0,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":16,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":80,"o":0.513315,"sx":1,"tx":0,"ty":0}
+  {"t":128,"o":0.970068,"sx":1,"tx":0,"ty":0}
+  {"t":144,"o":0.998007,"sx":1,"tx":0,"ty":0}
+  {"t":160,"o":0.994316,"sx":1,"tx":0,"ty":0}
+  {"t":240,"o":0.094796,"sx":1,"tx":0,"ty":0}
+  {"t":256,"o":0,"sx":1,"tx":0,"ty":0}
+  {"t":304,"o":0,"sx":1,"tx":0,"ty":0}
+## menu md reverse
+  {"t":0,"o":1,"sx":1,"tx":0,"ty":0}
+  {"t":96,"o":1,"sx":1,"tx":-17.3969,"ty":0}
+  {"t":288,"o":1,"sx":1,"tx":-246.275,"ty":0}
+  {"t":304,"o":1,"sx":1,"tx":-288,"ty":0}
+## computed offsets
+  {"t":16,"o":0.32,"sx":1,"tx":0,"ty":0}
+  {"t":48,"o":0.96,"sx":1,"tx":0,"ty":0}
+  {"t":80,"o":0.7,"sx":1,"tx":0,"ty":0}
+## ease-in / out
+  {"t":16,"o":0.04125,"sx":1,"tx":0,"ty":0}
+  {"t":48,"o":0.294144,"sx":1,"tx":0,"ty":0}
+## ease-out
+  {"t":16,"o":0.250589,"sx":1,"tx":0,"ty":0}
+  {"t":48,"o":0.662901,"sx":1,"tx":0,"ty":0}
+## translate+scale mixed
+  {"t":48,"o":1,"sx":0.74,"tx":0,"ty":20.8}
+## iterations 1.5 reverse
+  {"t":48,"o":0.52,"sx":1,"tx":0,"ty":0}
+  {"t":112,"o":0.88,"sx":1,"tx":0,"ty":0}
+  {"t":144,"o":0.56,"sx":1,"tx":0,"ty":0}
+  {"t":160,"o":0.5,"sx":1,"tx":0,"ty":0}
