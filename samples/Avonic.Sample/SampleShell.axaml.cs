@@ -75,7 +75,6 @@ public partial class SampleShell : UserControl
         _back = null;
         _safeArea?.Dispose();
         _safeArea = null;
-        _topLevel = null;
         _performance?.Dispose();
         _performance = null;
     }
