@@ -66,6 +66,9 @@ public class AvonicSkeletonText : TemplatedControl
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicSkeletonText>(VerticalAlignment.Top);
     }
 
+    /// <summary>The frame callback is made once, not at every frame.</summary>
+    public AvonicSkeletonText() => _onFrame = OnFrame;
+
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private Control? _shimmer;
@@ -76,6 +79,7 @@ public class AvonicSkeletonText : TemplatedControl
     private TimeSpan _startedAt;
     private IDisposable? _frame;
     private readonly List<Visual> _hiddenBy = [];
+    private readonly Action _onFrame;
 
     /// <summary>Whether a frame is requested: only while the band moves.</summary>
     internal bool IsFrameLoopRunning => _frame is not null;
@@ -151,6 +155,7 @@ public class AvonicSkeletonText : TemplatedControl
             else if (!_animated)
             {
                 StopFrames();
+                StopWaiting();
             }
         }
     }
@@ -217,7 +222,7 @@ public class AvonicSkeletonText : TemplatedControl
             _shimmerTransform.X = FlowDirection == FlowDirection.RightToLeft ? -offset : offset - ShimmerTile;
         }
 
-        _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
+        _frame ??= AvonicConfig.RequestFrame(this, _onFrame);
     }
 
     /// <summary>

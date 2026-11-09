@@ -186,7 +186,13 @@ public class AvonicImg : TemplatedControl
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        Check();
+
+        // A box that grows into the viewport intersects with no change of viewport. The size comes in the arrange, before the
+        // pass raises the viewport, which may also have moved, so check after the pass.
+        if (_watching)
+        {
+            CheckAfterLayout();
+        }
     }
 
     // ── The observer ─────────────────────────────────────────────────────────────────────────
@@ -234,13 +240,17 @@ public class AvonicImg : TemplatedControl
             return;
         }
 
+        CheckAfterLayout();
+        InvalidateArrange();
+    }
+
+    private void CheckAfterLayout()
+    {
         if (!_checkAfterLayout)
         {
             _checkAfterLayout = true;
             LayoutUpdated += OnLayoutUpdated;
         }
-
-        InvalidateArrange();
     }
 
     private void OnLayoutUpdated(object? sender, EventArgs e)
@@ -361,10 +371,10 @@ public class AvonicImg : TemplatedControl
     /// </summary>
     private void Load()
     {
+        // The generation first: a cancelled fetch can carry on at once, inside Cancel, and must find itself superseded
         var src = Src;
-        _cancel?.Cancel();
-        _cancel = null;
         var generation = ++_generation;
+        CancelFetch();
 
         if (src is null)
         {
@@ -407,9 +417,18 @@ public class AvonicImg : TemplatedControl
         }
 
         _loading = false;
+        _cancel?.Dispose();
         _cancel = null;
         Show(bitmap);
         RaiseEvent(new RoutedEventArgs(bitmap is null ? IonErrorEvent : IonImgDidLoadEvent, this));
+    }
+
+    private void CancelFetch()
+    {
+        var cancel = _cancel;
+        _cancel = null;
+        cancel?.Cancel();
+        cancel?.Dispose();
     }
 
     /// <summary>Shows a picture, or none, and frees the one it replaces, which nothing else holds.</summary>

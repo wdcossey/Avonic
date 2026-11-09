@@ -40,7 +40,7 @@ number.
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
 | 1 | Loads when it intersects the viewport | `ionImgWillLoad` at the first observer callback, then `ionImgDidLoad` | match: `IonImgWillLoad` after the first layout pass, `IonImgDidLoad` when the picture is shown |
-| 2 | The viewport's edge, no margin | in an `ion-content` 844 high: 843 and 844 load, 845 waits for a scroll of 1 px | match, in a `ScrollViewer` 844 high at the same three, and in an `AvonicContent` scrolled to it |
+| 2 | The viewport's edge, no margin | in an `ion-content` 844 high: 843 and 844 load, 845 waits for a scroll of 1 px | match, in a `ScrollViewer` 844 high at the same three, and in an `AvonicContent` scrolled to it; and one that grows into a clip |
 | 3 | Clipped by an ancestor | outside a 100 wide `overflow: hidden` box: no; on its edge: yes | match, with `ClipToBounds` |
 | 4 | Hidden | `display: none`: no load; shown: loads | match, on an ancestor, and on itself after a layout |
 | 5 | Removed before it loaded | loads when attached again | match |
@@ -49,7 +49,7 @@ number.
 | 8 | Before and while loading | alt text, 19 high; with no alt, 0; nothing while a first picture loads | match, without the icon |
 | 9 | Failure | `ionError`, no `ionImgDidLoad`, the alt text | match. A failure with no alt is 0 high here, where Chromium draws a 24 high grey box: a deliberate difference |
 | 10 | A change of `src` | `ionImgWillLoad`; the old picture stays until the new one loads; one set by an `ionImgWillLoad` handler is dropped | match, and the alt text when the new one fails |
-| 11 | Two changes in a row | only the last one's `ionImgDidLoad` | match, and the first request is cancelled |
+| 11 | Two changes in a row | only the last one's `ionImgDidLoad` | match, and the first request is cancelled, with no `IonError` and the picture shown kept |
 | 12 | `src` to `undefined`, or none at first | nothing; the picture stays | match |
 | 13 | Automation | `<img alt>`: an image named by `alt`; `alt=""` is decorative | match, from the HTML spec, not measured |
 | 14 | In an avatar or a thumbnail | `::slotted(ion-img)`: fills, covers, the avatar's circle | match. Not deeper down, as `::slotted` is a direct child |

@@ -76,7 +76,7 @@ Each becomes a test in `AvonicImgTests`.
 | # | Behaviour | Source |
 |---|---|---|
 | 1 | Nothing loads until it's attached, visible and intersects the viewport; then `IonImgWillLoad`, the load, and `IonImgDidLoad` when the picture is decoded and shown | `addIO`, `load`, `onLoad`; measured |
-| 2 | In a `ScrollViewer` or `AvonicContent`, one below the fold loads when it's scrolled to the viewport's edge, not before: an edge counts, with no margin | `new IntersectionObserver(cb)`; measured at 843, 844 and 845 |
+| 2 | In a `ScrollViewer` or `AvonicContent`, one below the fold loads when it's scrolled to the viewport's edge, not before: an edge counts, with no margin. One that grows into the viewport loads too | `new IntersectionObserver(cb)`; measured at 843, 844 and 845 |
 | 3 | An ancestor that clips (`ClipToBounds`) and has it outside the clip stops it loading; on the clip's edge it loads | measured `c`, `d` |
 | 4 | Hidden (`IsVisible` false on it or an ancestor) it doesn't load; shown, it does | measured |
 | 5 | Removed before it loaded, it loads when it's attached again and in view | the observer stays; measured `g`, `h` |
@@ -102,7 +102,7 @@ window's, clipped by every ancestor that clips, a `ScrollViewer`'s presenter inc
 root is. The control subscribes only while it's waiting to load, as Ionic observes only then, so an image that has loaded costs
 the layout manager nothing.
 
-Three differences from an observer have to be made up for:
+Four differences from an observer have to be made up for:
 
 - **A new listener hears nothing until a layout pass,** and a layout pass doesn't happen by itself. Measured: a listener added to
   a laid-out tree heard nothing through `RunJobs` and a render tick, and heard at the next `UpdateLayout`. So the control asks for
@@ -110,6 +110,8 @@ Three differences from an observer have to be made up for:
 - **Showing it raises nothing,** as the viewport hasn't moved. Measured: hiding and showing a listener raised no event. So a check
   that finds it hidden watches `IsVisible` on what in its chain is hidden, as `AvonicProgressBar` does, and checks again once it
   all shows and has been laid out.
+- **A box that grows into the viewport raises nothing either,** as the viewport hasn't moved in its own space. So a change of
+  size checks again, after the layout pass, by which time the viewport has been raised if it moved too.
 - **A viewport clipped away completely is `(0, 0, 0, 0)` in the clipping ancestor,** moved into the control's space. With edges
   counting, that would intersect a control at that ancestor's origin. Chromium's equivalent, a clip of no area, intersects only
   when it's in view, and then it has a width, as `b` did. So a viewport of no width and no height intersects nothing.
@@ -130,11 +132,13 @@ Avalonia has no loader for an `http(s)` `src`, and the conservative choice is no
 | `http:`, `https:` | One shared `HttpClient`, which sends a `User-Agent` and an `Accept` for pictures, as a browser does, since some servers refuse a request without one; a status that isn't success fails |
 | `data:…;base64,…` | Decoded from the URI. Not base64: fails |
 | `avares:` | `AssetLoader.Open` |
-| `file:`, or anything that isn't an absolute URI | A file, relative to the working directory |
+| `file:`, or a path | A file, a relative one relative to the working directory. A path is read as it's written, so `%41` in a file's name stays `%41`; only a `file:` URI is unescaped |
 | `""`, or any other scheme | Fails, as Chromium fails `src=""` |
 
 The bytes are read and decoded into a `Bitmap` on the thread pool, as `decoding="async"` does it off the main thread, and the
-result comes back to the UI thread. A newer `Src` drops an older result, and a picture that's replaced is disposed. Whatever Avalonia's `Bitmap` decodes loads: PNG, JPEG, WebP,
+result comes back to the UI thread. A newer `Src` drops an older result, and cancels its request, and a picture that's replaced
+is disposed. A request ends at once when it's cancelled, so the newer one is counted first, and the older one finds itself
+superseded rather than failed. A control that's removed keeps its picture, as an element does, since it may come back. Whatever Avalonia's `Bitmap` decodes loads: PNG, JPEG, WebP,
 GIF's first frame, BMP. SVG doesn't, so it fails: see "Deliberate differences".
 
 The loader is `AvonicImg.Loader`, an internal `Func<string, CancellationToken, Task<Bitmap>>` on the control, in its own folder,

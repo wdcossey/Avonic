@@ -343,6 +343,8 @@ public class AvonicSkeletonTextTests
 
         // Measured: item-skeleton-text on the item, overflow: hidden on the label
         Assert.Contains(":item-skeleton-text", item.Classes);
+        // Set, not the default a TemplatedControl clips by, which FlexRow doesn't count
+        Assert.True(label.IsSet(Visual.ClipToBoundsProperty));
         Assert.True(label.ClipToBounds);
         Assert.Single(told, styles => styles.ContainsKey("skeleton-text") && styles["skeleton-text"]);
 

@@ -44,6 +44,26 @@ public class AvonicImgLoaderTests
     }
 
     [AvaloniaFact]
+    public void B16_A_Path_Is_Read_As_It_Is_Written_And_A_File_Uri_Is_Unescaped()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), $"avonic-img-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(dir);
+        try
+        {
+            // A file whose name has %41 in it, which a URI would read as A
+            var path = Path.Combine(dir, "a%41b.png");
+            File.WriteAllBytes(path, TestPicture.Png(14, 10));
+            Assert.Equal(new PixelSize(14, 10), Load(path).PixelSize);
+            var uri = "file://" + (path.StartsWith('/') ? "" : "/") + path.Replace(Path.DirectorySeparatorChar, '/').Replace("%", "%25");
+            Assert.Equal(new PixelSize(14, 10), Load(uri).PixelSize);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [AvaloniaFact]
     public void B16_A_Relative_Path_Is_Relative_To_The_Working_Directory()
     {
         var path = TempPicture(12, 10);

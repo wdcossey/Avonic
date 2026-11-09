@@ -153,6 +153,23 @@ public class AvonicImgTests
         Assert.Single(loader.Requests);
     }
 
+    [AvaloniaFact]
+    public void B2_A_Box_That_Grows_Into_The_Viewport_Loads_With_No_Change_Of_Viewport()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png", Height = 10 };
+        Canvas.SetTop(img, -50);
+        var clip = new Canvas { Width = 100, Height = 20, ClipToBounds = true, Children = { img } };
+        using var scene = new Scene(Page(clip));
+        Layout(scene);
+        Assert.Empty(loader.Requests);
+
+        // Its top stays where it is, above the clip, and its bottom comes into it
+        img.Height = 60;
+        Layout(scene);
+        Assert.Single(loader.Requests);
+    }
+
     // ── 3. Clipped by an ancestor ────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -483,7 +500,9 @@ public class AvonicImgTests
         Layout(scene);
         Assert.True(loader.Requests[0].Token.IsCancellationRequested);
 
-        // The last one first, then the dropped one: nothing more
+        // Cancelled, the first one ended at once, inside the change, and raised nothing. Then the last one, then the dropped
+        // one, which can't change now: nothing more
+        Assert.Equal(["willLoad", "willLoad"], events);
         loader.Finish(1);
         loader.Finish(0);
         Assert.Equal(["willLoad", "willLoad", "didLoad"], events);
@@ -500,6 +519,27 @@ public class AvonicImgTests
     }
 
     // ── 12. A null src ───────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B11_A_Change_While_Another_Loads_Keeps_The_Picture_Shown_And_Raises_No_Error()
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png" };
+        var events = Record(img);
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+        loader.Finish(0);
+        var shown = img.Picture;
+
+        img.Src = "b.png";
+        Layout(scene);
+        img.Src = "c.png";
+        Layout(scene);
+
+        // b's fetch, cancelled by c, ends inside the change: it isn't a failure, and the picture shown stays
+        Assert.Equal(["willLoad", "didLoad", "willLoad", "willLoad"], events);
+        Assert.Same(shown, img.Picture);
+    }
 
     [AvaloniaFact]
     public void B12_Src_Set_To_Null_Changes_Nothing_And_The_Picture_Stays()
@@ -710,6 +750,9 @@ internal sealed class FakeLoader : IDisposable
         {
             var request = new Request(src, token);
             Requests.Add(request);
+
+            // As a real fetch does: cancelled, its task ends at once, inside Cancel
+            token.Register(() => request.Completion.TrySetCanceled(token));
             return request.Completion.Task;
         };
     }
@@ -718,13 +761,13 @@ internal sealed class FakeLoader : IDisposable
     {
         var request = Requests[index];
         request.Picture = TestPicture.Create(width, height);
-        request.Completion.SetResult(request.Picture);
+        request.Completion.TrySetResult(request.Picture);
         Dispatcher.UIThread.RunJobs();
     }
 
     public void Fail(int index)
     {
-        Requests[index].Completion.SetException(new FileNotFoundException(Requests[index].Src));
+        Requests[index].Completion.TrySetException(new FileNotFoundException(Requests[index].Src));
         Dispatcher.UIThread.RunJobs();
     }
 

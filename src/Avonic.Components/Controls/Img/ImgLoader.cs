@@ -55,7 +55,9 @@ internal static class ImgLoader
             return Convert.FromBase64String(Uri.UnescapeDataString(src[(comma + 1)..]));
         }
 
-        if (Uri.TryCreate(src, UriKind.Absolute, out var uri))
+        // A path is read as it's written: a URI would read %41 in a file's name as A. Only a file: URI is unescaped.
+        if (Uri.TryCreate(src, UriKind.Absolute, out var uri)
+            && (!uri.IsFile || src.StartsWith("file:", StringComparison.OrdinalIgnoreCase)))
         {
             switch (uri.Scheme)
             {
