@@ -85,7 +85,10 @@ public class AvonicGrid : ItemsControl
         }
     }
 
-    /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. A grid doesn't.</summary>
+    /// <summary>
+    /// An <see cref="ItemsControl"/> moves focus with the arrow keys between controls directly in its <see cref="StackPanel"/>.
+    /// A grid doesn't. Rows can't take focus, so it's only what an app puts in the grid without one.
+    /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
     }
@@ -102,6 +105,14 @@ public class AvonicGrid : ItemsControl
     /// </summary>
     private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        // Pseudoclasses are in the same collection, and change far more often.
+        if (e.Action != NotifyCollectionChangedAction.Reset
+            && e.NewItems?.Contains(NoPaddingClass) != true
+            && e.OldItems?.Contains(NoPaddingClass) != true)
+        {
+            return;
+        }
+
         var noPadding = Classes.Contains(NoPaddingClass);
         if (noPadding == _noPadding is not null)
         {

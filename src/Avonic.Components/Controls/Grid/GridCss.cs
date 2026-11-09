@@ -19,10 +19,12 @@ public static class GridCss
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
             Css.Var.Convert(values, typeof(object), parameter, culture) switch
             {
-                double length => new Thickness(length),
-                IConvertible length and not string and not bool => new Thickness(length.ToDouble(CultureInfo.InvariantCulture)),
+                IConvertible length when length.GetTypeCode() is >= TypeCode.SByte and <= TypeCode.Decimal =>
+                    new Thickness(length.ToDouble(CultureInfo.InvariantCulture)),
                 Thickness thickness => thickness,
-                _ => AvaloniaProperty.UnsetValue,
+
+                // An invalid value, as CSS has it: padding: 0.
+                _ => default(Thickness),
             };
     }
 }

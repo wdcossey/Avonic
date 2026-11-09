@@ -84,7 +84,7 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | 22 | Rows stack in the grid, each as wide as the grid inside its padding. A grid with nothing in it is its padding, and an empty column with no padding is 1 high | `display: block`, `min-height: 1px`; measured 380 at x = 5; empty 10 high; empty column 1 |
 | 23 | Text in a column wraps, and nothing is clipped: a column wider than the row shows | `white-space: normal`, `overflow: visible`; measured |
 | 24 | In a flex row, as in an item, the grid fills what's left | `:host { flex: 1 }`; measured 358 in an item, and 355.22 after a `span` |
-| 25 | The arrow keys don't move focus between controls in a grid | measured: focus stays on the button for all four |
+| 25 | The arrow keys don't move focus between controls in a grid, in columns or directly in it | measured: focus stays on the button for all four |
 | 26 | Automation: no role. A grid isn't a list and a column isn't a list item | `role` is never set; measured: neither is in the accessibility tree |
 
 ## Design
@@ -109,7 +109,8 @@ isn't a number) — with an offset and a shift, all as fractions of the row. Whe
 An offset is a margin at the start, counted when the line breaks. A shift is added when arranging, so it moves nothing else.
 Columns on a line are arranged as tall as the line, so a column's own `VerticalAlignment` is `align-self`, with no code.
 `min-content` is worked out as `FlexRow` does it, from the text's longest word, because `Measure` clamps to what's available
-and can't report it. `FlexRow`'s is private, so `RowPanel` has a copy, and the PR proposes sharing it.
+and can't report it. `FlexRow`'s is private, so `RowPanel` has a copy, and the PR proposes sharing it. Each child is measured
+on one line and then at its width, except a sized column, which only needs its width.
 
 **The viewport is the `TopLevel`'s client width.** `matchMedia` and `@media (min-width)` read the window's width, whatever the
 grid is in (behaviour 9). On a phone the `TopLevel` is the screen, and on the desktop it's the window, which is what a browser's
@@ -144,8 +145,11 @@ grid's theme.
 **Text wraps in a column:** `TextBlock.TextWrapping="Wrap"` on the column, in the theme, as on the card. Avalonia's `Wrap` also
 breaks a word that doesn't fit, which is what Ionic's `overflow-wrap: break-word` on `body` does.
 
-**No arrow keys and no list role.** An `ItemsControl` moves focus with the arrow keys, so the grid and the row override
-`OnKeyDown`, as `AvonicList` does. Their automation peers are plain `Group`s, not lists.
+**No arrow keys and no list role.** An `ItemsControl` moves focus with the arrow keys between focusable items of a panel
+that's an `INavigableContainer`. The grid's `StackPanel` is one, so a control put directly in a grid, without a row, would
+move focus, and the grid overrides `OnKeyDown`, as `AvonicList` does. `RowPanel` isn't one, so the row needs nothing (an
+override there was tried, and breaking it changed nothing). The grid's and the row's automation peers are
+`NoneAutomationPeer`s, as a plain control's are, not lists.
 
 ### Extensions
 

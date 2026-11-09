@@ -98,8 +98,18 @@ public sealed class RowPanel : Panel
                 continue;
             }
 
-            child.Measure(oneLine);
-            var item = new Item(child, ColumnIn(child)) { MaxContent = child.DesiredSize.Width, Box = Box(child) };
+            // A presenter makes its column here, so it's known before measuring.
+            child.ApplyTemplate();
+            var column = ColumnIn(child);
+
+            // A sized column's width is a fraction of the row, so its content only needs measuring at that width.
+            var oneLineNeeded = !bounded || column is not { Kind: ColumnKind.Fixed };
+            if (oneLineNeeded)
+            {
+                child.Measure(oneLine);
+            }
+
+            var item = new Item(child, column) { MaxContent = oneLineNeeded ? child.DesiredSize.Width : 0, Box = Box(child) };
             Prepare(item, width, bounded);
             _items.Add(item);
         }
@@ -115,7 +125,7 @@ public sealed class RowPanel : Panel
             {
                 if (item.HasContentMinimum && item.Minimum is null && item.Size < item.MaxContent - Tolerance)
                 {
-                    item.Minimum = Math.Min(Math.Max(item.Box, MinContent(item.Child)), item.Maximum);
+                    item.Minimum = Math.Min(Math.Max(item.Box, MinimumOf(item.Child)), item.Maximum);
                     again = true;
                 }
             }
@@ -393,21 +403,32 @@ public sealed class RowPanel : Panel
     private static double Box(Control control) =>
         OwnBox(control) + (control is ContentPresenter { Child: { } child } ? OwnBox(child) : 0);
 
-    /// <summary><c>min-width: auto</c>. Needs it measured on one line first.</summary>
-    private static double MinContent(Control control)
+    /// <summary><c>min-width: auto</c> on one of the row's items. Needs it measured on one line first.</summary>
+    private static double MinimumOf(Control child)
     {
+        var item = (child as ContentPresenter)?.Child ?? child;
+
         // contain: strict. Size containment leaves it no minimum.
-        if (control is AvonicIcon)
+        if (item is AvonicIcon)
         {
-            return OwnBox(control);
+            return Box(child);
         }
 
         // overflow: hidden, which also takes it away. A TemplatedControl clips by default, so only a set value counts.
-        if (control.ClipToBounds && control.IsSet(ClipToBoundsProperty))
+        if (item.ClipToBounds && item.IsSet(ClipToBoundsProperty))
         {
-            return OwnBox(control);
+            return Box(child);
         }
 
+        return MinContent(child);
+    }
+
+    /// <summary>
+    /// CSS's <c>min-content</c>, from the one-line sizes just measured, because <c>Measure</c> clamps to what's available
+    /// and so can't report it. Text can wrap, and nothing else can shrink.
+    /// </summary>
+    private static double MinContent(Control control)
+    {
         if (!double.IsNaN(control.Width))
         {
             return control.DesiredSize.Width;

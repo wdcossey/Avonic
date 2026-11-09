@@ -8,6 +8,8 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
+using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -251,6 +253,39 @@ public class AvonicGridTests
             Near(x, X(positioned, scene));
         });
 
+    public static TheoryData<string, string, double> BreakpointProps()
+    {
+        var data = new TheoryData<string, string, double>();
+        foreach (var kind in new[] { "Offset", "Push", "Pull" })
+        {
+            foreach (var (name, width) in new[] { ("Xs", 0d), ("Sm", 576d), ("Md", 768d), ("Lg", 992d), ("Xl", 1200d) })
+            {
+                data.Add(kind, name, width);
+            }
+        }
+
+        return data;
+    }
+
+    [AvaloniaTheory]
+    [MemberData(nameof(BreakpointProps))]
+    public void B7_Each_Offset_Push_And_Pull_Applies_From_Its_Breakpoint_Up(string kind, string breakpoint, double from) =>
+        InstalledTheme.Run(_ =>
+        {
+            foreach (var viewport in from == 0 ? new[] { 390d } : new[] { from - 1, from })
+            {
+                var col = Col("3");
+                var property = (StyledProperty<string?>)AvaloniaPropertyRegistry.Instance
+                    .FindRegistered(typeof(AvonicCol), kind + breakpoint)!;
+                col.SetValue(property, "3");
+                using var scene = Show(Grid(Row(col)), viewport);
+
+                var quarter = (viewport - 10) / 4;
+                var expected = viewport < from ? 5 : kind == "Pull" ? 5 - quarter : 5 + quarter;
+                Near(expected, X(col, scene));
+            }
+        });
+
     // ── 8. An empty value ────────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -303,6 +338,25 @@ public class AvonicGridTests
         Near(380, Width(col));
         Assert.Equal(new Thickness(5), grid.Padding);
         Near(5, X(col, scene));
+    });
+
+    [AvaloniaTheory]
+    [InlineData(390, 5)]
+    [InlineData(576, 30)]
+    [InlineData(1200, 30)]
+    public void B10_A_Restyle_From_A_Breakpoint_Up_Applies_At_Every_Wider_One(double viewport, double padding) => InstalledTheme.Run(_ =>
+    {
+        // @media (min-width: 576px) in an app's own CSS still matches at 1200.
+        var grid = Grid(Row(Col()));
+        var style = new Style(x => x.OfType<AvonicGrid>().Class(":breakpoint-sm"))
+        {
+            Setters = { new Setter(TemplatedControl.PaddingProperty, new Thickness(30)) },
+        };
+        using var scene = Show(grid, viewport);
+        scene.Window.Styles.Add(style);
+        Run();
+
+        Assert.Equal(new Thickness(padding), grid.Padding);
     });
 
     // ── 11. Odd sizes ────────────────────────────────────────────────────────────────────────
@@ -435,6 +489,21 @@ public class AvonicGridTests
         Assert.Equal(new Thickness(5), grid.Padding);
         Assert.Equal(new Thickness(5), col.Padding);
         Near(39, grid.Bounds.Height - col.Bounds.Height + 29, 0.01);
+    });
+
+    [AvaloniaTheory]
+    [InlineData(390, 7)]
+    [InlineData(768, 0)]
+    public void B14_A_Padding_Variable_That_Is_Not_A_Length_Is_No_Padding(double viewport, double padding) => InstalledTheme.Run(_ =>
+    {
+        // var() substitutes it, and padding: x is invalid at computed-value time, so it's padding: 0, not the rule below.
+        var col = Col();
+        var grid = Grid(Row(col));
+        grid.Resources["Avonic.GridColumnPadding"] = 7d;
+        grid.Resources["Avonic.GridColumnPaddingMd"] = 'x';
+        using var scene = Show(grid, viewport);
+
+        Assert.Equal(new Thickness(padding), col.Padding);
     });
 
     // ── 16. Fixed ────────────────────────────────────────────────────────────────────────────
@@ -570,12 +639,26 @@ public class AvonicGridTests
         Near(Box(word, scene.Window).Y, Box(d, scene.Window).Y);
     });
 
+    [AvaloniaFact]
+    public void B19_A_Clipping_Part_Inside_A_Column_Keeps_Its_Content_In_The_Minimum() => InstalledTheme.Run(_ =>
+    {
+        // overflow: hidden on a descendant doesn't change the column's min-content. A button's PART_Clip clips.
+        var button = new AvonicButton { Content = "Supercalifragilistic" };
+        AvonicCol col = new() { Content = button }, b = Col(text: "b"), c = Col(text: "c");
+        using var scene = Show(Grid(Row(col, b, c)));
+
+        Near(215.67, Width(col));
+        Near(82.17, Width(b));
+        Near(82.17, Width(c));
+    });
+
     // ── 20. Not a column ─────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
     public void B20_Something_That_Is_Not_A_Column_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
     {
-        var plain = new TextBlock { Text = "plain div" };
+        // A div's text wraps, so its content is one line and its min-content a word.
+        var plain = new TextBlock { Text = "plain div", TextWrapping = TextWrapping.Wrap };
         var col = Col(text: "col");
         using var scene = Show(Grid(Row(plain, col)));
 
@@ -703,6 +786,22 @@ public class AvonicGridTests
         AvonicButton one = new() { Content = "One" }, two = new() { Content = "Two" }, three = new() { Content = "Three" };
         var middle = new AvonicCol { Content = two };
         using var scene = Show(Grid(Row(new AvonicCol { Content = one }, middle), Row(new AvonicCol { Content = three })));
+
+        two.Focus();
+        Run();
+        scene.Window.KeyPressQwerty(key, RawInputModifiers.None);
+        Run();
+
+        Assert.True(two.IsFocused);
+    });
+
+    [AvaloniaTheory]
+    [InlineData(PhysicalKey.ArrowDown)]
+    [InlineData(PhysicalKey.ArrowUp)]
+    public void B25_Arrow_Keys_Do_Not_Move_Focus_Between_Controls_Directly_In_A_Grid(PhysicalKey key) => InstalledTheme.Run(_ =>
+    {
+        AvonicButton one = new() { Content = "One" }, two = new() { Content = "Two" }, three = new() { Content = "Three" };
+        using var scene = Show(Grid(one, two, three));
 
         two.Focus();
         Run();
