@@ -110,7 +110,7 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 ## Known gaps
 
 - **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed or was measured; see [COMPARISON.md](COMPARISON.md). Still to do:
-  a flick by hand against a native list, and the desktop row for the benchmark.
+  a flick by hand against a native list.
 - **`AvonicOverlay.Present()` with no `TopLevel` throws on Android with Avalonia's recommended `MainViewFactory`,** as
   `OverlayHost.TopLevelOf` reads `ISingleViewApplicationLifetime.MainView`, which the factory leaves null. The sample sets `MainView`
   instead, so that the single-view branch is tried. An app that follows Avalonia's docs has to call `Present(TopLevel)`. Reported, not

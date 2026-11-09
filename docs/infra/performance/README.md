@@ -73,8 +73,10 @@ the rows above. It says when a row isn't for the table: a Debug build, or Avalon
 | Where | When | Controls | Rules | Alternatives | `TextBlock` | `Border` |
 |---|---|---|---|---|---|---|
 | Pixel 8, Android 17 | 2026-11-09 | 35 | 146 | 243 | 55.3 to 107.7 (+52.4) | 15.1 to 53.6 (+38.4) |
+| The PC, Windows 11 | 2026-11-09 | 35 | 146 | 243 | 9.7 to 26.8 (+17.1) | 2.7 to 10.2 (+7.6) |
 
-The desktop row from the same page, to compare it with, is still to do ([comparison](../android/COMPARISON.md#the-benchmark)).
+The phone is 3 to 6 times slower than the PC, which is in line with their CPUs ([comparison](../android/COMPARISON.md#the-benchmark)). The cost
+is style matching on the UI thread, before anything is drawn, so a different renderer wouldn't change it.
 
 ## In a Debug build
 
@@ -106,5 +108,5 @@ trace.
 - **`render` can read low,** if a page opens within a frame of the last one, because its own render pass hasn't happened yet.
 - **Only style checks are budgeted.** A slow control, layout or animation wouldn't show here. The line in the sample is how
   to spot those.
-- **The table's numbers are from one desktop PC.** A Pixel 8's row from the sample is above, without a desktop row from the same page yet.
+- **The table's numbers are from one desktop PC.** A Pixel 8's row and the PC's from the same page are above.
 - **`ItemsControl`, virtualising and scrolling** haven't been measured. These are all times to attach.
