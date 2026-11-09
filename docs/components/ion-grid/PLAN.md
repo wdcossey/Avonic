@@ -61,7 +61,7 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | # | Behaviour | Source |
 |---|---|---|
 | 1 | Columns with no size share the row equally, padding included | `col.css` `flex-basis: 0; flex-grow: 1`; measured three at 126.67 |
-| 2 | `Size` n is n / 12 of the row, border box. The columns with no size share what's left | `calculateSize`; measured `6`, rest, `3`: 190, 95, 95 |
+| 2 | `Size` n is n / 12 of the row, border box. The columns with no size share what's left. A change lays the row out again, and a column an `ItemTemplate` makes counts | `calculateSize`; measured `6`, rest, `3`: 190, 95, 95; `size` set to `6` later: 190 |
 | 3 | `Size="auto"`: as wide as its content, and the rest fill. Never wider than the row: the text wraps, and the next column goes to the next line | `flex: 0 0 auto; width: auto`. `max-width: auto` is invalid, so `col.css`'s `100%` stays; measured 99.83, and a long one at 380 × 48 |
 | 4 | Columns that don't fit on the line wrap to the next one | `row.css` `flex-wrap: wrap`; measured two `8`s at 253.33, one under the other |
 | 5 | `Offset` n is a margin at the start of n / 12. A column with no size still grows into the rest | `calculateOffset`; measured x = 100; with no size, 68.33 and 158.34 wide |
@@ -70,18 +70,18 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | 8 | An empty value at a breakpoint goes back to no size there | `if (!columns \|\| columns === '') return`; measured `size-md=""` |
 | 9 | The breakpoint is the viewport's width, not the container's | `matchMedia`; measured `size-md="6"` in a 300 box at 768: 145 |
 | 10 | A change of the viewport's width re-lays the columns and the grid | `@Listen('resize', { target: 'window' })` → `forceUpdate`, and `@media` in the CSS; measured |
-| 11 | Odd sizes: `"4.5"` is 4.5 columns; `"0"` and negatives leave only the padding; more than 12 overflows the row and the next column wraps; anything that isn't a number makes it a plain flex item, as wide as its content | Invalid at computed-value time unsets `flex`, `width`, `max-width`; measured 142.5, 10, 10, 411.66, `abc` 36.06 |
+| 11 | Odd sizes: `"4.5"` is 4.5 columns; `"0"` and negatives leave only the padding; more than 12 overflows the row and the next column wraps; `".5"` and `"1e1"` are numbers; anything that isn't a CSS number, such as `"abc"` or `"4."`, makes it a plain flex item, as wide as its content | Invalid at computed-value time unsets `flex`, `width`, `max-width`; measured 142.5, 10, 10, 411.66, 15.83, 316.66, `abc` 36.06, `4.` 23.22 |
 | 12 | Odd offsets: `"0"` is none, a negative push moves towards the start, an offset past the row overflows it, and anything not a number is ignored | measured `off0`, `push="-1"` 36.67, `offset="11"` at 353.33 |
 | 13 | `Avonic.GridColumns` changes the count, from any ancestor's resources | `var(--ion-grid-columns, 12)`; measured `6`: size 3 is 183, offset 1 is 61 |
 | 14 | Column padding: 5, or `Avonic.GridColumnPadding`, with the breakpoint's key winning | `col.css`; measured 2 and `-xs` 7: 7 |
 | 15 | Grid padding: 5, or `Avonic.GridPadding`, with the breakpoint's key winning | `grid.css`; measured 12, and `-md` 20 at 800 |
 | 16 | `Fixed`: 100%, 540, 720, 960 and 1140 wide from each breakpoint, centred, and never wider than its container. `Avonic.GridWidth` and the breakpoint's key set it | `grid.css`; measured at 576 x = 18 w = 540, 768 w = 720, 992 w = 960; 300 in a 150 box: 150; `--ion-grid-width: 300px` 300; `-xs: 200px` 200 |
 | 17 | `Classes="ion-no-padding"` on a grid: no padding on the grid or on its columns, at any depth. A grid inside keeps its own, and its columns have none | `:host(.ion-no-padding)` sets the column variables, and `padding.css` the grid's; measured `gnest` |
-| 18 | Columns on a line are as tall as the tallest. One with its own `VerticalAlignment` keeps its height and aligns, as `align-self` | `align-items: normal` (stretch); measured 67, 67; `ion-align-self-start` 29 at the top, `-center` y + 19 |
+| 18 | Columns on a line are as tall as the tallest, and what's in them stays at the top, its own height. One with its own `VerticalAlignment` keeps its height and aligns, as `align-self` | `align-items: normal` (stretch); measured 67, 67, a `div` in one 19 high at the top; `ion-align-self-start` 29 at the top, `-center` y + 19 |
 | 19 | A column with no size is never narrower than its longest word, and the others share the rest | `min-width: auto`; measured `Supercalifragilisticexpialidocious` 244.11 and three of 45.3 |
 | 20 | Something in a row that isn't a column is as wide as its content, and the columns share the rest | `flex: 0 1 auto`; measured a `div` at 58.94 |
 | 21 | RTL: columns start at the right, and offset, push and pull mirror | measured with `dir="rtl"` on the document |
-| 22 | Rows stack in the grid, each as wide as the grid inside its padding. A grid with nothing in it is its padding | `display: block`; measured 380 at x = 5; empty 10 high |
+| 22 | Rows stack in the grid, each as wide as the grid inside its padding. A grid with nothing in it is its padding, and an empty column with no padding is 1 high | `display: block`, `min-height: 1px`; measured 380 at x = 5; empty 10 high; empty column 1 |
 | 23 | Text in a column wraps, and nothing is clipped: a column wider than the row shows | `white-space: normal`, `overflow: visible`; measured |
 | 24 | In a flex row, as in an item, the grid fills what's left | `:host { flex: 1 }`; measured 358 in an item, and 355.22 after a `span` |
 | 25 | The arrow keys don't move focus between controls in a grid | measured: focus stays on the button for all four |

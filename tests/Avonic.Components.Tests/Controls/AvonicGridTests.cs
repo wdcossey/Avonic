@@ -120,6 +120,20 @@ public class AvonicGridTests
         Assert.All(columns, column => Near(126.67, Width(column)));
     });
 
+    [AvaloniaFact]
+    public void B2_A_Change_Of_Size_Lays_The_Row_Out_Again() => InstalledTheme.Run(_ =>
+    {
+        AvonicCol changed = Col("4."), rest = Col();
+        using var scene = Show(Grid(Row(changed, rest)));
+
+        changed.Size = "6";
+        Run();
+
+        Near(190, Width(changed));
+        Near(195, X(rest, scene));
+        Near(190, Width(rest));
+    });
+
     // ── 3. Auto ──────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -313,11 +327,24 @@ public class AvonicGridTests
     public void B11_A_Size_That_Is_Not_A_Number_Makes_A_Plain_Flex_Item() => InstalledTheme.Run(_ =>
     {
         AvonicCol invalid = Col("abc", "abc"), rest = Col();
-        using var scene = Show(Grid(Row(invalid, rest)));
+        AvonicCol dot = Col("4.", "4."), afterDot = Col();
+        using var scene = Show(Grid(Row(invalid, rest), Row(dot, afterDot)));
 
         Near(36.06, Width(invalid));
         Near(5 + Width(invalid), X(rest, scene));
         Near(380 - Width(invalid), Width(rest));
+        Near(23.22, Width(dot));
+        Near(356.78, Width(afterDot));
+    });
+
+    [AvaloniaFact]
+    public void B11_A_Number_Can_Start_With_A_Point_Or_Have_An_Exponent() => InstalledTheme.Run(_ =>
+    {
+        AvonicCol point = Col(".5", ".5"), exponent = Col("1e1", "1e1");
+        using var scene = Show(Grid(Row(point, exponent)));
+
+        Near(15.83, Width(point));
+        Near(316.67, Width(exponent));
     });
 
     // ── 12. Odd offsets ──────────────────────────────────────────────────────────────────────
@@ -374,6 +401,10 @@ public class AvonicGridTests
         grid.Resources["Avonic.GridColumns"] = 6d;
         Run();
         Near(190, Width(col));
+
+        grid.Resources["Avonic.GridColumns"] = 4;
+        Run();
+        Near(285, Width(col));
 
         grid.Resources["Avonic.GridColumns"] = 0d;
         Run();
@@ -495,7 +526,8 @@ public class AvonicGridTests
     [AvaloniaFact]
     public void B18_Columns_On_A_Line_Are_As_Tall_As_The_Tallest_Unless_They_Align_Themselves() => InstalledTheme.Run(_ =>
     {
-        AvonicCol tall = Tall(), stretched = Col(text: "short");
+        var block = new Border { Background = Brushes.Gray, Child = new TextBlock { Text = "block" } };
+        AvonicCol tall = Tall(), stretched = new() { Content = block };
         var top = new AvonicCol { Content = "start", VerticalAlignment = VerticalAlignment.Top };
         var centre = new AvonicCol { Content = "center", VerticalAlignment = VerticalAlignment.Center };
         var other = Col(text: "short");
@@ -505,6 +537,10 @@ public class AvonicGridTests
         Assert.True(tall.Bounds.Height > 50, $"{tall.Bounds.Height}");
         Near(tall.Bounds.Height, stretched.Bounds.Height, 0.01);
         Near(tall.Bounds.Height, other.Bounds.Height, 0.01);
+
+        // What's in a column is a block, at the top, as tall as itself: 19 in a column of 67.
+        Near(Box(stretched, scene.Window).Y + 5, Box(block, scene.Window).Y);
+        Assert.True(block.Bounds.Height < 25, $"{block.Bounds.Height}");
 
         // Their own height, one line and the padding, at the top and in the middle of the line.
         Assert.True(top.Bounds.Height < 40, $"{top.Bounds.Height}");
@@ -586,6 +622,18 @@ public class AvonicGridTests
         Near(5, X(second, scene));
         Near(Box(first, scene.Window).Bottom, Box(second, scene.Window).Y);
         Near(10, empty.Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void B22_An_Empty_Column_With_No_Padding_Is_1_High() => InstalledTheme.Run(_ =>
+    {
+        var empty = new AvonicCol();
+        var grid = Grid(Row(empty));
+        grid.Classes.Add("ion-no-padding");
+        using var scene = Show(grid);
+
+        Assert.Equal(1, empty.Bounds.Height);
+        Assert.Equal(1, grid.Bounds.Height);
     });
 
     // ── 23. Wrapping text, and no clipping ───────────────────────────────────────────────────

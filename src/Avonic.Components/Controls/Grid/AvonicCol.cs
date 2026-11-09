@@ -202,29 +202,15 @@ public partial class AvonicCol : ContentControl
     [GeneratedRegex(@"^\s*[+-]?(\d*\.\d+|\d+)([eE][+-]?\d+)?\s*$")]
     private static partial Regex CssNumber();
 
+    /// <summary>A number of any type. Anything else, or a count that isn't positive, is unset, so 12.</summary>
     private void OnColumnsChanged(object? value)
     {
-        var columns = value switch
-        {
-            string text when TryParseNumber(text, out var parsed) => parsed,
-            IConvertible convertible and not string and not bool => SafeToDouble(convertible),
-            _ => DefaultColumns,
-        };
+        var columns = value is IConvertible number && number.GetTypeCode() is >= TypeCode.SByte and <= TypeCode.Decimal
+            ? number.ToDouble(CultureInfo.InvariantCulture)
+            : DefaultColumns;
 
         _columns = columns > 0 && double.IsFinite(columns) ? columns : DefaultColumns;
         UpdateColumn();
-    }
-
-    private static double SafeToDouble(IConvertible value)
-    {
-        try
-        {
-            return value.ToDouble(CultureInfo.InvariantCulture);
-        }
-        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
-        {
-            return DefaultColumns;
-        }
     }
 
     private sealed class ColumnsObserver(AvonicCol owner) : IObserver<object?>
