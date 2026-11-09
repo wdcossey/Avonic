@@ -148,6 +148,21 @@ public class AvonicAnimationTests
         Near(20.8, matrix.M32, 1e-3);
     }
 
+    [AvaloniaFact]
+    public void A1_Opacity_Is_Clamped_To_0_And_1_Under_An_Easing_That_Overshoots()
+    {
+        using var clock = new TestClock();
+        var (scene, element) = Stage();
+        using var _ = scene;
+        AvonicAnimation.Create().AddElement(element).FromTo("opacity", 0, 1).Easing("cubic-bezier(0.3,-0.8,0.7,1.8)").Duration(100).Play();
+
+        foreach (var (t, opacity) in new[] { (16.0, 0.0), (32, 0.0693537), (64, 0.844947), (80, 1.0) })
+        {
+            At(clock, t);
+            Near(opacity, element.Opacity);
+        }
+    }
+
     // ── A2: the timing model ─────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]

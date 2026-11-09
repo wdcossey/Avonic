@@ -584,8 +584,9 @@ try {
         Key '{ESC}' 600
         Check "the backdrop and Escape don't dismiss one that doesn't allow it" ([bool](FirstText 'Overlay 3 presented')) (FirstText 'Overlay 3*')
         1..4 | ForEach-Object { Key '{TAB}' 200 }
-        $focused = $AE::FocusedElement.Current.Name
-        Check 'Tab stays inside the overlay' ($focused -in @('Stack another', 'Dismiss', '')) $focused
+        # The box's buttons, or its text box: the page under it has no text box.
+        $focused = $AE::FocusedElement.Current
+        Check 'Tab stays inside the overlay' (($focused.Name -in @('Stack another', 'Dismiss')) -or ($focused.ControlType -eq $CT::Edit)) "$($focused.Name) $($focused.ControlType.ProgrammaticName)"
         Shot 'overlays-trapped'
         $x, $y = Centre (Named $CT::Button 'Dismiss')
         Click $x $y

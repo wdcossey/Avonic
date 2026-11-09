@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 using Avonic.Components.Controls;
@@ -62,6 +63,7 @@ public abstract class AvonicOverlay : TemplatedControl
     private IDisposable? _hidden;
     private IDisposable? _noPointer;
     private OverlayHost? _host;
+    private (TopLevel TopLevel, IInputElement Element)? _focusToRestore;
     private bool _presented;
 
     static AvonicOverlay()
@@ -176,15 +178,11 @@ public abstract class AvonicOverlay : TemplatedControl
             return;
         }
 
+        // A dismiss always detaches it, so this is always a new attach, and a new index, as connectedCallback gives.
         var host = OverlayHost.For(topLevel);
-        if (_host != host)
-        {
-            _host?.Detach(this);
-            _host = host;
-            OverlayIndex = ++s_lastOverlayIndex;
-            ZIndex = ZIndexBase + OverlayIndex;
-        }
-
+        _host = host;
+        OverlayIndex = ++s_lastOverlayIndex;
+        ZIndex = ZIndexBase + OverlayIndex;
         host.Attach(this);
         await PresentCore(host.TopLevel);
     }
@@ -212,7 +210,7 @@ public abstract class AvonicOverlay : TemplatedControl
     {
         if (StealsFocus)
         {
-            RestoreElementFocus(topLevel);
+            BlurForRestore(topLevel);
         }
 
         _presented = true;
@@ -221,7 +219,7 @@ public abstract class AvonicOverlay : TemplatedControl
         RaiseEvent(new RoutedEventArgs(IonDidPresentEvent, this));
 
         // Focus is left where it is if it's already inside.
-        if (KeyboardClose && (Focused(topLevel) is not Visual focused || !this.IsVisualAncestorOf(focused) && focused != this))
+        if (KeyboardClose && (Focused(topLevel) is not { } focused || !OverlayHost.Contains(this, focused)))
         {
             Focus();
         }
@@ -235,6 +233,7 @@ public abstract class AvonicOverlay : TemplatedControl
         }
 
         _presented = false;
+        var didDismiss = false;
         try
         {
             // Not clickable during the dismiss: pointer-events: none.
@@ -246,6 +245,7 @@ public abstract class AvonicOverlay : TemplatedControl
             }
 
             RaiseEvent(new OverlayEventArgs(IonDidDismissEvent, data, role));
+            didDismiss = true;
         }
         finally
         {
@@ -262,6 +262,7 @@ public abstract class AvonicOverlay : TemplatedControl
             LastFocus = null;
             _host?.Detach(this);
             _host = null;
+            RestoreElementFocus(didDismiss);
         }
 
         return true;
@@ -297,21 +298,40 @@ public abstract class AvonicOverlay : TemplatedControl
     }
 
     /// <summary>
-    /// Ionic <c>restoreElementFocus</c>: blur what has focus, and give it focus back after the next dismiss, unless something has
-    /// focus by then.
+    /// The first half of Ionic's <c>restoreElementFocus</c>: blur what has focus, and remember it for the dismiss.
     /// </summary>
-    private async void RestoreElementFocus(TopLevel topLevel)
+    private void BlurForRestore(TopLevel topLevel)
     {
-        if (Focused(topLevel) is not { } previous)
+        _focusToRestore = null;
+        if (Focused(topLevel) is { } previous)
+        {
+            _focusToRestore = (topLevel, previous);
+            Blur(topLevel);
+        }
+    }
+
+    /// <summary>
+    /// The second half: after <see cref="IonDidDismiss"/>, give focus back unless something has it by then. Ionic awaits
+    /// <c>onDidDismiss()</c>, so it runs once the overlay has gone, as a continuation, and never if the dismiss failed before the
+    /// event, whose promise then never resolves. Forgotten either way, so a later dismiss can't use it.
+    /// </summary>
+    private void RestoreElementFocus(bool didDismiss)
+    {
+        if (_focusToRestore is not var (topLevel, previous))
         {
             return;
         }
 
-        Blur(topLevel);
-        await OnDidDismiss();
-        if (Focused(topLevel) is null || ReferenceEquals(Focused(topLevel), topLevel))
+        _focusToRestore = null;
+        if (didDismiss)
         {
-            previous.Focus();
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (Focused(topLevel) is null || ReferenceEquals(Focused(topLevel), topLevel))
+                {
+                    previous.Focus();
+                }
+            });
         }
     }
 

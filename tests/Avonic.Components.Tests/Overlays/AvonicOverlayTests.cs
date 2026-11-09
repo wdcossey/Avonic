@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Primitives.PopupPositioning;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -452,6 +453,29 @@ public class AvonicOverlayTests
     }
 
     [AvaloniaFact]
+    public void O9_An_Escape_A_Control_Inside_Has_Handled_Does_Not_Dismiss()
+    {
+        using var stage = new Stage();
+        var closesItsOwn = TestOverlay.Button("Closes its own");
+        var handles = true;
+        closesItsOwn.KeyDown += (_, e) => e.Handled = handles && e.Key == Key.Escape;
+        var overlay = stage.Watch(new TestOverlay(closesItsOwn));
+        overlay.Present(stage.Window);
+        stage.At(200);
+
+        closesItsOwn.Focus();
+        stage.Key(PhysicalKey.Escape);
+        stage.At(400);
+        Assert.DoesNotContain(stage.Log, entry => entry.Contains("Dismiss", StringComparison.Ordinal));
+
+        // The same key, unhandled, does.
+        handles = false;
+        stage.Key(PhysicalKey.Escape);
+        stage.At(600);
+        Assert.Contains("didDismiss(,backdrop)@576", stage.Log);
+    }
+
+    [AvaloniaFact]
     public void O9_Escape_Does_Nothing_When_The_Top_Overlay_Is_Not_Dismissable_Even_With_One_Under_It_That_Is()
     {
         using var stage = new Stage();
@@ -591,6 +615,39 @@ public class AvonicOverlayTests
     }
 
     [AvaloniaFact]
+    public void O11_A_Dismiss_That_Failed_Gives_No_Focus_Back_Then_Or_Later()
+    {
+        using var stage = new Stage();
+        var overlay = new TestOverlay { Scoped = true };
+        stage.Opener.Focus();
+        overlay.Present(stage.Window);
+        stage.At(200);
+        var throws = true;
+        overlay.IonWillDismiss += (_, _) =>
+        {
+            if (throws)
+            {
+                throw new InvalidOperationException("an app's handler");
+            }
+        };
+
+        var failed = overlay.Dismiss();
+        stage.At(400);
+        Assert.True(failed.IsFaulted);
+        Assert.Null(overlay.GetVisualParent());
+        Assert.Null(stage.Focused);
+
+        // Presented again from another element: that one gets focus back, not the first.
+        throws = false;
+        stage.Other.Focus();
+        overlay.Present(stage.Window);
+        stage.At(600);
+        overlay.Dismiss();
+        stage.At(800);
+        Assert.Same(stage.Other, stage.Focused);
+    }
+
+    [AvaloniaFact]
     public void O11_Without_KeyboardClose_The_Overlay_Takes_No_Focus_And_Focus_Inside_Stays()
     {
         using var stage = new Stage();
@@ -697,12 +754,44 @@ public class AvonicOverlayTests
     public void O12_With_Nothing_Focusable_Inside_The_Overlay_Itself_Takes_It()
     {
         using var stage = new Stage();
-        var overlay = new TestOverlay(new TextBlock { Text = "Nothing to focus" }) { KeyboardClose = false };
+        // A button that isn't a tab stop is skipped, as tabindex="-1" is by Ionic's query.
+        var overlay = new TestOverlay(new TextBlock { Text = "Nothing to focus" }, new Button { Content = "Not a tab stop", IsTabStop = false })
+        {
+            KeyboardClose = false,
+        };
         overlay.Present(stage.Window);
         stage.At(200);
 
         stage.Other.Focus();
         Assert.Same(overlay, stage.Focused);
+    }
+
+    /// <summary>A popup opened from inside, as a ComboBox's drop-down is, with a button in it.</summary>
+    private static (Popup Popup, Button Inside) PopupWithButton()
+    {
+        var inside = TestOverlay.Button("In the popup");
+        return (new Popup { Child = inside, Placement = PlacementMode.Bottom }, inside);
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void O12_Focus_In_A_Popup_Opened_From_Inside_Is_Inside(bool scoped)
+    {
+        using var stage = new Stage();
+        var (popup, inPopup) = PopupWithButton();
+        var first = TestOverlay.Button("First");
+        var overlay = new TestOverlay(first, popup) { Scoped = scoped };
+        overlay.Present(stage.Window);
+        stage.At(200);
+        first.Focus();
+
+        popup.IsOpen = true;
+        Stage.Settle();
+        inPopup.Focus();
+        Assert.Same(inPopup, stage.Focused);
+        Assert.Same(inPopup, overlay.LastFocus);
+        popup.IsOpen = false;
     }
 
     [AvaloniaFact]

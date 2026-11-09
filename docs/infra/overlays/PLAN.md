@@ -185,13 +185,18 @@ overlay, as Ionic's `restoreElementFocus` does. Everything up to the first frame
 raised inside `Present()`.
 
 **The focus trap** is Ionic's `trapKeyboardFocus`, on the host: a `GotFocus` handler on the `TopLevel` (bubbling, handled events
-too, as a captured `focus` listener sees every focus). "Focusable" is Ionic's query in Avalonia's words: `Focusable`, effectively
-enabled and visible, and a tab stop, in visual-tree order. A wrap uses the focus's own navigation method, so a Tab wrap shows the
+too, as a captured `focus` listener sees every focus). "Inside" is a visual or a logical descendant, so a popup opened from inside
+the overlay, a `ComboBox`'s drop-down, is inside, though it's in another layer or window; in Ionic, `ion-select`'s drop-down is an
+overlay of its own, on top. "Focusable" is Ionic's query in Avalonia's words: `Focusable`, effectively enabled and visible, and a
+tab stop, in visual-tree order. It's a flat query, as Ionic's `querySelector` is, so it doesn't follow a container's
+`KeyboardNavigation.TabNavigation`, as Ionic's doesn't follow a roving `tabindex`. A wrap uses the focus's own navigation method, so a Tab wrap shows the
 focus ring, as `focusVisibleElement` does. Avalonia's own Tab from the last element of the overlay goes to the first of the page,
 as the browser's goes past the overlay (measured, headless), so the shadow variant catches it as Ionic's does; a scoped overlay's
 template has two sentinels, as Ionic's has.
 
-**Escape** is a `KeyDown` handler on the `TopLevel` (handled events too, not marked handled, as Ionic prevents nothing).
+**Escape** is a `KeyDown` handler on the `TopLevel`, not marked handled, as Ionic prevents nothing. It doesn't take handled
+keys: a control that handles Escape, as a `ComboBox` does to close its drop-down, has stopped it, as `stopPropagation()` keeps a
+`keydown` from the document.
 **Hardware back** is `TopLevel.BackRequested`, which Avalonia raises for Android's back button, and on desktop for Alt+Left and the
 mouse's back button (measured, headless): Escape doesn't raise it. When the top overlay dismisses, it's marked handled, as a
 registered handler stops the app's own back. The priority registry of `hardware-back-button.js` (`ionBackButton`, `register`) is
@@ -225,7 +230,9 @@ return AvonicAnimation.Create().AddElement(baseEl).Easing("ease-in-out").Duratio
   first frame) and starts at the next frame, which is its start time; it finishes at the first frame at or past its end. A
   zero-duration animation finishes at the next frame, as L6. `Play(sync: true)`, `Pause()`, `Stop()`, `Destroy()`, `IsRunning()`,
   `OnFinish(callback, oneTimeCallback)`.
-- **Properties**: `opacity` (`Opacity`) and `transform` (`RenderTransform`), from numbers or CSS strings; `transform` takes
+- **Properties**: `opacity` (`Opacity`), a number or a numeric string, and `transform` (`RenderTransform`), a CSS string. Ionic's
+  backdrop animations go to `'var(--backdrop-opacity)'`, resolved by the browser; here the builder reads the overlay's resource
+  and gives the number, at present, which is when Ionic builds the animation too. `transform` takes
   `translateX`, `translateY`, `translate`, `scale`, `scaleX`, `scaleY`, `rotate` in `px`, `%` and `deg`, interpolated function by
   function, with a percentage resolved against the element's size whenever its bounds change, so a `translateY(100%)` that starts
   before the first layout is right in the first frame drawn. Values are applied at animation priority through one binding per
@@ -258,10 +265,10 @@ for keys and pointers. Each one has to fail without its behaviour.
 | O6 | `Dismiss()` during the enter animation waits for `IonDidPresent` | `lockController`, L4 |
 | O7 | The overlay can't be hit during its dismiss | `pointer-events: none` |
 | O8 | Stacking: `ZIndex` is the base plus a counter from 1, so the later is above, and hit tests reach it | `prepareOverlay`, S1 |
-| O9 | Escape and hardware back dismiss the top overlay with the `backdrop` role when it allows it; not when it doesn't, even with one under it that does, nor during its leave animation; back is marked handled only when it dismisses, and a back the app has handled is left alone | `connectListeners`, E1 to E3 |
+| O9 | Escape and hardware back dismiss the top overlay with the `backdrop` role when it allows it; not when it doesn't, even with one under it that does, nor during its leave animation, nor when a control inside has handled Escape; back is marked handled only when it dismisses, and a back the app has handled is left alone | `connectListeners`, E1 to E3 |
 | O10 | A backdrop tap in the overlay dismisses it with the `backdrop` role when it's tappable; not during the enter animation, when the backdrop has `pointer-events: none` | `onIonBackdropTap`, B1 |
-| O11 | Focus: blurred at present, given back after the dismiss if nothing has focus, not if something does; the overlay takes focus after `IonDidPresent` with `KeyboardClose`, not without, nor when focus is already inside; a focused `TextBox` is blurred as the animation starts; an overlay that doesn't steal focus leaves it | `restoreElementFocus`, `keyboardClose`, F1, F6 |
-| O12 | The trap, shadow variant: Tab and Shift+Tab cycle inside; focus given to something behind moves inside, to the last if the first was where it came from; to the overlay itself with nothing focusable | `trapShadowFocus`, F4, F5 |
+| O11 | Focus: blurred at present, given back after the dismiss if nothing has focus, not if something does; the overlay takes focus after `IonDidPresent` with `KeyboardClose`, not without, nor when focus is already inside; a focused `TextBox` is blurred as the animation starts; an overlay that doesn't steal focus leaves it; a dismiss that failed gives no focus back, then or after a later present | `restoreElementFocus`, `keyboardClose`, F1, F6 |
+| O12 | The trap, shadow variant: Tab and Shift+Tab cycle inside; focus given to something behind moves inside, to the last if the first was where it came from; to the overlay itself with nothing focusable, skipping what isn't a tab stop; a popup opened from inside is inside, in both variants | `trapShadowFocus`, F4, F5 |
 | O13 | The trap, scoped variant: Tab wraps through the sentinels; focus behind it is left alone | `trapScopedFocus`, F2, F3 |
 | O14 | The trap: only the top overlay that steals focus traps; focus moving into one that doesn't goes back to the last focus; one with the trap disabled traps nothing | `trapKeyboardFocus` |
 | O15 | `Present()` with no `TopLevel` uses the application lifetime's; throws with none, and without an overlay layer | the host |

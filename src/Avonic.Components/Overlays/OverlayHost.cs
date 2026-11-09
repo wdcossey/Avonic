@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
 
@@ -34,7 +35,7 @@ internal sealed class OverlayHost : Panel
                 InvalidateMeasure();
             }
         };
-        topLevel.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble, handledEventsToo: true);
+        topLevel.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
         topLevel.AddHandler(TopLevel.BackRequestedEvent, OnBackRequested);
         topLevel.AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
     }
@@ -97,7 +98,11 @@ internal sealed class OverlayHost : Panel
         return size;
     }
 
-    /// <summary>Ionic's <c>keydown</c> listener: Escape dismisses the top overlay with the backdrop role, if it allows it. Nothing is prevented.</summary>
+    /// <summary>
+    /// Ionic's <c>keydown</c> listener on the document: Escape dismisses the top overlay with the backdrop role, if it allows it.
+    /// Nothing is prevented. A key a control has handled, as a <c>ComboBox</c> handles Escape to close its drop-down, doesn't
+    /// come, as a stopped <c>keydown</c> never reaches the document.
+    /// </summary>
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape && GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
@@ -204,9 +209,13 @@ internal sealed class OverlayHost : Panel
     private static bool IsInToast(IInputElement target) =>
         target is Visual visual && visual.GetSelfAndVisualAncestors().OfType<AvonicOverlay>().FirstOrDefault() is { StealsFocus: false };
 
-    /// <summary>Ionic's <c>contains</c>, which includes the element itself.</summary>
-    private static bool Contains(Visual container, IInputElement target) =>
-        target is Visual visual && (visual == container || container.IsVisualAncestorOf(visual));
+    /// <summary>
+    /// Ionic's <c>contains</c>, which includes the element itself. A popup opened from inside, such as a <c>ComboBox</c>'s
+    /// drop-down, is inside too: it's in another layer or window, but its logical parent is in the container. In Ionic the
+    /// drop-down of an <c>ion-select</c> is an overlay of its own, on top.
+    /// </summary>
+    internal static bool Contains(Visual container, IInputElement target) =>
+        target is Visual visual && (visual == container || container.IsVisualAncestorOf(visual) || container.IsLogicalAncestorOf(visual));
 
     /// <summary>Ionic's <c>focusableQueryString</c> in Avalonia's words: what Tab would stop at, in visual-tree order.</summary>
     private static IEnumerable<InputElement> Focusables(Visual container) =>

@@ -76,9 +76,11 @@ issue: see [PLAN.md](PLAN.md#deferred).
 - **Dismiss**: not hit-testable, `IonWillDismiss`, the leave animation (not for `gesture`), `IonDidDismiss`, every animation it
   played destroyed, hidden and removed; focus given back to what had it at present, if nothing has it now.
 - **Top overlay**: the last presented that's showing. Escape and `TopLevel.BackRequested` (Android's back, Alt+Left, the mouse's
-  back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled.
+  back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. An Escape a
+  control inside has handled, as a `ComboBox` closing its drop-down does, is left alone.
 - **Focus trap**: the top overlay that steals focus. Shadow variant: focus anywhere outside comes back inside, to the first focusable
-  element, or the last if the first was where it came from. Scoped: focus outside is left alone, and the sentinels wrap.
+  element, or the last if the first was where it came from. Scoped: focus outside is left alone, and the sentinels wrap. A popup
+  opened from inside (a `ComboBox`'s drop-down) counts as inside, by its logical parent.
 
 ## `AvonicAnimation`
 
@@ -91,6 +93,14 @@ issue: see [PLAN.md](PLAN.md#deferred).
 The timing is Web Animations', on `AvonicConfig.Now` and `AvonicConfig.RequestFrame`, so tests run it on `TestClock`: an animation
 played at 0 shows its first values at once, starts at the frame at 16, and shows local time t at 16 + t. Its values beat every
 style, and with the default `fill: both` the last stays until `Destroy()` or `Stop()`.
+
+## Extensions
+
+Avonic additions, which shadow no Ionic name:
+
+- `Present(TopLevel)`: presents in a given top level, for an app with several windows. `Present()` is Ionic's, in the
+  application's.
+- `CubicBezierEasing` is an Avalonia `Easing`, so a transition can use the exact CSS curve too.
 
 ## Known gaps
 
