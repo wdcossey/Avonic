@@ -4,6 +4,10 @@ The sample on a phone, for what can only be tried on one: real touch, scrolling 
 the back button, an overlay in a single view, and the style benchmark. The decisions are in [PLAN.md](PLAN.md). **It builds, and it
 hasn't run on a device yet,** so this has no status line until the checklist below has been done.
 
+<img src="compare/avonic-device-page.png" alt="The device page in the desktop sample, headless" width="300">
+
+The device page, headless on desktop, where there are no insets.
+
 ## The projects
 
 | Project | What it is |

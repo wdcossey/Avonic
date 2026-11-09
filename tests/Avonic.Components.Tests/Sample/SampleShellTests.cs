@@ -233,6 +233,29 @@ public class SampleShellTests
         Assert.False(Application.Current!.Resources.ContainsKey(SafeAreaMode.TopKey));
     }
 
+    // The page a phone is checked with. On desktop there are no insets, so it says so; captured for the docs.
+    [AvaloniaFact]
+    public void The_Device_Page_Opens_From_The_List_And_Says_There_Are_No_Insets_Here() => InstalledTheme.Run(_ =>
+    {
+        using var stage = new Stage();
+        stage.Window.SetRenderScaling(2);
+        var index = (StackPanel)stage.Shell.FindControl<ContentControl>("Host")!.Content!;
+        index.Children.OfType<Button>().Single(b => Equals(b.Content, "device")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Settle();
+
+        var page = Assert.IsType<Avonic.Sample.Pages.DevicePage>(stage.Shell.FindControl<ContentControl>("Host")!.Content);
+        Assert.Equal("No insets on this platform, so the switch does nothing.", page.FindControl<TextBlock>("Insets")!.Text);
+        Assert.Contains(" × ", page.FindControl<TextBlock>("Screen")!.Text, StringComparison.Ordinal);
+
+        for (var i = 0; i < 2; i++)
+        {
+            Settle();
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        }
+
+        Frames.Save(stage.Window.CaptureRenderedFrame()!, "avonic-sample-device-page.png");
+    });
+
     /// <summary>The test clock a millisecond at a time, so that an overlay's animation runs to its end.</summary>
     private static void Run(TestClock clock, double ms)
     {
