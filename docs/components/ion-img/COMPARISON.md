@@ -53,8 +53,8 @@ alt text and a 404, a 404 with no alt, an alt text and no `src`, neither, and a 
 alt, the box is 358 × 20 in a line 24 high, with a 1 px grey border and the icon at 2, 2, or fills a box of its own size; and a box
 with no `src` and no alt has no icon. The border is `#BFBFBF`, where Chromium's is `rgb(192, 192, 192)`.
 
-The sample's page, headless, with the pictures it ships as `avares://` resources, and the broken image below them. It needs the
-line proposed for `Avonic.Sample.csproj` in the PR; this frame was taken with it applied:
+The sample's page, headless, with the pictures it ships as `avares://` resources, and the broken image below them. It needs
+`<AvaloniaResource Include="Assets/**/*.png" />` in `Avonic.Sample.csproj`, which the same PR adds:
 
 ![The sample's ion-img page](compare/avonic-sample.png)
 

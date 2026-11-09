@@ -21,6 +21,11 @@
     <AvaloniaResource Include="../../tools/fonts/roboto/*.ttf" Link="Fonts/Roboto/%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- The pictures the ion-img page ships with: see Assets/Img/README.md. -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**/*.png" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Avonic\Avonic.csproj" />
   </ItemGroup>
