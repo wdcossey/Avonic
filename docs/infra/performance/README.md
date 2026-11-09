@@ -58,6 +58,7 @@ as an app has them. Times are µs per element. A row can go straight in the tabl
 | When | Controls | Rules | Alternatives | `TextBlock` | `Border` |
 |---|---|---|---|---|---|
 | 2026-11-06 | 18 | 98 | 174 | 18.5 to 24.2 (+5.6) | 2.2 to 8.0 (+5.8) |
+| 2026-11-09 (after P1) | 35 | 146 | 243 | 20.2 to 27.1 (+6.9) | 2.3 to 10.1 (+7.8) |
 
 ### On a phone
 
@@ -67,7 +68,13 @@ same trees, rounds and row, from `Diagnostics/StyleCost.cs`, which the test uses
 attaches into a panel in the shell, outside Avonic's controls, so that a tree's ancestors are the same both ways, and lays out. So its times include the sample's `SimpleTheme`, which the
 test's don't, and **a phone's row is compared with a desktop row from the same page**, in the desktop sample's Release build, not with
 the rows above. It says when a row isn't for the table: a Debug build, or Avalonia's diagnostics on. How to run it on the Pixel is in
-[the Android docs](../android/README.md#on-the-device). None has been run yet.
+[the Android docs](../android/README.md#on-the-device).
+
+| Where | When | Controls | Rules | Alternatives | `TextBlock` | `Border` |
+|---|---|---|---|---|---|---|
+| Pixel 8, Android 17 | 2026-11-09 | 35 | 146 | 243 | 55.3 to 107.7 (+52.4) | 15.1 to 53.6 (+38.4) |
+
+The desktop row from the same page, to compare it with, is still to do ([comparison](../android/COMPARISON.md#the-benchmark)).
 
 ## In a Debug build
 
@@ -99,5 +106,5 @@ trace.
 - **`render` can read low,** if a page opens within a frame of the last one, because its own render pass hasn't happened yet.
 - **Only style checks are budgeted.** A slow control, layout or animation wouldn't show here. The line in the sample is how
   to spot those.
-- **The numbers are from one desktop PC.** Nothing has been measured on a phone yet, though the sample can now do it.
+- **The table's numbers are from one desktop PC.** A Pixel 8's row from the sample is above, without a desktop row from the same page yet.
 - **`ItemsControl`, virtualising and scrolling** haven't been measured. These are all times to attach.

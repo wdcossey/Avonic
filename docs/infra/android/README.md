@@ -109,12 +109,13 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 
 ## Known gaps
 
-- **Not run on a device.** Everything above is to do.
+- **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed or was measured; see [COMPARISON.md](COMPARISON.md). Still to do:
+  a flick by hand against a native list, and the desktop row for the benchmark.
 - **`AvonicOverlay.Present()` with no `TopLevel` throws on Android with Avalonia's recommended `MainViewFactory`,** as
   `OverlayHost.TopLevelOf` reads `ISingleViewApplicationLifetime.MainView`, which the factory leaves null. The sample sets `MainView`
   instead, so that the single-view branch is tried. An app that follows Avalonia's docs has to call `Present(TopLevel)`. Reported, not
   changed here.
-- **CI's `android` job** hasn't run before this PR.
+- **CI's `android` job** builds the APK; its first run was this PR's.
 - **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation, resizing, display
   size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then the safe-area switch also keeps
   following the old activity's insets until it's turned off and on.
