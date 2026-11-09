@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using System.Globalization;
 using Avalonia;
+using Avalonia.Headless.XUnit;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Tests.Behaviors;
@@ -83,24 +84,26 @@ public class CssTests
     public void Box_With_A_Missing_Value_Is_Unset() =>
         Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.Box, null, 1d, 2d, 3d, AvaloniaProperty.UnsetValue));
 
-    [Fact]
+    // Avalonia facts: a brush is an AvaloniaObject, and making one on a test thread claims the dispatcher before the headless
+    // session can, which fails the session's first test.
+    [AvaloniaFact]
     public void Rgba_Takes_The_First_Set_Colour_At_The_Alpha_Rounded_To_A_Byte() =>
         // 0.065 × 255 = 16.575, which Chromium rounds to 17.
         Assert.Equal(Color.FromArgb(17, 1, 2, 3), Convert(Css.Rgba, "0.065", new CssUnset(), null, AvaloniaProperty.UnsetValue, Color.FromRgb(1, 2, 3), Colors.Red));
 
-    [Fact]
+    [AvaloniaFact]
     public void Rgba_Reads_A_Solid_Brush_And_Replaces_Its_Alpha() =>
         Assert.Equal(Color.FromArgb(51, 10, 20, 30), Convert(Css.Rgba, "0.2", new SolidColorBrush(Color.FromArgb(200, 10, 20, 30), 0.5)));
 
-    [Fact]
+    [AvaloniaFact]
     public void Rgba_Without_A_Parameter_Is_Opaque() =>
         Assert.Equal(Color.FromArgb(255, 1, 2, 3), Convert(Css.Rgba, null, Color.FromArgb(10, 1, 2, 3)));
 
-    [Fact]
+    [AvaloniaFact]
     public void Rgba_Clamps_The_Alpha() =>
         Assert.Equal(Color.FromArgb(255, 1, 2, 3), Convert(Css.Rgba, "1.5", Color.FromRgb(1, 2, 3)));
 
-    [Fact]
+    [AvaloniaFact]
     public void Rgba_Gives_A_Brush_To_A_Brush()
     {
         var brush = Assert.IsAssignableFrom<ISolidColorBrush>(
@@ -110,7 +113,7 @@ public class CssTests
         Assert.Equal(1, brush.Opacity);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Rgba_Of_Something_That_Is_Not_A_Colour_Is_Unset()
     {
         // rgba(var(--a), n) with --a a gradient is invalid, even with a colour after it, as var() takes the first that's set.
