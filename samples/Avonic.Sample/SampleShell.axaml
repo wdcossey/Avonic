@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.SampleShell"
+             Background="White">
+
+    <!-- The sample in a window on desktop, and as the main view on a phone. The header and page list are plain Avalonia until
+         ion-toolbar and ion-list are used here; each Avonic control gets one page under Pages/. -->
+    <DockPanel>
+        <Border Name="Header" DockPanel.Dock="Top" Background="#F8F8F8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <DockPanel Height="55" VerticalAlignment="Center" Margin="8,0">
+                <Button Name="BackButton" DockPanel.Dock="Left" IsVisible="False" Click="OnBack"
+                        AutomationProperties.Name="Back" VerticalAlignment="Center">
+                    <c:AvonicIcon IconName="arrow-back-sharp" FontSize="24" />
+                </Button>
+                <TextBlock Name="PageTitle" Text="Avonic" FontSize="20" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Margin="8,0" />
+            </DockPanel>
+        </Border>
+
+        <!-- A Debug build fills this in. See Diagnostics/PerformanceMonitor.cs. -->
+        <TextBlock Name="PerformanceLine" DockPanel.Dock="Bottom" IsVisible="False"
+                   FontSize="11" Margin="8,2" TextWrapping="Wrap" />
+
+        <!-- Where the device page's style benchmark attaches its trees: outside Avonic's controls, so that its ancestors are
+             the same with and without the theme, laid out, and clipped so that drawing them costs nothing. -->
+        <Panel Name="BenchmarkHost" DockPanel.Dock="Bottom" Height="0" ClipToBounds="True" IsHitTestVisible="False" />
+
+        <ContentControl Name="Host" />
+    </DockPanel>
+
+</UserControl>

@@ -43,6 +43,8 @@
             <c:AvonicButton Name="Present" Content="Present an overlay" Margin="16,8,16,0" />
             <c:AvonicButton Name="PresentLocked" Content="Present one the backdrop can't dismiss" Margin="16,8,16,0" />
             <c:AvonicButton Name="PresentStill" Content="Present one with no animation" Margin="16,8,16,0" />
+            <!-- Present() with no TopLevel: the app's lifetime finds it, a window on desktop and the main view on a phone (#66). -->
+            <c:AvonicButton Name="PresentFromApp" Content="Present one through the app" Margin="16,8,16,0" />
         </StackPanel>
     </c:AvonicContent>
 

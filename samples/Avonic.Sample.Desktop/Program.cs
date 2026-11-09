@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Avalonia;
 
-namespace Avonic.Sample;
+namespace Avonic.Sample.Desktop;
 
 internal static class Program
 {

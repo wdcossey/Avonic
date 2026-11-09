@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5D20
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Sample", "samples\Avonic.Sample\Avonic.Sample.csproj", "{D671D334-A649-4DBC-B719-1308744851E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avonic.Sample.Desktop", "samples\Avonic.Sample.Desktop\Avonic.Sample.Desktop.csproj", "{2B27B19E-E3BA-424F-AB52-CB6553C5E45A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{D671D334-A649-4DBC-B719-1308744851E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D671D334-A649-4DBC-B719-1308744851E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D671D334-A649-4DBC-B719-1308744851E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B27B19E-E3BA-424F-AB52-CB6553C5E45A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B27B19E-E3BA-424F-AB52-CB6553C5E45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B27B19E-E3BA-424F-AB52-CB6553C5E45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B27B19E-E3BA-424F-AB52-CB6553C5E45A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +61,6 @@ Global
 		{6C4F882F-AFFC-4936-91EC-51126675C39A} = {9AB2F7CC-67BD-4307-90BB-F9C3E4A169F3}
 		{41CAF6EA-EC3D-4C6B-847B-BA60197D783D} = {B5BA07F5-5D25-450D-9E84-CEE7E67BD1C4}
 		{D671D334-A649-4DBC-B719-1308744851E0} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{2B27B19E-E3BA-424F-AB52-CB6553C5E45A} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal

@@ -26,8 +26,11 @@ public sealed class PerformanceMonitor : IDisposable
     private long _started;
     private (int Rules, int Alternatives)? _census;
 
+    /// <summary>Avalonia's switch for its diagnostics, off by default.</summary>
+    public const string DiagnosticsSwitch = "Avalonia.Diagnostics.Diagnostic.IsEnabled";
+
     /// <summary>Avalonia reads the switch once, so call this before it starts.</summary>
-    public static void EnableDiagnostics() => AppContext.SetSwitch("Avalonia.Diagnostics.Diagnostic.IsEnabled", true);
+    public static void EnableDiagnostics() => AppContext.SetSwitch(DiagnosticsSwitch, true);
 
     public PerformanceMonitor()
     {

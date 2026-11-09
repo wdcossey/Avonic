@@ -1,10 +1,8 @@
 using System.Diagnostics;
-using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
-using Avonic.Components.Controls;
 using Avonic.Sample.Diagnostics;
 using Avonic.Themes;
 
@@ -21,25 +19,10 @@ public class StyleCostBenchmark
     /// <summary>Names the file for the row.</summary>
     internal const string Variable = "AVONIC_BENCHMARK";
 
-    private const int Elements = 5000;
-    private const int Depth = 20;
-    private const int WarmUpRounds = 4;
-    private const int Rounds = 25;
-
+    // The shape is StyleCost's, which the sample's runner on a phone shares.
     private static double Attach(Func<Control> make)
     {
-        var panel = new StackPanel();
-        for (var i = 0; i < Elements; i++)
-        {
-            panel.Children.Add(make());
-        }
-
-        Control root = panel;
-        for (var i = 0; i < Depth; i++)
-        {
-            root = new Border { Child = root };
-        }
-
+        var root = StyleCost.Tree(make);
         GC.Collect();
         GC.WaitForPendingFinalizers();
         var stopwatch = Stopwatch.StartNew();
@@ -48,8 +31,6 @@ public class StyleCostBenchmark
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
     }
-
-    private static double Median(List<double> values) => values.Order().ElementAt(values.Count / 2);
 
     [AvaloniaFact]
     public void Attach_Time()
@@ -65,11 +46,11 @@ public class StyleCostBenchmark
         var styles = Application.Current!.Styles;
         var census = StyleCensus.Count(new AvonicTheme());
         var cells = new List<string>();
-        foreach (var make in new Func<Control>[] { () => new TextBlock { Text = "x" }, () => new Border() })
+        foreach (var make in StyleCost.Kinds)
         {
             var without = new List<double>();
             var with = new List<double>();
-            for (var round = 0; round < WarmUpRounds + Rounds; round++)
+            for (var round = 0; round < StyleCost.WarmUpRounds + StyleCost.Rounds; round++)
             {
                 var plain = Attach(make);
 
@@ -85,21 +66,16 @@ public class StyleCostBenchmark
                     styles.Remove(theme);
                 }
 
-                if (round >= WarmUpRounds)
+                if (round >= StyleCost.WarmUpRounds)
                 {
                     without.Add(plain);
                     with.Add(themed);
                 }
             }
 
-            var before = Median(without) * 1000 / Elements;
-            var after = Median(with) * 1000 / Elements;
-            cells.Add(string.Create(CultureInfo.InvariantCulture, $"{before:0.0} to {after:0.0} ({after - before:+0.0;-0.0})"));
+            cells.Add(StyleCost.Cell(without, with));
         }
 
-        var controls = typeof(AvonicItem).Assembly.GetExportedTypes().Count(t =>
-            t.Namespace == typeof(AvonicItem).Namespace && t.Name.StartsWith("Avonic", StringComparison.Ordinal) && t.IsSubclassOf(typeof(StyledElement)));
-        var when = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        File.AppendAllText(file, $"| {when} | {controls} | {census.Rules} | {census.Alternatives} | {cells[0]} | {cells[1]} |{Environment.NewLine}");
+        File.AppendAllText(file, StyleCost.Row(DateTime.Now, census, cells) + Environment.NewLine);
     }
 }

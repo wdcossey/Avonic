@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.DevicePage">
+
+    <!-- Not a control: what to try on a phone (#66). The screen, the safe area and its switch, and the style benchmark.
+         See docs/infra/android/README.md. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicListHeader>
+                <TextBlock Text="This device" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Screen" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Safe area" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Insets" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="Ionic's way: edge to edge, and Avonic.SafeArea* filled" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <CheckBox Name="IonicSafeArea" AutomationProperties.Name="Ionic's safe area" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicItemDivider>
+                <c:AvonicLabel>
+                    <TextBlock Text="A divider: its start pads by the left key" />
+                </c:AvonicLabel>
+            </c:AvonicItemDivider>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="An item: its start pads by the left key, and its inner end by the right" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Style benchmark" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="BenchmarkStatus" TextWrapping="Wrap"
+                               Text="5,000 elements at a depth of 20, 25 rounds and 4 to warm up, without and with the theme. The page flickers while the theme's templates come off and on." />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicButton Name="RunBenchmark" Content="Run the style benchmark" Margin="16,8,16,0" />
+            <TextBox Name="BenchmarkRow" IsReadOnly="True" TextWrapping="Wrap" Margin="16,8" IsVisible="False"
+                     AutomationProperties.Name="Benchmark row" />
+        </StackPanel>
+    </c:AvonicContent>
+
+</UserControl>

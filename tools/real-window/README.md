@@ -7,7 +7,7 @@ on each batch before it's called ready to merge.
 opened.
 
 ```
-dotnet build samples/Avonic.Sample
+dotnet build samples/Avonic.Sample.Desktop
 powershell -ExecutionPolicy Bypass -File tools/real-window/drive.ps1
 ```
 

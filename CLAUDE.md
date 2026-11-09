@@ -49,8 +49,12 @@ src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS va
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step;
                                  Performance/ holds the style budget (docs/infra/performance/README.md)
-samples/Avonic.Sample/   phone-sized desktop app, one page per control, each marked [SamplePage]; a Debug build
-                         shows what each page cost to open (Diagnostics/)
+samples/Avonic.Sample/   the sample, a library its heads share: SampleShell (the page list, a page, Back), one page per
+                         control, each marked [SamplePage], and a device page; a Debug build shows what each page cost
+                         to open (Diagnostics/)
+samples/Avonic.Sample.Desktop/   the desktop head: Program.cs, opening MainWindow, a phone-sized window
+samples/Avonic.Sample.Android/   the Android head, not in Avonic.sln, as it needs the android workload; CI's android job
+                         builds the APK. Not yet run on a device (docs/infra/android/README.md)
 Directory.Build.targets  generates XamlManifest.Paths from a project's AvonicDiscoveredXaml globs
 tools/ionic-api.js       core.json → fidelity checklist (the spec for every control)
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
@@ -70,7 +74,8 @@ docs/                    PROCESS, ROADMAP, decisions, per-component plan/compari
 A control adds only its own files; templates, tokens and sample pages are auto-discovered
 ([convention](docs/infra/auto-discovery/README.md)).
 
-Stack: libraries target **net8.0**; tests target **net10.0** (xunit v3 needs the SDK's apphost);
+Stack: libraries target **net8.0**; tests and the sample target **net10.0** (xunit v3 needs the SDK's apphost, and Avalonia 12
+on Android needs net10.0), the Android head **net10.0-android**;
 built with the **.NET 10 SDK** (`global.json`). **Avalonia 12.1.4**, **xunit v3** — versions are
 central in `Directory.Packages.props`; warnings are errors. Solution file is `Avonic.sln`
 (classic format — `.slnx` needs SDK 9.0.200+).

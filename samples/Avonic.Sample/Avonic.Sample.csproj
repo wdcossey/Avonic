@@ -1,17 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- The sample, shared by its heads: Avonic.Sample.Desktop and Avonic.Sample.Android. See docs/infra/android/PLAN.md. -->
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <!-- An app, not a library: run on the current runtime (also avoids needing an older apphost pack). -->
+    <!-- On the current runtime, as its heads are. Avalonia 12 on Android needs net10.0. -->
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Desktop" />
     <!-- Window, ScrollViewer, TextBlock etc. need a base theme; Avonic styles only Avonic controls. -->
     <PackageReference Include="Avalonia.Themes.Simple" />
   </ItemGroup>
