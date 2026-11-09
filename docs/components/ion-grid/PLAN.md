@@ -61,7 +61,7 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | # | Behaviour | Source |
 |---|---|---|
 | 1 | Columns with no size share the row equally, padding included | `col.css` `flex-basis: 0; flex-grow: 1`; measured three at 126.67 |
-| 2 | `Size` n is n / 12 of the row, border box. The columns with no size share what's left. A change lays the row out again, and a column an `ItemTemplate` makes counts | `calculateSize`; measured `6`, rest, `3`: 190, 95, 95; `size` set to `6` later: 190 |
+| 2 | `Size` n is n / 12 of the row, border box. The columns with no size share what's left. A change lays the row out again, a column an `ItemTemplate` makes counts, and a hidden one takes no space | `calculateSize`; measured `6`, rest, `3`: 190, 95, 95; `size` set to `6` later: 190 |
 | 3 | `Size="auto"`: as wide as its content, and the rest fill. Never wider than the row: the text wraps, and the next column goes to the next line | `flex: 0 0 auto; width: auto`. `max-width: auto` is invalid, so `col.css`'s `100%` stays; measured 99.83, and a long one at 380 × 48 |
 | 4 | Columns that don't fit on the line wrap to the next one | `row.css` `flex-wrap: wrap`; measured two `8`s at 253.33, one under the other |
 | 5 | `Offset` n is a margin at the start of n / 12. A column with no size still grows into the rest | `calculateOffset`; measured x = 100; with no size, 68.33 and 158.34 wide |
@@ -73,12 +73,12 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | 11 | Odd sizes: `"4.5"` is 4.5 columns; `"0"` and negatives leave only the padding; more than 12 overflows the row and the next column wraps; `".5"` and `"1e1"` are numbers; anything that isn't a CSS number, such as `"abc"` or `"4."`, makes it a plain flex item, as wide as its content | Invalid at computed-value time unsets `flex`, `width`, `max-width`; measured 142.5, 10, 10, 411.66, 15.83, 316.66, `abc` 36.06, `4.` 23.22 |
 | 12 | Odd offsets: `"0"` is none, a negative push moves towards the start, an offset past the row overflows it, and anything not a number is ignored | measured `off0`, `push="-1"` 36.67, `offset="11"` at 353.33 |
 | 13 | `Avonic.GridColumns` changes the count, from any ancestor's resources | `var(--ion-grid-columns, 12)`; measured `6`: size 3 is 183, offset 1 is 61 |
-| 14 | Column padding: 5, or `Avonic.GridColumnPadding`, with the breakpoint's key winning | `col.css`; measured 2 and `-xs` 7: 7 |
+| 14 | Column padding: 5, or `Avonic.GridColumnPadding`, with the breakpoint's key winning. A value that isn't a length, or is negative, is no padding | `col.css`; measured 2 and `-xs` 7: 7; `-5px`: 0 |
 | 15 | Grid padding: 5, or `Avonic.GridPadding`, with the breakpoint's key winning | `grid.css`; measured 12, and `-md` 20 at 800 |
 | 16 | `Fixed`: 100%, 540, 720, 960 and 1140 wide from each breakpoint, centred, and never wider than its container. `Avonic.GridWidth` and the breakpoint's key set it | `grid.css`; measured at 576 x = 18 w = 540, 768 w = 720, 992 w = 960; 300 in a 150 box: 150; `--ion-grid-width: 300px` 300; `-xs: 200px` 200 |
-| 17 | `Classes="ion-no-padding"` on a grid: no padding on the grid or on its columns, at any depth. A grid inside keeps its own, and its columns have none | `:host(.ion-no-padding)` sets the column variables, and `padding.css` the grid's; measured `gnest` |
+| 17 | `Classes="ion-no-padding"` on a grid: no padding on the grid or on its columns, at any depth. A grid inside keeps its own, and its columns have none. On a column, no padding on it | `:host(.ion-no-padding)` sets the column variables, and `padding.css` the grid's; measured `gnest` |
 | 18 | Columns on a line are as tall as the tallest, and what's in them stays at the top, its own height. One with its own `VerticalAlignment` keeps its height and aligns, as `align-self` | `align-items: normal` (stretch); measured 67, 67, a `div` in one 19 high at the top; `ion-align-self-start` 29 at the top, `-center` y + 19 |
-| 19 | A column with no size is never narrower than its longest word, and the others share the rest | `min-width: auto`; measured `Supercalifragilisticexpialidocious` 244.11 and three of 45.3 |
+| 19 | A column with no size is never narrower than its longest word, and the others share the rest. What's in a clipping part still counts, and a grid inside a column wraps rather than widen it | `min-width: auto`; measured `Supercalifragilisticexpialidocious` 244.11 and three of 45.3; a button 215.67 with the others 82.17; a nested grid's column 126.67, its three columns stacked at 106.67 |
 | 20 | Something in a row that isn't a column is as wide as its content, and the columns share the rest | `flex: 0 1 auto`; measured a `div` at 58.94 |
 | 21 | RTL: columns start at the right, and offset, push and pull mirror | measured with `dir="rtl"` on the document |
 | 22 | Rows stack in the grid, each as wide as the grid inside its padding. A grid with nothing in it is its padding, and an empty column with no padding is 1 high | `display: block`, `min-height: 1px`; measured 380 at x = 5; empty 10 high; empty column 1 |
@@ -135,7 +135,7 @@ six `--ion-grid-column-padding*` variables to 0, and they inherit. Here the grid
 with the six keys at 0 in its own `Resources.MergedDictionaries`. Columns read them through `DynamicResource` as they would
 any ancestor's, a nested grid's columns too, and an app's own key on the same grid still wins, as an app's style beats a
 `:host` rule. The grid's own padding is `padding.css`, which `ionic.bundle.css` loads: a `^.ion-no-padding` rule last in the
-grid's theme.
+grid's theme, and the same rule is in the column's.
 
 **`flex: 1` on the grid** is `FlexRow.Flex = 1` in its theme, so an item's slot grows it (mapping rule). `RowPanel` also reads
 `FlexRow.Flex` on a child that isn't a column, so a grid in a row grows too.
@@ -165,6 +165,7 @@ None.
 | `Avonic.GridWidth*` are lengths. CSS takes a percentage too | `Infinity` stands for the default `100%`. Set `MaxWidth` for anything else |
 | `Avonic.GridColumns` that isn't a positive number counts as unset, so 12 | CSS would divide by it. 0 is a division by zero there |
 | `min-content` is estimated as `FlexRow` does: the longest word of a wrapping `TextBlock`, and the sum or maximum of what's in a panel | `Measure` can't report it. The same estimate as an item's label |
+| In a horizontally scrolling `ScrollViewer` (`AvonicContent ScrollX="True"`), columns are as wide as their content, on one line, with no offset, push or pull. Ionic's grid is as wide as the scroller | Avalonia measures there with no width. Laying out again at the arranged width would measure the children again during arrange, which makes the scroller measure again: a loop. `FlexRow` does the same |
 | A column outside a row is a plain block, as wide as its container. Ionic's is `display: inline` there (measured 41.45) | It isn't how a column is used, and an inline box isn't something Avalonia has |
 
 ## Not in this PR
@@ -172,7 +173,7 @@ None.
 | What | Why |
 |---|---|
 | `flex-utils.css`: `ion-justify-content-*`, `ion-align-items-*`, `ion-align-self-*`, `ion-nowrap`, `ion-wrap` | Global utility classes, not part of these components, as `.ion-padding` isn't. A column's `VerticalAlignment` does `align-self` |
-| `.ion-no-padding`, `.ion-padding` on a column or a row | The same. `Padding` on the control does it |
+| `.ion-padding` and the rest of `padding.css`, except `.ion-no-padding` on a grid or a column | The same. `Padding` on the control does it. `.ion-no-padding` is a rule in the grid's and the column's themes, which costs the style budget nothing |
 | The default text size outside a host: Avalonia's, where a web page's is 16 | Its own decision, already raised at `ion-icon`. The capture sets the page to 16, as `ion-text`'s does |
 
 ## Dependencies

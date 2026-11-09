@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Reactive;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -74,7 +75,7 @@ public partial class AvonicCol : ContentControl
     public AvonicCol()
     {
         // The column's own subscription, so it lives as long as the column, and follows it to any ancestor's resources.
-        this.GetResourceObservable(ColumnsKey).Subscribe(new ColumnsObserver(this));
+        this.GetResourceObservable(ColumnsKey).Subscribe(new AnonymousObserver<object?>(OnColumnsChanged));
     }
 
     /// <summary>What <see cref="RowPanel"/> lays the column out as.</summary>
@@ -96,6 +97,12 @@ public partial class AvonicCol : ContentControl
         if (change.Property.OwnerType == typeof(AvonicCol) && change.Property is StyledProperty<string?>)
         {
             UpdateColumn();
+        }
+        else if (change.Property == IsVisibleProperty)
+        {
+            // In an ItemTemplate's container, the row skips a hidden column without measuring the container, which then
+            // doesn't tell it when the column shows.
+            this.FindAncestorOfType<RowPanel>()?.InvalidateMeasure();
         }
     }
 
@@ -211,19 +218,6 @@ public partial class AvonicCol : ContentControl
 
         _columns = columns > 0 && double.IsFinite(columns) ? columns : DefaultColumns;
         UpdateColumn();
-    }
-
-    private sealed class ColumnsObserver(AvonicCol owner) : IObserver<object?>
-    {
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(object? value) => owner.OnColumnsChanged(value);
     }
 
     public string? Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }

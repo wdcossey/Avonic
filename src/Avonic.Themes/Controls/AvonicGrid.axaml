@@ -226,6 +226,11 @@
                 </MultiBinding>
             </Setter>
         </Style>
+
+        <!-- .ion-no-padding, from padding.css, which beats the media queries -->
+        <Style Selector="^.ion-no-padding">
+            <Setter Property="Padding" Value="0" />
+        </Style>
     </ControlTheme>
 
 </ResourceDictionary>

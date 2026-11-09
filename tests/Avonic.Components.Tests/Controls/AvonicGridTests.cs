@@ -136,6 +136,29 @@ public class AvonicGridTests
         Near(190, Width(rest));
     });
 
+    [AvaloniaFact]
+    public void B2_A_Hidden_Templated_Column_Takes_No_Space() => InstalledTheme.Run(_ =>
+    {
+        var row = new AvonicRow
+        {
+            ItemsSource = new[] { true, false, true },
+            ItemTemplate = new FuncDataTemplate<bool>((shown, _) => new AvonicCol { Size = "6", IsVisible = shown, Content = "x" }),
+        };
+        using var scene = Show(Grid(row));
+
+        var shown = row.GetVisualDescendants().OfType<AvonicCol>().Where(column => column.IsVisible).ToList();
+        Assert.Equal(2, shown.Count);
+        Near(5, X(shown[0], scene));
+        Near(195, X(shown[1], scene));
+        Near(Box(shown[0], scene.Window).Y, Box(shown[1], scene.Window).Y);
+
+        // Shown again, it takes its half, and the last one wraps.
+        row.GetVisualDescendants().OfType<AvonicCol>().Single(column => !column.IsVisible).IsVisible = true;
+        Run();
+        Near(5, X(shown[1], scene));
+        Near(Box(shown[0], scene.Window).Bottom, Box(shown[1], scene.Window).Y);
+    });
+
     // ── 3. Auto ──────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -506,6 +529,17 @@ public class AvonicGridTests
         Assert.Equal(new Thickness(padding), col.Padding);
     });
 
+    [AvaloniaFact]
+    public void B14_A_Negative_Padding_Variable_Is_No_Padding() => InstalledTheme.Run(_ =>
+    {
+        var col = Col();
+        var grid = Grid(Row(col));
+        grid.Resources["Avonic.GridColumnPadding"] = -5d;
+        using var scene = Show(grid);
+
+        Assert.Equal(new Thickness(0), col.Padding);
+    });
+
     // ── 16. Fixed ────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -590,6 +624,30 @@ public class AvonicGridTests
         Assert.Equal(new Thickness(padding), col.Padding);
     });
 
+    [AvaloniaFact]
+    public void B17_No_Padding_Survives_Resources_Set_After_The_Class() => InstalledTheme.Run(_ =>
+    {
+        // XAML sets Classes before a Resources element.
+        var col = Col();
+        var grid = Grid(Row(col));
+        grid.Classes.Add("ion-no-padding");
+        grid.Resources = new ResourceDictionary { ["Avonic.GridPadding"] = 3d };
+        using var scene = Show(grid);
+
+        Assert.Equal(new Thickness(0), col.Padding);
+    });
+
+    [AvaloniaFact]
+    public void B17_No_Padding_On_A_Column_Takes_Its_Own_Off() => InstalledTheme.Run(_ =>
+    {
+        var col = Col(text: "no padding");
+        col.Classes.Add("ion-no-padding");
+        using var scene = Show(Grid(Row(col)), 800);
+
+        Assert.Equal(new Thickness(0), col.Padding);
+        Near(790, Width(col));
+    });
+
     // ── 18. Stretch ──────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -650,6 +708,21 @@ public class AvonicGridTests
         Near(215.67, Width(col));
         Near(82.17, Width(b));
         Near(82.17, Width(c));
+    });
+
+    [AvaloniaFact]
+    public void B19_A_Grid_In_A_Column_Wraps_Rather_Than_Widen_It() => InstalledTheme.Run(_ =>
+    {
+        AvonicCol i1 = Col(text: "alpha beta"), i2 = Col(text: "gamma delta"), i3 = Col(text: "epsilon zeta");
+        var outer = new AvonicCol { Content = Grid(Row(i1, i2, i3)) };
+        AvonicCol b = Col(text: "b"), c = Col(text: "c");
+        using var scene = Show(Grid(Row(outer, b, c)));
+
+        Near(126.67, Width(outer));
+        Near(126.67, Width(b));
+        Near(106.67, Width(i1));
+        Near(15, X(i3, scene));
+        Near(Box(i2, scene.Window).Bottom, Box(i3, scene.Window).Y);
     });
 
     // ── 20. Not a column ─────────────────────────────────────────────────────────────────────

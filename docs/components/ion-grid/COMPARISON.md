@@ -33,7 +33,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicGri
 | # | Behaviour | Ionic | Result |
 |---|---|---|---|
 | 1 | Columns with no size share the row | 126.67 each | match |
-| 2 | A size is n / 12, the rest share; a change re-lays; a templated column counts | 190, 95, 95; 190 after a change | match |
+| 2 | A size is n / 12, the rest share; a change re-lays; a templated column counts, a hidden one doesn't | 190, 95, 95; 190 after a change | match |
 | 3 | Auto: content width, never wider than the row, then the next wraps | 99.83; 380 × 2 lines | match |
 | 4 | Wrapping | two 8s, one under the other | match |
 | 5 | Offset | x = 100; with no size, 68.33 and 158.33 wide | match |
@@ -45,12 +45,12 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicGri
 | 11 | Odd sizes | 142.5, 10, 10, 411.66, 15.83, 316.66; `abc` 36.06, `4.` 23.22 | match |
 | 12 | Odd offsets and pushes | `0` none, `-1` 36.67, `11` 353.33, invalid ignored | match |
 | 13 | `Avonic.GridColumns` | 6: 183 and an offset of 61 | match; a change re-lays, and 0 is 12 |
-| 14 | Column padding | 2 and `-xs` 7: 7; `-md` 9 at 768, 5 at 390 and 1200 | match |
+| 14 | Column padding | 2 and `-xs` 7: 7; `-md` 9 at 768, 5 at 390 and 1200; `-5px` 0 | match; a value that isn't a length is 0 too |
 | 15 | Grid padding | 12; `-md` 20 at 800 | match |
 | 16 | Fixed | 540 at x = 18, 720, 960, 1140; 300; 200; 150 in a 150 box | match |
-| 17 | `ion-no-padding` | 0 on the grid and its columns; a nested grid keeps 5, its columns 0; an inline `-xs: 3px` wins at 390 and not at 768 | match |
+| 17 | `ion-no-padding` | 0 on the grid and its columns; a nested grid keeps 5, its columns 0; an inline `-xs: 3px` wins at 390 and not at 768; on a column, 0 | match |
 | 18 | Stretch, and `align-self` | 67 and 67; a `div` inside 19 at the top; start and center | match. `align-self` is the column's `VerticalAlignment` |
-| 19 | The longest word | 244.11 and three of 45.3 | match |
+| 19 | The longest word; a clipping part; a grid inside | 244.11 and three of 45.3; a button's column 215.67; 126.67 with the inner columns stacked at 106.67 | match |
 | 20 | Not a column | 58.94, the column the rest | match |
 | 21 | RTL | 195, 163.33, 242.5, 290 | match, with `FlowDirection` on the window |
 | 22 | Rows stack; an empty grid; an empty column | 380 at x = 5; 10; 1 | match |
@@ -69,5 +69,6 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicGri
 | Width variables are lengths | — | `Infinity` is the default `100%` |
 | `Avonic.GridColumns` that isn't a positive number is 12 | — | CSS would divide by it |
 | `min-content` is estimated, as `FlexRow` does | the long word's 244.11 matches | `Measure` can't report it |
+| In a horizontally scrolling `ScrollViewer`, columns are content-wide on one line | — | Avalonia measures with no width there; re-laying at arrange loops |
 | A column outside a row is a block. Ionic's is `display: inline` there | 41.45 wide in Chromium | Not how a column is used |
 | **Not tested:** a grid in a `Popup` reads the window it belongs to | — | The headless platform has no popup windows, and throws. The code follows `PopupRoot.ParentTopLevel` |

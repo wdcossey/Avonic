@@ -62,7 +62,8 @@ which can be a fraction, or `"auto"` for `Size`. `null` is unset, and `""` at a 
 | [x] | `pull`, `pullXs` … `pullXl` | `Pull`, `PullXs`, `PullSm`, `PullMd`, `PullLg`, `PullXl` |
 | [ ] | `mode` | — (ADR 0001) |
 
-A column's own `VerticalAlignment` is `align-self`: unset, it's as tall as the tallest on its line.
+A column's own `VerticalAlignment` is `align-self`: unset, it's as tall as the tallest on its line. `Classes="ion-no-padding"`
+takes its padding off, as `padding.css` does.
 
 ### Breakpoints
 
@@ -103,6 +104,9 @@ None.
   popup belongs to.
 - **`min-content` is estimated** from a wrapping `TextBlock`'s longest word, as an item's label does, so a control that
   could shrink in CSS some other way doesn't here.
+- **In a horizontally scrolling `ScrollViewer`,** such as `AvonicContent ScrollX="True"`, columns are as wide as their
+  content, on one line, with no offset, push or pull. Avalonia measures there with no width, and laying out again at the
+  arranged width would loop.
 - **Not tried in a real window.**
 - The utility classes of `flex-utils.css` (`ion-justify-content-*`, `ion-align-items-*`, `ion-nowrap` …) aren't provided,
   as `.ion-padding` isn't. A column's `VerticalAlignment` does `align-self`.

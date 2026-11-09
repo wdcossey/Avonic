@@ -100,6 +100,12 @@ public sealed class RowPanel : Panel
 
             // A presenter makes its column here, so it's known before measuring.
             child.ApplyTemplate();
+
+            // display: none, as a column an ItemTemplate hid inside its container is.
+            if (child is ContentPresenter { Child.IsVisible: false })
+            {
+                continue;
+            }
             var column = ColumnIn(child);
 
             // A sized column's width is a fraction of the row, so its content only needs measuring at that width.
@@ -443,6 +449,12 @@ public sealed class RowPanel : Panel
         if (children.Count == 0)
         {
             return control.DesiredSize.Width;
+        }
+
+        // A row wraps, so its narrowest is its widest item's narrowest, however wide it was on one line.
+        if (control is RowPanel)
+        {
+            return Horizontal(control.Margin) + Math.Max(control.MinWidth, children.Max(MinContent));
         }
 
         // Not Grid.ColumnDefinitions: reading it makes the collection, and a Grid measured without one then throws when it arranges.

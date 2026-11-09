@@ -19,12 +19,12 @@ public static class GridCss
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
             Css.Var.Convert(values, typeof(object), parameter, culture) switch
             {
-                IConvertible length when length.GetTypeCode() is >= TypeCode.SByte and <= TypeCode.Decimal =>
-                    new Thickness(length.ToDouble(CultureInfo.InvariantCulture)),
-                Thickness thickness => thickness,
+                IConvertible length when length.GetTypeCode() is >= TypeCode.SByte and <= TypeCode.Decimal
+                    && length.ToDouble(CultureInfo.InvariantCulture) is >= 0 and var value => new Thickness(value),
 
-                // An invalid value, as CSS has it: padding: 0.
-                _ => default(Thickness),
+                // Not a length, or a negative one, is invalid, and an unset binding is the default padding, 0, as CSS has it. Measured: the
+                // style below doesn't come through.
+                _ => AvaloniaProperty.UnsetValue,
             };
     }
 }

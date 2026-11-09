@@ -4,6 +4,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Input;
+using Avalonia.LogicalTree;
 
 namespace Avonic.Components.Controls;
 
@@ -113,25 +114,37 @@ public class AvonicGrid : ItemsControl
             return;
         }
 
-        var noPadding = Classes.Contains(NoPaddingClass);
-        if (noPadding == _noPadding is not null)
-        {
-            return;
-        }
+        UpdateNoPadding();
+    }
 
-        if (noPadding)
+    /// <summary>Also on attach, as XAML can set <c>Resources</c> after <c>Classes</c>, which drops what was merged.</summary>
+    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToLogicalTree(e);
+        UpdateNoPadding();
+    }
+
+    private void UpdateNoPadding()
+    {
+        if (Classes.Contains(NoPaddingClass))
         {
-            _noPadding = [];
-            foreach (var key in ColumnPaddingKeys)
+            if (_noPadding is null)
             {
-                _noPadding[key] = 0d;
+                _noPadding = [];
+                foreach (var key in ColumnPaddingKeys)
+                {
+                    _noPadding[key] = 0d;
+                }
             }
 
-            Resources.MergedDictionaries.Add(_noPadding);
+            if (!Resources.MergedDictionaries.Contains(_noPadding))
+            {
+                Resources.MergedDictionaries.Add(_noPadding);
+            }
         }
-        else
+        else if (_noPadding is not null)
         {
-            Resources.MergedDictionaries.Remove(_noPadding!);
+            Resources.MergedDictionaries.Remove(_noPadding);
             _noPadding = null;
         }
     }
