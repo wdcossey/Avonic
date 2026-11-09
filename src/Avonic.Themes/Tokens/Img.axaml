@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ion-img has no variables. These are Avonic's own, for what a browser draws where a picture is missing, which isn't
+         Ionic's: see docs/components/ion-img/README.md. -->
+
+    <!-- The broken-image icon: Avonic's own drawing, a square with a cross, standing in for Chromium's artwork. -->
+    <SolidColorBrush x:Key="Avonic.Img.BrokenImageBrush" Color="{DynamicResource Avonic.Color.Danger}" />
+
+    <!-- The box a browser draws around the icon when there's no alt text: Chromium's is rgb(192, 192, 192). -->
+    <SolidColorBrush x:Key="Avonic.Img.BrokenImageBorderBrush" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
+
+</ResourceDictionary>

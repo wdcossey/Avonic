@@ -54,6 +54,7 @@ its own: `display: block`, the picture as wide as its parent, and as tall as its
 | Size, nothing loaded, no `alt` | 0 high |
 | Size, loading the first picture | 0 high, with or without `alt`: nothing shows until it has loaded |
 | Size, failed, no `alt` | 24 high: Chromium draws a grey 1 px box the width of the parent, with the icon in it |
+| The broken image (#108's follow-up, measured on [`ref-broken/`](ref-broken/) and at 2× pixel by pixel) | With an `alt`, failed or with no `src` yet: the icon, 16 × 16, at the top left, and the text from x 16 on the first line, wrapping to x 0; no box; 19 high at 16 px. With no `alt`, or `alt=""`, and failed: a box with a 1 px `rgb(192, 192, 192)` border, 20 high at the top of a line 24 high, the width of the parent, the icon in it at 2, 2. With a size of its own (120 × 60): the box fills it. No `alt` and no `src`: nothing, or, with a size, the box with no icon. Loading, with a size or not, with an `alt` or not: nothing. In an avatar the circle clips all of it |
 | When `ionImgWillLoad` fires | At the first `IntersectionObserver` callback, the frame after it's attached: 1 ms after an append. All in view fire in the same frame |
 | The observer | `new IntersectionObserver(cb)`: no `rootMargin`, no threshold, the viewport as root. Not the 200 ms `setTimeout` fallback, which is for browsers without one |
 | The edge | At the bottom of an `ion-content` 844 high, an image whose top is at 843 or 844 loads; at 845 it doesn't, until a scroll of 1 px. Edge-adjacent counts, and so does a box of no height, with or without `alt` |
@@ -92,6 +93,7 @@ Each becomes a test in `AvonicImgTests`.
 | 15 | The events bubble | `bubbles: true` |
 | 16 | The loader: a file path, a `file:` URI, a `data:` URI in base64, an `avares:` asset and `http:` (from a server on the loopback) each load; anything else, or a picture that doesn't decode, fails | Avonic's own: see "Loading" |
 | 17 | The picture is read and decoded off the UI thread | `decoding="async"` |
+| 18 | Where there's no picture, the broken image shows exactly when Chromium shows its own: the icon with the alt text, at the top left, the text from x 16; with no alt and a failure, the box with the icon in it, 358 × 20 in a line 24 high, or the host's size; with no alt and no `src`, the box alone where the host has a size, and nothing otherwise; nothing while loading | Chromium's `<img>`; measured |
 
 ## Design
 
@@ -149,15 +151,26 @@ which tests replace with one they finish themselves, so that no test needs the n
 
 What Chromium shows in an `<img>` is the browser's, not Ionic's, but Ionic's docs promise it: "Users will see this text displayed
 if the image URL is wrong, the image is not in one of the supported formats, or if the image is not yet downloaded". So the
-template has `PART_Image` and a `TextBlock` for the alt text, and the control shows one of them:
+template has `PART_Image`, `PART_Alt` for the alt text after the broken-image icon, and `PART_Broken`, the box, with the icon
+`PART_BrokenIcon` in it, and the control shows which, as Chromium does:
 
-| State | Shows |
-|---|---|
-| Not loaded yet, or `Src` null | The alt text, if there's one |
-| Loading the first picture | Nothing |
-| Loading another | The old picture |
-| Loaded | The picture |
-| Failed | The alt text, if there's one |
+| State | With an alt text | With none, or an empty one |
+|---|---|---|
+| Not loaded yet, or `Src` null | The icon and the alt text | Nothing; with a size of its own, the box alone |
+| Loading the first picture | Nothing | Nothing |
+| Loading another | The old picture | The old picture |
+| Loaded | The picture | The picture |
+| Failed | The icon and the alt text | The box, with the icon in it |
+
+A size of its own is a `Height`, or an avatar's or a thumbnail's, which `height: 100%` fills; the control sets `:sized` for
+the theme, which then lets the box fill the host instead of being 20 high at the top of a line 24 high.
+
+The icon is Avonic's own drawing, in the theme: a 16 × 16 square with a 1 px border and a cross from corner to corner, in
+`Avonic.Img.BrokenImageBrush`, which is the danger colour. It stands in for Chromium's artwork, which isn't Ionic's, isn't in
+ionicons, and can't be shipped. It's path data, `Avonic.Img.Md.BrokenImageIcon`, not an SVG file, as `AvonicImg` can't decode
+SVG. With an alt text it sits in the text's first line: the line keeps an empty space 16 wide and 0 high, so the text starts at
+16 and the line stays 19 high, and the icon is drawn over the space. An embedded control with a resource of its own is measured
+during the render in Avalonia 12.1.4, which throws, so the icon isn't the embedded control itself.
 
 ### Inside an avatar or a thumbnail
 
@@ -170,8 +183,15 @@ to an outer stylesheet.
 
 ### Resource keys
 
-None: `ion-img` has no variables. The radius in an avatar or a thumbnail is theirs, `Avonic.Avatar.BorderRadius` and
-`Avonic.Thumbnail.BorderRadius`.
+`ion-img` has no variables. The radius in an avatar or a thumbnail is theirs, `Avonic.Avatar.BorderRadius` and
+`Avonic.Thumbnail.BorderRadius`. For what the browser draws, which isn't Ionic's, `Tokens/Img.axaml` has Avonic's own keys:
+
+| Key | Type | Default |
+|---|---|---|
+| `Avonic.Img.BrokenImageBrush` | brush | `Avonic.Color.Danger` |
+| `Avonic.Img.BrokenImageBorderBrush` | brush | `Avonic.BackgroundColorStep250`, `#BFBFBF`, where Chromium's is `rgb(192, 192, 192)` |
+
+and the theme has the icon's path data as `Avonic.Img.Md.BrokenImageIcon`.
 
 ## Extensions
 
@@ -181,7 +201,7 @@ None. `Loader` is internal, for tests.
 
 | Difference | Why |
 |---|---|
-| No broken-image icon before the alt text, and nothing for a failure with no `Alt`, where Chromium draws a 24 high grey box | They're Chromium's artwork, not Ionic's, and not in ionicons (rule 6). The alt text starts 16 px further left, and a failure with no `Alt` is 0 high |
+| The broken-image icon is Avonic's own drawing, a square with a cross in the danger colour, where Chromium draws a torn picture. Its place, its size, the box around it and when each shows are Chromium's, measured | Chromium's artwork isn't Ionic's, isn't in ionicons (rule 6), and can't be shipped. The human chose this drawing in #108 |
 | SVG doesn't load, and raises `IonError` | Avalonia's `Bitmap` doesn't decode SVG, and a decoder would be a package |
 | No cache: the same URL in two images is fetched twice, where a browser's cache fetches it once | A cache is a policy an app should choose; see "For you to decide" in the PR |
 | A relative path is a file, relative to the working directory, where a browser resolves it against the page | There's no page. `avares://` names an app's own asset |

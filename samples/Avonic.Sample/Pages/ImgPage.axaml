@@ -3,35 +3,60 @@
              xmlns:c="using:Avonic.Components.Controls"
              x:Class="Avonic.Sample.Pages.ImgPage">
 
-    <!-- The pictures are made by the page, as data: URIs and a file, so that it works offline; one comes from the web. Each
-         loads only when it scrolls into view, and the log at the top says when. -->
+    <!-- The pictures an app ships with come first: avares:// resources in Assets/Img, drawn for this sample (see
+         Assets/Img/README.md). Then a data: URI and a file the page makes, one from the web, and what shows where there's no
+         picture. Each loads only when it scrolls into view, and the log at the top says when. -->
     <DockPanel>
         <Border DockPanel.Dock="Top" Padding="16,8" Background="#F2F2F2">
             <TextBlock Name="Log" Text="Scroll down: each picture loads as it comes into view." TextWrapping="Wrap" />
         </Border>
         <ScrollViewer>
             <StackPanel Name="Page" Margin="16" Spacing="16">
-                <TextBlock Text="A data: URI" FontWeight="SemiBold" />
-                <c:AvonicImg Name="First" Alt="Four quarters" />
-
-                <TextBlock Text="No src yet: the alt text" FontWeight="SemiBold" />
-                <c:AvonicImg Alt="A picture that hasn't been given a src" />
-
-                <TextBlock Text="A src that fails: IonError and the alt text" FontWeight="SemiBold" />
-                <c:AvonicImg Src="avares://Avonic.Sample/Missing.png" Alt="A picture that failed to load" />
+                <TextBlock Text="An app's own picture (avares://)" FontWeight="SemiBold" />
+                <c:AvonicImg Name="First" Src="avares://Avonic.Sample/Assets/Img/hills.png" Alt="Hills at dusk" />
 
                 <TextBlock Text="In an avatar and a thumbnail" FontWeight="SemiBold" />
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <c:AvonicAvatar>
-                        <c:AvonicImg Name="InAvatar" Alt="In an avatar" />
+                        <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/portrait.png" Alt="A portrait" />
                     </c:AvonicAvatar>
                     <c:AvonicThumbnail>
-                        <c:AvonicImg Name="InThumbnail" Alt="In a thumbnail" />
+                        <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/sea.png" Alt="The sea" />
                     </c:AvonicThumbnail>
                 </StackPanel>
 
-                <TextBlock Text="In an item" FontWeight="SemiBold" />
-                <c:AvonicItem Content="A file on disk">
+                <TextBlock Text="In items" FontWeight="SemiBold" />
+                <c:AvonicList>
+                    <c:AvonicItem Content="Mountains">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicThumbnail>
+                                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/mountains.png" Alt="Mountains" />
+                            </c:AvonicThumbnail>
+                        </c:AvonicItem.StartContent>
+                    </c:AvonicItem>
+                    <c:AvonicItem Content="A portrait">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar>
+                                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/portrait.png" Alt="A portrait" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <TextBlock Text="Change the first one's src" FontWeight="SemiBold" />
+                <c:AvonicButton Content="Next picture" Click="OnNext" />
+
+                <TextBlock Text="Where there's no picture" FontWeight="SemiBold" />
+                <c:AvonicImg Alt="A picture that hasn't been given a src" />
+                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/missing.png" Alt="A picture that failed to load" />
+                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/missing.png" />
+                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/missing.png" Width="120" Height="80" HorizontalAlignment="Left" />
+
+                <TextBlock Text="A data: URI, drawn by the page" FontWeight="SemiBold" />
+                <c:AvonicImg Name="Drawn" Alt="Four quarters" />
+
+                <TextBlock Text="A file on disk" FontWeight="SemiBold" />
+                <c:AvonicItem Content="Written by the page to the temp folder">
                     <c:AvonicItem.StartContent>
                         <c:AvonicThumbnail>
                             <c:AvonicImg Name="FromFile" Alt="From a file" />
@@ -44,9 +69,6 @@
 
                 <TextBlock Text="Twenty more, below the fold" FontWeight="SemiBold" />
                 <StackPanel Name="More" Spacing="16" />
-
-                <TextBlock Text="Change the first one's src" FontWeight="SemiBold" />
-                <c:AvonicButton Content="Next picture" Click="OnNext" />
             </StackPanel>
         </ScrollViewer>
     </DockPanel>

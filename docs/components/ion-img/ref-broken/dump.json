@@ -1,0 +1,837 @@
+{
+  "tag": "ion-img",
+  "snippet": "<div style=\"padding:16px\"><div style=\"margin-bottom:12px\"><ion-img alt=\"Missing picture\" src=\"/docs/components/ion-img/missing.png\"></ion-img></div><div style=\"margin-bottom:12px\"><ion-img alt=\"No src yet\"></ion-img></div><div style=\"margin-bottom:12px\"><ion-img src=\"/docs/components/ion-img/missing.png\"></ion-img></div><div style=\"margin-bottom:12px\"><ion-img alt=\"\" src=\"/docs/components/ion-img/missing.png\"></ion-img></div><div style=\"display:flex;flex-wrap:wrap;gap:12px\"><ion-img alt=\"Missing picture\" src=\"/docs/components/ion-img/missing.png\" style=\"width:120px;height:60px\"></ion-img><ion-img src=\"/docs/components/ion-img/missing.png\" style=\"width:120px;height:60px\"></ion-img><ion-img alt=\"No src yet\" style=\"width:120px;height:60px\"></ion-img><ion-img style=\"width:120px;height:60px\"></ion-img><ion-img alt=\"A longer alt text that wraps in its box\" src=\"/docs/components/ion-img/missing.png\" style=\"width:120px;height:60px\"></ion-img></div></div>",
+  "viewport": "390x844@2x md",
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "elements": [
+    {
+      "attributes": {
+        "alt": "Missing picture",
+        "src": "/docs/components/ion-img/missing.png",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 16,
+        "w": 358,
+        "h": 19
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "19px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 16,
+            "w": 358,
+            "h": 19
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "358px",
+            "height": "19px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "alt": "No src yet",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 47,
+        "w": 358,
+        "h": 19
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "19px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 47,
+            "w": 358,
+            "h": 19
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "358px",
+            "height": "19px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "src": "/docs/components/ion-img/missing.png",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 78,
+        "w": 358,
+        "h": 24
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "24px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 78,
+            "w": 358,
+            "h": 24
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "358px",
+            "height": "24px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "alt": "",
+        "src": "/docs/components/ion-img/missing.png",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 114,
+        "w": 358,
+        "h": 24
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "358px",
+        "height": "24px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 114,
+            "w": 358,
+            "h": 24
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "358px",
+            "height": "24px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "alt": "Missing picture",
+        "src": "/docs/components/ion-img/missing.png",
+        "style": "width:120px;height:60px",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 150,
+        "w": 120,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "120px",
+        "height": "60px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 150,
+            "w": 120,
+            "h": 60
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "120px",
+            "height": "60px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "src": "/docs/components/ion-img/missing.png",
+        "style": "width:120px;height:60px",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 148,
+        "y": 150,
+        "w": 120,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "120px",
+        "height": "60px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 148,
+            "y": 150,
+            "w": 120,
+            "h": 60
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "120px",
+            "height": "60px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "alt": "No src yet",
+        "style": "width:120px;height:60px",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 222,
+        "w": 120,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "120px",
+        "height": "60px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 222,
+            "w": 120,
+            "h": 60
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "120px",
+            "height": "60px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "style": "width:120px;height:60px",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 148,
+        "y": 222,
+        "w": 120,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "120px",
+        "height": "60px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 148,
+            "y": 222,
+            "w": 120,
+            "h": 60
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "120px",
+            "height": "60px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    },
+    {
+      "attributes": {
+        "alt": "A longer alt text that wraps in its box",
+        "src": "/docs/components/ion-img/missing.png",
+        "style": "width:120px;height:60px",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 294,
+        "w": 120,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "120px",
+        "height": "60px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [
+        {
+          "part": "image",
+          "tag": "img",
+          "classes": [],
+          "rect": {
+            "x": 16,
+            "y": 294,
+            "w": 120,
+            "h": 60
+          },
+          "computed": {
+            "display": "block",
+            "position": "static",
+            "box-sizing": "content-box",
+            "width": "120px",
+            "height": "60px",
+            "min-height": "0px",
+            "min-width": "0px",
+            "padding": "0px",
+            "margin": "0px",
+            "border": "0px none rgb(0, 0, 0)",
+            "border-radius": "0px",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "color": "rgb(0, 0, 0)",
+            "font-size": "16px",
+            "font-weight": "400",
+            "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+            "line-height": "normal",
+            "letter-spacing": "normal",
+            "text-transform": "none",
+            "opacity": "1",
+            "overflow": "clip",
+            "contain": "none",
+            "pointer-events": "auto",
+            "transition": "all",
+            "transform": "none",
+            "box-shadow": "none",
+            "outline": "rgb(0, 0, 0) none 0px",
+            "cursor": "auto"
+          }
+        }
+      ],
+      "tree": "  #shadow-root\n    <img part=\"image\">\n"
+    }
+  ]
+}
