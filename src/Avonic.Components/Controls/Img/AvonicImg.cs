@@ -22,7 +22,9 @@ namespace Avonic.Components.Controls;
 /// </remarks>
 [TemplatePart("PART_Image", typeof(Image))]
 [TemplatePart("PART_Alt", typeof(Control))]
-[PseudoClasses(":in-avatar", ":in-thumbnail")]
+[TemplatePart("PART_Broken", typeof(Control))]
+[TemplatePart("PART_BrokenIcon", typeof(Control))]
+[PseudoClasses(":in-avatar", ":in-thumbnail", ":sized")]
 public class AvonicImg : TemplatedControl
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -104,6 +106,8 @@ public class AvonicImg : TemplatedControl
 
     private Image? _image;
     private Control? _alt;
+    private Control? _broken;
+    private Control? _brokenIcon;
     private bool _attached;
     private bool _didLoad;
 
@@ -117,6 +121,9 @@ public class AvonicImg : TemplatedControl
     /// <summary>The picture shown, which stays while another loads, as an <c>&lt;img&gt;</c>'s does.</summary>
     private Bitmap? _bitmap;
     private bool _loading;
+
+    /// <summary>The last load failed, so a browser shows its broken image.</summary>
+    private bool _failed;
     private int _generation;
     private CancellationTokenSource? _cancel;
 
@@ -133,6 +140,8 @@ public class AvonicImg : TemplatedControl
         base.OnApplyTemplate(e);
         _image = e.NameScope.Find<Image>("PART_Image");
         _alt = e.NameScope.Find<Control>("PART_Alt");
+        _broken = e.NameScope.Find<Control>("PART_Broken");
+        _brokenIcon = e.NameScope.Find<Control>("PART_BrokenIcon");
         UpdateParts();
     }
 
@@ -144,18 +153,14 @@ public class AvonicImg : TemplatedControl
         // ::slotted(ion-img) in an avatar or a thumbnail: a direct child, which is the logical parent here
         PseudoClasses.Set(":in-avatar", Parent is AvonicAvatar);
         PseudoClasses.Set(":in-thumbnail", Parent is AvonicThumbnail);
+        UpdateParts();
 
         if (!_didLoad)
         {
-            // componentDidLoad, once. Until then, Stencil calls no watcher.
+            // componentDidLoad, once. Until then, Stencil calls no watcher. An observer that kept watching while it was away
+            // hears again at the layout that attaching it causes.
             _didLoad = true;
             AddIO();
-        }
-        else if (_watching)
-        {
-            // The observer kept watching while it was away: the layout manager forgot the listener, and remembers it now
-            _viewport = null;
-            RequestCheck();
         }
     }
 
@@ -177,7 +182,7 @@ public class AvonicImg : TemplatedControl
             // srcChanged
             AddIO();
         }
-        else if (change.Property == AltProperty)
+        else if (change.Property == AltProperty || change.Property == HeightProperty)
         {
             UpdateParts();
         }
@@ -382,6 +387,7 @@ public class AvonicImg : TemplatedControl
         }
 
         _loading = src is not null;
+        _failed = false;
         UpdateParts();
         RaiseEvent(new RoutedEventArgs(IonImgWillLoadEvent, this));
 
@@ -417,6 +423,7 @@ public class AvonicImg : TemplatedControl
         }
 
         _loading = false;
+        _failed = bitmap is null;
         _cancel?.Dispose();
         _cancel = null;
         Show(bitmap);
@@ -444,20 +451,41 @@ public class AvonicImg : TemplatedControl
     }
 
     /// <summary>
-    /// The picture, or, where there's none and none is loading, the alt text, as Chromium shows an <c>&lt;img&gt;</c>: nothing
-    /// while a first picture loads, the old one while another does.
+    /// The picture, or, where there's none and none is loading, what Chromium shows for an <c>&lt;img&gt;</c>, measured: nothing
+    /// while a first picture loads, and the old one while another does. With no picture:
+    /// <list type="bullet">
+    /// <item>An alt text: the broken-image icon, then the text, whether it failed or has no <c>src</c> yet.</item>
+    /// <item>No alt text, or an empty one, and it failed: a box with a border, and the icon in it.</item>
+    /// <item>No alt text, no <c>src</c> yet, and a size of its own: the box, with no icon. Without a size, nothing.</item>
+    /// </list>
     /// </summary>
     private void UpdateParts()
     {
+        // A size of its own: a Height, or an avatar's or a thumbnail's, which height: 100% fills
+        var sized = !double.IsNaN(Height) || PseudoClasses.Contains(":in-avatar") || PseudoClasses.Contains(":in-thumbnail");
+        PseudoClasses.Set(":sized", sized);
+
         if (_image is not null)
         {
             _image.Source = _bitmap;
             _image.IsVisible = _bitmap is not null;
         }
 
+        var none = _bitmap is null && !_loading;
+        var alt = !string.IsNullOrEmpty(Alt);
         if (_alt is not null)
         {
-            _alt.IsVisible = _bitmap is null && !_loading && !string.IsNullOrEmpty(Alt);
+            _alt.IsVisible = none && alt;
+        }
+
+        if (_broken is not null)
+        {
+            _broken.IsVisible = none && !alt && (_failed || sized);
+        }
+
+        if (_brokenIcon is not null)
+        {
+            _brokenIcon.IsVisible = _failed;
         }
     }
 

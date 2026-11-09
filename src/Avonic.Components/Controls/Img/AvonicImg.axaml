@@ -3,9 +3,9 @@
                     xmlns:c="using:Avonic.Components.Controls">
 
     <!--
-        Functional stub for ion-img: structure only. PART_Image is the <img>, whose picture the control sets, and PART_Alt
-        the alt text a browser shows where there's no picture; the control shows one or the other. The look is in
-        Avonic.Themes/Controls/AvonicImg.axaml.
+        Functional stub for ion-img: structure only. PART_Image is the <img>, whose picture the control sets. Where there's no
+        picture, a browser shows the alt text, PART_Alt, or a box, PART_Broken, with its broken-image icon, PART_BrokenIcon, in
+        it; the control shows which. The look, and the icon, are in Avonic.Themes/Controls/AvonicImg.axaml.
     -->
     <ControlTheme x:Key="{x:Type c:AvonicImg}" TargetType="c:AvonicImg">
         <Setter Property="Template">
@@ -13,6 +13,9 @@
                 <Panel Background="{TemplateBinding Background}">
                     <Image Name="PART_Image" IsVisible="False" />
                     <TextBlock Name="PART_Alt" Text="{TemplateBinding Alt}" IsVisible="False" />
+                    <Border Name="PART_Broken" IsVisible="False">
+                        <Panel Name="PART_BrokenIcon" />
+                    </Border>
                 </Panel>
             </ControlTemplate>
         </Setter>

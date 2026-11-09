@@ -60,6 +60,20 @@ public class AvonicImgTests
     private static T Part<T>(AvonicImg img, string name) where T : Control =>
         img.GetVisualDescendants().OfType<T>().Single(c => c.Name == name);
 
+    /// <summary>The alt text the template shows, from its runs.</summary>
+    private static string AltText(AvonicImg img) =>
+        string.Concat(Part<Control>(img, "PART_Alt").GetVisualDescendants().OfType<TextBlock>().Single().Inlines!.OfType<Run>().Select(run => run.Text));
+
+    /// <summary>A pixel of the frame, at a point in <paramref name="control"/>.</summary>
+    private static Color PixelIn(WriteableBitmap frame, Visual control, Window window, double x, double y)
+    {
+        var point = control.TranslatePoint(new Point(x, y), window)!.Value;
+        return Frames.PixelAt(frame, (int)point.X, (int)point.Y);
+    }
+
+    private static readonly Color Danger = Color.Parse("#C5000F");
+    private static readonly Color BorderGrey = Color.Parse("#BFBFBF");
+
     private static void Layout(Scene scene)
     {
         Dispatcher.UIThread.RunJobs();
@@ -337,9 +351,8 @@ public class AvonicImgTests
         Layout(scene);
 
         // Measured: 19 high at 16 px Roboto, the text in the inherited font
-        var text = Part<TextBlock>(alt, "PART_Alt");
-        Assert.True(text.IsEffectivelyVisible);
-        Assert.Equal("No src", text.Text);
+        Assert.True(Part<Control>(alt, "PART_Alt").IsEffectivelyVisible);
+        Assert.Equal("No src", AltText(alt));
         Assert.InRange(alt.Bounds.Height, 18, 19.5);
         Assert.Equal(358, alt.Bounds.Width);
         Assert.Equal(0, none.Bounds.Height);
@@ -355,13 +368,135 @@ public class AvonicImgTests
         Layout(scene);
 
         Assert.Single(loader.Requests);
-        Assert.False(Part<TextBlock>(img, "PART_Alt").IsVisible);
+        Assert.False(Part<Control>(img, "PART_Alt").IsVisible);
         Assert.Equal(0, img.Bounds.Height);
 
         loader.Finish(0);
         Layout(scene);
-        Assert.False(Part<TextBlock>(img, "PART_Alt").IsVisible);
+        Assert.False(Part<Control>(img, "PART_Alt").IsVisible);
         Assert.Equal(238.67, img.Bounds.Height, 0.5);
+    });
+
+    // ── 18. The broken image ─────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B18_With_An_Alt_Text_And_No_Picture_The_Icon_Is_At_The_Top_Left_And_The_Text_Starts_16_To_Its_Right() => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var failed = new AvonicImg { Alt = "Missing picture", Src = "missing.png" };
+        var noSrc = new AvonicImg { Alt = "No src yet" };
+        using var scene = new Scene(Page(failed, noSrc));
+        Layout(scene);
+        loader.Fail(0);
+        Layout(scene);
+
+        // Measured in Chromium: the icon 16 × 16 at the top left, the text from x 16, the line 19 high, no box
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        foreach (var img in new[] { failed, noSrc })
+        {
+            Assert.Equal(Danger, PixelIn(frame, img, scene.Window, 0, 8));
+            Assert.Equal(Danger, PixelIn(frame, img, scene.Window, 15, 8));
+            Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 8, 3));
+            Assert.False(Part<Control>(img, "PART_Broken").IsVisible);
+            var text = Part<Control>(img, "PART_Alt").GetVisualDescendants().OfType<TextBlock>().Single();
+            // The first character after the space the icon keeps
+            var first = text.TextLayout.HitTestTextPosition(1);
+            Assert.Equal(16, first.X);
+            Assert.Equal(19, img.Bounds.Height, 0.5);
+        }
+    });
+
+    [AvaloniaTheory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void B18_With_No_Alt_Text_A_Failure_Is_A_Box_With_The_Icon_In_It(string? alt) => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Alt = alt, Src = "missing.png" };
+        using var scene = new Scene(Page(img));
+        Layout(scene);
+        Assert.Equal(0, img.Bounds.Height);
+        loader.Fail(0);
+        Layout(scene);
+
+        // Measured in Chromium: the line 24 high, the box 358 × 20 at its top with a 1 px border, the icon in it at 2, 2
+        Assert.Equal(new Size(358, 24), img.Bounds.Size);
+        var box = Part<Control>(img, "PART_Broken");
+        Assert.True(box.IsVisible);
+        Assert.Equal(new Rect(0, 0, 358, 20), box.Bounds);
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(BorderGrey, PixelIn(frame, img, scene.Window, 100, 0));
+        Assert.Equal(BorderGrey, PixelIn(frame, img, scene.Window, 100, 19));
+        Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 100, 21));
+        Assert.Equal(Danger, PixelIn(frame, img, scene.Window, 2, 10));
+        Assert.Equal(Danger, PixelIn(frame, img, scene.Window, 17, 10));
+        Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 1, 10));
+    });
+
+    [AvaloniaFact]
+    public void B18_With_No_Alt_Text_And_No_Src_Only_A_Box_Of_Its_Own_Size_Shows_And_Without_The_Icon() => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var bare = new AvonicImg();
+        var sized = new AvonicImg { Width = 120, Height = 60, HorizontalAlignment = HorizontalAlignment.Left };
+        var failedSized = new AvonicImg { Src = "missing.png", Width = 120, Height = 60, HorizontalAlignment = HorizontalAlignment.Left };
+        using var scene = new Scene(Page(bare, sized, failedSized));
+        Layout(scene);
+        loader.Fail(0);
+        Layout(scene);
+
+        // Measured in Chromium: nothing at all; a box 120 × 60 with no icon; the same box with the icon at 2, 2
+        Assert.Equal(0, bare.Bounds.Height);
+        Assert.False(Part<Control>(bare, "PART_Broken").IsVisible);
+        Assert.Equal(new Rect(0, 0, 120, 60), Part<Control>(sized, "PART_Broken").Bounds);
+        Assert.True(Part<Control>(sized, "PART_Broken").IsVisible);
+        Assert.False(Part<Control>(sized, "PART_BrokenIcon").IsVisible);
+        Assert.Equal(new Rect(0, 0, 120, 60), Part<Control>(failedSized, "PART_Broken").Bounds);
+        Assert.True(Part<Control>(failedSized, "PART_BrokenIcon").IsVisible);
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(BorderGrey, PixelIn(frame, sized, scene.Window, 60, 59));
+        Assert.Equal(Colors.White, PixelIn(frame, sized, scene.Window, 2, 10));
+        Assert.Equal(Danger, PixelIn(frame, failedSized, scene.Window, 2, 10));
+    });
+
+    [AvaloniaFact]
+    public void B18_While_It_Loads_Nothing_Shows_Even_In_A_Box_Of_Its_Own_Size() => InstalledTheme.Run(_ =>
+    {
+        using var loader = new FakeLoader();
+        var img = new AvonicImg { Src = "a.png", Width = 120, Height = 60, HorizontalAlignment = HorizontalAlignment.Left };
+        var alt = new AvonicImg { Src = "b.png", Alt = "Alt", Width = 120, Height = 60, HorizontalAlignment = HorizontalAlignment.Left };
+        using var scene = new Scene(Page(img, alt));
+        Layout(scene);
+
+        // Measured in Chromium: a sized picture that's loading shows nothing, with or without an alt text
+        Assert.Equal(2, loader.Requests.Count);
+        foreach (var image in new[] { img, alt })
+        {
+            Assert.False(Part<Control>(image, "PART_Broken").IsVisible);
+            Assert.False(Part<Control>(image, "PART_Alt").IsVisible);
+        }
+
+        // And a failure, then a new src, takes the box away again while that loads
+        loader.Fail(0);
+        Layout(scene);
+        Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
+        img.Src = "c.png";
+        Layout(scene);
+        Assert.False(Part<Control>(img, "PART_Broken").IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void B18_In_An_Avatar_With_No_Src_And_No_Alt_The_Box_Fills_It() => InstalledTheme.Run(_ =>
+    {
+        var img = new AvonicImg();
+        var avatar = new AvonicAvatar { Content = img, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(Page(avatar));
+        Layout(scene);
+
+        // height: 100% gives it the avatar's size, so the box shows, as with a size of its own
+        Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
+        Assert.Equal(new Size(64, 64), Part<Control>(img, "PART_Broken").Bounds.Size);
     });
 
     // ── 9. Failure ───────────────────────────────────────────────────────────────────────────
@@ -379,7 +514,7 @@ public class AvonicImgTests
         Layout(scene);
         Assert.Equal(["willLoad", "error"], events);
         Assert.Null(img.Picture);
-        Assert.True(Part<TextBlock>(img, "PART_Alt").IsVisible);
+        Assert.True(Part<Control>(img, "PART_Alt").IsVisible);
         Assert.InRange(img.Bounds.Height, 18, 19.5);
     });
 
@@ -477,13 +612,13 @@ public class AvonicImgTests
         img.Src = "missing.png";
         Layout(scene);
         Assert.Same(first, img.Picture);
-        Assert.False(Part<TextBlock>(img, "PART_Alt").IsVisible);
+        Assert.False(Part<Control>(img, "PART_Alt").IsVisible);
 
         loader.Fail(1);
         Layout(scene);
         Assert.Equal(["willLoad", "didLoad", "willLoad", "error"], events);
         Assert.Null(img.Picture);
-        Assert.True(Part<TextBlock>(img, "PART_Alt").IsVisible);
+        Assert.True(Part<Control>(img, "PART_Alt").IsVisible);
         Assert.InRange(img.Bounds.Height, 18, 19.5);
     });
 
