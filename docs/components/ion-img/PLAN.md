@@ -166,7 +166,7 @@ A size of its own is a `Height`, or an avatar's or a thumbnail's, which `height:
 the theme, which then lets the box fill the host instead of being 20 high at the top of a line 24 high.
 
 The icon is Avonic's own drawing, in the theme: a 16 × 16 square with a 1 px border and a cross from corner to corner, in
-`Avonic.Img.BrokenImageColor`, which is the danger colour. It stands in for Chromium's artwork, which isn't Ionic's, isn't in
+`Avonic.Img.BrokenImageBrush`, which is the danger colour. It stands in for Chromium's artwork, which isn't Ionic's, isn't in
 ionicons, and can't be shipped. It's path data, `Avonic.Img.Md.BrokenImageIcon`, not an SVG file, as `AvonicImg` can't decode
 SVG. With an alt text it sits in the text's first line: the line keeps an empty space 16 wide and 0 high, so the text starts at
 16 and the line stays 19 high, and the icon is drawn over the space. An embedded control with a resource of its own is measured
@@ -188,8 +188,8 @@ to an outer stylesheet.
 
 | Key | Type | Default |
 |---|---|---|
-| `Avonic.Img.BrokenImageColor` | brush | `Avonic.Color.Danger` |
-| `Avonic.Img.BrokenImageBorderColor` | brush | `Avonic.BackgroundColorStep250`, `#BFBFBF`, where Chromium's is `rgb(192, 192, 192)` |
+| `Avonic.Img.BrokenImageBrush` | brush | `Avonic.Color.Danger` |
+| `Avonic.Img.BrokenImageBorderBrush` | brush | `Avonic.BackgroundColorStep250`, `#BFBFBF`, where Chromium's is `rgb(192, 192, 192)` |
 
 and the theme has the icon's path data as `Avonic.Img.Md.BrokenImageIcon`.
 
@@ -202,7 +202,6 @@ None. `Loader` is internal, for tests.
 | Difference | Why |
 |---|---|
 | The broken-image icon is Avonic's own drawing, a square with a cross in the danger colour, where Chromium draws a torn picture. Its place, its size, the box around it and when each shows are Chromium's, measured | Chromium's artwork isn't Ionic's, isn't in ionicons (rule 6), and can't be shipped. The human chose this drawing in #108 |
-| In an avatar the alt text and the box aren't cut to the circle, where Chromium cuts them | Only the picture is clipped, on `PART_Image`, so that its corners stay physical in right-to-left |
 | SVG doesn't load, and raises `IonError` | Avalonia's `Bitmap` doesn't decode SVG, and a decoder would be a package |
 | No cache: the same URL in two images is fetched twice, where a browser's cache fetches it once | A cache is a policy an app should choose; see "For you to decide" in the PR |
 | A relative path is a file, relative to the working directory, where a browser resolves it against the page | There's no page. `avares://` names an app's own asset |

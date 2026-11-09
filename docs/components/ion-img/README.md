@@ -57,8 +57,8 @@ a `Height` or an avatar's or a thumbnail's, so that the broken-image box fills i
 
 | Key | md default |
 |---|---|
-| `Avonic.Img.BrokenImageColor` | `Avonic.Color.Danger`: the icon |
-| `Avonic.Img.BrokenImageBorderColor` | `Avonic.BackgroundColorStep250`: the box's border, where Chromium's is `rgb(192, 192, 192)` |
+| `Avonic.Img.BrokenImageBrush` | `Avonic.Color.Danger`: the icon |
+| `Avonic.Img.BrokenImageBorderBrush` | `Avonic.BackgroundColorStep250`: the box's border, where Chromium's is `rgb(192, 192, 192)` |
 
 The icon's shape is path data in the theme, `Avonic.Img.Md.BrokenImageIcon`, 16 × 16.
 
@@ -89,7 +89,6 @@ None.
 
 - **The broken-image icon is Avonic's own drawing:** a square with a cross, in the danger colour, standing in for Chromium's
   artwork, which isn't Ionic's and can't be shipped. Restyle it through the keys above.
-- **In an avatar** the alt text and the box aren't cut to the circle, where Chromium cuts them.
 - **SVG doesn't load,** and raises `IonError`: Avalonia's `Bitmap` doesn't decode it.
 - **No cache:** the same URL in two images is fetched twice, where a browser's cache fetches it once.
 - **A relative path is a file,** relative to the working directory. Use `avares://` for an app's own asset.

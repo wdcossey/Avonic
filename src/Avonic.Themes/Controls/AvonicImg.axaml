@@ -14,7 +14,7 @@
     </Design.PreviewWith>
 
     <!-- The broken-image icon, 16 by 16 as Chromium's is: Avonic's own drawing, a square with a 1 px border and a cross from
-         corner to corner, standing in for the browser's artwork, which isn't Ionic's. Its colour is Avonic.Img.BrokenImageColor. -->
+         corner to corner, standing in for the browser's artwork, which isn't Ionic's. Its colour is Avonic.Img.BrokenImageBrush. -->
     <StreamGeometry x:Key="Avonic.Img.Md.BrokenImageIcon">M0.5,0.5 H15.5 V15.5 H0.5 Z M0.5,0.5 L15.5,15.5 M15.5,0.5 L0.5,15.5</StreamGeometry>
 
     <!-- A translation of img.css. ion-img has no variables: it's a block as wide as its parent, with the picture in it. -->
@@ -30,26 +30,34 @@
                          Chromium: the icon at the top left, the text from x 16. The line keeps an empty 16 by 16 space for it, and the
                          icon is drawn over that space, as an embedded control with a resource of its own is measured during the render, which
                          Avalonia refuses. -->
-                    <Panel Name="PART_Alt" IsVisible="False">
+                    <!-- At least the icon's height, as the icon's line is in Chromium, at any font size -->
+                    <Panel Name="PART_Alt" MinHeight="16" IsVisible="False">
                         <!-- The space has no height, so the line keeps the text's height, 19 at 16 px, as Chromium's does. No white space
                              between the two inlines, which XAML would make a space. -->
                         <TextBlock TextWrapping="Wrap"><InlineUIContainer><Border Width="16" Height="0" /></InlineUIContainer><Run Text="{TemplateBinding Alt}" /></TextBlock>
-                        <Path Width="16" Height="16" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Data="{DynamicResource Avonic.Img.Md.BrokenImageIcon}"
-                              Stroke="{DynamicResource Avonic.Img.BrokenImageColor}" StrokeThickness="1" />
+                        <Path Classes="broken-image" />
                     </Panel>
                     <!-- With no alt text, a box with a 1 px border, measured: 20 high at the top of a line 24 high, the width of the
                          host; or the host's own size, if it has one. The icon is in it 2 from the top left, when it failed. -->
                     <Border Name="PART_Broken" BorderThickness="1" Height="20" Margin="0,0,0,4" VerticalAlignment="Top"
-                            BorderBrush="{DynamicResource Avonic.Img.BrokenImageBorderColor}" IsVisible="False">
-                        <Path Name="PART_BrokenIcon" Width="16" Height="16" Margin="1" Stretch="None"
-                              HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Data="{DynamicResource Avonic.Img.Md.BrokenImageIcon}"
-                              Stroke="{DynamicResource Avonic.Img.BrokenImageColor}" StrokeThickness="1" />
+                            BorderBrush="{DynamicResource Avonic.Img.BrokenImageBorderBrush}" IsVisible="False">
+                        <Path Name="PART_BrokenIcon" Classes="broken-image" Margin="1" />
                     </Border>
                 </Panel>
             </ControlTemplate>
         </Setter>
+
+        <!-- The broken-image icon, over the alt text and in the box: one rule for both -->
+        <Style Selector="^ /template/ Path.broken-image">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Stretch" Value="None" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Data" Value="{DynamicResource Avonic.Img.Md.BrokenImageIcon}" />
+            <Setter Property="Stroke" Value="{DynamicResource Avonic.Img.BrokenImageBrush}" />
+            <Setter Property="StrokeThickness" Value="1" />
+        </Style>
 
         <!-- In a box of its own size, the broken-image box fills it -->
         <Style Selector="^:sized /template/ Border#PART_Broken">
@@ -69,6 +77,16 @@
         </Style>
         <Style Selector="^:in-avatar /template/ Image#PART_Image, ^:in-thumbnail /template/ Image#PART_Image">
             <Setter Property="Stretch" Value="UniformToFill" />
+        </Style>
+        <!-- Chromium cuts what it shows for a missing picture to the circle too. These don't need their corners physical: a radius
+             the same at every corner is the same mirrored. -->
+        <Style Selector="^:in-avatar /template/ Border#PART_Broken, ^:in-avatar /template/ Panel#PART_Alt">
+            <Setter Property="Clip">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
+                    <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <Style Selector="^:in-avatar /template/ Image#PART_Image">
             <Setter Property="Clip">

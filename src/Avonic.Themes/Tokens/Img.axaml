@@ -5,9 +5,9 @@
          Ionic's: see docs/components/ion-img/README.md. -->
 
     <!-- The broken-image icon: Avonic's own drawing, a square with a cross, standing in for Chromium's artwork. -->
-    <SolidColorBrush x:Key="Avonic.Img.BrokenImageColor" Color="{DynamicResource Avonic.Color.Danger}" />
+    <SolidColorBrush x:Key="Avonic.Img.BrokenImageBrush" Color="{DynamicResource Avonic.Color.Danger}" />
 
     <!-- The box a browser draws around the icon when there's no alt text: Chromium's is rgb(192, 192, 192). -->
-    <SolidColorBrush x:Key="Avonic.Img.BrokenImageBorderColor" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
+    <SolidColorBrush x:Key="Avonic.Img.BrokenImageBorderBrush" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
 
 </ResourceDictionary>

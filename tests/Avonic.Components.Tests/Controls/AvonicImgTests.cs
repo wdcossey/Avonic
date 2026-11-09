@@ -494,9 +494,25 @@ public class AvonicImgTests
         using var scene = new Scene(Page(avatar));
         Layout(scene);
 
-        // height: 100% gives it the avatar's size, so the box shows, as with a size of its own
+        // height: 100% gives it the avatar's size, so the box shows, as with a size of its own, cut to the circle as Chromium cuts it
         Assert.True(Part<Control>(img, "PART_Broken").IsVisible);
         Assert.Equal(new Size(64, 64), Part<Control>(img, "PART_Broken").Bounds.Size);
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(Colors.White, PixelIn(frame, img, scene.Window, 1, 1));
+        Assert.NotEqual(Colors.White, PixelIn(frame, img, scene.Window, 32, 0));
+    });
+
+    [AvaloniaFact]
+    public void B18_At_A_Small_Font_The_Alt_Text_Is_At_Least_As_Tall_As_The_Icon() => InstalledTheme.Run(_ =>
+    {
+        var img = new AvonicImg { Alt = "Small" };
+        var page = Page(img);
+        TextElement.SetFontSize(page, 10);
+        using var scene = new Scene(page);
+        Layout(scene);
+
+        // The icon's line is at least its height, so the icon stays inside the image
+        Assert.Equal(16, img.Bounds.Height);
     });
 
     [AvaloniaFact]

@@ -82,7 +82,7 @@ number.
 | 15 | Bubbling | `bubbles: true` | match |
 | 16 | The loader | the browser's | Avonic's own: `http(s)`, `data:` in base64, `avares:`, `file:` and paths. SVG doesn't load: a deliberate difference |
 | 17 | Decoding | `decoding="async"` | match: on the thread pool |
-| 18 | The broken image | the icon at the top left, the text from x 16; the box, 20 in a line 24, or the size it has; the icon only after a failure with no alt; nothing while loading | match, but for the artwork, and the circle's clip in an avatar |
+| 18 | The broken image | the icon at the top left, the text from x 16; the box, 20 in a line 24, or the size it has; the icon only after a failure with no alt; nothing while loading | match, but for the artwork |
 
 ## Found here, not by the tests
 
