@@ -124,6 +124,9 @@ public class AvonicTabButtonTests
         Assert.Equal(TextTrimming.CharacterEllipsis, Child<AvonicLabel>(both).GetValue(TextBlock.TextTrimmingProperty));
         Assert.Equal(22, Child<AvonicIcon>(both).Bounds.Height);
         Assert.Equal(12, Child<AvonicLabel>(both).FontSize);
+        // letter-spacing: 0.03em, and the bar's text-align: center, which both inherit.
+        Assert.Equal(0.36, Child<AvonicLabel>(both).GetValue(TextBlock.LetterSpacingProperty), 3);
+        Assert.Equal(TextAlignment.Center, Child<AvonicLabel>(labelOnly).GetValue(TextBlock.TextAlignmentProperty));
         Assert.Equal(TextWrapping.Wrap, Child<AvonicLabel>(labelOnly).GetValue(TextBlock.TextWrappingProperty));
         Assert.True(Child<AvonicLabel>(labelOnly).Bounds.Height > 40);
         Assert.Equal(24, Child<AvonicIcon>(iconOnly).Bounds.Height);
@@ -164,6 +167,16 @@ public class AvonicTabButtonTests
                     break;
             }
         });
+
+    [AvaloniaFact]
+    public void N6_The_Icon_Goes_First_Whatever_Its_Place() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicTabButton { Tab = "a", Items = { new AvonicLabel { Content = "Label" }, new AvonicIcon { IconName = "map" } } };
+        using var scene = new Scene(new StackPanel { Children = { Bar(null, button) } });
+
+        // ::slotted(ion-icon) { order: -1 }
+        Assert.True(Box(Child<AvonicIcon>(button), button).Bottom <= Box(Child<AvonicLabel>(button), button).Y);
+    });
 
     [AvaloniaFact]
     public void N6_N8_Icon_Hide_And_Label_Hide_Hide_One_And_Move_The_Badge() => InstalledTheme.Run(_ =>

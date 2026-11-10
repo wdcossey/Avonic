@@ -150,6 +150,8 @@ public class AvonicTabBarTests
         using var scene = new Scene(Top(bar, padded));
 
         Assert.Equal(57, bar.Bounds.Height);
+        Assert.Equal(Colors.White, ColorOf(bar.Background));
+        Assert.Equal(Color.Parse("#595959"), ColorOf(bar.Foreground));
         Assert.Equal(new Thickness(0, 1, 0, 0), bar.BorderThickness);
         Assert.Equal(Color.Parse("#12000000"), ColorOf(bar.BorderBrush));
         // padding-bottom and padding-left from the safe areas, and none on top.
