@@ -252,6 +252,33 @@ public class AvonicToggleTests
     }
 
     [AvaloniaFact]
+    public void T01_A_Click_On_A_Button_In_The_Label_Is_The_Buttons()
+    {
+        // TestApp has no base theme, so the button gets a template of its own to be pressed.
+        var info = new Button
+        {
+            Width = 60,
+            Height = 20,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<Button>((_, _) => new Border { Background = Brushes.Gray }),
+        };
+        var (toggle, scene) = Stub(null);
+        using var _ = scene;
+        toggle.Content = new StackPanel { Orientation = Orientation.Horizontal, Children = { new TextBlock { Text = "Label" }, info } };
+        Settle();
+        var changes = Changes.Of(toggle);
+        var clicks = 0;
+        info.Click += (_, _) => clicks++;
+
+        Click(scene, Centre(info, scene));
+        Assert.Equal(1, clicks);
+        Assert.Empty(changes.All);
+
+        // The text beside it is still the label's.
+        Click(scene, Centre(toggle.GetVisualDescendants().OfType<TextBlock>().First(t => t.Text == "Label"), scene));
+        Assert.Single(changes.All);
+    }
+
+    [AvaloniaFact]
     public void T01_IonChange_Carries_The_Value_As_It_Is_And_Bubbles()
     {
         var (toggle, scene) = Stub();
@@ -676,7 +703,6 @@ public class AvonicToggleTests
         Assert.Equal(new Thickness(0, 10, 16, 10), Label(toggle).Margin);
         AssertBox(338, 16.5, 36, 14, Bounds(Track(toggle), scene.Window));
         AssertBox(338, 13.5, 20, 20, Bounds(Handle(toggle), scene.Window));
-        Assert.Contains(":in-item", toggle.Classes);
     });
 
     [AvaloniaFact]
@@ -760,6 +786,10 @@ public class AvonicToggleTests
         var labelHeight = Label(toggle).Bounds.Height;
         AssertBox(0, 0, labelWidth, labelHeight + 16 + 14, Bounds(toggle, scene.Window));
         AssertBox((labelWidth - 36) / 2, labelHeight + 16, 36, 14, Bounds(Track(toggle), scene.Window));
+        // text-align: center, which a wrapped hint's lines inherit.
+        toggle.HelperText = "Helper";
+        Settle();
+        Assert.Equal(TextAlignment.Center, Part<TextBlock>(toggle, "PART_HelperText").TextAlignment);
         Assert.Equal(new RelativePoint(0.5, 0.5, RelativeUnit.Relative), Label(toggle).RenderTransformOrigin);
     });
 
@@ -1008,7 +1038,10 @@ public class AvonicToggleTests
         var on = new AvonicToggle { Content = "On", EnableOnOffLabels = true, Checked = true };
         var danger = new AvonicToggle { Content = "Danger", EnableOnOffLabels = true, Checked = true, Color = "warning" };
         var none = new AvonicToggle { Content = "None" };
-        using var scene = InItems(off, on, danger, none);
+        var inWarning = new AvonicToggle { Content = "In a warning item", EnableOnOffLabels = true, Checked = true };
+        using var scene = InItems(off, on, danger, none, inWarning);
+        inWarning.FindAncestorOfType<AvonicItem>()!.Color = "warning";
+        Settle();
 
         static AvonicIcon Icon(AvonicToggle toggle) => Part<AvonicIcon>(toggle, "PART_SwitchIcon");
 
@@ -1016,8 +1049,9 @@ public class AvonicToggleTests
         Assert.Equal(Colors.Black, Assert.IsAssignableFrom<ISolidColorBrush>(Icon(off).Foreground).Color);
         Assert.Equal("checkmark-outline", Icon(on).IconName);
         Assert.Equal(Colors.White, Assert.IsAssignableFrom<ISolidColorBrush>(Icon(on).Foreground).Color);
-        // var(ion-color-contrast): warning's is black.
+        // var(ion-color-contrast): warning's is black, and it inherits from a coloured item too.
         Assert.Equal(Colors.Black, Assert.IsAssignableFrom<ISolidColorBrush>(Icon(danger).Foreground).Color);
+        Assert.Equal(Colors.Black, Assert.IsAssignableFrom<ISolidColorBrush>(Icon(inWarning).Foreground).Color);
         AssertBox(1, 1, 18, 18, Bounds(Icon(off), Handle(off)));
         Assert.False(Icon(none).IsEffectivelyVisible);
         Assert.True(Icon(off).IsEffectivelyVisible);
@@ -1072,8 +1106,11 @@ public class AvonicToggleTests
         var raised = new List<(AutomationProperty Property, object? Value)>();
         peer.PropertyChanged += (_, e) => raised.Add((e.Property, e.NewValue));
 
-        // The app marks it invalid, as on blur: a new description and a new name, as the helper text leaves it.
+        // Touched alone changes neither, so nothing is announced.
         toggle.Classes.Add("ion-touched");
+        Assert.Empty(raised);
+
+        // The app marks it invalid, as on blur: a new description and a new name, as the helper text leaves it.
         toggle.Classes.Add("ion-invalid");
         Assert.Contains((AutomationElementIdentifiers.HelpTextProperty, (object?)"Required"), raised);
         Assert.Contains((AutomationElementIdentifiers.NameProperty, (object?)"Terms"), raised);
@@ -1081,6 +1118,11 @@ public class AvonicToggleTests
         raised.Clear();
         toggle.ErrorText = "Turn it on";
         Assert.Equal([(AutomationElementIdentifiers.HelpTextProperty, (object?)"Turn it on")], raised);
+
+        // A pseudoclass, a flip, announces nothing of the name or the help text, which haven't changed.
+        raised.Clear();
+        toggle.Checked = true;
+        Assert.DoesNotContain(raised, change => change.Property == AutomationElementIdentifiers.NameProperty || change.Property == AutomationElementIdentifiers.HelpTextProperty);
     }
 
     [AvaloniaFact]

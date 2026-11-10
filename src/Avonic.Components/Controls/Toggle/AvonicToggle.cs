@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -152,7 +153,7 @@ public class AvonicToggle : ContentControl, IItemControl
     public AvonicToggle()
     {
         // The host's onClick: the plain DOM click on release of every press, with no keys, as it's a <div>.
-        _ = new NativeButton(this, _ => OnClick(), () => false, UpdateIsEffectivelyEnabled);
+        _ = new NativeButton(this, OnNativeClick, () => false, UpdateIsEffectivelyEnabled);
 
         UpdateClasses();
     }
@@ -343,6 +344,21 @@ public class AvonicToggle : ContentControl, IItemControl
     }
 
     /// <summary>
+    /// A click on a button in the label is the button's: <c>onDivLabelClick</c> stops it, and a <c>&lt;label&gt;</c> doesn't
+    /// activate its input for a click on an interactive element inside it. <see cref="NativeButton"/> lets a stock button's press
+    /// through, as a nested <c>&lt;button&gt;</c> in a button clicks both, so it's checked here.
+    /// </summary>
+    private void OnNativeClick(object? source)
+    {
+        if (source is Visual visual && visual.GetSelfAndVisualAncestors().TakeWhile(ancestor => ancestor != this).OfType<Button>().Any())
+        {
+            return;
+        }
+
+        OnClick();
+    }
+
+    /// <summary>
     /// <c>onKeyDown</c>: Space, on every key down, repeats too. Enter does nothing. Ionic checks <c>disabled</c> here too, for a
     /// toggle an app has made focusable while disabled; Avalonia gives a disabled control neither focus nor keys.
     /// </summary>
@@ -479,9 +495,22 @@ public class AvonicToggle : ContentControl, IItemControl
                 }
             };
 
-            // The MutationObserver on class: a new aria-describedby, so that a screen reader announces the error.
-            owner.Classes.CollectionChanged += (_, _) => RaiseTextChanged();
+            // The MutationObserver on class: a new aria-describedby, so that a screen reader announces the error. Only the two
+            // classes checkInvalidState reads, as the list also holds every pseudoclass.
+            owner.Classes.CollectionChanged += (_, e) =>
+            {
+                if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset)
+                {
+                    RaiseTextChanged();
+                }
+            };
+
+            _name = GetName();
+            _help = GetHelpText();
         }
+
+        private static bool Mentions(System.Collections.IList? classes) =>
+            classes?.OfType<string>().Any(name => name is TouchedClass or InvalidClass) == true;
 
         private string? _name;
         private string? _help;

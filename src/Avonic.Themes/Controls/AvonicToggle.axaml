@@ -173,7 +173,9 @@
         </Style>
         <!-- transform: scale(0.75), with the origin's default, the middle, unless alignment says otherwise. A transform doesn't
              change the layout box, so the margin and the max-width of 100% / 0.75 are on the unscaled box, as in CSS. -->
+        <!-- text-align: center on the stacked .toggle-wrapper, which the label's lines and the hint's inherit. -->
         <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Label">
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="RenderTransform" Value="scale(0.75)" />
         </Style>
@@ -257,13 +259,16 @@
             <Setter Property="Background" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.Base)}" />
         </Style>
 
-        <!-- The on/off icon, md: checkmark-outline when checked, remove-outline when not. Checked, color: var(ion-color-contrast, #fff). -->
+        <!-- The on/off icon, md: checkmark-outline when checked, remove-outline when not. Checked, color: var(ion-color-contrast, #fff),
+             which inherits: the toggle's own Color, or a coloured ancestor's. -->
         <Style Selector="^:checked /template/ c|AvonicIcon#PART_SwitchIcon">
             <Setter Property="IconName" Value="checkmark-outline" />
-            <Setter Property="Foreground" Value="{DynamicResource Avonic.Toggle.Md.HandleColorChecked}" />
-        </Style>
-        <Style Selector="^:ion-color:checked /template/ c|AvonicIcon#PART_SwitchIcon">
-            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.Contrast)}" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="$parent[c:AvonicToggle].(b:ColorPalette.Contrast)" />
+                    <DynamicResource ResourceKey="Avonic.Toggle.Md.HandleColorChecked" />
+                </MultiBinding>
+            </Setter>
         </Style>
     </ControlTheme>
 

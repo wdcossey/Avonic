@@ -82,7 +82,7 @@ From `toggle.js` and `toggle.md.css`, each checked in Chromium. Each becomes a t
 
 | # | Behaviour | Source |
 |---|---|---|
-| 1 | A click anywhere on the toggle (the label, the track, the gap between, the empty end of the row) flips `Checked` and raises `IonChange` once, with `Checked` and `Value`. On release, every press: a double click flips twice. A finger that moved more than 15 px before lifting doesn't click | `onClick` on the host, `onDivLabelClick`; measured `mouseClickLabel`, `…Track`, `…Gap`, `dblclick`, `touchTap`, `touchDragLabel` |
+| 1 | A click anywhere on the toggle (the label, the track, the gap between, the empty end of the row) flips `Checked` and raises `IonChange` once, with `Checked` and `Value`. On release, every press: a double click flips twice. A finger that moved more than 15 px before lifting doesn't click. A click on a button in the label is the button's only | `onClick` on the host, `onDivLabelClick`; measured `mouseClickLabel`, `…Track`, `…Gap`, `dblclick`, `touchTap`, `touchDragLabel` |
 | 2 | Setting `Checked` in code raises nothing | `@Prop checked`; measured `programmatic` |
 | 3 | Space flips it on key down, and again on each repeat. Enter does nothing | `onKeyDown`; measured `space`, `enter`, `spaceRepeat` |
 | 4 | Disabled: no click, no key, no drag, not a tab stop, opacity 0.38 as a group, and a tap goes through to what's behind. Only its own `disabled` fades it: in a disabled item it keeps its look | `disabled`, `disabledChanged`, `tabindex`, `pointer-events: none`; measured `disabledClick`, `disabledTabindex`, `spaceDisabledFocused` |

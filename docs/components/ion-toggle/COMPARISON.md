@@ -61,6 +61,7 @@ rounding of a pixel: the track at 338, 16.5 in an item, the stacked label's box 
 | 1 | A click on the label, the track, the gap, the row's end | flips, one `ionChange` with `checked` and `value` | the same | match |
 | 1 | A double click | flips twice | the same | match |
 | 1 | A tap; a finger moved 30 px from the label | flips and focuses; nothing | the same | match |
+| 1 | A click on a button in the label | the button's click only | the same | match |
 | 2 | `checked` set in code | no `ionChange` | the same | match |
 | 3 | Space; held, repeating; Enter | flips on key down; flips each repeat; nothing | the same | match |
 | 4 | Disabled: click, Space, drag, Tab | nothing, not a tab stop, 0.38 as a group | the same | match |
@@ -86,7 +87,8 @@ rounding of a pixel: the track at 338, 16.5 in an item, the stacked label's box 
 | 19 | Helper text; `ion-touched` and `ion-invalid`; neither | helper at 12 px; error in danger instead; no bottom | the same | match |
 | 20 | Colours, a `Color`, the tokens | as measured | the same, by pixel | match |
 | 21 | Transitions | 160 ms `cubic-bezier(.4, 0, .2, 1)` for the handle, 160 ms `ease` for the track | the same | match |
-| 22 | On/off labels | `remove-outline`, `checkmark-outline`, 18 px, black, then the contrast | the same | match |
+| 22 | On/off labels | `remove-outline`, `checkmark-outline`, 18 px, black, then the contrast, a coloured ancestor's too | the same | match |
+| 15 | A stacked toggle's wrapped lines | centred, `text-align: center` | the same | match |
 | 23 | Accessibility | `switch`, named "Helper Helper text", "Helper" when invalid, "" with no label; `aria-labelledby` beats `aria-label` | a toggle-pattern button, the same names, the hint as help text, announced when it changes | match; `aria-required` and `aria-invalid` are a gap |
 | 24 | In an item's start or end slot | no margin | the same | match |
 
