@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-infinite-scroll-content: structure only. The look, md's sizes and the text colour, is in
+         Avonic.Themes/Controls/AvonicInfiniteScrollContent.axaml. The loading part shows only inside a loading infinite
+         scroll, as infinite-loading is display: none until then. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInfiniteScrollContent}" TargetType="c:AvonicInfiniteScrollContent">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Name="PART_Loading" IsVisible="False" VerticalAlignment="Center">
+                    <c:AvonicSpinner Name="PART_LoadingSpinner"
+                                     HorizontalAlignment="Center"
+                                     SpinnerName="{TemplateBinding LoadingSpinner}"
+                                     IsVisible="{TemplateBinding LoadingSpinner, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    <!-- The div and its text node, which an empty string doesn't have: an empty TextBlock is a line high. -->
+                    <Border Name="PART_LoadingText"
+                            IsVisible="{TemplateBinding LoadingText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <TextBlock TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Text="{TemplateBinding LoadingText}"
+                                   IsVisible="{TemplateBinding LoadingText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </Border>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:infinite-scroll-loading /template/ StackPanel#PART_Loading">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

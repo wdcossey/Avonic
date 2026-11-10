@@ -1,0 +1,58 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicList Width="390">
+            <c:AvonicRadioGroup Value="a" HelperText="Helper text">
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="a" Content="Apple" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="b" Content="Banana" />
+                </c:AvonicItem>
+            </c:AvonicRadioGroup>
+            <c:AvonicRadioGroup Classes="ion-touched ion-invalid" HelperText="Helper text" ErrorText="Error text">
+                <c:AvonicItem>
+                    <c:AvonicRadio Value="c" Content="Cherry" />
+                </c:AvonicItem>
+            </c:AvonicRadioGroup>
+        </c:AvonicList>
+    </Design.PreviewWith>
+
+    <!-- A translation of radio-group.md.css. Which of the two texts shows is the control's, as Ionic renders it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRadioGroup}" TargetType="c:AvonicRadioGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel>
+                    <!-- .radio-group-top: line-height 1.5, of the font size it inherits -->
+                    <StackPanel Name="PART_Top">
+                        <TextBlock.LineHeight>
+                            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                                <TemplateBinding Property="FontSize" />
+                            </MultiBinding>
+                        </TextBlock.LineHeight>
+                        <!-- color: var(ion-color-step-700, var(ion-text-color-step-300)); aria-live="polite" -->
+                        <TextBlock Name="PART_HelperText"
+                                   Text="{TemplateBinding HelperText}"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   Foreground="{DynamicResource Avonic.TextColorStep300Brush}" />
+                        <!-- role="alert" -->
+                        <TextBlock Name="PART_ErrorText"
+                                   Text="{TemplateBinding ErrorText}"
+                                   AutomationProperties.LiveSetting="Assertive"
+                                   Foreground="{DynamicResource Avonic.Color.DangerBrush}" />
+                    </StackPanel>
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ion-list .radio-group-top -->
+        <Style Selector="^:in-list /template/ StackPanel#PART_Top">
+            <Setter Property="Margin" Value="16,0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

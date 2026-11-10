@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SegmentPage">
+
+    <ScrollViewer>
+        <StackPanel Spacing="12">
+            <c:AvonicSegment Name="Basic" Value="friends">
+                <c:AvonicSegmentButton Value="friends"><c:AvonicLabel Content="Friends" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="enemies"><c:AvonicLabel Content="Enemies" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+            <TextBlock Name="Changed" Margin="16,0" Text="Tap or drag the indicator" />
+
+            <c:AvonicSegment Value="call" Color="danger">
+                <c:AvonicSegmentButton Value="call"><c:AvonicLabel Content="Call" /><c:AvonicIcon IconName="call" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="heart"><c:AvonicLabel Content="Heart" /><c:AvonicIcon IconName="heart" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="pin"><c:AvonicLabel Content="Pin" /><c:AvonicIcon IconName="pin" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+
+            <c:AvonicSegment Value="wifi" SelectOnFocus="True">
+                <c:AvonicSegmentButton Value="wifi" Layout="IconStart"><c:AvonicLabel Content="Wi-Fi" /><c:AvonicIcon IconName="wifi" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="bluetooth" Layout="IconEnd"><c:AvonicLabel Content="Bluetooth" /><c:AvonicIcon IconName="bluetooth" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+
+            <c:AvonicSegment Value="one">
+                <c:AvonicSegmentButton Value="one"><c:AvonicLabel Content="One" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="two" IsEnabled="False"><c:AvonicLabel Content="Two" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="three"><c:AvonicLabel Content="Three" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+
+            <c:AvonicSegment Value="s4" Scrollable="True">
+                <c:AvonicSegmentButton Value="s1"><c:AvonicLabel Content="First" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s2"><c:AvonicLabel Content="Second" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s3"><c:AvonicLabel Content="Third" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s4"><c:AvonicLabel Content="Fourth" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s5"><c:AvonicLabel Content="Fifth" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s6"><c:AvonicLabel Content="Sixth" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s7"><c:AvonicLabel Content="Seventh" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+
+            <c:AvonicToolbar Color="primary">
+                <c:AvonicSegment Value="inbox">
+                    <c:AvonicSegmentButton Value="inbox"><c:AvonicLabel Content="Inbox" /></c:AvonicSegmentButton>
+                    <c:AvonicSegmentButton Value="sent"><c:AvonicLabel Content="Sent" /></c:AvonicSegmentButton>
+                </c:AvonicSegment>
+            </c:AvonicToolbar>
+
+            <c:AvonicSegment Value="photos">
+                <c:AvonicSegmentButton Value="photos" ContentId="photos"><c:AvonicLabel Content="Photos" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="music" ContentId="music"><c:AvonicLabel Content="Music" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="files" ContentId="files"><c:AvonicLabel Content="Files" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+            <c:AvonicSegmentView Height="160">
+                <c:AvonicSegmentContent Name="photos">
+                    <TextBlock Margin="16" Text="Photos. Swipe sideways, or tap a button above, to page." />
+                </c:AvonicSegmentContent>
+                <c:AvonicSegmentContent Name="music">
+                    <TextBlock Margin="16" Text="Music." />
+                </c:AvonicSegmentContent>
+                <c:AvonicSegmentContent Name="files">
+                    <TextBlock Margin="16" Text="Files." />
+                </c:AvonicSegmentContent>
+            </c:AvonicSegmentView>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

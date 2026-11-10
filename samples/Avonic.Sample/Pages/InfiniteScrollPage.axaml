@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.InfiniteScrollPage"
+             FontSize="16">
+
+    <!-- Ionic's own example: rows, and an infinite scroll after them that adds 20 more half a second after it fires, until
+         there are 100. Disabled hides it, as display: none does. -->
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Background="#660054E9" Padding="8">
+            <WrapPanel>
+                <ToggleButton Name="Disabled" Content="Disabled" Margin="2" Click="OnDisabled" />
+                <Button Content="Start again" Margin="2" Click="OnReset" />
+            </WrapPanel>
+        </Border>
+
+        <c:AvonicContent Grid.Row="1">
+            <StackPanel>
+                <StackPanel Name="Rows" />
+                <c:AvonicInfiniteScroll Name="Infinite" IonInfinite="OnInfinite">
+                    <c:AvonicInfiniteScrollContent LoadingText="Loading more data…" />
+                </c:AvonicInfiniteScroll>
+            </StackPanel>
+        </c:AvonicContent>
+
+        <Border Grid.Row="2" Background="#660054E9" Padding="8">
+            <TextBlock Name="Status" Text="Scroll to the end to load more" />
+        </Border>
+    </Grid>
+</UserControl>

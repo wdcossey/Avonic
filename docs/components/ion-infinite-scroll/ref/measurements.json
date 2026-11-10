@@ -1,0 +1,422 @@
+{
+ "source": "Ionic 8.8.1, Chromium, md, 390x844@2x, ion-app > ion-content. Scripts outside the repo; see PLAN.md, Measured.",
+ "m1_m4_m7_m9_m10": {
+  "bottom": {
+   "scrollHeight": 1584,
+   "offsetHeight": 844,
+   "clientHeight": 844,
+   "infH": 84,
+   "hostClass": "md infinite-scroll-enabled hydrated",
+   "boundary": 529.4000000000001,
+   "firedAtBoundaryFloor": 0,
+   "topNow": 529,
+   "firedAfter": 1,
+   "classAfter": "md infinite-scroll-enabled hydrated infinite-scroll-loading",
+   "boxes": {
+    "scroll": [
+     0,
+     970,
+     390,
+     87
+    ],
+    "content": [
+     0,
+     970,
+     390,
+     87
+    ],
+    "loading": [
+     0,
+     970,
+     390,
+     55
+    ],
+    "spinnerDiv": [
+     0,
+     970,
+     390,
+     32
+    ],
+    "spinner": [
+     181,
+     970,
+     28,
+     28
+    ],
+    "text": [
+     32,
+     1006,
+     326,
+     19
+    ]
+   },
+   "text": {
+    "color": "rgb(102, 102, 102)",
+    "font": "16px Roboto, \"Helvetica Neue\", sans-serif normal 400"
+   },
+   "spinnerName": null,
+   "loadingSpinnerProp": "crescent",
+   "spinnerStroke": "rgb(0, 0, 0)",
+   "firedWhileLoading": 1,
+   "classAfterComplete": "md infinite-scroll-enabled hydrated infinite-scroll-loading",
+   "firedAfterComplete": 1,
+   "firedOnNextScroll": 1,
+   "firedBeforeDisable": 1,
+   "disabledDisplay": "none",
+   "disabledClass": "md hydrated",
+   "disabledH": 0,
+   "firedAfterReEnable": 1,
+   "firedAfterReEnable2": 2
+  },
+  "short": {
+   "box": [
+    100,
+    84
+   ],
+   "content": 84,
+   "firedShortContent": 0,
+   "loadingDisplay": "none"
+  },
+  "top": {
+   "initialTop": 740,
+   "max": 740,
+   "firedAt30": 1,
+   "before": 30,
+   "topsDomFirst": [
+    30,
+    30,
+    30,
+    30,
+    30,
+    30
+   ],
+   "fired2": 2,
+   "topsCompleteFirst": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+   ]
+  },
+  "noContentLogs": [
+   "error: <ion-infinite-scroll> must be used inside ion-content."
+  ],
+  "plain": {
+   "text": "<b>bold</b> &amp; x",
+   "html": "&lt;b&gt;bold&lt;/b&gt; &amp;amp; x",
+   "circularStroke": "rgb(0, 0, 0)",
+   "spinnerColor": "rgb(0, 0, 0)"
+  }
+ },
+ "m2_m5_m6": {
+  "top": {
+   "fired": 1,
+   "tops": [
+    [
+     1,
+     30
+    ],
+    [
+     2,
+     30
+    ],
+    [
+     3,
+     30
+    ],
+    [
+     4,
+     530
+    ],
+    [
+     5,
+     530
+    ],
+    [
+     6,
+     530
+    ],
+    [
+     7,
+     530
+    ]
+   ],
+   "firedAfter": 1
+  },
+  "stuck": {
+   "fired": 1,
+   "firedAfterDisableEnable": 1,
+   "cls": "md hydrated infinite-scroll-enabled"
+  },
+  "px": {
+   "a": 0,
+   "b": 1,
+   "ev": [
+    "scroll",
+    "set",
+    "inf",
+    "scroll",
+    "raf1"
+   ]
+  }
+ },
+ "m8_boxes": [
+  {
+   "scroll": [
+    0,
+    0,
+    390,
+    84
+   ],
+   "wrapper": [
+    0,
+    0,
+    390,
+    84
+   ],
+   "loading": [
+    0,
+    10,
+    390,
+    32
+   ],
+   "spinnerDiv": [
+    0,
+    10,
+    390,
+    32
+   ],
+   "spinner": [
+    181,
+    10,
+    28,
+    28
+   ],
+   "text": null,
+   "textLines": null,
+   "spinnerColor": "rgb(0, 0, 0)"
+  },
+  {
+   "scroll": [
+    0,
+    92,
+    390,
+    87
+   ],
+   "wrapper": [
+    0,
+    92,
+    390,
+    87
+   ],
+   "loading": [
+    0,
+    92,
+    390,
+    55
+   ],
+   "spinnerDiv": [
+    0,
+    92,
+    390,
+    32
+   ],
+   "spinner": [
+    181,
+    92,
+    28,
+    28
+   ],
+   "text": [
+    32,
+    128,
+    326,
+    19
+   ],
+   "textLines": [
+    [
+     122.8,
+     128,
+     144.41,
+     19
+    ]
+   ],
+   "spinnerColor": "rgb(0, 0, 0)"
+  },
+  {
+   "scroll": [
+    0,
+    187,
+    390,
+    106
+   ],
+   "wrapper": [
+    0,
+    187,
+    390,
+    106
+   ],
+   "loading": [
+    0,
+    187,
+    390,
+    74
+   ],
+   "spinnerDiv": [
+    0,
+    187,
+    390,
+    32
+   ],
+   "spinner": [
+    181,
+    187,
+    28,
+    28
+   ],
+   "text": [
+    32,
+    223,
+    326,
+    38
+   ],
+   "textLines": [
+    [
+     49.34,
+     223,
+     291.31,
+     19
+    ],
+    [
+     102.25,
+     242,
+     185.5,
+     19
+    ]
+   ],
+   "spinnerColor": "rgb(0, 0, 0)"
+  },
+  {
+   "scroll": [
+    0,
+    301,
+    390,
+    84
+   ],
+   "wrapper": [
+    0,
+    301,
+    390,
+    84
+   ],
+   "loading": [
+    0,
+    309,
+    390,
+    36
+   ],
+   "spinnerDiv": [
+    0,
+    309,
+    390,
+    32
+   ],
+   "spinner": [
+    181,
+    309,
+    28,
+    28
+   ],
+   "text": [
+    32,
+    345,
+    326,
+    0
+   ],
+   "textLines": [],
+   "spinnerColor": "rgb(0, 0, 0)"
+  },
+  {
+   "scroll": [
+    0,
+    393,
+    390,
+    84
+   ],
+   "wrapper": [
+    0,
+    393,
+    390,
+    84
+   ],
+   "loading": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "spinnerDiv": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "spinner": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "text": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "textLines": [],
+   "spinnerColor": "rgb(0, 0, 0)"
+  },
+  {
+   "scroll": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "wrapper": [
+    0,
+    485,
+    390,
+    0
+   ],
+   "loading": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "spinnerDiv": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "spinner": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "text": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "textLines": [],
+   "spinnerColor": "rgb(0, 0, 0)"
+  }
+ ]
+}

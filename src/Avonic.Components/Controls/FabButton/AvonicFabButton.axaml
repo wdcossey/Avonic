@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-fab-button: structure only. The look is in Avonic.Themes. The transparent panel is
+         what makes the whole box take input, as Ionic's native button does. The ripple is before the close icon and
+         the content, which have z-index 1 there. Activated shows the close icon instead of the content. -->
+    <ControlTheme x:Key="{x:Type c:AvonicFabButton}" TargetType="c:AvonicFabButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip">
+                        <Panel Background="Transparent">
+                            <Border Name="PART_Overlay" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <c:AvonicIcon Name="PART_CloseIcon"
+                                          Icon="{TemplateBinding CloseIcon}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Opacity="0" />
+                            <ContentPresenter Name="PART_ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalContentAlignment="Center"
+                                              VerticalContentAlignment="Center" />
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:close-active /template/ c|AvonicIcon#PART_CloseIcon">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="^:close-active /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
