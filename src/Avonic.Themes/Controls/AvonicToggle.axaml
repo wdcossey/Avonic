@@ -1,0 +1,275 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Default" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Checked" Checked="True" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Danger" Checked="True" Color="danger" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Disabled" IsEnabled="False" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Label at the end" LabelPlacement="End" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Stacked" LabelPlacement="Stacked" Alignment="Start" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="On/off labels" EnableOnOffLabels="True" Checked="True" />
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicToggle Content="Helper text" HelperText="Helper text" />
+            </c:AvonicItem>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of toggle.md.css. Its rules for the label are on the label part, by placement and by whether the toggle is
+         in an item, which CSS adds up from separate rules and a Thickness can't: so each combination is written out. -->
+    <ControlTheme x:Key="{x:Type c:AvonicToggle}" TargetType="c:AvonicToggle">
+        <Setter Property="Background" Value="Transparent" />
+        <!-- display: inline-block -->
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:TogglePanel Name="PART_Wrapper"
+                               Background="{TemplateBinding Background}"
+                               LabelPlacement="{TemplateBinding LabelPlacement}"
+                               Justify="{TemplateBinding Justify}"
+                               Alignment="{TemplateBinding Alignment}">
+                    <!-- .label-text-wrapper: nowrap, overflow: hidden and an ellipsis. Its margin is per placement, below. -->
+                    <StackPanel Name="PART_Label" ClipToBounds="True">
+                        <ContentPresenter Name="PART_LabelContent"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          TextWrapping="NoWrap"
+                                          TextTrimming="CharacterEllipsis" />
+                        <!-- .toggle-bottom: only with some hint text. padding-top: 4px; font-size: 0.75rem; white-space: normal -->
+                        <StackPanel Name="PART_Bottom" Margin="0,4,0,0" TextElement.FontSize="12">
+                            <StackPanel.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                                    <Binding Path="HelperText" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" />
+                                    <Binding Path="ErrorText" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" />
+                                </MultiBinding>
+                            </StackPanel.IsVisible>
+                            <!-- .helper-text: var(ion-color-step-700, var(ion-text-color-step-300, #4d4d4d)) -->
+                            <TextBlock Name="PART_HelperText"
+                                       Classes="supporting-text"
+                                       Text="{TemplateBinding HelperText}"
+                                       TextWrapping="Wrap"
+                                       TextTrimming="None"
+                                       Foreground="{DynamicResource Avonic.TextColorStep300Brush}"
+                                       IsVisible="{TemplateBinding HelperText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <!-- .error-text: display: none until invalid. var(ion-color-danger, #c5000f) -->
+                            <TextBlock Name="PART_ErrorText"
+                                       Classes="supporting-text"
+                                       Text="{TemplateBinding ErrorText}"
+                                       TextWrapping="Wrap"
+                                       TextTrimming="None"
+                                       Foreground="{DynamicResource Avonic.Color.DangerBrush}"
+                                       IsVisible="False" />
+                        </StackPanel>
+                    </StackPanel>
+                    <!-- .native-wrapper: display: flex; align-items: center -->
+                    <Panel Name="PART_NativeWrapper" VerticalAlignment="Center">
+                        <!-- .native-wrapper .toggle-icon: 36 by 14. A literal in md, with no variable. -->
+                        <Border Name="PART_Track" Width="36" Height="14">
+                            <Border.CornerRadius>
+                                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                                    <DynamicResource ResourceKey="Avonic.Toggle.BorderRadius" />
+                                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
+                            </Border.CornerRadius>
+                            <!-- .toggle-icon-wrapper: the whole track, moved by the handle's travel when checked. -->
+                            <Panel Name="PART_IconWrapper">
+                                <!-- .toggle-inner: position: absolute, centred down by the wrapper's align-items, so it hangs over
+                                     the track by 3 px above and below. -->
+                                <Border Name="PART_Handle"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Width="{DynamicResource Avonic.Toggle.HandleWidth}"
+                                        Height="{DynamicResource Avonic.Toggle.HandleHeight}"
+                                        MaxHeight="{DynamicResource Avonic.Toggle.HandleMaxHeight}"
+                                        BoxShadow="{DynamicResource Avonic.Toggle.HandleBoxShadow}">
+                                    <Border.Margin>
+                                        <MultiBinding Converter="{x:Static c:AvonicToggle.SpacingMarginConverter}">
+                                            <DynamicResource ResourceKey="Avonic.Toggle.HandleSpacing" />
+                                        </MultiBinding>
+                                    </Border.Margin>
+                                    <Border.CornerRadius>
+                                        <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                                            <DynamicResource ResourceKey="Avonic.Toggle.HandleBorderRadius" />
+                                            <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                                        </MultiBinding>
+                                    </Border.CornerRadius>
+                                    <!-- The on/off ion-icon: width and height 100%, with 1 px of padding, so 18 px in the middle. -->
+                                    <c:AvonicIcon Name="PART_SwitchIcon"
+                                                  IconName="remove-outline"
+                                                  FontSize="18"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  IsVisible="{TemplateBinding EnableOnOffLabels}"
+                                                  Foreground="{DynamicResource Avonic.Toggle.Md.HandleColor}" />
+                                </Border>
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </c:TogglePanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.in-item): flex: 1 1 0; width: 100%; height: 100%. The slot's flex is the item's. -->
+        <Style Selector="^:in-item">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <!-- display: block, once justify or alignment is set -->
+        <Style Selector="^:justify-start, ^:justify-end, ^:justify-space-between, ^:alignment-start, ^:alignment-center">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
+        <!-- :host(.toggle-disabled): opacity: 0.38, as a group, so a mask: see the key. Only the toggle's own disabled, as Ionic's
+             class comes from its own prop: in a disabled item it keeps its look, inside the item's fade. A disabled control already
+             takes no input and lets it through. -->
+        <Style Selector="^:toggle-disabled">
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Toggle.Md.DisabledMask}" />
+        </Style>
+
+        <!-- .label-text-wrapper-hidden: display: none -->
+        <Style Selector="^:label-text-wrapper-hidden /template/ StackPanel#PART_Label">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- The label's margins. start and fixed: margin-inline-end 16. end: margin-inline-start 16. stacked: margin-bottom 16.
+             In an item, 10 above and below, and 10 above and 16 below when stacked. -->
+        <Style Selector="^ /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,0,16,0" />
+        </Style>
+        <Style Selector="^:in-item /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,10,16,10" />
+        </Style>
+        <Style Selector="^:label-placement-end /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-end /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="16,10,0,10" />
+        </Style>
+        <!-- flex: 0 0 100px; width: 100px; min-width: 100px; max-width: 200px -->
+        <Style Selector="^:label-placement-fixed /template/ StackPanel#PART_Label">
+            <Setter Property="Width" Value="100" />
+        </Style>
+        <!-- transform: scale(0.75), with the origin's default, the middle, unless alignment says otherwise. A transform doesn't
+             change the layout box, so the margin and the max-width of 100% / 0.75 are on the unscaled box, as in CSS. -->
+        <!-- text-align: center on the stacked .toggle-wrapper, which the label's lines and the hint's inherit. -->
+        <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Label">
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="RenderTransform" Value="scale(0.75)" />
+        </Style>
+        <Style Selector="^:in-item:label-placement-stacked /template/ StackPanel#PART_Label">
+            <Setter Property="Margin" Value="0,10,0,16" />
+        </Style>
+        <!-- transform-origin: left top, which is right top in RTL, as Avalonia mirrors the box. -->
+        <Style Selector="^:label-placement-stacked:alignment-start /template/ StackPanel#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+        </Style>
+        <Style Selector="^:label-placement-stacked:alignment-center /template/ StackPanel#PART_Label">
+            <Setter Property="RenderTransformOrigin" Value="50%,0%" />
+        </Style>
+        <!-- :host(.in-item.toggle-label-placement-stacked) .native-wrapper: margin-bottom: 10px -->
+        <Style Selector="^:in-item:label-placement-stacked /template/ Panel#PART_NativeWrapper">
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+        <!-- :host(.toggle-label-placement-stacked) .toggle-bottom: font-size: 1rem -->
+        <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Bottom">
+            <Setter Property="TextElement.FontSize" Value="16" />
+        </Style>
+
+        <!-- :host(.ion-touched.ion-invalid): the error text replaces the helper text. -->
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="{Binding ErrorText, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </Style>
+
+        <!-- .toggle-icon: background: var(track-background); transition: background-color 160ms, CSS's default ease. -->
+        <Style Selector="^ /template/ Border#PART_Track">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.TrackBackground}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.16" Easing="{a:CubicBezier 0.25, 0.1, 0.25, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^:checked /template/ Border#PART_Track">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.TrackBackgroundChecked}" />
+        </Style>
+        <!-- :host(.ion-color.toggle-checked) .toggle-icon: rgba(var(ion-color-base-rgb), 0.5), which beats the variable. -->
+        <Style Selector="^:ion-color:checked /template/ Border#PART_Track">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.BaseColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.5}" />
+        </Style>
+
+        <!-- .toggle-icon-wrapper: transition: var(handle-transition). Checked: translate3d(calc(100% - var(handle-width)), 0, 0). -->
+        <Style Selector="^ /template/ Panel#PART_IconWrapper">
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Toggle.HandleTransition}" />
+            <Setter Property="RenderTransform" Value="translateX(0px)" />
+        </Style>
+        <Style Selector="^:checked /template/ Panel#PART_IconWrapper">
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static c:AvonicToggle.CheckedOffsetConverter}">
+                    <!-- The wrapper is the track's width, which is set, so this doesn't wait for a layout, and a checked toggle
+                         doesn't slide into place when it's first shown. -->
+                    <Binding Path="$parent[Border].Width" />
+                    <DynamicResource ResourceKey="Avonic.Toggle.HandleWidth" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .toggle-inner: background: var(handle-background); transition: var(handle-transition). -->
+        <Style Selector="^ /template/ Border#PART_Handle">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.HandleBackground}" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Toggle.HandleTransition}" />
+            <Setter Property="RenderTransform" Value="translateX(0px)" />
+        </Style>
+        <!-- Checked: var(handle-background-checked), and translate3d(calc(var(handle-spacing) * -2), 0, 0). -->
+        <Style Selector="^:checked /template/ Border#PART_Handle">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.HandleBackgroundChecked}" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static c:AvonicToggle.CheckedSpacingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Toggle.HandleSpacing" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-color.toggle-checked) .toggle-inner: var(ion-color-base), which beats the variable. -->
+        <Style Selector="^:ion-color:checked /template/ Border#PART_Handle">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.Base)}" />
+        </Style>
+
+        <!-- The on/off icon, md: checkmark-outline when checked, remove-outline when not. Checked, color: var(ion-color-contrast, #fff),
+             which inherits: the toggle's own Color, or a coloured ancestor's. -->
+        <Style Selector="^:checked /template/ c|AvonicIcon#PART_SwitchIcon">
+            <Setter Property="IconName" Value="checkmark-outline" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="$parent[c:AvonicToggle].(b:ColorPalette.Contrast)" />
+                    <DynamicResource ResourceKey="Avonic.Toggle.Md.HandleColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
