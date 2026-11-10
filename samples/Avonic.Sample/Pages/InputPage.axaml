@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.InputPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Start" Placeholder="Placeholder" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Floating" LabelPlacement="Floating" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Stacked" LabelPlacement="Stacked" Placeholder="Placeholder" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Fixed label that is long" LabelPlacement="Fixed" Value="Value" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Clear" ClearInput="True" Value="Value" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Password" Type="Password" Value="secret">
+                        <c:AvonicInput.EndContent>
+                            <c:AvonicInputPasswordToggle />
+                        </c:AvonicInput.EndContent>
+                    </c:AvonicInput>
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicInput Label="Email" Type="Email" Placeholder="you@example.com" Enterkeyhint="Next" />
+                </c:AvonicItem>
+            </c:AvonicList>
+
+            <StackPanel Margin="16" Spacing="12">
+                <c:AvonicInput Name="Validated"
+                               Fill="Solid"
+                               Label="Email, checked on change"
+                               LabelPlacement="Floating"
+                               HelperText="Enter a valid email"
+                               ErrorText="Invalid email"
+                               Counter="True"
+                               Maxlength="40"
+                               IonChange="OnValidatedChange"
+                               IonBlur="OnValidatedBlur" />
+                <c:AvonicInput Fill="Outline" Label="Outline" LabelPlacement="Floating" ClearInput="True" />
+                <c:AvonicInput Fill="Outline" Shape="Round" Label="Round" LabelPlacement="Stacked" Placeholder="Placeholder" />
+                <c:AvonicInput Label="Danger highlight" LabelPlacement="Stacked" Color="danger" Placeholder="Focus me" />
+                <c:AvonicInput Label="Debounced 500 ms" LabelPlacement="Stacked" Debounce="500" IonInput="OnDebouncedInput" />
+                <TextBlock Name="DebouncedText" Text="ionInput: (none yet)" />
+                <c:AvonicInput Label="Read-only" Readonly="True" Value="Can't change this" />
+                <c:AvonicInput Label="Disabled" IsEnabled="False" Value="Value" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
