@@ -38,6 +38,7 @@
 
     <!-- What fab-button.md.css gives those variables per class. These aren't Ionic's variables: override the keys
          above instead. -->
+    <SolidColorBrush x:Key="Avonic.FabButton.Md.BackgroundActivated" Color="Transparent" />
     <x:Double x:Key="Avonic.FabButton.Md.BackgroundActivatedOpacity">0</x:Double>
     <x:Double x:Key="Avonic.FabButton.Md.BackgroundFocusedOpacity">0.24</x:Double>
     <x:Double x:Key="Avonic.FabButton.Md.BackgroundHoverOpacity">0.08</x:Double>

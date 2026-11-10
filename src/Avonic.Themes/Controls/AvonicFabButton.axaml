@@ -214,6 +214,7 @@
             <Setter Property="Background">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.FabButton.BackgroundActivated" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BackgroundActivated" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Opacity">

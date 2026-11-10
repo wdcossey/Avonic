@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
@@ -163,11 +162,6 @@ public class AvonicFab : ItemsControl
     /// <summary>A control is its own container, as a child in the light DOM is. Anything else is shown in a presenter.</summary>
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<Control>(item, out recycleKey);
-
-    /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. A fab doesn't: Tab does.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-    }
 
     /// <summary>A plain element, where an <see cref="ItemsControl"/>'s own peer would call it a list.</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new FabGroupPeer(this);

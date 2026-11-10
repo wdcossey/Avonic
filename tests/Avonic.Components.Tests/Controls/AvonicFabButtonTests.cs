@@ -439,6 +439,29 @@ public class AvonicFabButtonTests
         }
     });
 
+    [AvaloniaFact]
+    public void B9_A_Pressed_Overlay_Is_Transparent_Even_With_An_App_Opacity() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var button = new AvonicFabButton { Content = "x" };
+        button.Resources["Avonic.FabButton.BackgroundActivatedOpacity"] = 0.2;
+        var (_, scene) = Themed(button);
+        using (scene)
+        {
+            button.Focus(NavigationMethod.Tab);
+            var centre = Box(button, scene.Window).Center;
+            scene.Window.MouseDown(centre, MouseButton.Left, RawInputModifiers.None);
+            clock.At(200);
+            Dispatcher.UIThread.RunJobs();
+
+            // --background-activated is transparent, so the focus rule's current colour doesn't show through.
+            Assert.Equal(0.2, Overlay(button).Opacity, 3);
+            Assert.Equal(0, Solid(Overlay(button).Background).A);
+
+            scene.Window.MouseUp(centre, MouseButton.Left, RawInputModifiers.None);
+        }
+    });
+
     // ── B10: Color ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -640,6 +663,28 @@ public class AvonicFabButtonTests
         ((IInvokeProvider)peer).Invoke();
         Assert.Equal(1, clicks);
         Assert.False(peer.IsEnabled());
+    }
+
+    [AvaloniaFact]
+    public void B15_A_List_Button_That_Is_Not_Shown_Is_Offscreen_And_Not_Invoked()
+    {
+        using var clock = new TestClock();
+        var clicks = 0;
+        var button = new AvonicFabButton { Content = "Share" };
+        button.Click += (_, _) => clicks++;
+        var list = List(FabListSide.Bottom, button);
+        list.IsVisible = true;
+        using var scene = new Scene(list);
+        var peer = ControlAutomationPeer.CreatePeerForElement(button);
+
+        Assert.True(peer.IsOffscreen());
+        ((IInvokeProvider)peer).Invoke();
+        Assert.Equal(0, clicks);
+
+        button.Show = true;
+        Assert.False(peer.IsOffscreen());
+        ((IInvokeProvider)peer).Invoke();
+        Assert.Equal(1, clicks);
     }
 
     [AvaloniaFact]

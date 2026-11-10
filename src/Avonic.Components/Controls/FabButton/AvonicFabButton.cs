@@ -8,7 +8,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -179,49 +179,69 @@ public class AvonicFabButton : ContentControl
         if (change.Property == ActivatedProperty)
         {
             PseudoClasses.Set(":close-active", change.GetNewValue<bool>());
+            UpdateHostContext();
         }
         else if (change.Property == ShowProperty)
         {
             PseudoClasses.Set(":show", change.GetNewValue<bool>());
-            UpdateHidden();
+            UpdateHostContext();
         }
         else if (change.Property == SizeProperty)
         {
             PseudoClasses.Set(":size-small", change.GetNewValue<FabButtonSize?>() == FabButtonSize.Small);
+            UpdateHostContext();
+        }
+        else if (change.Property == ColorProperty || change.Property == IsEnabledProperty || change.Property == CloseIconProperty)
+        {
+            // Ionic renders again when any of its props changes, and reads hostContext then.
+            UpdateHostContext();
         }
     }
 
     /// <summary>
-    /// <c>connectedCallback</c>'s <c>closest('ion-fab')</c>, and <c>hostContext('ion-fab-list')</c>, which <c>render</c> reads:
-    /// both in the light DOM, which is the logical tree here.
+    /// <c>connectedCallback</c>'s <c>closest('ion-fab')</c>, and <c>hostContext('ion-fab-list')</c>, which <c>render</c> reads: from
+    /// the visual ancestors when the button is attached and when one of its props changes, as the mapping rule for
+    /// <c>hostContext</c> says. A fab's and a list's buttons are their items, so these are the light DOM's ancestors too.
     /// </summary>
-    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        base.OnAttachedToLogicalTree(e);
-        _fab = this.FindLogicalAncestorOfType<AvonicFab>();
-        _inList = this.FindLogicalAncestorOfType<AvonicFabList>() is not null;
-        PseudoClasses.Set(":in-list", _inList);
-        UpdateHidden();
+        base.OnAttachedToVisualTree(e);
+        UpdateHostContext();
     }
 
-    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        base.OnDetachedFromLogicalTree(e);
+        base.OnDetachedFromVisualTree(e);
         _fab = null;
     }
 
+    private void UpdateHostContext()
+    {
+        if (TopLevel.GetTopLevel(this) is not null || this.GetVisualParent() is not null)
+        {
+            _fab = this.FindAncestorOfType<AvonicFab>();
+            _inList = this.FindAncestorOfType<AvonicFabList>() is not null;
+            PseudoClasses.Set(":in-list", _inList);
+        }
+
+        UpdateHidden();
+    }
+
     /// <summary><c>::slotted(.fab-button-in-list)</c> is <c>visibility: hidden</c> until <c>.fab-button-show</c>.</summary>
-    private void UpdateHidden() => _hidden.Set(_inList && !Show);
+    private bool IsHiddenInList => _inList && !Show;
+
+    private void UpdateHidden() => _hidden.Set(IsHiddenInList);
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
     /// The host's <c>onClick</c>, <c>fab.toggle()</c>, then the native button's click. A disabled button takes no click, and
-    /// automation's <c>Invoke</c> doesn't reach one either.
+    /// automation's <c>Invoke</c> doesn't reach one either. Nor does one that isn't shown: a closed list is <c>display: none</c>,
+    /// which blurs its button in a browser, where Avalonia leaves the focus on it, so Enter would open the fab again.
     /// </summary>
     private void OnNativeClick()
     {
-        if (!IsEffectivelyEnabled)
+        if (!IsEffectivelyEnabled || !IsEffectivelyVisible || IsHiddenInList)
         {
             return;
         }
@@ -281,6 +301,9 @@ public class AvonicFabButton : ContentControl
         protected override bool IsContentElementCore() => true;
 
         protected override bool IsControlElementCore() => true;
+
+        /// <summary><c>visibility: hidden</c> takes it out of the accessibility tree, so a list's button that isn't shown is offscreen.</summary>
+        protected override bool IsOffscreenCore() => owner.IsHiddenInList || base.IsOffscreenCore();
 
         public void Invoke() => owner.OnNativeClick();
     }

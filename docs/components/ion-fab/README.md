@@ -108,7 +108,8 @@ icon's 300 ms; they aren't Ionic's variables.
 | [x] | `activated` | `Activated` | Shown, and its fab buttons, at any depth, shown 30 ms apart; hidden at once, and its buttons after 0 ms |
 | [x] | `side` | `Side` (`FabListSide`) | `Bottom` (default), `Top`, `Start`, `End`: a column, a column upward, a row backward, a row |
 
-Its buttons are `Items`, laid out by `FabListPanel`, centred across, at least 56 square, with 5 between them and 10 from the
+A list's button that isn't shown takes no tap, focus, key or automation `Invoke`, and is offscreen to automation, as
+`visibility: hidden` is. Its buttons are `Items`, laid out by `FabListPanel`, centred across, at least 56 square, with 5 between them and 10 from the
 fab's button. Tab goes through them in their order, not the order on screen. Pseudoclasses: `:active`, `:side-bottom`, `:side-top`,
 `:side-start`, `:side-end`.
 
@@ -126,4 +127,6 @@ fab's button. Tab goes through them in their order, not the order on screen. Pse
 - **Shadows are lighter** than Chromium's, as on `ion-button`: Avalonia draws the same values lighter.
 - **An app's plain style for a list button's `Margin` loses** to the list's rule, which has an activator. A local value wins.
 - **`href` and the router props** aren't there, as on `ion-button`.
+- **A fab whose own `FlowDirection` differs from its container's** takes start and end from its own. RTL all through matches.
+- **A list that leaves the tree during its stagger finishes it when it comes back**, where Ionic leaves the rest hidden.
 - **Not tried in a real window, and not tried on a device.**

@@ -63,6 +63,21 @@ fab's half opacity match.
 - **An edge fab under the header and footer.** The first frame had the content at `ZIndex` 1, under the header's and footer's 10, and
   the fabs' outer halves were cut off. See above.
 
+### Found in review
+
+- **Enter on a list button that had closed the fab opened it again.** A browser blurs a button whose list goes `display: none`;
+  Avalonia leaves the focus on it. A button that isn't shown now takes no click, from a key or from automation, and is offscreen to
+  automation, as `visibility: hidden` takes it out of the accessibility tree.
+- **A pressed overlay had no transparent default**, so with an app's `BackgroundActivatedOpacity` it showed the focus or hover
+  colour. It's `Avonic.FabButton.Md.BackgroundActivated`, transparent, now.
+- **A list taken out of the tree during its stagger came back with buttons hidden.** Ionic cancels the timeouts in
+  `disconnectedCallback` and never restarts them. Here a list that's put back finishes what was cancelled: a page leaves the tree
+  and comes back far more often in Avalonia than a node moves in the DOM. A deliberate difference.
+- **A list from `ItemsSource` and a template was laid out in the flow**, under the button, as its presenter isn't a list. The panel
+  looks inside the presenter now.
+- **A list's side changing from bottom to top kept its order**, and **one with its own margin didn't move**, as nothing else
+  changed size. Both now have tests, found by the breakage run.
+
 ## Behaviours
 
 Measured in Chromium on Ionic 8.8.1. The ids are the behaviours in [PLAN.md](PLAN.md).
@@ -104,5 +119,7 @@ Measured in Chromium on Ionic 8.8.1. The ids are the behaviours in [PLAN.md](PLA
 - **Hover** wasn't measured: the phone context has no `any-hover`. It's from the CSS.
 - **A list's buttons in Ionic don't animate in or out**, measured frame by frame, and neither do Avonic's. The 270 ms transform and
   15 ms opacity in `--transition` are on `.button-native`, whose transform and opacity never change.
+- **A fab whose own `FlowDirection` differs from its container's** is placed by its own: start in an RTL fab inside an LTR content
+  is on the left, where Ionic's `:dir(rtl)` puts it on the right. A page that's RTL all through, the usual case, matches.
 - **`::slotted` rules lose to an app's style in Ionic, and here the list's margins on its buttons are a rule with an activator** in the
   button's own theme, which an app's plain style for `Margin` doesn't beat. A local value does.

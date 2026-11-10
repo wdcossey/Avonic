@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 
@@ -40,6 +39,7 @@ public class AvonicFabList : ItemsControl
 
     private readonly List<IDisposable> _timeouts = [];
     private readonly FabStyleValue<bool> _hidden = new(false);
+    private bool _interrupted;
 
     static AvonicFabList()
     {
@@ -105,11 +105,25 @@ public class AvonicFabList : ItemsControl
         }
     }
 
-    /// <summary><c>disconnectedCallback</c>.</summary>
+    /// <summary>
+    /// <c>disconnectedCallback</c>. What it cancels is done when the list comes back, where Ionic would leave the rest of its buttons
+    /// hidden: a page is taken out of the tree and put back far more often in Avalonia than a node is moved in the DOM.
+    /// </summary>
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromLogicalTree(e);
+        _interrupted |= _timeouts.Count > 0;
         ClearTimeouts();
+    }
+
+    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToLogicalTree(e);
+        if (_interrupted)
+        {
+            _interrupted = false;
+            ActivatedChanged(Activated);
+        }
     }
 
     private void ClearTimeouts()
@@ -134,11 +148,6 @@ public class AvonicFabList : ItemsControl
     /// <summary>A control is its own container, as a child in the light DOM is. Anything else is shown in a presenter.</summary>
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<Control>(item, out recycleKey);
-
-    /// <summary>An <see cref="ItemsControl"/> moves focus with the arrow keys. A fab list doesn't: Tab does.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-    }
 
     /// <summary>A plain element, where an <see cref="ItemsControl"/>'s own peer would call it a list.</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new AvonicFab.FabGroupPeer(this);

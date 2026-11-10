@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -30,7 +31,7 @@ public class FabPanel : Panel
         foreach (var child in Children)
         {
             child.Measure(infinite);
-            if (child is not AvonicFabList)
+            if (ListIn(child) is null)
             {
                 width = Math.Max(width, child.DesiredSize.Width);
             }
@@ -41,7 +42,7 @@ public class FabPanel : Panel
         double height = 0;
         foreach (var child in Children)
         {
-            if (child is not AvonicFabList)
+            if (ListIn(child) is null)
             {
                 height += child.DesiredSize.Height + EdgeShift(child, width, edgeTop, edgeBottom);
             }
@@ -57,7 +58,7 @@ public class FabPanel : Panel
         double y = 0;
         foreach (var child in Children)
         {
-            if (child is AvonicFabList)
+            if (ListIn(child) is not null)
             {
                 continue;
             }
@@ -72,9 +73,9 @@ public class FabPanel : Panel
         var height = Math.Max(0, y);
         foreach (var child in Children)
         {
-            if (child is AvonicFabList list)
+            if (ListIn(child) is { } list)
             {
-                list.Arrange(ListBox(list, width, height, edgeTop, edgeBottom));
+                child.Arrange(ListBox(list, child.DesiredSize, width, height, edgeTop, edgeBottom));
             }
         }
 
@@ -85,9 +86,8 @@ public class FabPanel : Panel
     /// <c>fab-list.css</c>: <c>top: 0</c>, or <c>bottom: 0</c> for the top side, and <c>inset-inline-start</c> or <c>-end: 0</c>
     /// for the sides, with the margin toward the button. A box here is the list's margin box, so the <c>100%</c> is all of it.
     /// </summary>
-    private static Rect ListBox(AvonicFabList list, double width, double height, bool edgeTop, bool edgeBottom)
+    private static Rect ListBox(AvonicFabList list, Size size, double width, double height, bool edgeTop, bool edgeBottom)
     {
-        var size = list.DesiredSize;
         var half = width / 2;
         return list.Side switch
         {
@@ -108,7 +108,7 @@ public class FabPanel : Panel
     /// <summary>How much an edge's margin changes a fab button's height in the flow: the new margin less its own.</summary>
     private static double EdgeShift(Control child, double width, bool edgeTop, bool edgeBottom)
     {
-        if (child is not AvonicFabButton button || !(edgeTop || edgeBottom))
+        if (Unwrapped(child) is not AvonicFabButton button || !(edgeTop || edgeBottom))
         {
             return 0;
         }
@@ -116,6 +116,11 @@ public class FabPanel : Panel
         var margin = button.Size == FabButtonSize.Small ? (-width + SmallMargins) / 2 : -width / 2;
         return margin - (edgeTop ? button.Margin.Top : button.Margin.Bottom);
     }
+
+    /// <summary>A child from <c>ItemsSource</c> and a template is in a presenter: what it shows is what counts.</summary>
+    private static Control Unwrapped(Control child) => child is ContentPresenter { Child: { } shown } ? shown : child;
+
+    private static AvonicFabList? ListIn(Control child) => Unwrapped(child) as AvonicFabList;
 
     private (bool Top, bool Bottom) Edges()
     {

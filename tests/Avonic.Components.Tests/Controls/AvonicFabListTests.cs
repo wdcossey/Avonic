@@ -123,6 +123,25 @@ public class AvonicFabListTests
     }
 
     [AvaloniaFact]
+    public void L2_Coming_Back_Into_The_Tree_Finishes_What_Was_Pending()
+    {
+        using var clock = new TestClock();
+        var buttons = Buttons(3);
+        var list = List(FabListSide.Top, buttons);
+        var holder = new StackPanel { Children = { list } };
+        using var scene = new Scene(holder);
+
+        list.Activated = true;
+        clock.At(0);
+        holder.Children.Remove(list);
+        clock.At(200);
+        holder.Children.Add(list);
+        clock.At(400);
+
+        Assert.All(buttons, button => Assert.True(button.Show));
+    }
+
+    [AvaloniaFact]
     public void L2_It_Shows_Fab_Buttons_At_Any_Depth()
     {
         using var clock = new TestClock();
@@ -168,6 +187,26 @@ public class AvonicFabListTests
             AssertBox(firstX, firstY, 40, 40, Box(buttons[0], list));
             AssertBox(secondX, secondY, 40, 40, Box(buttons[1], list));
         }
+    });
+
+    [AvaloniaFact]
+    public void L3_From_Bottom_To_Top_The_Order_Turns_Over() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var buttons = new[] { new AvonicFabButton { Content = "a" }, new AvonicFabButton { Content = "b" } };
+        var list = List(FabListSide.Bottom, buttons);
+        list.Activated = true;
+        list.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+        list.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+        using var scene = new Scene(new Panel { Margin = new Thickness(50), Children = { list } });
+        clock.At(100);
+        Dispatcher.UIThread.RunJobs();
+
+        list.Side = FabListSide.Top;
+        Dispatcher.UIThread.RunJobs();
+
+        AssertBox(8, 55, 40, 40, Box(buttons[0], list));
+        AssertBox(8, 5, 40, 40, Box(buttons[1], list));
     });
 
     [AvaloniaFact]

@@ -267,6 +267,24 @@ public class AvonicFabTests
         }
     });
 
+    [AvaloniaFact]
+    public void F3_Vertical_Can_Change_On_An_Edge() => InstalledTheme.Run(_ =>
+    {
+        var main = MainButton();
+        var fab = Fab(main);
+        fab.Horizontal = FabHorizontal.Start;
+        fab.Vertical = FabVertical.Top;
+        fab.Edge = true;
+        var (content, scene) = InContent(fab);
+        using (scene)
+        {
+            // An edge has no inset at the top or the bottom, so only the panel's own layout moves the button.
+            fab.Vertical = FabVertical.Bottom;
+            Dispatcher.UIThread.RunJobs();
+            AssertBox(10, 844 - 28, 56, 56, Box(main, content));
+        }
+    });
+
     // ── F4: Activated reaches the button and the lists ───────────────────────────────────────
 
     [AvaloniaFact]
@@ -452,20 +470,43 @@ public class AvonicFabTests
     }
 
     [AvaloniaFact]
-    public void F5_The_Arrow_Keys_Do_Not_Move_Focus_From_The_Main_Button()
+    public void F5_The_Arrow_Keys_Do_Not_Move_Focus_Between_Its_Buttons()
+    {
+        // Two buttons in the flow, one under the other, which an ItemsControl's arrow keys would move between.
+        var first = new AvonicFabButton { Width = 56, Height = 56 };
+        var second = new AvonicFabButton { Width = 56, Height = 56 };
+        var fab = Fab(first, second);
+        using var scene = new Scene(new Panel { Children = { fab } });
+        first.Focus(NavigationMethod.Tab);
+
+        PressKey(scene, PhysicalKey.ArrowDown);
+
+        Assert.True(first.IsFocused);
+    }
+
+    [AvaloniaFact]
+    public void F5_Enter_On_A_List_Button_That_Closed_The_Fab_Does_Not_Open_It_Again()
     {
         using var clock = new TestClock();
-        var (fab, main, _, scene) = Openable();
+        var clicks = 0;
+        var (fab, _, inList, scene) = Openable();
+        inList.Click += (_, _) => clicks++;
         using (scene)
         {
             fab.Activated = true;
             clock.At(100);
             Dispatcher.UIThread.RunJobs();
-            main.Focus(NavigationMethod.Tab);
+            inList.Focus(NavigationMethod.Tab);
 
-            PressKey(scene, PhysicalKey.ArrowDown);
+            PressKey(scene, PhysicalKey.Enter);
+            Assert.False(fab.Activated);
+            Assert.Equal(1, clicks);
 
-            Assert.True(main.IsFocused);
+            // In a browser, display: none blurs the button. Here the focus stays, so the button ignores it.
+            clock.At(200);
+            PressKey(scene, PhysicalKey.Enter);
+            Assert.False(fab.Activated);
+            Assert.Equal(1, clicks);
         }
     }
 
@@ -615,6 +656,51 @@ public class AvonicFabTests
         using (scene)
         {
             AssertBox(0, 0, 56, 56, Box(fab, content));
+        }
+    });
+
+    [AvaloniaFact]
+    public void F8_A_List_From_A_Template_Is_Placed_Beside_The_Button_Too() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var fab = new AvonicFab
+        {
+            ItemsSource = new object[] { "main", "list" },
+            ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((name, _) =>
+                name == "main" ? new AvonicFabButton { Content = "+" } : List(FabListSide.End, new AvonicFabButton { Content = "a" })),
+        };
+        fab.Horizontal = FabHorizontal.Start;
+        fab.Vertical = FabVertical.Top;
+        var (content, scene) = InContent(fab);
+        using (scene)
+        {
+            fab.Activated = true;
+            clock.At(100);
+            Dispatcher.UIThread.RunJobs();
+
+            var list = fab.GetVisualDescendants().OfType<AvonicFabList>().Single();
+            AssertBox(10, 10, 56, 56, Box(fab, content));
+            AssertBox(66, 0, 56, 56, Box(list, fab));
+        }
+    });
+
+    [AvaloniaFact]
+    public void F8_A_List_With_Its_Own_Margin_Moves_When_Its_Side_Changes() => InstalledTheme.Run(_ =>
+    {
+        var list = List(FabListSide.Bottom, new AvonicFabButton());
+        list.Margin = new Thickness(4);
+        var fab = Fab(MainButton(), list);
+        fab.Activated = true;
+        fab.Horizontal = FabHorizontal.Center;
+        fab.Vertical = FabVertical.Center;
+        var (_, scene) = InContent(fab);
+        using (scene)
+        {
+            list.Side = FabListSide.Top;
+            Dispatcher.UIThread.RunJobs();
+
+            // Its margin box ends at the fab's top, as bottom: 0 with a margin of 100%, and its own margin is 4 all round.
+            AssertBox(4, -60, 56, 56, Box(list, fab));
         }
     });
 
