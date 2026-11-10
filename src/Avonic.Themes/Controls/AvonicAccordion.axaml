@@ -1,0 +1,118 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicAccordionGroup Value="first">
+                <c:AvonicAccordion Value="first">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="First" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="First content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="second">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Second" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="Second content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+            <c:AvonicAccordionGroup Expand="Inset" Value="b">
+                <c:AvonicAccordion Value="a">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset A" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="b">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset B" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="B content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of accordion.md.css, and of the accordion rules in core.css and accordion-group.md.css that style the
+         accordion itself. What reaches into the header's item is in Styles/Accordion.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicAccordion}" TargetType="c:AvonicAccordion">
+        <!-- background-color: var(ion-background-color, #fff) -->
+        <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorBrush}" />
+        <!-- overflow: hidden is on PART_Clip, because here it would clip the inset shadow too -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="CornerRadius">
+            <MultiBinding Converter="{x:Static c:AccordionCorners.ToCornerRadius}">
+                <Binding Path="(c:AccordionCorners.Top)" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="(c:AccordionCorners.Bottom)" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Host" CornerRadius="{TemplateBinding CornerRadius}">
+                    <Border Name="PART_Clip"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ClipToBounds="True">
+                        <StackPanel>
+                            <ContentPresenter Name="PART_Header"
+                                              Content="{TemplateBinding HeaderContent}"
+                                              ContentTemplate="{TemplateBinding HeaderContentTemplate}" />
+                            <c:AccordionContentClip Name="PART_Content">
+                                <ContentPresenter Name="PART_ContentWrapper"
+                                                  Content="{TemplateBinding ContentContent}"
+                                                  ContentTemplate="{TemplateBinding ContentContentTemplate}" />
+                            </c:AccordionContentClip>
+                        </StackPanel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.accordion-animated) { transition: all 300ms ... } -->
+        <Style Selector="^:accordion-animated">
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.Accordion.Md.Transition}" />
+        </Style>
+
+        <!-- :host(.accordion-disabled) #header, #content { opacity: 0.4 }: not the host, which would show the shadow behind -->
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_Header">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <Style Selector="^:disabled /template/ c|AccordionContentClip#PART_Content">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- Inset, from accordion-group.md.css and core.css. Later rules win, as the more specific or later CSS does. -->
+        <Style Selector="^:accordion-group-expand-inset /template/ Border#PART_Host">
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.AccordionGroup.Md.InsetBoxShadow}" />
+        </Style>
+        <Style Selector="^:accordion-group-expand-inset:expanded">
+            <Setter Property="Margin" Value="0,16" />
+            <Setter Property="c:AccordionCorners.Top" Value="6" />
+            <Setter Property="c:AccordionCorners.Bottom" Value="6" />
+        </Style>
+        <Style Selector="^:accordion-group-expand-inset:accordion-previous">
+            <Setter Property="c:AccordionCorners.Bottom" Value="6" />
+        </Style>
+        <Style Selector="^:accordion-group-expand-inset:accordion-next">
+            <Setter Property="c:AccordionCorners.Top" Value="6" />
+        </Style>
+        <!-- core.css: first-of-type and last-of-type, 8px, which beat the group's 6px as the document's rules beat ::slotted -->
+        <Style Selector="^:accordion-group-expand-inset:nth-child(1)">
+            <Setter Property="c:AccordionCorners.Top" Value="8" />
+        </Style>
+        <Style Selector="^:accordion-group-expand-inset:nth-last-child(1)">
+            <Setter Property="c:AccordionCorners.Bottom" Value="8" />
+        </Style>
+        <Style Selector="^:accordion-group-expand-inset:expanded:nth-child(1)">
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
