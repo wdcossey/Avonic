@@ -49,6 +49,19 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#17](https://github.com/wdcossey/Avonic/issues/17) | `ion-img`, `ion-skeleton-text` | **done** — [docs](components/ion-img/README.md) |
 | [#18](https://github.com/wdcossey/Avonic/issues/18) | `ion-progress-bar` | **done** — [docs](components/ion-progress-bar/README.md) |
 | [#19](https://github.com/wdcossey/Avonic/issues/19) | `ion-chip` | **done** — [docs](components/ion-chip/README.md) |
+| [#20](https://github.com/wdcossey/Avonic/issues/20) | `ion-checkbox` | **done** — [docs](components/ion-checkbox/README.md) |
+| [#21](https://github.com/wdcossey/Avonic/issues/21) | `ion-toggle` | **done** — [docs](components/ion-toggle/README.md) |
+| [#22](https://github.com/wdcossey/Avonic/issues/22) | `ion-radio`, `ion-radio-group` | **done** — [docs](components/ion-radio/README.md) |
+| [#23](https://github.com/wdcossey/Avonic/issues/23) | `ion-range` | **done** — [docs](components/ion-range/README.md) |
+| [#24](https://github.com/wdcossey/Avonic/issues/24) | `ion-input`, `ion-input-password-toggle` | **done** — [docs](components/ion-input/README.md) |
+| [#28](https://github.com/wdcossey/Avonic/issues/28) | `ion-segment` family | **done** — [docs](components/ion-segment/README.md) |
+| [#29](https://github.com/wdcossey/Avonic/issues/29) | `ion-tabs` family (standalone, with no router) | **done** — [docs](components/ion-tabs/README.md) |
+| [#30](https://github.com/wdcossey/Avonic/issues/30) | `ion-fab` family | **done** — [docs](components/ion-fab/README.md) |
+| [#32](https://github.com/wdcossey/Avonic/issues/32) | `ion-accordion`, `ion-accordion-group` | **done** — [docs](components/ion-accordion/README.md) |
+| [#33](https://github.com/wdcossey/Avonic/issues/33) | `ion-breadcrumbs`, `ion-breadcrumb` | **done** — [docs](components/ion-breadcrumbs/README.md) |
+| [#36](https://github.com/wdcossey/Avonic/issues/36) | `ion-infinite-scroll`, `ion-infinite-scroll-content` | **done** — [docs](components/ion-infinite-scroll/README.md) |
+| [#66](https://github.com/wdcossey/Avonic/issues/66) | infra: an Android project for the sample, run on a Pixel 8 | **done** — [docs](infra/android/README.md) |
+| [#114](https://github.com/wdcossey/Avonic/issues/114) | infra: overlays under Android's `MainViewFactory`, with no `TopLevel` given | **done** — [docs](infra/overlays/README.md) |
 | [#71](https://github.com/wdcossey/Avonic/issues/71) | `ion-item`: a flex-like layout for long content | **done** — [docs](components/ion-item/README.md) |
 | [#72](https://github.com/wdcossey/Avonic/issues/72) | `ion-item`: shared press handling, `Command`, ripple and automation | **done** — [docs](components/ion-item/README.md) |
 | [#100](https://github.com/wdcossey/Avonic/issues/100) | infra: Roboto on both sides, for the tests, the tools and the sample | **done** — [docs](infra/roboto/README.md) |

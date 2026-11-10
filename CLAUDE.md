@@ -35,7 +35,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
   Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back),
-                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md)
+                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present() with no TopLevel
+                         finds the current activity's under Android's MainViewFactory (OpenTopLevels, the last one still open)
   Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
@@ -114,6 +115,17 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-progress-bar` | `AvonicProgressBar` | done — [docs](docs/components/ion-progress-bar/README.md) |
 | `ion-chip` | `AvonicChip` (+ `Click`, from `Behaviors.NativeButton`, and `Command`, as extensions) | done — [docs](docs/components/ion-chip/README.md) |
 | `ion-backdrop` | `AvonicBackdrop` (with the [overlay system](docs/infra/overlays/README.md)) | done — [docs](docs/components/ion-backdrop/README.md) |
+| `ion-checkbox` | `AvonicCheckbox` | done — [docs](docs/components/ion-checkbox/README.md) |
+| `ion-toggle` | `AvonicToggle` | done — [docs](docs/components/ion-toggle/README.md) |
+| `ion-radio`, `ion-radio-group` | `AvonicRadio`, `AvonicRadioGroup` | done — [docs](docs/components/ion-radio/README.md) |
+| `ion-range` | `AvonicRange` (+ `RangeValue`, one value or two) | done — [docs](docs/components/ion-range/README.md) |
+| `ion-input`, `ion-input-password-toggle` | `AvonicInput`, and `AvonicInputPasswordToggle` for `ion-input-password-toggle` | done — [docs](docs/components/ion-input/README.md) |
+| `ion-segment`, `ion-segment-button`, `ion-segment-view`, `ion-segment-content` | `AvonicSegment`, `AvonicSegmentButton`, `AvonicSegmentView`, `AvonicSegmentContent` | done — [docs](docs/components/ion-segment/README.md) |
+| `ion-tabs`, `ion-tab`, `ion-tab-bar`, `ion-tab-button` | `AvonicTabs`, `AvonicTab`, `AvonicTabBar`, `AvonicTabButton` (standalone, with no router) | done — [docs](docs/components/ion-tabs/README.md) |
+| `ion-fab`, `ion-fab-button`, `ion-fab-list` | `AvonicFab`, `AvonicFabButton`, `AvonicFabList` | done — [docs](docs/components/ion-fab/README.md) |
+| `ion-accordion`, `ion-accordion-group` | `AvonicAccordion`, `AvonicAccordionGroup` | done — [docs](docs/components/ion-accordion/README.md) |
+| `ion-breadcrumbs`, `ion-breadcrumb` | `AvonicBreadcrumbs`, `AvonicBreadcrumb` | done — [docs](docs/components/ion-breadcrumbs/README.md) |
+| `ion-infinite-scroll`, `ion-infinite-scroll-content` | `AvonicInfiniteScroll`, `AvonicInfiniteScrollContent` | done — [docs](docs/components/ion-infinite-scroll/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
 each priority tier, not by the control's own PR, so a recently finished control may be missing. For
