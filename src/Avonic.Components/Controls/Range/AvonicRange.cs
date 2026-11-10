@@ -179,6 +179,9 @@ public class AvonicRange : TemplatedControl, IItemControl
     private bool _noUpdate;
     private bool _inItem;
     private bool _loaded;
+    private int? _places;
+    private (double Min, double Max, double Step, bool Show) _tickKey;
+    private double[] _tickRatios = [];
     private bool _captured;
     private bool _initialContentScrollY = true;
     private bool _contentScrollDisabled;
@@ -419,7 +422,13 @@ public class AvonicRange : TemplatedControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // connectedCallback: updateRatio, activeBarStartChanged, then the gesture and the closest ion-content.
+        // connectedCallback: updateRatio, activeBarStartChanged, then the gesture and the closest ion-content. Before the first
+        // load the knobs start at 0, as Ionic's do, whatever order the props were set in, so that A is the lower of two.
+        if (!_loaded)
+        {
+            (_ratioA, _ratioB) = (0, 0);
+        }
+
         UpdateRatio();
         ActiveBarStartChanged();
         SetupGesture();
@@ -497,6 +506,7 @@ public class AvonicRange : TemplatedControl, IItemControl
         else if (change.Property == MinProperty || change.Property == MaxProperty)
         {
             // minChanged, maxChanged
+            _places = null;
             if (!_noUpdate)
             {
                 UpdateRatio();
@@ -506,7 +516,12 @@ public class AvonicRange : TemplatedControl, IItemControl
         }
         else if (change.Property == ActiveBarStartProperty)
         {
-            ActiveBarStartChanged();
+            // A watch, which isn't called before load: connectedCallback checks it once every prop is set.
+            if (_loaded)
+            {
+                ActiveBarStartChanged();
+            }
+
             Render();
         }
         else if (change.Property == DebounceProperty)
@@ -514,8 +529,13 @@ public class AvonicRange : TemplatedControl, IItemControl
             // debounceChanged: back to the original emitter. A pending one still fires, as Ionic's timer does.
             _debounce = null;
         }
+        else if (change.Property == StepProperty)
+        {
+            _places = null;
+            Render();
+        }
         else if (change.Property == IsEnabledProperty || change.Property == DualKnobsProperty || change.Property == PinProperty
-                 || change.Property == PinFormatterProperty || change.Property == SnapsProperty || change.Property == StepProperty
+                 || change.Property == PinFormatterProperty || change.Property == SnapsProperty
                  || change.Property == TicksProperty || change.Property == LabelProperty || change.Property == LabelContentProperty
                  || change.Property == LabelPlacementProperty || change.Property == StartContentProperty
                  || change.Property == EndContentProperty)
@@ -557,9 +577,12 @@ public class AvonicRange : TemplatedControl, IItemControl
         return DualKnobs ? new RangeValue(value.Lower, value.Upper) : new RangeValue(value.Number);
     }
 
-    private double ValA => RatioToValue(_ratioA, Min, Max, Step);
+    private double ValA => RatioToValue(_ratioA);
 
-    private double ValB => RatioToValue(_ratioB, Min, Max, Step);
+    private double ValB => RatioToValue(_ratioB);
+
+    /// <summary>The most decimals of <see cref="Min"/>, <see cref="Max"/> and <see cref="Step"/>, which a value is rounded to.</summary>
+    private int Places => _places ??= Math.Max(DecimalPlaces(Min), Math.Max(DecimalPlaces(Max), DecimalPlaces(Step)));
 
     private double RatioLower => DualKnobs
         ? Math.Min(_ratioA, _ratioB)
@@ -643,8 +666,9 @@ public class AvonicRange : TemplatedControl, IItemControl
     }
 
     /// <summary><c>ratioToValue</c>: Ionic adds <c>min</c> only with a step, and rounds to the decimals of the three.</summary>
-    internal static double RatioToValue(double ratio, double min, double max, double step)
+    private double RatioToValue(double ratio)
     {
+        var (min, max, step) = (Min, Max, Step);
         var value = (max - min) * ratio;
         if (step > 0)
         {
@@ -652,7 +676,7 @@ public class AvonicRange : TemplatedControl, IItemControl
             value = Math.Floor(value / step + 0.5) * step + min;
         }
 
-        return RoundToMaxDecimalPlaces(Math.Max(min, Math.Min(value, max)), min, max, step);
+        return RoundToMaxDecimalPlaces(Math.Max(min, Math.Min(value, max)), Places);
     }
 
     /// <summary><c>valueToRatio</c>.</summary>
@@ -660,14 +684,13 @@ public class AvonicRange : TemplatedControl, IItemControl
         Math.Max(0, Math.Min((value - min) / (max - min), 1));
 
     /// <summary><c>roundToMaxDecimalPlaces</c>: <c>toFixed</c> to the most decimals any of the references has.</summary>
-    private static double RoundToMaxDecimalPlaces(double value, params double[] references)
+    private static double RoundToMaxDecimalPlaces(double value, int places)
     {
         if (!double.IsFinite(value))
         {
             return 0;
         }
 
-        var places = references.Max(DecimalPlaces);
         return double.Parse(value.ToString("F" + places.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
     }
 
@@ -768,7 +791,7 @@ public class AvonicRange : TemplatedControl, IItemControl
         var ratio = RatioAt(x);
         if (Snaps)
         {
-            ratio = ValueToRatio(RatioToValue(ratio, Min, Max, Step), Min, Max);
+            ratio = ValueToRatio(RatioToValue(ratio), Min, Max);
         }
 
         if (_pressedKnob == RangeKnob.A)
@@ -789,7 +812,6 @@ public class AvonicRange : TemplatedControl, IItemControl
     {
         var ratio = RatioAt(x);
         _pressedKnob = !DualKnobs || Math.Abs(_ratioA - ratio) < Math.Abs(_ratioB - ratio) ? RangeKnob.A : RangeKnob.B;
-        Render();
     }
 
     /// <summary><c>disableContentScrollY</c>, once a drag starts.</summary>
@@ -981,21 +1003,19 @@ public class AvonicRange : TemplatedControl, IItemControl
         // Ticks: one per step from min to max, with snaps and ticks. Ionic's loop never ends with a step of 0.
         if (_ticks is not null)
         {
-            var ticks = new List<RangeTick>();
-            if (Snaps && Ticks && Step > 0)
+            var key = (min, max, Step, Snaps && Ticks && Step > 0);
+            if (key != _tickKey)
             {
-                var (low, high) = (Math.Min(ratioLower, ratioUpper), Math.Max(ratioLower, ratioUpper));
-                for (var value = min; value <= max; value += Step)
-                {
-                    var ratio = ValueToRatio(value, min, max);
-                    ticks.Add(new RangeTick(ratio, ratio >= low && ratio <= high));
+                _tickKey = key;
+                _tickRatios = key.Item4 ? TickRatios(min, max, Step) : [];
+            }
 
-                    // A step too small to change a value this large would loop for ever, as Ionic's does.
-                    if (value + Step == value)
-                    {
-                        break;
-                    }
-                }
+            var (low, high) = (Math.Min(ratioLower, ratioUpper), Math.Max(ratioLower, ratioUpper));
+            var ticks = new RangeTick[_tickRatios.Length];
+            for (var i = 0; i < ticks.Length; i++)
+            {
+                var ratio = _tickRatios[i];
+                ticks[i] = new RangeTick(ratio, ratio >= low && ratio <= high);
             }
 
             _ticks.Items = ticks;
@@ -1003,6 +1023,24 @@ public class AvonicRange : TemplatedControl, IItemControl
 
         RenderKnob(_handleA, RangeKnob.A, Finite(_ratioA), valA);
         RenderKnob(_handleB, RangeKnob.B, Finite(_ratioB), valB);
+    }
+
+    /// <summary>Where the ticks are: one per step from min to max, as Ionic's loop adds them up.</summary>
+    private static double[] TickRatios(double min, double max, double step)
+    {
+        var ratios = new List<double>();
+        for (var value = min; value <= max; value += step)
+        {
+            ratios.Add(ValueToRatio(value, min, max));
+
+            // A step too small to change a value this large would loop for ever, as Ionic's does.
+            if (value + step == value)
+            {
+                break;
+            }
+        }
+
+        return [.. ratios];
     }
 
     /// <summary>A ratio of NaN, from a <see cref="Min"/> equal to <see cref="Max"/>, is an invalid <c>left</c>, which CSS ignores.</summary>

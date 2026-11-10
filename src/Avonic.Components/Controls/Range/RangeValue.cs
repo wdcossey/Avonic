@@ -89,10 +89,12 @@ public sealed class RangeValueTypeConverter : TypeConverter
     };
 
     public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType) =>
-        destinationType == typeof(string) || destinationType == typeof(double) || base.CanConvertTo(context, destinationType);
+        destinationType == typeof(string) || destinationType == typeof(double) || destinationType == typeof(int) || base.CanConvertTo(context, destinationType);
 
     public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType) =>
         value is RangeValue range
-            ? destinationType == typeof(double) ? range.Number : range.ToString()
+            ? destinationType == typeof(double) ? range.Number
+              : destinationType == typeof(int) ? (int)Math.Floor(range.Number + 0.5)
+              : range.ToString()
             : base.ConvertTo(context, culture, value, destinationType);
 }

@@ -16,7 +16,7 @@ with a label, start and end slots, ticks, a pin, and an active bar that can star
 ```
 
 `Value` is a `RangeValue`: a number for one knob, `new RangeValue(lower, upper)` for two, `"40"` or `"20,80"` in XAML. A `double`
-converts to one, and `(double)value` is the number, or a pair's upper.
+converts to one, and `(double)value` is the number, or a pair's upper. A binding to a `double` or `int` works both ways.
 
 ## API
 
@@ -24,7 +24,7 @@ converts to one, and `(double)value` is the number, or a pair's upper.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | One knob only. Clamped into `Min` to `Max` |
+| [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | One knob only. Clamped into `Min` to `Max`, once they're set |
 | [x] | `color` | `Color` | See the [colour system](../../infra/color-system/README.md) |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | Delays `IonInput` only |
 | [x] | `disabled` | `IsEnabled` | `:range-disabled` follows the range's own `IsEnabled`, as Ionic's class follows its own prop |
@@ -89,7 +89,8 @@ All 23 in [PLAN.md](PLAN.md#behaviours), each with a test in `AvonicRangeTests`,
   exactly, and the value rounds to `Step`. In an `AvonicContent`, its `ScrollY` is off until the release.
 - A tap, or a move under 10 px, moves the nearer knob to the release. With two knobs, a tie goes to B, and the knobs can cross.
 - Right and Up add a step on a focused knob, Left and Down take one away, in RTL too.
-- In an item, 18 px of padding at an end with nothing there, so that a knob at the limit isn't cut off by the item.
+- In an item, 18 px of padding at an end with nothing there, so that a knob at the limit isn't cut off by the item. In an item's
+  start or end slot it grows, with `FlexRow.Flex` 3, as `flex: 3`.
 - Each knob is a slider for automation, named by `AutomationProperties.Name`, or else as Chromium names it from the label element.
 
 ## Resource keys

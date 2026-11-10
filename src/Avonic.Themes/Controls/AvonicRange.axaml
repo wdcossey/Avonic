@@ -35,6 +35,9 @@
     <ControlTheme x:Key="{x:Type c:AvonicRange}" TargetType="c:AvonicRange">
         <!-- font-family: var(ion-font-family, inherit) -->
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- flex: 3, which a FlexRow reads where the range is slotted, such as an item's start or end slot. The item's default slot
+             has a flex of its own, which wins. -->
+        <Setter Property="c:FlexRow.Flex" Value="3" />
         <Setter Property="Template">
             <ControlTemplate>
                 <!-- The host's padding: the item adjustments, then the pin's room as the wrapper's margin. -->

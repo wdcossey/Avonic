@@ -13,7 +13,7 @@ and Chromium's accessibility tree through CDP. The pages are at the top of [COMP
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | Single knob only. Clamped into `[Min, Max]` when it's set and when the range is attached, as `activeBarStartChanged` is, with `SetCurrentValue` so that a binding stays |
+| [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | Single knob only. Clamped into `[Min, Max]` when it's set after the range has loaded, and when it's attached, as `activeBarStartChanged` is a watch and in `connectedCallback`; with `SetCurrentValue`, so that a binding stays |
 | [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`. Bars, knob, halo, pin and ticks |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | `IonInput` only, through `AvonicConfig.Schedule`, as `debounceEvent` is `setTimeout`. `int?` as in `AvonicInput` (#120) |
 | [x] | `disabled` | `IsEnabled` | Mapping rule. `:range-disabled` follows the range's own `IsEnabled`, as Ionic's class follows its own prop |
@@ -111,7 +111,7 @@ From `range.js` and `range.md.css`, each checked in Chromium. Each becomes a tes
 | 9 | `Pin`: a pin over the knob with `PinFormatter(value)`, scaled from 0.01 to 1 and raised 24 px while the knob is pressed or keyboard-focused, with the knob staying at 0.67. Room for it: 28 px of padding above, or under a stacked label | md.css; measured `press`, `release 500`, `r3` (host 70 tall) |
 | 10 | The knobs are tab stops, A then B. `IonFocus` as focus enters the range and `IonBlur` as it leaves; nothing between its knobs. A knob focused by keyboard or code is `:ion-focused` (halo 2×, pin up, knob at 1 with no pin), and one focused by a press isn't. A press on a knob focuses it | `onKnobFocus`, `onKnobBlur`, `focusFromPointer`; measured `tabs`, `focused part`, `click same` |
 | 11 | Disabled: no drag, tap or key, and not a tab stop; the bar, ticks and knob grey, the knob at 0.55 in a white ring, the label and slots at 0.38 | `disabled`, `tabindex`, md.css; measured `r10` |
-| 12 | In an item, at any depth: `:in-item`; with nothing at the start (a start or fixed label, or a start slot) 18 px of padding there, and the same at the end, so that a knob at the limit isn't cut off; a stacked label gets 10 px above. The item counts it as an input | `hostContext('ion-item')`, `needsStartAdjustment`; measured `r1`, `r2`, `r6`, `r4` |
+| 12 | In an item, at any depth: `:in-item`; with nothing at the start (a start or fixed label, or a start slot) 18 px of padding there, and the same at the end, so that a knob at the limit isn't cut off; a stacked label gets 10 px above. The item counts it as an input. In an item's start or end slot, `flex: 3` (measured: 265.5 of the row, the slider 229.5) | `hostContext('ion-item')`, `needsStartAdjustment`; measured `r1`, `r2`, `r6`, `r4` |
 | 13 | The label: start puts it before the slider with 16 px between, end after; fixed is 100 px wide, wrapping; stacked is above at 0.75 from its top start corner, 16 px over the slider. With none, it takes no room. A long label squeezes the slider, to nothing (measured `r12`). A label in the slot is at most 200 px, on one line, with an ellipsis | md.css; measured `r1`, `r4`, `r5`, `r6`, `r12` |
 | 14 | Start and end slots: 14 px toward the slider, text at 12 px, an icon at 24 px | md.css; measured `r8`, `r11` |
 | 15 | RTL mirrors it: the knob is near the right for a low value, and a press counts from the right. The arrows don't swap | `isRTL`; measured `rtl` |

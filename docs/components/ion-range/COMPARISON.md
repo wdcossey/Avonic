@@ -67,7 +67,7 @@ can sit about 1 px apart. The rows are the same heights (48; 71 with a pin; 88 s
 | 9 | The pin: `Math.round`, scaled up and raised 24 px while pressed or focused, 28 px of room | Match; the pin frame lines up |
 | 10 | Focus: tab stops A then B, one `IonFocus` in and one `IonBlur` out; `:ion-focused` by keyboard or code, not by a press | Match. **Deliberate difference:** a tap on a knob. Chromium focuses it from the compatibility mouse events after `pointerup`, so the knob looks keyboard-focused, pin up, until it's blurred (measured `release 500`). Avalonia focuses on the press with `NavigationMethod.Pointer`, so a tap is like a mouse click in Chromium, which doesn't show it |
 | 11 | Disabled | Match: grey bar, knob at 0.55 in a white ring, label at 0.38. The ring is a 5 px spread shadow, which follows the corners as Chromium's outline does |
-| 12 | In an item: `:in-item`, 18 px adjustments, an input to the item | Match: `r1`, `r2`, `r6` boxes |
+| 12 | In an item: `:in-item`, 18 px adjustments, an input to the item; `flex: 3` in a start or end slot | Match: `r1`, `r2`, `r6` boxes, and 265.5 px in the start slot |
 | 13 | Label placements, a long label squeezing the slider, the slot's 200 px | Match: boxes within 1 px |
 | 14 | Slots: 14 px gaps, 12 px text, 24 px icons | Match |
 | 15 | RTL | Match in the frame; a press counts from the right. As in #116, `FlowDirection` inherits, where Ionic's `isRTL` reads only the range's own `dir` and the document's |

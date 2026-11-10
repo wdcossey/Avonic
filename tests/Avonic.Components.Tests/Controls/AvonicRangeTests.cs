@@ -523,6 +523,16 @@ public class AvonicRangeTests
         Assert.False(HandleB(single).IsVisible);
     }
 
+    [AvaloniaFact]
+    public void R07_A_Is_The_Lower_Knob_Whatever_Order_The_Props_Were_Set_In()
+    {
+        var range = new AvonicRange { Value = new RangeValue(20, 80), DualKnobs = true };
+        using var scene = Stub(range);
+
+        Assert.Equal(20, HandleA(range).Value);
+        Assert.Equal(80, HandleB(range).Value);
+    }
+
     // ── 8: activeBarStart ────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -543,6 +553,17 @@ public class AvonicRangeTests
     }
 
     [AvaloniaFact]
+    public void R08_ActiveBarStart_Is_Checked_Once_Every_Prop_Is_Set()
+    {
+        // Before Max is set it's over the default 100, and it stays: Ionic checks it at connectedCallback.
+        var range = new AvonicRange { ActiveBarStart = 150, Max = 200, Value = 20 };
+        using var scene = Stub(range);
+
+        Assert.Equal(150, range.ActiveBarStart);
+        AssertNear(39, Bounds(Part<Control>(range, "PART_BarActive"), scene.Window).X);
+    }
+
+    [AvaloniaFact]
     public void R08_ActiveBarStart_Outside_Min_To_Max_Moves_To_The_Nearer_End()
     {
         var range = new AvonicRange { ActiveBarStart = 150 };
@@ -559,7 +580,7 @@ public class AvonicRangeTests
     public void R09_The_Pin_Shows_The_Formatted_Value_And_Rises_While_Pressed_Or_Keyboard_Focused() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var range = new AvonicRange { Pin = true, Value = 42.5 };
+        var range = new AvonicRange { Pin = true, Value = 42.5, Step = 0.5 };
         using var scene = InItems(range);
         var pin = Part<Panel>(range, "PART_PinA");
         var knob = Part<Border>(range, "PART_KnobA");
@@ -569,9 +590,9 @@ public class AvonicRangeTests
         Assert.Equal("43", Part<TextBlock>(range, "PART_PinTextA").Text);
         AssertNear(0.01, Scale(pin), 1e-6);
 
-        // The pin shows the knob's value, which is on a step: 43.
+        // The pin shows the knob's value, which is on a step.
         range.PinFormatter = value => $"{value:0.0} °C";
-        Assert.Equal("43.0 °C", Part<TextBlock>(range, "PART_PinTextA").Text);
+        Assert.Equal("42.5 °C", Part<TextBlock>(range, "PART_PinTextA").Text);
 
         HandleA(range).Focus(NavigationMethod.Tab);
         Settle();
@@ -583,9 +604,9 @@ public class AvonicRangeTests
         // Room for it: measured r3, 28 px above.
         Assert.Equal(70, range.Bounds.Height);
 
-        // The pin's circle and its tip, below the circle, in pin-background.
+        // The pin's circle, above its tip's rounded top, and the tip, below the circle, in pin-background.
         var handle = Bounds(HandleA(range), scene.Window);
-        AssertClose(Primary, Pixel(scene, (int)handle.Center.X, (int)handle.Y - 21));
+        AssertClose(Primary, Pixel(scene, (int)handle.Center.X, (int)(handle.Y - 22.5)));
         AssertClose(Primary, Pixel(scene, (int)handle.Center.X, (int)handle.Y + 5));
     });
 
@@ -738,6 +759,18 @@ public class AvonicRangeTests
         using var alone = Stub(outside);
         Assert.DoesNotContain(":in-item", outside.Classes);
         Assert.DoesNotContain(":range-item-start-adjustment", outside.Classes);
+    });
+
+    [AvaloniaFact]
+    public void R12_In_An_Items_Start_Slot_It_Grows_With_Flex_3() => InstalledTheme.Run(_ =>
+    {
+        var range = new AvonicRange { Value = 50 };
+        var holder = new StackPanel { Children = { new AvonicItem { StartContent = range } } };
+        using var scene = Themed(holder);
+
+        // Measured: 265.5 of the row, with 18 px padding at both ends, the slider 229.5.
+        AssertNear(265.5, range.Bounds.Width, 1);
+        AssertNear(229.5, Slider(range).Bounds.Width, 1);
     });
 
     [AvaloniaFact]
@@ -1029,13 +1062,21 @@ public class AvonicRangeTests
         Assert.Equal(0.25, halo.Opacity, 6);
         mouse.Up(centre, 1200);
 
-        // A mouse over the knob: 2x, at 0.13.
-        HandleA(range).Focus(NavigationMethod.Unspecified);
-        clock.At(2000);
-        scene.Window.MouseMove(centre + new Point(1, 0), RawInputModifiers.None);
+    });
+
+    [AvaloniaFact]
+    public void R19_A_Mouse_Over_The_Knob_Grows_Its_Halo() => InstalledTheme.Run(_ =>
+    {
+        var range = new AvonicRange { Value = 50 };
+        using var scene = InItems(range);
+        var halo = Part<Border>(range, "PART_HaloA");
+
+        scene.Window.MouseMove(Bounds(HandleA(range), scene.Window).Center, RawInputModifiers.None);
         Settle();
+        Assert.False(HandleA(range).IsFocused);
         Assert.Contains(":ion-hover", HandleA(range).Classes);
         Assert.Equal(2, Scale(halo), 6);
+        Assert.Equal(0.13, halo.Opacity, 6);
     });
 
     // ── 20: automation ───────────────────────────────────────────────────────────────────────
@@ -1162,6 +1203,36 @@ public class AvonicRangeTests
         range.LabelPlacement = RangeLabelPlacement.Stacked;
         Assert.Contains(":label-placement-stacked", range.Classes);
         Assert.DoesNotContain(":label-placement-start", range.Classes);
+    }
+
+    private sealed class Volume : System.ComponentModel.INotifyPropertyChanged
+    {
+        private int _level = 30;
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+        public int Level
+        {
+            get => _level;
+            set
+            {
+                _level = value;
+                PropertyChanged?.Invoke(this, new(nameof(Level)));
+            }
+        }
+    }
+
+    [AvaloniaFact]
+    public void RangeValue_Binds_Both_Ways_To_An_Int()
+    {
+        var model = new Volume();
+        var range = new AvonicRange { DataContext = model };
+        range.Bind(AvonicRange.ValueProperty, new Avalonia.Data.Binding(nameof(Volume.Level)));
+        using var scene = Stub(range);
+        Assert.Equal(new RangeValue(30), range.Value);
+
+        Click(scene, At(range, scene, 0.6));
+        Assert.Equal(60, model.Level);
     }
 
     // ── RangeValue ───────────────────────────────────────────────────────────────────────────
