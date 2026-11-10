@@ -1,0 +1,204 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicBreadcrumbs>
+                <c:AvonicBreadcrumb Href="#home" Content="Home" />
+                <c:AvonicBreadcrumb Href="#electronics" Content="Electronics" />
+                <c:AvonicBreadcrumb Content="Cameras" />
+            </c:AvonicBreadcrumbs>
+            <c:AvonicBreadcrumbs MaxItems="3">
+                <c:AvonicBreadcrumb Content="Home" />
+                <c:AvonicBreadcrumb Content="Electronics" />
+                <c:AvonicBreadcrumb Content="Photography" />
+                <c:AvonicBreadcrumb Content="Cameras" />
+            </c:AvonicBreadcrumbs>
+            <c:AvonicBreadcrumbs Color="primary">
+                <c:AvonicBreadcrumb Content="Home" />
+                <c:AvonicBreadcrumb Content="Primary" />
+            </c:AvonicBreadcrumbs>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- .breadcrumbs-collapsed-indicator: a native button, 32 by 18, its icon 22 and 1 down. :hover is a mouse's, and :focus any
+         focus, as CSS's are. outline: none. -->
+    <ControlTheme x:Key="Avonic.BreadcrumbCollapsedIndicator" TargetType="Button">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Margin" Value="14,0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Background" Value="{DynamicResource Avonic.Breadcrumb.Md.CollapsedIndicatorBackground}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Breadcrumb.Md.CollapsedIndicatorColor}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Content="{TemplateBinding Content}"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Center" />
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+        <Style Selector="^:focus">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Breadcrumb.Md.CollapsedIndicatorBackgroundFocused}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- A translation of breadcrumb.md.css. The host's colour rules are in CSS's order of specificity, then of the file: later
+         beats earlier here. Slotted icons are in Styles/Breadcrumb.axaml, because a ControlTheme's styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBreadcrumb}" TargetType="c:AvonicBreadcrumb">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 1rem; font-weight: 400; line-height: 1.5 -->
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="TextBlock.LineHeight">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- .breadcrumb-native's padding -->
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- color: var(color) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Breadcrumb.Color" />
+                <DynamicResource ResourceKey="Avonic.Breadcrumb.Md.Color" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Background="Transparent">
+                    <!-- background: inherit, which is the host's. -->
+                    <Border Name="PART_Native" VerticalAlignment="Center"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                              Content="{TemplateBinding EndContent}"
+                                              ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        </StackPanel>
+                    </Border>
+                    <Button Name="PART_CollapsedIndicator"
+                            Theme="{StaticResource Avonic.BreadcrumbCollapsedIndicator}"
+                            VerticalAlignment="Center"
+                            IsVisible="False"
+                            AutomationProperties.Name="Show more breadcrumbs">
+                        <!-- font-size: 1.375rem; margin-top: 1px. Its own size, so that it isn't shrunk to the 18 px button. -->
+                        <c:AvonicIcon IconName="ellipsis-horizontal" FontSize="22" Width="22" Height="22" Margin="0,1,0,0"
+                                      AutomationProperties.AccessibilityView="Raw" />
+                    </Button>
+                    <!-- .breadcrumb-separator: margins 10, and -1 on top. -->
+                    <Panel Name="PART_Separator" VerticalAlignment="Center" Margin="10,-1,10,0" IsVisible="False"
+                           TextElement.Foreground="{DynamicResource Avonic.Breadcrumb.Md.SeparatorColor}"
+                           AutomationProperties.AccessibilityView="Raw">
+                        <TextBlock Text="/"
+                                   IsVisible="{Binding SeparatorContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                        <ContentPresenter Name="PART_SeparatorContent"
+                                          Content="{TemplateBinding SeparatorContent}"
+                                          ContentTemplate="{TemplateBinding SeparatorContentTemplate}" />
+                    </Panel>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.breadcrumb-collapsed) .breadcrumb-native { display: none } -->
+        <Style Selector="^:collapsed /template/ Border#PART_Native">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- :host(.breadcrumb-disabled). A disabled control already takes no input and lets it through. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
+        <!-- :host(.breadcrumb-active): color-active, and weight 500. -->
+        <Style Selector="^:active">
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.ColorActive" />
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.Md.ColorActive" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-focused): color-focused, and the native part's background, radius and shadow. -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.Md.ColorFocused" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused /template/ Border#PART_Native">
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Breadcrumb.Md.FocusedBoxShadow}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.Md.BackgroundFocused" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.in-breadcrumbs-color), and its separator: the breadcrumbs' base. -->
+        <Style Selector="^:in-breadcrumbs-color">
+            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Base)}" />
+        </Style>
+        <Style Selector="^:in-breadcrumbs-color /template/ Panel#PART_Separator">
+            <Setter Property="TextElement.Foreground" Value="{Binding $self.(b:ColorPalette.Base)}" />
+        </Style>
+
+        <!-- :host(.ion-color): its own base. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Base)}" />
+        </Style>
+
+        <!-- :host(.in-toolbar-color), and its separator: the toolbar's contrast at 0.8. -->
+        <Style Selector="^:in-toolbar-color">
+            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.ContrastColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.8}" />
+        </Style>
+        <Style Selector="^:in-toolbar-color /template/ Panel#PART_Separator">
+            <Setter Property="TextElement.Foreground" Value="{Binding $self.(b:ColorPalette.ContrastColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.8}" />
+        </Style>
+
+        <!-- :host(.ion-activatable:hover), a mouse's, which beats the rules above by specificity: in a coloured toolbar too, measured. -->
+        <Style Selector="^:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.Breadcrumb.Md.ColorHover" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.in-toolbar-color.breadcrumb-active), which ties with hover and comes after it. Its twin for in-breadcrumbs-color
+             only differs from hover over a link, and the shade below beats both there, so it's left out. -->
+        <Style Selector="^:in-toolbar-color:active">
+            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Contrast)}" />
+        </Style>
+
+        <!-- :host(.ion-activatable.in-breadcrumbs-color:hover), :host(.ion-activatable.ion-color:hover): the shade, over everything. -->
+        <Style Selector="^:ion-hover:in-breadcrumbs-color, ^:ion-hover:ion-color">
+            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Shade)}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

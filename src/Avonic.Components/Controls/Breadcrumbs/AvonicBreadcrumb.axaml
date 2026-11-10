@@ -1,0 +1,64 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The collapsed indicator, a native button in Ionic: a box around its content that takes input. -->
+    <ControlTheme x:Key="Avonic.BreadcrumbCollapsedIndicatorStub" TargetType="Button">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="Transparent"
+                                  Content="{TemplateBinding Content}"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Center" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-breadcrumb: structure only. The look is in Avonic.Themes. The host is a flex row with align-items:
+         center: the native part with the start, default and end slots, then the indicator and the separator, which the control shows
+         or hides as Ionic renders them or not. The transparent panel is what makes the whole box take input, as the host does. md's
+         separator is a slash, unless the separator slot has something. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBreadcrumb}" TargetType="c:AvonicBreadcrumb">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Background="Transparent">
+                    <Border Name="PART_Native" VerticalAlignment="Center" Padding="{TemplateBinding Padding}">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                              Content="{TemplateBinding EndContent}"
+                                              ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        </StackPanel>
+                    </Border>
+                    <Button Name="PART_CollapsedIndicator"
+                            Theme="{StaticResource Avonic.BreadcrumbCollapsedIndicatorStub}"
+                            VerticalAlignment="Center"
+                            IsVisible="False"
+                            AutomationProperties.Name="Show more breadcrumbs">
+                        <c:AvonicIcon IconName="ellipsis-horizontal" AutomationProperties.AccessibilityView="Raw" />
+                    </Button>
+                    <Panel Name="PART_Separator" VerticalAlignment="Center" IsVisible="False"
+                           AutomationProperties.AccessibilityView="Raw">
+                        <TextBlock Text="/"
+                                   IsVisible="{Binding SeparatorContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                        <ContentPresenter Name="PART_SeparatorContent"
+                                          Content="{TemplateBinding SeparatorContent}"
+                                          ContentTemplate="{TemplateBinding SeparatorContentTemplate}" />
+                    </Panel>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.breadcrumb-collapsed) .breadcrumb-native { display: none } -->
+        <Style Selector="^:collapsed /template/ Border#PART_Native">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

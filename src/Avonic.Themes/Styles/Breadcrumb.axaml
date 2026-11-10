@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- breadcrumb.md.css's ::slotted rules. Each slot is a ContentPresenter in the template, which is its content's logical parent,
+         so '>' means what's directly in a slot, as ::slotted does. The separator slot counts too. -->
+
+    <!-- ::slotted(ion-icon) { font-size: 1.125rem }, and its colour. -->
+    <Style Selector="c|AvonicBreadcrumb /template/ ContentPresenter > c|AvonicIcon">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Breadcrumb.Md.IconColor}" />
+    </Style>
+
+    <!-- :host(.breadcrumb-active) ::slotted(ion-icon) -->
+    <Style Selector="c|AvonicBreadcrumb:active /template/ ContentPresenter > c|AvonicIcon">
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Breadcrumb.Md.IconColorActive}" />
+    </Style>
+
+    <!-- ::slotted(ion-icon[slot=start]) and ::slotted(ion-icon[slot=end]): 8 on the side of the text. No activator, so an app's
+         plain style wins. -->
+    <Style Selector="c|AvonicBreadcrumb /template/ ContentPresenter#PART_Start > c|AvonicIcon">
+        <Setter Property="Margin" Value="0,0,8,0" />
+    </Style>
+    <Style Selector="c|AvonicBreadcrumb /template/ ContentPresenter#PART_End > c|AvonicIcon">
+        <Setter Property="Margin" Value="8,0,0,0" />
+    </Style>
+
+</Styles>
