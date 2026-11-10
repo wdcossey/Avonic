@@ -5,6 +5,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -230,6 +231,20 @@ public class AvonicRangeTests
         range.Value = 55;
 
         Assert.Equal(["input 55"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R02_The_Value_It_Loads_With_Raises_Nothing()
+    {
+        using var clock = new TestClock();
+        var inputs = 0;
+        var range = new AvonicRange { Debounce = 0 };
+        range.IonInput += (_, _) => inputs++;
+        range.Value = 50;
+        using var scene = Stub(range);
+        clock.At(100);
+
+        Assert.Equal(0, inputs);
     }
 
     // ── 3: a tap ─────────────────────────────────────────────────────────────────────────────
@@ -842,6 +857,25 @@ public class AvonicRangeTests
         AssertNear(282, Bounds(Slider(icons), scene.Window).Width, 1);
     });
 
+    [AvaloniaFact]
+    public void R14_Each_Slot_Takes_Its_Template()
+    {
+        static IDataTemplate Template(string prefix) =>
+            new FuncDataTemplate<string>((text, _) => new TextBlock { Text = prefix + text });
+
+        var range = new AvonicRange
+        {
+            StartContent = "a", StartContentTemplate = Template("start "),
+            EndContent = "b", EndContentTemplate = Template("end "),
+            LabelContent = "c", LabelContentTemplate = Template("label "),
+        };
+        using var scene = Stub(range);
+
+        Assert.Equal("start a", Assert.IsType<TextBlock>(Part<ContentPresenter>(range, "PART_Start").Child).Text);
+        Assert.Equal("end b", Assert.IsType<TextBlock>(Part<ContentPresenter>(range, "PART_End").Child).Text);
+        Assert.Equal("label c", Assert.IsType<TextBlock>(Part<ContentPresenter>(range, "PART_LabelContent").Child).Text);
+    }
+
     // ── 15: RTL ──────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -1072,6 +1106,17 @@ public class AvonicRangeTests
         range.Step = 0;
         Click(scene, At(range, scene, 1 / 3.0));
         Assert.Equal(new RangeValue(33), range.Value);
+    }
+
+    [AvaloniaFact]
+    public void R21_A_Tiny_Step_Keeps_Its_Decimals_As_JavaScript_Writes_Them()
+    {
+        var range = new AvonicRange { Min = 0, Max = 0.001, Step = 0.00001, Value = 0 };
+        using var scene = Stub(range);
+
+        // 0.00001 is "0.00001" in JavaScript, five places, where .NET writes 1E-05.
+        Click(scene, At(range, scene, 0.5));
+        Assert.Equal(new RangeValue(0.0005), range.Value);
     }
 
     // ── 22: two knobs snap on release ────────────────────────────────────────────────────────

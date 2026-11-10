@@ -178,6 +178,7 @@ public class AvonicRange : TemplatedControl, IItemControl
     private bool _hasFocus;
     private bool _noUpdate;
     private bool _inItem;
+    private bool _loaded;
     private bool _captured;
     private bool _initialContentScrollY = true;
     private bool _contentScrollDisabled;
@@ -427,6 +428,9 @@ public class AvonicRange : TemplatedControl, IItemControl
         // hostContext('ion-item'), at render. Read again here, as a moved range is attached again.
         _inItem = this.FindAncestorOfType<AvonicItem>() is not null;
         Render();
+
+        // componentDidLoad: from here, a change of the value is a watch's.
+        _loaded = true;
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -477,14 +481,18 @@ public class AvonicRange : TemplatedControl, IItemControl
         }
         else if (change.Property == ValueProperty)
         {
-            // valueChanged
-            EmitInput();
+            // valueChanged. A watch isn't called for the value a component loads with.
+            if (_loaded)
+            {
+                EmitInput();
+            }
+
+            // While the knobs set the value, the caller renders once they've moved.
             if (!_noUpdate)
             {
                 UpdateRatio();
+                Render();
             }
-
-            Render();
         }
         else if (change.Property == MinProperty || change.Property == MaxProperty)
         {
@@ -589,9 +597,15 @@ public class AvonicRange : TemplatedControl, IItemControl
     private void UpdateValue()
     {
         _noUpdate = true;
-        var (valA, valB) = (ValA, ValB);
-        SetCurrentValue(ValueProperty, DualKnobs ? new RangeValue(Math.Min(valA, valB), Math.Max(valA, valB)) : new RangeValue(valA));
-        _noUpdate = false;
+        try
+        {
+            var (valA, valB) = (ValA, ValB);
+            SetCurrentValue(ValueProperty, DualKnobs ? new RangeValue(Math.Min(valA, valB), Math.Max(valA, valB)) : new RangeValue(valA));
+        }
+        finally
+        {
+            _noUpdate = false;
+        }
     }
 
     /// <summary>
@@ -634,7 +648,8 @@ public class AvonicRange : TemplatedControl, IItemControl
         var value = (max - min) * ratio;
         if (step > 0)
         {
-            value = Math.Round(value / step, MidpointRounding.AwayFromZero) * step + min;
+            // Math.round: a half goes up, toward positive infinity.
+            value = Math.Floor(value / step + 0.5) * step + min;
         }
 
         return RoundToMaxDecimalPlaces(Math.Max(min, Math.Min(value, max)), min, max, step);
@@ -664,15 +679,14 @@ public class AvonicRange : TemplatedControl, IItemControl
             return 0;
         }
 
+        // .NET writes 1E-05 where JavaScript writes 0.00001, down to 1e-6: the digits, less the exponent.
         var text = value.ToString("R", CultureInfo.InvariantCulture);
-        var point = text.IndexOf('.');
-        if (point < 0)
-        {
-            return 0;
-        }
-
-        var exponent = text.IndexOfAny(['E', 'e']);
-        return (exponent < 0 ? text.Length : exponent) - point - 1;
+        var exponentAt = text.IndexOf('E');
+        var mantissa = exponentAt < 0 ? text : text[..exponentAt];
+        var exponent = exponentAt < 0 ? 0 : int.Parse(text[(exponentAt + 1)..], CultureInfo.InvariantCulture);
+        var point = mantissa.IndexOf('.');
+        var digits = point < 0 ? 0 : mantissa.Length - point - 1;
+        return Math.Max(0, digits - exponent);
     }
 
     // ── The gesture and taps ─────────────────────────────────────────────────────────────────
@@ -975,6 +989,12 @@ public class AvonicRange : TemplatedControl, IItemControl
                 {
                     var ratio = ValueToRatio(value, min, max);
                     ticks.Add(new RangeTick(ratio, ratio >= low && ratio <= high));
+
+                    // A step too small to change a value this large would loop for ever, as Ionic's does.
+                    if (value + Step == value)
+                    {
+                        break;
+                    }
                 }
             }
 

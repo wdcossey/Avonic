@@ -101,7 +101,7 @@ From `range.js` and `range.md.css`, each checked in Chromium. Each becomes a tes
 | # | Behaviour | Source, measurement |
 |---|---|---|
 | 1 | The knob's centre is at `(value - min) / (max - min)` of the slider, clamped to it; the active bar runs from the start to the knob. A value out of range isn't clamped | `valueToRatio`, `renderKnob`; measured `r1` (40: bar 114.1 of 285.3), `150` |
-| 2 | Setting `Value` in code raises `IonInput` when it differs, never `IonChange` | `valueChanged`; measured `programmatic` |
+| 2 | Setting `Value` in code raises `IonInput` when it differs, never `IonChange`; the value it loads with raises nothing, as a Stencil watch isn't called for it | `valueChanged`; measured `programmatic` |
 | 3 | A tap or click on the bar moves the knob to the release point: `IonKnobMoveStart` (the old value), `IonInput` (the new, if it differs), `IonChange`, `IonKnobMoveEnd`. A tap at the knob's own value still raises `IonChange`. A press doesn't move it, and a move under 10 px is still a tap, at the release | `onPointerUp`, `onStart`, `onEnd`; measured `click 75%`, `click same`, `6px move`, `touch tap 20%` |
 | 4 | A drag on the slider captures at 10 px, priority 100: `IonKnobMoveStart` at the capture, `IonInput` once a frame, `IonChange` and `IonKnobMoveEnd` at the release. The knob follows the pointer exactly, and the value rounds to `Step`. Meanwhile the range is `:range-pressed` and the knob `:pressed` | `setupGesture`, `onMove`, `update`; measured `drag` |
 | 5 | `Snaps` puts the knob on a step as it moves. With `Ticks` too, a tick per step from `Min` to `Max`, active between the two ends of the active bar | `update`, `renderRangeSlider`; measured `r8` (11 ticks, 6 active) |
@@ -133,7 +133,8 @@ From `range.js` and `range.md.css`, each checked in Chromium. Each becomes a tes
 - **A press outside a knob blurs the range** in Chromium (measured `6px move`: `ionBlur`), as a browser blurs on any press on
   something that can't take focus. Avalonia keeps the focus; that's the platform's, not the range's.
 - **`cursor: grab` and `grabbing`.** Avalonia has neither, and `Hand` stands for both.
-- **Ticks with `Step` 0.** Ionic's loop never ends and hangs the page; here there are none.
+- **Ticks with `Step` 0,** or a step too small to change a large value. Ionic's loop never ends and hangs the page; here there
+  are none, or the loop stops.
 - **`resetContentScrollY` after a tap.** Ionic's `onEnd` turns the content's `scrollY` back on after a tap that never turned it
   off, even if the app had it off; here only a drag that turned it off turns it back on.
 

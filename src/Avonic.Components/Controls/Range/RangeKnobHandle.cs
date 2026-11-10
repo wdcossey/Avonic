@@ -11,7 +11,7 @@ namespace Avonic.Components.Controls;
 /// <c>.range-knob-handle</c> in <c>ion-range</c>'s shadow root: a knob's container, which takes focus and the arrow keys, and holds
 /// its pin and its knob. <see cref="AvonicRange"/> sets its state. Its automation peer is the knob's <c>role="slider"</c>.
 /// </summary>
-[PseudoClasses(":pressed", ":ion-focused", ":lower", ":upper", ":range-knob-min", ":range-knob-max")]
+[PseudoClasses(":range-knob-pressed", ":ion-focused", ":lower", ":upper", ":range-knob-min", ":range-knob-max", ":activated", ":ion-hover")]
 public sealed class RangeKnobHandle : Panel
 {
     /// <summary>Which knob this is: A, or B, which only two knobs have.</summary>
