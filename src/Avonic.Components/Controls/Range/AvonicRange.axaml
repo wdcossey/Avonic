@@ -1,0 +1,61 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-range: structure only, with the sizes the parts need to be pressed and placed. The look is in
+         Avonic.Themes. The transparent slider is what takes presses on its whole height, as Ionic's .range-slider does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRange}" TargetType="c:AvonicRange">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Padding="{TemplateBinding Padding}">
+                <c:RangePanel Name="PART_Wrapper" LabelPlacement="{TemplateBinding LabelPlacement}">
+                    <Panel Name="PART_Label">
+                        <TextBlock Name="PART_LabelText" Text="{TemplateBinding Label}" TextWrapping="Wrap"
+                                   IsVisible="{TemplateBinding Label, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <ContentPresenter Name="PART_LabelContent"
+                                          Content="{TemplateBinding LabelContent}"
+                                          ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                          IsVisible="{TemplateBinding Label, Converter={x:Static ObjectConverters.IsNull}}" />
+                    </Panel>
+                    <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto">
+                        <ContentPresenter Name="PART_Start" Grid.Column="0" VerticalAlignment="Center"
+                                          IsVisible="{TemplateBinding StartContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                          Content="{TemplateBinding StartContent}" ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                        <c:RangeSlider Name="PART_Slider" Grid.Column="1" Height="42" Background="Transparent">
+                            <Border Name="PART_Bar" Height="2" VerticalAlignment="Center" />
+                            <Border Name="PART_BarActive" Height="2" VerticalAlignment="Center" />
+                            <c:RangeTicks Name="PART_Ticks" />
+                            <c:RangeKnobHandle Name="PART_KnobHandleA" Classes="knob-handle" Knob="A"
+                                               Width="36" Height="36" Margin="-18,0,0,0" VerticalAlignment="Center" Background="Transparent">
+                                <Panel Name="PART_PinA" Classes="pin" IsVisible="{TemplateBinding Pin}" Width="28" Height="28" VerticalAlignment="Top">
+                                    <TextBlock Name="PART_PinTextA" Text="{Binding PinText, RelativeSource={RelativeSource AncestorType=c:RangeKnobHandle}}" />
+                                </Panel>
+                                <Border Name="PART_KnobA" Classes="knob" Width="18" Height="18">
+                                    <Border Name="PART_HaloA" Classes="halo" />
+                                </Border>
+                            </c:RangeKnobHandle>
+                            <c:RangeKnobHandle Name="PART_KnobHandleB" Classes="knob-handle" Knob="B" IsVisible="{TemplateBinding DualKnobs}"
+                                               Width="36" Height="36" Margin="-18,0,0,0" VerticalAlignment="Center" Background="Transparent">
+                                <Panel Name="PART_PinB" Classes="pin" IsVisible="{TemplateBinding Pin}" Width="28" Height="28" VerticalAlignment="Top">
+                                    <TextBlock Name="PART_PinTextB" Text="{Binding PinText, RelativeSource={RelativeSource AncestorType=c:RangeKnobHandle}}" />
+                                </Panel>
+                                <Border Name="PART_KnobB" Classes="knob" Width="18" Height="18">
+                                    <Border Name="PART_HaloB" Classes="halo" />
+                                </Border>
+                            </c:RangeKnobHandle>
+                        </c:RangeSlider>
+                        <ContentPresenter Name="PART_End" Grid.Column="2" VerticalAlignment="Center"
+                                          IsVisible="{TemplateBinding EndContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                          Content="{TemplateBinding EndContent}" ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                    </Grid>
+                </c:RangePanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:label-text-wrapper-hidden /template/ Panel#PART_Label">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
