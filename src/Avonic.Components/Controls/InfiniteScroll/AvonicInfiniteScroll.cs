@@ -190,8 +190,8 @@ public partial class AvonicInfiniteScroll : ContentControl
     /// <summary>Ionic's <c>disconnectedCallback</c>.</summary>
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        // Ionic removes its listener; with no scroller, a check waiting for its frame does nothing, which is the same.
         base.OnDetachedFromVisualTree(e);
-        EnableScrollEvents(false);
         _offsetWatch?.Dispose();
         _offsetWatch = null;
         _scrollEl = null;

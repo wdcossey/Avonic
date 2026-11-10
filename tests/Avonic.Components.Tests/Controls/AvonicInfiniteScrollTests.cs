@@ -687,6 +687,13 @@ public class AvonicInfiniteScrollTests
             Attach(content);
             Assert.Equal(SpinnerName.Crescent, content.LoadingSpinner);
 
+            // componentDidLoad is once: cleared later, it stays unset, so no spinner
+            content.ClearValue(AvonicInfiniteScrollContent.LoadingSpinnerProperty);
+            host.Children.Remove(content);
+            Attach(content);
+            Assert.Null(content.LoadingSpinner);
+            Assert.False(Spinner(content).IsVisible);
+
             Assert.Equal(SpinnerName.Dots, Attach(new AvonicInfiniteScrollContent()).LoadingSpinner);
 
             var none = Attach(new AvonicInfiniteScrollContent { LoadingSpinner = null });
