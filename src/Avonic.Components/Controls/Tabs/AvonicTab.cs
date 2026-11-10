@@ -106,11 +106,12 @@ public class AvonicTab : ContentControl
 
     /// <summary>
     /// <c>prepareLazyLoaded</c>: the component is built once, the first time, and given class <c>ion-page</c>, as
-    /// <c>attachComponent</c> gives it. A tab with content keeps it, as a <see cref="ContentControl"/> holds one.
+    /// <c>attachComponent</c> gives it. A tab with content keeps it, as a <see cref="ContentControl"/> holds one, and the component
+    /// isn't built, as it would never show.
     /// </summary>
     private void PrepareLazyLoaded()
     {
-        if (_loaded || Component is null)
+        if (_loaded || Component is null || Content is not null)
         {
             return;
         }
@@ -126,10 +127,7 @@ public class AvonicTab : ContentControl
             };
 
             control.Classes.Add("ion-page");
-            if (Content is null)
-            {
-                SetCurrentValue(ContentProperty, control);
-            }
+            SetCurrentValue(ContentProperty, control);
         }
         catch (Exception exception)
         {

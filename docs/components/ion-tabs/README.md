@@ -131,7 +131,9 @@ None.
 - **The `tabButtonLayout` config** isn't on `AvonicConfig`, a shared file: `Layout` defaults to Ionic's fallback, `IconTop`.
 - **A hidden tab** is hidden at style priority, so an app's own `IsVisible` on a tab wins, where Ionic's `display: none` is
   `!important`.
-- **`Component` with `Content`** keeps the content and logs Ionic's error; Ionic appends both.
+- **`Component` with `Content`** keeps the content, logs Ionic's error, and doesn't build the component; Ionic appends both.
+- **The bar the tabs mark** is the first in `TopContent`, then `BottomContent`, then `Content`. Ionic takes the first in its
+  markup, which the author orders; slots have no order here, so a bar inside a page never takes the main bar's place.
 - **`AvonicContent`** in a tab takes the tab as its page, where Ionic's takes `ion-tabs`, so a fullscreen content stops at the
   tab bar's edge. A footer in tabs with a bottom bar keeps its bottom safe area, which Ionic drops. Both need those controls to
   know `AvonicTabs`.

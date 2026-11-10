@@ -111,7 +111,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | T3 | `Select` returns false, changing nothing, for a tab that isn't there (logging Ionic's error), the selected tab, or during a selection (from a handler); true otherwise | `select`, `shouldSwitch`, `getTab`; measured `[true, false, false]`, and `concurrent` |
 | T4 | The order: `IonTabsWillChange` with nothing changed; the new tab shows and the bar's `SelectedTab` is written, so its buttons are marked; the old tab hides; `IonTabsDidChange` | `setActive`, `tabSwitch`; measured `will … sel=home`, `barchanged`, `did … sel=radio` |
 | T5 | `GetSelected` gives the selected tab's id; `GetTab` the tab with an id, or null | `getSelected`, `getTab`; measured `"library", "home", null` |
-| T6 | The bar it writes is the first `AvonicTabBar` in it, and it's only written when the id differs | `updateTabBar` |
+| T6 | The bar it writes is the first `AvonicTabBar` in it, the bar slots before the default slot, and it's only written when the id differs | `updateTabBar` |
 | T7 | The slots stack: top, the default slot taking the rest, bottom; measured a tab 787 high over a bar 57 high at y 787 | `tabs.css` |
 
 ### The tab
@@ -174,6 +174,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | `--border` is two keys | A CSS shorthand has no Avalonia value |
 | A hidden tab is hidden at style priority, not `!important` | An app's own `IsVisible` on a tab wins, as every control's behaviour here lets it |
 | `Component` and `Content` together keep the `Content` | A `ContentControl` holds one. Ionic logs an error and appends both |
+| The bar the tabs write is the first in the top slot, then the bottom slot, then the default slot | Ionic's `querySelector` takes the first in the markup, which its author orders; slots have no order here, and a bar inside a page, such as a page's own, mustn't take the main bar's place |
 | Content in a tab finds the tab as its page, not the tabs | `AvonicContent`'s `getPageElement` doesn't know `AvonicTabs` yet: proposed in the PR |
 
 ## Extensions

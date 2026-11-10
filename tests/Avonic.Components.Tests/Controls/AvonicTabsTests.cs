@@ -188,6 +188,42 @@ public class AvonicTabsTests
     }
 
     [AvaloniaFact]
+    public void T6_A_Bar_In_A_Bar_Slot_Comes_Before_One_In_A_Page()
+    {
+        var f = Make();
+        var inPage = Bar("a", Button("a", "A"));
+        f.Home.Content = inPage;
+        using var scene = new Scene(f.Tabs);
+
+        Assert.Equal("home", f.Bar.SelectedTab);
+        Assert.Equal("a", inPage.SelectedTab);
+    }
+
+    [AvaloniaFact]
+    public void T4_A_Handler_That_Throws_Leaves_The_Selection_As_It_Was()
+    {
+        var f = Make();
+        using var scene = new Scene(f.Tabs);
+        var throwing = true;
+        f.Tabs.IonTabsWillChange += (_, _) =>
+        {
+            if (throwing)
+            {
+                throw new InvalidOperationException("from the app");
+            }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => f.Tabs.Select("radio"));
+        Assert.Equal("home", f.Tabs.GetSelected());
+        Assert.True(f.Home.IsVisible);
+        Assert.False(f.Radio.IsVisible);
+
+        throwing = false;
+        Assert.True(f.Tabs.Select("radio"));
+        Assert.True(f.Radio.IsVisible);
+    }
+
+    [AvaloniaFact]
     public void T6_Tabs_Anywhere_In_The_Slots_Are_Its_Tabs()
     {
         var deep = Page("deep", "Deep");
@@ -250,6 +286,19 @@ public class AvonicTabsTests
 
         // Without a component, the tab is the page.
         Assert.Contains("ion-page", tabs.GetTab("first")!.Classes);
+    }
+
+    [AvaloniaFact]
+    public void A2_A_Component_Beside_Inline_Content_Is_Never_Built()
+    {
+        LazyPage.Built = 0;
+        var both = new AvonicTab { Tab = "b", Component = typeof(LazyPage), Content = "Inline" };
+        using var scene = new Scene(new Panel { Children = { both } });
+
+        both.SetActive();
+
+        Assert.Equal(0, LazyPage.Built);
+        Assert.Equal("Inline", both.Content);
     }
 
     [AvaloniaFact]

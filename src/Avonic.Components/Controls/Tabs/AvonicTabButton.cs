@@ -59,7 +59,7 @@ public class AvonicTabButton : ItemsControl
         // An <a> with no href, which a browser doesn't focus: Tab never reached one, measured. An app can make it focusable.
         FocusableProperty.OverrideDefaultValue<AvonicTabButton>(false);
 
-        LayoutProperty.Changed.AddClassHandler<AvonicTabButton>((button, _) => button.UpdateClasses());
+        LayoutProperty.Changed.AddClassHandler<AvonicTabButton>((button, _) => button.UpdateChildClasses());
         SelectedProperty.Changed.AddClassHandler<AvonicTabButton>((button, e) => button.OnSelectedChanged(e));
     }
 
@@ -73,7 +73,8 @@ public class AvonicTabButton : ItemsControl
         _native = new NativeButton(this, _ => SelectTab(), () => false, UpdateIsEffectivelyEnabled);
         AddHandler(KeyUpEvent, OnKeyUp);
 
-        Items.CollectionChanged += (_, _) => UpdateClasses();
+        Items.CollectionChanged += (_, _) => UpdateChildClasses();
+        UpdateChildClasses();
         UpdateClasses();
     }
 
@@ -137,6 +138,7 @@ public class AvonicTabButton : ItemsControl
             _bar.StyleChanged += UpdateClasses;
         }
 
+        UpdateChildClasses();
         UpdateClasses();
     }
 
@@ -152,11 +154,17 @@ public class AvonicTabButton : ItemsControl
         UpdateClasses();
     }
 
-    /// <summary>The classes Ionic's <c>render</c> works out, and the bar's, which its <c>::slotted</c> rules read.</summary>
+    /// <summary>The classes Ionic's <c>render</c> works out from the selection, and the bar's, which its <c>::slotted</c> rules read.</summary>
     private void UpdateClasses()
     {
         PseudoClasses.Set(":selected", Selected);
+        PseudoClasses.Set(":in-tab-bar-color", !string.IsNullOrEmpty(_bar?.Color));
+        PseudoClasses.Set(":in-tab-bar-translucent", _bar?.Translucent == true);
+    }
 
+    /// <summary>The classes Ionic's <c>render</c> works out from its children and its layout.</summary>
+    private void UpdateChildClasses()
+    {
         // hasLabel, hasIcon: querySelector, anywhere inside.
         var descendants = this.GetLogicalDescendants().ToList();
         var hasLabel = descendants.OfType<AvonicLabel>().Any();
@@ -172,9 +180,6 @@ public class AvonicTabButton : ItemsControl
         PseudoClasses.Set(":layout-icon-end", Layout == TabButtonLayout.IconEnd);
         PseudoClasses.Set(":layout-icon-hide", Layout == TabButtonLayout.IconHide);
         PseudoClasses.Set(":layout-label-hide", Layout == TabButtonLayout.LabelHide);
-
-        PseudoClasses.Set(":in-tab-bar-color", _bar?.Color is not null);
-        PseudoClasses.Set(":in-tab-bar-translucent", _bar?.Translucent == true);
     }
 
     private void OnSelectedChanged(AvaloniaPropertyChangedEventArgs e)

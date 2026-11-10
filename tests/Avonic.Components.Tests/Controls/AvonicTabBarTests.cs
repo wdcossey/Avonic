@@ -140,6 +140,34 @@ public class AvonicTabBarTests
     });
 
     [AvaloniaFact]
+    public void B3_A_Row_Buttons_Min_Content_Is_Its_Icon_And_Label_Together() => InstalledTheme.Run(_ =>
+    {
+        var buttons = Enumerable.Range(0, 4).Select(i => Button($"t{i}", "Notifications", "calendar", layout: TabButtonLayout.IconStart)).ToArray();
+        var bar = Bar(null, buttons);
+        using var scene = new Scene(Top(bar));
+        Phone(scene);
+
+        // min-width: auto keeps each at its padding, icon, 6 and label, so four overflow the bar on both sides, centred.
+        var button = buttons[0];
+        var label = button.Items.OfType<AvonicLabel>().Single();
+        Assert.Equal(12 + 22 + 6 + label.DesiredSize.Width + 12, button.Bounds.Width, 0.5);
+        Assert.True(button.Bounds.Width * 4 > 390);
+        Assert.Equal((390 - button.Bounds.Width * 4) / 2, button.Bounds.X, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B5_An_Empty_Colour_Is_No_Colour() => InstalledTheme.Run(_ =>
+    {
+        var b = Button("b", "B");
+        var bar = Bar(null, b);
+        bar.Color = "";
+        using var scene = new Scene(Top(bar));
+
+        Assert.Equal(Colors.White, ColorOf(b.Background));
+        Assert.Equal(Color.Parse("#595959"), ColorOf(b.Foreground));
+    });
+
+    [AvaloniaFact]
     public void B4_The_Bar_Is_56_High_Inside_A_Border_On_Top_With_The_Safe_Areas() => InstalledTheme.Run(_ =>
     {
         var bar = Bar(null, Button("a", "A"));

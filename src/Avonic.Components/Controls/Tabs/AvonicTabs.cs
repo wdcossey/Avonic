@@ -185,10 +185,15 @@ public class AvonicTabs : TemplatedControl
         return found;
     }
 
-    /// <summary><c>updateTabBar</c>: the first tab bar in it gets the selected tab's id, if it has one and it differs.</summary>
+    /// <summary>
+    /// <c>updateTabBar</c>: the first tab bar in it gets the selected tab's id, if it has one and it differs. Ionic's
+    /// <c>querySelector</c> takes the first in the markup, which the author orders; slots have no order here, so the bar slots
+    /// come first, and a bar inside a page, such as a page's own, never takes the main bar's place.
+    /// </summary>
     private void UpdateTabBar()
     {
-        var bar = Slotted().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabBar>().FirstOrDefault();
+        var bar = new[] { TopContent, BottomContent, Content }.OfType<ILogical>()
+            .SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabBar>().FirstOrDefault();
         if (bar is null || _selectedTab?.Tab is not { } tab || bar.SelectedTab == tab)
         {
             return;
@@ -219,16 +224,22 @@ public class AvonicTabs : TemplatedControl
     private void SetActive(AvonicTab tab)
     {
         _transitioning = true;
+        var wasActive = tab.IsActive;
+        _leavingTab = _selectedTab;
+        _selectedTab = tab;
         try
         {
-            _leavingTab = _selectedTab;
-            _selectedTab = tab;
             RaiseEvent(new TabsChangeEventArgs(IonTabsWillChangeEvent, tab.Tab));
             tab.IsActive = true;
             UpdateTabBar();
         }
         catch
         {
+            // A DOM event's listener can't stop the switch, and an exception here would leave it half done: undo it, so the
+            // selected tab is still the one that shows.
+            tab.IsActive = wasActive;
+            _selectedTab = _leavingTab;
+            _leavingTab = null;
             _transitioning = false;
             throw;
         }
