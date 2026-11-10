@@ -1,0 +1,37 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicBreadcrumbs Width="390">
+            <c:AvonicBreadcrumb Content="Home" />
+            <c:AvonicBreadcrumb Content="Electronics" />
+            <c:AvonicBreadcrumb Content="Cameras" />
+        </c:AvonicBreadcrumbs>
+    </Design.PreviewWith>
+
+    <!-- A translation of breadcrumbs.md.css: a wrapping flex row, its children centred on each line. Its rules for the collapsed
+         indicator can't reach the breadcrumb's shadow root in Ionic, so they aren't here: measured unchanged. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBreadcrumbs}" TargetType="c:AvonicBreadcrumbs">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <WrapPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.in-toolbar) -->
+        <Style Selector="^:in-toolbar">
+            <Setter Property="Padding" Value="8,0" />
+        </Style>
+
+        <!-- :host(.in-toolbar-color) sets the toolbar's contrast, which the row inherits from the toolbar anyway. -->
+    </ControlTheme>
+
+</ResourceDictionary>

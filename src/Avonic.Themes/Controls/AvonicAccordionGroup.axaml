@@ -1,0 +1,31 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicAccordionGroup Expand="Inset">
+                <c:AvonicAccordion>
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of accordion-group.md.css's host rules. What it does to its accordions is in AvonicAccordion.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicAccordionGroup}" TargetType="c:AvonicAccordionGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.accordion-group-expand-inset) { margin: 16px } -->
+        <Style Selector="^:expand-inset">
+            <Setter Property="Margin" Value="16" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

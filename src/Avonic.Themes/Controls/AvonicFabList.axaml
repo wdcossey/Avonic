@@ -1,0 +1,49 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Border Padding="80" Width="300" Height="300">
+            <c:AvonicFab Activated="True">
+                <c:AvonicFabButton Content="+" />
+                <c:AvonicFabList Side="End">
+                    <c:AvonicFabButton Content="A" />
+                    <c:AvonicFabButton Content="B" />
+                </c:AvonicFabList>
+            </c:AvonicFab>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- A translation of fab-list.css, which has no md file. Its rules for the buttons in it are in
+         AvonicFabButton.axaml, on :in-list. -->
+    <ControlTheme x:Key="{x:Type c:AvonicFabList}" TargetType="c:AvonicFabList">
+        <!-- min-width and min-height 56, so that a list centres on a small button with its margins too -->
+        <Setter Property="MinWidth" Value="56" />
+        <Setter Property="MinHeight" Value="56" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:FabListPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+
+        <!-- The 10px of margin: calc(100% + 10px), toward the button. FabPanel gives the 100%. -->
+        <Style Selector="^:side-bottom">
+            <Setter Property="Margin" Value="0,10,0,0" />
+        </Style>
+        <Style Selector="^:side-top">
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+        <Style Selector="^:side-start">
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+        <Style Selector="^:side-end">
+            <Setter Property="Margin" Value="10,0,0,0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

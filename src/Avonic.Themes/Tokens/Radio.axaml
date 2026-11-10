@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ion-radio's variables, with radio.md.css's values, which it sets on the host. -->
+    <!-- border-radius of the ring. A string, a CornerRadius or a number, as BorderRadius reads it. -->
+    <x:String x:Key="Avonic.Radio.BorderRadius">50%</x:String>
+    <!-- rgb(var(ion-text-color-rgb), 0.6): the ring, unchecked -->
+    <SolidColorBrush x:Key="Avonic.Radio.Color" Color="{DynamicResource Avonic.TextColor}" Opacity="0.6" />
+    <!-- var(ion-color-primary): the ring and the mark, checked -->
+    <SolidColorBrush x:Key="Avonic.Radio.ColorChecked" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- border-radius of the mark, and of the focus circle -->
+    <x:String x:Key="Avonic.Radio.InnerBorderRadius">50%</x:String>
+
+</ResourceDictionary>
