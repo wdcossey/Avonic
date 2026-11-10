@@ -15,7 +15,7 @@ mobile one. The commands are at the top of [COMPARISON.md](COMPARISON.md).
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `alignment` | `Alignment` (`ToggleAlignment?`) | `Center`, `Start`; null is the default. Cross-axis alignment, and `display: block` |
-| [x] | `checked` | `Checked` (`bool`) | Two-way by default, as Ionic's is `mutable` and the toggle sets it itself. `SetCurrentValue`, so a binding survives |
+| [x] | `checked` | `Checked` (`bool`) | Two-way by default, as Ionic's is `mutable` and the toggle sets it itself. Set with `SetCurrentValue`, as Avalonia's `ToggleButton` sets `IsChecked`. Measured: `SetValue` gives the same here, as Avalonia 12 keeps a binding through either |
 | [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`. Only the checked state reads it |
 | [x] | `disabled` | `IsEnabled` | Mapping rule |
 | [x] | `enableOnOffLabels` | `EnableOnOffLabels` (`bool`) | Ionic's default is `config.get('toggleOnOffLabels')`, which is undefined unless an app sets it. `AvonicConfig` is a shared file, so the config is under "Proposed for shared files", and the default here is `false` |
@@ -85,7 +85,7 @@ From `toggle.js` and `toggle.md.css`, each checked in Chromium. Each becomes a t
 | 1 | A click anywhere on the toggle (the label, the track, the gap between, the empty end of the row) flips `Checked` and raises `IonChange` once, with `Checked` and `Value`. On release, every press: a double click flips twice. A finger that moved more than 15 px before lifting doesn't click | `onClick` on the host, `onDivLabelClick`; measured `mouseClickLabel`, `…Track`, `…Gap`, `dblclick`, `touchTap`, `touchDragLabel` |
 | 2 | Setting `Checked` in code raises nothing | `@Prop checked`; measured `programmatic` |
 | 3 | Space flips it on key down, and again on each repeat. Enter does nothing | `onKeyDown`; measured `space`, `enter`, `spaceRepeat` |
-| 4 | Disabled: no click, no key, no drag, not a tab stop, opacity 0.38, and a tap goes through to what's behind | `disabled`, `disabledChanged`, `tabindex`, `pointer-events: none`; measured `disabledClick`, `disabledTabindex`, `spaceDisabledFocused` |
+| 4 | Disabled: no click, no key, no drag, not a tab stop, opacity 0.38 as a group, and a tap goes through to what's behind. Only its own `disabled` fades it: in a disabled item it keeps its look | `disabled`, `disabledChanged`, `tabindex`, `pointer-events: none`; measured `disabledClick`, `disabledTabindex`, `spaceDisabledFocused` |
 | 5 | A drag on the track, priority 100, captures at 5 px. Then each move whose `deltaX` from the capture is past 10 px toward the other side flips it, with `IonChange` each time: on at more than +10, off again at less than −10. Leaving the track doesn't end it | `setupGesture`, `onMove`, `shouldToggle`; measured `mouseDragTrack` (on at 16 px from the press, off at −6), `dragOutside` |
 | 6 | A press on the label that's dragged isn't a gesture: a mouse still clicks on release | gesture `el` is the track; measured `mouseDragFromLabel` |
 | 7 | A click within 300 ms of a drag's end is ignored, and one after counts | `lastDrag`; measured `clickRightAfterDrag`, `clickLater` |
@@ -104,7 +104,7 @@ From `toggle.js` and `toggle.md.css`, each checked in Chromium. Each becomes a t
 | 20 | Unchecked: track `rgba(text, 0.39)`, white handle. Checked: track primary at 0.5, handle primary, moved right by the track's width less the handle's. A known `Color` replaces primary in both, and beats the tokens | md.css; measured `checkedComputed`, `handleChecked` |
 | 21 | The handle and its wrapper move and recolour over 160 ms `cubic-bezier(0.4, 0, 0.2, 1)`, and the track over 160 ms `ease` | measured `transitions` |
 | 22 | `EnableOnOffLabels`: an icon in the handle, `remove-outline` when off and `checkmark-outline` when on, 18 px, black when off and the colour's contrast (white) when on | `renderOnOffSwitchLabels` md; measured `icon`, `iconColor` |
-| 23 | Automation: a toggle, named by the label and the helper text while valid, or `AutomationProperties.Name`; its help text is the error text when invalid, else the helper text; toggling it is a click | `role=switch`, `aria-labelledby`, `aria-describedby`; measured the AX tree: `"Default"`, `"Helper Helper text"`, `"Helper"` when invalid, `""` with no label |
+| 23 | Automation: a toggle, named by the label and the helper text while valid, which beats `AutomationProperties.Name` (`aria-labelledby` beats `aria-label`); with no label, the name. Its help text is the error text when invalid, nothing if that's empty, else the helper text. A change of either is announced, the classes' too. Toggling it is a click | `role=switch`, `aria-labelledby`, `aria-describedby`; measured the AX tree: `"Default"`, `"Helper Helper text"`, `"Helper"` when invalid, `""` with no label |
 | 24 | In an item's start or end slot, no margin | `::slotted(ion-toggle[slot])` in `item.md.css` |
 
 ### Not reproduced
@@ -151,7 +151,8 @@ there comes and is dropped by `lastDrag`. Both give no second flip. `lastDrag` r
 `TestClock`.
 
 Pseudoclasses, from Ionic's host classes: `:checked`, `:activated` (`toggle-activated`, which md doesn't style),
-`:in-item`, `:justify-*`, `:alignment-*`, `:label-placement-*`, `:label-text-wrapper-hidden`, and `:ion-color` from `ColorPalette`.
+`:toggle-disabled` (its own `IsEnabled`, not an ancestor's, which `:disabled` follows), `:in-item`, `:justify-*`, `:alignment-*`,
+`:label-placement-*`, `:label-text-wrapper-hidden`, and `:ion-color` from `ColorPalette`.
 RTL is the toggle's `FlowDirection`.
 
 ### RTL: a deliberate difference

@@ -141,9 +141,10 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
 
-        <!-- :host(.toggle-disabled): opacity: 0.38, as a group, so a mask: see the key. A disabled control already takes no input
-             and lets it through. -->
-        <Style Selector="^:disabled">
+        <!-- :host(.toggle-disabled): opacity: 0.38, as a group, so a mask: see the key. Only the toggle's own disabled, as Ionic's
+             class comes from its own prop: in a disabled item it keeps its look, inside the item's fade. A disabled control already
+             takes no input and lets it through. -->
+        <Style Selector="^:toggle-disabled">
             <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Toggle.Md.DisabledMask}" />
         </Style>
 

@@ -72,8 +72,12 @@ public sealed class TogglePanel : Panel
             return new Size(Math.Max(labelSize.Width, nativeSize.Width), labelSize.Height + nativeSize.Height);
         }
 
-        // overflow: hidden takes away the label's minimum, so it shrinks to fit. A fixed label's width is its own.
-        label?.Measure(new Size(Math.Max(0, availableSize.Width - nativeSize.Width), double.PositiveInfinity));
+        // overflow: hidden takes away the label's minimum, so it shrinks to fit, as a measure clamps it to what it's given. A fixed
+        // label doesn't shrink (flex: 0 0 100px; min-width: 100px), so it isn't given less.
+        var labelRoom = LabelPlacement == ToggleLabelPlacement.Fixed
+            ? double.PositiveInfinity
+            : Math.Max(0, availableSize.Width - nativeSize.Width);
+        label?.Measure(new Size(labelRoom, double.PositiveInfinity));
         var rowLabel = label?.DesiredSize ?? default;
         return new Size(rowLabel.Width + nativeSize.Width, Math.Max(rowLabel.Height, nativeSize.Height));
     }
@@ -102,10 +106,8 @@ public sealed class TogglePanel : Panel
         var placement = LabelPlacement;
         var reverse = placement == ToggleLabelPlacement.End;
 
-        // Shrinking: only the label, and a fixed one doesn't (flex: 0 0 100px).
-        var labelWidth = placement == ToggleLabelPlacement.Fixed
-            ? labelSize.Width
-            : Math.Min(labelSize.Width, Math.Max(0, finalSize.Width - nativeSize.Width));
+        // The label has already shrunk to fit, in the measure.
+        var labelWidth = labelSize.Width;
 
         // .toggle-wrapper is space-between, and end's own rule sets start. A justify rule comes after both.
         var justify = Justify ?? (reverse ? ToggleJustify.Start : ToggleJustify.SpaceBetween);

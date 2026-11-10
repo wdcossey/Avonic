@@ -286,7 +286,7 @@ public class AvonicToggleTests
         Assert.Empty(changes.All);
         Assert.True(toggle.Checked);
 
-        // SetCurrentValue: the binding survives the toggle setting it.
+        // The binding survives the toggle setting it.
         Click(scene, Centre(Track(toggle), scene));
         Assert.False(toggle.Checked);
         source.SetValue(property, false);
@@ -347,6 +347,19 @@ public class AvonicToggleTests
     }
 
     [AvaloniaFact]
+    public void T04_In_A_Disabled_Item_It_Keeps_Its_Look() => InstalledTheme.Run(_ =>
+    {
+        var inside = new AvonicToggle { Content = "Inside" };
+        var own = new AvonicToggle { Content = "Own", IsEnabled = false };
+        var holder = new StackPanel { Children = { new AvonicItem { IsEnabled = false, Content = inside }, new AvonicItem { Content = own } } };
+        using var scene = Themed(holder);
+
+        // toggle-disabled comes from its own prop only: the disabled item fades it, and the toggle adds nothing.
+        Assert.Null(inside.OpacityMask);
+        Assert.NotNull(own.OpacityMask);
+    });
+
+    [AvaloniaFact]
     public void T04_Disabled_Mid_Drag_It_Flips_No_More()
     {
         var (toggle, scene) = Stub();
@@ -382,6 +395,17 @@ public class AvonicToggleTests
         AssertClose(Colors.White, Pixel(scene, (int)(handle.Right - 4), (int)handle.Center.Y), 2);
         // The track beside it: black at 0.39, then at 0.38.
         AssertClose(OverWhite(Colors.Black, 0.39 * 0.38), Pixel(scene, (int)(handle.Right + 8), (int)handle.Center.Y));
+    });
+
+    [AvaloniaFact]
+    public void T04_Disabled_A_Bare_Toggle_Still_Shows_The_Handle_Over_Its_Edge() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { IsEnabled = false, Margin = new Thickness(10) };
+        using var scene = Themed(new StackPanel { Children = { toggle } });
+        scene.Window.Background = Brushes.Black;
+
+        // The handle hangs 3 px over the 14 px toggle. Faded as a group on black: white at 0.38.
+        AssertClose(Color.FromRgb(97, 97, 97), Pixel(scene, 20, 8), 6);
     });
 
     // ── 5: a drag ────────────────────────────────────────────────────────────────────────────
@@ -715,6 +739,17 @@ public class AvonicToggleTests
     });
 
     [AvaloniaFact]
+    public void T15_A_Fixed_Label_Does_Not_Shrink_In_A_Narrow_Row() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "A fixed label", LabelPlacement = ToggleLabelPlacement.Fixed };
+        using var scene = Themed(new StackPanel { Width = 130, HorizontalAlignment = HorizontalAlignment.Left, Children = { toggle } });
+
+        // flex: 0 0 100px; min-width: 100px: the track is pushed out instead, 16 after the label.
+        Assert.Equal(100, Label(toggle).Bounds.Width);
+        Assert.InRange(Bounds(Track(toggle), scene.Window).X, 115.5, 116.5);
+    });
+
+    [AvaloniaFact]
     public void T15_Stacked_Alone_It_Is_As_Wide_As_The_Labels_Layout_Box_With_Both_Centred() => InstalledTheme.Run(_ =>
     {
         var toggle = new AvonicToggle { Content = "Stacked alone", LabelPlacement = ToggleLabelPlacement.Stacked };
@@ -837,7 +872,9 @@ public class AvonicToggleTests
     {
         var toggle = new AvonicToggle { Content = "Helper", HelperText = "Helper text", ErrorText = "Error text" };
         var plain = new AvonicToggle { Content = "Plain" };
-        using var scene = InItems(toggle, plain);
+        var helperOnly = new AvonicToggle { Content = "Helper only", HelperText = "Helper text" };
+        using var scene = InItems(toggle, plain, helperOnly);
+        Assert.True(Part<TextBlock>(helperOnly, "PART_HelperText").IsEffectivelyVisible);
         var helper = Part<TextBlock>(toggle, "PART_HelperText");
         var error = Part<TextBlock>(toggle, "PART_ErrorText");
 
@@ -994,9 +1031,12 @@ public class AvonicToggleTests
         var plain = new AvonicToggle { Content = "Default" };
         var helper = new AvonicToggle { Content = "Helper", HelperText = "Helper text", ErrorText = "Error" };
         var bare = new AvonicToggle();
-        var named = new AvonicToggle { Content = "Label" };
+        var named = new AvonicToggle();
         AutomationProperties.SetName(named, "Named");
-        using var scene = InItems(plain, helper, bare, named);
+        var labelledAndNamed = new AvonicToggle { Content = "Label" };
+        AutomationProperties.SetName(labelledAndNamed, "Named");
+        var helperOnly = new AvonicToggle { Content = "Helper only", HelperText = "Thanks" };
+        using var scene = InItems(plain, helper, bare, named, labelledAndNamed, helperOnly);
 
         static AutomationPeer Peer(AvonicToggle toggle) => ControlAutomationPeer.CreatePeerForElement(toggle);
 
@@ -1007,12 +1047,41 @@ public class AvonicToggleTests
         Assert.Equal("Helper text", Peer(helper).GetHelpText());
         Assert.Equal("", Peer(bare).GetName());
         Assert.Equal("Named", Peer(named).GetName());
+        // aria-labelledby beats aria-label: measured, the label's text.
+        Assert.Equal("Label", Peer(labelledAndNamed).GetName());
 
         helper.Classes.Add("ion-touched");
         helper.Classes.Add("ion-invalid");
         Assert.Equal("Helper", Peer(helper).GetName());
         Assert.Equal("Error", Peer(helper).GetHelpText());
+
+        // Invalid with no error text: aria-describedby is the helper's element, which is empty while invalid.
+        helperOnly.Classes.Add("ion-touched");
+        helperOnly.Classes.Add("ion-invalid");
+        Assert.True(string.IsNullOrEmpty(Peer(helperOnly).GetHelpText()));
     });
+
+    [AvaloniaFact]
+    public void T23_The_Name_And_Help_Text_Announce_Their_Changes()
+    {
+        var (toggle, scene) = Stub("Terms");
+        using var _ = scene;
+        toggle.HelperText = "Thanks";
+        toggle.ErrorText = "Required";
+        var peer = ControlAutomationPeer.CreatePeerForElement(toggle);
+        var raised = new List<(AutomationProperty Property, object? Value)>();
+        peer.PropertyChanged += (_, e) => raised.Add((e.Property, e.NewValue));
+
+        // The app marks it invalid, as on blur: a new description and a new name, as the helper text leaves it.
+        toggle.Classes.Add("ion-touched");
+        toggle.Classes.Add("ion-invalid");
+        Assert.Contains((AutomationElementIdentifiers.HelpTextProperty, (object?)"Required"), raised);
+        Assert.Contains((AutomationElementIdentifiers.NameProperty, (object?)"Terms"), raised);
+
+        raised.Clear();
+        toggle.ErrorText = "Turn it on";
+        Assert.Equal([(AutomationElementIdentifiers.HelpTextProperty, (object?)"Turn it on")], raised);
+    }
 
     [AvaloniaFact]
     public void T23_Toggling_Through_Automation_Is_A_Click_And_The_State_Follows()
@@ -1073,6 +1142,18 @@ public class AvonicToggleTests
         {
             Application.Current!.Styles.Remove(app);
         }
+    });
+
+    [AvaloniaFact]
+    public void T24_In_The_Default_Slot_An_App_Themes_Margin_Stays() => InstalledTheme.Run(_ =>
+    {
+        // Ionic has no rule for a toggle in the default slot, so nothing here beats a margin the app's own theme gives it.
+        var toggle = new AvonicToggle { Content = "Default slot" };
+        var theme = new ControlTheme(typeof(AvonicToggle)) { BasedOn = (ControlTheme)Application.Current!.FindResource(typeof(AvonicToggle))! };
+        theme.Setters.Add(new Setter(Layoutable.MarginProperty, new Thickness(5)));
+        toggle.Theme = theme;
+        using var scene = InItems(toggle);
+        Assert.Equal(new Thickness(5), toggle.Margin);
     });
 
     [AvaloniaFact]

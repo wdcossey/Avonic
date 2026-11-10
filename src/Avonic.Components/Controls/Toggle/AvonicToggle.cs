@@ -32,7 +32,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_LabelContent", typeof(ContentPresenter))]
 [TemplatePart("PART_HelperText", typeof(TextBlock))]
 [TemplatePart("PART_ErrorText", typeof(TextBlock))]
-[PseudoClasses(":checked", ":activated", ":in-item", ":label-text-wrapper-hidden")]
+[PseudoClasses(":checked", ":activated", ":in-item", ":label-text-wrapper-hidden", ":toggle-disabled")]
 [PseudoClasses(":justify-end", ":justify-space-between", ":justify-start", ":alignment-center", ":alignment-start")]
 [PseudoClasses(":label-placement-end", ":label-placement-fixed", ":label-placement-stacked", ":label-placement-start")]
 public class AvonicToggle : ContentControl, IItemControl
@@ -296,7 +296,7 @@ public class AvonicToggle : ContentControl, IItemControl
             _gesture?.Enable(IsEffectivelyEnabled);
         }
         else if (change.Property == CheckedProperty || change.Property == JustifyProperty || change.Property == AlignmentProperty
-                 || change.Property == LabelPlacementProperty || change.Property == ContentProperty)
+                 || change.Property == LabelPlacementProperty || change.Property == ContentProperty || change.Property == IsEnabledProperty)
         {
             UpdateClasses();
         }
@@ -306,6 +306,7 @@ public class AvonicToggle : ContentControl, IItemControl
     private void UpdateClasses()
     {
         PseudoClasses.Set(":checked", Checked);
+        PseudoClasses.Set(":toggle-disabled", !IsEnabled);
         PseudoClasses.Set(":in-item", _inItem);
         PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
 
@@ -444,11 +445,14 @@ public class AvonicToggle : ContentControl, IItemControl
         return !IsInvalid && !string.IsNullOrEmpty(HelperText) ? $"{text} {HelperText}".Trim() : text;
     }
 
-    /// <summary><c>aria-describedby</c>: <c>getHintTextId</c>, the error text when invalid and set, or else the helper text.</summary>
+    /// <summary>
+    /// <c>aria-describedby</c>: <c>getHintTextId</c>, the error text when invalid and set, or else the helper text's element, which
+    /// is empty while invalid, as <c>renderHintText</c> leaves it.
+    /// </summary>
     private string? HintText() =>
-        IsInvalid && !string.IsNullOrEmpty(ErrorText) ? ErrorText
-        : !string.IsNullOrEmpty(HelperText) ? HelperText
-        : null;
+        IsInvalid ? (string.IsNullOrEmpty(ErrorText) ? null : ErrorText)
+        : string.IsNullOrEmpty(HelperText) ? null
+        : HelperText;
 
     protected override AutomationPeer OnCreateAutomationPeer() => new TogglePeer(this);
 
@@ -469,7 +473,34 @@ public class AvonicToggle : ContentControl, IItemControl
                 {
                     RaisePropertyChangedEvent(TogglePatternIdentifiers.ToggleStateProperty, State(e.GetOldValue<bool>()), State(e.GetNewValue<bool>()));
                 }
+                else if (e.Property == HelperTextProperty || e.Property == ErrorTextProperty || e.Property == ContentProperty)
+                {
+                    RaiseTextChanged();
+                }
             };
+
+            // The MutationObserver on class: a new aria-describedby, so that a screen reader announces the error.
+            owner.Classes.CollectionChanged += (_, _) => RaiseTextChanged();
+        }
+
+        private string? _name;
+        private string? _help;
+
+        private void RaiseTextChanged()
+        {
+            var name = GetName();
+            var help = GetHelpText();
+            if (name != _name)
+            {
+                RaisePropertyChangedEvent(AutomationElementIdentifiers.NameProperty, _name, name);
+                _name = name;
+            }
+
+            if (help != _help)
+            {
+                RaisePropertyChangedEvent(AutomationElementIdentifiers.HelpTextProperty, _help, help);
+                _help = help;
+            }
         }
 
         public ToggleState ToggleState => State(_owner.Checked);
@@ -481,11 +512,8 @@ public class AvonicToggle : ContentControl, IItemControl
 
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Button;
 
-        protected override string? GetNameCore()
-        {
-            var name = base.GetNameCore();
-            return string.IsNullOrEmpty(name) ? _owner.AccessibleName() : name;
-        }
+        /// <summary><c>aria-labelledby</c> the label, whenever there is one, which beats <c>aria-label</c>: measured.</summary>
+        protected override string? GetNameCore() => _owner.HasLabel ? _owner.AccessibleName() : base.GetNameCore();
 
         protected override string? GetHelpTextCore()
         {
