@@ -1,0 +1,71 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicContent Width="390" Height="400">
+            <c:AvonicContent.FixedContent>
+                <c:AvonicFab Horizontal="End" Vertical="Bottom" Activated="True">
+                    <c:AvonicFabButton>
+                        <c:AvonicIcon IconName="add" />
+                    </c:AvonicFabButton>
+                    <c:AvonicFabList Side="Top">
+                        <c:AvonicFabButton Content="A" />
+                        <c:AvonicFabButton Content="B" />
+                    </c:AvonicFabList>
+                </c:AvonicFab>
+            </c:AvonicContent.FixedContent>
+        </c:AvonicContent>
+    </Design.PreviewWith>
+
+    <!-- A translation of fab.css, which has no md file. FabPanel lays out the button and the lists; this places the
+         fab in its container. -->
+    <ControlTheme x:Key="{x:Type c:AvonicFab}" TargetType="c:AvonicFab">
+        <!-- z-index: 999. It sorts the fab among its parent's children only. -->
+        <Setter Property="ZIndex" Value="999" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:FabPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+        <!-- left: calc(10px + ion-safe-area-left), right: calc(10px + ion-safe-area-right), swapped in RTL; top: 10px;
+             bottom: 10px; 0 beside an edge. -->
+        <Setter Property="Margin">
+            <MultiBinding Converter="{x:Static c:AvonicFab.InsetConverter}" ConverterParameter="10">
+                <Binding Path="Horizontal" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="Vertical" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="Edge" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+
+        <!-- .fab-horizontal-* and .fab-vertical-*. With an activator, so they beat AvonicContent's Left and Top for its
+             fixed slot, as an inset beats the static position. An app's local alignment still wins. -->
+        <Style Selector="^:horizontal-start">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="^:horizontal-center">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^:horizontal-end">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+        <Style Selector="^:vertical-top">
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^:vertical-center">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^:vertical-bottom">
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

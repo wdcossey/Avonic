@@ -1,0 +1,57 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-fab-button's variables. fab-button.md.css gives a CssUnset key's default by the host's class, and the
+         theme's bindings say what: any value overrides it, for every class, as setting the variable from outside does. -->
+    <b:CssUnset x:Key="Avonic.FabButton.Background" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundActivated" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundActivatedOpacity" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundFocused" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundFocusedOpacity" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundHover" />
+    <b:CssUnset x:Key="Avonic.FabButton.BackgroundHoverOpacity" />
+
+    <!-- initial, which is the current colour. Drawn only with a BorderWidth: border-style is none in Ionic, and
+         Avalonia's Border only draws solid. -->
+    <b:CssUnset x:Key="Avonic.FabButton.BorderColor" />
+    <x:String x:Key="Avonic.FabButton.BorderRadius">50%</x:String>
+    <Thickness x:Key="Avonic.FabButton.BorderWidth">0</Thickness>
+    <b:CssUnset x:Key="Avonic.FabButton.BoxShadow" />
+    <x:Double x:Key="Avonic.FabButton.CloseIconFontSize">24</x:Double>
+
+    <b:CssUnset x:Key="Avonic.FabButton.Color" />
+    <b:CssUnset x:Key="Avonic.FabButton.ColorActivated" />
+    <b:CssUnset x:Key="Avonic.FabButton.ColorFocused" />
+    <b:CssUnset x:Key="Avonic.FabButton.ColorHover" />
+
+    <b:CssUnset x:Key="Avonic.FabButton.RippleColor" />
+
+    <!-- box-shadow, background-color and color 280ms cubic-bezier(0.4, 0, 0.2, 1). Its opacity and transform parts
+         are left out: .button-native's never change. -->
+    <Transitions x:Key="Avonic.FabButton.Transition">
+        <BoxShadowsTransition Property="{x:Static Border.BoxShadowProperty}" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+        <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+        <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+    </Transitions>
+
+    <!-- What fab-button.md.css gives those variables per class. These aren't Ionic's variables: override the keys
+         above instead. -->
+    <SolidColorBrush x:Key="Avonic.FabButton.Md.BackgroundActivated" Color="Transparent" />
+    <x:Double x:Key="Avonic.FabButton.Md.BackgroundActivatedOpacity">0</x:Double>
+    <x:Double x:Key="Avonic.FabButton.Md.BackgroundFocusedOpacity">0.24</x:Double>
+    <x:Double x:Key="Avonic.FabButton.Md.BackgroundHoverOpacity">0.08</x:Double>
+    <BoxShadows x:Key="Avonic.FabButton.Md.BoxShadow">0 3 5 -1 #33000000, 0 6 10 0 #24000000, 0 1 18 0 #1F000000</BoxShadows>
+    <BoxShadows x:Key="Avonic.FabButton.Md.BoxShadowActivated">0 7 8 -4 #33000000, 0 12 17 2 #24000000, 0 5 22 4 #1F000000</BoxShadows>
+    <!-- .fab-button-in-list: rgba(ion-text-color-rgb, 0.54) -->
+    <SolidColorBrush x:Key="Avonic.FabButton.Md.ColorInList" Color="{DynamicResource Avonic.TextColor}" Opacity="0.54" />
+
+    <!-- .close-icon and .button-inner: transition: all ease-in-out 300ms; transition-property: transform, opacity.
+         A literal in Ionic, with no variable. -->
+    <Transitions x:Key="Avonic.FabButton.Md.CloseTransition">
+        <TransformOperationsTransition Property="{x:Static Visual.RenderTransformProperty}" Duration="0:0:0.3" Easing="{a:CubicBezier 0.42, 0, 0.58, 1}" />
+        <DoubleTransition Property="{x:Static Visual.OpacityProperty}" Duration="0:0:0.3" Easing="{a:CubicBezier 0.42, 0, 0.58, 1}" />
+    </Transitions>
+
+</ResourceDictionary>
