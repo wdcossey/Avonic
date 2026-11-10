@@ -1,0 +1,432 @@
+{
+  "tag": "ion-segment",
+  "snippet": "<ion-app style=\"position:static;display:block;contain:none;overflow:visible\"><div style=\"display:flex;flex-direction:column;gap:8px\"><ion-segment value=\"a\"><ion-segment-button value=\"a\"><ion-label>Friends</ion-label></ion-segment-button><ion-segment-button value=\"b\"><ion-label>Enemies</ion-label></ion-segment-button></ion-segment><ion-segment value=\"call\" color=\"danger\"><ion-segment-button value=\"call\"><ion-label>Call</ion-label><ion-icon name=\"call\"></ion-icon></ion-segment-button><ion-segment-button value=\"heart\"><ion-label>Heart</ion-label><ion-icon name=\"heart\"></ion-icon></ion-segment-button><ion-segment-button value=\"pin\"><ion-label>Pin</ion-label><ion-icon name=\"pin\"></ion-icon></ion-segment-button></ion-segment><ion-segment value=\"wifi\"><ion-segment-button value=\"wifi\" layout=\"icon-start\"><ion-label>Wi-Fi</ion-label><ion-icon name=\"wifi\"></ion-icon></ion-segment-button><ion-segment-button value=\"bt\" layout=\"icon-start\"><ion-label>Bluetooth</ion-label><ion-icon name=\"bluetooth\"></ion-icon></ion-segment-button></ion-segment><ion-segment value=\"1\"><ion-segment-button value=\"1\"><ion-label>One</ion-label></ion-segment-button><ion-segment-button value=\"2\" disabled><ion-label>Two</ion-label></ion-segment-button><ion-segment-button value=\"3\"><ion-label>Three</ion-label></ion-segment-button></ion-segment><ion-segment scrollable value=\"s4\"><ion-segment-button value=\"s1\"><ion-label>First</ion-label></ion-segment-button><ion-segment-button value=\"s2\"><ion-label>Second</ion-label></ion-segment-button><ion-segment-button value=\"s3\"><ion-label>Third</ion-label></ion-segment-button><ion-segment-button value=\"s4\"><ion-label>Fourth</ion-label></ion-segment-button><ion-segment-button value=\"s5\"><ion-label>Fifth</ion-label></ion-segment-button><ion-segment-button value=\"s6\"><ion-label>Sixth</ion-label></ion-segment-button></ion-segment><ion-toolbar color=\"primary\"><ion-segment value=\"t1\"><ion-segment-button value=\"t1\"><ion-label>Inbox</ion-label></ion-segment-button><ion-segment-button value=\"t2\"><ion-label>Sent</ion-label></ion-segment-button></ion-segment></ion-toolbar><ion-toolbar><ion-segment value=\"t2\"><ion-segment-button value=\"t1\"><ion-label>Inbox</ion-label></ion-segment-button><ion-segment-button value=\"t2\"><ion-label>Sent</ion-label></ion-segment-button></ion-segment></ion-toolbar><ion-segment value=\"v1\"><ion-segment-button value=\"v1\" content-id=\"v1\"><ion-label>Photos</ion-label></ion-segment-button><ion-segment-button value=\"v2\" content-id=\"v2\"><ion-label>Music</ion-label></ion-segment-button><ion-segment-button value=\"v3\" content-id=\"v3\"><ion-label>Files</ion-label></ion-segment-button></ion-segment><ion-segment-view style=\"height:64px\"><ion-segment-content id=\"v1\"><p style=\"margin:16px\">Photos content</p></ion-segment-content><ion-segment-content id=\"v2\"><p style=\"margin:16px\">Music content</p></ion-segment-content><ion-segment-content id=\"v3\"><p style=\"margin:16px\">Files content</p></ion-segment-content></ion-segment-view></div></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "value": "a",
+        "role": "tablist",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 48
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "48px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "value": "call",
+        "color": "danger",
+        "role": "tablist",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 56,
+        "w": 390,
+        "h": 70
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "70px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.in-segment-color.segment-button-has-label.segment-button-has-icon.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n    <ion-icon.md.hydrated>\n      #shadow-root\n        <div.icon-inner>\n          <svg>\n            <path>\n  <ion-segment-button.md.in-segment.in-segment-color.segment-button-has-label.segment-button-has-icon.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n    <ion-icon.md.hydrated>\n      #shadow-root\n        <div.icon-inner>\n          <svg>\n            <path>\n  <ion-segment-button.md.in-segment.in-segment-color.segment-button-has-label.segment-button-has-icon.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n    <ion-icon.md.hydrated>\n      #shadow-root\n        <div.icon-inner>\n          <svg>\n            <path>\n"
+    },
+    {
+      "attributes": {
+        "value": "wifi",
+        "role": "tablist",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 134,
+        "w": 390,
+        "h": 48
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "48px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-icon.segment-button-checked.segment-button-layout-icon-start.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n    <ion-icon.md.hydrated>\n      #shadow-root\n        <div.icon-inner>\n          <svg>\n            <path>\n            <path>\n            <path>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-icon.segment-button-layout-icon-start.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n    <ion-icon.md.hydrated>\n      #shadow-root\n        <div.icon-inner>\n          <svg>\n            <path>\n"
+    },
+    {
+      "attributes": {
+        "value": "1",
+        "role": "tablist",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 190,
+        "w": 390,
+        "h": 48
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "48px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-disabled.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "scrollable": "",
+        "value": "s4",
+        "role": "tablist",
+        "class": "md segment-scrollable hydrated"
+      },
+      "classes": [
+        "md",
+        "segment-scrollable",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 246,
+        "w": 390,
+        "h": 48
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "48px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "auto",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "value": "t1",
+        "role": "tablist",
+        "class": "md in-toolbar in-toolbar-color hydrated"
+      },
+      "classes": [
+        "md",
+        "in-toolbar",
+        "in-toolbar-color",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 302,
+        "w": 390,
+        "h": 56
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "56px",
+        "min-height": "56px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(255, 255, 255)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(255, 255, 255) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-toolbar.in-toolbar-color.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-toolbar.in-toolbar-color.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "value": "t2",
+        "role": "tablist",
+        "class": "md in-toolbar hydrated"
+      },
+      "classes": [
+        "md",
+        "in-toolbar",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 366,
+        "w": 390,
+        "h": 56
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "56px",
+        "min-height": "56px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(66, 66, 66)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(66, 66, 66)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(66, 66, 66) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-toolbar.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-toolbar.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    },
+    {
+      "attributes": {
+        "value": "v1",
+        "role": "tablist",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 430,
+        "w": 390,
+        "h": 48
+      },
+      "cssVars": {
+        "--background": "transparent"
+      },
+      "host": {
+        "display": "grid",
+        "position": "relative",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "48px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "paint",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-checked.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated.segment-button-after-checked>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n  <ion-segment-button.md.in-segment.segment-button-has-label.segment-button-has-label-only.segment-button-layout-icon-top.ion-activatable.ion-activatable-instant.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n      <div.segment-button-indicator.segment-button-indicator-animated part=\"indicator\">\n        <div.segment-button-indicator-background part=\"indicator-background\">\n    <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n"
+    }
+  ]
+}

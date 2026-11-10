@@ -1,0 +1,61 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- segment-button.md.css's ::slotted rules. A button's child is its own container, so its logical parent is the button, and
+         '>' means direct children only, as ::slotted does. A margin is one Thickness here, where CSS sets each side on its own,
+         so each rule gives what the sides add up to. -->
+
+    <!-- ::slotted(ion-icon) { flex-shrink: 0; order: -1; pointer-events: none; margin-top: 12px; margin-bottom: 12px; font-size: 24px }.
+         The order and the shrinking are SegmentButtonPanel's. -->
+    <Style Selector="c|AvonicSegmentButton > c|AvonicIcon">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Margin" Value="0,12" />
+        <Setter Property="FontSize" Value="24" />
+    </Style>
+
+    <!-- ::slotted(ion-label) { display: block; max-width: 100%; line-height: 22px; overflow: hidden; pointer-events: none;
+         margin-top: 12px; margin-bottom: 12px }, and the host's text-transform: uppercase. Its text-overflow: ellipsis and
+         white-space: nowrap are the host's too, which it inherits. -->
+    <Style Selector="c|AvonicSegmentButton > c|AvonicLabel">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Margin" Value="0,12" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="TextBlock.LineHeight" Value="22" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="ContentTemplate" Value="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicSegmentButton.UppercaseTextForContent}}" />
+    </Style>
+
+    <!-- :host(.segment-button-layout-icon-top) ::slotted(ion-label), :host(.segment-button-layout-icon-bottom) ::slotted(ion-icon) { margin-top: 0 },
+         and the same with margin-bottom for the other two, unless :host(.segment-button-has-icon-only) ::slotted(ion-icon) or
+         :host(.segment-button-has-label-only) ::slotted(ion-label), later, puts 12 back on both. -->
+    <Style Selector="c|AvonicSegmentButton:layout-icon-top:not(:has-icon-only) > c|AvonicIcon">
+        <Setter Property="Margin" Value="0,12,0,0" />
+    </Style>
+    <Style Selector="c|AvonicSegmentButton:layout-icon-bottom:not(:has-icon-only) > c|AvonicIcon">
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+    <Style Selector="c|AvonicSegmentButton:layout-icon-top:not(:has-label-only) > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+    <Style Selector="c|AvonicSegmentButton:layout-icon-bottom:not(:has-label-only) > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,12,0,0" />
+    </Style>
+
+    <!-- :host(.segment-button-layout-icon-start) ::slotted(ion-label) { margin-inline: 8px 0 }, and icon-end's 0 8px -->
+    <Style Selector="c|AvonicSegmentButton:layout-icon-start > c|AvonicLabel">
+        <Setter Property="Margin" Value="8,12,0,12" />
+    </Style>
+    <Style Selector="c|AvonicSegmentButton:layout-icon-end > c|AvonicLabel">
+        <Setter Property="Margin" Value="0,12,8,12" />
+    </Style>
+
+    <!-- :host(.segment-button-layout-icon-hide) ::slotted(ion-icon), :host(.segment-button-layout-label-hide) ::slotted(ion-label) { display: none } -->
+    <Style Selector="c|AvonicSegmentButton:layout-icon-hide > c|AvonicIcon">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="c|AvonicSegmentButton:layout-label-hide > c|AvonicLabel">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+</Styles>

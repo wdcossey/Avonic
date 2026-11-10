@@ -1,0 +1,300 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicSegment Value="wifi">
+                <c:AvonicSegmentButton Value="wifi" Layout="IconStart">
+                    <c:AvonicLabel Content="Wi-Fi" />
+                    <c:AvonicIcon IconName="wifi" />
+                </c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="bt" Layout="IconEnd">
+                    <c:AvonicLabel Content="Bluetooth" />
+                    <c:AvonicIcon IconName="bluetooth" />
+                </c:AvonicSegmentButton>
+            </c:AvonicSegment>
+            <c:AvonicSegment Value="1">
+                <c:AvonicSegmentButton Value="1"><c:AvonicLabel Content="One" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="2" IsEnabled="False"><c:AvonicLabel Content="Two" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="3"><c:AvonicLabel Content="Three" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of segment-button.md.css, in its order. Its rules for a state are ordered by their specificity, then by
+         the file, as everything here with a pseudoclass is ordered: later beats earlier. The label's and the icon's rules are
+         in Styles/SegmentButton.axaml, because a ControlTheme's styles can't reach them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegmentButton}" TargetType="c:AvonicSegmentButton">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 14px; font-weight: 500; letter-spacing: 0.06em; line-height: 40px; text-transform: uppercase -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextBlock.LetterSpacing">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.06">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="TextBlock.LineHeight" Value="40" />
+        <Setter Property="ItemTemplate" Value="{x:Static c:AvonicSegmentButton.UppercaseText}" />
+        <!-- font-kerning: none -->
+        <Setter Property="TextBlock.FontFeatures">
+            <FontFeatureCollection>
+                <FontFeature Tag="kern" Value="0" />
+            </FontFeatureCollection>
+        </Setter>
+        <!-- white-space: nowrap; text-overflow: ellipsis -->
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="MinWidth" Value="90" />
+        <Setter Property="MinHeight" Value="48" />
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- :host(:focus) { outline: none }. The overlay is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- color: var(color); background: var(background) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.SegmentButton.Color" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.SegmentButton.Background" />
+            </MultiBinding>
+        </Setter>
+        <!-- border-radius, border-width, border-style and border-color, from the variables -->
+        <Setter Property="CornerRadius" Value="{DynamicResource Avonic.SegmentButton.BorderRadius}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource Avonic.SegmentButton.BorderWidth}" />
+        <Setter Property="BorderBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.SegmentButton.BorderColor" />
+                <Binding Path="Foreground" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- transition: var(transition), on .button-native, whose colour is the host's here -->
+        <Setter Property="Transitions" Value="{DynamicResource Avonic.SegmentButton.Transition}" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentButtonPanel Layout="{Binding Layout, RelativeSource={RelativeSource AncestorType=c:AvonicSegmentButton}}" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Host"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Panel>
+                        <!-- position: absolute; left: 0; right: 0; bottom: 0; transform-origin: left. Before the native part,
+                             which is over it, as z-index: 2 puts it. -->
+                        <Border Name="PART_Indicator" VerticalAlignment="Bottom" RenderTransformOrigin="0%,50%" IsHitTestVisible="False">
+                            <Border Name="PART_IndicatorBackground" />
+                        </Border>
+                        <!-- .button-native: overflow: hidden, its margin, and the transition. Its colour inherits the host's. -->
+                        <Border Name="PART_Native" ClipToBounds="True">
+                            <Panel Background="Transparent">
+                                <!-- .button-native::after -->
+                                <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                                <c:AvonicRippleEffect Name="PART_Ripple" />
+                                <!-- .button-inner, inside the padding -->
+                                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.MarginStart" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.MarginTop" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.MarginEnd" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.MarginBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <Style Selector="^ /template/ ItemsPresenter#PART_ItemsPresenter">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .button-native::after { opacity: 0 } -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color, var(color-checked)) }. In a segment, ripple-color is currentColor, the
+             host's, which it inherits; alone, the checked colour. -->
+        <Style Selector="^:not(:in-segment) /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .segment-button-indicator { opacity: 0 }, and 1 when checked -->
+        <Style Selector="^ /template/ Border#PART_Indicator">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="^:checked /template/ Border#PART_Indicator">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <!-- .segment-button-indicator-background -->
+        <Style Selector="^ /template/ Border#PART_IndicatorBackground">
+            <Setter Property="Height" Value="{DynamicResource Avonic.SegmentButton.IndicatorHeight}" />
+            <Setter Property="RenderTransform" Value="{DynamicResource Avonic.SegmentButton.IndicatorTransform}" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.SegmentButton.IndicatorBoxShadow}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.IndicatorColor" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- The colour. .button-native's colour beats the host's in CSS, and it's what the text, the icon and the ripple show,
+             but a child here inherits the host's, so each of .button-native's colour rules sets the host's, in the order of their
+             specificity, then of the file. A focused or hovered colour that's unset falls back to what the host's would be. -->
+        <!-- :host(.segment-button-checked) -->
+        <Style Selector="^:checked">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.BackgroundChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.in-segment-color): a literal colour, not var(color), which beats checked on the host -->
+        <Style Selector="^:in-segment-color">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.SegmentButton.Md.InSegmentColorColor}" />
+        </Style>
+        <!-- :host(.ion-focused) .button-native { color: var(color-focused) } -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.Color" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:checked">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:in-segment-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.Md.InSegmentColorColor" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(:hover) .button-native { color: var(color-hover) }, after focus, which it beats -->
+        <Style Selector="^:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.Color" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.segment-button-checked:hover) .button-native -->
+        <Style Selector="^:checked:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.in-segment-color.segment-button-checked) .button-native -->
+        <Style Selector="^:in-segment-color:checked">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- :host(.in-segment-color:hover) .button-native -->
+        <Style Selector="^:in-segment-color:ion-hover">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.SegmentButton.Md.InSegmentColorColor}" />
+        </Style>
+        <Style Selector="^:in-segment-color:checked:ion-hover">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- :host(.in-toolbar-color:not(.in-segment-color)) .button-native: the contrast of the toolbar, later than hover, which it beats -->
+        <Style Selector="^:in-toolbar-color:not(:in-segment-color)">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicToolbar].(b:ColorPalette.ContrastColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.6}" />
+        </Style>
+        <Style Selector="^:in-toolbar-color:checked:not(:in-segment-color)">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicToolbar].(b:ColorPalette.Contrast)}" />
+        </Style>
+
+        <!-- :host(.segment-button-disabled). A disabled control already takes no input. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+
+        <!-- .button-native::after, focused and hovered -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.SegmentButton.BackgroundFocusedOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.SegmentButton.BackgroundHoverOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.BackgroundHover" />
+                    <DynamicResource ResourceKey="Avonic.SegmentButton.ColorChecked" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-segment-color:ion-focused /template/ Border#PART_Overlay, ^:in-segment-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicSegmentButton].(b:ColorPalette.Base)}" />
+        </Style>
+        <Style Selector="^:in-toolbar-color:not(:in-segment-color) /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToolbar].(b:ColorPalette.Contrast)}" />
+        </Style>
+
+        <!-- The ripple and the indicator in the segment's colour, or the toolbar's contrast -->
+        <Style Selector="^:in-segment-color /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:in-segment-color /template/ Border#PART_IndicatorBackground">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicSegmentButton].(b:ColorPalette.Base)}" />
+        </Style>
+        <Style Selector="^:in-toolbar-color:not(:in-segment-color) /template/ Border#PART_IndicatorBackground">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToolbar].(b:ColorPalette.Contrast)}" />
+        </Style>
+
+        <!-- .segment-scrollable ::slotted(ion-segment-button) { min-width: auto } -->
+        <Style Selector="^:in-segment-scrollable">
+            <Setter Property="MinWidth" Value="0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

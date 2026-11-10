@@ -1,0 +1,158 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The scrolling part of a scrollable ion-segment: no scroll bars, as the segment hides its own, and a gesture recognizer,
+         which is what makes a touch drag scroll. It's here because a base theme's template has scroll bars, and TestApp has
+         no base theme. The theme's template uses this one too. -->
+    <ControlTheme x:Key="AvonicSegmentScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                                 CanVerticallyScroll="False"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-segment: structure only. The look is in Avonic.Themes. One row of columns, as display: grid
+         is, in a scroller that scrolls only when the segment is scrollable, and clips, as contain: paint does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegment}" TargetType="c:AvonicSegment">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}">
+                    <ScrollViewer Name="PART_Scroll"
+                                  Theme="{DynamicResource AvonicSegmentScrollViewer}"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:scrollable /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        </Style>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-segment-button: structure only. The indicator is first, so that the native part, z-index: 2,
+         is over it. The transparent panel is what makes the whole box take input. The children are a flex box that follows
+         Layout. The indicator shows only on the checked button. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegmentButton}" TargetType="c:AvonicSegmentButton">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentButtonPanel Layout="{Binding Layout, RelativeSource={RelativeSource AncestorType=c:AvonicSegmentButton}}" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Indicator" VerticalAlignment="Bottom" RenderTransformOrigin="0%,50%" Opacity="0" IsHitTestVisible="False">
+                        <Border Name="PART_IndicatorBackground" />
+                    </Border>
+                    <Border Name="PART_Native" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                        </Panel>
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:checked /template/ Border#PART_Indicator">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </ControlTheme>
+
+    <!-- The scrolling part of ion-segment-view: no scroll bars, a touch drag that pages it one content at a time, as
+         scroll-snap-type: x mandatory and scroll-snap-stop: always do. The view turns the drag off when it can't swipe. -->
+    <ControlTheme x:Key="AvonicSegmentViewScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        HorizontalSnapPointsType="MandatorySingle"
+                                        HorizontalSnapPointsAlignment="Near"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="True"
+                                                 CanVerticallyScroll="False"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-segment-view: structure only. A row of contents, each the view's width, in a scroller with no
+         bar. The panel's transparent background, and each content's, make all of it take input, as a browser's box does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegmentView}" TargetType="c:AvonicSegmentView">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentViewPanel Background="Transparent" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollViewer Name="PART_Scroll"
+                              Theme="{DynamicResource AvonicSegmentViewScrollViewer}"
+                              Background="{TemplateBinding Background}"
+                              HorizontalScrollBarVisibility="Hidden"
+                              VerticalScrollBarVisibility="Disabled">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </ScrollViewer>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The scrolling part of ion-segment-content: overflow-y: scroll with no scroll bar. -->
+    <ControlTheme x:Key="AvonicSegmentContentScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="False"
+                                                 CanVerticallyScroll="True"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-segment-content: a page that scrolls vertically. It has no look of its own in md. Text wraps,
+         as it does in a browser. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegmentContent}" TargetType="c:AvonicSegmentContent">
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollViewer Name="PART_Scroll"
+                              Theme="{DynamicResource AvonicSegmentContentScrollViewer}"
+                              Background="{TemplateBinding Background}"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Hidden">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Background="Transparent"
+                                      Padding="{TemplateBinding Padding}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                </ScrollViewer>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
