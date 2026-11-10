@@ -218,6 +218,40 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B4_A_Second_Tap_Before_It_Opens_Adds_Nothing()
+    {
+        var a = Accordion("a");
+        var group = Group(null, a);
+        group.Multiple = true;
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        // It's still closed until a frame has passed, so the second tap asks to open it again.
+        Tap(scene, a);
+        Tap(scene, a);
+
+        Assert.Equal(["a"], Assert.IsAssignableFrom<IEnumerable<string>>(group.Value));
+        Assert.Single(changes);
+    }
+
+    [AvaloniaFact]
+    public void B1_A_Value_That_Is_Not_A_String_Is_Read_The_Same_Way_By_A_Tap()
+    {
+        var a = Accordion("1");
+        var group = Group(new object[] { 1 }, a);
+        group.Multiple = true;
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        Assert.Equal(ContentHeight, Shown(scene, a));
+        Tap(scene, a);
+        clock.At(1000);
+
+        Assert.Equal(0, Shown(scene, a));
+    }
+
+    [AvaloniaFact]
     public void B6_An_Array_Without_Multiple_Logs_A_Warning()
     {
         var sink = new WarningSink();
@@ -273,8 +307,10 @@ public class AvonicAccordionTests
         Assert.False(hit is not null && Header(b).IsVisualAncestorOf(hit));
 
         // The content too: open it from the group, and nothing in it takes the pointer.
+        group.Animated = false;
         group.Value = "b";
         Dispatcher.UIThread.RunJobs();
+        Assert.True(Content(b).IsEffectivelyVisible);
         scene.Window.CaptureRenderedFrame();
         var inContent = scene.Window.InputHitTest(CentreOf(scene, Content(b))) as Visual;
         Assert.False(inContent is not null && Content(b).IsVisualAncestorOf(inContent));
@@ -435,14 +471,15 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
-    public void B10_An_Item_In_A_Panel_In_The_Header_Counts()
+    public void B10_An_Item_Inside_A_Panel_In_The_Header_Is_Left_Alone()
     {
+        // Ionic looks at what's assigned to the slot, and a <div> there isn't an ion-item.
         var item = Item("a");
         var a = new AvonicAccordion { Value = "a", HeaderContent = new StackPanel { Children = { item } } };
         using var scene = Show(Group(null, a));
 
-        Assert.True(item.Button);
-        Assert.IsType<AvonicIcon>(item.EndContent);
+        Assert.False(item.Button);
+        Assert.Null(item.EndContent);
     }
 
     [AvaloniaFact]
@@ -774,6 +811,41 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B14_Leaving_The_Group_Mid_Collapse_Finishes_It()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        var panel = new StackPanel();
+        using var scene = new Scene(new StackPanel { Children = { group, panel } });
+        using var clock = new TestClock();
+
+        Tap(scene, b);
+        clock.At(32 + 100);
+        Assert.True(double.IsFinite(Content(a).MaxHeight));
+
+        group.Items.Remove(a);
+        panel.Children.Add(a);
+        clock.At(1000);
+
+        Assert.Equal(0, Shown(scene, a));
+        Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
+    }
+
+    [AvaloniaFact]
+    public void B14_A_Padded_Content_Box_Eases_To_Its_Whole_Height()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        using var scene = Show(Group("a", a, b));
+        using var clock = new TestClock();
+        Content(b).Padding = new Thickness(0, 8);
+
+        Tap(scene, b);
+        clock.At(32 + 288);
+
+        Assert.Equal((ContentHeight + 16) * Ease.Ease(288 / 300.0), Content(b).MaxHeight, 6);
+    }
+
+    [AvaloniaFact]
     public void B15_Animated_Off_On_The_Group_Means_No_Animation()
     {
         AvonicAccordion a = Accordion("a"), b = Accordion("b");
@@ -900,6 +972,54 @@ public class AvonicAccordionTests
         Assert.True(b.Margin.Top < 8);
     });
 
+    [AvaloniaFact]
+    public void B18_Changing_Expand_Reaches_The_Accordions() => InstalledTheme.Run(_ =>
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        Assert.Equal(new CornerRadius(0), a.CornerRadius);
+
+        group.Expand = AccordionGroupExpand.Inset;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(new CornerRadius(8, 8, 6, 6), a.CornerRadius);
+        Assert.Equal(3, Part<Border>(b, "PART_Host").BoxShadow.Count);
+    });
+
+    /// <summary>Accordions made from <c>ItemsSource</c> and a template are the group's own too, in presenters.</summary>
+    [AvaloniaFact]
+    public void B18_Accordions_From_ItemsSource_Are_The_Groups_Own() => InstalledTheme.Run(_ =>
+    {
+        var group = new AvonicAccordionGroup
+        {
+            Expand = AccordionGroupExpand.Inset,
+            Value = "b",
+            ItemsSource = new[] { "a", "b", "c" },
+            ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((value, _) => Accordion(value)),
+        };
+        var changes = Changes(group);
+        using var scene = Show(group);
+        var accordions = group.GetVisualDescendants().OfType<AvonicAccordion>().ToList();
+        Assert.Equal(3, accordions.Count);
+        AvonicAccordion a = accordions[0], b = accordions[1], c = accordions[2];
+
+        // First, before the open one; the open one; last, after it. And the last's line goes.
+        Assert.Equal(new CornerRadius(8, 8, 6, 6), a.CornerRadius);
+        Assert.Equal(new CornerRadius(6), b.CornerRadius);
+        Assert.Equal(new CornerRadius(6, 6, 8, 8), c.CornerRadius);
+        Assert.Equal(new Thickness(0), NativeBorder(c));
+
+        // Keys move between them, and readonly reaches them.
+        ((AvonicItem)a.HeaderContent!).Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.ArrowDown, RawInputModifiers.None);
+        Assert.Same(b.HeaderContent, scene.Window.FocusManager!.GetFocusedElement());
+        group.Readonly = true;
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Header(a).IsHitTestVisible);
+        Assert.Empty(changes);
+    });
+
     private static Thickness NativeBorder(AvonicAccordion accordion) =>
         Part<Border>((AvonicItem)accordion.HeaderContent!, "PART_Native").BorderThickness;
 
@@ -982,6 +1102,35 @@ public class AvonicAccordionTests
         scene.Window.KeyPressQwerty(PhysicalKey.ArrowDown, RawInputModifiers.None);
 
         Assert.Same(y.HeaderContent, scene.Window.FocusManager!.GetFocusedElement());
+    }
+
+    [AvaloniaFact]
+    public void B20_A_Disabled_Accordion_Is_Passed_Over()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b"), c = Accordion("c");
+        c.IsEnabled = false;
+        using var scene = Show(Group(null, a, b, c));
+
+        ((AvonicItem)b.HeaderContent!).Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.ArrowDown, RawInputModifiers.None);
+        Assert.Same(a.HeaderContent, scene.Window.FocusManager!.GetFocusedElement());
+
+        scene.Window.KeyPressQwerty(PhysicalKey.End, RawInputModifiers.None);
+        Assert.Same(b.HeaderContent, scene.Window.FocusManager!.GetFocusedElement());
+    }
+
+    [AvaloniaFact]
+    public void B20_Home_On_The_First_Leaves_Focus_Where_It_Is()
+    {
+        var a = Accordion("a");
+        var button = new Button { Content = "In the header" };
+        ((AvonicItem)a.HeaderContent!).StartContent = button;
+        using var scene = Show(Group(null, a, Accordion("b")));
+
+        button.Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.Home, RawInputModifiers.None);
+
+        Assert.Same(button, scene.Window.FocusManager!.GetFocusedElement());
     }
 
     [AvaloniaFact]

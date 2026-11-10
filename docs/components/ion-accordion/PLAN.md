@@ -83,6 +83,11 @@ No methods, slots, parts or CSS variables. Its children have no slot in `core.js
 - **The header's click.** `NativeButton`, with no keys, on `PART_Header`, for a press on anything there; and the `Click` of an
   `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or `Button` inside, for a key. A press that has already clicked
   something inside doesn't toggle twice.
+- **The header item** is `HeaderContent` when it's an `AvonicItem`. Ionic looks at the elements assigned to the slot, so an
+  item inside a panel there isn't it.
+- **Its group's own.** `:scope > ion-accordion` is an accordion that's an item of the group, or made from its `ItemTemplate`, in
+  a presenter. `:first-of-type` and `:last-of-type` are pseudoclasses the accordion works out from the group's accordions, so that
+  they hold for `ItemsSource` too, as `:nth-child` doesn't through a presenter.
 - **The toggle icon** goes in the item's `EndContent` (or `StartContent`) if it's empty; at the end of a `Panel` there; and
   beside a single control there, in a horizontal `StackPanel`, as Ionic's `appendChild` puts it after what's there.
 - **Theme.** `Themes/Controls/AvonicAccordion.axaml` and `AvonicAccordionGroup.axaml`: the background, the inset shadow,

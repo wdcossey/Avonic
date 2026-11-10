@@ -15,8 +15,8 @@ public class AccordionContentClip : Decorator
         ClipToBoundsProperty.OverrideDefaultValue<AccordionContentClip>(true);
     }
 
-    /// <summary>The child's own height, which is <c>#content-wrapper</c>'s <c>offsetHeight</c>.</summary>
-    internal double ChildHeight => Child?.DesiredSize.Height ?? 0;
+    /// <summary>Its height with no <c>max-height</c>: the child's own, which is <c>#content-wrapper</c>'s <c>offsetHeight</c>, and the padding.</summary>
+    internal double NaturalHeight => (Child?.DesiredSize.Height ?? 0) + Padding.Top + Padding.Bottom;
 
     protected override Size MeasureOverride(Size availableSize)
     {

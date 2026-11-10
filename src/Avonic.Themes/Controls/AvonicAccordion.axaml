@@ -104,13 +104,13 @@
             <Setter Property="c:AccordionCorners.Top" Value="6" />
         </Style>
         <!-- core.css: first-of-type and last-of-type, 8px, which beat the group's 6px as the document's rules beat ::slotted -->
-        <Style Selector="^:accordion-group-expand-inset:nth-child(1)">
+        <Style Selector="^:accordion-group-expand-inset:first-in-group">
             <Setter Property="c:AccordionCorners.Top" Value="8" />
         </Style>
-        <Style Selector="^:accordion-group-expand-inset:nth-last-child(1)">
+        <Style Selector="^:accordion-group-expand-inset:last-in-group">
             <Setter Property="c:AccordionCorners.Bottom" Value="8" />
         </Style>
-        <Style Selector="^:accordion-group-expand-inset:expanded:nth-child(1)">
+        <Style Selector="^:accordion-group-expand-inset:expanded:first-in-group">
             <Setter Property="Margin" Value="0,0,0,16" />
         </Style>
     </ControlTheme>

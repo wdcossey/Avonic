@@ -102,6 +102,11 @@ A click on the second header, with the first open. Chromium's frames are about 1
   The content's height, which is the control's own, is on the clock.
 - **A request reversed within a frame.** Ionic lets a collapse that hasn't started yet run, even after the group has reopened the
   accordion, and the other way round. Here the pending one is cancelled, so the accordion follows its group.
-- **An interrupted transition** starts from the height shown. Not measured against Chromium's own interrupted transitions.
+- **An interrupted transition.** Measured: Ionic's expand clicked again 112 ms in, at 36.7 px. The collapse sets the shown
+  height inline, which ends the running transition, so there's no reversing shortening: the height creeps to 39.9 over the two
+  frames, then eases to 0 over the full 300 ms (8.68 px 100 ms in). Here the collapse reads the height the transition has reached a
+  frame on, and eases from it over 300 ms; the two frames between hold it still, where Chromium's go on growing, about 3 px.
+- **Keys pass over a disabled accordion.** In Ionic `focus()` lands on the disabled one's item, which isn't disabled itself; here
+  `IsEnabled` reaches it, so it can't take focus, and the keys go on to the next one rather than stop.
 - **The toggle icon beside other content.** A slot holds one child here: a panel there gets the icon added; a single control is put
   into a horizontal `StackPanel` with the icon after it; content that isn't a control gets no icon, and a warning.

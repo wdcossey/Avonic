@@ -40,8 +40,9 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 
 Pseudoclasses, from Ionic's host classes: `:accordion-expanding`, `:accordion-expanded`, `:accordion-collapsing`,
-`:accordion-collapsed`, `:accordion-next`, `:accordion-previous`, `:accordion-animated`, and `:accordion-group-expand-inset`
-for `ion-accordion-group.accordion-group-expand-inset > ion-accordion`.
+`:accordion-collapsed`, `:accordion-next`, `:accordion-previous`, `:accordion-animated`; `:accordion-group-expand-inset` for
+`ion-accordion-group.accordion-group-expand-inset > ion-accordion`; and `:first-in-group` and `:last-in-group` for
+`ion-accordion-group > ion-accordion:first-of-type` and `:last-of-type`, which hold for accordions made from `ItemsSource` too.
 
 ### AvonicAccordionGroup
 
@@ -56,7 +57,8 @@ for `ion-accordion-group.accordion-group-expand-inset > ion-accordion`.
 | [x] | `ionChange` | `IonChange`, `IonChangeEvent` (`AccordionGroupChangeEventArgs.Value`) | Only from a tap or a key |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 
-Its accordions are its `Items`: it's an `ItemsControl`, and an accordion is its own container.
+Its accordions are its `Items`: it's an `ItemsControl`, and an accordion is its own container. Accordions made from
+`ItemsSource` and an `ItemTemplate` are its own too.
 
 ### Resource keys
 
@@ -82,7 +84,8 @@ its own height and clips it, so the content slides rather than squeezes.
 - A tap anywhere in an accordion's header, or Enter or Space on its item, asks the group to toggle it. The group sets `Value`
   and raises `IonChange`. Setting `Value` in code raises nothing.
 - A readonly or disabled accordion or group can't be toggled. An accordion outside a group never opens.
-- When it first loads, an accordion makes the `AvonicItem` in its header a button, with no detail icon and full lines unless it
+- When it first loads, an accordion makes the `AvonicItem` that is its `HeaderContent` (not one inside a panel there, as Ionic
+  only looks at what's assigned to the slot) a button, with no detail icon and full lines unless it
   has its own, and adds a toggle icon to its end slot (or start), unless the item already holds a control with the style class
   `ion-accordion-toggle-icon`. The icon turns 180° while open.
 - Nothing animates until the first interaction. After it, the content's height eases over 300 ms, on `AvonicConfig`'s clock,
@@ -90,7 +93,7 @@ its own height and clips it, so the content slides rather than squeezes.
 - Inset: the group has a 16 px margin, each accordion a shadow, and an open one 16 px above and below and rounded corners. The
   header item's line goes while open, on the last accordion, and inset on one before an open one.
 - With focus in a header, ArrowDown and ArrowUp move it to the next or previous accordion, wrapping, and Home and End to the first
-  and the last.
+  and the last. A disabled accordion can't take focus here, so it's passed over.
 - The accordion's automation peer has `ExpandCollapse`, for `aria-expanded`.
 
 ## Extensions

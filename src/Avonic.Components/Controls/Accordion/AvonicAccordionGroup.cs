@@ -3,9 +3,11 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Presenters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -46,6 +48,7 @@ public class AvonicAccordionGroup : ItemsControl
         RoutedEvent.Register<AvonicAccordionGroup, AccordionGroupChangeEventArgs>(nameof(IonChange), RoutingStrategies.Bubble);
 
     private bool _didLoad;
+    private bool _notifyPosted;
 
     /// <summary>A <see cref="Avalonia.Controls.Primitives.TemplatedControl"/> clips by default, and the group doesn't, so an inset accordion's shadow shows.</summary>
     static AvonicAccordionGroup()
@@ -98,18 +101,74 @@ public class AvonicAccordionGroup : ItemsControl
     internal event Action? ValueChange;
 
     /// <summary>Whether an accordion with this value is open. <c>Array.isArray(value) ? value.includes(v) : value === v</c>.</summary>
-    internal static bool Includes(object? value, string? accordionValue) => value switch
+    internal static bool Includes(object? value, string? accordionValue) => AsList(value).Contains(accordionValue!) && accordionValue is not null;
+
+    /// <summary>What it holds at each index: the accordion, whether it's an item or made from the template, or null.</summary>
+    internal IList Elements()
     {
-        string single => single == accordionValue,
-        IEnumerable many => many.Cast<object?>().Any(v => Equals(v, accordionValue)),
-        _ => false,
-    };
+        var elements = new List<AvonicAccordion?>(ItemCount);
+        for (var i = 0; i < ItemCount; i++)
+        {
+            elements.Add(ContainerFromIndex(i) switch
+            {
+                AvonicAccordion accordion => accordion,
+                ContentPresenter { Child: AvonicAccordion accordion } => accordion,
+                null => Items[i] as AvonicAccordion,
+                _ => null,
+            });
+        }
+
+        return elements;
+    }
 
     /// <summary><c>getAccordions</c>: its own accordions, not those further in.</summary>
-    internal IEnumerable<AvonicAccordion> Accordions() => Items.OfType<AvonicAccordion>();
+    internal IEnumerable<AvonicAccordion> Accordions() => Elements().OfType<AvonicAccordion>();
+
+    /// <summary>The group an accordion is a child of: as an item, or made from the item template, in a presenter.</summary>
+    internal static AvonicAccordionGroup? OwnerOf(AvonicAccordion accordion) => accordion.Parent switch
+    {
+        AvonicAccordionGroup group => group,
+        ContentPresenter presenter when ItemsControlFromItemContainer(presenter) is AvonicAccordionGroup group => group,
+        _ => null,
+    };
 
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<AvonicAccordion>(item, out recycleKey);
+
+    /// <summary>Which accordion is first and last changes with the items, whether they're its own or from <c>ItemsSource</c>.</summary>
+    protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
+    {
+        base.PrepareContainerForItemOverride(container, item, index);
+        PostNotify();
+    }
+
+    protected override void ClearContainerForItemOverride(Control container)
+    {
+        base.ClearContainerForItemOverride(container);
+        PostNotify();
+    }
+
+    protected override void ContainerIndexChangedOverride(Control container, int oldIndex, int newIndex)
+    {
+        base.ContainerIndexChangedOverride(container, oldIndex, newIndex);
+        PostNotify();
+    }
+
+    /// <summary>Once the items have settled, and a template's accordion is in its presenter.</summary>
+    private void PostNotify()
+    {
+        if (_notifyPosted)
+        {
+            return;
+        }
+
+        _notifyPosted = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _notifyPosted = false;
+            NotifyAccordions();
+        }, DispatcherPriority.Loaded);
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -178,6 +237,7 @@ public class AvonicAccordionGroup : ItemsControl
         RaiseEvent(new AccordionGroupChangeEventArgs(IonChangeEvent, value));
     }
 
+    /// <summary>The value as a list of strings, which both a tap and <see cref="Includes"/> read, so that they agree.</summary>
     private static List<string> AsList(object? value) => value switch
     {
         null => [],
@@ -259,15 +319,25 @@ public class AvonicAccordionGroup : ItemsControl
             return;
         }
 
-        var next = e.Key switch
+        // Where to look, in order: the next or the previous, wrapping, or the first or the last. An accordion that can't take focus,
+        // as a disabled one can't here, is passed over, rather than stop the keys there.
+        var count = accordions.Count;
+        var order = e.Key switch
         {
-            Key.Down => accordions[start + 1 < accordions.Count ? start + 1 : 0],
-            Key.Up => accordions[start > 0 ? start - 1 : accordions.Count - 1],
-            Key.Home => accordions[0],
-            _ => accordions[^1],
+            Key.Down => Enumerable.Range(1, count).Select(i => (start + i) % count),
+            Key.Up => Enumerable.Range(1, count).Select(i => (start - i + count) % count),
+            Key.Home => Enumerable.Range(0, count),
+            _ => Enumerable.Range(0, count).Select(i => count - 1 - i),
         };
 
-        next.FocusFirst();
+        foreach (var index in order)
+        {
+            // focus() on a host with delegatesFocus that already holds focus leaves it where it is.
+            if (accordions[index].IsKeyboardFocusWithin || accordions[index].FocusFirst())
+            {
+                return;
+            }
+        }
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────

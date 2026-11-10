@@ -9,8 +9,8 @@
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <!-- core.css: ion-accordion-group > ion-accordion:last-of-type ion-item[slot=header] { border-width: 0px } -->
-    <Style Selector="c|AvonicAccordionGroup > c|AvonicAccordion:nth-last-child(1) /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Native">
+    <!-- core.css: ion-accordion-group > ion-accordion:last-of-type ion-item[slot=header] { border-width: 0px }. :last-in-group is that last-of-type -->
+    <Style Selector="c|AvonicAccordion:last-in-group /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Native">
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 

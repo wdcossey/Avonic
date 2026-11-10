@@ -28,7 +28,8 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_ContentWrapper", typeof(ContentPresenter))]
 [PseudoClasses(
     ":accordion-expanding", ":accordion-expanded", ":accordion-collapsing", ":accordion-collapsed", ":expanded",
-    ":accordion-next", ":accordion-previous", ":accordion-animated", ":accordion-group-expand-inset")]
+    ":accordion-next", ":accordion-previous", ":accordion-animated", ":accordion-group-expand-inset",
+    ":first-in-group", ":last-in-group")]
 public class AvonicAccordion : TemplatedControl
 {
     /// <summary><c>transition: max-height 300ms</c> on <c>#content</c>.</summary>
@@ -148,9 +149,9 @@ public class AvonicAccordion : TemplatedControl
     private IDisposable? _contentNoHit;
     private IDisposable? _contentHidden;
 
-    /// <summary>A pointer is down on the header, and whether something inside has clicked during it.</summary>
-    private bool _pressing;
-    private bool _pressClicked;
+    /// <summary>A release is on its way through the header, and whether something inside has clicked during it.</summary>
+    private bool _releasing;
+    private bool _releaseClicked;
 
     /// <summary>The next frame, or the timeout, that the expand or collapse waits on: Ionic's <c>currentRaf</c>.</summary>
     private IDisposable? _pending;
@@ -176,7 +177,10 @@ public class AvonicAccordion : TemplatedControl
     private bool IsExpandedState => _state is AccordionState.Expanded or AccordionState.Expanding;
 
     /// <summary>Its own <c>readonly</c>, or its group's, which Ionic copies to the group's own accordions.</summary>
-    private bool IsReadonly => Readonly || (Parent is AvonicAccordionGroup { Readonly: true });
+    private bool IsReadonly => Readonly || OwnGroup is { Readonly: true };
+
+    /// <summary>The group it's a child of, as <c>:scope &gt; ion-accordion</c> is, whether it's in its items or made from its template.</summary>
+    private AvonicAccordionGroup? OwnGroup => AvonicAccordionGroup.OwnerOf(this);
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -216,14 +220,31 @@ public class AvonicAccordion : TemplatedControl
         }
 
         Group = null;
+
+        // A transition cut short ends where it was going, so that nothing is left half open with no group to finish it.
         CancelPending();
         StopTransition();
+        _state = _state switch
+        {
+            AccordionState.Expanding => AccordionState.Expanded,
+            AccordionState.Collapsing => AccordionState.Collapsed,
+            _ => _state,
+        };
+        _content?.ClearValue(MaxHeightProperty);
+        Render();
     }
 
-    /// <summary>The group's <c>expand</c> or <c>readonly</c> changed, or it's a new group.</summary>
+    /// <summary>
+    /// The group's <c>expand</c> or <c>readonly</c> changed, its items did, or it's a new group. <c>:first-in-group</c> and
+    /// <c>:last-in-group</c> are <c>ion-accordion-group &gt; ion-accordion:first-of-type</c> and <c>:last-of-type</c>.
+    /// </summary>
     internal void OnGroupChanged()
     {
-        PseudoClasses.Set(":accordion-group-expand-inset", Parent is AvonicAccordionGroup { Expand: AccordionGroupExpand.Inset });
+        var group = OwnGroup;
+        PseudoClasses.Set(":accordion-group-expand-inset", group is { Expand: AccordionGroupExpand.Inset });
+        var accordions = group?.Accordions().ToList();
+        PseudoClasses.Set(":first-in-group", accordions is { Count: > 0 } && accordions[0] == this);
+        PseudoClasses.Set(":last-in-group", accordions is { Count: > 0 } && accordions[^1] == this);
         UpdateReadonly();
     }
 
@@ -286,12 +307,13 @@ public class AvonicAccordion : TemplatedControl
     /// <summary><c>nextElementSibling</c> or <c>previousElementSibling</c>, if it's an accordion.</summary>
     private AvonicAccordion? Sibling(int offset)
     {
-        System.Collections.IList? siblings = Parent switch
-        {
-            ItemsControl items => items.Items,
-            Panel panel => panel.Children,
-            _ => null,
-        };
+        System.Collections.IList? siblings = OwnGroup is { } group ? group.Elements()
+            : Parent switch
+            {
+                ItemsControl items => items.Items,
+                Panel panel => panel.Children,
+                _ => null,
+            };
 
         if (siblings is null)
         {
@@ -349,7 +371,6 @@ public class AvonicAccordion : TemplatedControl
                     StartTransition(from, to, () =>
                     {
                         _state = AccordionState.Expanded;
-                        content.ClearValue(MaxHeightProperty);
                         Render();
                     });
                 });
@@ -382,11 +403,11 @@ public class AvonicAccordion : TemplatedControl
         CancelPending();
         if (ShouldAnimate())
         {
-            var shown = _transitioning ? ShownHeight() : double.NaN;
-            StopTransition();
             _pending = AvonicConfig.RequestFrame(this, () =>
             {
-                var from = double.IsNaN(shown) ? ContentShownHeight() : shown;
+                // offsetHeight, a frame on: a transition that was running has gone on until now, as Chromium's does.
+                var from = _transitioning ? HeightAt(AvonicConfig.Now()) : ContentShownHeight();
+                StopTransition();
                 content.MaxHeight = from;
                 _pending = AvonicConfig.RequestFrame(this, () =>
                 {
@@ -421,7 +442,7 @@ public class AvonicAccordion : TemplatedControl
     private double ContentHeight()
     {
         _content?.UpdateLayout();
-        return _content?.ChildHeight ?? 0;
+        return _content?.NaturalHeight ?? 0;
     }
 
     /// <summary><c>contentEl.offsetHeight</c>.</summary>
@@ -550,9 +571,9 @@ public class AvonicAccordion : TemplatedControl
         {
             // #header's onClick: a press on anything in the header clicks it, as a <div> does, with no keys of its own.
             _headerButton = new NativeButton(_header, _ => OnHeaderPressClick(), () => false, () => { });
-            _header.AddHandler(PointerPressedEvent, OnHeaderPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _header.AddHandler(PointerReleasedEvent, OnHeaderReleased, RoutingStrategies.Bubble, handledEventsToo: true);
-            _header.AddHandler(PointerCaptureLostEvent, OnHeaderReleased, RoutingStrategies.Bubble, handledEventsToo: true);
+            // Around NativeButton's own release handler: one release is one click, however many controls it passes on the way up.
+            _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseStarts, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseEnds, RoutingStrategies.Bubble, handledEventsToo: true);
             foreach (var click in InnerClicks)
             {
                 _header.AddHandler(click, OnInnerClick);
@@ -575,9 +596,8 @@ public class AvonicAccordion : TemplatedControl
 
     private void RemoveHeaderHandlers(ContentPresenter header)
     {
-        header.RemoveHandler(PointerPressedEvent, OnHeaderPressed);
-        header.RemoveHandler(PointerReleasedEvent, OnHeaderReleased);
-        header.RemoveHandler(PointerCaptureLostEvent, OnHeaderReleased);
+        header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseStarts);
+        header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseEnds);
         foreach (var click in InnerClicks)
         {
             header.RemoveHandler(click, OnInnerClick);
@@ -614,25 +634,28 @@ public class AvonicAccordion : TemplatedControl
 
     // ── The header's click ───────────────────────────────────────────────────────────────────
 
-    private void OnHeaderPressed(object? sender, PointerPressedEventArgs e)
+    private void OnHeaderReleaseStarts(object? sender, PointerReleasedEventArgs e)
     {
-        _pressing = true;
-        _pressClicked = false;
+        _releasing = true;
+        _releaseClicked = false;
     }
 
-    private void OnHeaderReleased(object? sender, RoutedEventArgs e) => _pressing = false;
+    private void OnHeaderReleaseEnds(object? sender, PointerReleasedEventArgs e) => _releasing = false;
 
-    /// <summary>A control inside clicked. A press clicks once, however many controls it passes through on the way up.</summary>
+    /// <summary>
+    /// A control inside clicked, from a release, a key or automation. A release clicks once, however many controls it passes
+    /// through on the way up, and the header's own click doesn't come again after it.
+    /// </summary>
     private void OnInnerClick(object? sender, RoutedEventArgs e)
     {
-        if (_pressing)
+        if (_releasing)
         {
-            if (_pressClicked)
+            if (_releaseClicked)
             {
                 return;
             }
 
-            _pressClicked = true;
+            _releaseClicked = true;
         }
 
         ToggleExpanded();
@@ -640,7 +663,7 @@ public class AvonicAccordion : TemplatedControl
 
     private void OnHeaderPressClick()
     {
-        if (!_pressClicked)
+        if (!_releaseClicked)
         {
             ToggleExpanded();
         }
@@ -668,13 +691,14 @@ public class AvonicAccordion : TemplatedControl
     internal bool IsInHeader(Visual visual) => _header is not null && (_header == visual || _header.IsVisualAncestorOf(visual));
 
     /// <summary>
-    /// <c>focus()</c>, with <c>delegatesFocus</c>: the first control in it that can take focus, the header's first.
+    /// <c>focus()</c>, with <c>delegatesFocus</c>: the first control in it that can take focus, the header's first. False if
+    /// there's none, as in a disabled accordion here, where <see cref="InputElement.IsEnabled"/> reaches the item.
     /// </summary>
-    internal void FocusFirst() =>
+    internal bool FocusFirst() =>
         this.GetVisualDescendants()
             .OfType<InputElement>()
             .FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible)
-            ?.Focus(NavigationMethod.Directional);
+            ?.Focus(NavigationMethod.Directional) == true;
 
     // ── When it first loads ──────────────────────────────────────────────────────────────────
 
@@ -692,13 +716,11 @@ public class AvonicAccordion : TemplatedControl
         SlotToggleIcon();
     }
 
-    /// <summary>The first <see cref="AvonicItem"/> in the header slot: <c>getSlottedHeaderIonItem</c>. A panel there stands for the slot.</summary>
-    internal AvonicItem? HeaderItem() => HeaderContent switch
-    {
-        AvonicItem item => item,
-        Panel panel => panel.Children.OfType<AvonicItem>().FirstOrDefault(),
-        _ => null,
-    };
+    /// <summary>
+    /// The <see cref="AvonicItem"/> in the header slot: <c>getSlottedHeaderIonItem</c>, which looks at what's assigned to the slot
+    /// and not inside it, so an item inside a panel there isn't it.
+    /// </summary>
+    internal AvonicItem? HeaderItem() => HeaderContent as AvonicItem;
 
     /// <summary>
     /// <c>setItemDefaults</c>: a button, for the keyboard, with no detail icon, and full lines unless it has its own. Ionic assigns
