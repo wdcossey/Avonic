@@ -161,8 +161,7 @@ do and no more:
 ### The group
 
 `AvonicRadioGroup : ItemsControl`, with the hint above the `ItemsPresenter`. Its `Value` is two-way by default, as the user changes
-it. Its `TabNavigation` is `Continue`, where an `ItemsControl`'s is `Once`: Tab goes through what's inside, as in a page, and the
-radios' own tab stops do the rest. It overrides `OnKeyDown` without calling the base, which would move focus between containers
+it. It overrides `OnKeyDown` without calling the base, which would move focus between containers
 with the arrows. `:in-list` comes from the logical ancestors on
 attach, for the 16 at each side, so the rule is in the group's own theme and costs nothing elsewhere. `ion-touched` and
 `ion-invalid` are style classes, as classes an app sets are.

@@ -90,10 +90,6 @@ public class AvonicRadioGroup : ItemsControl
         // overflow: visible, for a focused radio's circle at the edge. A TemplatedControl clips by default.
         ClipToBoundsProperty.OverrideDefaultValue<AvonicRadioGroup>(false);
 
-        // Tab moves through what's inside, as in a page: an ItemsControl is one tab stop that remembers the last one focused, which
-        // would skip a button in an item and come back to a radio that's no longer the choice.
-        KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue<AvonicRadioGroup>(KeyboardNavigationMode.Continue);
-
         ValueProperty.Changed.AddClassHandler<AvonicRadioGroup>((group, _) => group.OnValueChanged());
         HelperTextProperty.Changed.AddClassHandler<AvonicRadioGroup>((group, _) => group.UpdateHint());
         ErrorTextProperty.Changed.AddClassHandler<AvonicRadioGroup>((group, _) => group.UpdateHint());
@@ -233,7 +229,7 @@ public class AvonicRadioGroup : ItemsControl
     /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.Source is not AvonicRadio current || current.Group != this || !current.IsEnabled)
+        if (e.Source is not AvonicRadio current || current.Group != this)
         {
             return;
         }
@@ -241,6 +237,7 @@ public class AvonicRadioGroup : ItemsControl
         // !radio.disabled: its own, as a radio in a disabled item is still one to move to.
         var radios = Radios().Where(radio => radio.IsEnabled).ToList();
         var index = radios.IndexOf(current);
+        // radios.includes(ev.target): a disabled radio, which can't have focus here anyway, takes no keys.
         if (index < 0)
         {
             return;

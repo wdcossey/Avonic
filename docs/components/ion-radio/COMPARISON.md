@@ -70,7 +70,7 @@ First `/code-review` at high effort:
 | Finding | Outcome |
 |---|---|
 | The group's `Value` was one-way, so a bound view model never heard the user's choice | Fixed: two-way by default, as Avalonia's own selection is. `G1_A_Bound_Value_Hears_The_Users_Choice` |
-| An `ItemsControl` is one tab stop that remembers the last focused child, so Tab skipped a button in the group and came back to a radio that was no longer the choice | Fixed: `TabNavigation` is `Continue`. `R7_Tab_Goes_On…`, `R7_Tab_Comes_Back_To_The_Choice…` |
+| An `ItemsControl` is one tab stop that remembers the last focused child, so Tab would skip a button in the group and come back to a radio that was no longer the choice | Wrong, for Avalonia 12: the tests written for it, `R7_Tab_Goes_On…` and `R7_Tab_Comes_Back_To_The_Choice…`, pass without setting `TabNavigation`, and the breakage run showed the setting did nothing, so it went. The tests stay |
 | `Select()` from automation on the checked radio cleared the value with `AllowEmptySelection` | Fixed: selecting a selected radio does nothing; activation of an unchecked one is still a click. `R10_Selecting_The_Checked_Radio…` |
 | `compareOptions` also checks a radio whose own value is an array holding the group's | Fixed. `R3_A_Radio_Whose_Value_Is_An_Array…` |
 | A fixed label shrank below 100 in a narrow line, where `flex: 0 0 100px` keeps it | Fixed: it keeps 100, and the line overflows. `V5_A_Fixed_Label_Keeps…` |
@@ -87,7 +87,7 @@ Second `/code-review` at high effort, on the fixed code:
 | `:disabled` is also an ancestor's, so a radio in a disabled item was faded twice, and the arrows skipped it, where Ionic reads the radio's own `disabled` | Fixed: the fade, the keys and the tab stop read the radio's own `IsEnabled`. `V4_A_Radio_In_A_Disabled_Item…`, `G3_A_Radio_In_A_Disabled_Item…` |
 | A change of the hint wasn't announced, and the texts weren't live, where Ionic has `aria-live="polite"` and `role="alert"` | Fixed: `LiveSetting` `Polite` and `Assertive`, and the peer raises a change of `HelpText`. `G7_The_Hint_Is_Live…`, `G7_The_Themes_Hint_Is_Live_Too` |
 | `line-height: 1.5` was a fixed 24 | Fixed: `Css.Em` of the font size. `G6_The_Line_Is_One_And_A_Half…` |
-| `[slot=start]` applies in any host, a toolbar's too | Fixed: `:slot-start` and `:slot-end` in any host, with `width: auto`. `R8_In_A_Toolbars_Start_Slot…` |
+| `[slot=start]` applies in any host, a toolbar's too | `:slot-start` and `:slot-end` are now set in any host. The `width: auto` rule written for it did nothing, as the breakage run showed: a toolbar's slot already gives its child its own width, which `R8_In_A_Toolbars_Start_Slot…` holds. So the rule went |
 | The style-priority frames were made again on every attach | Fixed: only when the context changes. `AvonicItem`'s helper for it is private, in a file this PR doesn't touch |
 | The item's role in a group belongs in its peer | Waived, as in the first review |
 | `Equals` on boxed numbers needs the same type, where JavaScript has one kind of number | Waived: `Equals` is .NET's strict equality, and an app gets back the type it gives |

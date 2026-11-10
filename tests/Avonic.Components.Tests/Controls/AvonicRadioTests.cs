@@ -525,7 +525,14 @@ public class AvonicRadioTests
         var radio = Radio("a");
         Activatable.SetIsEnabled(radio, false);
         FocusVisible.SetIsEnabled(radio, false);
-        using var scene = Show(radio);
+        var item = Item(radio);
+        var panel = new StackPanel { Children = { item } };
+        using var scene = Show(panel);
+
+        // Out of the item, where the radio is activatable and focusable itself
+        item.Content = null;
+        panel.Children.Add(radio);
+        Dispatcher.UIThread.RunJobs();
 
         Assert.False(Activatable.GetIsEnabled(radio));
         Assert.False(FocusVisible.GetIsEnabled(radio));
@@ -604,6 +611,9 @@ public class AvonicRadioTests
 
         var ring = Bounds(Part<Border>(radio, "PART_Container"), scene.Window);
         AssertBox(ring.X - 8, ring.Y - 8, 36, 36, Bounds(focus, scene.Window));
+
+        // position: absolute: the circle takes no room, so nothing moves when it shows
+        Assert.Equal(new Size(76, 20), radio.Bounds.Size);
 
         // rgb(26, 101, 235) at 0.2 on white, just inside the circle, outside the ring: (209, 224, 251)
         AssertClose(Color.FromRgb(209, 224, 251), Pixel(scene, (int)(ring.Center.X), (int)(ring.Y - 5)));

@@ -134,11 +134,9 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
-        <!-- In any host's start or end slot, a toolbar's too: width: auto, and flex: initial, which a slot's child has here. In an
-             item, height: 100% is of a height that isn't definite there, so it's auto, and the slot centres it: measured 39 high. -->
-        <Style Selector="^:slot-start, ^:slot-end">
-            <Setter Property="HorizontalAlignment" Value="Left" />
-        </Style>
+        <!-- :host([slot=start]), :host([slot=end]) { flex: initial; width: auto }, which a start or end slot's child has here in any
+             host. In an item, height: 100% is of a height that isn't definite there, so it's auto, and the slot centres it:
+             measured 39 high. -->
         <Style Selector="^:in-item:slot-start, ^:in-item:slot-end">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
