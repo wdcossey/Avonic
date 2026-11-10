@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.AccordionPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicListHeader><c:AvonicLabel Content="Compact" /></c:AvonicListHeader>
+            <c:AvonicAccordionGroup Name="Compact" Value="first" IonChange="OnIonChange">
+                <c:AvonicAccordion Value="first">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="First Accordion" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" TextWrapping="Wrap" Text="First Content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="second">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Second Accordion" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" TextWrapping="Wrap"
+                                   Text="Second Content, long enough to wrap onto a second line and a third, so that the animation has some height to ease." />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="third" IsEnabled="False">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Disabled Accordion" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="Third Content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+            <TextBlock Name="Changes" Margin="16,8" Text="ionChange: none yet" />
+
+            <c:AvonicListHeader><c:AvonicLabel Content="Inset, multiple" /></c:AvonicListHeader>
+            <c:AvonicAccordionGroup Expand="Inset" Multiple="True">
+                <c:AvonicAccordion Value="a">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset A" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="A Content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="b">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset B" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="B Content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="c" ToggleIcon="caret-down-circle" ToggleIconSlot="Start">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Inset C, icon at the start" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="C Content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+
+            <c:AvonicListHeader><c:AvonicLabel Content="Readonly group" /></c:AvonicListHeader>
+            <c:AvonicAccordionGroup Value="r1" Readonly="True">
+                <c:AvonicAccordion Value="r1">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Can't be closed" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="Readonly content" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+                <c:AvonicAccordion Value="r2">
+                    <c:AvonicAccordion.HeaderContent>
+                        <c:AvonicItem><c:AvonicLabel Content="Can't be opened" /></c:AvonicItem>
+                    </c:AvonicAccordion.HeaderContent>
+                    <c:AvonicAccordion.ContentContent>
+                        <TextBlock Margin="16" Text="Never shown" />
+                    </c:AvonicAccordion.ContentContent>
+                </c:AvonicAccordion>
+            </c:AvonicAccordionGroup>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation">
+    <!-- ion-accordion and ion-accordion-group have no CSS variables. These are md literals, kept here so they can be restyled. -->
+
+    <!-- box-shadow on an inset group's accordions, from accordion-group.md.css -->
+    <BoxShadows x:Key="Avonic.AccordionGroup.Md.InsetBoxShadow">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
+
+    <!-- :host(.accordion-animated) { transition: all 300ms cubic-bezier(0.25, 0.8, 0.5, 1) }: what changes on the host, inset -->
+    <Transitions x:Key="Avonic.Accordion.Md.Transition">
+        <ThicknessTransition Property="{x:Static Layoutable.MarginProperty}" Duration="0:0:0.3" Easing="{a:CubicBezier 0.25, 0.8, 0.5, 1}" />
+        <CornerRadiusTransition Property="{x:Static TemplatedControl.CornerRadiusProperty}" Duration="0:0:0.3" Easing="{a:CubicBezier 0.25, 0.8, 0.5, 1}" />
+    </Transitions>
+
+    <!-- 300ms transform cubic-bezier(0.25, 0.8, 0.5, 1) on the toggle icon, from core.css -->
+    <Transitions x:Key="Avonic.Accordion.Md.ToggleIconTransition">
+        <TransformOperationsTransition Property="{x:Static Visual.RenderTransformProperty}" Duration="0:0:0.3" Easing="{a:CubicBezier 0.25, 0.8, 0.5, 1}" />
+    </Transitions>
+</ResourceDictionary>
