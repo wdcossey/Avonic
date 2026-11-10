@@ -1,0 +1,60 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <!-- Each is 84 high and empty, as it is until its infinite scroll loads, which only a scroll starts. The sample's
+             page and docs/components/ion-infinite-scroll/compare show it loading. -->
+        <StackPanel Width="390" FontSize="16" Spacing="8">
+            <c:AvonicInfiniteScroll>
+                <c:AvonicInfiniteScrollContent />
+            </c:AvonicInfiniteScroll>
+            <c:AvonicInfiniteScroll>
+                <c:AvonicInfiniteScrollContent LoadingSpinner="Dots" LoadingText="Loading more data…" />
+            </c:AvonicInfiniteScroll>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of infinite-scroll-content.md.css. There are no CSS variables: the sizes are literals that an app can
+         restyle, and the text's colour is a global one. user-select: none has nothing to do, as a TextBlock isn't selectable. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInfiniteScrollContent}" TargetType="c:AvonicInfiniteScrollContent">
+        <!-- min-height: 84px -->
+        <Setter Property="MinHeight" Value="84" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- display: flex; flex-direction: column; justify-content: center; text-align: center -->
+                <Panel Background="{TemplateBinding Background}">
+                    <!-- .infinite-loading: margin: 0 0 32px; display: none; width: 100% -->
+                    <StackPanel Name="PART_Loading" IsVisible="False" VerticalAlignment="Center" Margin="0,0,0,32">
+                        <!-- .infinite-loading-spinner > ion-spinner: an inline-block 28 px square on a line of the inherited
+                             font, which is 32 high with the descent below it, at 16 px Roboto. md colours the spinner's
+                             shapes with a global rule, which can't reach its shadow root, so it keeps the inherited colour. -->
+                        <c:AvonicSpinner Name="PART_LoadingSpinner"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,4"
+                                         SpinnerName="{TemplateBinding LoadingSpinner}"
+                                         IsVisible="{TemplateBinding LoadingSpinner, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <!-- .infinite-loading-text: margin: 4px 32px 0; color: var(ion-color-step-600, var(ion-text-color-step-400, #666666)).
+                             The div, and the text node in it, which an empty string doesn't have, so it's 0 high, where an
+                             empty TextBlock is a line high. -->
+                        <Border Name="PART_LoadingText"
+                                Margin="32,4,32,0"
+                                IsVisible="{TemplateBinding LoadingText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <TextBlock TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource Avonic.TextColorStep400Brush}"
+                                       Text="{TemplateBinding LoadingText}"
+                                       IsVisible="{TemplateBinding LoadingText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </Border>
+                    </StackPanel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .infinite-scroll-loading ion-infinite-scroll-content > .infinite-loading { display: block } -->
+        <Style Selector="^:infinite-scroll-loading /template/ StackPanel#PART_Loading">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
