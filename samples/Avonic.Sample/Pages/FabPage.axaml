@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.FabPage">
+
+    <!-- A page with a header, a content and a footer. The content is above the header and the footer, whose ZIndex is
+         10, so that a fab on an edge paints over them, as z-index: 999 does in Ionic: ZIndex only sorts siblings. -->
+    <Grid RowDefinitions="Auto,*,Auto">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Fab" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1" ZIndex="11">
+            <StackPanel Margin="16" Spacing="8">
+                <TextBlock TextWrapping="Wrap" Text="Tap a fab with a list to open it, and a button in a list to close it. The one at the top sits on the header's edge." />
+                <TextBlock Name="Status" Text="Nothing tapped yet" />
+            </StackPanel>
+
+            <c:AvonicContent.FixedContent>
+                <!-- Several fabs in the one fixed slot: a panel as big as the content holds them. -->
+                <Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <c:AvonicFab Horizontal="End" Vertical="Top" Edge="True">
+                        <c:AvonicFabButton Size="Small">
+                            <c:AvonicIcon IconName="share" />
+                        </c:AvonicFabButton>
+                        <c:AvonicFabList Side="Start">
+                            <c:AvonicFabButton Click="OnAction" Tag="GitHub">
+                                <c:AvonicIcon IconName="logo-github" />
+                            </c:AvonicFabButton>
+                            <c:AvonicFabButton Click="OnAction" Tag="Heart">
+                                <c:AvonicIcon IconName="heart" />
+                            </c:AvonicFabButton>
+                        </c:AvonicFabList>
+                        <c:AvonicFabList Side="Bottom">
+                            <c:AvonicFabButton Click="OnAction" Tag="Star">
+                                <c:AvonicIcon IconName="star" />
+                            </c:AvonicFabButton>
+                        </c:AvonicFabList>
+                    </c:AvonicFab>
+
+                    <c:AvonicFab Horizontal="Center" Vertical="Center">
+                        <c:AvonicFabButton Color="danger" Click="OnAction" Tag="Danger">
+                            <c:AvonicIcon IconName="add" />
+                        </c:AvonicFabButton>
+                    </c:AvonicFab>
+
+                    <c:AvonicFab Horizontal="Start" Vertical="Bottom">
+                        <c:AvonicFabButton Content="Off" IsEnabled="False" />
+                    </c:AvonicFab>
+
+                    <c:AvonicFab Name="Main" Horizontal="End" Vertical="Bottom">
+                        <c:AvonicFabButton>
+                            <c:AvonicIcon IconName="add" />
+                        </c:AvonicFabButton>
+                        <c:AvonicFabList Side="Top">
+                            <c:AvonicFabButton Content="A" Click="OnAction" Tag="A" />
+                            <c:AvonicFabButton Content="B" Click="OnAction" Tag="B" />
+                            <c:AvonicFabButton Content="C" Click="OnAction" Tag="C" />
+                        </c:AvonicFabList>
+                        <c:AvonicFabList Side="Start">
+                            <c:AvonicFabButton Click="OnAction" Tag="Pin">
+                                <c:AvonicIcon IconName="pin" />
+                            </c:AvonicFabButton>
+                        </c:AvonicFabList>
+                    </c:AvonicFab>
+                </Panel>
+            </c:AvonicContent.FixedContent>
+        </c:AvonicContent>
+
+        <c:AvonicFooter Grid.Row="2">
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Footer" />
+            </c:AvonicToolbar>
+        </c:AvonicFooter>
+    </Grid>
+
+</UserControl>

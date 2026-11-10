@@ -1,0 +1,346 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8" Margin="16">
+            <c:AvonicFabButton>
+                <c:AvonicIcon IconName="add" />
+            </c:AvonicFabButton>
+            <c:AvonicFabButton Activated="True">
+                <c:AvonicIcon IconName="add" />
+            </c:AvonicFabButton>
+            <c:AvonicFabButton Size="Small" Color="danger">
+                <c:AvonicIcon IconName="add" />
+            </c:AvonicFabButton>
+            <c:AvonicFabButton Content="Fab" Color="secondary" />
+            <c:AvonicFabButton Content="Off" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of fab-button.md.css, in its order: its state rules have equal specificity, and so does everything
+         here with a pseudoclass, so later beats earlier. Its ::slotted rules are in Styles/FabButton.axaml, because a
+         ControlTheme can't reach the content. fab-list.css's rules for a button in a list are here, on :in-list, so that
+         they cost nothing elsewhere. -->
+    <ControlTheme x:Key="{x:Type c:AvonicFabButton}" TargetType="c:AvonicFabButton">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- display: block; width: 56px; height: 56px; margin: 0; font-size: 14px -->
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="FontSize" Value="14" />
+        <!-- text-align: center; white-space: nowrap; font-kerning: none -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.FontFeatures">
+            <FontFeatureCollection>
+                <FontFeature Tag="kern" Value="0" />
+            </FontFeatureCollection>
+        </Setter>
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none. The overlay is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <Border Name="PART_Overlay" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <c:AvonicIcon Name="PART_CloseIcon"
+                                          Icon="{TemplateBinding CloseIcon}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            <ContentPresenter Name="PART_ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalContentAlignment="Center"
+                                              VerticalContentAlignment="Center" />
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .button-native: color: var(color). Its background-clip: padding-box isn't BackgroundSizing="InnerBorderEdge",
+             because Avalonia draws no BoxShadow with that, measured; the border is 0 unless an app sets one. -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.FabButton.Transition}" />
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.Background" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BoxShadow" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderThickness" Value="{DynamicResource Avonic.FabButton.BorderWidth}" />
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BorderColor" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- overflow: hidden. It's on a part inside, because a Border's own ClipToBounds also clips its BoxShadow. -->
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="{Binding $parent[Border].CornerRadius}" />
+        </Style>
+
+        <!-- .button-native::after -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color) }, and ripple-color is currentColor -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.RippleColor" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .close-icon: scale(0.4) rotateZ(-45deg), opacity 0, font-size: var(close-icon-font-size). Centred, as its
+             box is 1em wide and the button's height, with the glyph in the middle. -->
+        <Style Selector="^ /template/ c|AvonicIcon#PART_CloseIcon">
+            <Setter Property="FontSize" Value="{DynamicResource Avonic.FabButton.CloseIconFontSize}" />
+            <Setter Property="RenderTransform" Value="scale(0.4) rotate(-45deg)" />
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.FabButton.Md.CloseTransition}" />
+        </Style>
+
+        <!-- .button-inner. transform: none, written so that it eases to the rotation. -->
+        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="RenderTransform" Value="scale(1) rotate(0deg)" />
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.FabButton.Md.CloseTransition}" />
+        </Style>
+
+        <!-- :host(.fab-button-disabled). A disabled control already takes no input and lets it through. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+
+        <!-- :host(:hover), mouse and pen -->
+        <Style Selector="^:ion-hover /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundHover" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundHoverOpacity" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BackgroundHoverOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-focused) -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundFocused" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundFocusedOpacity" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BackgroundFocusedOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-activated): a pressed button. Its overlay is transparent at 0, and the shadow deepens. -->
+        <Style Selector="^:activated /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BoxShadowActivated" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:activated /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundActivated" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundActivatedOpacity" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.BackgroundActivatedOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.fab-button-close-active): the close icon in, the content out -->
+        <Style Selector="^:close-active /template/ c|AvonicIcon#PART_CloseIcon">
+            <Setter Property="RenderTransform" Value="scale(1) rotate(0deg)" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="^:close-active /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="RenderTransform" Value="scale(0.4) rotate(45deg)" />
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- :host(.fab-button-small) -->
+        <Style Selector="^:size-small">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <!-- :host(.fab-button-in-list), which sets the variables' defaults: an app's value still wins -->
+        <Style Selector="^:in-list /template/ Border#PART_Native">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.Background" />
+                    <DynamicResource ResourceKey="Avonic.Color.LightBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.ColorInList" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-list:ion-hover /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorHover" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.ColorInList" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-list:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundHover" />
+                    <DynamicResource ResourceKey="Avonic.Color.LightTintBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- color-focused is var(color-activated) in a list, which isn't var(color) there -->
+        <Style Selector="^:in-list:ion-focused /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.ColorInList" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-list:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.Color.LightShadeBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-list:activated /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.FabButton.ColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.FabButton.Md.ColorInList" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- fab-list.css: ::slotted(.fab-button-in-list) is 40 square, with a margin along the list, and hidden, as
+             scale(0), opacity 0 and visibility: hidden, which the button's code does, until .fab-button-show. With no
+             transition: it appears at once, measured. It beats .fab-button-small and .fab-button-disabled, as the outer
+             tree's ::slotted beats the button's own :host. -->
+        <Style Selector="^:in-list">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Margin" Value="{Binding $parent[c:AvonicFabList].Side, Converter={x:Static c:AvonicFabList.ButtonMarginConverter}, ConverterParameter=5}" />
+            <Setter Property="RenderTransform" Value="scale(0)" />
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="^:in-list:show">
+            <Setter Property="RenderTransform" Value="scale(1)" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <!-- :host(.ion-color) .button-native, which beats every state's colour. An unknown colour makes these invalid:
+             the background goes transparent, and the text inherits the host's. -->
+        <Style Selector="^:ion-color /template/ Border#PART_Native">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:AvonicFabButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-color.ion-focused), .ion-activated and :hover, in that order -->
+        <Style Selector="^:ion-color:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:ion-color:activated /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="^:ion-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
