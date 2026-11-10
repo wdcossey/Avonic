@@ -88,12 +88,11 @@
                                         </MultiBinding>
                                     </Border.CornerRadius>
                                 </Border>
-                                <!-- .range-tick: bar-height square, var(bar-background-active); .range-tick-active: transparent.
+                                <!-- .range-tick: bar-height square, var(bar-background-active); .range-tick-active: transparent, which ActiveBackground is unset.
                                      z-index 1, over the bars. -->
                                 <c:RangeTicks Name="PART_Ticks"
                                               TickSize="{DynamicResource Avonic.Range.BarHeight}"
-                                              Background="{DynamicResource Avonic.Range.BarBackgroundActive}"
-                                              ActiveBackground="{x:Null}" />
+                                              Background="{DynamicResource Avonic.Range.BarBackgroundActive}" />
                                 <c:RangeKnobHandle Name="PART_KnobHandleA" Classes="knob-handle" Knob="A">
                                     <Panel Name="PART_PinA" Classes="pin" IsVisible="{TemplateBinding Pin}">
                                         <Border Classes="pin-background" />

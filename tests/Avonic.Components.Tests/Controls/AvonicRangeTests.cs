@@ -567,6 +567,11 @@ public class AvonicRangeTests
 
         // Room for it: measured r3, 28 px above.
         Assert.Equal(70, range.Bounds.Height);
+
+        // The pin's circle and its tip, below the circle, in pin-background.
+        var handle = Bounds(HandleA(range), scene.Window);
+        AssertClose(Primary, Pixel(scene, (int)handle.Center.X, (int)handle.Y - 21));
+        AssertClose(Primary, Pixel(scene, (int)handle.Center.X, (int)handle.Y + 5));
     });
 
     // ── 10: focus ────────────────────────────────────────────────────────────────────────────
@@ -655,6 +660,26 @@ public class AvonicRangeTests
     }
 
     [AvaloniaFact]
+    public void R11_Disabling_It_Mid_Drag_Ends_The_Drag()
+    {
+        using var clock = new TestClock();
+        var range = new AvonicRange { Value = 50 };
+        using var scene = Stub(range);
+        var mouse = new Mouse(scene, clock);
+        var start = At(range, scene, 0.5);
+        mouse.Down(start, 0).Move(start + new Point(20, 0), 16).Move(start + new Point(39, 0), 32);
+        clock.At(48);
+        var log = Log.Of(range);
+
+        // disabledChanged: gesture.enable(false), which ends a captured gesture with onEnd.
+        range.IsEnabled = false;
+        Settle();
+        Assert.Equal(["change 60", "end 60"], log.Take());
+        Assert.DoesNotContain(":range-pressed", range.Classes);
+        mouse.Up(start + new Point(39, 0), 64);
+    }
+
+    [AvaloniaFact]
     public void R11_Disabled_Greys_The_Bar_And_Shrinks_The_Knob_In_A_White_Ring() => InstalledTheme.Run(_ =>
     {
         var range = new AvonicRange { Value = 40, IsEnabled = false, Label = "Off" };
@@ -711,6 +736,13 @@ public class AvonicRangeTests
         Settle();
 
         Assert.Contains(":item-multiple-inputs", item.Classes);
+
+        // One is an input, not a cover such as a checkbox: the item doesn't become pressable.
+        var single = new AvonicItem { Content = new AvonicRange() };
+        using var other = new Scene(single);
+        Settle();
+        Assert.DoesNotContain(":ion-activatable", single.Classes);
+        Assert.DoesNotContain(":item-multiple-inputs", single.Classes);
     }
 
     // ── 13: the label ────────────────────────────────────────────────────────────────────────
@@ -853,6 +885,12 @@ public class AvonicRangeTests
             AssertClose(colour, Pixel(scene, (int)(bar.X + bar.Width * 0.25), (int)bar.Y));
             AssertClose(OverWhite(colour, 0.26), Pixel(scene, (int)(bar.X + bar.Width * 0.8), (int)bar.Y));
             AssertClose(colour, Pixel(scene, (int)Bounds(Part<Border>(range, "PART_KnobA"), scene.Window).Center.X, (int)bar.Y));
+
+            // An inactive tick, 2 px at 80 %, in the colour over the light bar.
+            range.Snaps = true;
+            range.Step = 10;
+            GestureTests.Render();
+            AssertClose(colour, Pixel(scene, (int)(bar.X + bar.Width * 0.8) + 1, (int)bar.Y));
         }
     });
 
@@ -956,6 +994,14 @@ public class AvonicRangeTests
         Assert.Contains(":activated", HandleA(range).Classes);
         Assert.Equal(0.25, halo.Opacity, 6);
         mouse.Up(centre, 1200);
+
+        // A mouse over the knob: 2x, at 0.13.
+        HandleA(range).Focus(NavigationMethod.Unspecified);
+        clock.At(2000);
+        scene.Window.MouseMove(centre + new Point(1, 0), RawInputModifiers.None);
+        Settle();
+        Assert.Contains(":ion-hover", HandleA(range).Classes);
+        Assert.Equal(2, Scale(halo), 6);
     });
 
     // ── 20: automation ───────────────────────────────────────────────────────────────────────
