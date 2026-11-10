@@ -300,6 +300,25 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void B3_Showing_It_Makes_The_Last_Active_Once()
+    {
+        var trail = Trail("A", "B", "C");
+        var c = Crumbs(trail)[2];
+        var changes = new List<bool>();
+        c.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AvonicBreadcrumb.ActiveProperty)
+            {
+                changes.Add(c.Active);
+            }
+        };
+
+        using var scene = Show(trail);
+
+        Assert.Equal([true], changes);
+    }
+
+    [AvaloniaFact]
     public void B3_Before_Anything_Is_Shown_The_Children_Are_Read_Once_As_Ionic_Loads_Them()
     {
         var active = Crumb("Active");
@@ -545,6 +564,29 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void B10_Each_Slot_Takes_Its_Template() => EachSlotTakesItsTemplate();
+
+    [AvaloniaFact]
+    public void B10_Each_Slot_Takes_Its_Template_In_The_Theme() => InstalledTheme.Run(_ => EachSlotTakesItsTemplate());
+
+    private static void EachSlotTakesItsTemplate()
+    {
+        static FuncDataTemplate<string> Upper() => new((text, _) => new TextBlock { Text = text.ToUpperInvariant() });
+        var breadcrumb = new AvonicBreadcrumb
+        {
+            StartContent = "s", StartContentTemplate = Upper(),
+            Content = "c", ContentTemplate = Upper(),
+            EndContent = "e", EndContentTemplate = Upper(),
+            SeparatorContent = "x", SeparatorContentTemplate = Upper(),
+        };
+        var trail = Trail(breadcrumb, Crumb("End"));
+        using var scene = Show(trail);
+
+        var shown = breadcrumb.GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsEffectivelyVisible).Select(t => t.Text);
+        Assert.Equal(["S", "C", "E", "X"], shown);
+    }
+
+    [AvaloniaFact]
     public void B11_B12_Collapsed_Only_The_Indicator_And_Its_Separator_Show() => InstalledTheme.Run(_ =>
     {
         var trail = Trail("Home", "Electronics", "Photography", "Cameras");
@@ -698,6 +740,23 @@ public class AvonicBreadcrumbsTests
         Assert.False(hidden.Focusable);
         trail.MaxItems = null;
         Assert.True(hidden.Focusable);
+    }
+
+    [AvaloniaFact]
+    public void B15_A_Focused_Link_That_Collapses_Loses_Focus()
+    {
+        var hidden = Crumb("Hidden", "#h");
+        var trail = Trail(Crumb("A"), Crumb("B"), hidden, Crumb("D"));
+        using var scene = Show(trail);
+        var blurs = 0;
+        hidden.IonBlur += (_, _) => blurs++;
+        hidden.Focus(NavigationMethod.Tab);
+        Assert.True(hidden.IsFocused);
+
+        trail.MaxItems = 2;
+
+        Assert.False(hidden.IsFocused);
+        Assert.Equal(1, blurs);
     }
 
     [AvaloniaFact]
@@ -1023,6 +1082,33 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void E1_A_Finger_That_Moves_Too_Far_On_The_Indicator_Clicks_Nothing()
+    {
+        var trail = Trail("A", "B", "C", "D");
+        trail.MaxItems = 2;
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[1];
+        var indicator = Indicator(b);
+        var log = new List<string>();
+        trail.IonCollapsedClick += (_, _) => log.Add("ionCollapsedClick");
+        b.Click += (_, _) => log.Add("click");
+
+        // 20 px across the 32 px button, past Chromium's 15, and released still on it: the button would click, Chromium doesn't.
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        var left = Bounds(indicator, scene.Window).Center - new Point(10, 0);
+        var right = left + new Point(20, 0);
+        var properties = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed);
+        indicator.RaiseEvent(new PointerPressedEventArgs(indicator, finger, scene.Window, left, 0, properties, KeyModifiers.None));
+        indicator.RaiseEvent(new PointerEventArgs(InputElement.PointerMovedEvent, indicator, finger, scene.Window, right, 0,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.Other), KeyModifiers.None));
+        indicator.RaiseEvent(new PointerReleasedEventArgs(indicator, finger, scene.Window, right, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Empty(log);
+    }
+
+    [AvaloniaFact]
     public void E1_Command_Runs_Unless_Click_Is_Handled_And_One_That_Cannot_Execute_Disables()
     {
         var link = Crumb("Link", "#l");
@@ -1030,16 +1116,19 @@ public class AvonicBreadcrumbsTests
         var canExecute = true;
         var command = new TestCommand(() => runs++, () => canExecute);
         link.Command = command;
+        link.CommandParameter = "p";
         var trail = Trail(link, Crumb("Last"));
         using var scene = Show(trail);
 
         Click(scene, Bounds(link, scene.Window).Center);
         Assert.Equal(1, runs);
+        Assert.Equal("p", command.Parameter);
 
         EventHandler<RoutedEventArgs> handle = (_, e) => e.Handled = true;
         link.Click += handle;
         Click(scene, Bounds(link, scene.Window).Center);
         Assert.Equal(1, runs);
+        Assert.Equal("p", command.Parameter);
         link.Click -= handle;
 
         canExecute = false;
@@ -1053,7 +1142,13 @@ public class AvonicBreadcrumbsTests
 
         public bool CanExecute(object? parameter) => canExecute();
 
-        public void Execute(object? parameter) => execute();
+        public object? Parameter { get; private set; }
+
+        public void Execute(object? parameter)
+        {
+            Parameter = parameter;
+            execute();
+        }
 
         public void Raise() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }

@@ -157,6 +157,7 @@ public class AvonicBreadcrumbs : ItemsControl
         if (!_loaded)
         {
             _loaded = true;
+            _itemsChanged = false;
             BreadcrumbsInit(GetBreadcrumbs());
         }
     }

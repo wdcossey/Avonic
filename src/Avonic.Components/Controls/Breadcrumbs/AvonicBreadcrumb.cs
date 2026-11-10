@@ -242,6 +242,7 @@ public class AvonicBreadcrumb : TemplatedControl
     private bool _last;
     private bool _showCollapsedIndicator;
     private bool _releasing;
+    private bool _indicatorReleased;
     private Button? _indicator;
     private Control? _separatorPart;
     private Control? _nativePart;
@@ -267,10 +268,11 @@ public class AvonicBreadcrumb : TemplatedControl
         // The DOM click on release, with no keys of its own: a link takes Enter only, below.
         _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled);
 
-        // A release on its way through, for the indicator, which clicks during it: see OnIndicatorClick. Nothing is left set when a
-        // release goes elsewhere, as one does when a gesture takes the pointer.
+        // A release on its way through, for the indicator, which clicks during it, before NativeButton sees it: see OnIndicatorClick.
+        // Registered after NativeButton, so the bubble clears both after it. Nothing is left set when a release goes elsewhere, as
+        // one does when a gesture takes the pointer.
         AddHandler(PointerReleasedEvent, (_, _) => _releasing = true, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(PointerReleasedEvent, (_, _) => _releasing = false, RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(PointerReleasedEvent, (_, _) => _releasing = _indicatorReleased = false, RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     /// <summary>Ionic's internal <c>collapsed</c>: hidden in the collapsed middle of the trail.</summary>
@@ -283,6 +285,12 @@ public class AvonicBreadcrumb : TemplatedControl
             {
                 _collapsed = value;
                 Update();
+
+                // display: none on the focused <a> blurs it, and focus goes back to the page.
+                if (value && IsFocused)
+                {
+                    TopLevel.GetTopLevel(this)?.FocusManager?.Focus(null);
+                }
             }
         }
     }
@@ -404,15 +412,19 @@ public class AvonicBreadcrumb : TemplatedControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>collapsedIndicatorClick</c>, then the DOM click reaching the host. A press on the indicator reaches the host's click through
-    /// <see cref="NativeButton"/>, as a press anywhere on the breadcrumb does, later in the same release. A key or a screen reader
-    /// clicks the indicator with no release, so that click is raised here.
+    /// <c>collapsedIndicatorClick</c>, then the DOM click reaching the host. A key or a screen reader clicks the indicator with no
+    /// release, so both are raised here. A release that clicks it only marks it, and <see cref="NativeButton"/> decides, later in the
+    /// same release, whether the press was a click at all, as Chromium cancels the whole click: then both are raised, or neither.
     /// </summary>
     private void OnIndicatorClick(object? sender, RoutedEventArgs e)
     {
-        RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
-        if (!_releasing)
+        if (_releasing)
         {
+            _indicatorReleased = true;
+        }
+        else
+        {
+            RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
             OnNativeClick();
         }
     }
@@ -423,6 +435,12 @@ public class AvonicBreadcrumb : TemplatedControl
     /// </summary>
     private void OnNativeClick()
     {
+        if (_indicatorReleased)
+        {
+            _indicatorReleased = false;
+            RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
+        }
+
         if (IsEffectivelyEnabled)
         {
             _native.Click(ClickEvent);
@@ -469,8 +487,11 @@ public class AvonicBreadcrumb : TemplatedControl
     /// </summary>
     private sealed class BreadcrumbAutomationPeer(AvonicBreadcrumb owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
-        /// <summary>An <c>&lt;a href&gt;</c>. A disabled one has its <c>href</c> taken away, so it isn't a link.</summary>
-        private bool IsLink => owner.Href is not null && !owner._collapsed && owner.IsEnabled;
+        /// <summary>
+        /// An <c>&lt;a href&gt;</c>. A disabled one has its <c>href</c> taken away, so it isn't a link: disabled itself, or by a
+        /// <see cref="Command"/> that can't execute, but not by an ancestor, which leaves the <c>href</c>.
+        /// </summary>
+        private bool IsLink => owner.Href is not null && !owner._collapsed && owner.IsEnabledCore;
 
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             IsLink ? AutomationControlType.Hyperlink : AutomationControlType.Group;
