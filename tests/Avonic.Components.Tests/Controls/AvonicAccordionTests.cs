@@ -72,7 +72,12 @@ public class AvonicAccordionTests
     private static Point CentreOf(Scene scene, Visual visual) =>
         visual.TranslatePoint(new Point(visual.Bounds.Width / 2, visual.Bounds.Height / 2), scene.Window)!.Value;
 
-    private static void Tap(Scene scene, AvonicAccordion accordion) => Click(scene, CentreOf(scene, Header(accordion)));
+    /// <summary>Where the header is now: one above may be opening or closing.</summary>
+    private static void Tap(Scene scene, AvonicAccordion accordion)
+    {
+        scene.Window.UpdateLayout();
+        Click(scene, CentreOf(scene, Header(accordion)));
+    }
 
     private static void Click(Scene scene, Point point)
     {
@@ -684,6 +689,22 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B13_Each_Tap_On_The_Header_Item_Toggles()
+    {
+        var a = Accordion("a");
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        Tap(scene, a);
+        clock.At(1000);
+        Tap(scene, a);
+
+        Assert.Equal(["a", null], changes);
+    }
+
+    [AvaloniaFact]
     public void B13_After_A_Tap_A_Key_Still_Toggles()
     {
         var a = Accordion("a");
@@ -814,12 +835,14 @@ public class AvonicAccordionTests
     public void B14_A_Collapse_During_An_Expand_Starts_From_The_Height_It_Had_Reached()
     {
         AvonicAccordion a = Accordion("a"), b = Accordion("b");
-        using var scene = Show(Group("a", a, b));
+        var group = Group("a", a, b);
+        using var scene = Show(group);
         using var clock = new TestClock();
 
         Tap(scene, b);
         clock.At(32 + 96);
         Tap(scene, b);
+        Assert.Null(group.Value);
 
         // The tick that was due at 144 doesn't come; the collapse's first frame reads where the expand had got to by then.
         clock.At(32 + 112);
@@ -934,6 +957,10 @@ public class AvonicAccordionTests
 
         group.Items.Remove(a);
         panel.Children.Add(a);
+
+        // At once: with no group, nothing would be waiting on it.
+        Assert.Equal(0, Shown(scene, a));
+        Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
         clock.At(1000);
 
         Assert.Equal(0, Shown(scene, a));
@@ -963,14 +990,22 @@ public class AvonicAccordionTests
 
         Tap(scene, b);
         clock.At(32 + 100);
-        var template = b.Template;
-        b.Template = null;
-        b.ApplyTemplate();
-        b.Template = template;
-        b.ApplyTemplate();
-        clock.At(1000);
+        foreach (var accordion in new[] { a, b })
+        {
+            var template = accordion.Template;
+            accordion.Template = null;
+            accordion.ApplyTemplate();
+            accordion.Template = template;
+            accordion.ApplyTemplate();
+        }
 
+        // Finished at once, and the old template's frames leave the new content box alone.
+        Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
+        Assert.True(double.IsPositiveInfinity(Content(b).MaxHeight));
+        clock.At(1000);
         Assert.Equal(ContentHeight, Shown(scene, b));
+        Assert.Equal(0, Shown(scene, a));
+        Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
         Assert.True(double.IsPositiveInfinity(Content(b).MaxHeight));
     }
 
@@ -1115,6 +1150,18 @@ public class AvonicAccordionTests
         Assert.Equal(new CornerRadius(8, 8, 6, 6), a.CornerRadius);
         Assert.Equal(3, Part<Border>(b, "PART_Host").BoxShadow.Count);
     });
+
+    [AvaloniaFact]
+    public void An_Accordion_Among_The_Items_Is_Not_Put_Through_The_Item_Template()
+    {
+        var a = Accordion("a");
+        var group = Group("a", a);
+        group.ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<object>((_, _) => new TextBlock { Text = "templated" });
+        using var scene = Show(group);
+
+        Assert.Contains(a, group.GetVisualDescendants());
+        Assert.DoesNotContain(group.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == "templated");
+    }
 
     /// <summary>Accordions made from <c>ItemsSource</c> and a template are the group's own too, in presenters.</summary>
     [AvaloniaFact]
