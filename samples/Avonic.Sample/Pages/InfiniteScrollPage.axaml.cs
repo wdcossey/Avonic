@@ -12,6 +12,8 @@ public partial class InfiniteScrollPage : UserControl
     private const int Batch = 20;
     private const int Max = 100;
 
+    private IDisposable? _load;
+
     public InfiniteScrollPage()
     {
         InitializeComponent();
@@ -32,8 +34,9 @@ public partial class InfiniteScrollPage : UserControl
     private void OnInfinite(object? sender, RoutedEventArgs e)
     {
         Status.Text = "Loading…";
-        DispatcherTimer.RunOnce(() =>
+        _load = DispatcherTimer.RunOnce(() =>
         {
+            _load = null;
             AddRows();
             Infinite.Complete();
             if (Rows.Children.Count >= Max)
@@ -45,10 +48,24 @@ public partial class InfiniteScrollPage : UserControl
         }, TimeSpan.FromMilliseconds(500));
     }
 
-    private void OnDisabled(object? sender, RoutedEventArgs e) => Infinite.IsEnabled = Disabled.IsChecked != true;
+    // A load that's under way is dropped and completed first: disabled while loading, an infinite scroll never fires again,
+    // as in Ionic.
+    private void CancelLoad()
+    {
+        _load?.Dispose();
+        _load = null;
+        Infinite.Complete();
+    }
+
+    private void OnDisabled(object? sender, RoutedEventArgs e)
+    {
+        CancelLoad();
+        Infinite.IsEnabled = Disabled.IsChecked != true;
+    }
 
     private void OnReset(object? sender, RoutedEventArgs e)
     {
+        CancelLoad();
         Rows.Children.Clear();
         AddRows();
         Infinite.IsEnabled = true;

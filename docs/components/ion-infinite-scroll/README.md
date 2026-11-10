@@ -57,7 +57,8 @@ No events, methods, slots, parts or CSS variables.
 
 - **The scroller** is the nearest `AvonicContent`'s, or a `ScrollViewer` with the class `ion-content-scroll-host`, among the
   scroll and its visual ancestors, found when it's attached. Outside both it logs `AvonicInfiniteScroll must be used inside
-  AvonicContent.` at `Error` in `LogArea.Control`, and does nothing.
+  AvonicContent.` at `Error` in `LogArea.Control`, and does nothing; with a host that has no `ScrollViewer`, `AvonicInfiniteScroll
+  found no ScrollViewer in {Host}.`
 - **A check** runs at the frame after the scroller's `Offset` changes, once however many times it changed, as a browser dispatches
   `scroll`. A change of layout alone isn't a scroll, so a list too short to scroll never fires. It reads the layout that's due
   first, as a browser's reads force one.

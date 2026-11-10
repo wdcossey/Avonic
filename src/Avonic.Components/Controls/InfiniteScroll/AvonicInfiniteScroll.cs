@@ -156,8 +156,15 @@ public partial class AvonicInfiniteScroll : ContentControl
             return;
         }
 
-        // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready.
-        _scrollEl = host as ScrollViewer ?? ((AvonicContent)host).GetScrollElement();
+        // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready. A host with the class scrolls
+        // itself in a browser; here only a ScrollViewer can, and a content with a replaced template may have none.
+        _scrollEl = host is AvonicContent content ? content.GetScrollElement() : host as ScrollViewer;
+        if (_scrollEl is null)
+        {
+            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicInfiniteScroll found no ScrollViewer in {Host}.", host);
+            return;
+        }
+
         DisabledChanged();
         if (Position == InfiniteScrollPosition.Top && _scrollEl is { } scrollEl)
         {
@@ -183,12 +190,12 @@ public partial class AvonicInfiniteScroll : ContentControl
         _scrollEl = null;
     }
 
-    /// <summary><c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself.</summary>
+    /// <summary><c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself and stops at the first.</summary>
     private Control? FindClosestScrollHost()
     {
         foreach (var visual in this.GetSelfAndVisualAncestors())
         {
-            if (visual is AvonicContent || (visual is ScrollViewer scroll && scroll.Classes.Contains(ScrollHostClass)))
+            if (visual is AvonicContent || (visual is Control control && control.Classes.Contains(ScrollHostClass)))
             {
                 return (Control)visual;
             }
@@ -320,7 +327,7 @@ public partial class AvonicInfiniteScroll : ContentControl
     /// <summary>A scroll container's <c>scrollHeight</c>: its content, or its own height when that's taller.</summary>
     private static double ScrollHeight(ScrollViewer scrollEl) => Math.Max(scrollEl.Extent.Height, scrollEl.Viewport.Height);
 
-    /// <summary>JavaScript's <c>parseFloat</c>: the longest number at the start, after white space, or NaN.</summary>
+    /// <summary>JavaScript's <c>parseFloat</c>: the longest number at the start, after JavaScript's white space, or NaN.</summary>
     internal static double ParseFloat(string? value)
     {
         if (value is null)
@@ -345,6 +352,6 @@ public partial class AvonicInfiniteScroll : ContentControl
         return negative ? -parsed : parsed;
     }
 
-    [GeneratedRegex(@"^\s*(?<sign>[+-]?)(?<number>Infinity|(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?)", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[\t\n\v\f\r \u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*(?<sign>[+-]?)(?<number>Infinity|(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?)", RegexOptions.CultureInvariant)]
     private static partial Regex FloatPrefix();
 }

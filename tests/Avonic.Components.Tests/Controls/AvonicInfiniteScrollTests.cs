@@ -154,6 +154,9 @@ public class AvonicInfiniteScrollTests
         Assert.Equal(double.PositiveInfinity, AvonicInfiniteScroll.ParseFloat("Infinity"));
         Assert.True(double.IsNaN(AvonicInfiniteScroll.ParseFloat("px15")));
         Assert.True(double.IsNaN(AvonicInfiniteScroll.ParseFloat(null)));
+        // JavaScript's white space, which isn't .NET's
+        Assert.Equal(50, AvonicInfiniteScroll.ParseFloat("\uFEFF\u00A050px"));
+        Assert.True(double.IsNaN(AvonicInfiniteScroll.ParseFloat("\u008550px")));
     }
 
     // ── B3: the scroll event's frame ─────────────────────────────────────────────────────────
@@ -468,6 +471,27 @@ public class AvonicInfiniteScrollTests
 
             Assert.Equal(0, fired);
             Assert.Contains(sink.Errors, e => ReferenceEquals(e.Source, infinite) && e.Message == "AvonicInfiniteScroll must be used inside AvonicContent.");
+        }
+        finally
+        {
+            Logger.Sink = previous;
+        }
+    }
+
+    [AvaloniaFact]
+    public void B12_The_Nearest_Scroll_Host_Wins_And_One_That_Is_No_ScrollViewer_Is_Logged()
+    {
+        var previous = Logger.Sink;
+        var sink = new ErrorSink();
+        Logger.Sink = sink;
+        try
+        {
+            // closest() stops at the class, here on something that can't scroll, inside a content that does
+            Border? host = null;
+            using var stage = new Stage(wrap: infinite => host = new Border { Classes = { AvonicInfiniteScroll.ScrollHostClass }, Child = infinite });
+            stage.ScrollTo(740);
+            Assert.Equal(0, stage.Fired);
+            Assert.Contains(sink.Errors, e => ReferenceEquals(e.Source, stage.Infinite) && e.Message == "AvonicInfiniteScroll found no ScrollViewer in {Host}.");
         }
         finally
         {
