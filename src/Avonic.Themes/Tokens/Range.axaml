@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-range's variables, with their md defaults. -->
+
+    <!-- bar-background: rgba(var(ion-color-primary-rgb), 0.26) -->
+    <SolidColorBrush x:Key="Avonic.Range.BarBackground" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.26" />
+    <!-- bar-background-active: var(ion-color-primary) -->
+    <SolidColorBrush x:Key="Avonic.Range.BarBackgroundActive" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- bar-border-radius: 0. A CornerRadius, a number or a CSS string such as 50%. -->
+    <x:Double x:Key="Avonic.Range.BarBorderRadius">0</x:Double>
+    <!-- bar-height: 2px -->
+    <x:Double x:Key="Avonic.Range.BarHeight">2</x:Double>
+    <!-- height: 42px -->
+    <x:Double x:Key="Avonic.Range.Height">42</x:Double>
+    <!-- knob-background: var(bar-background-active). Unset, so that the theme reads Avonic.Range.BarBackgroundActive next, and a
+         change of that changes the knob too, as in CSS. -->
+    <b:CssUnset x:Key="Avonic.Range.KnobBackground" />
+    <!-- knob-border-radius: 50% -->
+    <x:String x:Key="Avonic.Range.KnobBorderRadius">50%</x:String>
+    <!-- knob-box-shadow: none -->
+    <BoxShadows x:Key="Avonic.Range.KnobBoxShadow">0 0 0 0 #00000000</BoxShadows>
+    <!-- knob-size: 18px. The handle around it is twice that. -->
+    <x:Double x:Key="Avonic.Range.KnobSize">18</x:Double>
+    <!-- pin-background: var(ion-color-primary) -->
+    <SolidColorBrush x:Key="Avonic.Range.PinBackground" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- pin-color: var(ion-color-primary-contrast) -->
+    <SolidColorBrush x:Key="Avonic.Range.PinColor" Color="{DynamicResource Avonic.Color.PrimaryContrast}" />
+
+    <!-- md literals with no variable. :host(.range-disabled) .range-knob { outline: 5px solid #fff } -->
+    <!-- .range-knob::before { border-radius: 50% }, the halo's own, not knob-border-radius. -->
+    <x:String x:Key="Avonic.Range.Md.HaloBorderRadius">50%</x:String>
+    <BoxShadows x:Key="Avonic.Range.Md.DisabledKnobOutline">0 0 0 5 #FFFFFF</BoxShadows>
+
+</ResourceDictionary>

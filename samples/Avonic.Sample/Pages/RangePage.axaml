@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.RangePage">
+
+    <!-- The same ranges as the reference render at the top of docs/components/ion-range/COMPARISON.md, then one that reports
+         its events. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicList>
+                <c:AvonicItem><c:AvonicRange Label="Label" Value="40" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Value="0" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Label="Pin" Pin="True" Value="60" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Label="Stacked" LabelPlacement="Stacked" Value="30" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Label="A fixed label that wraps" LabelPlacement="Fixed" Value="50" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Label="End" LabelPlacement="End" Value="70" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange DualKnobs="True" Value="20,80" /></c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicRange Snaps="True" Step="10" Value="50">
+                        <c:AvonicRange.StartContent><c:AvonicIcon IconName="sunny-outline" /></c:AvonicRange.StartContent>
+                        <c:AvonicRange.EndContent><c:AvonicIcon IconName="sunny" /></c:AvonicRange.EndContent>
+                    </c:AvonicRange>
+                </c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange ActiveBarStart="50" Value="20" Color="danger" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange IsEnabled="False" Value="40" /></c:AvonicItem>
+                <c:AvonicItem><c:AvonicRange Value="40" StartContent="Low" EndContent="High" /></c:AvonicItem>
+            </c:AvonicList>
+            <c:AvonicRange Value="25" />
+            <c:AvonicItem FlowDirection="RightToLeft"><c:AvonicRange Label="RTL" Value="25" /></c:AvonicItem>
+
+            <c:AvonicListHeader Content="Events" />
+            <c:AvonicItem>
+                <c:AvonicRange Name="Playground" Label="Pin, snaps" Pin="True" Snaps="True" Step="5" Value="50"
+                               IonInput="OnInput" IonChange="OnChange" />
+            </c:AvonicItem>
+            <c:AvonicItem><TextBlock Name="Report" Text="Drag, tap or use the arrow keys" /></c:AvonicItem>
+            <c:AvonicItem><c:AvonicRange Label="Dual, pin" DualKnobs="True" Pin="True" Value="30,70" /></c:AvonicItem>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
