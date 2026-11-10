@@ -30,7 +30,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
                          BorderRadius = border-radius with percentages, for themes;
-                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end)
+                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end;
+                         StyleValue = a value the control's code gives a property at style priority, or nothing)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)

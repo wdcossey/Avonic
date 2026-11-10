@@ -102,7 +102,7 @@ These are mistakes this project has already made, so don't repeat them.
   as strings, then shows the control's type name in a `TextBlock`. An `ItemsControl` that wraps controls in containers has to clear
   the template for them. See `AvonicChip.PrepareContainerForItemOverride`.
 - **Of two values at one priority, the later wins.** A style-priority frame made when a state turns on beats an app's style that was
-  already there. Bind once, in the constructor, and push the value through it: see `ReversalTransform` in `AvonicProgressBar`.
+  already there. Bind once, in the constructor, and push the value through it: `Behaviors/StyleValue<T>`.
 - **An invisible control isn't measured, so its template isn't applied.** Anything that starts on attach and needs the template has to
   wait for it to be shown.
 - **A slotted control's `Margin` rule goes in the host's `Styles/` file,** after the host's rule for any child, with no activator.

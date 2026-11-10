@@ -7,6 +7,7 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -38,7 +39,7 @@ public class AvonicFabList : ItemsControl
     internal static readonly TimeSpan ShowInterval = TimeSpan.FromMilliseconds(30);
 
     private readonly List<IDisposable> _timeouts = [];
-    private readonly FabStyleValue<bool> _hidden = new(false);
+    private readonly StyleValue<bool> _hidden = new();
     private bool _interrupted;
     private int _pending;
 
@@ -53,7 +54,7 @@ public class AvonicFabList : ItemsControl
         // display: none until .fab-list-active. In the control, so it survives a replaced theme, and at style priority, so that an
         // app's own value wins.
         Bind(IsVisibleProperty, _hidden, BindingPriority.Style);
-        _hidden.Set(true);
+        _hidden.Set(false);
         UpdateSide();
     }
 
@@ -77,7 +78,7 @@ public class AvonicFabList : ItemsControl
         {
             var activated = change.GetNewValue<bool>();
             PseudoClasses.Set(":active", activated);
-            _hidden.Set(!activated);
+            _hidden.Set(!activated, false);
             ActivatedChanged(activated);
         }
         else if (change.Property == SideProperty)
