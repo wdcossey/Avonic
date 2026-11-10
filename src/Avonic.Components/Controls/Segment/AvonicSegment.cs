@@ -238,12 +238,6 @@ public class AvonicSegment : ItemsControl, IItemControl
 
     private void OnUnloaded()
     {
-        // Destroying the gesture mid-drag never ends it, so the held indicator lets go here.
-        if (_activated)
-        {
-            SetActivated(false);
-        }
-
         _gesture?.Destroy();
         _gesture = null;
         _smooth?.Stop();
@@ -400,14 +394,17 @@ public class AvonicSegment : ItemsControl, IItemControl
         _valueBeforeGesture = null;
     }
 
-    /// <summary>The button an event landed on, or null for the segment itself, as a disabled button lets the press through.</summary>
+    /// <summary>
+    /// The button an event landed on, or null for the segment itself. A disabled button takes no input and a hit test passes it
+    /// by, so it's never the one, as <c>pointer-events: none</c> lets the press through to the segment.
+    /// </summary>
     private AvonicSegmentButton? ButtonAt(object? source)
     {
         for (var visual = source as Visual; visual is not null && visual != this; visual = visual.GetVisualParent())
         {
             if (visual is AvonicSegmentButton button)
             {
-                return button.IsEffectivelyEnabled ? button : null;
+                return button;
             }
         }
 

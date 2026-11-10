@@ -442,6 +442,19 @@ public class AvonicSegmentFamilyTests
     });
 
     [AvaloniaFact]
+    public void L1_A_Taller_Label_Or_Icon_Keeps_12_Above_And_Below() => InstalledTheme.Run(_ =>
+    {
+        // Centred in 48, the margins only show once the content is taller than that.
+        var label = new AvonicSegmentButton { Value = "a", Items = { new AvonicLabel { Content = new Border { Height = 40, Width = 20 } } } };
+        var icon = new AvonicSegmentButton { Value = "b", Layout = SegmentButtonLayout.IconStart, Items = { new AvonicIcon { IconName = "call", FontSize = 40 } } };
+        using var scene = new Scene(new StackPanel { Children = { Segment("a", label), Segment("b", icon) } });
+        Settle();
+
+        Assert.Equal(64, label.Bounds.Height);
+        Assert.Equal(64, icon.Bounds.Height);
+    });
+
+    [AvaloniaFact]
     public void B7_A_Label_Is_Upper_Case_On_One_Line_With_An_Ellipsis() => InstalledTheme.Run(_ =>
     {
         var button = Button("a", "A label far too long to fit in its column at all");
@@ -454,6 +467,15 @@ public class AvonicSegmentFamilyTests
         Assert.Equal(TextTrimming.CharacterEllipsis, text.TextTrimming);
         Assert.Equal(TextWrapping.NoWrap, text.TextWrapping);
         Assert.True(Box(text, button).Right <= button.Bounds.Width - 16 + 0.5);
+
+        // Text straight in a button, with no label, has the host's white-space: nowrap and ellipsis.
+        var plain = new AvonicSegmentButton { Value = "p", Items = { "Text straight in a button that is far too long to fit" } };
+        using var second = new Scene(Segment("p", plain, Button("q", "Q"), Button("r", "R"), Button("s", "S")));
+        Settle();
+        var direct = plain.GetVisualDescendants().OfType<TextBlock>().Single();
+        Assert.Equal("TEXT STRAIGHT IN A BUTTON THAT IS FAR TOO LONG TO FIT", direct.Text);
+        Assert.Equal(TextWrapping.NoWrap, direct.TextWrapping);
+        Assert.Equal(TextTrimming.CharacterEllipsis, direct.TextTrimming);
     });
 
     [AvaloniaFact]
@@ -616,14 +638,18 @@ public class AvonicSegmentFamilyTests
         b.Transitions = [];
         Settle();
 
+        // Focused, checked or not; then hovered, which beats focus.
+        b.Focus(NavigationMethod.Tab);
+        Settle();
+        Assert.Equal(Colors.Purple, ColorOf(b.Foreground));
+        a.Focus(NavigationMethod.Tab);
+        Settle();
+        Assert.Equal(Colors.Purple, ColorOf(a.Foreground));
+
         GestureTests.Render();
         scene.Window.MouseMove(Centre(b, scene), RawInputModifiers.None);
         Settle();
         Assert.Equal(Colors.Orange, ColorOf(b.Foreground));
-
-        a.Focus(NavigationMethod.Tab);
-        Settle();
-        Assert.Equal(Colors.Purple, ColorOf(a.Foreground));
     });
 
     [AvaloniaFact]
@@ -698,7 +724,7 @@ public class AvonicSegmentFamilyTests
     }
 
     [AvaloniaFact]
-    public void R4_A_Segment_Unloaded_Mid_Drag_Lets_The_Indicator_Go()
+    public void R4_A_Segment_Unloaded_Mid_Drag_Lets_The_Indicator_Go_As_The_Gesture_Ends()
     {
         using var clock = new TestClock();
         var segment = Segment("a", Button("a", "A"), Button("b", "B"));
