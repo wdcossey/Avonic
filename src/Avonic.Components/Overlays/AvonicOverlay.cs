@@ -174,7 +174,7 @@ public abstract class AvonicOverlay : TemplatedControl
         ? Present(topLevel)
         : Task.FromException(new InvalidOperationException(
             "There's no TopLevel to present the overlay in: the application has no desktop, single-view or activity lifetime, or none of its " +
-            "top levels is loaded. Use Present(TopLevel)."));
+            "top levels is open. Use Present(TopLevel)."));
 
     /// <summary>Ionic <c>present()</c>, in <paramref name="topLevel"/>. An Avonic extension, for an app with several windows.</summary>
     public async Task Present(TopLevel topLevel)

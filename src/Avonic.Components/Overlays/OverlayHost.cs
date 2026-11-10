@@ -43,18 +43,18 @@ internal sealed class OverlayHost : Panel
     /// <summary>
     /// A lifetime's <see cref="TopLevel"/>: a desktop's active window, else its main one; a single view's main view's (iOS, the
     /// browser, and Android when the app sets <c>MainView</c>); under Android's <c>MainViewFactory</c>, which leaves <c>MainView</c>
-    /// null, the last top level to load that's still loaded, which is the current activity's.
+    /// null, the last top level to come that's still open, which is the current activity's.
     /// </summary>
     /// <remarks>
     /// Android's lifetime is both an <see cref="ISingleViewApplicationLifetime"/> and an <see cref="IActivityApplicationLifetime"/>,
     /// so a <c>MainView</c> it's given comes first, as it's the view every activity shows; while it's out of every top level, as
-    /// when an activity is recreated, the last loaded is still the current activity's.
+    /// when an activity is recreated, the last open is still the current activity's.
     /// </remarks>
     internal static TopLevel? TopLevelOf(IApplicationLifetime? lifetime) => lifetime switch
     {
         IClassicDesktopStyleApplicationLifetime desktop => desktop.Windows.FirstOrDefault(w => w.IsActive) ?? desktop.MainWindow,
         ISingleViewApplicationLifetime { MainView: { } view } when TopLevel.GetTopLevel(view) is { } topLevel => topLevel,
-        IActivityApplicationLifetime => LoadedTopLevels.Last,
+        IActivityApplicationLifetime => OpenTopLevels.Last,
         _ => null,
     };
 

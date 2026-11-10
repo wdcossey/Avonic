@@ -145,7 +145,7 @@ with its own focus scope; not wrapping the `TopLevel`'s content, which an app ow
 
 **Which `TopLevel`.** `present()` has no arguments, and a page has one document. `Present()` uses the application's: the active
 window of a desktop lifetime, else its main window; a single-view lifetime's main view; under Android's `MainViewFactory`, the last
-top level to load that's still loaded, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114), below).
+top level to come that's still open, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114), below).
 `Present(TopLevel)` is an Avonic extension for a multi-window app.
 
 **Android's `MainViewFactory`** (#114). Avalonia 12's Android lifetime, `Avalonia.Android.ApplicationLifetime`, is internal, and is an
@@ -153,19 +153,22 @@ top level to load that's still loaded, the current activity's ([#114](https://gi
 view; set through the factory, which Avalonia recommends, `MainView` stays null, and each activity's `AvaloniaView` makes its own
 `EmbeddableControlRoot` around a new view. The current activity is internal to `Avalonia.Android` (`AndroidActivatableLifetime.
 CurrentMainActivity`), which a net8.0 library can't reference, and Avalonia 12 has no public list of top levels, no static focused
-element (`KeyboardDevice.Instance` is internal) and no lifetime that's an `ISingleTopLevelApplicationLifetime` on Android. So
-`LoadedTopLevels` keeps the top levels that are loaded, from class handlers that a module initializer adds when `Avonic.Components`
-loads, which is in `Application.Initialize`, with `AvonicTheme`, before Android makes the first activity. A top level comes at
-`TemplateApplied`, when it has an overlay layer, which is synchronous in an `EmbeddableControlRoot`'s `Prepare()`, before the view in
-it is attached, or at `Loaded`, which is posted after layout; it goes at `Unloaded`. A template applied again, for a new theme, keeps
-its place. Only an activity lifetime, or none yet, listens: a desktop or a single view without activities doesn't pay for a handler
-on every control's `Loaded` and `Unloaded`.
-The last still loaded is the activity on top: a second activity loads after the first, and a destroyed one unloads. Read from
+element (`KeyboardDevice.Instance` is internal) and no lifetime that's an `ISingleTopLevelApplicationLifetime` on Android.
+
+So `OpenTopLevels` keeps the top levels that are open, in the order they came. A top level comes when its template is applied,
+which is when it has an overlay layer, from a class handler on `TemplateApplied`; it goes at its `Closed`. Both are synchronous: an
+`EmbeddableControlRoot`'s `Prepare()` applies its template before the view in it is attached, and its `Dispose()` closes it, loaded
+or not. `Loaded` would come too late, posted after layout, and a root disposed before it loads never unloads. A template applied
+again, for a new theme, keeps its place. A module initializer adds the handler when `Avonic.Components` loads, which is in
+`Application.Initialize`, with `AvonicTheme`, before Android makes the first activity. Only an activity lifetime, or none yet,
+listens: a desktop or a single view without activities doesn't pay for a handler on every control's `TemplateApplied`.
+
+The last still open is the activity on top: a second activity comes after the first, and a destroyed one closes. Read from
 `Avalonia.Android` 12.1.4, decompiled: `AvaloniaView`'s constructor makes the `EmbeddableControlRoot` and prepares it, and
-`AvaloniaActivity.OnDestroy` disposes the view, which disposes the root. That a prepared root loads and a disposed one unloads is
+`AvaloniaActivity.OnDestroy` disposes the view, which disposes the root. That a prepared root comes and a disposed one goes is
 tested headlessly. A `MainView`, when the app sets one, comes first, as every activity shows it; while it's in no top level, as
-during a recreation, the last loaded is still taken. Popups needn't be left out: Android's
-`TopLevelImpl.CreatePopup` returns null, so its popups are in the overlay layer, with no top level of their own.
+during a recreation, the last open is still taken. Popups needn't be left out: Android's `TopLevelImpl.CreatePopup` returns null,
+so its popups are in the overlay layer, with no top level of their own.
 
 **The index** is given when the overlay is attached to the host, at `Present()`, as `connectedCallback` gives it when an element is
 attached. Ionic's controller attaches at `create()`; Avonic has no `create()`, so an overlay made first and presented second is on
@@ -314,10 +317,12 @@ for keys and pointers. Each one has to fail without its behaviour.
   Avalonia: the reference assemblies give each one a member that can't be. So `Present()`'s choice of top level is tested through
   `OverlayHost.TopLevelOf`, with Avalonia's own (internal) desktop lifetime made by reflection, and the single-view and Android
   lifetimes as types emitted at run time (`LifetimeDouble`), as the runtime assemblies don't have that member.
-- **A top level loads as soon as it's made,** a `Window` before it's shown, and an `EmbeddableControlRoot` once it's prepared and
-  rendering; its template is applied before that, in `Prepare()` for the root and in `Show()` for a window. A closed window and a
-  disposed root unload; an unshown window that's closed doesn't. The headless platform makes no embeddable top level of its own, so the test gives one a
-  headless window's platform view.
+- **A top level's template is applied** in `Show()` for a window and in `Prepare()` for an `EmbeddableControlRoot`; it loads later,
+  posted after layout, and a `Window` loads even if it's never shown. A root disposed before it loads raises `Closed` and no
+  `Unloaded`. The headless platform makes no embeddable top level of its own, so the tests give one a headless window's platform
+  view from `PlatformManager.CreateWindow()`.
+- **The open top levels are process-wide,** so their tests are in a collection that doesn't run in parallel, as the shared
+  dispatcher could otherwise open another test's window between two asserts.
 
 ## Deliverables
 

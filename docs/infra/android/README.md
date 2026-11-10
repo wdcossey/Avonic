@@ -113,7 +113,7 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 
 - **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed; see [COMPARISON.md](COMPARISON.md).
 - **`AvonicOverlay.Present()` under Avalonia's recommended `MainViewFactory`,** which leaves `MainView` null, takes the last top
-  level to load that's still loaded, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114),
+  level to come that's still open, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114),
   [overlays](../overlays/README.md)). Tested headlessly, not tried on a device. The sample still sets `MainView`.
 - **CI's `android` job** builds the APK; its first run was this PR's.
 - **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation, resizing, display
