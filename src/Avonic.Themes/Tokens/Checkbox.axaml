@@ -1,0 +1,32 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-checkbox's variables, with checkbox.md.css's values. The checked ones are unset: :host(.ion-color) sets them inside
+         the shadow root, so an app's value beats the colour, and the theme falls back to the colour, then to primary. -->
+
+    <!-- size: 18px -->
+    <x:Double x:Key="Avonic.Checkbox.Size">18</x:Double>
+    <!-- border-radius: calc(var(size) * .125). Unset, the theme works it out from the size. -->
+    <b:CssUnset x:Key="Avonic.Checkbox.BorderRadius" />
+    <!-- border-width: 2px -->
+    <Thickness x:Key="Avonic.Checkbox.BorderWidth">2</Thickness>
+    <!-- border-color: rgb(var(ion-text-color-rgb), 0.6) -->
+    <SolidColorBrush x:Key="Avonic.Checkbox.BorderColor" Color="{DynamicResource Avonic.TextColor}" Opacity="0.6" />
+    <!-- border-color-checked: var(ion-color-primary), or the colour's base -->
+    <b:CssUnset x:Key="Avonic.Checkbox.BorderColorChecked" />
+    <!-- checkbox-background: var(ion-item-background, var(ion-background-color)) -->
+    <b:CssUnset x:Key="Avonic.Checkbox.CheckboxBackground" />
+    <!-- checkbox-background-checked: var(ion-color-primary), or the colour's base -->
+    <b:CssUnset x:Key="Avonic.Checkbox.CheckboxBackgroundChecked" />
+    <!-- checkmark-color: var(ion-color-primary-contrast), or the colour's contrast -->
+    <b:CssUnset x:Key="Avonic.Checkbox.CheckmarkColor" />
+    <!-- checkmark-width: 3, in the 24-unit view box -->
+    <x:Double x:Key="Avonic.Checkbox.CheckmarkWidth">3</x:Double>
+    <!-- transition: background 180ms cubic-bezier(0.4, 0, 0.2, 1), on the box -->
+    <Transitions x:Key="Avonic.Checkbox.Transition">
+        <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.18" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+    </Transitions>
+
+</ResourceDictionary>
