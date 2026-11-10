@@ -56,8 +56,8 @@ public sealed class CheckboxWrapper : Panel
     /// <summary>The label's width on one line: its <c>max-content</c>.</summary>
     private double _labelWidth;
 
-    /// <summary>The width the label was last measured at: infinite unless it had to shrink.</summary>
-    private double _labelSpace = double.PositiveInfinity;
+    /// <summary>A fixed label is <c>flex: 0 0 100px</c>; the others shrink.</summary>
+    private bool Shrinks => LabelPlacement != CheckboxLabelPlacement.Fixed;
 
     private bool Stacked => LabelPlacement == CheckboxLabelPlacement.Stacked;
 
@@ -81,11 +81,9 @@ public sealed class CheckboxWrapper : Panel
             var limit = availableSize.Width / ScaleOf(label);
             label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             _labelWidth = label.DesiredSize.Width;
-            _labelSpace = double.PositiveInfinity;
             if (_labelWidth > limit)
             {
                 label.Measure(new Size(limit, double.PositiveInfinity));
-                _labelSpace = limit;
             }
 
             var width = Math.Max(_labelWidth, box.Width);
@@ -93,15 +91,13 @@ public sealed class CheckboxWrapper : Panel
         }
 
         // flex-basis is the label's one line, and it shrinks to what the box leaves, which is then its width, though its text
-        // is trimmed narrower.
-        var space = Math.Max(0, availableSize.Width - box.Width);
+        // is trimmed narrower. A fixed label is flex: 0 0 100px, and doesn't shrink.
+        var space = Shrinks ? Math.Max(0, availableSize.Width - box.Width) : double.PositiveInfinity;
         label.Measure(new Size(double.PositiveInfinity, availableSize.Height));
         _labelWidth = label.DesiredSize.Width;
-        _labelSpace = double.PositiveInfinity;
         if (_labelWidth > space)
         {
             label.Measure(new Size(space, availableSize.Height));
-            _labelSpace = space;
         }
 
         return new Size(Math.Min(_labelWidth, space) + box.Width, Math.Max(label.DesiredSize.Height, box.Height));
@@ -120,11 +116,6 @@ public sealed class CheckboxWrapper : Panel
         if (Stacked)
         {
             var labelWidth = Math.Min(_labelWidth, finalSize.Width / ScaleOf(label));
-            if (labelWidth < _labelSpace && labelWidth < _labelWidth)
-            {
-                label.Measure(new Size(labelWidth, double.PositiveInfinity));
-                _labelSpace = labelWidth;
-            }
 
             var labelHeight = label.DesiredSize.Height;
 
@@ -142,14 +133,9 @@ public sealed class CheckboxWrapper : Panel
             return finalSize;
         }
 
-        // The label takes what the box leaves, measured again if that's less than it was measured with.
-        var labelSpace = Math.Max(0, finalSize.Width - box.Width);
-        if (labelSpace < _labelSpace && labelSpace < _labelWidth)
-        {
-            label.Measure(new Size(labelSpace, finalSize.Height));
-            _labelSpace = labelSpace;
-        }
-
+        // The label takes what the box leaves. Measured again only in a measure, as a measure here would ask for another one; a
+        // TextBlock arranged narrower trims to it.
+        var labelSpace = Shrinks ? Math.Max(0, finalSize.Width - box.Width) : double.PositiveInfinity;
         var labelSize = new Size(Math.Min(_labelWidth, labelSpace), label.DesiredSize.Height);
         var end = LabelPlacement == CheckboxLabelPlacement.End;
 
@@ -162,7 +148,8 @@ public sealed class CheckboxWrapper : Panel
         {
             CheckboxJustify.Start => (0d, firstSize.Width),
             CheckboxJustify.End => (gap, gap + firstSize.Width),
-            _ => (0d, finalSize.Width - secondSize.Width),
+            // With no room, space-between is flex-start: the second right after the first.
+            _ => (0d, Math.Max(firstSize.Width, finalSize.Width - secondSize.Width)),
         };
 
         first.Arrange(new Rect(firstX, Cross(firstSize.Height), firstSize.Width, firstSize.Height));

@@ -107,4 +107,6 @@ None.
 - Chromium's own focus ring on keyboard focus is the base theme's focus adorner here.
 - `aria-invalid` has no Avalonia equivalent.
 - The few pixels an `inline-block` line box adds around a standalone checkbox aren't there.
+- A standalone label longer than the page ends in an ellipsis, where Ionic's `inline-block` overflows the page with its box off screen.
+- A parent that arranges it narrower than it measured it clips the label without an ellipsis.
 - Not tried in a real window or on a device.

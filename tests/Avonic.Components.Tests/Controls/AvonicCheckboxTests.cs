@@ -427,6 +427,8 @@ public class AvonicCheckboxTests
 
         // max-width: calc(100% / 0.75): 200 wide before the scale, so 150 after it.
         Assert.Equal(200, Label(box).Bounds.Width, 0.5);
+        var text = box.GetVisualDescendants().OfType<TextBlock>().First(block => block.Text == "A stacked label much longer than its host");
+        Assert.InRange(text.TextLayout.Width, 150.5, 200.5);
         AssertBox(0, 2.38, 150, 14.25, Bounds(Label(box), scene.Window));
     });
 
@@ -713,6 +715,59 @@ public class AvonicCheckboxTests
     });
 
     [AvaloniaFact]
+    public void B19_Invalid_With_Only_Helper_Text_Shows_Neither()
+    {
+        var box = new AvonicCheckbox { Content = "Label", HelperText = "Helper" };
+        box.Classes.Add("ion-touched");
+        box.Classes.Add("ion-invalid");
+        using var scene = Plain(box);
+
+        // The bottom is there, with the helper hidden and the error's div empty, so no line of its own.
+        Assert.True(Part<Control>(box, "PART_Bottom").IsVisible);
+        Assert.False(Helper(box).IsVisible);
+        Assert.False(Error(box).IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void B15_Checked_Before_The_First_Frame_Is_Drawn_At_Once()
+    {
+        using var clock = new TestClock();
+        var box = new AvonicCheckbox { Content = "Label" };
+        using var scene = Plain(box);
+
+        // As Stencil's first render is at the next frame: a change before it isn't a transition.
+        box.Checked = true;
+
+        Assert.Equal(0, Mark(box).DashOffset);
+    }
+
+    [AvaloniaFact]
+    public void B21_Beside_An_End_Slot_It_Takes_What_Is_Left() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "With a note" };
+        var note = new AvonicNote { Content = "Note" };
+        var item = new AvonicItem { Content = box, EndContent = note };
+        using var scene = Themed(item);
+
+        // Measured: the checkbox 318.44 wide at 16, its box ending at 334.44, and the note after it.
+        Assert.Equal(16, Bounds(box, item).X, 0.5);
+        Assert.Equal(334.44, Bounds(box, item).Right, 0.6);
+        Assert.Equal(Bounds(note, item).X - 16, Bounds(box, item).Right, 0.6);
+        Assert.Equal(Bounds(box, item).Right, Bounds(Box(box), item).Right, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B7_A_Long_Standalone_Label_Shrinks_To_The_Width() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "A standalone label that is far too long to fit on one line beside its box" };
+        using var scene = Themed(box);
+
+        // Ionic's inline-block overflows to 519.2 with its box off the page; here it's as wide as the page, the box at the end.
+        Assert.Equal(390, box.Bounds.Width, 0.5);
+        Assert.Equal(372, Bounds(Box(box), scene.Window).X, 0.5);
+    });
+
+    [AvaloniaFact]
     public void B19_With_Neither_There_Is_No_Bottom()
     {
         var box = new AvonicCheckbox { Content = "Label" };
@@ -775,11 +830,11 @@ public class AvonicCheckboxTests
     });
 
     [AvaloniaFact]
-    public void B24_An_Item_Forwards_A_Tap_On_Its_Padding()
+    public void B24_An_Item_Forwards_A_Tap_On_Its_Padding() => InstalledTheme.Run(_ =>
     {
         var box = new AvonicCheckbox { Content = "In an item" };
         var item = new AvonicItem { Content = box };
-        using var scene = Plain(item);
+        using var scene = Themed(item);
         var changes = Changes(box);
 
         Assert.Equal(ItemControlType.Checkbox, ((IItemControl)box).ItemControlType);
@@ -787,7 +842,7 @@ public class AvonicCheckboxTests
 
         Assert.True(box.Checked);
         Assert.Single(changes);
-    }
+    });
 
     [AvaloniaFact]
     public void B24_A_Disabled_Checkbox_Takes_No_Forwarded_Tap()
@@ -898,6 +953,10 @@ public class AvonicCheckboxTests
 
         AssertBox(356, 14.5, 18, 18, Bounds(Box(box), item));
         Assert.Equal(358 - 18 - 16, Label(box).Bounds.Width, 0.5);
+
+        // Trimmed to it, with an ellipsis.
+        var text = box.GetVisualDescendants().OfType<TextBlock>().First(block => block.Text is { Length: > 40 });
+        Assert.InRange(text.TextLayout.Width, 1, 324.5);
     });
 
     [AvaloniaFact]
@@ -985,20 +1044,82 @@ public class AvonicCheckboxTests
     }
 
     [AvaloniaFact]
-    public void B10_A_Stacked_Label_Arranged_Narrower_Than_Measured_Is_Trimmed_To_It() => InstalledTheme.Run(_ =>
+    public void B10_Arranged_Narrower_Than_Measured_The_Label_Is_Clipped_And_Layout_Settles() => InstalledTheme.Run(_ =>
     {
-        var box = new AvonicCheckbox
+        var stacked = new AvonicCheckbox
         {
             Content = "A stacked label much longer than its host",
             LabelPlacement = CheckboxLabelPlacement.Stacked,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
-        using var scene = Themed(new Squeeze { Child = box });
+        var row = new AvonicCheckbox
+        {
+            Content = "A label much longer than its host",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+        };
+        using var scene = Themed(new Squeeze { Child = stacked }, new Squeeze { Child = row });
 
-        var text = box.GetVisualDescendants().OfType<TextBlock>().First(block => block.Text == "A stacked label much longer than its host");
-        Assert.Equal(200, Label(box).Bounds.Width, 0.5);
-        Assert.InRange(text.DesiredSize.Width, 0, 200.5);
+        // No measure in arrange, which would ask for another layout pass after every one.
+        Assert.Equal(200, Label(stacked).Bounds.Width, 0.5);
+        Assert.Equal(150 - 18 - 16, Label(row).Bounds.Width, 0.5);
+        Assert.Equal(132, Bounds(Box(row), row).X, 0.5);
+        foreach (var wrapper in scene.Window.GetVisualDescendants().OfType<CheckboxWrapper>())
+        {
+            Assert.True(wrapper.IsMeasureValid && wrapper.IsArrangeValid);
+        }
     });
+
+    [AvaloniaFact]
+    public void B9_A_Fixed_Label_Does_Not_Shrink() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Fixed label that is long", LabelPlacement = CheckboxLabelPlacement.Fixed, Width = 110 };
+        using var scene = Themed(box);
+
+        // flex: 0 0 100px: the row overflows, and the box is still at 116.
+        Assert.Equal(100, Label(box).Bounds.Width, 0.5);
+        Assert.Equal(116, Bounds(Box(box), box).X, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B6_In_A_Disabled_Item_It_Is_Not_Faded_Again() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "In a disabled item" };
+        using var scene = Themed(new AvonicItem { Content = box, IsEnabled = false });
+
+        Assert.Equal(1, Label(box).Opacity);
+        Assert.Equal(1, Part<Control>(box, "PART_NativeWrapper").Opacity);
+    });
+
+    [AvaloniaFact]
+    public void B18_New_Data_Is_Read_From_What_Its_Template_Makes() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox
+        {
+            Content = 1,
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<int>((value, _) => value == 1 ? new AvonicIcon { IconName = "heart" } : new TextBlock { Text = "Two" }),
+        };
+        using var scene = Themed(box);
+        Assert.False(Label(box).IsVisible);
+
+        box.Content = 2;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(Label(box).IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void B25_Invalid_With_No_Error_Text_Is_Described_By_Nothing()
+    {
+        var box = new AvonicCheckbox { Content = "Label", HelperText = "Pick one" };
+        using var scene = Plain(box);
+        var peer = ControlAutomationPeer.CreatePeerForElement(box);
+
+        box.Classes.Add("ion-touched");
+        box.Classes.Add("ion-invalid");
+
+        // aria-describedby is the helper's div, which is empty while invalid.
+        Assert.True(string.IsNullOrEmpty(peer.GetHelpText()));
+    }
 
     [AvaloniaFact]
     public void B15_Hidden_Half_Way_The_Mark_Ends_Its_Transition()

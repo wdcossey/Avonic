@@ -119,10 +119,10 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
 
-        <!-- :host(.in-item): flex: 1 1 0; width: 100%; height: 100% -->
+        <!-- :host(.in-item): flex: 1 1 0; width: 100%; height: 100%. With width: 100%, flex-grow changes nothing, as the host
+             already fills what's left, and a stretched child in a FlexRow does the same: so no FlexRow.Flex. -->
         <Style Selector="^:in-item">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="c:FlexRow.Flex" Value="1" />
         </Style>
         <!-- height: 100% only resolves in the default slot, which the item stretches. A start or end slot centres it. -->
         <Style Selector="^:in-item:not(:slot-start):not(:slot-end)">
@@ -131,7 +131,6 @@
         <!-- :host([slot=start]), :host([slot=end]): flex: initial; width: auto -->
         <Style Selector="^:slot-start, ^:slot-end">
             <Setter Property="HorizontalAlignment" Value="Left" />
-            <Setter Property="c:FlexRow.Flex" Value="0" />
         </Style>
 
         <!-- The label's margins, by placement. start and fixed: 16 at the end; end: 16 at the start; stacked: 16 below. -->
@@ -153,7 +152,13 @@
         <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Label">
             <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="b:Css.Scale" Value="0.75" />
-            <Setter Property="RenderTransform" Value="scale(0.75)" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <Style Selector="^:label-placement-stacked:alignment-start /template/ StackPanel#PART_Label">
             <Setter Property="RenderTransformOrigin" Value="0%,0%" />
@@ -226,11 +231,12 @@
             </Setter>
         </Style>
 
-        <!-- :host(.checkbox-disabled): the label at 0.38 and the box at 0.63. A disabled control already takes no input. -->
-        <Style Selector="^:disabled /template/ StackPanel#PART_Label">
+        <!-- :host(.checkbox-disabled): the label at 0.38 and the box at 0.63. Its own disabled only, not an ancestor's, which
+             :disabled would follow: in a disabled item it isn't faded twice. A disabled control already takes no input. -->
+        <Style Selector="^[IsEnabled=False] /template/ StackPanel#PART_Label">
             <Setter Property="Opacity" Value="0.38" />
         </Style>
-        <Style Selector="^:disabled /template/ Panel#PART_NativeWrapper">
+        <Style Selector="^[IsEnabled=False] /template/ Panel#PART_NativeWrapper">
             <Setter Property="Opacity" Value="0.63" />
         </Style>
     </ControlTheme>

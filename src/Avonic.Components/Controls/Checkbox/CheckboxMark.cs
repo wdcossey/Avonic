@@ -53,6 +53,10 @@ public sealed class CheckboxMark : Control
     private IDisposable? _frame;
     private IDisposable? _firstFrame;
     private bool _attached;
+    private (Size Size, bool Indeterminate, double Visible) _drawn;
+    private StreamGeometry? _geometry;
+    private (IBrush Stroke, double Thickness) _penKey;
+    private Pen? _pen;
 
     static CheckboxMark()
     {
@@ -187,6 +191,27 @@ public sealed class CheckboxMark : Control
         var offset = new Vector((Bounds.Width - 24 * scale) / 2, (Bounds.Height - 24 * scale) / 2);
         var points = Indeterminate ? Bar : Tick;
 
+        // The same tick is drawn again on every repaint, so it's kept until the size, the path or the dash changes.
+        var key = (Bounds.Size, Indeterminate, visible);
+        if (_geometry is null || _drawn != key)
+        {
+            _geometry = Geometry(points, scale, offset, visible);
+            _drawn = key;
+        }
+
+        if (_pen is null || _penKey != (stroke, StrokeThickness * scale))
+        {
+            // The SVG defaults: butt caps and miter joins.
+            _penKey = (stroke, StrokeThickness * scale);
+            _pen = new Pen(stroke, _penKey.Thickness, lineCap: PenLineCap.Flat, lineJoin: PenLineJoin.Miter);
+        }
+
+        context.DrawGeometry(null, _pen, _geometry);
+    }
+
+    /// <summary>The path's first <paramref name="visible"/> units, which is what a dash from its start draws.</summary>
+    private static StreamGeometry Geometry(Point[] points, double scale, Vector offset, double visible)
+    {
         var geometry = new StreamGeometry();
         using (var g = geometry.Open())
         {
@@ -205,7 +230,6 @@ public sealed class CheckboxMark : Control
             g.EndFigure(isClosed: false);
         }
 
-        // The SVG defaults: butt caps and miter joins.
-        context.DrawGeometry(null, new Pen(stroke, StrokeThickness * scale, lineCap: PenLineCap.Flat, lineJoin: PenLineJoin.Miter), geometry);
+        return geometry;
     }
 }

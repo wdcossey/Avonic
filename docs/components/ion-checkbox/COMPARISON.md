@@ -72,6 +72,12 @@ again.
 - **The focus ring.** Chromium draws its own focus ring (`outline: auto`) on a checkbox focused from the keyboard; Ionic doesn't
   style it. Avonic leaves `FocusAdorner` to the base theme, which draws its own on keyboard focus. The same rule, a different ring.
 - **Inline layout.** As above, the few pixels a line box adds around an `inline-block` aren't there.
+- **A long standalone label.** Ionic's `inline-block` is as wide as its label's one line even when that's wider than the page:
+  measured, a 485.2 label makes a 519.2 host in a 390 page, with the box off screen at 501.2. Avalonia gives a control no more than
+  the space there is, so here the label ends in an ellipsis and the box is at the end, at 372. In an item, or with `Justify` or
+  `Alignment`, both shrink the label to fit (measured 324 in an item), and match.
+- **Arranged narrower than measured.** A parent that measures the checkbox wider than it then arranges it clips the label at its
+  box, without an ellipsis: measuring the label again during arrange would ask for another layout pass after every one.
 - **`aria-invalid`.** Avalonia's automation has no invalid state, so it isn't exposed. The error text is the help text, and its
   change raises the help text's property-changed event, which is what a screen reader announces.
 - **`name` and the form.** The hidden `<input>` exists for form submission, which Avalonia doesn't have; `value` is still in

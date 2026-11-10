@@ -1,4 +1,3 @@
-using System.Text;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Automation;
@@ -232,7 +231,8 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         base.OnPropertyChanged(change);
 
-        // Ionic renders again when any of its props changes, and reads the label's textContent then.
+        // Ionic renders again when any of its props changes, and reads the label's textContent then. It reads hostContext then
+        // too, but the ancestors and the slot can't change without a detach and an attach, where they're read.
         if (change.Property.OwnerType == typeof(AvonicCheckbox) || change.Property == ContentProperty
             || change.Property == ColorProperty || change.Property == IsEnabledProperty)
         {
@@ -271,10 +271,21 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         base.OnApplyTemplate(e);
         _label = e.NameScope.Find<Control>("PART_Label");
-        _content = e.NameScope.Find<ContentPresenter>("PART_Content");
         _bottom = e.NameScope.Find<Control>("PART_Bottom");
         _helper = e.NameScope.Find<TextBlock>("PART_HelperText");
         _error = e.NameScope.Find<TextBlock>("PART_ErrorText");
+
+        // What a template makes of data comes after Content changes, so the label is looked at again then.
+        if (_content is not null)
+        {
+            _content.PropertyChanged -= OnContentPresenterChanged;
+        }
+
+        _content = e.NameScope.Find<ContentPresenter>("PART_Content");
+        if (_content is not null)
+        {
+            _content.PropertyChanged += OnContentPresenterChanged;
+        }
 
         // aria-live="polite" on the helper, and role="alert" on the error, which is assertive.
         _helper?.SetValue(AutomationProperties.LiveSettingProperty, AutomationLiveSetting.Polite);
@@ -288,12 +299,25 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // hostContext('ion-item'), read at render, and [slot]: the item slot holding it.
+        UpdateHostContext();
+        HoldTransitions();
+    }
+
+    /// <summary><c>hostContext('ion-item')</c>, read at each render, and <c>[slot]</c>: the item slot holding it.</summary>
+    private void UpdateHostContext()
+    {
         PseudoClasses.Set(":in-item", this.FindAncestorOfType<AvonicItem>() is not null);
         var slot = (Parent as StyledElement)?.Name;
         PseudoClasses.Set(":slot-start", slot == "PART_Start");
         PseudoClasses.Set(":slot-end", slot == "PART_End");
-        HoldTransitions();
+    }
+
+    private void OnContentPresenterChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            UpdateLabel();
+        }
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -312,14 +336,11 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         ReleaseTransitions();
         PseudoClasses.Set(":drawn", false);
-        if (TopLevel.GetTopLevel(this) is not null)
+        _firstFrame = AvonicConfig.RequestFrame(this, () =>
         {
-            _firstFrame = AvonicConfig.RequestFrame(this, () =>
-            {
-                _firstFrame = null;
-                PseudoClasses.Set(":drawn", true);
-            });
-        }
+            _firstFrame = null;
+            PseudoClasses.Set(":drawn", true);
+        });
     }
 
     private void ReleaseTransitions()
@@ -354,7 +375,7 @@ public class AvonicCheckbox : ContentControl, IItemControl
     /// </summary>
     private void UpdateLabel()
     {
-        if (_label is not null && TextContent(Content).Length > 0 is var shown && _label.IsVisible != shown)
+        if (_label is not null && HasText(Content) is var shown && _label.IsVisible != shown)
         {
             _label.IsVisible = shown;
         }
@@ -401,61 +422,47 @@ public class AvonicCheckbox : ContentControl, IItemControl
         }
     }
 
-    /// <summary><c>textContent</c>: every piece of text inside, shown or not. An object shown as its text counts as text.</summary>
-    private string TextContent(object? content)
+    /// <summary>
+    /// <c>textContent !== ''</c>: any text inside, shown or not, stopping at the first. Data is in the DOM as what its template
+    /// makes, which is the presenter's child, or as its text when it has none yet.
+    /// </summary>
+    private bool HasText(object? content)
     {
-        // Something that isn't a control is in the DOM as what its template makes, or as its text.
         if (content is not (null or string or Control) && _content?.Child is { } made)
         {
             content = made;
         }
 
-        var text = new StringBuilder();
-        Collect(content, text);
-        return text.ToString();
+        return Has(content);
 
-        static void Collect(object? content, StringBuilder text)
+        static bool Has(object? content) => content switch
         {
-            switch (content)
-            {
-                case null:
-                    break;
-                case string value:
-                    text.Append(value);
-                    break;
-                case TextBlock block:
-                    text.Append(block.Inlines is { Count: > 0 } inlines ? inlines.Text : block.Text);
-                    break;
-                case ContentControl control:
-                    Collect(control.Content, text);
-                    break;
-                case ILogical logical:
-                    foreach (var child in logical.LogicalChildren)
-                    {
-                        Collect(child, text);
-                    }
-
-                    break;
-                default:
-                    text.Append(content);
-                    break;
-            }
-        }
+            null => false,
+            string value => value.Length > 0,
+            TextBlock block => (block.Inlines is { Count: > 0 } inlines ? inlines.Text : block.Text) is { Length: > 0 },
+            ContentControl control => Has(control.Content),
+            ILogical logical => logical.LogicalChildren.Any(Has),
+            _ => content.ToString() is { Length: > 0 },
+        };
     }
 
     /// <summary><c>aria-checked</c>: <c>mixed</c> when indeterminate, whatever <c>checked</c> is.</summary>
     private static ToggleState ToggleStateOf(bool isChecked, bool indeterminate) =>
         indeterminate ? ToggleState.Indeterminate : isChecked ? ToggleState.On : ToggleState.Off;
 
-    /// <summary>The <c>aria-describedby</c> target, <c>getHintTextId</c>: the error while invalid with one, else the helper.</summary>
+    /// <summary>
+    /// The <c>aria-describedby</c> target, <c>getHintTextId</c>: the error while invalid with one, else the helper. While invalid,
+    /// the helper's div is empty, so it describes nothing.
+    /// </summary>
     private string? HintText()
     {
-        if (IsInvalid && !string.IsNullOrEmpty(ErrorText))
+        var invalid = IsInvalid;
+        if (invalid && !string.IsNullOrEmpty(ErrorText))
         {
             return ErrorText;
         }
 
-        return string.IsNullOrEmpty(HelperText) ? null : HelperText;
+        return invalid || string.IsNullOrEmpty(HelperText) ? null : HelperText;
     }
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
