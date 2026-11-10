@@ -19,7 +19,8 @@
     </Design.PreviewWith>
 
     <!-- The native <input>, as the stub's, with md's text and placeholder. The placeholder is the input's own colour at 0.6:
-         placeholder-color is initial, which falls back to the inherited colour, measured black. -->
+         placeholder-color is initial, which falls back to the inherited colour, measured black. Unset, the key leaves the
+         text box's colour to inherit. -->
     <ControlTheme x:Key="Avonic.Input.Md.NativeInput" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -43,7 +44,6 @@
                                 <TextBlock.Foreground>
                                     <MultiBinding Converter="{x:Static b:Css.Var}">
                                         <DynamicResource ResourceKey="Avonic.Input.PlaceholderColor" />
-                                        <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
                                     </MultiBinding>
                                 </TextBlock.Foreground>
                                 <TextBlock.Opacity>

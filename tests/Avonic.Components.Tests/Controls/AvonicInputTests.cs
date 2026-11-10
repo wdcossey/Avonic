@@ -597,6 +597,20 @@ public class AvonicInputTests
         Assert.Equal(75, solid.Bounds.Height, 1.1);
     });
 
+    [AvaloniaFact]
+    public void B13_A_Large_Field_Has_1px_Above_It_Stacked_And_6px_Around_It_In_An_Outline() => InstalledTheme.Run(_ =>
+    {
+        // At 40 px the text, not the 56 px minimum, sets the height, so the margins show.
+        var stacked = new AvonicInput { Label = "L", LabelPlacement = InputLabelPlacement.Stacked, FontSize = 40 };
+        var outline = new AvonicInput { Label = "L", LabelPlacement = InputLabelPlacement.Stacked, Fill = InputFill.Outline, FontSize = 40 };
+        using var scene = new Scene(Page(stacked, outline));
+        Render();
+
+        var label = Part<Control>(stacked, "PART_Label").Bounds.Height;
+        Assert.Equal(label + 1 + Native(stacked).Bounds.Height, stacked.Bounds.Height, 0.5);
+        Assert.Equal(6 + Native(outline).Bounds.Height + 6, outline.Bounds.Height, 0.5);
+    });
+
     // ── 14, 15: the highlight ────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -831,6 +845,29 @@ public class AvonicInputTests
     });
 
     [AvaloniaFact]
+    public void B17_No_Label_No_Notch()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Fill = InputFill.Outline });
+        using var _ = scene;
+        Assert.True(Part<Control>(input, "PART_OutlineContainer").IsVisible);
+        Assert.False(Part<Control>(input, "PART_OutlineNotch").IsVisible);
+        Assert.False(Part<Control>(input, "PART_Label").IsVisible);
+
+        input.Label = "L";
+        Settle();
+        Assert.True(Part<Control>(input, "PART_OutlineNotch").IsVisible);
+        Assert.True(Part<Control>(input, "PART_Label").IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void B17_No_Label_No_Notch_In_The_Theme() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput { Fill = InputFill.Outline };
+        using var scene = new Scene(Page(input));
+        Assert.False(Part<Control>(input, "PART_OutlineNotch").IsVisible);
+    });
+
+    [AvaloniaFact]
     public void B18_Round_Shapes() => InstalledTheme.Run(_ =>
     {
         var outline = new AvonicInput { Label = "Round", Fill = InputFill.Outline, Shape = InputShape.Round, LabelPlacement = InputLabelPlacement.Stacked };
@@ -934,10 +971,12 @@ public class AvonicInputTests
         Assert.Equal(12, helper.FontSize);
         Assert.Equal(Color.Parse("#4D4D4D"), BrushColor(helper.Foreground));
         Assert.Equal(input.Bounds.Width - 16, Bounds(Part<Control>(input, "PART_Counter"), input).Right, 0.6);
+        Assert.Equal(Bounds(Part<Control>(input, "PART_Counter"), input).X - 16, Bounds(helper, input).Right, 0.6);
         Assert.Equal(new Thickness(0), Part<Border>(input, "PART_Bottom").BorderThickness);
 
-        // scene1 i: no fill, no padding, and a top border.
+        // scene1 i: no fill, no padding, and a top border, then 5 px.
         Assert.Equal(0, Bounds(Part<Control>(plain, "PART_HelperText"), plain).X, 0.5);
+        Assert.Equal(62, Bounds(Part<Control>(plain, "PART_HelperText"), plain).Y, 0.6);
         Assert.Equal(new Thickness(0, 1, 0, 0), Part<Border>(plain, "PART_Bottom").BorderThickness);
     });
 
@@ -1043,6 +1082,12 @@ public class AvonicInputTests
         input.Value = "v";
         Settle();
         Assert.False(placeholder.IsVisible);
+
+        // An app's colour.
+        input.Resources["Avonic.Input.PlaceholderColor"] = new SolidColorBrush(Colors.Red);
+        input.Value = "";
+        Settle();
+        Assert.Equal(Colors.Red, BrushColor(placeholder.Foreground));
     });
 
     // ── 24, 25: the platform ─────────────────────────────────────────────────────────────────
