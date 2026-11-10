@@ -81,16 +81,16 @@ public sealed class RadioWrapper : Panel
 
         if (Stacked)
         {
-            var labelSize = hasLabel ? label!.DesiredSize.WithWidth(Math.Min(label.DesiredSize.Width, finalSize.Width / StackedScale)) : default;
+            // Measured at most 100% / 0.75 wide, so its desired size is its box.
+            var labelSize = hasLabel ? label!.DesiredSize : default;
             var (labelY, nativeY) = Pack(finalSize.Height, labelSize.Height, nativeSize.Height, hasLabel, reversed: false);
             Arrange(label, new Rect(Across(finalSize.Width, labelSize.Width), labelY, labelSize.Width, labelSize.Height));
             Arrange(native, new Rect(Across(finalSize.Width, nativeSize.Width), nativeY, nativeSize.Width, nativeSize.Height));
             return finalSize;
         }
 
-        var labelWidth = !hasLabel ? 0
-            : Fixed ? label!.DesiredSize.Width
-            : Math.Min(label!.DesiredSize.Width, Math.Max(0, finalSize.Width - nativeSize.Width));
+        // Measured in what the ring leaves, or at its own width when fixed, so its desired width is its box.
+        var labelWidth = hasLabel ? label!.DesiredSize.Width : 0;
         var reversed = LabelPlacement == RadioLabelPlacement.End;
 
         // In visual order, left to right: row-reverse puts the radio first.

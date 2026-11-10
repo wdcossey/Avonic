@@ -249,12 +249,14 @@ public class AvonicRadioTests
     public void R3_CompareWith_A_Property_Name_Reads_A_Dictionary_Entry()
     {
         var apple = Radio(new Dictionary<string, object> { ["id"] = 1 });
-        var group = Group(apple, Radio(new Dictionary<string, object> { ["id"] = 2 }));
+        var pear = Radio(new Dictionary<string, object> { ["id"] = 2 });
+        var group = Group(apple, pear);
         group.CompareWith = "id";
         group.Value = new Dictionary<string, object> { ["id"] = 1 };
         using var scene = Show(group);
 
         Assert.True(Checked(apple));
+        Assert.False(Checked(pear));
     }
 
     [AvaloniaFact]
@@ -454,11 +456,13 @@ public class AvonicRadioTests
         var a = Radio("a");
         a.IsTabStop = true;
         var b = Radio("b");
+        b.IsTabStop = false;
         var group = Group(a, b);
         group.Value = "b";
         using var scene = Show(group);
 
         Assert.True(a.IsTabStop);
+        Assert.False(b.IsTabStop);
     }
 
     [AvaloniaFact]
@@ -567,6 +571,17 @@ public class AvonicRadioTests
         Assert.Equal(45.5, box.Width, 0.5);
         Assert.Equal(39, box.Height, 0.5);
         Assert.Equal(10, Bounds(Part<ContentPresenter>(radio, "PART_Label"), radio).Y, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void R8_In_A_Toolbars_Start_Slot_It_Is_As_Wide_As_Its_Content_Even_With_Justify() => InstalledTheme.Run(_ =>
+    {
+        var radio = Radio("a");
+        radio.Justify = RadioJustify.Start;
+        using var scene = Show(new AvonicToolbar { StartContent = radio });
+
+        // :host([slot=start]) { width: auto }
+        Assert.Equal(76, radio.Bounds.Width, 0.5);
     });
 
     // ── R9: focus by keyboard ────────────────────────────────────────────────────────────────
@@ -834,6 +849,17 @@ public class AvonicRadioTests
         Assert.Equal(0.63, Part<Panel>(radio, "PART_Native").Opacity);
     });
 
+    [AvaloniaFact]
+    public void V4_A_Radio_In_A_Disabled_Item_Is_Faded_Once_By_The_Item_Not_Again_By_Itself() => InstalledTheme.Run(_ =>
+    {
+        var radio = Radio("a");
+        using var scene = Show(new AvonicItem { IsEnabled = false, Content = radio });
+
+        // radio-disabled is the radio's own disabled
+        Assert.Equal(1, Part<ContentPresenter>(radio, "PART_Label").Opacity);
+        Assert.Equal(1, Part<Panel>(radio, "PART_Native").Opacity);
+    });
+
     // ── V5–V9: the layout ────────────────────────────────────────────────────────────────────
 
     private static (Rect Label, Rect Ring) Layout(AvonicRadio radio) =>
@@ -855,12 +881,16 @@ public class AvonicRadioTests
     public void V5_End_Puts_The_Ring_First_And_The_Label_At_The_End() => InstalledTheme.Run(_ =>
     {
         var radio = new AvonicRadio { Value = "d", Content = Box(113), LabelPlacement = RadioLabelPlacement.End };
-        using var scene = Show(Item(radio));
+        var tall = new AvonicRadio { Value = "t", Content = Box(113, 40), LabelPlacement = RadioLabelPlacement.End };
+        using var scene = Show(new StackPanel { Children = { Item(radio), Item(tall) } });
 
         // measured d: the label at the end of the line, 14 down; the ring at the start, 13.5 down
         var (label, ring) = Layout(radio);
         AssertBox(358 - 113, 14, 113, 19, label);
         AssertBox(0, 13.5, 20, 20, ring);
+
+        // 10 above and below a taller label
+        Assert.Equal(60, tall.Bounds.Height, 0.5);
     });
 
     [AvaloniaFact]
@@ -1224,6 +1254,22 @@ public class AvonicRadioTests
     });
 
     [AvaloniaFact]
+    public void G3_A_Radio_In_A_Disabled_Item_Is_Still_One_To_Move_To()
+    {
+        var a = Radio("a");
+        var b = Radio("b");
+        var group = Group(Item(a), new AvonicItem { IsEnabled = false, Content = b }, Item(Radio("c")));
+        group.Value = "a";
+        using var scene = Show(group);
+        a.Focus(NavigationMethod.Tab);
+
+        // !radio.disabled, its own: the arrow checks it, though focus can't go into a disabled item here
+        Press(scene, PhysicalKey.ArrowDown);
+        Assert.Equal("b", group.Value);
+        Assert.True(b.IsTabStop);
+    }
+
+    [AvaloniaFact]
     public void G4_Space_Checks_The_Focused_Radio_And_Raises_IonChange_Only_If_It_Changed()
     {
         var (group, r) = Keyed(Radio("a"), Radio("b"));
@@ -1281,7 +1327,7 @@ public class AvonicRadioTests
     {
         var button = new Button { Content = "Inside" };
         var (group, _) = Keyed(Radio("a"), Radio("b"));
-        group.Items.Add(button);
+        group.Items.Insert(0, button);
         group.Value = "a";
         var changes = Changes(group);
         using var scene = Show(group);
@@ -1316,6 +1362,8 @@ public class AvonicRadioTests
         var group = Group(Item(Radio("a")));
         group.HelperText = "Helper text";
         group.ErrorText = "Error text";
+        // A browser's 16, which the hint inherits
+        group.FontSize = 16;
         using var scene = Show(new AvonicList { Items = { group } });
 
         var helper = Text(group, "PART_HelperText");
@@ -1348,6 +1396,17 @@ public class AvonicRadioTests
 
         // Outside a list, at the edge
         Assert.Equal(0, Bounds(error, scene.Window).X, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void G6_The_Line_Is_One_And_A_Half_Times_The_Font() => InstalledTheme.Run(_ =>
+    {
+        var group = Group(Item(Radio("a")));
+        group.HelperText = "Helper text";
+        group.FontSize = 20;
+        using var scene = Show(group);
+
+        Assert.Equal(30, Text(group, "PART_HelperText").Bounds.Height, 0.5);
     });
 
     [AvaloniaFact]
@@ -1385,6 +1444,37 @@ public class AvonicRadioTests
         group.Classes.Add("ion-invalid");
         Assert.Equal("Error text", peer.GetHelpText());
     }
+
+    [AvaloniaFact]
+    public void G7_The_Hint_Is_Live_And_A_Change_Of_It_Is_Announced()
+    {
+        var group = Group(Item(Radio("a")));
+        group.HelperText = "Helper text";
+        group.ErrorText = "Error text";
+        using var scene = Show(group);
+        var peer = ControlAutomationPeer.CreatePeerForElement(group);
+        var changed = new List<AutomationProperty>();
+        peer.PropertyChanged += (_, e) => changed.Add(e.Property);
+
+        // aria-live="polite" on the helper text, role="alert" on the error text
+        Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(Text(group, "PART_HelperText")));
+        Assert.Equal(AutomationLiveSetting.Assertive, AutomationProperties.GetLiveSetting(Text(group, "PART_ErrorText")));
+
+        group.Classes.Add("ion-touched");
+        Assert.Empty(changed);
+        group.Classes.Add("ion-invalid");
+        Assert.Contains(AutomationElementIdentifiers.HelpTextProperty, changed);
+    }
+
+    [AvaloniaFact]
+    public void G7_The_Themes_Hint_Is_Live_Too() => InstalledTheme.Run(_ =>
+    {
+        var group = Group(Item(Radio("a")));
+        using var scene = Show(group);
+
+        Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(Text(group, "PART_HelperText")));
+        Assert.Equal(AutomationLiveSetting.Assertive, AutomationProperties.GetLiveSetting(Text(group, "PART_ErrorText")));
+    });
 
     [AvaloniaFact]
     public void G7_A_Divider_Labels_It_When_There_Is_No_Header()

@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
                     xmlns:c="using:Avonic.Components.Controls">
 
     <Design.PreviewWith>
@@ -25,14 +26,22 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <StackPanel>
-                    <!-- .radio-group-top: line-height 1.5 -->
-                    <StackPanel Name="PART_Top" TextBlock.LineHeight="24">
-                        <!-- color: var(ion-color-step-700, var(ion-text-color-step-300)) -->
+                    <!-- .radio-group-top: line-height 1.5, of the font size it inherits -->
+                    <StackPanel Name="PART_Top">
+                        <TextBlock.LineHeight>
+                            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                                <TemplateBinding Property="FontSize" />
+                            </MultiBinding>
+                        </TextBlock.LineHeight>
+                        <!-- color: var(ion-color-step-700, var(ion-text-color-step-300)); aria-live="polite" -->
                         <TextBlock Name="PART_HelperText"
                                    Text="{TemplateBinding HelperText}"
+                                   AutomationProperties.LiveSetting="Polite"
                                    Foreground="{DynamicResource Avonic.TextColorStep300Brush}" />
+                        <!-- role="alert" -->
                         <TextBlock Name="PART_ErrorText"
                                    Text="{TemplateBinding ErrorText}"
+                                   AutomationProperties.LiveSetting="Assertive"
                                    Foreground="{DynamicResource Avonic.Color.DangerBrush}" />
                     </StackPanel>
                     <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />

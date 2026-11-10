@@ -33,8 +33,9 @@
             <ControlTemplate>
                 <StackPanel>
                     <StackPanel Name="PART_Top">
-                        <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" />
-                        <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" />
+                        <!-- aria-live="polite", and role="alert", which is assertive -->
+                        <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" AutomationProperties.LiveSetting="Assertive" />
                     </StackPanel>
                     <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
                 </StackPanel>

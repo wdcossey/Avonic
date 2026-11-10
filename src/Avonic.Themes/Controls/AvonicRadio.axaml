@@ -125,19 +125,21 @@
             </ControlTemplate>
         </Setter>
 
-        <!-- display: block, with justify or alignment, and width: 100% in an item. flex: 1 1 0 and height: 100% in an item, and
-             :host([slot=start]), :host([slot=end]) { flex: initial }. -->
+        <!-- display: block, with justify or alignment, and width: 100% and height: 100% in an item. flex: 1 1 0 there is the
+             container slot's own flex, as the slot holds only the radio. -->
         <Style Selector="^:justify-start, ^:justify-end, ^:justify-space-between, ^:alignment-start, ^:alignment-center">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
         <Style Selector="^:in-item">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
-            <Setter Property="c:FlexRow.Flex" Value="1" />
         </Style>
-        <!-- There, height: 100% is of a height that isn't definite, so it's auto, and the slot centres it: measured 39 high. -->
+        <!-- In any host's start or end slot, a toolbar's too: width: auto, and flex: initial, which a slot's child has here. In an
+             item, height: 100% is of a height that isn't definite there, so it's auto, and the slot centres it: measured 39 high. -->
+        <Style Selector="^:slot-start, ^:slot-end">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
         <Style Selector="^:in-item:slot-start, ^:in-item:slot-end">
-            <Setter Property="c:FlexRow.Flex" Value="0" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
@@ -155,10 +157,9 @@
             <Setter Property="Margin" Value="16,10,0,10" />
         </Style>
 
-        <!-- .radio-label-placement-fixed: flex: 0 0 100px -->
+        <!-- .radio-label-placement-fixed: flex: 0 0 100px, which RadioWrapper doesn't shrink -->
         <Style Selector="^:label-placement-fixed /template/ ContentPresenter#PART_Label">
             <Setter Property="Width" Value="100" />
-            <Setter Property="MinWidth" Value="100" />
         </Style>
 
         <!-- .radio-label-placement-stacked: above, scaled from its centre, 16 below it; from its top with alignment -->
@@ -211,11 +212,12 @@
             </Setter>
         </Style>
 
-        <!-- .radio-disabled. A disabled control already takes no input and lets it through, as pointer-events: none does. -->
-        <Style Selector="^:disabled /template/ ContentPresenter#PART_Label">
+        <!-- .radio-disabled, from the radio's own disabled, not an ancestor's, which fades it already. A disabled control takes no
+             input and lets it through, as pointer-events: none does. -->
+        <Style Selector="^[IsEnabled=False] /template/ ContentPresenter#PART_Label">
             <Setter Property="Opacity" Value="0.38" />
         </Style>
-        <Style Selector="^:disabled /template/ Panel#PART_Native">
+        <Style Selector="^[IsEnabled=False] /template/ Panel#PART_Native">
             <Setter Property="Opacity" Value="0.63" />
         </Style>
 

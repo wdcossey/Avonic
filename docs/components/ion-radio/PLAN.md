@@ -89,7 +89,7 @@ Each becomes a test. Measured values are from the page in COMPARISON.md.
 | R2 | In a group, it's checked when its `Value` is the group's, and follows the group's `Value` and its own as they change in code | `updateState` on `ionValueChange`, `valueChanged`, `connectedCallback` |
 | R3 | `CompareWith`: a function, or a property name compared on both values; an array (here an `IList`, as `Array.isArray` isn't true of a string or a dictionary) as the group's value checks every radio whose value is in it | `isOptionSelected`, `compareOptions` |
 | R4 | A radio without a `Value` gets a unique one when it's attached, so two of them in a group are two choices | `connectedCallback`: `this.value = this.inputId` |
-| R5 | Disabled: a click does nothing, the keys skip it, it's never the tab stop | `onClick`, `pointer-events: none`, `onKeydown`'s filter, `setRadioTabindex` |
+| R5 | Disabled: a click does nothing, the keys skip it, it's never the tab stop. Its own `disabled`: one in a disabled item is faded only by the item, and the keys still move to it | `onClick`, `pointer-events: none`, `onKeydown`'s filter, `setRadioTabindex`, all on `radio.disabled` |
 | R6 | `IonFocus` and `IonBlur` when the radio itself gets and loses focus; a click focuses it | `onFocus`, `onBlur`; measured `log1` `focus`, `clickA` `blur`, `focus` |
 | R7 | Not a tab stop alone (`tabindex="-1"`). In a group, the first enabled radio whose value is the group's (strictly) is the one tab stop, or the first enabled radio if none is, set on load and whenever the group's value changes | `buttonTabindex = -1`, `setRadioTabindex`; measured `0-1-1…`, `tab`, `shtab` |
 | R8 | In an item: `:in-item`, not activatable or focusable itself (the item is, as a cover), fills the item's row, and a tap on the item's padding clicks it. The label has 10 above and below | `inItem`, `:host(.in-item)`; item.js `getFirstInteractive`, `hasCover`; measured `padTap` `change:b` |
@@ -160,7 +160,10 @@ do and no more:
 
 ### The group
 
-`AvonicRadioGroup : ItemsControl`, with the hint above the `ItemsPresenter`. `:in-list` comes from the logical ancestors on
+`AvonicRadioGroup : ItemsControl`, with the hint above the `ItemsPresenter`. Its `Value` is two-way by default, as the user changes
+it. Its `TabNavigation` is `Continue`, where an `ItemsControl`'s is `Once`: Tab goes through what's inside, as in a page, and the
+radios' own tab stops do the rest. It overrides `OnKeyDown` without calling the base, which would move focus between containers
+with the arrows. `:in-list` comes from the logical ancestors on
 attach, for the 16 at each side, so the rule is in the group's own theme and costs nothing elsewhere. `ion-touched` and
 `ion-invalid` are style classes, as classes an app sets are.
 

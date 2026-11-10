@@ -87,6 +87,7 @@ public class AvonicRadio : ContentControl, IItemControl
     private IDisposable? _tabStopFrame;
     private IDisposable? _activatableFrame;
     private IDisposable? _focusableFrame;
+    private bool? _inItem;
 
     static AvonicRadio()
     {
@@ -269,20 +270,24 @@ public class AvonicRadio : ContentControl, IItemControl
 
     /// <summary>
     /// <c>in-item</c>, and <c>ion-activatable</c> and <c>ion-focusable</c> only when not in one: the item is, as the radio is its
-    /// cover. <c>[slot=start]</c> and <c>[slot=end]</c> are the item's start and end slots, which <c>:host([slot])</c> reads.
+    /// cover. <c>[slot=start]</c> and <c>[slot=end]</c> are a host's start and end slots, an item's or a toolbar's.
     /// </summary>
     private void UpdateHostContext(bool inItem)
     {
         PseudoClasses.Set(":in-item", inItem);
         var slot = (Parent as ContentPresenter)?.Name;
-        PseudoClasses.Set(":slot-start", inItem && slot == "PART_Start");
-        PseudoClasses.Set(":slot-end", inItem && slot == "PART_End");
+        PseudoClasses.Set(":slot-start", slot == "PART_Start");
+        PseudoClasses.Set(":slot-end", slot == "PART_End");
 
-        // At style priority, as the classes are, so an app's own value wins.
-        _activatableFrame?.Dispose();
-        _activatableFrame = SetValue(Activatable.IsEnabledProperty, !inItem, BindingPriority.Style);
-        _focusableFrame?.Dispose();
-        _focusableFrame = SetValue(FocusVisible.IsEnabledProperty, !inItem, BindingPriority.Style);
+        // At style priority, as the classes are, so an app's own value wins. Only when it changes, so a move raises nothing.
+        if (_inItem != inItem)
+        {
+            _inItem = inItem;
+            _activatableFrame?.Dispose();
+            _activatableFrame = SetValue(Activatable.IsEnabledProperty, !inItem, BindingPriority.Style);
+            _focusableFrame?.Dispose();
+            _focusableFrame = SetValue(FocusVisible.IsEnabledProperty, !inItem, BindingPriority.Style);
+        }
     }
 
     private void UpdateClasses()

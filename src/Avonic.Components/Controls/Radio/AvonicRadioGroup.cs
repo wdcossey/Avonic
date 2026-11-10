@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
@@ -82,6 +83,7 @@ public class AvonicRadioGroup : ItemsControl
     private Control? _top;
     private Control? _helperText;
     private Control? _errorText;
+    private string? _hint;
 
     static AvonicRadioGroup()
     {
@@ -156,8 +158,9 @@ public class AvonicRadioGroup : ItemsControl
     private void SetRadioTabStops()
     {
         var radios = Radios().ToList();
-        var focusable = radios.FirstOrDefault(radio => Equals(radio.Value, Value) && radio.IsEffectivelyEnabled)
-                        ?? radios.FirstOrDefault(radio => radio.IsEffectivelyEnabled);
+        // radio.disabled: its own, not an ancestor's.
+        var focusable = radios.FirstOrDefault(radio => Equals(radio.Value, Value) && radio.IsEnabled)
+                        ?? radios.FirstOrDefault(radio => radio.IsEnabled);
         if (focusable is null)
         {
             return;
@@ -230,12 +233,13 @@ public class AvonicRadioGroup : ItemsControl
     /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.Source is not AvonicRadio current || current.Group != this || !current.IsEffectivelyEnabled)
+        if (e.Source is not AvonicRadio current || current.Group != this || !current.IsEnabled)
         {
             return;
         }
 
-        var radios = Radios().Where(radio => radio.IsEffectivelyEnabled).ToList();
+        // !radio.disabled: its own, as a radio in a disabled item is still one to move to.
+        var radios = Radios().Where(radio => radio.IsEnabled).ToList();
         var index = radios.IndexOf(current);
         if (index < 0)
         {
@@ -260,9 +264,11 @@ public class AvonicRadioGroup : ItemsControl
 
         if (e.Key == Key.Space)
         {
+            // Ionic also raises it whenever AllowEmptySelection is on, but then the value always changes: it clears a value, and
+            // sets one where there was none, as a radio always has one.
             var previous = Value;
             SetCurrentValue(ValueProperty, AllowEmptySelection && Value is not null ? null : current.Value);
-            if (!Equals(previous, Value) || AllowEmptySelection)
+            if (!Equals(previous, Value))
             {
                 EmitValueChange();
             }
@@ -291,6 +297,18 @@ public class AvonicRadioGroup : ItemsControl
     /// </summary>
     private void UpdateHint()
     {
+        // aria-describedby follows the shown text, which Ionic re-renders at once so that it's announced.
+        var hint = HintText;
+        if (hint != _hint)
+        {
+            var old = _hint;
+            _hint = hint;
+            if (ControlAutomationPeer.FromElement(this) is { } peer)
+            {
+                peer.RaisePropertyChangedEvent(AutomationElementIdentifiers.HelpTextProperty, old, hint);
+            }
+        }
+
         var invalid = IsInvalid;
         if (_top is not null)
         {
