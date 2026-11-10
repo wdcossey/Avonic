@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -17,21 +15,14 @@ namespace Avonic.Components.Overlays;
 internal static class OpenTopLevels
 {
     private static readonly List<WeakReference<TopLevel>> s_open = [];
-
-    /// <summary>
-    /// From the moment this assembly loads. An app that uses Avonic loads it with <c>AvonicTheme</c>, from its XAML in
-    /// <c>Application.Initialize</c>, which on Android runs in the application's <c>OnCreate</c>, before the first activity and its
-    /// top level. A static constructor would run only at the first overlay, too late to hear the top level it's presented in.
-    /// </summary>
-    [ModuleInitializer]
-    [SuppressMessage("Usage", "CA2255:The 'ModuleInitializer' attribute should not be used in libraries",
-        Justification = "It only adds a class handler, and has to run before the app's first top level is made.")]
-    internal static void OnModuleLoaded() => Start(Application.Current?.ApplicationLifetime);
+    private static bool s_listening;
 
     /// <summary>
     /// Listens, unless <paramref name="lifetime"/> is one that never reads the list: a desktop's or a single view's without
     /// activities, which then don't pay for a handler on every control's <c>TemplateApplied</c>. With no lifetime yet, as when an
-    /// app touches Avonic before it builds Avalonia, it can't tell, so it listens. True if it listens.
+    /// app touches Avonic before it builds Avalonia, it can't tell, so it listens. True if it listens. Called by each
+    /// <see cref="AvonicComponentsStyles"/>, which an app's <c>Application.Initialize</c> makes, with <c>AvonicTheme</c>, and which on
+    /// Android runs in the application's <c>OnCreate</c>, before the first activity and its top level; it listens once.
     /// </summary>
     internal static bool Start(IApplicationLifetime? lifetime)
     {
@@ -40,8 +31,14 @@ internal static class OpenTopLevels
             return false;
         }
 
-        // Synchronous: in an EmbeddableControlRoot's Prepare(), before the view in it is attached; in a window's Show().
-        TemplatedControl.TemplateAppliedEvent.AddClassHandler<TopLevel>((topLevel, _) => Add(topLevel));
+        if (!s_listening)
+        {
+            s_listening = true;
+
+            // Synchronous: in an EmbeddableControlRoot's Prepare(), before the view in it is attached; in a window's Show().
+            TemplatedControl.TemplateAppliedEvent.AddClassHandler<TopLevel>((topLevel, _) => Add(topLevel));
+        }
+
         return true;
     }
 

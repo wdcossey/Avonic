@@ -159,8 +159,9 @@ So `OpenTopLevels` keeps the top levels that are open, in the order they came. A
 which is when it has an overlay layer, from a class handler on `TemplateApplied`; it goes at its `Closed`. Both are synchronous: an
 `EmbeddableControlRoot`'s `Prepare()` applies its template before the view in it is attached, and its `Dispose()` closes it, loaded
 or not. `Loaded` would come too late, posted after layout, and a root disposed before it loads never unloads. A template applied
-again, for a new theme, keeps its place. A module initializer adds the handler when `Avonic.Components` loads, which is in
-`Application.Initialize`, with `AvonicTheme`, before Android makes the first activity. Only an activity lifetime, or none yet,
+again, for a new theme, keeps its place. `AvonicComponentsStyles`' constructor adds the handler, once, which is in
+`Application.Initialize`, with `AvonicTheme`, before Android makes the first activity. (It was a module initializer until the P2
+roll-up, which needed CA2255 suppressed; an app with no `AvonicComponentsStyles` can't template an overlay anyway.) Only an activity lifetime, or none yet,
 listens: a desktop or a single view without activities doesn't pay for a handler on every control's `TemplateApplied`.
 
 The last still open is the activity on top: a second activity comes after the first, and a destroyed one closes. Read from

@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using Avonic.Components.Overlays;
 
 namespace Avonic.Components;
 
@@ -18,6 +20,9 @@ public class AvonicComponentsStyles : Styles
         {
             Resources.MergedDictionaries.Add(new ResourceInclude(BaseUri) { Source = new Uri(BaseUri, path) });
         }
+
+        // Before the app's first top level, so that an overlay presented with none finds the current activity's.
+        OpenTopLevels.Start(Application.Current?.ApplicationLifetime);
     }
 
     /// <summary>Glob order differs between file systems, so merge order is fixed here.</summary>

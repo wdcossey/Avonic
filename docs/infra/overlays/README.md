@@ -117,11 +117,11 @@ Avonic additions, which shadow no Ionic name:
 - **Transforms** whose lists differ switch at the midpoint, where CSS interpolates matrices. No md enter or leave animation has one.
 - **Single-view and Android lifetimes** are tested with doubles emitted at run time, as C# can't implement Avalonia's lifetime
   interfaces, and Android's `EmbeddableControlRoot` on a headless window's platform view. The single-view branch was tried on a
-  Pixel 8 ([#66](../android/COMPARISON.md)); `MainViewFactory` hasn't been tried on a device
-  ([#114](https://github.com/wdcossey/Avonic/issues/114)).
+  Pixel 8 ([#66](../android/COMPARISON.md)), and `MainViewFactory` on the same phone on 2026-11-10: `Present()` with no top level
+  presented in the activity's, and Back dismissed it ([#114](https://github.com/wdcossey/Avonic/issues/114)).
 - **Several Avalonia activities** under `MainViewFactory`: the current one is taken to be the last to come that's still open,
   which holds while the one on top is the newest. An app that brings an older activity forward with `FLAG_ACTIVITY_REORDER_TO_FRONT`,
   or shows two of its activities in split screen, would need `Present(TopLevel)`. So would `Present()` from a view's constructor
-  under the factory, which runs before its activity's top level exists, and an app that loads Avonic's assembly only after its first
-  activity, with no `AvonicTheme` in its `App.axaml`.
+  under the factory, which runs before its activity's top level exists, and an app that adds `AvonicTheme` or
+  `AvonicComponentsStyles` only after its first activity, rather than in its `App.axaml`.
 - Not tried in a real window: `tools/real-window/drive.ps1` has a section for the sample page, which the batch's runner runs.
