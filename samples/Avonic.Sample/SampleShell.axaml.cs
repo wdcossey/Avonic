@@ -7,8 +7,8 @@ using Avalonia.Reactive;
 namespace Avonic.Sample;
 
 /// <summary>
-/// The sample: the page list, a page, and Back. <see cref="MainWindow"/> holds one on desktop, and a single-view lifetime, as on
-/// Android, has one as its main view. See docs/infra/android/PLAN.md.
+/// The sample: the page list, a page, and Back. <see cref="MainWindow"/> holds one on desktop, Android's activity lifetime makes one
+/// for each activity, and any other single-view lifetime has one as its main view. See docs/infra/android/PLAN.md.
 /// </summary>
 public partial class SampleShell : UserControl
 {

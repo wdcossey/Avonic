@@ -165,12 +165,16 @@ public abstract class AvonicOverlay : TemplatedControl
     /// <summary>What the overlay gives its enter and leave animations, as a toast gives its position.</summary>
     protected virtual object? AnimationOptions => null;
 
-    /// <summary>Ionic <c>present()</c>, in the application's top level: a desktop's active window, else its main one; a single view's.</summary>
+    /// <summary>
+    /// Ionic <c>present()</c>, in the application's top level: a desktop's active window, else its main one; a single view's; under
+    /// Android's <c>MainViewFactory</c>, the current activity's.
+    /// </summary>
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
     public Task Present() => OverlayHost.TopLevelOf(Application.Current?.ApplicationLifetime) is { } topLevel
         ? Present(topLevel)
         : Task.FromException(new InvalidOperationException(
-            "There's no TopLevel to present the overlay in: the application has no desktop or single-view lifetime. Use Present(TopLevel)."));
+            "There's no TopLevel to present the overlay in: the application has no desktop, single-view or activity lifetime, or none of its " +
+            "top levels is open. Use Present(TopLevel)."));
 
     /// <summary>Ionic <c>present()</c>, in <paramref name="topLevel"/>. An Avonic extension, for an app with several windows.</summary>
     public async Task Present(TopLevel topLevel)
