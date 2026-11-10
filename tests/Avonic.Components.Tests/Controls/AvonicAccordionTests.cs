@@ -736,6 +736,30 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B13_After_A_Press_Mode_Click_The_Next_Press_Elsewhere_Toggles()
+    {
+        var button = new Button
+        {
+            ClickMode = ClickMode.Press,
+            Width = 60,
+            Height = 36,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<Button>((_, _) => new Border { Background = Brushes.Transparent }),
+        };
+        var plain = new Border { Height = 48, Background = Brushes.Transparent };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = new StackPanel { Children = { button, plain } } };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        Click(scene, CentreOf(scene, button));
+        clock.At(1000);
+        Click(scene, CentreOf(scene, plain));
+
+        Assert.Equal(["a", null], changes);
+    }
+
+    [AvaloniaFact]
     public void B13_A_Handled_Click_Inside_Does_Not_Toggle()
     {
         var a = Accordion("a");
