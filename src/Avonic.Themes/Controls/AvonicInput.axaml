@@ -269,6 +269,8 @@
             <Setter Property="CornerRadius">
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Padding">
@@ -304,6 +306,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -312,6 +316,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -343,6 +349,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -400,6 +408,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -414,6 +424,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -444,6 +456,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>
@@ -452,6 +466,8 @@
                 <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
         </Style>

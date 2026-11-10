@@ -1181,6 +1181,148 @@ public class AvonicInputTests
         AssertBox(313.97, 0, 44.03, 48.03, Bounds(toggle, input), 1);
     });
 
+    // ── Found in review ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R01_A_Press_On_The_Clear_Buttons_Edge_Keeps_Focus_Too() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput { Label = "Clear", ClearInput = true, Value = "abc" };
+        var log = Log.Of(input);
+        using var scene = new Scene(Page(input));
+        input.SetFocus();
+        Settle();
+        log.Take();
+        Render();
+
+        // 2 px in from the corner: on the 30 px button, off its 22 px icon.
+        var box = Bounds(Part<Control>(input, "PART_ClearButton"), scene.Window);
+        Click(scene, new Point(box.X + 2, box.Y + 2));
+
+        Assert.Equal("", input.Value);
+        Assert.Equal(["input:"], log.Take());
+        Assert.Same(Native(input), Focused(input));
+    });
+
+    [AvaloniaFact]
+    public void R02_A_Focusable_Item_Around_The_Input_Doesnt_Take_Focus_From_A_Press_On_The_Toggle_Or_Clear_Button()
+    {
+        var toggle = new AvonicInputPasswordToggle();
+        var input = new AvonicInput { Label = "P", Type = InputType.Password, Value = "pw", ClearInput = true, EndContent = toggle };
+        var log = Log.Of(input);
+        var item = new AvonicItem { Button = true, Content = input };
+        using var scene = new Scene(new StackPanel { Children = { item } });
+        Assert.True(item.Focusable);
+        input.SetFocus();
+        Settle();
+        log.Take();
+        Render();
+
+        Click(scene, Centre(Part<AvonicButton>(toggle, "PART_Button"), scene));
+        Assert.Equal(InputType.Text, input.Type);
+        Assert.Same(Native(input), Focused(input));
+
+        Click(scene, Centre(Part<Control>(input, "PART_ClearButton"), scene));
+        Assert.Equal("", input.Value);
+        Assert.Same(Native(input), Focused(input));
+        Assert.Equal(["input:"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R03_A_Pending_Debounced_IonInput_Is_Still_Raised_After_Debounce_Changes_Or_The_Input_Leaves()
+    {
+        using var clock = new TestClock();
+        var (input, _, scene) = Stub(new AvonicInput { Debounce = 100 });
+        var log = Log.Of(input);
+        input.SetFocus();
+        Settle();
+        log.Take();
+
+        clock.At(0);
+        Type(scene, PhysicalKey.A, "a");
+        input.Debounce = null;
+        clock.At(100);
+        Assert.Equal(["input:a"], log.Take());
+
+        input.Debounce = 100;
+        clock.At(200);
+        Type(scene, PhysicalKey.B, "b");
+        scene.Dispose();
+        Assert.DoesNotContain("input:ab", log.Take());
+        clock.At(300);
+        Assert.Equal(["input:ab"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R04_A_Chip_In_A_Slot_Keeps_Its_Own_4px_Above_And_Below() => InstalledTheme.Run(_ =>
+    {
+        var chip = new AvonicChip { Items = { "Chip" } };
+        var input = new AvonicInput { Label = "Chip", StartContent = chip };
+        using var scene = new Scene(Page(input));
+        Render();
+
+        Assert.Equal(new Thickness(0, 4, 16, 4), chip.Margin);
+    });
+
+    [AvaloniaFact]
+    public void R05_Hover_Ends_When_The_Input_Leaves_The_Tree() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput { Label = "Solid", Fill = InputFill.Solid };
+        var host = new Border { Child = input };
+        using var scene = new Scene(Page(host));
+        var wrapper = Part<Border>(input, "PART_Wrapper");
+        wrapper.Transitions = [];
+        Render();
+        scene.Window.MouseMove(Centre(wrapper, scene), RawInputModifiers.None);
+        Settle();
+        Assert.Equal(Color.Parse("#E6E6E6"), BrushColor(wrapper.Background));
+
+        host.Child = null;
+        Settle();
+        host.Child = input;
+        Settle();
+        Assert.Equal(Color.Parse("#F2F2F2"), BrushColor(wrapper.Background));
+    });
+
+    [AvaloniaFact]
+    public void R06_Maxlength_0_Allows_Nothing()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Maxlength = 0, Counter = true });
+        using var _ = scene;
+        var log = Log.Of(input);
+        input.SetFocus();
+        Settle();
+        log.Take();
+        Type(scene, PhysicalKey.A, "a");
+
+        Assert.Equal("", input.Value);
+        Assert.Empty(log.Take());
+        Assert.Equal("0 / 0", input.CounterText);
+    }
+
+    [AvaloniaFact]
+    public void R07_A_Templated_Slotted_Label_Names_The_Field()
+    {
+        var input = new AvonicInput
+        {
+            LabelContent = new Uri("https://example.com/"),
+            LabelContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Uri>((uri, _) => new TextBlock { Text = uri.Host }),
+        };
+        var (_, _, scene) = Stub(input);
+        using var _ = scene;
+
+        Assert.Equal("example.com", AutomationProperties.GetName(Native(input)));
+    }
+
+    [AvaloniaFact]
+    public void R08_A_Radius_Key_Can_Be_A_CSS_String() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput { Label = "Solid", Fill = InputFill.Solid, Resources = { ["Avonic.Input.BorderRadius"] = "8px" } };
+        using var scene = new Scene(Page(input));
+        Render();
+
+        Assert.Equal(new CornerRadius(8, 8, 0, 0), Part<Border>(input, "PART_Wrapper").CornerRadius);
+    });
+
     // ── 28: RTL ──────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

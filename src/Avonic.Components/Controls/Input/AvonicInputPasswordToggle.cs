@@ -45,6 +45,13 @@ public class AvonicInputPasswordToggle : TemplatedControl
         AvaloniaProperty.RegisterDirect<AvonicInputPasswordToggle, string>(nameof(ButtonLabel), toggle => toggle.ButtonLabel);
 
     private AvonicInput? _input;
+
+    public AvonicInputPasswordToggle()
+    {
+        // onPointerDown's preventDefault: a press on the button doesn't take focus from the field. On the toggle, which the
+        // press tunnels through before it reaches the button.
+        AddHandler(PointerPressedEvent, static (_, e) => KeepFocus.During(e), RoutingStrategies.Tunnel, handledEventsToo: true);
+    }
     private AvonicButton? _button;
     private InputType _type = InputType.Password;
     private string _icon = DefaultShowIcon;
@@ -87,16 +94,12 @@ public class AvonicInputPasswordToggle : TemplatedControl
         if (_button is not null)
         {
             _button.Click -= OnButtonClick;
-            _button.RemoveHandler(PointerPressedEvent, OnButtonPressed);
         }
 
         _button = e.NameScope.Find<AvonicButton>("PART_Button");
         if (_button is not null)
         {
             _button.Click += OnButtonClick;
-
-            // onPointerDown's preventDefault: the press doesn't take focus from the field.
-            _button.AddHandler(PointerPressedEvent, OnButtonPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         }
     }
 
@@ -159,7 +162,7 @@ public class AvonicInputPasswordToggle : TemplatedControl
         input.SetCurrentValue(AvonicInput.TypeProperty, input.Type == InputType.Text ? InputType.Password : InputType.Text);
     }
 
-    private static void OnButtonPressed(object? sender, PointerPressedEventArgs e) => KeepFocus.During(sender, e);
+
 
     private void Unwatch()
     {

@@ -291,10 +291,14 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
         {
-            var r = values.FirstOrDefault(value => value is double or Avalonia.CornerRadius) switch
+            // The extras: the element's Bounds and FlowDirection, for a CSS string's percentages.
+            var extras = values.Where(value => value is Rect or Size or Avalonia.Media.FlowDirection).ToList();
+            var r = values.FirstOrDefault(value => value is double or Avalonia.CornerRadius or string) switch
             {
                 double number => new Avalonia.CornerRadius(number),
                 Avalonia.CornerRadius radius => radius,
+                string css => Behaviors.BorderRadius.ToCornerRadius.Convert([css, .. extras], typeof(Avalonia.CornerRadius), null, culture)
+                    is Avalonia.CornerRadius parsed ? parsed : default,
                 _ => default,
             };
             return parameter switch
@@ -328,6 +332,10 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         // The <label for> around the field: a click on it focuses the input, on release, with no keys.
         _ = new NativeButton(this, OnLabelClick, () => false, UpdateIsEffectivelyEnabled);
+
+        // The clear button's onPointerDown preventDefault: a press on it doesn't take focus from the field. Here, on the way
+        // down, before the press reaches the button.
+        AddHandler(PointerPressedEvent, OnPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
 
         Classes.CollectionChanged += OnClassesChanged;
         UpdateClasses();
@@ -590,6 +598,7 @@ public class AvonicInput : TemplatedControl, IItemControl
         {
             _native.PropertyChanged -= OnNativePropertyChanged;
             _native.RemoveHandler(TextInputEvent, OnNativeTextInput);
+            _native.PastingFromClipboard -= OnNativePasting;
             _native.GotFocus -= OnNativeGotFocus;
             _native.LostFocus -= OnNativeLostFocus;
             _native.RemoveHandler(KeyDownEvent, OnNativeKeyDown);
@@ -597,7 +606,17 @@ public class AvonicInput : TemplatedControl, IItemControl
 
         _native = e.NameScope.Find<TextBox>("PART_NativeInput");
         _wrapper = e.NameScope.Find<Control>("PART_Wrapper");
+        if (_labelContent is not null)
+        {
+            _labelContent.PropertyChanged -= OnLabelContentPropertyChanged;
+        }
+
         _labelContent = e.NameScope.Find<ContentPresenter>("PART_LabelContent");
+        if (_labelContent is not null)
+        {
+            // A templated label's element is made after the template's applied: name the field again then.
+            _labelContent.PropertyChanged += OnLabelContentPropertyChanged;
+        }
         _clearButton = e.NameScope.Find<Control>("PART_ClearButton");
 
         if (_native is not null)
@@ -612,6 +631,7 @@ public class AvonicInput : TemplatedControl, IItemControl
 
             // A soft keyboard can type with no key down, where Chromium's keydown says "Unidentified": that clears too.
             _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _native.PastingFromClipboard += OnNativePasting;
             UpdateNative();
             SyncNativeText();
         }
@@ -621,8 +641,6 @@ public class AvonicInput : TemplatedControl, IItemControl
             // A native <button>: a click on release, Enter and Space.
             _ = new NativeButton(_clearButton, _ => ClearTextInput(), () => true, static () => { });
 
-            // onPointerDown's preventDefault: a press doesn't take focus from the field.
-            _clearButton.AddHandler(PointerPressedEvent, static (sender, e) => KeepFocus.During(sender, e), RoutingStrategies.Tunnel, handledEventsToo: true);
         }
 
         UpdateAutomation();
@@ -650,8 +668,8 @@ public class AvonicInput : TemplatedControl, IItemControl
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        _debounced?.Dispose();
-        _debounced = null;
+        // A pointer that leaves with the input raises no exit.
+        PseudoClasses.Set(":ion-hover", false);
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -682,8 +700,7 @@ public class AvonicInput : TemplatedControl, IItemControl
         }
         else if (change.Property == DebounceProperty)
         {
-            // debounceChanged: a pending ionInput was for the old emitter.
-            _debounced?.Dispose();
+            // debounceChanged replaces the emitter, and the old one's timer still runs: a pending ionInput is still raised.
             _debounced = null;
         }
         else if (change.Property == LabelProperty || change.Property == LabelContentProperty || change.Property == HelperTextProperty
@@ -757,6 +774,7 @@ public class AvonicInput : TemplatedControl, IItemControl
         var password = Type == InputType.Password;
         native.PasswordChar = password ? PasswordMask : default;
         native.IsReadOnly = Readonly;
+        // A negative maxlength is invalid in HTML, so no limit; 0 allows nothing, which OnNativeTextInput keeps out.
         native.MaxLength = Maxlength is > 0 and var max ? max : 0;
         native.PlaceholderText = Placeholder ?? "";
 
@@ -863,7 +881,33 @@ public class AvonicInput : TemplatedControl, IItemControl
         EmitInputChange();
     }
 
-    private void OnNativeTextInput(object? sender, TextInputEventArgs e) => CheckClearOnEdit(Key.None);
+    private void OnNativeTextInput(object? sender, TextInputEventArgs e)
+    {
+        // maxlength="0": nothing can be typed, which Avalonia's MaxLength of 0, no limit, doesn't say.
+        if (Maxlength == 0)
+        {
+            e.Handled = true;
+            return;
+        }
+
+        CheckClearOnEdit(Key.None);
+    }
+
+    private void OnNativePasting(object? sender, RoutedEventArgs e)
+    {
+        if (Maxlength == 0)
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void OnPressedTunnel(object? sender, PointerPressedEventArgs e)
+    {
+        if (_clearButton is not null && e.Source is Visual source && (source == _clearButton || _clearButton.IsVisualAncestorOf(source)))
+        {
+            KeepFocus.During(e);
+        }
+    }
 
     private void SetValueFromUser(string value)
     {
@@ -968,11 +1012,17 @@ public class AvonicInput : TemplatedControl, IItemControl
 
         // debounce: each call restarts the timer, and the last call's detail is what's raised.
         _debounced?.Dispose();
-        _debounced = AvonicConfig.Schedule(() =>
+        IDisposable? handle = null;
+        handle = AvonicConfig.Schedule(() =>
         {
-            _debounced = null;
+            if (_debounced == handle)
+            {
+                _debounced = null;
+            }
+
             RaiseEvent(new InputInputEventArgs(IonInputEvent, this, value));
         }, TimeSpan.FromMilliseconds(Math.Max(0, wait)));
+        _debounced = handle;
     }
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
@@ -999,6 +1049,14 @@ public class AvonicInput : TemplatedControl, IItemControl
         }
 
         SetFocus();
+    }
+
+    private void OnLabelContentPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            UpdateAutomation();
+        }
     }
 
     protected override void OnPointerEntered(PointerEventArgs e)

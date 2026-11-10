@@ -88,8 +88,10 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 - **An icon-only `ion-button` in a slot**: `input.md.css` makes it 40 px round with 8 px padding. That needs the button's own
   padding and radius keys per instance, which a `::slotted` rule can't set here; the button keeps its own look. Not measured
   further.
-- **Hover and focus colours beat an app's key** for `--background` and `--border-color`, as Ionic's `:host(.input-fill-solid:hover)`
-  rules are more specific than a class on the input. At rest the app's key wins.
+- **An app's `--background` and `--border-color` with a fill.** ion-input is scoped, not shadow DOM, so `:host(.input-fill-solid)`
+  is `.sc-ion-input-md-h.input-fill-solid` in the page, and beats `ion-input.custom { --background: red }`: measured, the solid
+  input stays `#f2f2f2` at rest, `#e6e6e6` hovered and `#d9d9d9` focused. A resource key has no specificity, so here the app's key
+  wins at rest, which is the only way to set it, and the hover and focus colours beat it, as in Ionic.
 - **`:host-context(ion-item)[slot=start|end] { width: auto }`**: an input in an item's start or end slot still stretches.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto).

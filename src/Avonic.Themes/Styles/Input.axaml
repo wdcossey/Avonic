@@ -16,11 +16,11 @@
     <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > :is(Control)">
         <Setter Property="Margin" Value="16,0,0,0" />
     </Style>
-    <!-- An ion-button keeps md's 4px above and below: measured 4px 0px 4px 16px at the end. -->
-    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicButton">
+    <!-- An ion-button and an ion-chip keep their own 4px above and below: measured 4px 0px 4px 16px for a button at the end. -->
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicChip">
         <Setter Property="Margin" Value="0,4,16,4" />
     </Style>
-    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicButton">
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicChip">
         <Setter Property="Margin" Value="16,4,0,4" />
     </Style>
 
