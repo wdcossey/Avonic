@@ -121,7 +121,7 @@ public class AvonicInfiniteScrollTests
         using var stage = new Stage();
 
         // 50% of 844 is 422: 1584 - 84 - scrollTop - 422 - 844 < 0 from 234
-        stage.Infinite.Threshold = "50%";
+        stage.Infinite.Threshold = " 50% ";
         stage.ScrollTo(234);
         Assert.Equal(0, stage.Fired);
         stage.ScrollTo(235);
@@ -179,6 +179,20 @@ public class AvonicInfiniteScrollTests
         Assert.Equal(1, stage.Fired);
     }
 
+    [AvaloniaFact]
+    public void B3_One_Scroll_Event_A_Frame_So_A_Handler_That_Completes_At_Once_Fires_Once()
+    {
+        using var stage = new Stage();
+        stage.Infinite.IonInfinite += (_, _) => stage.Infinite.Complete();
+
+        stage.Scroll.Offset = new Vector(0, 600);
+        stage.Scroll.Offset = new Vector(0, 610);
+        stage.Frame();
+        Assert.Equal(1, stage.Fired);
+        stage.ScrollTo(620);
+        Assert.Equal(2, stage.Fired);
+    }
+
     // ── B4: only a scroll checks ─────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -226,6 +240,7 @@ public class AvonicInfiniteScrollTests
 
         // display: none takes its height away
         Assert.False(stage.Infinite.IsVisible);
+        Assert.DoesNotContain(":infinite-scroll-enabled", stage.Infinite.Classes);
         Assert.Equal(1500, stage.Scroll.Extent.Height);
         stage.ScrollTo(656);
         Assert.Equal(0, stage.Fired);
@@ -233,17 +248,22 @@ public class AvonicInfiniteScrollTests
         stage.Infinite.IsEnabled = true;
         Dispatcher.UIThread.RunJobs();
         Assert.True(stage.Infinite.IsVisible);
+        Assert.Contains(":infinite-scroll-enabled", stage.Infinite.Classes);
         stage.ScrollTo(530);
         Assert.Equal(1, stage.Fired);
     }
 
     [AvaloniaFact]
-    public void B6_An_Apps_Own_IsVisible_Wins_Over_Disabled()
+    public void B6_An_Apps_Own_IsVisible_Wins_Over_Disabled_And_It_Still_Does_Not_Listen()
     {
         using var stage = new Stage();
         stage.Infinite.IsEnabled = false;
         stage.Infinite.IsVisible = true;
+        Dispatcher.UIThread.RunJobs();
         Assert.True(stage.Infinite.IsVisible);
+        stage.ScrollTo(530);
+        stage.ScrollTo(740);
+        Assert.Equal(0, stage.Fired);
     }
 
     [AvaloniaFact]
@@ -294,6 +314,19 @@ public class AvonicInfiniteScrollTests
         Assert.Equal(0, stage.Fired);
         stage.ScrollTo(210);
         Assert.Equal(1, stage.Fired);
+    }
+
+    [AvaloniaFact]
+    public void B8_At_The_Top_Its_Scroll_To_The_End_Lays_Out_First()
+    {
+        // Added to a page already shown, with no layout before the frame: the end is the one with it in
+        using var stage = new Stage();
+        stage.Rows.Children.Remove(stage.Infinite);
+        Dispatcher.UIThread.RunJobs();
+        var top = new AvonicInfiniteScroll { Position = InfiniteScrollPosition.Top, Content = new Border { Height = 84 } };
+        stage.Rows.Children.Insert(0, top);
+        stage.Frame();
+        Assert.Equal(740, stage.Scroll.Offset.Y);
     }
 
     [AvaloniaFact]
@@ -505,8 +538,10 @@ public class AvonicInfiniteScrollTests
 
         stage.ScrollTo(530);
         Assert.True(Loading(content).IsVisible);
+        Assert.Contains(":infinite-scroll-loading", stage.Infinite.Classes);
 
         stage.Infinite.Complete();
+        Assert.DoesNotContain(":infinite-scroll-loading", stage.Infinite.Classes);
         Assert.False(Loading(content).IsVisible);
 
         stage.ScrollTo(531);
@@ -524,6 +559,7 @@ public class AvonicInfiniteScrollTests
         Assert.True(Loading(content).IsVisible);
 
         stage.Infinite.Content = null;
+        Assert.False(Loading(content).IsVisible);
         var other = new Border { Child = content };
         stage.Rows.Children.Insert(0, other);
         Dispatcher.UIThread.RunJobs();

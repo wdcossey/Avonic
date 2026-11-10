@@ -46,9 +46,11 @@ public partial class AvonicInfiniteScroll : ContentControl
     private double _thrPx;
     private double _thrPc;
 
-    // didFire keeps ionInfinite from firing again while the scroll stays within the threshold, until complete().
+    // didFire keeps ionInfinite from firing again while the scroll stays within the threshold, until complete(). Ionic's canStart()
+    // also asks for not isLoading and not isBusy, but each is only ever true while didFire is: fire sets both flags, complete()
+    // clears loading first and didFire with busy at the end, and disabling clears loading and busy but not didFire. So didFire
+    // is the whole of it here, and a disabled one isn't listening.
     private bool _didFire;
-    private bool _isBusy;
     private bool _isLoading;
 
     private ScrollViewer? _scrollEl;
@@ -109,7 +111,7 @@ public partial class AvonicInfiniteScroll : ContentControl
             return;
         }
 
-        _isBusy = true;
+        // Ionic's isBusy, until the position is restored, is didFire, which stays true until then.
         // Not a forced layout, unlike the reads after: Ionic's own comment says the UI hasn't updated yet, which is what an app
         // that adds its rows and then calls this sees in a browser, as a framework renders them later. Here they're in the tree
         // already, and not yet laid out, so the last layout's numbers are the ones from before.
@@ -122,7 +124,6 @@ public partial class AvonicInfiniteScroll : ContentControl
             AvonicConfig.RequestFrame(scrollEl, () => AvonicConfig.RequestFrame(scrollEl, () =>
             {
                 scrollEl.SetCurrentValue(ScrollViewer.OffsetProperty, new Vector(scrollEl.Offset.X, newScrollTop));
-                _isBusy = false;
                 _didFire = false;
             }));
         }));
@@ -155,8 +156,8 @@ public partial class AvonicInfiniteScroll : ContentControl
             return;
         }
 
+        // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready.
         _scrollEl = host as ScrollViewer ?? ((AvonicContent)host).GetScrollElement();
-        ThresholdChanged();
         DisabledChanged();
         if (Position == InfiniteScrollPosition.Top && _scrollEl is { } scrollEl)
         {
@@ -216,7 +217,6 @@ public partial class AvonicInfiniteScroll : ContentControl
         if (!IsEnabled)
         {
             SetLoading(false);
-            _isBusy = false;
         }
 
         EnableScrollEvents(IsEnabled);
@@ -248,8 +248,6 @@ public partial class AvonicInfiniteScroll : ContentControl
         PseudoClasses.Set(LoadingClass, loading);
         LoadingChanged?.Invoke(this, EventArgs.Empty);
     }
-
-    private bool CanStart() => IsEnabled && !_isBusy && _scrollEl is not null && !_isLoading;
 
     private void EnableScrollEvents(bool shouldListen)
     {
@@ -289,7 +287,7 @@ public partial class AvonicInfiniteScroll : ContentControl
     private void OnScroll()
     {
         var scrollEl = _scrollEl;
-        if (scrollEl is null || !CanStart())
+        if (scrollEl is null || _didFire)
         {
             return;
         }
@@ -311,7 +309,7 @@ public partial class AvonicInfiniteScroll : ContentControl
             ? scrollHeight - infiniteHeight - scrollTop - threshold - height
             : scrollTop - infiniteHeight - threshold;
 
-        if (distanceFromInfinite < 0 && !_didFire)
+        if (distanceFromInfinite < 0)
         {
             SetLoading(true);
             _didFire = true;
