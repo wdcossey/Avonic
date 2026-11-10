@@ -606,6 +606,7 @@ public class AvonicInput : TemplatedControl, IItemControl
             _native.GotFocus -= OnNativeGotFocus;
             _native.LostFocus -= OnNativeLostFocus;
             _native.RemoveHandler(KeyDownEvent, OnNativeKeyDown);
+            _native.RemoveHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
         }
 
         _native = e.NameScope.Find<TextBox>("PART_NativeInput");
@@ -636,6 +637,10 @@ public class AvonicInput : TemplatedControl, IItemControl
             // A soft keyboard can type with no key down, where Chromium's keydown says "Unidentified": that clears too.
             _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
             _native.PastingFromClipboard += OnNativePasting;
+
+            // Avalonia's text presenter brings its caret into view whenever the caret moves, focused or not, and the caret
+            // moves to the end of an assigned value. Chromium never scrolls to an input that isn't focused.
+            _native.AddHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
             UpdateNative();
             SyncNativeText();
         }
@@ -887,6 +892,15 @@ public class AvonicInput : TemplatedControl, IItemControl
             // Assigned during the user's edit, which the text box finishes by placing its caret after what was typed.
             // Chromium leaves the caret at the end of an assigned value.
             Dispatcher.UIThread.Post(() => native.CaretIndex = native.Text?.Length ?? 0, DispatcherPriority.Send);
+        }
+    }
+
+    /// <summary>Keeps a value assigned to an input that isn't focused from scrolling the page to it.</summary>
+    private void OnNativeRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
+    {
+        if (_native is { IsKeyboardFocusWithin: false })
+        {
+            e.Handled = true;
         }
     }
 

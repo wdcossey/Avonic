@@ -109,7 +109,8 @@ Each is in `Tokens/Input.axaml`. `CssUnset` ones fall back as Ionic's do; the fi
 Each has a test in `AvonicInputTests`, named after its number in [PLAN.md](PLAN.md#behaviours).
 
 - Typing raises `IonInput` with each value; Enter, and leaving the field after an edit, raise `IonChange` once.
-- A value set in code raises nothing; an `IonInput` handler can replace what was typed (masking, trimming).
+- A value set in code raises nothing; an `IonInput` handler can replace what was typed (masking, trimming). It leaves the caret at
+  the end, as Chromium does, and doesn't scroll the page to an input that isn't focused.
 - `Debounce` raises one `IonInput`, with the last value, after the wait.
 - `ClearOnEdit` (on for passwords) clears on the first key that edits, once per focus.
 - The clear button shows with a value, clears, raises `IonInput` with `""`, and leaves the field focused.

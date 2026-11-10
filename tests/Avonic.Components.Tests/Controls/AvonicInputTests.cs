@@ -1521,6 +1521,60 @@ public class AvonicInputTests
         Assert.Equal("a", Native(input).Text);
     }
 
+    // A value puts the caret at its end, and Avalonia's text presenter brings its caret into view whenever it moves. Chromium
+    // never scrolls to an input that isn't focused. The base theme gives the ScrollViewer and the TextBox their templates.
+    [AvaloniaFact]
+    public void R12_A_Value_On_An_Input_That_Isnt_Focused_Doesnt_Scroll_The_Page() => WithScroller(input => input.Value = "x", (viewer, input) =>
+    {
+        Assert.Equal(0, viewer.Offset.Y);
+
+        input.Value = "changed";
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, viewer.Offset.Y);
+    });
+
+    [AvaloniaFact]
+    public void R12_A_Focused_Input_Still_Brings_Its_Caret_Into_View() => WithScroller(_ => { }, (viewer, input) =>
+    {
+        Native(input).Focus();
+        Dispatcher.UIThread.RunJobs();
+        viewer.Offset = default;
+        Dispatcher.UIThread.RunJobs();
+
+        input.Value = "typed";
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(viewer.Offset.Y > 0, $"offset {viewer.Offset.Y}");
+    });
+
+    /// <summary>An input below the fold of a 300-high ScrollViewer, over the base theme.</summary>
+    private static void WithScroller(Action<AvonicInput> before, Action<ScrollViewer, AvonicInput> test)
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var input = new AvonicInput { Label = "Below" };
+                before(input);
+                var viewer = new ScrollViewer
+                {
+                    Height = 300,
+                    Content = new StackPanel { Children = { new Border { Height = 400 }, input, new Border { Height = 50 } } },
+                };
+                using var scene = new Scene(new StackPanel { Children = { viewer, new Button() } });
+                Dispatcher.UIThread.RunJobs();
+                Assert.True(viewer.Extent.Height > 300);
+                test(viewer, input);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
     // ── 28: RTL ──────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
