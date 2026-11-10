@@ -1,0 +1,204 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The native input's scroller: only a presenter, so that a long value scrolls to the caret with no base theme. -->
+    <ControlTheme x:Key="Avonic.Input.NativeScroller" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The native <input>: no border, padding or background, the placeholder under the text. Functional, so that a test
+         with no base theme can type into it. The look of the text and the placeholder is the theme's. -->
+    <ControlTheme x:Key="Avonic.Input.NativeInput" TargetType="TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  Theme="{StaticResource Avonic.Input.NativeScroller}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                        <Panel VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <TextBlock Name="PART_Placeholder"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       Foreground="{TemplateBinding PlaceholderForeground}"
+                                       TextWrapping="NoWrap"
+                                       IsHitTestVisible="False"
+                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretIndex="{TemplateBinding CaretIndex}"
+                                           SelectionStart="{TemplateBinding SelectionStart}"
+                                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           PasswordChar="{TemplateBinding PasswordChar}"
+                                           RevealPassword="{TemplateBinding RevealPassword}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           CaretBrush="{TemplateBinding CaretBrush}" />
+                        </Panel>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-input: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInput}" TargetType="c:AvonicInput">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="*,Auto">
+                    <!-- .input-outline-container: across the wrapper's padding box, behind it -->
+                    <Grid Name="PART_OutlineContainer" ColumnDefinitions="Auto,Auto,*" IsVisible="False" IsHitTestVisible="False">
+                        <Border Name="PART_OutlineStart" />
+                        <Border Name="PART_OutlineNotch" Grid.Column="1">
+                            <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0">
+                                <TextBlock.Width>
+                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                        <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="#PART_LabelContent.Bounds.Width" />
+                                    </MultiBinding>
+                                </TextBlock.Width>
+                            </TextBlock>
+                        </Border>
+                        <Border Name="PART_OutlineEnd" Grid.Column="2" />
+                    </Grid>
+                    <!-- .input-wrapper, the <label for>: a transparent background, so a click anywhere in it is the label's -->
+                    <Border Name="PART_Wrapper" Background="Transparent">
+                        <Panel>
+                            <c:InputWrapperPanel Name="PART_Layout" LabelPlacement="{TemplateBinding LabelPlacement}">
+                                <Border Name="PART_Label" IsHitTestVisible="False">
+                                    <Panel VerticalAlignment="Center">
+                                        <TextBlock Name="PART_LabelText"
+                                                   Text="{TemplateBinding Label}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="NoWrap"
+                                                   IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <ContentPresenter Name="PART_LabelContent"
+                                                          Content="{TemplateBinding LabelContent}"
+                                                          ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                          IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                    </Panel>
+                                </Border>
+                                <!-- .native-wrapper, in DOM order, which is the tab order: start, input, clear, end -->
+                                <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <ContentPresenter Name="PART_Start"
+                                                      VerticalAlignment="Center"
+                                                      Content="{TemplateBinding StartContent}"
+                                                      ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                                    <TextBox Name="PART_NativeInput" Grid.Column="1"
+                                             Theme="{StaticResource Avonic.Input.NativeInput}" />
+                                    <Border Name="PART_ClearButton" Grid.Column="2"
+                                            Background="Transparent"
+                                            AutomationProperties.Name="reset"
+                                            AutomationProperties.ControlTypeOverride="Button">
+                                        <c:AvonicIcon Name="PART_ClearIcon"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      AutomationProperties.AccessibilityView="Raw"
+                                                      Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=close-sharp}" />
+                                    </Border>
+                                    <ContentPresenter Name="PART_End" Grid.Column="3"
+                                                      VerticalAlignment="Center"
+                                                      Content="{TemplateBinding EndContent}"
+                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                                </Grid>
+                            </c:InputWrapperPanel>
+                        </Panel>
+                    </Border>
+                    <!-- .input-highlight: across the wrapper's padding box, at its bottom -->
+                    <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
+                    <!-- .input-bottom: helper or error text, and the counter at the end -->
+                    <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" />
+                            <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" />
+                            <TextBlock Name="PART_Counter" Grid.Column="1" Text="{TemplateBinding CounterText}" TextWrapping="NoWrap"
+                                       IsVisible="{Binding CounterText, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .label-text-wrapper-hidden, .input-outline-notch-hidden: display: none -->
+        <Style Selector="^:label-text-wrapper-hidden /template/ Border#PART_Label, ^:label-text-wrapper-hidden /template/ Border#PART_OutlineNotch">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <!-- renderLabelContainer: the outline's parts, with fill="outline" -->
+        <Style Selector="^:fill-outline /template/ Grid#PART_OutlineContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- shouldRenderHighlight: not with the outline, and not in an item -->
+        <Style Selector="^:not(:fill-outline):not(:in-item) /template/ Border#PART_Highlight">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- The clear button: rendered with clearInput, unless read-only or disabled; visibility: hidden with no value -->
+        <Style Selector="^ /template/ Border#PART_ClearButton">
+            <Setter Property="IsVisible" Value="{Binding ClearInput, RelativeSource={RelativeSource TemplatedParent}}" />
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+        <Style Selector="^:has-value /template/ Border#PART_ClearButton">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="IsHitTestVisible" Value="True" />
+            <Setter Property="Focusable" Value="True" />
+        </Style>
+        <Style Selector="^:readonly /template/ Border#PART_ClearButton, ^:input-disabled /template/ Border#PART_ClearButton">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:has-bottom /template/ Border#PART_Bottom">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- :host(.ion-touched.ion-invalid): the error text replaces the helper text -->
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-input-password-toggle: a round clear button with the icon. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInputPasswordToggle}" TargetType="c:AvonicInputPasswordToggle">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:AvonicButton Name="PART_Button"
+                                Fill="Clear"
+                                Shape="Round"
+                                Size="Default"
+                                Color="{TemplateBinding Color}"
+                                AutomationProperties.Name="{TemplateBinding ButtonLabel}">
+                    <c:AvonicButton.IconOnlyContent>
+                        <c:AvonicIcon Name="PART_Icon"
+                                      Icon="{Binding Icon, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicInputPasswordToggle}}"
+                                      AutomationProperties.AccessibilityView="Raw" />
+                    </c:AvonicButton.IconOnlyContent>
+                </c:AvonicButton>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host([disabled]) ::slotted(ion-input-password-toggle), and readonly: visibility: hidden -->
+        <Style Selector="^:input-hidden">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:input-hidden /template/ c|AvonicButton#PART_Button">
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
