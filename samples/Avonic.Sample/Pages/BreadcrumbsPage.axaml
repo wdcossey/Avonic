@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.BreadcrumbsPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicListHeader Content="Links" />
+            <c:AvonicBreadcrumbs Name="Trail" />
+            <TextBlock Name="Showing" Margin="16,4" />
+
+            <c:AvonicListHeader Content="Collapsed" />
+            <c:AvonicBreadcrumbs Name="Collapsed" MaxItems="4" IonCollapsedClick="OnCollapsedClick">
+                <c:AvonicBreadcrumb Href="#home" Content="Home" />
+                <c:AvonicBreadcrumb Href="#electronics" Content="Electronics" />
+                <c:AvonicBreadcrumb Href="#photography" Content="Photography" />
+                <c:AvonicBreadcrumb Href="#cameras" Content="Cameras" />
+                <c:AvonicBreadcrumb Href="#film" Content="Film" />
+                <c:AvonicBreadcrumb Content="35 mm" />
+            </c:AvonicBreadcrumbs>
+            <!-- An app would open an ion-popover listing them, which Avonic doesn't have yet. -->
+            <TextBlock Name="Hidden" Margin="16,4" TextWrapping="Wrap" />
+
+            <c:AvonicListHeader Content="Icons and separators" />
+            <c:AvonicBreadcrumbs>
+                <c:AvonicBreadcrumb Content="Home">
+                    <c:AvonicBreadcrumb.StartContent>
+                        <c:AvonicIcon IconName="home" />
+                    </c:AvonicBreadcrumb.StartContent>
+                </c:AvonicBreadcrumb>
+                <c:AvonicBreadcrumb Content="Files">
+                    <c:AvonicBreadcrumb.EndContent>
+                        <c:AvonicIcon IconName="folder" />
+                    </c:AvonicBreadcrumb.EndContent>
+                </c:AvonicBreadcrumb>
+                <c:AvonicBreadcrumb Content="Report" />
+            </c:AvonicBreadcrumbs>
+            <c:AvonicBreadcrumbs>
+                <c:AvonicBreadcrumb Content="Custom">
+                    <c:AvonicBreadcrumb.SeparatorContent>
+                        <c:AvonicIcon IconName="arrow-forward" />
+                    </c:AvonicBreadcrumb.SeparatorContent>
+                </c:AvonicBreadcrumb>
+                <c:AvonicBreadcrumb Content="Separators">
+                    <c:AvonicBreadcrumb.SeparatorContent>
+                        <c:AvonicIcon IconName="arrow-forward" />
+                    </c:AvonicBreadcrumb.SeparatorContent>
+                </c:AvonicBreadcrumb>
+                <c:AvonicBreadcrumb Content="End" />
+            </c:AvonicBreadcrumbs>
+
+            <c:AvonicListHeader Content="Colours and states" />
+            <c:AvonicBreadcrumbs Color="primary">
+                <c:AvonicBreadcrumb Href="#home" Content="Home" />
+                <c:AvonicBreadcrumb Href="#electronics" Content="Electronics" />
+                <c:AvonicBreadcrumb Content="Primary" />
+            </c:AvonicBreadcrumbs>
+            <c:AvonicBreadcrumbs>
+                <c:AvonicBreadcrumb Href="#danger" Color="danger" Content="Danger" />
+                <c:AvonicBreadcrumb Href="#disabled" IsEnabled="False" Content="Disabled" />
+                <c:AvonicBreadcrumb Active="True" Content="Active" />
+                <c:AvonicBreadcrumb Content="Last" />
+            </c:AvonicBreadcrumbs>
+
+            <c:AvonicListHeader Content="In a toolbar" />
+            <c:AvonicToolbar>
+                <c:AvonicBreadcrumbs>
+                    <c:AvonicBreadcrumb Href="#home" Content="Home" />
+                    <c:AvonicBreadcrumb Content="In a toolbar" />
+                </c:AvonicBreadcrumbs>
+            </c:AvonicToolbar>
+            <c:AvonicToolbar Color="primary">
+                <c:AvonicBreadcrumbs MaxItems="2">
+                    <c:AvonicBreadcrumb Href="#home" Content="Home" />
+                    <c:AvonicBreadcrumb Href="#hidden" Content="Hidden" />
+                    <c:AvonicBreadcrumb Content="Primary toolbar" />
+                </c:AvonicBreadcrumbs>
+            </c:AvonicToolbar>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

@@ -14,10 +14,14 @@ public partial class App : Application
         {
             desktop.MainWindow = new MainWindow();
         }
+        else if (ApplicationLifetime is IActivityApplicationLifetime activity)
+        {
+            // Android: a shell for each activity, as Avalonia recommends. AvonicOverlay.Present() finds the current activity's
+            // TopLevel without a MainView (#114). See docs/infra/android/PLAN.md.
+            activity.MainViewFactory = () => new SampleShell();
+        }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
         {
-            // MainView, not Android's MainViewFactory, so that AvonicOverlay.Present() finds its TopLevel through the single-view
-            // lifetime, which is the branch to try on a phone. See docs/infra/android/PLAN.md.
             singleView.MainView = new SampleShell();
         }
 

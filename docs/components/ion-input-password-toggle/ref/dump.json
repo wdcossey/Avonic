@@ -1,0 +1,158 @@
+{
+  "tag": "ion-input-password-toggle",
+  "snippet": "<ion-app style=\"position:static;display:block;contain:none;overflow:visible\"><ion-list><ion-item><ion-input label=\"Password\" type=\"password\" value=\"secret\"><ion-input-password-toggle slot=\"end\"></ion-input-password-toggle></ion-input></ion-item><ion-item><ion-input label=\"Shown\" type=\"text\" value=\"secret\"><ion-input-password-toggle slot=\"end\"></ion-input-password-toggle></ion-input></ion-item><ion-item><ion-input label=\"Danger\" type=\"password\" value=\"secret\"><ion-input-password-toggle slot=\"end\" color=\"danger\"></ion-input-password-toggle></ion-input></ion-item></ion-list></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "slot": "end",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 329.97,
+        "y": 8,
+        "w": 44.03,
+        "h": 48.03
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "44.0312px",
+        "height": "48.0312px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px 0px 0px 16px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "default"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <ion-button.md.button.button-round.button-clear.button-has-icon-only.ion-activatable.ion-focusable.hydrated>\n      #shadow-root\n        <button.button-native part=\"native\">\n          <span.button-inner>\n            <slot name=\"icon-only\">\n            <slot name=\"start\">\n            <slot name=\"\">\n            <slot name=\"end\">\n          <ion-ripple-effect.md.hydrated>\n            #shadow-root\n      <ion-icon.md.hydrated slot=\"icon-only\">\n        #shadow-root\n          <div.icon-inner>\n            <svg>\n              <circle>\n              <path>\n"
+    },
+    {
+      "attributes": {
+        "slot": "end",
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 329.97,
+        "y": 57.03,
+        "w": 44.03,
+        "h": 48.03
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "44.0312px",
+        "height": "48.0312px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px 0px 0px 16px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "default"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <ion-button.md.button.button-round.button-clear.button-has-icon-only.ion-activatable.ion-focusable.hydrated>\n      #shadow-root\n        <button.button-native part=\"native\">\n          <span.button-inner>\n            <slot name=\"icon-only\">\n            <slot name=\"start\">\n            <slot name=\"\">\n            <slot name=\"end\">\n          <ion-ripple-effect.md.hydrated>\n            #shadow-root\n      <ion-icon.md.hydrated slot=\"icon-only\">\n        #shadow-root\n          <div.icon-inner>\n            <svg>\n              <path>\n              <path>\n"
+    },
+    {
+      "attributes": {
+        "slot": "end",
+        "color": "danger",
+        "class": "ion-color ion-color-danger md hydrated"
+      },
+      "classes": [
+        "ion-color",
+        "ion-color-danger",
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 329.97,
+        "y": 106.06,
+        "w": 44.03,
+        "h": 48.03
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "44.0312px",
+        "height": "48.0312px",
+        "min-height": "auto",
+        "min-width": "auto",
+        "padding": "0px",
+        "margin": "0px 0px 0px 16px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "default"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <ion-button.ion-color.ion-color-danger.md.button.button-round.button-clear.button-has-icon-only.ion-activatable.ion-focusable.hydrated>\n      #shadow-root\n        <button.button-native part=\"native\">\n          <span.button-inner>\n            <slot name=\"icon-only\">\n            <slot name=\"start\">\n            <slot name=\"\">\n            <slot name=\"end\">\n          <ion-ripple-effect.md.hydrated>\n            #shadow-root\n      <ion-icon.md.hydrated slot=\"icon-only\">\n        #shadow-root\n          <div.icon-inner>\n            <svg>\n              <circle>\n              <path>\n"
+    }
+  ]
+}

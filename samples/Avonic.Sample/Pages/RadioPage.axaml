@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.RadioPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicList>
+                <c:AvonicRadioGroup Name="Fruit" Value="banana" HelperText="Pick one" IonChange="OnFruitChange">
+                    <c:AvonicListHeader>
+                        <c:AvonicLabel Content="Fruit" />
+                    </c:AvonicListHeader>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="apple" Content="Apple" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="banana" Content="Banana" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="cherry" Content="Cherry (disabled)" IsEnabled="False" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="date" Content="Date" Color="danger" />
+                    </c:AvonicItem>
+                </c:AvonicRadioGroup>
+            </c:AvonicList>
+            <TextBlock Name="FruitChoice" Margin="16,0" Text="ionChange: none yet" />
+
+            <c:AvonicList>
+                <c:AvonicRadioGroup AllowEmptySelection="True" HelperText="Allow empty selection: tap the checked one to clear it">
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="1" Content="Label at the end" LabelPlacement="End" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="2" Content="A fixed label that is far too long" LabelPlacement="Fixed" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="3" Content="Stacked" LabelPlacement="Stacked" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="4" Content="Stacked, at the start" LabelPlacement="Stacked" Alignment="Start" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="5" Content="Justify start" Justify="Start" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="6" Content="Justify end" Justify="End" />
+                    </c:AvonicItem>
+                </c:AvonicRadioGroup>
+            </c:AvonicList>
+
+            <c:AvonicList>
+                <c:AvonicRadioGroup Name="Validated" HelperText="Choose a size" ErrorText="A size is required">
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="s" Content="Small" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="l" Content="Large" />
+                    </c:AvonicItem>
+                </c:AvonicRadioGroup>
+            </c:AvonicList>
+            <c:AvonicButton Margin="16,0" Content="Validate" Click="OnValidate" />
+
+            <c:AvonicRadioGroup Value="b" Margin="16">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <c:AvonicRadio Value="a" VerticalAlignment="Center" />
+                    <c:AvonicRadio Value="b" VerticalAlignment="Center" />
+                    <c:AvonicRadio Value="c" Color="success" VerticalAlignment="Center" />
+                    <c:AvonicRadio Value="d" Content="Alone in a row" VerticalAlignment="Center" />
+                </StackPanel>
+            </c:AvonicRadioGroup>
+
+            <c:AvonicList FlowDirection="RightToLeft">
+                <c:AvonicRadioGroup Value="r">
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="r" Content="Right to left" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="s" Content="Right to left, at the end" LabelPlacement="End" />
+                    </c:AvonicItem>
+                </c:AvonicRadioGroup>
+            </c:AvonicList>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
