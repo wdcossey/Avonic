@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-toggle: structure only. The look is in Avonic.Themes. The transparent panel is what makes the
+         whole box take input, as Ionic's host does. The handle is the track's child, as the gesture counts presses on anything
+         inside the track. -->
+    <ControlTheme x:Key="{x:Type c:AvonicToggle}" TargetType="c:AvonicToggle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:TogglePanel Name="PART_Wrapper"
+                               Background="{TemplateBinding Background}"
+                               LabelPlacement="{TemplateBinding LabelPlacement}"
+                               Justify="{TemplateBinding Justify}"
+                               Alignment="{TemplateBinding Alignment}">
+                    <StackPanel Name="PART_Label" ClipToBounds="True">
+                        <ContentPresenter Name="PART_LabelContent"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          TextWrapping="NoWrap"
+                                          TextTrimming="CharacterEllipsis" />
+                        <StackPanel Name="PART_Bottom">
+                            <TextBlock Name="PART_HelperText" Classes="supporting-text" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" />
+                            <TextBlock Name="PART_ErrorText" Classes="supporting-text" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Panel Name="PART_NativeWrapper" VerticalAlignment="Center">
+                        <Border Name="PART_Track" Width="36" Height="14" Background="Transparent">
+                            <Panel Name="PART_IconWrapper">
+                                <Border Name="PART_Handle" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </c:TogglePanel>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:label-text-wrapper-hidden /template/ StackPanel#PART_Label">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:checked /template/ Panel#PART_IconWrapper">
+            <Setter Property="RenderTransform" Value="translateX(16px)" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

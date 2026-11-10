@@ -18,7 +18,7 @@ The device page, headless on desktop, where there are no insets.
 | `samples/Avonic.Sample.Desktop` | `Program.cs`: the desktop app. `tools/real-window` runs this one |
 | `samples/Avonic.Sample.Android` | `MainActivity` and `SampleApplication`: the Android app. Not in `Avonic.sln` |
 
-On Android, `App` gives the single-view lifetime a `SampleShell` as its `MainView`. The package id is `io.github.wdcossey.avonic.sample`,
+On Android, `App` gives the activity lifetime a `MainViewFactory` that makes a `SampleShell`, as Avalonia recommends. The package id is `io.github.wdcossey.avonic.sample`,
 the app is called Avonic, and it has no icon of its own, so Android shows its default. Minimum Android 7 (API 24), target API 36.
 
 ## Build
@@ -62,8 +62,8 @@ adb logcat --pid=$(adb shell pidof -s io.github.wdcossey.avonic.sample)
 ```
 
 `Console.WriteLine` goes to logcat under the tag `DOTNET`, a crash under `AndroidRuntime`, and .NET's runtime under `monodroid`, so
-`adb logcat -s DOTNET AndroidRuntime monodroid` also works before it starts. Avalonia warns once, at start, that a `MainView` "is not fully
-supported on Android": that's expected (PLAN.md, section 2). The benchmark's row is the line starting `AvonicBenchmark`.
+`adb logcat -s DOTNET AndroidRuntime monodroid` also works before it starts. Avalonia's warning that a `MainView` "is not fully supported on
+Android" no longer comes, since the sample uses `MainViewFactory`. The benchmark's row is the line starting `AvonicBenchmark`.
 
 ## On the device
 
@@ -94,8 +94,8 @@ the PC: `adb exec-out screencap -p > shot.png`. A recording: `adb shell screenre
 5. **Back.** On any page, Android's back (the gesture or the button) should go to the list, and on the list leave the app. On `overlays`,
    present one, and back should dismiss it and stay on the page; present "the backdrop can't dismiss", and back should go to the list with the
    overlay still up, as in Ionic, where the router goes back when no overlay takes it. Record each.
-6. **An overlay in a single view.** On `overlays`, **Present one through the app**, which calls `Present()` with no `TopLevel`, so that the
-   single-view lifetime's `MainView` finds it. It should present like the others, and the status should say "Overlay N presented". If it says
+6. **An overlay in a single view.** On `overlays`, **Present one through the app**, which calls `Present()` with no `TopLevel`, so that
+   Avonic finds the current activity's under `MainViewFactory` ([#114](https://github.com/wdcossey/Avonic/issues/114)). It should present like the others, and the status should say "Overlay N presented". If it says
    "wasn't presented", record the message.
 7. **The benchmark.** Install the Release build, open the device page, and tap **Run the style benchmark**. It takes several minutes, and
    the page flickers while the theme's templates come off and on: leave the phone alone, screen on. Copy the row from the page, or from the log line
@@ -112,11 +112,14 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 ## Known gaps
 
 - **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed; see [COMPARISON.md](COMPARISON.md).
-- **`AvonicOverlay.Present()` with no `TopLevel` throws on Android with Avalonia's recommended `MainViewFactory`,** as
-  `OverlayHost.TopLevelOf` reads `ISingleViewApplicationLifetime.MainView`, which the factory leaves null. The sample sets `MainView`
-  instead, so that the single-view branch is tried. An app that follows Avalonia's docs has to call `Present(TopLevel)`. To fix in
-  [#114](https://github.com/wdcossey/Avonic/issues/114).
+- **`AvonicOverlay.Present()` under Avalonia's recommended `MainViewFactory`,** which leaves `MainView` null, takes the last top
+  level to come that's still open, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114),
+  [overlays](../overlays/README.md)). Tested headlessly, not tried on a device: the sample uses the factory since #114, and check 6
+  hasn't been run with it. The Pixel 8 run passed it through `MainView`.
 - **CI's `android` job** builds the APK; its first run was this PR's.
-- **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation, resizing, display
-  size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then the safe-area switch also keeps
-  following the old activity's insets until it's turned off and on.
+- **A recreated activity** gets a new `SampleShell` from the factory, at the page list. The activity handles rotation, resizing, display
+  size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then
+  Ionic's safe area, if it was on, is applied twice: `SafeAreaMode`'s state is static, so the keys stay filled from the old activity's
+  insets, and the switch shows on, but the new shell's root is padded by Avalonia again, so the content sits an inset lower. Turning the
+  switch off and on puts it right. It also keeps the old activity's `IInsetsManager` until then. Reasoned from the code, not tried on a
+  device.

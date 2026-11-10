@@ -1,0 +1,42 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- What ion-accordion's CSS does to the header's item, which a ControlTheme can't reach. -->
+
+    <!-- :host(.accordion-expanding|expanded) ::slotted(ion-item[slot=header]) { border-width: 0px } -->
+    <Style Selector="c|AvonicAccordion:expanded /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Native">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- core.css: ion-accordion-group > ion-accordion:last-of-type ion-item[slot=header] { border-width: 0px }. :last-in-group is that last-of-type -->
+    <Style Selector="c|AvonicAccordion:last-in-group /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Native">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- core.css: ion-accordion-group.accordion-group-expand-inset.md > ion-accordion.accordion-previous ion-item[slot=header]
+         { border-width: 0px; inner-border-width: 0px } -->
+    <Style Selector="c|AvonicAccordion:accordion-group-expand-inset:accordion-previous /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Native">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="c|AvonicAccordion:accordion-group-expand-inset:accordion-previous /template/ ContentPresenter#PART_Header > c|AvonicItem /template/ Border#PART_Inner">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- Ionic's item in a disabled accordion isn't disabled itself: only the header's 0.4 dims it. Here IsEnabled reaches the item,
+         whose own 0.3 would dim it again, so an item that isn't disabled itself keeps its opacity. -->
+    <Style Selector="c|AvonicAccordion:disabled /template/ ContentPresenter#PART_Header > c|AvonicItem[IsEnabled=True]">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <!-- core.css: ion-accordion.accordion-animated > [slot=header] .ion-accordion-toggle-icon { transition: 300ms transform ... } -->
+    <Style Selector="c|AvonicAccordion:accordion-animated /template/ ContentPresenter#PART_Header c|AvonicIcon.ion-accordion-toggle-icon">
+        <Setter Property="Transitions" Value="{DynamicResource Avonic.Accordion.Md.ToggleIconTransition}" />
+    </Style>
+
+    <!-- core.css: ion-accordion.accordion-expanding|expanded > [slot=header] .ion-accordion-toggle-icon { transform: rotate(180deg) } -->
+    <Style Selector="c|AvonicAccordion:expanded /template/ ContentPresenter#PART_Header c|AvonicIcon.ion-accordion-toggle-icon">
+        <Setter Property="RenderTransform" Value="rotate(180deg)" />
+    </Style>
+
+</Styles>

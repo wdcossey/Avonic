@@ -1,0 +1,27 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- input.md.css's ::slotted rules. A slotted control's logical parent is the presenter, so '>' means direct children
+         only, as ::slotted does. A slot holds one child, so its :last-of-type and :first-of-type always hold.
+
+         The rule for any child sets the whole Margin, where CSS sets one side, so a button's own 4 px above and below are
+         kept in a rule of its own, after it. No activators, so an app's plain style beats them. -->
+
+    <!-- ::slotted([slot=start]:last-of-type): margin-inline-end 16px, margin-inline-start 0 -->
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_Start > :is(Control)">
+        <Setter Property="Margin" Value="0,0,16,0" />
+    </Style>
+    <!-- ::slotted([slot=end]:first-of-type): margin-inline-start 16px, margin-inline-end 0 -->
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+    <!-- An ion-button and an ion-chip keep their own 4px above and below: measured 4px 0px 4px 16px for a button at the end. -->
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicChip">
+        <Setter Property="Margin" Value="0,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicChip">
+        <Setter Property="Margin" Value="16,4,0,4" />
+    </Style>
+
+</Styles>
