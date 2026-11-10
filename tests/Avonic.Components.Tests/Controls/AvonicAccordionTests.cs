@@ -717,6 +717,23 @@ public class AvonicAccordionTests
         Assert.True(double.IsPositiveInfinity(Content(b).MaxHeight));
     }
 
+    /// <summary>Measured: a collapse 112 ms into an expand eases to 0 from where the expand had got to a frame on.</summary>
+    [AvaloniaFact]
+    public void B14_A_Collapse_During_An_Expand_Starts_From_The_Height_It_Had_Reached()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        using var scene = Show(Group("a", a, b));
+        using var clock = new TestClock();
+
+        Tap(scene, b);
+        clock.At(32 + 96);
+        Tap(scene, b);
+
+        // The tick that was due at 144 doesn't come; the collapse's first frame reads where the expand had got to by then.
+        clock.At(32 + 112);
+        Assert.Equal(ContentHeight * Ease.Ease(112 / 300.0), Content(b).MaxHeight, 6);
+    }
+
     [AvaloniaFact]
     public void B14_Collapsing_Reads_The_Height_Then_Eases_To_Zero_And_Hides()
     {
