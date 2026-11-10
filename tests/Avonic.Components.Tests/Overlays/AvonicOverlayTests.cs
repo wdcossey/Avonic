@@ -22,7 +22,7 @@ namespace Avonic.Components.Tests.Overlays;
 /// </summary>
 public class AvonicOverlayTests
 {
-    private const double Finished = 176;
+    internal const double Finished = 176;
 
     /// <summary>A page with things to focus, in a window with <c>SimpleTheme</c>, whose template has the overlay layer.</summary>
     internal sealed class Stage : IDisposable
@@ -969,7 +969,7 @@ public class AvonicOverlayTests
     /// Avalonia's own desktop lifetime, which is internal in 12, as its interfaces can't be implemented outside it. Made by
     /// reflection, so that the test goes through the real one.
     /// </summary>
-    private static IClassicDesktopStyleApplicationLifetime DesktopLifetime() =>
+    internal static IClassicDesktopStyleApplicationLifetime DesktopLifetime() =>
         (IClassicDesktopStyleApplicationLifetime)Activator.CreateInstance(
             typeof(Window).Assembly.GetType("Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime", throwOnError: true)!,
             nonPublic: true)!;
