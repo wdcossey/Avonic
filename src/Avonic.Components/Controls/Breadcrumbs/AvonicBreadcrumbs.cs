@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -56,6 +57,9 @@ public class AvonicBreadcrumbs : ItemsControl
     /// <summary>Loaded: <c>slotchange</c> and the watchers only come once the component has loaded, which here is attached.</summary>
     private bool _loaded;
 
+    private bool _slotChangePending;
+    private bool _itemsChanged;
+
     static AvonicBreadcrumbs()
     {
         // overflow: visible, so that a focused breadcrumb's shadow isn't cut off at the row's edge. A TemplatedControl clips by default.
@@ -68,7 +72,7 @@ public class AvonicBreadcrumbs : ItemsControl
     public AvonicBreadcrumbs()
     {
         // slotchange.
-        Items.CollectionChanged += (_, _) => BreadcrumbsChanged();
+        Items.CollectionChanged += (_, _) => SlotChanged(itemsChanged: true);
     }
 
     public string? Color
@@ -102,24 +106,30 @@ public class AvonicBreadcrumbs : ItemsControl
     }
 
     /// <summary>
-    /// <c>slotChanged</c>: the children changed, or a breadcrumb inside was attached or detached, as one made from an
-    /// <see cref="ItemsControl.ItemTemplate"/> is after its item.
+    /// <c>slotchange</c>: the children changed, or a breadcrumb inside was attached or detached, as one made from an
+    /// <see cref="ItemsControl.ItemTemplate"/> is after its item. A browser fires it once, after the task that made the changes, so
+    /// several changes at once are looked at together, which matters to the active one: see <c>B3</c> in the tests.
     /// </summary>
-    internal void BreadcrumbsChanged()
+    internal void SlotChanged(bool itemsChanged = false)
     {
-        if (_loaded)
+        _itemsChanged |= itemsChanged;
+        if (_loaded && !_slotChangePending)
         {
-            ResetActiveBreadcrumb();
-            BreadcrumbsInit();
+            _slotChangePending = true;
+            Dispatcher.UIThread.Post(OnSlotChange);
         }
     }
 
-    /// <summary>A breadcrumb inside was attached or detached: <c>slotchange</c>, if that changed which breadcrumbs there are.</summary>
-    internal void BreadcrumbAttachedOrDetached()
+    /// <summary><c>slotChanged</c>. A breadcrumb attached or detached with nothing changed, as when the panel is made, is no slotchange.</summary>
+    private void OnSlotChange()
     {
-        if (_loaded && !GetBreadcrumbs().SequenceEqual(_breadcrumbs))
+        _slotChangePending = false;
+        var itemsChanged = _itemsChanged;
+        _itemsChanged = false;
+        if (_loaded && (itemsChanged || !GetBreadcrumbs().SequenceEqual(_breadcrumbs)))
         {
-            BreadcrumbsChanged();
+            ResetActiveBreadcrumb();
+            BreadcrumbsInit();
         }
     }
 
@@ -128,9 +138,11 @@ public class AvonicBreadcrumbs : ItemsControl
         base.OnPropertyChanged(change);
 
         // @Watch('maxItems'), @Watch('itemsBeforeCollapse'), @Watch('itemsAfterCollapse').
-        if (change.Property == MaxItemsProperty || change.Property == ItemsBeforeCollapseProperty || change.Property == ItemsAfterCollapseProperty)
+        if (_loaded && (change.Property == MaxItemsProperty || change.Property == ItemsBeforeCollapseProperty
+                || change.Property == ItemsAfterCollapseProperty))
         {
-            BreadcrumbsChanged();
+            ResetActiveBreadcrumb();
+            BreadcrumbsInit();
         }
     }
 

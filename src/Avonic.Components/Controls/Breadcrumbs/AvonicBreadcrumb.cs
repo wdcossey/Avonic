@@ -350,7 +350,7 @@ public class AvonicBreadcrumb : TemplatedControl
         base.OnAttachedToVisualTree(e);
         Update();
         _breadcrumbs = this.FindAncestorOfType<AvonicBreadcrumbs>();
-        _breadcrumbs?.BreadcrumbAttachedOrDetached();
+        _breadcrumbs?.SlotChanged();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -358,7 +358,7 @@ public class AvonicBreadcrumb : TemplatedControl
         base.OnDetachedFromVisualTree(e);
         var breadcrumbs = _breadcrumbs;
         _breadcrumbs = null;
-        breadcrumbs?.BreadcrumbAttachedOrDetached();
+        breadcrumbs?.SlotChanged();
     }
 
     /// <summary><c>render</c>: the host classes, and the indicator and separator, which Ionic renders or not.</summary>

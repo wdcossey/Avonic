@@ -227,6 +227,21 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void B3_Several_Changes_At_Once_Are_One_Change()
+    {
+        var trail = Trail("A", "B", "C");
+        using var scene = Show(trail);
+
+        // One slotchange for both: C is undone, and X is already active, so Y isn't made active. One at a time, X would be undone.
+        var x = Crumb("X");
+        x.Active = true;
+        trail.Items.Add(x);
+        trail.Items.Add(Crumb("Y"));
+
+        Assert.Equal("A:Ssep=true | B:Ssep=true | C:Ssep=true | X:ASsep=true | Y:sep=undefined", State(trail));
+    }
+
+    [AvaloniaFact]
     public void B3_Before_Anything_Is_Shown_The_Children_Are_Read_Once_As_Ionic_Loads_Them()
     {
         var active = Crumb("Active");
