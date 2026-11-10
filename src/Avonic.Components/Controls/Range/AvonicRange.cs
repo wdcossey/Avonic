@@ -182,7 +182,6 @@ public class AvonicRange : TemplatedControl, IItemControl
     private int? _places;
     private (double Min, double Max, double Step, bool Show) _tickKey;
     private double[] _tickRatios = [];
-    private bool _captured;
     private bool _initialContentScrollY = true;
     private bool _contentScrollDisabled;
 
@@ -377,7 +376,6 @@ public class AvonicRange : TemplatedControl, IItemControl
         if (_slider is not null)
         {
             _slider.RemoveHandler(PointerReleasedEvent, OnSliderReleased);
-            _slider.RemoveHandler(PointerPressedEvent, OnSliderPressed);
         }
 
         foreach (var handle in new[] { _handleA, _handleB })
@@ -398,7 +396,6 @@ public class AvonicRange : TemplatedControl, IItemControl
 
         if (_slider is not null)
         {
-            _slider.AddHandler(PointerPressedEvent, OnSliderPressed, RoutingStrategies.Bubble, handledEventsToo: true);
             _slider.AddHandler(PointerReleasedEvent, OnSliderReleased, RoutingStrategies.Bubble, handledEventsToo: true);
         }
 
@@ -468,11 +465,7 @@ public class AvonicRange : TemplatedControl, IItemControl
             GestureName = "range",
             GesturePriority = GesturePriority,
             Threshold = GestureThreshold,
-            OnStart = _ =>
-            {
-                _captured = true;
-                OnStart();
-            },
+            OnStart = _ => OnStart(),
             OnMove = OnMove,
             OnEnd = OnEnd,
         });
@@ -749,18 +742,15 @@ public class AvonicRange : TemplatedControl, IItemControl
         Render();
     }
 
-    private void OnSliderPressed(object? sender, PointerPressedEventArgs e) => _captured = false;
-
     /// <summary>
-    /// <c>onPointerUp</c>: a release the gesture didn't capture, a tap or a move under its threshold, moves the knob there. Ionic tells
-    /// them apart by <c>pressedKnob</c>, which is set by the first move after a capture; here by the capture itself, so the order
-    /// in which the gesture and this hear the release doesn't matter.
+    /// <c>onPointerUp</c>: a release with no <c>pressedKnob</c>, a tap or a move under the gesture's threshold, moves the knob there.
+    /// A drag's release comes here before the gesture's <c>onEnd</c>, which is what clears <c>pressedKnob</c>, as Chromium's
+    /// <c>pointerup</c> comes before the gesture's <c>mouseup</c> or <c>touchend</c>: this handler is added before the gesture's.
     /// </summary>
     private void OnSliderReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (_captured || _pressedKnob is not null || _slider is null || !IsEffectivelyEnabled)
+        if (_pressedKnob is not null || _slider is null || !IsEffectivelyEnabled)
         {
-            _captured = false;
             return;
         }
 
