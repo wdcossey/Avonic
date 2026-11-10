@@ -696,6 +696,30 @@ public class AvonicRangeTests
     }
 
     [AvaloniaFact]
+    public void R11_A_Range_In_A_Disabled_Panel_Takes_No_Input_And_Looks_Disabled() => InstalledTheme.Run(_ =>
+    {
+        // A deliberate difference: Ionic's class follows only its own disabled, but Avalonia disables a range with its
+        // ancestor, so it looks disabled with it.
+        var range = new AvonicRange { Value = 40, Label = "Off" };
+        var item = new AvonicItem { Content = range };
+        var panel = new StackPanel { Children = { item }, IsEnabled = false };
+        using var scene = Themed(panel);
+        var log = Log.Of(range);
+
+        Click(scene, At(range, scene, 0.8));
+        Assert.Empty(log.All);
+        Assert.Equal(new RangeValue(40), range.Value);
+        Assert.Contains(":range-disabled", range.Classes);
+        Assert.Equal(0.38, Part<Control>(range, "PART_Label").Opacity, 6);
+        AssertNear(0.55, Scale(Part<Border>(range, "PART_KnobA")), 1e-6);
+
+        panel.IsEnabled = true;
+        Settle();
+        Assert.DoesNotContain(":range-disabled", range.Classes);
+        Assert.Equal(1, Part<Control>(range, "PART_Label").Opacity, 6);
+    });
+
+    [AvaloniaFact]
     public void R11_Disabling_It_Mid_Drag_Ends_The_Drag()
     {
         using var clock = new TestClock();

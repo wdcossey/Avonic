@@ -478,8 +478,9 @@ public class AvonicRange : TemplatedControl, IItemControl
 
         if (change.Property == IsEffectivelyEnabledProperty)
         {
-            // disabledChanged
+            // disabledChanged. The look follows too, so that a range in a disabled panel fades, a deliberate difference.
             _gesture?.Enable(IsEffectivelyEnabled);
+            Render();
         }
         else if (change.Property == ValueProperty)
         {
@@ -527,7 +528,7 @@ public class AvonicRange : TemplatedControl, IItemControl
             _places = null;
             Render();
         }
-        else if (change.Property == IsEnabledProperty || change.Property == DualKnobsProperty || change.Property == PinProperty
+        else if (change.Property == DualKnobsProperty || change.Property == PinProperty
                  || change.Property == PinFormatterProperty || change.Property == SnapsProperty
                  || change.Property == TicksProperty || change.Property == LabelProperty || change.Property == LabelContentProperty
                  || change.Property == LabelPlacementProperty || change.Property == StartContentProperty
@@ -954,7 +955,8 @@ public class AvonicRange : TemplatedControl, IItemControl
         var hasStartContent = (hasLabel && placement is RangeLabelPlacement.Start or RangeLabelPlacement.Fixed) || StartContent is not null;
         var hasEndContent = (hasLabel && placement == RangeLabelPlacement.End) || EndContent is not null;
         PseudoClasses.Set(":in-item", _inItem);
-        PseudoClasses.Set(":range-disabled", !IsEnabled);
+        // Ionic's class follows only its own prop; this follows the effective IsEnabled, as an ancestor's disables it too.
+        PseudoClasses.Set(":range-disabled", !IsEffectivelyEnabled);
         PseudoClasses.Set(":range-dual-knobs", dual);
         PseudoClasses.Set(":range-pressed", pressed is not null);
         PseudoClasses.Set(":range-pressed-a", dual && pressed == RangeKnob.A);

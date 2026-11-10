@@ -16,7 +16,7 @@ and Chromium's accessibility tree through CDP. The pages are at the top of [COMP
 | [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | Single knob only. Clamped into `[Min, Max]` when it's set after the range has loaded, and when it's attached, as `activeBarStartChanged` is a watch and in `connectedCallback`; with `SetCurrentValue`, so that a binding stays |
 | [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`. Bars, knob, halo, pin and ticks |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | `IonInput` only, through `AvonicConfig.Schedule`, as `debounceEvent` is `setTimeout`. `int?` as in `AvonicInput` (#120) |
-| [x] | `disabled` | `IsEnabled` | Mapping rule. `:range-disabled` follows the range's own `IsEnabled`, as Ionic's class follows its own prop |
+| [x] | `disabled` | `IsEnabled` | Mapping rule. `:range-disabled` follows the effective `IsEnabled`, where Ionic's class follows only its own prop: decided at the PR, so that a range in a disabled panel fades |
 | [x] | `dualKnobs` | `DualKnobs` (`bool`) | Ionic has no watch on it: the ratios are worked out from `Value` when the range is attached and when `Value`, `Min` or `Max` change, as there |
 | [x] | `label` | `Label` (`string?`) | Beats `LabelContent`, as Ionic renders the slot only when `label` is undefined. `""` still counts as a label |
 | [x] | `labelPlacement` | `LabelPlacement` (`RangeLabelPlacement`) | `End`, `Fixed`, `Stacked`, `Start` (default) |

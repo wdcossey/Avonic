@@ -89,3 +89,6 @@ can sit about 1 px apart. The rows are the same heights (48; 71 with a pin; 88 s
 - **A row that overflows:** the native wrapper keeps its slots' widths and the label takes what's left, where CSS would shrink both
   in proportion. Only a label longer than the row and slots together shows it.
 - **The form input** (`name`) isn't reproduced: Avalonia has no form.
+- **A range in a disabled panel fades.** Avalonia disables it with its ancestor, so it takes no input either way; Ionic's
+  `range-disabled` follows only the range's own `disabled`. Here `:range-disabled` follows the effective `IsEnabled`, decided at
+  the PR, as a range that takes no input but looks enabled would mislead.

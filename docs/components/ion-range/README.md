@@ -27,7 +27,7 @@ converts to one, and `(double)value` is the number, or a pair's upper. A binding
 | [x] | `activeBarStart` | `ActiveBarStart` (`double?`) | One knob only. Clamped into `Min` to `Max`, once they're set |
 | [x] | `color` | `Color` | See the [colour system](../../infra/color-system/README.md) |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | Delays `IonInput` only |
-| [x] | `disabled` | `IsEnabled` | `:range-disabled` follows the range's own `IsEnabled`, as Ionic's class follows its own prop |
+| [x] | `disabled` | `IsEnabled` | `:range-disabled` follows the effective `IsEnabled`, so a range in a disabled panel fades too. Ionic's class follows only its own prop: a deliberate difference |
 | [x] | `dualKnobs` | `DualKnobs` (`bool`) | |
 | [x] | `label` | `Label` (`string?`) | Beats `LabelContent`. `""` still counts as a label |
 | [x] | `labelPlacement` | `LabelPlacement` (`RangeLabelPlacement`: `Start`, `End`, `Fixed`, `Stacked`) | `Start` by default |
@@ -121,4 +121,5 @@ None.
 ## Known gaps
 
 See [COMPARISON.md](COMPARISON.md#known-gaps-and-differences): `cursor: grab`, the touch `hover` part, ticks that would hang Ionic,
-an overflowing row, and the form input. Not tried in a real window or on a device.
+an overflowing row, the form input, and a range in a disabled panel. On a Pixel 8 (2026-11-10), a tap on a knob leaves no focus and
+no pin, and a drag shows the pin until the release.
