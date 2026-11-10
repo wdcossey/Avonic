@@ -71,6 +71,15 @@ scrolls a vertical scroller only for a drag nearer vertical than horizontal. Avo
 deciding first; it shows for a drag between 40° and 45° near a sideways gesture, which scrolls here and doesn't in Chromium. From the
 design of the gesture utility (#4, PR #83), in `docs/infra/gesture/PLAN.md`. An axis lock on the recogniser would match browsers.
 
+## `TextPresenter` brings its caret into view when it isn't focused
+
+**Measured.** Setting a `TextBox`'s `CaretIndex` posts `BringIntoView` on the caret from `TextPresenter.CaretChanged`, whether the box
+is focused or not, so a `ScrollViewer` around it scrolls to the box. Headlessly, over `SimpleTheme`, a `TextBox` below the fold with
+`Text` alone left the page at 0; with `CaretIndex` set as well, it scrolled the page 118 px to show it. Chromium never scrolls to an
+input that isn't focused when its value or selection changes. Found as the sample's `ion-input` page opening scrolled: `AvonicInput`
+moves the caret to the end of an assigned value, as Chromium does, and now handles `RequestBringIntoView` from its text box while
+the box isn't focused. Bringing the caret into view only while focused would match browsers.
+
 ## `Visual.IsEffectivelyVisibleChanged` is internal
 
 **Checked by reflection.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective
