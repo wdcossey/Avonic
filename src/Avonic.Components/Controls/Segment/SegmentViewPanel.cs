@@ -15,6 +15,13 @@ public sealed class SegmentViewPanel : Panel, IScrollSnapPointsInfo
 {
     private double _pageWidth;
 
+    public SegmentViewPanel()
+    {
+        // overflow-x: hidden with swiping off: a wheel that a content didn't take doesn't page the view either. Here, below the
+        // view's scroller, so that a content's own vertical scroll still has it first.
+        AddHandler(PointerWheelChangedEvent, (_, e) => e.Handled |= this.FindAncestorOfType<AvonicSegmentView>() is { CanSwipe: false });
+    }
+
     /// <summary>The view's width, which a scroller around this panel doesn't pass on.</summary>
     private double Page(Size available) =>
         this.FindAncestorOfType<AvonicSegmentView>()?.PageWidth is { } page && double.IsFinite(page) ? page

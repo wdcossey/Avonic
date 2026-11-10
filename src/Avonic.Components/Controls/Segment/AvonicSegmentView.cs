@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
 
 namespace Avonic.Components.Controls;
 
@@ -55,8 +56,6 @@ public class AvonicSegmentView : ItemsControl
         AddHandler(PointerReleasedEvent, (_, e) => { if (e.Pointer.Type == PointerType.Touch) _isTouching = false; }, RoutingStrategies.Tunnel, true);
         AddHandler(PointerCaptureLostEvent, (_, e) => { if (e.Pointer.Type == PointerType.Touch) _isTouching = false; }, RoutingStrategies.Bubble, true);
 
-        // overflow-x: hidden with swiping off: a wheel doesn't scroll it either.
-        AddHandler(PointerWheelChangedEvent, (_, e) => e.Handled |= !CanSwipe, RoutingStrategies.Tunnel);
     }
 
     public bool SegmentViewSwipeGesture
@@ -69,7 +68,7 @@ public class AvonicSegmentView : ItemsControl
     internal bool? IsManualScroll => _isManualScroll;
 
     /// <summary><c>segment-view-disabled</c> and <c>segment-view-swipe-disabled</c> are <c>overflow-x: hidden</c>.</summary>
-    private bool CanSwipe => IsEnabled && SegmentViewSwipeGesture;
+    internal bool CanSwipe => IsEnabled && SegmentViewSwipeGesture;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -97,8 +96,26 @@ public class AvonicSegmentView : ItemsControl
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        PageWidth = availableSize.Width;
+        // The scroller measures the row with an infinite width whatever the view's, so it has to be told.
+        if (PageWidth != availableSize.Width)
+        {
+            PageWidth = availableSize.Width;
+            ItemsPanelRoot?.InvalidateMeasure();
+        }
+
         return base.MeasureOverride(availableSize);
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+
+        // A new width keeps the same content in view, as scroll snapping does after a layout change.
+        if (_scroll is not null && e.WidthChanged && e.PreviousSize.Width > 0 && _smooth?.IsRunning != true)
+        {
+            var page = Math.Round(_scroll.Offset.X / e.PreviousSize.Width);
+            Dispatcher.UIThread.Post(() => _scroll.Offset = new Vector(page * Bounds.Width, _scroll.Offset.Y), DispatcherPriority.Loaded);
+        }
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -106,6 +123,10 @@ public class AvonicSegmentView : ItemsControl
         _smooth?.Stop();
         _scrollEndTimeout?.Dispose();
         _scrollEndTimeout = null;
+        _isTouching = false;
+
+        // Ionic's timeout still fires after the view leaves, so it comes back taking input.
+        SetManualScroll(null);
         base.OnDetachedFromVisualTree(e);
     }
 

@@ -67,7 +67,8 @@ public sealed class SegmentButtonPanel : Panel
         }
 
         var over = _widths.Sum() - availableSize.Width;
-        if (over > 0)
+        var shrinking = Enumerable.Range(0, _ordered.Count).Where(i => _ordered[i] is not AvonicIcon).Sum(i => _widths[i]);
+        if (over > 0 && shrinking > 0)
         {
             var shrinkable = Enumerable.Range(0, _ordered.Count).Where(i => _ordered[i] is not AvonicIcon).ToList();
             var shrinkableWidth = shrinkable.Sum(i => _widths[i]);

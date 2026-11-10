@@ -22,7 +22,7 @@ during each smooth scroll.
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [x] | `scrollable` | `Scrollable` (`bool`) | `:scrollable`. Columns at their content's width, scrolling sideways; turns the gesture off |
 | [x] | `selectOnFocus` | `SelectOnFocus` (`bool`) | The arrows, Home and End check the button they focus |
-| [x] | `swipeGesture` | `SwipeGesture` (`bool`, `true`) | The drag gesture |
+| [x] | `swipeGesture` | `SegmentSwipeGesture` (`bool`, `true`) | The drag gesture. Prefixed as `name` is (`IconName`), because `InputElement.SwipeGesture` is Avalonia's swipe event |
 | [x] | `value` | `Value` (`object?`) | Null is `undefined`. Two-way, as the user changes it |
 
 ### ion-segment: events (1), no methods, slots or parts
@@ -91,15 +91,16 @@ All `Avonic.SegmentButton.<Name>`. md defaults from `segment-button.md.css`, res
 | [x] | `--padding-bottom`, `--padding-end`, `--padding-start`, `--padding-top` | `PaddingBottom`, … | 0, 16, 0, 16 |
 | [x] | `--transition` | `Transition` | `color 0.15s linear, opacity 0.15s linear`: a `Transitions` on the part |
 
-`--ion-toolbar-segment-*`, which the button reads in a toolbar, are `Avonic.ToolbarSegment*Brush` keys, unset, in this
-family's tokens, as only it reads them.
+`--ion-toolbar-segment-*`, five global variables that the button reads in a toolbar without a colour, aren't mapped: unset,
+as Ionic leaves them, they give what the button has anywhere else, and mapping them would double every colour rule. See Known
+gaps in the README.
 
 ### ion-segment-view: props (2), events (1)
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `disabled` | `IsEnabled` | Mapping rule. No swiping; opacity 0.3 |
-| [x] | `swipeGesture` | `SwipeGesture` (`bool`, `true`) | `false`: no swiping. Code still pages it |
+| [x] | `swipeGesture` | `SegmentViewSwipeGesture` (`bool`, `true`) | `false`: no swiping. Code still pages it. Prefixed for the same reason |
 | [x] | `ionSegmentViewScroll` | `IonSegmentViewScroll` (`SegmentViewScrollEventArgs`: `ScrollRatio`, `IsManualScroll`) | On every scroll |
 
 Its internal `setContent(id, smoothScroll)` is the internal `SetContent`. Its children are `Items`, as `core.json` lists no slot.
@@ -178,7 +179,8 @@ Each becomes a test. "Measured" is from the scripts above.
   scrollable. `MaxColumnWidth` is infinite in the stub and 360 in the theme, as `minmax(auto, 360px)` is md's. The template
   holds it in a `ScrollViewer` with no bars, which scrolls only when `Scrollable`.
 - **The gesture** is `Gesture.Create` with Ionic's config: `segment`, priority 100, threshold 0, enabled while not
-  scrollable, enabled and swiping. "Under the pointer" is a hit test at the checked button's middle y.
+  scrollable, enabled and swiping. "Under the pointer" is a hit test at the checked button's middle y. The indicator's
+  starting transform is set in the next frame, as `writeTask` sets it, which is before that frame draws.
 - **The indicator's slide** is a CSS transition, run by the segment on `AvonicConfig`'s clock, on `PART_Indicator`'s
   `RenderTransform`, with its origin at the left. The duration, delay and easing are read from
   `Avonic.SegmentButton.IndicatorTransition` on the button; with none, it jumps, as `transition: none` does.
@@ -197,8 +199,6 @@ Each becomes a test. "Measured" is from the scripts above.
 
 - **A vertical drag that starts on a segment doesn't scroll the page around it.** The gesture captures at the press, as
   Ionic's does with threshold 0, and Avonic's gesture keeps a scroller off a captured pointer, where Chromium scrolls anyway.
-- **The indicator's starting transform is applied at once,** not in the next frame (`writeTask`), so that no frame shows it at
-  its end before it starts.
 - **`prefers-reduced-motion`** isn't read: Avalonia has no such setting.
 - **`Scrollable` changing after load turns the gesture on or off.** Ionic has no watcher on it, so its gesture keeps what
   it read at load.

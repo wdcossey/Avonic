@@ -80,11 +80,11 @@ public class AvonicSegment : ItemsControl, IItemControl
     private AvonicSegmentView? _segmentView;
     private TopLevel? _topLevel;
     private bool _loaded;
+    private bool _didLoad;
     private bool _activated;
     private object? _valueBeforeGesture;
     private int? _lastNextIndex;
     private bool? _triggerScrollOnValueChange;
-    private AvonicSegmentButton? _pressed;
 
     static AvonicSegment()
     {
@@ -181,15 +181,13 @@ public class AvonicSegment : ItemsControl, IItemControl
     }
 
     /// <summary><c>componentDidLoad</c>.</summary>
+    /// <summary>
+    /// <c>componentDidLoad</c>, the first time, and the gesture every time, as leaving the tree destroys it here. Ionic's runs
+    /// once for an element, so a segment that comes back doesn't snap its view again.
+    /// </summary>
     private void OnLoaded()
     {
         _loaded = true;
-        _segmentView = GetSegmentView();
-        SetCheckedClasses();
-
-        // Once the buttons are laid out, snap the checked one into view, rather than scroll to it.
-        AvonicConfig.RequestFrame(this, () => ScrollActiveButtonIntoView(false));
-
         _gesture?.Destroy();
         _gesture = Gesture.Create(new GestureConfig
         {
@@ -202,6 +200,18 @@ public class AvonicSegment : ItemsControl, IItemControl
             OnEnd = OnEnd,
         });
         GestureChanged();
+        if (_didLoad)
+        {
+            return;
+        }
+
+        _didLoad = true;
+        _segmentView = GetSegmentView();
+        SetCheckedClasses();
+
+        // Once the buttons are laid out, snap the checked one into view, rather than scroll to it.
+        AvonicConfig.RequestFrame(this, () => ScrollActiveButtonIntoView(false));
+
         if (!IsEnabled)
         {
             DisabledChanged();
@@ -214,6 +224,12 @@ public class AvonicSegment : ItemsControl, IItemControl
     private void OnUnloaded()
     {
         _loaded = false;
+        // Destroying the gesture mid-drag never ends it, so the held indicator lets go here.
+        if (_activated)
+        {
+            SetActivated(false);
+        }
+
         _gesture?.Destroy();
         _gesture = null;
         _smooth?.Stop();
@@ -239,7 +255,13 @@ public class AvonicSegment : ItemsControl, IItemControl
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        RowWidth = availableSize.Width;
+        // The scroller measures the grid with an infinite width whatever the segment's, so it has to be told.
+        if (RowWidth != availableSize.Width)
+        {
+            RowWidth = availableSize.Width;
+            ItemsPanelRoot?.InvalidateMeasure();
+        }
+
         return base.MeasureOverride(availableSize);
     }
 
@@ -323,11 +345,6 @@ public class AvonicSegment : ItemsControl, IItemControl
     private void DisabledChanged()
     {
         GestureChanged();
-        if (!_loaded)
-        {
-            return;
-        }
-
         if (_segmentView is null)
         {
             foreach (var button in Buttons())
@@ -376,7 +393,6 @@ public class AvonicSegment : ItemsControl, IItemControl
         }
 
         _valueBeforeGesture = null;
-        _pressed = null;
     }
 
     /// <summary>The button an event landed on, or null for the segment itself, as a disabled button lets the press through.</summary>
@@ -396,7 +412,7 @@ public class AvonicSegment : ItemsControl, IItemControl
     private void Activate(GestureDetail detail)
     {
         // Only a press on a segment button activates, as a disabled one gives the press to the segment.
-        var clicked = _pressed = ButtonAt(detail.Event?.Source);
+        var clicked = ButtonAt(detail.Event?.Source);
         if (clicked is null)
         {
             return;
@@ -608,25 +624,25 @@ public class AvonicSegment : ItemsControl, IItemControl
     /// </summary>
     private void CheckButton(AvonicSegmentButton previous, AvonicSegmentButton current)
     {
-        if (previous.Indicator is not { } previousIndicator || current.Indicator is not { } currentIndicator
-            || previousIndicator.TransformToVisual(this) is not { } previousMatrix
-            || currentIndicator.TransformToVisual(this) is not { } currentMatrix)
+        // Ionic's indicators are always in the shadow root. Here one isn't until its button's template is applied, which an
+        // invisible button's isn't: then it doesn't slide, but the value still changes, as nothing in Ionic stops it.
+        if (previous.Indicator is { } previousIndicator && current.Indicator is { } currentIndicator
+            && previousIndicator.TransformToVisual(this) is { } previousMatrix
+            && currentIndicator.TransformToVisual(this) is { } currentMatrix)
         {
-            return;
+            // As getBoundingClientRect, with any transform they have. In the segment's own space, which RTL mirrors as it does
+            // the indicator's, so the transform is right either way.
+            var previousRect = new Rect(previousIndicator.Bounds.Size).TransformToAABB(previousMatrix);
+            var currentRect = new Rect(currentIndicator.Bounds.Size).TransformToAABB(currentMatrix);
+            var widthDelta = previousRect.Width / currentRect.Width;
+            var xPosition = previousRect.Left - currentRect.Left;
+
+            AvonicConfig.RequestFrame(this, () =>
+            {
+                current.Slide?.Start(xPosition, widthDelta, current);
+                ScrollActiveButtonIntoView(true);
+            });
         }
-
-        // As getBoundingClientRect, with any transform they have. In the segment's own space, which RTL mirrors as it does
-        // the indicator's, so the transform is right either way.
-        var previousRect = new Rect(previousIndicator.Bounds.Size).TransformToAABB(previousMatrix);
-        var currentRect = new Rect(currentIndicator.Bounds.Size).TransformToAABB(currentMatrix);
-        var widthDelta = previousRect.Width / currentRect.Width;
-        var xPosition = previousRect.Left - currentRect.Left;
-
-        AvonicConfig.RequestFrame(this, () =>
-        {
-            current.Slide?.Start(xPosition, widthDelta, current);
-            ScrollActiveButtonIntoView(true);
-        });
 
         SetCurrentValue(ValueProperty, current.Value);
         SetCheckedClasses();
@@ -657,8 +673,9 @@ public class AvonicSegment : ItemsControl, IItemControl
             return null;
         }
 
-        var content = top.GetVisualDescendants().OfType<AvonicSegmentContent>().FirstOrDefault(content => content.Name == id)
-                      ?? top.GetLogicalDescendants().OfType<AvonicSegmentContent>().FirstOrDefault(content => content.Name == id);
+        // The name scope first, which is where XAML puts a content beside its segment, then the window.
+        var content = this.FindNameScope()?.Find<AvonicSegmentContent>(id)
+                      ?? top.GetVisualDescendants().OfType<AvonicSegmentContent>().FirstOrDefault(content => content.Name == id);
         return content?.FindAncestorOfType<AvonicSegmentView>() ?? content?.FindLogicalAncestorOfType<AvonicSegmentView>();
     }
 

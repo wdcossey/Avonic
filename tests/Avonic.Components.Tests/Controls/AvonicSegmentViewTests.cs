@@ -235,4 +235,66 @@ public class AvonicSegmentViewTests
         page.Segment.IsEnabled = true;
         Assert.True(page.View.IsEnabled);
     });
+
+    // ── Found in review ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R6_A_View_That_Leaves_Mid_Scroll_Comes_Back_Taking_Input()
+    {
+        using var clock = new TestClock();
+        var built = Build();
+        var host = new Border { Child = built.Root };
+        using var scene = new Scene(host);
+        var page = Show(built, scene);
+        clock.At(200);
+
+        page.Segment.Value = "v3";
+        Assert.False(page.View.IsHitTestVisible);
+        host.Child = null;
+        Dispatcher.UIThread.RunJobs();
+        host.Child = built.Root;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(page.View.IsHitTestVisible);
+    }
+
+    [AvaloniaFact]
+    public void R7_With_Swiping_Off_A_Wheel_Still_Scrolls_A_Content_But_Not_The_View()
+    {
+        using var clock = new TestClock();
+        var built = Build();
+        built.View.SegmentViewSwipeGesture = false;
+        ((AvonicSegmentContent)built.View.Items[0]!).Content = new Border { Height = 1000, Background = Avalonia.Media.Brushes.Transparent };
+        using var scene = new Scene(built.Root);
+        var page = Show(built, scene);
+        clock.At(200);
+        GestureTests.Render();
+        var inner = ((AvonicSegmentContent)page.View.Items[0]!).GetVisualDescendants().OfType<ScrollViewer>().First();
+        var at = Centre(page.View, scene);
+
+        scene.Window.MouseWheel(at, new Vector(0, -1), RawInputModifiers.None);
+        scene.Window.MouseWheel(at, new Vector(-1, 0), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(inner.Offset.Y > 0);
+        Assert.Equal(0, page.Scroll.Offset.X);
+    }
+
+    [AvaloniaFact]
+    public void R8_A_Resized_View_Keeps_Its_Content_The_Views_Width_And_In_View()
+    {
+        using var clock = new TestClock();
+        var built = Build("v2");
+        var host = new Border { Width = 390, HorizontalAlignment = HorizontalAlignment.Left, Child = built.Root };
+        using var scene = new Scene(host);
+        var page = Show(built, scene);
+        Assert.Equal(390, page.Scroll.Offset.X);
+
+        host.Width = 300;
+        Dispatcher.UIThread.RunJobs();
+        GestureTests.Render();
+
+        Assert.All(page.View.Items.OfType<AvonicSegmentContent>(), content => Assert.Equal(300, content.Bounds.Width));
+        Assert.Equal(300, page.Scroll.Offset.X);
+    }
 }

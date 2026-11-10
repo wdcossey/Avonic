@@ -590,4 +590,88 @@ public class AvonicSegmentFamilyTests
         Settle();
         Assert.Equal(0.12, Part<Border>(a, "PART_Overlay").Opacity);
     });
+
+    // ── Found in review ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R1_A_Scrollable_Segments_Shares_Follow_Its_Width() => InstalledTheme.Run(_ =>
+    {
+        var segment = Segment("a", Button("a", "A"), Button("b", "Longer label"));
+        segment.Scrollable = true;
+        var host = new Border { Width = 390, HorizontalAlignment = HorizontalAlignment.Left, Child = segment };
+        using var scene = new Scene(host);
+        Settle();
+        Assert.All(Buttons(segment), b => Assert.Equal(195, b.Bounds.Width, 1));
+
+        host.Width = 300;
+        Settle();
+        Assert.All(Buttons(segment), b => Assert.Equal(150, b.Bounds.Width, 1));
+    });
+
+    [AvaloniaFact]
+    public void R2_A_Hidden_Button_Still_Takes_The_Value_From_The_Keys()
+    {
+        var hidden = Button("c", "C");
+        hidden.IsVisible = false;
+        var segment = Segment("a", Button("a", "A"), Button("b", "B"), hidden);
+        segment.SelectOnFocus = true;
+        using var scene = new Scene(segment);
+        Settle();
+        Buttons(segment)[0].Focus(NavigationMethod.Tab);
+
+        Key(scene, PhysicalKey.End);
+
+        Assert.Equal("c", segment.Value);
+    }
+
+    [AvaloniaFact]
+    public void R3_A_Segment_Enabled_While_Away_Comes_Back_With_Its_Buttons_Enabled()
+    {
+        var segment = Segment("a", Button("a", "A"), Button("b", "B"));
+        var host = new Border { Child = segment };
+        using var scene = new Scene(host);
+        Settle();
+
+        segment.IsEnabled = false;
+        host.Child = null;
+        Settle();
+        segment.IsEnabled = true;
+        host.Child = segment;
+        Settle();
+
+        Assert.All(Buttons(segment), b => Assert.True(b.IsEffectivelyEnabled));
+    }
+
+    [AvaloniaFact]
+    public void R4_A_Segment_Unloaded_Mid_Drag_Lets_The_Indicator_Go()
+    {
+        using var clock = new TestClock();
+        var segment = Segment("a", Button("a", "A"), Button("b", "B"));
+        var host = new Border { Child = segment };
+        using var scene = new Scene(host);
+        Settle();
+        GestureTests.Render();
+        var at = Centre(Buttons(segment)[0], scene);
+        scene.Window.MouseMove(at, RawInputModifiers.None);
+        scene.Window.MouseDown(at, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        Assert.Contains(":segment-activated", segment.Classes);
+
+        host.Child = null;
+        Settle();
+
+        Assert.DoesNotContain(":segment-activated", segment.Classes);
+        Assert.All(Buttons(segment), b => Assert.DoesNotContain(":segment-button-activated", b.Classes));
+        scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
+    }
+
+    [AvaloniaFact]
+    public void R5_A_Row_With_Nothing_To_Shrink_But_An_Empty_Text_Lays_Out()
+    {
+        var button = new AvonicSegmentButton { Value = "a", Layout = SegmentButtonLayout.IconStart, Width = 20, Items = { new AvonicIcon { IconName = "call", Width = 40 }, "" } };
+        using var scene = new Scene(Segment("a", button));
+        Settle();
+
+        Assert.True(button.IsArrangeValid);
+    }
 }
