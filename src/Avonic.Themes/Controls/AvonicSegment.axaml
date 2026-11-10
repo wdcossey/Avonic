@@ -1,0 +1,78 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicSegment Value="a">
+                <c:AvonicSegmentButton Value="a">
+                    <c:AvonicLabel Content="Friends" />
+                </c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="b">
+                    <c:AvonicLabel Content="Enemies" />
+                </c:AvonicSegmentButton>
+            </c:AvonicSegment>
+            <c:AvonicSegment Value="call" Color="danger">
+                <c:AvonicSegmentButton Value="call">
+                    <c:AvonicLabel Content="Call" />
+                    <c:AvonicIcon IconName="call" />
+                </c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="heart">
+                    <c:AvonicLabel Content="Heart" />
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicSegmentButton>
+            </c:AvonicSegment>
+            <c:AvonicSegment Value="s3" Scrollable="True">
+                <c:AvonicSegmentButton Value="s1"><c:AvonicLabel Content="First" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s2"><c:AvonicLabel Content="Second" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s3"><c:AvonicLabel Content="Third" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s4"><c:AvonicLabel Content="Fourth" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s5"><c:AvonicLabel Content="Fifth" /></c:AvonicSegmentButton>
+                <c:AvonicSegmentButton Value="s6"><c:AvonicLabel Content="Sixth" /></c:AvonicSegmentButton>
+            </c:AvonicSegment>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- segment.md.css: a grid of one row, its columns minmax(auto, 360px), centred, or minmax(min-content, 1fr) from the start
+         when scrollable. The scroller, with no bars, scrolls only then, and clips, as contain: paint does. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegment}" TargetType="c:AvonicSegment">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- text-align: center -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <!-- background: var(background) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Segment.Background" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentPanel MaxColumnWidth="360" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}">
+                    <ScrollViewer Name="PART_Scroll"
+                                  Theme="{DynamicResource AvonicSegmentScrollViewer}"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.segment-scrollable) { overflow-x: auto }, with its scroll bar hidden -->
+        <Style Selector="^:scrollable /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        </Style>
+
+        <!-- :host(.in-toolbar) { min-height: var(min-height) }, the toolbar's -->
+        <Style Selector="^:in-toolbar">
+            <Setter Property="MinHeight" Value="{DynamicResource Avonic.Toolbar.MinHeight}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

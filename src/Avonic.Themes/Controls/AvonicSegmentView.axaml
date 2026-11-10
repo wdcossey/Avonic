@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicSegmentView Width="390" Height="80">
+            <c:AvonicSegmentContent Name="first">
+                <TextBlock Margin="16" Text="First content" />
+            </c:AvonicSegmentContent>
+            <c:AvonicSegmentContent Name="second">
+                <TextBlock Margin="16" Text="Second content" />
+            </c:AvonicSegmentContent>
+        </c:AvonicSegmentView>
+    </Design.PreviewWith>
+
+    <!-- segment-view.md.css: a row of contents in a scroller with no bar, each the view's width. ion-segment-content has no
+         look of its own, so it keeps its functional template. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSegmentView}" TargetType="c:AvonicSegmentView">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:SegmentViewPanel Background="Transparent" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollViewer Name="PART_Scroll"
+                              Theme="{DynamicResource AvonicSegmentViewScrollViewer}"
+                              Background="{TemplateBinding Background}"
+                              HorizontalScrollBarVisibility="Hidden"
+                              VerticalScrollBarVisibility="Disabled">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </ScrollViewer>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.segment-view-disabled) -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

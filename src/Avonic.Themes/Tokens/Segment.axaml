@@ -1,0 +1,60 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-segment's variable, with segment.md.css's value. -->
+    <SolidColorBrush x:Key="Avonic.Segment.Background" Color="Transparent" />
+
+    <!-- ion-segment-button's variables, with segment-button.md.css's values, which it sets on the host. A CssUnset key is one
+         that md leaves unset, or sets to another variable, which the theme reads next. -->
+    <!-- none -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.Background" />
+    <b:CssUnset x:Key="Avonic.SegmentButton.BackgroundChecked" />
+    <!-- var(color-checked) -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.BackgroundFocused" />
+    <x:Double x:Key="Avonic.SegmentButton.BackgroundFocusedOpacity">0.12</x:Double>
+    <!-- var(color-checked) -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.BackgroundHover" />
+    <x:Double x:Key="Avonic.SegmentButton.BackgroundHoverOpacity">0.04</x:Double>
+    <!-- Unset, and border-style is none, so there's no border: a width of 0. -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.BorderColor" />
+    <CornerRadius x:Key="Avonic.SegmentButton.BorderRadius">0</CornerRadius>
+    <Thickness x:Key="Avonic.SegmentButton.BorderWidth">0</Thickness>
+    <!-- rgba(var(ion-text-color-rgb), 0.6) -->
+    <SolidColorBrush x:Key="Avonic.SegmentButton.Color" Color="{DynamicResource Avonic.TextColor}" Opacity="0.6" />
+    <!-- var(ion-color-primary) -->
+    <SolidColorBrush x:Key="Avonic.SegmentButton.ColorChecked" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- Unset: the host's colour -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.ColorFocused" />
+    <!-- var(color) -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.ColorHover" />
+    <BoxShadows x:Key="Avonic.SegmentButton.IndicatorBoxShadow">none</BoxShadows>
+    <!-- var(color-checked) -->
+    <b:CssUnset x:Key="Avonic.SegmentButton.IndicatorColor" />
+    <x:Double x:Key="Avonic.SegmentButton.IndicatorHeight">2</x:Double>
+    <!-- none -->
+    <TransformGroup x:Key="Avonic.SegmentButton.IndicatorTransform" />
+    <!-- transform 250ms cubic-bezier(0.4, 0, 0.2, 1). The segment runs it on Avonic's clock, from its Duration, Delay and Easing. -->
+    <Transitions x:Key="Avonic.SegmentButton.IndicatorTransition">
+        <TransformOperationsTransition Property="{x:Static Visual.RenderTransformProperty}" Duration="0:0:0.25" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+    </Transitions>
+    <!-- Unset: 0 -->
+    <x:Double x:Key="Avonic.SegmentButton.MarginBottom">0</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.MarginEnd">0</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.MarginStart">0</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.MarginTop">0</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.PaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.PaddingEnd">16</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.PaddingStart">16</x:Double>
+    <x:Double x:Key="Avonic.SegmentButton.PaddingTop">0</x:Double>
+    <!-- color 0.15s linear 0s, opacity 0.15s linear 0s, on the native part. Its colour is the host's here, and its opacity
+         never changes, so it's the colour's, on the host. -->
+    <Transitions x:Key="Avonic.SegmentButton.Transition">
+        <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.15" />
+    </Transitions>
+
+    <!-- :host(.in-segment-color) { color: rgba(var(ion-text-color-rgb), 0.6) }, which has no variable of its own -->
+    <SolidColorBrush x:Key="Avonic.SegmentButton.Md.InSegmentColorColor" Color="{DynamicResource Avonic.TextColor}" Opacity="0.6" />
+
+</ResourceDictionary>
