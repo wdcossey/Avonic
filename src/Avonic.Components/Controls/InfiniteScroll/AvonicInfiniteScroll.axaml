@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-infinite-scroll: structure only, and all there is, as it has no look of its own. Its content, usually an
+         AvonicInfiniteScrollContent, is in the presenter. Hidden while disabled is the control's, at style priority. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInfiniteScroll}" TargetType="c:AvonicInfiniteScroll">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
