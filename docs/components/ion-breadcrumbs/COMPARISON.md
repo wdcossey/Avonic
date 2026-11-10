@@ -69,6 +69,8 @@ The top of the page, Ionic on the left:
 | 15 | A link navigates | the browser follows `href`, or `ion-router` does | **nothing navigates**: the app follows it from `Click` | gap: no router yet. See "For you to decide" in the PR |
 | 15 | A link's cursor | the hand, over the `<a>` | the arrow | gap: a desktop detail, on a phone there's none |
 | 16 | Focused by keyboard: `#35404e`, white, radius 4, the shadow, no outline | element 4 | the same | match |
+| 16 | A focused link that collapses loses focus | `display: none` blurs it | focus is cleared, `IonBlur` raised | match |
+| 7 | A finger that moves past 15 px on the indicator | no click at all | neither `IonCollapsedClick` nor `Click`, though the `Button` alone would click | match |
 | 17 | `ionFocus`/`ionBlur` from the breadcrumb only | `focus A`, `blur A`, nothing for the indicator | the same | match |
 | 18 | Disabled: 0.5, separator too, no input, no tab stop | `Dis` skipped | the same | match |
 | 19 | Slotted icons 18, `#7d8894`, `#222d3a` active, 8 beside the text | element 26 | the same | match |
@@ -80,4 +82,5 @@ The top of the page, Ionic on the left:
 
 - **A real window and a device.** Headless only: "real-window run queued", "not tried on a device".
 - **RTL** is in the frame and matches; Avalonia mirrors the margins.
+- **Dark mode.** The md literals don't follow `Dark.axaml` yet: see the README's known gaps.
 - **The popover** an app opens from `ionCollapsedClick`: `ion-popover` isn't built yet. The sample lists the hidden breadcrumbs instead.
