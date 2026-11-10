@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-checkbox: structure only. The look is in Avonic.Themes. The transparent panel is what makes the
+         whole host take a click, as Ionic's host does. PART_Wrapper is the label element, .checkbox-wrapper; PART_Label is
+         .label-text-wrapper, holding the slot and .checkbox-bottom; PART_NativeWrapper holds the box, which is the SVG. -->
+    <ControlTheme x:Key="{x:Type c:AvonicCheckbox}" TargetType="c:AvonicCheckbox">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <c:CheckboxWrapper Name="PART_Wrapper"
+                                       LabelPlacement="{TemplateBinding LabelPlacement}"
+                                       Justify="{TemplateBinding Justify}"
+                                       Alignment="{TemplateBinding Alignment}">
+                        <StackPanel Name="PART_Label" ClipToBounds="True">
+                            <ContentPresenter Name="PART_Content"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            <Panel Name="PART_Bottom">
+                                <TextBlock Name="PART_HelperText" TextWrapping="Wrap" />
+                                <TextBlock Name="PART_ErrorText" TextWrapping="Wrap" />
+                            </Panel>
+                        </StackPanel>
+                        <Panel Name="PART_NativeWrapper">
+                            <Border Name="PART_Container">
+                                <c:CheckboxMark Name="PART_Mark"
+                                                Checked="{TemplateBinding Checked}"
+                                                Indeterminate="{TemplateBinding Indeterminate}" />
+                            </Border>
+                        </Panel>
+                    </c:CheckboxWrapper>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

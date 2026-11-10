@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.CheckboxPage">
+
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="8">
+            <c:AvonicCheckbox Content="Label start" />
+            <c:AvonicCheckbox Content="Checked" Checked="True" />
+            <c:AvonicCheckbox Content="Indeterminate" Indeterminate="True" />
+            <c:AvonicCheckbox Content="Label end" LabelPlacement="End" />
+            <c:AvonicCheckbox Content="Fixed label that is long" LabelPlacement="Fixed" />
+            <c:AvonicCheckbox Content="Stacked" LabelPlacement="Stacked" Checked="True" />
+            <c:AvonicCheckbox Content="Space between, danger" Justify="SpaceBetween" Color="danger" Checked="True" />
+            <c:AvonicCheckbox Content="Disabled" Checked="True" IsEnabled="False" />
+            <c:AvonicCheckbox Name="Terms" Content="I agree to the terms"
+                              HelperText="Required to continue" ErrorText="You have to agree"
+                              Required="True" IonChange="OnTermsChange" />
+            <TextBlock Name="Changes" Text="No ionChange yet" />
+
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicCheckbox Content="In an item" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicCheckbox Content="In an item, label end" LabelPlacement="End" Justify="Start" Checked="True" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicCheckbox />
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicLabel Content="Checkbox in the start slot" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicCheckbox Content="Stacked, start" LabelPlacement="Stacked" Alignment="Start" />
+                </c:AvonicItem>
+            </c:AvonicList>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.TogglePage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicToggle Name="WifiToggle" Content="Wi-Fi" Value="wifi" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Checked" Checked="True" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Danger" Checked="True" Color="danger" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Disabled" IsEnabled="False" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Checked and disabled" Checked="True" IsEnabled="False" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Label at the end" LabelPlacement="End" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="A fixed label that is far too long" LabelPlacement="Fixed" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Stacked" LabelPlacement="Stacked" Alignment="Start" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="On/off labels" EnableOnOffLabels="True" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Helper text" HelperText="Turn it on to clear the error below" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicToggle Name="RequiredToggle"
+                                    Classes="ion-touched ion-invalid"
+                                    Content="Accept the terms"
+                                    HelperText="Thanks"
+                                    ErrorText="This has to be on"
+                                    IonChange="OnRequiredChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="In the end slot" />
+                    <c:AvonicItem.EndContent>
+                        <c:AvonicToggle IonChange="OnIonChange" />
+                    </c:AvonicItem.EndContent>
+                </c:AvonicItem>
+                <c:AvonicItem FlowDirection="RightToLeft">
+                    <c:AvonicToggle Content="RTL" IonChange="OnIonChange" />
+                </c:AvonicItem>
+            </c:AvonicList>
+
+            <StackPanel Margin="16,8" Spacing="8">
+                <c:AvonicToggle Content="Justify start" Justify="Start" IonChange="OnIonChange" />
+                <c:AvonicToggle Content="Justify end" Justify="End" IonChange="OnIonChange" />
+                <c:AvonicToggle Content="Justify space-between" Justify="SpaceBetween" IonChange="OnIonChange" />
+                <c:AvonicToggle IonChange="OnIonChange" />
+                <TextBlock Name="Changes" Text="Flip a toggle, or drag its track" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
