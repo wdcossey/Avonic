@@ -1,0 +1,32 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-breadcrumb's variables. breadcrumb.md.css sets them on :host, so a value from outside wins: unset here, and read
+         through Css.Var with the Md keys below as the next value. -->
+    <b:CssUnset x:Key="Avonic.Breadcrumb.BackgroundFocused" />
+    <b:CssUnset x:Key="Avonic.Breadcrumb.Color" />
+    <b:CssUnset x:Key="Avonic.Breadcrumb.ColorActive" />
+    <b:CssUnset x:Key="Avonic.Breadcrumb.ColorFocused" />
+    <b:CssUnset x:Key="Avonic.Breadcrumb.ColorHover" />
+
+    <!-- The literal fallbacks of breadcrumb.md.css. Ionic leaves the step variables and ion-text-color unset in light, so these
+         render, measured, where Avonic's ramps always have a value: they don't follow them. Not Ionic's variables: override the
+         keys above instead, or these for what has none. -->
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.Color" Color="#677483" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorActive" Color="#03060B" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorFocused" Color="#35404E" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorHover" Color="#03060B" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.BackgroundFocused" Color="#FFFFFF" />
+    <!-- .breadcrumb-separator, ::slotted(ion-icon), and :host(.breadcrumb-active) ::slotted(ion-icon) -->
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.SeparatorColor" Color="#73849A" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.IconColor" Color="#7D8894" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.IconColorActive" Color="#222D3A" />
+    <!-- .breadcrumbs-collapsed-indicator, and :focus -->
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorBackground" Color="#EEF1F3" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorBackgroundFocused" Color="#DFE5E8" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorColor" Color="#73849A" />
+    <!-- :host(.ion-focused) .breadcrumb-native { box-shadow } -->
+    <BoxShadows x:Key="Avonic.Breadcrumb.Md.FocusedBoxShadow">0 1 2 0 #33000000, 0 2 8 0 #1F000000</BoxShadows>
+
+</ResourceDictionary>
