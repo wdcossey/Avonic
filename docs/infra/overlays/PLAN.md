@@ -144,8 +144,23 @@ Not `AdornerLayer`, which is below the overlay layer and is for decorations; not
 with its own focus scope; not wrapping the `TopLevel`'s content, which an app owns.
 
 **Which `TopLevel`.** `present()` has no arguments, and a page has one document. `Present()` uses the application's: the active
-window of a desktop lifetime, else its main window; a single-view lifetime's main view. `Present(TopLevel)` is an Avonic extension
-for a multi-window app.
+window of a desktop lifetime, else its main window; a single-view lifetime's main view; under Android's `MainViewFactory`, the last
+top level to load that's still loaded, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114), below).
+`Present(TopLevel)` is an Avonic extension for a multi-window app.
+
+**Android's `MainViewFactory`** (#114). Avalonia 12's Android lifetime, `Avalonia.Android.ApplicationLifetime`, is internal, and is an
+`IActivityApplicationLifetime` and an `ISingleViewApplicationLifetime`. Its `MainView` setter fills `MainViewFactory` with that one
+view; set through the factory, which Avalonia recommends, `MainView` stays null, and each activity's `AvaloniaView` makes its own
+`EmbeddableControlRoot` around a new view. The current activity is internal to `Avalonia.Android` (`AndroidActivatableLifetime.
+CurrentMainActivity`), which a net8.0 library can't reference, and Avalonia 12 has no public list of top levels, no static focused
+element (`KeyboardDevice.Instance` is internal) and no lifetime that's an `ISingleTopLevelApplicationLifetime` on Android. So
+`LoadedTopLevels` keeps the top levels that are loaded, from class handlers on `Loaded` and `Unloaded` that a module initializer adds
+when `Avonic.Components` loads, which is in `Application.Initialize`, with `AvonicTheme`, before Android makes the first activity.
+The last still loaded is the activity on top: a second activity loads after the first, and a destroyed one unloads. Read from
+`Avalonia.Android` 12.1.4, decompiled: `AvaloniaView`'s constructor makes the `EmbeddableControlRoot` and prepares it, and
+`AvaloniaActivity.OnDestroy` disposes the view, which disposes the root. That a prepared root loads and a disposed one unloads is
+tested headlessly. A `MainView`, when the app sets one, comes first, as every activity shows it. Popups needn't be left out: Android's
+`TopLevelImpl.CreatePopup` returns null, so its popups are in the overlay layer, with no top level of their own.
 
 **The index** is given when the overlay is attached to the host, at `Present()`, as `connectedCallback` gives it when an element is
 attached. Ionic's controller attaches at `create()`; Avonic has no `create()`, so an overlay made first and presented second is on
@@ -290,9 +305,13 @@ for keys and pointers. Each one has to fail without its behaviour.
 - **Hit tests read the last rendered scene, and a newly made overlay layer can take a second render tick** to reach it in a
   headless test. The overlay tests render twice.
 - **`TopLevel.BackRequested`** is raised by Alt+Left and the mouse's back button headless, as on desktop, and not by Escape.
-- **Avalonia's lifetimes** can't be set once the application has started, and their interfaces can't be implemented outside
-  Avalonia, so `Present()`'s choice of top level is tested through `OverlayHost.TopLevelOf` with Avalonia's own (internal) desktop
-  lifetime, made by reflection.
+- **Avalonia's lifetimes** can't be set once the application has started, and their interfaces can't be implemented in C# outside
+  Avalonia: the reference assemblies give each one a member that can't be. So `Present()`'s choice of top level is tested through
+  `OverlayHost.TopLevelOf`, with Avalonia's own (internal) desktop lifetime made by reflection, and the single-view and Android
+  lifetimes as types emitted at run time (`LifetimeDouble`), as the runtime assemblies don't have that member.
+- **A top level loads as soon as it's made,** a `Window` before it's shown, and an `EmbeddableControlRoot` once it's prepared and rendering; a
+  closed window and a disposed root unload. The headless platform makes no embeddable top level of its own, so the test gives one a
+  headless window's platform view.
 
 ## Deliverables
 

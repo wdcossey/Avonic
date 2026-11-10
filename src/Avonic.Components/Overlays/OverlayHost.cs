@@ -41,16 +41,19 @@ internal sealed class OverlayHost : Panel
     }
 
     /// <summary>
-    /// A lifetime's <see cref="TopLevel"/>: a desktop's active window, else its main one; a phone's or a browser's main view's.
+    /// A lifetime's <see cref="TopLevel"/>: a desktop's active window, else its main one; a single view's main view's (iOS, the
+    /// browser, and Android when the app sets <c>MainView</c>); under Android's <c>MainViewFactory</c>, which leaves <c>MainView</c>
+    /// null, the last top level to load that's still loaded, which is the current activity's.
     /// </summary>
     /// <remarks>
-    /// Only the desktop lifetime is in the assemblies the tests load, and the interfaces can't be implemented outside Avalonia,
-    /// so the tests reach the desktop branch alone.
+    /// Android's lifetime is both an <see cref="ISingleViewApplicationLifetime"/> and an <see cref="IActivityApplicationLifetime"/>,
+    /// so a <c>MainView</c> it's given comes first, as it's the view every activity shows.
     /// </remarks>
     internal static TopLevel? TopLevelOf(IApplicationLifetime? lifetime) => lifetime switch
     {
         IClassicDesktopStyleApplicationLifetime desktop => desktop.Windows.FirstOrDefault(w => w.IsActive) ?? desktop.MainWindow,
         ISingleViewApplicationLifetime { MainView: { } view } => TopLevel.GetTopLevel(view),
+        IActivityApplicationLifetime => LoadedTopLevels.Last,
         _ => null,
     };
 

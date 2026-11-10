@@ -991,6 +991,76 @@ public class AvonicOverlayTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => present);
     }
 
+    /// <summary>
+    /// Android with Avalonia's <c>MainViewFactory</c>, which makes a view for each activity and leaves <c>MainView</c> null: the
+    /// current activity's top level is the last to load that's still loaded, as a second activity on top loads after the first,
+    /// and one that's finished unloads.
+    /// </summary>
+    [AvaloniaFact]
+    public void O15_Present_Under_A_Main_View_Factory_Uses_The_Last_Loaded_Top_Level()
+    {
+        using var stage = new Stage();
+        var android = LifetimeDouble.Android();
+        ((IActivityApplicationLifetime)android).MainViewFactory = () => new Panel();
+        Assert.Null(((ISingleViewApplicationLifetime)android).MainView);
+        Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
+
+        var second = new Scene(new Panel());
+        Assert.Same(second.Window, OverlayHost.TopLevelOf(android));
+        second.Dispose();
+        Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
+    }
+
+    /// <summary>
+    /// What Android's <c>AvaloniaView</c> does with each activity's view: an <c>EmbeddableControlRoot</c>, prepared and rendering,
+    /// disposed with the activity. Under <c>SimpleTheme</c>, as the sample's. The headless platform makes no embeddable top level, so it's on a headless window's platform
+    /// view, taken from a window that's never shown. A window loads as soon as it's made, shown or not, so that one is made first.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task O15_An_Embedded_Root_Is_The_Current_Top_Level_Until_It_Is_Disposed()
+    {
+        var unshown = new Window();
+        using var stage = new Stage();
+        var android = LifetimeDouble.Android();
+        var root = new Avalonia.Controls.Embedding.EmbeddableControlRoot(unshown.PlatformImpl!) { Content = new Panel() };
+        root.Prepare();
+        root.StartRendering();
+        Stage.Settle();
+        Assert.Same(root, OverlayHost.TopLevelOf(android));
+
+        // Its template has the overlay layer, as the window's has.
+        var overlay = new TestOverlay();
+        var present = overlay.Present(root);
+        stage.At(Finished);
+        await present;
+        Assert.Same(root, TopLevel.GetTopLevel(overlay));
+        Assert.True(overlay.IsShown);
+
+        root.StopRendering();
+        root.Dispose();
+        Stage.Settle();
+        Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
+    }
+
+    /// <summary>
+    /// A main view the app gives Android's lifetime is every activity's, so it comes before the last loaded. iOS's and the browser's
+    /// single view has no activities, so with no main view there's nowhere.
+    /// </summary>
+    [AvaloniaFact]
+    public void O15_A_Main_View_Comes_Before_The_Last_Loaded_Top_Level()
+    {
+        using var stage = new Stage();
+        var android = LifetimeDouble.Android();
+        ((ISingleViewApplicationLifetime)android).MainView = stage.Other;
+        using var second = new Scene(new Panel());
+        Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
+
+        var singleView = (ISingleViewApplicationLifetime)LifetimeDouble.SingleView();
+        Assert.Null(OverlayHost.TopLevelOf(singleView));
+        singleView.MainView = stage.Other;
+        Assert.Same(stage.Window, OverlayHost.TopLevelOf(singleView));
+    }
+
     [AvaloniaFact]
     public async Task O15_A_Top_Level_With_No_Overlay_Layer_Cannot_Present()
     {

@@ -112,10 +112,9 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 ## Known gaps
 
 - **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed; see [COMPARISON.md](COMPARISON.md).
-- **`AvonicOverlay.Present()` with no `TopLevel` throws on Android with Avalonia's recommended `MainViewFactory`,** as
-  `OverlayHost.TopLevelOf` reads `ISingleViewApplicationLifetime.MainView`, which the factory leaves null. The sample sets `MainView`
-  instead, so that the single-view branch is tried. An app that follows Avalonia's docs has to call `Present(TopLevel)`. To fix in
-  [#114](https://github.com/wdcossey/Avonic/issues/114).
+- **`AvonicOverlay.Present()` under Avalonia's recommended `MainViewFactory`,** which leaves `MainView` null, takes the last top
+  level to load that's still loaded, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114),
+  [overlays](../overlays/README.md)). Tested headlessly, not tried on a device. The sample still sets `MainView`.
 - **CI's `android` job** builds the APK; its first run was this PR's.
 - **A recreated activity** gets the same main view back, which Avalonia warns about. The activity handles rotation, resizing, display
   size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then the safe-area switch also keeps
