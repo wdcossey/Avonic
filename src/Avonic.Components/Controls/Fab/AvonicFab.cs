@@ -62,6 +62,8 @@ public class AvonicFab : ItemsControl
         ClipToBoundsProperty.OverrideDefaultValue<AvonicFab>(false);
     }
 
+    private bool _loaded;
+
     public AvonicFab() => UpdateClasses();
 
     public bool Activated
@@ -118,22 +120,33 @@ public class AvonicFab : ItemsControl
     }
 
     /// <summary>
-    /// Ionic's <c>componentDidLoad</c>: an <c>activated</c> given in the markup reaches the button and the lists, which a
-    /// property set before they were added couldn't.
+    /// Ionic's <c>componentDidLoad</c>, once: an <c>activated</c> given in the markup reaches the button and the lists, which a
+    /// property set before they were added couldn't. Not again when the fab comes back into the tree, as an app may have
+    /// changed a list since.
     /// </summary>
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
 
-        if (Activated)
+        if (Activated && !_loaded)
         {
             ActivatedChanged();
         }
+
+        _loaded = true;
     }
 
     /// <summary><c>activatedChanged</c>: <c>querySelector('ion-fab-button')</c>, the first in document order, and every list.</summary>
     private void ActivatedChanged()
     {
+        // Children a template makes don't exist until the fab is first laid out. In the DOM they're there all along.
+        LayoutUpdated -= OnFirstLayout;
+        if (ItemsPanelRoot is null && ItemsView.Any(item => item is not Control))
+        {
+            LayoutUpdated += OnFirstLayout;
+            return;
+        }
+
         var activated = Activated;
         if (this.GetLogicalDescendants().OfType<AvonicFabButton>().FirstOrDefault() is { } button)
         {
@@ -143,6 +156,15 @@ public class AvonicFab : ItemsControl
         foreach (var list in this.GetLogicalDescendants().OfType<AvonicFabList>().ToList())
         {
             list.SetCurrentValue(AvonicFabList.ActivatedProperty, activated);
+        }
+    }
+
+    private void OnFirstLayout(object? sender, EventArgs e)
+    {
+        if (ItemsPanelRoot is not null)
+        {
+            LayoutUpdated -= OnFirstLayout;
+            ActivatedChanged();
         }
     }
 

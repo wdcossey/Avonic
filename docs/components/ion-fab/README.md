@@ -129,4 +129,6 @@ fab's button. Tab goes through them in their order, not the order on screen. Pse
 - **`href` and the router props** aren't there, as on `ion-button`.
 - **A fab whose own `FlowDirection` differs from its container's** takes start and end from its own. RTL all through matches.
 - **A list that leaves the tree during its stagger finishes it when it comes back**, where Ionic leaves the rest hidden.
+- **Buttons a list's template makes, and a fab's templated children,** exist only once they're laid out, so the stagger and the
+  fab's `Activated` wait for that first layout, about a frame.
 - **Not tried in a real window, and not tried on a device.**

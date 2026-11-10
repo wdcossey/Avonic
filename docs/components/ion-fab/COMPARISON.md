@@ -75,6 +75,13 @@ fab's half opacity match.
   and comes back far more often in Avalonia than a node moves in the DOM. A deliberate difference.
 - **A list from `ItemsSource` and a template was laid out in the flow**, under the button, as its presenter isn't a list. The panel
   looks inside the presenter now.
+- **Buttons and lists from `ItemsSource` and a template were never reached**: a closed list isn't laid out, so its templated
+  buttons don't exist when it opens, and a fab's templated children don't exist before its first layout. The stagger, and the
+  fab's `Activated`, wait for the first layout now. In the DOM they exist all along.
+- **The fab's load ran on every return to the tree**, which reopened a list an app had closed. It runs once, as
+  `componentDidLoad` does. A list put back only finishes a stagger that was really cut off, not one that had finished.
+- **A child in the fab's flow other than its button kept its own width**, where `display: block` is as wide as the fab, and the
+  fab's width wasn't kept within the room there is, as `fit-content` is.
 - **A list's side changing from bottom to top kept its order**, and **one with its own margin didn't move**, as nothing else
   changed size. Both now have tests, found by the breakage run.
 

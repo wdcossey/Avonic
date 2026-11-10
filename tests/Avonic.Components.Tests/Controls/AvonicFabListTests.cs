@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avonic.Components.Controls;
 using static Avonic.Components.Tests.Controls.AvonicFabTests;
@@ -139,6 +140,46 @@ public class AvonicFabListTests
         clock.At(400);
 
         Assert.All(buttons, button => Assert.True(button.Show));
+    }
+
+    [AvaloniaFact]
+    public void L2_Buttons_From_A_Template_Are_Shown_When_The_List_First_Opens()
+    {
+        using var clock = new TestClock();
+        var list = new AvonicFabList
+        {
+            ItemsSource = new[] { "a", "b" },
+            ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new AvonicFabButton { Content = text, Width = 40, Height = 40 }),
+        };
+        using var scene = new Scene(new StackPanel { Children = { list } });
+
+        list.Activated = true;
+        Dispatcher.UIThread.RunJobs();
+        clock.At(100);
+
+        var buttons = list.GetLogicalDescendants().OfType<AvonicFabButton>().ToList();
+        Assert.Equal(2, buttons.Count);
+        Assert.All(buttons, button => Assert.True(button.Show));
+    }
+
+    [AvaloniaFact]
+    public void L2_A_Finished_Stagger_Is_Not_Run_Again_When_The_List_Comes_Back()
+    {
+        using var clock = new TestClock();
+        var buttons = Buttons(2);
+        var list = List(FabListSide.Top, buttons);
+        var holder = new StackPanel { Children = { list } };
+        using var scene = new Scene(holder);
+        list.Activated = true;
+        clock.At(100);
+
+        // Something the app did after the stagger finished stays done.
+        buttons[1].Show = false;
+        holder.Children.Remove(list);
+        holder.Children.Add(list);
+        clock.At(300);
+
+        Assert.False(buttons[1].Show);
     }
 
     [AvaloniaFact]

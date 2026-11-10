@@ -481,6 +481,27 @@ public class AvonicFabButtonTests
     });
 
     [AvaloniaFact]
+    public void B10_A_Coloured_Button_Overlay_Is_The_Contrast_Over_An_App_Variable() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicFabButton { Content = "x", Color = "warning" };
+        button.Resources["Avonic.FabButton.BackgroundFocused"] = new SolidColorBrush(Colors.Red);
+        button.Resources["Avonic.FabButton.BackgroundHover"] = new SolidColorBrush(Colors.Red);
+        var (_, scene) = Themed(button);
+        using (scene)
+        {
+            // :host(.ion-color.ion-focused) and :host(.ion-color:hover) set the background themselves, not through the variable.
+            scene.Window.MouseMove(Box(button, scene.Window).Center, RawInputModifiers.None);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(Colors.Black, Solid(Overlay(button).Background));
+
+            scene.Window.MouseMove(new Point(0, 0), RawInputModifiers.None);
+            button.Focus(NavigationMethod.Tab);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(Colors.Black, Solid(Overlay(button).Background));
+        }
+    });
+
+    [AvaloniaFact]
     public void B10_Color_In_A_List_Beats_The_List_Colours() => InstalledTheme.Run(_ =>
     {
         var (button, _, scene) = InList(new AvonicFabButton { Content = "x", Color = "danger" });

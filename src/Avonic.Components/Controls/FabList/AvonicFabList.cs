@@ -40,6 +40,7 @@ public class AvonicFabList : ItemsControl
     private readonly List<IDisposable> _timeouts = [];
     private readonly FabStyleValue<bool> _hidden = new(false);
     private bool _interrupted;
+    private int _pending;
 
     static AvonicFabList()
     {
@@ -84,8 +85,8 @@ public class AvonicFabList : ItemsControl
             UpdateSide();
             ItemsPanelRoot?.InvalidateMeasure();
 
-            // The fab places the list from its side.
-            (this.GetVisualParent() as FabPanel)?.InvalidateArrange();
+            // The fab places the list from its side, through a presenter if it came from a template.
+            this.FindAncestorOfType<FabPanel>()?.InvalidateArrange();
         }
     }
 
@@ -96,12 +97,37 @@ public class AvonicFabList : ItemsControl
     private void ActivatedChanged(bool activated)
     {
         ClearTimeouts();
+
+        // Buttons a template makes don't exist until a closed list, which isn't measured, is laid out for the first time. In the
+        // DOM they're there all along, so the stagger waits for them.
+        if (activated && ItemsPanelRoot is null && ItemsView.Any(item => item is not Control))
+        {
+            LayoutUpdated += OnFirstLayout;
+            return;
+        }
+
         var interval = activated ? ShowInterval : TimeSpan.Zero;
         var index = 0;
         foreach (var button in this.GetLogicalDescendants().OfType<AvonicFabButton>().ToList())
         {
-            _timeouts.Add(AvonicConfig.Schedule(() => button.SetCurrentValue(AvonicFabButton.ShowProperty, activated), interval * index));
+            _pending++;
+            _timeouts.Add(AvonicConfig.Schedule(
+                () =>
+                {
+                    _pending--;
+                    button.SetCurrentValue(AvonicFabButton.ShowProperty, activated);
+                },
+                interval * index));
             index++;
+        }
+    }
+
+    private void OnFirstLayout(object? sender, EventArgs e)
+    {
+        if (ItemsPanelRoot is not null)
+        {
+            LayoutUpdated -= OnFirstLayout;
+            ActivatedChanged(Activated);
         }
     }
 
@@ -112,7 +138,7 @@ public class AvonicFabList : ItemsControl
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromLogicalTree(e);
-        _interrupted |= _timeouts.Count > 0;
+        _interrupted |= _pending > 0;
         ClearTimeouts();
     }
 
@@ -134,6 +160,8 @@ public class AvonicFabList : ItemsControl
         }
 
         _timeouts.Clear();
+        _pending = 0;
+        LayoutUpdated -= OnFirstLayout;
     }
 
     private void UpdateSide()

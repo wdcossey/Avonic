@@ -5,6 +5,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -324,6 +325,39 @@ public class AvonicFabTests
 
         Assert.True(main.Activated);
         Assert.True(list.Activated);
+    }
+
+    [AvaloniaFact]
+    public void F4_Activated_Reaches_Children_From_A_Template_Once_They_Exist()
+    {
+        var fab = new AvonicFab
+        {
+            Activated = true,
+            ItemsSource = new[] { "main", "list" },
+            ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((name, _) =>
+                name == "main" ? new AvonicFabButton() : List(FabListSide.Top, new AvonicFabButton())),
+        };
+        using var scene = new Scene(fab);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(fab.GetLogicalDescendants().OfType<AvonicFabButton>().First().Activated);
+        Assert.True(fab.GetLogicalDescendants().OfType<AvonicFabList>().Single().Activated);
+    }
+
+    [AvaloniaFact]
+    public void F4_Coming_Back_Into_The_Tree_Does_Not_Open_A_List_The_App_Closed()
+    {
+        var list = List(FabListSide.Top, new AvonicFabButton());
+        var fab = new AvonicFab { Activated = true, Items = { new AvonicFabButton(), list } };
+        var holder = new StackPanel { Children = { fab } };
+        using var scene = new Scene(holder);
+        Assert.True(list.Activated);
+
+        list.Activated = false;
+        holder.Children.Remove(fab);
+        holder.Children.Add(fab);
+
+        Assert.False(list.Activated);
     }
 
     [AvaloniaFact]
@@ -703,6 +737,44 @@ public class AvonicFabTests
             AssertBox(4, -60, 56, 56, Box(list, fab));
         }
     });
+
+    [AvaloniaFact]
+    public void F8_A_List_From_A_Template_Moves_When_Its_Side_Changes() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        AvonicFabList? list = null;
+        var fab = new AvonicFab
+        {
+            ItemsSource = new object[] { "main", "list" },
+            ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((name, _) =>
+                name == "main" ? new AvonicFabButton { Content = "+" } : list = List(FabListSide.Bottom, new AvonicFabButton { Content = "a" })),
+            Horizontal = FabHorizontal.Center,
+            Vertical = FabVertical.Center,
+        };
+        var (_, scene) = InContent(fab);
+        using (scene)
+        {
+            fab.Activated = true;
+            clock.At(100);
+            Dispatcher.UIThread.RunJobs();
+            AssertBox(0, 66, 56, 56, Box(list!, fab));
+
+            list!.Side = FabListSide.Top;
+            Dispatcher.UIThread.RunJobs();
+            AssertBox(0, -66, 56, 56, Box(list, fab));
+        }
+    });
+
+    [AvaloniaFact]
+    public void F8_Another_Child_In_The_Flow_Is_As_Wide_As_The_Fab()
+    {
+        var bar = new Border { Height = 4 };
+        var fab = Fab(new AvonicFabButton { Width = 56, Height = 56 }, bar);
+        using var scene = new Scene(new Panel { Children = { fab } });
+
+        // display: block in a fit-content box: the button's 56.
+        AssertBox(0, 56, 56, 4, Box(bar, fab));
+    }
 
     // ── F9: nothing is cut off ───────────────────────────────────────────────────────────────
 

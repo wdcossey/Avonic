@@ -25,12 +25,14 @@ public class FabPanel : Panel
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        // fit-content: as wide as the content wants, whatever the room.
+        // fit-content: as wide as the content wants, within the room there is. The lists are out of the flow, so they have all
+        // they want.
         var infinite = new Size(double.PositiveInfinity, double.PositiveInfinity);
+        var inFlow = new Size(availableSize.Width, double.PositiveInfinity);
         double width = 0;
         foreach (var child in Children)
         {
-            child.Measure(infinite);
+            child.Measure(ListIn(child) is null ? inFlow : infinite);
             if (ListIn(child) is null)
             {
                 width = Math.Max(width, child.DesiredSize.Width);
@@ -63,10 +65,10 @@ public class FabPanel : Panel
                 continue;
             }
 
-            // display: block at its own width, from the start. An edge's top margin moves it up; a bottom margin only
-            // shortens the fab.
+            // display: block, as wide as the fab, where a fab button's own width keeps it at the start. An edge's top margin
+            // moves it up; a bottom margin only shortens the fab.
             var shift = EdgeShift(child, width, edgeTop, edgeBottom);
-            child.Arrange(new Rect(0, y + (edgeTop ? shift : 0), child.DesiredSize.Width, child.DesiredSize.Height));
+            child.Arrange(new Rect(0, y + (edgeTop ? shift : 0), width, child.DesiredSize.Height));
             y += child.DesiredSize.Height + shift;
         }
 
