@@ -678,6 +678,9 @@ public class AvonicInput : TemplatedControl, IItemControl
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        // Avalonia doesn't always raise an exit for a pointer over an input that leaves the tree: measured, it does when the
+        // test runs alone, and not after the rest of the suite has used the mouse.
+        PseudoClasses.Set(Activatable.HoverPseudoClass, false);
         _item = null;
         base.OnDetachedFromVisualTree(e);
     }

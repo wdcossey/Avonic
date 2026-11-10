@@ -1358,7 +1358,7 @@ public class AvonicInputTests
     [AvaloniaFact]
     public void R05_Hover_Ends_When_The_Input_Leaves_The_Tree() => InstalledTheme.Run(_ =>
     {
-        // Avalonia raises the exit itself when the input leaves, so the input needs nothing for it.
+        // Avalonia raises an exit here when this test runs alone, and not after the suite has used the mouse.
         var input = new AvonicInput { Label = "Solid", Fill = InputFill.Solid };
         var host = new Border { Child = input };
         using var scene = new Scene(Page(host));
