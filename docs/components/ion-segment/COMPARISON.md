@@ -91,6 +91,8 @@ everywhere in Avonic.
   The mapping rule makes `disabled` `IsEnabled`.
 - **`prefers-reduced-motion`** isn't read: Avalonia has no such setting, so the indicator always slides.
 - **A label's or icon's `hasLabel` and `hasIcon`** follow the button's children as they change. Ionic reads them only when it renders.
+- **Adding buttons doesn't scroll the checked one into view or move the view,** which Ionic's `slotchange` does through
+  `valueChanged`. Each new button checks itself as it attaches, as Ionic's `connectedCallback` does too.
 - **The view keeps its content in view when it's resized,** a step after the layout, as Chromium's snap does in the same frame.
 
 ## Known gaps

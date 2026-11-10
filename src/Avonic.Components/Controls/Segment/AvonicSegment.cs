@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
@@ -79,7 +78,6 @@ public class AvonicSegment : ItemsControl, IItemControl
     private Gesture? _gesture;
     private AvonicSegmentView? _segmentView;
     private TopLevel? _topLevel;
-    private bool _loaded;
     private bool _didLoad;
     private bool _activated;
     private object? _valueBeforeGesture;
@@ -100,7 +98,6 @@ public class AvonicSegment : ItemsControl, IItemControl
 
     public AvonicSegment()
     {
-        Items.CollectionChanged += OnSlottedItemsChange;
         Loaded += (_, _) => OnLoaded();
         Unloaded += (_, _) => OnUnloaded();
     }
@@ -206,7 +203,6 @@ public class AvonicSegment : ItemsControl, IItemControl
     /// </summary>
     private void OnLoaded()
     {
-        _loaded = true;
         _gesture?.Destroy();
         _gesture = Gesture.Create(new GestureConfig
         {
@@ -242,7 +238,6 @@ public class AvonicSegment : ItemsControl, IItemControl
 
     private void OnUnloaded()
     {
-        _loaded = false;
         // Destroying the gesture mid-drag never ends it, so the held indicator lets go here.
         if (_activated)
         {
@@ -378,15 +373,6 @@ public class AvonicSegment : ItemsControl, IItemControl
     }
 
     private void GestureChanged() => _gesture?.Enable(!Scrollable && IsEnabled && SegmentSwipeGesture);
-
-    private void OnSlottedItemsChange(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        // New buttons are checked if the value matches theirs.
-        if (_loaded)
-        {
-            ValueChanged(Value, null);
-        }
-    }
 
     // ── The gesture ──────────────────────────────────────────────────────────────────────────
 

@@ -134,7 +134,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | S14 | `IsEnabled="False"` disables every button, and enabling it again enables every button, as Ionic writes each button's `disabled` | `disabledChanged` |
 | S15 | The button after the checked one has `:after-checked`, set at load and when the indicator slides | `setCheckedClasses` |
 | S16 | In a toolbar: `:in-toolbar`, `:in-toolbar-color`, and the toolbar's min height (56) | `hostContext`, `:host(.in-toolbar)`; measured 56 high |
-| S17 | Buttons added later are checked if their value matches | `onSlottedItemsChange` |
+| S17 | Buttons added later are checked if their value matches | the button's `connectedCallback` `updateState` |
 | S18 | It raises `IonStyle` with `segment`, and counts as an input to an item | `emitStyle`; item.js `totalNestedInputs` |
 
 ### The button

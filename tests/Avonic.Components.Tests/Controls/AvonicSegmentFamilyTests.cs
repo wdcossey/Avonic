@@ -424,11 +424,13 @@ public class AvonicSegmentFamilyTests
         var both = Button("call", "Call", "call");
         var start = Button("wifi", "Wi-Fi", "wifi", SegmentButtonLayout.IconStart);
         var iconOnly = new AvonicSegmentButton { Value = "i", Items = { new AvonicIcon { IconName = "call" } } };
+        var bottom = Button("b", "Bottom", "call", SegmentButtonLayout.IconBottom);
         using var scene = new Scene(new StackPanel
         {
-            Children = { Segment("a", labelOnly), Segment("call", both), Segment("wifi", start), Segment("i", iconOnly) },
+            Children = { Segment("a", labelOnly), Segment("call", both), Segment("wifi", start), Segment("i", iconOnly), Segment("b", bottom) },
         });
         Settle();
+        Assert.Equal(70, bottom.Bounds.Height);
 
         var label = Box(labelOnly.Items.OfType<AvonicLabel>().Single(), labelOnly);
         Assert.Equal((13.0, 22.0), (label.Top, label.Height));
@@ -481,6 +483,7 @@ public class AvonicSegmentFamilyTests
         // Instant: activated and rippling at the press, then cancelled by the gesture's capture, as ionGestureCaptured cancels
         // tap-click: measured, the ripple gone by 600 ms with the press still held.
         Assert.DoesNotContain(Activatable.ActivatedPseudoClass, b.Classes);
+        Assert.NotEmpty(ripple.Ripples);
         clock.At(600);
         ripple.Tick();
         Assert.Empty(ripple.Ripples);
@@ -570,6 +573,57 @@ public class AvonicSegmentFamilyTests
         Assert.Equal(Colors.White, Text(toolbar, 0));
         Assert.Equal(Color.FromArgb(153, 255, 255, 255), Text(toolbar, 1));
         Assert.Equal(Colors.White, Bar(toolbar, 0));
+    });
+
+    [AvaloniaFact]
+    public void L3_Colour_Rules_That_Variables_Show() => InstalledTheme.Run(_ =>
+    {
+        // A segment's colour beats an app's color for an unchecked button, which is a literal there. The ripple is the base,
+        // in a coloured segment; the checked colour alone; the host's colour in a plain segment.
+        var danger = Segment("a", Button("a", "A"), Button("b", "B"));
+        danger.Color = "danger";
+        var plain = Segment("a", Button("a", "A"), Button("b", "B"));
+        var alone = Button("x", "Alone");
+        var page = new StackPanel { Children = { danger, plain, alone } };
+        page.Resources["Avonic.SegmentButton.Color"] = new SolidColorBrush(Colors.Red);
+        page.Resources["Avonic.SegmentButton.BackgroundChecked"] = new SolidColorBrush(Colors.Green);
+        using var scene = new Scene(page);
+        foreach (var button in Buttons(danger).Concat(Buttons(plain)).Append(alone))
+        {
+            button.Transitions = [];
+        }
+
+        Settle();
+
+        Assert.Equal(Color.FromArgb(153, 0, 0, 0), ColorOf(Buttons(danger)[1].Foreground));
+        Assert.Equal(Colors.Red, ColorOf(Buttons(plain)[1].Foreground));
+        Assert.Equal(Colors.Green, ColorOf(Buttons(plain)[0].Background));
+        Assert.Null(Buttons(danger)[0].Background);
+        Assert.Equal(Color.FromRgb(197, 0, 15), ColorOf(Part<AvonicRippleEffect>(Buttons(danger)[1], "PART_Ripple").Foreground));
+        Assert.Equal(Colors.Red, ColorOf(Part<AvonicRippleEffect>(Buttons(plain)[1], "PART_Ripple").Foreground));
+        Assert.Equal(Color.FromRgb(0, 84, 233), ColorOf(Part<AvonicRippleEffect>(alone, "PART_Ripple").Foreground));
+    });
+
+    [AvaloniaFact]
+    public void L5_A_Hovered_Or_Focused_Colour_Set_By_An_App_Shows() => InstalledTheme.Run(_ =>
+    {
+        var segment = Segment("a", Button("a", "A"), Button("b", "B"));
+        segment.Resources["Avonic.SegmentButton.ColorHover"] = new SolidColorBrush(Colors.Orange);
+        segment.Resources["Avonic.SegmentButton.ColorFocused"] = new SolidColorBrush(Colors.Purple);
+        using var scene = new Scene(segment);
+        var (a, b) = (Buttons(segment)[0], Buttons(segment)[1]);
+        a.Transitions = [];
+        b.Transitions = [];
+        Settle();
+
+        GestureTests.Render();
+        scene.Window.MouseMove(Centre(b, scene), RawInputModifiers.None);
+        Settle();
+        Assert.Equal(Colors.Orange, ColorOf(b.Foreground));
+
+        a.Focus(NavigationMethod.Tab);
+        Settle();
+        Assert.Equal(Colors.Purple, ColorOf(a.Foreground));
     });
 
     [AvaloniaFact]

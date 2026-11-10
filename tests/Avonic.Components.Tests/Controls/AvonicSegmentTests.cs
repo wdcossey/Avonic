@@ -257,7 +257,7 @@ public class AvonicSegmentTests
     }
 
     [AvaloniaFact]
-    public void S8_With_The_Gesture_Off_A_Click_Checks_With_The_Slide()
+    public void S8_With_The_Gesture_Off_A_Click_Checks_With_The_Slide() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         var segment = FriendsEnemies();
@@ -266,16 +266,23 @@ public class AvonicSegmentTests
         using var scene = new Scene(segment);
         var (a, b) = (Buttons(segment)[0], Buttons(segment)[1]);
 
-        Down(scene, Centre(b, scene));
+        // No gesture: a press on the checked button doesn't hold the indicator, and a release elsewhere is no click.
+        Down(scene, Centre(a, scene));
+        Move(scene, Centre(b, scene));
         clock.At(40);
-        // A drag off the gesture: the click comes from the button, at the release.
+        Up(scene, Centre(b, scene));
+        Assert.Equal("a", segment.Value);
+
+        // The click comes from the button, at the release.
+        Down(scene, Centre(b, scene));
         Move(scene, Centre(b, scene) + new Point(5, 0));
+        clock.At(80);
         Assert.Equal("a", segment.Value);
         Up(scene, Centre(b, scene) + new Point(5, 0));
-
         Assert.Equal("b", segment.Value);
         Assert.Equal(["b"], changes);
-        Assert.True(b.Slide!.IsRunning || Indicator(b).RenderTransform is null);
-        _ = a;
-    }
+
+        clock.At(80 + 16);
+        Assert.True(b.Slide!.IsRunning);
+    });
 }

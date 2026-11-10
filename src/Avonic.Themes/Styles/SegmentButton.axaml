@@ -14,15 +14,15 @@
         <Setter Property="FontSize" Value="24" />
     </Style>
 
-    <!-- ::slotted(ion-label) { display: block; max-width: 100%; line-height: 22px; text-overflow: ellipsis; white-space: nowrap;
-         overflow: hidden; pointer-events: none; margin-top: 12px; margin-bottom: 12px }, and the host's text-transform: uppercase -->
+    <!-- ::slotted(ion-label) { display: block; max-width: 100%; line-height: 22px; overflow: hidden; pointer-events: none;
+         margin-top: 12px; margin-bottom: 12px }, and the host's text-transform: uppercase. Its text-overflow: ellipsis and
+         white-space: nowrap are the host's too, which it inherits. -->
     <Style Selector="c|AvonicSegmentButton > c|AvonicLabel">
         <Setter Property="IsHitTestVisible" Value="False" />
         <Setter Property="Margin" Value="0,12" />
         <Setter Property="ClipToBounds" Value="True" />
         <Setter Property="TextBlock.LineHeight" Value="22" />
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
-        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
         <Setter Property="ContentTemplate" Value="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static c:AvonicSegmentButton.UppercaseTextForContent}}" />
     </Style>
 
