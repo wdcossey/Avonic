@@ -24,6 +24,9 @@ public class AvonicAccordionTests
 {
     private const double ContentHeight = 51;
 
+    /// <summary>cubic-bezier(0.25, 0.8, 0.5, 1), from accordion.md.css, not the control's own constant.</summary>
+    private static readonly Avonic.Components.Animation.CubicBezierEasing Ease = new(0.25, 0.8, 0.5, 1);
+
     private static AvonicItem Item(string text) => new() { Content = new AvonicLabel { Content = text } };
 
     private static AvonicAccordion Accordion(string value) => new()
@@ -255,6 +258,7 @@ public class AvonicAccordionTests
     {
         AvonicAccordion a = Accordion("a"), b = Accordion("b");
         b.Readonly = true;
+        b.ContentContent = new Border { Height = ContentHeight, Background = Brushes.Transparent };
         var group = Group("a", a, b);
         var changes = Changes(group);
         using var scene = Show(group);
@@ -297,6 +301,23 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B7_A_Readonly_Group_Refuses_An_Accordion_Further_In()
+    {
+        // Not the group's own child, so the group doesn't make it readonly: the group refuses its request instead.
+        var inner = Accordion("inner");
+        var group = new AvonicAccordionGroup { Readonly = true };
+        group.Items.Add(new StackPanel { Children = { inner } });
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        Assert.True(Header(inner).IsHitTestVisible);
+        Tap(scene, inner);
+
+        Assert.Null(group.Value);
+        Assert.Empty(changes);
+    }
+
+    [AvaloniaFact]
     public void B7_Readonly_Stops_The_Keyboard_Too()
     {
         var a = Accordion("a");
@@ -323,6 +344,19 @@ public class AvonicAccordionTests
         Tap(scene, b);
 
         Assert.Equal("a", group.Value);
+    }
+
+    [AvaloniaFact]
+    public void B8_Disabled_Stops_Automation_Too()
+    {
+        var a = Accordion("a");
+        a.IsEnabled = false;
+        var group = Group(null, a);
+        using var scene = Show(group);
+
+        ((IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(a)).Expand();
+
+        Assert.Null(group.Value);
     }
 
     [AvaloniaFact]
@@ -401,6 +435,17 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B10_An_Item_In_A_Panel_In_The_Header_Counts()
+    {
+        var item = Item("a");
+        var a = new AvonicAccordion { Value = "a", HeaderContent = new StackPanel { Children = { item } } };
+        using var scene = Show(Group(null, a));
+
+        Assert.True(item.Button);
+        Assert.IsType<AvonicIcon>(item.EndContent);
+    }
+
+    [AvaloniaFact]
     public void B11_A_Toggle_Icon_Goes_In_The_Items_End_Slot()
     {
         var a = Accordion("a");
@@ -455,6 +500,7 @@ public class AvonicAccordionTests
         using var scene = Show(Group(null, a, b));
 
         var wrapper = Assert.IsType<StackPanel>(item.EndContent);
+        Assert.Equal(Avalonia.Layout.Orientation.Horizontal, wrapper.Orientation);
         Assert.Same(note, wrapper.Children[0]);
         Assert.Contains("ion-accordion-toggle-icon", wrapper.Children[1].Classes);
         Assert.Same(panel, panelItem.EndContent);
@@ -542,6 +588,48 @@ public class AvonicAccordionTests
         Assert.Equal(["a", null], changes);
     }
 
+    /// <summary>A click from a key or from automation, on each kind of control that raises one: each bubbles to the header.</summary>
+    [AvaloniaFact]
+    public void B13_A_Click_From_Any_Control_Inside_Toggles()
+    {
+        var button = new AvonicButton { Content = "Go" };
+        var chip = new AvonicChip { Items = { "Chip" } };
+        var card = new AvonicCard { Button = true, Content = "Card" };
+        var stock = new Button { Content = "Stock" };
+        var item = Item("a");
+        item.EndContent = new StackPanel { Children = { button, chip, card, stock } };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        using var clock = new TestClock();
+        var now = 0;
+        foreach (var control in new Control[] { item, button, chip, card, stock })
+        {
+            ((IInvokeProvider)ControlAutomationPeer.CreatePeerForElement(control)).Invoke();
+            clock.At(now += 1000);
+        }
+
+        Assert.Equal(["a", null, "a", null, "a"], changes);
+    }
+
+    [AvaloniaFact]
+    public void B13_After_A_Tap_A_Key_Still_Toggles()
+    {
+        var a = Accordion("a");
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        Tap(scene, a);
+        ((AvonicItem)a.HeaderContent!).Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+
+        Assert.Equal(["a", null], changes);
+    }
+
     [AvaloniaFact]
     public void B13_A_Handled_Click_Inside_Does_Not_Toggle()
     {
@@ -576,7 +664,7 @@ public class AvonicAccordionTests
         clock.At(32);
         Assert.Equal(0, Shown(scene, b));
         clock.At(32 + 144);
-        var expected = ContentHeight * AvonicAccordion.TransitionEasing.Ease(144 / 300.0);
+        var expected = ContentHeight * Ease.Ease(144 / 300.0);
         Assert.Equal(expected, Content(b).MaxHeight, 6);
         // Laid out on whole pixels, rounded up.
         Assert.Equal(Math.Ceiling(expected), Shown(scene, b));
@@ -605,7 +693,7 @@ public class AvonicAccordionTests
         Assert.Equal(ContentHeight, Shown(scene, a));
 
         clock.At(32 + 144);
-        var expected = ContentHeight * (1 - AvonicAccordion.TransitionEasing.Ease(144 / 300.0));
+        var expected = ContentHeight * (1 - Ease.Ease(144 / 300.0));
         Assert.Equal(expected, Content(a).MaxHeight, 6);
         Assert.Equal(Math.Ceiling(expected), Shown(scene, a));
 
@@ -613,6 +701,42 @@ public class AvonicAccordionTests
         Assert.False(Content(a).IsVisible);
         Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
     }
+
+    [AvaloniaFact]
+    public void B14_The_Content_Keeps_Its_Own_Height_While_The_Box_Grows()
+    {
+        // A scroller is as tall as it's let be, so it shows whether the content is measured at its own height, as a block is.
+        var a = new AvonicAccordion
+        {
+            Value = "a",
+            HeaderContent = Item("a"),
+            ContentContent = new ScrollViewer { Content = new Border { Height = ContentHeight } },
+        };
+        var b = Accordion("b");
+        using var scene = Show(Group("b", a, b));
+        using var clock = new TestClock();
+
+        Tap(scene, a);
+        clock.At(32 + 144);
+        scene.Window.UpdateLayout();
+
+        Assert.True(Content(a).Bounds.Height < ContentHeight);
+        Assert.Equal(ContentHeight, Content(a).Child!.Bounds.Height);
+    }
+
+    [AvaloniaFact]
+    public void B14_An_Accordion_Never_Opened_Is_Not_Animated() => InstalledTheme.Run(_ =>
+    {
+        // A tap the group refuses is still an interaction, but it has never been open, so its host has no transitions.
+        var inner = Accordion("inner");
+        var group = new AvonicAccordionGroup { Readonly = true };
+        group.Items.Add(new StackPanel { Children = { inner } });
+        using var scene = Show(group);
+
+        Tap(scene, inner);
+
+        Assert.Null(inner.Transitions);
+    });
 
     [AvaloniaFact]
     public void B14_Nothing_Animates_Before_An_Interaction()
@@ -753,6 +877,9 @@ public class AvonicAccordionTests
         Assert.Equal(new Thickness(0), group.Margin);
         Assert.Equal(new Thickness(0), a.Margin);
         Assert.Equal(new CornerRadius(0), a.CornerRadius);
+        // background-color: var(ion-background-color), and the host doesn't clip, so an inset shadow shows.
+        Assert.Equal(Colors.White, Assert.IsAssignableFrom<ISolidColorBrush>(a.Background).Color);
+        Assert.False(a.ClipToBounds);
         Assert.Equal(0, Part<Border>(a, "PART_Host").BoxShadow.Count);
     });
 
@@ -801,10 +928,15 @@ public class AvonicAccordionTests
         group.Expand = AccordionGroupExpand.Inset;
         using var scene = Show(group);
 
-        var inner = Part<Border>((AvonicItem)b.HeaderContent!, "PART_Inner").BorderThickness;
-        Assert.Equal(new Thickness(0), inner);
-        var aInner = Part<Border>((AvonicItem)a.HeaderContent!, "PART_Inner").BorderThickness;
-        Assert.Equal(new Thickness(0, 0, 0, 1), aInner);
+        Thickness Inner(AvonicAccordion accordion) => Part<Border>((AvonicItem)accordion.HeaderContent!, "PART_Inner").BorderThickness;
+        Assert.Equal(new Thickness(0), Inner(b));
+        Assert.Equal(new Thickness(0, 0, 0, 1), Inner(a));
+
+        // Open, it's no longer the one before an open one, so its inner line is back: only border-width goes while open.
+        group.Animated = false;
+        group.Value = "b";
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(new Thickness(0, 0, 0, 1), Inner(b));
     });
 
     // ── B20: keys ────────────────────────────────────────────────────────────────────────────
@@ -834,6 +966,22 @@ public class AvonicAccordionTests
         Assert.Same(Item(a), Focused());
         Press(PhysicalKey.End);
         Assert.Same(Item(c), Focused());
+    }
+
+    [AvaloniaFact]
+    public void B20_A_Group_Inside_Moves_Focus_Among_Its_Own_Only()
+    {
+        AvonicAccordion x = Accordion("x"), y = Accordion("y");
+        var inner = Group(null, x, y);
+        var outer = Accordion("outer");
+        outer.ContentContent = inner;
+        var other = Accordion("other");
+        using var scene = Show(Group("outer", outer, other));
+
+        ((AvonicItem)x.HeaderContent!).Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.ArrowDown, RawInputModifiers.None);
+
+        Assert.Same(y.HeaderContent, scene.Window.FocusManager!.GetFocusedElement());
     }
 
     [AvaloniaFact]

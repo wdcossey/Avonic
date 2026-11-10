@@ -87,7 +87,7 @@ A click on the second header, with the first open. Chromium's frames are about 1
 | B17 | `accordion-next`, `accordion-previous` | match, through the inset corners |
 | B18 | Inset margins, corners and shadow | match, above. The host's `transition: all` is an Avalonia transition of the margin and the corners, on real time |
 | B19 | The header item's border | match, above |
-| B20 | Arrow keys, Home and End move focus between headers, wrapping | match. Deliberate: a key that moves focus is handled |
+| B20 | Arrow keys, Home and End move focus between headers, wrapping | match. Not handled, as Ionic doesn't prevent the default |
 | B21 | Changing an accordion's value works its state out again | match |
 | B22 | `aria-expanded` | deliberate: the accordion's own peer has `ExpandCollapse`, as the item's peer is the item's |
 

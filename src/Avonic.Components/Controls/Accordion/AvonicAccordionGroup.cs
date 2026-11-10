@@ -189,7 +189,8 @@ public class AvonicAccordionGroup : ItemsControl
     /// <summary><c>requestAccordionToggle</c>.</summary>
     internal void RequestAccordionToggle(string? accordionValue, bool expand)
     {
-        if (Readonly || !IsEffectivelyEnabled)
+        // Ionic checks disabled here too. An accordion in a disabled group is disabled itself, through IsEnabled, so it never asks.
+        if (Readonly)
         {
             return;
         }
@@ -223,7 +224,8 @@ public class AvonicAccordionGroup : ItemsControl
 
     /// <summary>
     /// <c>onKeydown</c>, in place of an <see cref="ItemsControl"/>'s own arrow keys. Only with focus in an accordion's header, so
-    /// that a control in the content keeps its keys. A key that moves focus is handled, so that nothing moves it again.
+    /// that a control in the content keeps its keys. Ionic doesn't prevent the key's default, so it isn't handled: a scroller
+    /// around still scrolls, as a page does.
     /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -244,11 +246,12 @@ public class AvonicAccordionGroup : ItemsControl
             }
         }
 
-        if (!inHeader || accordionEl is null || accordionEl.Group != this)
+        if (!inHeader || accordionEl is null)
         {
             return;
         }
 
+        // closest('ion-accordion-group') === this, and in its own accordions: the second means the first, here.
         var accordions = Accordions().ToList();
         var start = accordions.IndexOf(accordionEl);
         if (start == -1)
@@ -264,10 +267,7 @@ public class AvonicAccordionGroup : ItemsControl
             _ => accordions[^1],
         };
 
-        if (next.FocusFirst())
-        {
-            e.Handled = true;
-        }
+        next.FocusFirst();
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────

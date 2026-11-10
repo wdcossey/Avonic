@@ -96,7 +96,6 @@ No methods, slots, parts or CSS variables. Its children have no slot in `core.js
 - `prefers-reduced-motion` has no equivalent in Avalonia, so it isn't read.
 - An accordion inside a disabled one is disabled too, through `IsEnabled`; in Ionic it only looks it, under the 0.4 opacity.
 - Group `readonly` set back to false doesn't clear an accordion's own `readonly`, as Ionic's assignment would.
-- Arrow keys that move focus are handled, so that Avalonia's own directional navigation doesn't move it again.
 
 ## Dependencies
 

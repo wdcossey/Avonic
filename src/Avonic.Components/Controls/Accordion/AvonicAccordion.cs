@@ -670,13 +670,11 @@ public class AvonicAccordion : TemplatedControl
     /// <summary>
     /// <c>focus()</c>, with <c>delegatesFocus</c>: the first control in it that can take focus, the header's first.
     /// </summary>
-    internal bool FocusFirst()
-    {
-        var target = this.GetVisualDescendants()
+    internal void FocusFirst() =>
+        this.GetVisualDescendants()
             .OfType<InputElement>()
-            .FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible);
-        return target?.Focus(NavigationMethod.Directional) == true;
-    }
+            .FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible)
+            ?.Focus(NavigationMethod.Directional);
 
     // ── When it first loads ──────────────────────────────────────────────────────────────────
 
