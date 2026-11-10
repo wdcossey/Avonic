@@ -561,6 +561,24 @@ public class AvonicBreadcrumbsTests
         AssertColor(Primary, a.Foreground);
     });
 
+    [AvaloniaFact]
+    public void B14_A_Prop_Of_Its_Own_Renders_It_Again_And_Reads_A_Toolbar_Coloured_Since() => InstalledTheme.Run(_ =>
+    {
+        var trail = Trail("A", "B");
+        var toolbar = new AvonicToolbar { Content = trail };
+        using var scene = Show(toolbar);
+        var a = Crumbs(trail)[0];
+
+        toolbar.Color = "primary";
+        Dispatcher.UIThread.RunJobs();
+        AssertColor(Plain, a.Foreground);
+
+        // Its own colour: in-toolbar-color comes after ion-color, so the contrast at 0.8.
+        a.Color = "danger";
+        Dispatcher.UIThread.RunJobs();
+        AssertColor(Colors.White, a.Foreground, 0.8);
+    });
+
     // ── 15, 16: a link ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -683,13 +701,54 @@ public class AvonicBreadcrumbsTests
         AssertColor(Colors.White, native.Background);
         Assert.Equal(new CornerRadius(4), native.CornerRadius);
         Assert.Equal(2, native.BoxShadow.Count);
-        Assert.Null(link.FocusAdorner);
+
+        // overflow: visible, so the shadow isn't cut off by the breadcrumb or the row.
+        Assert.False(link.ClipToBounds);
+        Assert.False(trail.ClipToBounds);
 
         // A press anywhere ends it, as focus-visible's pointerdown does.
         Click(scene, new Point(380, 830));
         AssertColor(Plain, link.Foreground);
         Assert.Equal(default, native.CornerRadius);
     });
+
+    // outline: none, on the link and on the indicator. The adorner comes from the app's base theme, which TestApp doesn't load, so
+    // this adds it underneath, as the sample does. FocusAdorner reads null either way, so only the layer shows what's drawn.
+    [AvaloniaFact]
+    public void B16_B20_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var link = Crumb("A", "#a");
+                var trail = Trail(link, Crumb("B"), Crumb("C"), Crumb("D"));
+                trail.MaxItems = 3;
+                var other = new Button { Content = "x" };
+                using var scene = Show(new StackPanel { Children = { trail, other } });
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(link)!;
+
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(link.IsFocused);
+                Assert.Empty(layer.Children);
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(Indicator(Crumbs(trail)[1]).IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
 
     [AvaloniaFact]
     public void B17_IonFocus_And_IonBlur_Follow_The_Breadcrumb_Not_Its_Indicator()
@@ -781,6 +840,7 @@ public class AvonicBreadcrumbsTests
         Assert.Equal("ellipsis-horizontal", icon.IconName);
         Assert.Equal(22, icon.Bounds.Height);
         Assert.Equal(22, icon.FontSize);
+        Assert.NotNull(indicator.Cursor);
 
         Hover(scene, indicator);
         Assert.Equal(0.7, indicator.Opacity);

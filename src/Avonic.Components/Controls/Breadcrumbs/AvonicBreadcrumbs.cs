@@ -132,11 +132,6 @@ public class AvonicBreadcrumbs : ItemsControl
         {
             BreadcrumbsChanged();
         }
-        else if (change.Property == ColorProperty)
-        {
-            // render. A breadcrumb inside reads hostContext('ion-breadcrumbs[color]') only at its own next render, as in Ionic.
-            UpdateClasses();
-        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -144,7 +139,8 @@ public class AvonicBreadcrumbs : ItemsControl
         base.OnAttachedToVisualTree(e);
         UpdateClasses();
 
-        // componentWillLoad.
+        // componentWillLoad. Ionic reads the classes again at each render, which only a change of toolbar between two of its own
+        // props would show.
         _loaded = true;
         BreadcrumbsInit();
     }
@@ -155,7 +151,7 @@ public class AvonicBreadcrumbs : ItemsControl
         _loaded = false;
     }
 
-    /// <summary>hostContext('ion-toolbar') and hostContext('ion-toolbar[color]'), read at each render.</summary>
+    /// <summary>hostContext('ion-toolbar') and hostContext('ion-toolbar[color]'): any ancestor.</summary>
     private void UpdateClasses()
     {
         bool inToolbar = false, inToolbarColor = false;

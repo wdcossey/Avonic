@@ -31,7 +31,6 @@
         <Setter Property="Margin" Value="14,0" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="CornerRadius" Value="2" />
-        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusAdorner" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Avonic.Breadcrumb.Md.CollapsedIndicatorBackground}" />
@@ -42,7 +41,6 @@
                                   Background="{TemplateBinding Background}"
                                   CornerRadius="{TemplateBinding CornerRadius}"
                                   Content="{TemplateBinding Content}"
-                                  ClipToBounds="False"
                                   HorizontalContentAlignment="Center"
                                   VerticalContentAlignment="Center" />
             </ControlTemplate>
@@ -101,7 +99,7 @@
                             VerticalAlignment="Center"
                             IsVisible="False"
                             AutomationProperties.Name="Show more breadcrumbs">
-                        <!-- font-size: 1.375rem; margin-top: 1px. Its own size, so that it overflows the 18 px button, as in CSS, and isn't shrunk to it. -->
+                        <!-- font-size: 1.375rem; margin-top: 1px. Its own size, so that it isn't shrunk to the 18 px button. -->
                         <c:AvonicIcon IconName="ellipsis-horizontal" FontSize="22" Width="22" Height="22" Margin="0,1,0,0"
                                       AutomationProperties.AccessibilityView="Raw" />
                     </Button>
@@ -191,11 +189,8 @@
             </Setter>
         </Style>
 
-        <!-- :host(.in-breadcrumbs-color.breadcrumb-active), then :host(.in-toolbar-color.breadcrumb-active), which tie with hover and
-             come after it. -->
-        <Style Selector="^:in-breadcrumbs-color:active">
-            <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Base)}" />
-        </Style>
+        <!-- :host(.in-toolbar-color.breadcrumb-active), which ties with hover and comes after it. Its twin for in-breadcrumbs-color
+             only differs from hover over a link, and the shade below beats both there, so it's left out. -->
         <Style Selector="^:in-toolbar-color:active">
             <Setter Property="Foreground" Value="{Binding $self.(b:ColorPalette.Contrast)}" />
         </Style>
