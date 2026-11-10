@@ -166,9 +166,10 @@ with the arrows. `:in-list` comes from the logical ancestors on
 attach, for the 16 at each side, so the rule is in the group's own theme and costs nothing elsewhere. `ion-touched` and
 `ion-invalid` are style classes, as classes an app sets are.
 
-The item rule (G8) is `AutomationProperties.ControlTypeOverride`, in `Styles/RadioGroup.axaml`, as the mapping says for a role
-from `hostContext` on a control that isn't ours: `c|AvonicRadioGroup c|AvonicItem:not(:button)` → `Group`, the item's own type
-outside a list. A button item stays a button, as it does in a list.
+The item rule (G8) is in the item's peer: `inList` is a list ancestor and no radio-group ancestor, as `item.js` has it, so an item in
+a group is a `Group`, its own type outside a list, and a button item stays a button. It was a rule in `Styles/RadioGroup.axaml`
+until the P2 roll-up, which moved it, as the mapping says for a role from `hostContext` on a control of ours, and took the style
+budget down by one.
 
 ## Extensions
 

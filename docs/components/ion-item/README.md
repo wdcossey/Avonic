@@ -158,7 +158,7 @@ public class AvonicToggle : TemplatedControl, IItemControl
 | The type | Effect in an item |
 |---|---|
 | `Checkbox`, `Datetime`, `Select`, `Radio` | One of these alone makes the item activatable |
-| `Toggle`, `Checkbox`, `Radio`, `Select`, `Input`, `Textarea` | Can receive a tap on the padding |
+| `Toggle`, `Checkbox`, `Radio`, `Select`, `Input`, `Textarea` | Can receive a tap on the padding, if enabled at the tap, as Ionic looks at each click |
 | `Input`, `Textarea` | Don't get a pointer cursor over the item |
 | `Button` | Avalonia's `Button` counts without implementing this |
 
@@ -179,7 +179,14 @@ RaiseEvent(new IonStyleEventArgs(new Dictionary<string, bool>
 ```
 
 The item's own rules read `interactive`, `interactive-disabled`, `label-stacked`, `label-floating` and `textarea`. It also
-works out which control is the first interactive one again, so raise this when a control's `IsEnabled` changes.
+works out which control is the first interactive one again. A tap on the padding looks for it at the tap, so a control enabled
+later still takes it without raising anything.
+
+### Roles
+
+The item's peer is a list item in an `AvonicList`, but not in an `AvonicRadioGroup` (`inList` in `item.js`), and a group
+otherwise; a button item is a button. As an `AvonicAccordion`'s header, it has `ExpandCollapse`, for the `aria-expanded` the
+accordion sets on its button.
 
 ### Slotted styles
 

@@ -175,7 +175,7 @@ public class AvonicAccordion : TemplatedControl
 
     internal AccordionState State => _state;
 
-    private bool IsExpandedState => _state is AccordionState.Expanded or AccordionState.Expanding;
+    internal bool IsExpandedState => _state is AccordionState.Expanded or AccordionState.Expanding;
 
     /// <summary>Its own <c>readonly</c>, or its group's, which Ionic copies to the group's own accordions.</summary>
     private bool IsReadonly => Readonly || OwnGroup is { Readonly: true };
@@ -551,7 +551,8 @@ public class AvonicAccordion : TemplatedControl
             _content.ClearValue(MaxHeightProperty);
         }
 
-        _peer?.RaiseExpandCollapseChanged();
+        // setAria: aria-expanded on the header item's button, found again each time.
+        HeaderItem()?.RaiseExpandCollapseChanged();
     }
 
     // ── Template ─────────────────────────────────────────────────────────────────────────────
@@ -823,49 +824,11 @@ public class AvonicAccordion : TemplatedControl
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
 
-    private AccordionAutomationPeer? _peer;
+    protected override AutomationPeer OnCreateAutomationPeer() => new AccordionAutomationPeer(this);
 
-    protected override AutomationPeer OnCreateAutomationPeer() => _peer = new AccordionAutomationPeer(this);
-
-    /// <summary>
-    /// <c>aria-expanded</c>, which Ionic puts on the header item's button: the accordion's own peer says it here, as the item's
-    /// peer is the item's. Expanding or collapsing it asks the group, as a tap does.
-    /// </summary>
-    private sealed class AccordionAutomationPeer(AvonicAccordion owner) : ControlAutomationPeer(owner), IExpandCollapseProvider
+    /// <summary>A group. <c>aria-expanded</c> is on the header item's peer, where Ionic puts it, on the item's button.</summary>
+    private sealed class AccordionAutomationPeer(AvonicAccordion owner) : ControlAutomationPeer(owner)
     {
-        private ExpandCollapseState _last = owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
-
-        public ExpandCollapseState ExpandCollapseState =>
-            owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
-
-        public bool ShowsMenu => false;
-
-        public void Expand()
-        {
-            if (!owner.IsExpandedState)
-            {
-                owner.ToggleExpanded();
-            }
-        }
-
-        public void Collapse()
-        {
-            if (owner.IsExpandedState)
-            {
-                owner.ToggleExpanded();
-            }
-        }
-
-        public void RaiseExpandCollapseChanged()
-        {
-            var state = ExpandCollapseState;
-            if (state != _last)
-            {
-                RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, _last, state);
-                _last = state;
-            }
-        }
-
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
 
         protected override bool IsControlElementCore() => true;

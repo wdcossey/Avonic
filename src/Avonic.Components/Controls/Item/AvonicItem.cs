@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
@@ -338,6 +339,13 @@ public class AvonicItem : TemplatedControl, IItemHost
         _ => null,
     };
 
+    /// <summary>
+    /// Whether anything slotted could be <c>getFirstInteractive</c>'s, enabled or not: Ionic looks at each click, so a control
+    /// enabled after the item looked still takes a tap on the padding, which <see cref="Tap"/> checks.
+    /// </summary>
+    private bool MayHaveFirstInteractive() =>
+        SlottedControls().OfType<IItemControl>().Any(control => FirstInteractiveTypes.Contains(control.ItemControlType));
+
     /// <summary><c>getFirstInteractive</c>.</summary>
     private IItemControl? FirstInteractive() =>
         SlottedControls()
@@ -349,7 +357,7 @@ public class AvonicItem : TemplatedControl, IItemHost
     private void UpdateInteractivity()
     {
         // Most rows are plain, and don't pay for this until they have something to press or to forward to.
-        if (_native is null && (Button || FirstInteractive() is not null))
+        if (_native is null && (Button || MayHaveFirstInteractive()))
         {
             _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
             UpdateIsEffectivelyEnabled();
@@ -470,26 +478,84 @@ public class AvonicItem : TemplatedControl, IItemHost
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
 
-    protected override AutomationPeer OnCreateAutomationPeer() => new ItemAutomationPeer(this);
+    private ItemAutomationPeer? _peer;
 
-    private sealed class ItemAutomationPeer(AvonicItem owner) : ControlAutomationPeer(owner), IInvokeProvider
+    protected override AutomationPeer OnCreateAutomationPeer() => _peer = new ItemAutomationPeer(this);
+
+    /// <summary>The accordion whose header this item is: <c>getSlottedHeaderIonItem</c>, the other way round.</summary>
+    private AvonicAccordion? HeaderOf() =>
+        this.GetLogicalAncestors().OfType<AvonicAccordion>().FirstOrDefault(accordion => accordion.HeaderItem() == this);
+
+    /// <summary>The accordion's <c>setAria</c>: its state changed, which this item's peer announces.</summary>
+    internal void RaiseExpandCollapseChanged() => _peer?.RaiseExpandCollapseChanged();
+
+    private sealed class ItemAutomationPeer(AvonicItem owner) : ControlAutomationPeer(owner), IInvokeProvider, IExpandCollapseProvider
     {
-        /// <summary>Ionic only sets onClick when clickable, "to prevent screen readers from reading all items as clickable".</summary>
+        private ExpandCollapseState? _last;
+
+        /// <summary>
+        /// Ionic only sets onClick when clickable, "to prevent screen readers from reading all items as clickable". And
+        /// <c>aria-expanded</c> only on an accordion's header item, which the accordion sets on its button.
+        /// </summary>
         protected override object? GetProviderCore(Type providerType) =>
-            providerType == typeof(IInvokeProvider) && !owner.Button ? null : base.GetProviderCore(providerType);
+            providerType == typeof(IInvokeProvider) && !owner.Button ? null
+            : providerType == typeof(IExpandCollapseProvider) && owner.HeaderOf() is null ? null
+            : base.GetProviderCore(providerType);
+
+        public ExpandCollapseState ExpandCollapseState =>
+            owner.HeaderOf()?.IsExpandedState == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
+
+        public bool ShowsMenu => false;
+
+        /// <summary>Asks the group, as a tap does.</summary>
+        public void Expand()
+        {
+            if (owner.HeaderOf() is { IsExpandedState: false } accordion)
+            {
+                accordion.ToggleExpanded();
+            }
+        }
+
+        public void Collapse()
+        {
+            if (owner.HeaderOf() is { IsExpandedState: true } accordion)
+            {
+                accordion.ToggleExpanded();
+            }
+        }
+
+        /// <summary>Only a change: an accordion that renders again in the same state says nothing.</summary>
+        public void RaiseExpandCollapseChanged()
+        {
+            var state = ExpandCollapseState;
+            var last = _last ?? state;
+            _last = state;
+            if (state != last)
+            {
+                RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, last, state);
+            }
+        }
 
         /// <summary><c>aria-disabled</c>: <c>disabled || childStyles['item-interactive-disabled']</c>.</summary>
         protected override bool IsEnabledCore() =>
             base.IsEnabledCore() && !owner.PseudoClasses.Contains(":item-interactive-disabled");
 
         /// <summary>
-        /// <c>role="listitem"</c>, where <c>hostContext('ion-list')</c>. A button item stays a button: Ionic has a button inside the
-        /// listitem, and Avalonia has one peer for both.
+        /// <c>role="listitem"</c>, where <c>inList = hostContext('ion-list') &amp;&amp; !hostContext('ion-radio-group')</c>. A button
+        /// item stays a button: Ionic has a button inside the listitem, and Avalonia has one peer for both.
         /// </summary>
-        protected override AutomationControlType GetAutomationControlTypeCore() =>
-            owner.Button ? AutomationControlType.Button
-            : owner.GetLogicalAncestors().OfType<AvonicList>().Any() ? AutomationControlType.ListItem
-            : AutomationControlType.Group;
+        protected override AutomationControlType GetAutomationControlTypeCore()
+        {
+            if (owner.Button)
+            {
+                return AutomationControlType.Button;
+            }
+
+            var ancestors = owner.GetLogicalAncestors().ToList();
+            return ancestors.OfType<AvonicList>().Any() && !ancestors.OfType<AvonicRadioGroup>().Any()
+                ? AutomationControlType.ListItem
+                : AutomationControlType.Group;
+        }
 
         /// <summary>A native button names itself from what's inside it.</summary>
         protected override string? GetNameCore()

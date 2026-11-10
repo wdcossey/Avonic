@@ -395,7 +395,7 @@ public class AvonicAccordionTests
         var group = Group(null, a);
         using var scene = Show(group);
 
-        ((IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(a)).Expand();
+        ((IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(HeaderOf(a))).Expand();
 
         Assert.Null(group.Value);
     }
@@ -1333,7 +1333,7 @@ public class AvonicAccordionTests
         var group = Group(new[] { "a" }, a, b);
         group.Multiple = true;
         using var scene = Show(group);
-        var peer = ControlAutomationPeer.CreatePeerForElement(a);
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(a));
         var changes = 0;
         peer.PropertyChanged += (_, e) => changes += e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty ? 1 : 0;
 
@@ -1351,7 +1351,7 @@ public class AvonicAccordionTests
         using var scene = Show(group);
         using var clock = new TestClock();
 
-        var peer = (IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(b);
+        var peer = (IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
         Assert.Equal(ExpandCollapseState.Collapsed, peer.ExpandCollapseState);
 
         peer.Expand();
@@ -1360,6 +1360,46 @@ public class AvonicAccordionTests
         clock.At(16);
         Assert.Equal(ExpandCollapseState.Expanded, peer.ExpandCollapseState);
     }
+
+    // setAria puts aria-expanded on the header item's button, so the item says it, and the accordion and other items don't.
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Says_It_And_Nothing_Else_Does()
+    {
+        var a = Accordion("a");
+        var other = Item("other");
+        var group = Group("a", a);
+        using var scene = Show(new StackPanel { Children = { group, other } });
+
+        Assert.NotNull(ControlAutomationPeer.CreatePeerForElement(HeaderOf(a)).GetProvider<IExpandCollapseProvider>());
+        Assert.Null(ControlAutomationPeer.CreatePeerForElement(a).GetProvider<IExpandCollapseProvider>());
+        Assert.Null(ControlAutomationPeer.CreatePeerForElement(other).GetProvider<IExpandCollapseProvider>());
+    }
+
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Announces_A_Change()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
+        _ = ((IExpandCollapseProvider)peer).ExpandCollapseState;
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+
+        group.Value = "b";
+        clock.At(16);
+
+        Assert.Equal([ExpandCollapseState.Expanded], changes);
+    }
+
+    private static AvonicItem HeaderOf(AvonicAccordion accordion) => (AvonicItem)accordion.HeaderContent!;
 }
 
 internal static class AccordionTestExtensions

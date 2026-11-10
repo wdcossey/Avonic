@@ -95,7 +95,7 @@ its own height and clips it, so the content slides rather than squeezes.
   header item's line goes while open, on the last accordion, and inset on one before an open one.
 - With focus in a header, ArrowDown and ArrowUp move it to the next or previous accordion, wrapping, and Home and End to the first
   and the last. A disabled accordion can't take focus here, so it's passed over.
-- The accordion's automation peer has `ExpandCollapse`, for `aria-expanded`.
+- The header item's automation peer has `ExpandCollapse`, for the `aria-expanded` Ionic sets on its button; the accordion's is a group.
 
 ## Extensions
 
@@ -106,8 +106,7 @@ None.
 - `prefers-reduced-motion` isn't read: Avalonia has no equivalent.
 - `IsEnabled` reaches the controls in a disabled accordion, so one in the content that dims itself when disabled dims twice. The
   header's item is kept at its opacity.
-- `aria-expanded` is on the accordion's peer, not the header item's; `role="region"` on the content isn't mapped. Proposed: the
-  item's peer reports `ExpandCollapse` when it's an accordion's header.
+- `role="region"` on the content isn't mapped.
 - The host's transitions and the icon's turn run on real time, as Avalonia's transitions do.
 - From a key, only the `Click` of an `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or stock `Button` in the header
   toggles it. A pointer press on anything there does.
