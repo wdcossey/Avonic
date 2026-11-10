@@ -1,6 +1,5 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:b="using:Avonic.Components.Behaviors"
                     xmlns:c="using:Avonic.Components.Controls">
 
     <Design.PreviewWith>
@@ -32,10 +31,7 @@
             <Setter Property="Padding" Value="8,0" />
         </Style>
 
-        <!-- :host(.in-toolbar-color): the contrast, for anything inside that inherits it. -->
-        <Style Selector="^:in-toolbar-color">
-            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
-        </Style>
+        <!-- :host(.in-toolbar-color) sets the toolbar's contrast, which the row inherits from the toolbar anyway. -->
     </ControlTheme>
 
 </ResourceDictionary>

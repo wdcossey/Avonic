@@ -241,7 +241,7 @@ public class AvonicBreadcrumb : TemplatedControl
     private bool _collapsed;
     private bool _last;
     private bool _showCollapsedIndicator;
-    private bool _indicatorClicked;
+    private bool _releasing;
     private Button? _indicator;
     private Control? _separatorPart;
     private Control? _nativePart;
@@ -266,7 +266,11 @@ public class AvonicBreadcrumb : TemplatedControl
 
         // The DOM click on release, with no keys of its own: a link takes Enter only, below.
         _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled);
-        AddHandler(PointerPressedEvent, (_, _) => _indicatorClicked = false, RoutingStrategies.Tunnel, handledEventsToo: true);
+
+        // A release on its way through, for the indicator, which clicks during it: see OnIndicatorClick. Nothing is left set when a
+        // release goes elsewhere, as one does when a gesture takes the pointer.
+        AddHandler(PointerReleasedEvent, (_, _) => _releasing = true, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(PointerReleasedEvent, (_, _) => _releasing = false, RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     /// <summary>Ionic's internal <c>collapsed</c>: hidden in the collapsed middle of the trail.</summary>
@@ -400,17 +404,16 @@ public class AvonicBreadcrumb : TemplatedControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>collapsedIndicatorClick</c>, then the DOM click reaching the host. A press on the indicator also ends in
-    /// <see cref="OnNativeClick"/>, as a press anywhere on the breadcrumb does, so that one is skipped. A key or a screen reader
-    /// clicks the indicator with no press.
+    /// <c>collapsedIndicatorClick</c>, then the DOM click reaching the host. A press on the indicator reaches the host's click through
+    /// <see cref="NativeButton"/>, as a press anywhere on the breadcrumb does, later in the same release. A key or a screen reader
+    /// clicks the indicator with no release, so that click is raised here.
     /// </summary>
     private void OnIndicatorClick(object? sender, RoutedEventArgs e)
     {
         RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
-        _indicatorClicked = true;
-        if (IsEffectivelyEnabled)
+        if (!_releasing)
         {
-            _native.Click(ClickEvent);
+            OnNativeClick();
         }
     }
 
@@ -420,12 +423,6 @@ public class AvonicBreadcrumb : TemplatedControl
     /// </summary>
     private void OnNativeClick()
     {
-        if (_indicatorClicked)
-        {
-            _indicatorClicked = false;
-            return;
-        }
-
         if (IsEffectivelyEnabled)
         {
             _native.Click(ClickEvent);
@@ -438,7 +435,6 @@ public class AvonicBreadcrumb : TemplatedControl
         base.OnKeyDown(e);
         if (!e.Handled && e.Key == Key.Enter && ReferenceEquals(e.Source, this) && Href is not null && !_collapsed)
         {
-            _indicatorClicked = false;
             OnNativeClick();
             e.Handled = true;
         }
@@ -473,7 +469,8 @@ public class AvonicBreadcrumb : TemplatedControl
     /// </summary>
     private sealed class BreadcrumbAutomationPeer(AvonicBreadcrumb owner) : ControlAutomationPeer(owner), IInvokeProvider
     {
-        private bool IsLink => owner.Href is not null && !owner._collapsed;
+        /// <summary>An <c>&lt;a href&gt;</c>. A disabled one has its <c>href</c> taken away, so it isn't a link.</summary>
+        private bool IsLink => owner.Href is not null && !owner._collapsed && owner.IsEnabled;
 
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             IsLink ? AutomationControlType.Hyperlink : AutomationControlType.Group;

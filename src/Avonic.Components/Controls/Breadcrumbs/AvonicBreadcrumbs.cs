@@ -19,7 +19,7 @@ namespace Avonic.Components.Controls;
 /// Its children have no slot in <c>core.json</c>, so they're <see cref="ItemsControl.Items"/>. Breadcrumbs anywhere inside count,
 /// in order, as <c>querySelectorAll</c> finds them.
 /// </remarks>
-[PseudoClasses(":in-toolbar", ":in-toolbar-color")]
+[PseudoClasses(":in-toolbar")]
 public class AvonicBreadcrumbs : ItemsControl
 {
     /// <summary>Ionic <c>color</c>. The breadcrumbs inside take its base.</summary>
@@ -54,7 +54,7 @@ public class AvonicBreadcrumbs : ItemsControl
     /// <summary>The breadcrumbs the last look found, so that one attached or detached with nothing changed is no <c>slotchange</c>.</summary>
     private List<AvonicBreadcrumb> _breadcrumbs = [];
 
-    /// <summary>Loaded: <c>slotchange</c> and the watchers only come once the component has loaded, which here is attached.</summary>
+    /// <summary>Loaded: <c>slotchange</c> and the watchers only come once the component has loaded, which here is first attached.</summary>
     private bool _loaded;
 
     private bool _slotChangePending;
@@ -126,10 +126,11 @@ public class AvonicBreadcrumbs : ItemsControl
         _slotChangePending = false;
         var itemsChanged = _itemsChanged;
         _itemsChanged = false;
-        if (_loaded && (itemsChanged || !GetBreadcrumbs().SequenceEqual(_breadcrumbs)))
+        var breadcrumbs = GetBreadcrumbs();
+        if (itemsChanged || !breadcrumbs.SequenceEqual(_breadcrumbs))
         {
-            ResetActiveBreadcrumb();
-            BreadcrumbsInit();
+            ResetActiveBreadcrumb(breadcrumbs);
+            BreadcrumbsInit(breadcrumbs);
         }
     }
 
@@ -141,8 +142,9 @@ public class AvonicBreadcrumbs : ItemsControl
         if (_loaded && (change.Property == MaxItemsProperty || change.Property == ItemsBeforeCollapseProperty
                 || change.Property == ItemsAfterCollapseProperty))
         {
-            ResetActiveBreadcrumb();
-            BreadcrumbsInit();
+            var breadcrumbs = GetBreadcrumbs();
+            ResetActiveBreadcrumb(breadcrumbs);
+            BreadcrumbsInit(breadcrumbs);
         }
     }
 
@@ -151,47 +153,34 @@ public class AvonicBreadcrumbs : ItemsControl
         base.OnAttachedToVisualTree(e);
         UpdateClasses();
 
-        // componentWillLoad. Ionic reads the classes again at each render, which only a change of toolbar between two of its own
-        // props would show.
-        _loaded = true;
-        BreadcrumbsInit();
+        // componentWillLoad, once. Then slotchange and the watchers come whether or not it's in the document, as in a browser.
+        if (!_loaded)
+        {
+            _loaded = true;
+            BreadcrumbsInit(GetBreadcrumbs());
+        }
     }
 
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnDetachedFromVisualTree(e);
-        _loaded = false;
-    }
 
-    /// <summary>hostContext('ion-toolbar') and hostContext('ion-toolbar[color]'): any ancestor.</summary>
+    /// <summary>hostContext('ion-toolbar'): any ancestor.</summary>
     private void UpdateClasses()
     {
-        bool inToolbar = false, inToolbarColor = false;
-        foreach (var ancestor in this.GetVisualAncestors())
-        {
-            if (ancestor is AvonicToolbar toolbar)
-            {
-                inToolbar = true;
-                inToolbarColor |= toolbar.Color is not null;
-            }
-        }
-
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        // :host(.in-toolbar-color) only sets the toolbar's own contrast again, which the row inherits anyway, and each breadcrumb
+        // sets its own colour: so it isn't a pseudoclass here.
+        PseudoClasses.Set(":in-toolbar", this.GetVisualAncestors().OfType<AvonicToolbar>().Any());
     }
 
-    private void BreadcrumbsInit()
+    private void BreadcrumbsInit(List<AvonicBreadcrumb> breadcrumbs)
     {
-        var breadcrumbs = GetBreadcrumbs();
         _breadcrumbs = breadcrumbs;
         SetBreadcrumbSeparator(breadcrumbs);
         SetMaxItems(breadcrumbs);
     }
 
     /// <summary>Only undoes an active breadcrumb if this made one active; otherwise the one set on the breadcrumb stays.</summary>
-    private void ResetActiveBreadcrumb()
+    private void ResetActiveBreadcrumb(List<AvonicBreadcrumb> breadcrumbs)
     {
-        if (_activeChanged && GetBreadcrumbs().FirstOrDefault(breadcrumb => breadcrumb.Active) is { } active)
+        if (_activeChanged && breadcrumbs.FirstOrDefault(breadcrumb => breadcrumb.Active) is { } active)
         {
             active.SetCurrentValue(AvonicBreadcrumb.ActiveProperty, false);
         }

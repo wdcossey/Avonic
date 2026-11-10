@@ -242,6 +242,64 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void B3_A_Child_That_Is_No_Breadcrumb_Is_A_Change_Too()
+    {
+        var trail = Trail("A", "B", "C");
+        using var scene = Show(trail);
+        var crumbs = Crumbs(trail);
+
+        // B set active as well as C, which the breadcrumbs chose: a slotchange undoes B, the first.
+        crumbs[1].Active = true;
+        trail.Items.Add(new TextBlock { Text = "Not a breadcrumb" });
+
+        Assert.Equal("A:Ssep=true | B:Ssep=true | C:Asep=undefined", State(trail));
+    }
+
+    [AvaloniaFact]
+    public void B3_It_Is_Worked_Out_When_It_Is_Attached_Before_It_Is_Laid_Out()
+    {
+        var holder = new StackPanel();
+        using var scene = Show(holder);
+        var trail = Trail("A", "B");
+
+        // componentWillLoad, before the first render: no layout or dispatcher job has run.
+        holder.Children.Add(trail);
+        var crumbs = Crumbs(trail);
+
+        Assert.Equal(true, crumbs[0].Separator);
+        Assert.True(crumbs[1].Active);
+    }
+
+    [AvaloniaFact]
+    public void B2_The_Breadcrumbs_Value_Gives_Way_To_An_Apps_Style_Set_Later()
+    {
+        var trail = Trail("A", "B");
+        trail.Styles.Add(new Style(x => x.OfType<AvonicBreadcrumb>().Class("off")) { Setters = { new Setter(AvonicBreadcrumb.ActiveProperty, false) } });
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[1];
+        Assert.True(b.Active);
+
+        b.Classes.Add("off");
+
+        Assert.False(b.Active);
+    }
+
+    [AvaloniaFact]
+    public void B3_Changes_While_It_Is_Out_Of_The_Window_Still_Count()
+    {
+        var trail = Trail("A", "B", "C");
+        var holder = new StackPanel { Children = { trail } };
+        using var scene = Show(holder);
+
+        holder.Children.Remove(trail);
+        trail.Items.Add(Crumb("D"));
+        Dispatcher.UIThread.RunJobs();
+        holder.Children.Add(trail);
+
+        Assert.Equal("A:Ssep=true | B:Ssep=true | C:Ssep=true | D:Asep=undefined", State(trail));
+    }
+
+    [AvaloniaFact]
     public void B3_Before_Anything_Is_Shown_The_Children_Are_Read_Once_As_Ionic_Loads_Them()
     {
         var active = Crumb("Active");
@@ -475,6 +533,16 @@ public class AvonicBreadcrumbsTests
         // element 26: an 18 by 18 separator at y + 8.5, which layout rounds at a scale of 1.
         AssertBox(Bounds(separator, trail).X, 8.5, 18, 18, Bounds(separator, trail), 1);
     });
+
+    [AvaloniaFact]
+    public void B10_Separator_Content_Replaces_The_Slash_In_The_Stub_Too()
+    {
+        var trail = Trail(new AvonicBreadcrumb { Content = "Custom", SeparatorContent = "to" }, Crumb("End"));
+        using var scene = Show(trail);
+
+        var shown = Separator(Crumbs(trail)[0]).GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsEffectivelyVisible);
+        Assert.Equal(["to"], shown.Select(t => t.Text));
+    }
 
     [AvaloniaFact]
     public void B11_B12_Collapsed_Only_The_Indicator_And_Its_Separator_Show() => InstalledTheme.Run(_ =>
@@ -908,6 +976,53 @@ public class AvonicBreadcrumbsTests
     }
 
     [AvaloniaFact]
+    public void E1_A_Key_On_The_Indicator_Leaves_Nothing_Behind_For_The_Next_Click()
+    {
+        var trail = Trail("A", "B", "C", "D");
+        trail.MaxItems = 2;
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[1];
+        b.Href = "#b";
+        var clicks = 0;
+        b.Click += (_, _) => clicks++;
+
+        Indicator(b).Focus(NavigationMethod.Tab);
+        PressKey(scene, PhysicalKey.Space);
+        Assert.Equal(1, clicks);
+
+        // Expanded, B is a link, and a screen reader's activation clicks it.
+        trail.MaxItems = null;
+        ControlAutomationPeer.CreatePeerForElement(b).GetProvider<IInvokeProvider>()!.Invoke();
+        Assert.Equal(2, clicks);
+    }
+
+    [AvaloniaFact]
+    public void E1_A_Press_On_The_Indicator_That_Loses_Its_Capture_Leaves_Keys_Working()
+    {
+        var trail = Trail("A", "B", "C", "D");
+        trail.MaxItems = 2;
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[1];
+        var indicator = Indicator(b);
+        var clicks = 0;
+        b.Click += (_, _) => clicks++;
+
+        // A gesture takes the pointer mid-press: no release comes.
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        var centre = Bounds(indicator, scene.Window).Center;
+        indicator.RaiseEvent(new PointerPressedEventArgs(indicator, finger, scene.Window, centre, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None));
+        finger.Capture(indicator);
+        finger.Capture(scene.Window);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, clicks);
+
+        indicator.Focus(NavigationMethod.Tab);
+        PressKey(scene, PhysicalKey.Enter);
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
     public void E1_Command_Runs_Unless_Click_Is_Handled_And_One_That_Cannot_Execute_Disables()
     {
         var link = Crumb("Link", "#l");
@@ -960,6 +1075,10 @@ public class AvonicBreadcrumbsTests
         Assert.Equal("Electronics", peer.GetName());
         peer.GetProvider<IInvokeProvider>()!.Invoke();
         Assert.Equal(1, clicks);
+
+        // A disabled one has its href taken away: no link.
+        link.IsEnabled = false;
+        Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
 
         var spanPeer = ControlAutomationPeer.CreatePeerForElement(span);
         Assert.Equal(AutomationControlType.Group, spanPeer.GetAutomationControlType());

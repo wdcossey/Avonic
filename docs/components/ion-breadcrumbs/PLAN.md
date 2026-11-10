@@ -143,11 +143,13 @@ colour.
 
 | Decision | Why |
 |---|---|
-| The breadcrumbs sets `Active` and `Separator` with `SetCurrentValue` | Ionic assigns the props, so an app reads them back, and an app's later value wins. A local value would drop an app's binding, and a style value couldn't be cleared as Ionic clears an active breadcrumb in 3 |
+| The breadcrumbs sets `Active` and `Separator` with `SetCurrentValue` | Ionic assigns the props, so an app reads them back, and an app's later value wins. `SetCurrentValue` doesn't take the property's priority, so a style or binding an app changes later still wins, where a local value would beat a style; and a style value couldn't be undone as Ionic undoes an active breadcrumb in 3 |
 | `Collapsed`, `Last` and `ShowCollapsedIndicator` are internal | `@internal` in Ionic. `:collapsed` is the pseudoclass for `breadcrumb-collapsed`; the indicator and separator are shown or not by the control, as Ionic renders them or not |
 | A change of `Items` is posted to the dispatcher, once for any number of changes before it runs | `slotchange` is a browser event after the task, measured in 3. The watchers stay at once, as `@Watch` is |
 | The breadcrumbs looks again when a breadcrumb inside is attached or detached, if that changed which breadcrumbs there are, not only when `Items` changes | A breadcrumb made from an `ItemTemplate` appears after `Items` changes. Ionic's `slotchange` only fires for direct children: a breadcrumb added inside a nested panel later counts here and not there |
-| Nothing is looked at before it's attached | `componentWillLoad`, then `slotchange` and the watchers, only come once Ionic has loaded the component. Children added one at a time before then would otherwise undo an app's `Active` by the rule in 3 |
+| Once it has been attached, changes count while it's detached too | `slotchange` and the watchers fire on an element out of the document. `componentWillLoad` is once, so attaching again doesn't look again |
+| Nothing is looked at before it's first attached | `componentWillLoad`, then `slotchange` and the watchers, only come once Ionic has loaded the component. Children added one at a time before then would otherwise undo an app's `Active` by the rule in 3 |
+| `in-toolbar-color` isn't a pseudoclass on the breadcrumbs | Its rule sets the toolbar's contrast, which the row inherits from the toolbar anyway, and each breadcrumb sets its own colour |
 | `breadcrumbs-collapsed` isn't a pseudoclass | Its state is never set in `breadcrumbs.js`: dead |
 | `:in-toolbar` on a breadcrumb isn't a pseudoclass | No md rule reads it |
 | `breadcrumbs.md.css`'s indicator rules aren't translated | They're in the breadcrumbs' shadow root and can't reach the breadcrumb's: measured unchanged |
