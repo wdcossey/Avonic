@@ -94,6 +94,21 @@ Second `/code-review` at high effort, on the fixed code:
 | The visual walk for the radios | Waived, as in the first review |
 | README.md and COMPARISON.md were missing | Wrong at the time: written, and not yet committed. They are now |
 
+## Found by deliberate breakage
+
+`tools/breakage/run.js` with the `AvonicRadio` and `StyleBudget` tests, on clean clones. Three runs:
+
+- **119 breakages, 104 caught**, before the reviews' fixes. Four didn't build and were rewritten. Weak tests, made stronger: a
+  dictionary compared by a property name, an app's own `IsTabStop`, the end placement's margins in an item, an arrow on something
+  else in the group. Rules that did nothing, removed: the radio's `flex` in an item (the container slot has it), a fixed label's
+  `MinWidth` (its `Width` does it), a second clamp on the label in `RadioWrapper` (its measure does it), and Space's raise whenever
+  `allowEmptySelection` is on (the value then always changes).
+- **132, 126 caught**, after both reviews. Weak tests, made stronger: the focus circle's negative margin (the part is invisible, so
+  unmeasured, until it shows: the test now checks the radio's size while it shows), and an app's own `Activatable` and `FocusVisible`
+  (only lost when the radio moves out of an item). Rules that did nothing, removed: `TabNavigation` on the group, the `width: auto`
+  rule for a start or end slot, and a check on the key's source that a disabled radio, which can't have focus, never reaches.
+- **129, 129 caught**, on the final code.
+
 ## Behaviours
 
 | # | Behaviour | Result | Test |
