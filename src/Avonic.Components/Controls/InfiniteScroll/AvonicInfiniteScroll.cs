@@ -57,7 +57,6 @@ public partial class AvonicInfiniteScroll : ContentControl
     private ScrollViewer? _scrollEl;
     private bool _listening;
     private IDisposable? _offsetWatch;
-    private ScrollViewer? _scrollEventTarget;
     private IDisposable? _scrollEvent;
     private IDisposable? _hidden;
 
@@ -170,12 +169,6 @@ public partial class AvonicInfiniteScroll : ContentControl
         }
 
         _scrollEl = scrollEl;
-        if (!ReferenceEquals(_scrollEventTarget, scrollEl))
-        {
-            _scrollEvent?.Dispose();
-            _scrollEvent = null;
-        }
-
         _offsetWatch = scrollEl.GetPropertyChangedObservable(ScrollViewer.OffsetProperty).Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs>(_ => OnOffsetChanged(scrollEl)));
         DisabledChanged();
         if (Position == InfiniteScrollPosition.Top)
@@ -290,12 +283,12 @@ public partial class AvonicInfiniteScroll : ContentControl
             return;
         }
 
-        _scrollEventTarget = scrollEl;
+        // Heard by whoever listens at the frame. Moved to another scroller by then, the check reads that one, which a browser
+        // would have checked at its own next frame.
         _scrollEvent = AvonicConfig.RequestFrame(scrollEl, () =>
         {
             _scrollEvent = null;
-            _scrollEventTarget = null;
-            if (_listening && ReferenceEquals(_scrollEl, scrollEl))
+            if (_listening)
             {
                 OnScroll();
             }
