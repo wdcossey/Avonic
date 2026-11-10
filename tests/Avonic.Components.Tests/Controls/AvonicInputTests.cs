@@ -1465,6 +1465,15 @@ public class AvonicInputTests
         Settle();
 
         Assert.Same(other, Focused(other));
+
+        // Loaded again with nothing focused: still not again.
+        host.Child = null;
+        Settle();
+        scene.Window.FocusManager?.Focus(null);
+        Settle();
+        host.Child = input;
+        Settle();
+        Assert.NotSame(Native(input), Focused(input));
     }
 
     [AvaloniaFact]
