@@ -876,6 +876,10 @@ public class AvonicCheckboxTests
         static Point In(double x, double y) => new(2 + x * 14 / 24, 2 + y * 14 / 24);
         AssertClose(Colors.White, Pixel(scene, Box(box), In(5, 16.2).X, In(5, 16.2).Y), 40);
         AssertClose(Primary, Pixel(scene, Box(box), In(19.5, 7.9).X, In(19.5, 7.9).Y), 10);
+
+        // And at the end, the whole tick.
+        clock.At(16 + 200);
+        AssertClose(Colors.White, Pixel(scene, Box(box), In(19.5, 7.9).X, In(19.5, 7.9).Y), 40);
     });
 
     [AvaloniaFact]

@@ -128,10 +128,8 @@
         <Style Selector="^:in-item:not(:slot-start):not(:slot-end)">
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
-        <!-- :host([slot=start]), :host([slot=end]): flex: initial; width: auto -->
-        <Style Selector="^:slot-start, ^:slot-end">
-            <Setter Property="HorizontalAlignment" Value="Left" />
-        </Style>
+        <!-- :host([slot=start]), :host([slot=end]): flex: initial; width: auto. An item's start and end slots are already as wide
+             as what's in them, so this needs no rule here. -->
 
         <!-- The label's margins, by placement. start and fixed: 16 at the end; end: 16 at the start; stacked: 16 below. -->
         <Style Selector="^ /template/ StackPanel#PART_Label">
