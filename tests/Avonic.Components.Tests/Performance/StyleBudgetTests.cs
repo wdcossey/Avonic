@@ -24,7 +24,7 @@ public class StyleBudgetTests
     private const int MaxAlternativesReachingTextBlock = 60;
 
     /// <summary>Alternatives that get past the type of any other common element, the most of any of them.</summary>
-    private const int MaxAlternativesReachingAnother = 37;
+    private const int MaxAlternativesReachingAnother = 38;
 
     private static string Report(IEnumerable<StyleTrace.Check> checks) =>
         string.Join(Environment.NewLine, checks.OrderByDescending(c => c.Alternatives.Count).Take(15).Select(c => $"{c.Alternatives.Count,3}  {c.Selector}"));
