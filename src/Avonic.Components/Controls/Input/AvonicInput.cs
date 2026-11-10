@@ -678,8 +678,6 @@ public class AvonicInput : TemplatedControl, IItemControl
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        // A pointer that leaves with the input raises no exit.
-        PseudoClasses.Set(Activatable.HoverPseudoClass, false);
         _item = null;
         base.OnDetachedFromVisualTree(e);
     }

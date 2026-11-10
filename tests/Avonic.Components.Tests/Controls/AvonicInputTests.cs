@@ -437,7 +437,9 @@ public class AvonicInputTests
 
         other.Focus();
         Settle();
-        Click(scene, Centre(Part<Control>(input, "PART_HelperText"), scene));
+        // On the text itself, which is what takes a click on a TextBlock.
+        var helper = Bounds(Part<Control>(input, "PART_HelperText"), scene.Window);
+        Click(scene, new Point(helper.X + 4, helper.Center.Y));
         Assert.Same(other, Focused(input));
 
         Click(scene, Centre(button, scene));
@@ -1356,6 +1358,7 @@ public class AvonicInputTests
     [AvaloniaFact]
     public void R05_Hover_Ends_When_The_Input_Leaves_The_Tree() => InstalledTheme.Run(_ =>
     {
+        // Avalonia raises the exit itself when the input leaves, so the input needs nothing for it.
         var input = new AvonicInput { Label = "Solid", Fill = InputFill.Solid };
         var host = new Border { Child = input };
         using var scene = new Scene(Page(host));
@@ -1458,6 +1461,22 @@ public class AvonicInputTests
         Settle();
         host.Child = null;
         Settle();
+        host.Child = input;
+        Settle();
+
+        Assert.Same(other, Focused(other));
+    }
+
+    [AvaloniaFact]
+    public void R11_Autofocus_Doesnt_Take_Focus_From_Another_Element()
+    {
+        var other = new TextBox();
+        var host = new Border();
+        using var scene = new Scene(new StackPanel { Children = { host, other } });
+        other.Focus();
+        Settle();
+
+        var input = new AvonicInput { Autofocus = true };
         host.Child = input;
         Settle();
 
