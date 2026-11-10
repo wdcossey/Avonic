@@ -36,6 +36,10 @@ section, which states what exists.
 element names. `MainWindow` is a `Window` holding a `SampleShell`, so the desktop sample looks and behaves as before, and `drive.ps1`
 finds the same automation names (`Back`, each page's title).
 
+**Since [#114](https://github.com/wdcossey/Avonic/issues/114)** `App` gives Android's activity lifetime a `MainViewFactory` that makes a
+`SampleShell`, and `Present()` finds the current activity's top level without a `MainView`; see
+[overlays](../overlays/PLAN.md). What follows is the decision for #66, when it had to be `MainView`.
+
 `App` gives a desktop lifetime a `MainWindow`, and any single-view lifetime a `SampleShell` as its **`MainView`**, deliberately not
 `IActivityApplicationLifetime.MainViewFactory`:
 
