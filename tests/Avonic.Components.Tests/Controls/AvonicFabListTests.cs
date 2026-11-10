@@ -189,6 +189,26 @@ public class AvonicFabListTests
         AssertBox(8, 5, 40, 40, Box(button, list));
     });
 
+    [AvaloniaFact]
+    public void L3_A_Button_Shadow_Is_Not_Cut_Off_At_The_List_Edge() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var list = List(FabListSide.Bottom, new AvonicFabButton { Content = "a" }, new AvonicFabButton { Content = "b" });
+        list.Activated = true;
+        list.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+        list.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+        var holder = new Panel { Margin = new Thickness(50), Children = { list } };
+        using var scene = new Scene(holder);
+        scene.Window.Background = Avalonia.Media.Brushes.White;
+        clock.At(100);
+        Dispatcher.UIThread.RunJobs();
+
+        // The list ends 5 below the button; its shadow goes on past that, as CSS doesn't clip it.
+        var under = Box(list, scene.Window);
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.InRange(Frames.PixelAt(frame, (int)under.Center.X, (int)under.Bottom).R, 0, 250);
+    });
+
     // ── L4: Tab follows the list's order ─────────────────────────────────────────────────────
 
     [AvaloniaFact]

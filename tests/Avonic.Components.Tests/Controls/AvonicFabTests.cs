@@ -451,6 +451,24 @@ public class AvonicFabTests
         }
     }
 
+    [AvaloniaFact]
+    public void F5_The_Arrow_Keys_Do_Not_Move_Focus_From_The_Main_Button()
+    {
+        using var clock = new TestClock();
+        var (fab, main, _, scene) = Openable();
+        using (scene)
+        {
+            fab.Activated = true;
+            clock.At(100);
+            Dispatcher.UIThread.RunJobs();
+            main.Focus(NavigationMethod.Tab);
+
+            PressKey(scene, PhysicalKey.ArrowDown);
+
+            Assert.True(main.IsFocused);
+        }
+    }
+
     // ── F6: Close ────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

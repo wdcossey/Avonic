@@ -358,6 +358,87 @@ public class AvonicFabButtonTests
         }
     });
 
+    // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it underneath, as
+    // the sample has it. FocusAdorner reads null whether or not it's set, so only the layer shows what's really drawn.
+    [AvaloniaFact]
+    public void B7_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var button = new AvonicFabButton { Content = "x" };
+                var other = new Button();
+                using var scene = new Scene(new StackPanel { Children = { button, other } });
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(button)!;
+
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(button.IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
+    [AvaloniaFact]
+    public void B9_The_Ripple_Is_The_Current_Colour_Or_The_Variable() => InstalledTheme.Run(_ =>
+    {
+        var (button, scene) = Themed();
+        using (scene)
+        {
+            var ripple = Part<AvonicRippleEffect>(button, "PART_Ripple");
+            Assert.Equal(Colors.White, Solid(ripple.Foreground));
+
+            button.Resources["Avonic.FabButton.RippleColor"] = new SolidColorBrush(Colors.Red);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(Colors.Red, Solid(ripple.Foreground));
+        }
+    });
+
+    [AvaloniaFact]
+    public void B9_The_Shadow_Background_And_Colour_Ease_Over_280_Ms() => InstalledTheme.Run(_ =>
+    {
+        var (button, scene) = Themed(transitions: true);
+        using (scene)
+        {
+            var transitions = Native(button).Transitions!;
+            Assert.Equal(TimeSpan.FromMilliseconds(280), Assert.Single(transitions.OfType<BoxShadowsTransition>()).Duration);
+            var brushes = transitions.OfType<BrushTransition>().ToList();
+            Assert.Equal(2, brushes.Count);
+            Assert.All(brushes, transition => Assert.Equal(TimeSpan.FromMilliseconds(280), transition.Duration));
+            Assert.Contains(brushes, transition => transition.Property == Border.BackgroundProperty);
+            Assert.Contains(brushes, transition => transition.Property == TextElement.ForegroundProperty);
+        }
+    });
+
+    [AvaloniaFact]
+    public void B1_A_Border_Width_Draws_A_Border_In_The_Current_Colour() => InstalledTheme.Run(_ =>
+    {
+        var button = new AvonicFabButton { Content = "x" };
+        button.Resources["Avonic.FabButton.BorderWidth"] = new Thickness(2);
+        var (_, scene) = Themed(button);
+        using (scene)
+        {
+            Assert.Equal(new Thickness(2), Native(button).BorderThickness);
+            Assert.Equal(Colors.White, Solid(Native(button).BorderBrush));
+
+            button.Resources["Avonic.FabButton.BorderColor"] = new SolidColorBrush(Colors.Red);
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(Colors.Red, Solid(Native(button).BorderBrush));
+        }
+    });
+
     // ── B10: Color ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
