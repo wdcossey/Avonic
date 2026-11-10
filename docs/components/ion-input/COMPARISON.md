@@ -95,4 +95,7 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 - **`:host-context(ion-item)[slot=start|end] { width: auto }`**: an input in an item's start or end slot still stretches.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto).
-- **The soft keyboard, IME composition, and haptics** are untested: there's no device here.
+- **A slotted label's text is read when it's set**, and when the slot's element is made, not each time its text changes, where
+  Ionic's `aria-labelledby` follows the element. The field's own `Label` is always current.
+- **The soft keyboard, IME composition, and haptics** are untested: there's no device here. A value set during composition waits,
+  as Ionic's `isComposing` check does; that's tested with a preedit set by hand.

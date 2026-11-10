@@ -13,6 +13,7 @@ using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -316,6 +317,9 @@ public class AvonicInput : TemplatedControl, IItemControl
     private Control? _clearButton;
     private ContentPresenter? _labelContent;
     private bool _syncing;
+    private bool _inUserEdit;
+    private bool _autofocused;
+    private AvonicItem? _item;
     private bool _hasFocus;
     private bool _didInputClearOnEdit;
     private string? _focusedValue;
@@ -651,7 +655,8 @@ public class AvonicInput : TemplatedControl, IItemControl
         base.OnAttachedToVisualTree(e);
 
         // hostContext('ion-item') and hostContext('ion-item.ion-color'), at render. Read again here, as a moved input is
-        // attached again.
+        // attached again, and kept, as only an attach can change it.
+        _item = this.FindAncestorOfType<AvonicItem>();
         UpdateClasses();
     }
 
@@ -659,17 +664,23 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         base.OnLoaded(e);
 
-        // autoFocus on the native input: Chromium focuses it once it's in the document.
-        if (Autofocus)
+        // autoFocus on the native input: Chromium focuses it once, when it's first in the document, unless something else
+        // already has focus. Not again when it's loaded again.
+        if (Autofocus && !_autofocused)
         {
-            SetFocus();
+            _autofocused = true;
+            if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is null)
+            {
+                SetFocus();
+            }
         }
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         // A pointer that leaves with the input raises no exit.
-        PseudoClasses.Set(":ion-hover", false);
+        PseudoClasses.Set(Activatable.HoverPseudoClass, false);
+        _item = null;
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -735,7 +746,7 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         var placement = LabelPlacement;
         var hasStartEnd = StartContent is not null || EndContent is not null;
-        var item = this.FindAncestorOfType<AvonicItem>();
+        var item = _item;
 
         PseudoClasses.Set(":has-value", HasValue);
         PseudoClasses.Set(":has-focus", _hasFocus);
@@ -852,7 +863,9 @@ public class AvonicInput : TemplatedControl, IItemControl
     /// <summary><c>valueChanged</c>: assigning the native input's value, which lets an <c>ionInput</c> handler replace it.</summary>
     private void SyncNativeText()
     {
-        if (_native is not { } native || _syncing || native.Text == CurrentValue)
+        // Not during an IME's composition, as Ionic checks isComposing.
+        if (_native is not { } native || _syncing || native.Text == CurrentValue
+            || native.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault() is { PreeditText.Length: > 0 })
         {
             return;
         }
@@ -867,6 +880,13 @@ public class AvonicInput : TemplatedControl, IItemControl
         {
             _syncing = false;
         }
+
+        if (_inUserEdit)
+        {
+            // Assigned during the user's edit, which the text box finishes by placing its caret after what was typed.
+            // Chromium leaves the caret at the end of an assigned value.
+            Dispatcher.UIThread.Post(() => native.CaretIndex = native.Text?.Length ?? 0, DispatcherPriority.Send);
+        }
     }
 
     /// <summary><c>onInput</c>: the user edited the text.</summary>
@@ -877,8 +897,16 @@ public class AvonicInput : TemplatedControl, IItemControl
             return;
         }
 
-        SetValueFromUser(native.Text ?? "");
-        EmitInputChange();
+        _inUserEdit = true;
+        try
+        {
+            SetValueFromUser(native.Text ?? "");
+            EmitInputChange();
+        }
+        finally
+        {
+            _inUserEdit = false;
+        }
     }
 
     private void OnNativeTextInput(object? sender, TextInputEventArgs e)
@@ -929,7 +957,7 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         // onFocus
         _hasFocus = true;
-        _focusedValue = CurrentValue;
+        _focusedValue = Value;
         UpdateClasses();
         RaiseEvent(new RoutedEventArgs(IonFocusEvent, this));
     }
@@ -1040,7 +1068,7 @@ public class AvonicInput : TemplatedControl, IItemControl
         }
 
         // A label does nothing when the click is on interactive content inside it, other than its own control.
-        for (var at = visual; at is not null && at != _wrapper; at = at.GetVisualParent())
+        for (var at = visual; at is not null && at != _wrapper && at != this; at = at.GetVisualParent())
         {
             if (at is InputElement { Focusable: true } element && element != _native && !(_native?.IsVisualAncestorOf(element) ?? false))
             {
@@ -1064,13 +1092,13 @@ public class AvonicInput : TemplatedControl, IItemControl
         base.OnPointerEntered(e);
 
         // @media (any-hover: hover): a mouse or a pen, not a finger.
-        PseudoClasses.Set(":ion-hover", e.Pointer.Type != PointerType.Touch);
+        PseudoClasses.Set(Activatable.HoverPseudoClass, e.Pointer.Type != PointerType.Touch);
     }
 
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        PseudoClasses.Set(":ion-hover", false);
+        PseudoClasses.Set(Activatable.HoverPseudoClass, false);
     }
 
     // ── Item ─────────────────────────────────────────────────────────────────────────────────

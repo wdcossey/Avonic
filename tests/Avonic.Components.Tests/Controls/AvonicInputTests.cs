@@ -284,6 +284,12 @@ public class AvonicInputTests
         Settle();
         Key(scene, PhysicalKey.Tab);
         Assert.Equal("zz", input.Value);
+
+        // Tab left the field, which resets it: the next focus clears again.
+        input.SetFocus();
+        Settle();
+        Type(scene, PhysicalKey.Q, "q");
+        Assert.Equal("q", input.Value);
     }
 
     [AvaloniaFact]
@@ -454,7 +460,7 @@ public class AvonicInputTests
     }
 
     [AvaloniaFact]
-    public void B10_A_Tap_On_An_Items_Padding_Focuses_The_Input()
+    public void B10_A_Tap_On_An_Items_Padding_Focuses_The_Input() => InstalledTheme.Run(_ =>
     {
         var input = new AvonicInput { Label = "Label" };
         var log = Log.Of(input);
@@ -462,12 +468,15 @@ public class AvonicInputTests
         using var scene = new Scene(new StackPanel { Children = { item, new TextBox() } });
         Render();
 
+        // The item's 16 px padding, outside the input.
         var box = Bounds(item, scene.Window);
-        Click(scene, new Point(box.X + 4, box.Center.Y));
+        var at = new Point(box.X + 4, box.Center.Y);
+        Assert.False(Bounds(input, scene.Window).Contains(at));
+        Click(scene, at);
 
         Assert.Same(Native(input), Focused(input));
         Assert.Equal(["focus"], log.Take());
-    }
+    });
 
     // ── 11 to 13: layout ─────────────────────────────────────────────────────────────────────
 
@@ -543,11 +552,15 @@ public class AvonicInputTests
         var (input, other, scene) = Stub(new AvonicInput { Label = "L", LabelPlacement = InputLabelPlacement.Floating });
         using var owned = scene;
         Native(input).Transitions = [];
+        Part<Control>(input, "PART_Label").Transitions = [];
         Assert.Equal(0, Native(input).Opacity);
 
         input.SetFocus();
         Settle();
         Assert.Equal(1, Native(input).Opacity);
+
+        // Focus floats the label too.
+        Assert.Equal(0.75, Part<Control>(input, "PART_Label").GetValue(Css.ScaleProperty));
 
         other.Focus();
         Settle();
@@ -731,10 +744,18 @@ public class AvonicInputTests
         wrapper.Transitions = [];
         Render();
 
-        using var finger = scene.Window.TouchBegin(Centre(wrapper, scene), RawInputModifiers.None);
+        // Avalonia raises an enter for a finger as it lands, which headless touch doesn't, so it's raised here.
+        void Enter(PointerType type) => input.RaiseEvent(new PointerEventArgs(
+            InputElement.PointerEnteredEvent, input, new Pointer(Pointer.GetNextFreeId(), type, true), scene.Window,
+            Centre(wrapper, scene), 0, new PointerPointProperties(), KeyModifiers.None));
+
+        Enter(PointerType.Touch);
         Settle();
         Assert.Equal(Color.Parse("#F2F2F2"), BrushColor(wrapper.Background));
-        scene.Window.TouchEnd(finger, Centre(wrapper, scene), RawInputModifiers.None);
+
+        Enter(PointerType.Pen);
+        Settle();
+        Assert.Equal(Color.Parse("#E6E6E6"), BrushColor(wrapper.Background));
     });
 
     [AvaloniaFact]
@@ -783,6 +804,30 @@ public class AvonicInputTests
         Render();
 
         Assert.Equal(label.Bounds.Width * 0.75 + 8, Part<Control>(input, "PART_OutlineNotch").Bounds.Width, 0.5);
+    });
+
+    [AvaloniaFact]
+    public void B17_A_Floating_Outline_Label_Has_8px_Less_Room() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput
+        {
+            LabelContent = new Border { Width = 1000, Height = 10 },
+            Fill = InputFill.Outline, LabelPlacement = InputLabelPlacement.Floating, Value = "v",
+        };
+
+        // The label takes no room: a 60 px slot makes the input 60, not 60 and the label's 10.
+        var tall = new AvonicInput
+        {
+            Label = "Tall", Fill = InputFill.Outline, LabelPlacement = InputLabelPlacement.Stacked,
+            EndContent = new Border { Width = 10, Height = 60 },
+        };
+        using var scene = new Scene(Page(input, tall));
+        Render();
+
+        // max-width: calc((100% - padding - 8px) / 0.75), of what's inside the padding.
+        var room = (input.Bounds.Width - 32 - 8) / 0.75;
+        Assert.Equal(room, Part<Control>(input, "PART_Label").Bounds.Width, 1.0);
+        Assert.Equal(60, tall.Bounds.Height, 0.5);
     });
 
     [AvaloniaFact]
@@ -1322,6 +1367,86 @@ public class AvonicInputTests
 
         Assert.Equal(new CornerRadius(8, 8, 0, 0), Part<Border>(input, "PART_Wrapper").CornerRadius);
     });
+
+    [AvaloniaFact]
+    public void R09_A_Value_Set_In_Code_Before_Focus_Isnt_A_Change_On_Blur()
+    {
+        var (input, other, scene) = Stub();
+        using var _ = scene;
+        input.Value = "abc";
+        var log = Log.Of(input);
+
+        input.SetFocus();
+        Settle();
+        other.Focus();
+        Settle();
+
+        Assert.Equal(["focus", "blur"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R10_A_Null_Value_Focused_And_Left_Isnt_A_Change()
+    {
+        var (input, other, scene) = Stub(new AvonicInput { Value = null });
+        using var _ = scene;
+        var log = Log.Of(input);
+
+        input.SetFocus();
+        Settle();
+        Key(scene, PhysicalKey.Enter);
+        other.Focus();
+        Settle();
+
+        Assert.Equal(["focus", "blur"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R11_Autofocus_Only_The_First_Time_It_Loads()
+    {
+        var input = new AvonicInput { Autofocus = true };
+        var other = new TextBox();
+        var host = new Border { Child = input };
+        using var scene = new Scene(new StackPanel { Children = { host, other } });
+        Assert.Same(Native(input), Focused(input));
+
+        other.Focus();
+        Settle();
+        host.Child = null;
+        Settle();
+        host.Child = input;
+        Settle();
+
+        Assert.Same(other, Focused(other));
+    }
+
+    [AvaloniaFact]
+    public void R12_A_Value_Replaced_During_An_Edit_Leaves_The_Caret_At_The_End()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Value = "abc" });
+        using var _ = scene;
+        input.IonInput += (_, e) => input.Value = e.Value?.ToUpperInvariant();
+        input.SetFocus();
+        Settle();
+        Native(input).CaretIndex = 1;
+
+        Type(scene, PhysicalKey.X, "x");
+
+        Assert.Equal("AXBC", Native(input).Text);
+        Assert.Equal(4, Native(input).CaretIndex);
+    }
+
+    [AvaloniaFact]
+    public void R13_A_Value_Set_During_Composition_Waits()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Value = "a" });
+        using var _ = scene;
+        var presenter = Native(input).GetVisualDescendants().OfType<Avalonia.Controls.Presenters.TextPresenter>().First();
+        presenter.PreeditText = "ka";
+
+        input.Value = "b";
+
+        Assert.Equal("a", Native(input).Text);
+    }
 
     // ── 28: RTL ──────────────────────────────────────────────────────────────────────────────
 

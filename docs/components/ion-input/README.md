@@ -133,4 +133,4 @@ Not in Ionic's API, but needed by the theme:
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): a click on the label while focused keeps focus, where
 Chromium blurs and refocuses; no date or time types and no number filtering; an icon-only button in a slot keeps its own look;
 an app's background and border keys win at rest with a fill, where Ionic's fill wins; an input in an item's start or end slot still stretches; the notch has no
-`max-width`; bottom text is 1 px taller. Not tried in a real window, with a soft keyboard, or on a device.
+`max-width`; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader. Not tried in a real window, with a soft keyboard, or on a device.
