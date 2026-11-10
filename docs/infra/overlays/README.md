@@ -71,8 +71,9 @@ issue: see [PLAN.md](PLAN.md#deferred).
 
 - **Which top level**: `Present()` takes a desktop's active window, else its main one; a single view's main view's (iOS, the
   browser, Android when the app sets `MainView`); under Android's `MainViewFactory`, which leaves `MainView` null, the last top level
-  to load that's still loaded, which is the current activity's. Avonic hears them load from when its assembly loads, with
-  `AvonicTheme`. With none, it throws, in its task: use `Present(TopLevel)`.
+  to come that's still loaded, which is the current activity's. A top level comes when its template is applied, and goes when it
+  unloads; Avonic listens from when its assembly loads, with `AvonicTheme`. With none, it throws, in its task: use
+  `Present(TopLevel)`.
 - **Where**: in a panel of Avonic's in the `TopLevel`'s `OverlayLayer`, the window's size, below Avalonia's popups. A top level
   without one (a template with no `VisualLayerManager`) throws. `ZIndex` is the base plus a counter from 1, given at each present.
 - **Present**: blurs the focused element (unless `StealsFocus` is false), `WillPresent`, shows the overlay and plays the enter
@@ -118,8 +119,9 @@ Avonic additions, which shadow no Ionic name:
   interfaces, and Android's `EmbeddableControlRoot` on a headless window's platform view. The single-view branch was tried on a
   Pixel 8 ([#66](../android/COMPARISON.md)); `MainViewFactory` hasn't been tried on a device
   ([#114](https://github.com/wdcossey/Avonic/issues/114)).
-- **Several Avalonia activities** under `MainViewFactory`: the current one is taken to be the last to load that's still loaded, which
-  holds while the one on top is the newest. An app that brings an older activity forward with `FLAG_ACTIVITY_REORDER_TO_FRONT`
-  would need `Present(TopLevel)`. An app that loads Avonic's assembly only after its first activity, with no `AvonicTheme` in its
-  XAML, isn't heard either.
+- **Several Avalonia activities** under `MainViewFactory`: the current one is taken to be the last to come that's still loaded,
+  which holds while the one on top is the newest. An app that brings an older activity forward with `FLAG_ACTIVITY_REORDER_TO_FRONT`,
+  or shows two of its activities in split screen, would need `Present(TopLevel)`. So would `Present()` from a view's constructor
+  under the factory, which runs before its activity's top level exists, and an app that loads Avonic's assembly only after its first
+  activity, with no `AvonicTheme` in its `App.axaml`.
 - Not tried in a real window: `tools/real-window/drive.ps1` has a section for the sample page, which the batch's runner runs.

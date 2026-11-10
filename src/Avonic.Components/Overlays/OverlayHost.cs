@@ -47,12 +47,13 @@ internal sealed class OverlayHost : Panel
     /// </summary>
     /// <remarks>
     /// Android's lifetime is both an <see cref="ISingleViewApplicationLifetime"/> and an <see cref="IActivityApplicationLifetime"/>,
-    /// so a <c>MainView</c> it's given comes first, as it's the view every activity shows.
+    /// so a <c>MainView</c> it's given comes first, as it's the view every activity shows; while it's out of every top level, as
+    /// when an activity is recreated, the last loaded is still the current activity's.
     /// </remarks>
     internal static TopLevel? TopLevelOf(IApplicationLifetime? lifetime) => lifetime switch
     {
         IClassicDesktopStyleApplicationLifetime desktop => desktop.Windows.FirstOrDefault(w => w.IsActive) ?? desktop.MainWindow,
-        ISingleViewApplicationLifetime { MainView: { } view } => TopLevel.GetTopLevel(view),
+        ISingleViewApplicationLifetime { MainView: { } view } when TopLevel.GetTopLevel(view) is { } topLevel => topLevel,
         IActivityApplicationLifetime => LoadedTopLevels.Last,
         _ => null,
     };

@@ -1,14 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Primitives;
 
 namespace Avonic.Components.Overlays;
 
 /// <summary>
-/// The top levels that are loaded, in the order they loaded. It's how <see cref="AvonicOverlay.Present()"/> finds
-/// the current activity's top level under Android's <c>IActivityApplicationLifetime.MainViewFactory</c>, which gives each activity a
-/// view of its own and leaves <c>MainView</c> null: Avalonia 12 keeps the current activity internal to <c>Avalonia.Android</c>, and
-/// has no public list of top levels and no focused element without one. See <c>docs/infra/overlays/README.md</c>.
+/// The top levels that are loaded, in the order they came. It's how <see cref="AvonicOverlay.Present()"/> finds the current
+/// activity's top level under Android's <c>IActivityApplicationLifetime.MainViewFactory</c>, which gives each activity a view of its
+/// own and leaves <c>MainView</c> null: Avalonia 12 keeps the current activity internal to <c>Avalonia.Android</c>, and has no public
+/// list of top levels and no focused element without one. See <c>docs/infra/overlays/PLAN.md</c>.
 /// </summary>
 internal static class LoadedTopLevels
 {
@@ -21,14 +24,30 @@ internal static class LoadedTopLevels
     /// </summary>
     [ModuleInitializer]
     [SuppressMessage("Usage", "CA2255:The 'ModuleInitializer' attribute should not be used in libraries",
-        Justification = "It only adds two class handlers, and has to run before the app's first top level loads.")]
+        Justification = "It only adds class handlers, and has to run before the app's first top level loads.")]
     internal static void Start()
     {
-        Control.LoadedEvent.AddClassHandler<TopLevel>((topLevel, _) => OnLoaded(topLevel));
-        Control.UnloadedEvent.AddClassHandler<TopLevel>((topLevel, _) => OnUnloaded(topLevel));
+        if (!Needed(Application.Current?.ApplicationLifetime))
+        {
+            return;
+        }
+
+        // A top level comes when its template is applied, which is when it has an overlay layer: synchronously, in an
+        // EmbeddableControlRoot's Prepare(), before the view in it is attached. Loaded comes later, posted after layout.
+        TemplatedControl.TemplateAppliedEvent.AddClassHandler<TopLevel>((topLevel, _) => Add(topLevel));
+        Control.LoadedEvent.AddClassHandler<TopLevel>((topLevel, _) => Add(topLevel));
+        Control.UnloadedEvent.AddClassHandler<TopLevel>((topLevel, _) => Remove(topLevel));
     }
 
-    /// <summary>The last top level to load that's still loaded: the activity on top, as the one Android created last.</summary>
+    /// <summary>
+    /// Only the activity lifetime reads the list, so a desktop or a single view without activities doesn't pay for a handler on
+    /// every control's <c>Loaded</c> and <c>Unloaded</c>. No lifetime yet, as when an app touches Avonic before it builds Avalonia,
+    /// listens, as it can't tell.
+    /// </summary>
+    internal static bool Needed(IApplicationLifetime? lifetime) =>
+        lifetime is null or IActivityApplicationLifetime;
+
+    /// <summary>The last top level to come that's still loaded: the activity on top, as the one Android created last.</summary>
     internal static TopLevel? Last
     {
         get
@@ -50,18 +69,21 @@ internal static class LoadedTopLevels
 
     /// <summary>
     /// Every top level, popups' too: Android, the one platform with activities, shows popups in the overlay layer, where they have
-    /// none of their own.
+    /// none of their own. One that's already there keeps its place, as a template applied again, for a new theme, isn't a new one.
     /// </summary>
-    private static void OnLoaded(TopLevel topLevel)
+    private static void Add(TopLevel topLevel)
     {
         lock (s_loaded)
         {
-            s_loaded.Add(new WeakReference<TopLevel>(topLevel));
+            if (!s_loaded.Exists(r => r.TryGetTarget(out var known) && ReferenceEquals(known, topLevel)))
+            {
+                s_loaded.Add(new WeakReference<TopLevel>(topLevel));
+            }
         }
     }
 
     /// <summary>Weak, in case a top level is let go of without unloading; those are cleared at the next unload.</summary>
-    private static void OnUnloaded(TopLevel topLevel)
+    private static void Remove(TopLevel topLevel)
     {
         lock (s_loaded)
         {

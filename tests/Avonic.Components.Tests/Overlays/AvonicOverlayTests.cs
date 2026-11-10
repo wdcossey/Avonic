@@ -1007,6 +1007,15 @@ public class AvonicOverlayTests
 
         var second = new Scene(new Panel());
         Assert.Same(second.Window, OverlayHost.TopLevelOf(android));
+
+        // A template applied again, as for a new theme, isn't a new top level.
+        var applied = false;
+        stage.Window.TemplateApplied += (_, _) => applied = true;
+        stage.Window.Template = new Avalonia.Controls.Templates.FuncControlTemplate<Window>((_, _) => new VisualLayerManager());
+        stage.Window.ApplyTemplate();
+        Assert.True(applied);
+        Assert.Same(second.Window, OverlayHost.TopLevelOf(android));
+
         second.Dispose();
         Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
     }
@@ -1020,10 +1029,16 @@ public class AvonicOverlayTests
     public async Task O15_An_Embedded_Root_Is_The_Current_Top_Level_Until_It_Is_Disposed()
     {
         var unshown = new Window();
+        Stage.Settle();
         using var stage = new Stage();
         var android = LifetimeDouble.Android();
         var root = new Avalonia.Controls.Embedding.EmbeddableControlRoot(unshown.PlatformImpl!) { Content = new Panel() };
         root.Prepare();
+
+        // Known once its template is applied, in Prepare(), before it loads: the view in it is attached after, and can present.
+        Assert.False(root.IsLoaded);
+        Assert.Same(root, OverlayHost.TopLevelOf(android));
+
         root.StartRendering();
         Stage.Settle();
         Assert.Same(root, OverlayHost.TopLevelOf(android));
@@ -1055,10 +1070,26 @@ public class AvonicOverlayTests
         using var second = new Scene(new Panel());
         Assert.Same(stage.Window, OverlayHost.TopLevelOf(android));
 
+        // Out of every top level, as while an activity is recreated: the current activity's, still.
+        ((ISingleViewApplicationLifetime)android).MainView = new Border();
+        Assert.Same(second.Window, OverlayHost.TopLevelOf(android));
+
         var singleView = (ISingleViewApplicationLifetime)LifetimeDouble.SingleView();
+        Assert.Null(OverlayHost.TopLevelOf(singleView));
+        singleView.MainView = new Border();
         Assert.Null(OverlayHost.TopLevelOf(singleView));
         singleView.MainView = stage.Other;
         Assert.Same(stage.Window, OverlayHost.TopLevelOf(singleView));
+    }
+
+    /// <summary>Only Android's lifetime reads the loaded top levels, so the others don't listen; with no lifetime yet, it can't tell.</summary>
+    [AvaloniaFact]
+    public void O15_Only_An_Activity_Lifetime_Listens_For_Top_Levels()
+    {
+        Assert.True(LoadedTopLevels.Needed(LifetimeDouble.Android()));
+        Assert.True(LoadedTopLevels.Needed(null));
+        Assert.False(LoadedTopLevels.Needed(DesktopLifetime()));
+        Assert.False(LoadedTopLevels.Needed(LifetimeDouble.SingleView()));
     }
 
     [AvaloniaFact]

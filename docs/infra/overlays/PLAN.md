@@ -154,12 +154,17 @@ view; set through the factory, which Avalonia recommends, `MainView` stays null,
 `EmbeddableControlRoot` around a new view. The current activity is internal to `Avalonia.Android` (`AndroidActivatableLifetime.
 CurrentMainActivity`), which a net8.0 library can't reference, and Avalonia 12 has no public list of top levels, no static focused
 element (`KeyboardDevice.Instance` is internal) and no lifetime that's an `ISingleTopLevelApplicationLifetime` on Android. So
-`LoadedTopLevels` keeps the top levels that are loaded, from class handlers on `Loaded` and `Unloaded` that a module initializer adds
-when `Avonic.Components` loads, which is in `Application.Initialize`, with `AvonicTheme`, before Android makes the first activity.
+`LoadedTopLevels` keeps the top levels that are loaded, from class handlers that a module initializer adds when `Avonic.Components`
+loads, which is in `Application.Initialize`, with `AvonicTheme`, before Android makes the first activity. A top level comes at
+`TemplateApplied`, when it has an overlay layer, which is synchronous in an `EmbeddableControlRoot`'s `Prepare()`, before the view in
+it is attached, or at `Loaded`, which is posted after layout; it goes at `Unloaded`. A template applied again, for a new theme, keeps
+its place. Only an activity lifetime, or none yet, listens: a desktop or a single view without activities doesn't pay for a handler
+on every control's `Loaded` and `Unloaded`.
 The last still loaded is the activity on top: a second activity loads after the first, and a destroyed one unloads. Read from
 `Avalonia.Android` 12.1.4, decompiled: `AvaloniaView`'s constructor makes the `EmbeddableControlRoot` and prepares it, and
 `AvaloniaActivity.OnDestroy` disposes the view, which disposes the root. That a prepared root loads and a disposed one unloads is
-tested headlessly. A `MainView`, when the app sets one, comes first, as every activity shows it. Popups needn't be left out: Android's
+tested headlessly. A `MainView`, when the app sets one, comes first, as every activity shows it; while it's in no top level, as
+during a recreation, the last loaded is still taken. Popups needn't be left out: Android's
 `TopLevelImpl.CreatePopup` returns null, so its popups are in the overlay layer, with no top level of their own.
 
 **The index** is given when the overlay is attached to the host, at `Present()`, as `connectedCallback` gives it when an element is
@@ -309,8 +314,9 @@ for keys and pointers. Each one has to fail without its behaviour.
   Avalonia: the reference assemblies give each one a member that can't be. So `Present()`'s choice of top level is tested through
   `OverlayHost.TopLevelOf`, with Avalonia's own (internal) desktop lifetime made by reflection, and the single-view and Android
   lifetimes as types emitted at run time (`LifetimeDouble`), as the runtime assemblies don't have that member.
-- **A top level loads as soon as it's made,** a `Window` before it's shown, and an `EmbeddableControlRoot` once it's prepared and rendering; a
-  closed window and a disposed root unload. The headless platform makes no embeddable top level of its own, so the test gives one a
+- **A top level loads as soon as it's made,** a `Window` before it's shown, and an `EmbeddableControlRoot` once it's prepared and
+  rendering; its template is applied before that, in `Prepare()` for the root and in `Show()` for a window. A closed window and a
+  disposed root unload; an unshown window that's closed doesn't. The headless platform makes no embeddable top level of its own, so the test gives one a
   headless window's platform view.
 
 ## Deliverables
