@@ -108,5 +108,10 @@ A click on the second header, with the first open. Chromium's frames are about 1
   frame on, and eases from it over 300 ms; the two frames between hold it still, where Chromium's go on growing, about 3 px.
 - **Keys pass over a disabled accordion.** In Ionic `focus()` lands on the disabled one's item, which isn't disabled itself; here
   `IsEnabled` reaches it, so it can't take focus, and the keys go on to the next one rather than stop.
-- **The toggle icon beside other content.** A slot holds one child here: a panel there gets the icon added; a single control is put
-  into a horizontal `StackPanel` with the icon after it; content that isn't a control gets no icon, and a warning.
+- **The toggle icon beside other content.** A slot holds one child here: a horizontal `StackPanel` there, which stands for the slot's
+  row, gets the icon added at its end; any other control, a panel included, is put into a horizontal `StackPanel` with the icon
+  after it; content that isn't a control gets no icon, and a warning.
+- **Clicks in the header.** Ionic's `#header` hears every `click` that bubbles; here the header hears a press on anything in it,
+  and the `Click` of an `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or stock `Button` for a key or automation. Another
+  control's own click event, from a key, doesn't toggle it. A `RepeatButton`'s doesn't either, as a browser doesn't click on a
+  scrollbar's or a spinner's arrows.

@@ -84,7 +84,8 @@ its own height and clips it, so the content slides rather than squeezes.
 - A tap anywhere in an accordion's header, or Enter or Space on its item, asks the group to toggle it. The group sets `Value`
   and raises `IonChange`. Setting `Value` in code raises nothing.
 - A readonly or disabled accordion or group can't be toggled. An accordion outside a group never opens.
-- When it first loads, an accordion makes the `AvonicItem` that is its `HeaderContent` (not one inside a panel there, as Ionic
+- When it first loads, an accordion makes the `AvonicItem` in its header slot, given or from `HeaderContentTemplate` (not one
+  inside a panel there, as Ionic
   only looks at what's assigned to the slot) a button, with no detail icon and full lines unless it
   has its own, and adds a toggle icon to its end slot (or start), unless the item already holds a control with the style class
   `ion-accordion-toggle-icon`. The icon turns 180° while open.
@@ -108,4 +109,6 @@ None.
 - `aria-expanded` is on the accordion's peer, not the header item's; `role="region"` on the content isn't mapped. Proposed: the
   item's peer reports `ExpandCollapse` when it's an accordion's header.
 - The host's transitions and the icon's turn run on real time, as Avalonia's transitions do.
+- From a key, only the `Click` of an `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or stock `Button` in the header
+  toggles it. A pointer press on anything there does.
 - Not tried in a real window, and not tried on a device.

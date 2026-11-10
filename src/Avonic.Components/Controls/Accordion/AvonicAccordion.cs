@@ -152,6 +152,7 @@ public class AvonicAccordion : TemplatedControl
     /// <summary>A release is on its way through the header, and whether something inside has clicked during it.</summary>
     private bool _releasing;
     private bool _releaseClicked;
+    private bool _clickedOnPress;
 
     /// <summary>The next frame, or the timeout, that the expand or collapse waits on: Ionic's <c>currentRaf</c>.</summary>
     private IDisposable? _pending;
@@ -220,8 +221,16 @@ public class AvonicAccordion : TemplatedControl
         }
 
         Group = null;
+        FinishNow();
+        Render();
+    }
 
-        // A transition cut short ends where it was going, so that nothing is left half open with no group to finish it.
+    /// <summary>
+    /// A transition cut short ends where it was going, so that nothing is left half open: on leaving the group, which would have
+    /// finished it, and on a new template, whose content box the old one's frames don't know.
+    /// </summary>
+    private void FinishNow()
+    {
         CancelPending();
         StopTransition();
         _state = _state switch
@@ -231,7 +240,6 @@ public class AvonicAccordion : TemplatedControl
             _ => _state,
         };
         _content?.ClearValue(MaxHeightProperty);
-        Render();
     }
 
     /// <summary>
@@ -551,6 +559,7 @@ public class AvonicAccordion : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        FinishNow();
 
         if (_header is not null)
         {
@@ -572,6 +581,7 @@ public class AvonicAccordion : TemplatedControl
             // #header's onClick: a press on anything in the header clicks it, as a <div> does, with no keys of its own.
             _headerButton = new NativeButton(_header, _ => OnHeaderPressClick(), () => false, () => { });
             // Around NativeButton's own release handler: one release is one click, however many controls it passes on the way up.
+            _header.AddHandler(PointerPressedEvent, OnHeaderPressStarts, RoutingStrategies.Tunnel, handledEventsToo: true);
             _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseStarts, RoutingStrategies.Tunnel, handledEventsToo: true);
             _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseEnds, RoutingStrategies.Bubble, handledEventsToo: true);
             foreach (var click in InnerClicks)
@@ -596,6 +606,7 @@ public class AvonicAccordion : TemplatedControl
 
     private void RemoveHeaderHandlers(ContentPresenter header)
     {
+        header.RemoveHandler(PointerPressedEvent, OnHeaderPressStarts);
         header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseStarts);
         header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseEnds);
         foreach (var click in InnerClicks)
@@ -634,6 +645,9 @@ public class AvonicAccordion : TemplatedControl
 
     // ── The header's click ───────────────────────────────────────────────────────────────────
 
+    /// <summary>A stock <see cref="Avalonia.Controls.Button"/> with <c>ClickMode.Press</c> clicks on the press, which is this press's click.</summary>
+    private void OnHeaderPressStarts(object? sender, PointerPressedEventArgs e) => _clickedOnPress = false;
+
     private void OnHeaderReleaseStarts(object? sender, PointerReleasedEventArgs e)
     {
         _releasing = true;
@@ -648,6 +662,17 @@ public class AvonicAccordion : TemplatedControl
     /// </summary>
     private void OnInnerClick(object? sender, RoutedEventArgs e)
     {
+        // A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.
+        if (e.Source is RepeatButton)
+        {
+            return;
+        }
+
+        if (e.Source is Avalonia.Controls.Button { ClickMode: ClickMode.Press })
+        {
+            _clickedOnPress = true;
+        }
+
         if (_releasing)
         {
             if (_releaseClicked)
@@ -663,7 +688,7 @@ public class AvonicAccordion : TemplatedControl
 
     private void OnHeaderPressClick()
     {
-        if (!_releaseClicked)
+        if (!_releaseClicked && !_clickedOnPress)
         {
             ToggleExpanded();
         }
@@ -717,10 +742,11 @@ public class AvonicAccordion : TemplatedControl
     }
 
     /// <summary>
-    /// The <see cref="AvonicItem"/> in the header slot: <c>getSlottedHeaderIonItem</c>, which looks at what's assigned to the slot
-    /// and not inside it, so an item inside a panel there isn't it.
+    /// The <see cref="AvonicItem"/> in the header slot, given or made from <see cref="HeaderContentTemplate"/>:
+    /// <c>getSlottedHeaderIonItem</c>, which looks at what's assigned to the slot and not inside it, so an item inside a panel there
+    /// isn't it.
     /// </summary>
-    internal AvonicItem? HeaderItem() => HeaderContent as AvonicItem;
+    internal AvonicItem? HeaderItem() => _header?.Child as AvonicItem ?? HeaderContent as AvonicItem;
 
     /// <summary>
     /// <c>setItemDefaults</c>: a button, for the keyboard, with no detail icon, and full lines unless it has its own. Ionic assigns
@@ -762,8 +788,9 @@ public class AvonicAccordion : TemplatedControl
             case null:
                 item.SetCurrentValue(slot, icon);
                 break;
-            case Panel panel:
-                panel.Children.Add(icon);
+            case StackPanel { Orientation: Orientation.Horizontal } row:
+                // A row stands for the slot, and the icon goes at its end. Any other panel is a single control here.
+                row.Children.Add(icon);
                 break;
             case Control existing:
                 item.SetCurrentValue(slot, null);
@@ -784,7 +811,7 @@ public class AvonicAccordion : TemplatedControl
 
     private void WarnNoRoom(AvonicItem item) =>
         Logger.TryGet(LogEventLevel.Warning, LogArea.Control)?.Log(
-            this, "The accordion's toggle icon has no room in {Item}'s slot, which holds content that isn't a control. Put a panel there.", item);
+            this, "The accordion's toggle icon has no room in {Item}'s slot, which holds content that isn't a control. Put a control there.", item);
 
     /// <summary><c>ionItem.querySelector('.ion-accordion-toggle-icon')</c>: anywhere in what the item holds.</summary>
     private static bool HasToggleIcon(AvonicItem item) =>
@@ -806,7 +833,7 @@ public class AvonicAccordion : TemplatedControl
     /// </summary>
     private sealed class AccordionAutomationPeer(AvonicAccordion owner) : ControlAutomationPeer(owner), IExpandCollapseProvider
     {
-        private ExpandCollapseState _last = ExpandCollapseState.Collapsed;
+        private ExpandCollapseState _last = owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
 
         public ExpandCollapseState ExpandCollapseState =>
             owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;

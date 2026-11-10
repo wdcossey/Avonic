@@ -483,6 +483,22 @@ public class AvonicAccordionTests
     }
 
     [AvaloniaFact]
+    public void B10_An_Item_From_The_Header_Template_Counts()
+    {
+        var a = new AvonicAccordion
+        {
+            Value = "a",
+            HeaderContent = "From a view model",
+            HeaderContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => Item(text)),
+        };
+        using var scene = Show(Group(null, a));
+
+        var item = Assert.IsType<AvonicItem>(Header(a).Child);
+        Assert.True(item.Button);
+        Assert.IsType<AvonicIcon>(item.EndContent);
+    }
+
+    [AvaloniaFact]
     public void B11_A_Toggle_Icon_Goes_In_The_Items_End_Slot()
     {
         var a = Accordion("a");
@@ -541,8 +557,24 @@ public class AvonicAccordionTests
         Assert.Same(note, wrapper.Children[0]);
         Assert.Contains("ion-accordion-toggle-icon", wrapper.Children[1].Classes);
         Assert.Same(panel, panelItem.EndContent);
+        // A row stands for the slot; any other panel is one control in it, as a vertical one would put the icon underneath.
         Assert.Same(badge, panel.Children[0]);
         Assert.Contains("ion-accordion-toggle-icon", panel.Children[1].Classes);
+    }
+
+    [AvaloniaFact]
+    public void B11_A_Panel_That_Is_Not_A_Row_Goes_Beside_The_Icon()
+    {
+        var a = Accordion("a");
+        var item = (AvonicItem)a.HeaderContent!;
+        var column = new StackPanel { Children = { new AvonicNote { Content = "1" } } };
+        item.EndContent = column;
+        using var scene = Show(Group(null, a));
+
+        var row = Assert.IsType<StackPanel>(item.EndContent);
+        Assert.Equal(Avalonia.Layout.Orientation.Horizontal, row.Orientation);
+        Assert.Same(column, row.Children[0]);
+        Assert.Contains("ion-accordion-toggle-icon", row.Children[1].Classes);
     }
 
     [AvaloniaFact]
@@ -665,6 +697,42 @@ public class AvonicAccordionTests
         scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
 
         Assert.Equal(["a", null], changes);
+    }
+
+    [AvaloniaFact]
+    public void B13_A_RepeatButtons_Click_Does_Not_Toggle()
+    {
+        var repeat = new RepeatButton { Content = "+" };
+        var item = Item("a");
+        item.EndContent = repeat;
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        using var scene = Show(group);
+
+        repeat.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Null(group.Value);
+    }
+
+    [AvaloniaFact]
+    public void B13_A_Button_That_Clicks_On_Press_Toggles_Once()
+    {
+        // TestApp has no base theme, so a stock button needs a template of its own to be hit.
+        var button = new Button
+        {
+            ClickMode = ClickMode.Press,
+            Width = 60,
+            Height = 36,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<Button>((_, _) => new Border { Background = Brushes.Transparent }),
+        };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = button };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        Click(scene, CentreOf(scene, button));
+
+        Assert.Equal(["a"], changes);
     }
 
     [AvaloniaFact]
@@ -860,6 +928,26 @@ public class AvonicAccordionTests
         clock.At(32 + 288);
 
         Assert.Equal((ContentHeight + 16) * Ease.Ease(288 / 300.0), Content(b).MaxHeight, 6);
+    }
+
+    [AvaloniaFact]
+    public void B14_A_New_Template_Mid_Transition_Finishes_It()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        using var scene = Show(Group("a", a, b));
+        using var clock = new TestClock();
+
+        Tap(scene, b);
+        clock.At(32 + 100);
+        var template = b.Template;
+        b.Template = null;
+        b.ApplyTemplate();
+        b.Template = template;
+        b.ApplyTemplate();
+        clock.At(1000);
+
+        Assert.Equal(ContentHeight, Shown(scene, b));
+        Assert.True(double.IsPositiveInfinity(Content(b).MaxHeight));
     }
 
     [AvaloniaFact]
@@ -1166,6 +1254,23 @@ public class AvonicAccordionTests
     }
 
     // ── B22: automation ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B22_A_Peer_Made_While_Open_Announces_No_Change()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group(new[] { "a" }, a, b);
+        group.Multiple = true;
+        using var scene = Show(group);
+        var peer = ControlAutomationPeer.CreatePeerForElement(a);
+        var changes = 0;
+        peer.PropertyChanged += (_, e) => changes += e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty ? 1 : 0;
+
+        // a is told of the new value, and renders, still open.
+        group.Value = new[] { "a", "b" };
+
+        Assert.Equal(0, changes);
+    }
 
     [AvaloniaFact]
     public void B22_The_Peer_Says_Whether_It_Is_Expanded_And_Asks_The_Group()
