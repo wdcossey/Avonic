@@ -46,7 +46,8 @@ Boxes in CSS pixels, from Chromium's `getBoundingClientRect` and Avonic's `Bound
 | B10 | Reads | force a layout | `UpdateLayout()` first | Match |
 | B11 | `ionInfinite` | bubbles | bubbles | Match |
 | B12 | Outside `ion-content` | `console.error` | an error in Avalonia's log, `LogArea.Control` | Match, in Avalonia's terms |
-| B13 | Removed | stops listening | stops listening, and a scroll waiting for its frame isn't heard | Match |
+| B12 | `.ion-content-scroll-host` | the nearest such element scrolls | the nearest such element, or the `ScrollViewer` in its template | Match: only a `ScrollViewer` scrolls in Avalonia |
+| B13 | Removed | stops listening; back before the frame, it hears the scroll | the same | Match |
 | B14 | Hidden by an ancestor | `offsetHeight` 0, no check | the same | Match |
 | B15 | The content outside a loading scroll | nothing shown | nothing shown | Match |
 | B16 | The content's default spinner | `crescent`, or the config's | `Crescent`, or `AvonicConfig.Spinner` | Match, except `infiniteLoadingSpinner`: see below |

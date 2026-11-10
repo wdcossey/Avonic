@@ -43,6 +43,7 @@ public partial class InfiniteScrollPage : UserControl
             {
                 Infinite.IsEnabled = false;
                 Disabled.IsChecked = true;
+                Disabled.IsEnabled = false;
                 Status.Text = string.Create(CultureInfo.InvariantCulture, $"{Rows.Children.Count} items: no more, so it's disabled");
             }
         }, TimeSpan.FromMilliseconds(500));
@@ -52,8 +53,13 @@ public partial class InfiniteScrollPage : UserControl
     // as in Ionic.
     private void CancelLoad()
     {
-        _load?.Dispose();
-        _load = null;
+        if (_load is not null)
+        {
+            _load.Dispose();
+            _load = null;
+            Status.Text = string.Create(CultureInfo.InvariantCulture, $"{Rows.Children.Count} items: the load was dropped");
+        }
+
         Infinite.Complete();
     }
 
@@ -70,5 +76,6 @@ public partial class InfiniteScrollPage : UserControl
         AddRows();
         Infinite.IsEnabled = true;
         Disabled.IsChecked = false;
+        Disabled.IsEnabled = true;
     }
 }

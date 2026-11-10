@@ -6,6 +6,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
+using Avalonia.Reactive;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
@@ -55,6 +56,8 @@ public partial class AvonicInfiniteScroll : ContentControl
 
     private ScrollViewer? _scrollEl;
     private bool _listening;
+    private IDisposable? _offsetWatch;
+    private ScrollViewer? _scrollEventTarget;
     private IDisposable? _scrollEvent;
     private IDisposable? _hidden;
 
@@ -150,23 +153,32 @@ public partial class AvonicInfiniteScroll : ContentControl
     {
         base.OnAttachedToVisualTree(e);
 
-        if (FindClosestScrollHost() is not { } host)
+        if (FindClosestScrollHost(out var inside) is not { } host)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicInfiniteScroll must be used inside AvonicContent.");
             return;
         }
 
         // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready. A host with the class scrolls
-        // itself in a browser; here only a ScrollViewer can, and a content with a replaced template may have none.
-        _scrollEl = host is AvonicContent content ? content.GetScrollElement() : host as ScrollViewer;
-        if (_scrollEl is null)
+        // itself in a browser; here only a ScrollViewer can, so it's the host, or the one in the host's template around this, as a
+        // ListBox has. A content with a replaced template may have none.
+        var scrollEl = host is AvonicContent content ? content.GetScrollElement() : host as ScrollViewer ?? inside;
+        if (scrollEl is null)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicInfiniteScroll found no ScrollViewer in {Host}.", host);
             return;
         }
 
+        _scrollEl = scrollEl;
+        if (!ReferenceEquals(_scrollEventTarget, scrollEl))
+        {
+            _scrollEvent?.Dispose();
+            _scrollEvent = null;
+        }
+
+        _offsetWatch = scrollEl.GetPropertyChangedObservable(ScrollViewer.OffsetProperty).Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs>(_ => OnOffsetChanged(scrollEl)));
         DisabledChanged();
-        if (Position == InfiniteScrollPosition.Top && _scrollEl is { } scrollEl)
+        if (Position == InfiniteScrollPosition.Top)
         {
             // writeTask: scrollTop = scrollHeight - clientHeight, if it's still connected.
             AvonicConfig.RequestFrame(scrollEl, () =>
@@ -187,18 +199,26 @@ public partial class AvonicInfiniteScroll : ContentControl
     {
         base.OnDetachedFromVisualTree(e);
         EnableScrollEvents(false);
+        _offsetWatch?.Dispose();
+        _offsetWatch = null;
         _scrollEl = null;
     }
 
-    /// <summary><c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself and stops at the first.</summary>
-    private Control? FindClosestScrollHost()
+    /// <summary>
+    /// <c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself and stops at the first, with
+    /// the nearest <see cref="ScrollViewer"/> on the way to it.
+    /// </summary>
+    private Control? FindClosestScrollHost(out ScrollViewer? inside)
     {
+        inside = null;
         foreach (var visual in this.GetSelfAndVisualAncestors())
         {
             if (visual is AvonicContent || (visual is Control control && control.Classes.Contains(ScrollHostClass)))
             {
                 return (Control)visual;
             }
+
+            inside ??= visual as ScrollViewer;
         }
 
         return null;
@@ -256,38 +276,30 @@ public partial class AvonicInfiniteScroll : ContentControl
         LoadingChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void EnableScrollEvents(bool shouldListen)
+    /// <summary>Ionic's add and remove of its <c>scroll</c> listener: who hears the scroll event when it's dispatched.</summary>
+    private void EnableScrollEvents(bool shouldListen) => _listening = shouldListen && _scrollEl is not null;
+
+    /// <summary>
+    /// A browser dispatches <c>scroll</c> once, at the next frame, however many times the position changed, to whoever listens
+    /// then: one removed and added again in the meantime, by being disabled and enabled or moved, still hears it.
+    /// </summary>
+    private void OnOffsetChanged(ScrollViewer scrollEl)
     {
-        if (_scrollEl is not { } scrollEl || shouldListen == _listening)
+        if (_scrollEvent is not null)
         {
             return;
         }
 
-        _listening = shouldListen;
-        if (shouldListen)
+        _scrollEventTarget = scrollEl;
+        _scrollEvent = AvonicConfig.RequestFrame(scrollEl, () =>
         {
-            scrollEl.PropertyChanged += OnScrollElPropertyChanged;
-        }
-        else
-        {
-            scrollEl.PropertyChanged -= OnScrollElPropertyChanged;
-            // A listener that's gone hears no scroll that's waiting to be dispatched.
-            _scrollEvent?.Dispose();
             _scrollEvent = null;
-        }
-    }
-
-    /// <summary>A browser dispatches <c>scroll</c> once, at the next frame, however many times the position changed.</summary>
-    private void OnScrollElPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == ScrollViewer.OffsetProperty && _scrollEvent is null && sender is ScrollViewer scrollEl)
-        {
-            _scrollEvent = AvonicConfig.RequestFrame(scrollEl, () =>
+            _scrollEventTarget = null;
+            if (_listening && ReferenceEquals(_scrollEl, scrollEl))
             {
-                _scrollEvent = null;
                 OnScroll();
-            });
-        }
+            }
+        });
     }
 
     /// <summary>Ionic's <c>onScroll</c>.</summary>

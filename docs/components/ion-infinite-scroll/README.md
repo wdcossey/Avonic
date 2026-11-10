@@ -55,12 +55,13 @@ No events, methods, slots, parts or CSS variables.
 
 ## Behaviour
 
-- **The scroller** is the nearest `AvonicContent`'s, or a `ScrollViewer` with the class `ion-content-scroll-host`, among the
-  scroll and its visual ancestors, found when it's attached. Outside both it logs `AvonicInfiniteScroll must be used inside
+- **The scroller** is the nearest `AvonicContent`'s, or that of the nearest element with the class `ion-content-scroll-host`,
+  among the scroll and its visual ancestors, found when it's attached: the element itself if it's a `ScrollViewer`, or else the
+  `ScrollViewer` around the scroll inside it, as in a `ListBox`'s template. Outside both it logs `AvonicInfiniteScroll must be used inside
   AvonicContent.` at `Error` in `LogArea.Control`, and does nothing; with a host that has no `ScrollViewer`, `AvonicInfiniteScroll
   found no ScrollViewer in {Host}.`
 - **A check** runs at the frame after the scroller's `Offset` changes, once however many times it changed, as a browser dispatches
-  `scroll`. A change of layout alone isn't a scroll, so a list too short to scroll never fires. It reads the layout that's due
+  `scroll`, if it's listening then: disabled and enabled again, or moved and back, before the frame, it still checks. A change of layout alone isn't a scroll, so a list too short to scroll never fires. It reads the layout that's due
   first, as a browser's reads force one.
 - **It fires** when the distance is below 0, strictly: at the bottom `scrollHeight - its height - scrollTop - threshold - the
   scroller's height`; at the top `scrollTop - its height - threshold`. Hidden, its height is 0, and it doesn't check. Once fired, it
@@ -97,8 +98,8 @@ None.
   font, so at another size the gap under the spinner is a pixel or two different.
 - **The content follows the nearest infinite scroll around it**, where Ionic's descendant rule follows any loading ancestor, which
   only differs for one infinite scroll inside another's content.
-- **A scroll host with `ion-content-scroll-host`** has to be a `ScrollViewer`, as only one scrolls here. The nearest element with the
-  class is the host, as `closest()` finds it; if it isn't one, the error is logged and nothing fires.
+- **A scroll host with `ion-content-scroll-host`** has to be a `ScrollViewer` or have one around the infinite scroll, as only a
+  `ScrollViewer` scrolls here. If it has neither, the error is logged and nothing fires.
 - **`infiniteLoadingSpinner`** isn't in `AvonicConfig`; `AvonicConfig.Spinner` is read instead.
 - **`loadingText` has no HTML**, as with Ionic's default.
 - Not tried in a real window, nor on a device: a momentum flick hasn't been seen.

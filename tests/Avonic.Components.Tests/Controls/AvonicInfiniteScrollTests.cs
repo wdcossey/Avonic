@@ -270,6 +270,19 @@ public class AvonicInfiniteScrollTests
     }
 
     [AvaloniaFact]
+    public void B6_A_Scroll_While_Disabled_Is_Heard_If_It_Is_Enabled_By_The_Frame()
+    {
+        // As the listener is added back before the browser dispatches the scroll
+        using var stage = new Stage();
+        stage.Infinite.IsEnabled = false;
+        stage.Scroll.Offset = new Vector(0, 600);
+        stage.Infinite.IsEnabled = true;
+        Dispatcher.UIThread.RunJobs();
+        stage.Frame();
+        Assert.Equal(1, stage.Fired);
+    }
+
+    [AvaloniaFact]
     public void B6_A_Disabled_Ancestor_Is_Not_Its_Own_Disabled()
     {
         using var stage = new Stage();
@@ -479,6 +492,33 @@ public class AvonicInfiniteScrollTests
     }
 
     [AvaloniaFact]
+    public void B12_A_Scroll_Host_That_Is_No_ScrollViewer_Scrolls_By_The_One_Inside_It()
+    {
+        // As a ListBox does in its template: the host has the class, the ScrollViewer is between it and the infinite scroll
+        using var clock = new TestClock();
+        var fired = 0;
+        var infinite = new AvonicInfiniteScroll { Content = new Border { Height = 84 } };
+        infinite.IonInfinite += (_, _) => fired++;
+        var rows = new StackPanel();
+        for (var i = 0; i < 30; i++)
+        {
+            rows.Children.Add(Stage.Row());
+        }
+
+        rows.Children.Add(infinite);
+        var scroll = new ScrollViewer
+        {
+            Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!,
+            Content = rows,
+        };
+        using var scene = new Scene(new Border { Classes = { AvonicInfiniteScroll.ScrollHostClass }, Child = scroll });
+
+        scroll.Offset = new Vector(0, 530);
+        clock.At(16);
+        Assert.Equal(1, fired);
+    }
+
+    [AvaloniaFact]
     public void B12_The_Nearest_Scroll_Host_Wins_And_One_That_Is_No_ScrollViewer_Is_Logged()
     {
         var previous = Logger.Sink;
@@ -517,15 +557,30 @@ public class AvonicInfiniteScrollTests
     }
 
     [AvaloniaFact]
-    public void B13_A_Scroll_Waiting_For_Its_Frame_Is_Not_Heard_Once_Removed()
+    public void B13_A_Scroll_Waiting_For_Its_Frame_Is_Heard_Only_If_It_Is_Back_By_Then()
     {
-        using var stage = new Stage();
-        stage.Scroll.Offset = new Vector(0, 600);
-        stage.Rows.Children.Remove(stage.Infinite);
-        stage.Rows.Children.Add(stage.Infinite);
-        Dispatcher.UIThread.RunJobs();
-        stage.Frame();
-        Assert.Equal(0, stage.Fired);
+        // A browser dispatches the scroll to whoever listens at the frame: removed and added again, it's still heard
+        using (var stage = new Stage())
+        {
+            stage.Scroll.Offset = new Vector(0, 600);
+            stage.Rows.Children.Remove(stage.Infinite);
+            stage.Rows.Children.Add(stage.Infinite);
+            Dispatcher.UIThread.RunJobs();
+            stage.Frame();
+            Assert.Equal(1, stage.Fired);
+        }
+
+        // Removed until after the frame, it isn't
+        using (var stage = new Stage())
+        {
+            stage.Scroll.Offset = new Vector(0, 600);
+            stage.Rows.Children.Remove(stage.Infinite);
+            stage.Frame();
+            stage.Rows.Children.Add(stage.Infinite);
+            Dispatcher.UIThread.RunJobs();
+            stage.Frame();
+            Assert.Equal(0, stage.Fired);
+        }
     }
 
     // ── B14: hidden ──────────────────────────────────────────────────────────────────────────
