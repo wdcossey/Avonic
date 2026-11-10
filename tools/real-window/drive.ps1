@@ -201,7 +201,8 @@ try {
     "$Exe"
     "window $($r.Width) x $($r.Height), scale $([math]::Round($r.Width / 390, 2)), touch hardware contacts $contacts, touch injection $touch"
     "frames in $Out"
-    $titles = @(All $CT::Button | ForEach-Object { $_.Current.Name } | Where-Object { $_ })
+    # The index scrolls once it outgrows the window, and its scroll bar's buttons are Buttons too.
+    $titles = @(All $CT::Button | ForEach-Object { $_.Current.Name } | Where-Object { $_ -and $_ -notin 'Line up', 'Page up', 'Page down', 'Line down' })
     Shot 'index'
 
     Section 'Every page on the index' {
