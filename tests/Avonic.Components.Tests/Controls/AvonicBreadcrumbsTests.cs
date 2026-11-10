@@ -292,8 +292,13 @@ public class AvonicBreadcrumbsTests
         using var scene = Show(holder);
 
         holder.Children.Remove(trail);
-        trail.Items.Add(Crumb("D"));
+        var d = Crumb("D");
+        trail.Items.Add(d);
         Dispatcher.UIThread.RunJobs();
+
+        // Out of the window, as an element out of the document still gets slotchange.
+        Assert.True(d.Active);
+        Assert.False(Crumbs(trail)[2].Active);
         holder.Children.Add(trail);
 
         Assert.Equal("A:Ssep=true | B:Ssep=true | C:Ssep=true | D:Asep=undefined", State(trail));
@@ -316,6 +321,23 @@ public class AvonicBreadcrumbsTests
         using var scene = Show(trail);
 
         Assert.Equal([true], changes);
+    }
+
+    [AvaloniaFact]
+    public void B3_Children_Added_One_By_One_Before_It_Is_Shown_Are_Read_Once()
+    {
+        var trail = new AvonicBreadcrumbs();
+        var active = Crumb("Active");
+        active.Active = true;
+        foreach (var breadcrumb in new[] { Crumb("A"), active, Crumb("Last") })
+        {
+            trail.Items.Add(breadcrumb);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        using var scene = Show(trail);
+
+        Assert.Equal("A:Ssep=true | Active:ASsep=true | Last:sep=undefined", State(trail));
     }
 
     [AvaloniaFact]
@@ -612,6 +634,11 @@ public class AvonicBreadcrumbsTests
         AssertColor(ActiveText, crumbs[1].Foreground);
         Assert.Equal(FontWeight.Medium, crumbs[1].FontWeight);
         AssertColor(SeparatorText, Separator(crumbs[0]).GetValue(TextElement.ForegroundProperty));
+
+        // Set later, with nothing else changing.
+        crumbs[0].Active = true;
+        Dispatcher.UIThread.RunJobs();
+        AssertColor(ActiveText, crumbs[0].Foreground);
     });
 
     [AvaloniaFact]
