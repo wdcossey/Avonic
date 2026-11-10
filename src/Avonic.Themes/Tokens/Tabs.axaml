@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-tab-bar's variables, with tab-bar.md.css's values. A CssUnset key falls back as Ionic's var() does; any value
+         overrides it. A resource set on the bar reaches its buttons, as a variable set on it does. -->
+    <!-- var(ion-tab-bar-background, var(ion-background-color, #fff)): Avonic.TabBarBackgroundBrush, in Global.axaml -->
+    <b:CssUnset x:Key="Avonic.TabBar.Background" />
+    <!-- var(ion-tab-bar-color, var(ion-color-step-650, var(ion-text-color-step-350, #595959))) -->
+    <b:CssUnset x:Key="Avonic.TabBar.Color" />
+    <!-- border: 1px solid var(ion-tab-bar-border-color, ...). A shorthand has no Avalonia value, so it's a width and a colour.
+         It's on top, or at the bottom in the top slot. -->
+    <x:Double x:Key="Avonic.TabBar.BorderWidth">1</x:Double>
+    <b:CssUnset x:Key="Avonic.TabBar.BorderColor" />
+
+    <!-- The global variables the tab bar reads, which Ionic leaves unset. ion-tab-bar-color falls back to ion-color-step-650,
+         which Ionic 8 leaves unset too, then ion-text-color-step-350, which both palettes set. -->
+    <SolidColorBrush x:Key="Avonic.TabBarColorBrush" Color="{DynamicResource Avonic.TextColorStep350}" />
+    <!-- ion-tab-bar-color-selected: var(ion-color-primary) -->
+    <SolidColorBrush x:Key="Avonic.TabBarColorSelectedBrush" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- ion-tab-bar-background-focused: #e0e0e0 -->
+    <Color x:Key="Avonic.TabBarBackgroundFocused">#E0E0E0</Color>
+    <SolidColorBrush x:Key="Avonic.TabBarBackgroundFocusedBrush" Color="{DynamicResource Avonic.TabBarBackgroundFocused}" />
+    <!-- ion-tab-bar-border-color, unset: its fallback, ion-border-color, then ion-color-step-150 and
+         ion-background-color-step-150, which Ionic's light palette leaves unset, where here Avonic.BorderColor and the steps
+         always have a value. So the literal follows, as Tokens/Toolbar.axaml keeps toolbar.md.css's. -->
+    <b:CssUnset x:Key="Avonic.TabBarBorderColorBrush" />
+
+    <!-- tab-bar.md.css's literal fallbacks, height and the safe area's other sides. Not Ionic's variables: override the keys above. -->
+    <!-- rgba(0, 0, 0, 0.07), measured -->
+    <SolidColorBrush x:Key="Avonic.TabBar.Md.BorderColorBrush" Color="#12000000" />
+    <!-- height: 56px, inside the border and the padding, as box-sizing: content-box puts it -->
+    <x:Double x:Key="Avonic.TabBar.Md.Height">56</x:Double>
+    <x:Double x:Key="Avonic.TabBar.Md.NoPadding">0</x:Double>
+
+    <!-- ion-tab-button's variables, with tab-button.md.css's values. Unset ones are the bar's, which the button inherits in CSS. -->
+    <!-- The bar's background -->
+    <b:CssUnset x:Key="Avonic.TabButton.Background" />
+    <!-- The bar's: var(ion-tab-bar-background-focused, #e0e0e0) -->
+    <b:CssUnset x:Key="Avonic.TabButton.BackgroundFocused" />
+    <x:Double x:Key="Avonic.TabButton.BackgroundFocusedOpacity">1</x:Double>
+    <!-- The bar's colour -->
+    <b:CssUnset x:Key="Avonic.TabButton.Color" />
+    <!-- Unset: the host's colour -->
+    <b:CssUnset x:Key="Avonic.TabButton.ColorFocused" />
+    <!-- The bar's: var(ion-tab-bar-color-selected, var(ion-color-primary, #0054e9)) -->
+    <b:CssUnset x:Key="Avonic.TabButton.ColorSelected" />
+    <x:Double x:Key="Avonic.TabButton.PaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.TabButton.PaddingEnd">12</x:Double>
+    <x:Double x:Key="Avonic.TabButton.PaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.TabButton.PaddingStart">12</x:Double>
+    <!-- var(color-selected) -->
+    <b:CssUnset x:Key="Avonic.TabButton.RippleColor" />
+
+</ResourceDictionary>

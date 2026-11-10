@@ -15,7 +15,7 @@ namespace Avonic.Components.Tests.Performance;
 public class StyleBudgetTests
 {
     /// <summary>All the alternatives in the theme's global rules.</summary>
-    private const int MaxAlternatives = 275;
+    private const int MaxAlternatives = 278;
 
     /// <summary>Don't raise the limit past this without measuring on a real phone. See the README.</summary>
     private const int Checkpoint = 600;

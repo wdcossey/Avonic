@@ -1,0 +1,322 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8">
+            <c:AvonicTabBar SelectedTab="a">
+                <c:AvonicTabButton Tab="a" Layout="IconStart">
+                    <c:AvonicIcon IconName="calendar" />
+                    <c:AvonicLabel Content="Start" />
+                    <c:AvonicBadge Content="6" />
+                </c:AvonicTabButton>
+                <c:AvonicTabButton Tab="b" Layout="IconEnd">
+                    <c:AvonicIcon IconName="person-circle" />
+                    <c:AvonicLabel Content="End" />
+                </c:AvonicTabButton>
+                <c:AvonicTabButton Tab="c" Layout="IconBottom">
+                    <c:AvonicIcon IconName="map" />
+                    <c:AvonicLabel Content="Bottom" />
+                    <c:AvonicBadge />
+                </c:AvonicTabButton>
+            </c:AvonicTabBar>
+            <c:AvonicTabBar Color="primary" SelectedTab="a">
+                <c:AvonicTabButton Tab="a"><c:AvonicIcon IconName="calendar" /><c:AvonicLabel Content="Primary" /></c:AvonicTabButton>
+                <c:AvonicTabButton Tab="b"><c:AvonicIcon IconName="map" /><c:AvonicLabel Content="Map" /></c:AvonicTabButton>
+            </c:AvonicTabBar>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of tab-button.md.css, in its order, and of tab-bar.md.css's rules for its buttons, which the button reads
+         from :in-tab-bar-color and :in-tab-bar-translucent. In CSS those beat the button's own, as the bar's shadow tree comes
+         first. Its ::slotted rules set inheriting TabButtonPanel values on the host here, which Styles/TabButton.axaml gives
+         the icon, the label and the badge, and the panel reads for the badge's place. A margin is one Thickness here, where CSS
+         sets each side on its own, so a rule gives what the sides add up to in that state. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTabButton}" TargetType="c:AvonicTabButton">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- max-width: 168px; font-size: 12px; font-weight: normal; letter-spacing: 0.03em -->
+        <Setter Property="MaxWidth" Value="168" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="TextBlock.LetterSpacing">
+            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.03">
+                <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <!-- .button-native { cursor: pointer } -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- color: var(color); background: var(background), the bar's when unset -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.TabButton.Color" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Color" />
+                <DynamicResource ResourceKey="Avonic.TabBarColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.TabButton.Background" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Background" />
+                <DynamicResource ResourceKey="Avonic.TabBarBackgroundBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- .button-native's padding, inside which .button-inner is -->
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.TabButton.PaddingStart" />
+                <DynamicResource ResourceKey="Avonic.TabButton.PaddingTop" />
+                <DynamicResource ResourceKey="Avonic.TabButton.PaddingEnd" />
+                <DynamicResource ResourceKey="Avonic.TabButton.PaddingBottom" />
+            </MultiBinding>
+        </Setter>
+
+        <!-- ::slotted(ion-icon) { margin: 16px 0; font-size: 22px }, ::slotted(ion-label) { margin: 2px 0 } and white-space: nowrap,
+             ::slotted(ion-badge) { top: 8px; inset-inline-start: calc(50% + 6px) } -->
+        <Setter Property="c:TabButtonPanel.IconMargin" Value="0,16" />
+        <Setter Property="c:TabButtonPanel.IconSize" Value="22" />
+        <Setter Property="c:TabButtonPanel.LabelMargin" Value="0,2" />
+        <Setter Property="c:TabButtonPanel.BadgeTop" Value="8" />
+        <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.5" />
+        <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="6" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:TabButtonPanel Layout="{Binding Layout, RelativeSource={RelativeSource AncestorType=c:AvonicTabButton}}" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- .button-native: overflow: hidden, and its colour, which inherits the host's -->
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" ClipToBounds="True">
+                    <Panel Background="Transparent">
+                        <!-- .button-native::after -->
+                        <Border Name="PART_Overlay" IsHitTestVisible="False" />
+                        <c:AvonicRippleEffect Name="PART_Ripple" Type="Unbounded" />
+                        <!-- .button-inner, inside the padding, and over the ripple, as z-index: 1 puts it -->
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .button-native::after { opacity: 0 } -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- The colour, in the order of the rules' specificity, then of the files: the button's own, then the bar's ::slotted
+             ones, which beat them, then the anchor's focused and hovered colours. A focused colour that's unset is the host's. -->
+        <!-- :host(.tab-selected) { color: var(color-selected) } -->
+        <Style Selector="^:selected">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <DynamicResource ResourceKey="Avonic.TabBarColorSelectedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- The bar's :host(.ion-color) ::slotted(ion-tab-button) { color: rgba(var(ion-color-contrast-rgb), 0.7); background: var(ion-color-base) } -->
+        <Style Selector="^:in-tab-bar-color">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.ContrastColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.7}" />
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- The bar's :host(.ion-color) ::slotted(.tab-selected) { color: var(ion-color-contrast) } -->
+        <Style Selector="^:in-tab-bar-color:selected">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- @media (any-hover: hover) { a:hover { color: var(color-selected) } }, which the bar's colour sets to the contrast -->
+        <Style Selector="^:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <DynamicResource ResourceKey="Avonic.TabBarColorSelectedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-tab-bar-color:ion-hover">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-focused) .button-native { color: var(color-focused) }, which beats a:hover -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.TabButton.Color" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.Color" />
+                    <DynamicResource ResourceKey="Avonic.TabBarColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:selected">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <DynamicResource ResourceKey="Avonic.TabBarColorSelectedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:in-tab-bar-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorFocused" />
+                    <Binding Path="(b:ColorPalette.ContrastColor)" RelativeSource="{RelativeSource Self}" Converter="{x:Static b:ColorPalette.WithAlpha}" ConverterParameter="0.7" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:in-tab-bar-color:selected">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorFocused" />
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- The background. The bar's :host(.tab-bar-translucent) ::slotted(ion-tab-button) { background: transparent }, then its
+             focused rule, which is more specific: background: var(background-focused), the shade in a bar with a colour. -->
+        <Style Selector="^:in-tab-bar-translucent">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="^:in-tab-bar-translucent:ion-focused">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.TabBarBackgroundFocusedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-tab-bar-color:ion-focused">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.BackgroundFocused" />
+                    <Binding Path="(b:ColorPalette.Shade)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-focused) .button-native::after { background: var(background-focused); opacity: var(background-focused-opacity) } -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.TabButton.BackgroundFocusedOpacity}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.BackgroundFocused" />
+                    <DynamicResource ResourceKey="Avonic.TabBarBackgroundFocusedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:in-tab-bar-color /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.BackgroundFocused" />
+                    <Binding Path="(b:ColorPalette.Shade)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.tab-disabled) { pointer-events: none; opacity: 0.4 }. A disabled control already takes no input. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color) }, which is var(color-selected): the contrast in a bar with a colour -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.RippleColor" />
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <DynamicResource ResourceKey="Avonic.TabBarColorSelectedBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:in-tab-bar-color /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.TabButton.RippleColor" />
+                    <DynamicResource ResourceKey="Avonic.TabButton.ColorSelected" />
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- The ::slotted rules, by layout, in the file's order -->
+        <!-- :host(.tab-has-label-only) ::slotted(ion-label) { white-space: normal } -->
+        <Style Selector="^:has-label-only">
+            <Setter Property="c:TabButtonPanel.LabelWrapping" Value="Wrap" />
+        </Style>
+        <!-- :host(.tab-layout-icon-hide) ::slotted(ion-icon), :host(.tab-layout-label-hide) ::slotted(ion-label) { display: none } -->
+        <Style Selector="^:layout-icon-hide">
+            <Setter Property="c:TabButtonPanel.IconVisible" Value="False" />
+        </Style>
+        <Style Selector="^:layout-label-hide">
+            <Setter Property="c:TabButtonPanel.LabelVisible" Value="False" />
+        </Style>
+        <!-- :host(.tab-layout-icon-top): the icon's margin 6px 0 2px, the label's 0 0 6px -->
+        <Style Selector="^:layout-icon-top">
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0,6,0,2" />
+            <Setter Property="c:TabButtonPanel.LabelMargin" Value="0,0,0,6" />
+        </Style>
+        <!-- :host(.tab-layout-icon-bottom): the badge at top 8px, inset-inline-start 70%; the icon's margin 0 0 6px, the label's 6px 0 0 -->
+        <Style Selector="^:layout-icon-bottom">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="8" />
+            <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.7" />
+            <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="0" />
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0,0,0,6" />
+            <Setter Property="c:TabButtonPanel.LabelMargin" Value="0,6,0,0" />
+        </Style>
+        <!-- :host(.tab-layout-icon-start), :host(.tab-layout-icon-end): the badge at top 16px, inset-inline-start 80%; the icon's
+             margin-inline-end, or start, 6px, beside its 16px above and below -->
+        <Style Selector="^:layout-icon-start">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.8" />
+            <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="0" />
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0,16,6,16" />
+        </Style>
+        <Style Selector="^:layout-icon-end">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.8" />
+            <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="0" />
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="6,16,0,16" />
+        </Style>
+        <!-- :host(.tab-layout-icon-hide), :host(.tab-has-label-only): the badge at top 16px, inset-inline-start 70%; the label's
+             margin 0 above and below -->
+        <Style Selector="^:layout-icon-hide">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.7" />
+            <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="0" />
+            <Setter Property="c:TabButtonPanel.LabelMargin" Value="0" />
+        </Style>
+        <Style Selector="^:has-label-only">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.BadgeStart" Value="0.7" />
+            <Setter Property="c:TabButtonPanel.BadgeStartOffset" Value="0" />
+            <Setter Property="c:TabButtonPanel.LabelMargin" Value="0" />
+        </Style>
+        <!-- :host(.tab-layout-label-hide), :host(.tab-has-icon-only): the badge at top 16px, where it was across; the icon's margin
+             0 above and below, beside an icon-start or icon-end one's 6px, and font-size: 24px -->
+        <Style Selector="^:layout-label-hide">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0" />
+            <Setter Property="c:TabButtonPanel.IconSize" Value="24" />
+        </Style>
+        <Style Selector="^:has-icon-only">
+            <Setter Property="c:TabButtonPanel.BadgeTop" Value="16" />
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0" />
+            <Setter Property="c:TabButtonPanel.IconSize" Value="24" />
+        </Style>
+        <Style Selector="^:has-icon-only:layout-icon-start">
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="0,0,6,0" />
+        </Style>
+        <Style Selector="^:has-icon-only:layout-icon-end">
+            <Setter Property="c:TabButtonPanel.IconMargin" Value="6,0,0,0" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

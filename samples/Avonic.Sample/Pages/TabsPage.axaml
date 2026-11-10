@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.TabsPage">
+
+    <!-- ion-tabs, standalone: the first tab is selected at load, and a tab button selects its tab. -->
+    <c:AvonicTabs Name="Tabs">
+        <Panel>
+            <c:AvonicTab Tab="layouts">
+                <ScrollViewer>
+                    <StackPanel Spacing="8" Margin="0,8">
+                        <TextBlock Name="Changes" Margin="16,0" TextWrapping="Wrap" Text="Tap a tab below." />
+                        <c:AvonicTabBar SelectedTab="a">
+                            <c:AvonicTabButton Tab="a" Layout="IconStart"><c:AvonicIcon IconName="calendar" /><c:AvonicLabel Content="Start" /><c:AvonicBadge Content="6" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="b" Layout="IconEnd"><c:AvonicIcon IconName="person-circle" /><c:AvonicLabel Content="End" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="c" Layout="IconBottom"><c:AvonicIcon IconName="map" /><c:AvonicLabel Content="Bottom" /><c:AvonicBadge /></c:AvonicTabButton>
+                        </c:AvonicTabBar>
+                        <c:AvonicTabBar SelectedTab="b">
+                            <c:AvonicTabButton Tab="a" Layout="IconHide"><c:AvonicIcon IconName="calendar" /><c:AvonicLabel Content="Icon hide" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="b" Layout="LabelHide"><c:AvonicIcon IconName="person-circle" /><c:AvonicLabel Content="Label hide" /><c:AvonicBadge Content="3" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="c"><c:AvonicLabel Content="Label only, long enough to wrap" /></c:AvonicTabButton>
+                        </c:AvonicTabBar>
+                        <c:AvonicTabBar Color="primary" SelectedTab="a">
+                            <c:AvonicTabButton Tab="a"><c:AvonicIcon IconName="calendar" /><c:AvonicLabel Content="Primary" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="b"><c:AvonicIcon IconName="map" /><c:AvonicLabel Content="Map" /></c:AvonicTabButton>
+                        </c:AvonicTabBar>
+                        <c:AvonicTabBar Color="dark" SelectedTab="b" FlowDirection="RightToLeft">
+                            <c:AvonicTabButton Tab="a"><c:AvonicIcon IconName="calendar" /><c:AvonicLabel Content="RTL" /><c:AvonicBadge Content="9" /></c:AvonicTabButton>
+                            <c:AvonicTabButton Tab="b"><c:AvonicIcon IconName="map" /><c:AvonicLabel Content="Dark" /></c:AvonicTabButton>
+                        </c:AvonicTabBar>
+                    </StackPanel>
+                </ScrollViewer>
+            </c:AvonicTab>
+            <c:AvonicTab Tab="radio">
+                <StackPanel Margin="16" Spacing="16">
+                    <TextBlock Text="Radio" FontSize="20" />
+                    <c:AvonicButton Name="ToLibrary" Content="Select the library from code" />
+                </StackPanel>
+            </c:AvonicTab>
+            <c:AvonicTab Tab="library">
+                <TextBlock Margin="16" Text="Library: shown the first time it's selected, and kept while hidden." TextWrapping="Wrap" />
+            </c:AvonicTab>
+        </Panel>
+        <c:AvonicTabs.BottomContent>
+            <c:AvonicTabBar>
+                <c:AvonicTabButton Tab="layouts"><c:AvonicIcon IconName="apps" /><c:AvonicLabel Content="Layouts" /></c:AvonicTabButton>
+                <c:AvonicTabButton Tab="radio"><c:AvonicIcon IconName="radio" /><c:AvonicLabel Content="Radio" /><c:AvonicBadge Content="6" /></c:AvonicTabButton>
+                <c:AvonicTabButton Tab="library"><c:AvonicIcon IconName="library" /><c:AvonicLabel Content="Library" /></c:AvonicTabButton>
+                <c:AvonicTabButton Tab="search" IsEnabled="False"><c:AvonicIcon IconName="search" /><c:AvonicLabel Content="Search" /></c:AvonicTabButton>
+            </c:AvonicTabBar>
+        </c:AvonicTabs.BottomContent>
+    </c:AvonicTabs>
+
+</UserControl>

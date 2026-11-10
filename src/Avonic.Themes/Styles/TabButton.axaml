@@ -1,0 +1,41 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- tab-button.md.css's ::slotted rules. A button's child is its own container, so its logical parent is the button, and '>'
+         means direct children only, as ::slotted does. What changes by layout, md sets in a dozen rules; here the button's theme
+         sets it on the button, as inheriting TabButtonPanel values, so that each kind of child needs only one rule. An app's own
+         plain style for the child comes later, so it wins, as a light DOM style beats ::slotted. -->
+
+    <!-- ::slotted(ion-icon) { display: block; max-width: 100%; overflow: hidden; height: 1em }, the margin and font-size by
+         layout, and display: none for icon-hide. The order is TabButtonPanel's. -->
+    <Style Selector="c|AvonicTabButton > c|AvonicIcon">
+        <Setter Property="Margin" Value="{Binding (c:TabButtonPanel.IconMargin), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="FontSize" Value="{Binding (c:TabButtonPanel.IconSize), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="IsVisible" Value="{Binding (c:TabButtonPanel.IconVisible), RelativeSource={RelativeSource Self}}" />
+    </Style>
+
+    <!-- ::slotted(ion-label) { display: block; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+         text-transform: none }, white-space: normal with no icon, the margin by layout, and display: none for label-hide -->
+    <Style Selector="c|AvonicTabButton > c|AvonicLabel">
+        <Setter Property="Margin" Value="{Binding (c:TabButtonPanel.LabelMargin), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="IsVisible" Value="{Binding (c:TabButtonPanel.LabelVisible), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="TextBlock.TextWrapping" Value="{Binding (c:TabButtonPanel.LabelWrapping), RelativeSource={RelativeSource Self}}" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <!-- ::slotted(ion-badge) { position: absolute; border-radius: 8px; padding: 3px 2px 2px; min-width: 12px; font-size: 8px;
+         font-weight: normal }, its top and inset-inline-start by layout, which TabButtonPanel places it at, and
+         ::slotted(ion-badge:empty) { display: block; min-width: 8px; height: 8px }, which beats the badge's own display: none -->
+    <Style Selector="c|AvonicTabButton > c|AvonicBadge">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="2,3,2,2" />
+        <Setter Property="FontSize" Value="8" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="IsVisible" Value="True" />
+        <Setter Property="MinWidth" Value="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static c:TabButtonPanel.IfEmpty}, ConverterParameter='8 12'}" />
+        <Setter Property="Height" Value="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static c:TabButtonPanel.IfEmpty}, ConverterParameter='8 NaN'}" />
+    </Style>
+
+</Styles>

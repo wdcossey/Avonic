@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-tab-button: structure only. The look is in Avonic.Themes/Controls/AvonicTabButton.axaml. The anchor clips, and
+         .button-inner lays out the icon, the label and the badge by the layout. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTabButton}" TargetType="c:AvonicTabButton">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:TabButtonPanel Layout="{Binding Layout, RelativeSource={RelativeSource AncestorType=c:AvonicTabButton}}" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" ClipToBounds="True">
+                    <Panel Background="Transparent">
+                        <c:AvonicRippleEffect Name="PART_Ripple" Type="Unbounded" />
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

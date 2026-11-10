@@ -1,0 +1,133 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Border Width="390" Height="300">
+            <c:AvonicTabs>
+                <Panel>
+                    <c:AvonicTab Tab="home"><TextBlock Margin="16" Text="Home" /></c:AvonicTab>
+                    <c:AvonicTab Tab="radio"><TextBlock Margin="16" Text="Radio" /></c:AvonicTab>
+                </Panel>
+                <c:AvonicTabs.BottomContent>
+                    <c:AvonicTabBar>
+                        <c:AvonicTabButton Tab="home">
+                            <c:AvonicIcon IconName="play-circle" />
+                            <c:AvonicLabel Content="Listen now" />
+                        </c:AvonicTabButton>
+                        <c:AvonicTabButton Tab="radio">
+                            <c:AvonicIcon IconName="radio" />
+                            <c:AvonicLabel Content="Radio" />
+                            <c:AvonicBadge Content="6" />
+                        </c:AvonicTabButton>
+                        <c:AvonicTabButton Tab="search" IsEnabled="False">
+                            <c:AvonicIcon IconName="search" />
+                            <c:AvonicLabel Content="Search" />
+                        </c:AvonicTabButton>
+                    </c:AvonicTabBar>
+                </c:AvonicTabs.BottomContent>
+            </c:AvonicTabs>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- A translation of tab-bar.md.css, in its order. The rules for its buttons, ::slotted(ion-tab-button), are in
+         Controls/AvonicTabButton.axaml, on pseudoclasses the button works out from its bar. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTabBar}" TargetType="c:AvonicTabBar">
+        <!-- background: var(background); color: var(color) -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.TabBar.Background" />
+                <DynamicResource ResourceKey="Avonic.TabBarBackgroundBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.TabBar.Color" />
+                <DynamicResource ResourceKey="Avonic.TabBarColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <!-- text-align: center, which the labels inherit -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <!-- border-top: var(border) -->
+        <Setter Property="BorderBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.TabBar.BorderColor" />
+                <DynamicResource ResourceKey="Avonic.TabBarBorderColorBrush" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.BorderColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="BorderThickness">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.TabBar.BorderWidth" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+            </MultiBinding>
+        </Setter>
+        <!-- padding-right: var(ion-safe-area-right); padding-bottom: var(ion-safe-area-bottom, 0); padding-left: var(ion-safe-area-left).
+             Physical sides, which Css.SafeAreaBox swaps in RTL. -->
+        <Setter Property="Padding">
+            <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:TabBarPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- height: 56px, of the content box -->
+        <Style Selector="^ /template/ ItemsPresenter#PART_ItemsPresenter">
+            <Setter Property="Height" Value="{DynamicResource Avonic.TabBar.Md.Height}" />
+        </Style>
+
+        <!-- :host(.ion-color): background: var(ion-color-base); color: rgba(var(ion-color-contrast-rgb), 0.7) -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.ContrastColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.7}" />
+        </Style>
+
+        <!-- :host([slot=top]): padding-top: var(ion-safe-area-top, 0); padding-bottom: 0; border-top: 0; border-bottom: var(border) -->
+        <Style Selector="^:slot-top">
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.BorderWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.TabBar.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

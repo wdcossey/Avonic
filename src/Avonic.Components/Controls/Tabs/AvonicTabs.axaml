@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-tabs: structure only, as it has no look. A column: the top slot, the default slot (.tabs-inner, flex: 1), the bottom
+         slot. The bars come after the default slot, so they're drawn over it, as their z-index: 10 puts them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTabs}" TargetType="c:AvonicTabs">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <ContentPresenter Name="PART_ContentPresenter" Grid.Row="1"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    <ContentPresenter Name="PART_Top" Grid.Row="0"
+                                      Content="{TemplateBinding TopContent}"
+                                      ContentTemplate="{TemplateBinding TopContentTemplate}" />
+                    <ContentPresenter Name="PART_Bottom" Grid.Row="2"
+                                      Content="{TemplateBinding BottomContent}"
+                                      ContentTemplate="{TemplateBinding BottomContentTemplate}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
