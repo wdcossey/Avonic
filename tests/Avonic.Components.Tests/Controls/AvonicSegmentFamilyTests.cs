@@ -11,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avalonia.Styling;
 using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
@@ -673,5 +674,45 @@ public class AvonicSegmentFamilyTests
         Settle();
 
         Assert.True(button.IsArrangeValid);
+    }
+
+    [AvaloniaFact]
+    public void R9_A_Style_Can_Give_A_Button_Its_Value()
+    {
+        var button = new AvonicSegmentButton { Classes = { "second" }, Items = { new AvonicLabel { Content = "B" } } };
+        var segment = Segment("b", Button("a", "A"), button);
+        segment.Styles.Add(new Style(x => x.OfType<AvonicSegmentButton>().Class("second"))
+        {
+            Setters = { new Setter(AvonicSegmentButton.ValueProperty, "b") },
+        });
+        using var scene = new Scene(segment);
+        Settle();
+
+        Assert.True(button.IsChecked);
+    }
+
+    [AvaloniaFact]
+    public void R10_With_No_Width_To_Fill_Each_Column_Grows_To_360() => InstalledTheme.Run(_ =>
+    {
+        var segment = Segment("a", Button("a", "Notifications"), Button("b", "B"));
+        using var scene = new Scene(new StackPanel { Orientation = Orientation.Horizontal, Children = { segment } });
+        Settle();
+
+        Assert.All(Buttons(segment), b => Assert.Equal(360, b.Bounds.Width));
+    });
+
+    [AvaloniaFact]
+    public void R11_Assistive_Technology_Hears_The_Selected_Tab_Change()
+    {
+        var segment = Segment("a", Button("a", "A"), Button("b", "B"));
+        using var scene = new Scene(segment);
+        Settle();
+        var peer = ControlAutomationPeer.CreatePeerForElement(Buttons(segment)[1]);
+        var heard = new List<object?>();
+        peer.PropertyChanged += (_, e) => heard.Add(e.NewValue);
+
+        segment.Value = "b";
+
+        Assert.Equal([true], heard);
     }
 }

@@ -297,4 +297,22 @@ public class AvonicSegmentViewTests
         Assert.All(page.View.Items.OfType<AvonicSegmentContent>(), content => Assert.Equal(300, content.Bounds.Width));
         Assert.Equal(300, page.Scroll.Offset.X);
     }
+
+    [AvaloniaFact]
+    public void R12_A_View_Narrowed_On_Its_Last_Content_Keeps_It()
+    {
+        using var clock = new TestClock();
+        var built = Build("v3");
+        var host = new Border { Width = 390, HorizontalAlignment = HorizontalAlignment.Left, Child = built.Root };
+        using var scene = new Scene(host);
+        var page = Show(built, scene);
+        Assert.Equal(780, page.Scroll.Offset.X);
+
+        host.Width = 300;
+        Dispatcher.UIThread.RunJobs();
+        GestureTests.Render();
+
+        Assert.Equal(600, page.Scroll.Offset.X);
+        Assert.Equal("v3", page.Segment.Value);
+    }
 }

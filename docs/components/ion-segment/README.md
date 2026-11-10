@@ -66,7 +66,7 @@ Its 28 CSS variables are `Avonic.SegmentButton.<Name>` keys in `Tokens/Segment.a
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `disabled` | `IsEnabled` | No swiping, 0.3 |
+| [x] | `disabled` | `IsEnabled` | No swiping, 0.3. Its contents' controls are disabled too, which Ionic's aren't: see COMPARISON.md |
 | [x] | `swipeGesture` | `SegmentViewSwipeGesture` (`true`) | `false`: no swiping or wheel; code still pages it |
 | [x] | `ionSegmentViewScroll` | `IonSegmentViewScroll` (`SegmentViewScrollEventArgs`: `ScrollRatio`, `IsManualScroll`) | On every scroll |
 

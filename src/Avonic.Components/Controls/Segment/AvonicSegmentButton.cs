@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
@@ -76,7 +77,8 @@ public class AvonicSegmentButton : ItemsControl
 
     public AvonicSegmentButton()
     {
-        Value = "ion-sb-" + s_ids++;
+        // A default that any value set later wins over, from a style too, as an attribute wins over Ionic's field initialiser.
+        SetCurrentValue(ValueProperty, "ion-sb-" + s_ids++);
 
         // ion-activatable, ion-activatable-instant and ion-focusable, always.
         Activatable.SetIsEnabled(this, true);
@@ -185,7 +187,19 @@ public class AvonicSegmentButton : ItemsControl
     private void UpdateState()
     {
         var value = _segment?.Value;
-        PseudoClasses.Set(":checked", value is not null && Equals(value, Value));
+        var isChecked = value is not null && Equals(value, Value);
+        if (isChecked == IsChecked)
+        {
+            return;
+        }
+
+        PseudoClasses.Set(":checked", isChecked);
+
+        // aria-selected changes, which assistive technology hears.
+        if (ControlAutomationPeer.FromElement(this) is SegmentButtonPeer peer)
+        {
+            peer.RaiseSelectedChanged(!isChecked, isChecked);
+        }
     }
 
     /// <summary>The classes Ionic's <c>render</c> works out.</summary>
@@ -259,5 +273,8 @@ public class AvonicSegmentButton : ItemsControl
         public void RemoveFromSelection()
         {
         }
+
+        public void RaiseSelectedChanged(bool oldValue, bool newValue) =>
+            RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, oldValue, newValue);
     }
 }

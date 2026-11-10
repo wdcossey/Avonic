@@ -86,6 +86,9 @@ everywhere in Avonic.
   content and never skip one.
 - **`Scrollable` changing after load turns the gesture on or off.** Ionic has no watcher on it, so its gesture keeps what it read at
   load; a scrollable segment whose gesture still runs would fight its own scroller.
+- **Disabling the view, or the segment, which disables its view, disables the controls in its contents,** as Avalonia's `IsEnabled`
+  does to every descendant. Ionic's `segment-view-disabled` only stops the swipe and fades the view to 0.3, leaving them working.
+  The mapping rule makes `disabled` `IsEnabled`.
 - **`prefers-reduced-motion`** isn't read: Avalonia has no such setting, so the indicator always slides.
 - **A label's or icon's `hasLabel` and `hasIcon`** follow the button's children as they change. Ionic reads them only when it renders.
 - **The view keeps its content in view when it's resized,** a step after the layout, as Chromium's snap does in the same frame.

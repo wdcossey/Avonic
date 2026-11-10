@@ -41,6 +41,7 @@ public class AvonicSegmentView : ItemsControl
     private IDisposable? _scrollEndTimeout;
     private bool _isTouching;
     private bool? _isManualScroll;
+    private int _page;
     private IDisposable? _hitTestOff;
 
     static AvonicSegmentView()
@@ -110,11 +111,13 @@ public class AvonicSegmentView : ItemsControl
     {
         base.OnSizeChanged(e);
 
-        // A new width keeps the same content in view, as scroll snapping does after a layout change.
-        if (_scroll is not null && e.WidthChanged && e.PreviousSize.Width > 0 && _smooth?.IsRunning != true)
+        // A new width keeps the same content in view, as scroll snapping does after a layout change, or goes on to the one it was
+        // scrolling to. The page is the one kept from the last scroll, as the scroller has clamped its offset by now.
+        if (_scroll is not null && _smooth is not null && e.WidthChanged && e.PreviousSize.Width > 0)
         {
-            var page = Math.Round(_scroll.Offset.X / e.PreviousSize.Width);
-            Dispatcher.UIThread.Post(() => _scroll.Offset = new Vector(page * Bounds.Width, _scroll.Offset.Y), DispatcherPriority.Loaded);
+            var page = _page;
+            var smooth = _smooth.IsRunning;
+            Dispatcher.UIThread.Post(() => _smooth.To(page * Bounds.Width, smooth), DispatcherPriority.Loaded);
         }
     }
 
@@ -150,6 +153,13 @@ public class AvonicSegmentView : ItemsControl
 
         var max = _scroll.Extent.Width - _scroll.Viewport.Width;
         var scrollRatio = max > 0 ? _scroll.Offset.X / max : 0;
+
+        // Where it is, unless SetContent is taking it somewhere: for a resize.
+        if (_smooth?.IsRunning != true && Bounds.Width > 0)
+        {
+            _page = (int)Math.Round(_scroll.Offset.X / Bounds.Width, MidpointRounding.AwayFromZero);
+        }
+
         RaiseEvent(new SegmentViewScrollEventArgs(IonSegmentViewScrollEvent, scrollRatio, _isManualScroll ?? true));
         ResetScrollEndTimeout();
     }
@@ -208,6 +218,7 @@ public class AvonicSegmentView : ItemsControl
 
         SetManualScroll(false);
         ResetScrollEndTimeout();
+        _page = index;
         _smooth.To(index * Bounds.Width, smoothScroll);
     }
 }

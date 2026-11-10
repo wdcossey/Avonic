@@ -61,6 +61,17 @@ public sealed class SegmentPanel : Panel
             }
         }
 
+        if (!scrollable && !double.IsFinite(width))
+        {
+            // With no width to fill, as under a max-content constraint, each column grows to its limit: MaxColumnWidth, or with
+            // none, its content's width.
+            for (var i = 0; i < children.Count; i++)
+            {
+                children[i].Measure(new Size(double.PositiveInfinity, availableSize.Height));
+                bases[i] = Math.Max(bases[i], double.IsFinite(MaxColumnWidth) ? MaxColumnWidth : children[i].DesiredSize.Width);
+            }
+        }
+
         _columns = scrollable ? Flexible(bases, width) : Grown(bases, width, MaxColumnWidth);
         var total = _columns.Sum();
         _start = scrollable || !double.IsFinite(width) ? 0 : (width - total) / 2;

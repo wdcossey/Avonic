@@ -142,8 +142,28 @@ public class AvonicSegment : ItemsControl, IItemControl
     {
     }
 
-    /// <summary><c>getButtons</c>: every button inside, in tree order.</summary>
-    internal List<AvonicSegmentButton> Buttons() => this.GetLogicalDescendants().OfType<AvonicSegmentButton>().ToList();
+    /// <summary><c>getButtons</c>: every button inside, in tree order. Not inside a button, whose label and icon it skips.</summary>
+    internal List<AvonicSegmentButton> Buttons()
+    {
+        var buttons = new List<AvonicSegmentButton>();
+        Collect(this);
+        return buttons;
+
+        void Collect(ILogical parent)
+        {
+            foreach (var child in parent.LogicalChildren)
+            {
+                if (child is AvonicSegmentButton button)
+                {
+                    buttons.Add(button);
+                }
+                else
+                {
+                    Collect(child);
+                }
+            }
+        }
+    }
 
     /// <summary>The <c>checked</c> getter: the button whose value is the segment's.</summary>
     private AvonicSegmentButton? Checked => Value is { } value ? Buttons().Find(button => Equals(button.Value, value)) : null;
@@ -180,7 +200,6 @@ public class AvonicSegment : ItemsControl, IItemControl
         base.OnDetachedFromVisualTree(e);
     }
 
-    /// <summary><c>componentDidLoad</c>.</summary>
     /// <summary>
     /// <c>componentDidLoad</c>, the first time, and the gesture every time, as leaving the tree destroys it here. Ionic's runs
     /// once for an element, so a segment that comes back doesn't snap its view again.
