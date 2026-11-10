@@ -68,8 +68,11 @@ public sealed class TabButtonPanel : Panel
     /// </summary>
     public static readonly IValueConverter IfEmpty = new FuncValueConverter<object?, string?, double>((content, parameter) =>
     {
-        var values = (parameter ?? "NaN NaN").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return double.Parse(values[content is null or "" ? 0 : 1], CultureInfo.InvariantCulture);
+        var values = (parameter ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var index = content is null or "" ? 0 : 1;
+        return index < values.Length && double.TryParse(values[index], NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+            ? value
+            : double.NaN;
     });
 
     private List<Control> _flow = [];

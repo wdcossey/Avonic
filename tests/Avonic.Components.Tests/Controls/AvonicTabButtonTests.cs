@@ -190,6 +190,8 @@ public class AvonicTabButtonTests
         // Measured, in buttons 97.5 wide: the label at y 21; the badge at x 63.45, or 70% of the inner box, and y 16.
         Assert.False(Child<AvonicIcon>(iconHide).IsVisible);
         Assert.Equal(21, Box(Child<AvonicLabel>(iconHide), iconHide).Y, 0.5);
+        // margin 0 above and below, which a lone centred label shows only once it overflows: measured 0px.
+        Assert.Equal(new Thickness(0), Child<AvonicLabel>(iconHide).Margin);
         Assert.Equal(new Rect(63.45, 16, 12, 13), Box(Child<AvonicBadge>(iconHide), iconHide), Half);
         // An icon of 24 with no margins at y 16, and the badge at 50% + 6 and y 16.
         Assert.False(Child<AvonicLabel>(labelHide).IsVisible);
@@ -215,6 +217,18 @@ public class AvonicTabButtonTests
         Assert.Equal(195, Box(rtl, scene.Window).X, 0.25);
         Assert.Equal(261, Box(Child<AvonicBadge>(rtl), scene.Window).X, 0.5);
     });
+
+    [AvaloniaFact]
+    public void N8_The_Empty_Badge_Converter_Gives_Auto_For_A_Missing_Or_Bad_Value()
+    {
+        var convert = (object? content, string parameter) =>
+            (double)TabButtonPanel.IfEmpty.Convert(content, typeof(double), parameter, System.Globalization.CultureInfo.InvariantCulture)!;
+
+        Assert.Equal(8, convert(null, "8 12"));
+        Assert.Equal(12, convert("6", "8 12"));
+        Assert.True(double.IsNaN(convert("6", "8")));
+        Assert.True(double.IsNaN(convert(null, "x")));
+    }
 
     [AvaloniaFact]
     public void N8_A_Badge_Is_8_Px_With_Its_Padding_And_Radius() => InstalledTheme.Run(_ =>

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -88,19 +89,29 @@ public class AvonicTab : ContentControl
     {
         base.OnAttachedToLogicalTree(e);
 
-        // componentWillLoad, in a dev build: a component and inline content can't be used together.
-        if (!_checkedComponent)
+        CheckComponent();
+    }
+
+    /// <summary>
+    /// <c>componentWillLoad</c>, in a dev build: a component and inline content can't be used together. Before the component is
+    /// first built too, which can come before the tab joins the tree.
+    /// </summary>
+    private void CheckComponent()
+    {
+        if (_checkedComponent)
         {
-            _checkedComponent = true;
-            if (Component is not null && Content is not null)
-            {
-                Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(
-                    this,
-                    "[ion-tab] - You can not use a lazy-loaded component in a tab and inlined content at the same time. " +
-                    "- Remove the component attribute in: <ion-tab component=\"{Component}\"> or " +
-                    "- Remove the embedded content inside the ion-tab: <ion-tab></ion-tab>",
-                    Component);
-            }
+            return;
+        }
+
+        _checkedComponent = true;
+        if (Component is not null && Content is not null)
+        {
+            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(
+                this,
+                "[ion-tab] - You can not use a lazy-loaded component in a tab and inlined content at the same time. " +
+                "- Remove the component attribute in: <ion-tab component=\"{Component}\"> or " +
+                "- Remove the embedded content inside the ion-tab: <ion-tab></ion-tab>",
+                Component);
         }
     }
 
@@ -111,6 +122,7 @@ public class AvonicTab : ContentControl
     /// </summary>
     private void PrepareLazyLoaded()
     {
+        CheckComponent();
         if (_loaded || Component is null || Content is not null)
         {
             return;
@@ -171,8 +183,11 @@ public class AvonicTab : ContentControl
 
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Pane;
 
+        /// <summary>An app's own name, then <c>aria-labelledby</c>, which beats the content's text, as it does in a browser.</summary>
         protected override string? GetNameCore() =>
-            base.GetNameCore() is { Length: > 0 } name ? name : Button is { } button ? CreatePeerForElement(button).GetName() : null;
+            AutomationProperties.GetName(owner) is { Length: > 0 } own ? own
+            : Button is { } button ? CreatePeerForElement(button).GetName()
+            : base.GetNameCore();
 
         protected override AutomationPeer? GetLabeledByCore() =>
             base.GetLabeledByCore() ?? (Button is { } button ? CreatePeerForElement(button) : null);

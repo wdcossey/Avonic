@@ -51,7 +51,6 @@ public class AvonicTabButton : ItemsControl
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
-    private readonly NativeButton _native;
     private AvonicTabBar? _bar;
 
     static AvonicTabButton()
@@ -70,7 +69,7 @@ public class AvonicTabButton : ItemsControl
         FocusVisible.SetIsEnabled(this, true);
 
         // The host's onClick, which the anchor's click reaches. No keys: the host's onKeyUp takes Enter and Space.
-        _native = new NativeButton(this, _ => SelectTab(), () => false, UpdateIsEffectivelyEnabled);
+        _ = new NativeButton(this, _ => SelectTab(), () => false, () => { });
         AddHandler(KeyUpEvent, OnKeyUp);
 
         Items.CollectionChanged += (_, _) => UpdateChildClasses();
@@ -95,8 +94,6 @@ public class AvonicTabButton : ItemsControl
         get => GetValue(SelectedProperty);
         set => SetValue(SelectedProperty, value);
     }
-
-    protected override bool IsEnabledCore => base.IsEnabledCore && _native?.CanExecute != false;
 
     /// <summary>A control is its own container, so that its logical parent is the button, as a slotted child's host is.</summary>
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>

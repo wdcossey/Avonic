@@ -106,7 +106,7 @@ Each becomes a test. "Measured" is from the scripts above.
 
 | # | Behaviour | Source |
 |---|---|---|
-| T1 | At load it selects its first tab: that tab shows, the others stay hidden, `IonTabsWillChange` and `IonTabsDidChange` are raised for it, and the bar's `SelectedTab` is its id | `componentWillLoad`; measured `initial` |
+| T1 | At load it selects its first tab: that tab shows, the others stay hidden, `IonTabsWillChange` and `IonTabsDidChange` are raised for it, and the bar's `SelectedTab` is its id. A tab selected in code before then is kept; tabs and a bar that templates make are found, at the load | `componentWillLoad`, `componentDidLoad`; measured `initial` |
 | T2 | A click on a tab button selects the tab with the button's `Tab`; a click on the selected one changes nothing | `onTabClicked`; measured `clickRadio`, `clickRadioAgain` |
 | T3 | `Select` returns false, changing nothing, for a tab that isn't there (logging Ionic's error), the selected tab, or during a selection (from a handler); true otherwise | `select`, `shouldSwitch`, `getTab`; measured `[true, false, false]`, and `concurrent` |
 | T4 | The order: `IonTabsWillChange` with nothing changed; the new tab shows and the bar's `SelectedTab` is written, so its buttons are marked; the old tab hides; `IonTabsDidChange` | `setActive`, `tabSwitch`; measured `will … sel=home`, `barchanged`, `did … sel=radio` |

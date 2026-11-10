@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -73,6 +74,39 @@ public class AvonicTabsTests
         Assert.Equal("home", f.Bar.SelectedTab);
         Assert.True(f.HomeButton.Selected);
         Assert.False(f.RadioButton.Selected);
+    }
+
+    [AvaloniaFact]
+    public void T1_A_Tab_Selected_Before_The_Load_Is_Kept()
+    {
+        var f = Make();
+        Assert.True(f.Tabs.Select("radio"));
+
+        using var scene = new Scene(f.Tabs);
+
+        Assert.Equal("radio", f.Tabs.GetSelected());
+        Assert.True(f.Radio.IsVisible);
+        Assert.False(f.Home.IsVisible);
+        Assert.Equal("radio", f.Bar.SelectedTab);
+    }
+
+    [AvaloniaFact]
+    public void T1_Tabs_And_A_Bar_That_Templates_Make_Are_Found()
+    {
+        var tabs = new AvonicTabs
+        {
+            Content = "pages",
+            ContentTemplate = new FuncDataTemplate<string>((_, _) => new Panel { Children = { Page("one", "One"), Page("two", "Two") } }),
+            BottomContent = "bar",
+            BottomContentTemplate = new FuncDataTemplate<string>((_, _) => Bar(null, Button("one", "One"), Button("two", "Two"))),
+        };
+        using var scene = new Scene(tabs);
+
+        Assert.Equal("one", tabs.GetSelected());
+        var bar = tabs.GetVisualDescendants().OfType<AvonicTabBar>().Single();
+        Assert.Equal("one", bar.SelectedTab);
+        Assert.True(bar.Items.OfType<AvonicTabButton>().First().Selected);
+        Assert.True(tabs.GetTab("one")!.IsVisible);
     }
 
     [AvaloniaFact]
@@ -289,6 +323,45 @@ public class AvonicTabsTests
     }
 
     [AvaloniaFact]
+    public void A2_A_Lazy_First_Tab_Logs_No_Error_And_One_With_Content_Does()
+    {
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            var tabs = new AvonicTabs { Content = new Panel { Children = { new AvonicTab { Tab = "lazy", Component = typeof(LazyPage) } } } };
+            using (new Scene(tabs))
+            {
+                Assert.IsType<LazyPage>(tabs.GetTab("lazy")!.Content);
+            }
+
+            Assert.DoesNotContain(sink.Errors, error => error.Contains("[ion-tab]"));
+
+            using (new Scene(new Panel { Children = { new AvonicTab { Component = typeof(LazyPage), Content = "Inline" } } }))
+            {
+                Assert.Contains(sink.Errors, error => error.Contains("[ion-tab] - You can not use a lazy-loaded component"));
+            }
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
+
+    private sealed class ErrorSink : Avalonia.Logging.ILogSink
+    {
+        public List<string> Errors { get; } = [];
+
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Error;
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) => Errors.Add(messageTemplate);
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues) =>
+            Errors.Add(messageTemplate + string.Join(",", propertyValues));
+    }
+
+    [AvaloniaFact]
     public void A2_A_Component_Beside_Inline_Content_Is_Never_Built()
     {
         LazyPage.Built = 0;
@@ -333,6 +406,7 @@ public class AvonicTabsTests
     public void A4_A_Tab_Is_A_Pane_Named_By_Its_Tab_Button()
     {
         var f = Make();
+        f.Home.Content = new TextBlock { Text = "The page's own text" };
         using var scene = new Scene(f.Tabs);
 
         var peer = ControlAutomationPeer.CreatePeerForElement(f.Home);

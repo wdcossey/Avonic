@@ -63,6 +63,9 @@ public class AvonicTabs : TemplatedControl
     private AvonicTab? _leavingTab;
     private bool _transitioning;
     private bool _willLoad;
+    private ContentPresenter? _topPresenter;
+    private ContentPresenter? _contentPresenter;
+    private ContentPresenter? _bottomPresenter;
 
     public AvonicTabs()
     {
@@ -142,36 +145,65 @@ public class AvonicTabs : TemplatedControl
     // ── Load ─────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>componentWillLoad</c>: without a router, the first tab is selected, before the first layout, so that no other shows.
-    /// Once, as Stencil calls it once. On the visual tree, which a window's own content joins only when it's shown, after its
-    /// XAML has filled the slots.
+    /// <c>componentWillLoad</c>: without a router, the first tab is selected, before the first layout, so that no other shows. On
+    /// the visual tree, which a window's own content joins only when it's shown, after its XAML has filled the slots. A tab a
+    /// template or an <c>ItemsSource</c> makes is only there after a layout, so with none found, it's tried again at the load. A
+    /// tab selected in code before then is kept, as Ionic runs a method called before its load after it.
     /// </summary>
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        WillLoad();
+    }
 
-        if (!_willLoad)
+    /// <summary><c>componentDidLoad</c>: the bar is told again, which finds one a template made.</summary>
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        WillLoad();
+        _willLoad = true;
+        UpdateTabBar();
+    }
+
+    private void WillLoad()
+    {
+        if (!_willLoad && _selectedTab is null && Tabs().FirstOrDefault() is { } first)
         {
             _willLoad = true;
-            if (Tabs().FirstOrDefault() is { } first)
-            {
-                SelectTab(first);
-            }
+            SelectTab(first);
         }
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        _topPresenter = e.NameScope.Find<ContentPresenter>("PART_Top");
+        _contentPresenter = e.NameScope.Find<ContentPresenter>("PART_ContentPresenter");
+        _bottomPresenter = e.NameScope.Find<ContentPresenter>("PART_Bottom");
     }
 
     // ── The tabs and the bar ─────────────────────────────────────────────────────────────────
 
+    /// <summary>What's in a slot: its content, or what its template made of it.</summary>
+    private static ILogical? InSlot(object? content, ContentPresenter? presenter) => content as ILogical ?? presenter?.Child;
+
     /// <summary>Its slots' content, in the order the slots are in.</summary>
     private IEnumerable<ILogical> Slotted() =>
-        new[] { TopContent, Content, BottomContent }.OfType<ILogical>();
+        new[] { InSlot(TopContent, _topPresenter), InSlot(Content, _contentPresenter), InSlot(BottomContent, _bottomPresenter) }.OfType<ILogical>();
+
+    /// <summary>
+    /// The bar slots first, then the default slot. Ionic's <c>querySelector</c> takes the first in the markup, which the author
+    /// orders; slots have no order here, and a bar inside a page, such as a page's own, mustn't take the main bar's place.
+    /// </summary>
+    private IEnumerable<ILogical> BarsFirst() =>
+        new[] { InSlot(TopContent, _topPresenter), InSlot(BottomContent, _bottomPresenter), InSlot(Content, _contentPresenter) }.OfType<ILogical>();
 
     /// <summary><c>querySelectorAll('ion-tab')</c>: every <see cref="AvonicTab"/> in it, at any depth.</summary>
     internal IEnumerable<AvonicTab> Tabs() => Slotted().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTab>();
 
-    /// <summary>Every <see cref="AvonicTabButton"/> in it, for a tab's automation name.</summary>
+    /// <summary>Every <see cref="AvonicTabButton"/> in it, for a tab's automation name, the bar slots' first.</summary>
     internal IEnumerable<AvonicTabButton> TabButtons() =>
-        Slotted().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabButton>();
+        BarsFirst().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabButton>();
 
     /// <summary><c>getTab</c> by id, which logs Ionic's error when there's none.</summary>
     private AvonicTab? FindTab(string tab)
@@ -185,15 +217,10 @@ public class AvonicTabs : TemplatedControl
         return found;
     }
 
-    /// <summary>
-    /// <c>updateTabBar</c>: the first tab bar in it gets the selected tab's id, if it has one and it differs. Ionic's
-    /// <c>querySelector</c> takes the first in the markup, which the author orders; slots have no order here, so the bar slots
-    /// come first, and a bar inside a page, such as a page's own, never takes the main bar's place.
-    /// </summary>
+    /// <summary><c>updateTabBar</c>: the first tab bar in it gets the selected tab's id, if it has one and it differs.</summary>
     private void UpdateTabBar()
     {
-        var bar = new[] { TopContent, BottomContent, Content }.OfType<ILogical>()
-            .SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabBar>().FirstOrDefault();
+        var bar = BarsFirst().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTabBar>().FirstOrDefault();
         if (bar is null || _selectedTab?.Tab is not { } tab || bar.SelectedTab == tab)
         {
             return;
@@ -235,8 +262,8 @@ public class AvonicTabs : TemplatedControl
         }
         catch
         {
-            // A DOM event's listener can't stop the switch, and an exception here would leave it half done: undo it, so the
-            // selected tab is still the one that shows.
+            // An exception from a handler escapes here, where a DOM listener's goes to window.onerror and the switch goes on.
+            // Undone, so that the selected tab is still the one that shows, rather than left half done.
             tab.IsActive = wasActive;
             _selectedTab = _leavingTab;
             _leavingTab = null;

@@ -47,9 +47,10 @@ public class AvonicTabBarTests
     {
         var a = Button("a", "A");
         var b = Button("b", "B");
-        var bar = Bar("b", a, b);
+        var bar = Bar(null, a, b);
 
         // Before the load, the watcher is skipped.
+        bar.SelectedTab = "b";
         Assert.False(b.Selected);
 
         using var scene = new Scene(Top(bar));

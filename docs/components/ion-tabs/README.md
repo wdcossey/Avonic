@@ -132,6 +132,12 @@ None.
 - **A hidden tab** is hidden at style priority, so an app's own `IsVisible` on a tab wins, where Ionic's `display: none` is
   `!important`.
 - **`Component` with `Content`** keeps the content, logs Ionic's error, and doesn't build the component; Ionic appends both.
+- **An `IonTabsWillChange` handler that throws** stops the switch and the exception leaves `Select`, or the click. In Ionic a
+  listener's error goes to `window.onerror` and the switch goes on. Here the switch is undone, so the selection stays whole.
+- **A tab button's children are controls.** Its `ItemsSource` and `ItemTemplate`, which `ItemsControl` has, make containers the
+  slotted rules and the layout don't see, as with `AvonicSegmentButton`.
+- **A tab selected before the load** is kept, and the first isn't selected first, where Ionic selects the first at its load and
+  then runs the call, with both events for each.
 - **The bar the tabs mark** is the first in `TopContent`, then `BottomContent`, then `Content`. Ionic takes the first in its
   markup, which the author orders; slots have no order here, so a bar inside a page never takes the main bar's place.
 - **`AvonicContent`** in a tab takes the tab as its page, where Ionic's takes `ion-tabs`, so a fullscreen content stops at the
