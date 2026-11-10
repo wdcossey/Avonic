@@ -91,6 +91,14 @@ None.
 - **`Complete()` reads the last layout, not a forced one**, so it measures the rows from before the new ones are laid out, which is
   what Ionic's comment and framework examples have. An app that waits for a layout between adding rows and calling `Complete()`
   at the top sees them jump, as a plain-DOM page does in Chromium.
+- **The functional stub has no minimum height**, as 84 is md's (and ios's) skin. With the stub alone, and nothing else giving the
+  content a height, the infinite scroll is 0 high, and, as in Ionic, a scroll of no height never fires.
+- **The spinner's line is 32 high** at any font size: 28 and the descent of 16 px Roboto. Chromium's line follows the inherited
+  font, so at another size the gap under the spinner is a pixel or two different.
+- **The content follows the nearest infinite scroll around it**, where Ionic's descendant rule follows any loading ancestor, which
+  only differs for one infinite scroll inside another's content.
+- **A scroll host with `ion-content-scroll-host`** has to be a `ScrollViewer`, as only one scrolls here. The nearest element with the
+  class is the host, as `closest()` finds it; if it isn't one, the error is logged and nothing fires.
 - **`infiniteLoadingSpinner`** isn't in `AvonicConfig`; `AvonicConfig.Spinner` is read instead.
 - **`loadingText` has no HTML**, as with Ionic's default.
 - Not tried in a real window, nor on a device: a momentum flick hasn't been seen.
