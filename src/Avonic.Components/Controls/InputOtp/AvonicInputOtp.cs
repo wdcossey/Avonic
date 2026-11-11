@@ -173,6 +173,9 @@ public class AvonicInputOtp : ContentControl
     private Regex? _validKeyPattern;
     private bool _syncing;
     private bool _updatingClasses;
+
+    /// <summary>Past <c>componentWillLoad</c>: the watchers on <c>value</c>, <c>length</c> and <c>separators</c> run from then on.</summary>
+    private bool _loaded;
     private IDisposable? _autofillFocus;
 
     static AvonicInputOtp()
@@ -184,8 +187,6 @@ public class AvonicInputOtp : ContentControl
     public AvonicInputOtp()
     {
         Classes.CollectionChanged += OnClassesChanged;
-        ProcessSeparators();
-        InitializeValues();
         UpdateClasses();
     }
 
@@ -341,9 +342,30 @@ public class AvonicInputOtp : ContentControl
         UpdateTabIndexes();
     }
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        // componentWillLoad, once, with every property set, whatever order they were set in: the separators, then the values.
+        if (!_loaded)
+        {
+            _loaded = true;
+            ProcessSeparators();
+            UpdateSeparators();
+            InitializeValues();
+            UpdateTabIndexes();
+        }
+    }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+
+        if (!_loaded && (change.Property == ValueProperty || change.Property == LengthProperty || change.Property == SeparatorsProperty))
+        {
+            // Stencil doesn't run a watcher before the component loads, which does what they would.
+            return;
+        }
 
         if (change.Property == ValueProperty)
         {
@@ -381,7 +403,17 @@ public class AvonicInputOtp : ContentControl
 
     protected override AutomationPeer OnCreateAutomationPeer() => new InputOtpAutomationPeer(this);
 
-    private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateClasses();
+    private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        // Only the classes the boxes copy: the list also holds every pseudoclass, which changes on each hover and focus.
+        if (e.Action == NotifyCollectionChangedAction.Reset || Mentions(e.NewItems) || Mentions(e.OldItems))
+        {
+            UpdateClasses();
+        }
+    }
+
+    private static bool Mentions(System.Collections.IList? classes) =>
+        classes?.OfType<string>().Any(name => name is ValidClass or InvalidClass or TouchedClass or ColorPalette.IonColorPseudoClass) == true;
 
     // ── The value ────────────────────────────────────────────────────────────────────────────
 
@@ -402,7 +434,7 @@ public class AvonicInputOtp : ContentControl
         _inputValues = Enumerable.Repeat("", length).ToList();
         if (string.IsNullOrEmpty(Value))
         {
-            Render();
+            ShowValues();
             return;
         }
 
@@ -416,7 +448,7 @@ public class AvonicInputOtp : ContentControl
             }
         }
 
-        Render();
+        ShowValues();
 
         // Without events: the watcher runs again for a value that changes.
         SetCurrentValue(ValueProperty, string.Concat(_inputValues));
@@ -481,6 +513,7 @@ public class AvonicInputOtp : ContentControl
     private void Render()
     {
         var length = Math.Max(0, Length);
+        var changed = false;
         while (_boxes.Count > length)
         {
             var last = _boxes.Count - 1;
@@ -489,6 +522,7 @@ public class AvonicInputOtp : ContentControl
             Unhook(_boxes[last]);
             _boxes.RemoveAt(last);
             _separators.RemoveAt(last);
+            changed = true;
         }
 
         while (_boxes.Count < length)
@@ -500,16 +534,26 @@ public class AvonicInputOtp : ContentControl
             _separators.Add(separator);
             _group?.Children.Add(box);
             _group?.Children.Add(separator);
+            changed = true;
         }
 
+        ShowValues();
+        UpdateSeparators();
+        if (changed)
+        {
+            // New boxes, or a new length in each box's name.
+            UpdateNative();
+            UpdateClasses();
+        }
+    }
+
+    /// <summary>The part of <c>render</c> that an edit changes: each box shows <c>inputValues[index]</c>.</summary>
+    private void ShowValues()
+    {
         foreach (var box in _boxes)
         {
             SetBoxText(box, At(_inputValues, box.Index));
         }
-
-        UpdateSeparators();
-        UpdateNative();
-        UpdateClasses();
     }
 
     private void Hook(InputOtpBox box)
@@ -1050,8 +1094,20 @@ public class AvonicInputOtp : ContentControl
 
     private async void PasteFromClipboard()
     {
+        // The clipboard is read asynchronously, where Chromium hands onPaste its text with the event.
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        var text = clipboard is null ? null : await clipboard.TryGetTextAsync();
+        string? text;
+        try
+        {
+            text = clipboard is null ? null : await clipboard.TryGetTextAsync();
+        }
+        catch (Exception exception)
+        {
+            // A platform that can't read its clipboard now: nothing is pasted, rather than an unhandled exception.
+            Warn($"The clipboard couldn't be read: {exception.Message}");
+            return;
+        }
+
         OnPaste(text);
     }
 
@@ -1090,7 +1146,9 @@ public class AvonicInputOtp : ContentControl
 
         protected override string? GetNameCore()
         {
-            var name = base.GetNameCore();
+            // The host's own name only, as inheritAriaAttributes moves aria-label: not the description's text, which a content
+            // control's name could come from.
+            var name = AutomationProperties.GetName(Owner);
             return string.IsNullOrEmpty(name) ? GroupName : name;
         }
     }

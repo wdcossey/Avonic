@@ -140,6 +140,10 @@ tunnel key handler, as `onKeyDown`; paste through `PastingFromClipboard`, handle
 native edit (a selection deleted, Delete, cut) through the text's change, as an `input` event. Focus and blur are the boxes'
 `GotFocus` and `LostFocus`, with `NewFocusedElement` as `relatedTarget`.
 
+`componentWillLoad` is the first attach: the separators and the values are read then, once, with every property set, so
+the order an app or XAML sets them in doesn't matter, as in Ionic, whose watchers don't run before the component loads. The watchers
+on `Value`, `Length` and `Separators` run from then on.
+
 Reused from `Controls/Input/` without changing it: nothing public fits (its enums and event args are `ion-input`'s, and Ionic's
 names differ), so `InputOtp*` types of the same shape are added, by the mapping rule.
 

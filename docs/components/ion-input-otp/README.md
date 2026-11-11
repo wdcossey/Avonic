@@ -38,8 +38,6 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [x] | `type` | `Type` (`InputOtpType`) | `Number` (default), `Text` |
 | [x] | `value` | `Value` (`string?`, `""`) | Two-way by default; rewritten to what the boxes hold |
 
-`HighlightBrush` is Ionic's internal `--highlight-color`, which the theme sets per state.
-
 ### Events, methods, slots
 
 | ✓ | Ionic | Avonic |
@@ -111,7 +109,8 @@ The per-size, per-shape and outline defaults are `Avonic.InputOtp.Md.SizeSmall`,
 
 ## Extensions
 
-None.
+- `HighlightBrush` (`IBrush?`): Ionic's private `--highlight-color`, public so that the theme can set it per state and each
+  box can read it, as `AvonicInput`'s is. Ionic has no such member.
 
 ## Known gaps
 

@@ -12,6 +12,4 @@ public sealed class InputOtpSeparator : Border
     internal InputOtpSeparator()
     {
     }
-
-    protected override Type StyleKeyOverride => typeof(InputOtpSeparator);
 }

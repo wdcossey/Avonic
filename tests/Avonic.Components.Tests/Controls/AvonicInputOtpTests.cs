@@ -175,6 +175,22 @@ public class AvonicInputOtpTests
         Assert.Equal("1|2|3|||", Shown(otp));
     }
 
+    [AvaloniaFact]
+    public void B01_The_Value_Is_Read_Once_Every_Property_Is_Set_Whatever_Their_Order()
+    {
+        // As componentWillLoad: the value isn't cut by the default length, or filtered by the default type, set after it.
+        var six = new AvonicInputOtp { Value = "123456", Length = 6, Separators = "5" };
+        var text = new AvonicInputOtp { Value = "AB", Type = InputOtpType.Text };
+        var scene = new Scene(new StackPanel { Children = { six, text } });
+        using var _ = scene;
+
+        Assert.Equal("123456", six.Value);
+        Assert.Equal("1|2|3|4|5|6", Shown(six));
+        Assert.True(Separators(six)[4].IsVisible);
+        Assert.Equal("AB", text.Value);
+        Assert.Equal("A|B||", Shown(text));
+    }
+
     // ── 2 to 5: typing ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -707,6 +723,10 @@ public class AvonicInputOtpTests
         Assert.Equal(AutomationControlType.Group, peer.GetAutomationControlType());
         Assert.Equal("One-time password input", peer.GetName());
         Assert.Equal("Input 2 of 4", AutomationProperties.GetName(Boxes(otp)[1]));
+
+        // Not the description's text.
+        otp.Content = "Didn't get a code?";
+        Assert.Equal("One-time password input", peer.GetName());
 
         AutomationProperties.SetName(otp, "Verification code");
         Assert.Equal("Verification code", peer.GetName());

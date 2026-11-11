@@ -26,7 +26,5 @@ public sealed class InputOtpBox : TextBox
     /// <summary>Its place in the row, from 0.</summary>
     internal int Index { get; }
 
-    protected override Type StyleKeyOverride => typeof(InputOtpBox);
-
     internal void SetState(string pseudoClass, bool on) => PseudoClasses.Set(pseudoClass, on);
 }
