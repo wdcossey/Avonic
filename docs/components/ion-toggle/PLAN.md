@@ -50,7 +50,7 @@ No methods.
 | [x] | `track` | `PART_Track` (`.toggle-icon`): the gesture's element |
 | [x] | `handle` | `PART_Handle` (`.toggle-inner`) |
 
-Other parts: `PART_Wrapper` (`.toggle-wrapper`, a `TogglePanel`), `PART_LabelContent` (the `<slot>`), `PART_Bottom`
+Other parts: `PART_Wrapper` (`.toggle-wrapper`, a `TogglePanel`, the shared `LabelledControlPanel` since the P2 roll-up), `PART_LabelContent` (the `<slot>`), `PART_Bottom`
 (`.toggle-bottom`), `PART_NativeWrapper` (`.native-wrapper`), `PART_IconWrapper` (`.toggle-icon-wrapper`, which moves) and
 `PART_SwitchIcon` (the on/off `ion-icon`).
 
@@ -131,7 +131,7 @@ TogglePanel PART_Wrapper            .toggle-wrapper (display: flex)
             └─ AvonicIcon PART_SwitchIcon
 ```
 
-`TogglePanel` is the flex row or column of `.toggle-wrapper`, for the four placements, three justifications and two alignments.
+`TogglePanel` (the shared `LabelledControlPanel` in `Controls/Flex/` since the P2 roll-up) is the flex row or column of `.toggle-wrapper`, for the four placements, three justifications and two alignments.
 `FlexRow` has no `justify-content` and no column. Its rules, each measured:
 
 - **Row** (start, fixed): label then track. **Row-reverse** (end): track then label. The label shrinks, the track doesn't.

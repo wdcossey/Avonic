@@ -31,9 +31,9 @@ public class StyleValueTests
         value.Clear();
         Assert.True(double.IsNaN(border.Width));
 
-        value.Set(true, 30);
+        value.SetWhen(true, 30);
         Assert.Equal(30, border.Width);
-        value.Set(false, 30);
+        value.SetWhen(false, 30);
         Assert.True(double.IsNaN(border.Width));
     }
 

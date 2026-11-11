@@ -230,7 +230,7 @@ public class AvonicFabButton : ContentControl
     /// <summary><c>::slotted(.fab-button-in-list)</c> is <c>visibility: hidden</c> until <c>.fab-button-show</c>.</summary>
     private bool IsHiddenInList => _inList && !Show;
 
-    private void UpdateHidden() => _hidden.Set(IsHiddenInList, false);
+    private void UpdateHidden() => _hidden.SetWhen(IsHiddenInList, false);
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 

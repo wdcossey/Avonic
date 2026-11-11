@@ -308,7 +308,7 @@ public class AvonicProgressBar : TemplatedControl
         var reversed = IsEffectivelyReversed;
         PseudoClasses.Set(":reversed", reversed);
 
-        _reversal.Set(reversed, _mirror);
+        _reversal.SetWhen(reversed, _mirror);
     }
 
     // ── Frames ───────────────────────────────────────────────────────────────────────────────

@@ -41,7 +41,7 @@ a tap on an item's padding, the keys, focus and blur, and the mark's transition 
 | [x] | `label` part | `PART_Label` | The label's wrapper. Hidden with no content, as `label-text-wrapper-hidden` is |
 | [x] | `mark` part | `PART_Mark` | The dot |
 
-Also `PART_Wrapper` (`.radio-wrapper`, a `RadioWrapper` panel) and `PART_Native` (`.native-wrapper`), which aren't parts in
+Also `PART_Wrapper` (`.radio-wrapper`, a `RadioWrapper` panel, the shared `LabelledControlPanel` since the P2 roll-up) and `PART_Native` (`.native-wrapper`), which aren't parts in
 Ionic, and `PART_Focus`, the `::after` focus circle.
 
 ### ion-radio: CSS variables (4)
@@ -147,7 +147,7 @@ The tab stop is `IsTabStop`, at style priority so an app's own value wins, and `
 
 `.radio-wrapper` is a flex row or column with two children, the label and the native wrapper, whose order, `justify-content` and
 `align-items` change with the three props. A `Grid` can't shrink the label to an ellipsis while packing it at the start, and
-`FlexRow` has no `justify-content` or column, so `RadioWrapper`, a two-child panel in the radio's folder, does what those rules
+`FlexRow` has no `justify-content` or column, so `RadioWrapper`, a two-child panel in the radio's folder (the shared `LabelledControlPanel` in `Controls/Flex/` since the P2 roll-up), does what those rules
 do and no more:
 
 - Row (start, fixed, end): the native wrapper keeps its 20, and the label takes what's left, down to nothing, as `overflow:

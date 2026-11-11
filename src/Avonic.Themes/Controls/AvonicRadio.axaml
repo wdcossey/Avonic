@@ -165,6 +165,8 @@
         <Style Selector="^:label-placement-stacked /template/ ContentPresenter#PART_Label">
             <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="RenderTransform" Value="scale(0.75)" />
+            <!-- max-width: calc(100% / 0.75), which LabelledControlPanel reads -->
+            <Setter Property="b:Css.Scale" Value="0.75" />
         </Style>
         <Style Selector="^:in-item:label-placement-stacked /template/ ContentPresenter#PART_Label">
             <Setter Property="Margin" Value="0,10,0,16" />

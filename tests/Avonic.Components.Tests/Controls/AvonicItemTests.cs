@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -1785,6 +1786,40 @@ public class AvonicItemTests
         Assert.False(overlaid.IsHitTestVisible);
         Assert.False(unfocusable.Focusable);
         Assert.True(focusable.Focusable);
+    }
+
+    // CSS: an app's rule beats the host's own, whenever the host's class turns on. A value given at style priority when the
+    // state turns on would come after the app's style, and win.
+    [AvaloniaFact]
+    public void B27_An_Apps_Style_Survives_A_State_That_Turns_On_After_It()
+    {
+        var child = new Border();
+        var item = new AvonicItem { Content = child };
+        var window = new Window
+        {
+            Content = item,
+            Styles =
+            {
+                new Style(x => x.OfType<AvonicItem>())
+                {
+                    Setters =
+                    {
+                        new Setter(InputElement.FocusableProperty, false),
+                        new Setter(InputElement.IsHitTestVisibleProperty, true),
+                    },
+                },
+            },
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        item.Button = true;
+        Raise(child, ("interactive-disabled", true));
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(item.Focusable);
+        Assert.True(item.IsHitTestVisible);
+        window.Close();
     }
 
     [AvaloniaFact]

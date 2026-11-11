@@ -78,7 +78,7 @@ public class AvonicFabList : ItemsControl
         {
             var activated = change.GetNewValue<bool>();
             PseudoClasses.Set(":active", activated);
-            _hidden.Set(!activated, false);
+            _hidden.SetWhen(!activated, false);
             ActivatedChanged(activated);
         }
         else if (change.Property == SideProperty)

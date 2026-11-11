@@ -138,12 +138,12 @@ public class LabelledControlPanelTests
         }
     }
 
-    // max-width: calc(100% / 0.75) on a stacked label, or its own Css.Scale when the theme sets it.
+    // max-width: calc(100% / 0.75) on a stacked label, the scale being its Css.Scale, which md's theme sets.
     [AvaloniaFact]
     public void A_Stacked_Label_Can_Be_Wider_Than_The_Line_By_Its_Scale()
     {
         var (panel, _, native, scene) = Line(LabelledControlPlacement.Stacked, labelWidth: double.NaN, width: 150,
-            setUp: p => p.Children[0] = LongLine());
+            setUp: p => p.Children[0] = LongLine(0.75));
         using (scene)
         {
             var wide = panel.Children[0];
@@ -157,6 +157,18 @@ public class LabelledControlPanelTests
         using (halfScene)
         {
             Assert.Equal(300, halfPanel.Children[0].Bounds.Width, 0.5);
+        }
+    }
+
+    // A template that doesn't scale the label, such as the functional stub, keeps it to the line.
+    [AvaloniaFact]
+    public void A_Stacked_Label_That_Isnt_Scaled_Is_No_Wider_Than_The_Line()
+    {
+        var (panel, _, _, scene) = Line(LabelledControlPlacement.Stacked, labelWidth: double.NaN, width: 150,
+            setUp: p => p.Children[0] = LongLine());
+        using (scene)
+        {
+            Assert.Equal(new Rect(0, 0, 150, panel.Children[0].Bounds.Height), panel.Children[0].Bounds);
         }
     }
 
@@ -185,4 +197,18 @@ public class LabelledControlPanelTests
         Assert.Equal(LabelledControlJustify.SpaceBetween, convert.Convert(ToggleJustify.SpaceBetween, typeof(LabelledControlJustify?), null, culture));
         Assert.Null(convert.Convert(null, typeof(LabelledControlAlignment?), null, culture));
     }
+
+    // The converter maps by name, so a member a control gains without the panel would throw in a binding: this says so first.
+    [Theory]
+    [InlineData(typeof(CheckboxLabelPlacement), typeof(LabelledControlPlacement))]
+    [InlineData(typeof(RadioLabelPlacement), typeof(LabelledControlPlacement))]
+    [InlineData(typeof(ToggleLabelPlacement), typeof(LabelledControlPlacement))]
+    [InlineData(typeof(CheckboxJustify), typeof(LabelledControlJustify))]
+    [InlineData(typeof(RadioJustify), typeof(LabelledControlJustify))]
+    [InlineData(typeof(ToggleJustify), typeof(LabelledControlJustify))]
+    [InlineData(typeof(CheckboxAlignment), typeof(LabelledControlAlignment))]
+    [InlineData(typeof(RadioAlignment), typeof(LabelledControlAlignment))]
+    [InlineData(typeof(ToggleAlignment), typeof(LabelledControlAlignment))]
+    public void Every_Member_Of_A_Controls_Enum_Has_The_Panels_Of_The_Same_Name(Type control, Type panel) =>
+        Assert.Empty(Enum.GetNames(control).Except(Enum.GetNames(panel)));
 }

@@ -48,14 +48,12 @@ public enum LabelledControlAlignment
 /// In a row the label has <c>overflow: hidden</c>, so no minimum, and the control's part can't shrink below its content, so the
 /// label takes what the part leaves: its flex basis is its one line, and its width is that or the space left, whichever is less,
 /// though its text is trimmed narrower. A fixed label doesn't shrink. In a column the label is as wide as its one line, up to
-/// <c>calc(100% / scale)</c>, the scale being its <see cref="Css.ScaleProperty"/>, or Ionic's 0.75 when the theme scales it some
-/// other way. Each control keeps its own enums; <see cref="FromControl"/> maps them onto this panel's by name in a template.
+/// <c>calc(100% / scale)</c>, the scale being its <see cref="Css.ScaleProperty"/>, which a theme that scales it sets: md's 0.75.
+/// Unset, it's 1, so a template that doesn't scale the label keeps it to the line. Each control keeps its own enums;
+/// <see cref="FromControl"/> maps them onto this panel's by name in a template.
 /// </remarks>
 public sealed class LabelledControlPanel : Panel
 {
-    /// <summary><c>scale(0.75)</c> on a stacked label, whose box can be <c>100% / 0.75</c> wide.</summary>
-    public const double StackedLabelScale = 0.75;
-
     public static readonly StyledProperty<LabelledControlPlacement> LabelPlacementProperty =
         AvaloniaProperty.Register<LabelledControlPanel, LabelledControlPlacement>(nameof(LabelPlacement));
 
@@ -119,9 +117,8 @@ public sealed class LabelledControlPanel : Panel
         return (label is { IsVisible: true } ? label : null, native is { IsVisible: true } ? native : null);
     }
 
-    /// <summary><c>calc(100% / 0.75)</c>'s divisor.</summary>
-    private static double ScaleOf(Control label) =>
-        label.IsSet(Css.ScaleProperty) && label.GetValue(Css.ScaleProperty) is > 0 and var scale ? scale : StackedLabelScale;
+    /// <summary><c>calc(100% / 0.75)</c>'s divisor: the label's <see cref="Css.ScaleProperty"/>, 1 for a label that isn't scaled.</summary>
+    private static double ScaleOf(Control label) => label.GetValue(Css.ScaleProperty) is > 0 and var scale ? scale : 1;
 
     protected override Size MeasureOverride(Size availableSize)
     {

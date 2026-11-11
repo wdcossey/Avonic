@@ -20,7 +20,7 @@ internal sealed class StyleValue<T> : IObservable<BindingValue<T>>
     public void Clear() => Update(false, default);
 
     /// <summary><paramref name="value"/> while <paramref name="on"/>, and nothing otherwise.</summary>
-    public void Set(bool on, T value) => Update(on, on ? value : default);
+    public void SetWhen(bool on, T value) => Update(on, on ? value : default);
 
     private void Update(bool hasValue, T? value)
     {

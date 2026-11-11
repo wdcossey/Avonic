@@ -214,8 +214,8 @@ public class AvonicItem : TemplatedControl, IItemHost
     private AvonicRippleEffect? _ripple;
     private bool _multipleInputs;
     private bool _forwarded;
-    private IDisposable? _focusableFrame;
-    private IDisposable? _noInputFrame;
+    private readonly StyleValue<bool> _focusable = new();
+    private readonly StyleValue<bool> _noInput = new();
 
     public AvonicItem()
     {
@@ -224,6 +224,11 @@ public class AvonicItem : TemplatedControl, IItemHost
         AddHandler(TappedEvent, (_, e) => e.Handled = _forwarded);
         AddHandler(PointerPressedEvent, (_, _) => _forwarded = false, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(IonStyle.IonStyleEvent, OnIonStyle);
+
+        // Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS is, so an app's own
+        // value wins, bound once so that it still wins when the state turns on after it.
+        Bind(FocusableProperty, _focusable, BindingPriority.Style);
+        Bind(IsHitTestVisibleProperty, _noInput, BindingPriority.Style);
         UpdateLines();
         UpdateInteractivity();
     }
@@ -395,10 +400,10 @@ public class AvonicItem : TemplatedControl, IItemHost
         FocusVisible.SetIsEnabled(this, canActivate || focusableChild);
 
         // A <button> takes focus, and a cover's control takes it itself.
-        SetStyleValue(ref _focusableFrame, FocusableProperty, clickable, true);
+        _focusable.SetWhen(clickable, true);
 
         // :host(.item-interactive-disabled:not(.item-multiple-inputs)) { pointer-events: none }
-        SetStyleValue(ref _noInputFrame, IsHitTestVisibleProperty, PseudoClasses.Contains(":item-interactive-disabled") && !_multipleInputs, false);
+        _noInput.SetWhen(PseudoClasses.Contains(":item-interactive-disabled") && !_multipleInputs, false);
 
         if (_ripple is not null)
         {
@@ -409,23 +414,6 @@ public class AvonicItem : TemplatedControl, IItemHost
         PseudoClasses.Set(
             ":item-control-needs-pointer-cursor",
             FirstInteractive() is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
-    }
-
-    /// <summary>
-    /// Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS is,
-    /// so an app's own value wins.
-    /// </summary>
-    private void SetStyleValue(ref IDisposable? frame, StyledProperty<bool> property, bool active, bool value)
-    {
-        if (active && frame is null)
-        {
-            frame = SetValue(property, value, BindingPriority.Style);
-        }
-        else if (!active)
-        {
-            frame?.Dispose();
-            frame = null;
-        }
     }
 
     /// <summary><c>clickedWithinShadowRoot</c>, inverted. Plain text in a slot has no element of its own, so it's padding.</summary>
@@ -491,7 +479,11 @@ public class AvonicItem : TemplatedControl, IItemHost
 
     private sealed class ItemAutomationPeer(AvonicItem owner) : ControlAutomationPeer(owner), IInvokeProvider, IExpandCollapseProvider
     {
-        private ExpandCollapseState? _last;
+        /// <summary>What a screen reader knows: the state when the peer was made, or when it was last read or announced.</summary>
+        private ExpandCollapseState _last = StateOf(owner);
+
+        private static ExpandCollapseState StateOf(AvonicItem item) =>
+            item.HeaderOf()?.IsExpandedState == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
 
         /// <summary>
         /// Ionic only sets onClick when clickable, "to prevent screen readers from reading all items as clickable". And
@@ -502,8 +494,7 @@ public class AvonicItem : TemplatedControl, IItemHost
             : providerType == typeof(IExpandCollapseProvider) && owner.HeaderOf() is null ? null
             : base.GetProviderCore(providerType);
 
-        public ExpandCollapseState ExpandCollapseState =>
-            owner.HeaderOf()?.IsExpandedState == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
+        public ExpandCollapseState ExpandCollapseState => _last = StateOf(owner);
 
         public bool ShowsMenu => false;
 
@@ -527,9 +518,8 @@ public class AvonicItem : TemplatedControl, IItemHost
         /// <summary>Only a change: an accordion that renders again in the same state says nothing.</summary>
         public void RaiseExpandCollapseChanged()
         {
+            var last = _last;
             var state = ExpandCollapseState;
-            var last = _last ?? state;
-            _last = state;
             if (state != last)
             {
                 RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, last, state);

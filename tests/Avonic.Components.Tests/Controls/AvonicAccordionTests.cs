@@ -9,6 +9,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -291,6 +292,31 @@ public class AvonicAccordionTests
     }
 
     // ── B7, B8, B9: what stops a tap ─────────────────────────────────────────────────────────
+
+    // ion-accordion::part(header) { pointer-events: auto } beats the shadow root's own rule, whenever readonly turns on. A value
+    // given at style priority when it turns on would come after the app's style, and win.
+    [AvaloniaFact]
+    public void B7_An_Apps_Style_On_A_Part_Survives_Readonly_Turning_On_After_It()
+    {
+        var a = Accordion("a");
+        var group = Group("a", a);
+        using var scene = Show(group);
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicAccordion>().Template().OfType<ContentPresenter>().Name("PART_Header"))
+        {
+            Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+        });
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicAccordion>().Template().OfType<AccordionContentClip>().Name("PART_Content"))
+        {
+            Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+        });
+        Dispatcher.UIThread.RunJobs();
+
+        a.Readonly = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(Header(a).IsHitTestVisible);
+        Assert.True(Content(a).IsHitTestVisible);
+    }
 
     [AvaloniaFact]
     public void B7_Readonly_Stops_A_Tap_And_Takes_Pointer_Input_Off_The_Header_And_Content()
@@ -1397,6 +1423,30 @@ public class AvonicAccordionTests
         clock.At(16);
 
         Assert.Equal([ExpandCollapseState.Expanded], changes);
+    }
+
+    // With no animation the accordion renders once, already in the new state: the peer still announces it.
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Announces_A_Change_With_No_Animation()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        group.Animated = false;
+        using var scene = Show(group);
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+
+        group.Value = "b";
+        group.Value = null;
+
+        Assert.Equal([ExpandCollapseState.Expanded, ExpandCollapseState.Collapsed], changes);
     }
 
     private static AvonicItem HeaderOf(AvonicAccordion accordion) => (AvonicItem)accordion.HeaderContent!;

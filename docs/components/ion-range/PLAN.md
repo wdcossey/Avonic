@@ -162,7 +162,7 @@ RangePanel PART_Wrapper                  .range-wrapper: a row, a reversed row (
 ratio) at that fraction of its width, and one with `RangeSlider.End` too between the two, as `left` and `right` percentages do; a
 handle's negative start margin centres it, as `margin-inline-start: calc(0px - var(--knob-handle-size) / 2)` does. It's mirrored in
 RTL, as any panel is, so a press is read in its own coordinates, which then count from the right. `RangePanel` lays out the label
-and the native wrapper in a row, a reversed row or a column, as `TogglePanel` does in #116.
+and the native wrapper in a row, a reversed row or a column, as `TogglePanel` does in #116 (the shared `LabelledControlPanel` since the P2 roll-up; the range keeps its own `RangePanel`).
 
 The gesture is `Gesture.Create` on `PART_Slider` with Ionic's name, priority and threshold, made once the template is applied and
 the range is in the tree, destroyed when it leaves, and enabled with `IsEffectivelyEnabled`. The tap is the slider's

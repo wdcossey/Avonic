@@ -58,7 +58,7 @@ The scene and the commands are in [COMPARISON.md](COMPARISON.md).
 | [x] | `helper-text` | `PART_HelperText` (`TextBlock`) | |
 | [x] | `error-text` | `PART_ErrorText` (`TextBlock`) | |
 
-The template also has `PART_Wrapper` (`CheckboxWrapper`, Ionic's `<label class="checkbox-wrapper">`), `PART_Bottom`
+The template also has `PART_Wrapper` (`LabelledControlPanel`, `CheckboxWrapper` until the P2 roll-up, Ionic's `<label class="checkbox-wrapper">`), `PART_Bottom`
 (`.checkbox-bottom`), `PART_NativeWrapper` (`.native-wrapper`) and `PART_Content` (the slot). The hidden `<input>` isn't
 recreated: it's `display: none`, and only there for forms.
 
@@ -120,7 +120,7 @@ Each becomes a test. Ids are the checkboxes in the measurement scene.
   keys, as the chip's DOM `click`; Space is the control's own `KeyDown`, which Ionic handles on key down, not as a button's
   keyup. `ItemControlType.Checkbox` tells an item it's a cover and its first interactive control, which the item already
   does.
-- **`CheckboxWrapper`**, a panel for `.checkbox-wrapper`: two children, label and native wrapper, in a row, a reversed row,
+- **`CheckboxWrapper`** (since the P2 roll-up, the shared `LabelledControlPanel` in `Controls/Flex/`), a panel for `.checkbox-wrapper`: two children, label and native wrapper, in a row, a reversed row,
   or a column, with `justify-content` and `align-items` from `Justify` and `Alignment`. `FlexRow` has no justify, reverse or
   column. Stacked, the label is measured at the width over its scale (`Css.Scale`), as `max-width: calc(100% / 0.75)`.
 - **`CheckboxMark`**, a control that draws md's path into a 24-unit view box, and runs the dash's transition on

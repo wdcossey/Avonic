@@ -396,7 +396,7 @@ public class AvonicBreadcrumb : TemplatedControl
         PseudoClasses.Set(":in-breadcrumbs-color", inBreadcrumbsColor);
         PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
 
-        _link.Set(Href is not null && !_collapsed, true);
+        _link.SetWhen(Href is not null && !_collapsed, true);
 
         if (_indicator is not null)
         {
