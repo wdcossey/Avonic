@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The native input's scroller: only a presenter, so that a long value scrolls to the caret with no base theme. As
+         ion-input's, which is that control's own. -->
+    <ControlTheme x:Key="Avonic.Searchbar.NativeScroller" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The native <input>: no border or background, the placeholder under the text. Functional, so that a test with no base
+         theme can type into it. Its look is the theme's. -->
+    <ControlTheme x:Key="Avonic.Searchbar.NativeInput" TargetType="TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  Theme="{StaticResource Avonic.Searchbar.NativeScroller}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                        <Panel VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <TextBlock Name="PART_Placeholder"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       Foreground="{TemplateBinding PlaceholderForeground}"
+                                       TextWrapping="NoWrap"
+                                       IsHitTestVisible="False"
+                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretIndex="{TemplateBinding CaretIndex}"
+                                           SelectionStart="{TemplateBinding SelectionStart}"
+                                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           PasswordChar="{TemplateBinding PasswordChar}"
+                                           RevealPassword="{TemplateBinding RevealPassword}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           CaretBrush="{TemplateBinding CaretBrush}" />
+                        </Panel>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-searchbar: structure, and what's shown when. The look is in Avonic.Themes. In DOM order, which
+         is the tab order: the input, the cancel button, the search icon, the clear button. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSearchbar}" TargetType="c:AvonicSearchbar">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="PART_Container" Margin="{TemplateBinding Padding}">
+                    <TextBox Name="PART_NativeInput"
+                             Theme="{StaticResource Avonic.Searchbar.NativeInput}"
+                             AutomationProperties.Name="search text" />
+                    <Border Name="PART_CancelButton"
+                            HorizontalAlignment="Left"
+                            Background="Transparent"
+                            Focusable="True"
+                            IsVisible="False"
+                            AutomationProperties.Name="{TemplateBinding CancelButtonText}"
+                            AutomationProperties.ControlTypeOverride="Button">
+                        <c:AvonicIcon Name="PART_CancelIcon"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.AccessibilityView="Raw"
+                                      FlipRtl="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.FlipUnlessDefault}}"
+                                      Icon="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=arrow-back-sharp}" />
+                    </Border>
+                    <c:AvonicIcon Name="PART_SearchIcon"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center"
+                                  IsHitTestVisible="False"
+                                  AutomationProperties.AccessibilityView="Raw"
+                                  Icon="{Binding SearchIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=search-sharp}" />
+                    <Border Name="PART_ClearButton"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            Focusable="True"
+                            IsVisible="False"
+                            AutomationProperties.Name="reset"
+                            AutomationProperties.ControlTypeOverride="Button">
+                        <c:AvonicIcon Name="PART_ClearIcon"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.AccessibilityView="Raw"
+                                      Icon="{Binding ClearIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=close-sharp}" />
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .searchbar-has-value.searchbar-should-show-clear .searchbar-clear-button: display: block -->
+        <Style Selector="^:has-value:should-show-clear /template/ Border#PART_ClearButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- md: the cancel button, when rendered, shows with focus or should-show-cancel, and takes the search icon's place -->
+        <Style Selector="^:has-cancel-button:has-focus /template/ Border#PART_CancelButton, ^:should-show-cancel /template/ Border#PART_CancelButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-cancel-button:has-focus /template/ c|AvonicIcon#PART_SearchIcon, ^:should-show-cancel /template/ c|AvonicIcon#PART_SearchIcon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
