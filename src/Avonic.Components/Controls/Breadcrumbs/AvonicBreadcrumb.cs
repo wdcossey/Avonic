@@ -42,7 +42,7 @@ public class AvonicBreadcrumb : TemplatedControl
 
     /// <summary>
     /// Ionic <c>href</c>: makes the breadcrumb a link, which takes focus, clicks on Enter, and shows hover and focus. Avonic doesn't
-    /// navigate, as there's no router yet: follow it from <see cref="Click"/> or <see cref="Command"/>.
+    /// navigate, as there's no router: follow it from <see cref="Click"/> or <see cref="Command"/>.
     /// </summary>
     public static readonly StyledProperty<string?> HrefProperty =
         AvaloniaProperty.Register<AvonicBreadcrumb, string?>(nameof(Href));

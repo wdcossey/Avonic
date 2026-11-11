@@ -4,7 +4,7 @@ Status: done · [#29](https://github.com/wdcossey/Avonic/issues/29)
 
 `AvonicTabs` shows one of its `AvonicTab`s at a time, with an `AvonicTabBar` of `AvonicTabButton`s to switch them. The four were
 built together, and share a [PLAN.md](PLAN.md) and a [COMPARISON.md](COMPARISON.md). This is Ionic's standalone mode: there's no
-router yet, so the tabs select their first tab at load, and a tab button's click selects its tab.
+router (it's out of scope), so the tabs select their first tab at load, and a tab button's click selects its tab.
 
 ```xml
 <c:AvonicTabs IonTabsDidChange="OnTabChanged">

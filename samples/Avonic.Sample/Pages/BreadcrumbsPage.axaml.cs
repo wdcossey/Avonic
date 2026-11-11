@@ -16,7 +16,7 @@ public partial class BreadcrumbsPage : UserControl
     }
 
     /// <summary>
-    /// A trail of links, each followed from its <c>Click</c>, as there's no router yet: the trail ends at the one clicked, and the
+    /// A trail of links, each followed from its <c>Click</c>, as there's no router: the trail ends at the one clicked, and the
     /// breadcrumbs makes the new last one active.
     /// </summary>
     private void ShowPath(int length)

@@ -1,7 +1,7 @@
 # ion-tabs family — Plan
 
 `ion-tabs` holds `ion-tab`s, the pages, and an `ion-tab-bar` of `ion-tab-button`s, and shows one page at a time. One family, one
-PR (#29). There's no router yet (`ion-router`, `ion-router-outlet`), so this is Ionic's standalone mode, where `ion-tabs` selects
+PR (#29). There's no router (`ion-router` and `ion-router-outlet` are out of scope), so this is Ionic's standalone mode, where `ion-tabs` selects
 the first tab at load and a tab button's click selects its tab through `select()`.
 
 Measurements are from real Ionic 8 in Chromium, md, 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: the

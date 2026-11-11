@@ -35,7 +35,7 @@ No methods, slots, parts or variables. Its children have no slot in `core.json`,
 | [x] | `color` | `Color` | |
 | [x] | `disabled` | `IsEnabled` | Mapping rule |
 | [ ] | `download` | — | Not applicable: only applies when a browser follows `href` |
-| [x] | `href` | `Href` (`string?`) | Makes it a link: `ion-activatable` and `ion-focusable`, a tab stop, Enter. **Avonic doesn't navigate**: there's no router yet (`ion-router`), so the app follows it from the `Click` extension. See "For you to decide" |
+| [x] | `href` | `Href` (`string?`) | Makes it a link: `ion-activatable` and `ion-focusable`, a tab stop, Enter. **Avonic doesn't navigate**: the router family is out of scope ([ROADMAP](../../ROADMAP.md#out-of-scope)), so the app follows it from the `Click` extension. Kept, where the other controls leave it out, because it makes the breadcrumb a link (decided 2026-11-11) |
 | [ ] | `mode` | — | ADR 0001 |
 | [ ] | `rel` | — | Not applicable: only applies when a browser follows `href` |
 | [ ] | `routerAnimation` | — | Out of scope: router |
