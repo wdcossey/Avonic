@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-textarea's variables, with md defaults from textarea.md.css. A CssUnset key falls back to something else in Ionic,
+         often a value that depends on the fill: the theme's bindings say what. Any value overrides it. -->
+    <b:CssUnset x:Key="Avonic.Textarea.Background" />
+    <b:CssUnset x:Key="Avonic.Textarea.BorderColor" />
+    <b:CssUnset x:Key="Avonic.Textarea.BorderRadius" />
+    <x:Double x:Key="Avonic.Textarea.BorderWidth">1</x:Double>
+    <b:CssUnset x:Key="Avonic.Textarea.Color" />
+    <b:CssUnset x:Key="Avonic.Textarea.HighlightColorFocused" />
+    <SolidColorBrush x:Key="Avonic.Textarea.HighlightColorInvalid" Color="{DynamicResource Avonic.Color.Danger}" />
+    <SolidColorBrush x:Key="Avonic.Textarea.HighlightColorValid" Color="{DynamicResource Avonic.Color.Success}" />
+    <x:Double x:Key="Avonic.Textarea.HighlightHeight">2</x:Double>
+    <b:CssUnset x:Key="Avonic.Textarea.PaddingTop" />
+    <b:CssUnset x:Key="Avonic.Textarea.PaddingEnd" />
+    <b:CssUnset x:Key="Avonic.Textarea.PaddingBottom" />
+    <b:CssUnset x:Key="Avonic.Textarea.PaddingStart" />
+    <b:CssUnset x:Key="Avonic.Textarea.PlaceholderColor" />
+    <b:CssUnset x:Key="Avonic.Textarea.PlaceholderFontStyle" />
+    <b:CssUnset x:Key="Avonic.Textarea.PlaceholderFontWeight" />
+    <b:CssUnset x:Key="Avonic.Textarea.PlaceholderOpacity" />
+
+    <!-- md's defaults for the variables above that depend on the fill, the shape or the placement. The background is transparent with no
+         fill, which still takes a click, as the label does. -->
+    <SolidColorBrush x:Key="Avonic.Textarea.Md.Background" Color="Transparent" />
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingTop">18</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingBottom">8</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingFill">16</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingOutlineRound">32</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusFill">4</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusRound">16</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusOutlineRound">28</x:Double>
+
+</ResourceDictionary>

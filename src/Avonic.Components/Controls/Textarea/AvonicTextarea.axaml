@@ -1,0 +1,158 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The native textarea's scroller: only a presenter. It scrolls down past its rows with no bar, as a phone's overlay bar
+         shows only while it scrolls, and sideways only when the text doesn't wrap. -->
+    <ControlTheme x:Key="Avonic.Textarea.NativeScroller" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The native <textarea>: no border, padding or background, the placeholder under the text, at the top. Functional, so that
+         a test with no base theme can type into it. The look of the text and the placeholder is the theme's. -->
+    <ControlTheme x:Key="Avonic.Textarea.NativeInput" TargetType="TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  Theme="{StaticResource Avonic.Textarea.NativeScroller}"
+                                  VerticalContentAlignment="Top">
+                        <Panel VerticalAlignment="Top">
+                            <TextBlock Name="PART_Placeholder"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       Foreground="{TemplateBinding PlaceholderForeground}"
+                                       TextWrapping="{TemplateBinding TextWrapping}"
+                                       IsHitTestVisible="False"
+                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretIndex="{TemplateBinding CaretIndex}"
+                                           SelectionStart="{TemplateBinding SelectionStart}"
+                                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           LineHeight="{TemplateBinding LineHeight}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           CaretBrush="{TemplateBinding CaretBrush}" />
+                        </Panel>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <!-- wrap="off": a long line scrolls sideways -->
+        <Style Selector="^[TextWrapping=NoWrap] /template/ ScrollViewer#PART_ScrollViewer">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        </Style>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-textarea: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTextarea}" TargetType="c:AvonicTextarea">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="*,Auto">
+                    <!-- .textarea-outline-container: across the wrapper's padding box, behind it -->
+                    <Grid Name="PART_OutlineContainer" ColumnDefinitions="Auto,Auto,*" IsVisible="False" IsHitTestVisible="False">
+                        <Border Name="PART_OutlineStart" />
+                        <Border Name="PART_OutlineNotch" Grid.Column="1">
+                            <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0">
+                                <TextBlock.Width>
+                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                        <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="#PART_LabelContent.Bounds.Width" />
+                                    </MultiBinding>
+                                </TextBlock.Width>
+                            </TextBlock>
+                        </Border>
+                        <Border Name="PART_OutlineEnd" Grid.Column="2" />
+                    </Grid>
+                    <!-- .textarea-wrapper, the <label for>: a transparent background, so a click anywhere in it is the label's -->
+                    <Border Name="PART_Wrapper" Background="Transparent">
+                        <c:InputWrapperPanel Name="PART_Layout"
+                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicTextarea.PlacementConverter}}">
+                            <!-- align-items: flex-start -->
+                            <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
+                                <Panel>
+                                    <TextBlock Name="PART_LabelText"
+                                               Text="{TemplateBinding Label}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"
+                                               IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <ContentPresenter Name="PART_LabelContent"
+                                                      Content="{TemplateBinding LabelContent}"
+                                                      ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                      IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                </Panel>
+                            </Border>
+                            <!-- .textarea-wrapper-inner, in DOM order, which is the tab order: start, textarea, end -->
+                            <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto">
+                                <Border Name="PART_StartWrapper" VerticalAlignment="Top">
+                                    <ContentPresenter Name="PART_Start"
+                                                      Content="{TemplateBinding StartContent}"
+                                                      ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                                </Border>
+                                <c:TextareaNativeInput Name="PART_NativeInput" Grid.Column="1"
+                                                       Theme="{StaticResource Avonic.Textarea.NativeInput}" />
+                                <Border Name="PART_EndWrapper" Grid.Column="2" VerticalAlignment="Top">
+                                    <ContentPresenter Name="PART_End"
+                                                      Content="{TemplateBinding EndContent}"
+                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                                </Border>
+                            </Grid>
+                        </c:InputWrapperPanel>
+                    </Border>
+                    <!-- .textarea-highlight: across the wrapper's padding box, at its bottom -->
+                    <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
+                    <!-- .textarea-bottom: helper or error text, and the counter at the end -->
+                    <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" />
+                            <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" />
+                            <TextBlock Name="PART_Counter" Grid.Column="1" Text="{TemplateBinding CounterText}" TextWrapping="NoWrap"
+                                       IsVisible="{Binding CounterText, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .label-text-wrapper-hidden, .textarea-outline-notch-hidden: display: none -->
+        <Style Selector="^:label-text-wrapper-hidden /template/ Border#PART_Label, ^:label-text-wrapper-hidden /template/ Border#PART_OutlineNotch">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <!-- renderLabelContainer: the outline's parts, with fill="outline" -->
+        <Style Selector="^:fill-outline /template/ Grid#PART_OutlineContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- shouldRenderHighlight: not with the outline, and not in an item -->
+        <Style Selector="^:not(:fill-outline):not(:in-item) /template/ Border#PART_Highlight">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-bottom /template/ Border#PART_Bottom">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- :host(.ion-touched.ion-invalid): the error text replaces the helper text -->
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- :host([cols]:not([auto-grow])): width: fit-content -->
+        <Style Selector="^:cols:not(:auto-grow)">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
