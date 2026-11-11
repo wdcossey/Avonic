@@ -692,7 +692,6 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             return;
         }
 
-        native.AcceptsReturn = true;
         native.IsReadOnly = Readonly;
         // A negative maxlength is invalid in HTML, so no limit; 0 allows nothing, which OnNativeTextInput keeps out.
         native.MaxLength = Maxlength is > 0 and var max ? max : 0;
@@ -900,13 +899,8 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         }
     }
 
-    /// <summary><c>emitValueChange</c>.</summary>
-    private void EmitValueChange()
-    {
-        var value = Value;
-        _focusedValue = value;
-        RaiseEvent(new TextareaChangeEventArgs(IonChangeEvent, this, value));
-    }
+    /// <summary><c>emitValueChange</c>. Ionic's also sets the value at focus, which only the blur after it reads; here the blur raises it.</summary>
+    private void EmitValueChange() => RaiseEvent(new TextareaChangeEventArgs(IonChangeEvent, this, Value));
 
     /// <summary><c>emitInputChange</c>, through <c>debounceEvent</c> when <see cref="Debounce"/> is set.</summary>
     private void EmitInputChange()

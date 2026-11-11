@@ -15,7 +15,8 @@ namespace Avonic.Components.Controls;
 /// <list type="bullet">
 /// <item>It's <see cref="Rows"/> lines high, 2 when that's null, and scrolls past them; with <see cref="AutoGrow"/>, as many lines
 /// as its text has, never fewer. Arranged taller, as in a 56 px row, it fills the room, as the stretched <c>&lt;textarea&gt;</c> does.</item>
-/// <item>With <see cref="Cols"/> and no <see cref="AutoGrow"/>, it's <c>Cols</c> × the <c>x</c> glyph's advance, rounded, + 4 wide:
+/// <item>With <see cref="Cols"/>, it wants <c>Cols</c> × the <c>x</c> glyph's advance, rounded, + 4 wide, which shows when the host is
+/// as wide as its content (without <c>autoGrow</c>; with it the field is stretched, as <c>width: 100%</c> beats it):
 /// Chromium on Windows takes the <c>x</c> glyph when the font gives it no average width, and keeps 4 px for a phone's
 /// overlay scroll bar. Measured 84, 164 and 324 for 10, 20 and 40 columns of 16 px Roboto.</item>
 /// <item>Its lines are <c>line-height: normal</c> as Chromium works it out: the font's ascent, descent and gap, each rounded, which
@@ -101,7 +102,7 @@ public sealed class TextareaNativeInput : TextBox
         var rows = (Rows is { } count && count > 0 ? count : DefaultRows) * lineHeight + chrome;
 
         var height = AutoGrow ? Math.Max(size.Height, rows) : rows;
-        var width = !AutoGrow && Cols is { } cols && cols > 0
+        var width = Cols is { } cols && cols > 0
             ? Math.Round(Advance("x")) * cols + ColsGutter + Padding.Left + Padding.Right + BorderThickness.Left + BorderThickness.Right
             : size.Width;
         return new Size(width, height);

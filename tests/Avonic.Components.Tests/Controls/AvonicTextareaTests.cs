@@ -476,6 +476,18 @@ public class AvonicTextareaTests
     });
 
     [AvaloniaFact]
+    public void B12_Cols_Fits_The_Host_To_Its_Content_On_The_Stub_Too()
+    {
+        var (textarea, other, scene) = Stub(new AvonicTextarea { Cols = 10 });
+        using var _ = scene;
+        Assert.True(textarea.Bounds.Width < other.Bounds.Width / 2, $"{textarea.Bounds.Width}");
+
+        textarea.AutoGrow = true;
+        Settle();
+        Assert.Equal(other.Bounds.Width, textarea.Bounds.Width, 0.5);
+    }
+
+    [AvaloniaFact]
     public void B13_Wrap_Off_Keeps_A_Line_On_One_Line() => InstalledTheme.Run(_ =>
     {
         const string Long = "A long line that will not wrap because wrap is off here";
