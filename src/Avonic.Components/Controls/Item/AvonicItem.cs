@@ -213,6 +213,12 @@ public class AvonicItem : TemplatedControl, IItemHost
     private AvonicIcon? _detailIcon;
     private AvonicRippleEffect? _ripple;
     private bool _multipleInputs;
+
+    /// <summary>
+    /// <c>getFirstInteractive</c>'s control as the item last rendered: <c>render()</c> keeps it for the click, so one enabled
+    /// since isn't forwarded to, and one disabled since ignores it.
+    /// </summary>
+    private IItemControl? _firstInteractive;
     private bool _forwarded;
     private readonly StyleValue<bool> _focusable = new();
     private readonly StyleValue<bool> _noInput = new();
@@ -354,8 +360,10 @@ public class AvonicItem : TemplatedControl, IItemHost
     /// <summary><c>setMultipleInputs</c>, <c>canActivate</c> and <c>isFocusable</c>.</summary>
     private void UpdateInteractivity()
     {
+        _firstInteractive = FirstInteractive();
+
         // Most rows are plain, and don't pay for this until they have something to press or to forward to.
-        if (_native is null && (Button || FirstInteractive() is not null))
+        if (_native is null && (Button || _firstInteractive is not null))
         {
             _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
             UpdateIsEffectivelyEnabled();
@@ -406,7 +414,7 @@ public class AvonicItem : TemplatedControl, IItemHost
         // firstInteractiveNeedsPointerCursor
         PseudoClasses.Set(
             ":item-control-needs-pointer-cursor",
-            FirstInteractive() is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
+            _firstInteractive is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
     }
 
     /// <summary><c>clickedWithinShadowRoot</c>, inverted. Plain text in a slot has no element of its own, so it's padding.</summary>
@@ -436,7 +444,8 @@ public class AvonicItem : TemplatedControl, IItemHost
             RaiseClick();
         }
 
-        if (!_multipleInputs && FirstInteractive() is { } first && !IsOnSlottedControl(source))
+        // firstInteractive.click(): a control disabled since ignores it itself, as each of Ionic's does in its onClick.
+        if (!_multipleInputs && _firstInteractive is { } first && !IsOnSlottedControl(source))
         {
             first.OnItemTap();
             _forwarded = true;
@@ -534,10 +543,18 @@ public class AvonicItem : TemplatedControl, IItemHost
                 return AutomationControlType.Button;
             }
 
-            var ancestors = owner.GetLogicalAncestors().ToList();
-            return ancestors.OfType<AvonicList>().Any() && !ancestors.OfType<AvonicRadioGroup>().Any()
-                ? AutomationControlType.ListItem
-                : AutomationControlType.Group;
+            var inList = false;
+            foreach (var ancestor in owner.GetLogicalAncestors())
+            {
+                if (ancestor is AvonicRadioGroup)
+                {
+                    return AutomationControlType.Group;
+                }
+
+                inList |= ancestor is AvonicList;
+            }
+
+            return inList ? AutomationControlType.ListItem : AutomationControlType.Group;
         }
 
         /// <summary>A native button names itself from what's inside it.</summary>

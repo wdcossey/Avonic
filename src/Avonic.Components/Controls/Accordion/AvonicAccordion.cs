@@ -145,10 +145,9 @@ public class AvonicAccordion : TemplatedControl
     private ContentPresenter? _header;
     private AccordionContentClip? _content;
     private NativeButton? _headerButton;
-    private readonly StyleValue<bool> _headerNoHit = new();
-    private readonly StyleValue<bool> _contentNoHit = new();
-    private readonly StyleValue<bool> _contentHidden = new();
-    private IDisposable?[] _partBindings = [];
+    /// <summary>The header's <c>pointer-events: none</c>: its own, or, in a template with a stock presenter, one bound here.</summary>
+    private StyleValue<bool>? _headerNoHit;
+    private IDisposable? _headerNoHitBinding;
 
     /// <summary>A release is on its way through the header, and whether something inside has clicked during it.</summary>
     private bool _releasing;
@@ -545,7 +544,7 @@ public class AvonicAccordion : TemplatedControl
         PseudoClasses.Set(":accordion-previous", _isPrevious);
 
         // :host(.accordion-collapsed) #content { display: none }
-        _contentHidden.SetWhen(_state == AccordionState.Collapsed, false);
+        _content?.Hidden.SetWhen(_state == AccordionState.Collapsed, false);
 
         if (_content is not null && _state == AccordionState.Expanded && !_transitioning && _pending is null)
         {
@@ -568,22 +567,20 @@ public class AvonicAccordion : TemplatedControl
             RemoveHeaderHandlers(_header);
         }
 
-        foreach (var binding in _partBindings)
-        {
-            binding?.Dispose();
-        }
-
+        _headerNoHitBinding?.Dispose();
+        _headerNoHitBinding = null;
         _header = e.NameScope.Find<ContentPresenter>("PART_Header");
         _content = e.NameScope.Find<AccordionContentClip>("PART_Content");
 
-        // Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS is, so a style on the
-        // part wins, bound once per part so that it still wins when the state turns on after it.
-        _partBindings =
-        [
-            _header?.Bind(IsHitTestVisibleProperty, _headerNoHit, BindingPriority.Style),
-            _content?.Bind(IsHitTestVisibleProperty, _contentNoHit, BindingPriority.Style),
-            _content?.Bind(IsVisibleProperty, _contentHidden, BindingPriority.Style),
-        ];
+        // Behaviour, so it doesn't depend on the theme, which an app can replace, at style priority, as CSS is. The parts hold the
+        // values, bound as they're made, so that a style on a part wins, as ::part does. A stock presenter as the header gets one
+        // bound now, after its styles, which then lose to it.
+        _headerNoHit = (_header as AccordionHeaderPresenter)?.NoHit;
+        if (_header is not null && _headerNoHit is null)
+        {
+            _headerNoHit = new StyleValue<bool>();
+            _headerNoHitBinding = _header.Bind(IsHitTestVisibleProperty, _headerNoHit, BindingPriority.Style);
+        }
 
         if (_header is not null)
         {
@@ -631,8 +628,8 @@ public class AvonicAccordion : TemplatedControl
     {
         // :host(.accordion-readonly) #header, #content { pointer-events: none }
         var isReadonly = IsReadonly;
-        _headerNoHit.SetWhen(isReadonly, false);
-        _contentNoHit.SetWhen(isReadonly, false);
+        _headerNoHit?.SetWhen(isReadonly, false);
+        _content?.NoHit.SetWhen(isReadonly, false);
     }
 
     // ── The header's click ───────────────────────────────────────────────────────────────────

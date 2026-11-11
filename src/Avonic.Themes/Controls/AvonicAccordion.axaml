@@ -61,7 +61,7 @@
                             CornerRadius="{TemplateBinding CornerRadius}"
                             ClipToBounds="True">
                         <StackPanel>
-                            <ContentPresenter Name="PART_Header"
+                            <c:AccordionHeaderPresenter Name="PART_Header"
                                               Content="{TemplateBinding HeaderContent}"
                                               ContentTemplate="{TemplateBinding HeaderContentTemplate}" />
                             <c:AccordionContentClip Name="PART_Content">

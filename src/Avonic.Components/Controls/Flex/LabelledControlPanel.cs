@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -79,6 +80,10 @@ public sealed class LabelledControlPanel : Panel
     {
         AffectsMeasure<LabelledControlPanel>(LabelPlacementProperty);
         AffectsArrange<LabelledControlPanel>(JustifyProperty, AlignmentProperty, EndJustifyProperty);
+
+        // A label's scale is its max-width's divisor.
+        Css.ScaleProperty.Changed.AddClassHandler<Control>((control, _) =>
+            (control.GetVisualParent() as LabelledControlPanel)?.InvalidateMeasure());
     }
 
     public LabelledControlPlacement LabelPlacement

@@ -172,6 +172,22 @@ public class LabelledControlPanelTests
         }
     }
 
+    // A style that scales the label later, as a change of placement does, lays the line out again.
+    [AvaloniaFact]
+    public void A_Label_Scaled_Later_Is_Laid_Out_Again()
+    {
+        var (panel, _, _, scene) = Line(LabelledControlPlacement.Stacked, labelWidth: double.NaN, width: 150,
+            setUp: p => p.Children[0] = LongLine());
+        using (scene)
+        {
+            panel.Children[0].SetValue(Css.ScaleProperty, 0.75);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            scene.Window.UpdateLayout();
+
+            Assert.Equal(200, panel.Children[0].Bounds.Width, 0.5);
+        }
+    }
+
     private static TextBlock LongLine(double? scale = null)
     {
         var text = new TextBlock

@@ -298,17 +298,24 @@ public class AvonicAccordionTests
     [AvaloniaFact]
     public void B7_An_Apps_Style_On_A_Part_Survives_Readonly_Turning_On_After_It()
     {
+        // The app's styles are there before the accordion's template is, as an app's styles are.
         var a = Accordion("a");
-        var group = Group("a", a);
-        using var scene = Show(group);
-        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicAccordion>().Template().OfType<ContentPresenter>().Name("PART_Header"))
+        var window = new Window
         {
-            Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
-        });
-        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicAccordion>().Template().OfType<AccordionContentClip>().Name("PART_Content"))
-        {
-            Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
-        });
+            Content = Group("a", a),
+            Styles =
+            {
+                new Style(x => x.OfType<AvonicAccordion>().Template().OfType<ContentPresenter>().Name("PART_Header"))
+                {
+                    Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+                },
+                new Style(x => x.OfType<AvonicAccordion>().Template().OfType<AccordionContentClip>().Name("PART_Content"))
+                {
+                    Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+                },
+            },
+        };
+        window.Show();
         Dispatcher.UIThread.RunJobs();
 
         a.Readonly = true;
@@ -316,6 +323,35 @@ public class AvonicAccordionTests
 
         Assert.True(Header(a).IsHitTestVisible);
         Assert.True(Content(a).IsHitTestVisible);
+        window.Close();
+    }
+
+    // An app's own template may have a stock presenter as the header: readonly still takes its input.
+    [AvaloniaFact]
+    public void B7_Readonly_Takes_Input_Off_A_Stock_Presenter_As_The_Header()
+    {
+        var a = Accordion("a");
+        a.Theme = new ControlTheme(typeof(AvonicAccordion))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.TemplateProperty, new Avalonia.Controls.Templates.FuncControlTemplate<AvonicAccordion>((accordion, scope) =>
+                {
+                    var header = new ContentPresenter { Name = "PART_Header", Content = accordion.HeaderContent };
+                    var content = new AccordionContentClip { Name = "PART_Content" };
+                    scope.Register(header.Name, header);
+                    scope.Register(content.Name, content);
+                    return new StackPanel { Children = { header, content } };
+                })),
+            },
+        };
+        using var scene = Show(Group("a", a));
+
+        a.Readonly = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.IsNotType<AccordionHeaderPresenter>(Header(a));
+        Assert.False(Header(a).IsHitTestVisible);
     }
 
     [AvaloniaFact]

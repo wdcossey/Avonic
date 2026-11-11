@@ -706,6 +706,40 @@ public class AvonicToggleTests
         Assert.Empty(changes.All);
     });
 
+    // A button item has a click of its own, but forwards to the control it found as it rendered: none, here.
+    [AvaloniaFact]
+    public void T12_A_Button_Item_Forwards_No_Tap_To_A_Toggle_Enabled_After_It_Rendered() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Later", IsEnabled = false };
+        var changes = Changes.Of(toggle);
+        var item = new AvonicItem { Button = true, Content = toggle };
+        var clicks = 0;
+        item.Click += (_, _) => clicks++;
+        using var scene = Themed(new StackPanel { Children = { item } });
+
+        toggle.IsEnabled = true;
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, new Point(5, 20));
+
+        Assert.Equal(1, clicks);
+        Assert.Empty(changes.All);
+    });
+
+    // The control it found, disabled since, ignores the click, as an ion-toggle's onClick does.
+    [AvaloniaFact]
+    public void T12_A_Toggle_Disabled_After_The_Item_Rendered_Ignores_The_Tap() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Then disabled" };
+        var changes = Changes.Of(toggle);
+        using var scene = InItems(toggle);
+
+        toggle.IsEnabled = false;
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, new Point(5, 20));
+
+        Assert.Empty(changes.All);
+    });
+
     // ── 13: an item's layout ─────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

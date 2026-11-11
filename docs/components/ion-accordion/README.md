@@ -34,7 +34,7 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [x] | `value` | `Value` | `ion-accordion-N` by default |
 | [x] | slot `header` | `HeaderContent`, `HeaderContentTemplate` | |
 | [x] | slot `content` | `ContentContent`, `ContentContentTemplate` | |
-| [x] | part `header` | `PART_Header` | |
+| [x] | part `header` | `PART_Header` | An `AccordionHeaderPresenter`, a `ContentPresenter` styled as one, which holds `readonly`'s `pointer-events: none` from when it's made, so that an app's style on it wins, as `::part(header)` does. A stock `ContentPresenter` in an app's own template works, but its style loses to `readonly` |
 | [x] | part `content` | `PART_Content` (`AccordionContentClip`), with `PART_ContentWrapper` inside | |
 | [x] | part `expanded` | `:expanded` | `::part(header expanded)` → `c\|AvonicAccordion:expanded /template/ ContentPresenter#PART_Header` |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
