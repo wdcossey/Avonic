@@ -66,7 +66,7 @@ The default slot is `Content`, the label. With no text in it, the label and its 
 | [x] | `helper-text` | `PART_HelperText` |
 | [x] | `error-text` | `PART_ErrorText` |
 
-`CheckboxWrapper` (`PART_Wrapper`) lays out the label and the box for each placement, and `CheckboxMark` draws md's tick or bar.
+`LabelledControlPanel` (`PART_Wrapper`), shared with the radio and the toggle, lays out the label and the box for each placement, and `CheckboxMark` draws md's tick or bar.
 Pseudoclasses for a theme: `:checked`, `:indeterminate`, `:label-placement-*`, `:justify-*`, `:alignment-*`, `:in-item`,
 `:slot-start`, `:slot-end`, `:ion-color`, and `:drawn` from the first frame, for the transition.
 

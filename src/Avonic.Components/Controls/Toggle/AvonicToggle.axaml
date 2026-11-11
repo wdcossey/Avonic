@@ -9,11 +9,11 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <ControlTemplate>
-                <c:TogglePanel Name="PART_Wrapper"
+                <c:LabelledControlPanel Name="PART_Wrapper"
                                Background="{TemplateBinding Background}"
-                               LabelPlacement="{TemplateBinding LabelPlacement}"
-                               Justify="{TemplateBinding Justify}"
-                               Alignment="{TemplateBinding Alignment}">
+                               LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                               Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                               Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}">
                     <StackPanel Name="PART_Label" ClipToBounds="True">
                         <ContentPresenter Name="PART_LabelContent"
                                           Content="{TemplateBinding Content}"
@@ -32,7 +32,7 @@
                             </Panel>
                         </Border>
                     </Panel>
-                </c:TogglePanel>
+                </c:LabelledControlPanel>
             </ControlTemplate>
         </Setter>
 

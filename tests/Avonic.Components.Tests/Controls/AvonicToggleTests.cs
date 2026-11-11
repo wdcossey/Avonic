@@ -870,10 +870,10 @@ public class AvonicToggleTests
         };
         using var scene = InItems(toggle);
 
-        // max-width: calc(100% / 0.75), then scale(0.75) from the middle: the label's box is 358 / 0.75, drawn 358 wide. A
-        // trimmed TextBlock is as wide as what it draws, up to the ellipsis, where CSS's box is the max-width: a few pixels less.
+        // max-width: calc(100% / 0.75), then scale(0.75) from the middle: the label's box is 358 / 0.75, drawn 358 wide, as CSS's
+        // box is the max-width, though the trimmed text is narrower. Rounded to a pixel.
         var drawn = Bounds(Label(toggle), scene.Window);
-        Assert.InRange(Label(toggle).Bounds.Width, 358 / 0.75 - 6, 358 / 0.75 + 0.5);
+        Assert.InRange(Label(toggle).Bounds.Width, 358 / 0.75 - 0.5, 358 / 0.75 + 1);
         Assert.InRange(drawn.Width, 358 - 4.5, 358 + 0.5);
         Assert.InRange(drawn.Center.X, 194.5, 195.5);
     });

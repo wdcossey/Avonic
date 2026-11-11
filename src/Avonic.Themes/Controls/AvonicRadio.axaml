@@ -35,7 +35,7 @@
     </Design.PreviewWith>
 
     <!-- A translation of radio.css and radio.md.css. The structure is the stub's: the label and the native wrapper in a
-         RadioWrapper, which does .radio-wrapper's flex line. Where CSS adds the margins of two rules to one box, a rule here
+         LabelledControlPanel, which does .radio-wrapper's flex line. Where CSS adds the margins of two rules to one box, a rule here
          sets the whole Margin, so the combinations are written out. -->
     <ControlTheme x:Key="{x:Type c:AvonicRadio}" TargetType="c:AvonicRadio">
         <!-- cursor: pointer -->
@@ -45,10 +45,11 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel Background="Transparent">
-                    <c:RadioWrapper Name="PART_Wrapper"
-                                    LabelPlacement="{TemplateBinding LabelPlacement}"
-                                    Justify="{TemplateBinding Justify}"
-                                    Alignment="{TemplateBinding Alignment}">
+                    <c:LabelledControlPanel Name="PART_Wrapper"
+                                    LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    EndJustify="SpaceBetween">
                         <!-- .label-text-wrapper: one line, an ellipsis, overflow: hidden -->
                         <ContentPresenter Name="PART_Label"
                                           Content="{TemplateBinding Content}"
@@ -120,7 +121,7 @@
                                 </Border.CornerRadius>
                             </Border>
                         </Panel>
-                    </c:RadioWrapper>
+                    </c:LabelledControlPanel>
                 </Panel>
             </ControlTemplate>
         </Setter>
@@ -155,7 +156,7 @@
             <Setter Property="Margin" Value="16,10,0,10" />
         </Style>
 
-        <!-- .radio-label-placement-fixed: flex: 0 0 100px, which RadioWrapper doesn't shrink -->
+        <!-- .radio-label-placement-fixed: flex: 0 0 100px, which LabelledControlPanel doesn't shrink -->
         <Style Selector="^:label-placement-fixed /template/ ContentPresenter#PART_Label">
             <Setter Property="Width" Value="100" />
         </Style>

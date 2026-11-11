@@ -74,15 +74,15 @@ public class AvonicToggle : ContentControl, IItemControl
 
     /// <summary>Ionic <c>labelPlacement</c>.</summary>
     public static readonly StyledProperty<ToggleLabelPlacement> LabelPlacementProperty =
-        TogglePanel.LabelPlacementProperty.AddOwner<AvonicToggle>();
+        AvaloniaProperty.Register<AvonicToggle, ToggleLabelPlacement>(nameof(LabelPlacement), ToggleLabelPlacement.Start);
 
     /// <summary>Ionic <c>justify</c>. Set, the toggle fills the width, as <c>display: block</c> does.</summary>
     public static readonly StyledProperty<ToggleJustify?> JustifyProperty =
-        TogglePanel.JustifyProperty.AddOwner<AvonicToggle>();
+        AvaloniaProperty.Register<AvonicToggle, ToggleJustify?>(nameof(Justify));
 
     /// <summary>Ionic <c>alignment</c>. Set, the toggle fills the width, as <c>display: block</c> does.</summary>
     public static readonly StyledProperty<ToggleAlignment?> AlignmentProperty =
-        TogglePanel.AlignmentProperty.AddOwner<AvonicToggle>();
+        AvaloniaProperty.Register<AvonicToggle, ToggleAlignment?>(nameof(Alignment));
 
     /// <summary>Ionic <c>helperText</c>: under the label, unless the toggle is invalid.</summary>
     public static readonly StyledProperty<string?> HelperTextProperty =

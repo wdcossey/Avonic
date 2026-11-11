@@ -1067,7 +1067,7 @@ public class AvonicCheckboxTests
         Assert.Equal(200, Label(stacked).Bounds.Width, 0.5);
         Assert.Equal(150 - 18 - 16, Label(row).Bounds.Width, 0.5);
         Assert.Equal(132, Bounds(Box(row), row).X, 0.5);
-        foreach (var wrapper in scene.Window.GetVisualDescendants().OfType<CheckboxWrapper>())
+        foreach (var wrapper in scene.Window.GetVisualDescendants().OfType<LabelledControlPanel>())
         {
             Assert.True(wrapper.IsMeasureValid && wrapper.IsArrangeValid);
         }

@@ -46,7 +46,7 @@ and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 
 The default slot is `Content`, the label: a string, or any control. Parts: `PART_Label`, `PART_HelperText` and `PART_ErrorText`
 (each with the style class `supporting-text`, Ionic's part on both), `PART_Track` (the drag's element) and `PART_Handle`. Also
-`PART_Wrapper` (a `TogglePanel`), `PART_LabelContent`, `PART_Bottom`, `PART_NativeWrapper`, `PART_IconWrapper` and
+`PART_Wrapper` (a `LabelledControlPanel`, shared with the checkbox and the radio), `PART_LabelContent`, `PART_Bottom`, `PART_NativeWrapper`, `PART_IconWrapper` and
 `PART_SwitchIcon`.
 
 ### Resource keys

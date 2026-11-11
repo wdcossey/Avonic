@@ -23,7 +23,8 @@ Ionic implementation before writing a line, and you build and test before every 
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
   Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template; MinContent, the
-                         min-content width both FlexRow and the grid's RowPanel use
+                         min-content width both FlexRow and the grid's RowPanel use; LabelledControlPanel, the label and the
+                         control's part of a checkbox, a radio and a toggle, for labelPlacement, justify and alignment
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
                          AccessibleText = what a browser names a button from; Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
@@ -264,6 +265,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `ion-touched`, `ion-invalid`, set by the app | Style classes of the same name, followed through `Classes.CollectionChanged`, as Ionic's `MutationObserver` | `AvonicCheckbox` |
 | `[slot=start]` on the host, read by its own CSS | `:slot-start`, `:slot-end`, from the name of the presenter it's in | `AvonicCheckbox` |
 | A CSS transition in the theme, which a first style doesn't run | The theme's `Transitions` under a `:drawn` pseudoclass the control sets from its first frame, as a transition can't be taken back once it's started | `AvonicCheckbox` |
+| `labelPlacement`, `justify`, `alignment` on a form control (`.xxx-wrapper`) | `LabelledControlPanel` as `PART_Wrapper`, the control's own enums mapped by name through `LabelledControlPanel.FromControl` | `AvonicCheckbox`, `AvonicRadio`, `AvonicToggle` |
 | `opacity` on a control whose parts overlap | `OpacityMask` with a solid brush at that alpha, as Avalonia's `Opacity` fades each part on its own | `AvonicToggle`'s disabled 0.38 |
 | `isRTL(el)` | The control's `FlowDirection`, which inherits from any ancestor, where Ionic reads only the element's and the document's `dir` | `AvonicToggle`'s drag |
 | A native `<input>` | A `TextBox` with its own minimal `ControlTheme`, `Value` kept in step through `Text`'s property change (synchronous; `TextChanged` is posted), so only the user's edits raise the input event | `AvonicInput` |
