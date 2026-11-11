@@ -659,6 +659,12 @@ public class AvonicInputOtpTests
         Key(scene, PhysicalKey.Backspace);
         Assert.Equal(["input:1"], log.Take());
 
+        // In the now empty box, focus moves back, and the native deletion does nothing in a read-only input.
+        Key(scene, PhysicalKey.Backspace);
+        Assert.Empty(log.Take());
+        Assert.Equal(0, FocusedBox(otp));
+        Assert.Equal("1", otp.Value);
+
         Paste(scene, "55");
         Assert.Equal(["input:55"], log.Take());
     }
@@ -789,6 +795,10 @@ public class AvonicInputOtpTests
         AssertBox(-5, 96, 40, 48, Bounds(Boxes(separated)[0], scene.Window));
         AssertBox(47, 116, 8, 8, Bounds(Separators(separated)[0], scene.Window));
         AssertBox(355, 96, 40, 48, Bounds(Boxes(separated)[5], scene.Window));
+
+        // overflow: visible. Left of the host, the first box still takes a click.
+        Render();
+        Assert.Same(Boxes(eight)[0], (scene.Window.InputHitTest(new Point(5, 40)) as Visual)?.GetSelfAndVisualAncestors().OfType<InputOtpBox>().FirstOrDefault());
     });
 
     [AvaloniaFact]
@@ -832,6 +842,10 @@ public class AvonicInputOtpTests
 
         Assert.Equal(new Thickness(1), box.BorderThickness);
         Assert.Equal(14, box.FontSize);
+
+        // Chromium's 1px 2px for an <input>, and text-align: center.
+        Assert.Equal(new Thickness(2, 1), box.Padding);
+        Assert.Equal(TextAlignment.Center, box.TextAlignment);
         Assert3("#B3B3B3", "#00FFFFFF", "#000000");
         otp.Readonly = true;
         Assert3("#B3B3B3", "#F2F2F2", "#000000");

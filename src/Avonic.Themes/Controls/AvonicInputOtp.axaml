@@ -74,7 +74,6 @@
                 <Binding Path="$parent[Control].(TextElement.Foreground)" />
             </MultiBinding>
         </Setter>
-        <Setter Property="CaretBrush" Value="{Binding $self.Foreground}" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
