@@ -49,7 +49,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` | |
 | [x] | `readonly` | `Readonly` | |
-| [ ] | `required` | — | Not applicable: Avalonia's automation can't say it |
+| [x] | `required` | `Required` | Said to a screen reader (`IsRequiredForForm`); no form validation |
 | [x] | `rows` | `Rows` (`int?`) | Null is 2 |
 | [x] | `shape` | `Shape` (`TextareaShape?`) | `Round` |
 | [ ] | `spellcheck` | — | Not applicable: no spell checker |

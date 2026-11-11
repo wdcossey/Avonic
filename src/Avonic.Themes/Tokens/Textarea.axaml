@@ -33,4 +33,7 @@
     <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusRound">16</x:Double>
     <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusOutlineRound">28</x:Double>
 
+    <!-- :host(.textarea-disabled) { opacity: 0.38 }, as a mask so that the textarea fades as one -->
+    <SolidColorBrush x:Key="Avonic.Textarea.Md.DisabledMask" Color="#000000" Opacity="0.38" />
+
 </ResourceDictionary>

@@ -41,7 +41,7 @@ would better move to a shared place is in the PR, under "Proposed for shared fil
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` (`string?`) | |
 | [x] | `readonly` | `Readonly` (`bool`) | `TextBox.IsReadOnly` |
-| [ ] | `required` | — | Not applicable, as for the input |
+| [x] | `required` | `Required` (`bool`) | `AutomationProperties.IsRequiredForForm` on the native textarea, as the mapping rule for `aria-required` says; form validation isn't here |
 | [x] | `rows` | `Rows` (`int?`) | Null is HTML's 2. The field is that many lines high (19 px each for 16 px Roboto), and scrolls past them |
 | [x] | `shape` | `Shape` (`TextareaShape?`) | `Round` |
 | [ ] | `spellcheck` | — | Not applicable: Avalonia's `TextBox` has no spell checker |
@@ -124,11 +124,11 @@ From `textarea.js` and `textarea.md.css`, each checked in Chromium. Each becomes
 | 20 | Outline: a 1 px step 300 border in three parts, the notch opening for a floating label; focused 2 px in the highlight; round 28 with 32 padding | md.css, `createNotchController`; measured `j`, `k` |
 | 21 | Bottom: only with helper or error text or a counter; 5 px above 12 px text; error replaces helper when touched and invalid; the counter at the end | `renderBottomContent`; measured `i`, `l` |
 | 22 | Slots: at the top, with the field's padding above and below them, 16 px from the field; in a column 8 px lower (outline 12). A slotted button keeps only its 4 px below (measured `0 0 4 16` at the end) | md.css `.start-slot-wrapper`, `::slotted`; measured `q` |
-| 23 | Disabled: 0.38, no focus. Read-only: focusable, not editable | `textarea-disabled` |
+| 23 | Disabled: 0.38, as one (an `OpacityMask`, as the parts overlap), no focus. Read-only: focusable, not editable | `textarea-disabled` |
 | 24 | Placeholder: the field's colour at 0.6 | `::placeholder` |
 | 25 | The hints reach the platform: `Inputmode`, `Enterkeyhint`, `Autocapitalize` set `TextInputOptions`; the field takes Return | `<textarea>` attributes |
 | 26 | `Autofocus` focuses the field when it's first loaded | `autoFocus` |
-| 27 | Automation: named by the label (or the host's name), described by the error text when invalid, else the helper | `inheritAriaAttributes`, `getHintTextID` |
+| 27 | Automation: named by the label (or the host's name), described by the error text when invalid, else the helper; `Required` says it's required | `inheritAriaAttributes`, `getHintTextID` |
 | 28 | RTL mirrors the row, the label's origin and the outline | md.css |
 
 ### Not reproduced

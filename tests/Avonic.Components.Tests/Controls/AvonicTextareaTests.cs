@@ -493,6 +493,30 @@ public class AvonicTextareaTests
     }
 
     [AvaloniaFact]
+    public void B13_Wrap_Off_Scrolls_Sideways_On_The_Stub_Too()
+    {
+        var textarea = new AvonicTextarea { Wrap = TextareaWrap.Off, Value = "A long line that will not wrap because wrap is off here", Width = 120 };
+        var (_, _, scene) = Stub(textarea);
+        using var _ = scene;
+        var viewer = Part<ScrollViewer>(Native(textarea), "PART_ScrollViewer");
+        Assert.True(viewer.Extent.Width > viewer.Viewport.Width, $"{viewer.Extent.Width}");
+    }
+
+    [AvaloniaFact]
+    public void B16_An_Apps_Padding_Keys_Win() => InstalledTheme.Run(_ =>
+    {
+        var textarea = new AvonicTextarea { Label = "L" };
+        textarea.Resources["Avonic.Textarea.PaddingTop"] = 30.0;
+        textarea.Resources["Avonic.Textarea.PaddingBottom"] = 2.0;
+        using var scene = new Scene(Page(textarea));
+        Render();
+
+        // 30 + 2 × 19 + 2, and the label's text 30 down, as its padding is the field's.
+        Assert.Equal(70, textarea.Bounds.Height, 0.5);
+        Assert.Equal(30, Bounds(Part<Control>(textarea, "PART_LabelText"), textarea).Y, 0.5);
+    });
+
+    [AvaloniaFact]
     public void B13_Wrap_Off_Keeps_A_Line_On_One_Line() => InstalledTheme.Run(_ =>
     {
         const string Long = "A long line that will not wrap because wrap is off here";
@@ -827,6 +851,13 @@ public class AvonicTextareaTests
         textarea.CounterFormatter = (_, _) => throw new InvalidOperationException();
         Assert.Equal("4 / 100", textarea.CounterText);
 
+        // renderBottomContent reads counter and maxlength, not the text: a formatter's null keeps the bottom.
+        textarea.CounterFormatter = (_, _) => null!;
+        Settle();
+        Assert.Null(textarea.CounterText);
+        Assert.True(bottom.IsVisible);
+        textarea.CounterFormatter = null;
+
         textarea.Counter = false;
         textarea.HelperText = "Helper";
         textarea.ErrorText = "Error";
@@ -868,6 +899,8 @@ public class AvonicTextareaTests
         var row = new AvonicTextarea { Label = "Outline start", Fill = TextareaFill.Outline, Value = "Value", StartContent = icon, EndContent = button };
         var startIcon = new Border { Width = 20, Height = 20 };
         var stacked = new AvonicTextarea { Label = "Stacked", LabelPlacement = TextareaLabelPlacement.Stacked, StartContent = startIcon };
+        var endIcon = new Border { Width = 20, Height = 20 };
+        stacked.EndContent = endIcon;
         var outlineIcon = new Border { Width = 20, Height = 20 };
         var outlined = new AvonicTextarea { Label = "Outline", LabelPlacement = TextareaLabelPlacement.Floating, Fill = TextareaFill.Outline, StartContent = outlineIcon };
         using var scene = new Scene(Page(row, stacked, outlined));
@@ -885,6 +918,8 @@ public class AvonicTextareaTests
         Assert.Equal(27, Bounds(startIcon, stacked).Y, 0.5);
         Assert.Equal(Bounds(Native(stacked), stacked).Y, Bounds(startIcon, stacked).Y, 0.5);
         Assert.Equal(12, Bounds(outlineIcon, outlined).Y, 0.5);
+        Assert.Equal(new Thickness(16, 0, 0, 0), endIcon.Margin);
+        Assert.Equal(Bounds(Native(stacked), stacked).Right + 16, Bounds(endIcon, stacked).X, 0.5);
     });
 
     [AvaloniaFact]
@@ -934,11 +969,14 @@ public class AvonicTextareaTests
     {
         var textarea = new AvonicTextarea { Label = "Disabled", Value = "Value" };
         using var scene = new Scene(Page(textarea));
-        Assert.Equal(1, textarea.Opacity);
+        Assert.Null(textarea.OpacityMask);
 
+        // As one: a mask, not Opacity, which fades each overlapping part on its own.
         textarea.IsEnabled = false;
         Settle();
-        Assert.Equal(0.38, textarea.Opacity, 3);
+        Assert.Equal(1, textarea.Opacity);
+        var mask = Assert.IsAssignableFrom<ISolidColorBrush>(textarea.OpacityMask);
+        Assert.Equal(0.38, mask.Opacity * mask.Color.A / 255.0, 3);
     });
 
     [AvaloniaFact]
@@ -1077,6 +1115,10 @@ public class AvonicTextareaTests
 
         textarea.ErrorText = null;
         Assert.Equal("Helper", AutomationProperties.GetHelpText(native));
+
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+        textarea.Required = true;
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
 
         AutomationProperties.SetName(textarea, "Your notes");
         Assert.Equal("Your notes", AutomationProperties.GetName(native));

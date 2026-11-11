@@ -72,11 +72,11 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 | 20 | Outline and round shapes | Match |
 | 21 | The bottom, error text, the counter and its formatter | Match; the bottom's text 1 px taller |
 | 22 | Slots at the top, with the field's padding, 16 from it; 8 (12) lower in a column; a button `0 0 4 16` | Match |
-| 23 | Disabled and read-only | Match |
+| 23 | Disabled (0.38 as one, through an `OpacityMask`) and read-only | Match |
 | 24 | Placeholder at 0.6 | Match |
 | 25 | `Inputmode`, `Enterkeyhint`, `Autocapitalize`, multi-line, `Maxlength` | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
 | 26 | Autofocus | Match |
-| 27 | Automation name and help text | Match |
+| 27 | Automation name, help text and required | Set on the native textarea and tested; no screen reader tried |
 | 28 | RTL | Match, by the input's numbers (the same rules) |
 
 ## Deliberate differences and gaps

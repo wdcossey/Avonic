@@ -223,9 +223,10 @@
         <Style Selector="^:label-placement-floating /template/ Border#PART_Wrapper, ^:label-placement-stacked /template/ Border#PART_Wrapper, ^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper, ^:label-placement-floating /template/ Grid#PART_NativeWrapper, ^:label-placement-stacked /template/ Grid#PART_NativeWrapper, ^:fill-solid /template/ Grid#PART_NativeWrapper, ^:fill-outline /template/ Grid#PART_NativeWrapper">
             <Setter Property="MinHeight" Value="56" />
         </Style>
-        <!-- :host(.textarea-disabled) -->
+        <!-- :host(.textarea-disabled): opacity 0.38, of the whole as one, which an OpacityMask is, where Opacity would fade the
+             label, the text and the background each on its own -->
         <Style Selector="^:textarea-disabled">
-            <Setter Property="Opacity" Value="0.38" />
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Textarea.Md.DisabledMask}" />
         </Style>
 
         <!-- ── .textarea-wrapper ─────────────────────────────────────────────────────────────────── -->

@@ -28,10 +28,10 @@ namespace Avonic.Components.Controls;
 /// <see cref="IonInput"/>, as only the native <c>input</c> event does in Ionic. A click on the wrapper is the <c>&lt;label for&gt;</c>'s
 /// activation, through <see cref="NativeButton"/> with no keys.
 /// </remarks>
-[TemplatePart("PART_NativeInput", typeof(TextBox))]
+[TemplatePart("PART_NativeInput", typeof(TextareaNativeInput))]
 [TemplatePart("PART_Wrapper", typeof(Control))]
 [TemplatePart("PART_LabelContent", typeof(ContentPresenter))]
-[PseudoClasses(":has-value", ":has-focus", ":label-floating", ":in-item", ":textarea-disabled", ":readonly", ":auto-grow", ":cols")]
+[PseudoClasses(":has-value", ":has-focus", ":label-floating", ":in-item", ":textarea-disabled", ":auto-grow", ":cols")]
 [PseudoClasses(":fill-outline", ":fill-solid", ":shape-round", ":label-text-wrapper-hidden", ":has-bottom", ":ion-hover")]
 [PseudoClasses(":label-placement-start", ":label-placement-end", ":label-placement-fixed", ":label-placement-floating", ":label-placement-stacked")]
 public class AvonicTextarea : TemplatedControl, IItemControl
@@ -87,6 +87,10 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     /// <summary>Ionic <c>readonly</c>: focusable, but not editable.</summary>
     public static readonly StyledProperty<bool> ReadonlyProperty =
         AvaloniaProperty.Register<AvonicTextarea, bool>(nameof(Readonly));
+
+    /// <summary>Ionic <c>required</c>: the native textarea says it's required to a screen reader.</summary>
+    public static readonly StyledProperty<bool> RequiredProperty =
+        AvaloniaProperty.Register<AvonicTextarea, bool>(nameof(Required));
 
     /// <summary>Ionic <c>maxlength</c>: typing stops there, and the counter counts to it.</summary>
     public static readonly StyledProperty<int?> MaxlengthProperty =
@@ -310,6 +314,12 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     {
         get => GetValue(ReadonlyProperty);
         set => SetValue(ReadonlyProperty, value);
+    }
+
+    public bool Required
+    {
+        get => GetValue(RequiredProperty);
+        set => SetValue(RequiredProperty, value);
     }
 
     public int? Maxlength
@@ -622,7 +632,8 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             _debounced = null;
         }
         else if (change.Property == LabelProperty || change.Property == LabelContentProperty || change.Property == HelperTextProperty
-                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty)
+                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty
+                 || change.Property == RequiredProperty)
         {
             UpdateClasses();
             UpdateAutomation();
@@ -671,13 +682,12 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         PseudoClasses.Set(":label-placement-stacked", placement == TextareaLabelPlacement.Stacked);
         PseudoClasses.Set(":in-item", _item is not null);
         PseudoClasses.Set(":textarea-disabled", !IsEnabled);
-        PseudoClasses.Set(":readonly", Readonly);
         PseudoClasses.Set(":auto-grow", AutoGrow);
         PseudoClasses.Set(":cols", Cols is not null);
         PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
 
         // renderBottomContent: only with hint text or a counter.
-        PseudoClasses.Set(":has-bottom", !string.IsNullOrEmpty(HelperText) || !string.IsNullOrEmpty(ErrorText) || CounterText is not null);
+        PseudoClasses.Set(":has-bottom", !string.IsNullOrEmpty(HelperText) || !string.IsNullOrEmpty(ErrorText) || (Counter && Maxlength is not null));
     }
 
     /// <summary>What <c>render</c> puts on the native textarea.</summary>
@@ -1054,5 +1064,8 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             : !string.IsNullOrEmpty(HelperText) ? HelperText
             : null;
         native.SetValue(AutomationProperties.HelpTextProperty, hint);
+
+        // required on the <textarea>: aria-required to a screen reader. Form validation isn't here.
+        native.SetValue(AutomationProperties.IsRequiredForFormProperty, Required);
     }
 }
