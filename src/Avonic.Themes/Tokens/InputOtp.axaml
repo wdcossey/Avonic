@@ -1,0 +1,40 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-input-otp's variables, with md defaults from input-otp.md.css. A CssUnset key falls back to something else in Ionic,
+         often a value that depends on the fill, the size or the shape: the theme's bindings say what. Any value overrides it. -->
+    <b:CssUnset x:Key="Avonic.InputOtp.Background" />
+    <b:CssUnset x:Key="Avonic.InputOtp.BorderColor" />
+    <b:CssUnset x:Key="Avonic.InputOtp.BorderRadius" />
+    <x:Double x:Key="Avonic.InputOtp.BorderWidth">1</x:Double>
+    <b:CssUnset x:Key="Avonic.InputOtp.Color" />
+    <b:CssUnset x:Key="Avonic.InputOtp.Height" />
+    <b:CssUnset x:Key="Avonic.InputOtp.HighlightColorFocused" />
+    <b:CssUnset x:Key="Avonic.InputOtp.HighlightColorInvalid" />
+    <b:CssUnset x:Key="Avonic.InputOtp.HighlightColorValid" />
+    <x:Double x:Key="Avonic.InputOtp.MarginTop">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.MarginEnd">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.MarginBottom">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.MarginStart">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.MinWidth">40</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.PaddingTop">16</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.PaddingEnd">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.PaddingBottom">16</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.PaddingStart">0</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.SeparatorBorderRadius">999</x:Double>
+    <b:CssUnset x:Key="Avonic.InputOtp.SeparatorColor" />
+    <b:CssUnset x:Key="Avonic.InputOtp.SeparatorHeight" />
+    <x:Double x:Key="Avonic.InputOtp.SeparatorWidth">8</x:Double>
+    <b:CssUnset x:Key="Avonic.InputOtp.Width" />
+
+    <!-- md's defaults for the variables above that depend on the size, the shape or the fill. -->
+    <x:Double x:Key="Avonic.InputOtp.Md.SizeSmall">40</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.Md.SizeMedium">48</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.Md.SizeLarge">56</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.Md.BorderRadiusRound">16</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.Md.BorderRadiusSoft">8</x:Double>
+    <x:Double x:Key="Avonic.InputOtp.Md.BorderRadiusRectangular">0</x:Double>
+    <SolidColorBrush x:Key="Avonic.InputOtp.Md.Background" Color="Transparent" />
+
+</ResourceDictionary>
