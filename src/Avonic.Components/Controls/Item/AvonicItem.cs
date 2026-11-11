@@ -344,13 +344,6 @@ public class AvonicItem : TemplatedControl, IItemHost
         _ => null,
     };
 
-    /// <summary>
-    /// Whether anything slotted could be <c>getFirstInteractive</c>'s, enabled or not: Ionic looks at each click, so a control
-    /// enabled after the item looked still takes a tap on the padding, which <see cref="Tap"/> checks.
-    /// </summary>
-    private bool MayHaveFirstInteractive() =>
-        SlottedControls().OfType<IItemControl>().Any(control => FirstInteractiveTypes.Contains(control.ItemControlType));
-
     /// <summary><c>getFirstInteractive</c>.</summary>
     private IItemControl? FirstInteractive() =>
         SlottedControls()
@@ -362,7 +355,7 @@ public class AvonicItem : TemplatedControl, IItemHost
     private void UpdateInteractivity()
     {
         // Most rows are plain, and don't pay for this until they have something to press or to forward to.
-        if (_native is null && (Button || MayHaveFirstInteractive()))
+        if (_native is null && (Button || FirstInteractive() is not null))
         {
             _native = new NativeButton(this, Tap, () => Button, UpdateIsEffectivelyEnabled);
             UpdateIsEffectivelyEnabled();

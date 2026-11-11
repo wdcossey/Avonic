@@ -690,10 +690,10 @@ public class AvonicToggleTests
         Assert.False(disabled.Checked);
     });
 
-    // getFirstInteractive runs at each click, so a toggle enabled after the item first looked takes the tap. Toggles don't raise
-    // ionStyle, so nothing else tells the item.
+    // item.js's render() keeps getFirstInteractive's control, and sets the click only if there was one. A toggle raises no
+    // ionStyle when it's enabled, so the item doesn't render again, and a tap on its padding does nothing.
     [AvaloniaFact]
-    public void T12_A_Toggle_Enabled_After_The_Item_Looked_Takes_A_Tap_On_The_Padding() => InstalledTheme.Run(_ =>
+    public void T12_A_Toggle_Enabled_After_The_Item_Rendered_Takes_No_Tap_On_The_Padding() => InstalledTheme.Run(_ =>
     {
         var toggle = new AvonicToggle { Content = "Later", IsEnabled = false };
         var changes = Changes.Of(toggle);
@@ -703,7 +703,7 @@ public class AvonicToggleTests
         Dispatcher.UIThread.RunJobs();
         Click(scene, new Point(5, 20));
 
-        Assert.Equal([(true, "on")], changes.All);
+        Assert.Empty(changes.All);
     });
 
     // ── 13: an item's layout ─────────────────────────────────────────────────────────────────
