@@ -128,14 +128,17 @@ Panel PART_Container                 .searchbar-input-container, inside the host
 ```
 
 Host classes become pseudoclasses: `:has-value`, `:has-focus`, `:should-show-clear`, `:should-show-cancel`, `:animated`,
-`:no-animate`, `:left-aligned`, `:searchbar-disabled` (`disabled`; Avalonia's own `:disabled` also follows ancestors), and
-`:has-cancel-button`, as Ionic renders the cancel button only when it isn't `never` (as `ion-input`'s `:has-bottom`).
+`:no-animate`, `:left-aligned` and `:searchbar-disabled` (`disabled`; Avalonia's own `:disabled` also follows ancestors).
+md.css shows the cancel button for `searchbar-has-focus` or `searchbar-should-show-cancel`, but a rendered cancel button with
+focus is always `should-show-cancel` too (`focus` and `always` both show it then), so the theme has the one rule; the deliberate
+breakage proved the other did nothing. The cancel button's press is handled, which keeps focus where it is, as `preventDefault`.
 `:host-context(ion-toolbar)` is a descendant rule in `Styles/Searchbar.axaml`, by the mapping rule.
 
 The clear button is a `Border` with `NativeButton` (a click on release, Enter and Space), and a press on it keeps focus where it
-is, through `KeepFocus`, as its `pointerdown` handler's `preventDefault` does. The cancel button acts on `PointerPressed`, also
-keeping focus, and has no key action. `onClearInput`'s 64 ms is `AvonicConfig.Schedule`. The native `change` event is kept apart
+is, through `KeepFocus`, as its `pointerdown` handler's `preventDefault` does. The cancel button acts on `PointerPressed`,
+handled, which moves no focus, and has no key action. `onClearInput`'s 64 ms is `AvonicConfig.Schedule`. The native `change` event is kept apart
 from Ionic's `onBlur` check, as they come in a different order: a flag for the user's edits and the text at the last commit.
+Enter's change and Escape's clear are default actions: they run after the key's handlers, and not if one handled it.
 
 ## Dependencies
 

@@ -89,7 +89,7 @@ Each has a test in `AvonicSearchbarTests`, named after its number in [PLAN.md](P
   moves focus. It's a tab stop, at 0.5 while focused.
 - The cancel button acts on the press, not the release: `IonCancel`, `IonClear`, then the clear, a commit and the blur. Enter on it
   does nothing, as in Ionic.
-- Escape clears a `Search` field, as Chromium's search input does.
+- Escape clears a `Search` field, as Chromium's search input does, unless a key handler handled it.
 - `Debounce`, `Maxlength`, the type and the keyboard hints, as `ion-input`.
 - md's look, measured: the white card with md's shadow, the icons, the toolbar's tighter padding, `Color`, disabled at 0.4, RTL.
 - An item takes it as `item-searchbar` and counts it as an input; the host is a search landmark.
@@ -102,5 +102,5 @@ default cancel arrow isn't mirrored).
 ## Known gaps
 
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `dir` set on the searchbar itself mirrors everything; no
-`backButtonIcon` config for the cancel icon's default; the typed text sits 0.5 px lower. Not tried in a real window, with a soft
+`backButtonIcon` config for the cancel icon's default; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear. Not tried in a real window, with a soft
 keyboard, or on a device.

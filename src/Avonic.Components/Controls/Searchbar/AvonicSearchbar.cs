@@ -3,7 +3,6 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
-using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
@@ -27,7 +26,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_NativeInput", typeof(TextBox))]
 [TemplatePart("PART_ClearButton", typeof(Control))]
 [TemplatePart("PART_CancelButton", typeof(Control))]
-[PseudoClasses(":has-value", ":has-focus", ":should-show-clear", ":should-show-cancel", ":has-cancel-button", ":searchbar-disabled")]
+[PseudoClasses(":has-value", ":has-focus", ":should-show-clear", ":should-show-cancel", ":searchbar-disabled")]
 [PseudoClasses(":animated", ":no-animate", ":left-aligned")]
 public class AvonicSearchbar : TemplatedControl, IItemControl
 {
@@ -332,10 +331,6 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
 
     // ── For the theme ────────────────────────────────────────────────────────────────────────
 
-    /// <summary>The value, or else the <c>ConverterParameter</c>: md's icon for a null one.</summary>
-    public static readonly Avalonia.Data.Converters.IValueConverter OrConverter =
-        new Avalonia.Data.Converters.FuncValueConverter<object?, object?, object?>((value, parameter) => value is null or "" ? parameter : value);
-
     /// <summary>
     /// The cancel icon's <c>flipRtl</c>: false for the default, which Ionic imports as SVG with no name to flip by, else the
     /// icon's own rule.
@@ -384,8 +379,9 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
             _native.GotFocus += OnNativeGotFocus;
             _native.LostFocus += OnNativeLostFocus;
 
-            // Before the text box handles the key.
-            _native.AddHandler(KeyDownEvent, OnNativeKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            // Enter's change and Escape's clear are default actions, after the key's listeners, and not if one handled it, as
+            // preventDefault() stops them. The text box itself handles neither.
+            _native.AddHandler(KeyDownEvent, OnNativeKeyDown, RoutingStrategies.Bubble);
             _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
             _native.PastingFromClipboard += OnNativePasting;
 
@@ -494,9 +490,6 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         PseudoClasses.Set(":should-show-clear", ShouldShowClear);
         PseudoClasses.Set(":should-show-cancel", ShouldShowCancel);
         PseudoClasses.Set(":searchbar-disabled", !IsEnabled);
-
-        // The cancel button is rendered only when it isn't never.
-        PseudoClasses.Set(":has-cancel-button", ShowCancelButton != SearchbarShowCancelButton.Never);
     }
 
     /// <summary><c>positionElements</c>: in md, only <c>shouldAlignLeft</c>, which the next render shows.</summary>
@@ -567,9 +560,8 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     /// <summary><c>valueChanged</c>: assigning the native input's value, which lets an <c>ionInput</c> handler replace it.</summary>
     private void SyncNativeText()
     {
-        // Not during an IME's composition.
-        if (_native is not { } native || _syncing || native.Text == CurrentValue
-            || native.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault() is { PreeditText.Length: > 0 })
+        // During an IME's composition too: searchbar.js's valueChanged, unlike ion-input's, doesn't check isComposing.
+        if (_native is not { } native || _syncing || native.Text == CurrentValue)
         {
             return;
         }
@@ -817,8 +809,8 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         }
         else if (_cancelButton is not null && (source == _cancelButton || _cancelButton.IsVisualAncestorOf(source)))
         {
-            // onMouseDown, onTouchStart: preventDefault and stopPropagation, then cancel. Any button, as mousedown is.
-            KeepFocus.During(e);
+            // onMouseDown, onTouchStart: preventDefault and stopPropagation, then cancel. Any button, as mousedown is. A handled
+            // press moves no focus, which is preventDefault's part.
             e.Handled = true;
             OnCancelSearchbar();
         }

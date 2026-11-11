@@ -243,6 +243,14 @@ public class AvonicSearchbarTests
         other.Focus();
         Settle();
         Assert.Equal(["focus", "input:yz", "blur"], log.Take());
+
+        // An edit that was never committed is forgotten at the next focus: a value in code is Ionic's change, after ionBlur.
+        searchbar.SetFocus();
+        Settle();
+        searchbar.Value = "q";
+        other.Focus();
+        Settle();
+        Assert.Equal(["focus", "blur", "change:q"], log.Take());
     }
 
     [AvaloniaFact]
@@ -406,6 +414,45 @@ public class AvonicSearchbarTests
         Assert.Same(Native(searchbar), Focused(searchbar));
     });
 
+    // outline: none on both buttons. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it
+    // underneath. FocusAdorner reads null whether or not it's set, so only the layer shows what's really drawn.
+    [AvaloniaFact]
+    public void B08_The_Buttons_Draw_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var searchbar = new AvonicSearchbar { Value = "v", ShowCancelButton = SearchbarShowCancelButton.Always };
+                var other = new Button();
+                using var scene = new Scene(Page(searchbar, other));
+                Settle();
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(searchbar)!;
+
+                searchbar.SetFocus();
+                Settle();
+                Key(scene, PhysicalKey.Tab);
+                Assert.Same(CancelButton(searchbar), Focused(searchbar));
+                Assert.Empty(layer.Children);
+                Key(scene, PhysicalKey.Tab);
+                Assert.Same(ClearButton(searchbar), Focused(searchbar));
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                Key(scene, PhysicalKey.Tab);
+                Assert.True(other.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
     // ── 9 to 11: the cancel button, and Escape ───────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -514,6 +561,37 @@ public class AvonicSearchbarTests
         Settle();
         Key(scene, PhysicalKey.Escape);
         Assert.Equal("tt", searchbar.Value);
+    }
+
+    [AvaloniaFact]
+    public void B11_An_Apps_Handler_That_Handles_The_Key_Stops_Escapes_Clear_And_Enters_Change()
+    {
+        var (searchbar, _, scene) = Stub(new AvonicSearchbar { Value = "x" });
+        using var _ = scene;
+        var log = Log.Of(searchbar);
+
+        // preventDefault() on keydown: the default action doesn't run.
+        searchbar.AddHandler(InputElement.KeyDownEvent, (_, e) => e.Handled = e.Key is Avalonia.Input.Key.Escape or Avalonia.Input.Key.Enter, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+        searchbar.SetFocus();
+        Settle();
+        Key(scene, PhysicalKey.Escape);
+        Assert.Equal("x", searchbar.Value);
+        Type(scene, PhysicalKey.Y, "y");
+        Key(scene, PhysicalKey.Enter);
+        Assert.Equal(["focus", "input:xy"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void B04_A_Value_Set_During_A_Composition_Is_Shown_As_SearchbarJs_Doesnt_Wait()
+    {
+        var (searchbar, _, scene) = Stub(new AvonicSearchbar { Value = "a" });
+        using var _ = scene;
+        var presenter = Native(searchbar).GetVisualDescendants().OfType<Avalonia.Controls.Presenters.TextPresenter>().First();
+        presenter.PreeditText = "ka";
+
+        searchbar.Value = "b";
+
+        Assert.Equal("b", Native(searchbar).Text);
     }
 
     // ── 12, 13: methods and the item ─────────────────────────────────────────────────────────
@@ -627,6 +705,8 @@ public class AvonicSearchbarTests
         Assert.False(Native(plain).ClipToBounds);
 
         // The placeholder: "Search", the input's colour at 0.6.
+        Assert.False(ClearButton(empty).IsVisible);
+        Assert.True(ClearButton(plain).IsVisible);
         var placeholder = Part<TextBlock>(empty, "PART_Placeholder");
         Assert.Equal("Search", placeholder.Text);
         Assert.Equal(Color.Parse("#262626"), BrushColor(placeholder.Foreground));
@@ -842,6 +922,33 @@ public class AvonicSearchbarTests
         clock.At(100);
         Assert.Equal("x", searchbar.Value);
         Assert.Equal(["clear"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void B20_Removing_A_Focused_Searchbar_Commits_And_Blurs_And_It_Comes_Back_Unfocused()
+    {
+        var searchbar = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Focus };
+        var host = new StackPanel { Children = { searchbar } };
+        using var scene = new Scene(host);
+        Settle();
+        var log = Log.Of(searchbar);
+        searchbar.SetFocus();
+        Settle();
+        Type(scene, PhysicalKey.A, "a");
+        log.Take();
+
+        // Measured: Chromium raises change and blur on the removal, and the re-render drops searchbar-has-focus.
+        host.Children.Remove(searchbar);
+        Settle();
+        Assert.Equal(["change:a", "blur"], log.Take());
+
+        host.Children.Add(searchbar);
+        Settle();
+        Assert.Empty(log.Take());
+        Assert.False(CancelButton(searchbar).IsVisible);
+        searchbar.SetFocus();
+        Settle();
+        Assert.Equal(["focus"], log.Take());
     }
 
     [AvaloniaFact]

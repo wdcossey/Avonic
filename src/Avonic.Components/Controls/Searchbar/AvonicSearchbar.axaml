@@ -76,14 +76,14 @@
                                       VerticalAlignment="Center"
                                       AutomationProperties.AccessibilityView="Raw"
                                       FlipRtl="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.FlipUnlessDefault}}"
-                                      Icon="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=arrow-back-sharp}" />
+                                      Icon="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=arrow-back-sharp}" />
                     </Border>
                     <c:AvonicIcon Name="PART_SearchIcon"
                                   HorizontalAlignment="Left"
                                   VerticalAlignment="Center"
                                   IsHitTestVisible="False"
                                   AutomationProperties.AccessibilityView="Raw"
-                                  Icon="{Binding SearchIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=search-sharp}" />
+                                  Icon="{Binding SearchIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=search-sharp}" />
                     <Border Name="PART_ClearButton"
                             HorizontalAlignment="Right"
                             Background="Transparent"
@@ -95,7 +95,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                       AutomationProperties.AccessibilityView="Raw"
-                                      Icon="{Binding ClearIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.OrConverter}, ConverterParameter=close-sharp}" />
+                                      Icon="{Binding ClearIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=close-sharp}" />
                     </Border>
                 </Panel>
             </ControlTemplate>
@@ -105,11 +105,12 @@
         <Style Selector="^:has-value:should-show-clear /template/ Border#PART_ClearButton">
             <Setter Property="IsVisible" Value="True" />
         </Style>
-        <!-- md: the cancel button, when rendered, shows with focus or should-show-cancel, and takes the search icon's place -->
-        <Style Selector="^:has-cancel-button:has-focus /template/ Border#PART_CancelButton, ^:should-show-cancel /template/ Border#PART_CancelButton">
+        <!-- md: the cancel button shows with focus or should-show-cancel, and takes the search icon's place. Focus with a cancel
+             button rendered is always should-show-cancel too, so that's the one rule. -->
+        <Style Selector="^:should-show-cancel /template/ Border#PART_CancelButton">
             <Setter Property="IsVisible" Value="True" />
         </Style>
-        <Style Selector="^:has-cancel-button:has-focus /template/ c|AvonicIcon#PART_SearchIcon, ^:should-show-cancel /template/ c|AvonicIcon#PART_SearchIcon">
+        <Style Selector="^:should-show-cancel /template/ c|AvonicIcon#PART_SearchIcon">
             <Setter Property="IsVisible" Value="False" />
         </Style>
     </ControlTheme>
