@@ -32,6 +32,7 @@
                         <Panel VerticalAlignment="Top">
                             <TextBlock Name="PART_Placeholder"
                                        Text="{TemplateBinding PlaceholderText}"
+                                       LineHeight="{TemplateBinding LineHeight}"
                                        TextWrapping="{TemplateBinding TextWrapping}"
                                        IsHitTestVisible="False"
                                        IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}">

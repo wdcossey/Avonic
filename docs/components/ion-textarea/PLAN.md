@@ -114,7 +114,7 @@ From `textarea.js` and `textarea.md.css`, each checked in Chromium. Each becomes
 | 10 | Rows: the field is `Rows` lines high (default 2), 19 px a line for 16 px Roboto, plus `--padding-top` and `--padding-bottom` (18 + 8 in a row): 64 for 2, 102 for 4, 45 for 1. A longer value scrolls inside it | measured `a`, `h`, `r1`, `e` (scrollHeight 102 in 64) |
 | 11 | `AutoGrow`: as many lines as the value, never fewer than `Rows`; grows and shrinks as it's typed or set: 45, 64, 83, 64 with `rows="1"` | `runAutoGrow`, `.native-wrapper::after`; measured `grow*` |
 | 12 | `Cols` without `AutoGrow`: the host is as wide as its content, the field `Cols` × 8 + 4 for 16 px Roboto; with `AutoGrow`, full width | `:host([cols]:not([auto-grow]))`; measured `c10`, `c20`, `c40`, `c20g` |
-| 13 | `Wrap`: `Off` keeps a line on one line; otherwise it wraps | `wrap` |
+| 13 | `Wrap`: `Off` keeps a line on one line; otherwise it wraps. A line break is a line feed, typed or pasted (CR LF and CR become LF), and an unfocused field shows its first lines | `wrap`; the HTML value's line breaks |
 | 14 | Row placements: the label at the top, 18 px above and 8 below its text (45 high), 16 px from the field; end mirrored; fixed 100 px; at most 200 | md.css; measured `a`, `e`, `f` |
 | 15 | Column placements: the label above (19), the field 8 px under it (outline: 12, with the label out of flow), the field's box at least 56 so the host is 75; floating sits on the field (`translateY(100%)`) until it has a value, focus or slotted content, then `translateY(50%) scale(0.75)`; the field is transparent until focus or a value | md.css; measured `b`, `c`, `d`, `j`, `k` |
 | 16 | Heights: 44 at least; 56 for floating, stacked, solid and outline, on both the wrapper and `.textarea-wrapper-inner` | md.css |
@@ -140,7 +140,10 @@ From `textarea.js` and `textarea.md.css`, each checked in Chromium. Each becomes
 - **`:host(.in-item) .textarea-highlight { bottom: 0 }`** is dead: `textarea.js` never sets `in-item`, and draws no highlight in
   an item.
 - **`.item-textarea`** on `ion-item`: no Ionic 8 textarea emits `ionStyle`, so it's dead, as `.item-input` is for the input.
-- **Composition** and **the soft keyboard**: as `ion-input`.
+- **The icon-only `ion-button` rule** (`::slotted(ion-button[slot].button-has-icon-only)`: 50% radius, 8 px padding, 40 px):
+  the button keeps its own look, as in `ion-input`.
+- **The soft keyboard**: as `ion-input`. Unlike the input, a value set during an IME's composition is written at once, as
+  `textarea.js`'s `valueChanged` has no `isComposing` check.
 
 ## Design
 

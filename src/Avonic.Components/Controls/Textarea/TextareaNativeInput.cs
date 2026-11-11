@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
@@ -45,6 +47,9 @@ public sealed class TextareaNativeInput : TextBox
         AvaloniaProperty.Register<TextareaNativeInput, bool>(nameof(AutoGrow));
 
     private readonly StyleValue<double> _normalLineHeight = new();
+    private double _normal = double.NaN;
+    private double _xAdvance;
+    private TextPresenter? _presenter;
 
     static TextareaNativeInput()
     {
@@ -58,7 +63,7 @@ public sealed class TextareaNativeInput : TextBox
     public TextareaNativeInput()
     {
         Bind(LineHeightProperty, _normalLineHeight, BindingPriority.Style);
-        UpdateNormalLineHeight();
+        UpdateFontMetrics();
     }
 
     /// <summary>The look of a <see cref="TextBox"/>, as an app's own <c>TextBox</c> styles reach the input's field too.</summary>
@@ -89,46 +94,64 @@ public sealed class TextareaNativeInput : TextBox
         if (change.Property == FontFamilyProperty || change.Property == FontSizeProperty || change.Property == FontStyleProperty
             || change.Property == FontWeightProperty || change.Property == FontStretchProperty)
         {
-            UpdateNormalLineHeight();
+            UpdateFontMetrics();
+        }
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        _presenter?.RemoveHandler(RequestBringIntoViewEvent, OnPresenterRequestBringIntoView);
+        _presenter = e.NameScope.Find<TextPresenter>("PART_TextPresenter");
+
+        // Avalonia's text presenter brings its caret into view whenever the caret moves, focused or not, and the caret moves to
+        // the end of an assigned value. Chromium scrolls neither the page nor the textarea's own lines to a textarea that isn't
+        // focused. At the presenter, as the field's own scroller is the first to act on it.
+        _presenter?.AddHandler(RequestBringIntoViewEvent, OnPresenterRequestBringIntoView);
+    }
+
+    private void OnPresenterRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
+    {
+        if (!IsKeyboardFocusWithin)
+        {
+            e.Handled = true;
         }
     }
 
     protected override Size MeasureOverride(Size availableSize)
     {
         var size = base.MeasureOverride(availableSize);
-        var lineHeight = LineHeight is var set && double.IsFinite(set) && set > 0 ? set : NormalLineHeight();
+        var lineHeight = LineHeight is var set && double.IsFinite(set) && set > 0 ? set : _normal;
         var chrome = Padding.Top + Padding.Bottom + BorderThickness.Top + BorderThickness.Bottom;
         // A rows of 0 or less isn't valid HTML, which gives the default.
         var rows = (Rows is { } count && count > 0 ? count : DefaultRows) * lineHeight + chrome;
 
         var height = AutoGrow ? Math.Max(size.Height, rows) : rows;
         var width = Cols is { } cols && cols > 0
-            ? Math.Round(Advance("x")) * cols + ColsGutter + Padding.Left + Padding.Right + BorderThickness.Left + BorderThickness.Right
+            ? Math.Round(_xAdvance) * cols + ColsGutter + Padding.Left + Padding.Right + BorderThickness.Left + BorderThickness.Right
             : size.Width;
         return new Size(width, height);
     }
 
-    private void UpdateNormalLineHeight() => _normalLineHeight.Set(NormalLineHeight());
-
     private Typeface Typeface => new(FontFamily, FontStyle, FontWeight, FontStretch);
 
-    /// <summary>Chromium's <c>line-height: normal</c>: the ascent, the descent and the gap, each rounded on its own.</summary>
-    private double NormalLineHeight()
+    /// <summary>
+    /// Chromium's <c>line-height: normal</c>, the ascent, the descent and the gap each rounded on its own, and the <c>x</c> glyph's
+    /// advance, for the columns. Worked out when the font changes, not on each measure.
+    /// </summary>
+    private void UpdateFontMetrics()
     {
         using var layout = new TextLayout("x", Typeface, FontSize, null);
-        if (layout.TextLines.Count == 0)
+        if (layout.TextLines.Count > 0)
         {
-            return double.NaN;
+            var line = layout.TextLines[0];
+            _normal = Math.Round(line.Baseline, MidpointRounding.AwayFromZero)
+                      + Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero);
         }
 
-        var line = layout.TextLines[0];
-        return Math.Round(line.Baseline, MidpointRounding.AwayFromZero)
-               + Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero);
-    }
-
-    private double Advance(string text)
-    {
-        using var layout = new TextLayout(text, Typeface, FontSize, null);
-        return layout.WidthIncludingTrailingWhitespace;
+        _xAdvance = layout.WidthIncludingTrailingWhitespace;
+        _normalLineHeight.Set(_normal);
+        InvalidateMeasure();
     }
 }

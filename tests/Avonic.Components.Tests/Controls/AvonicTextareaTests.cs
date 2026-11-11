@@ -392,6 +392,11 @@ public class AvonicTextareaTests
         var viewer = Part<ScrollViewer>(Native(full), "PART_ScrollViewer");
         Assert.Equal(38, viewer.Viewport.Height, 0.5);
         Assert.Equal(76, viewer.Extent.Height, 0.5);
+
+        // Not focused, it shows its first lines, as Chromium does, though the caret is at the end of the value.
+        full.Value = "Five\nsix\nseven\neight";
+        Render();
+        Assert.Equal(0, viewer.Offset.Y);
     });
 
     [AvaloniaFact]
@@ -946,6 +951,7 @@ public class AvonicTextareaTests
         var placeholder = Part<TextBlock>(Native(textarea), "PART_Placeholder");
         Assert.Equal("Placeholder", placeholder.Text);
         Assert.Equal(0.6, placeholder.Opacity, 3);
+        Assert.Equal(19, placeholder.LineHeight);
         Assert.Equal(BrushColor(textarea.Foreground), BrushColor(placeholder.Foreground));
 
         textarea.Value = "v";
@@ -1013,10 +1019,15 @@ public class AvonicTextareaTests
         Type(scene, PhysicalKey.C, "c");
         Assert.Equal("ab", textarea.Value);
 
+        // A line break counts, at the limit.
+        Key(scene, PhysicalKey.Enter);
+        Assert.Equal("ab", textarea.Value);
+
         textarea.Value = "";
         textarea.Maxlength = 0;
         var log = Log.Of(textarea);
         Type(scene, PhysicalKey.A, "a");
+        Key(scene, PhysicalKey.Enter);
         Assert.Equal("", textarea.Value);
         Assert.Empty(log.Take());
     }
@@ -1121,8 +1132,9 @@ public class AvonicTextareaTests
     }
 
     [AvaloniaFact]
-    public void R02_A_Value_Set_During_Composition_Waits()
+    public void R02_A_Value_Set_During_Composition_Is_Shown_At_Once()
     {
+        // textarea.js's valueChanged, unlike input.js's, doesn't check isComposing.
         var (textarea, _, scene) = Stub(new AvonicTextarea { Value = "a" });
         using var _ = scene;
         var presenter = Native(textarea).GetVisualDescendants().OfType<Avalonia.Controls.Presenters.TextPresenter>().First();
@@ -1130,7 +1142,46 @@ public class AvonicTextareaTests
 
         textarea.Value = "b";
 
-        Assert.Equal("a", Native(textarea).Text);
+        Assert.Equal("b", Native(textarea).Text);
+    }
+
+    [AvaloniaFact]
+    public void R05_A_Pasted_Line_Break_Is_A_Line_Feed_With_The_Caret_After_It()
+    {
+        var (textarea, _, scene) = Stub(new AvonicTextarea { Value = "ab" });
+        using var _ = scene;
+        var log = Log.Of(textarea);
+        textarea.SetFocus();
+        Settle();
+        log.Take();
+        var native = Native(textarea);
+
+        // What a paste does: the text, then the caret after what was pasted, in the text's own terms.
+        native.Text = "a1\r\n2\rb";
+        native.CaretIndex = 6;
+        Settle();
+
+        Assert.Equal("a1\n2\nb", textarea.Value);
+        Assert.Equal("a1\n2\nb", native.Text);
+        Assert.Equal(5, native.CaretIndex);
+        Assert.Equal(["input:a1\n2\nb"], log.Take());
+    }
+
+    [AvaloniaFact]
+    public void R06_The_Start_And_End_Slots_Take_Templates()
+    {
+        var textarea = new AvonicTextarea
+        {
+            StartContent = "s",
+            StartContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new TextBlock { Text = "start " + text }),
+            EndContent = "e",
+            EndContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new TextBlock { Text = "end " + text }),
+        };
+        var (_, _, scene) = Stub(textarea);
+        using var _ = scene;
+
+        Assert.Equal("start s", Assert.IsType<TextBlock>(Part<Avalonia.Controls.Presenters.ContentPresenter>(textarea, "PART_Start").Child).Text);
+        Assert.Equal("end e", Assert.IsType<TextBlock>(Part<Avalonia.Controls.Presenters.ContentPresenter>(textarea, "PART_End").Child).Text);
     }
 
     [AvaloniaFact]

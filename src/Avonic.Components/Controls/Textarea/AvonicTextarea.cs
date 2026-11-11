@@ -239,6 +239,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     private Control? _wrapper;
     private ContentPresenter? _labelContent;
     private bool _syncing;
+    private bool _normalising;
     private bool _inUserEdit;
     private bool _autofocused;
     private AvonicItem? _item;
@@ -521,7 +522,6 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             _native.GotFocus -= OnNativeGotFocus;
             _native.LostFocus -= OnNativeLostFocus;
             _native.RemoveHandler(KeyDownEvent, OnNativeKeyDown);
-            _native.RemoveHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
         }
 
         _native = e.NameScope.Find<TextareaNativeInput>("PART_NativeInput");
@@ -551,10 +551,6 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             // A soft keyboard can type with no key down, where Chromium's keydown says "Unidentified": that clears too.
             _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
             _native.PastingFromClipboard += OnNativePasting;
-
-            // Avalonia's text presenter brings its caret into view whenever the caret moves, focused or not. Chromium never
-            // scrolls the page to a textarea that isn't focused.
-            _native.AddHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
             UpdateNative();
             SyncNativeText();
         }
@@ -758,12 +754,13 @@ public class AvonicTextarea : TemplatedControl, IItemControl
 
     // ── The native textarea ──────────────────────────────────────────────────────────────────
 
-    /// <summary><c>valueChanged</c>: assigning the native textarea's value, which lets an <c>ionInput</c> handler replace it.</summary>
+    /// <summary>
+    /// <c>valueChanged</c>: assigning the native textarea's value, which lets an <c>ionInput</c> handler replace it. Unlike
+    /// <c>ion-input</c>'s, it doesn't wait for an IME's composition: <c>textarea.js</c> has no <c>isComposing</c> check.
+    /// </summary>
     private void SyncNativeText()
     {
-        // Not during an IME's composition.
-        if (_native is not { } native || _syncing || native.Text == CurrentValue
-            || native.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault() is { PreeditText.Length: > 0 })
+        if (_native is not { } native || _syncing || _normalising || native.Text == CurrentValue)
         {
             return;
         }
@@ -787,15 +784,6 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         }
     }
 
-    /// <summary>Keeps a value assigned to a textarea that isn't focused from scrolling the page to it.</summary>
-    private void OnNativeRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
-    {
-        if (_native is { IsKeyboardFocusWithin: false })
-        {
-            e.Handled = true;
-        }
-    }
-
     /// <summary><c>onInput</c>: the user edited the text.</summary>
     private void OnNativePropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
@@ -804,15 +792,61 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             return;
         }
 
+        // A <textarea>'s value keeps a line break as a line feed: a pasted CR LF or CR is one. The field's own text is fixed once
+        // the text box has placed its caret, which is in the text's own terms until then.
+        var text = native.Text ?? "";
+        var normal = Normalise(text);
+        if (normal != text)
+        {
+            _normalising = true;
+            Dispatcher.UIThread.Post(() => NormaliseNative(native, text), DispatcherPriority.Send);
+        }
+
         _inUserEdit = true;
         try
         {
-            SetValueFromUser(native.Text ?? "");
+            SetValueFromUser(normal);
             EmitInputChange();
         }
         finally
         {
             _inUserEdit = false;
+        }
+    }
+
+    /// <summary>A textarea's line breaks: CR LF and CR are each a line feed.</summary>
+    private static string Normalise(string text) => text.Replace("\r\n", "\n").Replace('\r', '\n');
+
+    private void NormaliseNative(TextBox native, string text)
+    {
+        _normalising = false;
+        if (native.Text != text)
+        {
+            SyncNativeText();
+            return;
+        }
+
+        var caret = Math.Clamp(native.CaretIndex, 0, text.Length);
+        var removed = 0;
+        for (var i = 0; i + 1 < caret; i++)
+        {
+            if (text[i] == '\r' && text[i + 1] == '\n')
+            {
+                removed++;
+            }
+        }
+
+        var replaced = CurrentValue != Normalise(text);
+        _syncing = true;
+        try
+        {
+            native.Text = CurrentValue;
+            // Where the text box put it, or at the end of a value an ionInput handler replaced, as Chromium leaves it.
+            native.CaretIndex = replaced ? CurrentValue.Length : Math.Min(caret - removed, CurrentValue.Length);
+        }
+        finally
+        {
+            _syncing = false;
         }
     }
 
@@ -876,7 +910,16 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         RaiseEvent(new RoutedEventArgs(IonBlurEvent, this));
     }
 
-    private void OnNativeKeyDown(object? sender, KeyEventArgs e) => CheckClearOnEdit(e.Key);
+    private void OnNativeKeyDown(object? sender, KeyEventArgs e)
+    {
+        CheckClearOnEdit(e.Key);
+
+        // maxlength="0": not a line break either, which the text box types from Enter with no text input.
+        if (Maxlength == 0 && e.Key == Key.Enter)
+        {
+            e.Handled = true;
+        }
+    }
 
     /// <summary><c>checkClearOnEdit</c>, on key down, before the key is typed. <see cref="Key.None"/> is text with no key.</summary>
     private void CheckClearOnEdit(Key key)
