@@ -9,6 +9,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -292,6 +293,67 @@ public class AvonicAccordionTests
 
     // ── B7, B8, B9: what stops a tap ─────────────────────────────────────────────────────────
 
+    // ion-accordion::part(header) { pointer-events: auto } beats the shadow root's own rule, whenever readonly turns on. A value
+    // given at style priority when it turns on would come after the app's style, and win.
+    [AvaloniaFact]
+    public void B7_An_Apps_Style_On_A_Part_Survives_Readonly_Turning_On_After_It()
+    {
+        // The app's styles are there before the accordion's template is, as an app's styles are.
+        var a = Accordion("a");
+        var window = new Window
+        {
+            Content = Group("a", a),
+            Styles =
+            {
+                new Style(x => x.OfType<AvonicAccordion>().Template().OfType<ContentPresenter>().Name("PART_Header"))
+                {
+                    Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+                },
+                new Style(x => x.OfType<AvonicAccordion>().Template().OfType<AccordionContentClip>().Name("PART_Content"))
+                {
+                    Setters = { new Setter(InputElement.IsHitTestVisibleProperty, true) },
+                },
+            },
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        a.Readonly = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(Header(a).IsHitTestVisible);
+        Assert.True(Content(a).IsHitTestVisible);
+        window.Close();
+    }
+
+    // An app's own template may have a stock presenter as the header: readonly still takes its input.
+    [AvaloniaFact]
+    public void B7_Readonly_Takes_Input_Off_A_Stock_Presenter_As_The_Header()
+    {
+        var a = Accordion("a");
+        a.Theme = new ControlTheme(typeof(AvonicAccordion))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.TemplateProperty, new Avalonia.Controls.Templates.FuncControlTemplate<AvonicAccordion>((accordion, scope) =>
+                {
+                    var header = new ContentPresenter { Name = "PART_Header", Content = accordion.HeaderContent };
+                    var content = new AccordionContentClip { Name = "PART_Content" };
+                    scope.Register(header.Name, header);
+                    scope.Register(content.Name, content);
+                    return new StackPanel { Children = { header, content } };
+                })),
+            },
+        };
+        using var scene = Show(Group("a", a));
+
+        a.Readonly = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.IsNotType<AccordionHeaderPresenter>(Header(a));
+        Assert.False(Header(a).IsHitTestVisible);
+    }
+
     [AvaloniaFact]
     public void B7_Readonly_Stops_A_Tap_And_Takes_Pointer_Input_Off_The_Header_And_Content()
     {
@@ -395,7 +457,7 @@ public class AvonicAccordionTests
         var group = Group(null, a);
         using var scene = Show(group);
 
-        ((IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(a)).Expand();
+        ((IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(HeaderOf(a))).Expand();
 
         Assert.Null(group.Value);
     }
@@ -1333,7 +1395,7 @@ public class AvonicAccordionTests
         var group = Group(new[] { "a" }, a, b);
         group.Multiple = true;
         using var scene = Show(group);
-        var peer = ControlAutomationPeer.CreatePeerForElement(a);
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(a));
         var changes = 0;
         peer.PropertyChanged += (_, e) => changes += e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty ? 1 : 0;
 
@@ -1351,7 +1413,7 @@ public class AvonicAccordionTests
         using var scene = Show(group);
         using var clock = new TestClock();
 
-        var peer = (IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(b);
+        var peer = (IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
         Assert.Equal(ExpandCollapseState.Collapsed, peer.ExpandCollapseState);
 
         peer.Expand();
@@ -1360,6 +1422,70 @@ public class AvonicAccordionTests
         clock.At(16);
         Assert.Equal(ExpandCollapseState.Expanded, peer.ExpandCollapseState);
     }
+
+    // setAria puts aria-expanded on the header item's button, so the item says it, and the accordion and other items don't.
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Says_It_And_Nothing_Else_Does()
+    {
+        var a = Accordion("a");
+        var other = Item("other");
+        var group = Group("a", a);
+        using var scene = Show(new StackPanel { Children = { group, other } });
+
+        Assert.NotNull(ControlAutomationPeer.CreatePeerForElement(HeaderOf(a)).GetProvider<IExpandCollapseProvider>());
+        Assert.Null(ControlAutomationPeer.CreatePeerForElement(a).GetProvider<IExpandCollapseProvider>());
+        Assert.Null(ControlAutomationPeer.CreatePeerForElement(other).GetProvider<IExpandCollapseProvider>());
+    }
+
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Announces_A_Change()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
+        _ = ((IExpandCollapseProvider)peer).ExpandCollapseState;
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+
+        group.Value = "b";
+        clock.At(16);
+
+        Assert.Equal([ExpandCollapseState.Expanded], changes);
+    }
+
+    // With no animation the accordion renders once, already in the new state: the peer still announces it.
+    [AvaloniaFact]
+    public void B22_The_Header_Item_Announces_A_Change_With_No_Animation()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        group.Animated = false;
+        using var scene = Show(group);
+        var peer = ControlAutomationPeer.CreatePeerForElement(HeaderOf(b));
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+
+        group.Value = "b";
+        group.Value = null;
+
+        Assert.Equal([ExpandCollapseState.Expanded, ExpandCollapseState.Collapsed], changes);
+    }
+
+    private static AvonicItem HeaderOf(AvonicAccordion accordion) => (AvonicItem)accordion.HeaderContent!;
 }
 
 internal static class AccordionTestExtensions

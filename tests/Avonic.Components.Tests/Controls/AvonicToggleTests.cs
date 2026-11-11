@@ -690,6 +690,56 @@ public class AvonicToggleTests
         Assert.False(disabled.Checked);
     });
 
+    // item.js's render() keeps getFirstInteractive's control, and sets the click only if there was one. A toggle raises no
+    // ionStyle when it's enabled, so the item doesn't render again, and a tap on its padding does nothing.
+    [AvaloniaFact]
+    public void T12_A_Toggle_Enabled_After_The_Item_Rendered_Takes_No_Tap_On_The_Padding() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Later", IsEnabled = false };
+        var changes = Changes.Of(toggle);
+        using var scene = InItems(toggle);
+
+        toggle.IsEnabled = true;
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, new Point(5, 20));
+
+        Assert.Empty(changes.All);
+    });
+
+    // A button item has a click of its own, but forwards to the control it found as it rendered: none, here.
+    [AvaloniaFact]
+    public void T12_A_Button_Item_Forwards_No_Tap_To_A_Toggle_Enabled_After_It_Rendered() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Later", IsEnabled = false };
+        var changes = Changes.Of(toggle);
+        var item = new AvonicItem { Button = true, Content = toggle };
+        var clicks = 0;
+        item.Click += (_, _) => clicks++;
+        using var scene = Themed(new StackPanel { Children = { item } });
+
+        toggle.IsEnabled = true;
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, new Point(5, 20));
+
+        Assert.Equal(1, clicks);
+        Assert.Empty(changes.All);
+    });
+
+    // The control it found, disabled since, ignores the click, as an ion-toggle's onClick does.
+    [AvaloniaFact]
+    public void T12_A_Toggle_Disabled_After_The_Item_Rendered_Ignores_The_Tap() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Then disabled" };
+        var changes = Changes.Of(toggle);
+        using var scene = InItems(toggle);
+
+        toggle.IsEnabled = false;
+        Dispatcher.UIThread.RunJobs();
+        Click(scene, new Point(5, 20));
+
+        Assert.Empty(changes.All);
+    });
+
     // ── 13: an item's layout ─────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -854,10 +904,10 @@ public class AvonicToggleTests
         };
         using var scene = InItems(toggle);
 
-        // max-width: calc(100% / 0.75), then scale(0.75) from the middle: the label's box is 358 / 0.75, drawn 358 wide. A
-        // trimmed TextBlock is as wide as what it draws, up to the ellipsis, where CSS's box is the max-width: a few pixels less.
+        // max-width: calc(100% / 0.75), then scale(0.75) from the middle: the label's box is 358 / 0.75, drawn 358 wide, as CSS's
+        // box is the max-width, though the trimmed text is narrower. Rounded to a pixel.
         var drawn = Bounds(Label(toggle), scene.Window);
-        Assert.InRange(Label(toggle).Bounds.Width, 358 / 0.75 - 6, 358 / 0.75 + 0.5);
+        Assert.InRange(Label(toggle).Bounds.Width, 358 / 0.75 - 0.5, 358 / 0.75 + 1);
         Assert.InRange(drawn.Width, 358 - 4.5, 358 + 0.5);
         Assert.InRange(drawn.Center.X, 194.5, 195.5);
     });

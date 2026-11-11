@@ -4,15 +4,16 @@
 
     <!-- Functional stub for ion-radio: structure only. The look is in Avonic.Themes. The transparent panel is what makes the whole
          box take a click, as Ionic's host does. The label and the native wrapper are the two children of .radio-wrapper, in that
-         order, which RadioWrapper lays out. -->
+         order, which LabelledControlPanel lays out. -->
     <ControlTheme x:Key="{x:Type c:AvonicRadio}" TargetType="c:AvonicRadio">
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel Background="Transparent">
-                    <c:RadioWrapper Name="PART_Wrapper"
-                                    LabelPlacement="{TemplateBinding LabelPlacement}"
-                                    Justify="{TemplateBinding Justify}"
-                                    Alignment="{TemplateBinding Alignment}">
+                    <c:LabelledControlPanel Name="PART_Wrapper"
+                                    LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                    EndJustify="SpaceBetween">
                         <ContentPresenter Name="PART_Label"
                                           Content="{TemplateBinding Content}"
                                           ContentTemplate="{TemplateBinding ContentTemplate}" />
@@ -21,7 +22,7 @@
                                 <Border Name="PART_Mark" />
                             </Border>
                         </Panel>
-                    </c:RadioWrapper>
+                    </c:LabelledControlPanel>
                 </Panel>
             </ControlTemplate>
         </Setter>

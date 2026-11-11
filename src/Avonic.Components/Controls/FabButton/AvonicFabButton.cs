@@ -143,7 +143,7 @@ public class AvonicFabButton : ContentControl
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private readonly NativeButton? _native;
-    private readonly FabStyleValue<bool> _hidden = new(false);
+    private readonly StyleValue<bool> _hidden = new();
     private AvonicFab? _fab;
     private bool _inList;
 
@@ -230,7 +230,7 @@ public class AvonicFabButton : ContentControl
     /// <summary><c>::slotted(.fab-button-in-list)</c> is <c>visibility: hidden</c> until <c>.fab-button-show</c>.</summary>
     private bool IsHiddenInList => _inList && !Show;
 
-    private void UpdateHidden() => _hidden.Set(IsHiddenInList);
+    private void UpdateHidden() => _hidden.SetWhen(IsHiddenInList, false);
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 

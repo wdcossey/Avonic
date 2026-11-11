@@ -66,7 +66,7 @@ The top of the page, Ionic on the left:
 | 13 | Active: `#03060b` at 500 | element 2 | the same | match |
 | 14 | Colours: base, the breadcrumbs' base, the toolbar's contrast at 0.8, contrast when active, read at the breadcrumb's render | `hover u` white, `w` black | the same | match |
 | 15 | A link: a tab stop, Enter not Space, hover `#03060b` or the shade, hover beating the toolbar's contrast | `tab 0`, `Space on link []`, `hover t` | the same | match |
-| 15 | A link navigates | the browser follows `href`, or `ion-router` does | **nothing navigates**: the app follows it from `Click` | gap: no router yet. See "For you to decide" in the PR |
+| 15 | A link navigates | the browser follows `href`, or `ion-router` does | **nothing navigates**: the app follows it from `Click` | deliberate difference: the router family is out of scope ([ROADMAP](../../ROADMAP.md#out-of-scope)) |
 | 15 | A link's cursor | the hand, over the `<a>` | the arrow | gap: a desktop detail, on a phone there's none |
 | 16 | Focused by keyboard: `#35404e`, white, radius 4, the shadow, no outline | element 4 | the same | match |
 | 16 | A focused link that collapses loses focus | `display: none` blurs it | focus is cleared, `IonBlur` raised | match |

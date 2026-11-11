@@ -9,10 +9,10 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel Background="Transparent">
-                    <c:CheckboxWrapper Name="PART_Wrapper"
-                                       LabelPlacement="{TemplateBinding LabelPlacement}"
-                                       Justify="{TemplateBinding Justify}"
-                                       Alignment="{TemplateBinding Alignment}">
+                    <c:LabelledControlPanel Name="PART_Wrapper"
+                                       LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                       Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                       Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}">
                         <StackPanel Name="PART_Label" ClipToBounds="True">
                             <ContentPresenter Name="PART_Content"
                                               Content="{TemplateBinding Content}"
@@ -29,7 +29,7 @@
                                                 Indeterminate="{TemplateBinding Indeterminate}" />
                             </Border>
                         </Panel>
-                    </c:CheckboxWrapper>
+                    </c:LabelledControlPanel>
                 </Panel>
             </ControlTemplate>
         </Setter>

@@ -43,11 +43,11 @@
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <ControlTemplate>
-                <c:TogglePanel Name="PART_Wrapper"
+                <c:LabelledControlPanel Name="PART_Wrapper"
                                Background="{TemplateBinding Background}"
-                               LabelPlacement="{TemplateBinding LabelPlacement}"
-                               Justify="{TemplateBinding Justify}"
-                               Alignment="{TemplateBinding Alignment}">
+                               LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                               Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                               Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}">
                     <!-- .label-text-wrapper: nowrap, overflow: hidden and an ellipsis. Its margin is per placement, below. -->
                     <StackPanel Name="PART_Label" ClipToBounds="True">
                         <ContentPresenter Name="PART_LabelContent"
@@ -127,7 +127,7 @@
                             </Panel>
                         </Border>
                     </Panel>
-                </c:TogglePanel>
+                </c:LabelledControlPanel>
             </ControlTemplate>
         </Setter>
 
@@ -178,6 +178,8 @@
             <Setter Property="TextBlock.TextAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="RenderTransform" Value="scale(0.75)" />
+            <!-- max-width: calc(100% / 0.75), which LabelledControlPanel reads -->
+            <Setter Property="b:Css.Scale" Value="0.75" />
         </Style>
         <Style Selector="^:in-item:label-placement-stacked /template/ StackPanel#PART_Label">
             <Setter Property="Margin" Value="0,10,0,16" />

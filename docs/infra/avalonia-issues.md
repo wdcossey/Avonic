@@ -80,6 +80,38 @@ input that isn't focused when its value or selection changes. Found as the sampl
 moves the caret to the end of an assigned value, as Chromium does, and now handles `RequestBringIntoView` from its text box while
 the box isn't focused. Bringing the caret into view only while focused would match browsers.
 
+## `Opacity` isn't group opacity
+
+**Measured.** A control's `Opacity` fades each of its parts on its own, so where parts overlap, the one underneath shows through: a
+white child over a grey sibling at 0.38 read 233, where CSS's `opacity`, which fades the group as one picture, gives 255.
+`AvonicToggle`'s disabled look fades with an `OpacityMask` of a solid brush at that alpha instead, which is a group. Found by
+`ion-toggle` (#21, PR #116). Other controls with overlapping parts may need the same.
+
+## `AutomationProperties.IsRequiredForForm` has nothing that reads it
+
+**Read, not tested on a screen reader.** The attached property exists in 12.1.4, but no peer reports it and no platform's
+automation reads it, so `aria-required` can't be said. `AvonicCheckbox` sets it at style priority anyway; `AvonicToggle` leaves
+`required` out. Found by `ion-checkbox` and `ion-toggle` (#20, #21).
+
+## No public way to find the current activity's `TopLevel` under `MainViewFactory`
+
+**Read from 12.1.4.** `AndroidActivatableLifetime.CurrentMainActivity` is internal, Android's lifetime isn't an
+`ISingleTopLevelApplicationLifetime`, and `KeyboardDevice.Instance` is internal. A library that shows an overlay with no target has
+to track top levels itself: `Overlays/OpenTopLevels` keeps the open ones and takes the last still open. Sure of the API; whether a
+public way is planned is unknown. Found by #114 (PR #119).
+
+## `TextBox.MaxLength = 0` means no limit
+
+**Measured.** HTML's `maxlength="0"` allows nothing; Avalonia's `0` is no limit. `AvonicInput` sets `0` for no limit and keeps every
+character out itself when Ionic's `maxlength` is 0. Found by `ion-input` (#24, PR #120). Also from that PR: headless touch raises no
+`PointerEntered`, so a touch's hover can't be tested headlessly.
+
+## A `Border` with `BackgroundSizing="InnerBorderEdge"` draws no `BoxShadow`
+
+**Measured.** The column under a 56 px round fab button read 255 with `InnerBorderEdge`; with the default sizing, 177, 187 and 198
+from the shadow. `AvonicFabButton` leaves the sizing alone, where CSS has `background-clip: padding-box`. Found by `ion-fab` (#30,
+PR #123).
+
 ## `Visual.IsEffectivelyVisibleChanged` is internal
 
 **Checked by reflection.** A control that has to stop work when it or an ancestor is hidden can't subscribe to its own effective

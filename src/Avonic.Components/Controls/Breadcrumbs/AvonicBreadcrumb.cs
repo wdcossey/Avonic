@@ -42,7 +42,7 @@ public class AvonicBreadcrumb : TemplatedControl
 
     /// <summary>
     /// Ionic <c>href</c>: makes the breadcrumb a link, which takes focus, clicks on Enter, and shows hover and focus. Avonic doesn't
-    /// navigate, as there's no router yet: follow it from <see cref="Click"/> or <see cref="Command"/>.
+    /// navigate, as there's no router: follow it from <see cref="Click"/> or <see cref="Command"/>.
     /// </summary>
     public static readonly StyledProperty<string?> HrefProperty =
         AvaloniaProperty.Register<AvonicBreadcrumb, string?>(nameof(Href));
@@ -236,7 +236,7 @@ public class AvonicBreadcrumb : TemplatedControl
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private readonly NativeButton _native;
-    private readonly BreadcrumbStyleValue<bool> _link = new();
+    private readonly StyleValue<bool> _link = new();
     private int _clickHandlers;
     private bool _collapsed;
     private bool _last;
@@ -396,7 +396,7 @@ public class AvonicBreadcrumb : TemplatedControl
         PseudoClasses.Set(":in-breadcrumbs-color", inBreadcrumbsColor);
         PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
 
-        _link.Set(Href is not null && !_collapsed);
+        _link.SetWhen(Href is not null && !_collapsed, true);
 
         if (_indicator is not null)
         {
@@ -514,44 +514,5 @@ public class AvonicBreadcrumb : TemplatedControl
                 : base.GetProviderCore(providerType);
 
         public void Invoke() => owner.OnNativeClick();
-    }
-}
-
-/// <summary>
-/// A value bound at style priority for the control's life, so that it keeps its place among the styles and an app's value wins.
-/// The type's default is unset, so that it gives way to anything else. See <c>ReversalTransform</c> in <see cref="AvonicProgressBar"/>.
-/// </summary>
-internal sealed class BreadcrumbStyleValue<T> : IObservable<BindingValue<T>>
-{
-    private readonly List<IObserver<BindingValue<T>>> _observers = [];
-    private T? _value;
-
-    public void Set(T value)
-    {
-        if (EqualityComparer<T>.Default.Equals(value, _value))
-        {
-            return;
-        }
-
-        _value = value;
-        foreach (var observer in _observers.ToArray())
-        {
-            observer.OnNext(Current);
-        }
-    }
-
-    private BindingValue<T> Current =>
-        EqualityComparer<T>.Default.Equals(_value, default) ? BindingValue<T>.Unset : new BindingValue<T>(_value!);
-
-    public IDisposable Subscribe(IObserver<BindingValue<T>> observer)
-    {
-        _observers.Add(observer);
-        observer.OnNext(Current);
-        return new Unsubscriber(_observers, observer);
-    }
-
-    private sealed class Unsubscriber(List<IObserver<BindingValue<T>>> observers, IObserver<BindingValue<T>> observer) : IDisposable
-    {
-        public void Dispose() => observers.Remove(observer);
     }
 }

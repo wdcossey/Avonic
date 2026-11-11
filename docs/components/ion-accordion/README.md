@@ -34,7 +34,7 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [x] | `value` | `Value` | `ion-accordion-N` by default |
 | [x] | slot `header` | `HeaderContent`, `HeaderContentTemplate` | |
 | [x] | slot `content` | `ContentContent`, `ContentContentTemplate` | |
-| [x] | part `header` | `PART_Header` | |
+| [x] | part `header` | `PART_Header` | An `AccordionHeaderPresenter`, a `ContentPresenter` styled as one, which holds `readonly`'s `pointer-events: none` from when it's made, so that an app's style on it wins, as `::part(header)` does. A stock `ContentPresenter` in an app's own template works, but its style loses to `readonly` |
 | [x] | part `content` | `PART_Content` (`AccordionContentClip`), with `PART_ContentWrapper` inside | |
 | [x] | part `expanded` | `:expanded` | `::part(header expanded)` → `c\|AvonicAccordion:expanded /template/ ContentPresenter#PART_Header` |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
@@ -95,7 +95,7 @@ its own height and clips it, so the content slides rather than squeezes.
   header item's line goes while open, on the last accordion, and inset on one before an open one.
 - With focus in a header, ArrowDown and ArrowUp move it to the next or previous accordion, wrapping, and Home and End to the first
   and the last. A disabled accordion can't take focus here, so it's passed over.
-- The accordion's automation peer has `ExpandCollapse`, for `aria-expanded`.
+- The header item's automation peer has `ExpandCollapse`, for the `aria-expanded` Ionic sets on its button; the accordion's is a group.
 
 ## Extensions
 
@@ -106,8 +106,7 @@ None.
 - `prefers-reduced-motion` isn't read: Avalonia has no equivalent.
 - `IsEnabled` reaches the controls in a disabled accordion, so one in the content that dims itself when disabled dims twice. The
   header's item is kept at its opacity.
-- `aria-expanded` is on the accordion's peer, not the header item's; `role="region"` on the content isn't mapped. Proposed: the
-  item's peer reports `ExpandCollapse` when it's an accordion's header.
+- `role="region"` on the content isn't mapped.
 - The host's transitions and the icon's turn run on real time, as Avalonia's transitions do.
 - From a key, only the `Click` of an `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or stock `Button` in the header
   toggles it. A pointer press on anything there does.

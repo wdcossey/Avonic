@@ -179,7 +179,15 @@ RaiseEvent(new IonStyleEventArgs(new Dictionary<string, bool>
 ```
 
 The item's own rules read `interactive`, `interactive-disabled`, `label-stacked`, `label-floating` and `textarea`. It also
-works out which control is the first interactive one again, so raise this when a control's `IsEnabled` changes.
+works out which control is the first interactive one again, so raise this when a control's `IsEnabled` changes. Ionic's item
+works it out as it renders, and a toggle, a checkbox or a radio raises nothing when it's enabled, so one enabled after the item
+rendered takes no tap on the padding until something else makes the item look again.
+
+### Roles
+
+The item's peer is a list item in an `AvonicList`, but not in an `AvonicRadioGroup` (`inList` in `item.js`), and a group
+otherwise; a button item is a button. As an `AvonicAccordion`'s header, it has `ExpandCollapse`, for the `aria-expanded` the
+accordion sets on its button.
 
 ### Slotted styles
 

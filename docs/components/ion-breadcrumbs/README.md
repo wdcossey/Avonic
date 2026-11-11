@@ -91,7 +91,7 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 ## Known gaps
 
-- **`Href` doesn't navigate.** There's no router yet. Follow it from `Click`.
+- **`Href` doesn't navigate.** The router family is out of scope ([ROADMAP](../../ROADMAP.md#out-of-scope)). Follow it from `Click`.
 - **A link shows the arrow cursor**, where a browser shows the hand over an `<a>`.
 - **A breadcrumb wider than the whole row** draws past its edge as in Ionic, but its box is held to the row's width by Avalonia's
   `WrapPanel`, so a tap past the edge misses it.

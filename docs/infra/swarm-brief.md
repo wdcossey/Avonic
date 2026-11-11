@@ -102,11 +102,16 @@ These are mistakes this project has already made, so don't repeat them.
   as strings, then shows the control's type name in a `TextBlock`. An `ItemsControl` that wraps controls in containers has to clear
   the template for them. See `AvonicChip.PrepareContainerForItemOverride`.
 - **Of two values at one priority, the later wins.** A style-priority frame made when a state turns on beats an app's style that was
-  already there. Bind once, in the constructor, and push the value through it: see `ReversalTransform` in `AvonicProgressBar`.
+  already there. Bind once, in the constructor, and push the value through it: `Behaviors/StyleValue<T>`.
 - **An invisible control isn't measured, so its template isn't applied.** Anything that starts on attach and needs the template has to
   wait for it to be shown.
 - **A slotted control's `Margin` rule goes in the host's `Styles/` file,** after the host's rule for any child, with no activator.
   An activator would beat an app's plain style too, and a plain rule in the control's own file wins or loses by merge order.
+- **A `MultiBinding` set as a property element on a part inside a `ControlTemplate` is a local value,** so no state's style can
+  beat it. Put it in a `^ /template/ #PART_X` style setter. Measured with `GetDiagnostic`: `LocalValue`.
+- **An `ItemsControl`'s `OnKeyDown` handles the arrows** before an instance handler sees them: override `OnKeyDown`.
+- **An `ItemsControl`'s child that is its own container inherits from the control,** its logical parent, not from the template part
+  it sits in, so a part's `color` rule (`.button-native { color }`) goes on the host's `Foreground`.
 - **`AvonicConfig.Animated` isn't a master switch.** Ionic's `animated` reaches tap-click and the transitions of the accordion,
   menu, nav, router outlet, overlays, searchbar and skeleton text only. A control Ionic doesn't make read it ignores it here too.
 

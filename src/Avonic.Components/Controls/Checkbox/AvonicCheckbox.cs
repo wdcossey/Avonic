@@ -35,7 +35,7 @@ public sealed class CheckboxChangeEventArgs(RoutedEvent routedEvent, object? sou
 /// A click anywhere on it toggles it, as Ionic's host <c>onClick</c> does, through <see cref="NativeButton"/> with no keys, as
 /// the DOM <c>click</c> of an element that isn't a button. Space toggles on key down, as Ionic's <c>onKeyDown</c> does.
 /// </remarks>
-[TemplatePart("PART_Wrapper", typeof(CheckboxWrapper))]
+[TemplatePart("PART_Wrapper", typeof(LabelledControlPanel))]
 [TemplatePart("PART_Label", typeof(Control))]
 [TemplatePart("PART_Content", typeof(ContentPresenter))]
 [TemplatePart("PART_Bottom", typeof(Control))]

@@ -139,7 +139,9 @@ public class AvonicProgressBar : TemplatedControl
     /// until it shows. A hide and show between two frames isn't seen, as in Chromium, measured, where no style change sees it.
     /// </summary>
     private readonly HiddenChainWatcher _hiddenChain;
-    private readonly ReversalTransform _reversal = new();
+    // scaleX(-1) while the bar is reversed, and nothing otherwise.
+    private readonly StyleValue<ITransform?> _reversal = new();
+    private readonly ScaleTransform _mirror = new(-1, 1);
     private ProgressBarAutomationPeer? _peer;
 
     /// <summary>Whether a frame is requested: only while something moves.</summary>
@@ -306,7 +308,7 @@ public class AvonicProgressBar : TemplatedControl
         var reversed = IsEffectivelyReversed;
         PseudoClasses.Set(":reversed", reversed);
 
-        _reversal.Set(reversed);
+        _reversal.SetWhen(reversed, _mirror);
     }
 
     // ── Frames ───────────────────────────────────────────────────────────────────────────────
@@ -528,44 +530,5 @@ internal sealed class CssTransition
         {
             Snap(to);
         }
-    }
-}
-
-/// <summary>
-/// <c>scaleX(-1)</c> while the bar is reversed, and nothing otherwise, so that the binding gives way to whatever else sets the
-/// transform. One binding for the bar's life, so that it keeps its place among the styles.
-/// </summary>
-internal sealed class ReversalTransform : IObservable<BindingValue<ITransform?>>
-{
-    private readonly List<IObserver<BindingValue<ITransform?>>> _observers = [];
-    private bool _reversed;
-
-    public void Set(bool reversed)
-    {
-        if (reversed == _reversed)
-        {
-            return;
-        }
-
-        _reversed = reversed;
-        foreach (var observer in _observers.ToArray())
-        {
-            observer.OnNext(Current);
-        }
-    }
-
-    private BindingValue<ITransform?> Current =>
-        _reversed ? new ScaleTransform(-1, 1) : BindingValue<ITransform?>.Unset;
-
-    public IDisposable Subscribe(IObserver<BindingValue<ITransform?>> observer)
-    {
-        _observers.Add(observer);
-        observer.OnNext(Current);
-        return new Unsubscriber(_observers, observer);
-    }
-
-    private sealed class Unsubscriber(List<IObserver<BindingValue<ITransform?>>> observers, IObserver<BindingValue<ITransform?>> observer) : IDisposable
-    {
-        public void Dispose() => observers.Remove(observer);
     }
 }

@@ -114,8 +114,8 @@ Also, on any page: the text should be Roboto, as on desktop, and the pictures on
 - **Run on a Pixel 8, Android 17, on 2026-11-09:** every check passed; see [COMPARISON.md](COMPARISON.md).
 - **`AvonicOverlay.Present()` under Avalonia's recommended `MainViewFactory`,** which leaves `MainView` null, takes the last top
   level to come that's still open, the current activity's ([#114](https://github.com/wdcossey/Avonic/issues/114),
-  [overlays](../overlays/README.md)). Tested headlessly, not tried on a device: the sample uses the factory since #114, and check 6
-  hasn't been run with it. The Pixel 8 run passed it through `MainView`.
+  [overlays](../overlays/README.md)). Check 6 passed with it on the same Pixel 8 on 2026-11-10, from a build of every P2 control:
+  the overlay presented, and Back dismissed it with the backdrop role and stayed on the page.
 - **CI's `android` job** builds the APK; its first run was this PR's.
 - **A recreated activity** gets a new `SampleShell` from the factory, at the page list. The activity handles rotation, resizing, display
   size and keyboards itself, so that's only after the system destroys it in the background, or with "Don't keep activities" on. Then

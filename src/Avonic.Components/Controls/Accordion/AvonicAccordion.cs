@@ -145,9 +145,9 @@ public class AvonicAccordion : TemplatedControl
     private ContentPresenter? _header;
     private AccordionContentClip? _content;
     private NativeButton? _headerButton;
-    private IDisposable? _headerNoHit;
-    private IDisposable? _contentNoHit;
-    private IDisposable? _contentHidden;
+    /// <summary>The header's <c>pointer-events: none</c>: its own, or, in a template with a stock presenter, one bound here.</summary>
+    private StyleValue<bool>? _headerNoHit;
+    private IDisposable? _headerNoHitBinding;
 
     /// <summary>A release is on its way through the header, and whether something inside has clicked during it.</summary>
     private bool _releasing;
@@ -175,7 +175,7 @@ public class AvonicAccordion : TemplatedControl
 
     internal AccordionState State => _state;
 
-    private bool IsExpandedState => _state is AccordionState.Expanded or AccordionState.Expanding;
+    internal bool IsExpandedState => _state is AccordionState.Expanded or AccordionState.Expanding;
 
     /// <summary>Its own <c>readonly</c>, or its group's, which Ionic copies to the group's own accordions.</summary>
     private bool IsReadonly => Readonly || OwnGroup is { Readonly: true };
@@ -544,14 +544,15 @@ public class AvonicAccordion : TemplatedControl
         PseudoClasses.Set(":accordion-previous", _isPrevious);
 
         // :host(.accordion-collapsed) #content { display: none }
-        SetStyleValue(ref _contentHidden, _content, IsVisibleProperty, _state == AccordionState.Collapsed);
+        _content?.Hidden.SetWhen(_state == AccordionState.Collapsed, false);
 
         if (_content is not null && _state == AccordionState.Expanded && !_transitioning && _pending is null)
         {
             _content.ClearValue(MaxHeightProperty);
         }
 
-        _peer?.RaiseExpandCollapseChanged();
+        // setAria: aria-expanded on the header item's button, found again each time.
+        HeaderItem()?.RaiseExpandCollapseChanged();
     }
 
     // ── Template ─────────────────────────────────────────────────────────────────────────────
@@ -566,15 +567,20 @@ public class AvonicAccordion : TemplatedControl
             RemoveHeaderHandlers(_header);
         }
 
-        _headerNoHit?.Dispose();
-        _headerNoHit = null;
-        _contentNoHit?.Dispose();
-        _contentNoHit = null;
-        _contentHidden?.Dispose();
-        _contentHidden = null;
-
+        _headerNoHitBinding?.Dispose();
+        _headerNoHitBinding = null;
         _header = e.NameScope.Find<ContentPresenter>("PART_Header");
         _content = e.NameScope.Find<AccordionContentClip>("PART_Content");
+
+        // Behaviour, so it doesn't depend on the theme, which an app can replace, at style priority, as CSS is. The parts hold the
+        // values, bound as they're made, so that a style on a part wins, as ::part does. A stock presenter as the header gets one
+        // bound now, after its styles, which then lose to it.
+        _headerNoHit = (_header as AccordionHeaderPresenter)?.NoHit;
+        if (_header is not null && _headerNoHit is null)
+        {
+            _headerNoHit = new StyleValue<bool>();
+            _headerNoHitBinding = _header.Bind(IsHitTestVisibleProperty, _headerNoHit, BindingPriority.Style);
+        }
 
         if (_header is not null)
         {
@@ -622,25 +628,8 @@ public class AvonicAccordion : TemplatedControl
     {
         // :host(.accordion-readonly) #header, #content { pointer-events: none }
         var isReadonly = IsReadonly;
-        SetStyleValue(ref _headerNoHit, _header, IsHitTestVisibleProperty, isReadonly);
-        SetStyleValue(ref _contentNoHit, _content, IsHitTestVisibleProperty, isReadonly);
-    }
-
-    /// <summary>
-    /// Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS is, so a theme's own
-    /// value on the part wins.
-    /// </summary>
-    private static void SetStyleValue(ref IDisposable? frame, Control? part, StyledProperty<bool> property, bool active)
-    {
-        if (active && frame is null && part is not null)
-        {
-            frame = part.SetValue(property, false, BindingPriority.Style);
-        }
-        else if (!active)
-        {
-            frame?.Dispose();
-            frame = null;
-        }
+        _headerNoHit?.SetWhen(isReadonly, false);
+        _content?.NoHit.SetWhen(isReadonly, false);
     }
 
     // ── The header's click ───────────────────────────────────────────────────────────────────
@@ -823,49 +812,11 @@ public class AvonicAccordion : TemplatedControl
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
 
-    private AccordionAutomationPeer? _peer;
+    protected override AutomationPeer OnCreateAutomationPeer() => new AccordionAutomationPeer(this);
 
-    protected override AutomationPeer OnCreateAutomationPeer() => _peer = new AccordionAutomationPeer(this);
-
-    /// <summary>
-    /// <c>aria-expanded</c>, which Ionic puts on the header item's button: the accordion's own peer says it here, as the item's
-    /// peer is the item's. Expanding or collapsing it asks the group, as a tap does.
-    /// </summary>
-    private sealed class AccordionAutomationPeer(AvonicAccordion owner) : ControlAutomationPeer(owner), IExpandCollapseProvider
+    /// <summary>A group. <c>aria-expanded</c> is on the header item's peer, where Ionic puts it, on the item's button.</summary>
+    private sealed class AccordionAutomationPeer(AvonicAccordion owner) : ControlAutomationPeer(owner)
     {
-        private ExpandCollapseState _last = owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
-
-        public ExpandCollapseState ExpandCollapseState =>
-            owner.IsExpandedState ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
-
-        public bool ShowsMenu => false;
-
-        public void Expand()
-        {
-            if (!owner.IsExpandedState)
-            {
-                owner.ToggleExpanded();
-            }
-        }
-
-        public void Collapse()
-        {
-            if (owner.IsExpandedState)
-            {
-                owner.ToggleExpanded();
-            }
-        }
-
-        public void RaiseExpandCollapseChanged()
-        {
-            var state = ExpandCollapseState;
-            if (state != _last)
-            {
-                RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, _last, state);
-                _last = state;
-            }
-        }
-
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
 
         protected override bool IsControlElementCore() => true;

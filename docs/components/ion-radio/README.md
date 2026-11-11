@@ -39,7 +39,7 @@ sets its `Value` and raises `IonChange`, and each radio is checked when its `Val
 | [x] | `ionFocus` | `IonFocus` (`IonFocusEvent`) | The radio itself got focus |
 | [x] | `ionBlur` | `IonBlur` (`IonBlurEvent`) | The radio itself lost focus |
 | [x] | default slot | `Content` | The label |
-| [x] | `container`, `label`, `mark` parts | `PART_Container`, `PART_Label`, `PART_Mark` | Also `PART_Wrapper` (a `RadioWrapper`), `PART_Native` and `PART_Focus` |
+| [x] | `container`, `label`, `mark` parts | `PART_Container`, `PART_Label`, `PART_Mark` | Also `PART_Wrapper` (a `LabelledControlPanel`, shared with the checkbox and the toggle, with `EndJustify` `SpaceBetween`, as the radio's end rule only reverses the row), `PART_Native` and `PART_Focus` |
 
 Checked is internal, as Ionic's `checked` is: it's the pseudoclass `:checked`, and the automation peer's `IsSelected`. Alone, a click
 checks a radio and nothing unchecks it. Alone it's not a tab stop, as `tabindex="-1"` isn't.

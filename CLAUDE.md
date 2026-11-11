@@ -23,19 +23,22 @@ Ionic implementation before writing a line, and you build and test before every 
 src/Avonic.Components/   controls: behaviour, properties, events, structure — zero visual opinion
   Controls/<Name>/       one folder per control: class, enums, functional stub ControlTheme (.axaml)
   Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template; MinContent, the
-                         min-content width both FlexRow and the grid's RowPanel use
+                         min-content width both FlexRow and the grid's RowPanel use; LabelledControlPanel, the label and the
+                         control's part of a checkbox, a radio and a toggle, for labelPlacement, justify and alignment
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
                          AccessibleText = what a browser names a button from; Activatable = tap-click;
                          FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
                          BorderRadius = border-radius with percentages, for themes;
-                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end)
+                         HiddenChainWatcher = waits for display: none on a control or an ancestor to end;
+                         StyleValue = a value the control's code gives a property at style priority, or nothing)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
   Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back),
-                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md)
+                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present() with no TopLevel
+                         finds the current activity's under Android's MainViewFactory (OpenTopLevels, the last one still open)
   Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
@@ -114,6 +117,17 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-progress-bar` | `AvonicProgressBar` | done — [docs](docs/components/ion-progress-bar/README.md) |
 | `ion-chip` | `AvonicChip` (+ `Click`, from `Behaviors.NativeButton`, and `Command`, as extensions) | done — [docs](docs/components/ion-chip/README.md) |
 | `ion-backdrop` | `AvonicBackdrop` (with the [overlay system](docs/infra/overlays/README.md)) | done — [docs](docs/components/ion-backdrop/README.md) |
+| `ion-checkbox` | `AvonicCheckbox` | done — [docs](docs/components/ion-checkbox/README.md) |
+| `ion-toggle` | `AvonicToggle` | done — [docs](docs/components/ion-toggle/README.md) |
+| `ion-radio`, `ion-radio-group` | `AvonicRadio`, `AvonicRadioGroup` | done — [docs](docs/components/ion-radio/README.md) |
+| `ion-range` | `AvonicRange` (+ `RangeValue`, one value or two) | done — [docs](docs/components/ion-range/README.md) |
+| `ion-input`, `ion-input-password-toggle` | `AvonicInput`, and `AvonicInputPasswordToggle` for `ion-input-password-toggle` | done — [docs](docs/components/ion-input/README.md) |
+| `ion-segment`, `ion-segment-button`, `ion-segment-view`, `ion-segment-content` | `AvonicSegment`, `AvonicSegmentButton`, `AvonicSegmentView`, `AvonicSegmentContent` | done — [docs](docs/components/ion-segment/README.md) |
+| `ion-tabs`, `ion-tab`, `ion-tab-bar`, `ion-tab-button` | `AvonicTabs`, `AvonicTab`, `AvonicTabBar`, `AvonicTabButton` (standalone, with no router) | done — [docs](docs/components/ion-tabs/README.md) |
+| `ion-fab`, `ion-fab-button`, `ion-fab-list` | `AvonicFab`, `AvonicFabButton`, `AvonicFabList` | done — [docs](docs/components/ion-fab/README.md) |
+| `ion-accordion`, `ion-accordion-group` | `AvonicAccordion`, `AvonicAccordionGroup` | done — [docs](docs/components/ion-accordion/README.md) |
+| `ion-breadcrumbs`, `ion-breadcrumb` | `AvonicBreadcrumbs`, `AvonicBreadcrumb` | done — [docs](docs/components/ion-breadcrumbs/README.md) |
+| `ion-infinite-scroll`, `ion-infinite-scroll-content` | `AvonicInfiniteScroll`, `AvonicInfiniteScrollContent` | done — [docs](docs/components/ion-infinite-scroll/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
 each priority tier, not by the control's own PR, so a recently finished control may be missing. For
@@ -242,6 +256,37 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `::slotted(ion-foo)` in another control's CSS, when the style budget is tight | A pseudoclass the child works out from its `Parent` when it's attached, and rules in its own `ControlTheme`, which cost nothing elsewhere and lose to an app's style as `::slotted` does | `AvonicImg`'s `:in-avatar`, `:in-thumbnail` |
 | Vertical margins between blocks collapse | Not in Avalonia: a `StackPanel` adds both. Record it; an app sets one side | `AvonicSkeletonText` |
 | A slot order that differs from the DOM's (flex `order`) | The template puts the slots in visual order, and each slot is its own tab group, with a `TabIndex` in DOM order, inside a container with `KeyboardNavigation.TabNavigation="Local"` so that the indexes don't mix with the window's | `AvonicToolbar`'s md order, `PART_Container` |
+| A mutable prop the user changes (`checked`, a group's `value`) | A `StyledProperty`, two-way by default, set from input with `SetCurrentValue` | `AvonicCheckbox.Checked`, `AvonicRadioGroup.Value` |
+| A `@State` that styles the host (`checked`) | A pseudoclass and the automation peer, with no public property | `AvonicRadio`'s `:checked` |
+| An `@internal` event between two of your controls (`ionValueChange`) | An internal CLR event | `AvonicRadioGroup.ValueChanged`, `AvonicAccordionGroup.ValueChange` |
+| A prop whose name an Avalonia member already has | `<Control><Prop>`, as for `name` | `swipeGesture` → `SegmentSwipeGesture`, as `InputElement.SwipeGesture` is an event |
+| `role="checkbox"`, `aria-checked="mixed"` | A peer with `IToggleProvider`: `On`, `Off`, `Indeterminate`; `Toggle` is a click | `AvonicCheckbox` |
+| `aria-required`, `aria-describedby` | `AutomationProperties.IsRequiredForForm` at style priority; the peer's `GetHelpTextCore`, raising `HelpTextProperty` when it changes | `AvonicCheckbox` |
+| `ion-touched`, `ion-invalid`, set by the app | Style classes of the same name, followed through `Classes.CollectionChanged`, as Ionic's `MutationObserver` | `AvonicCheckbox` |
+| `[slot=start]` on the host, read by its own CSS | `:slot-start`, `:slot-end`, from the name of the presenter it's in | `AvonicCheckbox` |
+| A CSS transition in the theme, which a first style doesn't run | The theme's `Transitions` under a `:drawn` pseudoclass the control sets from its first frame, as a transition can't be taken back once it's started | `AvonicCheckbox` |
+| `labelPlacement`, `justify`, `alignment` on a form control (`.xxx-wrapper`) | `LabelledControlPanel` as `PART_Wrapper`, the control's own enums mapped by name through `LabelledControlPanel.FromControl` | `AvonicCheckbox`, `AvonicRadio`, `AvonicToggle` |
+| `opacity` on a control whose parts overlap | `OpacityMask` with a solid brush at that alpha, as Avalonia's `Opacity` fades each part on its own | `AvonicToggle`'s disabled 0.38 |
+| `isRTL(el)` | The control's `FlowDirection`, which inherits from any ancestor, where Ionic reads only the element's and the document's `dir` | `AvonicToggle`'s drag |
+| A native `<input>` | A `TextBox` with its own minimal `ControlTheme`, `Value` kept in step through `Text`'s property change (synchronous; `TextChanged` is posted), so only the user's edits raise the input event | `AvonicInput` |
+| `<label for>` around a control | `NativeButton` with no keys on the host; a click whose path from the source holds focusable content other than the control does nothing, as HTML's label activation | `AvonicInput` |
+| `pointerdown` with `preventDefault()`: a button that mustn't take focus | `KeepFocus.During(e)` from an ancestor's tunnel handler: every focusable element on the press's path is unfocusable until the press is handled, as Avalonia focuses in a class handler before the element's own handlers | `AvonicInput`'s clear button, `AvonicInputPasswordToggle` |
+| A part name that other parts carry in a state (`part="header expanded"`) | A pseudoclass on the host, as the state isn't an element of its own | `ion-accordion`'s `expanded` → `:expanded` |
+| `max-height` animated on a box with `overflow: hidden` | A `Decorator` that measures its child at its own height and clips it, with `MaxHeight` eased on `AvonicConfig`'s clock | `AccordionContentClip` |
+| A container that sets its children's props (`breadcrumb.active = true`) | `SetCurrentValue` from the container, so an app reads it back and a style or binding it sets later still wins | `AvonicBreadcrumbs` |
+| `slotchange` | Posted to the dispatcher once for any number of changes before it runs, and only once the control has first been attached; changes while detached still count | `AvonicBreadcrumbs` |
+| A child's margin as a percentage of its host's width (`calc(100% + 10px)`) | A panel of the host's that places the child, with the fixed part as the child's `Margin` in its theme | `FabPanel` |
+| `visibility: hidden` | Transparent and scaled from the theme; `IsHitTestVisible`, `Focusable` and a click off from the control at style priority; offscreen to automation | `AvonicFabButton` in a closed list |
+| `background-clip: padding-box` beside a `box-shadow` | Leave `BackgroundSizing` alone: `InnerBorderEdge` draws no `BoxShadow` | `AvonicFabButton` |
+| `z-index` over something outside the parent | Not possible: `ZIndex` sorts siblings, so the ancestor that is a sibling needs it | an edge `AvonicFab` over `AvonicHeader` |
+| `scrollTo({ behavior: 'smooth' })` | `SmoothScroll`, internal to `Controls/Segment/`: √distance / 60 s, `cubic-bezier(0.42, 0, 0.58, 1)`, measured in Chromium | the scrollable segment, the segment view |
+| A DOM `scroll` listener | A change of the `ScrollViewer`'s `Offset`, checked once at the next `AvonicConfig.RequestFrame`; not `ScrollChanged`, which also comes for the extent and the viewport | `AvonicInfiniteScroll` |
+| Reading `scrollHeight`, `offsetHeight` (a forced reflow) | `UpdateLayout()` first, then `Extent`, `Bounds` | `AvonicInfiniteScroll`'s checks |
+| Many `::slotted` rules that change with the host's state, when the style budget is tight | Inheriting attached properties that the host's `ControlTheme` sets per state, read by one rule per kind of child in `Styles/` | `TabButtonPanel.IconMargin` and the rest |
+| A CSS variable a child inherits from its host (`--color` on `ion-tab-bar`, read by `ion-tab-button`) | The child's key unset, falling back to the host's key, so a resource set on the host reaches the child | `Avonic.TabButton.Color` → `Avonic.TabBar.Color` |
+| A union of a number and an object (`number \| { lower, upper }`) | A struct with Ionic's name, a `TypeConverter` from text and a number, and Ionic's own reading of each form | `RangeValue` |
+| Elements the component makes in `render`, one per item, with a part on each | A part that draws them, with a brush property per part | `RangeTicks` for `tick`, `tick-active` |
+| `::slotted(ion-icon[slot])` on a host with slots | A pseudoclass the host works out from what's in each slot, read by its own `ControlTheme`, so nothing goes in `Styles/` | `AvonicRange`'s `:start-icon`, `:end-icon` |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.

@@ -101,7 +101,7 @@ Second `/code-review` at high effort, on the fixed code:
 - **119 breakages, 104 caught**, before the reviews' fixes. Four didn't build and were rewritten. Weak tests, made stronger: a
   dictionary compared by a property name, an app's own `IsTabStop`, the end placement's margins in an item, an arrow on something
   else in the group. Rules that did nothing, removed: the radio's `flex` in an item (the container slot has it), a fixed label's
-  `MinWidth` (its `Width` does it), a second clamp on the label in `RadioWrapper` (its measure does it), and Space's raise whenever
+  `MinWidth` (its `Width` does it), a second clamp on the label in `RadioWrapper`, now the shared `LabelledControlPanel` (its measure does it), and Space's raise whenever
   `allowEmptySelection` is on (the value then always changes).
 - **132, 126 caught**, after both reviews. Weak tests, made stronger: the focus circle's negative margin (the part is invisible, so
   unmeasured, until it shows: the test now checks the radio's size while it shows), and an app's own `Activatable` and `FocusVisible`

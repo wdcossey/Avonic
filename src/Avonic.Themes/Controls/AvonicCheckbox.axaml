@@ -32,10 +32,10 @@
             <ControlTemplate>
                 <Panel Background="Transparent">
                     <!-- .checkbox-wrapper -->
-                    <c:CheckboxWrapper Name="PART_Wrapper"
-                                       LabelPlacement="{TemplateBinding LabelPlacement}"
-                                       Justify="{TemplateBinding Justify}"
-                                       Alignment="{TemplateBinding Alignment}">
+                    <c:LabelledControlPanel Name="PART_Wrapper"
+                                       LabelPlacement="{TemplateBinding LabelPlacement, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                       Justify="{TemplateBinding Justify, Converter={x:Static c:LabelledControlPanel.FromControl}}"
+                                       Alignment="{TemplateBinding Alignment, Converter={x:Static c:LabelledControlPanel.FromControl}}">
                         <!-- .label-text-wrapper: text-overflow: ellipsis; white-space: nowrap; overflow: hidden -->
                         <StackPanel Name="PART_Label"
                                     ClipToBounds="True"
@@ -72,7 +72,7 @@
                                                 StrokeThickness="{DynamicResource Avonic.Checkbox.CheckmarkWidth}" />
                             </Border>
                         </Panel>
-                    </c:CheckboxWrapper>
+                    </c:LabelledControlPanel>
                 </Panel>
             </ControlTemplate>
         </Setter>
@@ -144,7 +144,7 @@
         </Style>
         <!-- transform: scale(0.75), and max-width: calc(100% / 0.75), which the wrapper reads from Css.Scale. The origin is the
              centre unless an alignment is set. text-align: center on the wrapper. -->
-        <Style Selector="^:label-placement-stacked /template/ c|CheckboxWrapper#PART_Wrapper">
+        <Style Selector="^:label-placement-stacked /template/ c|LabelledControlPanel#PART_Wrapper">
             <Setter Property="TextBlock.TextAlignment" Value="Center" />
         </Style>
         <Style Selector="^:label-placement-stacked /template/ StackPanel#PART_Label">
