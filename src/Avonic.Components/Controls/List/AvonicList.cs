@@ -69,12 +69,6 @@ public partial class AvonicList : ItemsControl
         {
             PseudoClasses.Set(":inset", Inset);
             UpdateNextList();
-
-            // A row's check waits for a layout pass, and an app's own margin may not change, so ask for one.
-            if (_awaitingRowIndex)
-            {
-                InvalidateArrange();
-            }
         }
     }
 

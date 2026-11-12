@@ -1272,6 +1272,41 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_Rows_Realised_Above_The_Top_Are_Not_On_Screen() => Scrolling(() =>
+    {
+        // CacheLength realises rows above the top, the second divider among them, which sticks itself.
+        var (list, scroller, _) = Virtualised();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel { CacheLength = 1 });
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 24000);
+        Run();
+        var second = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single(divider => divider.Content is "d2");
+        var natural = second.GetVisualParent<Visual>()!.TranslatePoint(default, list)!.Value.Y;
+
+        scroller.Offset = new Vector(0, natural + 100);
+        Run();
+
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Replaced_Divider_Is_Drawn_Again() => Scrolling(() =>
+    {
+        var (list, scroller, data) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data[0] = "dX";
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+
+        Assert.Equal("dX", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
     public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
     {
         var (list, scroller, _) = Virtualised();

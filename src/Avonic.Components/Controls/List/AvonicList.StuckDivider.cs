@@ -244,10 +244,8 @@ public partial class AvonicList
             if (((child as ContentPresenter)?.Child ?? child) is AvonicItemDivider { Sticky: true } divider)
             {
                 _realisedDividers.Add((index, child == divider ? at.Y : at.Y + divider.Bounds.Top));
-                if (_stickyRows.Add(index))
-                {
-                    _sectionRow = -1;
-                }
+                // One newly sticky is found by the next look from the last answer, as that looks at every row since.
+                _stickyRows.Add(index);
             }
             else if (_stickyRows.Remove(index))
             {
