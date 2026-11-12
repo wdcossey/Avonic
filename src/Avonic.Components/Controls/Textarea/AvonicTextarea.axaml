@@ -31,7 +31,6 @@
                         <Panel VerticalAlignment="Top">
                             <TextBlock Name="PART_Placeholder"
                                        Text="{TemplateBinding PlaceholderText}"
-                                       LineHeight="{TemplateBinding LineHeight}"
                                        Foreground="{TemplateBinding PlaceholderForeground}"
                                        TextWrapping="{TemplateBinding TextWrapping}"
                                        IsHitTestVisible="False"

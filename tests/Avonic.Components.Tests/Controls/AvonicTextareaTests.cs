@@ -882,6 +882,7 @@ public class AvonicTextareaTests
 
         // Measured l: the bottom under the 64 px wrapper, 5 px above 12 px text, a 1 px top border, the helper step 700.
         var bottom = Part<Border>(textarea, "PART_Bottom");
+        Assert.True(bottom.IsVisible);
         Assert.Equal(64, bottom.Bounds.Y, 0.5);
         Assert.Equal(new Thickness(0, 1, 0, 0), bottom.BorderThickness);
         Assert.Equal(new Thickness(0, 5, 0, 0), bottom.Padding);
@@ -989,6 +990,8 @@ public class AvonicTextareaTests
         var placeholder = Part<TextBlock>(Native(textarea), "PART_Placeholder");
         Assert.Equal("Placeholder", placeholder.Text);
         Assert.Equal(0.6, placeholder.Opacity, 3);
+
+        // The field's line height, which the placeholder inherits.
         Assert.Equal(19, placeholder.LineHeight);
         Assert.Equal(BrushColor(textarea.Foreground), BrushColor(placeholder.Foreground));
 

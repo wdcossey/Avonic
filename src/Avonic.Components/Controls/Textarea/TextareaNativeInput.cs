@@ -55,9 +55,8 @@ public sealed class TextareaNativeInput : TextBox
     {
         AffectsMeasure<TextareaNativeInput>(RowsProperty, ColsProperty, AutoGrowProperty, LineHeightProperty);
 
-        // A <textarea> takes Return, and its line break is a line feed, whatever the platform's.
+        // A <textarea> takes Return. Its line break is a line feed, which AvonicTextarea makes of whatever the text box types.
         AcceptsReturnProperty.OverrideDefaultValue<TextareaNativeInput>(true);
-        NewLineProperty.OverrideDefaultValue<TextareaNativeInput>("\n");
     }
 
     public TextareaNativeInput()
@@ -152,6 +151,5 @@ public sealed class TextareaNativeInput : TextBox
 
         _xAdvance = layout.WidthIncludingTrailingWhitespace;
         _normalLineHeight.Set(_normal);
-        InvalidateMeasure();
     }
 }
