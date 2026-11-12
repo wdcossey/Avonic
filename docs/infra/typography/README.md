@@ -8,7 +8,9 @@ Ionic's `css/typography.css`: sizes, weight, margins and line height for `h1` to
 
 ## Using it
 
-Merge it into the app's resources, before or after `AvonicTheme`, which is in its styles:
+Merge it into the app's `Resources`, not its `Styles`, at startup. Where `AvonicTheme` is in the styles doesn't matter: the app's
+resources are looked up first. In `Application.Styles` the file's keys would lose to `AvonicTheme`'s own, and a label's headings
+would keep their line height without it:
 
 ```xml
 <Application.Resources>
@@ -69,7 +71,12 @@ didn't change.
 
 - **Vertical margins don't collapse** in Avalonia: two headings in a `StackPanel` are 10 + 18 apart, where CSS gives 18.
 - **An app's own `ControlTheme` for `TextBlock`** and this file replace each other: the nearer resource wins. Put an app's rules for headings in a
-  style instead.
+  style instead. Only SimpleTheme has been checked for a `ControlTheme` of its own for `TextBlock` (it has none); FluentTheme
+  hasn't, as no project here references it.
+- **A `SelectableTextBlock`** gets nothing, as its theme is looked up by its own type. Headings are `TextBlock`s.
+- **Merged or removed while the app runs,** it doesn't restyle a `TextBlock` already shown, as Avalonia picks a control's theme
+  when it's attached, while the label's and card's keys follow at once. Merge it at startup, or in the `Resources` of a view
+  before the view is shown.
 - **A plain `TextBlock` style with no class** loses to the file's `h1`, as CSS's `*` does to `h1`.
 - **Without the file,** a heading outside a host has Avalonia's defaults, not a browser's; in a divider it lacks Chromium's 2 px
   margins; in a wrapping label `h1` and `h2` are normal, where Chromium inherits 1.5.

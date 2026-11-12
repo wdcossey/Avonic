@@ -62,14 +62,13 @@ public class TypographyBudgetTests
     }
 
     [AvaloniaTheory]
-    [MemberData(nameof(StyleBudgetTests.CommonElements), MemberType = typeof(StyleBudgetTests))]
+    [MemberData(nameof(OtherElements))]
     public void Other_Elements_Are_Not_Checked_Against_It(string name)
     {
-        if (name == nameof(TextBlock))
-        {
-            return;
-        }
-
         Assert.Equal((0, 0), Added(() => StyleBudgetTests.Make(name)));
     }
+
+    // StyleBudgetTests.CommonElements without TextBlock.
+    public static TheoryData<string> OtherElements() =>
+        ["Border", "Panel", "StackPanel", "Grid", "DockPanel", "Image", "Button", "ScrollViewer", "ContentPresenter"];
 }

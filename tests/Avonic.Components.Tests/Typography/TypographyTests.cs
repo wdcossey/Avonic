@@ -226,9 +226,10 @@ public class TypographyTests
         Assert.Equal(FontWeight.Normal, outside.FontWeight);
     });
 
-    // The order an app merges things in doesn't matter: a global style beats a ControlTheme either way.
+    // The file in the app's resources and AvonicTheme in its styles: whichever was added last, the label's rules beat the file's, as a
+    // global style beats a ControlTheme, and the file's keys beat the theme's, as the app's resources are looked up before its styles'.
     [AvaloniaFact]
-    public void B3_Before_Or_After_The_Theme_The_Labels_Rules_Win() => WithFile(() =>
+    public void B3_Whichever_Is_Added_Last_The_Label_And_The_File_Share_As_Measured() => WithFile(() =>
     {
         var app = Application.Current!;
         var theme = app.Styles.OfType<Avonic.Themes.AvonicTheme>().Single();
@@ -240,6 +241,7 @@ public class TypographyTests
         Assert.Equal(24, block.FontSize);
         Assert.Equal(FontWeight.Normal, block.FontWeight);
         Assert.Equal(new Thickness(0, 0, 0, 2), block.Margin);
+        Assert.Equal(28.8, block.LineHeight, 6);
     });
 
     // A base theme with its own ControlTheme for TextBlock would be replaced by the file. SimpleTheme has none.

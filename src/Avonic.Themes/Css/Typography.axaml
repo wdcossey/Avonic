@@ -4,7 +4,7 @@
 
     <!--
         Ionic's global typography, from css/typography.css (@ionic/core 8.8.1). Opt-in, as Ionic's file is: AvonicTheme doesn't
-        merge it, so it costs nothing unless an app asks for it. Merge it with the app's resources, before or after AvonicTheme:
+        merge it, so it costs nothing unless an app asks for it. Merge it into the app's resources, not its styles, at startup:
 
             <Application.Resources>
                 <ResourceDictionary>
@@ -14,7 +14,8 @@
                 </ResourceDictionary>
             </Application.Resources>
 
-        or in any control's resources, for what's inside it only. Headings are TextBlocks with the classes h1 to h6.
+        or into any control's resources, before it's shown, for what's inside it only. In the app's styles, AvonicTheme's own keys
+        would win over the two below. Headings are TextBlocks with the classes h1 to h6.
 
         It's a ControlTheme for TextBlock, not global Styles, for two reasons. CSS's h1 is the least specific rule there is, so
         a label's or a card's own rules for headings beat it, and a global Style beats a ControlTheme whatever order they're
