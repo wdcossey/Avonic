@@ -6,4 +6,8 @@
          inside an item only, as in Ionic. -->
     <b:CssUnset x:Key="Avonic.Label.Color" />
 
+    <!-- line-height on h1 and h2 in a label: normal, as without typography.css. Css/Typography.axaml sets it to 1.2, as
+         typography.css's h1 beats what they'd inherit. A factor of their own size. -->
+    <x:Double x:Key="Avonic.Label.HeadingLineHeight">NaN</x:Double>
+
 </ResourceDictionary>

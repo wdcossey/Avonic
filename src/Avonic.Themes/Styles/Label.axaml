@@ -99,17 +99,19 @@
         </Setter>
     </Style>
 
-    <!-- ::slotted(*) h1 etc, with a panel standing for the slot. line-height 1.2 on h1 and h2 is from Ionic's
-         global typography, and it's a factor of the element's own size. It doesn't clip in CSS, and a TextBlock
-         otherwise clips its descenders to it. -->
+    <!-- ::slotted(*) h1 etc, with a panel standing for the slot. line-height on h1 and h2 is
+         Avonic.Label.HeadingLineHeight: normal, or typography.css's 1.2 once an app merges Css/Typography.axaml.
+         It's a factor of the element's own size. It doesn't clip in CSS, and a TextBlock otherwise clips its descenders
+         to it. In an ion-text-wrap label they'd inherit 1.5 without the file, and they're normal: see docs/infra/typography. -->
     <Style Selector="c|AvonicLabel > TextBlock.h1, c|AvonicLabel > :is(Panel) > TextBlock.h1">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight">
-            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+            <MultiBinding Converter="{x:Static b:Css.Em}">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.Label.HeadingLineHeight" />
             </MultiBinding>
         </Setter>
     </Style>
@@ -119,8 +121,9 @@
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight">
-            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+            <MultiBinding Converter="{x:Static b:Css.Em}">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.Label.HeadingLineHeight" />
             </MultiBinding>
         </Setter>
     </Style>

@@ -830,12 +830,12 @@ public class AvonicCardFamilyTests
     // ── Behaviour 26: h1-h6 and p ────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
-    [InlineData("h1", 24, 0, 2, 28.8)]
-    [InlineData("h2", 16, 2, 2, 19.2)]
-    [InlineData("h3", 14, 2, 2, 16.8)]
-    [InlineData("h4", 14, 2, 2, 16.8)]
-    [InlineData("h5", 14, 2, 2, 16.8)]
-    [InlineData("h6", 14, 2, 2, 16.8)]
+    [InlineData("h1", 24, 0, 2, 36)]
+    [InlineData("h2", 16, 2, 2, 24)]
+    [InlineData("h3", 14, 2, 2, 21)]
+    [InlineData("h4", 14, 2, 2, 21)]
+    [InlineData("h5", 14, 2, 2, 21)]
+    [InlineData("h6", 14, 2, 2, 21)]
     [InlineData("p", 14, 0, 2, 21)]
     public void B26_Typography_Directly_And_In_A_Panel(string name, double size, double top, double bottom, double lineHeight) => InstalledTheme.Run(_ =>
     {
@@ -856,12 +856,12 @@ public class AvonicCardFamilyTests
     });
 
     [AvaloniaTheory]
-    [InlineData("h1", 48)]
-    [InlineData("h2", 48)]
-    [InlineData("h3", 48)]
-    [InlineData("h4", 48)]
-    [InlineData("h5", 48)]
-    [InlineData("h6", 48)]
+    [InlineData("h1", 60)]
+    [InlineData("h2", 60)]
+    [InlineData("h3", 60)]
+    [InlineData("h4", 60)]
+    [InlineData("h5", 60)]
+    [InlineData("h6", 60)]
     [InlineData("p", 60)]
     public void B26_Line_Height_Follows_Their_Own_Size(string name, double lineHeight) => InstalledTheme.Run(_ =>
     {

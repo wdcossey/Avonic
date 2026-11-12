@@ -74,7 +74,7 @@ public class StyleBudgetTests
     public static TheoryData<string> CommonElements() =>
         ["TextBlock", "Border", "Panel", "StackPanel", "Grid", "DockPanel", "Image", "Button", "ScrollViewer", "ContentPresenter"];
 
-    private static Control Make(string name) => name switch
+    internal static Control Make(string name) => name switch
     {
         "TextBlock" => new TextBlock(),
         "Border" => new Border(),

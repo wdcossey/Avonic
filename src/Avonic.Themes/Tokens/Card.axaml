@@ -12,6 +12,10 @@
     <b:CssUnset x:Key="Avonic.CardTitle.Color" />
     <b:CssUnset x:Key="Avonic.CardSubtitle.Color" />
 
+    <!-- line-height on h1 to h6 in card content: the 1.5 they inherit without typography.css. Css/Typography.axaml sets it
+         to 1.2, as typography.css's h1 beats what they'd inherit. A factor of their own size. -->
+    <x:Double x:Key="Avonic.CardContent.HeadingLineHeight">1.5</x:Double>
+
     <!-- box-shadow on the host. There's no variable for it. -->
     <BoxShadows x:Key="Avonic.Card.BoxShadow">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
 
