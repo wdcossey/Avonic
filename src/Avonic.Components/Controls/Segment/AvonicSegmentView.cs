@@ -3,11 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -42,7 +44,7 @@ public class AvonicSegmentView : ItemsControl
     private bool _isTouching;
     private bool? _isManualScroll;
     private int _page;
-    private IDisposable? _hitTestOff;
+    private readonly StyleValue<bool> _scrollDisabled = new();
 
     static AvonicSegmentView()
     {
@@ -57,6 +59,8 @@ public class AvonicSegmentView : ItemsControl
         AddHandler(PointerReleasedEvent, (_, e) => { if (e.Pointer.Type == PointerType.Touch) _isTouching = false; }, RoutingStrategies.Tunnel, true);
         AddHandler(PointerCaptureLostEvent, (_, e) => { if (e.Pointer.Type == PointerType.Touch) _isTouching = false; }, RoutingStrategies.Bubble, true);
 
+        // At style priority, as CSS is, bound once, before any style, so that an app's style still wins when it turns off after it.
+        Bind(IsHitTestVisibleProperty, _scrollDisabled, BindingPriority.Style);
     }
 
     public bool SegmentViewSwipeGesture
@@ -192,15 +196,7 @@ public class AvonicSegmentView : ItemsControl
     private void SetManualScroll(bool? value)
     {
         _isManualScroll = value;
-        if (value == false)
-        {
-            _hitTestOff ??= SetValue(IsHitTestVisibleProperty, false, Avalonia.Data.BindingPriority.Style);
-        }
-        else
-        {
-            _hitTestOff?.Dispose();
-            _hitTestOff = null;
-        }
+        _scrollDisabled.SetWhen(value == false, false);
     }
 
     /// <summary>

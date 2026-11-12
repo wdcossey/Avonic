@@ -296,6 +296,20 @@ public class AvonicBadgeTests
         Assert.False(badge.IsEffectivelyVisible);
     });
 
+    // :host(:empty) is the shadow root's rule, and an app's ion-badge { display } beats it, whenever the badge empties. A value
+    // given at style priority when it empties would come after the app's style, and win.
+    [AvaloniaFact]
+    public void B5_An_Apps_Style_Survives_It_Emptying_After_It()
+    {
+        var badge = new AvonicBadge { Content = "1" };
+        using var scene = Scene.Styled(new StackPanel { Children = { badge } }, Scene.AppStyle<AvonicBadge>(Visual.IsVisibleProperty, true));
+
+        badge.Content = "";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(badge.IsVisible);
+    }
+
     [AvaloniaFact]
     public void B5_Empty_In_A_Slot_It_Leaves_No_Margin() => InstalledTheme.Run(_ =>
     {

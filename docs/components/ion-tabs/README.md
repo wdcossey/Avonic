@@ -129,8 +129,9 @@ None.
   `TopLevel.InputPane`, which headless tests can't open, so it would ship untested, as the footer's keyboard rule didn't.
 - **`href`, `download`, `rel`, `target`** aren't declared, as on `AvonicButton`: without a router a link would do nothing.
 - **The `tabButtonLayout` config** isn't on `AvonicConfig`, a shared file: `Layout` defaults to Ionic's fallback, `IconTop`.
-- **A hidden tab** is hidden at style priority, so an app's own `IsVisible` on a tab wins, where Ionic's `display: none` is
-  `!important`.
+- **A hidden tab** is hidden at a style trigger's priority, which beats an app's plain style, as `!important` does. An app's own
+  `IsVisible` on a tab still wins, as every control's behaviour here lets it, and so does its style with a class or a pseudoclass,
+  where Ionic's `display: none !important` beats both.
 - **`Component` with `Content`** keeps the content, logs Ionic's error, and doesn't build the component; Ionic appends both.
 - **An `IonTabsWillChange` handler that throws** stops the switch and the exception leaves `Select`, or the click. In Ionic a
   listener's error goes to `window.onerror` and the switch goes on. Here the switch is undone, so the selection stays whole.

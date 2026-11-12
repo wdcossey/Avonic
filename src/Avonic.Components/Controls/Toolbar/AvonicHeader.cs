@@ -4,6 +4,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Data;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -22,7 +23,7 @@ public class AvonicHeader : ItemsControl
     public static readonly StyledProperty<HeaderCollapse?> CollapseProperty =
         AvaloniaProperty.Register<AvonicHeader, HeaderCollapse?>(nameof(Collapse));
 
-    private IDisposable? _noRole;
+    private readonly StyleValue<AutomationLandmarkType?> _noRole = new();
 
     static AvonicHeader()
     {
@@ -36,6 +37,9 @@ public class AvonicHeader : ItemsControl
     public AvonicHeader()
     {
         PseudoClasses.Set(":collapse-none", true);
+
+        // Bound once, before any style, so that an app's style still wins when collapse turns to condense after it.
+        Bind(AutomationProperties.LandmarkTypeProperty, _noRole, BindingPriority.Style);
     }
 
     public HeaderCollapse? Collapse
@@ -60,8 +64,7 @@ public class AvonicHeader : ItemsControl
 
             // getRoleType: role="none" for a condensed header in md, as its large title is never shown. At style priority,
             // so an app's value wins.
-            _noRole?.Dispose();
-            _noRole = condense ? SetValue(AutomationProperties.LandmarkTypeProperty, null, BindingPriority.Style) : null;
+            _noRole.SetWhen(condense, null);
         }
     }
 }

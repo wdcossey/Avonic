@@ -147,7 +147,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
 
     /// <summary>
     /// <c>align-items: center</c>: the slot's content alignment, at style priority, so that an app's value wins. Once, when it's
-    /// made, so the frame lasts as long as the slot does, however often it's reused.
+    /// made, so the frame lasts as long as the slot does, however often it's reused, and comes before any style, so an app's
+    /// style wins too.
     /// </summary>
     protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
     {
