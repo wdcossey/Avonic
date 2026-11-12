@@ -57,7 +57,7 @@ and a line of 14 px text is 16.4, which Chromium rounds to 16, so such a row is 
 | 15 | Off by default, and live | Match |
 | 16 | Nothing scrolling | Match |
 | 17 | Takes input when stuck | Match |
-| 18 | Drawn above later rows | Match, including from a template. **Known gap:** in a flat virtualising panel, its row is recycled |
+| 18 | Drawn above later rows | Match, including from a template, and in a flat virtualising `AvonicList`, where the list draws it once its row is recycled, under the next divider, after a jump, and with a focused row kept above ([#68](https://github.com/wdcossey/Avonic/issues/68)) |
 | 19 | An app's transform wins | No equivalent: CSS's `position` isn't a transform |
 
 ## Found here, not by the tests

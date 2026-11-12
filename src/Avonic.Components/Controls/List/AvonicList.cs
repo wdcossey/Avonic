@@ -63,6 +63,12 @@ public partial class AvonicList : ItemsControl
         {
             PseudoClasses.Set(":inset", Inset);
             UpdateNextList();
+
+            // A row's check waits for a layout pass, and an app's own margin may not change, so ask for one.
+            if (_awaitingRowIndex)
+            {
+                InvalidateArrange();
+            }
         }
     }
 
@@ -77,11 +83,15 @@ public partial class AvonicList : ItemsControl
         if (_inParent.GetVisualParent() is VirtualizingPanel panelOfRows)
         {
             // The panel is in its owner's template, so the owner is the first items control above it.
-            if (panelOfRows.FindAncestorOfType<ItemsControl>() is { } owner)
+            if (panelOfRows.FindAncestorOfType<ItemsControl>() is { } owner && owner.ItemsPanelRoot == panelOfRows)
             {
                 _rowsOwner = owner;
                 owner.ContainerPrepared += OnRowPrepared;
                 owner.ContainerIndexChanged += OnRowIndexChanged;
+
+                // Until the pass is over, as for a row whose item before isn't realised, so that a run of sections
+                // alike doesn't lay out twice.
+                PseudoClasses.Set(":after-inset", Inset);
             }
         }
         else if (_inParent.GetVisualParent() is Panel panel)
@@ -212,7 +222,6 @@ public partial class AvonicList : ItemsControl
 
         _awaitingRowIndex = true;
         LayoutUpdated += OnRowRealised;
-        InvalidateArrange();
     }
 
     private void OnRowRealised(object? sender, EventArgs e)

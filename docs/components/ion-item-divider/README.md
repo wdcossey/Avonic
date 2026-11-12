@@ -68,7 +68,12 @@ Each has a test in `AvonicItemDividerTests`. See the [plan](PLAN.md#behaviours) 
 
 ## Differences from Ionic
 
-- **Known gap:** in a flat list with a `VirtualizingStackPanel`, a stuck divider's row gets recycled, so it goes. Use a group per section.
+- **In a flat `AvonicList` with a `VirtualizingStackPanel`, the list draws a stuck divider once the panel recycles its row** ([#68](https://github.com/wdcossey/Avonic/issues/68)).
+  It's a second container for the same item, made from the list's `ItemTemplate`, so it looks the same and takes the input, but
+  it's another instance: state an app sets on the divider itself doesn't carry over. Rows the panel never realised, as after a
+  jump, are made from the template once to find the section's divider, and not shown; a `Sticky` set by a style there isn't
+  seen, though one bound to the item is. An item that's a control can't be in two places, so it isn't drawn twice: give the
+  list data and a template. In another `ItemsControl`, a group per section still keeps it.
 - **An app's own `RenderTransform` stops it sticking.** Wrap it to do both.
 - **`h1`–`h6` have no styles here.** Ionic's come from its global typography: see the [plan](PLAN.md#not-in-this-pr) for the numbers.
 

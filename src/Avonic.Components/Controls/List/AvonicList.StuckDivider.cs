@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Templates;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using System.Collections.Specialized;
@@ -23,6 +24,12 @@ public partial class AvonicList
     private readonly HashSet<int> _knownRows = [];
 
     private readonly TranslateTransform _stuckOffset = new();
+    private readonly RectangleGeometry _stuckClip = new();
+    private readonly List<(int Index, double Top)> _realisedDividers = [];
+
+    /// <summary>The last row <see cref="SectionDividerBefore"/> was asked about, or -1, and its answer.</summary>
+    private int _sectionRow = -1;
+    private int _section = -1;
     private bool _watchingStickyRows;
     private ContentPresenter? _stuckDivider;
     private int _stuckIndex = -1;
@@ -64,6 +71,7 @@ public partial class AvonicList
 
         _stickyRows.Clear();
         _knownRows.Clear();
+        _sectionRow = -1;
         RemoveStuckDivider();
     }
 
@@ -90,6 +98,7 @@ public partial class AvonicList
 
         // The copy may be of an item that's gone or moved, so it's made again at the next pass.
         _stuckIndex = -1;
+        _sectionRow = -1;
     }
 
     private void Forget(int from, int count)
@@ -120,11 +129,34 @@ public partial class AvonicList
 
     /// <summary>
     /// The last sticky divider before a row: the section it's in. A row the panel hasn't realised, as after a jump, is
-    /// made from its template to see, once, and not shown, as the DOM has every row.
+    /// made from its template to see, once, and not shown, as the DOM has every row. The last answer is kept, so that
+    /// a scroll looks only at the rows it moved past.
     /// </summary>
     private int SectionDividerBefore(int row)
     {
-        for (var index = row - 1; index >= 0; index--)
+        int section;
+        if (_sectionRow < 0)
+        {
+            section = LastStickyBetween(0, row - 1);
+        }
+        else if (row >= _sectionRow)
+        {
+            section = LastStickyBetween(_sectionRow, row - 1) is var found and >= 0 ? found : _section;
+        }
+        else
+        {
+            // Nothing between the last answer's divider and its row was sticky.
+            section = _section < row ? _section : LastStickyBetween(0, row - 1);
+        }
+
+        _sectionRow = row;
+        _section = section;
+        return section;
+    }
+
+    private int LastStickyBetween(int from, int to)
+    {
+        for (var index = to; index >= from; index--)
         {
             if (_stickyRows.Contains(index))
             {
@@ -136,8 +168,15 @@ public partial class AvonicList
                 continue;
             }
 
+            // Made as the panel would make it, with the item as its data, so that a binding of Sticky is read.
             var item = ItemsView[index];
-            var made = item as Control ?? this.FindDataTemplate(item, ItemTemplate)?.Build(item);
+            var made = item as Control;
+            if (made is null && this.FindDataTemplate(item, ItemTemplate)?.Build(item) is { } built)
+            {
+                built.DataContext = item;
+                made = built;
+            }
+
             if (made is AvonicItemDivider { Sticky: true })
             {
                 _stickyRows.Add(index);
@@ -148,56 +187,90 @@ public partial class AvonicList
         return -1;
     }
 
+    /// <summary>
+    /// An inset list has <c>overflow: hidden</c>, so it's the divider's scrollport, and it never scrolls, as the divider
+    /// measures it.
+    /// </summary>
+    private bool IsInAnInsetList(ScrollViewer scrollViewer)
+    {
+        for (Visual? visual = this; visual is not null && visual != scrollViewer; visual = visual.GetVisualParent())
+        {
+            if (visual is AvonicList { Inset: true })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>A scroll is a change of arrangement, so a layout pass is the one thing that follows every cause.</summary>
     private void OnLayoutUpdatedForStickyRows(object? sender, EventArgs e)
     {
-        if (ItemsPanelRoot is not VirtualizingPanel panel || this.FindAncestorOfType<ScrollViewer>() is not { } scrollViewer)
+        if (ItemsPanelRoot is not VirtualizingPanel panel
+            || this.FindAncestorOfType<ScrollViewer>() is not { } scrollViewer
+            || scrollViewer.TranslatePoint(new Point(0, scrollViewer.Padding.Top), this) is not { } scrollport
+            || IsInAnInsetList(scrollViewer))
         {
             HideStuckDivider();
             return;
         }
 
-        // What's realised now, and the natural top of the first sticky divider in it, which is drawn above the copy.
+        // The first row on screen, and the natural tops of the sticky dividers realised. A row the panel keeps above
+        // the top, as it does a focused one, isn't on screen.
         var first = int.MaxValue;
-        var nextTop = double.PositiveInfinity;
+        _realisedDividers.Clear();
         foreach (var child in panel.Children)
         {
             var index = child.IsVisible ? IndexFromContainer(child) : -1;
-            if (index < 0)
+            if (index < 0 || panel.TranslatePoint(new Point(0, child.Bounds.Top), this) is not { } at)
             {
                 continue;
             }
 
-            first = Math.Min(first, index);
             _knownRows.Add(index);
+            if (at.Y + child.Bounds.Height > scrollport.Y)
+            {
+                first = Math.Min(first, index);
+            }
+
             if (((child as ContentPresenter)?.Child ?? child) is AvonicItemDivider { Sticky: true } divider)
             {
-                _stickyRows.Add(index);
-                var top = child == divider ? child.Bounds.Top : child.Bounds.Top + divider.Bounds.Top;
-                if (panel.TranslatePoint(new Point(0, top), this) is { } natural)
+                _realisedDividers.Add((index, child == divider ? at.Y : at.Y + divider.Bounds.Top));
+                if (_stickyRows.Add(index))
                 {
-                    nextTop = Math.Min(nextTop, natural.Y);
+                    _sectionRow = -1;
                 }
             }
-            else
+            else if (_stickyRows.Remove(index))
             {
-                _stickyRows.Remove(index);
+                _sectionRow = -1;
             }
         }
 
-        // The section's divider is the last sticky one before what's realised. One that's realised sticks by itself.
-        // An item that's a control is its own row, and can be in one place only.
+        // The section's divider is the last sticky one before the first row on screen. One that's realised sticks by
+        // itself. An item that's a control is its own row, and can be in one place only.
         var section = first == int.MaxValue ? -1 : SectionDividerBefore(Math.Min(first, ItemsView.Count));
-        if (section < 0 || ItemsView[section] is Control)
+        if (section < 0 || ItemsView[section] is Control || ContainerFromIndex(section) is { IsVisible: true })
         {
             HideStuckDivider();
             return;
         }
 
-        ShowStuckDivider(section, panel, scrollViewer, nextTop);
+        // A later sticky divider is drawn above it, as it comes later in the DOM.
+        var nextTop = double.PositiveInfinity;
+        foreach (var (index, top) in _realisedDividers)
+        {
+            if (index > section)
+            {
+                nextTop = Math.Min(nextTop, top);
+            }
+        }
+
+        ShowStuckDivider(section, panel, scrollport.Y, nextTop);
     }
 
-    private void ShowStuckDivider(int index, Panel panel, ScrollViewer scrollViewer, double nextTop)
+    private void ShowStuckDivider(int index, Panel panel, double scrollportTop, double nextTop)
     {
         if (_stuckDivider is null)
         {
@@ -222,9 +295,7 @@ public partial class AvonicList
 
         // Only whether there's a divider to show changes the layout. Being covered is drawing, so that a pass doesn't
         // undo the last one's choice.
-        if (_stuckDivider.Child is not AvonicItemDivider divider
-            || scrollViewer.TranslatePoint(new Point(0, scrollViewer.Padding.Top), this) is not { } scrollport
-            || panel.TranslatePoint(default, this) is not { } panelTop)
+        if (_stuckDivider.Child is not AvonicItemDivider divider || panel.TranslatePoint(default, this) is not { } panelTop)
         {
             HideStuckDivider();
             return;
@@ -234,15 +305,25 @@ public partial class AvonicList
 
         // As the divider's own offset: the border box at the top of the scrollport, and never out of its parent.
         var height = divider.Bounds.Height;
-        var top = Math.Min(scrollport.Y, panelTop.Y + panel.Bounds.Height - height - divider.Margin.Bottom);
+        var top = Math.Min(scrollportTop, panelTop.Y + panel.Bounds.Height - height - divider.Margin.Bottom);
         _stuckOffset.Y = top - divider.Margin.Top;
 
-        // A later sticky divider is drawn above it, as it comes later in the DOM, so it shows only above that one.
+        // It shows only above a later sticky divider, which is drawn above it.
         var shown = Math.Clamp(nextTop - top, 0, height);
         _stuckDivider.IsHitTestVisible = shown > 0;
-        _stuckDivider.Clip = shown >= height
-            ? null
-            : new RectangleGeometry(new Rect(0, 0, _stuckDivider.Bounds.Width, divider.Margin.Top + shown));
+        if (shown >= height)
+        {
+            _stuckDivider.Clip = null;
+            return;
+        }
+
+        var clip = new Rect(0, 0, _stuckDivider.Bounds.Width, divider.Margin.Top + shown);
+        if (_stuckClip.Rect != clip)
+        {
+            _stuckClip.Rect = clip;
+        }
+
+        _stuckDivider.Clip = _stuckClip;
     }
 
     private void HideStuckDivider()
@@ -265,21 +346,53 @@ public partial class AvonicList
         }
     }
 
+    // As a templated control lays out its template, but with the copy beside it at its own size, which leaves the
+    // list's size alone. Arranged at a place that doesn't move as the list scrolls: its transform puts it where it sticks.
     protected override Size MeasureOverride(Size availableSize)
     {
-        var size = base.MeasureOverride(availableSize);
-        _stuckDivider?.Measure(new Size(availableSize.Width, double.PositiveInfinity));
+        if (_stuckDivider is null)
+        {
+            return base.MeasureOverride(availableSize);
+        }
+
+        var size = default(Size);
+        foreach (var child in VisualChildren)
+        {
+            if (child is Layoutable layoutable && child != _stuckDivider)
+            {
+                layoutable.Measure(availableSize);
+                size = new Size(
+                    Math.Max(size.Width, layoutable.DesiredSize.Width),
+                    Math.Max(size.Height, layoutable.DesiredSize.Height));
+            }
+        }
+
+        // At the panel's width, at which it's arranged.
+        var width = ItemsPanelRoot is { Bounds.Width: > 0 } panel ? panel.Bounds.Width : availableSize.Width;
+        _stuckDivider.Measure(new Size(width, double.PositiveInfinity));
         return size;
     }
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var size = base.ArrangeOverride(finalSize);
-        if (_stuckDivider is not null && ItemsPanelRoot is { } panel && panel.TranslatePoint(default, this) is { } at)
+        if (_stuckDivider is null)
+        {
+            return base.ArrangeOverride(finalSize);
+        }
+
+        foreach (var child in VisualChildren)
+        {
+            if (child is Layoutable layoutable && child != _stuckDivider)
+            {
+                layoutable.Arrange(new Rect(finalSize));
+            }
+        }
+
+        if (ItemsPanelRoot is { } panel && panel.TranslatePoint(default, this) is { } at)
         {
             _stuckDivider.Arrange(new Rect(at.X, 0, panel.Bounds.Width, _stuckDivider.DesiredSize.Height));
         }
 
-        return size;
+        return finalSize;
     }
 }

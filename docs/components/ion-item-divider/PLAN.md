@@ -108,7 +108,7 @@ and layout rounding makes that 25. The tests found this.
 
 | Difference | Why |
 |---|---|
-| **Known gap:** in a flat list with a `VirtualizingStackPanel`, a stuck divider's row gets recycled, so it goes when it leaves the realised range | The panel owns its children. Ionic has no virtualising panel to compare with. Use a group per section, which keeps it in a realised parent. `D18_Known_Gap_…` records it |
+| In a flat `AvonicList` with a `VirtualizingStackPanel`, the list draws a stuck divider once the panel recycles its row: a second container for the same item, from the list's `ItemTemplate`, at the top of the scrollport, under any later sticky divider, until the row is realised again ([#68](https://github.com/wdcossey/Avonic/issues/68)). Rows never realised are made from the template once, with the item as their data, to find the section's divider. An item that's a control isn't drawn twice | The panel owns its children and recycles a row once its place is above the top, and Avalonia has no way to keep one realised. Ionic has no virtualising panel: CSS keeps it stuck to the end of the list. A style's `Sticky` on an unrealised row isn't seen, as it's made outside the tree. `D18_In_A_Flat_Virtualising_Panel_…` |
 | Two things in a slot don't share it by themselves | One child per slot, as for `ion-item`. A panel stands for the slot |
 | An app's own `RenderTransform` stops it sticking | It's the same property. An app that transforms a sticky divider has to wrap it |
 | The end of its parent includes the parent's padding, if that's a `Border` | CSS stops at the content box. `AvonicList` and `AvonicItemGroup` hold it in a `StackPanel`, which has no padding, so it only shows with a padded `Border` directly around a divider |
