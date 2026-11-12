@@ -60,7 +60,11 @@ public class AvonicItemOptions : ItemsControl
     public AvonicItemOptions()
     {
         UpdateSide();
-        Items.CollectionChanged += (_, _) => FindSliding()?.OptionsChanged();
+        Items.CollectionChanged += (_, _) =>
+        {
+            UpdateOuter();
+            FindSliding()?.OptionsChanged();
+        };
     }
 
     /// <summary>
@@ -142,7 +146,24 @@ public class AvonicItemOptions : ItemsControl
         if (change.Property == SideProperty || change.Property == FlowDirectionProperty)
         {
             UpdateSide();
+            UpdateOuter();
             ItemsPanelRoot?.InvalidateArrange();
+
+            // The sliding item's left and right options follow, whichever of the two changes first in an inherited change.
+            FindSliding()?.OptionsChanged();
+        }
+    }
+
+    /// <summary>
+    /// The option at the outer edge: the first of start options, the last of end options, which is the physical left or right
+    /// one in either direction, as Avalonia mirrors the row in RTL.
+    /// </summary>
+    private void UpdateOuter()
+    {
+        var options = Items.OfType<AvonicItemOption>().ToList();
+        for (var i = 0; i < options.Count; i++)
+        {
+            options[i].SetOuter(Side == ItemOptionsSide.Start && i == 0, Side == ItemOptionsSide.End && i == options.Count - 1);
         }
     }
 

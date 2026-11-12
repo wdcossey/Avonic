@@ -94,6 +94,7 @@ public class AvonicItemSliding : ItemsControl
     private bool _optsDirty = true;
     private AvonicContent? _contentEl;
     private bool _initialContentScrollY = true;
+    private bool _contentScrollDisabled;
     private SlidingState _state = SlidingState.Disabled;
     private bool _closing;
     private AvonicItemOptions? _leftOptions;
@@ -156,8 +157,12 @@ public class AvonicItemSliding : ItemsControl
     /// </summary>
     public void Open(ItemOptionsSide? side = null)
     {
-        var item = _item ??= FindItem();
-        if (item is null)
+        if (_item is null)
+        {
+            SetItem(FindItem());
+        }
+
+        if (_item is null)
         {
             return;
         }
@@ -255,6 +260,9 @@ public class AvonicItemSliding : ItemsControl
         _attached = false;
         _gesture?.Destroy();
         _gesture = null;
+
+        // Destroy() ends a drag with no OnEnd, as Ionic's does, which would leave the content unable to scroll: put it back.
+        RestoreContentScroll();
         SetItem(null);
         _leftOptions = _rightOptions = null;
         if (s_openSlidingItem == this)
@@ -361,6 +369,7 @@ public class AvonicItemSliding : ItemsControl
             // disableContentScrollY
             _initialContentScrollY = content.ScrollY;
             content.SetCurrentValue(AvonicContent.ScrollYProperty, false);
+            _contentScrollDisabled = true;
         }
 
         s_openSlidingItem = this;
@@ -422,10 +431,7 @@ public class AvonicItemSliding : ItemsControl
 
     private void OnEnd(GestureDetail detail)
     {
-        if (_contentEl is { } content)
-        {
-            content.SetCurrentValue(AvonicContent.ScrollYProperty, _initialContentScrollY);
-        }
+        RestoreContentScroll();
 
         var velocity = detail.VelocityX;
         var restingPoint = _openAmount > 0 ? _optsWidthRightSide : -_optsWidthLeftSide;
@@ -449,6 +455,17 @@ public class AvonicItemSliding : ItemsControl
         {
             _leftOptions.FireSwipeEvent();
         }
+    }
+
+    /// <summary><c>resetContentScrollY</c>: the content's <c>ScrollY</c> back to what it was when the drag started.</summary>
+    private void RestoreContentScroll()
+    {
+        if (_contentScrollDisabled && _contentEl is { } content)
+        {
+            content.SetCurrentValue(AvonicContent.ScrollYProperty, _initialContentScrollY);
+        }
+
+        _contentScrollDisabled = false;
     }
 
     /// <summary>Ionic's truth table, solved: close if slow in the close zone, or fast towards closed.</summary>
@@ -515,6 +532,9 @@ public class AvonicItemSliding : ItemsControl
             // The options take no input while the item closes, and the gesture can't interrupt it, which would let two be open.
             _closing = true;
             _gesture?.Enable(false);
+
+            // Enable(false) mid-drag ends the drag, and its OnEnd closes again, re-entrantly, and has set a timer already.
+            _tmr?.Dispose();
             _tmr = AvonicConfig.Schedule(() =>
             {
                 _tmr = null;

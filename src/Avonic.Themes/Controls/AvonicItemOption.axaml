@@ -103,6 +103,35 @@
             <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
         </Style>
 
+        <!-- item-options.md.css: the outermost option is padded by the safe area on its side, padding-left on the left
+             options' first (last in RTL) and padding-right on the right options' last (first in RTL). -->
+        <Style Selector="^:outer-start /template/ Border#PART_Host">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Start">
+                    <Binding Path="Padding.Left" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Top" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Right" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Bottom" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:outer-end /template/ Border#PART_Host">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="End">
+                    <Binding Path="Padding.Left" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Top" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Right" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="Padding.Bottom" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaLeft" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaRight" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
         <!-- .button-native: padding-inline: 0.7em, which is 9.8 at the 14 above -->
         <Style Selector="^ /template/ Border#PART_Native">
             <Setter Property="Padding" Value="9.8,0" />

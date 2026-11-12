@@ -26,7 +26,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Container", typeof(Panel))]
 [TemplatePart("PART_Expander", typeof(ItemOptionExpander))]
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
-[PseudoClasses(":expandable")]
+[PseudoClasses(":expandable", ":outer-start", ":outer-end")]
 public class AvonicItemOption : TemplatedControl
 {
     // ── Properties ───────────────────────────────────────────────────────────────────────────
@@ -259,6 +259,17 @@ public class AvonicItemOption : TemplatedControl
         ExpandsBefore = before;
         _expander?.InvalidateMeasure();
         InvalidateMeasure();
+    }
+
+    /// <summary>
+    /// Whether it's the outermost option of start options (<c>:outer-start</c>) or of end options (<c>:outer-end</c>), which
+    /// <c>item-options.md.css</c> pads by the safe area on that physical side (<c>.item-options-start ion-item-option:first-child</c>
+    /// and its RTL and end forms). The options set it.
+    /// </summary>
+    internal void SetOuter(bool start, bool end)
+    {
+        PseudoClasses.Set(":outer-start", start);
+        PseudoClasses.Set(":outer-end", end);
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)

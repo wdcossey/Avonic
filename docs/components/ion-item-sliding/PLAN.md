@@ -92,6 +92,7 @@ Each becomes a test. Read from `item-sliding.js`, `item-options.js` and `item-op
 | O6 | A click on release, Enter and Space, as a native button: `Click` and `Command` (extensions, as `AvonicFabButton`'s); a ripple in the text colour on press | `<button>`, `ion-activatable`, `ion-ripple-effect` |
 | O7 | Disabled: content at 0.5, no input, no focus | `.item-option-disabled` |
 | O8 | Automation: a button, named by its text | native `<button>` |
+| O9 | The outermost option is padded by the safe area on its physical side: the left options' first (last in RTL) by `--ion-safe-area-left`, the right options' last (first in RTL) by `-right` | `item-options.md.css` |
 
 ## How it maps to Avalonia
 

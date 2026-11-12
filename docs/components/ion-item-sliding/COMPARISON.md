@@ -62,6 +62,7 @@ swipe on `a` from 300 to 40 in 8 px steps, held 700 ms.
 | O2 | Expandable grows over 600 ms | `padding-left` 118 px, then 390; 0 at once on release | `O02` ×2 | match |
 | O3 | Lines in a list | `.list-md-lines-full .item-options-md` | `O03` | match |
 | O4–O8 | Option's look, colour, click, disabled, automation | `item-option.md.css`; a native `<button>` | `O04`–`O08` | match |
+| O9 | Safe area on the outermost option | read from the CSS: the safe areas are 0 in Chromium | `O09` (LTR and RTL) | match |
 
 ## Deliberate differences
 
@@ -70,9 +71,18 @@ swipe on `a` from 300 to 40 in 8 px steps, held 700 ms.
 - **`visibility: hidden` is `IsVisible` false** for the options on the closed side, as they're under the item either way and take no
   input or focus in both.
 - **One open item per process**, not per document.
+- **`IsEnabled = false` disables what's inside too,** the item included, where Ionic's `disabled` only stops the gesture: the
+  mapping rule for `disabled`, and Avalonia's inherited `IsEnabled`.
+- **A sliding item removed mid-drag gives the content its scrolling back.** Ionic's `destroy()` ends the drag with no `onEnd`,
+  which leaves `ion-content`'s `scrollY` off.
+- **One close timer at a time.** A drag back past closed ends the drag, whose `onEnd` closes again from inside the first close;
+  Ionic then has two timers and can only cancel one, so a later `open()` could be hidden by the other.
+- **An options' `Side` or direction changing is followed** by the sliding item. Ionic reads the sides only when the children
+  change, and its own `item-options-start` class doesn't follow `dir` either, so it stays consistent, if stale; here the options'
+  side follows at once, so the sliding item has to as well.
 
 ## Gaps
 
-- The safe-area padding on the outermost option, and `flex-shrink` on options wider than the row; see the README.
+- `flex-shrink` on options wider than the row; see the README.
 - In an inset list, Ionic takes the line off the item in the last sliding item, and keeps it on an item that's last inside its
   sliding item; Avonic's list rule (`Styles/List.axaml`, a shared file) looks at the item's own position. Proposed in the PR.

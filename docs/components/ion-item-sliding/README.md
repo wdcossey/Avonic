@@ -76,7 +76,8 @@ only one has options, the elastic 0.55 past the options' width, the full swipe 3
 `cubic-bezier(0.36, 0.66, 0.04, 1)` ease, the 600 ms close in which the options take no input and the gesture is off, the open
 item taking no taps, one open at a time, the 15 px edge, the methods, the options shown only on the open side and behind the item,
 RTL, `IsEnabled`, an enclosing `AvonicContent`'s `ScrollY` off during a drag, children found again when they change, a vertical
-drag scrolling a scroller, and the expandable option's 600 ms `cubic-bezier(0.65, 0.05, 0.36, 1)` growth.
+drag scrolling a scroller, the expandable option's 600 ms `cubic-bezier(0.65, 0.05, 0.36, 1)` growth, and the outermost option padded by
+`Avonic.SafeAreaLeft` or `Right` on its side.
 
 ## Extensions
 
@@ -97,15 +98,15 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
 
 ## Known gaps
 
-- **The safe area.** Ionic pads the outermost option by `--ion-safe-area-left` or `-right`. Not done: `Avonic.SafeArea*` are 0
-  unless an app fills them, and the padding would need the option to know it's outermost. An app that fills them can set the
-  option's `Padding`.
 - **An option wider than the row doesn't shrink** (`flex-shrink: 1`); options keep their own width and the row overflows inwards.
   Options are short, so this needs a row narrower than its options to show.
 - **One open item per process,** where Ionic's is one per document, as with `GestureController`.
 - **An app's margin on slotted content adds to the slot's,** where Ionic's `::slotted` rule replaces it: the 5 px and 10 px are on
   the slot's presenter, which the option's `ControlTheme` can reach without a rule in `Styles/`.
-- **Ionic's own quirks are kept,** as the port is line for line: `Open()` of the other side leaves the gesture off until the next
-  close (Ionic clears the closing timer that would turn it back on), and in RTL `Open()` with no side opens the physical right
-  when only the left has options.
+- **Ionic's own quirks are kept,** as the port is line for line: `Open()` of the other side, or within 600 ms of a close, cancels
+  the timer that ends the close, so the options take no taps and the gesture stays off until the next close (measured: Chromium
+  kept `item-sliding-closing` after `open('start')` on an item open at the end); and in RTL `Open()` with no side opens the
+  physical right when only the left has options.
+- **`IsEnabled = false` disables the item and the options too,** as Avalonia's `IsEnabled` is inherited: the item takes the
+  disabled look and no clicks. Ionic's `disabled` only turns the gesture off. Kept, as `disabled` maps to `IsEnabled` everywhere.
 - Not tried in a real window, or on a device.

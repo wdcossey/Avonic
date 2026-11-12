@@ -179,6 +179,17 @@ public class AvonicItemSlidingTests
         Assert.Equal(-(EndWidth + 50 * AvonicItemSliding.ElasticFactor), f.ItemX, 3);
     }
 
+    [AvaloniaFact]
+    public void S03_Past_The_Start_Options_Width_It_Is_Elastic_Too()
+    {
+        using var f = Make();
+        f.Finger().Down(100, Y, 0).Move(110, Y, 16).Move(230, Y, 32);
+        f.At(48);
+
+        // 120 raw to the right: −80 − 40 × 0.55
+        Assert.Equal(-StartWidth - 40 * AvonicItemSliding.ElasticFactor, f.Sliding.GetOpenAmount(), 3);
+    }
+
     // ── S4–S7: the release ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -303,6 +314,19 @@ public class AvonicItemSlidingTests
     }
 
     [AvaloniaFact]
+    public void S08_A_Drag_Started_And_Released_While_It_Eases_Leaves_It_Where_It_Was_Going()
+    {
+        using var f = Make();
+        f.Sliding.Open(ItemOptionsSide.End);
+        f.At(116);
+
+        // Captured and lifted with no move in between: the ease was ended at its end value, and there's nowhere else to go.
+        f.Finger().Down(300, Y, 120).Move(290, Y, 136).Up(290, Y, 136);
+        f.At(200);
+        Assert.Equal(-EndWidth, f.ItemX, 3);
+    }
+
+    [AvaloniaFact]
     public void S09_Closing_Keeps_The_Options_Shown_Without_Input_And_The_Gesture_Off_For_600_Ms()
     {
         using var f = Make();
@@ -327,6 +351,21 @@ public class AvonicItemSlidingTests
         f.Finger().Down(300, Y, 2000).Move(290, Y, 2016).Move(200, Y, 2032);
         f.At(2048);
         Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
+    }
+
+    [AvaloniaFact]
+    public void S09_A_Drag_Back_Past_Closed_Ends_The_Drag_And_An_Open_Soon_After_Stays_Open()
+    {
+        using var f = Make(start: false);
+        // Right, with only end options: the amount is held at 0, which closes, and ends the drag (Ionic's gesture.enable(false)).
+        f.Finger().Down(100, Y, 0).Move(110, Y, 16).Move(150, Y, 32);
+        f.At(48);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+
+        f.Sliding.Open(ItemOptionsSide.End);
+        f.At(700);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+        Assert.True(f.End!.IsEffectivelyVisible);
     }
 
     [AvaloniaFact]
@@ -634,6 +673,73 @@ public class AvonicItemSlidingTests
         Assert.Equal(72, f.Sliding.GetOpenAmount(), 3);
     }
 
+    [AvaloniaFact]
+    public void S10_An_Item_Added_After_Attach_And_Opened_By_Code_Takes_No_Tap()
+    {
+        using var clock = new TestClock();
+        var options = new AvonicItemOptions { Items = { Option(70, "Favorite") } };
+        var sliding = new AvonicItemSliding { Items = { options } };
+        using var scene = new Scene(new StackPanel { Children = { sliding } });
+        GestureTests.Render();
+        var late = new AvonicItem { MinHeight = 48, Content = "Late", Button = true };
+        sliding.Items.Insert(0, late);
+        GestureTests.Render();
+        var clicks = 0;
+        late.Click += (_, _) => clicks++;
+
+        // open() finds the item, as it was null.
+        sliding.Open(ItemOptionsSide.End);
+        clock.At(1000);
+        new GestureTests.Finger(scene, clock).Down(100, Y, 1100).Up(100, Y, 1116);
+        Assert.Equal(70, sliding.GetOpenAmount(), 3);
+        Assert.Equal(0, clicks);
+        Assert.True(late.ZIndex > options.ZIndex);
+    }
+
+    [AvaloniaFact]
+    public void S17_Turning_RTL_On_At_Run_Time_Swaps_The_Sides()
+    {
+        using var f = Make(start: false);
+        f.Sliding.FlowDirection = FlowDirection.RightToLeft;
+        GestureTests.Render();
+
+        f.Finger().Down(100, Y, 0).Move(110, Y, 16).Move(150, Y, 32);
+        f.At(48);
+        Assert.Equal(-40, f.Sliding.GetOpenAmount(), 3);
+        Assert.True(f.End!.IsEffectivelyVisible);
+    }
+
+    [AvaloniaFact]
+    public void S18_Disabled_Mid_Drag_The_Drag_Ends_Where_It_Is()
+    {
+        using var f = Make();
+        var t = SlowDrag(f, 0, 300, 190, false, out var finger); // 100 open, slow
+        f.Sliding.IsEnabled = false;
+        f.At(t + 16);
+        // gesture.enable(false) ends the drag: onEnd rests it open, past half.
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+
+        finger.Move(250, Y, t + 32);
+        f.At(t + 48);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+        finger.Up(250, Y, t + 64);
+    }
+
+    [AvaloniaFact]
+    public void S19_A_Sliding_Item_Removed_Mid_Drag_Gives_The_Content_Its_Scrolling_Back()
+    {
+        AvonicContent? content = null;
+        StackPanel? column = null;
+        using var f = Make(wrap: sliding => content = new AvonicContent { Content = column = new StackPanel { Children = { sliding } } });
+
+        f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32);
+        f.At(48);
+        Assert.False(content!.ScrollY);
+        column!.Children.Remove(f.Sliding);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(content.ScrollY);
+    }
+
     // ── Options and option ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -816,6 +922,45 @@ public class AvonicItemSlidingTests
         Assert.Equal(1, clicks);
         Assert.True(option.Focusable);
     }
+
+    [AvaloniaTheory]
+    [InlineData(FlowDirection.LeftToRight)]
+    [InlineData(FlowDirection.RightToLeft)]
+    public void O09_The_Outermost_Option_Is_Padded_By_The_Safe_Area_On_Its_Side(FlowDirection flow) => InstalledTheme.Run(_ =>
+    {
+        static AvonicItemOption Fixed(string tag) => new() { Content = new Border { Width = 40, Height = 10, Tag = tag } };
+        var start = new AvonicItemOptions { Side = ItemOptionsSide.Start, Items = { Fixed("a") } };
+        var end = new AvonicItemOptions { Items = { Fixed("b"), Fixed("c") } };
+        var sliding = new AvonicItemSliding { FlowDirection = flow, Items = { start, new AvonicItem { MinHeight = 48 }, end } };
+        var root = new StackPanel { Children = { sliding } };
+        root.Resources["Avonic.SafeAreaLeft"] = 20.0;
+        root.Resources["Avonic.SafeAreaRight"] = 30.0;
+        using var clock = new TestClock();
+        using var scene = new Scene(root);
+        GestureTests.Render();
+
+        sliding.Open(ItemOptionsSide.End);
+        clock.At(1000);
+        GestureTests.Render();
+        var options = end.Items.OfType<AvonicItemOption>().ToList();
+        // 40 + 0.7em each side; the outer one also has the safe area of the physical side it's on.
+        var rtl = flow == FlowDirection.RightToLeft;
+        Assert.Equal(59.6, options[0].Bounds.Width, 0);
+        Assert.Equal(59.6 + (rtl ? 20 : 30), options[1].Bounds.Width, 0);
+        // The content stays clear of it: the outer edge of the native button is the safe area in from the row's edge.
+        var native = options[1].GetVisualDescendants().OfType<Border>().First(b => b.Name == "PART_Native");
+        var box = new Rect(native.Bounds.Size).TransformToAABB(native.TransformToVisual(scene.Window)!.Value);
+        if (rtl)
+        {
+            Assert.Equal(20, box.X, 0);
+        }
+        else
+        {
+            Assert.Equal(390 - 30, box.Right, 0);
+        }
+
+        Assert.Equal(59.6 + (rtl ? 30 : 20), start.Items.OfType<AvonicItemOption>().Single().DesiredSize.Width, 0);
+    });
 
     [AvaloniaFact]
     public void A_Style_From_The_App_Wins_Over_The_Options_Being_Shown()
