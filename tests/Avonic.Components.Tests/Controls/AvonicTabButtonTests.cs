@@ -195,10 +195,16 @@ public class AvonicTabButtonTests
             {
                 Setters = { new Setter(AvonicTabButton.LayoutProperty, TabButtonLayout.IconEnd) },
             });
+            var compact = Make("d");
+            compact.Classes.Add("compact");
+            compact.Styles.Add(new Style(x => x.OfType<AvonicTabButton>().Class("compact"))
+            {
+                Setters = { new Setter(AvonicTabButton.LayoutProperty, TabButtonLayout.IconHide) },
+            });
             AvonicConfig.TabButtonLayout = TabButtonLayout.IconStart;
             Assert.Equal(TabButtonLayout.IconTop, unset.Layout);
 
-            var bar = Bar(null, unset, own, styled);
+            var bar = Bar(null, unset, own, styled, compact);
             panel.Children.Add(bar);
             Phone(scene);
 
@@ -209,6 +215,12 @@ public class AvonicTabButtonTests
             Assert.Equal(6, label.X - icon.Right, 1);
             Assert.Equal(TabButtonLayout.IconBottom, own.Layout);
             Assert.Equal(TabButtonLayout.IconEnd, styled.Layout);
+
+            // An app's style that already applies at the load wins, and when it stops the config's layout is back.
+            Assert.Equal(TabButtonLayout.IconHide, compact.Layout);
+            compact.Classes.Remove("compact");
+            Settle();
+            Assert.Equal(TabButtonLayout.IconStart, compact.Layout);
 
             // An app's style that applies later wins, and when it stops the config's layout is back.
             unset.Styles.Add(new Style(x => x.OfType<AvonicTabButton>().Class("hide-label"))

@@ -128,6 +128,9 @@ None.
 - **The keyboard.** Ionic hides a bottom bar while the on-screen keyboard is open (`tab-bar-hidden`). Not done: it needs
   `TopLevel.InputPane`, which headless tests can't open, so it would ship untested, as the footer's keyboard rule didn't.
 - **`href`, `download`, `rel`, `target`** aren't declared, as on `AvonicButton`: without a router a link would do nothing.
+- **With `AvonicConfig.TabButtonLayout` set,** clearing an app's own `Layout` gives the config's back, where Ionic's `undefined`
+  after the load renders as icon-top; and a setter in an app's `ControlTheme` loses to it, as CSS can't set the prop. The config's
+  value is at style priority so that every style of the app's wins, and it comes back when the style stops.
 - **A hidden tab** is hidden at a style trigger's priority, which beats an app's plain style, as `!important` does. An app's own
   `IsVisible` on a tab still wins, as every control's behaviour here lets it, and so does its style with a class or a pseudoclass,
   where Ionic's `display: none !important` beats both.

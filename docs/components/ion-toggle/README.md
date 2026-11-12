@@ -105,5 +105,6 @@ None.
 | `required`, `aria-invalid` aren't exposed | Avalonia 12's automation has neither |
 | The track's colour mid-transition | Avalonia's `BrushTransition` doesn't blend as CSS does; the ends match. See [COMPARISON.md](COMPARISON.md#gaps) |
 | An item that met its toggle disabled doesn't forward a padding tap once it's enabled | `AvonicItem`'s, proposed in the PR |
+| With `AvonicConfig.ToggleOnOffLabels` on, clearing an app's own `EnableOnOffLabels` gives the config's `true` back, and a setter in an app's `ControlTheme` loses to it | The config is the toggle's at style priority, as `AvonicSearchbar` takes `BackButtonIcon`. Ionic's `undefined` later shows none, and CSS can't set the prop at all |
 | No haptics on a drag's flip | `hapticSelection` is Capacitor's plugin, which does nothing in a browser |
 | Not tried in a real window, or on a device | Real-window run queued |
