@@ -759,6 +759,48 @@ public class AvonicListTests
     });
 
     [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_An_Item_Before_The_Top_Is_Read_With_Its_Data() => Scrolling(() =>
+    {
+        // Inset bound to the item: the item before the top row, made to be read, has to have it as its data.
+        static bool Inset(int index) => index % 3 != 1;
+        var sections = new ItemsControl
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = Enumerable.Range(0, 200).Select(Inset).ToList(),
+            ItemTemplate = new FuncDataTemplate<bool>(
+                (_, _) => new AvonicList { [!AvonicList.InsetProperty] = new Avalonia.Data.Binding("."), Items = { Item() } }),
+        };
+        var scroller = new ScrollViewer { Content = sections };
+        using var scene = new Scene(scroller, 390, 400);
+        scroller.Offset = new Vector(0, 3000);
+        Run();
+        for (var offset = 3000.0; offset > 0; offset -= 53)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_A_Change_Reaches_The_Next_Row_When_Nothing_Else_Moves() => Scrolling(() =>
+    {
+        // An app's own margin on the list that changes, so the change itself moves nothing.
+        static bool Inset(int _) => true;
+        var (sections, scroller) = VirtualisedSections(Inset);
+        using var scene = new Scene(scroller, 390, 400);
+        var rows = Realised(sections);
+        rows[1].List.Margin = new Thickness(16);
+        Run();
+        Assert.Equal(0, rows[2].List.Margin.Top);
+
+        rows[1].List.Inset = false;
+        Run();
+
+        Assert.Equal(16, rows[2].List.Margin.Top);
+    });
+
+    [AvaloniaFact]
     public void L14_In_A_Virtualising_Panel_An_Inserted_Item_Moves_The_Rows_After_It() => Scrolling(() =>
     {
         var data = new System.Collections.ObjectModel.ObservableCollection<bool> { true, true, true };

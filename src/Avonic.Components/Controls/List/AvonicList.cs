@@ -37,9 +37,6 @@ public partial class AvonicList : ItemsControl
     /// <summary>Waiting for the panel to finish realising this row, so that it has an index.</summary>
     private bool _awaitingRowIndex;
 
-    /// <summary>This row's index when it was last seen, or -1.</summary>
-    private int _rowIndex = -1;
-
     public ListLines? Lines
     {
         get => GetValue(LinesProperty);
@@ -92,7 +89,7 @@ public partial class AvonicList : ItemsControl
         if (_inParent.GetVisualParent() is VirtualizingPanel panelOfRows)
         {
             // The panel is in its owner's template, so the owner is the first items control above it.
-            if (panelOfRows.FindAncestorOfType<ItemsControl>() is { } owner && owner.ItemsPanelRoot == panelOfRows)
+            if (panelOfRows.FindAncestorOfType<ItemsControl>() is { } owner)
             {
                 _rowsOwner = owner;
                 owner.ContainerPrepared += OnRowPrepared;
@@ -130,7 +127,6 @@ public partial class AvonicList : ItemsControl
 
         LayoutUpdated -= OnRowRealised;
         _awaitingRowIndex = false;
-        _rowIndex = -1;
         StopWatchingStickyRows();
 
         _inParent = null;
@@ -143,22 +139,17 @@ public partial class AvonicList : ItemsControl
 
     private void OnSiblingsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateAfterInset();
 
-    private void OnRowPrepared(object? sender, ContainerPreparedEventArgs e) => OnRowChanged(e.Container, e.Index);
+    private void OnRowPrepared(object? sender, ContainerPreparedEventArgs e) => OnRowChanged(e.Container);
 
-    private void OnRowIndexChanged(object? sender, ContainerIndexChangedEventArgs e) => OnRowChanged(e.Container, e.NewIndex);
+    private void OnRowIndexChanged(object? sender, ContainerIndexChangedEventArgs e) => OnRowChanged(e.Container);
 
     /// <summary>
-    /// This row given another item or index, as a template that recycles its content keeps the list, or the row just
-    /// before it realised or moved. The index is the last one seen, so that each row's check is cheap.
+    /// This row given another item, as a template that recycles its content keeps the list, or another index. A row
+    /// realised or moved before it tells it, once its own check is done.
     /// </summary>
-    private void OnRowChanged(Control container, int index)
+    private void OnRowChanged(Control container)
     {
         if (container == _inParent)
-        {
-            _rowIndex = index;
-            ScheduleRowCheck();
-        }
-        else if (index >= 0 && index == _rowIndex - 1)
         {
             ScheduleRowCheck();
         }
@@ -239,7 +230,6 @@ public partial class AvonicList : ItemsControl
         _awaitingRowIndex = false;
 
         var index = RowIndex();
-        _rowIndex = index;
         if (index >= 0)
         {
             UpdateAfterInsetRow(index);
