@@ -1249,6 +1249,24 @@ public class AvonicInputTests
         Assert.True(AutomationProperties.GetIsRequiredForForm(native));
     }
 
+    [AvaloniaFact]
+    public void B26_An_Apps_Not_Required_On_The_Native_Input_Wins_Over_Required()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email", Required = true });
+        using var _ = scene;
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicInput>().Template().OfType<TextBox>())
+        {
+            Setters = { new Setter(AutomationProperties.IsRequiredForFormProperty, false) },
+        });
+        Settle();
+        var native = Native(input);
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = false;
+        input.Required = true;
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+    }
+
     // ── 27: the password toggle ──────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
