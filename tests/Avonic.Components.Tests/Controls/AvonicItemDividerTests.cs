@@ -1049,8 +1049,8 @@ public class AvonicItemDividerTests
             Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
         }
 
-        // A jump far into the section.
-        scroller.Offset = new Vector(0, 15000);
+        // A jump into the section, within 200 rows of its divider.
+        scroller.Offset = new Vector(0, 9000);
         Run();
         Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
         var frame = scene.Window.CaptureRenderedFrame()!;
@@ -1063,14 +1063,19 @@ public class AvonicItemDividerTests
     {
         var (list, scroller, _) = Virtualised();
         using var scene = new Scene(scroller, 390, 200);
-        scroller.Offset = new Vector(0, 15000);
-        Run();
+        // Down the section, so every row is known, as a scroll realises each.
+        for (var offset = 0.0; offset < 23500; offset += 150)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+        }
+
         Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
 
         // Scrolling down to the second: it comes up over the first, and then it's the one stuck.
         string? last = "d1";
         var both = false;
-        for (var offset = 15000.0; offset < 30000 && last == "d1"; offset += 7)
+        for (var offset = 23500.0; offset < 30000 && last == "d1"; offset += 7)
         {
             scroller.Offset = new Vector(0, offset);
             Run();
@@ -1100,13 +1105,19 @@ public class AvonicItemDividerTests
     [AvaloniaFact]
     public void D18_In_A_Flat_Virtualising_Panel_A_Jump_Finds_The_Sections_Own_Divider() => Scrolling(() =>
     {
-        // Straight from the top into the third section, past two dividers the panel never realised.
+        // Straight from the top into the third section, past two dividers the panel never realised, the third within
+        // 200 rows of where it lands.
         var (list, scroller, _) = Virtualised(sections: 4);
         using var scene = new Scene(scroller, 390, 200);
 
-        scroller.Offset = new Vector(0, 60000);
+        scroller.Offset = new Vector(0, 1100 * 48);
         Run();
         Assert.Equal("d3", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Further than that from it: no copy, rather than the wrong section's.
+        scroller.Offset = new Vector(0, 1400 * 48);
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
 
         scroller.Offset = new Vector(0, 30000);
         Run();
@@ -1143,7 +1154,7 @@ public class AvonicItemDividerTests
         var scroller = new ScrollViewer { Content = list };
         using var scene = new Scene(scroller, 390, 200);
 
-        scroller.Offset = new Vector(0, 1200 * 48);
+        scroller.Offset = new Vector(0, 1080 * 48);
         Run();
 
         Assert.Equal("d1000", DividerAt(scene, new Point(100, 5))?.Content);
@@ -1189,7 +1200,14 @@ public class AvonicItemDividerTests
         Assert.Equal("d1", stuck?.Content);
         var height = stuck!.Bounds.Height;
 
-        // The list ends 20 below the top of the scrollport, and 8 of that is its padding.
+        // The list ends 20 below the top of the scrollport, and 8 of that is its padding. Scrolled there, so that
+        // every row between is known.
+        for (var offset = 5000.0; offset < list.Bounds.Height - 20; offset += 150)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+        }
+
         scroller.Offset = new Vector(0, list.Bounds.Height - 20);
         Run();
         Assert.Equal(12 - height, Top(stuck, scroller), 3);
@@ -1339,6 +1357,34 @@ public class AvonicItemDividerTests
         scroller.Offset = default;
         Run();
         Assert.Equal(narrower, list.GetVisualDescendants().OfType<AvonicItemDivider>().First(divider => divider != copy && divider.IsEffectivelyVisible).Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Long_Jump_Makes_Few_Rows() => Scrolling(() =>
+    {
+        // One sticky divider at the top of 10,000 rows: the rows between it and a jump to 9,000 aren't all made to
+        // be read. Known difference: so Ionic's stuck divider isn't drawn, until the rows between are known, rather than
+        // what might be a wrong one.
+        var built = 0;
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = new object[] { "d1" }.Concat(Enumerable.Range(0, 10000).Cast<object>()).ToList(),
+            ItemTemplate = new FuncDataTemplate<object>((value, _) =>
+            {
+                built++;
+                return value is string text ? new AvonicItemDivider { Sticky = true, Content = text } : new AvonicItem { Content = "r" };
+            }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+        built = 0;
+
+        scroller.Offset = new Vector(0, 9000 * 48);
+        Run();
+
+        Assert.True(built < 300, $"{built} rows made");
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
     });
 
     [AvaloniaFact]

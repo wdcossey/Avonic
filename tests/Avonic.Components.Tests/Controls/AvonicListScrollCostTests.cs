@@ -109,6 +109,30 @@ public class AvonicListScrollCostTests
         return counts;
     }
 
+    /// <summary>A jump from the top to row 9,000 of 10,000: the time of that one pass, and the rows the template made.</summary>
+    private static string Jump(string what, int stickyEvery)
+    {
+        var built = 0;
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = Enumerable.Range(0, 10000).Select(index => stickyEvery > 0 && index % stickyEvery == 0 ? (object)("d" + index) : index).ToList(),
+            ItemTemplate = new FuncDataTemplate<object>((value, _) =>
+            {
+                built++;
+                return value is string text ? new AvonicItemDivider { Sticky = true, Content = text } : new AvonicItem { Content = "Row" };
+            }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 844);
+        built = 0;
+        var stopwatch = Stopwatch.StartNew();
+        scroller.Offset = new Vector(0, 9000 * 48);
+        Dispatcher.UIThread.RunJobs();
+        stopwatch.Stop();
+        return $"| {what} | {stopwatch.Elapsed.TotalMilliseconds:0.0} ms | {built} |";
+    }
+
     private static string Row(string what, Counts counts) =>
         $"| {what} | {counts.Passes} | {counts.Prepared} | {counts.Built} | {counts.Measures} | {counts.Arranges} | {counts.StyleChecks} |";
 
@@ -136,6 +160,14 @@ public class AvonicListScrollCostTests
                     : new AvonicItem { Content = "Row" })));
                 rows.Add(Row("1,000 inset lists of one item", Scroll(InsetSections, _ =>
                     new AvonicList { Inset = true, Items = { new AvonicItem { Content = "Row" } } })));
+            });
+            InstalledTheme.Run(_ =>
+            {
+                // Twice each, the first to warm up.
+                Jump("warm-up", 50);
+                rows.Add(Jump("Jump to row 9,000 of 10,000 plain rows", 0));
+                rows.Add(Jump("Jump to row 9,000 of 10,000, a sticky divider every 50", 50));
+                rows.Add(Jump("Jump to row 9,000 of 10,000, one sticky divider at the top", 10000));
             });
             File.WriteAllLines(file, rows);
         }

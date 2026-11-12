@@ -106,6 +106,16 @@ over, as the panel gives it an index only then, and so it's laid out again when 
 realised makes that item from its template to read it: about one a row, scrolling up. A guess before the pass, tried, laid out
 once where the sections are alike, but where they differ the panel recycled and remade the top row for ever.
 
+**A jump** from the top to row 9,000 of 10,000, in the same test: the time of that pass in a Release build, with
+diagnostics on, and the rows the `ItemTemplate` made. A list only looks for a section's divider once a sticky one has been a
+row, so a plain list pays nothing. It makes rows the panel never realised only within 200 rows of the first one realised.
+
+| List | Unbounded | Bounded, now |
+|---|---|---|
+| 10,000 plain rows | 7.9 ms, 37 made | 8.3 ms, 37 made |
+| A sticky divider every 50 | 8.3 ms, 70 made | 8.2 ms, 70 made |
+| One sticky divider, at the top | 40.6 ms, 10,002 made | 17.6 ms, 236 made |
+
 In both, about 3,000 style checks a step are the rows the panel makes as they come in, whatever they are. That's what
 `StyleBudgetTests` keeps down.
 

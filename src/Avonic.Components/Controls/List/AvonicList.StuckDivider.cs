@@ -29,6 +29,7 @@ public partial class AvonicList
     /// <summary>The last row <see cref="SectionDividerBefore"/> was asked about, or -1, and its answer.</summary>
     private int _sectionRow = -1;
     private int _section = -1;
+    private int _firstRealised;
     private bool _watchingStickyRows;
     private ContentPresenter? _stuckDivider;
     private int _stuckIndex = -1;
@@ -133,34 +134,54 @@ public partial class AvonicList
     }
 
     /// <summary>
-    /// The last sticky divider before a row: the section it's in. A row the panel hasn't realised, as after a jump, is
-    /// made from its template to see, once, and not shown, as the DOM has every row. The last answer is kept, so that
-    /// a scroll looks only at the rows it moved past.
+    /// The last sticky divider before a row: the section it's in, or -1. A row the panel hasn't realised, as after a
+    /// jump, is made from its template to see, once, and not shown, as the DOM has every row, up to
+    /// <see cref="LookBack"/> rows back. The last full answer is kept, so that a scroll looks only at the rows it moved
+    /// past.
     /// </summary>
     private int SectionDividerBefore(int row)
     {
-        int section;
+        int found;
         if (_sectionRow < 0)
         {
-            section = LastStickyBetween(0, row - 1);
+            found = LastStickyBetween(0, row - 1);
         }
         else if (row >= _sectionRow)
         {
-            section = LastStickyBetween(_sectionRow, row - 1) is var found and >= 0 ? found : _section;
+            found = LastStickyBetween(_sectionRow, row - 1) is var later and not -1 ? later : _section;
         }
         else
         {
             // Nothing between the last answer's divider and its row was sticky.
-            section = _section < row ? _section : LastStickyBetween(0, row - 1);
+            found = _section < row ? _section : LastStickyBetween(0, row - 1);
+        }
+
+        if (found == Unknown)
+        {
+            // Not a full answer, so the next pass looks again.
+            _sectionRow = -1;
+            return -1;
         }
 
         _sectionRow = row;
-        _section = section;
-        return section;
+        _section = found;
+        return found;
     }
+
+    /// <summary>
+    /// How far back from the first realised row a row the panel never realised is made to be read, so that a jump in a
+    /// long list makes at most this many. Past it, a row not known stops the look: an older divider than one it can't see
+    /// would be the wrong section's, so there's no copy until the rows between are known.
+    /// </summary>
+    private const int LookBack = 200;
+
+    /// <summary>No sticky divider in the rows looked at, and rows before them not looked at: no copy.</summary>
+    private const int Unknown = -2;
 
     private int LastStickyBetween(int from, int to)
     {
+        // Rows known, realised or looked at before, are read wherever they are. Only those near are made.
+        var made = _firstRealised - LookBack;
         for (var index = to; index >= from; index--)
         {
             if (_stickyRows.Contains(index))
@@ -168,21 +189,28 @@ public partial class AvonicList
                 return index;
             }
 
-            if (!_knownRows.Add(index))
+            if (_knownRows.Contains(index))
             {
                 continue;
             }
 
-            // Made as the panel would make it, with the item as its data, so that a binding of Sticky is read.
-            var item = ItemsView[index];
-            var made = item as Control;
-            if (made is null && this.FindDataTemplate(item, ItemTemplate)?.Build(item) is { } built)
+            if (index < made)
             {
-                built.DataContext = item;
-                made = built;
+                return Unknown;
             }
 
-            if (made is AvonicItemDivider { Sticky: true })
+            _knownRows.Add(index);
+
+            // Made as the panel would make it, with the item as its data, so that a binding of Sticky is read.
+            var item = ItemsView[index];
+            var row = item as Control;
+            if (row is null && this.FindDataTemplate(item, ItemTemplate)?.Build(item) is { } built)
+            {
+                built.DataContext = item;
+                row = built;
+            }
+
+            if (row is AvonicItemDivider { Sticky: true })
             {
                 _stickyRows.Add(index);
                 return index;
@@ -253,6 +281,7 @@ public partial class AvonicList
 
         // The section's divider is the last sticky one before the first row realised. One that's realised sticks by
         // itself, and covers the copy. An item that's a control is its own row, and can be in one place only.
+        _firstRealised = first;
         var section = first == int.MaxValue ? -1 : SectionDividerBefore(Math.Min(first, ItemsView.Count));
         if (section < 0 || ItemsView[section] is Control)
         {
