@@ -3,7 +3,7 @@
 Headless tests can't see everything. The first run of this by hand found a control bug that 1,486 tests had missed, so it runs
 on each batch before it's called ready to merge.
 
-**It takes over the cursor and focus for about three minutes, so ask first.** It puts the cursor back and closes only the window
+**It takes over the cursor and focus for about four minutes, so ask first.** It puts the cursor back and closes only the window
 it opened.
 
 ```
@@ -13,7 +13,7 @@ powershell -ExecutionPolicy Bypass -File tools/real-window/drive.ps1
 
 A Debug build also checks the performance line. For a Release build, pass `-Exe`. Frames go to a new folder in the temp folder for
 each run, which it prints, unless you pass `-Out`. `-Only 'ion-picker,ion-re*'` runs only the sections with those titles, to work
-on one; the whole run is the one that counts. It exits 1 if a check fails.
+on one, and fails if none matches; the whole run is the one that counts. It exits 1 if a check fails.
 
 **If something takes the focus, it stops sending input** rather than type into another app, and fails those checks. It stops at
 once if the window doesn't fit on the screen.
@@ -39,7 +39,7 @@ once if the window doesn't fit on the screen.
   - `ion-input-otp`: typing box to box, Backspace, `IonComplete`, a paste and `IonChange` on leaving. The paste puts the
     clipboard's text back afterwards, and is skipped if the clipboard holds anything else.
   - `typography`: frames only.
-- **197 checks** in all, in about three minutes.
+- **198 checks** in all, in about four minutes.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 

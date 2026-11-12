@@ -1,7 +1,7 @@
 # Opens the real sample window and uses it with real mouse and keyboard input, and touch through Windows' touch injection.
 # Checks what it can, saves a frame of everything, and exits 1 if a check fails. See README.md here.
 #
-# It takes over the cursor and focus for about a minute, so ask before running it on someone's PC.
+# It takes over the cursor and focus for about four minutes, so ask before running it on someone's PC.
 # Windows only, and PowerShell 5.1 or later: powershell -ExecutionPolicy Bypass -File tools\real-window\drive.ps1
 param(
     # The sample to run. Build it first. A Debug build also has the performance line to check.
@@ -55,6 +55,25 @@ public static class RealInput {
   public static void TouchUp(int x, int y) { Send(x, y, 0x40000); }
 }
 '@
+Add-Type -ReferencedAssemblies System.Drawing @'
+using System; using System.Drawing; using System.Drawing.Imaging; using System.Runtime.InteropServices;
+public static class Pixels {
+  // How many of every other pixel differ between two regions of one size.
+  public static int Differ(Bitmap a, Bitmap b) {
+    if (a.Width != b.Width || a.Height != b.Height) throw new ArgumentException("The regions differ in size");
+    var r = new Rectangle(0, 0, a.Width, a.Height);
+    var da = a.LockBits(r, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+    var db = b.LockBits(r, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+    try {
+      int n = 0;
+      for (int y = 0; y < a.Height; y += 2)
+        for (int x = 0; x < a.Width; x += 2)
+          if (Marshal.ReadInt32(da.Scan0, y * da.Stride + x * 4) != Marshal.ReadInt32(db.Scan0, y * db.Stride + x * 4)) n++;
+      return n;
+    } finally { a.UnlockBits(da); b.UnlockBits(db); }
+  }
+}
+'@
 [void][RealInput]::SetProcessDPIAware()
 $AE = [System.Windows.Automation.AutomationElement]
 $TS = [System.Windows.Automation.TreeScope]
@@ -63,6 +82,7 @@ $SendKeys = [System.Windows.Forms.SendKeys]
 $cursor = [System.Windows.Forms.Cursor]::Position
 $script:failures = 0
 $script:checks = 0
+$script:sections = 0
 
 function Check($name, [bool]$ok, $detail = '') {
     $script:checks++
@@ -179,7 +199,7 @@ function WheelUp($notches) { Guard; 1..$notches | ForEach-Object { [RealInput]::
 function TouchDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
     # Windows refuses a touch off the screen (87) partway through, so stay inside the window.
     $r = $win.Current.BoundingRectangle
-    if (-not $r.Contains((New-Object Windows.Point ($x + $dx), ($y + $dy)))) { throw "A drag to $($x + $dx), $($y + $dy) would leave the window" }
+    if (-not ($r.Contains((New-Object Windows.Point $x, $y)) -and $r.Contains((New-Object Windows.Point ($x + $dx), ($y + $dy))))) { throw "A drag from $x, $y to $($x + $dx), $($y + $dy) would leave the window" }
     TouchDown $x $y
     for ($i = 1; $i -le $steps; $i++) {
         Start-Sleep -Milliseconds $ms
@@ -206,15 +226,14 @@ function Region($x, $y, $wd, $ht) {
     $bmp = New-Object Drawing.Bitmap ([int]$wd), ([int]$ht)
     $g = [Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen([int]$x, [int]$y, 0, 0, $bmp.Size); $g.Dispose(); $bmp
 }
-# How many of every other pixel differ between two regions of one size. Disposes of both.
-function Changed($a, $b) {
-    $n = 0
-    for ($y = 0; $y -lt $a.Height; $y += 2) { for ($x = 0; $x -lt $a.Width; $x += 2) { if ($a.GetPixel($x, $y).ToArgb() -ne $b.GetPixel($x, $y).ToArgb()) { $n++ } } }
-    $a.Dispose(); $b.Dispose()
-    $n
+# How many of every other pixel differ between a region taken earlier, which the caller keeps, and one taken now, which this
+# disposes of. A disposed bitmap's size reads as nothing in PowerShell, so a reused one would compare nothing and pass.
+function Changed($before, $now) {
+    try { [Pixels]::Differ($before, $now) } finally { $now.Dispose() }
 }
 function Section($title, [scriptblock]$body) {
     if (-not @($Only -split ',' | Where-Object { $title -like $_.Trim() })) { return }
+    $script:sections++
     "== $title"
     try { & $body }
     catch { LetGo; $script:failures++; "  FAIL  the section stopped: $($_.Exception.Message) at line $($_.InvocationInfo.ScriptLineNumber)" }
@@ -794,6 +813,7 @@ try {
         $after = Changed $plain (& $iconArea)
         Shot 'ion-refresher-done'
         Check 'and the spinner goes' ($after -lt 10) "$after sampled pixels differ"
+        $plain.Dispose()
 
         TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 80) 10
         Start-Sleep -Milliseconds 800
@@ -883,7 +903,6 @@ try {
         $cancelX = [int]($e.X + (Px 20))
 
         $plain = & $icon
-        $before = & $icon
         ClickOn $edit
         Start-Sleep -Milliseconds 300
         Check 'a click focuses it' (IsFocused $edit)
@@ -892,7 +911,8 @@ try {
         Check 'focus shows the cancel button in place of the search icon' ((Changed $plain $focused) -gt 10)
         Key 'abc' 700
         Check 'typing sets its value' ((Value $edit) -eq 'abc') (Value $edit)
-        Check 'and IonInput comes once, after the debounce' (((Log)[0] -eq 'ionInput: abc') -and ((Log) -notcontains 'ionInput: a')) ((Log) -join ' | ')
+        $inputs = @(Log | Where-Object { $_ -like 'ionInput:*' })
+        Check 'and IonInput comes once, after the debounce' (($inputs.Count -eq 1) -and ($inputs[0] -eq 'ionInput: abc')) ((Log) -join ' | ')
 
         Click $clearX $iy
         Start-Sleep -Milliseconds 500
@@ -914,7 +934,8 @@ try {
         Check 'and takes the focus away' (-not (IsFocused $edit))
         Away
         Start-Sleep -Milliseconds 300
-        Check 'and the search icon is back' ((Changed $before (& $icon)) -lt 5)
+        Check 'and the search icon is back' ((Changed $plain (& $icon)) -lt 5)
+        $plain.Dispose()
     }
 
     Section 'ion-textarea' {
@@ -939,6 +960,7 @@ try {
         Key 'hello' 400
         Check 'the counter counts' ([bool](FirstText 'The counter shows 5 / 200')) (FirstText 'The counter shows*')
         Check 'and shows it' ((Changed $empty (& $counter)) -gt 5)
+        $empty.Dispose()
 
         $w = $win.Current.BoundingRectangle
         [void][RealInput]::SetCursorPos(($w.X + (Px 6)), ([int]($w.Y + $w.Height / 2))); Start-Sleep -Milliseconds 150
@@ -997,6 +1019,8 @@ try {
         'frames only: look at them'
     }
 
+    # A mistyped -Only would otherwise pass with nothing run.
+    Check 'a section ran' ($script:sections -gt 0) "none is like '$Only'"
     Check 'the app is still running' (-not $p.HasExited)
 }
 finally {

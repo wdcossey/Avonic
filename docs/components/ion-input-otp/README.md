@@ -117,4 +117,4 @@ The per-size, per-shape and outline defaults are `Avonic.InputOtp.Md.SizeSmall`,
 - `autocomplete="one-time-code"`: Avalonia 12 has no content type for it, so a phone won't offer a code from a message by itself.
 - Read-only Backspace and paste edit the value, as Ionic's do: see COMPARISON.md.
 - A paste reads the clipboard asynchronously, so a key typed during a slow read comes first.
-- Tried in a real window with mouse, touch and keys by `tools/real-window`; not on a device.
+- Tried in a real window with keys and the mouse by `tools/real-window`; not on a device.

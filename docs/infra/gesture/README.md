@@ -101,8 +101,8 @@ frame; the others are dropped, not merged.
   browser's `touchcancel` can't arrive in the middle of one.
   `Enable(false)` or `Destroy()` mid-drag leaves the pointer with `Element` until the release, as a touch that went sideways in
   Chromium never scrolls.
-- **A mouse move that doesn't move the mouse is dropped.** Windows sends one when the capture changes, as the gesture's own capture
-  does, and a DOM `mousemove` is for a mouse that moved, so Ionic never sees it. It reached `OnMove` with no delta, which closed
+- **A mouse or pen move that doesn't move it is dropped**, before it holds a scroller. Windows sends a mouse move when the capture
+  changes, as the gesture's own capture does, and a DOM `mousemove` is for a pointer that moved, so Ionic never sees one. It reached `OnMove` with no delta, which closed
   `ion-item-sliding` and turned its gesture off, so no mouse could open one (found by `tools/real-window`). Touch is left as it comes.
 - **A `ScrollViewer` waits** while a gesture on the pointer decides. Avalonia's `ScrollGestureRecognizer` starts at 5 px, before most
   thresholds, with no axis lock, so a gesture's first undecided move sets `Pointer.IsGestureRecognitionSkipped` before any recogniser
