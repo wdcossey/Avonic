@@ -222,8 +222,8 @@ public class AvonicRefresher : ContentControl
     }
 
     /// <summary>
-    /// <c>disconnectedCallback</c>. Destroying the gesture mid-pull calls nothing back, as in Ionic, which leaves its state and its
-    /// pulling frame as they were until the next pull; only the press's own bookkeeping is dropped here.
+    /// <c>disconnectedCallback</c>. A pull under way has already ended by now: leaving the tree takes the pointer capture from the
+    /// scroll element, which is the gesture's <c>touchcancel</c>, and its <c>OnEnd</c>.
     /// </summary>
     private void Disconnect()
     {
@@ -235,7 +235,6 @@ public class AvonicRefresher : ContentControl
         _gesture?.Destroy();
         _gesture = null;
         _deciding = null;
-        _data = null;
         UpdatePseudoClasses();
     }
 

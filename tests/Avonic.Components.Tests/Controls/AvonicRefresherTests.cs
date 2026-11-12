@@ -599,7 +599,11 @@ public class AvonicRefresherTests
         page.Wait(16);
         grid.Children.Add(page.Content);
         page.Wait(16);
-        page.Lift().Wait(16);
+        page.Lift().Wait(200);
+
+        // Leaving the tree took the pointer from the scroll element: the pull ended there, as Ionic's touchcancel ends it
+        Assert.Contains("ionPullEnd:Cancel", page.Names);
+        Assert.False(((IPseudoClasses)page.Refresher.Classes).Contains(":active"));
 
         page.Drag(-100).Lift().Wait(200);
         Assert.True(page.Scroll.Offset.Y > 50, $"scrolled {page.Scroll.Offset.Y}");
