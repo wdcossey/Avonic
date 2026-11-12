@@ -68,7 +68,7 @@ public class AvonicRefresher : ContentControl
     private Point _pressPoint;
 
     private readonly List<IDisposable> _animations = [];
-    private IDisposable? _reset;
+    private readonly List<PendingReset> _resets = [];
 
     static AvonicRefresher()
     {
@@ -190,15 +190,24 @@ public class AvonicRefresher : ContentControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        Disconnect();
+    }
 
-        // disconnectedCallback
+    /// <summary>
+    /// <c>disconnectedCallback</c>. Destroying the gesture mid-pull calls nothing back, as in Ionic, so the pull's own bookkeeping is
+    /// dropped here, and the next pull starts afresh.
+    /// </summary>
+    private void Disconnect()
+    {
         _nativeRefresher = false;
         _scrollEl?.RemoveHandler(PointerMovedEvent, OnScrollPreviewMoved);
+        _scrollEl?.RemoveHandler(PointerReleasedEvent, OnScrollReleased);
         _scrollEl = null;
         _contentEl = null;
         _gesture?.Destroy();
         _gesture = null;
         _deciding = null;
+        _data = null;
         UpdatePseudoClasses();
     }
 
@@ -211,6 +220,13 @@ public class AvonicRefresher : ContentControl
             // disabledChanged
             _gesture?.Enable(IsEnabled);
         }
+        else if (change.Property == ContentProperty && VisualRoot is not null)
+        {
+            // Ionic reads its ion-refresher-content when it connects, and again after each render (checkNativeRefresher). A new
+            // content is looked at again, from the start.
+            Disconnect();
+            Connect();
+        }
     }
 
     /// <summary>
@@ -220,7 +236,7 @@ public class AvonicRefresher : ContentControl
     /// </summary>
     private void Connect()
     {
-        if (this.GetVisualParent() is not ContentPresenter { Name: "PART_Fixed", TemplatedParent: AvonicContent content })
+        if (FindFixedSlot() is not { } content)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(
                 this, "AvonicRefresher must be the FixedContent of an AvonicContent, as ion-refresher needs slot=\"fixed\".");
@@ -239,6 +255,28 @@ public class AvonicRefresher : ContentControl
         {
             SetupNativeRefresher();
         }
+    }
+
+    /// <summary>
+    /// The content whose fixed slot it's in, through any panel there, as an <c>ion-fab</c> can share the slot: the nearest
+    /// <see cref="AvonicContent"/>, if the way up to it is through its <c>PART_Fixed</c>.
+    /// </summary>
+    private AvonicContent? FindFixedSlot()
+    {
+        for (var visual = this.GetVisualParent(); visual is not null; visual = visual.GetVisualParent())
+        {
+            if (visual is ContentPresenter { Name: "PART_Fixed", TemplatedParent: AvonicContent content })
+            {
+                return content;
+            }
+
+            if (visual is AvonicContent)
+            {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -270,6 +308,7 @@ public class AvonicRefresher : ContentControl
 
         // Before the gesture's own handlers, so that an upward drag is handed to the scroller before the gesture decides.
         scrollEl.AddHandler(PointerMovedEvent, OnScrollPreviewMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
+        scrollEl.AddHandler(PointerReleasedEvent, OnScrollReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
 
         _gesture = Gesture.Create(new GestureConfig
         {
@@ -322,6 +361,15 @@ public class AvonicRefresher : ContentControl
             _deciding = null;
             _gesture.Enable(false);
             _gesture.Enable(IsEnabled);
+        }
+    }
+
+    /// <summary>A press the controller refused calls nothing back, so the press is forgotten when it ends.</summary>
+    private void OnScrollReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (ReferenceEquals(e.Pointer, _deciding))
+        {
+            _deciding = null;
         }
     }
 
@@ -389,7 +437,7 @@ public class AvonicRefresher : ContentControl
             animation.PlayBack(_progress, () =>
             {
                 DestroyAnimations();
-                gesture.Enable(true);
+                gesture.Enable(IsEnabled);
                 State = RefresherState.Inactive;
                 RaiseEvent(new RefresherPullEndEventArgs(IonPullEndEvent, RefresherPullEndReason.Cancel));
             });
@@ -409,7 +457,7 @@ public class AvonicRefresher : ContentControl
                 BeginRefresh();
                 animation.Dispose();
                 _animations.Remove(animation);
-                gesture.Enable(true);
+                gesture.Enable(IsEnabled);
             });
         }));
     }
@@ -446,25 +494,49 @@ public class AvonicRefresher : ContentControl
     /// </summary>
     private void ResetNativeRefresher(RefresherState state)
     {
-        var previous = State;
         State = state;
-        _reset?.Dispose();
 
-        // transitionEndAsync(.refresher-refreshing-icon, 200): its transition ends at 200 ms when it scales away from showing
-        var transitions = state == RefresherState.Completing
-                          && previous != RefresherState.Completing
-                          && AvonicRefresherContent.ShowsRefreshing(previous)
-                          && _refresherContent?.RefreshingIconPart is not null;
-        _reset = AvonicConfig.Schedule(() =>
+        // transitionEndAsync(.refresher-refreshing-icon, 200): the icon's transitionend, which ends every wait on it, or the
+        // fallback. The completing state's scale runs one when the icon was showing; the content says when it ends.
+        var now = AvonicConfig.Now();
+        var reset = new PendingReset(state, now + TransitionFallback);
+        _resets.Add(reset);
+        if (_refresherContent?.IconTransitionEndsAt is { } endsAt && endsAt >= now)
         {
-            _reset = null;
-            DestroyAnimations();
-            _progress = 0;
-            State = RefresherState.Inactive;
-            RaiseEvent(new RefresherPullEndEventArgs(
-                IonPullEndEvent,
-                state == RefresherState.Completing ? RefresherPullEndReason.Complete : RefresherPullEndReason.Cancel));
-        }, transitions ? AvonicRefresherContent.IconTransition : TransitionFallback);
+            foreach (var pending in _resets.Where(pending => pending.Due > endsAt).ToArray())
+            {
+                pending.Due = endsAt;
+                pending.Timer?.Dispose();
+                pending.Timer = null;
+            }
+        }
+
+        foreach (var pending in _resets.Where(pending => pending.Timer is null).ToArray())
+        {
+            pending.Timer = AvonicConfig.Schedule(() => FinishReset(pending), pending.Due - now);
+        }
+    }
+
+    /// <summary>The rest of <c>resetNativeRefresher</c>, once the wait is over: inactive, and <c>ionPullEnd</c>.</summary>
+    private void FinishReset(PendingReset reset)
+    {
+        _resets.Remove(reset);
+        DestroyAnimations();
+        _progress = 0;
+        State = RefresherState.Inactive;
+        RaiseEvent(new RefresherPullEndEventArgs(
+            IonPullEndEvent,
+            reset.State == RefresherState.Completing ? RefresherPullEndReason.Complete : RefresherPullEndReason.Cancel));
+    }
+
+    /// <summary>A <c>resetNativeRefresher</c> waiting for the icon's transition.</summary>
+    private sealed class PendingReset(RefresherState state, TimeSpan due)
+    {
+        public RefresherState State { get; } = state;
+
+        public TimeSpan Due { get; set; } = due;
+
+        public IDisposable? Timer { get; set; }
     }
 
     private void AfterTwoFrames(Action action)

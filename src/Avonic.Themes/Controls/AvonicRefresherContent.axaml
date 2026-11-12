@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
                     xmlns:c="using:Avonic.Components.Controls">
 
     <Design.PreviewWith>
@@ -18,14 +19,13 @@
                 <StackPanel VerticalAlignment="Center">
                     <!-- .refresher-pulling: display: none; width: 100% -->
                     <Panel Name="PART_Pulling" IsVisible="False">
-                        <!-- .refresher-pulling-icon, native: margin: 0 auto; border-radius: 100%; padding: 8px; display: flex;
+                        <!-- .refresher-pulling-icon, native: margin: 0 auto; border-radius: 100% (below); padding: 8px; display: flex;
                              the border, background and shadow; transform: translateY(calc(-100% - 10px)), which is 52 for its
                              42 px; transform-origin: center -->
                         <Border Name="PART_PullingIcon"
                                 HorizontalAlignment="Center"
                                 Padding="8"
                                 BorderThickness="1"
-                                CornerRadius="21"
                                 BorderBrush="{DynamicResource Avonic.Refresher.Md.NativeIconBorderBrush}"
                                 Background="{DynamicResource Avonic.Refresher.Md.NativeIconBackgroundBrush}"
                                 BoxShadow="{DynamicResource Avonic.Refresher.Md.NativeIconBoxShadow}"
@@ -66,7 +66,6 @@
                                 HorizontalAlignment="Center"
                                 Padding="8"
                                 BorderThickness="1"
-                                CornerRadius="21"
                                 BorderBrush="{DynamicResource Avonic.Refresher.Md.NativeIconBorderBrush}"
                                 Background="{DynamicResource Avonic.Refresher.Md.NativeIconBackgroundBrush}"
                                 BoxShadow="{DynamicResource Avonic.Refresher.Md.NativeIconBoxShadow}">
@@ -86,6 +85,17 @@
                 </StackPanel>
             </ControlTemplate>
         </Setter>
+
+        <!-- border-radius: 100% -->
+        <Style Selector="^ /template/ Border#PART_PullingIcon, ^ /template/ Border#PART_RefreshingIcon">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.Refresher.Md.NativeIconBorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
 
         <Style Selector="^:pulling-circular /template/ c|RefresherCircle#PART_PullingCircle">
             <Setter Property="IsVisible" Value="True" />

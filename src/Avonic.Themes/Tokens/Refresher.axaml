@@ -8,6 +8,9 @@
     <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBorderBrush" Color="#ECECEC" />
     <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBackgroundBrush" Color="#FFFFFF" />
 
+    <!-- border-radius: 100%, of the icon's own size -->
+    <x:String x:Key="Avonic.Refresher.Md.NativeIconBorderRadius">100%</x:String>
+
     <!-- box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.1). Avalonia's blur isn't CSS's: 6 is 9.4 here, the ratio of 1.56 found for ion-reorder, which puts every pixel sampled below the icon within 3 levels of Chromium's (COMPARISON.md). -->
     <BoxShadows x:Key="Avonic.Refresher.Md.NativeIconBoxShadow">0 1 9.4 0 #1A000000</BoxShadows>
 

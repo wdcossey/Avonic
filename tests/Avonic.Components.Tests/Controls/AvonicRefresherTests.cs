@@ -254,6 +254,9 @@ public class AvonicRefresherTests
         var moved = BoundsInWindow(icon, page.Scene.Window);
         var natural = moved.Translate(new Vector(0, -expected.IconTransform.M32));
         Assert.Equal(new Rect(174, 65, 42, 42), new Rect(natural.X, Math.Round(natural.Y, 9), natural.Width, natural.Height));
+
+        // border-radius: 100% of its 42 px
+        Assert.Equal(new CornerRadius(21), icon.CornerRadius);
     });
 
     [AvaloniaFact]
@@ -573,5 +576,97 @@ public class AvonicRefresherTests
         Assert.True(spinner.IsEffectivelyVisible);
         Assert.Equal(SpinnerName.Dots, spinner.SpinnerName);
         Assert.False(page.Part<RefresherCircle>("PART_RefreshingCircle").IsEffectivelyVisible);
+        Assert.False(page.Part<RefresherCircle>("PART_RefreshingCircle").IsRunning);
+    });
+
+    // ── R1–R5: from the first review ───────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R1_Removed_Mid_Pull_And_Back_An_Upward_Drag_Still_Scrolls()
+    {
+        using var page = new Page();
+        page.Drag(8 + 40).Wait(16);
+        Assert.Contains("ionStart", page.Names);
+        var grid = (Grid)page.Content.Parent!;
+        grid.Children.Remove(page.Content);
+        page.Wait(16);
+        grid.Children.Add(page.Content);
+        page.Wait(16);
+        page.Lift().Wait(16);
+
+        page.Drag(-100).Lift().Wait(200);
+        Assert.True(page.Scroll.Offset.Y > 50, $"scrolled {page.Scroll.Offset.Y}");
+    }
+
+    [AvaloniaFact]
+    public void R2_It_Shares_The_Fixed_Slot_Through_A_Panel()
+    {
+        using var page = new Page();
+        page.Content.FixedContent = null;
+        page.Wait(16);
+        page.Content.FixedContent = new Panel { Children = { page.Refresher, new AvonicFab() } };
+        page.Wait(16);
+        page.Drag(8 + 40).Wait(16);
+        Assert.Contains("ionStart", page.Names);
+    }
+
+    [AvaloniaFact]
+    public void R3_Disabled_In_The_Refresh_Handler_Stays_Disabled()
+    {
+        using var page = new Page();
+        page.Refresher.IonRefresh += (_, _) => page.Refresher.IsEnabled = false;
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        page.LastRefresh!.Complete();
+        page.Wait(400);
+        Assert.Contains("ionPullEnd:Complete", page.Names);
+        var before = page.Log.Count;
+
+        page.Drag(8 + 200).Wait(16).Lift().Wait(400);
+        Assert.Equal(before, page.Log.Count);
+    }
+
+    [AvaloniaFact]
+    public void R4_A_Content_Given_After_It_Is_Attached_Is_Used()
+    {
+        using var page = new Page(refresherContent: new AvonicRefresherContent { RefreshingSpinner = null });
+        Assert.False(((IPseudoClasses)page.Refresher.Classes).Contains(":native"));
+        var content = new AvonicRefresherContent();
+        page.Refresher.Content = content;
+        page.Wait(16);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":native"));
+        page.Drag(8 + 90).Wait(16);
+        Assert.Contains("ionStart", page.Names);
+        Assert.Equal(
+            RefresherPullFrame.At(page.Refresher.GetProgress(), RefresherAnimationType.Translate, page.Refresher.Bounds.Height).CircleDash,
+            content.GetVisualDescendants().OfType<RefresherCircle>().First(c => c.Name == "PART_PullingCircle").Dash);
+    }
+
+    [AvaloniaFact]
+    public void R5_Every_Wait_Ends_At_The_Icons_Transitionend() => InstalledTheme.Run(_ =>
+    {
+        // Two completes: both waits end with the one transition, and each raises ionPullEnd, as each of Ionic's does
+        using (var page = Refreshing())
+        {
+            page.LastRefresh!.Complete();
+            page.Wait(16);
+            page.Refresher.Complete();
+            var first = page.At + 16;
+            page.Wait(16 + 200 + 16);
+            var ends = page.Log.Where(e => e.Name == "ionPullEnd:Complete").ToList();
+            Assert.Equal(2, ends.Count);
+            Assert.All(ends, e => Assert.Equal(first + 200, e.At, 0));
+        }
+
+        // A cancel, then a complete before the cancel's 700 ms: the completing transition ends both
+        using (var page = Refreshing())
+        {
+            page.Refresher.Cancel();
+            page.Wait(32 + 100);
+            page.Refresher.Complete();
+            var completing = page.At + 32;
+            page.Wait(32 + 200);
+            Assert.Equal(["ionPullEnd:Cancel", "ionPullEnd:Complete"], page.Names.Where(n => n.StartsWith("ionPullEnd")));
+            Assert.All(page.Log.Where(e => e.Name.StartsWith("ionPullEnd")), e => Assert.Equal(completing + 200, e.At, 0));
+        }
     });
 }

@@ -123,8 +123,11 @@ public class AvonicRefresherContent : TemplatedControl
     /// <summary>Whether the refresher can use md's native refresher: a pulling spinner and a refreshing spinner (<c>shouldUseNativeRefresher</c>).</summary>
     internal bool HasSpinners => PullingIcon is not null && RefreshingSpinner is not null;
 
-    /// <summary>The refreshing icon, which <see cref="AvonicRefresher"/> waits for, as Ionic's <c>transitionEndAsync</c> does.</summary>
-    internal Control? RefreshingIconPart => _refreshingIcon;
+    /// <summary>
+    /// When the refreshing icon's running transition ends, on <see cref="AvonicConfig.Now"/>, which <see cref="AvonicRefresher"/> waits
+    /// for as Ionic's <c>transitionEndAsync</c> does; null when none has run.
+    /// </summary>
+    internal TimeSpan? IconTransitionEndsAt { get; private set; }
 
     /// <inheritdoc/>
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -187,6 +190,7 @@ public class AvonicRefresherContent : TemplatedControl
         {
             // The refreshing spinner's circle is the one with animation-delay: -655ms
             PseudoClasses.Set(":refreshing-circular", RefreshingSpinner == SpinnerName.Circular);
+            UpdateRefreshingCircle(_state);
         }
     }
 
@@ -203,7 +207,8 @@ public class AvonicRefresherContent : TemplatedControl
             return;
         }
 
-        if (!ShowsRefreshing(_state) || _refresher?.IsNative != true)
+        // Only the circle that shows runs: another spinner is an AvonicSpinner
+        if (!ShowsRefreshing(_state) || _refresher?.IsNative != true || RefreshingSpinner != SpinnerName.Circular)
         {
             circle.Stop();
         }
@@ -322,6 +327,7 @@ public class AvonicRefresherContent : TemplatedControl
         }
 
         var start = AvonicConfig.Now();
+        IconTransitionEndsAt = start + IconTransition;
         void Step()
         {
             var t = Math.Min(1, (AvonicConfig.Now() - start) / IconTransition);
@@ -336,6 +342,7 @@ public class AvonicRefresherContent : TemplatedControl
 
     private void StopIconScale()
     {
+        IconTransitionEndsAt = null;
         _transitionFrame?.Dispose();
         _transitionFrame = null;
         _iconScale?.Dispose();
