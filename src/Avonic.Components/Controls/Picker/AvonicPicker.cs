@@ -155,6 +155,10 @@ public class AvonicPicker : ItemsControl
         return null;
     }
 
+    /// <summary>The column the press is in, whether on an option or on the column's own parts.</summary>
+    private static AvonicPickerColumn? OwningColumn(object? source) =>
+        (source as Visual)?.GetSelfAndVisualAncestors().OfType<AvonicPickerColumn>().FirstOrDefault();
+
     /// <summary>Ionic's <c>onPointerDown</c>: what the click that follows does to input mode.</summary>
     private void OnPointerDown(object? sender, PointerPressedEventArgs e)
     {
@@ -177,9 +181,10 @@ public class AvonicPicker : ItemsControl
             }
             else
             {
-                // With one numeric column, the column tapped, which Ionic's ev.target is; with more, every numeric column.
+                // With one numeric column, the column tapped, which Ionic's ev.target is (see "Decided" for a tap on an option);
+                // with more, every numeric column.
                 var numeric = Columns.Count(column => column.NumericInput);
-                var columnEl = numeric == 1 ? target : null;
+                var columnEl = numeric == 1 ? OwningColumn(e.Source) : null;
                 _actionOnClick = () => EnterInputMode(columnEl);
             }
 
@@ -424,9 +429,15 @@ public class AvonicPicker : ItemsControl
         }
     }
 
-    /// <summary><c>/^0+(?=[1-9])|0+(?=0$)/</c>: the zeros before a digit, or all but the last of a string of zeros.</summary>
-    private static string TrimLeadingZeros(string text) =>
-        System.Text.RegularExpressions.Regex.Replace(text, "^0+(?=[1-9])|0+(?=0$)", string.Empty);
+    private static readonly System.Text.RegularExpressions.Regex LeadingZeros = new("^0+(?=[1-9])|0+(?=0$)");
+    private static readonly System.Text.RegularExpressions.Regex ZerosAtStart = new("^0+");
+    private static readonly System.Text.RegularExpressions.Regex ZeroAtEnd = new("0$");
+
+    /// <summary>
+    /// <c>/^0+(?=[1-9])|0+(?=0$)/</c>, with no <c>g</c>, so only the first match: the zeros before a digit, or all but the last of a
+    /// string of zeros.
+    /// </summary>
+    private static string TrimLeadingZeros(string text) => LeadingZeros.Replace(text, string.Empty, 1);
 
     /// <summary>
     /// Ionic's <c>searchColumn</c>: the enabled option whose text, without its zeros at the start (or the end), is
@@ -439,8 +450,8 @@ public class AvonicPicker : ItemsControl
             return false;
         }
 
-        var pattern = zerosAtStart ? "^0+" : "0$";
-        string Strip(string text) => System.Text.RegularExpressions.Regex.Replace(text, pattern, string.Empty);
+        var pattern = zerosAtStart ? ZerosAtStart : ZeroAtEnd;
+        string Strip(string text) => pattern.Replace(text, string.Empty, 1);
         value = Strip(value);
         var option = column.Options.FirstOrDefault(o => o.IsEnabled && Strip(OptionText(o)) == value);
         if (option is not null)

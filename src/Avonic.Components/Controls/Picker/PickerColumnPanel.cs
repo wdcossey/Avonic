@@ -27,7 +27,8 @@ public sealed class PickerColumnPanel : Panel, IScrollSnapPointsInfo
     internal const int EmptyRows = 3;
 
     private IReadOnlyList<double> _snapPoints = [];
-    private IReadOnlyList<(double Top, double Bottom)> _snapBoxes = [];
+    private IReadOnlyList<double> _snapTops = [];
+    private IReadOnlyList<double> _snapBottoms = [];
 
     static PickerColumnPanel()
     {
@@ -85,20 +86,24 @@ public sealed class PickerColumnPanel : Panel, IScrollSnapPointsInfo
         var column = this.FindAncestorOfType<AvonicPickerColumn>();
         var columnDisabled = column is { IsEffectivelyEnabled: false };
         var points = new List<double>();
-        var boxes = new List<(double, double)>();
+        var tops = new List<double>();
+        var bottoms = new List<double>();
         foreach (var child in Children)
         {
             if (child is AvonicPickerColumnOption option && child.IsVisible && (columnDisabled || option.IsEnabled))
             {
                 points.Add(child.Bounds.Y + child.Bounds.Height / 2);
-                boxes.Add((child.Bounds.Top, child.Bounds.Bottom));
+                tops.Add(child.Bounds.Top);
+                bottoms.Add(child.Bounds.Bottom);
             }
         }
 
-        if (!points.SequenceEqual(_snapPoints))
+        var changed = !points.SequenceEqual(_snapPoints) || !tops.SequenceEqual(_snapTops);
+        _snapPoints = points;
+        _snapTops = tops;
+        _snapBottoms = bottoms;
+        if (changed)
         {
-            _snapPoints = points;
-            _snapBoxes = boxes;
             VerticalSnapPointsChanged?.Invoke(this, new RoutedEventArgs());
         }
     }
@@ -120,8 +125,8 @@ public sealed class PickerColumnPanel : Panel, IScrollSnapPointsInfo
         return snapPointsAlignment switch
         {
             SnapPointsAlignment.Center => _snapPoints,
-            SnapPointsAlignment.Near => _snapBoxes.Select(b => b.Top).ToList(),
-            _ => _snapBoxes.Select(b => b.Bottom).ToList(),
+            SnapPointsAlignment.Near => _snapTops,
+            _ => _snapBottoms,
         };
     }
 

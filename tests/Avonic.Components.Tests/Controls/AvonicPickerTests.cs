@@ -155,7 +155,7 @@ public class AvonicPickerTests
 
     private sealed record Time(AvonicPicker Picker, AvonicPickerColumn Hour, AvonicPickerColumn Minute, AvonicPickerColumn Other, TextBox Input);
 
-    private static Time ShowTime(TestClock clock, Scene? sceneOut, out Scene scene)
+    private static Time ShowTime(TestClock clock, out Scene scene)
     {
         var hour = Column("1", Hours, numeric: true);
         var minute = Column("00", Minutes, numeric: true);
@@ -172,7 +172,7 @@ public class AvonicPickerTests
     public void P3_A_Tap_In_The_Highlight_Takes_Digits_For_Every_Numeric_Column() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var time = ShowTime(clock, null, out var scene);
+        var time = ShowTime(clock, out var scene);
         using var _scene = scene;
         var changes = new List<object?>();
         time.Hour.IonChange += (_, e) => changes.Add(e.Value);
@@ -204,7 +204,7 @@ public class AvonicPickerTests
     public void P3_A_Tap_Outside_The_Highlight_Leaves_Input_Mode() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var time = ShowTime(clock, null, out var scene);
+        var time = ShowTime(clock, out var scene);
         using var _scene = scene;
         Click(scene, Centre(time.Hour.Scroller!, scene));
         Later(clock, 16);
@@ -222,7 +222,7 @@ public class AvonicPickerTests
     public void P3_Enter_In_The_Input_Leaves_Input_Mode() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var time = ShowTime(clock, null, out var scene);
+        var time = ShowTime(clock, out var scene);
         using var _scene = scene;
         Click(scene, Centre(time.Hour.Scroller!, scene));
         Later(clock, 16);
@@ -240,7 +240,7 @@ public class AvonicPickerTests
     public void P3_A_Column_Focused_By_The_Keyboard_Takes_Digits_For_Itself_And_A_Pause_Starts_Again() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var time = ShowTime(clock, null, out var scene);
+        var time = ShowTime(clock, out var scene);
         using var _scene = scene;
 
         time.Hour.Focus(NavigationMethod.Tab);
@@ -277,7 +277,7 @@ public class AvonicPickerTests
     public void P3_A_Users_Scroll_Leaves_Input_Mode_Only_Once_A_Scroll_Has_Ended_Since_The_Column_Last_Centred_Itself() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
-        var time = ShowTime(clock, null, out var scene);
+        var time = ShowTime(clock, out var scene);
         using var _scene = scene;
         Click(scene, Centre(time.Hour.Scroller!, scene));
         Later(clock, 600);
@@ -308,6 +308,31 @@ public class AvonicPickerTests
         Assert.False(time.Picker.UseInputMode);
         Assert.False(Active(time.Minute));
         Assert.False(time.Input.IsFocused);
+    });
+
+    [AvaloniaFact]
+    public void P3_With_One_Numeric_Column_A_Tap_On_Its_Option_Takes_Digits_For_That_Column() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var minute = Column("00", Minutes, numeric: true);
+        var other = Column("AM", ["AM", "PM"]);
+        var picker = new AvonicPicker { Items = { minute, other }, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(picker);
+        Show(clock);
+
+        Click(scene, Centre(minute.Scroller!, scene));
+        Later(clock, 16);
+        Assert.Same(minute, picker.InputModeColumn);
+        Assert.True(Active(minute));
+
+        // One column's search: "56", then "7", which makes 567, no minute, so the last two, 67, then the last one: 07.
+        foreach (var digit in "567")
+        {
+            scene.Window.KeyTextInput(digit.ToString());
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        Assert.Equal("07", minute.Value);
     });
 
     // ── The compare frame ────────────────────────────────────────────────────────────────────

@@ -58,6 +58,7 @@ disabled option and column at 0.4, the fades, and the prefix and suffix. Avonic'
 | C8 | Keys: 11 → ↓ 12 → ↑ 11 → PgUp 6 → Home 1 → End 12 → PgUp 7 | measured on a desktop | the same; reversed on Android and iOS | match |
 | C9 | A value with no option: kept at load (first option at the centre, none active); set while visible, it becomes the first option's with `ionChange` | `scrollTop` 19; `a` | 19; `a` at the next frame | match |
 | C10 | Focused: the scroller has the colour's base at 0.2 | `rgba(0, 84, 233, 0.2)` | a primary brush at opacity 0.2; none on Android and iOS | match |
+| C3 | `aria-valuetext` while the user scrolls | Ionic 8.8.1 writes it to `assistiveFocusable`, which nothing sets, so nothing changes until the render after the value | the peer's value changes at the render after the value | match |
 | C11 | `setFocus()` | does nothing in 8.8.1: `assistiveFocusable` is never set | focuses the column | deliberate difference: see "Decided" |
 | C12 | An option added later centres the column | from the code | tested | match |
 | C13 | A hidden column doesn't scroll for a value, and centres when shown | from the code | tested | match |

@@ -51,7 +51,6 @@ evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in [CO
 | `setFocus()` | `SetFocus()` | Focuses the column |
 | `prefix`, `suffix` slots | `PrefixContent`, `SuffixContent` (+ `…Template`) | Left and right of the options |
 | default slot | `Items` | Its options |
-| `text-align` on the host | `HorizontalContentAlignment` | Centred; a picker's first column is at the start and its last at the end. The options follow it, as `text-align: inherit` |
 | `numericInput` (internal) | `internal NumericInput` | For `ion-datetime`'s hour and minute |
 
 ### `AvonicPickerColumnOption` (`ion-picker-column-option`)
@@ -117,4 +116,6 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 
 ## Extensions
 
-None.
+- **`AvonicPickerColumn.HorizontalContentAlignment`**: the column's `text-align`, which isn't an Ionic prop but CSS on the host.
+  Centred; a picker's first column is at the start and its last at the end (`picker.md.css`). The options follow it, as
+  `text-align: inherit`. `ion-datetime` sets it on its columns, as Ionic's comment on `.picker-opts` says.
