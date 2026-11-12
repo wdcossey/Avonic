@@ -135,7 +135,9 @@ Not in Ionic's config; each is there because Avalonia doesn't do what the browse
   wheel scrolled in a card modal or a sliding item doesn't move it. A gesture listens to handled presses, as the DOM has no
   "handled", so nothing inside could stop one: a touch or pen press whose source is the marked element, or inside it, now starts
   no gesture whose `Element` is around it. A gesture on the marked element, or inside it, still hears it, and a mouse press isn't
-  stopped, as only `touchstart` is. `AvonicPicker` has it on by default.
+  stopped, as only `touchstart` is. A pen counts as a touch, as Chromium on Android and iOS reports a stylus as touches; on a
+  desktop Chromium a pen is a mouse, which isn't stopped (not measured, and headless input has no pen). `AvonicPicker` has it on
+  by default.
 
 ## Known gaps
 

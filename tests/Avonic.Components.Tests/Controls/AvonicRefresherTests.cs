@@ -607,6 +607,25 @@ public class AvonicRefresherTests
         Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
     });
 
+    [AvaloniaFact]
+    public void B20_From_Refreshing_To_Completing_The_Circle_Carries_On_Even_With_The_Pulling_Icon_Changed() => InstalledTheme.Run(_ =>
+    {
+        // The class list changes at once, so .refresher-refreshing stays shown and its animation runs on; and Ionic sets the delay
+        // once, at setup, so a pulling icon changed in the middle moves nothing
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        page.RefresherContent.PullingIcon = SpinnerName.Lines;
+        page.LastRefresh!.Complete();
+        page.Wait(32);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":completing"));
+        Assert.True(spinner.IsEffectivelyVisible);
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
+        Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+    });
+
     // ── R1–R5: from the first review ───────────────────────────────────────────────────────────
 
     [AvaloniaFact]

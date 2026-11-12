@@ -38,8 +38,9 @@ internal sealed class SmoothScroll(ScrollViewer scroller, Orientation orientatio
             : Math.Max(0, scroller.Extent.Width - scroller.Viewport.Width);
         var target = Math.Clamp(position, 0, max);
 
-        // The same target again, while it's going there, as Ionic's checkButton asks after valueChanged has: it carries on.
-        if (smooth && IsRunning && Math.Abs(target - _to) < 0.5)
+        // The same target again, while it's going there, as Ionic's checkButton asks after valueChanged has: it carries on. Not if
+        // something else has scrolled it since its last frame, which ends this one at the next.
+        if (smooth && IsRunning && Math.Abs(target - _to) < 0.5 && Math.Abs(Current - _last) <= 0.5)
         {
             return;
         }

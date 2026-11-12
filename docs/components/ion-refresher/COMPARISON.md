@@ -66,7 +66,9 @@ Refreshing:
   `animation-delay`. Until #131 it was the refresher's own `RefresherCircle` in a running mode; the capture frames came out the same,
   pixel for pixel. Ionic sets the delay on the host and the first `circle` of the refreshing spinner when both spinners have a
   `circle`, which moves only `circular`'s animation: other refreshing spinners start from 0, as before, and so does `circular`
-  after a pulling spinner of lines, which before #131 started 655 ms in.
+  after a pulling spinner of lines, which before #131 started 655 ms in. The new state's pseudoclass goes on before the old one's
+  goes off, as a class list changes at once, so from refreshing to completing or cancelling the spinner carries on rather than
+  start again, which another refreshing spinner did before #131.
 - **`IsEnabled` is kept after a pull.** Ionic calls `gesture.enable(true)` once a pull has played back or refreshed, whatever
   `disabled` is, so a refresher disabled in its `ionRefresh` handler could be pulled again. Here it's `Enable(IsEnabled)` (R3).
 - **The fixed slot can be shared through a panel**, as `AvonicContent.FixedContent` holds one child, where Ionic's slot holds an

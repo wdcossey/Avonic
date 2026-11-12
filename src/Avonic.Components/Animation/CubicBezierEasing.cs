@@ -12,6 +12,9 @@ public sealed class CubicBezierEasing : Easing
     private const double Epsilon = 1e-7;
     private readonly double _ax, _bx, _cx, _ay, _by, _cy;
 
+    /// <summary>CSS's <c>ease</c>, <c>cubic-bezier(0.25, 0.1, 0.25, 1)</c>: a transition's timing function when it names none.</summary>
+    internal static readonly CubicBezierEasing CssEase = new(0.25, 0.1, 0.25, 1);
+
     /// <exception cref="ArgumentOutOfRangeException">An x outside 0..1, which CSS rejects.</exception>
     public CubicBezierEasing(double x1, double y1, double x2, double y2)
     {

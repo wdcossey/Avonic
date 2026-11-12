@@ -48,7 +48,7 @@ public class AvonicReorderGroup : ItemsControl
     internal static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(300);
 
     /// <summary>Its timing function: <c>ease</c>, the default, <c>cubic-bezier(0.25, 0.1, 0.25, 1)</c>.</summary>
-    internal static readonly CubicBezierEasing TransitionEasing = new(0.25, 0.1, 0.25, 1);
+    internal static readonly CubicBezierEasing TransitionEasing = CubicBezierEasing.CssEase;
 
     /// <summary>Ionic <c>disabled</c>: true hides the handles and turns the drag off. Not <c>IsEnabled</c>, which would disable the items.</summary>
     public static readonly StyledProperty<bool> DisabledProperty =

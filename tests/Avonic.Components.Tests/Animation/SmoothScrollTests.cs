@@ -107,4 +107,30 @@ public class SmoothScrollTests
         Run(clock, start + 1000);
         Assert.Equal(new Vector(0, 20), scroller.Offset);
     }
+
+    [AvaloniaFact]
+    public void The_Same_Target_Again_Carries_On_Unless_Something_Else_Scrolled_It_Since()
+    {
+        using var clock = new TestClock();
+        var scroller = Scroller();
+        using var scene = new Scene(scroller);
+        var smooth = new SmoothScroll(scroller, Orientation.Vertical);
+
+        // Asked again mid-way, it keeps its start and its duration: √400 / 60 s from the first ask
+        var start = clock.Now.TotalMilliseconds;
+        smooth.To(400, smooth: true);
+        Run(clock, start + 80);
+        smooth.To(400, smooth: true);
+        var duration = Math.Sqrt(400) / 60 * 1000;
+        Run(clock, start + 160);
+        Assert.Equal(400 * SmoothScroll.Easing.Ease(160 / duration), scroller.Offset.Y, 3);
+
+        // Scrolled by something else, then asked again before its next frame: a new scroll from there, which gets there
+        scroller.Offset = new Vector(0, 50);
+        var again = clock.Now.TotalMilliseconds;
+        smooth.To(400, smooth: true);
+        Assert.True(smooth.IsRunning);
+        Run(clock, again + Math.Sqrt(350) / 60 * 1000 + 16);
+        Assert.Equal(400, scroller.Offset.Y);
+    }
 }

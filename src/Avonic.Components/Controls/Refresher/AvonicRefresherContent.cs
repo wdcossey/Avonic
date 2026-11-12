@@ -54,7 +54,7 @@ public class AvonicRefresherContent : TemplatedControl
     internal static readonly TimeSpan IconTransition = TimeSpan.FromMilliseconds(200);
 
     /// <summary>The transition's timing function, CSS's default <c>ease</c>.</summary>
-    private static readonly CubicBezierEasing Ease = new(0.25, 0.1, 0.25, 1);
+    private static readonly CubicBezierEasing Ease = CubicBezierEasing.CssEase;
 
     static AvonicRefresherContent()
     {
@@ -172,7 +172,6 @@ public class AvonicRefresherContent : TemplatedControl
         _arrow = e.NameScope.Find<Control>("PART_Arrow");
         _refreshingIcon = e.NameScope.Find<Control>("PART_RefreshingIcon");
         _refreshingSpinner = e.NameScope.Find<AvonicSpinner>("PART_RefreshingSpinner");
-        UpdateRefreshingDelay();
     }
 
     /// <inheritdoc/>
@@ -183,11 +182,6 @@ public class AvonicRefresherContent : TemplatedControl
         {
             // mode === 'md' && pullingIcon === 'circular': the circle without its animation, and the arrow
             PseudoClasses.Set(":pulling-circular", PullingIcon == SpinnerName.Circular);
-            UpdateRefreshingDelay();
-        }
-        else if (change.Property == RefreshingSpinnerProperty)
-        {
-            UpdateRefreshingDelay();
         }
     }
 
@@ -200,15 +194,15 @@ public class AvonicRefresherContent : TemplatedControl
     /// <summary>
     /// <c>setupMDNativeRefresher</c>'s <c>animation-delay</c> on the refreshing spinner, set only if both spinners have a
     /// <c>circle</c> (the lines have <c>line</c>s), and which moves only <c>circular</c>'s animation, as the other names animate
-    /// their <c>svg</c>s, not the <c>circle</c> it's set on. Set before the spinner shows: it starts its animation when
-    /// <c>.refresher-refreshing</c> shows, as CSS does after <c>display: none</c>.
+    /// their <c>svg</c>s, not the <c>circle</c> it's set on. Worked out as <c>.refresher-refreshing</c> is about to show, where the
+    /// spinner starts its animation, as CSS does after <c>display: none</c>, and left alone while it shows: Ionic sets it once, so a
+    /// spinner changed mid-refresh doesn't jump.
     /// </summary>
-    private void UpdateRefreshingDelay()
+    private void UpdateRefreshingDelay(RefresherState previous)
     {
-        if (_refreshingSpinner is { } spinner)
+        if (_refreshingSpinner is { } spinner && ShowsRefreshing(_state) && !ShowsRefreshing(previous))
         {
-            spinner.AnimationDelay = _refresher?.IsNative == true
-                                     && RefreshingSpinner == SpinnerName.Circular
+            spinner.AnimationDelay = RefreshingSpinner == SpinnerName.Circular
                                      && PullingIcon is { } pulling
                                      && !SpinnerConfigs.Get(pulling).IsLine
                 ? RefreshingDelay
@@ -224,12 +218,20 @@ public class AvonicRefresherContent : TemplatedControl
         // Ionic's rules for these states that show anything are md's native refresher's; the legacy refresher, which md would use
         // otherwise, isn't here, and it sits behind the content.
         _state = _refresher is { IsNative: true } refresher ? refresher.State : RefresherState.Inactive;
-        UpdateRefreshingDelay();
-        PseudoClasses.Set(":pulling", _state == RefresherState.Pulling);
-        PseudoClasses.Set(":ready", _state == RefresherState.Ready);
-        PseudoClasses.Set(":refreshing", _state == RefresherState.Refreshing);
-        PseudoClasses.Set(":cancelling", _state == RefresherState.Cancelling);
-        PseudoClasses.Set(":completing", _state == RefresherState.Completing);
+        UpdateRefreshingDelay(previous);
+
+        // The new state's class on before the old one's off, as the class list changes at once in a browser: from refreshing to
+        // completing, .refresher-refreshing never has display: none in between, so its spinner carries on rather than start again.
+        SetStateClass(RefresherState.Pulling, ":pulling", on: true);
+        SetStateClass(RefresherState.Ready, ":ready", on: true);
+        SetStateClass(RefresherState.Refreshing, ":refreshing", on: true);
+        SetStateClass(RefresherState.Cancelling, ":cancelling", on: true);
+        SetStateClass(RefresherState.Completing, ":completing", on: true);
+        SetStateClass(RefresherState.Pulling, ":pulling", on: false);
+        SetStateClass(RefresherState.Ready, ":ready", on: false);
+        SetStateClass(RefresherState.Refreshing, ":refreshing", on: false);
+        SetStateClass(RefresherState.Cancelling, ":cancelling", on: false);
+        SetStateClass(RefresherState.Completing, ":completing", on: false);
         PseudoClasses.Set(":native", _refresher?.IsNative == true);
 
         // .refresher-completing .refresher-refreshing-icon { transform: scale(0) }, with transition: 200ms. It transitions only if
@@ -241,6 +243,15 @@ public class AvonicRefresherContent : TemplatedControl
         else if (_state != RefresherState.Completing)
         {
             StopIconScale();
+        }
+    }
+
+    /// <summary>The pseudoclass for <paramref name="state"/>, if it's the one <paramref name="on"/> asks to set.</summary>
+    private void SetStateClass(RefresherState state, string pseudoClass, bool on)
+    {
+        if ((_state == state) == on)
+        {
+            PseudoClasses.Set(pseudoClass, on);
         }
     }
 
