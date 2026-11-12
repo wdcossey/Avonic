@@ -23,7 +23,10 @@
                     </Panel>
                     <Panel Name="PART_Refreshing" IsVisible="False">
                         <Border Name="PART_RefreshingIcon" HorizontalAlignment="Center">
-                            <c:AvonicSpinner Name="PART_RefreshingSpinner" SpinnerName="{TemplateBinding RefreshingSpinner}" />
+                            <Panel>
+                                <c:RefresherCircle Name="PART_RefreshingCircle" IsVisible="False" />
+                                <c:AvonicSpinner Name="PART_RefreshingSpinner" SpinnerName="{TemplateBinding RefreshingSpinner}" />
+                            </Panel>
                         </Border>
                     </Panel>
                 </StackPanel>
@@ -39,6 +42,14 @@
         </Style>
         <Style Selector="^:pulling-circular /template/ Panel#PART_ArrowContainer">
             <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- A circular refreshing spinner is drawn with its animation-delay of -655ms, which AvonicSpinner can't take -->
+        <Style Selector="^:refreshing-circular /template/ c|RefresherCircle#PART_RefreshingCircle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:refreshing-circular /template/ c|AvonicSpinner#PART_RefreshingSpinner">
+            <Setter Property="IsVisible" Value="False" />
         </Style>
 
         <!-- .refresher-pulling ion-refresher-content .refresher-pulling, and ready's and cancelling's -->

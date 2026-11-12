@@ -526,4 +526,38 @@ public class AvonicRefresherTests
         page.Wait(1000);
         Assert.Empty(page.Log);
     }
+
+    [AvaloniaFact]
+    public void B20_The_Refreshing_Circle_Starts_655ms_Into_Its_Animation_When_It_Shows_And_Stops_When_It_Hides() => InstalledTheme.Run(_ =>
+    {
+        using var page = new Page();
+        var circle = page.Part<RefresherCircle>("PART_RefreshingCircle");
+        Assert.False(circle.IsRunning);
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        Assert.Contains("ionRefresh", page.Names);
+        Assert.True(circle.IsEffectivelyVisible);
+        Assert.False(page.Part<AvonicSpinner>("PART_RefreshingSpinner").IsEffectivelyVisible);
+
+        // When it showed, its animation was already 655 ms in: spinner-circular-inner's arc there, not the 1 px it starts with
+        var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
+        Assert.Equal(expected, circle.CurrentArcs());
+        Assert.Equal(TimeSpan.FromMilliseconds(refreshedAt - 655), circle.StartedAt);
+
+        page.LastRefresh!.Complete();
+        page.Wait(400);
+        Assert.False(circle.IsRunning);
+    });
+
+    [AvaloniaFact]
+    public void B21_Another_Refreshing_Spinner_Is_An_AvonicSpinner() => InstalledTheme.Run(_ =>
+    {
+        using var page = new Page(refresherContent: new AvonicRefresherContent { RefreshingSpinner = SpinnerName.Dots });
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        Assert.True(spinner.IsEffectivelyVisible);
+        Assert.Equal(SpinnerName.Dots, spinner.SpinnerName);
+        Assert.False(page.Part<RefresherCircle>("PART_RefreshingCircle").IsEffectivelyVisible);
+    });
 }

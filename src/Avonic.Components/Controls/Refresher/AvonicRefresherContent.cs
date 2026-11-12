@@ -30,7 +30,8 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Refreshing", typeof(Control))]
 [TemplatePart("PART_RefreshingIcon", typeof(Control))]
 [TemplatePart("PART_RefreshingSpinner", typeof(AvonicSpinner))]
-[PseudoClasses(":pulling", ":ready", ":refreshing", ":cancelling", ":completing", ":native", ":pulling-circular")]
+[TemplatePart("PART_RefreshingCircle", typeof(RefresherCircle))]
+[PseudoClasses(":pulling", ":ready", ":refreshing", ":cancelling", ":completing", ":native", ":pulling-circular", ":refreshing-circular")]
 public class AvonicRefresherContent : TemplatedControl
 {
     /// <summary>
@@ -74,6 +75,7 @@ public class AvonicRefresherContent : TemplatedControl
     private Control? _arrowContainer;
     private Control? _arrow;
     private Control? _refreshingIcon;
+    private RefresherCircle? _refreshingCircle;
 
     private readonly List<IDisposable> _animated = [];
     private IDisposable? _snapBack;
@@ -167,6 +169,9 @@ public class AvonicRefresherContent : TemplatedControl
         _arrowContainer = e.NameScope.Find<Control>("PART_ArrowContainer");
         _arrow = e.NameScope.Find<Control>("PART_Arrow");
         _refreshingIcon = e.NameScope.Find<Control>("PART_RefreshingIcon");
+        _refreshingCircle?.Stop();
+        _refreshingCircle = e.NameScope.Find<RefresherCircle>("PART_RefreshingCircle");
+        UpdateRefreshingCircle(RefresherState.Inactive);
     }
 
     /// <inheritdoc/>
@@ -177,6 +182,34 @@ public class AvonicRefresherContent : TemplatedControl
         {
             // mode === 'md' && pullingIcon === 'circular': the circle without its animation, and the arrow
             PseudoClasses.Set(":pulling-circular", PullingIcon == SpinnerName.Circular);
+        }
+        else if (change.Property == RefreshingSpinnerProperty)
+        {
+            // The refreshing spinner's circle is the one with animation-delay: -655ms
+            PseudoClasses.Set(":refreshing-circular", RefreshingSpinner == SpinnerName.Circular);
+        }
+    }
+
+    /// <summary>
+    /// <c>animation-delay: -655ms</c> on the refreshing spinner's circle, which md's native refresher sets so that the arc it
+    /// starts with is about the one the pull left: its animation begins 655 ms in, from when <c>.refresher-refreshing</c> shows.
+    /// </summary>
+    internal static readonly TimeSpan RefreshingDelay = TimeSpan.FromMilliseconds(-655);
+
+    private void UpdateRefreshingCircle(RefresherState previous)
+    {
+        if (_refreshingCircle is not { } circle)
+        {
+            return;
+        }
+
+        if (!ShowsRefreshing(_state) || _refresher?.IsNative != true)
+        {
+            circle.Stop();
+        }
+        else if (!ShowsRefreshing(previous) || !circle.IsRunning)
+        {
+            circle.Run(AvonicConfig.Now() + RefreshingDelay);
         }
     }
 
@@ -192,6 +225,7 @@ public class AvonicRefresherContent : TemplatedControl
         PseudoClasses.Set(":cancelling", _state == RefresherState.Cancelling);
         PseudoClasses.Set(":completing", _state == RefresherState.Completing);
         PseudoClasses.Set(":native", _refresher?.IsNative == true);
+        UpdateRefreshingCircle(previous);
 
         // .refresher-completing .refresher-refreshing-icon { transform: scale(0) }, with transition: 200ms. It transitions only if
         // the icon was showing already: from display: none, there's no style to start from, and it's simply scale(0).
