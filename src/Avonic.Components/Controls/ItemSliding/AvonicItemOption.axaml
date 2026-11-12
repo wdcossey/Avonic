@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-item-option: structure only. The look is in Avonic.Themes. The host's border is its
+         background; the expander adds a full swipe's padding; PART_Native is .button-native, with the ripple under
+         .button-inner, a column of top, the row (start, icon-only, default, end), and bottom. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemOption}" TargetType="c:AvonicItemOption">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Host" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <c:ItemOptionExpander Name="PART_Expander">
+                        <Border Name="PART_Native">
+                            <Panel Background="Transparent">
+                                <c:AvonicRippleEffect Name="PART_Ripple" />
+                                <StackPanel Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ContentPresenter Name="PART_Top" HorizontalAlignment="Center"
+                                                      Content="{TemplateBinding TopContent}"
+                                                      ContentTemplate="{TemplateBinding TopContentTemplate}" />
+                                    <StackPanel Name="PART_Container" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding StartContent}"
+                                                          ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                                        <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding IconOnlyContent}"
+                                                          ContentTemplate="{TemplateBinding IconOnlyContentTemplate}" />
+                                        <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}">
+                                            <ContentPresenter.Content>
+                                                <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                                    <Binding Path="Content" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                    <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                </MultiBinding>
+                                            </ContentPresenter.Content>
+                                        </ContentPresenter>
+                                        <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding EndContent}"
+                                                          ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                                    </StackPanel>
+                                    <ContentPresenter Name="PART_Bottom" HorizontalAlignment="Center"
+                                                      Content="{TemplateBinding BottomContent}"
+                                                      ContentTemplate="{TemplateBinding BottomContentTemplate}" />
+                                </StackPanel>
+                            </Panel>
+                        </Border>
+                    </c:ItemOptionExpander>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-item-option's variables. Unset, the theme falls back to primary and primary contrast, as item-option.md.css's
+         :host does; a value here wins over those, as setting the variable from outside does. -->
+    <b:CssUnset x:Key="Avonic.ItemOption.Background" />
+    <b:CssUnset x:Key="Avonic.ItemOption.Color" />
+
+</ResourceDictionary>

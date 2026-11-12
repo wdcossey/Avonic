@@ -1,0 +1,144 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Orientation="Horizontal" Height="48" Margin="16">
+            <c:AvonicItemOption Content="Favorite" />
+            <c:AvonicItemOption Color="danger" Content="Delete" />
+            <c:AvonicItemOption Color="tertiary">
+                <c:AvonicItemOption.IconOnlyContent>
+                    <c:AvonicIcon IconName="pin" />
+                </c:AvonicItemOption.IconOnlyContent>
+            </c:AvonicItemOption>
+            <c:AvonicItemOption Color="warning" Content="Star">
+                <c:AvonicItemOption.TopContent>
+                    <c:AvonicIcon IconName="star" />
+                </c:AvonicItemOption.TopContent>
+            </c:AvonicItemOption>
+            <c:AvonicItemOption Color="medium" Content="Off" IsEnabled="False">
+                <c:AvonicItemOption.StartContent>
+                    <c:AvonicIcon IconName="trash" />
+                </c:AvonicItemOption.StartContent>
+            </c:AvonicItemOption>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of item-option.md.css, in its order. Its ::slotted margins are on the slots' presenters, which a
+         ControlTheme can reach, and which are hidden while empty, as an empty slot takes no room. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemOption}" TargetType="c:AvonicItemOption">
+        <!-- :host: background: var(background); color: var(color); font-family; font-size: 0.875rem; font-weight: 500;
+             text-transform: uppercase -->
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ItemOption.Background" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ItemOption.Color" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryContrastBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <!-- .button-native: cursor: pointer; outline: none -->
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Host" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <c:ItemOptionExpander Name="PART_Expander">
+                        <Border Name="PART_Native">
+                            <Panel Background="Transparent">
+                                <c:AvonicRippleEffect Name="PART_Ripple" />
+                                <StackPanel Name="PART_Inner" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ContentPresenter Name="PART_Top" HorizontalAlignment="Center"
+                                                      Content="{TemplateBinding TopContent}"
+                                                      ContentTemplate="{TemplateBinding TopContentTemplate}"
+                                                      IsVisible="{TemplateBinding TopContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <StackPanel Name="PART_Container" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ContentPresenter Name="PART_Start" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding StartContent}"
+                                                          ContentTemplate="{TemplateBinding StartContentTemplate}"
+                                                          IsVisible="{TemplateBinding StartContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <ContentPresenter Name="PART_IconOnly" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding IconOnlyContent}"
+                                                          ContentTemplate="{TemplateBinding IconOnlyContentTemplate}"
+                                                          IsVisible="{TemplateBinding IconOnlyContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <ContentPresenter Name="PART_Content" VerticalAlignment="Center"
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                          IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                            <ContentPresenter.Content>
+                                                <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                                    <Binding Path="Content" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                    <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                </MultiBinding>
+                                            </ContentPresenter.Content>
+                                        </ContentPresenter>
+                                        <ContentPresenter Name="PART_End" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding EndContent}"
+                                                          ContentTemplate="{TemplateBinding EndContentTemplate}"
+                                                          IsVisible="{TemplateBinding EndContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    </StackPanel>
+                                    <ContentPresenter Name="PART_Bottom" HorizontalAlignment="Center"
+                                                      Content="{TemplateBinding BottomContent}"
+                                                      ContentTemplate="{TemplateBinding BottomContentTemplate}"
+                                                      IsVisible="{TemplateBinding BottomContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                            </Panel>
+                        </Border>
+                    </c:ItemOptionExpander>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color): the palette's base behind and its contrast in front. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+
+        <!-- .button-native: padding-inline: 0.7em, which is 9.8 at the 14 above -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="Padding" Value="9.8,0" />
+        </Style>
+
+        <!-- ion-ripple-effect's colour is the current colour -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicItemOption].Foreground}" />
+        </Style>
+
+        <!-- ::slotted([slot=start]): margin-inline-end: 5px; ::slotted([slot=end]): margin-inline-start: 5px -->
+        <Style Selector="^ /template/ ContentPresenter#PART_Start">
+            <Setter Property="Margin" Value="0,0,5,0" />
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#PART_End">
+            <Setter Property="Margin" Value="5,0,0,0" />
+        </Style>
+
+        <!-- ::slotted([slot=icon-only]): margin-inline: 10px; font-size: 1.8em -->
+        <Style Selector="^ /template/ ContentPresenter#PART_IconOnly">
+            <Setter Property="Margin" Value="10,0" />
+            <Setter Property="FontSize">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.8">
+                    <Binding Path="$parent[c:AvonicItemOption].FontSize" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.item-option-disabled) .button-native: opacity: 0.5; cursor: default. A disabled control already takes no
+             input. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+        <Style Selector="^:disabled /template/ Border#PART_Native">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
