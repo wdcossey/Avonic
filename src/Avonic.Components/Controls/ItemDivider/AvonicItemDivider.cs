@@ -167,7 +167,7 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
         AvonicList.WatchStickyRow(_inParent);
         FindScrollport();
 
-        // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.
+        // Through the values bound in the constructor, which an app's value or style beats.
         _transform.Set(_stickyOffset);
         _zIndex.Set(StickyZIndex);
         if (_inParent != this)

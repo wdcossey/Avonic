@@ -44,7 +44,7 @@ public class AvonicSegmentView : ItemsControl
     private bool _isTouching;
     private bool? _isManualScroll;
     private int _page;
-    private readonly StyleValue<bool> _hitTestOff = new();
+    private readonly StyleValue<bool> _scrollDisabled = new();
 
     static AvonicSegmentView()
     {
@@ -60,7 +60,7 @@ public class AvonicSegmentView : ItemsControl
         AddHandler(PointerCaptureLostEvent, (_, e) => { if (e.Pointer.Type == PointerType.Touch) _isTouching = false; }, RoutingStrategies.Bubble, true);
 
         // At style priority, as CSS is, bound once, before any style, so that an app's style still wins when it turns off after it.
-        Bind(IsHitTestVisibleProperty, _hitTestOff, BindingPriority.Style);
+        Bind(IsHitTestVisibleProperty, _scrollDisabled, BindingPriority.Style);
     }
 
     public bool SegmentViewSwipeGesture
@@ -196,7 +196,7 @@ public class AvonicSegmentView : ItemsControl
     private void SetManualScroll(bool? value)
     {
         _isManualScroll = value;
-        _hitTestOff.SetWhen(value == false, false);
+        _scrollDisabled.SetWhen(value == false, false);
     }
 
     /// <summary>

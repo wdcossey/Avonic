@@ -44,8 +44,10 @@ public class AvonicTab : ContentControl
 
     public AvonicTab()
     {
-        // Bound once, before any style, so that an app's style still wins when the tab is hidden after it.
-        Bind(IsVisibleProperty, _hidden, BindingPriority.Style);
+        // !important: above an app's plain style, whenever the tab is hidden, as a trigger's priority is above a plain style's.
+        // An app's own IsVisible still wins, as everywhere here, and so does its style with a class or a pseudoclass, which comes
+        // after this. Bound once, so that the answer doesn't depend on when the tab was hidden.
+        Bind(IsVisibleProperty, _hidden, BindingPriority.StyleTrigger);
         UpdateHidden();
         UpdatePageClass();
     }
@@ -149,8 +151,8 @@ public class AvonicTab : ContentControl
     }
 
     /// <summary>
-    /// <c>:host(.tab-hidden) { display: none !important }</c>, at style priority, so that it survives a replaced theme. Hidden, it's
-    /// also out of the automation tree, as <c>aria-hidden</c> takes it out.
+    /// <c>:host(.tab-hidden) { display: none !important }</c>, at a style trigger's priority, so that it survives a replaced theme
+    /// and beats an app's plain style. Hidden, it's also out of the automation tree, as <c>aria-hidden</c> takes it out.
     /// </summary>
     private void UpdateHidden() => _hidden.SetWhen(!_isActive, false);
 

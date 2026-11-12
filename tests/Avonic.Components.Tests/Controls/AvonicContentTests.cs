@@ -557,11 +557,13 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B9_An_Apps_Style_For_The_Alignment_Wins()
     {
+        // Slotted before the window is shown, as from XAML, and after.
+        var early = new AppBlock();
         var stretched = new AppBlock();
         var content = new AvonicContent();
         var made = new AvonicContent { ContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock()) };
         using var scene = Scene.Styled(
-            new StackPanel { Children = { InBox(content), InBox(made) } },
+            new StackPanel { Children = { InBox(new AvonicContent { Content = early }), InBox(content), InBox(made) } },
             new Style(x => x.OfType<AppBlock>())
             {
                 Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Stretch) },
@@ -573,10 +575,11 @@ public class AvonicContentTests
         scene.Window.UpdateLayout();
 
         var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
-        Assert.Equal(VerticalAlignment.Stretch, stretched.VerticalAlignment);
-        Assert.Equal(VerticalAlignment.Stretch, fromTemplate.VerticalAlignment);
-        Assert.Equal(300, stretched.Bounds.Height);
-        Assert.Equal(300, fromTemplate.Bounds.Height);
+        Assert.All(new[] { early, stretched, fromTemplate }, block =>
+        {
+            Assert.Equal(VerticalAlignment.Stretch, block.VerticalAlignment);
+            Assert.Equal(300, block.Bounds.Height);
+        });
     }
 
     [AvaloniaFact]
@@ -2570,8 +2573,11 @@ public class AvonicContentTests
             FixedContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock { Width = 60, Height = 60 }),
         };
         var content = new AvonicContent();
+        // Slotted before the window is shown, as from XAML, and after.
+        var early = new AppBlock { Width = 60, Height = 60 };
+        var earlyContent = new AvonicContent { FixedContent = early };
         using var scene = Scene.Styled(
-            new StackPanel { Children = { InBox(content), InBox(made) } },
+            new StackPanel { Children = { InBox(earlyContent), InBox(content), InBox(made) } },
             new Style(x => x.OfType<AppBlock>())
             {
                 Setters =
@@ -2587,11 +2593,12 @@ public class AvonicContentTests
         scene.Window.UpdateLayout();
 
         var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
-        Assert.All(new[] { slot, fromTemplate }, border =>
+        Assert.All(new[] { early, slot, fromTemplate }, border =>
         {
             Assert.Equal(HorizontalAlignment.Right, border.HorizontalAlignment);
             Assert.Equal(VerticalAlignment.Bottom, border.VerticalAlignment);
         });
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(early, earlyContent));
         Assert.Equal(new Rect(330, 240, 60, 60), Box(slot, content));
         Assert.Equal(new Rect(330, 240, 60, 60), Box(fromTemplate, made));
     }
