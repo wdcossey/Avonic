@@ -333,6 +333,18 @@ public class AvonicTabButtonTests
 
     // ── Interaction ──────────────────────────────────────────────────────────────────────────
 
+    // ion-activatable and ion-focusable are behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void N9_An_Apps_Style_For_Activatable_And_FocusVisible_Wins()
+    {
+        var button = new AvonicTabButton { Tab = "home" };
+        using var scene = Scene.Styled(button, Scene.AppStyle<AvonicTabButton>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicTabButton>(FocusVisible.IsEnabledProperty, false));
+
+        Assert.False(Activatable.GetIsEnabled(button));
+        Assert.False(FocusVisible.GetIsEnabled(button));
+    }
+
     [AvaloniaFact]
     public void N9_It_Is_Activatable_With_An_Unbounded_Ripple_In_The_Selected_Colour() => InstalledTheme.Run(_ =>
     {

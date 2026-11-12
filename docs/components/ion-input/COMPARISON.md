@@ -99,7 +99,8 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
   and 298 at 13, 15, 16, 17, 18.5, 20 and 24 px are tested), and 1 px out at 12, 28 and 32 px (150, 347, 397 against 149, 348,
   398), where Chromium's own advance seems to be whole. That's Chromium on Windows, which takes the `x` glyph as the character;
   Chromium on Android may take the font's average width, which isn't measured. Elsewhere, a container that sizes to its content
-  still gives the input its text's width.
+  still gives the input its text's width. The native input is `width: 100%`, which makes it compressible: with too little room
+  an end slot's input gives way to a start slot's, 127 beside a 199, as in Chromium (#155), where it used to keep its 199.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto).
 - **A slotted label's text is read when it's set**, and when the slot's element is made, not each time its text changes, where

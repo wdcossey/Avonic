@@ -70,6 +70,12 @@ internal static class MinContent
             return Math.Min(control.DesiredSize.Width, Horizontal(text.Margin) + Horizontal(text.Padding) + LongestWord(text));
         }
 
+        // The native <input> and <textarea> are width: 100%, which makes them compressible: a min-content of nothing but their box.
+        if (control is InputNativeInput or TextareaNativeInput)
+        {
+            return OwnBox(control);
+        }
+
         var children = control.GetVisualChildren().OfType<Control>().Where(child => child.IsVisible).ToList();
         if (children.Count == 0)
         {

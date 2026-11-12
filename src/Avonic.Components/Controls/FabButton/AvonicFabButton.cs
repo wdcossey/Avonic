@@ -160,9 +160,9 @@ public class AvonicFabButton : ContentControl
     {
         _native = new NativeButton(this, _ => OnNativeClick(), () => true, UpdateIsEffectivelyEnabled);
 
-        // ion-activatable and ion-focusable, always.
-        Activatable.SetIsEnabled(this, true);
-        FocusVisible.SetIsEnabled(this, true);
+        // ion-activatable and ion-focusable, always. At style priority, here, before any style, so that an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
+        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
 
         // visibility: hidden, for a list's button that isn't shown: no hit test and no focus. The theme gives the look.
         Bind(IsHitTestVisibleProperty, _hidden, BindingPriority.Style);

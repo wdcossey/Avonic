@@ -240,6 +240,21 @@ public class AvonicSegmentTests
         Assert.Equal(["b"], changes);
     }
 
+    // ion-activatable, ion-activatable-instant and ion-focusable are behaviour at style priority, given before any style, so that
+    // an app's plain style wins.
+    [AvaloniaFact]
+    public void S6_An_Apps_Style_For_Activatable_And_FocusVisible_Wins()
+    {
+        var button = new AvonicSegmentButton { Value = "a", Items = { new AvonicLabel { Content = "A" } } };
+        using var scene = Scene.Styled(button, Scene.AppStyle<AvonicSegmentButton>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicSegmentButton>(Activatable.IsInstantProperty, false),
+            Scene.AppStyle<AvonicSegmentButton>(FocusVisible.IsEnabledProperty, false));
+
+        Assert.False(Activatable.GetIsEnabled(button));
+        Assert.False(Activatable.GetIsInstant(button));
+        Assert.False(FocusVisible.GetIsEnabled(button));
+    }
+
     [AvaloniaFact]
     public void S7_A_Press_On_A_Disabled_Button_Does_Nothing()
     {

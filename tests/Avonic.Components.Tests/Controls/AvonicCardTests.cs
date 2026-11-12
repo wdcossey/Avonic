@@ -111,6 +111,21 @@ public class AvonicCardTests
         Assert.Null(plain.Cursor);
     });
 
+    // ion-activatable and the focus ring are behaviour at style priority, bound before any style, so that an app's plain style
+    // wins when button turns on after it.
+    [AvaloniaFact]
+    public void B1_An_Apps_Style_For_Activatable_And_FocusVisible_Survives_Button_Turning_On_After_It()
+    {
+        var card = new AvonicCard { Content = "x", Height = 80 };
+        using var scene = Scene.Styled(card, Scene.AppStyle<AvonicCard>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicCard>(FocusVisible.IsEnabledProperty, false));
+
+        card.Button = true;
+
+        Assert.False(Activatable.GetIsEnabled(card));
+        Assert.False(FocusVisible.GetIsEnabled(card));
+    }
+
     [AvaloniaFact]
     public void B2_Plain_Card_Is_Not_Activatable()
     {

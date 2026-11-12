@@ -33,6 +33,8 @@ internal sealed class LabelledTextField
     private readonly Action _updateAutomation;
     private Control? _wrapper;
     private ContentPresenter? _labelContent;
+    private TextBox? _lateNative;
+    private NativeFieldAutomation? _lateAutomation;
     private bool _autofocused;
 
     /// <param name="host">The input or the textarea.</param>
@@ -114,9 +116,13 @@ internal sealed class LabelledTextField
     /// <summary>
     /// The native field's <c>aria-labelledby</c>: the label, or the slotted label's text, unless the host has an
     /// <c>aria-label</c>, which <c>inheritAriaAttributes</c> moves to the field. <c>aria-describedby</c>: <c>getHintTextID</c>.
+    /// <c>aria-required</c>: <c>required</c> on the native field, to a screen reader; form validation isn't here. All at style
+    /// priority, through <see cref="NativeFieldAutomation"/>, so that an app's style for the field wins.
     /// </summary>
-    public void UpdateAutomation(TextBox native, string? label, object? labelContent, string? helperText, string? errorText)
+    public void UpdateAutomation(TextBox native, string? label, object? labelContent, string? helperText, string? errorText,
+        bool required)
     {
+        var automation = AutomationOf(native);
         var name = AutomationProperties.GetName(_host);
         if (string.IsNullOrEmpty(name))
         {
@@ -128,12 +134,36 @@ internal sealed class LabelledTextField
             };
         }
 
-        native.SetValue(AutomationProperties.NameProperty, name);
+        automation.Name.SetWhen(name is not null, name);
 
         var hint = IsInvalid && !string.IsNullOrEmpty(errorText) ? errorText
             : !string.IsNullOrEmpty(helperText) ? helperText
             : null;
-        native.SetValue(AutomationProperties.HelpTextProperty, hint);
+        automation.HelpText.SetWhen(hint is not null, hint);
+        automation.IsRequiredForForm.Set(required);
+    }
+
+    /// <summary>
+    /// The field's own <see cref="NativeFieldAutomation"/>, bound before its styles. A plain <see cref="TextBox"/> in an app's
+    /// own template has none: it's bound now, after its styles, which then lose to it, and let go when another field takes its
+    /// place.
+    /// </summary>
+    private NativeFieldAutomation AutomationOf(TextBox native)
+    {
+        if (_lateNative != native)
+        {
+            _lateAutomation?.Dispose();
+            _lateAutomation = null;
+            _lateNative = null;
+        }
+
+        if (native is INativeFieldAutomation field)
+        {
+            return field.Automation;
+        }
+
+        _lateNative = native;
+        return _lateAutomation ??= new NativeFieldAutomation(native);
     }
 
     /// <summary><c>renderCounter</c> and <c>getCounterText</c>: null when there's no counter.</summary>

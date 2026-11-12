@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Logging;
 using Avalonia.LogicalTree;
@@ -80,10 +81,11 @@ public class AvonicSegmentButton : ItemsControl
         // A default that any value set later wins over, from a style too, as an attribute wins over Ionic's field initialiser.
         SetCurrentValue(ValueProperty, "ion-sb-" + s_ids++);
 
-        // ion-activatable, ion-activatable-instant and ion-focusable, always.
-        Activatable.SetIsEnabled(this, true);
-        Activatable.SetIsInstant(this, true);
-        FocusVisible.SetIsEnabled(this, true);
+        // ion-activatable, ion-activatable-instant and ion-focusable, always. At style priority, here, before any style, so that
+        // an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
+        SetValue(Activatable.IsInstantProperty, true, BindingPriority.Style);
+        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
 
         // The native button's click, which the segment hears as its own. No keys: the segment's onKeyDown takes Enter and Space,
         // and prevents the button's.

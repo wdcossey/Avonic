@@ -532,6 +532,30 @@ public class AvonicInputTests
         }
     });
 
+    // The native input is width: 100%, which makes it compressible: an input in the end slot gives way to the start slot's, where
+    // a label beside it, which is flex: 1, wraps instead. Measured in Chromium.
+    [AvaloniaFact]
+    public void B11_In_A_Slot_With_Too_Little_Room_The_Input_Gives_Way() => InstalledTheme.Run(_ =>
+    {
+        var beside = new AvonicInput { [AutomationProperties.NameProperty] = "x" };
+        var start = new AvonicInput { Value = "a very long value that is wider than twenty characters and more", [AutomationProperties.NameProperty] = "x" };
+        var end = new AvonicInput { [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { StartContent = beside, Content = new AvonicLabel { Content = "A label that is long enough to want the whole row for itself" } },
+                new AvonicItem { StartContent = start, EndContent = end },
+            },
+        });
+        Render();
+
+        Assert.Equal(199, beside.Bounds.Width, 0.6);
+        Assert.Equal(199, start.Bounds.Width, 0.6);
+        Assert.Equal(127, end.Bounds.Width, 0.6);
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+    });
+
     [AvaloniaFact]
     public void B11_Row_Placements_Measured_In_An_Item() => InstalledTheme.Run(_ =>
     {
@@ -1314,6 +1338,57 @@ public class AvonicInputTests
         input.Required = false;
         input.Required = true;
         Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+    }
+
+    // aria-required, aria-labelledby and aria-describedby on the native input are at style priority and bound before the field's
+    // styles, so that an app's plain style for the field, there before the window is shown, wins whenever they change after it.
+    [AvaloniaFact]
+    public void B26_An_Apps_Style_For_The_Native_Inputs_Automation_Survives_Changes_After_It()
+    {
+        var input = new AvonicInput { Label = "Email", HelperText = "Helper" };
+        using var scene = Scene.Styled(new StackPanel { Children = { input } },
+            Scene.AppStyle<TextBox>(AutomationProperties.IsRequiredForFormProperty, false),
+            Scene.AppStyle<TextBox>(AutomationProperties.NameProperty, "The app's name"),
+            Scene.AppStyle<TextBox>(AutomationProperties.HelpTextProperty, "The app's hint"));
+        var native = Native(input);
+
+        input.Required = true;
+        input.Label = "Address";
+        input.HelperText = "Another helper";
+
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+        Assert.Equal("The app's name", AutomationProperties.GetName(native));
+        Assert.Equal("The app's hint", AutomationProperties.GetHelpText(native));
+    }
+
+    // A plain TextBox in an app's own template has no automation of its own: it's given the name, the hint and required when it's
+    // found, and they're taken from it when another field takes its place.
+    [AvaloniaFact]
+    public void B26_A_Plain_Native_Input_In_An_Apps_Template_Is_Named_Too_And_Let_Go_When_Replaced()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email", HelperText = "Helper", Required = true });
+        using var _ = scene;
+        static FuncControlTemplate<AvonicInput> Plain() =>
+            new((_, scope) => new TextBox { Name = "PART_NativeInput" }.RegisterInNameScope(scope));
+
+        input.Template = Plain();
+        input.ApplyTemplate();
+        Settle();
+        var first = Native(input);
+        Assert.IsNotType<InputNativeInput>(first);
+        Assert.Equal("Email", AutomationProperties.GetName(first));
+        Assert.Equal("Helper", AutomationProperties.GetHelpText(first));
+        Assert.True(AutomationProperties.GetIsRequiredForForm(first));
+
+        input.Template = Plain();
+        input.ApplyTemplate();
+        Settle();
+        input.Label = "Address";
+        Assert.NotSame(first, Native(input));
+        Assert.Equal("Address", AutomationProperties.GetName(Native(input)));
+        Assert.True(AutomationProperties.GetIsRequiredForForm(Native(input)));
+        Assert.Null(AutomationProperties.GetName(first));
+        Assert.False(AutomationProperties.GetIsRequiredForForm(first));
     }
 
     // ── 27: the password toggle ──────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Metadata;
 using Avonic.Components.Behaviors;
@@ -232,8 +233,9 @@ public class AvonicItemOption : TemplatedControl
     {
         _native = new NativeButton(this, _ => OnNativeClick(), () => true, UpdateIsEffectivelyEnabled);
 
-        // ion-activatable, always. Not ion-focusable: item-option.md.css has no focused state.
-        Activatable.SetIsEnabled(this, true);
+        // ion-activatable, always. Not ion-focusable: item-option.md.css has no focused state. At style priority, here, before
+        // any style, so that an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
     }
 
     /// <summary>A command that can't execute disables the option. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>

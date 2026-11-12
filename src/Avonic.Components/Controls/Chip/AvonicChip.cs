@@ -95,7 +95,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     public AvonicChip()
     {
         // ion-activatable, always. Not ion-focusable: the chip takes focus only if an app makes it focusable, as tabindex does.
-        Activatable.SetIsEnabled(this, true);
+        // At style priority, here, before any style, so that an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
 
         // The DOM click on release, with no keys. It handles nothing, so Tapped and the rest still reach the app. A stock button
         // inside clicks it too, from a key as from a press, as a <button>'s DOM click bubbles to the host.

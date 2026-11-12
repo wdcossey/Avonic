@@ -494,6 +494,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
         if (_field.Native is not null)
         {
             UpdateNative();
+            UpdateWidth();
             _field.Sync();
         }
 
@@ -507,6 +508,20 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
         // hostContext('ion-item'), at render: read again on each attach, as only an attach can change it.
         _item = this.FindAncestorOfType<AvonicItem>();
         UpdateClasses();
+        UpdateWidth();
+    }
+
+    /// <summary>
+    /// <c>:host-context(ion-item)[slot=start]</c> and <c>[slot=end]</c>: <c>width: auto</c>, as wide as what's in it, where the
+    /// native textarea is as wide as Chromium makes 20 columns, or <see cref="Cols"/>. Elsewhere <c>width: 100%</c>, which
+    /// stretching gives.
+    /// </summary>
+    private void UpdateWidth()
+    {
+        if (_field.Native is TextareaNativeInput native)
+        {
+            native.SizesToCharacters = _item is not null && (Parent as StyledElement)?.Name is "PART_Start" or "PART_End";
+        }
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -743,14 +758,9 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
     /// <summary>The native textarea's <c>aria-labelledby</c>, <c>aria-describedby</c> and <c>aria-required</c>.</summary>
     private void UpdateAutomation()
     {
-        if (_field.Native is not { } native)
+        if (_field.Native is { } native)
         {
-            return;
+            _label.UpdateAutomation(native, Label, LabelContent, HelperText, ErrorText, Required);
         }
-
-        _label.UpdateAutomation(native, Label, LabelContent, HelperText, ErrorText);
-
-        // required on the <textarea>: aria-required to a screen reader. Form validation isn't here.
-        native.SetValue(AutomationProperties.IsRequiredForFormProperty, Required);
     }
 }

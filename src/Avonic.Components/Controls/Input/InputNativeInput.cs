@@ -20,7 +20,7 @@ namespace Avonic.Components.Controls;
 /// <c>xMax - xMin</c>, rounded. Fitted to Chromium at 14 sizes of Roboto from 12 to 32 px: the same at 11, among them 16 px's 199
 /// and 24 px's 298, and 1 px out at 12, 28 and 32 px, where Chromium's own advance seems to be whole.
 /// </remarks>
-public sealed class InputNativeInput : TextBox
+public sealed class InputNativeInput : TextBox, INativeFieldAutomation
 {
     /// <summary>HTML's <c>size</c> when it isn't set, which <c>ion-input</c> doesn't set.</summary>
     public const int DefaultSize = 20;
@@ -28,8 +28,13 @@ public sealed class InputNativeInput : TextBox
     /// <summary>Each typeface's widest glyph per em, or null, read once.</summary>
     private static readonly ConditionalWeakTable<GlyphTypeface, StrongBox<double?>> s_widest = new();
 
+    private readonly NativeFieldAutomation _automation;
     private bool _sizesToCharacters;
     private double _sizedWidth = double.NaN;
+
+    public InputNativeInput() => _automation = new NativeFieldAutomation(this);
+
+    NativeFieldAutomation INativeFieldAutomation.Automation => _automation;
 
     /// <summary>The look of a <see cref="TextBox"/>, as an app's own <c>TextBox</c> styles reach the input's field too.</summary>
     protected override Type StyleKeyOverride => typeof(TextBox);

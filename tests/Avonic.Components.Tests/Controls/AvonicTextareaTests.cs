@@ -492,6 +492,101 @@ public class AvonicTextareaTests
         Assert.Equal(other.Bounds.Width, textarea.Bounds.Width, 0.5);
     }
 
+    // Chromium's columns: ceil(cols × c) + 4, where c is the x glyph's advance, or that rounded when it rounds up. 13 px's 6.45
+    // stays, where rounding it would give 124. Each measured in Chromium.
+    [AvaloniaFact]
+    public void B12_Cols_Follows_Chromiums_Rounding_At_Each_Size() => InstalledTheme.Run(_ =>
+    {
+        var textarea = new AvonicTextarea { Cols = 20 };
+        using var scene = new Scene(Page(textarea), 358, 600);
+
+        foreach (var (size, cols, width) in new[]
+                 {
+                     (13.0, 20, 133.0), (15.0, 20, 153.0), (17.0, 20, 173.0), (21.0, 20, 213.0), (12.5, 33, 209.0), (13.5, 7, 53.0),
+                     (14.3, 10, 75.0), (16.6, 3, 29.0), (19.2, 10, 104.0), (12.0, 20, 124.0), (16.0, 20, 164.0),
+                 })
+        {
+            textarea.FontSize = size;
+            textarea.Cols = cols;
+            Render();
+            Assert.True(Math.Abs(width - textarea.Bounds.Width) < 0.5, $"{size} px, {cols} columns: {textarea.Bounds.Width}, not {width}");
+        }
+    });
+
+    // :host-context(ion-item)[slot=start] and [slot=end]: width: auto, as wide as 20 columns, or cols, whatever the value or the
+    // placeholder. autoGrow's overflow: hidden leaves no room for a scroll bar, and a long line widens it to what's left. Each
+    // measured in Chromium.
+    [AvaloniaFact]
+    public void B12_In_An_Items_Start_Or_End_Slot_The_Textarea_Is_As_Wide_As_Its_Columns() => InstalledTheme.Run(_ =>
+    {
+        static AvonicItem Start(AvonicTextarea textarea) => new() { StartContent = textarea, Content = new AvonicLabel { Content = "L" } };
+        var bare = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        var valued = new AvonicTextarea { Value = "hello", [AutomationProperties.NameProperty] = "x" };
+        var labelled = new AvonicTextarea { Label = "Notes" };
+        var end = new AvonicTextarea { Placeholder = "A placeholder that is long enough to matter here", [AutomationProperties.NameProperty] = "x" };
+        var ten = new AvonicTextarea { Cols = 10, [AutomationProperties.NameProperty] = "x" };
+        var growing = new AvonicTextarea { AutoGrow = true, Value = "hi", [AutomationProperties.NameProperty] = "x" };
+        var growingTen = new AvonicTextarea { AutoGrow = true, Cols = 10, Value = "hi", [AutomationProperties.NameProperty] = "x" };
+        var growingLong = new AvonicTextarea { AutoGrow = true, Value = "a rather long line of text that goes on and on and on", [AutomationProperties.NameProperty] = "x" };
+        var stacked = new AvonicTextarea { Label = "Notes", LabelPlacement = TextareaLabelPlacement.Stacked };
+        var full = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        var sized = new AvonicTextarea { FontSize = 13, [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                Start(bare), Start(valued), Start(labelled),
+                new AvonicItem { Content = new AvonicLabel { Content = "L" }, EndContent = end },
+                Start(ten), Start(growing), Start(growingTen), Start(growingLong), Start(stacked),
+                new AvonicItem { Content = full },
+                Start(sized),
+            },
+        });
+        Render();
+
+        Assert.Equal(16, Bounds(bare, scene.Window).X, 0.6);
+        Assert.Equal(164, bare.Bounds.Width, 0.6);
+        Assert.Equal(164, Native(bare).Bounds.Width, 0.6);
+        Assert.Equal(164, valued.Bounds.Width, 0.6);
+        Assert.Equal(222.52, labelled.Bounds.Width, 0.6);
+        Assert.Equal(164, Native(labelled).Bounds.Width, 0.6);
+        Assert.Equal(164, end.Bounds.Width, 0.6);
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+        Assert.Equal(84, ten.Bounds.Width, 0.6);
+        Assert.Equal(160, growing.Bounds.Width, 0.6);
+        Assert.Equal(80, growingTen.Bounds.Width, 0.6);
+        Assert.Equal(342, growingLong.Bounds.Width, 0.6);
+        Assert.Equal(164, stacked.Bounds.Width, 0.6);
+        Assert.Equal(133, sized.Bounds.Width, 0.6);
+
+        // In the default slot it's width: 100%.
+        Assert.Equal(358, full.Bounds.Width, 0.6);
+    });
+
+    // The native textarea is width: 100%, which makes it compressible: a textarea in the end slot gives way to the start slot's,
+    // where a label beside it, which is flex: 1, wraps instead. Measured in Chromium.
+    [AvaloniaFact]
+    public void B12_In_A_Slot_With_Too_Little_Room_The_Textarea_Gives_Way() => InstalledTheme.Run(_ =>
+    {
+        var beside = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        var start = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        var end = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { StartContent = beside, Content = new AvonicLabel { Content = "A label that is long enough to want the whole row for itself" } },
+                new AvonicItem { StartContent = start, EndContent = end },
+            },
+        });
+        Render();
+
+        Assert.Equal(164, beside.Bounds.Width, 0.6);
+        Assert.Equal(164, start.Bounds.Width, 0.6);
+        Assert.Equal(162, end.Bounds.Width, 0.6);
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+    });
+
     [AvaloniaFact]
     public void B13_Wrap_Off_Scrolls_Sideways_On_The_Stub_Too()
     {
@@ -1136,6 +1231,28 @@ public class AvonicTextareaTests
         textarea.LabelContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Uri>((uri, _) => new TextBlock { Text = uri.Host });
         Settle();
         Assert.Equal("example.com", AutomationProperties.GetName(native));
+    }
+
+    // aria-required, aria-labelledby and aria-describedby on the native textarea are at style priority and bound before the
+    // field's styles, so that an app's plain style for the field, there before the window is shown, wins whenever they change
+    // after it.
+    [AvaloniaFact]
+    public void B27_An_Apps_Style_For_The_Native_Textareas_Automation_Survives_Changes_After_It()
+    {
+        var textarea = new AvonicTextarea { Label = "Notes", HelperText = "Helper" };
+        using var scene = Scene.Styled(new StackPanel { Children = { textarea } },
+            Scene.AppStyle<TextBox>(AutomationProperties.IsRequiredForFormProperty, false),
+            Scene.AppStyle<TextBox>(AutomationProperties.NameProperty, "The app's name"),
+            Scene.AppStyle<TextBox>(AutomationProperties.HelpTextProperty, "The app's hint"));
+        var native = Native(textarea);
+
+        textarea.Required = true;
+        textarea.Label = "Comments";
+        textarea.HelperText = "Another helper";
+
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+        Assert.Equal("The app's name", AutomationProperties.GetName(native));
+        Assert.Equal("The app's hint", AutomationProperties.GetHelpText(native));
     }
 
     // ── 28: RTL ──────────────────────────────────────────────────────────────────────────────
