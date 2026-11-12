@@ -47,9 +47,6 @@ public class AvonicReorderGroup : ItemsControl
     /// <summary><c>.reorder-list-active &gt; * { transition: transform 300ms }</c>.</summary>
     internal static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(300);
 
-    /// <summary>Its timing function: <c>ease</c>, the default, <c>cubic-bezier(0.25, 0.1, 0.25, 1)</c>.</summary>
-    internal static readonly CubicBezierEasing TransitionEasing = CubicBezierEasing.CssEase;
-
     /// <summary>Ionic <c>disabled</c>: true hides the handles and turns the drag off. Not <c>IsEnabled</c>, which would disable the items.</summary>
     public static readonly StyledProperty<bool> DisabledProperty =
         AvaloniaProperty.Register<AvonicReorderGroup, bool>(nameof(Disabled), defaultValue: true);
@@ -645,6 +642,7 @@ public class AvonicReorderGroup : ItemsControl
 
         public IDisposable? Frame { get; } = frame;
 
-        public CssTransition Transition { get; } = new(TransitionEasing, 0);
+        // Its timing function is the default, ease.
+        public CssTransition Transition { get; } = new(CubicBezierEasing.CssEase, 0);
     }
 }

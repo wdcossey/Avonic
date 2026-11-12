@@ -64,8 +64,9 @@ Refreshing:
   priority. The snap back and the completing transition are small loops on the same clock.
 - **The refreshing circle is an `AvonicSpinner` with an internal `AnimationDelay`** of -655 ms, md's native refresher's
   `animation-delay`. Until #131 it was the refresher's own `RefresherCircle` in a running mode; the capture frames came out the same,
-  pixel for pixel. Ionic sets the delay on the host and the first `circle` of the refreshing spinner when both spinners have a
-  `circle`, which moves only `circular`'s animation: other refreshing spinners start from 0, as before, and so does `circular`
+  pixel for pixel. Ionic sets the delay once, at `setupMDNativeRefresher`, on the host and the first `circle` of the refreshing
+  spinner when both spinners have a `circle`, so a spinner changed later changes nothing (the same here, worked out when the
+  refresher becomes native), which moves only `circular`'s animation: other refreshing spinners start from 0, as before, and so does `circular`
   after a pulling spinner of lines, which before #131 started 655 ms in. The new state's pseudoclass goes on before the old one's
   goes off, as a class list changes at once, so from refreshing to completing or cancelling the spinner carries on rather than
   start again, which another refreshing spinner did before #131.

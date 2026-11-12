@@ -624,6 +624,36 @@ public class AvonicRefresherTests
         var config = SpinnerConfigs.Get(SpinnerName.Circular);
         var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
         Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+
+        // The next refresh, with the lines now pulling, still starts 655 ms in
+        page.Wait(1000);
+        page.Log.Clear();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
+        Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+    });
+
+    [AvaloniaFact]
+    public void B20_A_Template_Applied_Mid_Refresh_Gives_Its_Circle_The_Delay_Too() => InstalledTheme.Run(_ =>
+    {
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var template = page.RefresherContent.Template;
+        page.RefresherContent.Template = null;
+        page.RefresherContent.ApplyTemplate();
+        page.RefresherContent.Template = template;
+        page.RefresherContent.ApplyTemplate();
+        page.Wait(16);
+        var shownAt = page.Clock.Now.TotalMilliseconds - 16;
+        page.Wait(48);
+
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        Assert.True(spinner.IsEffectivelyVisible);
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var frame = Assert.Single(spinner.CurrentFrame()).Arcs!;
+        Assert.NotEqual(SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - shownAt).Arcs!, frame);
+        Assert.Equal(TimeSpan.FromMilliseconds(-655), spinner.AnimationDelay);
     });
 
     // ── R1–R5: from the first review ───────────────────────────────────────────────────────────

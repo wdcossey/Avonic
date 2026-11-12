@@ -27,6 +27,10 @@ public partial class AvonicInfiniteScroll : ContentControl
     internal const string LoadingClass = ":infinite-scroll-loading";
     internal const string EnabledClass = ":infinite-scroll-enabled";
 
+    /// <summary>The class Ionic's selector also takes for a scroller: <c>.ion-content-scroll-host</c>.</summary>
+    [Obsolete("Use AvonicContent.ScrollHostClass, which the infinite scroll, the reorder group and the refresher share.")]
+    public const string ScrollHostClass = AvonicContent.ScrollHostClass;
+
     /// <summary>Ionic <c>position</c>.</summary>
     public static readonly StyledProperty<InfiniteScrollPosition> PositionProperty =
         AvaloniaProperty.Register<AvonicInfiniteScroll, InfiniteScrollPosition>(nameof(Position));
