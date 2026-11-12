@@ -65,6 +65,8 @@ public class AvonicSpinner : Control
     /// <summary>When the animations were paused, or null while they run.</summary>
     private TimeSpan? _pausedAt;
 
+    private TimeSpan _animationDelay;
+
     private IDisposable? _frame;
     private bool _attached;
 
@@ -170,6 +172,32 @@ public class AvonicSpinner : Control
     {
         get => GetValue(ForegroundProperty);
         set => SetValue(ForegroundProperty, value);
+    }
+
+    /// <summary>
+    /// CSS <c>animation-delay</c> on each element's animation, on top of the delay its config gives it: a negative one starts the
+    /// animations that far in. A change moves the running animations, as a change of <c>animation-delay</c> does. Internal, for md's
+    /// native refresher, which sets <c>-655ms</c> on its circular refreshing spinner.
+    /// </summary>
+    internal TimeSpan AnimationDelay
+    {
+        get => _animationDelay;
+        set
+        {
+            if (_animationDelay == value)
+            {
+                return;
+            }
+
+            var shift = value - _animationDelay;
+            _animationDelay = value;
+            for (var i = 0; i < _starts.Length; i++)
+            {
+                _starts[i] += shift;
+            }
+
+            InvalidateVisual();
+        }
     }
 
     // ── For tests ────────────────────────────────────────────────────────────────────────────
@@ -281,7 +309,7 @@ public class AvonicSpinner : Control
         // An element that's inserted, or shown again, gets new animations, which start from the beginning. An old pause goes
         // with the old animations, and UpdatePlayState pauses the new ones if it's paused.
         var now = AvonicConfig.Now();
-        _starts = Enumerable.Repeat(now, _config.Count).ToArray();
+        _starts = Enumerable.Repeat(now + _animationDelay, _config.Count).ToArray();
         _pausedAt = null;
         UpdatePlayState();
     }
@@ -303,7 +331,7 @@ public class AvonicSpinner : Control
             var starts = new TimeSpan[_config.Count];
             for (var i = 0; i < starts.Length; i++)
             {
-                starts[i] = i < _starts.Length && previous.Animation == _config.Animation ? _starts[i] : now;
+                starts[i] = i < _starts.Length && previous.Animation == _config.Animation ? _starts[i] : now + _animationDelay;
             }
 
             _starts = starts;

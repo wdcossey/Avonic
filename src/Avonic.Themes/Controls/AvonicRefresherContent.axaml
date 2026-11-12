@@ -70,10 +70,6 @@
                                 Background="{DynamicResource Avonic.Refresher.Md.NativeIconBackgroundBrush}"
                                 BoxShadow="{DynamicResource Avonic.Refresher.Md.NativeIconBoxShadow}">
                             <Panel Width="24" Height="24">
-                                <!-- circular, with animation-delay: -655ms -->
-                                <c:RefresherCircle Name="PART_RefreshingCircle"
-                                                   IsVisible="False"
-                                                   Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
                                 <c:AvonicSpinner Name="PART_RefreshingSpinner"
                                                  Width="24"
                                                  Height="24"
@@ -106,14 +102,6 @@
         <!-- ion-refresher.refresher-native .arrow-container: display: block, for md's circular pulling icon -->
         <Style Selector="^:pulling-circular /template/ Panel#PART_ArrowContainer">
             <Setter Property="IsVisible" Value="True" />
-        </Style>
-
-        <!-- A circular refreshing spinner is drawn with its animation-delay of -655ms, which AvonicSpinner can't take -->
-        <Style Selector="^:refreshing-circular /template/ c|RefresherCircle#PART_RefreshingCircle">
-            <Setter Property="IsVisible" Value="True" />
-        </Style>
-        <Style Selector="^:refreshing-circular /template/ c|AvonicSpinner#PART_RefreshingSpinner">
-            <Setter Property="IsVisible" Value="False" />
         </Style>
 
         <!-- display: flex for pulling and ready in the native refresher; display: block for cancelling -->

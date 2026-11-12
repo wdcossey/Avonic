@@ -120,7 +120,22 @@ frame; the others are dropped, not merged.
 | over 45° | scrolls | scrolls |
 
 A vertical gesture in a vertical scroller is the one real difference: Chromium scrolls and Ionic's passive gesture runs too, where
-Avalonia gives the pointer to one owner, the gesture. `ion-refresher` decides in `CanStart` for that reason.
+Avalonia gives the pointer to one owner, the gesture. `ion-refresher` decides in `CanStart` for that reason, and sets
+`ReleaseAgainstDirection`, below.
+
+## Avonic additions
+
+Not in Ionic's config; each is there because Avalonia doesn't do what the browser does around a gesture (#131).
+
+- **`GestureConfig.ReleaseAgainstDirection`**: a press that reaches `Threshold` moving against `Direction` (up for `Y`, left for
+  `X`, whatever the flow direction) is let go with `NotCaptured`, carrying that move's detail, before the move is held from the
+  scrollers, so a `ScrollViewer` that has followed the press scrolls from there. Ionic's refresher gesture is passive: it captures an
+  upward drag, its `onMove` ignores it, and Chromium scrolls the content all the same. `ion-refresher` sets it.
+- **`Gesture.StopsTouchStart`** (internal, attached): `ion-picker`'s `touchstart` listener calls `stopPropagation()`, so that a
+  wheel scrolled in a card modal or a sliding item doesn't move it. A gesture listens to handled presses, as the DOM has no
+  "handled", so nothing inside could stop one: a touch or pen press whose source is the marked element, or inside it, now starts
+  no gesture whose `Element` is around it. A gesture on the marked element, or inside it, still hears it, and a mouse press isn't
+  stopped, as only `touchstart` is. `AvonicPicker` has it on by default.
 
 ## Known gaps
 

@@ -70,5 +70,5 @@ disabled option and column at 0.4, the fades, and the prefix and suffix. Avonic'
 | P3 | Enter leaves input mode and blurs the input | measured | tested | match |
 | P3 | A column focused by the keyboard takes digits for itself; a second's pause starts again | from the code | tested | match |
 | P3 | With one numeric column, a tap on an option in the highlight | from the code: the option becomes the input mode's column, and typing selects nothing | that column takes digits | deliberate difference: see the README's "Decided" |
-| P4 | A touch on the picker doesn't reach a gesture outside it (`touchstart` `stopPropagation`) | — | not done | gap: Avonic's gestures listen to handled presses too, so nothing in the picker can stop them. See "Proposed for shared files" |
+| P4 | A touch on the picker doesn't reach a gesture outside it (`touchstart` `stopPropagation`) | read from `picker.js`, not measured | `Gesture.StopsTouchStart` on the picker: a sideways drag on a column in an `AvonicItemSliding` doesn't open it (#131, `P4_…`) | match; a mouse press still reaches them, as only `touchstart` is stopped |
 | — | Haptics | iOS only, so none in md | none | match (Avonic has no haptics) |

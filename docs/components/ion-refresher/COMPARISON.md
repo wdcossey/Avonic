@@ -53,16 +53,20 @@ Refreshing:
 
 - **An upward drag from the top.** In Chromium Ionic's passive gesture captures it and the browser scrolls anyway; the first move,
   with `velocityY < 0`, cancels the pull. Avalonia gives a pointer to one owner, so a captured gesture would stop the scroll: the
-  refresher lets go of a press that goes up by its 5 px threshold before the gesture decides, and the `ScrollViewer`, which has
-  followed the press, scrolls. Nothing is raised either way.
+  refresher's gesture lets go of a press that goes up by its 5 px threshold before it decides (`GestureConfig.ReleaseAgainstDirection`,
+  since #131; before, a tunnel handler of the refresher's own), and the `ScrollViewer`, which has followed the press, scrolls.
+  Nothing is raised either way.
 - **The scroll element isn't set to `overflow: hidden`** while pulling: the captured gesture already keeps the scroller off the
   pointer. A mouse wheel during a pull would still scroll.
 - **The animations aren't `AvonicAnimation`s.** `createPullingAnimation` is driven by `progressStart`, `progressStep` and
   `progressEnd`, and animates the circle's `stroke-dasharray`, and `AvonicAnimation` has neither, so the pulling frame is
   computed, as `RefresherPullFrame`, on `AvonicConfig`'s clock, as the spinner's are, and set on the template's parts at animation
   priority. The snap back and the completing transition are small loops on the same clock.
-- **The refreshing circle is the refresher's own `RefresherCircle`**, drawn from `AvonicSpinner`'s config, as `AvonicSpinner`
-  can't take the `animation-delay: -655ms` md's native refresher gives it. Other refreshing spinners are an `AvonicSpinner`.
+- **The refreshing circle is an `AvonicSpinner` with an internal `AnimationDelay`** of -655 ms, md's native refresher's
+  `animation-delay`. Until #131 it was the refresher's own `RefresherCircle` in a running mode; the capture frames came out the same,
+  pixel for pixel. Ionic sets the delay on the host and the first `circle` of the refreshing spinner when both spinners have a
+  `circle`, which moves only `circular`'s animation: other refreshing spinners start from 0, as before, and so does `circular`
+  after a pulling spinner of lines, which before #131 started 655 ms in.
 - **`IsEnabled` is kept after a pull.** Ionic calls `gesture.enable(true)` once a pull has played back or refreshed, whatever
   `disabled` is, so a refresher disabled in its `ionRefresh` handler could be pulled again. Here it's `Enable(IsEnabled)` (R3).
 - **The fixed slot can be shared through a panel**, as `AvonicContent.FixedContent` holds one child, where Ionic's slot holds an

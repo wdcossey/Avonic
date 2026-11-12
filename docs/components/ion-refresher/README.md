@@ -66,7 +66,8 @@ The refresher's state shows as pseudoclasses on both controls: `:pulling`, `:rea
 
 `AvonicRefresherContent`: `PART_Pulling`, `PART_PullingIcon`, `PART_SpinnerArrowContainer`, `PART_PullingSpinner` (turns, holding
 `PART_PullingCircle`, a `RefresherCircle`, or `PART_PullingOtherSpinner` for other spinners), `PART_ArrowContainer`, `PART_Arrow`,
-`PART_Refreshing`, `PART_RefreshingIcon`, `PART_RefreshingCircle` (circular) and `PART_RefreshingSpinner` (others).
+`PART_Refreshing`, `PART_RefreshingIcon` and `PART_RefreshingSpinner`, an `AvonicSpinner`, which for `circular` in the native
+refresher starts 655 ms in (its internal `AnimationDelay`, Ionic's `animation-delay: -655ms`).
 
 ## Resource keys
 
@@ -87,8 +88,11 @@ None.
 ## Known gaps
 
 - Ionic's legacy refresher (see above). With no spinner in either place, the refresher does nothing.
-- An upward drag from the top hands the press to the scroller at the gesture's threshold, where Chromium scrolls beside Ionic's passive
-  gesture; and the scroll element isn't made `overflow: hidden` during a pull. See [COMPARISON.md](COMPARISON.md#deliberate-differences).
+- An upward drag from the top hands the press to the scroller at the gesture's threshold (`GestureConfig.ReleaseAgainstDirection`),
+  where Chromium scrolls beside Ionic's passive gesture; and the scroll element isn't made `overflow: hidden` during a pull. See
+  [COMPARISON.md](COMPARISON.md#deliberate-differences).
+- A custom scroll target, an element with `ion-content-scroll-host` inside the content, isn't looked for: the content's own scroller
+  is the scroll element. Ionic's `connectedCallback` takes such an element first.
 - Ionic's dark palette sets the step colours the icon's border and background read; `Tokens/Palettes/Dark.axaml` doesn't follow
   them yet.
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

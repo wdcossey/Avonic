@@ -80,6 +80,8 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
   digits the first column's, the next two the second's), or into the only one; a column focused by the keyboard takes them for
   itself, and a second's pause starts again. A tap outside the highlight, Enter, or focus leaving the picker ends it. The column
   taking digits has the `:column-active` pseudoclass (Ionic's `picker-column-active`).
+- A touch on the picker starts no gesture around it, as Ionic stops `touchstart` there, so that scrolling a wheel doesn't swipe a
+  sliding item or a card modal (`Gesture.StopsTouchStart`, #131). A mouse press isn't stopped, as only `touchstart` is.
 
 ## Decided on the user's behalf
 
@@ -106,8 +108,6 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 
 ## Known gaps
 
-- **A touch on the picker reaches gestures outside it** (Ionic stops `touchstart`, so that scrolling a wheel in a card modal doesn't
-  swipe the modal). Avonic's `Gesture` listens to handled presses too, so the picker can't stop it.
 - **Snapping after a touch drag is Avalonia's**: it jumps to the snap point on release, or aims a fling at one, where Chromium eases.
 - **A hidden ancestor is noticed when the column next acts** (a value, a render), not at once as Ionic's `IntersectionObserver`
   does, as Avalonia doesn't say when an ancestor hides. Showing it again is noticed at once (`HiddenChainWatcher`).

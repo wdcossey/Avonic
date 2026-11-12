@@ -114,7 +114,8 @@ From `picker-column.js`, `picker-column-option.js` and `picker.js`; every number
   for `scroll`, and the 250 ms timeout is `AvonicConfig.Schedule`.
 - **The centre option** is the option whose box holds the scroller's centre, as `elementsFromPoint` finds it.
 - **Smooth scroll** is `SmoothScroll`'s timing (√distance / 60 s, `cubic-bezier(0.42, 0, 0.58, 1)`), measured again here, in a
-  vertical copy in the picker's folder, as `SmoothScroll` is horizontal and internal to the segment's.
+  vertical copy in the picker's folder, as `SmoothScroll` is horizontal and internal to the segment's. (Since #131, the one
+  `Animation/SmoothScroll`, which takes an axis.)
 - **Visible** is `EffectiveViewportChanged` intersecting the column, as for `AvonicImg`.
 - **Mobile** (`isPlatform('mobile')`, `any-pointer: coarse`) is Android or iOS; any-hover is the rest.
 
