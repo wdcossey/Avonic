@@ -26,7 +26,7 @@ with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [x] | `autocapitalize` | `Autocapitalize` (`string`, `"off"`) |
 | [ ] | `autocomplete` | — (no autofill in Avalonia) |
 | [x] | `autocorrect` | `Autocorrect` (`SearchbarAutocorrect`) |
-| [x] | `cancelButtonIcon` | `CancelButtonIcon` (`string?`; null is `arrow-back-sharp`, not mirrored in RTL) |
+| [x] | `cancelButtonIcon` | `CancelButtonIcon` (`string?`; unset, `AvonicConfig.BackButtonIcon` when made, as Ionic's `config.get('backButtonIcon')`; null is `arrow-back-sharp`, not mirrored in RTL) |
 | [x] | `cancelButtonText` | `CancelButtonText` (`string?`, `"Cancel"`): the cancel button's automation name |
 | [x] | `clearIcon` | `ClearIcon` (`string?`; null is `close-sharp`) |
 | [x] | `color` | `Color` |
@@ -96,11 +96,11 @@ Each has a test in `AvonicSearchbarTests`, named after its number in [PLAN.md](P
 
 ## Extensions
 
-Not in Ionic's API, but needed by the theme: the converters `OrConverter` (md's default icons) and `FlipUnlessDefault` (the
-default cancel arrow isn't mirrored).
+Not in Ionic's API, but needed by the theme: the converters `FieldConverters.Or` (md's default icons) and
+`FieldConverters.FlipUnlessDefault` (the default cancel arrow isn't mirrored). The native field is shared with the input and the
+textarea (`Controls/TextField/`).
 
 ## Known gaps
 
-See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `dir` set on the searchbar itself mirrors everything; no
-`backButtonIcon` config for the cancel icon's default; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear; a disabled searchbar's buttons can't be reached, where Ionic's still can by Tab; the buttons have no automation invoke. Tried in a real window by `tools/real-window`; not with a soft
+See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `dir` set on the searchbar itself mirrors everything; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear; a disabled searchbar's buttons can't be reached, where Ionic's still can by Tab; the buttons have no automation invoke. Tried in a real window by `tools/real-window`; not with a soft
 keyboard, or on a device.

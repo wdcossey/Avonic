@@ -483,6 +483,45 @@ public class AvonicInputTests
 
     // ── 11 to 13: layout ─────────────────────────────────────────────────────────────────────
 
+    // :host-context(ion-item)[slot=start|end] { width: auto }: as wide as its content, where the native input is as wide as
+    // Chromium makes an <input> of 20 characters. Measured in Chromium at 16 px Roboto: 199, and the label's 34.48 and 16 more;
+    // a long value doesn't widen it; 298 at 24 px.
+    [AvaloniaFact]
+    public void B11_In_An_Items_Start_Or_End_Slot_The_Input_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
+    {
+        var bare = new AvonicInput { [AutomationProperties.NameProperty] = "x" };
+        var labelled = new AvonicInput { Label = "Start", Value = "abc" };
+        var end = new AvonicInput { Placeholder = "End" };
+        var full = new AvonicInput { Label = "Default" };
+        var longValue = new AvonicInput { Value = "a very long value that is wider than twenty characters" };
+        var big = new AvonicInput { FontSize = 24, [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { StartContent = bare, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { StartContent = labelled, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { Content = new AvonicLabel { Content = "Label" }, EndContent = end },
+                new AvonicItem { Content = full },
+                new AvonicItem { StartContent = longValue, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { StartContent = big, Content = new AvonicLabel { Content = "Label" } },
+            },
+        });
+        Render();
+
+        Assert.Equal(199, longValue.Bounds.Width, 0.6);
+        Assert.Equal(298, big.Bounds.Width, 0.6);
+        AssertBox(16, 2, 199, 44, Bounds(bare, scene.Window));
+        Assert.Equal(199, Native(bare).Bounds.Width, 0.6);
+        Assert.Equal(249.48, labelled.Bounds.Width, 0.6);
+        Assert.Equal(199, Native(labelled).Bounds.Width, 0.6);
+        Assert.Equal(199, end.Bounds.Width, 0.6);
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+
+        // In the default slot it's width: 100%.
+        Assert.Equal(358, full.Bounds.Width, 0.6);
+    });
+
     [AvaloniaFact]
     public void B11_Row_Placements_Measured_In_An_Item() => InstalledTheme.Run(_ =>
     {

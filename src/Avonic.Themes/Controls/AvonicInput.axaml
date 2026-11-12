@@ -33,7 +33,7 @@
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
                     <ScrollViewer Name="PART_ScrollViewer"
-                                  Theme="{StaticResource Avonic.Input.NativeScroller}"
+                                  Theme="{StaticResource Avonic.TextField.NativeScroller}"
                                   VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
                         <Panel VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
                             <TextBlock Name="PART_Placeholder"
@@ -119,7 +119,7 @@
                                     </MultiBinding>
                                 </TextBlock.FontSize>
                                 <TextBlock.Width>
-                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
                                         <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="#PART_LabelContent.Bounds.Width" />
                                     </MultiBinding>
@@ -151,8 +151,8 @@
                                                   VerticalAlignment="Center"
                                                   Content="{TemplateBinding StartContent}"
                                                   ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                                <TextBox Name="PART_NativeInput" Grid.Column="1"
-                                         Theme="{StaticResource Avonic.Input.Md.NativeInput}" />
+                                <c:InputNativeInput Name="PART_NativeInput" Grid.Column="1"
+                                                    Theme="{StaticResource Avonic.Input.Md.NativeInput}" />
                                 <!-- .input-clear-icon: 30 px, in the middle of what's left -->
                                 <Border Name="PART_ClearButton" Grid.Column="2"
                                         Width="30" Height="30"
@@ -165,7 +165,7 @@
                                                   HorizontalAlignment="Center"
                                                   VerticalAlignment="Center"
                                                   AutomationProperties.AccessibilityView="Raw"
-                                                  Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=close-sharp}" />
+                                                  Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
                                 </Border>
                                 <ContentPresenter Name="PART_End" Grid.Column="3"
                                                   VerticalAlignment="Center"
@@ -268,14 +268,14 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
                     <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.PaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
@@ -293,7 +293,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
                     <DynamicResource ResourceKey="Avonic.Input.BorderWidth" />
                 </MultiBinding>
             </Setter>
@@ -304,7 +304,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -314,7 +314,7 @@
         </Style>
         <Style Selector="^:fill-solid:shape-round /template/ Border#PART_Wrapper">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -324,7 +324,7 @@
         </Style>
         <Style Selector="^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.PaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
@@ -335,7 +335,7 @@
         </Style>
         <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Wrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.PaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
@@ -347,7 +347,7 @@
         <!-- No fill, round: border-radius 16 -->
         <Style Selector="^:shape-round:not(:fill-solid):not(:fill-outline) /template/ Border#PART_Wrapper">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -395,18 +395,18 @@
         <Style Selector="^ /template/ Border#PART_OutlineStart">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="stb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="stb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Width">
-                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.PaddingFill" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -416,13 +416,13 @@
         </Style>
         <Style Selector="^:shape-round /template/ Border#PART_OutlineStart">
             <Setter Property="Width">
-                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.PaddingOutlineRound" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusOutlineRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -433,7 +433,7 @@
         <Style Selector="^ /template/ Border#PART_OutlineNotch">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="tb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="tb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
@@ -441,7 +441,7 @@
         <!-- :host(.label-floating.input-fill-outline) .input-outline-notch: border-top: none -->
         <Style Selector="^:label-floating /template/ Border#PART_OutlineNotch">
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
@@ -449,12 +449,12 @@
         <Style Selector="^ /template/ Border#PART_OutlineEnd">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="teb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="teb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -464,7 +464,7 @@
         </Style>
         <Style Selector="^:shape-round /template/ Border#PART_OutlineEnd">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Input.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.BorderRadiusOutlineRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -606,7 +606,7 @@
         <Style Selector="^ /template/ Border#PART_Bottom">
             <Setter Property="TextElement.FontSize" Value="12" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="t">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="t">
                     <DynamicResource ResourceKey="Avonic.Input.BorderWidth" />
                 </MultiBinding>
             </Setter>
@@ -617,7 +617,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
                 </MultiBinding>
@@ -626,7 +626,7 @@
         <Style Selector="^:fill-solid /template/ Border#PART_Bottom, ^:fill-outline /template/ Border#PART_Bottom">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.PaddingFill" />
@@ -635,7 +635,7 @@
         </Style>
         <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Bottom">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Input.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Input.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Input.Md.PaddingOutlineRound" />

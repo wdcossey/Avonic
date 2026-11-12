@@ -7,7 +7,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -36,9 +35,6 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     /// <summary><c>componentDidLoad</c>'s <c>setTimeout</c> before <c>noAnimate</c> turns off.</summary>
     internal static readonly TimeSpan NoAnimateTime = TimeSpan.FromMilliseconds(300);
 
-    /// <summary>What Chromium draws for each character of a password.</summary>
-    private const char PasswordMask = '•';
-
     // ── Properties ───────────────────────────────────────────────────────────────────────────
 
     /// <summary>Ionic <c>value</c>. Two-way by default, as the input sets it.</summary>
@@ -58,8 +54,9 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         AvaloniaProperty.Register<AvonicSearchbar, SearchbarAutocorrect>(nameof(Autocorrect));
 
     /// <summary>
-    /// Ionic <c>cancelButtonIcon</c>: an <see cref="AvonicIcon.Icon"/>, a name or a source. Null is md's <c>arrow-back-sharp</c>,
-    /// which Ionic gives as the icon's SVG, not its name, so it isn't mirrored in RTL; a name given here is, as an arrow's is.
+    /// Ionic <c>cancelButtonIcon</c>: an <see cref="AvonicIcon.Icon"/>, a name or a source. Unset, it's
+    /// <see cref="AvonicConfig.BackButtonIcon"/> when the searchbar is made. Null is md's <c>arrow-back-sharp</c>, which Ionic
+    /// gives as the icon's SVG, not its name, so it isn't mirrored in RTL; a name given here is, as an arrow's is.
     /// </summary>
     public static readonly StyledProperty<string?> CancelButtonIconProperty =
         AvaloniaProperty.Register<AvonicSearchbar, string?>(nameof(CancelButtonIcon));
@@ -138,11 +135,9 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     public static readonly RoutedEvent<RoutedEventArgs> IonCancelEvent =
         RoutedEvent.Register<AvonicSearchbar, RoutedEventArgs>(nameof(IonCancel), RoutingStrategies.Bubble);
 
-    private TextBox? _native;
+    private readonly NativeTextField _field;
     private Control? _clearButton;
     private Control? _cancelButton;
-    private bool _syncing;
-    private bool _inUserEdit;
     private bool _focused;
     private string? _focusedValue;
     private bool _userEdited;
@@ -150,7 +145,6 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     private bool _leftAligned = true;
     private bool _noAnimate = true;
     private bool _loaded;
-    private IDisposable? _debounced;
     private IDisposable? _clearTimeout;
     private IDisposable? _loadTimeout;
     private IDisposable? _positionFrame;
@@ -166,9 +160,28 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
 
     public AvonicSearchbar()
     {
+        // Enter's change and Escape's clear are default actions, after the key's listeners, and not if one handled it, as
+        // preventDefault() stops them. The text box itself handles neither. Unlike ion-input's, valueChanged doesn't wait for
+        // an IME's composition: searchbar.js's doesn't check isComposing.
+        _field = new NativeTextField(this, ValueProperty, MaxlengthProperty)
+        {
+            StaysOutOfView = true,
+            Edited = OnUserEdit,
+            Focused = OnNativeGotFocus,
+            Blurred = OnNativeLostFocus,
+            KeyDown = OnNativeKeyDown,
+        };
+
         // The clear button's onPointerDown preventDefault, and the cancel button's onMouseDown and onTouchStart: on the way
         // down, before the press reaches either.
         AddHandler(PointerPressedEvent, OnPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
+
+        // cancelButtonIcon's default, config.get('backButtonIcon', arrowBackSharp), read once here as Ionic reads it. At style
+        // priority, and before any style, so that an app's value, set or styled, wins.
+        if (AvonicConfig.BackButtonIcon is { } backButtonIcon)
+        {
+            SetValue(CancelButtonIconProperty, backButtonIcon, Avalonia.Data.BindingPriority.Style);
+        }
         UpdateClasses();
     }
 
@@ -321,22 +334,13 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     /// </summary>
     public TextBox? GetInputElement()
     {
-        if (_native is null)
+        if (_field.Native is null)
         {
             ApplyTemplate();
         }
 
-        return _native;
+        return _field.Native;
     }
-
-    // ── For the theme ────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// The cancel icon's <c>flipRtl</c>: false for the default, which Ionic imports as SVG with no name to flip by, else the
-    /// icon's own rule.
-    /// </summary>
-    public static readonly Avalonia.Data.Converters.IValueConverter FlipUnlessDefault =
-        new Avalonia.Data.Converters.FuncValueConverter<object?, bool?>(value => value is null or "" ? false : null);
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
@@ -357,38 +361,14 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     {
         base.OnApplyTemplate(e);
 
-        if (_native is not null)
-        {
-            _native.PropertyChanged -= OnNativePropertyChanged;
-            _native.GotFocus -= OnNativeGotFocus;
-            _native.LostFocus -= OnNativeLostFocus;
-            _native.RemoveHandler(KeyDownEvent, OnNativeKeyDown);
-            _native.RemoveHandler(TextInputEvent, OnNativeTextInput);
-            _native.PastingFromClipboard -= OnNativePasting;
-            _native.RemoveHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
-        }
-
-        _native = e.NameScope.Find<TextBox>("PART_NativeInput");
+        _field.Attach(e.NameScope.Find<TextBox>("PART_NativeInput"));
         _clearButton = e.NameScope.Find<Control>("PART_ClearButton");
         _cancelButton = e.NameScope.Find<Control>("PART_CancelButton");
 
-        if (_native is not null)
+        if (_field.Native is not null)
         {
-            // Text's own change, which is synchronous: TextChanged is posted, after the guard has gone.
-            _native.PropertyChanged += OnNativePropertyChanged;
-            _native.GotFocus += OnNativeGotFocus;
-            _native.LostFocus += OnNativeLostFocus;
-
-            // Enter's change and Escape's clear are default actions, after the key's listeners, and not if one handled it, as
-            // preventDefault() stops them. The text box itself handles neither.
-            _native.AddHandler(KeyDownEvent, OnNativeKeyDown, RoutingStrategies.Bubble);
-            _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _native.PastingFromClipboard += OnNativePasting;
-
-            // Chromium never scrolls to an input that isn't focused; Avalonia's presenter brings its caret into view anyway.
-            _native.AddHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
             UpdateNative();
-            SyncNativeText();
+            _field.Sync();
         }
 
         if (_clearButton is not null)
@@ -445,7 +425,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         if (change.Property == ValueProperty)
         {
             // valueChanged: the native input shows the value, unless it's what it already shows.
-            SyncNativeText();
+            _field.Sync();
             UpdateClasses();
         }
         else if (change.Property == TypeProperty || change.Property == MaxlengthProperty || change.Property == PlaceholderProperty
@@ -456,8 +436,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         }
         else if (change.Property == DebounceProperty)
         {
-            // debounceChanged replaces the emitter, and the old one's timer still runs: a pending ionInput is still raised.
-            _debounced = null;
+            _field.ForgetDebounce();
         }
         else if (change.Property == ShowCancelButtonProperty)
         {
@@ -501,166 +480,44 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     /// <summary>What <c>render</c> puts on the native input.</summary>
     private void UpdateNative()
     {
-        if (_native is not { } native)
+        if (_field.Native is not { } native)
         {
             return;
         }
 
         var password = Type == SearchbarType.Password;
-        native.PasswordChar = password ? PasswordMask : default;
-        // A negative maxlength is invalid in HTML, so no limit; 0 allows nothing, which OnNativeTextInput keeps out.
-        native.MaxLength = Maxlength is > 0 and var max ? max : 0;
-        native.PlaceholderText = Placeholder ?? "";
-
-        TextInputOptions.SetContentType(native, ContentType());
-        TextInputOptions.SetIsSensitive(native, password);
-        TextInputOptions.SetReturnKeyType(native, Enterkeyhint switch
-        {
-            SearchbarEnterkeyhint.Done => TextInputReturnKeyType.Done,
-            SearchbarEnterkeyhint.Enter => TextInputReturnKeyType.Return,
-            SearchbarEnterkeyhint.Go => TextInputReturnKeyType.Go,
-            SearchbarEnterkeyhint.Next => TextInputReturnKeyType.Next,
-            SearchbarEnterkeyhint.Previous => TextInputReturnKeyType.Previous,
-            SearchbarEnterkeyhint.Search => TextInputReturnKeyType.Search,
-            SearchbarEnterkeyhint.Send => TextInputReturnKeyType.Send,
-            _ => TextInputReturnKeyType.Default,
-        });
+        native.PasswordChar = password ? NativeTextField.PasswordMask : default;
 
         // autocapitalize === 'default' is no attribute, which is off.
-        var capitalize = Autocapitalize?.Trim().ToLowerInvariant();
-        TextInputOptions.SetAutoCapitalization(native, capitalize is "on" or "sentences" or "words");
-        TextInputOptions.SetUppercase(native, capitalize == "characters");
+        NativeTextField.Apply(native, Maxlength, Placeholder, NativeTextField.ContentType(Inputmode, Type), Enterkeyhint, Autocapitalize);
+        TextInputOptions.SetIsSensitive(native, password);
         TextInputOptions.SetShowSuggestions(native, Autocorrect == SearchbarAutocorrect.On);
     }
 
-    /// <summary><c>inputmode</c> if it's set, as it beats the type's keyboard, else <c>type</c>'s.</summary>
-    private TextInputContentType ContentType() => Inputmode switch
-    {
-        SearchbarInputmode.Decimal => TextInputContentType.Number,
-        SearchbarInputmode.Email => TextInputContentType.Email,
-        SearchbarInputmode.Numeric or SearchbarInputmode.Tel => TextInputContentType.Digits,
-        SearchbarInputmode.Search => TextInputContentType.Search,
-        SearchbarInputmode.Text => TextInputContentType.Normal,
-        SearchbarInputmode.Url => TextInputContentType.Url,
-        _ => Type switch
-        {
-            SearchbarType.Email => TextInputContentType.Email,
-            SearchbarType.Number => TextInputContentType.Number,
-            SearchbarType.Password => TextInputContentType.Password,
-            SearchbarType.Search => TextInputContentType.Search,
-            SearchbarType.Tel => TextInputContentType.Digits,
-            SearchbarType.Url => TextInputContentType.Url,
-            _ => TextInputContentType.Normal,
-        },
-    };
-
     // ── The native input ─────────────────────────────────────────────────────────────────────
 
-    /// <summary><c>valueChanged</c>: assigning the native input's value, which lets an <c>ionInput</c> handler replace it.</summary>
-    private void SyncNativeText()
-    {
-        // During an IME's composition too: searchbar.js's valueChanged, unlike ion-input's, doesn't check isComposing.
-        if (_native is not { } native || _syncing || native.Text == CurrentValue)
-        {
-            return;
-        }
-
-        _syncing = true;
-        try
-        {
-            native.Text = CurrentValue;
-            native.CaretIndex = CurrentValue.Length;
-        }
-        finally
-        {
-            _syncing = false;
-        }
-
-        if (_inUserEdit)
-        {
-            // Assigned during the user's edit, which the text box finishes by placing its caret after what was typed.
-            // Chromium leaves the caret at the end of an assigned value.
-            Dispatcher.UIThread.Post(() => native.CaretIndex = native.Text?.Length ?? 0, DispatcherPriority.Send);
-        }
-    }
-
-    private void OnNativeRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
-    {
-        if (_native is { IsKeyboardFocusWithin: false })
-        {
-            e.Handled = true;
-        }
-    }
-
-    /// <summary><c>onInput</c>: the user edited the text.</summary>
-    private void OnNativePropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != TextBox.TextProperty || _syncing || _native is not { } native)
-        {
-            return;
-        }
-
-        OnUserEdit(native.Text ?? "");
-    }
-
+    /// <summary><c>onInput</c>: the user edited the text, which the native change event follows.</summary>
     private void OnUserEdit(string text)
     {
         _userEdited = true;
-        _inUserEdit = true;
-        try
-        {
-            _syncing = true;
-            try
-            {
-                SetCurrentValue(ValueProperty, text);
-            }
-            finally
-            {
-                _syncing = false;
-            }
-
-            // A handler of the value's change can have replaced it, which the native input then shows.
-            SyncNativeText();
-            EmitInputChange();
-        }
-        finally
-        {
-            _inUserEdit = false;
-        }
+        _field.UserEdit(text, EmitInputChange);
     }
 
-    private void OnNativeTextInput(object? sender, TextInputEventArgs e)
-    {
-        // maxlength="0": nothing can be typed, which Avalonia's MaxLength of 0, no limit, doesn't say.
-        if (Maxlength == 0)
-        {
-            e.Handled = true;
-        }
-    }
-
-    private void OnNativePasting(object? sender, RoutedEventArgs e)
-    {
-        if (Maxlength == 0)
-        {
-            e.Handled = true;
-        }
-    }
-
-    private void OnNativeKeyDown(object? sender, KeyEventArgs e)
+    private void OnNativeKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
             // The native change event, which Enter raises after the user's edit.
             NativeChange();
         }
-        else if (e.Key == Key.Escape && Type == SearchbarType.Search && CurrentValue.Length > 0 && _native is { IsReadOnly: false })
+        else if (e.Key == Key.Escape && Type == SearchbarType.Search && CurrentValue.Length > 0 && _field.Native is { IsReadOnly: false })
         {
             // Chromium's search field: Escape clears it, as an edit. The key goes on, as it does in the page.
             OnUserEdit("");
         }
     }
 
-    private void OnNativeGotFocus(object? sender, FocusChangedEventArgs e)
+    private void OnNativeGotFocus()
     {
         // The native input's own record for its change event.
         _userEdited = false;
@@ -673,7 +530,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         PositionElements();
     }
 
-    private void OnNativeLostFocus(object? sender, FocusChangedEventArgs e)
+    private void OnNativeLostFocus()
     {
         // Chromium raises the native change before blur.
         NativeChange();
@@ -718,25 +575,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     private void EmitInputChange()
     {
         var value = Value;
-        if (Debounce is not { } wait)
-        {
-            RaiseEvent(new SearchbarInputEventArgs(IonInputEvent, this, value));
-            return;
-        }
-
-        // debounce: each call restarts the timer, and the last call's detail is what's raised.
-        _debounced?.Dispose();
-        IDisposable? handle = null;
-        handle = AvonicConfig.Schedule(() =>
-        {
-            if (_debounced == handle)
-            {
-                _debounced = null;
-            }
-
-            RaiseEvent(new SearchbarInputEventArgs(IonInputEvent, this, value));
-        }, TimeSpan.FromMilliseconds(Math.Max(0, wait)));
-        _debounced = handle;
+        _field.Debounced(Debounce, () => RaiseEvent(new SearchbarInputEventArgs(IonInputEvent, this, value)));
     }
 
     // ── The buttons ──────────────────────────────────────────────────────────────────────────
@@ -787,7 +626,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
             }
 
             // nativeInput.blur()
-            if (_native is { IsFocused: true } && TopLevel.GetTopLevel(this)?.FocusManager is { } focusManager)
+            if (_field.Native is { IsFocused: true } && TopLevel.GetTopLevel(this)?.FocusManager is { } focusManager)
             {
                 focusManager.Focus(null);
             }

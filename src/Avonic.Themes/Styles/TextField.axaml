@@ -1,0 +1,41 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- input.md.css's and textarea.md.css's ::slotted rules, in one file so that each host's own rules come after the shared
+         ones. A slotted control's logical parent is the presenter, so '>' means direct children only, as ::slotted does. A slot
+         holds one child, so its :last-of-type and :first-of-type always hold.
+
+         The rule for any child is the same in both, and is one rule for both hosts through IInputHost. It sets the whole Margin,
+         where CSS sets one side, so a button's and a chip's own 4 px are kept in a rule of their own per host, after it. No
+         activators, so an app's plain style beats them. -->
+
+    <!-- ::slotted([slot=start]:last-of-type): margin-inline-end 16px, margin-inline-start 0 -->
+    <Style Selector=":is(c|IInputHost) /template/ ContentPresenter#PART_Start > :is(Control)">
+        <Setter Property="Margin" Value="0,0,16,0" />
+    </Style>
+    <!-- ::slotted([slot=end]:first-of-type): margin-inline-start 16px, margin-inline-end 0 -->
+    <Style Selector=":is(c|IInputHost) /template/ ContentPresenter#PART_End > :is(Control)">
+        <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+
+    <!-- ion-input: an ion-button and an ion-chip keep their own 4px above and below: measured 4px 0px 4px 16px for a button at
+         the end. -->
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_Start > c|AvonicChip">
+        <Setter Property="Margin" Value="0,4,16,4" />
+    </Style>
+    <Style Selector="c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicButton, c|AvonicInput /template/ ContentPresenter#PART_End > c|AvonicChip">
+        <Setter Property="Margin" Value="16,4,0,4" />
+    </Style>
+
+    <!-- ion-textarea: an ion-button and an ion-chip keep their own 4px below, and lose the 4px above: measured 0px 0px 4px 16px
+         for a button at the end. margin-top 0 here; the 8 px (outline 12 px) above in a column is the slot wrapper's padding, in
+         the theme. -->
+    <Style Selector="c|AvonicTextarea /template/ ContentPresenter#PART_Start > c|AvonicButton, c|AvonicTextarea /template/ ContentPresenter#PART_Start > c|AvonicChip">
+        <Setter Property="Margin" Value="0,0,16,4" />
+    </Style>
+    <Style Selector="c|AvonicTextarea /template/ ContentPresenter#PART_End > c|AvonicButton, c|AvonicTextarea /template/ ContentPresenter#PART_End > c|AvonicChip">
+        <Setter Property="Margin" Value="16,0,0,4" />
+    </Style>
+
+</Styles>

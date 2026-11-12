@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -7,7 +6,6 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
@@ -34,7 +32,7 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(":has-value", ":has-focus", ":label-floating", ":in-item", ":textarea-disabled", ":auto-grow", ":cols")]
 [PseudoClasses(":fill-outline", ":fill-solid", ":shape-round", ":label-text-wrapper-hidden", ":has-bottom", ":ion-hover")]
 [PseudoClasses(":label-placement-start", ":label-placement-end", ":label-placement-fixed", ":label-placement-floating", ":label-placement-stacked")]
-public class AvonicTextarea : TemplatedControl, IItemControl
+public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
 {
     /// <summary>The style class an app sets once the user has been in the field, read with <see cref="InvalidClass"/>.</summary>
     public const string TouchedClass = "ion-touched";
@@ -202,56 +200,13 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     public static readonly RoutedEvent<RoutedEventArgs> IonBlurEvent =
         RoutedEvent.Register<AvonicTextarea, RoutedEventArgs>(nameof(IonBlur), RoutingStrategies.Bubble);
 
-    // ── For the theme ────────────────────────────────────────────────────────────────────────
-
-    /// <summary>The placement as <see cref="InputWrapperPanel"/> takes it, which lays out the label the same five ways.</summary>
-    public static readonly IValueConverter PlacementConverter =
-        new FuncValueConverter<TextareaLabelPlacement, InputLabelPlacement>(placement => placement switch
-        {
-            TextareaLabelPlacement.End => InputLabelPlacement.End,
-            TextareaLabelPlacement.Fixed => InputLabelPlacement.Fixed,
-            TextareaLabelPlacement.Floating => InputLabelPlacement.Floating,
-            TextareaLabelPlacement.Stacked => InputLabelPlacement.Stacked,
-            _ => InputLabelPlacement.Start,
-        });
-
-    /// <summary>
-    /// <c>padding-top: var(--padding-top)</c> and <c>padding-bottom: var(--padding-bottom)</c>, on the field, a row's label and the
-    /// slots. The values are the two variables, then the default for an unset bottom, then for an unset top (0 if there's none,
-    /// as in a column). The <c>ConverterParameter</c> is what's added above: a slotted child's <c>margin-top</c> in a column.
-    /// </summary>
-    public static readonly IMultiValueConverter VerticalPaddingConverter = new VerticalPaddingConverterImpl();
-
-    private static double Number(object? value) => value is double number && double.IsFinite(number) ? number : 0;
-
-    private static double NumberOr(object? value, double fallback) =>
-        value is double number && double.IsFinite(number) ? number : fallback;
-
-    private sealed class VerticalPaddingConverterImpl : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
-        {
-            var extra = double.TryParse(parameter as string, System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : 0;
-            var top = NumberOr(values.ElementAtOrDefault(0), Number(values.ElementAtOrDefault(3)));
-            var bottom = NumberOr(values.ElementAtOrDefault(1), Number(values.ElementAtOrDefault(2)));
-            return new Thickness(0, top + extra, 0, bottom);
-        }
-    }
-
-    private TextareaNativeInput? _native;
-    private Control? _wrapper;
-    private ContentPresenter? _labelContent;
-    private bool _syncing;
-    private bool _normalising;
-    private bool _inUserEdit;
-    private bool _autofocused;
+    private readonly NativeTextField _field;
+    private readonly LabelledTextField _label;
     private AvonicItem? _item;
     private bool _hasFocus;
     private bool _didTextareaClearOnEdit;
     private string? _focusedValue;
     private string? _counterText;
-    private IDisposable? _debounced;
 
     static AvonicTextarea()
     {
@@ -261,10 +216,23 @@ public class AvonicTextarea : TemplatedControl, IItemControl
 
     public AvonicTextarea()
     {
-        // The <label for> around the field: a click on it focuses the textarea, on release, with no keys.
-        _ = new NativeButton(this, OnLabelClick, () => false, UpdateIsEffectivelyEnabled);
+        // Unlike ion-input's, valueChanged doesn't wait for an IME's composition: textarea.js has no isComposing check. A
+        // caret moved into view while unfocused isn't held back either.
+        _field = new NativeTextField(this, ValueProperty, MaxlengthProperty)
+        {
+            KeyDownFirst = true,
+            Edited = OnNativeEdited,
+            Focused = OnNativeGotFocus,
+            Blurred = OnNativeLostFocus,
+            KeyDown = OnNativeKeyDown,
+            Typing = () => CheckClearOnEdit(Key.None),
+        };
+        _label = new LabelledTextField(this, _field, SetFocus, UpdateAutomation);
 
-        Classes.CollectionChanged += OnClassesChanged;
+        // The <label for> around the field: a click on it focuses the textarea, on release, with no keys.
+        _ = new NativeButton(this, _label.OnLabelClick, () => false, UpdateIsEffectivelyEnabled);
+
+        _label.FollowClasses();
         UpdateClasses();
     }
 
@@ -496,12 +464,12 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     /// </summary>
     public TextBox? GetInputElement()
     {
-        if (_native is null)
+        if (_field.Native is null)
         {
             ApplyTemplate();
         }
 
-        return _native;
+        return _field.Native;
     }
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
@@ -515,54 +483,18 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     /// <summary><c>hasLabel</c>: a <c>label</c>, even <c>""</c>, or anything in the <c>label</c> slot.</summary>
     private bool HasLabel => Label is not null || LabelContent is not null;
 
-    /// <summary><c>checkInvalidState</c>: the app has marked it both touched and invalid.</summary>
-    private bool IsInvalid => Classes.Contains(TouchedClass) && Classes.Contains(InvalidClass);
-
     // ── Lifecycle ────────────────────────────────────────────────────────────────────────────
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
 
-        if (_native is not null)
+        _field.Attach(e.NameScope.Find<TextareaNativeInput>("PART_NativeInput"));
+        _label.Attach(e.NameScope.Find<Control>("PART_Wrapper"), e.NameScope.Find<ContentPresenter>("PART_LabelContent"));
+        if (_field.Native is not null)
         {
-            _native.PropertyChanged -= OnNativePropertyChanged;
-            _native.RemoveHandler(TextInputEvent, OnNativeTextInput);
-            _native.PastingFromClipboard -= OnNativePasting;
-            _native.GotFocus -= OnNativeGotFocus;
-            _native.LostFocus -= OnNativeLostFocus;
-            _native.RemoveHandler(KeyDownEvent, OnNativeKeyDown);
-        }
-
-        _native = e.NameScope.Find<TextareaNativeInput>("PART_NativeInput");
-        _wrapper = e.NameScope.Find<Control>("PART_Wrapper");
-        if (_labelContent is not null)
-        {
-            _labelContent.PropertyChanged -= OnLabelContentPropertyChanged;
-        }
-
-        _labelContent = e.NameScope.Find<ContentPresenter>("PART_LabelContent");
-        if (_labelContent is not null)
-        {
-            // A templated label's element is made after the template's applied: name the field again then.
-            _labelContent.PropertyChanged += OnLabelContentPropertyChanged;
-        }
-
-        if (_native is not null)
-        {
-            // Text's own change, which is synchronous: TextChanged is posted, after the guard has gone.
-            _native.PropertyChanged += OnNativePropertyChanged;
-            _native.GotFocus += OnNativeGotFocus;
-            _native.LostFocus += OnNativeLostFocus;
-
-            // Before the text box types the key: checkClearOnEdit runs on keydown, before the character is in.
-            _native.AddHandler(KeyDownEvent, OnNativeKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
-
-            // A soft keyboard can type with no key down, where Chromium's keydown says "Unidentified": that clears too.
-            _native.AddHandler(TextInputEvent, OnNativeTextInput, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _native.PastingFromClipboard += OnNativePasting;
             UpdateNative();
-            SyncNativeText();
+            _field.Sync();
         }
 
         UpdateAutomation();
@@ -580,16 +512,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
-
-        // autoFocus: Chromium focuses it once, when it's first in the document, unless something else already has focus.
-        if (Autofocus && !_autofocused)
-        {
-            _autofocused = true;
-            if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is null)
-            {
-                SetFocus();
-            }
-        }
+        _label.OnLoaded(Autofocus);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -608,7 +531,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         {
             // valueChanged: the native textarea shows the value, unless it's what it already shows. runAutoGrow is the field's
             // own measure.
-            SyncNativeText();
+            _field.Sync();
             UpdateCounter();
             UpdateClasses();
         }
@@ -628,8 +551,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         }
         else if (change.Property == DebounceProperty)
         {
-            // debounceChanged replaces the emitter, and the old one's timer still runs: a pending ionInput is still raised.
-            _debounced = null;
+            _field.ForgetDebounce();
         }
         else if (change.Property == LabelProperty || change.Property == LabelContentProperty || change.Property == HelperTextProperty
                  || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty
@@ -646,41 +568,12 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         }
     }
 
-    private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        // The MutationObserver on class: a new aria-describedby. Only the two classes checkInvalidState reads.
-        if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset)
-        {
-            UpdateAutomation();
-        }
-    }
-
-    private static bool Mentions(System.Collections.IList? classes) =>
-        classes?.OfType<string>().Any(name => name is TouchedClass or InvalidClass) == true;
-
     /// <summary><c>render</c>'s host classes, and the reflected <c>cols</c> and <c>auto-grow</c> attributes.</summary>
     private void UpdateClasses()
     {
-        var placement = LabelPlacement;
-        var hasStartEnd = StartContent is not null || EndContent is not null;
-
-        PseudoClasses.Set(":has-value", HasValue);
-        PseudoClasses.Set(":has-focus", _hasFocus);
-
-        // The label floats when stacked, or floating with a value, focus, or anything in a slot.
-        PseudoClasses.Set(":label-floating",
-            placement == TextareaLabelPlacement.Stacked
-            || (placement == TextareaLabelPlacement.Floating && (HasValue || _hasFocus || hasStartEnd)));
-
-        PseudoClasses.Set(":fill-outline", Fill == TextareaFill.Outline);
-        PseudoClasses.Set(":fill-solid", Fill == TextareaFill.Solid);
-        PseudoClasses.Set(":shape-round", Shape == TextareaShape.Round);
-        PseudoClasses.Set(":label-placement-start", placement == TextareaLabelPlacement.Start);
-        PseudoClasses.Set(":label-placement-end", placement == TextareaLabelPlacement.End);
-        PseudoClasses.Set(":label-placement-fixed", placement == TextareaLabelPlacement.Fixed);
-        PseudoClasses.Set(":label-placement-floating", placement == TextareaLabelPlacement.Floating);
-        PseudoClasses.Set(":label-placement-stacked", placement == TextareaLabelPlacement.Stacked);
-        PseudoClasses.Set(":in-item", _item is not null);
+        LabelledTextField.SetClasses(PseudoClasses, LabelledTextField.Placement(LabelPlacement), HasValue, _hasFocus,
+            StartContent is not null || EndContent is not null, Fill == TextareaFill.Outline, Fill == TextareaFill.Solid,
+            Shape == TextareaShape.Round, _item is not null);
         PseudoClasses.Set(":textarea-disabled", !IsEnabled);
         PseudoClasses.Set(":auto-grow", AutoGrow);
         PseudoClasses.Set(":cols", Cols is not null);
@@ -693,135 +586,39 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     /// <summary>What <c>render</c> puts on the native textarea.</summary>
     private void UpdateNative()
     {
-        if (_native is not { } native)
+        if (_field.Native is not TextareaNativeInput native)
         {
             return;
         }
 
         native.IsReadOnly = Readonly;
-        // A negative maxlength is invalid in HTML, so no limit; 0 allows nothing, which OnNativeTextInput keeps out.
-        native.MaxLength = Maxlength is > 0 and var max ? max : 0;
-        native.PlaceholderText = Placeholder ?? "";
         native.Rows = Rows;
         native.Cols = Cols;
         native.AutoGrow = AutoGrow;
         native.TextWrapping = Wrap == TextareaWrap.Off ? TextWrapping.NoWrap : TextWrapping.Wrap;
 
         TextInputOptions.SetMultiline(native, true);
-        TextInputOptions.SetContentType(native, Inputmode switch
-        {
-            TextareaInputmode.Decimal => TextInputContentType.Number,
-            TextareaInputmode.Email => TextInputContentType.Email,
-            TextareaInputmode.Numeric or TextareaInputmode.Tel => TextInputContentType.Digits,
-            TextareaInputmode.Search => TextInputContentType.Search,
-            TextareaInputmode.Url => TextInputContentType.Url,
-            _ => TextInputContentType.Normal,
-        });
-        TextInputOptions.SetReturnKeyType(native, Enterkeyhint switch
-        {
-            TextareaEnterkeyhint.Done => TextInputReturnKeyType.Done,
-            TextareaEnterkeyhint.Enter => TextInputReturnKeyType.Return,
-            TextareaEnterkeyhint.Go => TextInputReturnKeyType.Go,
-            TextareaEnterkeyhint.Next => TextInputReturnKeyType.Next,
-            TextareaEnterkeyhint.Previous => TextInputReturnKeyType.Previous,
-            TextareaEnterkeyhint.Search => TextInputReturnKeyType.Search,
-            TextareaEnterkeyhint.Send => TextInputReturnKeyType.Send,
-            _ => TextInputReturnKeyType.Default,
-        });
-
-        var capitalize = Autocapitalize?.Trim().ToLowerInvariant();
-        TextInputOptions.SetAutoCapitalization(native, capitalize is "on" or "sentences" or "words");
-        TextInputOptions.SetUppercase(native, capitalize == "characters");
+        NativeTextField.Apply(native, Maxlength, Placeholder, NativeTextField.ContentType(Inputmode, null), Enterkeyhint, Autocapitalize);
     }
 
     /// <summary><c>renderCounter</c> and <c>getCounterText</c>.</summary>
-    private void UpdateCounter()
-    {
-        if (!Counter || Maxlength is not { } max)
-        {
-            CounterText = null;
-            return;
-        }
-
-        var length = CurrentValue.Length;
-        var fallback = $"{length} / {max}";
-        if (CounterFormatter is not { } formatter)
-        {
-            CounterText = fallback;
-            return;
-        }
-
-        try
-        {
-            CounterText = formatter(length, max);
-        }
-        catch (Exception)
-        {
-            // printIonError, then the default text.
-            CounterText = fallback;
-        }
-    }
+    private void UpdateCounter() => CounterText = LabelledTextField.CounterText(Counter, Maxlength, CurrentValue, CounterFormatter);
 
     // ── The native textarea ──────────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// <c>valueChanged</c>: assigning the native textarea's value, which lets an <c>ionInput</c> handler replace it. Unlike
-    /// <c>ion-input</c>'s, it doesn't wait for an IME's composition: <c>textarea.js</c> has no <c>isComposing</c> check.
-    /// </summary>
-    private void SyncNativeText()
-    {
-        if (_native is not { } native || _syncing || _normalising || native.Text == CurrentValue)
-        {
-            return;
-        }
-
-        _syncing = true;
-        try
-        {
-            native.Text = CurrentValue;
-            native.CaretIndex = CurrentValue.Length;
-        }
-        finally
-        {
-            _syncing = false;
-        }
-
-        if (_inUserEdit)
-        {
-            // Assigned during the user's edit, which the text box finishes by placing its caret after what was typed.
-            // Chromium leaves the caret at the end of an assigned value.
-            Dispatcher.UIThread.Post(() => native.CaretIndex = native.Text?.Length ?? 0, DispatcherPriority.Send);
-        }
-    }
-
     /// <summary><c>onInput</c>: the user edited the text.</summary>
-    private void OnNativePropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    private void OnNativeEdited(string text)
     {
-        if (e.Property != TextBox.TextProperty || _syncing || _native is not { } native)
-        {
-            return;
-        }
-
         // A <textarea>'s value keeps a line break as a line feed: a pasted CR LF or CR is one. The field's own text is fixed once
         // the text box has placed its caret, which is in the text's own terms until then.
-        var text = native.Text ?? "";
         var normal = Normalise(text);
-        if (normal != text)
+        if (normal != text && _field.Native is { } native)
         {
-            _normalising = true;
+            _field.IsHeld = true;
             Dispatcher.UIThread.Post(() => NormaliseNative(native, text), DispatcherPriority.Send);
         }
 
-        _inUserEdit = true;
-        try
-        {
-            SetValueFromUser(normal);
-            EmitInputChange();
-        }
-        finally
-        {
-            _inUserEdit = false;
-        }
+        _field.UserEdit(normal, EmitInputChange);
     }
 
     /// <summary>A textarea's line breaks: CR LF and CR are each a line feed.</summary>
@@ -829,10 +626,10 @@ public class AvonicTextarea : TemplatedControl, IItemControl
 
     private void NormaliseNative(TextBox native, string text)
     {
-        _normalising = false;
+        _field.IsHeld = false;
         if (native.Text != text)
         {
-            SyncNativeText();
+            _field.Sync();
             return;
         }
 
@@ -846,57 +643,12 @@ public class AvonicTextarea : TemplatedControl, IItemControl
             }
         }
 
+        // Where the text box put it, or at the end of a value an ionInput handler replaced, as Chromium leaves it.
         var replaced = CurrentValue != Normalise(text);
-        _syncing = true;
-        try
-        {
-            native.Text = CurrentValue;
-            // Where the text box put it, or at the end of a value an ionInput handler replaced, as Chromium leaves it.
-            native.CaretIndex = replaced ? CurrentValue.Length : Math.Min(caret - removed, CurrentValue.Length);
-        }
-        finally
-        {
-            _syncing = false;
-        }
+        _field.SetText(CurrentValue, replaced ? CurrentValue.Length : Math.Min(caret - removed, CurrentValue.Length));
     }
 
-    private void OnNativeTextInput(object? sender, TextInputEventArgs e)
-    {
-        // maxlength="0": nothing can be typed, which Avalonia's MaxLength of 0, no limit, doesn't say.
-        if (Maxlength == 0)
-        {
-            e.Handled = true;
-            return;
-        }
-
-        CheckClearOnEdit(Key.None);
-    }
-
-    private void OnNativePasting(object? sender, RoutedEventArgs e)
-    {
-        if (Maxlength == 0)
-        {
-            e.Handled = true;
-        }
-    }
-
-    private void SetValueFromUser(string value)
-    {
-        _syncing = true;
-        try
-        {
-            SetCurrentValue(ValueProperty, value);
-        }
-        finally
-        {
-            _syncing = false;
-        }
-
-        // A handler of the value's change can have replaced it, which the native textarea then shows.
-        SyncNativeText();
-    }
-
-    private void OnNativeGotFocus(object? sender, FocusChangedEventArgs e)
+    private void OnNativeGotFocus()
     {
         // onFocus
         _hasFocus = true;
@@ -905,7 +657,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         RaiseEvent(new RoutedEventArgs(IonFocusEvent, this));
     }
 
-    private void OnNativeLostFocus(object? sender, FocusChangedEventArgs e)
+    private void OnNativeLostFocus()
     {
         // The native change event, then onBlur, which finds the value already committed: one ionChange, if the value isn't what
         // it was at focus.
@@ -920,7 +672,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         RaiseEvent(new RoutedEventArgs(IonBlurEvent, this));
     }
 
-    private void OnNativeKeyDown(object? sender, KeyEventArgs e)
+    private void OnNativeKeyDown(KeyEventArgs e)
     {
         CheckClearOnEdit(e.Key);
 
@@ -942,7 +694,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl
         var ignored = IgnoredKeys.Contains(key);
         if (!_didTextareaClearOnEdit && HasValue && !ignored)
         {
-            SetValueFromUser("");
+            _field.SetValueFromUser("");
             EmitInputChange();
         }
 
@@ -959,59 +711,10 @@ public class AvonicTextarea : TemplatedControl, IItemControl
     private void EmitInputChange()
     {
         var value = Value;
-        if (Debounce is not { } wait)
-        {
-            RaiseEvent(new TextareaInputEventArgs(IonInputEvent, this, value));
-            return;
-        }
-
-        // debounce: each call restarts the timer, and the last call's detail is what's raised.
-        _debounced?.Dispose();
-        IDisposable? handle = null;
-        handle = AvonicConfig.Schedule(() =>
-        {
-            if (_debounced == handle)
-            {
-                _debounced = null;
-            }
-
-            RaiseEvent(new TextareaInputEventArgs(IonInputEvent, this, value));
-        }, TimeSpan.FromMilliseconds(Math.Max(0, wait)));
-        _debounced = handle;
+        _field.Debounced(Debounce, () => RaiseEvent(new TextareaInputEventArgs(IonInputEvent, this, value)));
     }
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// The <c>&lt;label for&gt;</c>'s activation: a click in the wrapper that isn't on the native textarea focuses it. A slotted
-    /// button's click is its own, as <see cref="NativeButton"/> arranges. The bottom text is outside the label.
-    /// </summary>
-    private void OnLabelClick(object? source)
-    {
-        if (source is not Visual visual || _wrapper is null || (visual != _wrapper && !_wrapper.IsVisualAncestorOf(visual)))
-        {
-            return;
-        }
-
-        // A label does nothing when the click is on interactive content inside it, other than its own control.
-        for (var at = visual; at is not null && at != _wrapper && at != this; at = at.GetVisualParent())
-        {
-            if (at is InputElement { Focusable: true } element && element != _native && !(_native?.IsVisualAncestorOf(element) ?? false))
-            {
-                return;
-            }
-        }
-
-        SetFocus();
-    }
-
-    private void OnLabelContentPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == ContentPresenter.ChildProperty)
-        {
-            UpdateAutomation();
-        }
-    }
 
     protected override void OnPointerEntered(PointerEventArgs e)
     {
@@ -1036,34 +739,15 @@ public class AvonicTextarea : TemplatedControl, IItemControl
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// The native textarea's <c>aria-labelledby</c>: the label, or the slotted label's text, unless the host has an
-    /// <c>aria-label</c>, which <c>inheritAriaAttributes</c> moves to it. <c>aria-describedby</c>: <c>getHintTextID</c>.
-    /// </summary>
+    /// <summary>The native textarea's <c>aria-labelledby</c>, <c>aria-describedby</c> and <c>aria-required</c>.</summary>
     private void UpdateAutomation()
     {
-        if (_native is not { } native)
+        if (_field.Native is not { } native)
         {
             return;
         }
 
-        var name = AutomationProperties.GetName(this);
-        if (string.IsNullOrEmpty(name))
-        {
-            name = Label ?? LabelContent switch
-            {
-                Control control => AccessibleText.Of(control),
-                string text => text,
-                _ => _labelContent?.Child is { } child ? AccessibleText.Of(child) : null,
-            };
-        }
-
-        native.SetValue(AutomationProperties.NameProperty, name);
-
-        var hint = IsInvalid && !string.IsNullOrEmpty(ErrorText) ? ErrorText
-            : !string.IsNullOrEmpty(HelperText) ? HelperText
-            : null;
-        native.SetValue(AutomationProperties.HelpTextProperty, hint);
+        _label.UpdateAutomation(native, Label, LabelContent, HelperText, ErrorText);
 
         // required on the <textarea>: aria-required to a screen reader. Form validation isn't here.
         native.SetValue(AutomationProperties.IsRequiredForFormProperty, Required);

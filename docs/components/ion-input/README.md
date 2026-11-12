@@ -126,13 +126,20 @@ Not in Ionic's API, but needed by the theme:
 
 - `HighlightBrush`: Ionic's internal `--highlight-color`, which the theme works out per state (focused, a colour, valid, invalid).
 - `CounterText`: the counter's text, or null when there's none.
-- The converters `PaddingConverter`, `BottomPaddingConverter`, `RadiusConverter`, `SidesConverter`, `OutlineStartWidthConverter`,
-  `NotchWidthConverter` and `OrConverter`.
+- The converters in `FieldConverters`, which the textarea's and the searchbar's themes share: `Padding`, `BottomPadding`, `Radius`,
+  `Sides`, `OutlineStartWidth`, `NotchWidth` and `Or`.
 - `InputWrapperPanel`: the wrapper's flex box, in a row, a column, or with the outline's label out of the flow.
+- `InputNativeInput`: the native `<input>`, a `TextBox` that wants the width Chromium gives 20 characters while the input is
+  `width: auto`, in an item's start or end slot: 199 at 16 px Roboto, as measured.
+- `IInputHost`, which the input and the textarea implement, for the slotted margins both have.
+
+The input shares its native field with the textarea and the searchbar (`Controls/TextField/`): the value kept in step through
+`Text`, `maxlength` 0, the keyboard options, `debounce`, and, with the textarea, the label's activation, automation and counter.
 
 ## Known gaps
 
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): a click on the label while focused keeps focus, where
 Chromium blurs and refocuses; no date or time types and no number filtering; an icon-only button in a slot keeps its own look;
-an app's background and border keys win at rest with a fill, where Ionic's fill wins; an input in an item's start or end slot still stretches; the notch has no
+an app's background and border keys win at rest with a fill, where Ionic's fill wins; outside an item's start or end slot, a
+container that sizes to its content gives the input its text's width, where Chromium gives it 20 characters; the notch has no
 `max-width`; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader; `Required` is set for automation, but nothing in Avalonia 12.1.4 reads it. Not tried in a real window, with a soft keyboard, or on a device.

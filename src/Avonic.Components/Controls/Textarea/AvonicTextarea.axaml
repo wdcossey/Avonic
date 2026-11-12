@@ -68,7 +68,7 @@
                         <Border Name="PART_OutlineNotch" Grid.Column="1">
                             <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0">
                                 <TextBlock.Width>
-                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
                                         <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="#PART_LabelContent.Bounds.Width" />
                                     </MultiBinding>
@@ -80,7 +80,7 @@
                     <!-- .textarea-wrapper, the <label for>: a transparent background, so a click anywhere in it is the label's -->
                     <Border Name="PART_Wrapper" Background="Transparent">
                         <c:InputWrapperPanel Name="PART_Layout"
-                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicTextarea.PlacementConverter}}">
+                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.TextareaPlacement}}">
                             <!-- align-items: flex-start -->
                             <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
                                 <Panel>

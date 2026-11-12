@@ -74,8 +74,8 @@ anti-aliasing at the text and the shadow's edge.
 
 - **`dir` on the searchbar itself** mirrors everything here; Ionic moves it to the native input, so only the text turns
   (measured in the first render, before the RTL row was wrapped). `lang` has no counterpart.
-- **The cancel button's default icon** is `null`, meaning md's `arrow-back-sharp`, where Ionic's default is
-  `config.get('backButtonIcon', arrowBackSharp)`: Avonic has no `backButtonIcon` config yet.
+- **The cancel button's default icon** is `config.get('backButtonIcon', arrowBackSharp)`, read when the searchbar is made: now
+  `AvonicConfig.BackButtonIcon` (#131), whose null is md's `arrow-back-sharp`, not mirrored.
 - **The typed text** sits 0.5 px lower (above).
 - **Disabled buttons.** Ionic's `disabled` disables only the native input and sets `pointer-events: none` on the host, so,
   measured, Tab still reaches a shown cancel button and clear button, and Enter on the clear button raises `ionClear` and

@@ -25,6 +25,10 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Controls/Flex/         FlexRow and FlexSlot: display: flex and <slot>, for the parts in a host's template; MinContent, the
                          min-content width both FlexRow and the grid's RowPanel use; LabelledControlPanel, the label and the
                          control's part of a checkbox, a radio and a toggle, for labelPlacement, justify and alignment
+  Controls/TextField/    what ion-input, ion-textarea and ion-searchbar share: NativeTextField (the native field kept in step
+                         with Value, maxlength 0, the keyboard, debounce), LabelledTextField (the input's and the textarea's
+                         label, automation and counter), FieldConverters for their themes, IInputHost for their slotted
+                         margins, and the one-line native TextBox's ControlTheme
   Controls/List/         AvonicList, and in AvonicList.StuckDivider.cs the copy it draws of a sticky AvonicItemDivider whose row
                          its virtualising panel has recycled (for items that are data, not controls)
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
@@ -34,7 +38,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          Css = var(), em, padding and transform values for themes;
                          BorderRadius = border-radius with percentages, for themes;
                          HiddenChainWatcher = waits for display: none on a control or an ancestor to end;
-                         StyleValue = a value the control's code gives a property at style priority, or nothing)
+                         StyleValue = a value the control's code gives a property at style priority, or nothing;
+                         KeepFocus = a pointerdown's preventDefault(), so that a press moves no focus)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting (docs/infra/gesture/README.md)
@@ -195,6 +200,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | CSS specificity | a rule with a pseudoclass or class beats one without, then later beats earlier | Global `Styles` beat a `ControlTheme`, and files in `Styles/` merge in ordinal order |
 | `:host-context(.foo)` | a descendant selector, in `Styles/` | `:host-context(.item-input)` → `c\|AvonicItem:item-input c\|AvonicLabel` |
 | `:host-context(.item)` | `:is(c\|IItemHost) c\|Foo`, which an item, a divider and a group implement, and a list header doesn't. A type, so that it adds no activators and doesn't rise over an app's plain style, as a pseudoclass would | `Styles/Label.axaml` |
+| A `::slotted` rule that `input.md.css` and `textarea.md.css` both have, word for word | `:is(c\|IInputHost) /template/ ContentPresenter#PART_Start > :is(Control)`, in `Styles/TextField.axaml`, with each host's own rules after it in the same file | the slotted margins |
 | A `::slotted(ion-foo)` rule that `item.md.css` and `item-divider.md.css` both have, word for word | `:is(c\|IItemHost) /template/ ContentPresenter > c\|AvonicFoo`, one rule for both hosts, in `Styles/Foo.axaml`, unless it sets `Margin`: then a copy in `Styles/Item.axaml` and `Styles/ItemDivider.axaml` each, after the host's rule for any child. A group has no slots, so it costs nothing there | `::slotted(ion-note)` → `Styles/Note.axaml`; `::slotted(ion-avatar)` → `Item.axaml` and `ItemDivider.axaml` |
 | `::slotted([slot=start])` setting one side, beside a slotted control's own margin | A rule for that control in the host's `Styles/` file, after the host's rule for any child, with no activator, so an app's plain style wins. Tests merge the control's file first and last, and add an app's plain style | `Item.axaml`: a chip's `4,4,16,4`, an avatar's `0,8,16,8`. Beside a stacked label the rule needs an activator, and the app's style loses: record it |
 | `z-index` on a slotted child, over a part outside the slot | The part goes before the slots, as `ZIndex` only sorts siblings | `::slotted(ion-button)` → `PART_Ripple` before `PART_Layout` |
@@ -238,7 +244,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `ion-foo.ion-color .ion-inherit-color` | `c\|Foo:ion-color c\|Bar`, with `Foreground` bound to `$parent[Control].(TextElement.Foreground)` | after `:ion-color`, which it beats |
 | `--ion-safe-area-top` | `Avonic.SafeAreaTop` (`double`), 0 by default, as Avalonia pads its root view itself. The app fills them | also `Bottom`, `Left`, `Right`. `calc(var(--padding-start) + var(--ion-safe-area-left))` → `Css.SafeAreaBox`, which swaps sides in RTL. The item, the divider and the list header read them |
 | `requestAnimationFrame`, `readTask` | `AvonicConfig.RequestFrame` | `TestClock` runs it at 16 ms, so that it asserts the timeline |
-| Ionic's global config (`config.get('foo')`) | A static property on `AvonicConfig`, read when Ionic reads it: in `render()`, that's the first attach and each change of a prop | `spinner` → `AvonicConfig.Spinner` |
+| Ionic's global config (`config.get('foo')`) | A static property on `AvonicConfig`, read when Ionic reads it: in `render()`, that's the first attach and each change of a prop; as a prop's default, in the constructor, at style priority, so an app's value wins | `spinner` → `AvonicConfig.Spinner`; `backButtonIcon` → `AvonicConfig.BackButtonIcon`, the searchbar's `CancelButtonIcon` |
 | `overflow: hidden` on a scroller's vertical axis | `Hidden`, with input blocked in the control, not `Disabled`, which resets the position | `ScrollY="False"` |
 | `position: absolute` with no inset, on a slot's child | the child's alignments, at style priority, so an app's value wins | `slot="fixed"` → `Left`, `Top` |
 | `--foo` with a different default per host class | key set to `<b:CssUnset />`, default from an `Avonic.<Name>.Md.*` key as `Css.Var`'s last value | `--background-hover-opacity` → `Avonic.Button.Md.BackgroundHoverOpacitySolid` |
@@ -281,9 +287,10 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `labelPlacement`, `justify`, `alignment` on a form control (`.xxx-wrapper`) | `LabelledControlPanel` as `PART_Wrapper`, the control's own enums mapped by name through `LabelledControlPanel.FromControl` | `AvonicCheckbox`, `AvonicRadio`, `AvonicToggle` |
 | `opacity` on a control whose parts overlap | `OpacityMask` with a solid brush at that alpha, as Avalonia's `Opacity` fades each part on its own | `AvonicToggle`'s disabled 0.38; `AvonicInput`, `AvonicTextarea`, `AvonicSearchbar` |
 | `isRTL(el)` | The control's `FlowDirection`, which inherits from any ancestor, where Ionic reads only the element's and the document's `dir` | `AvonicToggle`'s drag |
-| A native `<input>` | A `TextBox` with its own minimal `ControlTheme`, `Value` kept in step through `Text`'s property change (synchronous; `TextChanged` is posted), so only the user's edits raise the input event | `AvonicInput` |
+| A native `<input>` | A `TextBox` with a minimal `ControlTheme`, `Value` kept in step through `Text`'s property change (synchronous; `TextChanged` is posted), so only the user's edits raise the input event: `NativeTextField`, in `Controls/TextField/`, with what each control's `.js` does differently left to the control | `AvonicInput`, `AvonicTextarea`, `AvonicSearchbar` |
+| An `<input>` as wide as its `size`, 20 (`width: auto` on the host) | `InputNativeInput` wants Chromium's width: `ceil(round(x advance) × 20) + round(xMax − xMin) − round(x advance)`, from the font's `head` table, at most what's available | `AvonicInput` in an item's start or end slot: 199 at 16 px Roboto |
 | `<label for>` around a control | `NativeButton` with no keys on the host; a click whose path from the source holds focusable content other than the control does nothing, as HTML's label activation | `AvonicInput` |
-| `pointerdown` with `preventDefault()`: a button that mustn't take focus | `KeepFocus.During(e)` from an ancestor's tunnel handler: every focusable element on the press's path is unfocusable until the press is handled, as Avalonia focuses in a class handler before the element's own handlers | `AvonicInput`'s clear button, `AvonicInputPasswordToggle`, `AvonicSearchbar`'s clear button |
+| `pointerdown` with `preventDefault()`: a button that mustn't take focus | `Behaviors/KeepFocus.During(e)` from an ancestor's tunnel handler: every focusable element on the press's path is unfocusable until the press is handled, as Avalonia focuses in a class handler before the element's own handlers | `AvonicInput`'s clear button, `AvonicInputPasswordToggle`, `AvonicSearchbar`'s clear button |
 | `mousedown`, `touchstart` with `preventDefault()` and `stopPropagation()`, acting at once | The host's `PointerPressed` tunnel handler, for a press under the part: handled, which moves no focus, then the action. Not if an ancestor handled the press on its way down | `AvonicSearchbar`'s cancel button |
 | A part name that other parts carry in a state (`part="header expanded"`) | A pseudoclass on the host, as the state isn't an element of its own | `ion-accordion`'s `expanded` → `:expanded` |
 | `max-height` animated on a box with `overflow: hidden` | A `Decorator` that measures its child at its own height and clips it, with `MaxHeight` eased on `AvonicConfig`'s clock | `AccordionContentClip` |
