@@ -82,8 +82,8 @@ A virtualising panel isn't supported, as the drag reads every child.
 | `Avonic.ReorderGroup.SelectedBoxShadow` | `0 0 15.6 0 #66000000` | `.reorder-selected { box-shadow: 0 0 10px rgba(0,0,0,.4) }`: the same Gaussian in Avalonia's terms |
 
 Neither has CSS variables. The shadow is on `PART_Lift` in `Controls/AvonicReorderGroup.axaml`, at 0.8, as CSS fades it with the
-child. The handle's 31 px and 0.3 are literals in `Controls/AvonicReorder.axaml`; the lifted item's 0.8 is in
-`Styles/ReorderGroup.axaml`.
+child. The handle's 31 px and 0.3 are literals in `Controls/AvonicReorder.axaml`; the lifted item's 0.8 is in the item's own theme,
+`Controls/AvonicItem.axaml`, under `:reorder-selected`.
 
 ## Extensions
 
@@ -99,5 +99,5 @@ None. `:reorder-selected`, `:reorder-enabled` and `:reorder-list-active` are Ion
 - **A slot is an item's start or end**: a handle in another host's named slot isn't hidden, as Ionic's `[slot]` would be.
 - **The lifted item's opacity fades each part**, not the item as one layer. Over a white item it's the same.
 - **No haptics.**
-- **An `AvonicList` around the group clips** an item lifted past the list's edge, where `ion-list` doesn't.
+- An `AvonicList` around the group clips an item lifted past the list's edge, as `ion-list`'s `contain: content` does (measured).
 - Tried in a real window with touch and the mouse by `tools/real-window`; not on a device.

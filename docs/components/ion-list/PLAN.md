@@ -21,7 +21,7 @@ their own plans: [`ion-list-header`](../ion-list-header/PLAN.md), [`ion-item-div
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `closeSlidingItems()` | — | Omitted: `ion-item-sliding` (#31) doesn't exist, so it could only ever return `false`, and a declared member has to work. #31 adds it, with its test |
+| [ ] | `closeSlidingItems()` | — | Omitted: `ion-item-sliding` (#31) doesn't exist, so it could only ever return `false`, and a declared member has to work. #31 adds it, with its test. Added in #131's roll-up as `CloseSlidingItems()`, with the inset rule for sliding items |
 
 No events, slots, parts or CSS variables in `core.json`. The children of an `ion-list` aren't slotted, because it has no
 shadow root, so they're `Items`.

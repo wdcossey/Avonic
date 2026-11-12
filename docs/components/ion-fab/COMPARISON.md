@@ -50,8 +50,8 @@ fab's half opacity match.
   246, 249. Beside it, from its right edge: Chromium 218, 228, 235, 240, 243, 246, 248, 250; Avalonia 214, 226, 236, 242, 246, 249,
   251, 253.
 - **Several fabs in the one fixed slot need a panel.** `FixedContent` holds one child, which `AvonicContent` puts at its top start
-  as `position: absolute` would. A `Panel` with `HorizontalAlignment` and `VerticalAlignment` `Stretch` set on it covers the content,
-  as the slot does, and the fabs place themselves in it.
+  as `position: absolute` would, unless it's a `Panel`, which stands for the slot: it covers the content, and the fabs place
+  themselves in it. (Until #131's roll-up the app had to set the panel's alignments to `Stretch`.)
 
 ### Found here, not by the tests
 

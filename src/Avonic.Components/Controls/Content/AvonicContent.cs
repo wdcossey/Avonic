@@ -661,12 +661,15 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// <c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins, its
-    /// style too, as for <see cref="UpdateContainerChild"/>.
+    /// style too, as for <see cref="UpdateContainerChild"/>. A slot holds one child here, so a plain <see cref="Panel"/>, which
+    /// overlaps its children, stands for the slot, as Ionic takes any number of <c>slot="fixed"</c> elements: it's left to fill
+    /// the host, and its children, such as several <see cref="AvonicFab"/>s, place themselves in it. A panel of another type, a
+    /// <see cref="StackPanel"/> say, lays its children out as a <c>div</c> around them would, so it's one block at the corner.
     /// </summary>
     private void UpdateFixedChild()
     {
         Reset(_fixedChildDefaults);
-        if (_fixed?.Child is { } child)
+        if (_fixed?.Child is { } child && child.GetType() != typeof(Panel))
         {
             Add(_fixedChildDefaults, child.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Left, BindingPriority.Style));
             Add(_fixedChildDefaults, child.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top, BindingPriority.Style));
@@ -709,7 +712,12 @@ public class AvonicContent : TemplatedControl
 
     private void OnLayoutUpdated(object? sender, EventArgs e) => ReadDimensions();
 
-    /// <summary><c>readDimensions</c>: how far the edges of the host are from those of the page.</summary>
+    /// <summary>
+    /// <c>readDimensions</c>: <c>offsetTop</c>, and the page's height less that and the host's. <c>offsetTop</c> counts from the
+    /// offset parent, the closest <c>.ion-page</c>, which is the page itself except in tabs, where it's the tab: the offsets
+    /// reach the tabs' bottom (a bottom tab bar and a footer), and with a top tab bar the top is 0 and the bottom runs past the
+    /// tabs by the bar, as measured in Chromium.
+    /// </summary>
     private void ReadDimensions()
     {
         if (FindPage() is not { } page)
@@ -720,6 +728,11 @@ public class AvonicContent : TemplatedControl
         var top = 0d;
         for (Visual? visual = this; visual is not null && visual != page; visual = visual.GetVisualParent())
         {
+            if (visual != this && IsIonPage(visual))
+            {
+                break;
+            }
+
             top += visual.Bounds.Y;
 
             // offsetTop doesn't move with an ancestor's scroll.
@@ -733,10 +746,16 @@ public class AvonicContent : TemplatedControl
         SetOffsets(top, Math.Max(page.Bounds.Height - top - Bounds.Height, 0));
     }
 
-    /// <summary><c>getPageElement</c>: the closest <c>.ion-page</c>, or else the parent. Avonic has no <c>ion-app</c> or <c>ion-tabs</c> yet.</summary>
+    /// <summary>
+    /// <c>getPageElement</c>: the closest <see cref="AvonicTabs"/>, whatever is between, else the closest <c>.ion-page</c>, or else
+    /// the parent. Avonic has no <c>ion-app</c> or popover yet.
+    /// </summary>
     private Visual? FindPage() =>
-        this.GetVisualAncestors().FirstOrDefault(ancestor => ancestor.Classes.Contains("ion-page"))
+        this.FindAncestorOfType<AvonicTabs>()
+        ?? this.GetVisualAncestors().FirstOrDefault(IsIonPage)
         ?? this.GetVisualParent();
+
+    private static bool IsIonPage(Visual visual) => visual.Classes.Contains("ion-page");
 
     private void SetOffsets(double top, double bottom)
     {

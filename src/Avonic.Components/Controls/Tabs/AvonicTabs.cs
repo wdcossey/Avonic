@@ -198,6 +198,13 @@ public class AvonicTabs : TemplatedControl
     private IEnumerable<ILogical> BarsFirst() =>
         new[] { InSlot(TopContent, _topPresenter), InSlot(BottomContent, _bottomPresenter), InSlot(Content, _contentPresenter) }.OfType<ILogical>();
 
+    /// <summary>
+    /// <c>tabs.querySelector(':scope > ion-tab-bar').slot === 'bottom'</c>, which <see cref="AvonicFooter"/> reads: the first
+    /// <see cref="AvonicTabBar"/> directly in a bar slot, the top's first as in <see cref="BarsFirst"/>, is in the bottom one.
+    /// </summary>
+    internal bool HasBottomTabBar() =>
+        InSlot(TopContent, _topPresenter) is not AvonicTabBar && InSlot(BottomContent, _bottomPresenter) is AvonicTabBar;
+
     /// <summary><c>querySelectorAll('ion-tab')</c>: every <see cref="AvonicTab"/> in it, at any depth.</summary>
     internal IEnumerable<AvonicTab> Tabs() => Slotted().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTab>();
 

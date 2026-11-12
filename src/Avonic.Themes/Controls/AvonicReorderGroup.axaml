@@ -18,8 +18,8 @@
     </Design.PreviewWith>
 
     <!-- reorder-group.css: the host is a block of its children, and the transforms are the control's. Its .reorder-selected rule
-         is here as PART_Lift, which the group puts over the child being dragged, for the shadow, and in Styles/ReorderGroup.axaml
-         for the child's opacity. -->
+         is here as PART_Lift, which the group puts over the child being dragged, for the shadow, and in AvonicItem's own theme
+         for an item's opacity. -->
     <ControlTheme x:Key="{x:Type c:AvonicReorderGroup}" TargetType="c:AvonicReorderGroup">
         <Setter Property="Template">
             <ControlTemplate>

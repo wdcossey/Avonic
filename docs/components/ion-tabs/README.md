@@ -141,8 +141,8 @@ None.
   then runs the call, with both events for each.
 - **The bar the tabs mark** is the first in `TopContent`, then `BottomContent`, then `Content`. Ionic takes the first in its
   markup, which the author orders; slots have no order here, so a bar inside a page never takes the main bar's place.
-- **`AvonicContent`** in a tab takes the tab as its page, where Ionic's takes `ion-tabs`, so a fullscreen content stops at the
-  tab bar's edge. A footer in tabs with a bottom bar keeps its bottom safe area, which Ionic drops. Both need those controls to
-  know `AvonicTabs`.
+- **`AvonicTabs` clips,** where `ion-tabs` doesn't (`contain` without paint): with a top bar, a fullscreen content's scroll part
+  runs past the tabs' bottom by the bar's height, as Ionic's `offsetTop` counts from the tab, and that part isn't drawn here. A
+  tab doesn't clip, as `.ion-page` doesn't, so a fullscreen content shows behind a bottom bar.
 - **In dark,** the bar's border stays `rgba(0, 0, 0, 0.07)`, where Ionic's is `--ion-background-color-step-150`, until the dark
   palette sets `Avonic.TabBar.Md.BorderColorBrush`.

@@ -488,6 +488,101 @@ public class AvonicListTests
         Assert.Equal((NoBorder, NoBorder), Borders(items[2]));
     });
 
+    /// <summary>A sliding item holding <paramref name="item"/>, with its options after it, or before it as start options.</summary>
+    private static AvonicItemSliding Sliding(AvonicItem item, bool optionsFirst = false)
+    {
+        var options = new AvonicItemOptions
+        {
+            Side = optionsFirst ? ItemOptionsSide.Start : ItemOptionsSide.End,
+            Items = { new AvonicItemOption { Content = new Border { Width = 70, Height = 10 } } },
+        };
+        return optionsFirst ? new AvonicItemSliding { Items = { options, item } } : new AvonicItemSliding { Items = { item, options } };
+    }
+
+    [AvaloniaFact]
+    public void L12_The_Item_In_The_Last_Sliding_Item_Has_No_Border_Wherever_It_Is_In_It() => InstalledTheme.Run(_ =>
+    {
+        // Measured slide-inset: .list-inset ion-item-sliding:last-of-type ion-item, with the options after the item or before it.
+        // An item last in a sliding item that isn't the last keeps its line, as it's the only ion-item there (:only-of-type).
+        var optionsBefore = Item();
+        var optionsAfter = Item();
+        var lastOptionsAfter = Item();
+        var lastOptionsBefore = Item();
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicList { Inset = true, Items = { Sliding(optionsBefore, optionsFirst: true), Sliding(optionsAfter), Sliding(lastOptionsAfter) } },
+                new AvonicList { Inset = true, Items = { Sliding(Item()), Sliding(lastOptionsBefore, optionsFirst: true) } },
+            },
+        });
+
+        Assert.Equal((NoBorder, Bottom), Borders(optionsBefore));
+        Assert.Equal((NoBorder, Bottom), Borders(optionsAfter));
+        Assert.Equal((NoBorder, NoBorder), Borders(lastOptionsAfter));
+        Assert.Equal((NoBorder, NoBorder), Borders(lastOptionsBefore));
+    });
+
+    [AvaloniaFact]
+    public void L12_It_Reaches_The_Last_Sliding_Item_From_A_Template() => InstalledTheme.Run(_ =>
+    {
+        var list = new AvonicList
+        {
+            Inset = true,
+            ItemsSource = new[] { "a", "b", "c" },
+            ItemTemplate = new FuncDataTemplate<string>((text, _) => Sliding(new AvonicItem { Content = text })),
+        };
+        using var scene = new Scene(new StackPanel { Children = { list } });
+
+        var items = list.GetVisualDescendants().OfType<AvonicItem>().ToList();
+        Assert.Equal(3, items.Count);
+        Assert.Equal((NoBorder, Bottom), Borders(items[0]));
+        Assert.Equal((NoBorder, Bottom), Borders(items[1]));
+        Assert.Equal((NoBorder, NoBorder), Borders(items[2]));
+    });
+
+    [AvaloniaFact]
+    public void L12_A_Sliding_Item_In_A_Plain_List_Keeps_Its_Border() => InstalledTheme.Run(_ =>
+    {
+        var last = Item();
+        using var scene = new Scene(new AvonicList { Items = { Sliding(Item()), Sliding(last) } });
+
+        Assert.Equal((NoBorder, Bottom), Borders(last));
+    });
+
+    // ── closeSlidingItems ────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void L15_CloseSlidingItems_Closes_The_Open_Sliding_Item_And_Says_Whether_It_Did()
+    {
+        // list.js: the first ion-item-sliding in the list, at any depth, calls closeOpened(), which closes the open one wherever it is.
+        // A list with none returns false and closes nothing.
+        using var clock = new TestClock();
+        var inGroup = Sliding(new AvonicItem { MinHeight = 48 });
+        var elsewhere = Sliding(new AvonicItem { MinHeight = 48 });
+        var list = new AvonicList { Items = { new AvonicItemGroup { Items = { Sliding(new AvonicItem { MinHeight = 48 }), inGroup } } } };
+        var none = new AvonicList { Items = { Item() } };
+        using var scene = new Scene(new StackPanel { Children = { list, none, elsewhere } });
+        Avonic.Components.Tests.Gestures.GestureTests.Render();
+
+        Assert.False(list.CloseSlidingItems());
+
+        inGroup.Open();
+        clock.At(1000);
+        Assert.Equal(70, inGroup.GetOpenAmount(), 3);
+        Assert.False(none.CloseSlidingItems());
+        Assert.Equal(70, inGroup.GetOpenAmount(), 3);
+
+        Assert.True(list.CloseSlidingItems());
+        Assert.Equal(0, inGroup.GetOpenAmount());
+        Assert.False(list.CloseSlidingItems());
+
+        elsewhere.Open();
+        clock.At(2000);
+        Assert.True(list.CloseSlidingItems());
+        Assert.Equal(0, elsewhere.GetOpenAmount());
+    }
+
     [AvaloniaFact]
     public void L13_A_Plain_Lists_Last_Item_Keeps_Its_Border() => InstalledTheme.Run(_ =>
     {

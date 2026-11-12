@@ -52,7 +52,7 @@ with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `closeSlidingItems()` | — | Comes with `ion-item-sliding` (#31). It could only return `false` until then |
+| [x] | `closeSlidingItems()` | `CloseSlidingItems()` → `bool` | Closes the open `AvonicItemSliding`, wherever it is, if the list holds one at any depth, as Ionic's calls `closeOpened()` on its first; true if one closed. Synchronous |
 
 No events, slots, parts or CSS variables.
 
@@ -68,7 +68,9 @@ Each has a test in `AvonicListTests`. See the [plan](PLAN.md#behaviours) for the
 - `Lines` reaches items at any depth, unless they set their own, and beats their other borders.
 - Between nested lists, inset beats full, which beats none, whichever is inside.
 - `Inset` adds a margin and rounded corners that clip, and takes the border off the last item in each parent, whatever
-  its lines. An inset list straight after one has no top margin.
+  its lines, and off the item in the last `AvonicItemSliding`; an item last inside a sliding item that isn't the last keeps it.
+  An inset list straight after one has no top margin.
+- Any list clips what overflows it, as `contain: content` does, an item lifted by a reorder group included.
 - Each button item is its own tab stop, and the arrow keys do nothing.
 - It's a `List` to automation, and a plain item in it is a `ListItem`.
 

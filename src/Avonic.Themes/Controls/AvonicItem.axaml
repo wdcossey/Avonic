@@ -319,6 +319,14 @@
         <Style Selector="^:ion-color:ion-focused /template/ Border#PART_Overlay, ^:ion-color:ion-activatable:ion-hover:not(:ion-focused) /template/ Border#PART_Overlay">
             <Setter Property="Background" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
         </Style>
+
+        <!-- reorder-group.css's .reorder-selected { opacity: 0.8 }, on an item being dragged: AvonicReorderGroup sets the
+             pseudoclass. A global class in Ionic, outside the item's shadow root, so it beats :host(.item-disabled) above, and an
+             app's plain ion-item rule, as a rule with a pseudoclass does here. Its z-index is the group's, at style priority, and its
+             shadow the group's PART_Lift. A handle that wraps its item has the rule in its own theme. -->
+        <Style Selector="^:reorder-selected">
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
     </ControlTheme>
 
 </ResourceDictionary>

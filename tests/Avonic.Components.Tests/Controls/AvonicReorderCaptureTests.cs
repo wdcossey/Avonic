@@ -113,6 +113,23 @@ public class AvonicReorderCaptureTests
     });
 
     [AvaloniaFact]
+    public void B14_The_Lifted_Opacity_Beats_An_Apps_Plain_Item_Style() => InstalledTheme.Run(_ =>
+    {
+        // .reorder-selected, a class, beats an app's ion-item { opacity } rule, as the item theme's rule with a pseudoclass does.
+        using var clock = new TestClock();
+        var handle = new AvonicReorder();
+        var item = new AvonicItem { Content = new AvonicLabel { Content = "Item" }, EndContent = handle };
+        var group = new AvonicReorderGroup { Disabled = false, Items = { item } };
+        using var scene = Scene.Styled(new StackPanel { Children = { group } }, Scene.AppStyle<AvonicItem>(Visual.OpacityProperty, 0.5));
+        Render();
+        Assert.Equal(0.5, item.Opacity);
+
+        var at = handle.TranslatePoint(new Point(handle.Bounds.Width / 2, handle.Bounds.Height / 2), scene.Window)!.Value;
+        new Finger(scene, clock).Down(at.X, at.Y, 1000);
+        Assert.Equal(0.8, item.Opacity);
+    });
+
+    [AvaloniaFact]
     public void B14_The_Group_Does_Not_Clip_The_Lifted_Item() => InstalledTheme.Run(_ =>
     {
         // No list around it, which clips here (see the README), and room below the group

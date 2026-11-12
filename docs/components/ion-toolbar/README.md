@@ -138,8 +138,10 @@ These are in [PLAN.md](PLAN.md#behaviours), numbered, each with tests named afte
 - **The first `AvonicButtons` in `StartContent` gets 4 at its start, and the last one in `EndContent`, or else `PrimaryContent`, or
   else `SecondaryContent`, gets 4 at its end.** A panel directly in a slot stands for the slot.
 - **The safe area.** `Avonic.SafeAreaLeft` and `Right` pad every toolbar, on physical sides. The first toolbar in a header adds
-  `Avonic.SafeAreaTop`, and the last in a footer adds `Avonic.SafeAreaBottom`, with the background under them. The app fills
-  these keys; see [`ion-content`](../ion-content/README.md).
+  `Avonic.SafeAreaTop`, and the last in a footer adds `Avonic.SafeAreaBottom`, with the background under them, except in an
+  `AvonicTabs` whose tab bar is in `BottomContent`, which pads itself (`footer-toolbar-padding`, as `:footer-toolbar-padding` on
+  the footer). The footer reads the tabs when it's attached and loaded, as Ionic does when it renders. The app fills these keys;
+  see [`ion-content`](../ion-content/README.md).
 - **A header's and footer's shadow is drawn over what comes after,** as `z-index: 10` does, through `ZIndex` 10.
 - **Automation:** a header is the `Banner` landmark and a footer the `ContentInfo` one.
 
