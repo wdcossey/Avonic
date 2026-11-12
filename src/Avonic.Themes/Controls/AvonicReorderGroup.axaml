@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicReorderGroup Disabled="False">
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="Item 1" />
+                    <c:AvonicItem.EndContent><c:AvonicReorder /></c:AvonicItem.EndContent>
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="Item 2" />
+                    <c:AvonicItem.EndContent><c:AvonicReorder /></c:AvonicItem.EndContent>
+                </c:AvonicItem>
+            </c:AvonicReorderGroup>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- reorder-group.css has no rule for the host that Avalonia needs: it's a block of its children. What it does to the child
+         being dragged is in Styles/ReorderGroup.axaml, and the transforms are the control's. -->
+    <ControlTheme x:Key="{x:Type c:AvonicReorderGroup}" TargetType="c:AvonicReorderGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

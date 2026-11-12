@@ -1,0 +1,22 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- reorder-group.css's .reorder-selected { box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); opacity: 0.8 }, on an item being dragged.
+         Its z-index is the group's, at style priority, for any type of child. The class is global in Ionic, so this doesn't ask for
+         the group: only the group sets it. A handle that wraps its item has the rule in its own theme.
+
+         The shadow is the native part's, as only a Border has one, and Avalonia draws a Border's outer shadow only outside it: an
+         effect would show through the translucent item. The host and the part clip, where ion-item's host doesn't and the shadow is
+         outside them. -->
+    <Style Selector="c|AvonicItem:reorder-selected">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Opacity" Value="0.8" />
+    </Style>
+    <Style Selector="c|AvonicItem:reorder-selected /template/ Border#PART_Native">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="BackgroundSizing" Value="CenterBorder" />
+        <Setter Property="BoxShadow" Value="{DynamicResource Avonic.ReorderGroup.SelectedBoxShadow}" />
+    </Style>
+
+</Styles>
