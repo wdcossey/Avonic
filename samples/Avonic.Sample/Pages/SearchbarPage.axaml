@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SearchbarPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicSearchbar />
+            <c:AvonicSearchbar Value="Value" />
+            <c:AvonicSearchbar ShowCancelButton="Focus" Placeholder="Cancel on focus" />
+            <c:AvonicSearchbar ShowCancelButton="Always" Value="Cancel always" />
+            <c:AvonicSearchbar ShowClearButton="Never" Value="Clear never" />
+            <c:AvonicSearchbar Color="primary" Value="Primary" />
+            <c:AvonicSearchbar Color="dark" Placeholder="Dark" />
+            <c:AvonicSearchbar IsEnabled="False" Value="Disabled" />
+            <c:AvonicToolbar>
+                <c:AvonicSearchbar Placeholder="In a toolbar" />
+            </c:AvonicToolbar>
+            <c:AvonicSearchbar FlowDirection="RightToLeft" ShowCancelButton="Always" Value="RTL" />
+
+            <!-- The events, as an app sees them -->
+            <c:AvonicSearchbar Name="Logged" Debounce="300" ShowCancelButton="Focus" Placeholder="Debounced, 300 ms"
+                               IonInput="OnLoggedInput" IonChange="OnLoggedChange"
+                               IonClear="OnLoggedClear" IonCancel="OnLoggedCancel" />
+            <TextBlock Name="LogText" Margin="16,8" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
