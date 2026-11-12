@@ -1,0 +1,59 @@
+{
+  "tag": "ion-refresher",
+  "snippet": "<ion-app><ion-header><ion-toolbar><ion-title>Refresher</ion-title></ion-toolbar></ion-header><ion-content><ion-refresher slot=\"fixed\"><ion-refresher-content></ion-refresher-content></ion-refresher><ion-list><ion-item><ion-label>Item 1</ion-label></ion-item><ion-item><ion-label>Item 2</ion-label></ion-item><ion-item><ion-label>Item 3</ion-label></ion-item></ion-list></ion-content></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "slot": "fixed",
+        "class": "md refresher-md hydrated refresher-native"
+      },
+      "classes": [
+        "md",
+        "refresher-md",
+        "hydrated",
+        "refresher-native"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 56,
+        "w": 390,
+        "h": 60
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "absolute",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "60px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "none",
+        "transition": "all",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  <ion-refresher-content.md.hydrated>\n    <div.refresher-pulling>\n      <div.refresher-pulling-icon>\n        <div.spinner-arrow-container>\n          <ion-spinner.md.spinner-circular.spinner-paused.hydrated>\n            #shadow-root\n              <svg>\n                <circle>\n          <div.arrow-container>\n            <ion-icon.md.hydrated>\n              #shadow-root\n                <div.icon-inner>\n                  <svg>\n                    <path>\n    <div.refresher-refreshing>\n      <div.refresher-refreshing-icon>\n        <ion-spinner.md.spinner-circular.hydrated>\n          #shadow-root\n            <svg>\n              <circle>\n"
+    }
+  ]
+}

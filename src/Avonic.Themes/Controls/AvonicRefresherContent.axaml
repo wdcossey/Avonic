@@ -1,0 +1,130 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <!-- Shows nothing outside a pulled refresher. See docs/components/ion-refresher/compare. -->
+        <Border Width="390" Height="60">
+            <c:AvonicRefresherContent />
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- A translation of refresher.md.css's rules for ion-refresher-content in md's native refresher. Its texts are display:
+         none there, so they aren't here. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRefresherContent}" TargetType="c:AvonicRefresherContent">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- display: flex; flex-direction: column; justify-content: center; height: 100% -->
+                <StackPanel VerticalAlignment="Center">
+                    <!-- .refresher-pulling: display: none; width: 100% -->
+                    <Panel Name="PART_Pulling" IsVisible="False">
+                        <!-- .refresher-pulling-icon, native: margin: 0 auto; border-radius: 100% (below); padding: 8px; display: flex;
+                             the border, background and shadow; transform: translateY(calc(-100% - 10px)), which is 52 for its
+                             42 px; transform-origin: center -->
+                        <Border Name="PART_PullingIcon"
+                                HorizontalAlignment="Center"
+                                Padding="8"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource Avonic.Refresher.Md.NativeIconBorderBrush}"
+                                Background="{DynamicResource Avonic.Refresher.Md.NativeIconBackgroundBrush}"
+                                BoxShadow="{DynamicResource Avonic.Refresher.Md.NativeIconBoxShadow}"
+                                RenderTransform="translateY(-52px)">
+                            <!-- .spinner-arrow-container: display: inherit -->
+                            <Panel Name="PART_SpinnerArrowContainer">
+                                <!-- ion-spinner: width 24px; height 24px; color: var(ion-color-primary) -->
+                                <Panel Name="PART_PullingSpinner" Width="24" Height="24">
+                                    <c:RefresherCircle Name="PART_PullingCircle"
+                                                       IsVisible="False"
+                                                       Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                                    <c:AvonicSpinner Name="PART_PullingOtherSpinner"
+                                                     Width="24"
+                                                     Height="24"
+                                                     Paused="True"
+                                                     Foreground="{DynamicResource Avonic.Color.PrimaryBrush}"
+                                                     SpinnerName="{TemplateBinding PullingIcon}" />
+                                </Panel>
+                                <!-- .arrow-container: display: block; position: absolute; 24 x 24 -->
+                                <Panel Name="PART_ArrowContainer" Width="24" Height="24" IsVisible="False">
+                                    <!-- ion-icon: position: absolute; left: 0; right: 0; bottom: -4px; margin: 0 auto;
+                                         font-size: 12px; color: var(ion-color-primary) -->
+                                    <c:AvonicIcon Name="PART_Arrow"
+                                                  IconName="caret-back-sharp"
+                                                  FontSize="12"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Bottom"
+                                                  Margin="0,0,0,-4"
+                                                  Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                                </Panel>
+                            </Panel>
+                        </Border>
+                    </Panel>
+                    <!-- .refresher-refreshing -->
+                    <Panel Name="PART_Refreshing" IsVisible="False">
+                        <!-- .refresher-refreshing-icon: as the pulling icon, with no transform -->
+                        <Border Name="PART_RefreshingIcon"
+                                HorizontalAlignment="Center"
+                                Padding="8"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource Avonic.Refresher.Md.NativeIconBorderBrush}"
+                                Background="{DynamicResource Avonic.Refresher.Md.NativeIconBackgroundBrush}"
+                                BoxShadow="{DynamicResource Avonic.Refresher.Md.NativeIconBoxShadow}">
+                            <Panel Width="24" Height="24">
+                                <!-- circular, with animation-delay: -655ms -->
+                                <c:RefresherCircle Name="PART_RefreshingCircle"
+                                                   IsVisible="False"
+                                                   Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                                <c:AvonicSpinner Name="PART_RefreshingSpinner"
+                                                 Width="24"
+                                                 Height="24"
+                                                 Foreground="{DynamicResource Avonic.Color.PrimaryBrush}"
+                                                 SpinnerName="{TemplateBinding RefreshingSpinner}" />
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- border-radius: 100% -->
+        <Style Selector="^ /template/ Border#PART_PullingIcon, ^ /template/ Border#PART_RefreshingIcon">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.Refresher.Md.NativeIconBorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <Style Selector="^:pulling-circular /template/ c|RefresherCircle#PART_PullingCircle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:pulling-circular /template/ c|AvonicSpinner#PART_PullingOtherSpinner">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <!-- ion-refresher.refresher-native .arrow-container: display: block, for md's circular pulling icon -->
+        <Style Selector="^:pulling-circular /template/ Panel#PART_ArrowContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- A circular refreshing spinner is drawn with its animation-delay of -655ms, which AvonicSpinner can't take -->
+        <Style Selector="^:refreshing-circular /template/ c|RefresherCircle#PART_RefreshingCircle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:refreshing-circular /template/ c|AvonicSpinner#PART_RefreshingSpinner">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- display: flex for pulling and ready in the native refresher; display: block for cancelling -->
+        <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling, ^:cancelling /template/ Panel#PART_Pulling">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- the native refresher's refreshing, completing and cancelling. Completing's scale(0), with its 200 ms transition, is
+             the control's own, as AvonicRefresher waits for it to end. -->
+        <Style Selector="^:refreshing /template/ Panel#PART_Refreshing, ^:completing /template/ Panel#PART_Refreshing, ^:cancelling /template/ Panel#PART_Refreshing">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
