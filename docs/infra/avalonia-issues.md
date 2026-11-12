@@ -85,13 +85,15 @@ the box isn't focused. Bringing the caret into view only while focused would mat
 **Measured.** A control's `Opacity` fades each of its parts on its own, so where parts overlap, the one underneath shows through: a
 white child over a grey sibling at 0.38 read 233, where CSS's `opacity`, which fades the group as one picture, gives 255.
 `AvonicToggle`'s disabled look fades with an `OpacityMask` of a solid brush at that alpha instead, which is a group. Found by
-`ion-toggle` (#21, PR #116). Other controls with overlapping parts may need the same.
+`ion-toggle` (#21, PR #116). Other controls with overlapping parts may need the same: `AvonicTextarea`, `AvonicSearchbar` and
+`AvonicInput` now do (#134, #138, #141).
 
 ## `AutomationProperties.IsRequiredForForm` has nothing that reads it
 
 **Read, not tested on a screen reader.** The attached property exists in 12.1.4, but no peer reports it and no platform's
-automation reads it, so `aria-required` can't be said. `AvonicCheckbox` sets it at style priority anyway; `AvonicToggle` leaves
-`required` out. Found by `ion-checkbox` and `ion-toggle` (#20, #21).
+automation reads it, so `aria-required` can't be said. `AvonicCheckbox` and `AvonicInput` set it at style priority anyway, and
+`AvonicTextarea` as a local value on its native input; `AvonicToggle` leaves `required` out. Found by `ion-checkbox` and `ion-toggle`
+(#20, #21); the input and the textarea in #134 and #141.
 
 ## No public way to find the current activity's `TopLevel` under `MainViewFactory`
 
@@ -106,11 +108,18 @@ public way is planned is unknown. Found by #114 (PR #119).
 character out itself when Ionic's `maxlength` is 0. Found by `ion-input` (#24, PR #120). Also from that PR: headless touch raises no
 `PointerEntered`, so a touch's hover can't be tested headlessly.
 
-## A `Border` with `BackgroundSizing="InnerBorderEdge"` draws no `BoxShadow`
+## A `Border` draws no `BoxShadow` unless its border is even and its `BackgroundSizing` is the default
 
-**Measured.** The column under a 56 px round fab button read 255 with `InnerBorderEdge`; with the default sizing, 177, 187 and 198
-from the shadow. `AvonicFabButton` leaves the sizing alone, where CSS has `background-clip: padding-box`. Found by `ion-fab` (#30,
-PR #123).
+**Measured for each of three cases, and the cause not read.** The column under a 56 px round fab button read 255 with
+`BackgroundSizing="InnerBorderEdge"`; with the default sizing, 177, 187 and 198 from the shadow. `AvonicFabButton` leaves the sizing
+alone, where CSS has `background-clip: padding-box`. Found by `ion-fab` (#30, PR #123). `ion-reorder` (#34, PR #136) found the other
+two: its first lifted item put the shadow on `AvonicItem`'s `PART_Native`, which has `OuterBorderEdge` (CSS's `border-box`), and drew
+it only once the sizing was set back to `CenterBorder`; and with the sizing set back, an item with full lines, whose border is
+`0,0,0,1`, still had none. The reorder group now draws the shadow on a `Border` of its own over the item, `PART_Lift`, and
+`B14_The_Shadow_Shows_Whatever_The_Items_Lines` holds it for every kind of line. So a shadow can't sit on a part that also needs
+CSS's background clip or a bottom line. To reproduce: a 100 × 40 `Border` with `Background="White"` and `BoxShadow="0 0 10 0 Black"`
+over white, rendered headlessly; then the same with `BorderThickness="0,0,0,1"`, and with each `BackgroundSizing`. Only the even
+border with `CenterBorder` darkens the pixels around it.
 
 ## `Visual.IsEffectivelyVisibleChanged` is internal
 
@@ -126,3 +135,35 @@ through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.co
 `CubicBezierEasing` solves it as Chromium's `UnitBezier` does, Newton's method then bisection to 1e-7, and the tests hold it within 1e-6 of
 `Element.animate` in Chromium. `SplineEasing` also isn't specified for a control point's y outside 0..1, which CSS allows
 (`ion-progress-bar`'s keyframes have 1.38179). Small, but it shows in a pixel comparison of a curve's middle.
+
+## `BoxShadow`'s blur isn't CSS's
+
+**Measured on one shadow, and the cause not read.** CSS's `box-shadow` blur `B` is a Gaussian of sigma `B / 2`; Avalonia's, drawn by
+Skia, matches a Gaussian of sigma `0.288675 B + 0.5`, so the same number falls off in about two thirds of the distance. `ion-reorder`
+(#34, PR #136) measured `0 0 10px rgba(0, 0, 0, 0.4)` in Chromium beside Avonic: a blur of 10 fell off in 7 px instead of 10, and
+15.6, which is sigma 5 by that formula, matched within 1 of 255 at every pixel of the fall-off. `Avonic.ReorderGroup.SelectedBoxShadow`
+holds 15.6; every other `BoxShadows` token still holds CSS's number, so each md elevation draws tighter than Ionic's
+([#139](https://github.com/wdcossey/Avonic/issues/139) measures more blurs and converts them). The offset not scaling (above) is
+another difference. To reproduce: a white 100 × 40 box with `box-shadow: 0 0 10px rgba(0,0,0,.4)` in Chromium, and a `Border` with
+`BoxShadow="0 0 10 0 #66000000"` rendered headlessly at 1×; read the column below each box from its edge until it's 255.
+
+## No public way to keep a `VirtualizingStackPanel`'s element realised
+
+**Read from 12.1.4.** The panel keeps an element realised outside the viewport only when it's focused or being scrolled to, and both
+are internal; a subclass can't reach its realising. CSS's `position: sticky` keeps a divider stuck to the end of its section, but the
+panel recycles the divider's row once its place is above the top. `AvonicList` draws a second container for the same item instead,
+made by its own `PrepareContainerForItemOverride` (`AvonicList.StuckDivider.cs`), which is another instance: state an app set on the
+divider itself doesn't carry over. Found by #68 (PR #146). A public way to pin an element, as a header, would remove the copy. To
+reproduce: an `ItemsControl` with a `VirtualizingStackPanel` in a `ScrollViewer`, 1,000 rows of 48, scrolled to 2,000: row 0's
+container is gone, and nothing public brings it back without scrolling to it.
+
+## An implicit `ControlTheme` merged at runtime doesn't restyle controls already shown
+
+**Measured in #145's review, and not held by a test.** `Css/Typography.axaml`'s `ControlTheme` for `TextBlock` (`x:Key="{x:Type
+TextBlock}"`), merged into an app's `Resources` after a `TextBlock` with `Classes="h1"` is shown, doesn't reach it; one shown after the
+merge has it. `DynamicResource`s in the same dictionary do follow at once: a label's heading line height
+(`Avonic.Label.HeadingLineHeight`) changes. Removing the dictionary leaves the theme on what has it. Avalonia picks a control's implicit
+theme when it's attached, it seems. The typography README says to merge the file at startup, or in a view's `Resources` before it's
+shown. Found by #70 (PR #145). To reproduce: show a window with a `TextBlock`, then add a `ResourceDictionary` holding a
+`ControlTheme` for `TextBlock` that sets `FontSize` to the window's `Resources.MergedDictionaries`: the shown `TextBlock` keeps its
+size, and a `TextBlock` added after it takes the new one.
