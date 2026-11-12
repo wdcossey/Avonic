@@ -1002,21 +1002,454 @@ public class AvonicItemDividerTests
         Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
     });
 
-    [AvaloniaFact]
-    public void D18_Known_Gap_In_A_Flat_Virtualising_Panel_It_Goes_With_Its_Row() => Scrolling(() =>
+    /// <summary>Sections of 500 rows, each after a sticky divider named "d" and its number, in a virtualising panel.</summary>
+    private static (AvonicList List, ScrollViewer Scroller, System.Collections.ObjectModel.ObservableCollection<object> Data)
+        Virtualised(int sections = 2)
     {
-        // Ionic would keep it stuck. A virtualising panel recycles the row, so a sticky divider there needs a group.
+        var data = new System.Collections.ObjectModel.ObservableCollection<object>();
+        for (var section = 1; section <= sections; section++)
+        {
+            data.Add("d" + section);
+            foreach (var row in Enumerable.Range(0, 500))
+            {
+                data.Add(row);
+            }
+        }
+
         var list = FromTemplate();
         list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel());
-        list.ItemsSource = new object[] { "d1" }.Concat(Enumerable.Range(0, 1000).Cast<object>()).ToList();
-        var scroller = new ScrollViewer { Content = list };
-        using var scene = new Scene(scroller, 390, 200);
-        Assert.Single(list.GetVisualDescendants().OfType<AvonicItemDivider>());
+        list.ItemsSource = data;
+        return (list, new ScrollViewer { Content = list }, data);
+    }
 
+    /// <summary>The divider drawn at a point of the window, the top one where they overlap, as a hit test finds it.</summary>
+    private static AvonicItemDivider? DividerAt(Scene scene, Point point)
+    {
+        scene.Window.CaptureRenderedFrame();
+        return scene.Window.InputHitTest(point) is Visual hit
+            ? hit.GetSelfAndVisualAncestors().OfType<AvonicItemDivider>().FirstOrDefault()
+            : null;
+    }
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Stays_Stuck_While_Its_Section_Scrolls() => Scrolling(() =>
+    {
+        // CSS keeps it stuck to the end of its parent, the list. The panel recycles its row once that's above the top.
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scene.Window.Background = Brushes.White;
+
+        for (var offset = 8.0; offset < 1500; offset += 23)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            var divider = DividerAt(scene, new Point(100, 5));
+            Assert.True(divider is { Content: "d1" }, $"at {offset}: {divider?.Content}");
+            Assert.Equal(0, Top(divider!, scroller), 3);
+            Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
+        }
+
+        // A jump into the section, within 200 rows of its divider.
+        scroller.Offset = new Vector(0, 9000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 300, 10));
+        Frames.Save(frame, "avonic-item-divider-virtualised.png");
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Next_Divider_Covers_It() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        // Down the section, so every row is known, as a scroll realises each.
+        for (var offset = 0.0; offset < 23500; offset += 150)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+        }
+
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Scrolling down to the second: it comes up over the first, and then it's the one stuck.
+        string? last = "d1";
+        var both = false;
+        for (var offset = 23500.0; offset < 30000 && last == "d1"; offset += 7)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            last = DividerAt(scene, new Point(100, 2))?.Content as string;
+            var second = list.GetVisualDescendants().OfType<AvonicItemDivider>().FirstOrDefault(d => d.Content is "d2" && d.IsEffectivelyVisible);
+            if (second is not null && Top(second, scroller) is > 5 and < 30)
+            {
+                // Half way over: the first above it, the second below.
+                Assert.Equal("d1", DividerAt(scene, new Point(100, 2))?.Content);
+                Assert.Equal("d2", DividerAt(scene, new Point(100, Top(second, scroller) + 2))?.Content);
+                both = true;
+            }
+        }
+
+        Assert.True(both);
+        Assert.Equal("d2", last);
+        scroller.Offset = new Vector(0, scroller.Offset.Y + 5000);
+        Run();
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // And back up into the first section.
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Jump_Finds_The_Sections_Own_Divider() => Scrolling(() =>
+    {
+        // Straight from the top into the third section, past two dividers the panel never realised, the third within
+        // 200 rows of where it lands.
+        var (list, scroller, _) = Virtualised(sections: 4);
+        using var scene = new Scene(scroller, 390, 200);
+
+        scroller.Offset = new Vector(0, 1100 * 48);
+        Run();
+        Assert.Equal("d3", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Further than that from it: no copy, rather than the wrong section's.
+        scroller.Offset = new Vector(0, 1400 * 48);
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+
+        scroller.Offset = new Vector(0, 30000);
+        Run();
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Virtualising_Inset_List_It_Goes_With_The_Page() => Scrolling(() =>
+    {
+        // As D16's inset list: overflow: hidden makes the list its scrollport, so a divider in it never sticks.
+        var (list, scroller, _) = Virtualised();
+        list.Inset = true;
+        using var scene = new Scene(scroller, 390, 200);
         scroller.Offset = new Vector(0, 5000);
         Run();
 
-        Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsVisible);
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+        Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsEffectivelyVisible);
+    });
+
+    private sealed record Row(string Text, bool Header);
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Bound_Sticky_Is_Read_After_A_Jump() => Scrolling(() =>
+    {
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = Enumerable.Range(0, 2000).Select(index => new Row(index % 500 == 0 ? "d" + index : "r", index % 500 == 0)).ToList(),
+            ItemTemplate = new FuncDataTemplate<Row>((row, _) => row is { Header: true }
+                ? new AvonicItemDivider { [!AvonicItemDivider.StickyProperty] = new Avalonia.Data.Binding(nameof(Row.Header)), Content = row.Text }
+                : new AvonicItem { Content = row?.Text }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+
+        scroller.Offset = new Vector(0, 1080 * 48);
+        Run();
+
+        Assert.Equal("d1000", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Focused_Row_Kept_Above_Does_Not_Change_The_Section() => Scrolling(() =>
+    {
+        // The panel keeps a focused row realised wherever it is.
+        var (list, scroller, _) = Virtualised();
+        list.ItemTemplate = new FuncDataTemplate<object>((value, _) => value is string text
+            ? new AvonicItemDivider { Sticky = true, Content = text, Focusable = true }
+            : new Button { Content = "r", Height = 48 });
+        using var scene = new Scene(scroller, 390, 200);
+        var focused = list.GetVisualDescendants().OfType<Button>().First();
+        focused.Focus();
+        scroller.Offset = new Vector(0, 30000);
+        Run();
+        Assert.True(focused.IsEffectivelyVisible);
+
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // The divider of the section above, focused and kept, isn't on screen either.
+        scroller.Offset = default;
+        Run();
+        list.GetVisualDescendants().OfType<AvonicItemDivider>().First(divider => divider.Content is "d1").Focus();
+        scroller.Offset = new Vector(0, 30000);
+        Run();
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Never_Leaves_The_List() => Scrolling(() =>
+    {
+        // Content after the list scrolls up under the top: the stuck divider goes with the list's end, as in CSS.
+        var (list, own, _) = Virtualised(sections: 1);
+        own.Content = null;
+        var scroller = new ScrollViewer { Content = new StackPanel { Children = { list, new Border { Height = 1000 } } } };
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        var stuck = DividerAt(scene, new Point(100, 5));
+        Assert.Equal("d1", stuck?.Content);
+        var height = stuck!.Bounds.Height;
+
+        // The list ends 20 below the top of the scrollport, and 8 of that is its padding. Scrolled there, so that
+        // every row between is known.
+        for (var offset = 5000.0; offset < list.Bounds.Height - 20; offset += 150)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+        }
+
+        scroller.Offset = new Vector(0, list.Bounds.Height - 20);
+        Run();
+        Assert.Equal(12 - height, Top(stuck, scroller), 3);
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+        Assert.IsNotType<AvonicItemDivider>(DividerAt(scene, new Point(100, 15)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Stops_When_Its_Item_Stops_It() => Scrolling(() =>
+    {
+        var rows = Enumerable.Range(0, 1000).Select(index => new StickyRow(index == 0 ? "d1" : "r", index == 0)).ToList();
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = rows,
+            ItemTemplate = new FuncDataTemplate<StickyRow>((row, _) => row is { Text: "d1" }
+                ? new AvonicItemDivider { [!AvonicItemDivider.StickyProperty] = new Avalonia.Data.Binding(nameof(StickyRow.Sticky)), Content = row.Text }
+                : new AvonicItem { Content = row?.Text }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        rows[0].Sticky = false;
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+    });
+
+    /// <summary>A row whose divider's Sticky an app changes.</summary>
+    private sealed class StickyRow(string text, bool sticky) : System.ComponentModel.INotifyPropertyChanged
+    {
+        public string Text { get; } = text;
+
+        public bool Sticky
+        {
+            get => sticky;
+            set
+            {
+                sticky = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Sticky)));
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    [AvaloniaFact]
+    public void D18_In_A_Horizontal_Virtualising_Panel_Nothing_Is_Drawn_On_Top() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal });
+        scroller.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+        scroller.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(5000, 0);
+        Run();
+
+        Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsEffectivelyVisible);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_New_Template_Is_Read_Again() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        list.ItemTemplate = new FuncDataTemplate<object>((value, _) => value is string text
+            ? new AvonicItemDivider { Sticky = true, Content = text + "!" }
+            : new AvonicItem { Content = "r" });
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Equal("d1!", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_Rows_Realised_Above_The_Top_Are_Not_On_Screen() => Scrolling(() =>
+    {
+        // CacheLength realises rows above the top, the second divider among them, which sticks itself.
+        var (list, scroller, _) = Virtualised();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel { CacheLength = 1 });
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 24000);
+        Run();
+        var second = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single(divider => divider.Content is "d2");
+        var natural = second.GetVisualParent<Visual>()!.TranslatePoint(default, list)!.Value.Y;
+
+        scroller.Offset = new Vector(0, natural + 100);
+        Run();
+
+        // The row itself, and no copy of it over it.
+        Assert.Same(second, DividerAt(scene, new Point(100, 5)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Replaced_Divider_Is_Drawn_Again() => Scrolling(() =>
+    {
+        var (list, scroller, data) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data[0] = "dX";
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+
+        Assert.Equal("dX", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Copy_Is_As_Wide_As_The_Row() => Scrolling(() =>
+    {
+        // A label that wraps at the row's width, which the list's padding makes narrower than the list.
+        var label = string.Join(' ', Enumerable.Repeat("words", 14));
+        var data = new List<object> { label }.Concat(Enumerable.Range(0, 1000).Cast<object>()).ToList();
+        var list = FromTemplate();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel());
+        list.ItemsSource = data;
+        list.Padding = new Thickness(60, 8);
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 300);
+        var row = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single();
+        var height = row.Bounds.Height;
+
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        var copy = DividerAt(scene, new Point(200, 5));
+        Assert.NotSame(row, copy);
+        Assert.Equal(row.Bounds.Width, copy!.Bounds.Width);
+        Assert.Equal(height, copy.Bounds.Height);
+
+        // Narrower: it wraps again, as the row would.
+        scene.Window.Width = 330;
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        var narrower = copy.Bounds.Height;
+        Assert.True(narrower > height, $"{narrower} at 330, {height} at 390");
+        scroller.Offset = default;
+        Run();
+        Assert.Equal(narrower, list.GetVisualDescendants().OfType<AvonicItemDivider>().First(divider => divider != copy && divider.IsEffectivelyVisible).Bounds.Height);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Long_Jump_Makes_Few_Rows() => Scrolling(() =>
+    {
+        // One sticky divider at the top of 10,000 rows: the rows between it and a jump to 9,000 aren't all made to
+        // be read. Known difference: so Ionic's stuck divider isn't drawn, until the rows between are known, rather than
+        // what might be a wrong one.
+        var built = 0;
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = new object[] { "d1" }.Concat(Enumerable.Range(0, 10000).Cast<object>()).ToList(),
+            ItemTemplate = new FuncDataTemplate<object>((value, _) =>
+            {
+                built++;
+                return value is string text ? new AvonicItemDivider { Sticky = true, Content = text } : new AvonicItem { Content = "r" };
+            }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+        built = 0;
+
+        scroller.Offset = new Vector(0, 9000 * 48);
+        Run();
+
+        Assert.True(built < 300, $"{built} rows made");
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        scroller.Offset = default;
+        Run();
+
+        var shown = list.GetVisualDescendants().OfType<AvonicItemDivider>().Where(d => d.IsEffectivelyVisible).ToList();
+        var divider = Assert.Single(shown);
+        Assert.Equal(8, Top(divider, scroller));
+        Assert.IsNotType<AvonicItemDivider>(DividerAt(scene, new Point(100, 4)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Follows_Its_Item_When_Items_Change() => Scrolling(() =>
+    {
+        var (list, scroller, data) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Rows before it move it down, and a divider put in before the top starts a section there.
+        data.Insert(0, -1);
+        data.Insert(0, -2);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Insert(50, "d0");
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Equal("d0", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Remove("d0");
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Remove("d1");
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Stuck_Divider_Takes_The_Input() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        scene.Window.CaptureRenderedFrame();
+
+        object? pressed = null;
+        list.AddHandler(InputElement.PointerPressedEvent, (_, e) =>
+            pressed = (e.Source as Visual)?.GetSelfAndVisualAncestors().OfType<AvonicItemDivider>().FirstOrDefault()?.Content,
+            handledEventsToo: true);
+        scene.Window.MouseDown(new Point(100, 5), MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(new Point(100, 5), MouseButton.Left, RawInputModifiers.None);
+
+        Assert.Equal("d1", pressed);
     });
 
     [AvaloniaFact]

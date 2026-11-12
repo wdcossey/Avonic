@@ -80,6 +80,8 @@ The full list is in the [plan](PLAN.md#deliberate-differences). The ones you may
 - **A button item is a `Button` to automation,** not a `ListItem`.
 - **`role="listitem"` is in the theme,** so it goes if you replace the theme.
 - **Margins don't collapse.**
+- **Inset lists as rows of a `VirtualizingStackPanel`** are 16 apart, as in Ionic. A row whose item before isn't realised makes
+  that item from its template, with the item as its data, to read it, without showing it; an `Inset` set there by a style isn't seen.
 - **A last item in a `Border` keeps its border.** A `StackPanel` works.
 
 ## Extensions

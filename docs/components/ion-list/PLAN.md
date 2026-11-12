@@ -115,7 +115,7 @@ mechanical.
 | An explicit `Lines` beats a token | The same as `ion-item`'s plan |
 | Margins don't collapse | Avalonia has none. Measured: beside a block with a 30 margin, the gap is 30 in CSS, and 46 here. In a parent with no padding, the parent is 144 high with the 16 outside it in CSS, and 176 here with it inside, though what's in the parent lands in the same place. Between inset lists, the `+` rule means they never meet |
 | `Items`, not `Content` | `core.json` has no slot here, and a list has many children |
-| **Known gap:** inset lists that are themselves rows in a `VirtualizingStackPanel` all keep their top margin, so the gap between them is 32, not 16 | That panel's children are only what's realised, in no set order, so a row's margin would change as it's recycled, and the rows would move while scrolling. Stable and a little wide is the better wrong. `L14_Known_Gap_…` records it |
+| Inset lists that are rows in a `VirtualizingStackPanel` read the item before through the panel's owner, once the layout pass is over, so the gap is 16 ([#68](https://github.com/wdcossey/Avonic/issues/68)). When the item before isn't realised, as at the top while scrolling up, it's made from its template, with the item as its data, and read, without being shown. An `Inset` from a style isn't seen there, as it's made outside the tree | The panel's children are only what's realised, in no set order, and it makes a row's content while measuring, before the row has an index, so a new row is laid out again once it has read the one before: measured in [performance](../../infra/performance/README.md#scrolling-a-virtualised-list). `L14_In_A_Virtualising_Panel_…`. Was `L14_Known_Gap_…`, closed |
 
 ## Not in this PR
 
