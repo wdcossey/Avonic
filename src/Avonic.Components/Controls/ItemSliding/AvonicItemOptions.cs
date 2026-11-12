@@ -122,7 +122,7 @@ public class AvonicItemOptions : ItemsControl
     private void UpdateExpansion()
     {
         var progress = IsSwiping ? Math.Clamp((AvonicConfig.Now() - _expandStart) / ExpandDuration, 0, 1) : 0;
-        var expansion = IsSwiping ? ExpandEasing.Ease(progress) * Bounds.Width : 0;
+        var expansion = ExpandEasing.Ease(progress) * Bounds.Width;
         var before = Side != ItemOptionsSide.Start;
         foreach (var option in Items.OfType<AvonicItemOption>())
         {

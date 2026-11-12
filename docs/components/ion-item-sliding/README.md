@@ -109,4 +109,9 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
   physical right when only the left has options.
 - **`IsEnabled = false` disables the item and the options too,** as Avalonia's `IsEnabled` is inherited: the item takes the
   disabled look and no clicks. Ionic's `disabled` only turns the gesture off. Kept, as `disabled` maps to `IsEnabled` everywhere.
+- **In an inset list,** Ionic takes the line off the item in the last sliding item, and keeps it on an item that's last inside its
+  sliding item; `AvonicList`'s rule looks at the item's own position, so it does the opposite in both cases. The fix is in the
+  list's `Styles/List.axaml`, proposed in the PR.
+- **`ion-list`'s `closeSlidingItems()` isn't on `AvonicList` yet,** as that's the list's file: proposed in the PR. Until then,
+  `CloseOpened()` on any sliding item does the same.
 - Not tried in a real window, or on a device.
