@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-picker's hidden input: inputmode="numeric", which brings up a keyboard of digits, and nothing to see. -->
+    <ControlTheme x:Key="Avonic.Picker.Input" TargetType="TextBox">
+        <Setter Property="TextInputOptions.ContentType" Value="Digits" />
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text, Mode=TwoWay}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-picker: structure only. The hidden input, the highlight behind the columns (z-index: -1), the
+         columns in a row in the middle, and the two fades over them, which take no input (pointer-events: none). Left to right
+         whatever the direction (direction: ltr). -->
+    <ControlTheme x:Key="{x:Type c:AvonicPicker}" TargetType="c:AvonicPicker">
+        <Setter Property="FlowDirection" Value="LeftToRight" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <TextBox Name="PART_Input"
+                             Theme="{StaticResource Avonic.Picker.Input}"
+                             Opacity="0"
+                             IsTabStop="False"
+                             IsHitTestVisible="False" />
+                    <Border Name="PART_Highlight" VerticalAlignment="Center" IsHitTestVisible="False" />
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    <Border Name="PART_Before" VerticalAlignment="Top" IsHitTestVisible="False" />
+                    <Border Name="PART_After" VerticalAlignment="Bottom" IsHitTestVisible="False" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The scrolling part of ion-picker-column: no scroll bar, a touch drag that scrolls it, and a snap at the centre of each
+         option, as scroll-snap-type: y mandatory and scroll-snap-align: center do. -->
+    <ControlTheme x:Key="AvonicPickerColumnScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        VerticalSnapPointsType="Mandatory"
+                                        VerticalSnapPointsAlignment="Center"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="False"
+                                                 CanVerticallyScroll="True"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-picker-column: structure only. The prefix, the scroller of options and the suffix in a row,
+         centred, as display: flex with justify-content and align-items: center is. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPickerColumn}" TargetType="c:AvonicPickerColumn">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:PickerColumnPanel Background="Transparent" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,Auto,Auto" HorizontalAlignment="Center" Background="Transparent">
+                    <ContentPresenter Name="PART_Prefix"
+                                      Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsVisible="{TemplateBinding PrefixContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      Content="{TemplateBinding PrefixContent}"
+                                      ContentTemplate="{TemplateBinding PrefixContentTemplate}" />
+                    <ScrollViewer Name="PART_Scroll"
+                                  Grid.Column="1"
+                                  Theme="{StaticResource AvonicPickerColumnScrollViewer}"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Hidden">
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </ScrollViewer>
+                    <ContentPresenter Name="PART_Suffix"
+                                      Grid.Column="2"
+                                      VerticalAlignment="Center"
+                                      IsVisible="{TemplateBinding SuffixContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      Content="{TemplateBinding SuffixContent}"
+                                      ContentTemplate="{TemplateBinding SuffixContentTemplate}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-picker-column-option: structure only. Its text, in a row that takes input across its width. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPickerColumnOption}" TargetType="c:AvonicPickerColumnOption">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="Transparent"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+</ResourceDictionary>

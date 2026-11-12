@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.PickerPage">
+
+    <ScrollViewer>
+        <StackPanel Spacing="12">
+            <!-- The same as the comparison's Chromium page. -->
+            <c:AvonicPicker>
+                <c:AvonicPickerColumn Name="Colors" Value="Green">
+                    <c:AvonicPickerColumnOption Value="Red" Content="Red" />
+                    <c:AvonicPickerColumnOption Value="Orange" Content="Orange" />
+                    <c:AvonicPickerColumnOption Value="Yellow" Content="Yellow" IsEnabled="False" />
+                    <c:AvonicPickerColumnOption Value="Green" Content="Green" />
+                    <c:AvonicPickerColumnOption Value="Blue" Content="Blue" />
+                    <c:AvonicPickerColumnOption Value="Indigo" Content="Indigo" />
+                    <c:AvonicPickerColumnOption Value="Violet" Content="Violet" />
+                </c:AvonicPickerColumn>
+                <c:AvonicPickerColumn Name="Numbers" Value="5">
+                    <c:AvonicPickerColumnOption Value="1" Content="1" />
+                    <c:AvonicPickerColumnOption Value="2" Content="2" />
+                    <c:AvonicPickerColumnOption Value="3" Content="3" />
+                    <c:AvonicPickerColumnOption Value="4" Content="4" />
+                    <c:AvonicPickerColumnOption Value="5" Content="5" />
+                    <c:AvonicPickerColumnOption Value="6" Content="6" />
+                    <c:AvonicPickerColumnOption Value="7" Content="7" />
+                    <c:AvonicPickerColumnOption Value="8" Content="8" />
+                    <c:AvonicPickerColumnOption Value="9" Content="9" />
+                    <c:AvonicPickerColumnOption Value="10" Content="10" />
+                    <c:AvonicPickerColumnOption Value="11" Content="11" />
+                    <c:AvonicPickerColumnOption Value="12" Content="12" />
+                </c:AvonicPickerColumn>
+            </c:AvonicPicker>
+            <TextBlock Name="Changed" Margin="16,0" Text="Scroll, tap an option, or focus a column and use the arrows" />
+
+            <!-- A disabled column, with a prefix and a suffix. -->
+            <c:AvonicPicker>
+                <c:AvonicPickerColumn Value="b" IsEnabled="False" PrefixContent="Pre" SuffixContent="Suffix">
+                    <c:AvonicPickerColumnOption Value="a" Content="a" />
+                    <c:AvonicPickerColumnOption Value="b" Content="b" IsEnabled="False" />
+                    <c:AvonicPickerColumnOption Value="c" Content="c" />
+                </c:AvonicPickerColumn>
+            </c:AvonicPicker>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
