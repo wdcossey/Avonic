@@ -541,23 +541,24 @@ public class AvonicRefresherTests
     public void B20_The_Refreshing_Circle_Starts_655ms_Into_Its_Animation_When_It_Shows_And_Stops_When_It_Hides() => InstalledTheme.Run(_ =>
     {
         using var page = new Page();
-        var circle = page.Part<RefresherCircle>("PART_RefreshingCircle");
-        Assert.False(circle.IsRunning);
+        var circle = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        Assert.False(circle.IsRequestingFrames);
         page.Drag(8 + 200).Wait(16).Lift().Wait(160);
         Assert.Contains("ionRefresh", page.Names);
         Assert.True(circle.IsEffectivelyVisible);
-        Assert.False(page.Part<AvonicSpinner>("PART_RefreshingSpinner").IsEffectivelyVisible);
+        Assert.Equal(SpinnerName.Circular, circle.SpinnerName);
+        Assert.True(circle.IsRequestingFrames);
 
         // When it showed, its animation was already 655 ms in: spinner-circular-inner's arc there, not the 1 px it starts with
         var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
         var config = SpinnerConfigs.Get(SpinnerName.Circular);
         var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
-        Assert.Equal(expected, circle.CurrentArcs());
-        Assert.Equal(TimeSpan.FromMilliseconds(refreshedAt - 655), circle.StartedAt);
+        Assert.Equal(expected, Assert.Single(circle.CurrentFrame()).Arcs!);
 
         page.LastRefresh!.Complete();
         page.Wait(400);
-        Assert.False(circle.IsRunning);
+        Assert.False(circle.IsEffectivelyVisible);
+        Assert.False(circle.IsRequestingFrames);
     });
 
     [AvaloniaFact]
@@ -582,8 +583,77 @@ public class AvonicRefresherTests
         var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
         Assert.True(spinner.IsEffectivelyVisible);
         Assert.Equal(SpinnerName.Dots, spinner.SpinnerName);
-        Assert.False(page.Part<RefresherCircle>("PART_RefreshingCircle").IsEffectivelyVisible);
-        Assert.False(page.Part<RefresherCircle>("PART_RefreshingCircle").IsRunning);
+
+        // The animation-delay Ionic sets is on the host and the first circle, which dots don't animate: they start from 0 at the show
+        var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        var config = SpinnerConfigs.Get(SpinnerName.Dots);
+        var elapsed = page.Clock.Now.TotalMilliseconds - refreshedAt;
+        Assert.Equal(
+            Enumerable.Range(0, config.Count).Select(i => SpinnerFrame.Compute(config, config.Dur, i, elapsed)),
+            spinner.CurrentFrame());
+    });
+
+    [AvaloniaFact]
+    public void B20_With_A_Pulling_Spinner_Of_Lines_The_Refreshing_Circle_Starts_From_0() => InstalledTheme.Run(_ =>
+    {
+        // setupMDNativeRefresher sets the delay only if both spinners have a circle, and lines have none
+        using var page = new Page(refresherContent: new AvonicRefresherContent { PullingIcon = SpinnerName.Lines });
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        Assert.True(spinner.IsEffectivelyVisible);
+        var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt).Arcs!;
+        Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+    });
+
+    [AvaloniaFact]
+    public void B20_From_Refreshing_To_Completing_The_Circle_Carries_On_Even_With_The_Pulling_Icon_Changed() => InstalledTheme.Run(_ =>
+    {
+        // The class list changes at once, so .refresher-refreshing stays shown and its animation runs on; and Ionic sets the delay
+        // once, at setup, so a pulling icon changed in the middle moves nothing
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        var refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        page.RefresherContent.PullingIcon = SpinnerName.Lines;
+        page.LastRefresh!.Complete();
+        page.Wait(32);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":completing"));
+        Assert.True(spinner.IsEffectivelyVisible);
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
+        Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+
+        // The next refresh, with the lines now pulling, still starts 655 ms in
+        page.Wait(1000);
+        page.Log.Clear();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        refreshedAt = page.Log.Single(e => e.Name == "ionRefresh").At;
+        expected = SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - refreshedAt + 655).Arcs!;
+        Assert.Equal(expected, Assert.Single(spinner.CurrentFrame()).Arcs!);
+    });
+
+    [AvaloniaFact]
+    public void B20_A_Template_Applied_Mid_Refresh_Gives_Its_Circle_The_Delay_Too() => InstalledTheme.Run(_ =>
+    {
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        var template = page.RefresherContent.Template;
+        page.RefresherContent.Template = null;
+        page.RefresherContent.ApplyTemplate();
+        page.RefresherContent.Template = template;
+        page.RefresherContent.ApplyTemplate();
+        page.Wait(16);
+        var shownAt = page.Clock.Now.TotalMilliseconds - 16;
+        page.Wait(48);
+
+        var spinner = page.Part<AvonicSpinner>("PART_RefreshingSpinner");
+        Assert.True(spinner.IsEffectivelyVisible);
+        var config = SpinnerConfigs.Get(SpinnerName.Circular);
+        var frame = Assert.Single(spinner.CurrentFrame()).Arcs!;
+        Assert.NotEqual(SpinnerFrame.Compute(config, config.Dur, 0, page.Clock.Now.TotalMilliseconds - shownAt).Arcs!, frame);
+        Assert.Equal(TimeSpan.FromMilliseconds(-655), spinner.AnimationDelay);
     });
 
     // ── R1–R5: from the first review ───────────────────────────────────────────────────────────

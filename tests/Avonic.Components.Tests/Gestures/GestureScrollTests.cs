@@ -233,6 +233,49 @@ public class GestureScrollTests
         page.Lift(finger);
     }
 
+    // ── C11, C12: ReleaseAgainstDirection, a vertical gesture in a vertical scroller ─────────────
+
+    [AvaloniaFact]
+    public void C11_ReleaseAgainstDirection_Lets_Go_Of_An_Upward_Drag_At_The_Threshold_And_The_Scroller_Scrolls_It()
+    {
+        // What C10's Y gesture would capture is let go at its threshold, before it's held from the scroller, so the drag scrolls
+        // as C2's, which the gesture turns down for its direction.
+        using var clock = new TestClock();
+        using var page = new Page(clock);
+        using var gesture = Make(page.Row, page.Log, direction: GestureDirection.Y, releaseAgainstDirection: true);
+
+        page.Lift(page.Drag(0, -150));
+
+        Assert.Equal(["g.canStart", "g.notCaptured"], page.Log.Names);
+        Assert.Equal(-16, page.Log.Single("g.notCaptured").DeltaY);
+        Assert.Equal(145, page.ScrollTop);
+    }
+
+    [AvaloniaFact]
+    public void C12_ReleaseAgainstDirection_Still_Captures_A_Drag_With_The_Direction_And_Lets_Go_Of_One_Left_On_X()
+    {
+        using var clock = new TestClock();
+        using var page = new Page(clock);
+        using (var down = Make(page.Row, page.Log, direction: GestureDirection.Y, releaseAgainstDirection: true))
+        {
+            var finger = page.Drag(0, 150);
+            clock.At(page.At + 16);
+            page.Lift(finger);
+            Assert.Equal(["g.canStart", "g.onStart", "g.onMove", "g.onEnd"], page.Log.Names.Distinct());
+            Assert.Equal(0, page.ScrollTop);
+        }
+
+        page.Log.All.Clear();
+        using var sideways = Make(page.Row, page.Log, direction: GestureDirection.X, releaseAgainstDirection: true);
+        page.Lift(page.Drag(-80, 0, from: 3000));
+        Assert.Equal(["g.canStart", "g.notCaptured"], page.Log.Names);
+        Assert.Equal(-16, page.Log.Single("g.notCaptured").DeltaX);
+
+        page.Log.All.Clear();
+        page.Lift(page.Drag(80, 0, from: 5000));
+        Assert.Equal(["g.canStart", "g.onStart", "g.onMove", "g.onEnd"], page.Log.Names.Distinct());
+    }
+
     [AvaloniaFact]
     public void A_Gesture_That_Does_Not_Start_Leaves_The_Scroller_Alone()
     {

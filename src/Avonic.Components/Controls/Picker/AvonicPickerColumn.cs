@@ -14,6 +14,7 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -95,7 +96,7 @@ public class AvonicPickerColumn : ItemsControl
     private readonly StyleValue<string?> _defaultColor = new();
     private readonly HiddenChainWatcher _hiddenChain;
     private ScrollViewer? _scroll;
-    private PickerSmoothScroll? _smooth;
+    private SmoothScroll? _smooth;
     private AvonicPicker? _parent;
     private Rect? _viewport;
     private bool _attached;
@@ -257,7 +258,7 @@ public class AvonicPickerColumn : ItemsControl
         }
 
         _scroll = e.NameScope.Find<ScrollViewer>("PART_Scroll");
-        _smooth = _scroll is null ? null : new PickerSmoothScroll(_scroll);
+        _smooth = _scroll is null ? null : new SmoothScroll(_scroll, Orientation.Vertical);
         if (_scroll is not null)
         {
             _scroll.PropertyChanged += OnScrollPropertyChanged;

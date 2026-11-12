@@ -109,6 +109,9 @@ From [PLAN.md](PLAN.md), each a test in `AvonicSpinnerTests`:
 20. `AvonicConfig.Spinner` names a spinner that has none, read when it's first attached and at each change of a prop, and not
     when only the config changes, or when it's moved, or hidden and shown.
 
+Internal, for `ion-refresher`: `AnimationDelay`, CSS's `animation-delay` on each element's animation, which md's native refresher
+sets to `-655ms` on its circular refreshing spinner (#131). A change moves the running animations, as in CSS.
+
 ## Extensions
 
 None.

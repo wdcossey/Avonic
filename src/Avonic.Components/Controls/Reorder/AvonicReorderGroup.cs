@@ -10,6 +10,7 @@ using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Gestures;
 
 namespace Avonic.Components.Controls;
@@ -218,31 +219,9 @@ public class AvonicReorderGroup : ItemsControl
         base.OnDetachedFromVisualTree(e);
     }
 
-    /// <summary>
-    /// <c>findClosestIonContent</c>: <c>closest('ion-content, .ion-content-scroll-host')</c>, then its scroll element. A host with
-    /// the class scrolls itself in a browser; here only a <see cref="ScrollViewer"/> can, so it's the host, or the one around this
-    /// on the way to it.
-    /// </summary>
-    private ScrollViewer? FindScrollElement()
-    {
-        ScrollViewer? inside = null;
-        foreach (var visual in this.GetVisualAncestors())
-        {
-            if (visual is AvonicContent content)
-            {
-                return content.GetScrollElement();
-            }
-
-            if (visual is Control control && control.Classes.Contains("ion-content-scroll-host"))
-            {
-                return control as ScrollViewer ?? inside;
-            }
-
-            inside ??= visual as ScrollViewer;
-        }
-
-        return null;
-    }
+    /// <summary><c>findClosestIonContent</c>, then <c>getScrollElement</c> of what it found.</summary>
+    private ScrollViewer? FindScrollElement() =>
+        ContentUtils.FindClosestIonContent(this) is { } contentEl ? ContentUtils.GetScrollElement(contentEl, this) : null;
 
     private IReadOnlyList<Control> Children => ItemsPanelRoot?.Children ?? (IReadOnlyList<Control>)[];
 
@@ -663,6 +642,7 @@ public class AvonicReorderGroup : ItemsControl
 
         public IDisposable? Frame { get; } = frame;
 
-        public ReorderTransition Transition { get; } = new();
+        // Its timing function is the default, ease.
+        public CssTransition Transition { get; } = new(CubicBezierEasing.CssEase, 0);
     }
 }

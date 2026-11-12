@@ -37,6 +37,16 @@ public sealed class GestureConfig
     /// <summary>Ionic <c>maxAngle</c>: how far from <see cref="Direction"/>, in degrees, a movement can be and still capture. 40 by default.</summary>
     public double MaxAngle { get; init; } = 40;
 
+    /// <summary>
+    /// Not in Ionic: a press that reaches <see cref="Threshold"/> moving against <see cref="Direction"/> (up for
+    /// <see cref="GestureDirection.Y"/>, left for <see cref="GestureDirection.X"/>, whatever the flow direction) is let go before
+    /// the gesture decides, with <see cref="NotCaptured"/>, and before the move is kept from the gesture recognisers, so a
+    /// <c>ScrollViewer</c> that has followed the press, around the element or inside it, scrolls from there. For a vertical gesture
+    /// in a vertical scroller, where a drag the other way scrolls: Ionic's gesture there is passive, so it captures that drag, its
+    /// <c>onMove</c> ignores it, and the browser scrolls all the same; Avalonia gives a pointer to one owner, so the gesture lets go.
+    /// </summary>
+    public bool ReleaseAgainstDirection { get; init; }
+
     /// <summary>Ionic <c>blurOnStart</c>: clear the focus before <see cref="OnStart"/>.</summary>
     public bool BlurOnStart { get; init; }
 

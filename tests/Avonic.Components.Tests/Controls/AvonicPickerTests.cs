@@ -463,6 +463,51 @@ public class AvonicPickerTests
         Assert.True(Active(time.Minute));
     });
 
+    // ── P4: a touch on the picker reaches no gesture outside it ──────────────────────────────
+
+    [AvaloniaFact]
+    public void P4_Dragging_The_Picker_Sideways_Doesnt_Open_The_Sliding_Item_Around_It() => InstalledTheme.Run(_ =>
+    {
+        // picker.js's touchstart listener stops the event, so that a wheel in a card modal doesn't swipe the modal. A sideways drag
+        // on the item above the picker opens it; the same drag on the picker doesn't.
+        using var clock = new TestClock();
+        var column = Column("Green", AvonicPickerColumnTests.Colors);
+        var picker = new AvonicPicker { Items = { column } };
+        var item = new AvonicItem { Content = new StackPanel { Children = { new Border { Height = 48, Background = Brushes.Transparent }, picker } } };
+        var sliding = new AvonicItemSliding
+        {
+            Items = { item, new AvonicItemOptions { Items = { new AvonicItemOption { Content = new Border { Width = 80, Height = 10 } } } } },
+        };
+        var drags = 0;
+        sliding.IonDrag += (_, _) => drags++;
+        using var scene = new Scene(new StackPanel { Children = { sliding } });
+        Show(clock);
+        var origin = item.TranslatePoint(default, scene.Window)!.Value;
+        var onPicker = BoundsIn(column, scene.Window).Center;
+        Assert.True(onPicker.Y > origin.Y + 48);
+
+        void Drag(double x0, double y, double at)
+        {
+            var finger = new GestureTests.Finger(scene, clock).Down(x0, y, at);
+            for (var step = 1; step <= 9; step++)
+            {
+                finger.Move(x0 - step * 10, y, at += 16);
+            }
+
+            finger.Up(x0 - 90, y, at + 16);
+            Frames(clock, at + 1000);
+        }
+
+        // On the column's centre option
+        Drag(onPicker.X, onPicker.Y, 1000);
+        Assert.Equal(0, drags);
+        Assert.Equal(origin, item.TranslatePoint(default, scene.Window)!.Value);
+
+        Drag(onPicker.X, origin.Y + 24, 3000);
+        Assert.True(drags > 0);
+        Assert.NotEqual(origin, item.TranslatePoint(default, scene.Window)!.Value);
+    });
+
     // ── The compare frame ────────────────────────────────────────────────────────────────────
 
     /// <summary>The same content as the --html at the top of docs/components/ion-picker/COMPARISON.md.</summary>

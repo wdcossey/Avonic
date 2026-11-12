@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
+using Avonic.Components.Gestures;
 
 namespace Avonic.Components.Controls;
 
@@ -32,6 +33,13 @@ public class AvonicPicker : ItemsControl
     private IDisposable? _singleColumnSearchTimeout;
     private bool _keypressListening;
     private bool _settingInput;
+
+    static AvonicPicker()
+    {
+        // The host's touchstart listener, preventTouchStartPropagation: a touch on the picker starts no gesture around it, so that
+        // scrolling a wheel doesn't swipe a sliding item or a card modal.
+        Gesture.StopsTouchStartProperty.OverrideDefaultValue<AvonicPicker>(true);
+    }
 
     public AvonicPicker()
     {

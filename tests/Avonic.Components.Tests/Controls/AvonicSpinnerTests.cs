@@ -349,6 +349,42 @@ public class AvonicSpinnerTests
         }
     }
 
+    // ── Internal: animation-delay, for md's native refresher ─────────────────────────────────
+
+    private static IReadOnlyList<SpinnerElementFrame> Expected(SpinnerName name, double elapsed)
+    {
+        var config = SpinnerConfigs.Get(name);
+        return Enumerable.Range(0, config.Count).Select(i => SpinnerFrame.Compute(config, config.Dur, i, elapsed)).ToList();
+    }
+
+    [AvaloniaFact]
+    public void AnimationDelay_Starts_Each_Elements_Animation_That_Far_In_And_A_Change_Moves_The_Running_Ones()
+    {
+        // ion-refresher sets animation-delay: -655ms on its refreshing spinner's circle, which is circular's one element.
+        using var clock = new TestClock();
+        var spinner = new AvonicSpinner { SpinnerName = SpinnerName.Lines, Width = 28, Height = 28 };
+        spinner.AnimationDelay = TimeSpan.FromMilliseconds(-300);
+        var host = new StackPanel { Children = { spinner } };
+        using var scene = new Scene(host);
+
+        clock.At(100);
+        Assert.Equal(Expected(SpinnerName.Lines, 400), spinner.CurrentFrame());
+
+        // animation-delay changed while it runs: the same start time, so the animations move by the difference
+        spinner.AnimationDelay = TimeSpan.FromMilliseconds(-100);
+        Assert.Equal(Expected(SpinnerName.Lines, 200), spinner.CurrentFrame());
+
+        // Shown again, or another name's new animations, start that far in from then
+        host.IsVisible = false;
+        clock.At(500);
+        host.IsVisible = true;
+        clock.At(550);
+        Assert.Equal(Expected(SpinnerName.Lines, 150), spinner.CurrentFrame());
+        spinner.SpinnerName = SpinnerName.Circular;
+        clock.At(600);
+        Assert.Equal(Expected(SpinnerName.Circular, 150)[0].Arcs!, Assert.Single(spinner.CurrentFrame()).Arcs!);
+    }
+
     // ── B11: leaving the tree ────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

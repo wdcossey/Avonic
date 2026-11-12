@@ -7,11 +7,10 @@ using Avalonia.Media;
 namespace Avonic.Components.Controls;
 
 /// <summary>
-/// The circle of md's native refresher, drawn from the same config as <see cref="AvonicSpinner"/>'s <c>circular</c>:
+/// The pulling circle of md's native refresher, drawn from the same config as <see cref="AvonicSpinner"/>'s <c>circular</c>:
 /// <c>viewBox="24 24 48 48"</c>, a circle at 48, 48 of radius 20, a stroke of 5.6, its dash from 3 o'clock, clockwise. A part of
-/// <see cref="AvonicRefresherContent"/>'s template, in two places. The pulling icon's has its animation set to <c>none</c>, so
-/// the pull sets its dash. The refreshing icon's runs <c>spinner-circular-inner</c> with <c>animation-delay: -655ms</c>, which
-/// lines it up with where the pull left off, and which <see cref="AvonicSpinner"/> has no way to take.
+/// <see cref="AvonicRefresherContent"/>'s template: the pulling icon's circle, whose animation is set to <c>none</c>, so the pull
+/// sets its dash. The refreshing icon's circle runs, so it's an <see cref="AvonicSpinner"/>, with an <c>animation-delay</c>.
 /// </summary>
 public sealed class RefresherCircle : Control
 {
@@ -20,8 +19,6 @@ public sealed class RefresherCircle : Control
         TextElement.ForegroundProperty.AddOwner<RefresherCircle>();
 
     private double _dash = RefresherPullFrame.BaseCircleDash;
-    private TimeSpan? _startedAt;
-    private IDisposable? _frame;
     private Pen? _pen;
 
     static RefresherCircle()
@@ -36,7 +33,7 @@ public sealed class RefresherCircle : Control
         set => SetValue(ForegroundProperty, value);
     }
 
-    /// <summary>The <c>circle</c>'s <c>stroke-dasharray</c> dash while it isn't running, in the <c>viewBox</c>'s units.</summary>
+    /// <summary>The <c>circle</c>'s <c>stroke-dasharray</c> dash, in the <c>viewBox</c>'s units.</summary>
     internal double Dash
     {
         get => _dash;
@@ -50,67 +47,10 @@ public sealed class RefresherCircle : Control
         }
     }
 
-    /// <summary>Whether <c>spinner-circular-inner</c> is running.</summary>
-    internal bool IsRunning => _startedAt is not null;
-
-    /// <summary>The time on <see cref="AvonicConfig.Now"/> its animation began, delay included, while it's running.</summary>
-    internal TimeSpan? StartedAt => _startedAt;
-
-    /// <summary>Runs <c>spinner-circular-inner</c>, as if it had begun at <paramref name="startedAt"/>.</summary>
-    internal void Run(TimeSpan startedAt)
-    {
-        _startedAt = startedAt;
-        RequestFrame();
-        InvalidateVisual();
-    }
-
-    /// <summary>Stops it: <c>display: none</c> ends a CSS animation, and the next show starts it again.</summary>
-    internal void Stop()
-    {
-        _startedAt = null;
-        _frame?.Dispose();
-        _frame = null;
-        InvalidateVisual();
-    }
-
-    /// <inheritdoc/>
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        if (_startedAt is not null)
-        {
-            RequestFrame();
-        }
-    }
-
-    /// <inheritdoc/>
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnDetachedFromVisualTree(e);
-        _frame?.Dispose();
-        _frame = null;
-    }
-
-    private void RequestFrame() => _frame ??= AvonicConfig.RequestFrame(this, () =>
-    {
-        _frame = null;
-        if (_startedAt is not null && VisualRoot is not null)
-        {
-            InvalidateVisual();
-            RequestFrame();
-        }
-    });
-
-    /// <summary>The stretches of the circle drawn now: the running animation's, or the one dash from 3 o'clock.</summary>
+    /// <summary>The stretch of the circle drawn: the one dash from 3 o'clock.</summary>
     internal IReadOnlyList<SpinnerArc> CurrentArcs()
     {
         var config = SpinnerConfigs.Get(SpinnerName.Circular);
-        if (_startedAt is { } startedAt)
-        {
-            var frame = SpinnerFrame.Compute(config, config.Dur, 0, (AvonicConfig.Now() - startedAt).TotalMilliseconds);
-            return frame.Arcs ?? [];
-        }
-
         return _dash > 0 ? [new SpinnerArc(0, Math.Min(_dash, 2 * Math.PI * config.Radius))] : [];
     }
 

@@ -121,7 +121,7 @@ public class AvonicItemSliding : ItemsControl
     /// <summary>The item's <c>style.transition = 'none'</c>, from a drag's start until <c>setOpenAmount(…, true)</c>.</summary>
     private bool _transitionNone;
 
-    private readonly SlideTransition _transition = new(TransitionEasing);
+    private readonly CssTransition _transition = new(TransitionEasing, 0);
     private IDisposable? _transitionFrame;
     private TranslateTransform? _translate;
 

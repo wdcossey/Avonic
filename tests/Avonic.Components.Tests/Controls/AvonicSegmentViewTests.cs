@@ -116,7 +116,7 @@ public class AvonicSegmentViewTests
         var start = clock.Now.TotalMilliseconds;
         var duration = Math.Sqrt(780) / 60 * 1000;
         Frames(clock, start + 16 * 15);
-        Assert.Equal(780 * Components.Controls.SmoothScroll.Easing.Ease(16 * 15 / duration), page.Scroll.Offset.X, 3);
+        Assert.Equal(780 * Components.Animation.SmoothScroll.Easing.Ease(16 * 15 / duration), page.Scroll.Offset.X, 3);
         Frames(clock, start + duration + 16);
         Assert.Equal(780, page.Scroll.Offset.X);
         Assert.NotEmpty(page.Scrolls);

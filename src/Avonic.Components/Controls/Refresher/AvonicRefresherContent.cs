@@ -30,8 +30,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Refreshing", typeof(Control))]
 [TemplatePart("PART_RefreshingIcon", typeof(Control))]
 [TemplatePart("PART_RefreshingSpinner", typeof(AvonicSpinner))]
-[TemplatePart("PART_RefreshingCircle", typeof(RefresherCircle))]
-[PseudoClasses(":pulling", ":ready", ":refreshing", ":cancelling", ":completing", ":native", ":pulling-circular", ":refreshing-circular")]
+[PseudoClasses(":pulling", ":ready", ":refreshing", ":cancelling", ":completing", ":native", ":pulling-circular")]
 public class AvonicRefresherContent : TemplatedControl
 {
     /// <summary>
@@ -54,9 +53,6 @@ public class AvonicRefresherContent : TemplatedControl
     /// <summary><c>.refresher-refreshing-icon</c>'s <c>transition: 200ms</c>, which md's completing state runs on its scale.</summary>
     internal static readonly TimeSpan IconTransition = TimeSpan.FromMilliseconds(200);
 
-    /// <summary>The transition's timing function, CSS's default <c>ease</c>.</summary>
-    private static readonly CubicBezierEasing Ease = new(0.25, 0.1, 0.25, 1);
-
     static AvonicRefresherContent()
     {
         // The pulling icon comes down from above the refresher and goes on below it, and nothing clips it in Ionic. Avalonia
@@ -75,7 +71,11 @@ public class AvonicRefresherContent : TemplatedControl
     private Control? _arrowContainer;
     private Control? _arrow;
     private Control? _refreshingIcon;
-    private RefresherCircle? _refreshingCircle;
+    private AvonicSpinner? _refreshingSpinner;
+
+    // setupMDNativeRefresher's animation-delay, worked out when the refresher became native
+    private TimeSpan _refreshingDelay;
+    private bool _wasNative;
 
     private readonly List<IDisposable> _animated = [];
     private IDisposable? _snapBack;
@@ -172,9 +172,8 @@ public class AvonicRefresherContent : TemplatedControl
         _arrowContainer = e.NameScope.Find<Control>("PART_ArrowContainer");
         _arrow = e.NameScope.Find<Control>("PART_Arrow");
         _refreshingIcon = e.NameScope.Find<Control>("PART_RefreshingIcon");
-        _refreshingCircle?.Stop();
-        _refreshingCircle = e.NameScope.Find<RefresherCircle>("PART_RefreshingCircle");
-        UpdateRefreshingCircle(RefresherState.Inactive);
+        _refreshingSpinner = e.NameScope.Find<AvonicSpinner>("PART_RefreshingSpinner");
+        UpdateRefreshingDelay();
     }
 
     /// <inheritdoc/>
@@ -186,12 +185,6 @@ public class AvonicRefresherContent : TemplatedControl
             // mode === 'md' && pullingIcon === 'circular': the circle without its animation, and the arrow
             PseudoClasses.Set(":pulling-circular", PullingIcon == SpinnerName.Circular);
         }
-        else if (change.Property == RefreshingSpinnerProperty)
-        {
-            // The refreshing spinner's circle is the one with animation-delay: -655ms
-            PseudoClasses.Set(":refreshing-circular", RefreshingSpinner == SpinnerName.Circular);
-            UpdateRefreshingCircle(_state);
-        }
     }
 
     /// <summary>
@@ -200,21 +193,28 @@ public class AvonicRefresherContent : TemplatedControl
     /// </summary>
     internal static readonly TimeSpan RefreshingDelay = TimeSpan.FromMilliseconds(-655);
 
-    private void UpdateRefreshingCircle(RefresherState previous)
+    /// <summary>
+    /// <c>setupMDNativeRefresher</c>'s <c>animation-delay</c> on the refreshing spinner, set only if both spinners have a
+    /// <c>circle</c> (the lines have <c>line</c>s), and which moves only <c>circular</c>'s animation, as the other names animate
+    /// their <c>svg</c>s, not the <c>circle</c> it's set on. Worked out once, when the refresher becomes native, as Ionic sets it
+    /// once, from the spinners there are then: a spinner changed later doesn't change it. A template applied later gets it too.
+    /// </summary>
+    private void UpdateRefreshingDelay()
     {
-        if (_refreshingCircle is not { } circle)
+        var native = _refresher?.IsNative == true;
+        if (native && !_wasNative)
         {
-            return;
+            _refreshingDelay = RefreshingSpinner == SpinnerName.Circular
+                               && PullingIcon is { } pulling
+                               && !SpinnerConfigs.Get(pulling).IsLine
+                ? RefreshingDelay
+                : TimeSpan.Zero;
         }
 
-        // Only the circle that shows runs: another spinner is an AvonicSpinner
-        if (!ShowsRefreshing(_state) || _refresher?.IsNative != true || RefreshingSpinner != SpinnerName.Circular)
+        _wasNative = native;
+        if (_refreshingSpinner is { } spinner)
         {
-            circle.Stop();
-        }
-        else if (!ShowsRefreshing(previous) || !circle.IsRunning)
-        {
-            circle.Run(AvonicConfig.Now() + RefreshingDelay);
+            spinner.AnimationDelay = _refreshingDelay;
         }
     }
 
@@ -226,13 +226,22 @@ public class AvonicRefresherContent : TemplatedControl
         // Ionic's rules for these states that show anything are md's native refresher's; the legacy refresher, which md would use
         // otherwise, isn't here, and it sits behind the content.
         _state = _refresher is { IsNative: true } refresher ? refresher.State : RefresherState.Inactive;
-        PseudoClasses.Set(":pulling", _state == RefresherState.Pulling);
-        PseudoClasses.Set(":ready", _state == RefresherState.Ready);
-        PseudoClasses.Set(":refreshing", _state == RefresherState.Refreshing);
-        PseudoClasses.Set(":cancelling", _state == RefresherState.Cancelling);
-        PseudoClasses.Set(":completing", _state == RefresherState.Completing);
+        UpdateRefreshingDelay();
+
+        // The new state's class on before the old one's off, as the class list changes at once in a browser: from refreshing to
+        // completing, .refresher-refreshing never has display: none in between, so its spinner carries on rather than start again.
+        foreach (var on in s_onThenOff)
+        {
+            foreach (var (state, pseudoClass) in s_stateClasses)
+            {
+                if ((_state == state) == on)
+                {
+                    PseudoClasses.Set(pseudoClass, on);
+                }
+            }
+        }
+
         PseudoClasses.Set(":native", _refresher?.IsNative == true);
-        UpdateRefreshingCircle(previous);
 
         // .refresher-completing .refresher-refreshing-icon { transform: scale(0) }, with transition: 200ms. It transitions only if
         // the icon was showing already: from display: none, there's no style to start from, and it's simply scale(0).
@@ -245,6 +254,18 @@ public class AvonicRefresherContent : TemplatedControl
             StopIconScale();
         }
     }
+
+    /// <summary>The pseudoclass of each state that has one.</summary>
+    private static readonly (RefresherState State, string PseudoClass)[] s_stateClasses =
+    [
+        (RefresherState.Pulling, ":pulling"),
+        (RefresherState.Ready, ":ready"),
+        (RefresherState.Refreshing, ":refreshing"),
+        (RefresherState.Cancelling, ":cancelling"),
+        (RefresherState.Completing, ":completing"),
+    ];
+
+    private static readonly bool[] s_onThenOff = [true, false];
 
     /// <summary>The states in which md's native refresher shows <c>.refresher-refreshing</c>.</summary>
     internal static bool ShowsRefreshing(RefresherState state) =>
@@ -338,7 +359,8 @@ public class AvonicRefresherContent : TemplatedControl
         void Step()
         {
             var t = Math.Min(1, (AvonicConfig.Now() - start) / IconTransition);
-            var scale = 1 - Ease.Ease(t);
+            // The transition's timing function, CSS's default ease
+            var scale = 1 - CubicBezierEasing.CssEase.Ease(t);
             _iconScale?.Dispose();
             _iconScale = icon.SetValue(RenderTransformProperty, new ScaleTransform(scale, scale), BindingPriority.Animation);
             _transitionFrame = t < 1 ? AvonicConfig.RequestFrame(icon, Step) : null;
