@@ -9,6 +9,7 @@ using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;

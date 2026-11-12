@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Gestures;
 

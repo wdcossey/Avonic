@@ -70,7 +70,8 @@ public class GestureTests
         bool blurOnStart = false,
         Func<GestureDetail, bool>? canStart = null,
         Func<GestureDetail, Task>? onWillStart = null,
-        bool enable = true)
+        bool enable = true,
+        bool releaseAgainstDirection = false)
     {
         var gesture = Gesture.Create(new GestureConfig
         {
@@ -82,6 +83,7 @@ public class GestureTests
             MaxAngle = maxAngle,
             DisableScroll = disableScroll,
             BlurOnStart = blurOnStart,
+            ReleaseAgainstDirection = releaseAgainstDirection,
             CanStart = detail =>
             {
                 log.Add($"{name}.canStart");
@@ -1335,5 +1337,80 @@ public class GestureTests
 
         Assert.Equal(["g.canStart", "g.onStart", "g.onMove", "g.onEnd"], log.Names);
         Assert.Equal(30, log.Single("g.onMove").DeltaX, 6);
+    }
+
+    // ── G18: a touchstart stopped on its way (ion-picker's preventTouchStartPropagation) ──────
+
+    /// <summary>A box of 390 × 300 holding a box of 200 × 100 marked as stopping touchstart, holding one of 100 × 50, all at 0, 0.</summary>
+    private static (Border Outer, Border Stopper, Border Inner) Stopped()
+    {
+        var inner = Box(100, 50);
+        var stopper = Box(200, 100);
+        stopper.Child = inner;
+        Gesture.SetStopsTouchStart(stopper, true);
+        var outer = Box();
+        outer.Child = stopper;
+        return (outer, stopper, inner);
+    }
+
+    [AvaloniaFact]
+    public void G18_A_Touch_Inside_An_Element_That_Stops_TouchStart_Starts_No_Gesture_Around_It()
+    {
+        using var clock = new TestClock();
+        var (outer, _, _) = Stopped();
+        using var scene = new Scene(outer);
+        var log = new Log(clock);
+        using var gesture = Make(outer, log);
+
+        // On the inner box, and on the stopper itself: nothing, not even canStart.
+        new Finger(scene, clock).Down(50, 25, 1000).Move(80, 25, 1016).Move(110, 25, 1032).Up(110, 25, 1048);
+        new Finger(scene, clock).Down(150, 75, 2000).Move(180, 75, 2016).Move(210, 75, 2032).Up(210, 75, 2048);
+        Assert.Empty(log.All);
+
+        // Outside it, the gesture is as ever.
+        new Finger(scene, clock).Down(250, 200, 3000).Move(280, 200, 3016).Up(280, 200, 3032);
+        Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
+    }
+
+    [AvaloniaFact]
+    public void G18_A_Mouse_Press_Inside_It_Still_Starts_The_Gesture_Around_It_As_Only_TouchStart_Is_Stopped()
+    {
+        using var clock = new TestClock();
+        var (outer, _, _) = Stopped();
+        using var scene = new Scene(outer);
+        var log = new Log(clock);
+        using var gesture = Make(outer, log);
+        var window = scene.Window;
+
+        clock.At(1000);
+        Render();
+        window.MouseDown(new Point(50, 25), MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        clock.At(1016);
+        window.MouseMove(new Point(80, 25), RawInputModifiers.LeftMouseButton);
+        Settle();
+        clock.At(1032);
+        window.MouseUp(new Point(80, 25), MouseButton.Left, RawInputModifiers.None);
+        Settle();
+
+        Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
+    }
+
+    [AvaloniaFact]
+    public void G18_Gestures_On_The_Element_That_Stops_TouchStart_And_Inside_It_Still_Hear_The_Touch()
+    {
+        using var clock = new TestClock();
+        var (outer, stopper, inner) = Stopped();
+        using var scene = new Scene(outer);
+        var log = new Log(clock);
+        using var around = Make(outer, log, name: "outer");
+        using var on = Make(stopper, log, name: "stopper");
+        using var inside = Make(inner, log, name: "inner");
+
+        new Finger(scene, clock).Down(50, 25, 1000).Move(80, 25, 1016).Up(80, 25, 1032);
+
+        Assert.Contains("inner.canStart", log.Names);
+        Assert.Contains("stopper.canStart", log.Names);
+        Assert.DoesNotContain(log.Names, name => name.StartsWith("outer.", StringComparison.Ordinal));
     }
 }

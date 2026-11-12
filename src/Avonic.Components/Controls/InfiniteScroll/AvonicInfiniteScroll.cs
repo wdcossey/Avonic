@@ -27,9 +27,6 @@ public partial class AvonicInfiniteScroll : ContentControl
     internal const string LoadingClass = ":infinite-scroll-loading";
     internal const string EnabledClass = ":infinite-scroll-enabled";
 
-    /// <summary>The class Ionic's selector also takes for a scroller: <c>.ion-content-scroll-host</c>.</summary>
-    public const string ScrollHostClass = "ion-content-scroll-host";
-
     /// <summary>Ionic <c>position</c>.</summary>
     public static readonly StyledProperty<InfiniteScrollPosition> PositionProperty =
         AvaloniaProperty.Register<AvonicInfiniteScroll, InfiniteScrollPosition>(nameof(Position));
@@ -155,16 +152,15 @@ public partial class AvonicInfiniteScroll : ContentControl
     {
         base.OnAttachedToVisualTree(e);
 
-        if (FindClosestScrollHost(out var inside) is not { } host)
+        if (ContentUtils.FindClosestIonContent(this) is not { } host)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicInfiniteScroll must be used inside AvonicContent.");
             return;
         }
 
-        // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready. A host with the class scrolls
-        // itself in a browser; here only a ScrollViewer can, so it's the host, or the one in the host's template around this, as a
-        // ListBox has. A content with a replaced template may have none.
-        var scrollEl = host is AvonicContent content ? content.GetScrollElement() : host as ScrollViewer ?? inside;
+        // Ionic parses the threshold here too; it's parsed whenever it changes, so it's ready. A content with a replaced template,
+        // or a host with the class and no ScrollViewer, may have no scroller.
+        var scrollEl = ContentUtils.GetScrollElement(host, this);
         if (scrollEl is null)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicInfiniteScroll found no ScrollViewer in {Host}.", host);
@@ -198,26 +194,6 @@ public partial class AvonicInfiniteScroll : ContentControl
         _offsetWatch?.Dispose();
         _offsetWatch = null;
         _scrollEl = null;
-    }
-
-    /// <summary>
-    /// <c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself and stops at the first, with
-    /// the nearest <see cref="ScrollViewer"/> on the way to it.
-    /// </summary>
-    private Control? FindClosestScrollHost(out ScrollViewer? inside)
-    {
-        inside = null;
-        foreach (var visual in this.GetSelfAndVisualAncestors())
-        {
-            if (visual is AvonicContent || (visual is Control control && control.Classes.Contains(ScrollHostClass)))
-            {
-                return (Control)visual;
-            }
-
-            inside ??= visual as ScrollViewer;
-        }
-
-        return null;
     }
 
     private void ThresholdChanged()

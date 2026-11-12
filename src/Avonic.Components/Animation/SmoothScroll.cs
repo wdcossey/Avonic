@@ -1,18 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avonic.Components.Animation;
+using Avalonia.Layout;
 
-namespace Avonic.Components.Controls;
+namespace Avonic.Components.Animation;
 
 /// <summary>
-/// Chromium's programmatic smooth scroll, <c>scrollTo({ behavior: 'smooth' })</c>, on <see cref="AvonicConfig"/>'s clock: √distance / 60
-/// seconds, <c>cubic-bezier(0.42, 0, 0.58, 1)</c>. Measured in Chromium over 84, 390 and 780 px; see <c>docs/components/ion-segment/PLAN.md</c>.
-/// Scrolling by anything else in the middle stops it, as a person's scroll stops Chromium's.
+/// Chromium's programmatic smooth scroll, <c>scrollTo({ behavior: 'smooth' })</c>, along one axis, on <see cref="AvonicConfig"/>'s
+/// clock: √distance / 60 seconds, <c>cubic-bezier(0.42, 0, 0.58, 1)</c>. Measured in Chromium over 84, 390 and 780 px sideways
+/// (<c>docs/components/ion-segment/PLAN.md</c>), and 136 px down a picker column in 200 ms (<c>docs/components/ion-picker/PLAN.md</c>).
+/// Scrolling by anything else in the middle stops it, as a person's scroll stops Chromium's. The segment and the segment view
+/// scroll sideways, the picker column down.
 /// </summary>
-internal sealed class SmoothScroll(ScrollViewer scroller)
+internal sealed class SmoothScroll(ScrollViewer scroller, Orientation orientation = Orientation.Horizontal)
 {
     internal static readonly CubicBezierEasing Easing = new(0.42, 0, 0.58, 1);
 
+    private readonly bool _vertical = orientation == Orientation.Vertical;
     private IDisposable? _frame;
     private double _from;
     private double _to;
@@ -24,11 +27,16 @@ internal sealed class SmoothScroll(ScrollViewer scroller)
 
     internal static TimeSpan DurationFor(double distance) => TimeSpan.FromSeconds(Math.Sqrt(Math.Abs(distance)) / 60);
 
-    /// <summary><c>scrollTo</c>, smoothly or at once.</summary>
-    public void To(double x, bool smooth)
+    /// <summary>
+    /// <c>scrollTo</c> along the axis, smoothly or at once: <c>left</c> when horizontal, <c>top</c> when vertical. The other axis
+    /// stays where it is.
+    /// </summary>
+    public void To(double position, bool smooth)
     {
-        var max = Math.Max(0, scroller.Extent.Width - scroller.Viewport.Width);
-        var target = Math.Clamp(x, 0, max);
+        var max = _vertical
+            ? Math.Max(0, scroller.Extent.Height - scroller.Viewport.Height)
+            : Math.Max(0, scroller.Extent.Width - scroller.Viewport.Width);
+        var target = Math.Clamp(position, 0, max);
 
         // The same target again, while it's going there, as Ionic's checkButton asks after valueChanged has: it carries on.
         if (smooth && IsRunning && Math.Abs(target - _to) < 0.5)
@@ -37,7 +45,7 @@ internal sealed class SmoothScroll(ScrollViewer scroller)
         }
 
         Stop();
-        var from = scroller.Offset.X;
+        var from = Current;
         if (!smooth || Math.Abs(target - from) < 0.5)
         {
             Set(target);
@@ -58,10 +66,12 @@ internal sealed class SmoothScroll(ScrollViewer scroller)
         _frame = null;
     }
 
+    private double Current => _vertical ? scroller.Offset.Y : scroller.Offset.X;
+
     private void OnFrame()
     {
         _frame = null;
-        if (Math.Abs(scroller.Offset.X - _last) > 0.5)
+        if (Math.Abs(Current - _last) > 0.5)
         {
             // Someone else scrolled it.
             return;
@@ -75,9 +85,9 @@ internal sealed class SmoothScroll(ScrollViewer scroller)
         }
     }
 
-    private void Set(double x)
+    private void Set(double position)
     {
-        scroller.Offset = new Vector(x, scroller.Offset.Y);
-        _last = scroller.Offset.X;
+        scroller.Offset = _vertical ? new Vector(scroller.Offset.X, position) : new Vector(position, scroller.Offset.Y);
+        _last = Current;
     }
 }

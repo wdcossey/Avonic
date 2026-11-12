@@ -457,7 +457,7 @@ public class AvonicInfiniteScrollTests
         var scroll = new ScrollViewer
         {
             Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!,
-            Classes = { AvonicInfiniteScroll.ScrollHostClass },
+            Classes = { AvonicContent.ScrollHostClass },
             Content = rows,
         };
         using var scene = new Scene(scroll);
@@ -528,7 +528,7 @@ public class AvonicInfiniteScrollTests
             Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!,
             Content = rows,
         };
-        using var scene = new Scene(new Border { Classes = { AvonicInfiniteScroll.ScrollHostClass }, Child = scroll });
+        using var scene = new Scene(new Border { Classes = { AvonicContent.ScrollHostClass }, Child = scroll });
 
         scroll.Offset = new Vector(0, 530);
         clock.At(16);
@@ -545,7 +545,7 @@ public class AvonicInfiniteScrollTests
         {
             // closest() stops at the class, here on something that can't scroll, inside a content that does
             Border? host = null;
-            using var stage = new Stage(wrap: infinite => host = new Border { Classes = { AvonicInfiniteScroll.ScrollHostClass }, Child = infinite });
+            using var stage = new Stage(wrap: infinite => host = new Border { Classes = { AvonicContent.ScrollHostClass }, Child = infinite });
             stage.ScrollTo(740);
             Assert.Equal(0, stage.Fired);
             Assert.Contains(sink.Errors, e => ReferenceEquals(e.Source, stage.Infinite) && e.Message == "AvonicInfiniteScroll found no ScrollViewer in {Host}.");

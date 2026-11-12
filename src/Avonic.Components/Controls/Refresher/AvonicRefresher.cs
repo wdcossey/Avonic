@@ -66,10 +66,6 @@ public class AvonicRefresher : ContentControl
     // ev.data, for the press being pulled
     private PullData? _data;
 
-    // The press the gesture is deciding about, for handing an upward drag to the scroller
-    private IPointer? _deciding;
-    private Point _pressPoint;
-
     private readonly List<IDisposable> _animations = [];
     private readonly List<PendingReset> _resets = [];
 
@@ -228,13 +224,10 @@ public class AvonicRefresher : ContentControl
     private void Disconnect()
     {
         _nativeRefresher = false;
-        _scrollEl?.RemoveHandler(PointerMovedEvent, OnScrollPreviewMoved);
-        _scrollEl?.RemoveHandler(PointerReleasedEvent, OnScrollReleased);
         _scrollEl = null;
         _contentEl = null;
         _gesture?.Destroy();
         _gesture = null;
-        _deciding = null;
         UpdatePseudoClasses();
     }
 
@@ -273,8 +266,9 @@ public class AvonicRefresher : ContentControl
             return;
         }
 
+        // getScrollElement(contentEl). Ionic would take an .ion-content-scroll-host inside the content first, which isn't here.
         _contentEl = content;
-        _scrollEl = content.GetScrollElement();
+        _scrollEl = ContentUtils.GetScrollElement(content, this);
         if (_scrollEl is null)
         {
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", content);
@@ -337,10 +331,6 @@ public class AvonicRefresher : ContentControl
         UpdatePseudoClasses();
         StateChanged?.Invoke(this, EventArgs.Empty);
 
-        // Before the gesture's own handlers, so that an upward drag is handed to the scroller before the gesture decides.
-        scrollEl.AddHandler(PointerMovedEvent, OnScrollPreviewMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
-        scrollEl.AddHandler(PointerReleasedEvent, OnScrollReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
-
         _gesture = Gesture.Create(new GestureConfig
         {
             Element = scrollEl,
@@ -352,61 +342,24 @@ public class AvonicRefresher : ContentControl
             OnStart = OnStart,
             OnMove = OnMove,
             OnEnd = OnEnd,
-            NotCaptured = _ => _deciding = null,
+
+            // In Chromium an upward drag from the top scrolls the content, and Ionic's passive gesture, which captures it too,
+            // cancels at its first move. Avalonia gives a pointer to one owner, so the gesture lets go of an upward drag at its
+            // threshold, before it would capture it, and the scroller, which has followed the press, scrolls from there.
+            ReleaseAgainstDirection = true,
         });
 
         // disabledChanged
         _gesture.Enable(IsEnabled);
     }
 
-    private bool CanStart(GestureDetail detail)
-    {
-        var canStart = State != RefresherState.Refreshing
-                       && State != RefresherState.Completing
-                       && _scrollEl?.Offset.Y == 0;
-        if (canStart)
-        {
-            _deciding = detail.Event?.Pointer;
-            _pressPoint = new Point(detail.StartX, detail.StartY);
-        }
-
-        return canStart;
-    }
-
-    /// <summary>
-    /// In Chromium an upward drag from the top scrolls the content, and Ionic's passive gesture, which captures it too, cancels at
-    /// its first move. Avalonia gives a pointer to one owner, so the gesture lets go of an upward drag at its threshold, before it
-    /// would capture it, and the scroller, which has followed the press, scrolls from there.
-    /// </summary>
-    private void OnScrollPreviewMoved(object? sender, PointerEventArgs e)
-    {
-        if (_deciding is null || !ReferenceEquals(e.Pointer, _deciding) || _data is not null || _gesture is null)
-        {
-            return;
-        }
-
-        var point = e.GetPosition(null);
-        var delta = point - _pressPoint;
-        if (delta.Y < 0 && Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y) >= Threshold)
-        {
-            _deciding = null;
-            _gesture.Enable(false);
-            _gesture.Enable(IsEnabled);
-        }
-    }
-
-    /// <summary>A press the controller refused calls nothing back, so the press is forgotten when it ends.</summary>
-    private void OnScrollReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        if (ReferenceEquals(e.Pointer, _deciding))
-        {
-            _deciding = null;
-        }
-    }
+    private bool CanStart(GestureDetail detail) =>
+        State != RefresherState.Refreshing
+        && State != RefresherState.Completing
+        && _scrollEl?.Offset.Y == 0;
 
     private void OnStart(GestureDetail detail)
     {
-        _deciding = null;
         _progress = 0;
         _data = new PullData();
         detail.Data = _data;
@@ -454,7 +407,6 @@ public class AvonicRefresher : ContentControl
     {
         var data = detail.Data as PullData;
         _data = null;
-        _deciding = null;
         if (data is null || !data.DidStart || _gesture is not { } gesture)
         {
             return;

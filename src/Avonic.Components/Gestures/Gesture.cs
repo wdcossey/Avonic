@@ -61,6 +61,24 @@ public sealed class Gesture : IDisposable
     /// </summary>
     private static List<Gesture>? s_handoff;
 
+    /// <summary>
+    /// A <c>touchstart</c> listener on the element that calls <c>stopPropagation()</c>, as <c>ion-picker</c>'s
+    /// <c>preventTouchStartPropagation</c> does, so that scrolling a wheel doesn't start a gesture around it (a sliding item, a
+    /// card modal). A touch or pen press on the element, or inside it, starts no gesture whose element is around it; a gesture
+    /// on the element itself, or inside it, still hears it, as <c>stopPropagation</c> stops only the ancestors' listeners. A mouse
+    /// press isn't stopped, as only <c>touchstart</c> is, and a mouse fires <c>mousedown</c>; a pen counts as a touch, as on
+    /// Android, where Chromium reports a stylus as touches. Nothing else is stopped: a <c>ScrollViewer</c> around it still
+    /// scrolls, as stopping an event doesn't stop the browser's own scrolling.
+    /// </summary>
+    internal static readonly AttachedProperty<bool> StopsTouchStartProperty =
+        AvaloniaProperty.RegisterAttached<Gesture, InputElement, bool>("StopsTouchStart");
+
+    /// <inheritdoc cref="StopsTouchStartProperty"/>
+    internal static bool GetStopsTouchStart(InputElement element) => element.GetValue(StopsTouchStartProperty);
+
+    /// <inheritdoc cref="StopsTouchStartProperty"/>
+    internal static void SetStopsTouchStart(InputElement element, bool value) => element.SetValue(StopsTouchStartProperty, value);
+
     private Gesture(GestureConfig config)
     {
         _config = config;
@@ -427,7 +445,7 @@ public sealed class Gesture : IDisposable
 
     private void OnPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (!_listening)
+        if (!_listening || IsStoppedOnTheWay(e))
         {
             return;
         }
@@ -476,6 +494,15 @@ public sealed class Gesture : IDisposable
             return;
         }
 
+        if (_config.ReleaseAgainstDirection && MovesAgainstDirection(e))
+        {
+            // Let go before this move is held from the recognisers, so a scroller that followed the press scrolls from here. The
+            // detail is this move's, as at an abort in PointerMove.
+            CalcGestureData(_detail, e);
+            AbortGesture();
+            return;
+        }
+
         if (ReferenceEquals(_held, e.Pointer) || IsStill(e))
         {
             return;
@@ -483,6 +510,42 @@ public sealed class Gesture : IDisposable
 
         _held = e.Pointer;
         RecognitionHold.Hold(this, e.Pointer);
+    }
+
+    /// <summary>
+    /// <see cref="GestureConfig.ReleaseAgainstDirection"/>: the move reaches the threshold, as the pan recogniser measures it from
+    /// the press, going against <see cref="GestureConfig.Direction"/>: up for <see cref="GestureDirection.Y"/>, left for
+    /// <see cref="GestureDirection.X"/>.
+    /// </summary>
+    private bool MovesAgainstDirection(PointerEventArgs e)
+    {
+        var point = e.GetPosition(null);
+        var deltaX = point.X - _detail.StartX;
+        var deltaY = point.Y - _detail.StartY;
+        var along = _config.Direction == GestureDirection.X ? deltaX : deltaY;
+        return along < 0 && deltaX * deltaX + deltaY * deltaY >= _config.Threshold * _config.Threshold;
+    }
+
+    /// <summary>
+    /// <see cref="StopsTouchStartProperty"/> on the press's source or an element between it and this gesture's element, for a touch
+    /// or a pen.
+    /// </summary>
+    private bool IsStoppedOnTheWay(PointerPressedEventArgs e)
+    {
+        if (e.Pointer.Type == PointerType.Mouse)
+        {
+            return false;
+        }
+
+        for (var visual = e.Source as Visual; visual is not null && !ReferenceEquals(visual, _el); visual = visual.GetVisualParent())
+        {
+            if (visual is InputElement element && GetStopsTouchStart(element))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

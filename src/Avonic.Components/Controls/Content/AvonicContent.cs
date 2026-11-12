@@ -26,6 +26,11 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Fixed", typeof(ContentPresenter))]
 public class AvonicContent : TemplatedControl
 {
+    /// <summary>
+    /// Ionic's <c>.ion-content-scroll-host</c>: the class that marks a custom scroller, which the infinite scroll and the reorder
+    /// group take as their content's, as they take an <see cref="AvonicContent"/>.
+    /// </summary>
+    public const string ScrollHostClass = "ion-content-scroll-host";
 
     /// <summary>The <c>setInterval</c> of <c>onScrollStart</c>'s watchdog.</summary>
     internal static readonly TimeSpan WatchDogInterval = TimeSpan.FromMilliseconds(100);
