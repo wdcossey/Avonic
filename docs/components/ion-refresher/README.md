@@ -96,4 +96,7 @@ None.
   [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - A custom scroll target, an element with `ion-content-scroll-host` inside the content, isn't looked for: the content's own scroller
   is the scroll element. Ionic's `connectedCallback` takes such an element first.
+- Ionic's `refreshingSpinner` and `refreshingIcon` config keys, which `refresher-content.js` reads before `spinner` and
+  `circular`, have no `AvonicConfig` member: `RefreshingSpinner` falls back to `AvonicConfig.Spinner`, and `PullingIcon` to
+  `Circular`.
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

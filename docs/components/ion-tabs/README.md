@@ -83,7 +83,7 @@ Its buttons are `Items`.
 | [x] | `disabled` | `IsEnabled` | |
 | [ ] | `download`, `rel`, `target` | — | Not applicable: only with `href` |
 | [ ] | `href` | — | Out of scope: router, as on `AvonicButton` |
-| [x] | `layout` | `Layout` (`TabButtonLayout`) | Unset, `AvonicConfig.TabButtonLayout` (Ionic's `tabButtonLayout`) on the first attach, else `IconTop` |
+| [x] | `layout` | `Layout` (`TabButtonLayout`) | Unset, `AvonicConfig.TabButtonLayout` (Ionic's `tabButtonLayout`) on the first attach, at style priority, else `IconTop` |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [x] | `selected` | `Selected` (`bool`) | The bar writes it |
 | [x] | `tab` | `Tab` (`string?`) | |

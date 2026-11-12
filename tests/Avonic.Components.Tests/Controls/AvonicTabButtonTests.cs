@@ -179,6 +179,14 @@ public class AvonicTabButtonTests
         {
             static AvonicTabButton Make(string tab) => new() { Tab = tab, Items = { new AvonicIcon { IconName = "map" }, new AvonicLabel { Content = "Label" } } };
 
+            // Loaded with no config: Ionic's fallback, icon-top.
+            AvonicConfig.TabButtonLayout = null;
+            var early = Make("e");
+            var earlyBar = Bar(null, early);
+            var panel = new StackPanel { Children = { earlyBar } };
+            using var scene = new Scene(panel);
+            Assert.Equal(TabButtonLayout.IconTop, early.Layout);
+
             var unset = Make("a");
             var own = Make("b");
             own.Layout = TabButtonLayout.IconBottom;
@@ -191,7 +199,7 @@ public class AvonicTabButtonTests
             Assert.Equal(TabButtonLayout.IconTop, unset.Layout);
 
             var bar = Bar(null, unset, own, styled);
-            using var scene = new Scene(new StackPanel { Children = { bar } });
+            panel.Children.Add(bar);
             Phone(scene);
 
             // Made before the config changed, and loaded after it: the config's, with the icon before the label in a row.
@@ -202,6 +210,18 @@ public class AvonicTabButtonTests
             Assert.Equal(TabButtonLayout.IconBottom, own.Layout);
             Assert.Equal(TabButtonLayout.IconEnd, styled.Layout);
 
+            // An app's style that applies later wins, and when it stops the config's layout is back.
+            unset.Styles.Add(new Style(x => x.OfType<AvonicTabButton>().Class("hide-label"))
+            {
+                Setters = { new Setter(AvonicTabButton.LayoutProperty, TabButtonLayout.LabelHide) },
+            });
+            unset.Classes.Add("hide-label");
+            Settle();
+            Assert.Equal(TabButtonLayout.LabelHide, unset.Layout);
+            unset.Classes.Remove("hide-label");
+            Settle();
+            Assert.Equal(TabButtonLayout.IconStart, unset.Layout);
+
             // Once: loaded again after the config changes, it keeps what it had.
             AvonicConfig.TabButtonLayout = TabButtonLayout.LabelHide;
             bar.Items.Remove(unset);
@@ -209,6 +229,13 @@ public class AvonicTabButtonTests
             bar.Items.Add(unset);
             Settle();
             Assert.Equal(TabButtonLayout.IconStart, unset.Layout);
+
+            // And one loaded with no config keeps icon-top, as Ionic wrote it then.
+            earlyBar.Items.Remove(early);
+            Settle();
+            earlyBar.Items.Add(early);
+            Settle();
+            Assert.Equal(TabButtonLayout.IconTop, early.Layout);
         }
         finally
         {

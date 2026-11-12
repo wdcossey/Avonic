@@ -100,5 +100,7 @@ None.
   only differs for one infinite scroll inside another's content.
 - **A scroll host with `ion-content-scroll-host`** has to be a `ScrollViewer` or have one around the infinite scroll, as only a
   `ScrollViewer` scrolls here. If it has neither, the error is logged and nothing fires.
+- **`AvonicConfig.InfiniteLoadingSpinner` can't turn the spinner off** for every content, as Ionic's `null` does: its null means
+  unset, so `AvonicConfig.Spinner` is next. Set `LoadingSpinner` to null on the content instead.
 - **`loadingText` has no HTML**, as with Ionic's default.
 - Not tried in a real window, nor on a device: a momentum flick hasn't been seen.

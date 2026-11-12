@@ -4,6 +4,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
@@ -148,11 +149,12 @@ public class AvonicTabButton : ItemsControl
         if (!_willLoad)
         {
             // componentWillLoad, once: if (this.layout === undefined) this.layout = config.get('tabButtonLayout', 'icon-top').
-            // Ionic's fallback is the property's default, so only a value in the config is written.
+            // Ionic's fallback is the property's default, so only a value in the config is written. At style priority, so that an
+            // app's own value, or a style of its that applies later, wins, and the config's comes back when that style stops.
             _willLoad = true;
             if (!IsSet(LayoutProperty) && AvonicConfig.TabButtonLayout is { } layout)
             {
-                SetCurrentValue(LayoutProperty, layout);
+                SetValue(LayoutProperty, layout, BindingPriority.Style);
             }
         }
     }
