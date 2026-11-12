@@ -745,9 +745,8 @@ public class AvonicInput : TemplatedControl, IItemControl
         }
         else if (change.Property == RequiredProperty)
         {
-            // required on the <input>: aria-required to a screen reader. Form validation isn't here. False is no value, as
-            // Ionic's required: false renders no attribute.
-            _required.SetWhen(change.GetNewValue<bool>(), true);
+            // required on the <input>: aria-required to a screen reader. Form validation isn't here.
+            _required.Set(change.GetNewValue<bool>());
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
                  || change.Property == IsEnabledProperty || change.Property == StartContentProperty

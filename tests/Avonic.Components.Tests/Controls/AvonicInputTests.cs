@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
-using Avalonia.Data;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -1228,11 +1227,6 @@ public class AvonicInputTests
         Assert.False(AutomationProperties.GetIsRequiredForForm(native));
 
         input.Required = true;
-        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
-
-        // Not required is no value, as Ionic's required: false renders no attribute: a value from an app's own template shows.
-        native.SetValue(AutomationProperties.IsRequiredForFormProperty, true, BindingPriority.Template);
-        input.Required = false;
         Assert.True(AutomationProperties.GetIsRequiredForForm(native));
     }
 
