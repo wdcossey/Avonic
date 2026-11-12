@@ -40,13 +40,13 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 | 5 | `disabled`, true by default, turns the gesture off | match |
 | 6 | Starts at the press on a handle (threshold 0), never elsewhere | match |
 | 7 | The item follows the finger, held inside the group; the siblings make room by its height | match: +80, −48, −48 |
-| 7 | `ionReorderMove`'s `from` is the last `to` | match: 1>1, then 1>2, 2>2 and 2>3 as each middle is passed, as measured |
+| 8 | `ionReorderMove`'s `from` is the last `to` | match: 1>1, then 1>2, 2>2 and 2>3 as each middle is passed, as measured |
 | 9 | Siblings ease over 300 ms (`ease`): −1.8 a frame in | match, on the clock (`B9`) |
 | 10 | Auto-scroll: 10 px a move within 60 px of the content's edge, none when the finger is still | match: 10 per move, as measured |
 | 11 | `ionItemReorder` only when moved, then `ionReorderEnd`; in place completes itself | match |
 | 12 | `complete()` moves it, and clears every transform in the next frame, with no easing; `complete(false)` puts it back; `complete(array)` reorders the array and not the DOM | match: one frame unlifted with its transforms, then the new order |
 | 13 | Not completed: lifted, no new drag; a `complete()` 500 ms later still moves it | match |
-| 14 | `z-index: 100` over the siblings | match, for any type of child |
+| 14 | `z-index: 100` over the siblings, and nothing clips it in the group | match, for any type of child; an `AvonicList` around it clips, see below |
 | 15 | Leaving the tree, or disabled, mid-drag: ends with its events | match |
 
 ## Deliberate differences
@@ -64,6 +64,9 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 - **The opacity fades each part of the item**, as Avalonia's `Opacity` does, not the item as one layer: the item's text shows a little
   of what's under its background. Over a white item, which is what's under it, the two are the same.
 - **No haptics**: Ionic's are Capacitor's.
+- **`AvonicList` clips its children**, where `ion-list` doesn't (only an inset one does): an item lifted past the list's edge,
+  which the group's clamp allows by up to its height, is cut there. The group itself doesn't clip. It's `AvonicList`'s, so it's
+  proposed in the PR, not changed here.
 
 ## Not tried
 

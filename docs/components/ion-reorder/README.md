@@ -67,7 +67,8 @@ private void OnReorderEndBound(object? sender, ReorderEndEventArgs e) => e.Compl
    moves in the group itself. Before the end, or a second time, it does nothing.
 10. Until it's completed the item stays lifted, and no new drag starts.
 11. The lifted child is at `ZIndex` 100 and has the pseudoclass `:reorder-selected`: an item, or a handle that wraps one, is at 0.8
-    opacity with a shadow.
+    opacity with a shadow. The group doesn't clip it. The group has Ionic's host classes as `:reorder-enabled` and
+    `:reorder-list-active` (from the press until it's completed).
 12. Leaving the tree, or `Disabled` set, mid-drag ends the drag with its events.
 
 With `ItemsSource` set, `Complete()` leaves the source alone, as it's the app's: pass it to `Complete(list)`, or move it yourself.
@@ -84,7 +85,7 @@ Neither has CSS variables. The handle's 31 px and 0.3 are literals in `Controls/
 
 ## Extensions
 
-None. `:reorder-selected` is Ionic's `reorder-selected` class, for an app's own child type.
+None. `:reorder-selected`, `:reorder-enabled` and `:reorder-list-active` are Ionic's classes of those names, for an app's own rules.
 
 ## Known gaps
 
@@ -93,4 +94,5 @@ None. `:reorder-selected` is Ionic's `reorder-selected` class, for an app's own 
   its own `:reorder-selected` style for the shadow.
 - **The lifted item's opacity fades each part**, not the item as one layer. Over a white item it's the same.
 - **No haptics.**
+- **An `AvonicList` around the group clips** an item lifted past the list's edge, where `ion-list` doesn't.
 - Not tried in a real window, or on a device.

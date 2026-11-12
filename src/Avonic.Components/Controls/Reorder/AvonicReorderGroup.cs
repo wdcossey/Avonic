@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Interactivity;
@@ -17,6 +18,7 @@ namespace Avonic.Components.Controls;
 /// app calls <see cref="Complete()"/>, usually from <see cref="IonReorderEnd"/>. A virtualising panel isn't supported: the drag reads
 /// every child.
 /// </summary>
+[PseudoClasses(":reorder-enabled", ":reorder-list-active")]
 public class AvonicReorderGroup : ItemsControl
 {
     /// <summary>The pseudoclass of the child being dragged: Ionic's <c>reorder-selected</c> class.</summary>
@@ -67,6 +69,7 @@ public class AvonicReorderGroup : ItemsControl
     private readonly Dictionary<Control, Shift> _shifts = [];
     private Gesture? _gesture;
     private ScrollViewer? _scrollEl;
+    private ScrollViewer? _dragScrollEl;
     private ReorderGroupState _state;
     private Control? _selectedItemEl;
     private IDisposable? _selectedZIndex;
@@ -79,6 +82,14 @@ public class AvonicReorderGroup : ItemsControl
     private double _containerTop;
     private double _containerBottom;
     private IDisposable? _tick;
+
+    static AvonicReorderGroup()
+    {
+        // ion-reorder-group doesn't clip: a lifted child, and its shadow, can be outside it
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicReorderGroup>(false);
+    }
+
+    public AvonicReorderGroup() => PseudoClasses.Set(":reorder-enabled", !Disabled);
 
     public bool Disabled
     {
@@ -146,6 +157,7 @@ public class AvonicReorderGroup : ItemsControl
         if (change.Property == DisabledProperty)
         {
             _gesture?.Enable(!Disabled);
+            PseudoClasses.Set(":reorder-enabled", !Disabled);
             DisabledChanged?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -276,8 +288,11 @@ public class AvonicReorderGroup : ItemsControl
         var box = this.TranslatePoint(default, top!) ?? default;
         _containerTop = box.Y;
         _containerBottom = box.Y + Bounds.Height;
+        // A scroller that has left the tree since is none, as Ionic's would scroll nothing then
+        _dragScrollEl = null;
         if (_scrollEl is { } scrollEl && scrollEl.TranslatePoint(default, top!) is { } scrollBox)
         {
+            _dragScrollEl = scrollEl;
             _scrollElInitial = scrollEl.Offset.Y;
             _scrollElTop = scrollBox.Y + AutoScrollMargin;
             _scrollElBottom = scrollBox.Y + scrollEl.Bounds.Height - AutoScrollMargin;
@@ -291,7 +306,7 @@ public class AvonicReorderGroup : ItemsControl
 
         _lastToIndex = _selectedIndex;
         _selectedItemHeight = item.Bounds.Height;
-        _state = ReorderGroupState.Active;
+        SetState(ReorderGroupState.Active);
         SetSelected(item, true);
         RaiseEvent(new RoutedEventArgs(IonReorderStartEvent, this));
     }
@@ -327,10 +342,10 @@ public class AvonicReorderGroup : ItemsControl
     private void OnEnd()
     {
         var selectedItemEl = _selectedItemEl;
-        _state = ReorderGroupState.Complete;
+        SetState(ReorderGroupState.Complete);
         if (selectedItemEl is null)
         {
-            _state = ReorderGroupState.Idle;
+            SetState(ReorderGroupState.Idle);
             return;
         }
 
@@ -356,19 +371,19 @@ public class AvonicReorderGroup : ItemsControl
             return false;
         }
 
-        var children = Children.ToArray();
         var toIndex = _lastToIndex;
         var fromIndex = _selectedIndex;
 
-        // The move and the cleared transforms in one frame, so that nothing eases.
+        // The move and the cleared transforms in one frame, so that nothing eases. Every child that was moved, including one that
+        // has left the group since, where Ionic's would keep its inline transform.
         AvonicConfig.RequestFrame(this, () =>
         {
             if (toIndex != fromIndex && reorder)
             {
-                MoveItem(fromIndex, toIndex);
+                MoveItem(selectedItemEl, fromIndex, toIndex);
             }
 
-            foreach (var child in children)
+            foreach (var child in _shifts.Keys.ToArray())
             {
                 ClearTranslate(child);
             }
@@ -376,21 +391,30 @@ public class AvonicReorderGroup : ItemsControl
 
         SetSelected(selectedItemEl, false);
         _selectedItemEl = null;
-        _state = ReorderGroupState.Idle;
+        _dragScrollEl = null;
+        SetState(ReorderGroupState.Idle);
         return true;
     }
 
-    /// <summary><c>insertBefore</c>: the item is the child at <paramref name="from"/>, and ends at <paramref name="to"/>.</summary>
-    private void MoveItem(int from, int to)
+    /// <summary>
+    /// <c>insertBefore(selectedItemEl, fromIndex &lt; toIndex ? children[toIndex + 1] : children[toIndex])</c>, with the children as they
+    /// are now, in <see cref="ItemsControl.Items"/>.
+    /// </summary>
+    private void MoveItem(Control selected, int fromIndex, int toIndex)
     {
-        if (ItemsSource is not null || from < 0 || from >= Items.Count || to < 0 || to >= Items.Count)
+        var children = Children;
+        var index = fromIndex < toIndex ? toIndex + 1 : toIndex;
+        var reference = index >= 0 && index < children.Count ? children[index] : null;
+        var item = ItemFromContainer(selected);
+        if (ItemsSource is not null || reference == selected || item is null || Items.IndexOf(item) < 0)
         {
             return;
         }
 
-        var item = Items[from];
-        Items.RemoveAt(from);
-        Items.Insert(to, item);
+        var before = reference is null ? null : ItemFromContainer(reference);
+        Items.Remove(item);
+        var at = before is null ? -1 : Items.IndexOf(before);
+        Items.Insert(at < 0 ? Items.Count : at, item);
     }
 
     /// <summary><c>reorderArray</c>: the list changed in place, and a copy returned.</summary>
@@ -406,23 +430,24 @@ public class AvonicReorderGroup : ItemsControl
         copy.RemoveAt(from);
         copy.Insert(to, element);
 
-        if (list.IsReadOnly || from == to)
+        if (from == to)
         {
             return copy;
         }
 
+        // An array is read-only to ICollection<T>, and writable at a fixed size to IList.
         if (list is ObservableCollection<T> observable)
         {
             observable.Move(from, to);
         }
-        else if (list is IList { IsFixedSize: true })
+        else if (list is IList { IsFixedSize: true, IsReadOnly: false })
         {
             for (var i = 0; i < copy.Count; i++)
             {
                 list[i] = copy[i];
             }
         }
-        else
+        else if (!list.IsReadOnly)
         {
             list.RemoveAt(from);
             list.Insert(to, element);
@@ -468,7 +493,7 @@ public class AvonicReorderGroup : ItemsControl
 
     private double AutoScroll(double posY)
     {
-        if (_scrollEl is not { } scrollEl)
+        if (_dragScrollEl is not { } scrollEl)
         {
             return 0;
         }
@@ -541,6 +566,13 @@ public class AvonicReorderGroup : ItemsControl
             shift.Transition.Snap(y);
             shift.Transform.Y = y;
         }
+    }
+
+    /// <summary>The state, and <c>reorder-list-active</c> on the host while it isn't idle.</summary>
+    private void SetState(ReorderGroupState state)
+    {
+        _state = state;
+        PseudoClasses.Set(":reorder-list-active", state != ReorderGroupState.Idle);
     }
 
     private void Tick()

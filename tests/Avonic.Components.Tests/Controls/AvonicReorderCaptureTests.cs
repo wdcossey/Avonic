@@ -103,6 +103,33 @@ public class AvonicReorderCaptureTests
     });
 
     [AvaloniaFact]
+    public void B14_The_Group_Does_Not_Clip_The_Lifted_Item() => InstalledTheme.Run(_ =>
+    {
+        // No list around it, which clips here (see the README), and room below the group
+        using var clock = new TestClock();
+        var group = new AvonicReorderGroup { Disabled = false };
+        for (var i = 1; i <= 5; i++)
+        {
+            group.Items.Add(new AvonicItem { Content = new AvonicLabel { Content = $"Item {i}" }, EndContent = new AvonicReorder() });
+        }
+
+        using var scene = new Scene(new StackPanel { Children = { new Border { Height = 50 }, group } });
+        scene.Window.Background = Brushes.White;
+        Render();
+        var handle = group.ItemsPanelRoot!.Children[4].GetVisualDescendants().OfType<AvonicReorder>().First();
+        var at = handle.TranslatePoint(new Point(15, 15), scene.Window)!.Value;
+        var finger = new Finger(scene, clock).Down(at.X, at.Y, 1000);
+        finger.Move(at.X, at.Y + 100, 1016);
+        clock.At(1100);
+        Render();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        // Held at the group's bottom, 290, from the press at 266: the item reaches 314, and its shadow is below that, outside the group
+        Assert.Equal(290, group.Bounds.Bottom);
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 200, 316));
+    });
+
+    [AvaloniaFact]
     public void Reference_Page() => InstalledTheme.Run(_ =>
     {
         using var page = new Page();

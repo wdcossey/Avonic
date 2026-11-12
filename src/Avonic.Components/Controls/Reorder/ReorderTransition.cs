@@ -20,9 +20,6 @@ internal sealed class ReorderTransition
     private double _reversingStart;
     private double _shortening = 1;
 
-    /// <summary>The value it's going to.</summary>
-    public double Target => _to;
-
     public void Snap(double value)
     {
         _from = _to = _reversingStart = value;

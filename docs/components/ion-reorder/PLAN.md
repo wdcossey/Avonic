@@ -93,6 +93,8 @@ No props, events, methods or CSS variables.
 - The lift: the pseudoclass `:reorder-selected` on the element, and `ZIndex` 100 at style priority on the child in the panel (it has
   to be over its siblings to be seen, whatever its type). The shadow and opacity are the theme's: `Styles/ReorderGroup.axaml` for
   `AvonicItem`, `AvonicReorder`'s own theme for a wrapping handle.
+- The host classes `reorder-enabled` and `reorder-list-active` are the pseudoclasses `:reorder-enabled` and `:reorder-list-active`.
+  The group doesn't clip (`ClipToBounds` false by default), as a lifted child can be outside it.
 - The scroll element: the closest `AvonicContent`'s `GetScrollElement()`, or a control with the class `ion-content-scroll-host`, as
   `AvonicInfiniteScroll` finds it, at attach.
 - `Complete` with `ItemsSource` set: the source isn't Avonic's to change, so `Complete()` only clears, as Ionic's array form does in a

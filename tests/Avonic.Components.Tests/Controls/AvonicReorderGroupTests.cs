@@ -330,16 +330,17 @@ public class AvonicReorderGroupTests
     }
 
     [AvaloniaFact]
-    public void B6_Its_Priority_Of_110_Beats_A_Gesture_At_109_Around_It()
+    public void B6_Its_Priority_Of_110_Beats_A_Gesture_At_109_Inside_It()
     {
+        // A gesture on the item, as ion-item-sliding's, hears the press first and asks to start; the controller lets the one with
+        // the highest priority of those asking capture, so at 110 the group still takes it at its press
         using var page = new Page(count: 2);
         var log = new Log(page.Clock);
-        // Created last, so it would win a tie
-        using var outer = Make((InputElement)page.Group.Parent!, log, name: "outer", priority: 109, direction: Avonic.Components.Gestures.GestureDirection.Y, threshold: 0);
+        using var inner = Make(page.Child(1), log, name: "inner", priority: 109, threshold: 10);
         page.Move(page.Press(1), -40);
 
         Assert.StartsWith("start", page.Log[0]);
-        Assert.DoesNotContain("outer.onStart", log.Names);
+        Assert.DoesNotContain("inner.onStart", log.Names);
     }
 
     // ── 7, 9: moving ─────────────────────────────────────────────────────────────────────────
@@ -369,7 +370,7 @@ public class AvonicReorderGroupTests
     }
 
     [AvaloniaFact]
-    public void B7_A_Move_Says_The_Last_Index_And_The_New_One()
+    public void B8_A_Move_Says_The_Last_Index_And_The_New_One()
     {
         using var page = new Page();
         page.Move(page.Press(1), 80);
@@ -623,6 +624,32 @@ public class AvonicReorderGroupTests
     }
 
     [AvaloniaFact]
+    public void B12_An_Array_Is_Reordered_In_Place()
+    {
+        using var page = new Page();
+        var data = new[] { 1, 2, 3, 4, 5 };
+        page.OnEnd = e => e.Complete(data);
+        var press = page.Press(1);
+        page.Up(press.Finger, page.Move(press, 80));
+
+        Assert.Equal([1, 3, 4, 2, 5], data);
+    }
+
+    [AvaloniaFact]
+    public void B12_Complete_Moves_The_Dragged_Item_Before_The_Child_Now_At_Its_Place()
+    {
+        using var page = new Page();
+        var press = page.Press(1);
+        page.Up(press.Finger, page.Move(press, 80));
+
+        // The app adds one at the top before completing: Ionic inserts the dragged one before children[to + 1] as they are then
+        page.Group.Items.Insert(0, Page.Item("New"));
+        page.Group.Complete();
+        page.Tick();
+        Assert.Equal(["New", "Item 1", "Item 3", "Item 2", "Item 4", "Item 5"], page.Order);
+    }
+
+    [AvaloniaFact]
     public void B12_Complete_Before_The_End_Or_Twice_Does_Nothing()
     {
         using var page = new Page();
@@ -736,6 +763,25 @@ public class AvonicReorderGroupTests
         page.Tick();
 
         Assert.Same(own, page.Child(2).RenderTransform);
+    }
+
+    [AvaloniaFact]
+    public void Host_Classes_Reorder_Enabled_And_Reorder_List_Active()
+    {
+        using var page = new Page(disabled: true);
+        var classes = (IPseudoClasses)page.Group.Classes;
+        Assert.False(classes.Contains(":reorder-enabled"));
+        page.Group.Disabled = false;
+        Assert.True(classes.Contains(":reorder-enabled"));
+        Render();
+
+        // Active from the start, and until it's completed: the state isn't idle
+        var press = page.Press(1);
+        Assert.True(classes.Contains(":reorder-list-active"));
+        page.Up(press.Finger, page.Move(press, 80));
+        Assert.True(classes.Contains(":reorder-list-active"));
+        page.Group.Complete();
+        Assert.False(classes.Contains(":reorder-list-active"));
     }
 
     // ── 15: leaving, and disabling, mid-drag ────────────────────────────────────────────────
