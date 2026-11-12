@@ -564,6 +564,28 @@ public class NativeButtonTests
         Assert.Equal(0, clicks);
     }
 
+    // Invoke is offered while something listens: a null handler isn't one, and removing one never added leaves the real one.
+    [AvaloniaFact]
+    public void A_Chips_Invoke_Follows_The_Handlers_It_Really_Has()
+    {
+        static object? Invoke(Control control) =>
+            ControlAutomationPeer.CreatePeerForElement(control).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>();
+
+        var chip = new AvonicChip();
+        EventHandler<RoutedEventArgs>? none = null;
+        chip.Click += none;
+        Assert.Null(Invoke(chip));
+
+        EventHandler<RoutedEventArgs> real = (_, _) => { };
+        chip.Click += real;
+        chip.Click -= (_, _) => { };
+        chip.Click -= none;
+        Assert.NotNull(Invoke(chip));
+
+        chip.Click -= real;
+        Assert.Null(Invoke(chip));
+    }
+
     [AvaloniaTheory]
     [MemberData(nameof(Controls))]
     public void A_Child_That_Handles_The_Press_Stops_The_Click_Every_Time(string kind)

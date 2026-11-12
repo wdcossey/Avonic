@@ -751,6 +751,39 @@ public class AvonicAccordionTests
     }
 
     /// <summary>
+    /// A stock button in a chip, from a key and from a press when it clicks on the press: the button's click is the chip's, one
+    /// DOM click, which toggles once.
+    /// </summary>
+    [AvaloniaFact]
+    public void B13_A_Stock_Button_In_A_Chip_Toggles_Once()
+    {
+        var keyed = new Button { Content = "Key" };
+        var pressed = new Button
+        {
+            ClickMode = ClickMode.Press,
+            Width = 60,
+            Height = 36,
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<Button>((_, _) => new Border { Background = Brushes.Transparent }),
+        };
+        var item = Item("a");
+        item.EndContent = new StackPanel { Children = { new AvonicChip { Items = { keyed } }, new AvonicChip { Items = { pressed } } } };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        keyed.Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        Assert.Equal(["a"], changes);
+
+        clock.At(1000);
+        Click(scene, CentreOf(scene, pressed));
+        Assert.Equal(["a", null], changes);
+    }
+
+    /// <summary>
     /// The same for any other control with a native button, which the header hears as one event rather than a list of them:
     /// a fab button's and a breadcrumb's clicks bubble to <c>#header</c> too. A handled one doesn't.
     /// </summary>

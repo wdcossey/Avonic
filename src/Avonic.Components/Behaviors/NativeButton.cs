@@ -44,7 +44,8 @@ internal sealed class NativeButton
     private RoutedEvent? _nestedClick;
     private bool _routingPointer;
     private Button? _stockButtonClicked;
-    private int _clickHandlers;
+    private RoutedEventArgs? _stockClick;
+    private readonly List<Delegate> _clickHandlers = [];
     private TopLevel? _watchedForFingers;
 
     /// <param name="owner">The control.</param>
@@ -105,20 +106,28 @@ internal sealed class NativeButton
     /// Whether anything listens to the control's click: a handler added through <see cref="AddClickHandler"/>, or a command. Chromium
     /// offers a screen reader the DOM <c>click</c> only on an element something listens to, so this is when <c>Invoke</c> is offered.
     /// </summary>
-    public bool HasClickListeners => _clickHandlers > 0 || Command is not null;
+    public bool HasClickListeners => _clickHandlers.Count > 0 || Command is not null;
 
-    /// <summary>The control's <c>Click</c> event's <c>add</c>, counted for <see cref="HasClickListeners"/>.</summary>
+    /// <summary>
+    /// The control's <c>Click</c> event's <c>add</c>, kept for <see cref="HasClickListeners"/>. A null handler does nothing, as with
+    /// a field-like event.
+    /// </summary>
     public void AddClickHandler(RoutedEvent<RoutedEventArgs> click, EventHandler<RoutedEventArgs>? handler)
     {
-        _owner.AddHandler(click, handler);
-        _clickHandlers++;
+        if (handler is not null)
+        {
+            _owner.AddHandler(click, handler);
+            _clickHandlers.Add(handler);
+        }
     }
 
-    /// <summary>The control's <c>Click</c> event's <c>remove</c>.</summary>
+    /// <summary>The control's <c>Click</c> event's <c>remove</c>. A handler that wasn't added does nothing.</summary>
     public void RemoveClickHandler(RoutedEvent<RoutedEventArgs> click, EventHandler<RoutedEventArgs>? handler)
     {
-        _owner.RemoveHandler(click, handler);
-        _clickHandlers = Math.Max(0, _clickHandlers - 1);
+        if (handler is not null && _clickHandlers.Remove(handler))
+        {
+            _owner.RemoveHandler(click, handler);
+        }
     }
 
     /// <summary>A control that stops being a button mid-press doesn't finish it.</summary>
@@ -144,7 +153,7 @@ internal sealed class NativeButton
         }
 
         _nestedClick = null;
-        _owner.RaiseEvent(new ClickInsideArgs(click, handled));
+        _owner.RaiseEvent(new ClickInsideArgs(click, handled, _stockClick));
 
         if (!handled && Command is { } command && command.CanExecute(CommandParameter))
         {
@@ -164,13 +173,19 @@ internal sealed class NativeButton
         }
     }
 
-    internal sealed class ClickInsideArgs(RoutedEvent click, bool stopped) : RoutedEventArgs(ClickInsideEvent)
+    internal sealed class ClickInsideArgs(RoutedEvent click, bool stopped, RoutedEventArgs? stockClick) : RoutedEventArgs(ClickInsideEvent)
     {
         /// <summary>The control's own <c>Click</c> event.</summary>
         public RoutedEvent Click { get; } = click;
 
         /// <summary>A <c>Click</c> handler set <c>Handled</c>.</summary>
         public bool Stopped { get; } = stopped;
+
+        /// <summary>
+        /// The stock <see cref="Button"/>'s <c>Click</c> that this click is, from a key or automation, which goes on bubbling after
+        /// it: the DOM's one click, which a control around counts once.
+        /// </summary>
+        public RoutedEventArgs? StockClick { get; } = stockClick;
     }
 
     // ── A press ──────────────────────────────────────────────────────────────────────────────
@@ -318,7 +333,15 @@ internal sealed class NativeButton
         }
 
         StockButtonClicked?.Invoke(button);
-        _activate(button);
+        _stockClick = e;
+        try
+        {
+            _activate(button);
+        }
+        finally
+        {
+            _stockClick = null;
+        }
     }
 
     private void OnNativeButtonClickInside(object? sender, ClickInsideArgs e)

@@ -935,6 +935,22 @@ public class AvonicInputOtpTests
         Assert.Same(Boxes(eight)[0], (scene.Window.InputHitTest(new Point(5, 40)) as Visual)?.GetSelfAndVisualAncestors().OfType<InputOtpBox>().FirstOrDefault());
     });
 
+    // align-items: center. A box with no height of its own is as tall as its text, in the middle of the row, not stretched to it.
+    [AvaloniaFact]
+    public void B20_A_Box_With_No_Height_Is_Centred_Down_The_Row() => InstalledTheme.Run(_ =>
+    {
+        var (otp, _, scene) = Themed();
+        using var __ = scene;
+        var box = Boxes(otp)[1];
+        box.Height = double.NaN;
+        Render();
+
+        var bounds = Bounds(box, scene.Window);
+        var row = Bounds(Boxes(otp)[0], scene.Window);
+        Assert.True(bounds.Height < row.Height, $"{bounds.Height}");
+        Assert.Equal(row.Center.Y, bounds.Center.Y, tolerance: 1);
+    });
+
     [AvaloniaFact]
     public void B20_Separators_Are_Round_Step_150_Dots() => InstalledTheme.Run(_ =>
     {

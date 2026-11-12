@@ -153,6 +153,7 @@ public class AvonicAccordion : TemplatedControl
     private bool _releasing;
     private bool _releaseClicked;
     private bool _clickedOnPress;
+    private RoutedEventArgs? _countedStockClick;
 
     /// <summary>The next frame, or the timeout, that the expand or collapse waits on: Ionic's <c>currentRaf</c>.</summary>
     private IDisposable? _pending;
@@ -639,6 +640,8 @@ public class AvonicAccordion : TemplatedControl
     {
         if (!e.Stopped)
         {
+            // A chip's click from a key on a stock button in it is that button's click, which reaches the header next.
+            _countedStockClick = e.StockClick;
             OnInnerClick();
         }
     }
@@ -646,8 +649,9 @@ public class AvonicAccordion : TemplatedControl
     /// <summary>A stock button's click, which bubbles too. A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.</summary>
     private void OnStockButtonClick(object? sender, RoutedEventArgs e)
     {
-        if (e.Source is RepeatButton)
+        if (e.Source is RepeatButton || ReferenceEquals(e, _countedStockClick))
         {
+            _countedStockClick = null;
             return;
         }
 
@@ -667,7 +671,8 @@ public class AvonicAccordion : TemplatedControl
     {
         if (_releasing)
         {
-            if (_releaseClicked)
+            // A button that clicked on this press has been this press's click.
+            if (_releaseClicked || _clickedOnPress)
             {
                 return;
             }
