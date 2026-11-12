@@ -576,15 +576,61 @@ public class AvonicItemSlidingTests
     public void S18_Disabled_It_Does_Not_Slide()
     {
         using var f = Make();
-        f.Sliding.IsEnabled = false;
+        f.Sliding.Disabled = true;
         f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32);
         f.At(48);
         Assert.Equal(0, f.Sliding.GetOpenAmount());
 
-        f.Sliding.IsEnabled = true;
+        f.Sliding.Disabled = false;
         f.Finger().Down(300, Y, 100).Move(290, Y, 116).Move(200, Y, 132);
         f.At(148);
         Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
+    }
+
+    [AvaloniaFact]
+    public void S18_Disabled_Only_Turns_The_Drag_Off_The_Item_Stays_Enabled_And_Clicks()
+    {
+        // item-sliding.js's disabledChanged only does gesture.enable(!disabled): the item inside keeps its input and its look.
+        // Set before it's attached, as XAML does.
+        var item = new AvonicItem { MinHeight = 48, Content = "Item", Button = true };
+        using var f = Make(item: item, wrap: sliding =>
+        {
+            sliding.Disabled = true;
+            return new StackPanel { Children = { sliding } };
+        });
+        var clicks = 0;
+        item.Click += (_, _) => clicks++;
+
+        Assert.True(f.Sliding.IsEffectivelyEnabled);
+        Assert.True(item.IsEffectivelyEnabled);
+        Assert.True(f.End!.IsEffectivelyEnabled);
+
+        f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32).Up(200, Y, 48);
+        f.At(64);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+        Assert.Equal(0, f.ItemX);
+
+        f.Finger().Down(100, Y, 100).Up(100, Y, 116);
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void S18_Disabled_While_Open_The_Close_Leaves_The_Drag_Off()
+    {
+        // setOpenAmount(0)'s 600 ms timer turns the gesture back on with enable(!this.disabled), not on regardless.
+        using var f = Make();
+        f.Sliding.Open(ItemOptionsSide.End);
+        f.At(1000);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+
+        f.Sliding.Disabled = true;
+        f.Sliding.Close();
+        f.At(2000);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+
+        f.Finger().Down(300, Y, 2100).Move(290, Y, 2116).Move(200, Y, 2132);
+        f.At(2148);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
     }
 
     [AvaloniaFact]
@@ -727,7 +773,7 @@ public class AvonicItemSlidingTests
     {
         using var f = Make();
         var t = SlowDrag(f, 0, 300, 190, false, out var finger); // 100 open, slow
-        f.Sliding.IsEnabled = false;
+        f.Sliding.Disabled = true;
         f.At(t + 16);
         // gesture.enable(false) ends the drag: onEnd rests it open, past half.
         Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
@@ -736,6 +782,33 @@ public class AvonicItemSlidingTests
         f.At(t + 48);
         Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
         finger.Up(250, Y, t + 64);
+    }
+
+    [AvaloniaFact]
+    public void S18_IsEnabled_False_Mid_Drag_Ends_The_Drag_And_Gives_Scrolling_Back()
+    {
+        // Not Ionic's disabled, but Avalonia's IsEnabled, here or on an ancestor: a disabled control takes no input, so its drag
+        // ends as gesture.enable(false) ends it, rather than waiting on moves it no longer gets.
+        AvonicContent? content = null;
+        StackPanel? column = null;
+        using var f = Make(wrap: sliding => content = new AvonicContent { Content = column = new StackPanel { Children = { sliding } } });
+        var t = SlowDrag(f, 0, 300, 190, false, out var finger); // 100 open, slow
+        Assert.False(content!.ScrollY);
+
+        column!.IsEnabled = false;
+        f.At(t + 16);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+        Assert.True(content.ScrollY);
+        finger.Up(250, Y, t + 32);
+
+        // Enabled again, the drag is back on.
+        column.IsEnabled = true;
+        f.Sliding.Close();
+        f.At(t + 2000);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+        f.Finger().Down(300, Y, t + 2100).Move(290, Y, t + 2116).Move(200, Y, t + 2132);
+        f.At(t + 2148);
+        Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
     }
 
     [AvaloniaFact]

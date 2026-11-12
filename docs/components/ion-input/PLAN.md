@@ -40,7 +40,7 @@ in a desktop context; the frame in a mobile one). The commands are at the top of
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` (`string?`) | `TextBox.PlaceholderText` |
 | [x] | `readonly` | `Readonly` (`bool`) | `TextBox.IsReadOnly`; also hides the clear button and the password toggle |
-| [ ] | `required` | — | Not applicable: only `aria-required` and form validation; Avalonia 12's automation can't say it (as `ion-toggle`, #21) |
+| [x] | `required` | `Required` (`bool`) | `AutomationProperties.IsRequiredForForm` on the native input at style priority, as the mapping rule for `aria-required` says, and as `AvonicTextarea`; form validation isn't here. Nothing in Avalonia 12.1.4 reads it yet ([avalonia-issues](../../infra/avalonia-issues.md)) |
 | [x] | `shape` | `Shape` (`InputShape?`) | `Round`; null is the default |
 | [ ] | `spellcheck` | — | Not applicable: Avalonia's `TextBox` has no spell checker to turn on |
 | [x] | `type` | `Type` (`InputType`, `Text`) | `Email`, `Number`, `Password`, `Search`, `Tel`, `Text`, `Url`: the soft keyboard's `ContentType`, and `Password` masks with `•` and sets `IsSensitive`. The date and time types (`date`, `datetime-local`, `month`, `time`, `week`) aren't declared: Chromium gives them its own picker and segmented field, which is `ion-datetime`'s job here. Chromium also drops a non-number from a `number` input; this doesn't (a known gap) |
@@ -90,7 +90,7 @@ No shadow parts (it's scoped). Template parts, by Ionic's class: `PART_Wrapper` 
 md's literals with no variable are in the theme: min heights 44 and 56, the label's 16 px gap, 200 px max and 100 px fixed width,
 the transforms and their 150 ms `cubic-bezier(0.4, 0, 0.2, 1)`, the highlight's 200 ms `ease`, the wrapper's 15 ms background
 transition, the clear button's 30 px, 22 px icon, step 600 colour and 0.5 focused opacity, the bottom's 5 px, 12 px text and
-step 700 colour, the counter's 16 px gap and letter spacing, the notch's 4 px and 8 px, and 0.38 opacity when disabled.
+step 700 colour, the counter's 16 px gap and letter spacing, the notch's 4 px and 8 px, and 0.38 opacity when disabled, as one (an `OpacityMask`, `Avonic.Input.Md.DisabledMask`, as the parts overlap).
 
 ## Fidelity checklist: ion-input-password-toggle
 
@@ -133,11 +133,11 @@ From `input.js`, `input.md.css`, `input-password-toggle.js` and `utils/forms`, e
 | 19 | Bottom: shown only with helper text, error text or a counter. 5 px above 12 px text; a top border with no fill; helper step 700; while touched and invalid the error text in the invalid colour replaces the helper. The counter `len / max` at the end, 16 px from the text | `renderBottomContent`, `getCounterText`; measured `f`, `i`, `k`, `l` |
 | 20 | The clear button sits at the end of the field, 30 × 30, a 22 px `close-sharp` in step 600, or the item's colour in a coloured item | md.css; measured `j` |
 | 21 | Start and end slots sit beside the field, 16 px from it | md.css `::slotted`; measured `g` |
-| 22 | Disabled: 0.38 opacity, no focus, no clear button, the password toggle hidden. Read-only: focusable, not editable, no clear button, the toggle hidden | `input-disabled`, md.css; measured `m` |
+| 22 | Disabled: 0.38 opacity, as one (an `OpacityMask`, as the parts overlap), no focus, no clear button, the password toggle hidden. Read-only: focusable, not editable, no clear button, the toggle hidden | `input-disabled`, md.css; measured `m` |
 | 23 | Placeholder: the input's colour at 0.6 | `::placeholder`; measured `ph` |
 | 24 | Type and the hints reach the platform: `Password` masks and is sensitive; `Type`, `Inputmode`, `Enterkeyhint`, `Autocapitalize`, `Autocorrect` set `TextInputOptions` | `type`, `inputmode`, `enterKeyHint`, ... on `<input>` |
 | 25 | `Autofocus` focuses the field when it's loaded | `autoFocus` |
-| 26 | Automation: the native input is named by the label (or the host's `AutomationProperties.Name`, which beats it, as `aria-label` does), and described by the error text when invalid and set, else the helper text | `getLabelledById`, `getHintTextID`, `inheritAriaAttributes` |
+| 26 | Automation: the native input is named by the label (or the host's `AutomationProperties.Name`, which beats it, as `aria-label` does), and described by the error text when invalid and set, else the helper text; `Required` says it's required | `getLabelledById`, `getHintTextID`, `inheritAriaAttributes`, `required` |
 | 27 | Password toggle: a click flips the input between `Password` and `Text` (setting `Type`), and the icon between `eye` and `eye-off`, named "Show password" / "Hide password". A press on it doesn't take focus from the field. A change of the input's `Type` in code updates it | `togglePasswordVisibility`, `onTypeChange`; measured `toggle0`, `toggle1` |
 | 28 | RTL mirrors the row, the label's origin and the notch | measured `q` |
 
