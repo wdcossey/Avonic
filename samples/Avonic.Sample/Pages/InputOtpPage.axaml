@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.InputOtpPage">
+
+    <ScrollViewer>
+        <StackPanel Margin="16,0">
+            <c:AvonicInputOtp Name="Code" IonComplete="OnComplete" IonChange="OnChange">Enter the code we sent you</c:AvonicInputOtp>
+            <TextBlock Name="Status" HorizontalAlignment="Center" Text="ionComplete: none yet" />
+
+            <c:AvonicInputOtp Fill="Solid" Length="6" Separators="3" />
+            <c:AvonicInputOtp Shape="Soft" Size="Small" Length="6" Separators="all" Value="123" />
+            <c:AvonicInputOtp Shape="Rectangular" Size="Large" Type="Text" Value="AB" />
+            <c:AvonicInputOtp Color="secondary" Value="1" />
+            <c:AvonicInputOtp Name="Validated" IonBlur="OnValidatedBlur" IonInput="OnValidatedInput">Type 1234</c:AvonicInputOtp>
+            <c:AvonicInputOtp IsEnabled="False" Value="12" />
+            <c:AvonicInputOtp Readonly="True" Fill="Solid" Value="12" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

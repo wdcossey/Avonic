@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.TextareaPage">
+
+    <ScrollViewer>
+        <StackPanel>
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicTextarea Label="Start" Placeholder="Placeholder" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicTextarea Label="Floating" LabelPlacement="Floating" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicTextarea Label="Stacked" LabelPlacement="Stacked" Value="Two&#10;lines" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicTextarea Label="Fixed" LabelPlacement="Fixed" Rows="3"
+                                      Value="A fixed label, three rows, and a value that wraps onto the next line" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicTextarea Label="Auto grow" LabelPlacement="Floating" AutoGrow="True" Placeholder="Type a few lines" />
+                </c:AvonicItem>
+            </c:AvonicList>
+
+            <StackPanel Margin="16" Spacing="12">
+                <c:AvonicTextarea Name="Validated"
+                                  Fill="Solid"
+                                  Label="Comment, at least 10 characters"
+                                  LabelPlacement="Floating"
+                                  HelperText="Checked when you leave the field"
+                                  ErrorText="Too short"
+                                  Counter="True"
+                                  Maxlength="200"
+                                  AutoGrow="True"
+                                  IonChange="OnValidatedChange"
+                                  IonBlur="OnValidatedBlur" />
+                <c:AvonicTextarea Fill="Outline" Label="Outline" LabelPlacement="Floating" Value="Value" />
+                <c:AvonicTextarea Fill="Outline" Shape="Round" Label="Round" LabelPlacement="Stacked" Placeholder="Placeholder" />
+                <c:AvonicTextarea Label="Clear on edit" LabelPlacement="Stacked" ClearOnEdit="True" Value="The first key clears this" />
+                <c:AvonicTextarea Label="Debounced 500 ms" LabelPlacement="Stacked" Debounce="500" IonInput="OnDebouncedInput" />
+                <TextBlock Name="DebouncedText" Text="ionInput: (none yet)" />
+                <c:AvonicTextarea Label="Wrap off" LabelPlacement="Stacked" Wrap="Off"
+                                  Value="A long line that doesn't wrap, and scrolls sideways instead" />
+                <c:AvonicTextarea Placeholder="Cols 20" Cols="20" />
+                <c:AvonicTextarea Label="Read-only" Readonly="True" Value="Can't change this" />
+                <c:AvonicTextarea Label="Disabled" IsEnabled="False" Value="Value" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

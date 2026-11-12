@@ -1,0 +1,681 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="12" Margin="16">
+            <c:AvonicTextarea Label="Start" Placeholder="Placeholder" />
+            <c:AvonicTextarea Label="Floating" LabelPlacement="Floating" Value="Value" />
+            <c:AvonicTextarea Label="Solid" LabelPlacement="Floating" Fill="Solid" HelperText="Helper text" Counter="True" Maxlength="100" />
+            <c:AvonicTextarea Label="Outline" LabelPlacement="Floating" Fill="Outline" Value="Value" />
+            <c:AvonicTextarea Label="Auto grow" LabelPlacement="Stacked" AutoGrow="True" Value="One&#10;two&#10;three" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- The native <textarea>, as the stub's, with md's text and placeholder. The placeholder is the field's own colour at 0.6:
+         placeholder-color is initial, which falls back to the inherited colour. Unset, the key leaves the text box's colour to
+         inherit. -->
+    <ControlTheme x:Key="Avonic.Textarea.Md.NativeInput" TargetType="TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  Theme="{StaticResource Avonic.Textarea.NativeScroller}"
+                                  VerticalContentAlignment="Top">
+                        <Panel VerticalAlignment="Top">
+                            <TextBlock Name="PART_Placeholder"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       TextWrapping="{TemplateBinding TextWrapping}"
+                                       IsHitTestVisible="False"
+                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+                                <TextBlock.Foreground>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Textarea.PlaceholderColor" />
+                                    </MultiBinding>
+                                </TextBlock.Foreground>
+                                <TextBlock.Opacity>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Textarea.PlaceholderOpacity" />
+                                        <DynamicResource ResourceKey="Avonic.PlaceholderOpacity" />
+                                    </MultiBinding>
+                                </TextBlock.Opacity>
+                                <TextBlock.FontStyle>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Textarea.PlaceholderFontStyle" />
+                                        <Binding Path="FontStyle" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontStyle>
+                                <TextBlock.FontWeight>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Textarea.PlaceholderFontWeight" />
+                                        <Binding Path="FontWeight" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontWeight>
+                            </TextBlock>
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretIndex="{TemplateBinding CaretIndex}"
+                                           SelectionStart="{TemplateBinding SelectionStart}"
+                                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           LineHeight="{TemplateBinding LineHeight}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           CaretBrush="{TemplateBinding CaretBrush}" />
+                        </Panel>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <!-- wrap="off": a long line scrolls sideways -->
+        <Style Selector="^[TextWrapping=NoWrap] /template/ ScrollViewer#PART_ScrollViewer">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        </Style>
+    </ControlTheme>
+
+    <!-- A translation of textarea.md.css. Slotted content is styled in Styles/Textarea.axaml, because a ControlTheme's styles
+         can't reach it. -->
+    <ControlTheme x:Key="{x:Type c:AvonicTextarea}" TargetType="c:AvonicTextarea">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- width: 100% -->
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="ClipToBounds" Value="False" />
+        <!-- color: var(color), which is initial: the inherited colour, unless it's set -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Textarea.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <!-- highlight-color: highlight-color-focused, which a known colour's base replaces -->
+        <Setter Property="HighlightBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Textarea.HighlightColorFocused" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="*,Auto">
+                    <Grid Name="PART_OutlineContainer" ColumnDefinitions="Auto,Auto,*" IsVisible="False" IsHitTestVisible="False">
+                        <Border Name="PART_OutlineStart" />
+                        <Border Name="PART_OutlineNotch" Grid.Column="1">
+                            <!-- .notch-spacer: the label at 0.75em, and 8 px after it -->
+                            <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0" Margin="0,0,8,0" TextWrapping="NoWrap">
+                                <TextBlock.FontSize>
+                                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.75">
+                                        <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontSize>
+                                <TextBlock.Width>
+                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                        <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="#PART_LabelContent.Bounds.Width" />
+                                    </MultiBinding>
+                                </TextBlock.Width>
+                            </TextBlock>
+                        </Border>
+                        <Border Name="PART_OutlineEnd" Grid.Column="2" />
+                    </Grid>
+                    <Border Name="PART_Wrapper">
+                        <c:InputWrapperPanel Name="PART_Layout"
+                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicTextarea.PlacementConverter}}">
+                            <!-- align-items: flex-start -->
+                            <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
+                                <Panel>
+                                    <TextBlock Name="PART_LabelText"
+                                               Text="{TemplateBinding Label}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"
+                                               IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <ContentPresenter Name="PART_LabelContent"
+                                                      Content="{TemplateBinding LabelContent}"
+                                                      ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                      TextTrimming="CharacterEllipsis"
+                                                      TextWrapping="NoWrap"
+                                                      ClipToBounds="True"
+                                                      IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                </Panel>
+                            </Border>
+                            <!-- .textarea-wrapper-inner -->
+                            <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto">
+                                <!-- .start-slot-wrapper, .end-slot-wrapper: align-self: start -->
+                                <Border Name="PART_StartWrapper" VerticalAlignment="Top">
+                                    <ContentPresenter Name="PART_Start"
+                                                      Content="{TemplateBinding StartContent}"
+                                                      ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                                </Border>
+                                <c:TextareaNativeInput Name="PART_NativeInput" Grid.Column="1"
+                                                       Theme="{StaticResource Avonic.Textarea.Md.NativeInput}" />
+                                <Border Name="PART_EndWrapper" Grid.Column="2" VerticalAlignment="Top">
+                                    <ContentPresenter Name="PART_End"
+                                                      Content="{TemplateBinding EndContent}"
+                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                                </Border>
+                            </Grid>
+                        </c:InputWrapperPanel>
+                    </Border>
+                    <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
+                    <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" />
+                            <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" />
+                            <TextBlock Name="PART_Counter" Grid.Column="1" Text="{TemplateBinding CounterText}" TextWrapping="NoWrap"
+                                       IsVisible="{Binding CounterText, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ── Structure, as the stub ─────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^:label-text-wrapper-hidden /template/ Border#PART_Label, ^:label-text-wrapper-hidden /template/ Border#PART_OutlineNotch">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:fill-outline /template/ Grid#PART_OutlineContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:not(:fill-outline):not(:in-item) /template/ Border#PART_Highlight">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-bottom /template/ Border#PART_Bottom">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- :host([cols]:not([auto-grow])): width: fit-content -->
+        <Style Selector="^:cols:not(:auto-grow)">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+
+        <!-- ── The host ───────────────────────────────────────────────────────────────────────── -->
+
+        <!-- :host(.ion-color): highlight-color-focused is the colour's base -->
+        <Style Selector="^:ion-color">
+            <Setter Property="HighlightBrush" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- :host(.ion-valid), then :host(.ion-touched.ion-invalid), which beats it -->
+        <Style Selector="^.ion-valid">
+            <Setter Property="HighlightBrush" Value="{DynamicResource Avonic.Textarea.HighlightColorValid}" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid">
+            <Setter Property="HighlightBrush" Value="{DynamicResource Avonic.Textarea.HighlightColorInvalid}" />
+        </Style>
+        <!-- min-height 44px, and 56px for floating, stacked, solid and outline. The wrapper inherits it, and the bottom text is
+         under it, so it's the wrapper's; .textarea-wrapper-inner inherits it again, so in a column the label is above 56. -->
+        <Style Selector="^ /template/ Border#PART_Wrapper, ^ /template/ Grid#PART_NativeWrapper">
+            <Setter Property="MinHeight" Value="44" />
+        </Style>
+        <Style Selector="^:label-placement-floating /template/ Border#PART_Wrapper, ^:label-placement-stacked /template/ Border#PART_Wrapper, ^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper, ^:label-placement-floating /template/ Grid#PART_NativeWrapper, ^:label-placement-stacked /template/ Grid#PART_NativeWrapper, ^:fill-solid /template/ Grid#PART_NativeWrapper, ^:fill-outline /template/ Grid#PART_NativeWrapper">
+            <Setter Property="MinHeight" Value="56" />
+        </Style>
+        <!-- :host(.textarea-disabled): opacity 0.38, of the whole as one, which an OpacityMask is, where Opacity would fade the
+             label, the text and the background each on its own -->
+        <Style Selector="^:textarea-disabled">
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Textarea.Md.DisabledMask}" />
+        </Style>
+
+        <!-- ── .textarea-wrapper ─────────────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.015" />
+                </Transitions>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.Background" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.Background" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.textarea-fill-solid): background step 50, a bottom border step 500, the top corners 4 -->
+        <Style Selector="^:fill-solid /template/ Border#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep500Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid:shape-round /template/ Border#PART_Wrapper">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Wrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- No fill, round: border-radius 16 -->
+        <Style Selector="^:shape-round:not(:fill-solid):not(:fill-outline) /template/ Border#PART_Wrapper">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (any-hover: hover) :host(.textarea-fill-solid:hover); then :host(.textarea-fill-solid.has-focus). Each state's
+             value beats an app's, as the :host rule is more specific than a class on the textarea. -->
+        <Style Selector="^:fill-solid:ion-hover /template/ Border#PART_Wrapper">
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep100Brush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep750Brush}" />
+        </Style>
+        <Style Selector="^:fill-solid:has-focus /template/ Border#PART_Wrapper">
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep750Brush}" />
+        </Style>
+        <!-- :host(.has-focus.textarea-fill-solid.ion-valid), :host(.textarea-fill-solid.ion-touched.ion-invalid) -->
+        <Style Selector="^:fill-solid:has-focus.ion-valid /template/ Border#PART_Wrapper, ^:fill-solid.ion-touched.ion-invalid /template/ Border#PART_Wrapper">
+            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+        </Style>
+
+        <!-- ── The outline ────────────────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^ /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep300Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Tag" Value="{DynamicResource Avonic.Textarea.BorderWidth}" />
+        </Style>
+        <Style Selector="^:fill-outline:ion-hover /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource Avonic.BackgroundColorStep750Brush}" />
+        </Style>
+        <!-- :host(.textarea-fill-outline.has-focus): border-width highlight-height, border-color highlight-color -->
+        <Style Selector="^:fill-outline:has-focus /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+            <Setter Property="Tag" Value="{DynamicResource Avonic.Textarea.HighlightHeight}" />
+        </Style>
+        <Style Selector="^:fill-outline.ion-touched.ion-invalid /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineStart">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="stb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Width">
+                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-round /template/ Border#PART_OutlineStart">
+            <Setter Property="Width">
+                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineNotch">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="tb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.label-floating.textarea-fill-outline) .textarea-outline-notch: border-top: none -->
+        <Style Selector="^:label-floating /template/ Border#PART_OutlineNotch">
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineEnd">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="teb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-round /template/ Border#PART_OutlineEnd">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ── The label ──────────────────────────────────────────────────────────────────────── -->
+
+        <!-- .label-text-wrapper: at most 200 px, and the colour and transform ease over 150 ms -->
+        <Style Selector="^ /template/ Border#PART_Label">
+            <Setter Property="MaxWidth" Value="200" />
+            <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <!-- .label-text-wrapper: padding-top and padding-bottom as the field's, in a row -->
+        <Style Selector="^ /template/ Border#PART_Label">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingTop" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.textarea-label-placement-start), fixed: a 16 px gap after it; end: before it -->
+        <Style Selector="^:label-placement-start /template/ Border#PART_Label, ^:label-placement-fixed /template/ Border#PART_Label">
+            <Setter Property="Margin" Value="0,0,16,0" />
+        </Style>
+        <Style Selector="^:label-placement-end /template/ Border#PART_Label">
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        <!-- :host(.textarea-label-placement-fixed) .label-text: flex: 0 0 100px -->
+        <Style Selector="^:label-placement-fixed /template/ TextBlock#PART_LabelText">
+            <Setter Property="Width" Value="100" />
+        </Style>
+        <!-- Stacked and floating: a column, the label's max-width calc(100% / scale), which the panel works out -->
+        <Style Selector="^:label-placement-stacked /template/ Border#PART_Label, ^:label-placement-floating /template/ Border#PART_Label">
+            <Setter Property="MaxWidth" Value="Infinity" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <!-- :host(.textarea-label-placement-floating) .label-text-wrapper: translateY(100%) scale(1), on the field -->
+        <Style Selector="^:label-placement-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="1" />
+        </Style>
+        <!-- :host(.label-floating) .label-text-wrapper: translateY(50%) scale(0.75) -->
+        <Style Selector="^:label-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="0.5" />
+            <Setter Property="b:Css.Scale" Value="0.75" />
+        </Style>
+        <Style Selector="^:label-floating /template/ c|InputWrapperPanel#PART_Layout">
+            <Setter Property="LabelScale" Value="0.75" />
+        </Style>
+        <!-- The outline: position: absolute, and translateY(-32%) onto the border, with 8 px less room -->
+        <Style Selector="^:fill-outline:label-placement-stacked /template/ c|InputWrapperPanel#PART_Layout, ^:fill-outline:label-placement-floating /template/ c|InputWrapperPanel#PART_Layout">
+            <Setter Property="IsLabelOutOfFlow" Value="True" />
+        </Style>
+        <Style Selector="^:fill-outline:label-floating /template/ c|InputWrapperPanel#PART_Layout">
+            <Setter Property="LabelInset" Value="8" />
+        </Style>
+        <Style Selector="^:fill-outline:label-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="-0.32" />
+        </Style>
+        <!-- Focused, floating or stacked: the highlight colour; so too when focused and valid, or touched and invalid -->
+        <Style Selector="^:label-placement-floating:has-focus /template/ Border#PART_Label, ^:label-placement-stacked:has-focus /template/ Border#PART_Label, ^:label-placement-floating.ion-touched.ion-invalid /template/ Border#PART_Label, ^:label-placement-stacked.ion-touched.ion-invalid /template/ Border#PART_Label">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+        </Style>
+
+        <!-- ── The field ──────────────────────────────────────────────────────────────────────── -->
+
+        <!-- caret-color, the opacity's 150 ms, and padding-top and padding-bottom -->
+        <Style Selector="^ /template/ TextBox#PART_NativeInput">
+            <Setter Property="CaretBrush" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingTop" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- .start-slot-wrapper, .end-slot-wrapper: the same padding -->
+        <Style Selector="^ /template/ Border#PART_StartWrapper, ^ /template/ Border#PART_EndWrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingTop" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- Stacked and floating: padding-top 0, and margin-top 8px on the field and on the slots' children, which is the slot
+             wrapper's padding here, as a slot holds one child -->
+        <Style Selector="^:label-placement-stacked /template/ TextBox#PART_NativeInput, ^:label-placement-floating /template/ TextBox#PART_NativeInput">
+            <Setter Property="Margin" Value="0,8,0,0" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:label-placement-stacked /template/ Border#PART_StartWrapper, ^:label-placement-stacked /template/ Border#PART_EndWrapper, ^:label-placement-floating /template/ Border#PART_StartWrapper, ^:label-placement-floating /template/ Border#PART_EndWrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}" ConverterParameter="8">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- The outline, stacked and floating: 12px instead -->
+        <Style Selector="^:fill-outline:label-placement-stacked /template/ TextBox#PART_NativeInput, ^:fill-outline:label-placement-floating /template/ TextBox#PART_NativeInput">
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+        <Style Selector="^:fill-outline:label-placement-stacked /template/ Border#PART_StartWrapper, ^:fill-outline:label-placement-stacked /template/ Border#PART_EndWrapper, ^:fill-outline:label-placement-floating /template/ Border#PART_StartWrapper, ^:fill-outline:label-placement-floating /template/ Border#PART_EndWrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}" ConverterParameter="12">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.textarea-label-placement-floating) textarea: opacity 0, until it has focus or a value -->
+        <Style Selector="^:label-placement-floating /template/ TextBox#PART_NativeInput">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="^:label-placement-floating:has-focus /template/ TextBox#PART_NativeInput, ^:label-placement-floating:has-value /template/ TextBox#PART_NativeInput">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <!-- ── .textarea-highlight ───────────────────────────────────────────────────────────────── -->
+
+        <!-- bottom: -1px, height highlight-height, scale(0) to scale(1) over 200 ms (ease) -->
+        <Style Selector="^ /template/ Border#PART_Highlight">
+            <Setter Property="Margin" Value="0,0,0,-1" />
+            <Setter Property="Height" Value="{DynamicResource Avonic.Textarea.HighlightHeight}" />
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+            <Setter Property="b:Css.Scale" Value="0" />
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.2" Easing="{a:CubicBezier 0.25, 0.1, 0.25, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <!-- With the solid fill's bottom border, bottom: -1px covers it -->
+        <Style Selector="^:fill-solid /template/ Border#PART_Highlight">
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector="^:has-focus /template/ Border#PART_Highlight">
+            <Setter Property="b:Css.Scale" Value="1" />
+        </Style>
+
+        <!-- ── .textarea-bottom ──────────────────────────────────────────────────────────────────── -->
+
+        <!-- padding 5 above, the wrapper's start and end; a top border with no fill; 12 px text -->
+        <Style Selector="^ /template/ Border#PART_Bottom">
+            <Setter Property="TextElement.FontSize" Value="12" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="t">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Textarea.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid /template/ Border#PART_Bottom, ^:fill-outline /template/ Border#PART_Bottom">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Bottom">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.has-focus.ion-valid), :host(.ion-touched.ion-invalid): border-color highlight-color -->
+        <Style Selector="^:has-focus.ion-valid /template/ Border#PART_Bottom, ^.ion-touched.ion-invalid /template/ Border#PART_Bottom">
+            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicTextarea].HighlightBrush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_HelperText, ^ /template/ TextBlock#PART_Counter">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep300Brush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_ErrorText">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Textarea.HighlightColorInvalid}" />
+        </Style>
+        <!-- .counter: margin-inline-start auto, padding-inline-start 16, letter-spacing 0.0333em -->
+        <Style Selector="^ /template/ TextBlock#PART_Counter">
+            <Setter Property="Margin" Value="16,0,0,0" />
+            <Setter Property="LetterSpacing" Value="0.4" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
