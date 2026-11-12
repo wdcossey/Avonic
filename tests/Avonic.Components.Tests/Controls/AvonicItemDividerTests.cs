@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Themes.Simple;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -1485,5 +1486,26 @@ public class AvonicItemDividerTests
         using var scene = new Scene(new ScrollViewer { Content = new StackPanel { Children = { divider } } });
 
         Assert.Same(own, divider.RenderTransform);
+    });
+
+    // The host's z-index: 100 and position: sticky are the shadow root's rules, and an app's ion-item-divider rule beats them,
+    // whenever sticky turns on. Values given at style priority when it turns on would come after the app's style, and win.
+    [AvaloniaFact]
+    public void D19_An_Apps_Style_Survives_Sticky_Turning_On_After_It() => Scrolling(() =>
+    {
+        var own = new RotateTransform(0);
+        var divider = new AvonicItemDivider();
+        using var scene = Scene.Styled(
+            new ScrollViewer { Content = new StackPanel { Children = { divider } } },
+            new Style(x => x.OfType<AvonicItemDivider>())
+            {
+                Setters = { new Setter(Visual.RenderTransformProperty, own), new Setter(Visual.ZIndexProperty, 5) },
+            });
+
+        divider.Sticky = true;
+        Run();
+
+        Assert.Same(own, divider.RenderTransform);
+        Assert.Equal(5, divider.ZIndex);
     });
 }

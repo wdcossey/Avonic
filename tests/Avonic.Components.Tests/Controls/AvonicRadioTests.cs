@@ -10,6 +10,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
@@ -465,6 +466,23 @@ public class AvonicRadioTests
         Assert.False(b.IsTabStop);
     }
 
+    // An app's own style for it wins, whenever the group makes a radio its tab stop after it. A value given at style priority
+    // then would come after the app's style, and win.
+    [AvaloniaFact]
+    public void R7_An_Apps_Style_Survives_The_Group_Making_A_Radio_Its_Tab_Stop_After_It()
+    {
+        var a = Radio("a");
+        var b = Radio("b");
+        var group = Group(a, b);
+        using var scene = Scene.Styled(group, Scene.AppStyle<AvonicRadio>(InputElement.IsTabStopProperty, false));
+
+        group.Value = "b";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(a.IsTabStop);
+        Assert.False(b.IsTabStop);
+    }
+
     [AvaloniaFact]
     public void R7_Tab_Goes_On_From_The_Checked_Radio_To_A_Button_In_The_Group()
     {
@@ -536,6 +554,33 @@ public class AvonicRadioTests
 
         Assert.False(Activatable.GetIsEnabled(radio));
         Assert.False(FocusVisible.GetIsEnabled(radio));
+    }
+
+    // An app's own style for them wins, whenever the radio goes into an item after it. Values given at style priority when it
+    // goes in would come after the app's style, and win.
+    [AvaloniaFact]
+    public void R8_An_Apps_Style_Survives_The_Radio_Going_Into_An_Item_After_It()
+    {
+        var radio = Radio("a");
+        var item = new AvonicItem();
+        var panel = new StackPanel { Children = { radio, item } };
+        using var scene = Scene.Styled(
+            panel,
+            new Style(x => x.OfType<AvonicRadio>())
+            {
+                Setters =
+                {
+                    new Setter(Activatable.IsEnabledProperty, true),
+                    new Setter(FocusVisible.IsEnabledProperty, true),
+                },
+            });
+
+        panel.Children.Remove(radio);
+        item.Content = radio;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(Activatable.GetIsEnabled(radio));
+        Assert.True(FocusVisible.GetIsEnabled(radio));
     }
 
     [AvaloniaFact]

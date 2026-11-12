@@ -11,6 +11,7 @@ using Avalonia.Input.GestureRecognizers;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -545,6 +546,30 @@ public class AvonicContentTests
         var stretched = new Border { VerticalAlignment = VerticalAlignment.Stretch };
         using var scene = new Scene(InBox(new AvonicContent { Content = stretched }));
         Assert.Equal(300, stretched.Bounds.Height);
+    }
+
+    // A block's height is the app's to give, by its own rule, however and whenever it's slotted. The alignment is given before
+    // the child is styled, as the presenter sets its child before it adds it to the logical tree, so the app's style comes
+    // after it, and wins.
+    [AvaloniaFact]
+    public void B9_An_Apps_Style_For_The_Alignment_Wins()
+    {
+        var stretched = new Border { Classes = { "page" } };
+        var content = new AvonicContent();
+        var made = new AvonicContent { ContentTemplate = new FuncDataTemplate<string>((_, _) => new Border { Classes = { "page" } }) };
+        using var scene = Scene.Styled(
+            new StackPanel { Children = { InBox(content), InBox(made) } },
+            new Style(x => x.OfType<Border>().Class("page"))
+            {
+                Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Stretch) },
+            });
+
+        content.Content = stretched;
+        made.Content = "made from a template";
+        Settle();
+
+        Assert.Equal(300, stretched.Bounds.Height);
+        Assert.Equal(300, made.GetVisualDescendants().OfType<Border>().Single(border => border.Classes.Contains("page")).Bounds.Height);
     }
 
     [AvaloniaFact]
@@ -2526,6 +2551,35 @@ public class AvonicContentTests
         using var scene = new Scene(InBox(new AvonicContent { FixedContent = slot }));
 
         Assert.Equal(new Rect(0, 0, 390, 300), Box(slot, scene.Window));
+    }
+
+    // The insets are the app's to give, by its own rule, however and whenever it's slotted, as for the default slot (B9).
+    [AvaloniaFact]
+    public void B29_An_Apps_Style_For_The_Alignments_Wins()
+    {
+        var slot = new Border { Width = 60, Height = 60, Classes = { "fab" } };
+        var made = new AvonicContent
+        {
+            FixedContentTemplate = new FuncDataTemplate<string>((_, _) => new Border { Width = 60, Height = 60, Classes = { "fab" } }),
+        };
+        var content = new AvonicContent();
+        using var scene = Scene.Styled(
+            new StackPanel { Children = { InBox(content), InBox(made) } },
+            new Style(x => x.OfType<Border>().Class("fab"))
+            {
+                Setters =
+                {
+                    new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Right),
+                    new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Bottom),
+                },
+            });
+
+        content.FixedContent = slot;
+        made.FixedContent = "made from a template";
+        Settle();
+
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(slot, content));
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(made.GetVisualDescendants().OfType<Border>().Single(border => border.Classes.Contains("fab")), made));
     }
 
     [AvaloniaFact]

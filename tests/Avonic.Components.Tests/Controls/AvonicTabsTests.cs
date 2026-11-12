@@ -297,6 +297,24 @@ public class AvonicTabsTests
         Assert.True(tab.IsVisible);
     }
 
+    // A hidden tab is hidden at style priority, not !important (see the README), so an app's own style wins, whenever the tab
+    // is hidden after it. A value given at style priority when it's hidden would come after the app's style, and win.
+    [AvaloniaFact]
+    public void A1_An_Apps_Style_Survives_The_Tab_Being_Hidden_After_It()
+    {
+        var a = Page("a", "A");
+        var tabs = new AvonicTabs { Content = new Panel { Children = { a, Page("b", "B") } } };
+        using var scene = Scene.Styled(tabs, Scene.AppStyle<AvonicTab>(Visual.IsVisibleProperty, true));
+        tabs.Select("a");
+        Dispatcher.UIThread.RunJobs();
+
+        tabs.Select("b");
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(a.IsActive);
+        Assert.True(a.IsVisible);
+    }
+
     [AvaloniaFact]
     public void A2_A_Component_Is_Built_At_The_First_Activation_Once_As_A_Page()
     {

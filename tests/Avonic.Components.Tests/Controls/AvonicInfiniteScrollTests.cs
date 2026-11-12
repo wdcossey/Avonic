@@ -269,6 +269,23 @@ public class AvonicInfiniteScrollTests
         Assert.Equal(0, stage.Fired);
     }
 
+    // ion-infinite-scroll { display: none } is Ionic's rule, of the same weight as an app's ion-infinite-scroll rule, which comes
+    // after it and wins, whenever it's disabled. A value given at style priority when it's disabled would come after the app's
+    // style, and win.
+    [AvaloniaFact]
+    public void B6_An_Apps_Style_Survives_It_Being_Disabled_After_It()
+    {
+        var infinite = new AvonicInfiniteScroll { Content = new Border { Height = 84 } };
+        using var scene = Scene.Styled(
+            new AvonicContent { Content = new StackPanel { Children = { infinite } } },
+            Scene.AppStyle<AvonicInfiniteScroll>(Visual.IsVisibleProperty, true));
+
+        infinite.IsEnabled = false;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(infinite.IsVisible);
+    }
+
     [AvaloniaFact]
     public void B6_A_Scroll_While_Disabled_Is_Heard_If_It_Is_Enabled_By_The_Frame()
     {

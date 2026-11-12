@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Logging;
 using Avalonia.LogicalTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -34,7 +35,7 @@ public class AvonicTab : ContentControl
 
     private bool _isActive;
     private bool _checkedComponent;
-    private IDisposable? _hidden;
+    private readonly StyleValue<bool> _hidden = new();
 
     static AvonicTab()
     {
@@ -43,6 +44,8 @@ public class AvonicTab : ContentControl
 
     public AvonicTab()
     {
+        // Bound once, before any style, so that an app's style still wins when the tab is hidden after it.
+        Bind(IsVisibleProperty, _hidden, BindingPriority.Style);
         UpdateHidden();
         UpdatePageClass();
     }
@@ -149,18 +152,7 @@ public class AvonicTab : ContentControl
     /// <c>:host(.tab-hidden) { display: none !important }</c>, at style priority, so that it survives a replaced theme. Hidden, it's
     /// also out of the automation tree, as <c>aria-hidden</c> takes it out.
     /// </summary>
-    private void UpdateHidden()
-    {
-        if (!_isActive && _hidden is null)
-        {
-            _hidden = SetValue(IsVisibleProperty, false, BindingPriority.Style);
-        }
-        else if (_isActive && _hidden is not null)
-        {
-            _hidden.Dispose();
-            _hidden = null;
-        }
-    }
+    private void UpdateHidden() => _hidden.SetWhen(!_isActive, false);
 
     /// <summary><c>'ion-page': component === undefined</c>, so that an <see cref="AvonicContent"/> in it takes it as its page.</summary>
     private void UpdatePageClass() => Classes.Set("ion-page", Component is null);

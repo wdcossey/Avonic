@@ -84,10 +84,9 @@ public class AvonicRadio : ContentControl, IItemControl
     private AvonicRadioGroup? _group;
     private bool _checked;
     private Control? _label;
-    private IDisposable? _tabStopFrame;
-    private IDisposable? _activatableFrame;
-    private IDisposable? _focusableFrame;
-    private bool? _inItem;
+    private readonly StyleValue<bool> _tabStop = new();
+    private readonly StyleValue<bool> _activatable = new();
+    private readonly StyleValue<bool> _focusable = new();
 
     static AvonicRadio()
     {
@@ -128,6 +127,12 @@ public class AvonicRadio : ContentControl, IItemControl
                 RaiseEvent(new RoutedEventArgs(IonBlurEvent));
             }
         });
+
+        // At style priority, as the classes and tabindex are, so an app's own value wins. Bound once, before any style, so that an
+        // app's style still wins when the group or an item changes them after it.
+        Bind(IsTabStopProperty, _tabStop, BindingPriority.Style);
+        Bind(Activatable.IsEnabledProperty, _activatable, BindingPriority.Style);
+        Bind(FocusVisible.IsEnabledProperty, _focusable, BindingPriority.Style);
 
         UpdateClasses();
         UpdateHostContext(inItem: false);
@@ -252,11 +257,7 @@ public class AvonicRadio : ContentControl, IItemControl
     }
 
     /// <summary><c>setButtonTabindex</c>: 0 makes it the group's tab stop, at style priority, so an app's own value wins.</summary>
-    internal void SetTabStop(bool value)
-    {
-        _tabStopFrame?.Dispose();
-        _tabStopFrame = value ? SetValue(IsTabStopProperty, true, BindingPriority.Style) : null;
-    }
+    internal void SetTabStop(bool value) => _tabStop.SetWhen(value, true);
 
     // ── Host context ─────────────────────────────────────────────────────────────────────────
 
@@ -279,15 +280,10 @@ public class AvonicRadio : ContentControl, IItemControl
         PseudoClasses.Set(":slot-start", slot == "PART_Start");
         PseudoClasses.Set(":slot-end", slot == "PART_End");
 
-        // At style priority, as the classes are, so an app's own value wins. Only when it changes, so a move raises nothing.
-        if (_inItem != inItem)
-        {
-            _inItem = inItem;
-            _activatableFrame?.Dispose();
-            _activatableFrame = SetValue(Activatable.IsEnabledProperty, !inItem, BindingPriority.Style);
-            _focusableFrame?.Dispose();
-            _focusableFrame = SetValue(FocusVisible.IsEnabledProperty, !inItem, BindingPriority.Style);
-        }
+        // At style priority, as the classes are, so an app's own value wins. A value it already has raises nothing, so a move
+        // doesn't either.
+        _activatable.Set(!inItem);
+        _focusable.Set(!inItem);
     }
 
     private void UpdateClasses()

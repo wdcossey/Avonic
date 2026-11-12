@@ -641,7 +641,10 @@ public class AvonicContent : TemplatedControl
         }
     }
 
-    /// <summary>A block is as high as its content, where Avalonia would stretch it to the viewport. An app's own alignment wins.</summary>
+    /// <summary>
+    /// A block is as high as its content, where Avalonia would stretch it to the viewport. An app's own alignment wins, its style
+    /// too: a presenter sets its child before it adds it to the logical tree, which styles it, so the frame here comes first.
+    /// </summary>
     private void UpdateContainerChild()
     {
         Reset(_containerChildDefaults);
@@ -651,7 +654,10 @@ public class AvonicContent : TemplatedControl
         }
     }
 
-    /// <summary><c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins.</summary>
+    /// <summary>
+    /// <c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins, its
+    /// style too, as for <see cref="UpdateContainerChild"/>.
+    /// </summary>
     private void UpdateFixedChild()
     {
         Reset(_fixedChildDefaults);

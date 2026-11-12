@@ -61,8 +61,17 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
     private readonly List<AvonicList> _listsInTheWay = [];
     private Visual? _inParent;
     private ScrollViewer? _scrollViewer;
-    private IDisposable? _transformFrame;
-    private IDisposable? _zIndexFrame;
+    private readonly StyleValue<ITransform?> _transform = new();
+    private readonly StyleValue<int> _zIndex = new();
+    private IDisposable? _containerZIndexFrame;
+
+    public AvonicItemDivider()
+    {
+        // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is. Bound once, before any style, so that an
+        // app's style still wins when sticky turns on after it.
+        Bind(RenderTransformProperty, _transform, BindingPriority.Style);
+        Bind(ZIndexProperty, _zIndex, BindingPriority.Style);
+    }
 
     public string? Color
     {
@@ -159,8 +168,18 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
         FindScrollport();
 
         // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.
-        _transformFrame = SetValue(RenderTransformProperty, _stickyOffset, BindingPriority.Style);
-        _zIndexFrame = _inParent.SetValue(ZIndexProperty, StickyZIndex, BindingPriority.Style);
+        _transform.Set(_stickyOffset);
+        if (_inParent == this)
+        {
+            _zIndex.Set(StickyZIndex);
+        }
+        else
+        {
+            // An items control's wrapper, which isn't in the DOM, so no rule of the app's reaches it there: a frame now is
+            // enough.
+            _containerZIndexFrame = _inParent.SetValue(ZIndexProperty, StickyZIndex, BindingPriority.Style);
+        }
+
         if (_scrollViewer is not null)
         {
             LayoutUpdated += OnLayoutUpdated;
@@ -172,10 +191,10 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
     private void StopSticking()
     {
         LayoutUpdated -= OnLayoutUpdated;
-        _transformFrame?.Dispose();
-        _transformFrame = null;
-        _zIndexFrame?.Dispose();
-        _zIndexFrame = null;
+        _transform.Clear();
+        _zIndex.Clear();
+        _containerZIndexFrame?.Dispose();
+        _containerZIndexFrame = null;
         _inParent = null;
         _scrollViewer = null;
         _listsInTheWay.Clear();

@@ -16,7 +16,7 @@ public class AvonicBadge : ContentControl
     public static readonly StyledProperty<string?> ColorProperty =
         ColorPalette.ColorProperty.AddOwner<AvonicBadge>();
 
-    private IDisposable? _hidden;
+    private readonly StyleValue<bool> _hidden = new();
 
     static AvonicBadge()
     {
@@ -25,7 +25,12 @@ public class AvonicBadge : ContentControl
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicBadge>(VerticalAlignment.Center);
     }
 
-    public AvonicBadge() => UpdateEmpty();
+    public AvonicBadge()
+    {
+        // Bound once, before any style, so that an app's style still wins when the badge empties after it.
+        Bind(IsVisibleProperty, _hidden, BindingPriority.Style);
+        UpdateEmpty();
+    }
 
     public string? Color
     {
@@ -47,17 +52,5 @@ public class AvonicBadge : ContentControl
     /// <c>:host(:empty) { display: none }</c>. A framework renders no text node for an empty string, so that's empty too. It's
     /// at style priority, so that it survives a replaced theme and an app's own <c>IsVisible</c> wins.
     /// </summary>
-    private void UpdateEmpty()
-    {
-        var empty = Content is null or "";
-        if (empty && _hidden is null)
-        {
-            _hidden = SetValue(IsVisibleProperty, false, BindingPriority.Style);
-        }
-        else if (!empty && _hidden is not null)
-        {
-            _hidden.Dispose();
-            _hidden = null;
-        }
-    }
+    private void UpdateEmpty() => _hidden.SetWhen(Content is null or "", false);
 }

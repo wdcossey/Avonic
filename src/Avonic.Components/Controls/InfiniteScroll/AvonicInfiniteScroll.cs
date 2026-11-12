@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Logging;
 using Avalonia.Reactive;
 using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -58,10 +59,12 @@ public partial class AvonicInfiniteScroll : ContentControl
     private bool _listening;
     private IDisposable? _offsetWatch;
     private IDisposable? _scrollEvent;
-    private IDisposable? _hidden;
+    private readonly StyleValue<bool> _hidden = new();
 
     public AvonicInfiniteScroll()
     {
+        // Bound once, before any style, so that an app's style still wins when it's disabled after it.
+        Bind(IsVisibleProperty, _hidden, BindingPriority.Style);
         ThresholdChanged();
         UpdateEnabled();
     }
@@ -246,15 +249,7 @@ public partial class AvonicInfiniteScroll : ContentControl
     private void UpdateEnabled()
     {
         PseudoClasses.Set(EnabledClass, IsEnabled);
-        if (!IsEnabled && _hidden is null)
-        {
-            _hidden = SetValue(IsVisibleProperty, false, BindingPriority.Style);
-        }
-        else if (IsEnabled && _hidden is not null)
-        {
-            _hidden.Dispose();
-            _hidden = null;
-        }
+        _hidden.SetWhen(!IsEnabled, false);
     }
 
     private void SetLoading(bool loading)

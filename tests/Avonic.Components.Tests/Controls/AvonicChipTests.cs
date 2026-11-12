@@ -11,6 +11,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -188,6 +189,27 @@ public class AvonicChipTests
         AssertBox(16, 10, 20, 30, Bounds(tall, scene.Window));
         AssertBox(36, 20, 20, 10, Bounds(small, scene.Window));
     });
+
+    // The slot's align-items: center is given as the slot is made, before any style reaches it, so an app's style for it wins,
+    // however late the child comes.
+    [AvaloniaFact]
+    public void B1_An_Apps_Style_For_A_Slots_Alignment_Wins()
+    {
+        var chip = Chip(Box());
+        using var scene = Scene.Styled(
+            chip,
+            new Style(x => x.OfType<AvonicChip>().Descendant().OfType<ContentPresenter>())
+            {
+                Setters = { new Setter(ContentPresenter.VerticalContentAlignmentProperty, VerticalAlignment.Top) },
+            });
+
+        chip.Items.Add(Box());
+        Dispatcher.UIThread.RunJobs();
+
+        var slots = chip.GetVisualDescendants().OfType<FlexSlot>().ToList();
+        Assert.Equal(2, slots.Count);
+        Assert.All(slots, slot => Assert.Equal(VerticalAlignment.Top, slot.VerticalContentAlignment));
+    }
 
     [AvaloniaFact]
     public void B1_Text_Is_14_In_The_Font_Family() => InstalledTheme.Run(_ =>

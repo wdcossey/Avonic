@@ -549,7 +549,8 @@ public class AvonicReorderGroup : ItemsControl
     /// <summary>
     /// The <c>reorder-selected</c> class goes on the element the DOM has, which is a template's presenter's child: an
     /// <see cref="ItemsControl"/>'s wrapper isn't in the DOM. Its z-index goes on the child of the panel, as that's what
-    /// <c>ZIndex</c> sorts.
+    /// <c>ZIndex</c> sorts. A frame made now beats an app's plain style for the item's <c>ZIndex</c>, as <c>.reorder-selected</c>,
+    /// a class, beats an app's <c>ion-item</c> rule, and loses to an app's style with a class or pseudoclass.
     /// </summary>
     private void SetSelected(Control child, bool selected)
     {
