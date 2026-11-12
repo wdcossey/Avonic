@@ -47,6 +47,9 @@ public sealed class Gesture : IDisposable
     // release isn't a cancel, as the release is still to reach the element.
     private IPointer? _releasing;
 
+    // Where the tracked mouse last was, so that a move that doesn't move it is dropped: see OnMoved.
+    private Point _mouseAt;
+
     // Inside PointerDown or PointerMove, whose callbacks may move the capture. A cancel then waits until they return, as a browser's
     // touchcancel can't arrive in the middle of a callback.
     private bool _deciding;
@@ -432,7 +435,9 @@ public sealed class Gesture : IDisposable
         // Followed during PointerDown, so that the capture moving away during a capture at the press, in OnStart, is a cancel. One
         // pointer at a time: a second press is refused by hasStartedPan, and the first stays followed.
         var previous = _tracking;
+        var previousMouseAt = _mouseAt;
         _tracking = e.Pointer;
+        _mouseAt = e.GetPosition(null);
         _cancelPending = false;
         bool started;
         _deciding = true;
@@ -451,6 +456,7 @@ public sealed class Gesture : IDisposable
             if (ReferenceEquals(_tracking, e.Pointer))
             {
                 _tracking = previous;
+                _mouseAt = previousMouseAt;
             }
 
             return;
@@ -484,6 +490,20 @@ public sealed class Gesture : IDisposable
         if (!ReferenceEquals(e.Pointer, _tracking))
         {
             return;
+        }
+
+        // Windows sends a mouse move when the capture changes, as this gesture's own capture does, with the mouse where it was.
+        // The DOM's mousemove is for a mouse that moved, so Ionic never sees one: here it reached OnMove with no delta, and
+        // ion-item-sliding, at 0, closed and turned its gesture off. Measured in a real window. Touch is left as it comes.
+        if (e.Pointer.Type == PointerType.Mouse)
+        {
+            var at = e.GetPosition(null);
+            if (at == _mouseAt)
+            {
+                return;
+            }
+
+            _mouseAt = at;
         }
 
         _deciding = true;

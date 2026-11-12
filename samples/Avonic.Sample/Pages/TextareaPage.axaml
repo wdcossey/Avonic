@@ -36,6 +36,8 @@
                                   AutoGrow="True"
                                   IonChange="OnValidatedChange"
                                   IonBlur="OnValidatedBlur" />
+                <!-- What the counter shows, as text that tools/real-window can read -->
+                <TextBlock Text="{Binding #Validated.CounterText, StringFormat='The counter shows {0}'}" />
                 <c:AvonicTextarea Fill="Outline" Label="Outline" LabelPlacement="Floating" Value="Value" />
                 <c:AvonicTextarea Fill="Outline" Shape="Round" Label="Round" LabelPlacement="Stacked" Placeholder="Placeholder" />
                 <c:AvonicTextarea Label="Clear on edit" LabelPlacement="Stacked" ClearOnEdit="True" Value="The first key clears this" />

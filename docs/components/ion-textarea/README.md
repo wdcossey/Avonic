@@ -125,4 +125,4 @@ Not in Ionic's API, but needed by the theme:
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `cols` follows Chromium on Windows in a phone viewport, which
 Chromium on Android would make wider; a click on the label while focused keeps focus; an icon-only button in a slot keeps its own
 look; an app's background, border and top padding keys win where Ionic's host classes would; no `align-self: baseline` in an item;
-the notch has no `max-width`; bottom text is 1 px taller. Not tried in a real window, with a soft keyboard, or on a device.
+the notch has no `max-width`; bottom text is 1 px taller. Tried in a real window by `tools/real-window`; not with a soft keyboard, or on a device.

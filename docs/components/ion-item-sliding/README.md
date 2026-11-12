@@ -114,4 +114,4 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
   list's `Styles/List.axaml`, proposed in the PR.
 - **`ion-list`'s `closeSlidingItems()` isn't on `AvonicList` yet,** as that's the list's file: proposed in the PR. Until then,
   `CloseOpened()` on any sliding item does the same.
-- Not tried in a real window, or on a device.
+- Tried in a real window with mouse, touch and keys by `tools/real-window`, which found that no mouse could open one (fixed in the gesture); not on a device.

@@ -52,7 +52,8 @@
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
                 <c:AvonicItemSliding Disabled="True">
-                    <c:AvonicItem>
+                    <!-- Disabled stops the sliding only: the item still clicks -->
+                    <c:AvonicItem Button="True" Click="OnDisabledItem">
                         <c:AvonicLabel Content="Disabled" />
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
@@ -67,6 +68,10 @@
                 <c:AvonicButton Content="Close opened" Click="OnCloseOpened" />
             </WrapPanel>
             <TextBlock Name="Log" Margin="16,8" Text="Swipe an item sideways." />
+
+            <!-- Enough rows for the content to scroll, so that a drag up a sliding item scrolls it -->
+            <c:AvonicListHeader><c:AvonicLabel Content="More rows, so that the page scrolls" /></c:AvonicListHeader>
+            <c:AvonicList Name="More" />
         </StackPanel>
     </c:AvonicContent>
 </UserControl>

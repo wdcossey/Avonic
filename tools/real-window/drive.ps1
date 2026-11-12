@@ -7,7 +7,9 @@ param(
     # The sample to run. Build it first. A Debug build also has the performance line to check.
     [string]$Exe = (Join-Path $PSScriptRoot '..\..\samples\Avonic.Sample.Desktop\bin\Debug\net10.0\Avonic.Sample.Desktop.exe'),
     # Where the frames go. By default a new folder for each run, so that an old frame can't pass for a new one.
-    [string]$Out = (Join-Path ([IO.Path]::GetTempPath()) ('avonic-real-window\' + (Get-Date -Format 'yyyyMMdd-HHmmss')))
+    [string]$Out = (Join-Path ([IO.Path]::GetTempPath()) ('avonic-real-window\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))),
+    # Runs only the sections whose title is like one of these, such as 'ion-picker,ion-re*', to work on them. The whole run is the gate.
+    [string]$Only = '*'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -153,6 +155,7 @@ function Click($x, $y) {
     [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 120
     Press; Start-Sleep -Milliseconds 50; Release; Start-Sleep -Milliseconds 250
 }
+function ClickOn($el) { $x, $y = Centre $el; Click $x $y }
 function ClickTwice {
     Press; Start-Sleep -Milliseconds 40; Release; Start-Sleep -Milliseconds 60
     Press; Start-Sleep -Milliseconds 40; Release; Start-Sleep -Milliseconds 300
@@ -171,7 +174,47 @@ function Drag($x, $y, $dy, $steps = 15, $ms = 16) {
     TouchUp $x ($y + $dy)
 }
 function Wheel($notches) { Guard; 1..$notches | ForEach-Object { [RealInput]::Wheel(-120); Start-Sleep -Milliseconds 50 }; Start-Sleep -Milliseconds 350 }
+function WheelUp($notches) { Guard; 1..$notches | ForEach-Object { [RealInput]::Wheel(120); Start-Sleep -Milliseconds 50 }; Start-Sleep -Milliseconds 350 }
+# A drag in any direction, in screen pixels, by touch and by the mouse.
+function TouchDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
+    # Windows refuses a touch off the screen (87) partway through, so stay inside the window.
+    $r = $win.Current.BoundingRectangle
+    if (-not $r.Contains((New-Object Windows.Point ($x + $dx), ($y + $dy)))) { throw "A drag to $($x + $dx), $($y + $dy) would leave the window" }
+    TouchDown $x $y
+    for ($i = 1; $i -le $steps; $i++) {
+        Start-Sleep -Milliseconds $ms
+        [RealInput]::TouchMove([int]($x + $dx * $i / $steps), [int]($y + $dy * $i / $steps))
+    }
+    TouchUp ([int]($x + $dx)) ([int]($y + $dy))
+}
+function MouseDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
+    Guard
+    [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 120
+    Press
+    for ($i = 1; $i -le $steps; $i++) {
+        Start-Sleep -Milliseconds $ms
+        [void][RealInput]::SetCursorPos([int]($x + $dx * $i / $steps), [int]($y + $dy * $i / $steps))
+    }
+    Start-Sleep -Milliseconds 60
+    Release
+}
+# Device-independent pixels to the screen's.
+function Px($dip) { [int]($dip * $scale) }
+function Value($el) { $el.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).Current.Value }
+function IsFocused($el) { $f = $AE::FocusedElement; [bool]($f -and $el -and [Windows.Automation.Automation]::Compare($f, $el)) }
+function Region($x, $y, $wd, $ht) {
+    $bmp = New-Object Drawing.Bitmap ([int]$wd), ([int]$ht)
+    $g = [Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen([int]$x, [int]$y, 0, 0, $bmp.Size); $g.Dispose(); $bmp
+}
+# How many of every other pixel differ between two regions of one size. Disposes of both.
+function Changed($a, $b) {
+    $n = 0
+    for ($y = 0; $y -lt $a.Height; $y += 2) { for ($x = 0; $x -lt $a.Width; $x += 2) { if ($a.GetPixel($x, $y).ToArgb() -ne $b.GetPixel($x, $y).ToArgb()) { $n++ } } }
+    $a.Dispose(); $b.Dispose()
+    $n
+}
 function Section($title, [scriptblock]$body) {
+    if (-not @($Only -split ',' | Where-Object { $title -like $_.Trim() })) { return }
     "== $title"
     try { & $body }
     catch { LetGo; $script:failures++; "  FAIL  the section stopped: $($_.Exception.Message) at line $($_.InvocationInfo.ScriptLineNumber)" }
@@ -604,6 +647,354 @@ try {
         Key '{ESC}' 600
         Check 'Escape dismisses the top one, then the next' ([bool](WaitForText 'Overlay 4 dismissed, role backdrop')) (FirstText 'Overlay 4*')
         Away
+    }
+
+    # Ionic's item-swipe gesture (x, 5 px): released past half the options it rests open, 30 px past them it's a full swipe,
+    # and pressing another sliding item closes the open one (canStart). The item's offset is read from its label's bounds,
+    # which follow its transform; an option is in the tree only while its side is open.
+    Section 'ion-item-sliding' {
+        Open 'ion-item-sliding'
+        $w = $win.Current.BoundingRectangle
+        function Log { Texts | Where-Object { $_ -match '^(Clicked|Full swipe|Closed the|None was|Swipe an item)' } | Select-Object -First 1 }
+        # How far the row's item has moved, in dips: negative with the end options showing.
+        function Offset($label) { [math]::Round(((Named $CT::Text $label).Current.BoundingRectangle.X - $w.X) / $scale - 16) }
+        function RowY($label) { $b = (Named $CT::Text $label).Current.BoundingRectangle; [int]($b.Y + $b.Height / 2) }
+        $first = 'Options on both sides'
+        $y1 = RowY $first
+
+        TouchDrag ($w.X + (Px 300)) $y1 (Px (-150)) 0
+        Start-Sleep -Milliseconds 700
+        Shot 'ion-item-sliding-touch-open'
+        $o = Offset $first
+        Check 'a touch swipe left opens the end options' (($o -lt -100) -and (Named $CT::Button 'Favorite')) "offset $o"
+        $fx, $fy = Centre (Named $CT::Button 'Favorite')
+        Tap $fx $fy
+        Check 'a tap on an option clicks it' ((Log) -eq 'Clicked Favorite') (Log)
+        $lx, $ly = Centre (Named $CT::Text 'Clicked Favorite')
+        Tap $lx $ly
+        Start-Sleep -Milliseconds 600
+        Check 'a tap outside any sliding item leaves it open, as in Ionic' ((Offset $first) -eq $o) "offset $(Offset $first)"
+        Tap ($w.X + (Px 200)) (RowY 'Icons')
+        Start-Sleep -Milliseconds 800
+        Check 'a press on another sliding item closes it' ((Offset $first) -eq 0) "offset $(Offset $first)"
+
+        MouseDrag ($w.X + (Px 100)) $y1 (Px 150) 0
+        Start-Sleep -Milliseconds 700
+        Shot 'ion-item-sliding-mouse-open'
+        $o = Offset $first
+        Check 'a mouse drag right opens the start options' (($o -gt 50) -and (Named $CT::Button 'Archive')) "offset $o"
+        ClickOn (Named $CT::Button 'Close opened')
+        Start-Sleep -Milliseconds 800
+        Check 'CloseOpened() closes it' (((Log) -eq 'Closed the open item') -and ((Offset $first) -eq 0)) "$(Log), offset $(Offset $first)"
+
+        TouchDrag ($w.X + (Px 370)) $y1 (Px (-330)) 0 25
+        [void](WaitForText 'Full swipe*' 2)
+        Shot 'ion-item-sliding-full-swipe'
+        Check 'a full swipe raises IonSwipe on the end options' ((Log) -eq 'Full swipe to the End options') (Log)
+        Check 'and leaves the item open' ((Offset $first) -lt -100) "offset $(Offset $first)"
+        ClickOn (Named $CT::Button 'Close opened')
+        Start-Sleep -Milliseconds 800
+
+        $yd = RowY 'Disabled'
+        TouchDrag ($w.X + (Px 300)) $yd (Px (-150)) 0
+        Start-Sleep -Milliseconds 700
+        Check "the disabled row doesn't slide" (((Offset 'Disabled') -eq 0) -and -not (Named $CT::Button 'Never')) "offset $(Offset 'Disabled')"
+        Tap ($w.X + (Px 200)) $yd
+        Check 'but its item still clicks' ((Log) -eq "Clicked the disabled row's item") (Log)
+
+        $y2 = RowY 'Row 2'
+        TouchDrag ($w.X + (Px 200)) $y2 0 (Px (-250))
+        Start-Sleep -Milliseconds 1200
+        Shot 'ion-item-sliding-scrolled'
+        Check 'a drag up a sliding item scrolls the page' ((RowY 'Row 2') -lt ($y2 - (Px 150))) "$(RowY 'Row 2') against $y2"
+        Check 'and leaves it closed' ((Offset 'Row 2') -eq 0) "offset $(Offset 'Row 2')"
+    }
+
+    # Ionic's reorder gesture (y, threshold 0) starts only on a handle in an enabled group; the finger's place in the group is
+    # the new index, and within 60 px of the content's edge each move scrolls it 10 px. The page completes in ionReorderEnd.
+    Section 'ion-reorder' {
+        Open 'ion-reorder'
+        $w = $win.Current.BoundingRectangle
+        function Status { WaitForText 'ionReorderEnd*' 1 }
+        function Top($label) { (Named $CT::Text $label).Current.BoundingRectangle.Y }
+        # The handle at the end of a row, as the handles have no name of their own.
+        function HandleOf($label) {
+            $t = (Named $CT::Text $label).Current.BoundingRectangle
+            $cy = $t.Y + $t.Height / 2
+            Centre (All $CT::Image | Where-Object { $b = $_.Current.BoundingRectangle; ($b.X -gt $w.X + (Px 300)) -and ([math]::Abs($b.Y + $b.Height / 2 - $cy) -lt (Px 20)) } | Select-Object -First 1)
+        }
+        $row = 48
+
+        $hx, $hy = HandleOf 'Item 1'
+        TouchDrag $hx $hy 0 (Px (2 * $row + 10)) 20
+        Start-Sleep -Milliseconds 500
+        Shot 'ion-reorder-touch'
+        Check 'a touch drag on a handle moves the item' (((Status) -eq 'ionReorderEnd: from 0 to 2') -and ((Top 'Item 1') -gt (Top 'Item 3'))) (Status)
+        $hx, $hy = HandleOf 'Item 2'
+        MouseDrag $hx $hy 0 (Px ($row + 10)) 20
+        Start-Sleep -Milliseconds 500
+        Check 'and so does a mouse drag' (((Status) -eq 'ionReorderEnd: from 0 to 1') -and ((Top 'Item 2') -gt (Top 'Item 3'))) (Status)
+
+        Open 'ion-reorder'
+        $bottom = (All $CT::Group | Where-Object { $_.Current.ClassName -eq 'AvonicContent' } | Select-Object -First 1).Current.BoundingRectangle.Bottom
+        $hx, $hy = HandleOf 'Item 5'
+        $statusY = Top 'Drag a handle.'
+        $to = [int]($bottom - (Px 25))
+        TouchDown $hx $hy
+        for ($i = 1; $i -le 20; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove($hx, [int]($hy + ($to - $hy) * $i / 20)) }
+        for ($i = 0; $i -lt 40; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove($hx, ($to - ($i % 2))) }
+        # Lifted where it last was, and before reading anything: lifting elsewhere after a pause failed with 87.
+        TouchUp $hx ($to - 1)
+        Start-Sleep -Milliseconds 500
+        Shot 'ion-reorder-auto-scroll'
+        $scrolled = $statusY - (Top 'Drag a handle.')
+        $end = Status
+        Check 'held near the bottom, the drag scrolls the page' ($scrolled -gt (Px 150)) "by $scrolled px"
+        Check 'and the item goes further down' ($end -match '^ionReorderEnd: from 4 to (\d+)$' -and [int]$Matches[1] -gt 8) $end
+
+        Open 'ion-reorder'
+        $y0 = Top 'Item 1'
+        TouchDrag ($w.X + (Px 120)) ($y0 + (Px 12)) 0 (Px (-150))
+        Start-Sleep -Milliseconds 1200
+        Check "a drag that doesn't start on a handle scrolls the page" (((Top 'Item 1') -lt ($y0 - (Px 100))) -and -not (Status)) "$(Top 'Item 1') against $y0, $(Status)"
+
+        Open 'ion-reorder'
+        $hx, $hy = HandleOf 'Item 1'
+        $y0 = Top 'Item 1'
+        ClickOn (Named $CT::Button 'Reorder enabled')
+        Start-Sleep -Milliseconds 400
+        Shot 'ion-reorder-off'
+        $left = @(All $CT::Image | Where-Object { $_.Current.BoundingRectangle.X -gt $w.X + (Px 300) })
+        Check 'turning reorder off hides the handles' ($left.Count -eq 0) "$($left.Count) left"
+        TouchDrag $hx $hy 0 (Px (-150))
+        Start-Sleep -Milliseconds 1200
+        Check 'and a drag where a handle was scrolls instead' (((Top 'Item 1') -lt ($y0 - (Px 100))) -and -not (Status)) "$(Top 'Item 1') against $y0, $(Status)"
+    }
+
+    # md's native refresher: a pull from the top past 0.4 of it refreshes until the app completes (the page takes 2 s and adds a
+    # row); a shorter one cancels; it starts only at the top; and Disabled turns it off. The page says each ionPullEnd.
+    Section 'ion-refresher' {
+        Open 'ion-refresher'
+        $w = $win.Current.BoundingRectangle
+        $content = (All $CT::Group | Where-Object { $_.Current.ClassName -eq 'AvonicContent' } | Select-Object -First 1).Current.BoundingRectangle
+        $cx = [int]($w.X + $w.Width / 2)
+        $iconArea = { Region ($cx - (Px 40)) $content.Y (Px 80) (Px 110) }
+        function Top($label) { (Named $CT::Text $label).Current.BoundingRectangle.Y }
+        $plain = & $iconArea
+
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
+        Start-Sleep -Milliseconds 300
+        $refreshing = WaitForText 'Refreshing*' 1
+        Shot 'ion-refresher-refreshing'
+        $spinning = Changed $plain (& $iconArea)
+        Check 'a pull past the threshold refreshes' ([bool]$refreshing) (FirstText 'Pull*')
+        Check 'with the spinner showing' ($spinning -gt 50) "$spinning sampled pixels differ"
+        Check 'it completes, with a new row' ([bool](WaitForText 'Refreshed*' 4) -and (Named $CT::Text 'Item 21')) ((Texts | Select-Object -Last 1))
+        Start-Sleep -Milliseconds 1000
+        $after = Changed $plain (& $iconArea)
+        Shot 'ion-refresher-done'
+        Check 'and the spinner goes' ($after -lt 10) "$after sampled pixels differ"
+
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 80) 10
+        Start-Sleep -Milliseconds 800
+        Check 'a short pull snaps back and cancels' (((WaitForText 'Cancelled' 2) -eq 'Cancelled') -and -not (Named $CT::Text 'Item 22')) ((Texts | Select-Object -Last 1))
+
+        [void][RealInput]::SetCursorPos($cx, ([int]($content.Y + $content.Height / 2))); Start-Sleep -Milliseconds 150
+        Wheel 6
+        $scrolledTop = Top 'Item 21'
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 150) 15
+        Start-Sleep -Milliseconds 1500
+        Check 'a pull when scrolled down only scrolls' (((Top 'Item 21') -gt $scrolledTop + (Px 60)) -and -not (FirstText 'Refreshing*') -and -not (Named $CT::Text 'Item 22')) "$(Top 'Item 21') against $scrolledTop; $(Texts | Select-Object -Last 1)"
+
+        ClickOn (Named $CT::Button 'Disabled')
+        [void][RealInput]::SetCursorPos($cx, ([int]($content.Y + $content.Height / 2))); Start-Sleep -Milliseconds 150
+        WheelUp 10
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
+        Start-Sleep -Milliseconds 800
+        Shot 'ion-refresher-disabled'
+        Check 'Disabled stops it' ((-not (FirstText 'Refreshing*')) -and -not (Named $CT::Text 'Item 22')) ((Texts | Select-Object -Last 1))
+    }
+
+    # The page says each ionChange. A wheel notch scrolls 100 px and snaps to the nearest option (Chromium: three rows of 34),
+    # a tap on an option selects it, the focused column takes the arrows (a disabled option is skipped), and a touch drag
+    # scrolls and snaps when it ends.
+    Section 'ion-picker' {
+        Open 'ion-picker'
+        $cols = @(All $CT::Slider | Where-Object { $_.Current.ClassName -eq 'AvonicPickerColumn' })
+        $colours, $numbers = $cols[0], $cols[1]
+        function Said($change) { [bool](WaitForText "ionChange: $change" 2) }
+        function Status { FirstText 'ionChange:*' }
+        function Centred($name) {
+            $c = $colours.Current.BoundingRectangle
+            $o = (Named $CT::Button $name).Current.BoundingRectangle
+            [math]::Abs(($o.Y + $o.Height / 2) - ($c.Y + $c.Height / 2)) -le (Px 3)
+        }
+        $x, $y = Centre $colours
+
+        Guard
+        [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 150
+        Wheel 1
+        Start-Sleep -Milliseconds 400
+        Shot 'ion-picker-wheel'
+        Check 'a wheel notch down settles three rows on, as in Chromium' ((Said 'Violet') -and (Centred 'Violet')) (Status)
+        WheelUp 1
+        Start-Sleep -Milliseconds 400
+        Check 'and a notch up comes back' ((Said 'Green') -and (Centred 'Green')) (Status)
+
+        $ox, $oy = Centre (Named $CT::Button 'Orange')
+        Tap $ox $oy
+        Start-Sleep -Milliseconds 600
+        Check 'a tap on an option selects it and centres it' ((Said 'Orange') -and (Centred 'Orange')) (Status)
+
+        Click $x $y
+        Check 'a click focuses the column' (IsFocused $colours) "$($AE::FocusedElement.Current.ClassName)"
+        Key '{DOWN}' 600
+        Check 'Down moves on one, past the disabled option' (Said 'Green') (Status)
+        Shot 'ion-picker-keys'
+        Key '{UP}' 600
+        Check 'Up moves back' ((Said 'Orange') -and (Centred 'Orange')) (Status)
+
+        $nx, $ny = Centre $numbers
+        TouchDrag $nx $ny 0 (Px (-100)) 15
+        # Avalonia's inertia goes on for a second or two after the finger lifts, and the value comes 250 ms after it stops.
+        $lifted = Get-Date
+        do { Start-Sleep -Milliseconds 100; $now = Status } while ($now -notmatch '^ionChange: \d+$' -and ((Get-Date) - $lifted).TotalSeconds -lt 4)
+        "        ionChange $([math]::Round(((Get-Date) - $lifted).TotalSeconds, 1)) s after the finger lifted"
+        $snapped = $false
+        if ($now -match '^ionChange: (\d+)$') {
+            $c = $numbers.Current.BoundingRectangle
+            $o = (Named $CT::Button $Matches[1]).Current.BoundingRectangle
+            $snapped = ([int]$Matches[1] -gt 5) -and ([math]::Abs(($o.Y + $o.Height / 2) - ($c.Y + $c.Height / 2)) -le (Px 3))
+        }
+        Shot 'ion-picker-touch'
+        Check 'a touch drag up scrolls the numbers and snaps' $snapped $now
+    }
+
+    # Ionic's clear button clears and keeps the focus, md's cancel button (an arrow, in place of the search icon while focused)
+    # cancels and blurs, and Escape clears, as Chromium's search input does. The last searchbar logs its events, debounced.
+    Section 'ion-searchbar' {
+        Open 'ion-searchbar'
+        $edit = @(All $CT::Edit | Where-Object { $_.Current.Name -eq 'search text' })[-1]
+        $e = $edit.Current.BoundingRectangle
+        $iy = [int]($e.Y + $e.Height / 2)
+        $icon = { Region $e.X ($e.Y + 6) (Px 45) ($e.Height - 12) }
+        function Log { @((Texts | Where-Object { $_ -match '^ion(Input|Change|Clear|Cancel)' } | Select-Object -First 1) -split "`n") }
+        $clearX = [int]($e.Right - (Px 24))
+        $cancelX = [int]($e.X + (Px 20))
+
+        $plain = & $icon
+        $before = & $icon
+        ClickOn $edit
+        Start-Sleep -Milliseconds 300
+        Check 'a click focuses it' (IsFocused $edit)
+        $focused = & $icon
+        Shot 'ion-searchbar-focused'
+        Check 'focus shows the cancel button in place of the search icon' ((Changed $plain $focused) -gt 10)
+        Key 'abc' 700
+        Check 'typing sets its value' ((Value $edit) -eq 'abc') (Value $edit)
+        Check 'and IonInput comes once, after the debounce' (((Log)[0] -eq 'ionInput: abc') -and ((Log) -notcontains 'ionInput: a')) ((Log) -join ' | ')
+
+        Click $clearX $iy
+        Start-Sleep -Milliseconds 500
+        Check 'a click on the clear button clears it' (((Value $edit) -eq '') -and ((Log) -contains 'ionClear')) "'$(Value $edit)', $((Log) -join ' | ')"
+        Check 'and keeps the focus' (IsFocused $edit) "$($AE::FocusedElement.Current.ClassName)"
+        Key 'de' 300
+        Tap $clearX $iy
+        Start-Sleep -Milliseconds 300
+        Check 'a touch tap on it clears too, keeping the focus' (((Value $edit) -eq '') -and (IsFocused $edit)) "'$(Value $edit)'"
+        Key 'fg' 300
+        Key '{ESC}' 400
+        Check 'Escape clears it' ((Value $edit) -eq '') "'$(Value $edit)'"
+
+        Key 'hi' 300
+        Click $cancelX $iy
+        Start-Sleep -Milliseconds 500
+        Shot 'ion-searchbar-cancelled'
+        Check 'the cancel button cancels and clears' (((Log) -contains 'ionCancel') -and ((Value $edit) -eq '')) "'$(Value $edit)', $((Log) -join ' | ')"
+        Check 'and takes the focus away' (-not (IsFocused $edit))
+        Away
+        Start-Sleep -Milliseconds 300
+        Check 'and the search icon is back' ((Changed $before (& $icon)) -lt 5)
+    }
+
+    Section 'ion-textarea' {
+        Open 'ion-textarea'
+        $grow = Named $CT::Edit 'Auto grow'
+        $h0 = $grow.Current.BoundingRectangle.Height
+        ClickOn $grow
+        Check 'a click focuses it' (IsFocused $grow)
+        Key 'one{ENTER}two{ENTER}three{ENTER}four' 500
+        $v = Value $grow
+        $lines = @($v -split "`r?`n")
+        Check 'Enter makes a new line' (($lines.Count -eq 4) -and ($lines[3] -eq 'four')) ($v -replace "`r", '\r' -replace "`n", '\n')
+        $h1 = (Named $CT::Edit 'Auto grow').Current.BoundingRectangle.Height
+        Shot 'ion-textarea-auto-grow'
+        Check 'auto grow grows by the two lines more than its rows' ($h1 -ge $h0 + (Px 30)) "$h0 to $h1"
+
+        $c = Named $CT::Edit 'Comment, at least 10 characters'
+        $cb = $c.Current.BoundingRectangle
+        $counter = { Region ($cb.Right - (Px 70)) ($cb.Bottom + 2) (Px 70) (Px 24) }
+        $empty = & $counter
+        ClickOn $c
+        Key 'hello' 400
+        Check 'the counter counts' ([bool](FirstText 'The counter shows 5 / 200')) (FirstText 'The counter shows*')
+        Check 'and shows it' ((Changed $empty (& $counter)) -gt 5)
+
+        $w = $win.Current.BoundingRectangle
+        [void][RealInput]::SetCursorPos(($w.X + (Px 6)), ([int]($w.Y + $w.Height / 2))); Start-Sleep -Milliseconds 150
+        Wheel 3
+        $clear = Named $CT::Edit 'Clear on edit'
+        ClickOn $clear
+        Key 'x' 300
+        Check 'with clear on edit the first key clears it' ((Value $clear) -eq 'x') "'$(Value $clear)'"
+        Key 'y' 300
+        Check 'and the next one types' ((Value $clear) -eq 'xy') "'$(Value $clear)'"
+        Shot 'ion-textarea-typed'
+    }
+
+    Section 'ion-input-otp' {
+        Open 'ion-input-otp'
+        $code = Named $CT::Group 'One-time password input'
+        function Box($n) { $code.FindAll($TS::Descendants, (New-Object Windows.Automation.PropertyCondition $AE::NameProperty, "Input $n of 4")) | Select-Object -First 1 }
+        function Boxes { (1..4 | ForEach-Object { $b = Box $_; if ($b) { Value $b } else { '-' } }) -join ',' }
+        function Status { Texts | Where-Object { $_ -match '^ion(Complete|Change): ' } | Select-Object -First 1 }
+
+        ClickOn (Box 1)
+        Key '12' 300
+        Check 'typing fills a box and moves on' (((Boxes) -like '1,2,*') -and (IsFocused (Box 3))) "$(Boxes), focus $($AE::FocusedElement.Current.Name)"
+        Key '{BACKSPACE}' 300
+        Check 'Backspace in an empty box goes back and deletes there' (((Boxes) -like '1,,*' -or (Boxes) -like '1,-*') -and (IsFocused (Box 2))) "$(Boxes), focus $($AE::FocusedElement.Current.Name)"
+        Key '234' 300
+        Shot 'ion-input-otp-complete'
+        Check 'the last box raises IonComplete' ((Status) -eq 'ionComplete: 1234') (Status)
+
+        # The user's clipboard is put back afterwards; anything but plain text isn't touched, and the check is skipped.
+        $data = [Windows.Forms.Clipboard]::GetDataObject()
+        $formats = @(if ($data) { $data.GetFormats() })
+        $plainText = @($formats | Where-Object { $_ -notin 'Text', 'UnicodeText', 'System.String', 'OEMText', 'Locale' }).Count -eq 0
+        if (-not $plainText) { "  skip  a paste fills the boxes: the clipboard holds $($formats -join ', '), which this won't replace" }
+        else {
+            $saved = if ([Windows.Forms.Clipboard]::ContainsText()) { [Windows.Forms.Clipboard]::GetText() } else { $null }
+            try {
+                [Windows.Forms.Clipboard]::SetText('5678')
+                Key '^v' 600
+            }
+            finally { if ($null -ne $saved) { [Windows.Forms.Clipboard]::SetText($saved) } else { [Windows.Forms.Clipboard]::Clear() } }
+            Check 'a paste fills the boxes' (((Boxes) -eq '5,6,7,8') -and ((Status) -eq 'ionComplete: 5678')) "$(Boxes), $(Status)"
+        }
+        Key '{TAB}' 400
+        Check 'leaving it raises IonChange' ((Status) -like 'ionChange: *') (Status)
+    }
+
+    Section 'typography' {
+        Open 'typography'
+        Shot 'typography-top'
+        $w = $win.Current.BoundingRectangle
+        [void][RealInput]::SetCursorPos(([int]($w.X + $w.Width / 2)), ([int]($w.Y + $w.Height / 2))); Start-Sleep -Milliseconds 150
+        Wheel 8
+        Shot 'typography-scrolled'
+        Away
+        'frames only: look at them'
     }
 
     Check 'the app is still running' (-not $p.HasExited)
