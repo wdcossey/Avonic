@@ -4,7 +4,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 
-namespace Avonic.Components.Controls;
+namespace Avonic.Components.Behaviors;
 
 /// <summary>
 /// A <c>pointerdown</c> handler's <c>preventDefault()</c>: the press doesn't move focus, so the field keeps it, while the

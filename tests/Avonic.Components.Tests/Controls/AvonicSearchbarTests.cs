@@ -980,4 +980,44 @@ public class AvonicSearchbarTests
         // A name given is the icon's own: an arrow flips in RTL.
         Assert.Null(cancelIcon.FlipRtl);
     }
+
+    // cancelButtonIcon = config.get('backButtonIcon', arrowBackSharp), in the constructor: a searchbar made before the config
+    // changes keeps md's; one made after takes it; the app's own value, set or styled, beats it.
+    [AvaloniaFact]
+    public void B21_The_Cancel_Icon_Defaults_To_The_Back_Button_Icon_Config_When_The_Searchbar_Is_Made()
+    {
+        var previous = AvonicConfig.BackButtonIcon;
+        try
+        {
+            var before = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always };
+            AvonicConfig.BackButtonIcon = "chevron-back";
+            var after = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always };
+            var own = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always, CancelButtonIcon = "close" };
+            var styled = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always };
+
+            // A plain style, with no activator, which is at style priority as the config's value is.
+            var styledPanel = new StackPanel { Children = { styled } };
+            styledPanel.Styles.Add(new Style(x => x.OfType<AvonicSearchbar>())
+            {
+                Setters = { new Setter(AvonicSearchbar.CancelButtonIconProperty, "close-circle") },
+            });
+            var panel = new StackPanel { Children = { before, after, own, styledPanel } };
+            using var scene = new Scene(panel);
+            Settle();
+
+            Assert.Equal("arrow-back-sharp", Part<AvonicIcon>(before, "PART_CancelIcon").Icon);
+            Assert.False(Part<AvonicIcon>(before, "PART_CancelIcon").FlipRtl);
+            Assert.Equal("chevron-back", after.CancelButtonIcon);
+            Assert.Equal("chevron-back", Part<AvonicIcon>(after, "PART_CancelIcon").Icon);
+
+            // A name from the config is the icon's own, as Ionic gives the name to ion-icon: a chevron flips in RTL.
+            Assert.Null(Part<AvonicIcon>(after, "PART_CancelIcon").FlipRtl);
+            Assert.Equal("close", Part<AvonicIcon>(own, "PART_CancelIcon").Icon);
+            Assert.Equal("close-circle", Part<AvonicIcon>(styled, "PART_CancelIcon").Icon);
+        }
+        finally
+        {
+            AvonicConfig.BackButtonIcon = previous;
+        }
+    }
 }

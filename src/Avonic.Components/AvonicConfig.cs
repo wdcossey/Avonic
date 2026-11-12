@@ -42,6 +42,17 @@ public static class AvonicConfig
     /// </remarks>
     public static SpinnerName? Spinner { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>backButtonIcon</c> config: the icon of an <see cref="AvonicSearchbar"/>'s md cancel button, an
+    /// <see cref="AvonicIcon.Icon"/>, when its <see cref="AvonicSearchbar.CancelButtonIcon"/> isn't set. Null is md's
+    /// <c>arrow-back-sharp</c>, which Ionic gives as SVG, so it isn't mirrored in RTL; a name given here is, as an arrow's is.
+    /// </summary>
+    /// <remarks>
+    /// Read when the searchbar is made, as Ionic reads it for <c>cancelButtonIcon</c>'s default in the constructor: a change of
+    /// this reaches only searchbars made after it. The value is the searchbar's at style priority, so an app's own wins.
+    /// </remarks>
+    public static string? BackButtonIcon { get; set; }
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>

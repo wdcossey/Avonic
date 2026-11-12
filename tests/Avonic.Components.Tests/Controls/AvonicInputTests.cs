@@ -2,9 +2,11 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Input.TextInput;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -482,6 +484,53 @@ public class AvonicInputTests
     });
 
     // ── 11 to 13: layout ─────────────────────────────────────────────────────────────────────
+
+    // :host-context(ion-item)[slot=start|end] { width: auto }: as wide as its content, where the native input is as wide as
+    // Chromium makes an <input> of 20 characters. Measured in Chromium at 16 px Roboto: 199, and the label's 34.48 and 16 more;
+    // a long value doesn't widen it; 298 at 24 px.
+    [AvaloniaFact]
+    public void B11_In_An_Items_Start_Or_End_Slot_The_Input_Is_As_Wide_As_Its_Content() => InstalledTheme.Run(_ =>
+    {
+        var bare = new AvonicInput { [AutomationProperties.NameProperty] = "x" };
+        var labelled = new AvonicInput { Label = "Start", Value = "abc" };
+        var end = new AvonicInput { Placeholder = "End" };
+        var full = new AvonicInput { Label = "Default" };
+        var longValue = new AvonicInput { Value = "a very long value that is wider than twenty characters" };
+        var big = new AvonicInput { FontSize = 24, [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { StartContent = bare, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { StartContent = labelled, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { Content = new AvonicLabel { Content = "Label" }, EndContent = end },
+                new AvonicItem { Content = full },
+                new AvonicItem { StartContent = longValue, Content = new AvonicLabel { Content = "Label" } },
+                new AvonicItem { StartContent = big, Content = new AvonicLabel { Content = "Label" } },
+            },
+        });
+        Render();
+
+        Assert.Equal(199, longValue.Bounds.Width, 0.6);
+        Assert.Equal(298, big.Bounds.Width, 0.6);
+        AssertBox(16, 2, 199, 44, Bounds(bare, scene.Window));
+        Assert.Equal(199, Native(bare).Bounds.Width, 0.6);
+        Assert.Equal(249.48, labelled.Bounds.Width, 0.6);
+        Assert.Equal(199, Native(labelled).Bounds.Width, 0.6);
+        Assert.Equal(199, end.Bounds.Width, 0.6);
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+
+        // In the default slot it's width: 100%.
+        Assert.Equal(358, full.Bounds.Width, 0.6);
+
+        // A new font size is a new width: each measured in Chromium.
+        foreach (var (size, width) in new[] { (13.0, 161.0), (15.0, 186.0), (17.0, 211.0), (18.5, 229.0), (20.0, 249.0), (16.0, 199.0) })
+        {
+            big.FontSize = size;
+            Render();
+            Assert.Equal(width, big.Bounds.Width, 0.6);
+        }
+    });
 
     [AvaloniaFact]
     public void B11_Row_Placements_Measured_In_An_Item() => InstalledTheme.Run(_ =>
@@ -1451,6 +1500,18 @@ public class AvonicInputTests
         Assert.Equal("", input.Value);
         Assert.Empty(log.Take());
         Assert.Equal("0 / 0", input.CounterText);
+
+        // Nor a paste, which Avalonia's text box puts in with no text input.
+        var clipboard = scene.Window.Clipboard!;
+        clipboard.SetTextAsync("b").GetAwaiter().GetResult();
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.V, RawInputModifiers.Control);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.V, RawInputModifiers.Control);
+        Settle();
+        clipboard.ClearAsync().GetAwaiter().GetResult();
+
+        Assert.Equal("", input.Value);
+        Assert.Empty(log.Take());
     }
 
     [AvaloniaFact]
@@ -1567,6 +1628,32 @@ public class AvonicInputTests
 
         Assert.Equal("AXBC", Native(input).Text);
         Assert.Equal(4, Native(input).CaretIndex);
+    }
+
+    // A new template's native input is the one that's followed: the last one's edits no longer reach the value.
+    [AvaloniaFact]
+    public void R12_A_New_Template_Leaves_The_Last_Native_Input()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Value = "a" });
+        using var _ = scene;
+        var log = Log.Of(input);
+        var old = Native(input);
+
+        input.Template = new FuncControlTemplate<AvonicInput>((_, scope) => new TextBox { Name = "PART_NativeInput" }.RegisterInNameScope(scope));
+        input.ApplyTemplate();
+        Settle();
+        Assert.NotSame(old, Native(input));
+        Assert.Equal("a", Native(input).Text);
+
+        old.Text = "stale";
+        Settle();
+        Assert.Equal("a", input.Value);
+        Assert.Empty(log.Take());
+
+        Native(input).Text = "b";
+        Settle();
+        Assert.Equal("b", input.Value);
+        Assert.Equal(["input:b"], log.Take());
     }
 
     [AvaloniaFact]

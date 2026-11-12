@@ -2,59 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:c="using:Avonic.Components.Controls">
 
-    <!-- The native input's scroller: only a presenter, so that a long value scrolls to the caret with no base theme. -->
-    <ControlTheme x:Key="Avonic.Input.NativeScroller" TargetType="ScrollViewer">
-        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
-        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
-        <Setter Property="Template">
-            <ControlTemplate>
-                <ScrollContentPresenter Name="PART_ContentPresenter" />
-            </ControlTemplate>
-        </Setter>
-    </ControlTheme>
-
-    <!-- The native <input>: no border, padding or background, the placeholder under the text. Functional, so that a test
-         with no base theme can type into it. The look of the text and the placeholder is the theme's. -->
-    <ControlTheme x:Key="Avonic.Input.NativeInput" TargetType="TextBox">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="AcceptsReturn" Value="False" />
-        <Setter Property="TextWrapping" Value="NoWrap" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="FocusAdorner" Value="{x:Null}" />
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                    <ScrollViewer Name="PART_ScrollViewer"
-                                  Theme="{StaticResource Avonic.Input.NativeScroller}"
-                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
-                        <Panel VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
-                            <TextBlock Name="PART_Placeholder"
-                                       Text="{TemplateBinding PlaceholderText}"
-                                       Foreground="{TemplateBinding PlaceholderForeground}"
-                                       TextWrapping="NoWrap"
-                                       IsHitTestVisible="False"
-                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
-                            <TextPresenter Name="PART_TextPresenter"
-                                           Text="{TemplateBinding Text, Mode=TwoWay}"
-                                           CaretIndex="{TemplateBinding CaretIndex}"
-                                           SelectionStart="{TemplateBinding SelectionStart}"
-                                           SelectionEnd="{TemplateBinding SelectionEnd}"
-                                           TextAlignment="{TemplateBinding TextAlignment}"
-                                           TextWrapping="{TemplateBinding TextWrapping}"
-                                           PasswordChar="{TemplateBinding PasswordChar}"
-                                           RevealPassword="{TemplateBinding RevealPassword}"
-                                           SelectionBrush="{TemplateBinding SelectionBrush}"
-                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
-                                           CaretBrush="{TemplateBinding CaretBrush}" />
-                        </Panel>
-                    </ScrollViewer>
-                </Border>
-            </ControlTemplate>
-        </Setter>
-    </ControlTheme>
-
     <!-- Functional stub for ion-input: structure only. The look is in Avonic.Themes. -->
     <ControlTheme x:Key="{x:Type c:AvonicInput}" TargetType="c:AvonicInput">
         <Setter Property="Template">
@@ -66,7 +13,7 @@
                         <Border Name="PART_OutlineNotch" Grid.Column="1">
                             <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0">
                                 <TextBlock.Width>
-                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
                                         <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="#PART_LabelContent.Bounds.Width" />
                                     </MultiBinding>
@@ -98,8 +45,8 @@
                                                       VerticalAlignment="Center"
                                                       Content="{TemplateBinding StartContent}"
                                                       ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                                    <TextBox Name="PART_NativeInput" Grid.Column="1"
-                                             Theme="{StaticResource Avonic.Input.NativeInput}" />
+                                    <c:InputNativeInput Name="PART_NativeInput" Grid.Column="1"
+                                                        Theme="{StaticResource Avonic.TextField.NativeInput}" />
                                     <Border Name="PART_ClearButton" Grid.Column="2"
                                             Background="Transparent"
                                             AutomationProperties.Name="reset"
@@ -108,7 +55,7 @@
                                                       HorizontalAlignment="Center"
                                                       VerticalAlignment="Center"
                                                       AutomationProperties.AccessibilityView="Raw"
-                                                      Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=close-sharp}" />
+                                                      Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
                                     </Border>
                                     <ContentPresenter Name="PART_End" Grid.Column="3"
                                                       VerticalAlignment="Center"

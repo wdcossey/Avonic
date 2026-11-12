@@ -81,7 +81,7 @@
         </Style>
     </ControlTheme>
 
-    <!-- A translation of textarea.md.css. Slotted content is styled in Styles/Textarea.axaml, because a ControlTheme's styles
+    <!-- A translation of textarea.md.css. Slotted content is styled in Styles/TextField.axaml, because a ControlTheme's styles
          can't reach it. -->
     <ControlTheme x:Key="{x:Type c:AvonicTextarea}" TargetType="c:AvonicTextarea">
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
@@ -116,7 +116,7 @@
                                     </MultiBinding>
                                 </TextBlock.FontSize>
                                 <TextBlock.Width>
-                                    <MultiBinding Converter="{x:Static c:AvonicInput.NotchWidthConverter}">
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
                                         <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="#PART_LabelContent.Bounds.Width" />
                                     </MultiBinding>
@@ -127,7 +127,7 @@
                     </Grid>
                     <Border Name="PART_Wrapper">
                         <c:InputWrapperPanel Name="PART_Layout"
-                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicTextarea.PlacementConverter}}">
+                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.TextareaPlacement}}">
                             <!-- align-items: flex-start -->
                             <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
                                 <Panel>
@@ -243,14 +243,14 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
                     <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="0">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                 </MultiBinding>
@@ -266,7 +266,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderWidth" />
                 </MultiBinding>
             </Setter>
@@ -277,7 +277,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -287,7 +287,7 @@
         </Style>
         <Style Selector="^:fill-solid:shape-round /template/ Border#PART_Wrapper">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Top">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -297,7 +297,7 @@
         </Style>
         <Style Selector="^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="0">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
@@ -306,7 +306,7 @@
         </Style>
         <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Wrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="0">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="0">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
@@ -316,7 +316,7 @@
         <!-- No fill, round: border-radius 16 -->
         <Style Selector="^:shape-round:not(:fill-solid):not(:fill-outline) /template/ Border#PART_Wrapper">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -364,18 +364,18 @@
         <Style Selector="^ /template/ Border#PART_OutlineStart">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="stb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="stb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Width">
-                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -385,13 +385,13 @@
         </Style>
         <Style Selector="^:shape-round /template/ Border#PART_OutlineStart">
             <Setter Property="Width">
-                <MultiBinding Converter="{x:Static c:AvonicInput.OutlineStartWidthConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="Start">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusOutlineRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -402,7 +402,7 @@
         <Style Selector="^ /template/ Border#PART_OutlineNotch">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="tb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="tb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
@@ -410,7 +410,7 @@
         <!-- :host(.label-floating.textarea-fill-outline) .textarea-outline-notch: border-top: none -->
         <Style Selector="^:label-floating /template/ Border#PART_OutlineNotch">
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="b">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
@@ -418,12 +418,12 @@
         <Style Selector="^ /template/ Border#PART_OutlineEnd">
             <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="teb">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="teb">
                     <Binding Path="$parent[Grid].Tag" />
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusFill" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -433,7 +433,7 @@
         </Style>
         <Style Selector="^:shape-round /template/ Border#PART_OutlineEnd">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInput.RadiusConverter}" ConverterParameter="End">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.BorderRadiusOutlineRound" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -466,7 +466,7 @@
         <!-- .label-text-wrapper: padding-top and padding-bottom as the field's, in a row -->
         <Style Selector="^ /template/ Border#PART_Label">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -528,7 +528,7 @@
                 </Transitions>
             </Setter>
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -539,7 +539,7 @@
         <!-- .start-slot-wrapper, .end-slot-wrapper: the same padding -->
         <Style Selector="^ /template/ Border#PART_StartWrapper, ^ /template/ Border#PART_EndWrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -552,7 +552,7 @@
         <Style Selector="^:label-placement-stacked /template/ TextBox#PART_NativeInput, ^:label-placement-floating /template/ TextBox#PART_NativeInput">
             <Setter Property="Margin" Value="0,8,0,0" />
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -561,7 +561,7 @@
         </Style>
         <Style Selector="^:label-placement-stacked /template/ Border#PART_StartWrapper, ^:label-placement-stacked /template/ Border#PART_EndWrapper, ^:label-placement-floating /template/ Border#PART_StartWrapper, ^:label-placement-floating /template/ Border#PART_EndWrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}" ConverterParameter="8">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}" ConverterParameter="8">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -574,7 +574,7 @@
         </Style>
         <Style Selector="^:fill-outline:label-placement-stacked /template/ Border#PART_StartWrapper, ^:fill-outline:label-placement-stacked /template/ Border#PART_EndWrapper, ^:fill-outline:label-placement-floating /template/ Border#PART_StartWrapper, ^:fill-outline:label-placement-floating /template/ Border#PART_EndWrapper">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicTextarea.VerticalPaddingConverter}" ConverterParameter="12">
+                <MultiBinding Converter="{x:Static c:FieldConverters.VerticalPadding}" ConverterParameter="12">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingTop" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingBottom" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingBottom" />
@@ -625,7 +625,7 @@
         <Style Selector="^ /template/ Border#PART_Bottom">
             <Setter Property="TextElement.FontSize" Value="12" />
             <Setter Property="BorderThickness">
-                <MultiBinding Converter="{x:Static c:AvonicInput.SidesConverter}" ConverterParameter="t">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="t">
                     <DynamicResource ResourceKey="Avonic.Textarea.BorderWidth" />
                 </MultiBinding>
             </Setter>
@@ -636,7 +636,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                 </MultiBinding>
@@ -645,7 +645,7 @@
         <Style Selector="^:fill-solid /template/ Border#PART_Bottom, ^:fill-outline /template/ Border#PART_Bottom">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingFill" />
@@ -654,7 +654,7 @@
         </Style>
         <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Bottom">
             <Setter Property="Padding">
-                <MultiBinding Converter="{x:Static c:AvonicInput.BottomPaddingConverter}" ConverterParameter="5">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingStart" />
                     <DynamicResource ResourceKey="Avonic.Textarea.PaddingEnd" />
                     <DynamicResource ResourceKey="Avonic.Textarea.Md.PaddingOutlineRound" />
