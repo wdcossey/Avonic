@@ -520,6 +520,11 @@ public class AvonicInputTests
 
         // In the default slot it's width: 100%.
         Assert.Equal(358, full.Bounds.Width, 0.6);
+
+        // A new font size is a new width.
+        big.FontSize = 16;
+        Render();
+        Assert.Equal(199, big.Bounds.Width, 0.6);
     });
 
     [AvaloniaFact]
