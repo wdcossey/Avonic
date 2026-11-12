@@ -63,7 +63,7 @@ anti-aliasing at the text and the shadow's edge.
 | 13 | `item-searchbar`, and an item counting it as an input | Match |
 | 14 | The layout: 58 high, 48 in a toolbar, the input 42, each icon and button box | Match to 0.6 px, RTL included |
 | 15 | Colours, the placeholder, the background, corners and shadow, and `Color` | Match |
-| 16 | Disabled: 0.4 as a group, nothing focusable | Match |
+| 16 | Disabled: 0.4 as a group, the input not focusable | Match for the look and the input. **Difference:** the buttons, below |
 | 17 | Type and hints reach `TextInputOptions`; password masks; `Maxlength` | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
 | 18 | Automation: the search landmark and each name | Match |
 | 19 | `Animated`'s classes | Match; md has no rule on them, so an app's style is what reads them |
@@ -77,6 +77,12 @@ anti-aliasing at the text and the shadow's edge.
 - **The cancel button's default icon** is `null`, meaning md's `arrow-back-sharp`, where Ionic's default is
   `config.get('backButtonIcon', arrowBackSharp)`: Avonic has no `backButtonIcon` config yet.
 - **The typed text** sits 0.5 px lower (above).
+- **Disabled buttons.** Ionic's `disabled` disables only the native input and sets `pointer-events: none` on the host, so,
+  measured, Tab still reaches a shown cancel button and clear button, and Enter on the clear button raises `ionClear` and
+  clears the value. Here `disabled` is `IsEnabled`, by the mapping rule, which disables the whole template: neither button is
+  reachable.
+- **Invoking the buttons through automation.** The clear and cancel buttons are named buttons to automation, but, as
+  `ion-input`'s clear button, have no invoke pattern: a screen reader's activation of a native `<button>` clicks it in Chromium.
 - **A bubbling key handler on the searchbar or an ancestor** that handles Escape or Enter comes after the default action here,
   where a `keydown` listener anywhere comes before it in Chromium. A tunnel handler, as an app's `KeyDown` preview, stops it,
   as `preventDefault()` does.

@@ -537,6 +537,13 @@ public class AvonicSearchbarTests
         clock.At(400);
         Assert.Empty(log.Take());
         Assert.Equal("v", searchbar.Value);
+
+        // An ancestor that stops the press on its way down, as stopPropagation in the capture phase: the button never hears it.
+        scene.Window.AddHandler(InputElement.PointerPressedEvent, (_, e) => e.Handled = true, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+        Click(scene, cancel);
+        clock.At(500);
+        Assert.Empty(log.Take());
+        Assert.Equal("v", searchbar.Value);
     }
 
     [AvaloniaFact]

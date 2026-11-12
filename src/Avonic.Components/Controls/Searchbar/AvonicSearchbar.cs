@@ -430,12 +430,11 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         // disconnectedCallback: the timeouts are cleared. A pending clear never happens, and a cancel waiting on it never ends.
+        // A requested frame isn't, so positionElements still runs.
         _loadTimeout?.Dispose();
         _loadTimeout = null;
         _clearTimeout?.Dispose();
         _clearTimeout = null;
-        _positionFrame?.Dispose();
-        _positionFrame = null;
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -807,10 +806,10 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
             // onPointerDown: preventDefault, so the field keeps focus, or doesn't take it.
             KeepFocus.During(e);
         }
-        else if (_cancelButton is not null && (source == _cancelButton || _cancelButton.IsVisualAncestorOf(source)))
+        else if (!e.Handled && _cancelButton is not null && (source == _cancelButton || _cancelButton.IsVisualAncestorOf(source)))
         {
             // onMouseDown, onTouchStart: preventDefault and stopPropagation, then cancel. Any button, as mousedown is. A handled
-            // press moves no focus, which is preventDefault's part.
+            // press moves no focus, which is preventDefault's part. Not if an ancestor stopped the press on its way down.
             e.Handled = true;
             OnCancelSearchbar();
         }
