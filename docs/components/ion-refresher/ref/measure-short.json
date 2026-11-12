@@ -1,0 +1,485 @@
+{
+ "snippet": "<ion-app><ion-header><ion-toolbar><ion-title>Refresher</ion-title></ion-toolbar></ion-header><ion-content><ion-refresher slot=\"fixed\"><ion-refresher-content></ion-refresher-content></ion-refresher><ion-list><ion-item><ion-label>Item 1</ion-label></ion-item><ion-item><ion-label>Item 2</ion-label></ion-item><ion-item><ion-label>Item 3</ion-label></ion-item><ion-item><ion-label>Item 4</ion-label></ion-item><ion-item><ion-label>Item 5</ion-label></ion-item><ion-item><ion-label>Item 6</ion-label></ion-item><ion-item><ion-label>Item 7</ion-label></ion-item><ion-item><ion-label>Item 8</ion-label></ion-item><ion-item><ion-label>Item 9</ion-label></ion-item><ion-item><ion-label>Item 10</ion-label></ion-item><ion-item><ion-label>Item 11</ion-label></ion-item><ion-item><ion-label>Item 12</ion-label></ion-item><ion-item><ion-label>Item 13</ion-label></ion-item><ion-item><ion-label>Item 14</ion-label></ion-item><ion-item><ion-label>Item 15</ion-label></ion-item><ion-item><ion-label>Item 16</ion-label></ion-item><ion-item><ion-label>Item 17</ion-label></ion-item><ion-item><ion-label>Item 18</ion-label></ion-item><ion-item><ion-label>Item 19</ion-label></ion-item><ion-item><ion-label>Item 20</ion-label></ion-item></ion-list></ion-content></ion-app>",
+ "errors": [],
+ "results": [
+  {
+   "label": "idle",
+   "t": 918.6000000014901,
+   "classes": "md refresher-md hydrated refresher-native",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "short-0.3",
+   "t": 2024.1000000014901,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     77.39,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 12.3945)",
+    "spinner": "matrix(0.697918, 0.716177, -0.716177, 0.697918, 0, 0)",
+    "dash": "72.4118px, 200px",
+    "dashoffset": "0px",
+    "sac": "0.317261",
+    "arrowContainer": "matrix(-0.987029, 0.16054, -0.16054, -0.987029, 0, 0)",
+    "arrow": "matrix(0.609863, 0, 0, 0.609863, -0.134522, 0)",
+    "arrowRect": [
+     189.33,
+     84.3,
+     8.4,
+     8.4
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     178.03,
+     81.43,
+     33.94,
+     33.94
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "short-release-40",
+   "t": 2071.5,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     63.04,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, -1.96044)",
+    "spinner": "matrix(0.946513, 0.322665, -0.322665, 0.946513, 0, 0)",
+    "dash": "47.0342px, 200px",
+    "dashoffset": "0px",
+    "sac": "0.3",
+    "arrowContainer": "matrix(0.337475, 0.941335, -0.941335, 0.337475, 0, 0)",
+    "arrow": "matrix(0.250989, 0, 0, 0.250989, 1.12154, 0)",
+    "arrowRect": [
+     184.04,
+     86.54,
+     3.85,
+     3.85
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     179.77,
+     68.81,
+     30.46,
+     30.46
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "short-release-100",
+   "t": 2133.8000000044703,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     40.08,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, -24.9194)",
+    "spinner": "matrix(0.911949, -0.410304, 0.410304, 0.911949, 0, 0)",
+    "dash": "6.44598px, 200px",
+    "dashoffset": "0px",
+    "sac": "0.3",
+    "arrowContainer": "matrix(1, 0, 0, 1, 0, 0)",
+    "arrow": "matrix(0, 0, 0, 0, 2, 0)",
+    "arrowRect": [
+     197,
+     71.08,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     179.13,
+     45.21,
+     31.73,
+     31.73
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "short-release-160",
+   "t": 2196.7000000029802,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     6.49,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, -58.5113)",
+    "spinner": "matrix(0.0486997, -0.998813, 0.998813, 0.0486997, 0, 0)",
+    "dash": "1px, 200px",
+    "dashoffset": "0px",
+    "sac": "0.3",
+    "arrowContainer": "matrix(1, 0, 0, 1, 0, 0)",
+    "arrow": "matrix(0, 0, 0, 0, 2, 0)",
+    "arrowRect": [
+     197,
+     37.49,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     182.43,
+     14.92,
+     25.14,
+     25.14
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "short-release-260",
+   "t": 2289.8000000044703,
+   "classes": "md refresher-md hydrated refresher-native",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  }
+ ],
+ "log": [
+  {
+   "n": "ionStart",
+   "t": 1264.6000000014901,
+   "d": null
+  },
+  {
+   "n": "ionPullStart",
+   "t": 1264.6000000014901,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1371.2000000029802,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1405,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1438.6000000014901,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1471.1000000014901,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1504.7000000029802,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1538,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1571,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1605.2000000029802,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1638.2000000029802,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1671.1000000014901,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1704.9000000059605,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1739.4000000059605,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1771.9000000059605,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1804.3000000044703,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1837.7000000029802,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1871.3000000044703,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1904.3000000044703,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 1938.4000000059605,
+   "d": null
+  },
+  {
+   "n": "ionPullEnd",
+   "t": 2205,
+   "d": "\"cancel\""
+  }
+ ]
+}

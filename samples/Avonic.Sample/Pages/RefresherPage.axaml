@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.RefresherPage"
+             FontSize="16">
+
+    <!-- Ionic's own example: pull down from the top of the list, and the refresh takes two seconds and adds a row. With a
+         header just before the content, the icon comes out from under it; Disabled turns the pull off. -->
+    <Grid RowDefinitions="Auto,*,Auto">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicTitle>Pull to refresh</c:AvonicTitle>
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <c:AvonicContent.FixedContent>
+                <c:AvonicRefresher Name="Refresher" IonRefresh="OnRefresh" IonPullEnd="OnPullEnd">
+                    <c:AvonicRefresherContent />
+                </c:AvonicRefresher>
+            </c:AvonicContent.FixedContent>
+            <c:AvonicList Name="Rows" />
+        </c:AvonicContent>
+
+        <Border Grid.Row="2" Background="#660054E9" Padding="8">
+            <StackPanel Spacing="4">
+                <WrapPanel>
+                    <ToggleButton Name="Disabled" Content="Disabled" Margin="2" Click="OnDisabled" />
+                    <Button Content="Cancel the refresh" Margin="2" Click="OnCancel" />
+                </WrapPanel>
+                <TextBlock Name="Status" Text="Pull down from the top of the list" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
