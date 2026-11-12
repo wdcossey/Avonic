@@ -457,6 +457,7 @@ public class AvonicItemSlidingTests
         clock.At(2000);
         a.Close();
         Assert.Equal(0, a.GetOpenAmount());
+        Assert.False(b.CloseOpened());
         clock.At(3000);
         Assert.Equal(0, a.TranslatePoint(default, scene.Window)!.Value.X);
     }
@@ -683,13 +684,18 @@ public class AvonicItemSlidingTests
     {
         using var f = Make();
         var delete = f.End!.Items.OfType<AvonicItemOption>().Last();
-        var t = SlowDrag(f, 0, 300, 30, lift: false);
 
-        // The swipe began on the move that crossed 180; by now it has run at least 6 frames.
-        Assert.InRange(delete.Bounds.Width, 81, 80 + 389);
-        f.At(t + 700);
+        // Captured at 290; at 60 the raw 230 is 194 open, past 180, from the frame at 48.
+        var finger = f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(60, Y, 32);
+        f.At(352);
+        GestureTests.Render();
+        var expected = 80 + 390 * AvonicItemOptions.ExpandEasing.Ease(304 / 600.0);
+        Assert.InRange(delete.Bounds.Width, expected - 1, expected + 1); // layout rounds to whole pixels
+
+        f.At(700);
         GestureTests.Render();
         Assert.Equal(80 + 390, delete.Bounds.Width, 1);
+        finger.Up(60, Y, 716);
     }
 
     [AvaloniaFact]
