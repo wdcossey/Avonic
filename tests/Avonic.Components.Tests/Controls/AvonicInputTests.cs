@@ -554,6 +554,12 @@ public class AvonicInputTests
         Assert.Equal(199, start.Bounds.Width, 0.6);
         Assert.Equal(127, end.Bounds.Width, 0.6);
         Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+
+        // A plain TextBox in an app's own template is the native field too, and gives way with its text.
+        end.Template = new FuncControlTemplate<AvonicInput>((_, scope) => new TextBox { Name = "PART_NativeInput" }.RegisterInNameScope(scope));
+        end.Value = "a very long value that is wider than what's left of the row";
+        Render();
+        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
     });
 
     [AvaloniaFact]
@@ -1389,6 +1395,15 @@ public class AvonicInputTests
         Assert.True(AutomationProperties.GetIsRequiredForForm(Native(input)));
         Assert.Null(AutomationProperties.GetName(first));
         Assert.False(AutomationProperties.GetIsRequiredForForm(first));
+
+        // A template with no field lets go of the last one too.
+        var second = Native(input);
+        input.Template = new FuncControlTemplate<AvonicInput>((_, _) => new Border());
+        input.ApplyTemplate();
+        Settle();
+        Assert.Null(input.GetInputElement());
+        Assert.Null(AutomationProperties.GetName(second));
+        Assert.False(AutomationProperties.GetIsRequiredForForm(second));
     }
 
     // ── 27: the password toggle ──────────────────────────────────────────────────────────────

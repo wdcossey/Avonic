@@ -70,8 +70,9 @@ internal static class MinContent
             return Math.Min(control.DesiredSize.Width, Horizontal(text.Margin) + Horizontal(text.Padding) + LongestWord(text));
         }
 
-        // The native <input> and <textarea> are width: 100%, which makes them compressible: a min-content of nothing but their box.
-        if (control is InputNativeInput or TextareaNativeInput)
+        // The input's and the textarea's native field are width: 100%, which makes them compressible: a min-content of nothing but
+        // their box. Even a growing textarea's, whose copy of the text doesn't hold it open: measured with a 34-letter word.
+        if (control is TextBox { TemplatedParent: IInputHost })
         {
             return OwnBox(control);
         }

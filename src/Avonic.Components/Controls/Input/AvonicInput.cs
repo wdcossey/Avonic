@@ -534,7 +534,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     {
         if (_field.Native is InputNativeInput native)
         {
-            native.SizesToCharacters = _item is not null && (Parent as StyledElement)?.Name is "PART_Start" or "PART_End";
+            native.SizesToCharacters = LabelledTextField.InItemStartOrEndSlot(this, _item);
         }
     }
 

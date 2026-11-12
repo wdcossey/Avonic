@@ -571,12 +571,15 @@ public class AvonicTextareaTests
         var beside = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
         var start = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
         var end = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        // Even growing, with a word wider than what's left: its copy of the text doesn't hold it open.
+        var growing = new AvonicTextarea { AutoGrow = true, Value = "supercalifragilisticexpialidocious and more", [AutomationProperties.NameProperty] = "x" };
         using var scene = new Scene(new StackPanel
         {
             Children =
             {
                 new AvonicItem { StartContent = beside, Content = new AvonicLabel { Content = "A label that is long enough to want the whole row for itself" } },
                 new AvonicItem { StartContent = start, EndContent = end },
+                new AvonicItem { StartContent = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" }, EndContent = growing },
             },
         });
         Render();
@@ -585,6 +588,7 @@ public class AvonicTextareaTests
         Assert.Equal(164, start.Bounds.Width, 0.6);
         Assert.Equal(162, end.Bounds.Width, 0.6);
         Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+        Assert.Equal(162, growing.Bounds.Width, 0.6);
     });
 
     // The slot is read again when the textarea is moved, as hostContext and the slot attribute are at render.
