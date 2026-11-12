@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -1624,6 +1625,32 @@ public class AvonicInputTests
 
         Assert.Equal("AXBC", Native(input).Text);
         Assert.Equal(4, Native(input).CaretIndex);
+    }
+
+    // A new template's native input is the one that's followed: the last one's edits no longer reach the value.
+    [AvaloniaFact]
+    public void R12_A_New_Template_Leaves_The_Last_Native_Input()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Value = "a" });
+        using var _ = scene;
+        var log = Log.Of(input);
+        var old = Native(input);
+
+        input.Template = new FuncControlTemplate<AvonicInput>((_, scope) => new TextBox { Name = "PART_NativeInput" }.RegisterInNameScope(scope));
+        input.ApplyTemplate();
+        Settle();
+        Assert.NotSame(old, Native(input));
+        Assert.Equal("a", Native(input).Text);
+
+        old.Text = "stale";
+        Settle();
+        Assert.Equal("a", input.Value);
+        Assert.Empty(log.Take());
+
+        Native(input).Text = "b";
+        Settle();
+        Assert.Equal("b", input.Value);
+        Assert.Equal(["input:b"], log.Take());
     }
 
     [AvaloniaFact]
