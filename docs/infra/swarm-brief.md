@@ -31,7 +31,9 @@ The point is that the PRs can merge in any order without a conflict.
   `src/Avonic.Themes/Styles/<Name>.axaml`, `samples/Avonic.Sample/Pages/<Name>Page.axaml*` with `[SamplePage("<ion-tag>", Order = <issue number>)]`,
   `tests/.../Controls/Avonic<Name>*Tests.cs`, `docs/components/<ion-tag>/`. These are auto-discovered.
 - **The style budget's limits** are in a shared file. If you go over, raise them in your PR and say so, because they're meant to be raised.
-  Say the new total in the PR, and expect a conflict to resolve.
+  Say the new total in the PR, and expect a conflict to resolve. **Don't expect one when two PRs raise it by the same amount:** both
+  change the same line to the same text, so git merges them "cleanly" and one raise is lost (#136 and #138 both set 283 → 284, where
+  the total was 285). After merging `v2`, add your raise to the total `v2` now has, and say both in the PR.
 - **The reference render:** use `node tools/ionic-ref/render.js <ion-tag> --bare --html '...'`, and record the exact command at the top of
   `COMPARISON.md`. Don't add to `DEFAULT_HTML`.
 - **Use only your own temp folder,** for scripts, renders, clean clones and breakage copies. Whoever starts the batch names one for
@@ -41,6 +43,10 @@ The point is that the PRs can merge in any order without a conflict.
 - **Don't open a real window.** It takes over the human's PC, and whoever runs the batch does that with `tools/real-window`. Compare with headless
   capture only, and say "not tried in a real window" in the PR.
 - **Don't kill processes you didn't start.** The machine is also running the human's other projects. Keep builds polite: `-m:8` is plenty.
+- **Don't start a long command in the background and wait on it.** Run builds, tests and breakage runs in the foreground with a
+  timeout. An agent waited 9 hours on a background command that never reported back (2026-11-11).
+- **Don't pipe a script to `python -` or `node -` through a heredoc** with quotes nested inside: the shell's quoting breaks it, or it
+  waits on input. Write the script to a file in your temp folder and run the file. Make edits with the Edit tool.
 - **Don't ask the human anything.** Choose the conservative option, and put it under **"For you to decide"** in the PR.
 
 ## How to get this right
@@ -51,6 +57,9 @@ These are mistakes this project has already made, so don't repeat them.
   scripts in your own temp folder, not in the repo. Wrap the scene in `ion-app`, with `style="position:static;display:block;contain:none;overflow:visible"`:
   without `ion-app` tap-click and focus-visible never start, and collapsing it stops pointer hits. Read the CSS as well as the JS: rules can be dead,
   such as `item-has-focus`, which no Ionic 8 control raises. `grep` for who emits what.
+- **The reference render has Ionic's typography on.** `render.js` loads `ionic.bundle.css`, which includes `typography.css`, so an
+  `h1` to `h6` in a reference frame has its sizes, margins and line height of 1.2. Avonic's are opt-in: a capture test with headings
+  merges `Css/Typography.axaml` to match, as the label's and the card's do (`docs/infra/typography/README.md`).
 - **Numbers in docs must be measured.** If you read a number off an image, it's a guess. If you benchmark, alternate with and without, because warm-up
   makes the first one look far worse. An earlier "doubling" here was really 13%.
 - **The compare step finds real bugs.** Look at Ionic and Avonic side by side as an image, every time, with `node tools/ionic-ref/side.js a.png b.png out.png height`.
@@ -114,6 +123,13 @@ These are mistakes this project has already made, so don't repeat them.
   it sits in, so a part's `color` rule (`.button-native { color }`) goes on the host's `Foreground`.
 - **`AvonicConfig.Animated` isn't a master switch.** Ionic's `animated` reaches tap-click and the transitions of the accordion,
   menu, nav, router outlet, overlays, searchbar and skeleton text only. A control Ionic doesn't make read it ignores it here too.
+- **A `VirtualizingStackPanel` makes a row's content while it measures the row, before `IndexFromContainer` knows the row,** and
+  `ContainerFromIndex` reads the last pass's rows until the pass ends. Read a row's index and its neighbours from `LayoutUpdated`.
+  The panel's children are only what's realised, so a rule about the row before (`.foo + .bar`) can't read `Children`: see `AvonicList`.
+- **A `Border` draws a `BoxShadow` only with an even `BorderThickness` and the default `BackgroundSizing`,** and its blur is narrower
+  than CSS's: `0 0 10px` is `0 0 15.6` (`docs/infra/avalonia-issues.md`, #139).
+- **An implicit `ControlTheme` merged into resources at runtime doesn't restyle a control already shown,** though `DynamicResource`s
+  follow. Merge it before the control is attached.
 
 ## Review and PR
 

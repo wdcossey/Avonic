@@ -54,13 +54,22 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#22](https://github.com/wdcossey/Avonic/issues/22) | `ion-radio`, `ion-radio-group` | **done** — [docs](components/ion-radio/README.md) |
 | [#23](https://github.com/wdcossey/Avonic/issues/23) | `ion-range` | **done** — [docs](components/ion-range/README.md) |
 | [#24](https://github.com/wdcossey/Avonic/issues/24) | `ion-input`, `ion-input-password-toggle` | **done** — [docs](components/ion-input/README.md) |
+| [#25](https://github.com/wdcossey/Avonic/issues/25) | `ion-textarea` | **done** — [docs](components/ion-textarea/README.md) |
+| [#26](https://github.com/wdcossey/Avonic/issues/26) | `ion-searchbar` | **done** — [docs](components/ion-searchbar/README.md) |
+| [#27](https://github.com/wdcossey/Avonic/issues/27) | `ion-input-otp` | **done** — [docs](components/ion-input-otp/README.md) |
 | [#28](https://github.com/wdcossey/Avonic/issues/28) | `ion-segment` family | **done** — [docs](components/ion-segment/README.md) |
 | [#29](https://github.com/wdcossey/Avonic/issues/29) | `ion-tabs` family (standalone, with no router) | **done** — [docs](components/ion-tabs/README.md) |
 | [#30](https://github.com/wdcossey/Avonic/issues/30) | `ion-fab` family | **done** — [docs](components/ion-fab/README.md) |
+| [#31](https://github.com/wdcossey/Avonic/issues/31) | `ion-item-sliding`, `ion-item-options`, `ion-item-option` | **done** — [docs](components/ion-item-sliding/README.md) |
 | [#32](https://github.com/wdcossey/Avonic/issues/32) | `ion-accordion`, `ion-accordion-group` | **done** — [docs](components/ion-accordion/README.md) |
 | [#33](https://github.com/wdcossey/Avonic/issues/33) | `ion-breadcrumbs`, `ion-breadcrumb` | **done** — [docs](components/ion-breadcrumbs/README.md) |
+| [#34](https://github.com/wdcossey/Avonic/issues/34) | `ion-reorder`, `ion-reorder-group` | **done** — [docs](components/ion-reorder/README.md) |
+| [#35](https://github.com/wdcossey/Avonic/issues/35) | `ion-refresher`, `ion-refresher-content` | **done** — [docs](components/ion-refresher/README.md) |
 | [#36](https://github.com/wdcossey/Avonic/issues/36) | `ion-infinite-scroll`, `ion-infinite-scroll-content` | **done** — [docs](components/ion-infinite-scroll/README.md) |
+| [#37](https://github.com/wdcossey/Avonic/issues/37) | `ion-picker` family (the inline wheel picker) | **done** — [docs](components/ion-picker/README.md) |
 | [#66](https://github.com/wdcossey/Avonic/issues/66) | infra: an Android project for the sample, run on a Pixel 8 | **done** — [docs](infra/android/README.md) |
+| [#68](https://github.com/wdcossey/Avonic/issues/68) | `ion-list`: sticky dividers and inset lists as rows of a virtualising panel | **done** — [docs](components/ion-list/README.md) |
+| [#70](https://github.com/wdcossey/Avonic/issues/70) | infra: opt-in typography (Ionic's `typography.css`) | **done** — [docs](infra/typography/README.md) |
 | [#114](https://github.com/wdcossey/Avonic/issues/114) | infra: overlays under Android's `MainViewFactory`, with no `TopLevel` given | **done** — [docs](infra/overlays/README.md) |
 | [#71](https://github.com/wdcossey/Avonic/issues/71) | `ion-item`: a flex-like layout for long content | **done** — [docs](components/ion-item/README.md) |
 | [#72](https://github.com/wdcossey/Avonic/issues/72) | `ion-item`: shared press handling, `Command`, ripple and automation | **done** — [docs](components/ion-item/README.md) |
