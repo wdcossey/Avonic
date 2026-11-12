@@ -96,7 +96,8 @@ No props, events, methods or CSS variables.
   to be over its siblings to be seen, whatever its type). The shadow is `PART_Lift`, a `Border` in the group's template over the
   children, which the group sizes and moves with the dragged child: only a `Border` has a box shadow, Avalonia draws one only for a
   uniform border (an item with full lines has none), and an `Effect` would show through the translucent child. The opacity is the
-  theme's: `Styles/ReorderGroup.axaml` for `AvonicItem`, `AvonicReorder`'s own theme for a wrapping handle.
+  theme's: `AvonicItem`'s own theme for an item (in `Styles/ReorderGroup.axaml` until #131's roll-up), `AvonicReorder`'s own theme
+  for a wrapping handle.
 - The keyboard: Enter and Space, handled in the tunnel under a handle unless its group is disabled, as a browser's keyboard click
   on a button inside reaches the capture listener too; not a text box's, which types them.
 - The group's automation peer is a `NoneAutomationPeer`: `ion-reorder-group` has no role, so its items stay the list's.

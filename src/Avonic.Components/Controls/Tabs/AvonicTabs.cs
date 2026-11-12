@@ -67,6 +67,13 @@ public class AvonicTabs : TemplatedControl
     private ContentPresenter? _contentPresenter;
     private ContentPresenter? _bottomPresenter;
 
+    static AvonicTabs()
+    {
+        // contain: layout size style, with no paint, and no overflow rule: it doesn't clip, so a fullscreen content's parts that
+        // run past it, as they do under a top bar, are drawn, as in Chromium. A TemplatedControl clips by default.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicTabs>(false);
+    }
+
     public AvonicTabs()
     {
         // onIonTabButtonClick on the host: a tab button's click, from anywhere in it.
@@ -197,6 +204,19 @@ public class AvonicTabs : TemplatedControl
     /// </summary>
     private IEnumerable<ILogical> BarsFirst() =>
         new[] { InSlot(TopContent, _topPresenter), InSlot(BottomContent, _bottomPresenter), InSlot(Content, _contentPresenter) }.OfType<ILogical>();
+
+    /// <summary>
+    /// <c>.tabs-inner</c>, the default slot's box, which is <c>position: relative</c>, so an offset parent, for
+    /// <see cref="AvonicContent"/>'s <c>offsetTop</c>.
+    /// </summary>
+    internal Visual? Inner => _contentPresenter;
+
+    /// <summary>
+    /// <c>tabs.querySelector(':scope > ion-tab-bar').slot === 'bottom'</c>, which <see cref="AvonicFooter"/> reads: the first
+    /// <see cref="AvonicTabBar"/> directly in a bar slot, the top's first as in <see cref="BarsFirst"/>, is in the bottom one.
+    /// </summary>
+    internal bool HasBottomTabBar() =>
+        InSlot(TopContent, _topPresenter) is not AvonicTabBar && InSlot(BottomContent, _bottomPresenter) is AvonicTabBar;
 
     /// <summary><c>querySelectorAll('ion-tab')</c>: every <see cref="AvonicTab"/> in it, at any depth.</summary>
     internal IEnumerable<AvonicTab> Tabs() => Slotted().SelectMany(root => root.GetSelfAndLogicalDescendants()).OfType<AvonicTab>();

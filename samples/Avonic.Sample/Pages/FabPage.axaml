@@ -19,8 +19,8 @@
             </StackPanel>
 
             <c:AvonicContent.FixedContent>
-                <!-- Several fabs in the one fixed slot: a panel as big as the content holds them. -->
-                <Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <!-- Several fabs in the one fixed slot: a plain panel stands for the slot, as big as the content. -->
+                <Panel>
                     <c:AvonicFab Horizontal="End" Vertical="Top" Edge="True">
                         <c:AvonicFabButton Size="Small">
                             <c:AvonicIcon IconName="share" />

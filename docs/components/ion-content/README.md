@@ -45,7 +45,7 @@ var viewer = content.GetScrollElement();  // the ScrollViewer
 | [x] | `color` | `Color` | Paints the scroll part. See the [colour system](../../infra/color-system/README.md) |
 | [x] | `fixedSlotPlacement` | `FixedSlotPlacement` | `After` is on top and last in the tab order. `Before` is first in the tab order, **but under the scroll part, which takes the pointer**, as in Ionic |
 | [x] | `forceOverscroll` | `ForceOverscroll` | Null is off in md. On, content that fits can scroll by a pixel. Avalonia has no bounce to go with it |
-| [x] | `fullscreen` | `Fullscreen` | The background and scroll parts reach the page's edges, and the content's padded back. The page is the closest ancestor with class `ion-page`, or else the parent |
+| [x] | `fullscreen` | `Fullscreen` | The background and scroll parts reach the page's edges, and the content's padded back. The page is the closest `AvonicTabs`, else the closest ancestor with class `ion-page`, or else the parent. The top counts from the closest `ion-page`, as `offsetTop` does from its offset parent: in a tab, a fullscreen content reaches behind a bottom tab bar, and with a top bar its top is 0, as measured in Chromium |
 | [x] | `scrollEvents` | `ScrollEvents` | Off by default, as in Ionic |
 | [x] | `scrollX` | `ScrollX` | On, text doesn't wrap at the viewport unless it's given a width |
 | [x] | `scrollY` | `ScrollY` | Off, the user can't scroll it and a script can, and it keeps its position, as `overflow: hidden` does. The exception is with `ScrollX` on: see [PLAN.md](PLAN.md#deliberate-differences) |
@@ -89,7 +89,12 @@ Ionic: not a second call, and not the user's finger.
 | [x] | `scroll` | `PART_Scroll` |
 
 A child of the default slot is as high as its content, and a child of the fixed slot is as big as its content, at the host's corner, because that's what
-CSS does. Its own `HorizontalAlignment` and `VerticalAlignment` beat that, and a `Margin` is how to set `right: 10px`.
+CSS does. Its own `HorizontalAlignment` and `VerticalAlignment` beat that, and a `Margin` is how to set `right: 10px`. Ionic takes any number
+of `slot="fixed"` elements and a slot holds one child here, so a panel that overlaps its children (a plain `Panel`, a `Canvas`, or a
+`Grid` with no rows or columns) stands for the slot: it fills the host, and each child places itself in it, as several `AvonicFab`s
+do. Where it has no child, a press reaches the content under it, so give it no `Background`, which would take every press. A panel
+that lays its children out, such as a `StackPanel` or a `Grid` with columns, is a `div` around them, so it's one block at the corner.
+Which it is is read when it's slotted.
 
 ### Resource keys
 

@@ -15,7 +15,7 @@ namespace Avonic.Components.Tests.Performance;
 public class StyleBudgetTests
 {
     /// <summary>All the alternatives in the theme's global rules.</summary>
-    private const int MaxAlternatives = 281;
+    private const int MaxAlternatives = 284;
 
     /// <summary>Don't raise the limit past this without measuring on a real phone. See the README.</summary>
     private const int Checkpoint = 600;
@@ -24,7 +24,7 @@ public class StyleBudgetTests
     private const int MaxAlternativesReachingTextBlock = 60;
 
     /// <summary>Alternatives that get past the type of any other common element, the most of any of them.</summary>
-    private const int MaxAlternativesReachingAnother = 38;
+    private const int MaxAlternativesReachingAnother = 42;
 
     private static string Report(IEnumerable<StyleTrace.Check> checks) =>
         string.Join(Environment.NewLine, checks.OrderByDescending(c => c.Alternatives.Count).Take(15).Select(c => $"{c.Alternatives.Count,3}  {c.Selector}"));

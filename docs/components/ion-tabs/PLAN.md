@@ -175,7 +175,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | A hidden tab is hidden at style priority, not `!important` | An app's own `IsVisible` on a tab wins, as every control's behaviour here lets it |
 | `Component` and `Content` together keep the `Content` | A `ContentControl` holds one. Ionic logs an error and appends both |
 | The bar the tabs write is the first in the top slot, then the bottom slot, then the default slot | Ionic's `querySelector` takes the first in the markup, which its author orders; slots have no order here, and a bar inside a page, such as a page's own, mustn't take the main bar's place |
-| Content in a tab finds the tab as its page, not the tabs | `AvonicContent`'s `getPageElement` doesn't know `AvonicTabs` yet: proposed in the PR |
+| Content in a tab finds the tab as its page, not the tabs | `AvonicContent`'s `getPageElement` doesn't know `AvonicTabs` yet: proposed in the PR. Done in #131's roll-up, with the footer's `footer-toolbar-padding` |
 
 ## Extensions
 

@@ -26,8 +26,8 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
 A tap on the main button opens the lists, and a tap on any button in them closes the fab. A fab with no list doesn't open.
 
-`FixedContent` holds one child. For several fabs, put them in a `Panel` with `HorizontalAlignment` and `VerticalAlignment`
-`Stretch`, which covers the content as the slot does. For an edge fab to paint over the header or footer, the content has to be
+`FixedContent` holds one child. For several fabs, put them in a `Panel` (or a `Canvas`, or a `Grid` with no rows or columns),
+which stands for the slot: `AvonicContent` lets it fill the content, and each fab places itself in it. For an edge fab to paint over the header or footer, the content has to be
 above them: give it a `ZIndex` over theirs, which is 10. Avalonia's `ZIndex` only sorts siblings, so this also covers the header's
 shadow. See [COMPARISON.md](COMPARISON.md).
 

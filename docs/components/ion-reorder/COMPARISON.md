@@ -46,7 +46,7 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 | 11 | `ionItemReorder` only when moved, then `ionReorderEnd`; in place completes itself | match |
 | 12 | `complete()` moves it, and clears every transform in the next frame, with no easing; `complete(false)` puts it back; `complete(array)` reorders the array and not the DOM | match: one frame unlifted with its transforms, then the new order |
 | 13 | Not completed: lifted, no new drag; a `complete()` 500 ms later still moves it | match |
-| 14 | `z-index: 100` over the siblings, and nothing clips it in the group | match, for any type of child; an `AvonicList` around it clips, see below |
+| 14 | `z-index: 100` over the siblings, and nothing clips it in the group; an `ion-list` around it clips it at the list's edge | match, for any type of child (the list's clip measured in #131's roll-up, see below) |
 | 15 | Leaving the tree, or disabled, mid-drag: ends with its events | match |
 
 ## Deliberate differences
@@ -69,9 +69,11 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 - **The opacity fades each part of the item**, as Avalonia's `Opacity` does, not the item as one layer: the item's text shows a little
   of what's under its background. Over a white item, which is what's under it, the two are the same.
 - **No haptics**: Ionic's are Capacitor's.
-- **`AvonicList` clips its children**, where `ion-list` doesn't (only an inset one does): an item lifted past the list's edge,
-  which the group's clamp allows by up to its height, is cut there. The group itself doesn't clip. It's `AvonicList`'s, so it's
-  proposed in the PR, not changed here.
+
+An earlier version of this page said `ion-list` doesn't clip a lifted item. It does, plain or inset: `list.md.css` gives every list
+`contain: content`, which includes paint containment, and that clips as `overflow: hidden` does. Measured in Chromium (#131's
+roll-up): an item lifted 30 px above a plain list's top is cut at the list's edge, and its shadow shows nowhere outside the list.
+`AvonicList` clips too, so it matches.
 
 ## Not tried
 

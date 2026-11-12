@@ -6,6 +6,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using System.Collections.Specialized;
 
@@ -48,6 +49,14 @@ public partial class AvonicList : ItemsControl
         get => GetValue(InsetProperty);
         set => SetValue(InsetProperty, value);
     }
+
+    /// <summary>
+    /// Ionic <c>closeSlidingItems()</c>: the first <see cref="AvonicItemSliding"/> in the list, at any depth, closes the open one,
+    /// as <see cref="AvonicItemSliding.CloseOpened"/> does, wherever that is. True if one closed; false, too, with no sliding item
+    /// in the list. Synchronous, where Ionic's returns a promise.
+    /// </summary>
+    public bool CloseSlidingItems() =>
+        this.GetLogicalDescendants().OfType<AvonicItemSliding>().FirstOrDefault()?.CloseOpened() ?? false;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {

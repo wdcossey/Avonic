@@ -32,8 +32,9 @@
         </Setter>
     </Style>
 
-    <!-- ion-footer.footer-toolbar-padding ion-toolbar:last-of-type { padding-bottom: var(ion-safe-area-bottom) }, also for a toolbar a template made -->
-    <Style Selector="c|AvonicFooter > c|AvonicToolbar:nth-last-child(1), c|AvonicFooter > ContentPresenter:nth-last-child(1) > c|AvonicToolbar">
+    <!-- ion-footer.footer-toolbar-padding ion-toolbar:last-of-type { padding-bottom: var(ion-safe-area-bottom) }, also for a toolbar a
+         template made. The footer has the class except above a bottom tab bar. -->
+    <Style Selector="c|AvonicFooter:footer-toolbar-padding > c|AvonicToolbar:nth-last-child(1), c|AvonicFooter:footer-toolbar-padding > ContentPresenter:nth-last-child(1) > c|AvonicToolbar">
         <Setter Property="Padding">
             <MultiBinding Converter="{x:Static b:Css.SafeAreaBox}" ConverterParameter="Both">
                 <DynamicResource ResourceKey="Avonic.Toolbar.Md.NoPadding" />

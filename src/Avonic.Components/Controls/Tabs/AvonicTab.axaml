@@ -3,9 +3,8 @@
                     xmlns:c="using:Avonic.Components.Controls">
 
     <!-- ion-tab: structure only, as it has no look. The page, filling the default slot of its tabs, as .ion-page's
-         position: absolute; inset: 0 does, and clipping, as its overflow: hidden does. -->
+         position: absolute; inset: 0 does. It doesn't clip, as .ion-page has no overflow rule (measured: visible). -->
     <ControlTheme x:Key="{x:Type c:AvonicTab}" TargetType="c:AvonicTab">
-        <Setter Property="ClipToBounds" Value="True" />
         <Setter Property="Template">
             <ControlTemplate>
                 <ContentPresenter Name="PART_ContentPresenter"

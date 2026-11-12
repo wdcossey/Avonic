@@ -40,6 +40,10 @@ public class AvonicTab : ContentControl
     static AvonicTab()
     {
         ComponentProperty.Changed.AddClassHandler<AvonicTab>((tab, _) => tab.UpdatePageClass());
+
+        // .ion-page has no overflow rule (measured: visible), so a fullscreen AvonicContent in a tab reaches behind the tab bar,
+        // which is drawn over it. A TemplatedControl clips by default.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicTab>(false);
     }
 
     public AvonicTab()

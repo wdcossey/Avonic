@@ -36,7 +36,7 @@
         </Setter>
 
         <!-- reorder-group.css's .reorder-selected { opacity: 0.8 }, for a handle that wraps its item and is the group's child.
-             An item's is in Styles/ReorderGroup.axaml, and the shadow is the group's. -->
+             An item's is in the item's own theme, and the shadow is the group's. -->
         <Style Selector="^:reorder-selected">
             <Setter Property="Opacity" Value="0.8" />
         </Style>

@@ -28,10 +28,13 @@
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
-    <!-- .list-md.list-inset ion-item:not(:only-of-type):last-of-type, and ion-item:only-child. They beat every line
-         rule, an item's own included. Avalonia has no :last-of-type, so this is the last child: see the plan. An
-         ItemsControl wraps templated content in a presenter, so that's the child to ask about. -->
-    <Style Selector="c|AvonicList:inset c|AvonicItem:nth-last-child(1) /template/ Border#PART_Native, c|AvonicList:inset c|AvonicItem:nth-last-child(1) /template/ Border#PART_Inner, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Native, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Inner">
+    <!-- .list-md.list-inset ion-item:not(:only-of-type):last-of-type, ion-item-sliding:last-of-type ion-item, and
+         ion-item:only-child. They beat every line rule, an item's own included. Avalonia has no :last-of-type, so this is the
+         last child: see the plan. An item in a sliding item is the only one of its type there, so its own place doesn't count,
+         unless it's the only child, and the sliding item's does. An ItemsControl wraps templated content in a presenter, so that's
+         the child to ask about. The :not() goes before :nth-last-child(1): after it, Avalonia drops the :nth-last-child(1), and
+         every item matches. -->
+    <Style Selector="c|AvonicList:inset c|AvonicItem:not(c|AvonicItemSliding > c|AvonicItem:not(:nth-child(1))):nth-last-child(1) /template/ Border#PART_Native, c|AvonicList:inset c|AvonicItem:not(c|AvonicItemSliding > c|AvonicItem:not(:nth-child(1))):nth-last-child(1) /template/ Border#PART_Inner, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Native, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Inner, c|AvonicList:inset c|AvonicItemSliding:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Native, c|AvonicList:inset c|AvonicItemSliding:nth-last-child(1) > c|AvonicItem /template/ Border#PART_Inner, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItemSliding > c|AvonicItem /template/ Border#PART_Native, c|AvonicList:inset ContentPresenter:nth-last-child(1) > c|AvonicItemSliding > c|AvonicItem /template/ Border#PART_Inner">
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 

@@ -729,6 +729,49 @@ public class AvonicToolbarTests
     });
 
     [AvaloniaFact]
+    public void F2_Above_A_Bottom_Tab_Bar_The_Footer_Leaves_The_Safe_Area_To_The_Bar() => InstalledTheme.Run(_ =>
+    {
+        // Measured tabs-fs, with a safe area of 20: footer-toolbar-padding is off for a footer in ion-tabs whose tab bar is in the
+        // bottom slot (padding 0), and on with the bar in the top slot (20), as outside tabs. A bar a slot's template makes counts.
+        AvonicToolbar InTabs(Action<AvonicTabs, AvonicTabBar> slot, out AvonicTabs tabs)
+        {
+            var toolbar = new AvonicToolbar { Content = "F" };
+            tabs = new AvonicTabs { Height = 200, Content = new AvonicTab { Tab = "a", Content = new AvonicFooter { Items = { toolbar } } } };
+            slot(tabs, new AvonicTabBar());
+            return toolbar;
+        }
+
+        var bottom = InTabs((tabs, bar) => tabs.BottomContent = bar, out var bottomTabs);
+        var top = InTabs((tabs, bar) => tabs.TopContent = bar, out var topTabs);
+        var made = InTabs((tabs, _) =>
+        {
+            tabs.BottomContent = "bar";
+            tabs.BottomContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((_, _) => new AvonicTabBar());
+        }, out var madeTabs);
+        // querySelector takes the first bar; the top slot's comes first here, as it does for the bar the tabs mark.
+        var both = InTabs((tabs, bar) =>
+        {
+            tabs.TopContent = bar;
+            tabs.BottomContent = new AvonicTabBar();
+        }, out var bothTabs);
+        var alone = new AvonicToolbar { Content = "F" };
+        var page = new StackPanel
+        {
+            Children = { bottomTabs, topTabs, madeTabs, bothTabs, new AvonicFooter { Items = { alone } } },
+            Resources = { ["Avonic.SafeAreaBottom"] = 20d },
+        };
+        using var scene = new Scene(page);
+
+        Assert.Equal(0, bottom.Padding.Bottom);
+        Assert.Equal(20, top.Padding.Bottom);
+        Assert.Equal(0, made.Padding.Bottom);
+        Assert.Equal(20, both.Padding.Bottom);
+        Assert.Equal(20, alone.Padding.Bottom);
+        Assert.Equal(56, bottom.Bounds.Height);
+        Assert.Equal(76, top.Bounds.Height);
+    });
+
+    [AvaloniaFact]
     public void H3_F2_Toolbars_A_Template_Makes_Get_The_Safe_Area_Too() => InstalledTheme.Run(_ =>
     {
         var template = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new AvonicToolbar { Content = text });

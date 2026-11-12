@@ -86,4 +86,5 @@ swipe on `a` from 300 to 40 in 8 px steps, held 700 ms.
 
 - `flex-shrink` on options wider than the row; see the README.
 - In an inset list, Ionic takes the line off the item in the last sliding item, and keeps it on an item that's last inside its
-  sliding item; Avonic's list rule (`Styles/List.axaml`, a shared file) looks at the item's own position. Proposed in the PR.
+  sliding item; Avonic's list rule (`Styles/List.axaml`, a shared file) looks at the item's own position. Proposed in the PR, and
+  done in #131's roll-up: the list's rule now matches Ionic's (`AvonicListTests.L12_The_Item_In_The_Last_Sliding_Item…`).

@@ -661,17 +661,24 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// <c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins, its
-    /// style too, as for <see cref="UpdateContainerChild"/>.
+    /// style too, as for <see cref="UpdateContainerChild"/>. A slot holds one child here, so a panel that overlaps its children (a
+    /// plain <see cref="Panel"/>, a <see cref="Canvas"/>, or a <see cref="Grid"/> with no rows or columns) stands for the slot, as
+    /// Ionic takes any number of <c>slot="fixed"</c> elements: it's left to fill the host, and its children, such as several
+    /// <see cref="AvonicFab"/>s, place themselves in it. A panel that lays its children out, a <see cref="StackPanel"/> or a
+    /// <see cref="Grid"/> with columns say, is a <c>div</c> around them, so it's one block at the corner. Read when it's slotted.
     /// </summary>
     private void UpdateFixedChild()
     {
         Reset(_fixedChildDefaults);
-        if (_fixed?.Child is { } child)
+        if (_fixed?.Child is { } child && !StandsForTheSlot(child))
         {
             Add(_fixedChildDefaults, child.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Left, BindingPriority.Style));
             Add(_fixedChildDefaults, child.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top, BindingPriority.Style));
         }
     }
+
+    private static bool StandsForTheSlot(Control child) =>
+        child.GetType() == typeof(Panel) || child is Canvas || child is Grid { RowDefinitions.Count: 0, ColumnDefinitions.Count: 0 };
 
     private static void Reset(List<IDisposable> frames)
     {
@@ -709,7 +716,12 @@ public class AvonicContent : TemplatedControl
 
     private void OnLayoutUpdated(object? sender, EventArgs e) => ReadDimensions();
 
-    /// <summary><c>readDimensions</c>: how far the edges of the host are from those of the page.</summary>
+    /// <summary>
+    /// <c>readDimensions</c>: <c>offsetTop</c>, and the page's height less that and the host's. <c>offsetTop</c> counts from the
+    /// offset parent: the closest <c>.ion-page</c> above the host, or in tabs their <c>.tabs-inner</c> (<c>position: relative</c>),
+    /// whichever is nearer, and the page itself otherwise. So in tabs the offsets reach the tabs' bottom (a bottom tab bar and a
+    /// footer), and with a top tab bar the top is 0 and the bottom runs past the tabs by the bar, as measured in Chromium.
+    /// </summary>
     private void ReadDimensions()
     {
         if (FindPage() is not { } page)
@@ -717,9 +729,15 @@ public class AvonicContent : TemplatedControl
             return;
         }
 
+        var tabsInner = (page as AvonicTabs)?.Inner;
         var top = 0d;
         for (Visual? visual = this; visual is not null && visual != page; visual = visual.GetVisualParent())
         {
+            if (visual != this && (IsIonPage(visual) || visual == tabsInner))
+            {
+                break;
+            }
+
             top += visual.Bounds.Y;
 
             // offsetTop doesn't move with an ancestor's scroll.
@@ -733,10 +751,16 @@ public class AvonicContent : TemplatedControl
         SetOffsets(top, Math.Max(page.Bounds.Height - top - Bounds.Height, 0));
     }
 
-    /// <summary><c>getPageElement</c>: the closest <c>.ion-page</c>, or else the parent. Avonic has no <c>ion-app</c> or <c>ion-tabs</c> yet.</summary>
+    /// <summary>
+    /// <c>getPageElement</c>: the closest <see cref="AvonicTabs"/>, whatever is between, else the closest <c>.ion-page</c>, or else
+    /// the parent. Avonic has no <c>ion-app</c> or popover yet.
+    /// </summary>
     private Visual? FindPage() =>
-        this.GetVisualAncestors().FirstOrDefault(ancestor => ancestor.Classes.Contains("ion-page"))
+        this.FindAncestorOfType<AvonicTabs>()
+        ?? this.GetVisualAncestors().FirstOrDefault(IsIonPage)
         ?? this.GetVisualParent();
+
+    private static bool IsIonPage(Visual visual) => visual.Classes.Contains("ion-page");
 
     private void SetOffsets(double top, double bottom)
     {

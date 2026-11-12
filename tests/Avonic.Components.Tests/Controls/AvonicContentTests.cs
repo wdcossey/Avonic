@@ -2406,6 +2406,135 @@ public class AvonicContentTests
         Assert.Equal(default, Container(content).Padding);
     }
 
+    /// <summary>
+    /// The measured tabs-fs scene: an <c>ion-tabs</c> 400 high, a bar of <paramref name="bar"/> in a slot, and a tab holding the
+    /// content and a 56 high footer, as <c>.ion-page</c>'s column. The bar is see-through, so what's behind it shows.
+    /// </summary>
+    private static AvonicTabs InTabs(AvonicContent content, double bar, bool top = false)
+    {
+        Grid.SetRow(content, 0);
+        var footer = new Border { Height = 56 };
+        Grid.SetRow(footer, 1);
+        var tabs = new AvonicTabs
+        {
+            Height = 400,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = new AvonicTab { Tab = "a", Content = new Grid { RowDefinitions = new RowDefinitions("*,Auto"), Children = { content, footer } } },
+        };
+        if (top)
+        {
+            tabs.TopContent = new Border { Height = bar };
+        }
+        else
+        {
+            tabs.BottomContent = new Border { Height = bar };
+        }
+
+        return tabs;
+    }
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_The_Page_Is_The_Tabs_So_It_Reaches_Behind_A_Bottom_Tab_Bar()
+    {
+        // Measured tabs-fs: getPageElement takes ion-tabs before the tab's .ion-page. The content is 0 to 267, above a 56 footer
+        // and a 77 bar, and its offsets are 0 and 133, so the scroll and background parts are the tabs' 400.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var tabs = InTabs(content, 77);
+        using var scene = new Scene(tabs);
+
+        Assert.Equal(new Rect(0, 0, 390, 267), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 133), Container(content).Padding);
+        Assert.Equal(new Rect(0, 0, 390, 400), Box(Scroll(content), scene.Window));
+        Assert.Equal(new Rect(0, 0, 390, 400), Box(Background(content), scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_With_A_Top_Tab_Bar_The_Top_Counts_From_The_Tab()
+    {
+        // Measured tabs-fs, slot="top": offsetTop counts from the offset parent, the tab (.ion-page), so it's 0 under a 57 bar, and
+        // the bottom is the tabs' 400 less the content's 287: 113, past the tabs by the bar, as in Chromium.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var tabs = InTabs(content, 57, top: true);
+        using var scene = new Scene(tabs);
+
+        Assert.Equal(new Rect(0, 57, 390, 287), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 113), Container(content).Padding);
+        Assert.Equal(new Rect(0, 57, 390, 400), Box(Scroll(content), scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_A_Content_That_Is_The_Tabs_Page_Counts_From_The_Tabs_Inner_Box()
+    {
+        // A tab's component is the page: it has class ion-page, the tab doesn't, and its offset parent is .tabs-inner
+        // (position: relative), under the top bar, so the top is 0 there too, and the bottom is 400 less its 343.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var tabs = new AvonicTabs
+        {
+            Height = 400,
+            VerticalAlignment = VerticalAlignment.Top,
+            TopContent = new Border { Height = 57 },
+            Content = new AvonicTab { Tab = "a", Component = content },
+        };
+        using var scene = new Scene(tabs);
+
+        Assert.Contains("ion-page", content.Classes);
+        Assert.Equal(new Rect(0, 57, 390, 343), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 57), Container(content).Padding);
+    }
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_A_Page_Inside_The_Tab_Is_The_Offset_Parent()
+    {
+        // An .ion-page between the content and the tabs is position: absolute, so it's the offset parent, and offsetTop counts
+        // from it, not from the tab or .tabs-inner: 0 here, inside a wrapper with 10 of padding, and the bottom is 400 less 380.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var page = new Grid { Children = { content } };
+        page.Classes.Add("ion-page");
+        var tabs = new AvonicTabs
+        {
+            Height = 400,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = new AvonicTab { Tab = "a", Content = new Border { Padding = new Thickness(10), Child = page } },
+        };
+        using var scene = new Scene(tabs);
+
+        Assert.Equal(new Rect(10, 10, 370, 380), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 20), Container(content).Padding);
+    }
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_The_Background_Shows_Behind_A_See_Through_Tab_Bar() => InstalledTheme.Run(_ =>
+    {
+        // Measured tabs-fs: the content's background shows through a translucent tab bar, as the tab doesn't clip (overflow: visible).
+        var content = new AvonicContent { Fullscreen = true };
+        content.Resources["Avonic.Content.Background"] = new SolidColorBrush(Colors.Red);
+        var tabs = InTabs(content, 77);
+        using var scene = new Scene(tabs);
+        scene.Window.Background = Brushes.White;
+        Render();
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 390));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 200, 410));
+    });
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_With_A_Top_Tab_Bar_What_Runs_Past_The_Tabs_Is_Drawn() => InstalledTheme.Run(_ =>
+    {
+        // Measured tabs-fs, slot="top": the scroll and background parts run 57 past the tabs' bottom, and Chromium draws them
+        // there, as ion-tabs doesn't clip (contain without paint).
+        var content = new AvonicContent { Fullscreen = true };
+        content.Resources["Avonic.Content.Background"] = new SolidColorBrush(Colors.Red);
+        var tabs = InTabs(content, 57, top: true);
+        using var scene = new Scene(tabs);
+        scene.Window.Background = Brushes.White;
+        Render();
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 430));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 200, 470));
+    });
+
     [AvaloniaFact]
     public void B27_Fullscreen_Follows_A_Change()
     {
@@ -2617,6 +2746,91 @@ public class AvonicContentTests
         Assert.Equal(new Rect(0, 0, 20, 20), Box(second, scene.Window));
         Assert.Equal(HorizontalAlignment.Stretch, first.HorizontalAlignment);
         Assert.Equal(VerticalAlignment.Stretch, first.VerticalAlignment);
+    }
+
+    // Ionic takes any number of slot="fixed" elements, each placed in the host. A slot holds one child here, so a panel stands for
+    // the slot: it fills the host, and two fabs in it are where each would be alone.
+    [AvaloniaFact]
+    public void B29_A_Panel_In_The_Fixed_Slot_Fills_The_Host_So_Several_Fabs_Share_It() => InstalledTheme.Run(_ =>
+    {
+        AvonicFab Fab(FabHorizontal horizontal, FabVertical vertical) =>
+            new() { Horizontal = horizontal, Vertical = vertical, Items = { new AvonicFabButton() } };
+
+        var endBottom = Fab(FabHorizontal.End, FabVertical.Bottom);
+        var startTop = Fab(FabHorizontal.Start, FabVertical.Top);
+        var panel = new Panel { Children = { endBottom, startTop } };
+        var shared = new AvonicContent { FixedContent = panel };
+        var aloneEndBottom = Fab(FabHorizontal.End, FabVertical.Bottom);
+        var aloneStartTop = Fab(FabHorizontal.Start, FabVertical.Top);
+        var alone1 = new AvonicContent { FixedContent = aloneEndBottom };
+        var alone2 = new AvonicContent { FixedContent = aloneStartTop };
+        using var scene = new Scene(new StackPanel { Children = { InBox(shared), InBox(alone1), InBox(alone2) } });
+
+        Assert.Equal(new Rect(0, 0, 390, 300), Box(panel, shared));
+        Assert.Equal(Box(aloneEndBottom, alone1), Box(endBottom, shared));
+        Assert.Equal(Box(aloneStartTop, alone2), Box(startTop, shared));
+        Assert.True(Box(endBottom, shared).Right > 300 && Box(endBottom, shared).Bottom > 200);
+    });
+
+    [AvaloniaFact]
+    public void B29_A_Grid_Or_A_Canvas_Overlaps_Its_Children_So_It_Stands_For_The_Slot_Too()
+    {
+        // A grid with columns lays its children out, as a div would: one block at the corner.
+        var grid = new Grid { Children = { new Border { Width = 60, Height = 60 } } };
+        var canvas = new Canvas { Children = { new Border { Width = 60, Height = 60 } } };
+        var columns = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto"), Children = { new Border { Width = 60, Height = 60 } } };
+        var withGrid = new AvonicContent { FixedContent = grid };
+        var withCanvas = new AvonicContent { FixedContent = canvas };
+        var withColumns = new AvonicContent { FixedContent = columns };
+        using var scene = new Scene(new StackPanel { Children = { InBox(withGrid), InBox(withCanvas), InBox(withColumns) } });
+
+        Assert.Equal(new Rect(0, 0, 390, 300), Box(grid, withGrid));
+        Assert.Equal(new Rect(0, 0, 390, 300), Box(canvas, withCanvas));
+        Assert.Equal(new Rect(0, 0, 60, 60), Box(columns, withColumns));
+    }
+
+    [AvaloniaFact]
+    public void B29_Another_Kind_Of_Panel_In_The_Fixed_Slot_Is_One_Block_At_The_Corner()
+    {
+        // A StackPanel is a div around its children: as big as they are, at the host's corner.
+        var panel = new StackPanel { Children = { new Border { Width = 60, Height = 20 }, new Border { Width = 40, Height = 20 } } };
+        using var scene = new Scene(InBox(new AvonicContent { FixedContent = panel }));
+
+        Assert.Equal(new Rect(0, 0, 60, 40), Box(panel, scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B29_An_Apps_Alignment_Of_A_Panel_In_The_Fixed_Slot_Wins()
+    {
+        var panel = new Panel
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Children = { new Border { Width = 60, Height = 60 } },
+        };
+        using var scene = new Scene(InBox(new AvonicContent { FixedContent = panel }));
+
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(panel, scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B30_A_Panel_In_The_Fixed_Slot_Takes_Input_Only_On_Its_Children()
+    {
+        // The panel covers the host, and has no background, so the content under it still takes a press.
+        var child = new Border
+        {
+            Width = 60,
+            Height = 60,
+            Background = Brushes.Blue,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+        };
+        var content = new AvonicContent { Content = new Border { Height = 1000, Background = Brushes.White }, FixedContent = new Panel { Children = { child } } };
+        using var scene = new Scene(InBox(content));
+
+        Assert.Same(child, Hit(scene, new Point(30, 30)));
+        Assert.IsNotType<Panel>(Hit(scene, new Point(200, 200)));
+        Assert.True(((Visual)Hit(scene, new Point(200, 200))!).FindAncestorOfType<ScrollViewer>() is not null);
     }
 
     [AvaloniaFact]
