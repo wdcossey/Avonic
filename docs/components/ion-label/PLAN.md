@@ -49,7 +49,7 @@ Each becomes a test.
 | 8 | Long text wraps and grows the item | measured `long`: 78 high, three 19 px lines (in Roboto, since #100) |
 | 9 | `.ion-text-nowrap`: one line, an ellipsis, clipped, including `h2` and `p` inside | measured `nowrap`, `nw-h2`, `nw-p` |
 | 10 | `.ion-text-wrap`: line height 1.5 of each element's own size, without clipping, except where `h1`–`h6` and `p` set their own | measured `wrap`, `wrap-h` |
-| 11 | `h1`–`h6` and `p`: sizes 24, 16, 14, 14, 14, 14, 14; weight normal; margins, and line heights 28.8, 19.2, normal, 20 | measured `heads` |
+| 11 | `h1`–`h6` and `p`: sizes 24, 16, 14, 14, 14, 14, 14; weight normal; margins, and line heights 28.8, 19.2, normal, 20, with `typography.css` (the reference loads it); without it `h1` and `h2` are normal, see docs/infra/typography | measured `heads` |
 | 12 | `p` is `#666666` as a direct child, the inherited colour nested deeper | `::slotted(p)`; measured `p`, `n-p` |
 | 13 | `p` inherits in a coloured item, including a coloured label's colour, but stays `#666666` in a coloured label in a plain item | `.in-item-color`; measured `colored-p`, `colored2-p`, `danger-p` |
 | 14 | Fixed: 100 wide, at the start, wrapping | measured `fixed`, `fixedlong` |

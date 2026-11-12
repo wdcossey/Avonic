@@ -22,6 +22,10 @@
 |---|---|
 | ![](ref/page.png) | ![](compare/avonic-page.png) |
 
+> Typography: `render.js` loads `ionic.bundle.css`, which includes `typography.css`, so the Ionic side has global typography on,
+> and the Avonic frame is captured with `Css/Typography.axaml` merged to match. Without it, card content's headings follow the
+> typography-off measurements in [docs/infra/typography](../../infra/typography/PLAN.md#measured).
+
 Cards from the top: plain, button, danger, a primary header on a plain card, headings, disabled, and RTL. The Avonic
 scene uses `Spacing="-10"`, for the reason in the plan.
 
@@ -99,7 +103,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCar
 | 23 | Heading levels | `role="heading"`, `aria-level` 2 and 3 | match, as `AutomationProperties.HeadingLevel`. Not tried with a screen reader |
 | 24 | Content box | `co-c` 47: 13 + 21 + 13; `alone-c` the same | match |
 | 25 | After a header | 0 straight after, also outside a card and with the header hidden; 13 with `gap-d` between | match, in a panel |
-| 26 | `h1`–`h6`, `p` | 24, 16, 14, 14, 14, 14, 14; 400; 28.8, 19.2, 16.8, 16.8, 16.8, 16.8, 21 | match directly or in a panel, but not deeper. See the plan |
+| 26 | `h1`–`h6`, `p` | 24, 16, 14, 14, 14, 14, 14; 400; 28.8, 19.2, 16.8, 16.8, 16.8, 16.8, 21 with `typography.css`; without it the headings are 1.5 × their size: 36, 24, 21 | match directly or in a panel, but not deeper. See the plan |
 | 27 | RTL | text at the right, the same boxes | match |
 | 28 | Together | `full`: 370 wide, header over content | match. 10 between cards needs `Spacing="-10"` |
 

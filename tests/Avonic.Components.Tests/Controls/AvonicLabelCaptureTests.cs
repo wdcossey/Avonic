@@ -13,8 +13,9 @@ namespace Avonic.Components.Tests.Controls;
 public class AvonicLabelCaptureTests
 {
     // The same content as DEFAULT_HTML['ion-label'] in tools/ionic-ref/render.js.
+    // With Css/Typography.axaml merged, as render.js loads ionic.bundle.css, which includes typography.css.
     [AvaloniaFact]
-    public void Reference_Page() => InstalledTheme.Run(_ =>
+    public void Reference_Page() => Typography.TypographyTests.WithFile(() =>
     {
         static AvonicLabel Text(string text, string @class)
         {

@@ -6,6 +6,8 @@ Ionic's `css/typography.css`: sizes, weight, margins and line height for `h1` to
 `AvonicTheme` doesn't merge it, so an app that doesn't ask for it pays nothing. The design and the measurements are in
 [PLAN.md](PLAN.md), and the frames in [COMPARISON.md](COMPARISON.md).
 
+`tools/ionic-ref/render.js` loads `ionic.bundle.css`, which includes `typography.css`, so every component's reference frame has it on; the label's and card's capture tests merge this file to match.
+
 ## Using it
 
 Merge it into the app's `Resources`, not its `Styles`, at startup. Where `AvonicTheme` is in the styles doesn't matter: the app's
