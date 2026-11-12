@@ -560,6 +560,19 @@ public class AvonicItemSlidingTests
         new Rect(visual.Bounds.Size).TransformToAABB(visual.TransformToVisual(root)!.Value).X;
 
     [AvaloniaFact]
+    public void S17_Options_Whose_Side_Changes_Are_Found_On_Their_New_Side()
+    {
+        using var f = Make(start: false);
+        f.End!.Side = ItemOptionsSide.Start;
+        GestureTests.Render();
+
+        f.Finger().Down(100, Y, 0).Move(110, Y, 16).Move(150, Y, 32);
+        f.At(48);
+        Assert.Equal(-40, f.Sliding.GetOpenAmount(), 3);
+        Assert.True(f.End.IsEffectivelyVisible);
+    }
+
+    [AvaloniaFact]
     public void S18_Disabled_It_Does_Not_Slide()
     {
         using var f = Make();

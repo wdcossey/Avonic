@@ -320,7 +320,6 @@ public class AvonicItemSliding : ItemsControl
 
         foreach (var gone in _options.Keys.Except(found).ToList())
         {
-            gone.SetSwiping(false);
             foreach (var binding in _options[gone].Bindings)
             {
                 binding.Dispose();
