@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Background="White">
+            <c:AvonicReorderGroup Disabled="False">
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="Item 1" />
+                    <c:AvonicItem.EndContent><c:AvonicReorder /></c:AvonicItem.EndContent>
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="Item 2" />
+                    <c:AvonicItem.EndContent><c:AvonicReorder /></c:AvonicItem.EndContent>
+                </c:AvonicItem>
+            </c:AvonicReorderGroup>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- reorder-group.css: the host is a block of its children, and the transforms are the control's. Its .reorder-selected rule
+         is here as PART_Lift, which the group puts over the child being dragged, for the shadow, and in Styles/ReorderGroup.axaml
+         for the child's opacity. -->
+    <ControlTheme x:Key="{x:Type c:AvonicReorderGroup}" TargetType="c:AvonicReorderGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    <!-- box-shadow: 0 0 10px rgba(0, 0, 0, 0.4), outside the child only, as Avalonia draws a Border's outer shadow,
+                         at the child's opacity of 0.8, which in CSS fades its shadow too -->
+                    <Border Name="PART_Lift"
+                            Background="Transparent"
+                            Opacity="0.8"
+                            BoxShadow="{DynamicResource Avonic.ReorderGroup.SelectedBoxShadow}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

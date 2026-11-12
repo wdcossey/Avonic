@@ -1,0 +1,10 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- :host-context(ion-toolbar): padding 3px 7px. A descendant rule, which only a searchbar's style check pays for. -->
+    <Style Selector="c|AvonicToolbar c|AvonicSearchbar">
+        <Setter Property="Padding" Value="7,3" />
+    </Style>
+
+</Styles>

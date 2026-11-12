@@ -1,0 +1,2276 @@
+{
+ "note": "measure.js (kept out of the repo): ion-app > ion-content > ion-list > ion-reorder-group disabled=false, items with ion-reorder slot=end; a finger (CDP touch) pressed on the second handle and moved down in 8 px steps; transforms read each requestAnimationFrame. Times in ms from the listener being added.",
+ "boxes": [
+  {
+   "tag": "ION-REORDER-GROUP",
+   "slot": "",
+   "cls": "md hydrated",
+   "x": 0,
+   "y": 8,
+   "w": 390,
+   "h": 96,
+   "display": "inline",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 8,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-REORDER",
+   "slot": "end",
+   "cls": "md hydrated",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "display": "none",
+   "margin": "0px 0px 0px 16px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "fs": "31px",
+    "op": "0.3",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 56,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-REORDER",
+   "slot": "end",
+   "cls": "md hydrated",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "display": "none",
+   "margin": "0px 0px 0px 16px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "fs": "31px",
+    "op": "0.3",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-REORDER-GROUP",
+   "slot": "",
+   "cls": "md reorder-enabled hydrated",
+   "x": 0,
+   "y": 120,
+   "w": 390,
+   "h": 96,
+   "display": "inline",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 358,
+    "y": 183.5,
+    "w": 16,
+    "h": 16,
+    "fs": "16px",
+    "op": "1",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-REORDER",
+   "slot": "",
+   "cls": "md hydrated",
+   "x": 0,
+   "y": 120,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "grab",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "fs": "31px",
+    "op": "0.3",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 120,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "grab",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 168,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 358,
+    "y": 183.5,
+    "w": 16,
+    "h": 16,
+    "fs": "16px",
+    "op": "1",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-REORDER",
+   "slot": "end",
+   "cls": "md hydrated",
+   "x": 358,
+   "y": 183.5,
+   "w": 16,
+   "h": 16,
+   "display": "block",
+   "margin": "0px 0px 0px 16px",
+   "cursor": "grab",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "fs": "31px",
+    "op": "0.3",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-REORDER-GROUP",
+   "slot": "",
+   "cls": "md reorder-enabled hydrated",
+   "x": 0,
+   "y": 8,
+   "w": 390,
+   "h": 240,
+   "display": "inline",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 8,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  },
+  {
+   "tag": "ION-REORDER",
+   "slot": "end",
+   "cls": "md hydrated",
+   "x": 343,
+   "y": 16,
+   "w": 31,
+   "h": 31,
+   "display": "block",
+   "margin": "0px 0px 0px 16px",
+   "cursor": "grab",
+   "color": "rgb(0, 0, 0)",
+   "icon": {
+    "x": 343,
+    "y": 16,
+    "w": 31,
+    "h": 31,
+    "fs": "31px",
+    "op": "0.3",
+    "color": "rgb(0, 0, 0)"
+   }
+  },
+  {
+   "tag": "ION-ITEM",
+   "slot": "",
+   "cls": "item md item-lines-default in-list hydrated item-label",
+   "x": 0,
+   "y": 56,
+   "w": 390,
+   "h": 48,
+   "display": "block",
+   "margin": "0px",
+   "cursor": "auto",
+   "color": "rgb(0, 0, 0)"
+  }
+ ],
+ "completeInEndHandler": {
+  "handle": {
+   "x": 358.5,
+   "y": 79.5
+  },
+  "events": [
+   {
+    "t": 20,
+    "n": "ionReorderStart",
+    "st": 0
+   },
+   {
+    "t": 67,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 117,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 168,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 218,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 267,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 318,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 367,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 417,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 467,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 517,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionItemReorder",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionReorderEnd",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   }
+  ],
+  "frames": [
+   {
+    "t": 2,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 33,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 50,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 84,
+    "transforms": [
+     0,
+     8,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 134,
+    "transforms": [
+     0,
+     16,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 185,
+    "transforms": [
+     0,
+     24,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 234,
+    "transforms": [
+     0,
+     32,
+     -1.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 250,
+    "transforms": [
+     0,
+     32,
+     -5.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 267,
+    "transforms": [
+     0,
+     32,
+     -10.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 284,
+    "transforms": [
+     0,
+     40,
+     -16.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 301,
+    "transforms": [
+     0,
+     40,
+     -22.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 317,
+    "transforms": [
+     0,
+     40,
+     -27.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 334,
+    "transforms": [
+     0,
+     48,
+     -32,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 350,
+    "transforms": [
+     0,
+     48,
+     -35.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 367,
+    "transforms": [
+     0,
+     48,
+     -38.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 384,
+    "transforms": [
+     0,
+     56,
+     -40.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 401,
+    "transforms": [
+     0,
+     56,
+     -42.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 417,
+    "transforms": [
+     0,
+     56,
+     -44.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 435,
+    "transforms": [
+     0,
+     64,
+     -45.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 450,
+    "transforms": [
+     0,
+     64,
+     -46.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 467,
+    "transforms": [
+     0,
+     64,
+     -47.2,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 484,
+    "transforms": [
+     0,
+     72,
+     -47.7,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 500,
+    "transforms": [
+     0,
+     72,
+     -47.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 517,
+    "transforms": [
+     0,
+     72,
+     -48,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 534,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -1.8,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 550,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -5.4,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 567,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -10.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 583,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -16.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 601,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -22.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 618,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -27.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 634,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -32,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 650,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -35.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 668,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -38.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 683,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -40.9,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 701,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -42.8,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 717,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -44.4,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 733,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 3,Item 4,Item 2,Item 5"
+   }
+  ]
+ },
+ "completeFalse": {
+  "handle": {
+   "x": 358.5,
+   "y": 79.5
+  },
+  "events": [
+   {
+    "t": 20,
+    "n": "ionReorderStart",
+    "st": 0
+   },
+   {
+    "t": 68,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 118,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 168,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 219,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 268,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 318,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 368,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 418,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 469,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 518,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionItemReorder",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionReorderEnd",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   }
+  ],
+  "frames": [
+   {
+    "t": 1,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 35,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 51,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 84,
+    "transforms": [
+     0,
+     8,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 134,
+    "transforms": [
+     0,
+     16,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 185,
+    "transforms": [
+     0,
+     24,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 234,
+    "transforms": [
+     0,
+     32,
+     -1.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 251,
+    "transforms": [
+     0,
+     32,
+     -5.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 268,
+    "transforms": [
+     0,
+     32,
+     -10.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 285,
+    "transforms": [
+     0,
+     40,
+     -16.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 301,
+    "transforms": [
+     0,
+     40,
+     -22.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 318,
+    "transforms": [
+     0,
+     40,
+     -27.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 334,
+    "transforms": [
+     0,
+     48,
+     -32,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 351,
+    "transforms": [
+     0,
+     48,
+     -35.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 367,
+    "transforms": [
+     0,
+     48,
+     -38.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 384,
+    "transforms": [
+     0,
+     56,
+     -40.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 402,
+    "transforms": [
+     0,
+     56,
+     -42.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 417,
+    "transforms": [
+     0,
+     56,
+     -44.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 434,
+    "transforms": [
+     0,
+     64,
+     -45.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 451,
+    "transforms": [
+     0,
+     64,
+     -46.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 468,
+    "transforms": [
+     0,
+     64,
+     -47.2,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 484,
+    "transforms": [
+     0,
+     72,
+     -47.7,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 501,
+    "transforms": [
+     0,
+     72,
+     -47.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 518,
+    "transforms": [
+     0,
+     72,
+     -48,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 535,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -1.8,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 552,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -5.4,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 568,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -10.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 585,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -16.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 602,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -22.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 617,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -27.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 634,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -32,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 653,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -35.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 669,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -38.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 684,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -40.9,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 701,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -42.9,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 718,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -44.4,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 735,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   }
+  ]
+ },
+ "completeAfter500ms": {
+  "handle": {
+   "x": 358.5,
+   "y": 79.5
+  },
+  "events": [
+   {
+    "t": 19,
+    "n": "ionReorderStart",
+    "st": 0
+   },
+   {
+    "t": 68,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 118,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 167,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 218,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 268,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 317,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 369,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 418,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 484,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 2,
+    "st": 0
+   },
+   {
+    "t": 534,
+    "n": "ionReorderMove",
+    "from": 2,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionItemReorder",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   },
+   {
+    "t": 702,
+    "n": "ionReorderEnd",
+    "from": 1,
+    "to": 3,
+    "st": 0
+   }
+  ],
+  "frames": [
+   {
+    "t": 0,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 34,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 50,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 84,
+    "transforms": [
+     0,
+     8,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 134,
+    "transforms": [
+     0,
+     16,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 185,
+    "transforms": [
+     0,
+     24,
+     0,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 234,
+    "transforms": [
+     0,
+     32,
+     -1.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 252,
+    "transforms": [
+     0,
+     32,
+     -5.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 268,
+    "transforms": [
+     0,
+     32,
+     -10.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 284,
+    "transforms": [
+     0,
+     40,
+     -16.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 301,
+    "transforms": [
+     0,
+     40,
+     -22.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 317,
+    "transforms": [
+     0,
+     40,
+     -27.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 335,
+    "transforms": [
+     0,
+     48,
+     -32,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 351,
+    "transforms": [
+     0,
+     48,
+     -35.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 369,
+    "transforms": [
+     0,
+     48,
+     -38.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 385,
+    "transforms": [
+     0,
+     56,
+     -40.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 402,
+    "transforms": [
+     0,
+     56,
+     -42.8,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 418,
+    "transforms": [
+     0,
+     56,
+     -44.4,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 434,
+    "transforms": [
+     0,
+     64,
+     -45.6,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 450,
+    "transforms": [
+     0,
+     64,
+     -46.5,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 467,
+    "transforms": [
+     0,
+     64,
+     -47.2,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 484,
+    "transforms": [
+     0,
+     64,
+     -47.7,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 501,
+    "transforms": [
+     0,
+     72,
+     -47.9,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 518,
+    "transforms": [
+     0,
+     72,
+     -48,
+     0,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 551,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -1.8,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 568,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -5.4,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 584,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -10.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 602,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -16.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 619,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -22.4,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 635,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -27.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 651,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -32,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 667,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -35.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 684,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -38.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 701,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -40.9,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 718,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -42.8,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 734,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -44.4,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 750,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -45.6,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 768,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -46.5,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 784,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -47.2,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 801,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -47.7,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 817,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -47.9,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 835,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -48,
+     0
+    ],
+    "selected": 1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 1218,
+    "transforms": [
+     0,
+     80,
+     -48,
+     -48,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated reorder-list-active",
+    "order": "Item 1,Item 2,Item 3,Item 4,Item 5"
+   },
+   {
+    "t": 1234,
+    "transforms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "selected": -1,
+    "groupClass": "md reorder-enabled hydrated",
+    "order": "Item 1,Item 3,Item 4,Item 2,Item 5"
+   }
+  ]
+ },
+ "autoScroll30Items": {
+  "handle": {
+   "x": 358.5,
+   "y": 79.5
+  },
+  "events": [
+   {
+    "t": 15,
+    "n": "ionReorderStart",
+    "st": 0
+   },
+   {
+    "t": 62,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 113,
+    "n": "ionReorderMove",
+    "from": 1,
+    "to": 1,
+    "st": 0
+   },
+   {
+    "t": 4464,
+    "n": "ionReorderMove",
+    "from": 16,
+    "to": 16,
+    "st": 10
+   },
+   {
+    "t": 4513,
+    "n": "ionReorderMove",
+    "from": 16,
+    "to": 16,
+    "st": 20
+   },
+   {
+    "t": 4563,
+    "n": "ionReorderMove",
+    "from": 16,
+    "to": 17,
+    "st": 30
+   },
+   {
+    "t": 4629,
+    "n": "ionReorderMove",
+    "from": 17,
+    "to": 17,
+    "st": 40
+   },
+   {
+    "t": 4679,
+    "n": "ionReorderMove",
+    "from": 17,
+    "to": 17,
+    "st": 50
+   },
+   {
+    "t": 4730,
+    "n": "ionReorderMove",
+    "from": 17,
+    "to": 17,
+    "st": 60
+   },
+   {
+    "t": 4779,
+    "n": "ionReorderMove",
+    "from": 17,
+    "to": 18,
+    "st": 70
+   },
+   {
+    "t": 4830,
+    "n": "ionReorderMove",
+    "from": 18,
+    "to": 18,
+    "st": 80
+   },
+   {
+    "t": 4880,
+    "n": "ionReorderMove",
+    "from": 18,
+    "to": 18,
+    "st": 90
+   },
+   {
+    "t": 4930,
+    "n": "ionReorderMove",
+    "from": 18,
+    "to": 18,
+    "st": 100
+   },
+   {
+    "t": 4979,
+    "n": "ionReorderMove",
+    "from": 18,
+    "to": 18,
+    "st": 110
+   },
+   {
+    "t": 5030,
+    "n": "ionReorderMove",
+    "from": 18,
+    "to": 19,
+    "st": 120
+   },
+   {
+    "t": 5080,
+    "n": "ionReorderMove",
+    "from": 19,
+    "to": 19,
+    "st": 130
+   },
+   {
+    "t": 5129,
+    "n": "ionReorderMove",
+    "from": 19,
+    "to": 19,
+    "st": 140
+   },
+   {
+    "t": 5180,
+    "n": "ionReorderMove",
+    "from": 19,
+    "to": 19,
+    "st": 150
+   },
+   {
+    "t": 5246,
+    "n": "ionReorderMove",
+    "from": 19,
+    "to": 20,
+    "st": 160
+   },
+   {
+    "t": 5297,
+    "n": "ionReorderMove",
+    "from": 20,
+    "to": 20,
+    "st": 170
+   },
+   {
+    "t": 5347,
+    "n": "ionReorderMove",
+    "from": 20,
+    "to": 20,
+    "st": 180
+   },
+   {
+    "t": 5396,
+    "n": "ionReorderMove",
+    "from": 20,
+    "to": 20,
+    "st": 190
+   },
+   {
+    "t": 5446,
+    "n": "ionReorderMove",
+    "from": 20,
+    "to": 20,
+    "st": 200
+   },
+   {
+    "t": 5496,
+    "n": "ionReorderMove",
+    "from": 20,
+    "to": 21,
+    "st": 210
+   },
+   {
+    "t": 5546,
+    "n": "ionReorderMove",
+    "from": 21,
+    "to": 21,
+    "st": 220
+   },
+   {
+    "t": 5747,
+    "n": "ionItemReorder",
+    "from": 1,
+    "to": 21,
+    "st": 220
+   },
+   {
+    "t": 5747,
+    "n": "ionReorderEnd",
+    "from": 1,
+    "to": 21,
+    "st": 220
+   }
+  ]
+ }
+}

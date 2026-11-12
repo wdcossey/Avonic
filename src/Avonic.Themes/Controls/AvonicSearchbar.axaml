@@ -1,0 +1,214 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390">
+            <c:AvonicSearchbar />
+            <c:AvonicSearchbar Value="Value" />
+            <c:AvonicSearchbar ShowCancelButton="Always" Value="Cancel always" />
+            <c:AvonicSearchbar Color="primary" Value="Primary" />
+            <c:AvonicSearchbar IsEnabled="False" Value="Disabled" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- The native <input>, as the stub's, with md's look: .searchbar-input's background, corners and shadow on its own box,
+         and the placeholder in the input's colour at 0.6. -->
+    <ControlTheme x:Key="Avonic.Searchbar.Md.NativeInput" TargetType="TextBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- A TemplatedControl clips by default, which would cut off its own shadow: the scroller clips the text. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BoxShadow="{DynamicResource Avonic.Searchbar.BoxShadow}"
+                        Padding="{TemplateBinding Padding}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  Theme="{StaticResource Avonic.Searchbar.NativeScroller}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                        <Panel VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <TextBlock Name="PART_Placeholder"
+                                       Text="{TemplateBinding PlaceholderText}"
+                                       TextWrapping="NoWrap"
+                                       IsHitTestVisible="False"
+                                       IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+                                <TextBlock.Foreground>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Searchbar.PlaceholderColor" />
+                                        <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.Foreground>
+                                <TextBlock.Opacity>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Searchbar.PlaceholderOpacity" />
+                                        <DynamicResource ResourceKey="Avonic.PlaceholderOpacity" />
+                                    </MultiBinding>
+                                </TextBlock.Opacity>
+                                <TextBlock.FontStyle>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Searchbar.PlaceholderFontStyle" />
+                                        <Binding Path="FontStyle" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontStyle>
+                                <TextBlock.FontWeight>
+                                    <MultiBinding Converter="{x:Static b:Css.Var}">
+                                        <DynamicResource ResourceKey="Avonic.Searchbar.PlaceholderFontWeight" />
+                                        <Binding Path="FontWeight" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontWeight>
+                            </TextBlock>
+                            <TextPresenter Name="PART_TextPresenter"
+                                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                                           CaretIndex="{TemplateBinding CaretIndex}"
+                                           SelectionStart="{TemplateBinding SelectionStart}"
+                                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                                           TextAlignment="{TemplateBinding TextAlignment}"
+                                           TextWrapping="{TemplateBinding TextWrapping}"
+                                           PasswordChar="{TemplateBinding PasswordChar}"
+                                           RevealPassword="{TemplateBinding RevealPassword}"
+                                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                           CaretBrush="{TemplateBinding CaretBrush}" />
+                        </Panel>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A translation of searchbar.md.css. :host-context(ion-toolbar) is in Styles/Searchbar.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSearchbar}" TargetType="c:AvonicSearchbar">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- width: 100%; padding: 8px. background: inherit, which shows what's behind it. -->
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="8" />
+        <!-- The input's shadow, inside the padding; nothing of the host's clips in CSS. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <!-- color: var(color) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Searchbar.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- .searchbar-input-container -->
+                <Panel Name="PART_Container" Margin="{TemplateBinding Padding}" VerticalAlignment="Center">
+                    <!-- .searchbar-input: 55px at each side, 6px above and below a 30px line, 1rem, color: inherit -->
+                    <TextBox Name="PART_NativeInput"
+                             Theme="{StaticResource Avonic.Searchbar.Md.NativeInput}"
+                             Padding="55,6"
+                             MinHeight="42"
+                             FontSize="16"
+                             FontWeight="Normal"
+                             Foreground="{TemplateBinding Foreground}"
+                             CaretBrush="{TemplateBinding Foreground}"
+                             Background="{DynamicResource Avonic.Searchbar.Background}"
+                             CornerRadius="{DynamicResource Avonic.Searchbar.BorderRadius}"
+                             AutomationProperties.Name="search text" />
+                    <!-- .searchbar-cancel-button: at the start, 9px in, the whole height, 1.5em; transparent -->
+                    <Border Name="PART_CancelButton"
+                            HorizontalAlignment="Left"
+                            Margin="9,0,0,0"
+                            Background="Transparent"
+                            Focusable="True"
+                            FocusAdorner="{x:Null}"
+                            IsVisible="False"
+                            TextElement.Foreground="{DynamicResource Avonic.Searchbar.CancelButtonColor}"
+                            AutomationProperties.Name="{TemplateBinding CancelButtonText}"
+                            AutomationProperties.ControlTypeOverride="Button">
+                        <TextElement.FontSize>
+                            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.5">
+                                <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                            </MultiBinding>
+                        </TextElement.FontSize>
+                        <c:AvonicIcon Name="PART_CancelIcon"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.AccessibilityView="Raw"
+                                      FlipRtl="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicSearchbar.FlipUnlessDefault}}"
+                                      Icon="{Binding CancelButtonIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=arrow-back-sharp}" />
+                    </Border>
+                    <!-- .searchbar-search-icon: 1.3125rem, 16px in, 11px down -->
+                    <c:AvonicIcon Name="PART_SearchIcon"
+                                  Width="21" Height="21"
+                                  Margin="16,11,0,0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  IsHitTestVisible="False"
+                                  Foreground="{DynamicResource Avonic.Searchbar.IconColor}"
+                                  AutomationProperties.AccessibilityView="Raw"
+                                  Icon="{Binding SearchIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=search-sharp}" />
+                    <!-- .searchbar-clear-button: at the end, 13px in, the whole height; .searchbar-clear-icon 1.375rem -->
+                    <Border Name="PART_ClearButton"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,13,0"
+                            Background="Transparent"
+                            Focusable="True"
+                            FocusAdorner="{x:Null}"
+                            IsVisible="False"
+                            AutomationProperties.Name="reset"
+                            AutomationProperties.ControlTypeOverride="Button">
+                        <TextElement.Foreground>
+                            <MultiBinding Converter="{x:Static b:Css.Var}">
+                                <DynamicResource ResourceKey="Avonic.Searchbar.ClearButtonColor" />
+                                <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                            </MultiBinding>
+                        </TextElement.Foreground>
+                        <c:AvonicIcon Name="PART_ClearIcon"
+                                      Width="22" Height="22"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.AccessibilityView="Raw"
+                                      Icon="{Binding ClearIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicInput.OrConverter}, ConverterParameter=close-sharp}" />
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ── What's shown when, as the stub ────────────────────────────────────────────────── -->
+
+        <Style Selector="^:has-value:should-show-clear /template/ Border#PART_ClearButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:should-show-cancel /template/ Border#PART_CancelButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:should-show-cancel /template/ c|AvonicIcon#PART_SearchIcon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- .searchbar-clear-button:focus -->
+        <Style Selector="^ /template/ Border#PART_ClearButton:focus">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
+        <!-- :host(.ion-color): the contrast; the input the base; the icon and the buttons inherit -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Contrast), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ TextBox#PART_NativeInput">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicSearchbar].(b:ColorPalette.Base)}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ c|AvonicIcon#PART_SearchIcon">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSearchbar].Foreground}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_CancelButton, ^:ion-color /template/ Border#PART_ClearButton">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicSearchbar].Foreground}" />
+        </Style>
+
+        <!-- :host(.searchbar-disabled): opacity 0.4, as a group -->
+        <Style Selector="^:searchbar-disabled">
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Searchbar.Md.DisabledMask}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

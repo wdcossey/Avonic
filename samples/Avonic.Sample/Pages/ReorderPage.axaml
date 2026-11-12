@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ReorderPage">
+
+    <!-- In a content, so that a drag near its top or bottom scrolls it -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicToggle Name="Enabled" Checked="True" Content="Reorder enabled" />
+            </c:AvonicItem>
+            <TextBlock Name="Status" Margin="16,8" Text="Drag a handle." />
+
+            <c:AvonicListHeader><c:AvonicLabel Content="Handles at the end, completed in ionReorderEnd" /></c:AvonicListHeader>
+            <c:AvonicList>
+                <c:AvonicReorderGroup Name="Group"
+                                      Disabled="{Binding !#Enabled.Checked}"
+                                      IonReorderEnd="OnReorderEnd" />
+            </c:AvonicList>
+
+            <c:AvonicListHeader><c:AvonicLabel Content="Each item wrapped in its handle" /></c:AvonicListHeader>
+            <c:AvonicList>
+                <c:AvonicReorderGroup Disabled="{Binding !#Enabled.Checked}" IonReorderEnd="OnReorderEnd">
+                    <c:AvonicReorder>
+                        <c:AvonicItem><c:AvonicLabel Content="Drag me from anywhere" /></c:AvonicItem>
+                    </c:AvonicReorder>
+                    <c:AvonicReorder>
+                        <c:AvonicItem><c:AvonicLabel Content="Or me" /></c:AvonicItem>
+                    </c:AvonicReorder>
+                    <c:AvonicReorder>
+                        <c:AvonicItem><c:AvonicLabel Content="Or me" /></c:AvonicItem>
+                    </c:AvonicReorder>
+                </c:AvonicReorderGroup>
+            </c:AvonicList>
+
+            <c:AvonicListHeader><c:AvonicLabel Content="A custom handle, and complete(false)" /></c:AvonicListHeader>
+            <c:AvonicList>
+                <c:AvonicReorderGroup Disabled="{Binding !#Enabled.Checked}" IonReorderEnd="OnReorderEndCancel">
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="Goes back where it was" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicReorder><c:AvonicIcon IconName="pizza" /></c:AvonicReorder>
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="So does this one" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicReorder><c:AvonicIcon IconName="pizza" /></c:AvonicReorder>
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                </c:AvonicReorderGroup>
+            </c:AvonicList>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
