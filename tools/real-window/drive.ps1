@@ -130,6 +130,14 @@ function Guard {
         if ([RealInput]::GetForegroundWindow() -ne $p.MainWindowHandle) { throw 'The sample is not in front, so no input was sent' }
     }
 }
+# Throws rather than send input to a point outside the sample's window, where it would land in another app, or off the screen.
+function Within($x, $y) {
+    if (-not $win.Current.BoundingRectangle.Contains((New-Object Windows.Point $x, $y))) { throw "$x, $y is outside the window, so no input was sent" }
+}
+# Where a press may go once the sample holds it, and Windows still takes a touch: anywhere on the screens.
+function OnScreen($x, $y) {
+    if (-not [System.Windows.Forms.SystemInformation]::VirtualScreen.Contains([int]$x, [int]$y)) { throw "$x, $y is off the screen, so no input was sent" }
+}
 function Away { $r = $win.Current.BoundingRectangle; [void][RealInput]::SetCursorPos(([int]$r.X + 4), ([int]$r.Y + 4)); Start-Sleep -Milliseconds 150 }
 function Key($text, $ms = 250) { Guard; $SendKeys::SendWait($text); Start-Sleep -Milliseconds $ms }
 function Press { Guard; $script:held = $true; [RealInput]::Down() }
@@ -142,7 +150,7 @@ function LetGo {
         try { [RealInput]::TouchUp($script:touchX, $script:touchY) } catch { }
     }
 }
-function TouchDown($x, $y) { Guard; $script:touching = $true; $script:touchX = $x; $script:touchY = $y; [RealInput]::TouchDown($x, $y) }
+function TouchDown($x, $y) { Guard; Within $x $y; $script:touching = $true; $script:touchX = $x; $script:touchY = $y; [RealInput]::TouchDown($x, $y) }
 function TouchUp($x, $y) { [RealInput]::TouchUp($x, $y); $script:touching = $false }
 # What a page reports comes after layout, so it can take a moment.
 function WaitForText($like, $seconds = 5) {
@@ -172,6 +180,7 @@ function Open($title) {
 }
 function Click($x, $y) {
     Guard
+    Within $x $y
     [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 120
     Press; Start-Sleep -Milliseconds 50; Release; Start-Sleep -Milliseconds 250
 }
@@ -185,21 +194,13 @@ function Tap($x, $y) {
     [RealInput]::TouchMove($x, $y); Start-Sleep -Milliseconds 40
     TouchUp $x $y; Start-Sleep -Milliseconds 250
 }
-function Drag($x, $y, $dy, $steps = 15, $ms = 16) {
-    TouchDown $x $y
-    for ($i = 1; $i -le $steps; $i++) {
-        Start-Sleep -Milliseconds $ms
-        [RealInput]::TouchMove($x, [int]($y + $dy * $i / $steps))
-    }
-    TouchUp $x ($y + $dy)
-}
+function Drag($x, $y, $dy, $steps = 15, $ms = 16) { TouchDrag $x $y 0 $dy $steps $ms }
 function Wheel($notches) { Guard; 1..$notches | ForEach-Object { [RealInput]::Wheel(-120); Start-Sleep -Milliseconds 50 }; Start-Sleep -Milliseconds 350 }
 function WheelUp($notches) { Guard; 1..$notches | ForEach-Object { [RealInput]::Wheel(120); Start-Sleep -Milliseconds 50 }; Start-Sleep -Milliseconds 350 }
 # A drag in any direction, in screen pixels, by touch and by the mouse.
 function TouchDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
-    # Windows refuses a touch off the screen (87) partway through, so stay inside the window.
-    $r = $win.Current.BoundingRectangle
-    if (-not ($r.Contains((New-Object Windows.Point $x, $y)) -and $r.Contains((New-Object Windows.Point ($x + $dx), ($y + $dy))))) { throw "A drag from $x, $y to $($x + $dx), $($y + $dy) would leave the window" }
+    # Windows refuses a touch off the screen (87) partway through.
+    OnScreen ($x + $dx) ($y + $dy)
     TouchDown $x $y
     for ($i = 1; $i -le $steps; $i++) {
         Start-Sleep -Milliseconds $ms
@@ -209,6 +210,7 @@ function TouchDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
 }
 function MouseDrag($x, $y, $dx, $dy, $steps = 15, $ms = 16) {
     Guard
+    Within $x $y; OnScreen ($x + $dx) ($y + $dy)
     [void][RealInput]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 120
     Press
     for ($i = 1; $i -le $steps; $i++) {
@@ -734,7 +736,8 @@ try {
     Section 'ion-reorder' {
         Open 'ion-reorder'
         $w = $win.Current.BoundingRectangle
-        function Status { WaitForText 'ionReorderEnd*' 1 }
+        # Read once: where it's meant to be absent, a wait would only cost time.
+        function Status { FirstText 'ionReorderEnd*' }
         function Top($label) { (Named $CT::Text $label).Current.BoundingRectangle.Y }
         # The handle at the end of a row, as the handles have no name of their own.
         function HandleOf($label) {
@@ -748,11 +751,11 @@ try {
         TouchDrag $hx $hy 0 (Px (2 * $row + 10)) 20
         Start-Sleep -Milliseconds 500
         Shot 'ion-reorder-touch'
-        Check 'a touch drag on a handle moves the item' (((Status) -eq 'ionReorderEnd: from 0 to 2') -and ((Top 'Item 1') -gt (Top 'Item 3'))) (Status)
+        Check 'a touch drag on a handle moves the item' (((WaitForText 'ionReorderEnd: from 0 to 2' 2) -eq 'ionReorderEnd: from 0 to 2') -and ((Top 'Item 1') -gt (Top 'Item 3'))) (Status)
         $hx, $hy = HandleOf 'Item 2'
         MouseDrag $hx $hy 0 (Px ($row + 10)) 20
         Start-Sleep -Milliseconds 500
-        Check 'and so does a mouse drag' (((Status) -eq 'ionReorderEnd: from 0 to 1') -and ((Top 'Item 2') -gt (Top 'Item 3'))) (Status)
+        Check 'and so does a mouse drag' (((WaitForText 'ionReorderEnd: from 0 to 1' 2) -eq 'ionReorderEnd: from 0 to 1') -and ((Top 'Item 2') -gt (Top 'Item 3'))) (Status)
 
         Open 'ion-reorder'
         $bottom = (All $CT::Group | Where-Object { $_.Current.ClassName -eq 'AvonicContent' } | Select-Object -First 1).Current.BoundingRectangle.Bottom
@@ -767,7 +770,7 @@ try {
         Start-Sleep -Milliseconds 500
         Shot 'ion-reorder-auto-scroll'
         $scrolled = $statusY - (Top 'Drag a handle.')
-        $end = Status
+        $end = WaitForText 'ionReorderEnd*' 2
         Check 'held near the bottom, the drag scrolls the page' ($scrolled -gt (Px 150)) "by $scrolled px"
         Check 'and the item goes further down' ($end -match '^ionReorderEnd: from 4 to (\d+)$' -and [int]$Matches[1] -gt 8) $end
 
@@ -844,8 +847,8 @@ try {
         $colours, $numbers = $cols[0], $cols[1]
         function Said($change) { [bool](WaitForText "ionChange: $change" 2) }
         function Status { FirstText 'ionChange:*' }
-        function Centred($name) {
-            $c = $colours.Current.BoundingRectangle
+        function Centred($name, $column = $colours) {
+            $c = $column.Current.BoundingRectangle
             $o = (Named $CT::Button $name).Current.BoundingRectangle
             [math]::Abs(($o.Y + $o.Height / 2) - ($c.Y + $c.Height / 2)) -le (Px 3)
         }
@@ -882,9 +885,7 @@ try {
         "        ionChange $([math]::Round(((Get-Date) - $lifted).TotalSeconds, 1)) s after the finger lifted"
         $snapped = $false
         if ($now -match '^ionChange: (\d+)$') {
-            $c = $numbers.Current.BoundingRectangle
-            $o = (Named $CT::Button $Matches[1]).Current.BoundingRectangle
-            $snapped = ([int]$Matches[1] -gt 5) -and ([math]::Abs(($o.Y + $o.Height / 2) - ($c.Y + $c.Height / 2)) -le (Px 3))
+            $snapped = ([int]$Matches[1] -gt 5) -and (Centred $Matches[1] $numbers)
         }
         Shot 'ion-picker-touch'
         Check 'a touch drag up scrolls the numbers and snaps' $snapped $now
@@ -897,7 +898,7 @@ try {
         $edit = @(All $CT::Edit | Where-Object { $_.Current.Name -eq 'search text' })[-1]
         $e = $edit.Current.BoundingRectangle
         $iy = [int]($e.Y + $e.Height / 2)
-        $icon = { Region $e.X ($e.Y + 6) (Px 45) ($e.Height - 12) }
+        $icon = { Region $e.X ($e.Y + (Px 5)) (Px 45) ($e.Height - (Px 10)) }
         function Log { @((Texts | Where-Object { $_ -match '^ion(Input|Change|Clear|Cancel)' } | Select-Object -First 1) -split "`n") }
         $clearX = [int]($e.Right - (Px 24))
         $cancelX = [int]($e.X + (Px 20))
@@ -954,7 +955,7 @@ try {
 
         $c = Named $CT::Edit 'Comment, at least 10 characters'
         $cb = $c.Current.BoundingRectangle
-        $counter = { Region ($cb.Right - (Px 70)) ($cb.Bottom + 2) (Px 70) (Px 24) }
+        $counter = { Region ($cb.Right - (Px 70)) ($cb.Bottom + (Px 2)) (Px 70) (Px 24) }
         $empty = & $counter
         ClickOn $c
         Key 'hello' 400
@@ -999,7 +1000,10 @@ try {
             $saved = if ([Windows.Forms.Clipboard]::ContainsText()) { [Windows.Forms.Clipboard]::GetText() } else { $null }
             try {
                 [Windows.Forms.Clipboard]::SetText('5678')
-                Key '^v' 600
+                Key '^v' 100
+                # The paste reads the clipboard asynchronously: put the user's back only once it has.
+                $until = (Get-Date).AddSeconds(3)
+                while ((Boxes) -ne '5,6,7,8' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
             }
             finally { if ($null -ne $saved) { [Windows.Forms.Clipboard]::SetText($saved) } else { [Windows.Forms.Clipboard]::Clear() } }
             Check 'a paste fills the boxes' (((Boxes) -eq '5,6,7,8') -and ((Status) -eq 'ionComplete: 5678')) "$(Boxes), $(Status)"
