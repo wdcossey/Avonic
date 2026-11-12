@@ -726,6 +726,51 @@ public class AvonicInfiniteScrollTests
         }
     }
 
+    [AvaloniaFact]
+    public void B16_The_Infinite_Loading_Spinner_Config_Comes_Before_The_Spinner_Config_Once()
+    {
+        // config.get('infiniteLoadingSpinner', config.get('spinner', 'crescent')), in componentDidLoad.
+        using var clock = new TestClock();
+        var previousSpinner = AvonicConfig.Spinner;
+        var previousInfinite = AvonicConfig.InfiniteLoadingSpinner;
+        try
+        {
+            AvonicConfig.Spinner = SpinnerName.Dots;
+            AvonicConfig.InfiniteLoadingSpinner = SpinnerName.Bubbles;
+            var host = new StackPanel();
+            using var scene = new Scene(host);
+            AvonicInfiniteScrollContent Attach(AvonicInfiniteScrollContent content)
+            {
+                host.Children.Add(content);
+                Dispatcher.UIThread.RunJobs();
+                return content;
+            }
+
+            var content = new AvonicInfiniteScrollContent();
+            Attach(content);
+            Assert.Equal(SpinnerName.Bubbles, content.LoadingSpinner);
+            Assert.Equal(SpinnerName.Bubbles, Spinner(content).SpinnerName);
+
+            // Read once: a later attach keeps what the first gave.
+            AvonicConfig.InfiniteLoadingSpinner = SpinnerName.Lines;
+            host.Children.Remove(content);
+            Attach(content);
+            Assert.Equal(SpinnerName.Bubbles, content.LoadingSpinner);
+
+            // Its own spinner wins over both.
+            Assert.Equal(SpinnerName.Circles, Attach(new AvonicInfiniteScrollContent { LoadingSpinner = SpinnerName.Circles }).LoadingSpinner);
+
+            // Unset, the spinner config is next.
+            AvonicConfig.InfiniteLoadingSpinner = null;
+            Assert.Equal(SpinnerName.Dots, Attach(new AvonicInfiniteScrollContent()).LoadingSpinner);
+        }
+        finally
+        {
+            AvonicConfig.Spinner = previousSpinner;
+            AvonicConfig.InfiniteLoadingSpinner = previousInfinite;
+        }
+    }
+
     // ── B18: the text as it's written ────────────────────────────────────────────────────────
 
     [AvaloniaFact]

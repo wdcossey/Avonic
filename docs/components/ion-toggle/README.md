@@ -24,7 +24,7 @@ and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 | [x] | `checked` | `Checked` | Two-way by default |
 | [x] | `color` | `Color` | The checked track and handle. See the [colour system](../../infra/color-system/README.md) |
 | [x] | `disabled` | `IsEnabled` | 0.38, as a group, and a tap goes to what's behind it. A disabled ancestor doesn't add it |
-| [x] | `enableOnOffLabels` | `EnableOnOffLabels` | `false` by default: Ionic's `toggleOnOffLabels` config isn't in `AvonicConfig` yet |
+| [x] | `enableOnOffLabels` | `EnableOnOffLabels` | Unset, `AvonicConfig.ToggleOnOffLabels` (`false` by default) when the toggle is made, at style priority, so an app's own value or style wins |
 | [x] | `errorText` | `ErrorText` | Shown while the toggle has both style classes `ion-touched` and `ion-invalid` |
 | [x] | `helperText` | `HelperText` | Shown otherwise |
 | [x] | `justify` | `Justify` (`ToggleJustify?`) | `End`, `SpaceBetween`, `Start`. Set, the toggle fills the width |
@@ -105,5 +105,6 @@ None.
 | `required`, `aria-invalid` aren't exposed | Avalonia 12's automation has neither |
 | The track's colour mid-transition | Avalonia's `BrushTransition` doesn't blend as CSS does; the ends match. See [COMPARISON.md](COMPARISON.md#gaps) |
 | An item that met its toggle disabled doesn't forward a padding tap once it's enabled | `AvonicItem`'s, proposed in the PR |
+| With `AvonicConfig.ToggleOnOffLabels` on, clearing an app's own `EnableOnOffLabels` gives the config's `true` back, and a setter in an app's `ControlTheme` loses to it | The config is the toggle's at style priority, as `AvonicSearchbar` takes `BackButtonIcon`. Ionic's `undefined` later shows none, and CSS can't set the prop at all |
 | No haptics on a drag's flip | `hapticSelection` is Capacitor's plugin, which does nothing in a browser |
 | Not tried in a real window, or on a device | Real-window run queued |

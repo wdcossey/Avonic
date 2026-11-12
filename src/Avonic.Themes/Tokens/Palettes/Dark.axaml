@@ -129,4 +129,30 @@
     <SolidColorBrush x:Key="Avonic.Toolbar.Md.ColorBrush" Color="{DynamicResource Avonic.TextColor}" />
     <SolidColorBrush x:Key="Avonic.Toolbar.Md.BorderColorBrush" Color="{DynamicResource Avonic.BorderColor}" />
 
+    <!-- ion-breadcrumb: breadcrumb.md.css reads ion-text-color and the step colours, which dark sets, before its literals, which
+         Tokens/Breadcrumb.axaml keeps for light. Measured in Chromium with dark.always.css: the text a0a0a0, active and hover
+         ffffff, focused d0d0d0 on 1e1e1e, the separator and icons 949494, an active one's icon dbdbdb, the collapsed indicator
+         949494 on 2a2a2a, and on 363636 when focused. -->
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.Color" Color="{DynamicResource Avonic.TextColorStep400}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorActive" Color="{DynamicResource Avonic.TextColor}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorHover" Color="{DynamicResource Avonic.TextColor}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.ColorFocused" Color="{DynamicResource Avonic.TextColorStep200}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.BackgroundFocused" Color="{DynamicResource Avonic.BackgroundColorStep50}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.SeparatorColor" Color="{DynamicResource Avonic.TextColorStep450}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.IconColor" Color="{DynamicResource Avonic.TextColorStep450}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.IconColorActive" Color="{DynamicResource Avonic.TextColorStep150}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorBackground" Color="{DynamicResource Avonic.BackgroundColorStep100}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorBackgroundFocused" Color="{DynamicResource Avonic.BackgroundColorStep150}" />
+    <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorColor" Color="{DynamicResource Avonic.TextColorStep450}" />
+
+    <!-- ion-tab-bar: tab-bar.md.css's border falls back to ion-tab-bar-border-color, then ion-border-color, which
+         Avonic.BorderColor stands for, then ion-background-color-step-150, which dark sets: measured 363636. Tokens/Tabs.axaml
+         keeps the light literal. -->
+    <SolidColorBrush x:Key="Avonic.TabBar.Md.BorderColorBrush" Color="{DynamicResource Avonic.BorderColor}" />
+
+    <!-- ion-refresher: md's native icon reads ion-background-color-step-200 for its border and 250 for its background, which
+         dark sets: measured 414141 and 4d4d4d. Tokens/Refresher.axaml keeps the light literals. -->
+    <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBorderBrush" Color="{DynamicResource Avonic.BackgroundColorStep200}" />
+    <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
+
 </ResourceDictionary>

@@ -188,6 +188,31 @@ public class AvonicTabBarTests
         Assert.Equal(77, padded.Bounds.Height);
     });
 
+    // tab-bar.md.css's border falls back to ion-border-color, then ion-background-color-step-150, which dark.always.css sets:
+    // measured rgb(54, 54, 54), on #1f1f1f.
+    [AvaloniaFact]
+    public void B4_In_The_Dark_Palette_The_Border_Is_The_Border_Colour() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        var bar = Bar(null, Button("a", "A"));
+        using var scene = new Scene(Top(bar));
+
+        Assert.Equal(Color.Parse("#363636"), ColorOf(bar.BorderBrush));
+        Assert.Equal(Color.Parse("#1F1F1F"), ColorOf(bar.Background));
+
+        // var(ion-border-color), which an app may set.
+        var app = Application.Current!;
+        app.Resources["Avonic.BorderColor"] = Colors.Purple;
+        try
+        {
+            AvonicTabsTests.Settle();
+            Assert.Equal(Colors.Purple, ColorOf(bar.BorderBrush));
+        }
+        finally
+        {
+            app.Resources.Remove("Avonic.BorderColor");
+        }
+    }));
+
     [AvaloniaFact]
     public void B4_In_The_Top_Slot_The_Border_Is_At_The_Bottom_With_The_Top_Safe_Area() => InstalledTheme.Run(_ =>
     {

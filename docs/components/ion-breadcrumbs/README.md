@@ -66,7 +66,9 @@ Slots, which `core.json` doesn't list and `breadcrumb.js` renders: `StartContent
 
 Set, each beats md's own value, as a variable set from outside beats `:host` in Ionic. `Avonic.Breadcrumb.Md.*` holds md's
 literals, including those with no variable: the separator, slotted icons, the indicator and the focus shadow. Ionic leaves the
-step colours unset in light, so its literals render, and these don't follow `Avonic.TextColorStep*`.
+step colours unset in light, so its literals render, and these don't follow `Avonic.TextColorStep*`. Its dark palette sets them,
+so `Tokens/Palettes/Dark.axaml` gives the `Md` keys the step colours and `Avonic.TextColor` they read, as measured with
+`dark.always.css`.
 
 ## Behaviours
 
@@ -96,8 +98,6 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **A breadcrumb wider than the whole row** draws past its edge as in Ionic, but its box is held to the row's width by Avalonia's
   `WrapPanel`, so a tap past the edge misses it.
 - **No popover** for `IonCollapsedClick` yet: `ion-popover` comes later.
-- **Dark:** `Tokens/Palettes/Dark.axaml` doesn't set the `Avonic.Breadcrumb.Md.*` keys yet, so with it merged the breadcrumbs keep
-  md's light colours, where Ionic's dark palette sets the step colours they read. The lines are proposed in the PR.
 - **A restyled indicator with `ClickMode="Press"`** would click its breadcrumb twice: on the press, and as the host on the release.
   The theme's indicator clicks on release.
 - Not tried in a real window, nor on a device.

@@ -53,6 +53,36 @@ public static class AvonicConfig
     /// </remarks>
     public static string? BackButtonIcon { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>toggleOnOffLabels</c> config: the default of <see cref="AvonicToggle.EnableOnOffLabels"/>. Ionic leaves it
+    /// undefined, which is false.
+    /// </summary>
+    /// <remarks>
+    /// Read when the toggle is made, as Ionic reads it for <c>enableOnOffLabels</c>'s default in the constructor: a change of this
+    /// reaches only toggles made after it. The value is the toggle's at style priority, so an app's own wins.
+    /// </remarks>
+    public static bool ToggleOnOffLabels { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>infiniteLoadingSpinner</c> config: the <see cref="AvonicInfiniteScrollContent.LoadingSpinner"/> of a content that
+    /// has none, before <see cref="Spinner"/>. Null falls back to <see cref="Spinner"/>, then md's <see cref="SpinnerName.Crescent"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read when the content is first attached, as Ionic reads it in <c>componentDidLoad</c>: a change of this reaches only contents
+    /// attached for the first time after it.
+    /// </remarks>
+    public static SpinnerName? InfiniteLoadingSpinner { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>tabButtonLayout</c> config: the <see cref="AvonicTabButton.Layout"/> of a tab button that has none. Null is
+    /// Ionic's fallback, <see cref="Controls.TabButtonLayout.IconTop"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read when the tab button is first attached, as Ionic reads it in <c>componentWillLoad</c>: a change of this reaches only tab
+    /// buttons attached for the first time after it.
+    /// </remarks>
+    public static TabButtonLayout? TabButtonLayout { get; set; }
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>

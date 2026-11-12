@@ -83,7 +83,7 @@ Its buttons are `Items`.
 | [x] | `disabled` | `IsEnabled` | |
 | [ ] | `download`, `rel`, `target` | — | Not applicable: only with `href` |
 | [ ] | `href` | — | Out of scope: router, as on `AvonicButton` |
-| [x] | `layout` | `Layout` (`TabButtonLayout`) | `IconTop` by default |
+| [x] | `layout` | `Layout` (`TabButtonLayout`) | Unset, `AvonicConfig.TabButtonLayout` (Ionic's `tabButtonLayout`) on the first attach, at style priority, else `IconTop` |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [x] | `selected` | `Selected` (`bool`) | The bar writes it |
 | [x] | `tab` | `Tab` (`string?`) | |
@@ -102,7 +102,7 @@ All of [PLAN.md](PLAN.md#behaviours): T1–T7, A1–A4, B1–B7, N1–N12, each 
 | ✓ | Ionic | Key | md default |
 |---|---|---|---|
 | [x] | `ion-tab-bar` `--background` | `Avonic.TabBar.Background` | Unset: `Avonic.TabBarBackgroundBrush` |
-| [x] | `ion-tab-bar` `--border` | `Avonic.TabBar.BorderWidth`, `Avonic.TabBar.BorderColor` | 1; unset: `Avonic.TabBarBorderColorBrush`, then `rgba(0, 0, 0, 0.07)` |
+| [x] | `ion-tab-bar` `--border` | `Avonic.TabBar.BorderWidth`, `Avonic.TabBar.BorderColor` | 1; unset: `Avonic.TabBarBorderColorBrush`, then `rgba(0, 0, 0, 0.07)`; in `Tokens/Palettes/Dark.axaml`, `Avonic.BorderColor`, `#363636` |
 | [x] | `ion-tab-bar` `--color` | `Avonic.TabBar.Color` | Unset: `Avonic.TabBarColorBrush`, which follows `Avonic.TextColorStep350` |
 | [x] | `--background` | `Avonic.TabButton.Background` | Unset: the bar's |
 | [x] | `--background-focused` | `Avonic.TabButton.BackgroundFocused` | Unset: `Avonic.TabBarBackgroundFocusedBrush`, #e0e0e0 |
@@ -128,7 +128,9 @@ None.
 - **The keyboard.** Ionic hides a bottom bar while the on-screen keyboard is open (`tab-bar-hidden`). Not done: it needs
   `TopLevel.InputPane`, which headless tests can't open, so it would ship untested, as the footer's keyboard rule didn't.
 - **`href`, `download`, `rel`, `target`** aren't declared, as on `AvonicButton`: without a router a link would do nothing.
-- **The `tabButtonLayout` config** isn't on `AvonicConfig`, a shared file: `Layout` defaults to Ionic's fallback, `IconTop`.
+- **With `AvonicConfig.TabButtonLayout` set,** clearing an app's own `Layout` gives the config's back, where Ionic's `undefined`
+  after the load renders as icon-top; and a setter in an app's `ControlTheme` loses to it, as CSS can't set the prop. The config's
+  value is at style priority so that every style of the app's wins, and it comes back when the style stops.
 - **A hidden tab** is hidden at a style trigger's priority, which beats an app's plain style, as `!important` does. An app's own
   `IsVisible` on a tab still wins, as every control's behaviour here lets it, and so does its style with a class or a pseudoclass,
   where Ionic's `display: none !important` beats both.
@@ -145,5 +147,3 @@ None.
   content shows behind a bottom bar, and with a top bar its scroll part runs past the tabs' bottom by the bar's height and is
   drawn there, as Ionic's `offsetTop` counts from the tab (measured in Chromium). In an app whose tabs fill the window, that's off
   screen.
-- **In dark,** the bar's border stays `rgba(0, 0, 0, 0.07)`, where Ionic's is `--ion-background-color-step-150`, until the dark
-  palette sets `Avonic.TabBar.Md.BorderColorBrush`.

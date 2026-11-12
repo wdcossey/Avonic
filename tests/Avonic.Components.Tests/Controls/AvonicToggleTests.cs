@@ -1107,6 +1107,49 @@ public class AvonicToggleTests
         Assert.True(Icon(off).IsEffectivelyVisible);
     });
 
+    // enableOnOffLabels = config.get('toggleOnOffLabels'), in the constructor: a toggle made before the config changes keeps
+    // none; one made after shows them; the app's own value, set or styled, beats it.
+    [AvaloniaFact]
+    public void T22_On_Off_Labels_Default_To_The_Config_When_The_Toggle_Is_Made() => InstalledTheme.Run(_ =>
+    {
+        var previous = AvonicConfig.ToggleOnOffLabels;
+        try
+        {
+            var before = new AvonicToggle { Content = "Before" };
+            AvonicConfig.ToggleOnOffLabels = true;
+            var after = new AvonicToggle { Content = "After" };
+            var own = new AvonicToggle { Content = "Own", EnableOnOffLabels = false };
+            var styled = new AvonicToggle { Content = "Styled" };
+
+            // A plain style, with no activator, which is at style priority as the config's value is.
+            styled.Styles.Add(new Style(x => x.OfType<AvonicToggle>())
+            {
+                Setters = { new Setter(AvonicToggle.EnableOnOffLabelsProperty, false) },
+            });
+            using var scene = InItems(before, after, own, styled);
+
+            static AvonicIcon Icon(AvonicToggle toggle) => Part<AvonicIcon>(toggle, "PART_SwitchIcon");
+
+            Assert.False(before.EnableOnOffLabels);
+            Assert.False(Icon(before).IsEffectivelyVisible);
+            Assert.True(after.EnableOnOffLabels);
+            Assert.True(Icon(after).IsEffectivelyVisible);
+            Assert.Equal("remove-outline", Icon(after).IconName);
+            Assert.False(Icon(own).IsEffectivelyVisible);
+            Assert.False(styled.EnableOnOffLabels);
+            Assert.False(Icon(styled).IsEffectivelyVisible);
+
+            // Read once: a change of the config later doesn't reach a toggle already made.
+            AvonicConfig.ToggleOnOffLabels = false;
+            Settle();
+            Assert.True(Icon(after).IsEffectivelyVisible);
+        }
+        finally
+        {
+            AvonicConfig.ToggleOnOffLabels = previous;
+        }
+    });
+
     // ── 23: automation ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

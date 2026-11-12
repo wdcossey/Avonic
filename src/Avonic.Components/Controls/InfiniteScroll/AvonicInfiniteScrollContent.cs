@@ -22,7 +22,8 @@ namespace Avonic.Components.Controls;
 public class AvonicInfiniteScrollContent : TemplatedControl
 {
     /// <summary>
-    /// Ionic <c>loadingSpinner</c>. Left unset, it becomes <see cref="AvonicConfig.Spinner"/>, or <see cref="SpinnerName.Crescent"/>,
+    /// Ionic <c>loadingSpinner</c>. Left unset, it becomes <see cref="AvonicConfig.InfiniteLoadingSpinner"/>, else
+    /// <see cref="AvonicConfig.Spinner"/>, else <see cref="SpinnerName.Crescent"/>,
     /// md's default here, when it's first attached, as Ionic sets it in <c>componentDidLoad</c>. Null: no spinner.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> LoadingSpinnerProperty =
@@ -62,7 +63,7 @@ public class AvonicInfiniteScrollContent : TemplatedControl
             _didLoad = true;
             if (!IsSet(LoadingSpinnerProperty))
             {
-                SetCurrentValue(LoadingSpinnerProperty, AvonicConfig.Spinner ?? SpinnerName.Crescent);
+                SetCurrentValue(LoadingSpinnerProperty, AvonicConfig.InfiniteLoadingSpinner ?? AvonicConfig.Spinner ?? SpinnerName.Crescent);
             }
         }
 
