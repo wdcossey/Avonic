@@ -263,7 +263,7 @@ public class AvonicPickerTests
         Assert.True(Active(time.Hour));
         Assert.False(Active(time.Minute));
 
-        // "1" then "2": 12. A second's pause, then "7": 7, not 127 or 27.
+        // "1" then "2": 12.
         // A key that isn't a digit doesn't go in.
         scene.Window.KeyTextInput("a");
         Dispatcher.UIThread.RunJobs();
@@ -274,7 +274,17 @@ public class AvonicPickerTests
         scene.Window.KeyTextInput("2");
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("12", time.Hour.Value);
+        // After a second's pause "1" starts again, and after another "0" is alone, no hour, where without the pauses it would
+        // have made 10.
         Later(clock, 1001);
+        scene.Window.KeyTextInput("1");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("1", time.Hour.Value);
+        Later(clock, 1001);
+        scene.Window.KeyTextInput("0");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("1", time.Hour.Value);
+        // "07" is no option's text, so the last digit alone: 7.
         scene.Window.KeyTextInput("7");
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("7", time.Hour.Value);
