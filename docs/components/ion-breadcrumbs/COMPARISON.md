@@ -82,5 +82,6 @@ The top of the page, Ionic on the left:
 
 - **A real window and a device.** Headless only: "real-window run queued", "not tried on a device".
 - **RTL** is in the frame and matches; Avalonia mirrors the margins.
-- **Dark mode.** The md literals don't follow `Dark.axaml` yet: see the README's known gaps.
+- **Dark mode.** `Dark.axaml` gives the md keys the step colours (#131): measured in Chromium with `dark.always.css`, and asserted
+  by `B21_In_The_Dark_Palette_The_Colours_Are_The_Step_Colours`. No dark frame.
 - **The popover** an app opens from `ionCollapsedClick`: `ion-popover` isn't built yet. The sample lists the hidden breadcrumbs instead.

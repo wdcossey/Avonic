@@ -1023,6 +1023,47 @@ public class AvonicBreadcrumbsTests
         AssertColor(Color.Parse("#DFE5E8"), indicator.Background);
     });
 
+    // ── 21: the dark palette ─────────────────────────────────────────────────────────────────
+
+    // breadcrumb.md.css reads ion-text-color and the step colours before its literals, and dark.always.css sets them. Measured in
+    // Chromium with it: the text a0a0a0, active and hover ffffff, focused d0d0d0 on 1e1e1e, the separator and a slotted icon
+    // 949494, an active one's icon dbdbdb, the collapsed indicator 949494 on 2a2a2a, and on 363636 when focused.
+    [AvaloniaFact]
+    public void B21_In_The_Dark_Palette_The_Colours_Are_The_Step_Colours() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
+    {
+        var icon = new AvonicIcon { IconName = "home" };
+        var activeIcon = new AvonicIcon { IconName = "document" };
+        var link = new AvonicBreadcrumb { StartContent = icon, Content = "Home", Href = "#h" };
+        var hovered = Crumb("Hovered", "#x");
+        var last = new AvonicBreadcrumb { StartContent = activeIcon, Content = "Last" };
+        var trail = Trail(link, hovered, last);
+        var collapsed = Trail("A", "B", "C", "D");
+        collapsed.MaxItems = 2;
+        using var scene = Show(new StackPanel { Children = { trail, collapsed } });
+        var indicator = Indicator(Crumbs(collapsed)[1]);
+        Assert.True(indicator.IsVisible);
+
+        AssertColor(Color.Parse("#A0A0A0"), link.Foreground);
+        AssertColor(Colors.White, last.Foreground);
+        AssertColor(Color.Parse("#949494"), Separator(link).GetValue(TextElement.ForegroundProperty));
+        AssertColor(Color.Parse("#949494"), icon.Foreground);
+        AssertColor(Color.Parse("#DBDBDB"), activeIcon.Foreground);
+        AssertColor(Color.Parse("#2A2A2A"), indicator.Background);
+        AssertColor(Color.Parse("#949494"), indicator.GetVisualDescendants().OfType<AvonicIcon>().Single().Foreground);
+
+        Hover(scene, hovered);
+        AssertColor(Colors.White, hovered.Foreground);
+
+        link.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        AssertColor(Color.Parse("#D0D0D0"), link.Foreground);
+        AssertColor(Color.Parse("#1E1E1E"), Native(link).Background);
+
+        indicator.Focus(NavigationMethod.Pointer);
+        Dispatcher.UIThread.RunJobs();
+        AssertColor(Color.Parse("#363636"), indicator.Background);
+    }));
+
     // ── Extension: Click and Command ─────────────────────────────────────────────────────────
 
     [AvaloniaFact]

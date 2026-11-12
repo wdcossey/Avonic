@@ -47,7 +47,7 @@ No slots, parts or CSS variables; its child is `Content`.
 
 | ✓ | Ionic | Avonic | Default | |
 |---|---|---|---|---|
-| [x] | `loadingSpinner` | `LoadingSpinner` | unset | `SpinnerName?`. Unset: `AvonicConfig.Spinner`, else `Crescent`, once, on the first attach. `null`: no spinner |
+| [x] | `loadingSpinner` | `LoadingSpinner` | unset | `SpinnerName?`. Unset: `AvonicConfig.InfiniteLoadingSpinner`, else `AvonicConfig.Spinner`, else `Crescent`, once, on the first attach. `null`: no spinner |
 | [x] | `loadingText` | `LoadingText` | `null` | Plain text, shown as it's written. `""` is a line of no height, as in Ionic |
 | [ ] | `mode` | none | | Not exposed (ADR 0001) |
 
@@ -100,6 +100,7 @@ None.
   only differs for one infinite scroll inside another's content.
 - **A scroll host with `ion-content-scroll-host`** has to be a `ScrollViewer` or have one around the infinite scroll, as only a
   `ScrollViewer` scrolls here. If it has neither, the error is logged and nothing fires.
-- **`infiniteLoadingSpinner`** isn't in `AvonicConfig`; `AvonicConfig.Spinner` is read instead.
+- **`AvonicConfig.InfiniteLoadingSpinner` can't turn the spinner off** for every content, as Ionic's `null` does: its null means
+  unset, so `AvonicConfig.Spinner` is next. Set `LoadingSpinner` to null on the content instead.
 - **`loadingText` has no HTML**, as with Ionic's default.
 - Not tried in a real window, nor on a device: a momentum flick hasn't been seen.

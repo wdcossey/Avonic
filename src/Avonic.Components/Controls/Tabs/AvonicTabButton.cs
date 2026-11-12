@@ -4,6 +4,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
@@ -32,8 +33,10 @@ public class AvonicTabButton : ItemsControl
         AvaloniaProperty.Register<AvonicTabButton, string?>(nameof(Tab));
 
     /// <summary>
-    /// Ionic <c>layout</c>: where the icon goes, or what's hidden. <see cref="TabButtonLayout.IconTop"/> by default, Ionic's fallback
-    /// for its <c>tabButtonLayout</c> config.
+    /// Ionic <c>layout</c>: where the icon goes, or what's hidden. Left unset, it becomes <see cref="AvonicConfig.TabButtonLayout"/>,
+    /// else <see cref="TabButtonLayout.IconTop"/>, Ionic's fallback, when it's first attached, as Ionic sets it in
+    /// <c>componentWillLoad</c>. The config's value is at style priority, bound before any style, so an app's own value and every
+    /// style of its win, and the config's comes back when a style stops applying.
     /// </summary>
     public static readonly StyledProperty<TabButtonLayout> LayoutProperty =
         AvaloniaProperty.Register<AvonicTabButton, TabButtonLayout>(nameof(Layout));
@@ -52,6 +55,8 @@ public class AvonicTabButton : ItemsControl
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private AvonicTabBar? _bar;
+    private bool _willLoad;
+    private readonly StyleValue<TabButtonLayout> _configLayout = new();
 
     static AvonicTabButton()
     {
@@ -71,6 +76,10 @@ public class AvonicTabButton : ItemsControl
         // The host's onClick, which the anchor's click reaches. No keys: the host's onKeyUp takes Enter and Space.
         _ = new NativeButton(this, _ => SelectTab(), () => false, () => { });
         AddHandler(KeyUpEvent, OnKeyUp);
+
+        // The tabButtonLayout config, given at the first attach. Bound here, before any style, as the later of two values at one
+        // priority wins.
+        Bind(LayoutProperty, _configLayout, BindingPriority.Style);
 
         Items.CollectionChanged += (_, _) => UpdateChildClasses();
         UpdateChildClasses();
@@ -137,6 +146,23 @@ public class AvonicTabButton : ItemsControl
 
         UpdateChildClasses();
         UpdateClasses();
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        if (!_willLoad)
+        {
+            // componentWillLoad, once: if (this.layout === undefined) this.layout = config.get('tabButtonLayout', 'icon-top').
+            // Ionic's fallback is the property's default, so only a value in the config is given. A layout the app set, which is
+            // Ionic's defined prop, beats it, as does any style of the app's, whenever it applies.
+            _willLoad = true;
+            if (AvonicConfig.TabButtonLayout is { } layout)
+            {
+                _configLayout.Set(layout);
+            }
+        }
     }
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
