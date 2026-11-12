@@ -95,6 +95,10 @@ public class AvonicInput : TemplatedControl, IItemControl
     public static readonly StyledProperty<bool> ReadonlyProperty =
         AvaloniaProperty.Register<AvonicInput, bool>(nameof(Readonly));
 
+    /// <summary>Ionic <c>required</c>: the native input says it's required to a screen reader.</summary>
+    public static readonly StyledProperty<bool> RequiredProperty =
+        AvaloniaProperty.Register<AvonicInput, bool>(nameof(Required));
+
     /// <summary>Ionic <c>maxlength</c>: typing stops there, and the counter counts to it.</summary>
     public static readonly StyledProperty<int?> MaxlengthProperty =
         AvaloniaProperty.Register<AvonicInput, int?>(nameof(Maxlength));
@@ -397,6 +401,12 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         get => GetValue(ReadonlyProperty);
         set => SetValue(ReadonlyProperty, value);
+    }
+
+    public bool Required
+    {
+        get => GetValue(RequiredProperty);
+        set => SetValue(RequiredProperty, value);
     }
 
     public int? Maxlength
@@ -721,7 +731,8 @@ public class AvonicInput : TemplatedControl, IItemControl
             _debounced = null;
         }
         else if (change.Property == LabelProperty || change.Property == LabelContentProperty || change.Property == HelperTextProperty
-                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty)
+                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty
+                 || change.Property == RequiredProperty)
         {
             UpdateClasses();
             UpdateAutomation();
@@ -1153,5 +1164,8 @@ public class AvonicInput : TemplatedControl, IItemControl
             : !string.IsNullOrEmpty(HelperText) ? HelperText
             : null;
         native.SetValue(AutomationProperties.HelpTextProperty, hint);
+
+        // required on the <input>: aria-required to a screen reader. Form validation isn't here.
+        native.SetValue(AutomationProperties.IsRequiredForFormProperty, Required);
     }
 }

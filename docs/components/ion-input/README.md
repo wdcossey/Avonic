@@ -57,7 +57,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` | |
 | [x] | `readonly` | `Readonly` | |
-| [ ] | `required` | — | Not applicable: Avalonia's automation can't say it |
+| [x] | `required` | `Required` | Said to a screen reader (`IsRequiredForForm`); no form validation |
 | [x] | `shape` | `Shape` (`InputShape?`) | `Round` |
 | [ ] | `spellcheck` | — | Not applicable: no spell checker |
 | [x] | `type` | `Type` (`InputType`) | `Email`, `Number`, `Password`, `Search`, `Tel`, `Text`, `Url`; no date or time types |
@@ -117,7 +117,8 @@ Each has a test in `AvonicInputTests`, named after its number in [PLAN.md](PLAN.
 - A click on the label focuses the field; in an item, so does a tap on the item's padding.
 - The five label placements, the floating label, the highlight, the solid and outline looks, the notch, round shapes, helper
   and error text, the counter, disabled and read-only, all measured against Chromium.
-- The native input is named by the label and described by the helper or error text.
+- The native input is named by the label and described by the helper or error text, and says when it's `Required`.
+- Disabled fades the input as one, at 0.38, through an `OpacityMask` (`Avonic.Input.Md.DisabledMask`), as its parts overlap.
 
 ## Extensions
 

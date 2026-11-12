@@ -31,4 +31,7 @@
     <x:Double x:Key="Avonic.Input.Md.BorderRadiusRound">16</x:Double>
     <x:Double x:Key="Avonic.Input.Md.BorderRadiusOutlineRound">28</x:Double>
 
+    <!-- :host(.input-disabled) { opacity: 0.38 }, as a mask so that the input fades as one -->
+    <SolidColorBrush x:Key="Avonic.Input.Md.DisabledMask" Color="#000000" Opacity="0.38" />
+
 </ResourceDictionary>

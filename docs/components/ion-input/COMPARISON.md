@@ -73,11 +73,11 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 | 19 | The bottom, the error replacing the helper, the counter and its formatter | Match |
 | 20 | The clear button's box, icon and colour | Match |
 | 21 | Slots 16 px from the field | Match |
-| 22 | Disabled and read-only | Match |
+| 22 | Disabled (0.38 as one, through an `OpacityMask`) and read-only | Match |
 | 23 | Placeholder at 0.6 | Match |
 | 24 | Type, inputmode, enterkeyhint, autocapitalize, autocorrect reach `TextInputOptions`; password masks | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
 | 25 | Autofocus | Match |
-| 26 | Automation name and help text | Match |
+| 26 | Automation name, help text and required | Match |
 | 27 | The password toggle | Match; it doesn't take focus. 44 × 48 at the end of an item, as measured |
 | 28 | RTL | Match: the row, the outline's start on the right, the label scaled from its top right |
 
