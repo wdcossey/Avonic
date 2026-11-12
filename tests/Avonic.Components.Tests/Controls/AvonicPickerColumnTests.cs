@@ -555,6 +555,114 @@ public class AvonicPickerColumnTests
         Assert.Equal("danger", page.Option("Green").Color);
     });
 
+    // ── Found in review ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void Items_From_ItemsSource_Get_Options_Whose_Value_They_Are() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var column = new AvonicPickerColumn { Value = "3", ItemsSource = new[] { "1", "2", "3", "4" } };
+        var changes = new List<object?>();
+        column.IonChange += (_, e) => changes.Add(e.Value);
+        var picker = new AvonicPicker { Items = { column }, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(picker);
+        Show(clock);
+
+        var page = new Page(picker, column, changes);
+        Assert.Equal("3", page.Active);
+        Assert.Equal(19 + 34 * 2, page.Scroll.Offset.Y, 0.5);
+        column.Focus();
+        Key(scene, PhysicalKey.ArrowDown);
+        Assert.Equal(["4"], changes);
+    });
+
+    [AvaloniaFact]
+    public void A_Column_Hidden_By_An_Ancestor_Stops_Acting_As_Visible_And_Centres_When_Shown_Again() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Red");
+        var holder = new Border { Child = page.Picker };
+        using var scene = new Scene(holder);
+        Show(clock);
+        Assert.True(page.Column.IsColumnVisible);
+
+        // Hidden: a value with no option stays, with no ionChange, as the column isn't visible to render it.
+        holder.IsVisible = false;
+        Dispatcher.UIThread.RunJobs();
+        page.Column.Value = "nothing";
+        Later(clock, 400);
+        Assert.Equal("nothing", page.Column.Value);
+        Assert.Empty(page.Changes);
+        page.Column.Value = "Blue";
+
+        holder.IsVisible = true;
+        Dispatcher.UIThread.RunJobs();
+        GestureTests.Render();
+        Later(clock, 32);
+        Assert.True(page.Column.IsColumnVisible);
+        Assert.Equal(19 + 34 * 4, page.Scroll.Offset.Y, 0.5);
+        Assert.Equal("Blue", page.Active);
+        Later(clock, 400);
+        Assert.Empty(page.Changes);
+    });
+
+    [AvaloniaFact]
+    public void Shown_Again_Only_The_Values_Option_Is_Active() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Red");
+        var holder = new Border { Child = page.Picker };
+        using var scene = new Scene(holder);
+        Show(clock);
+        page.Scroll.Offset = new Vector(0, 19 + 34);
+        Later(clock, 400);
+        Assert.Equal("Orange", page.Active);
+
+        holder.IsVisible = false;
+        Dispatcher.UIThread.RunJobs();
+        Later(clock, 16);
+        page.Column.Value = "Blue";
+        holder.IsVisible = true;
+        Dispatcher.UIThread.RunJobs();
+        GestureTests.Render();
+        Later(clock, 32);
+        Assert.Equal("Blue", page.Active);
+    });
+
+    [AvaloniaFact]
+    public void The_Value_Text_Raises_A_Change_For_A_Screen_Reader() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Green");
+        using var scene = new Scene(page.Picker);
+        Show(clock);
+        var peer = ControlAutomationPeer.CreatePeerForElement(page.Column);
+        var changes = new List<(object? Old, object? New)>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Avalonia.Automation.ValuePatternIdentifiers.ValueProperty)
+            {
+                changes.Add((e.OldValue, e.NewValue));
+            }
+        };
+
+        page.Column.Focus();
+        Key(scene, PhysicalKey.ArrowDown);
+        Later(clock, 16);
+        Assert.Contains(changes, c => (string?)c.New == "Blue");
+    });
+
+    [AvaloniaFact]
+    public void An_Options_Text_Is_Its_Text_Content_However_It_Is_Made()
+    {
+        var runs = new TextBlock();
+        runs.Inlines!.Add(new Avalonia.Controls.Documents.Run("0"));
+        runs.Inlines.Add(new Avalonia.Controls.Documents.Run("7"));
+        Assert.Equal("07", AvonicPicker.OptionText(new AvonicPickerColumnOption { Content = runs }));
+        Assert.Equal("12", AvonicPicker.OptionText(new AvonicPickerColumnOption { Content = new StackPanel { Children = { new TextBlock { Text = "1" }, new TextBlock { Text = "2" } } } }));
+        Assert.Equal("5", AvonicPicker.OptionText(new AvonicPickerColumnOption { Content = 5 }));
+    }
+
     // ── The peers ────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

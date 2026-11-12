@@ -23,6 +23,13 @@ internal sealed class PickerSmoothScroll(ScrollViewer scroller)
     /// <summary><c>scroll</c>, smoothly or at once, to a top already clamped and snapped.</summary>
     public void To(double y, bool smooth)
     {
+        y = Math.Clamp(y, 0, Math.Max(0, scroller.Extent.Height - scroller.Viewport.Height));
+        // The same target again, while it's going there: it carries on, as SmoothScroll does.
+        if (smooth && IsRunning && Math.Abs(y - _to) < 0.5)
+        {
+            return;
+        }
+
         Stop();
         var from = scroller.Offset.Y;
         if (!smooth || Math.Abs(y - from) < 0.5)

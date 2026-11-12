@@ -56,7 +56,25 @@ public class AvonicPicker : ItemsControl
     /// <summary>The hidden input's text, as Ionic's <c>inputEl.value</c>.</summary>
     internal string InputValue => _input?.Text ?? string.Empty;
 
-    private IEnumerable<AvonicPickerColumn> Columns => this.GetLogicalDescendants().OfType<AvonicPickerColumn>();
+    /// <summary><c>querySelectorAll('ion-picker-column')</c>, without looking inside a column, where its options are.</summary>
+    private IEnumerable<AvonicPickerColumn> Columns => FindColumns(this);
+
+    private static IEnumerable<AvonicPickerColumn> FindColumns(ILogical parent)
+    {
+        foreach (var child in parent.LogicalChildren)
+        {
+            if (child is AvonicPickerColumn column)
+            {
+                yield return column;
+                continue;
+            }
+
+            foreach (var inner in FindColumns(child))
+            {
+                yield return inner;
+            }
+        }
+    }
 
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<Control>(item, out recycleKey);
@@ -86,8 +104,14 @@ public class AvonicPicker : ItemsControl
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        _singleColumnSearchTimeout?.Dispose();
-        _singleColumnSearchTimeout = null;
+        // The search's pause ends now, so the digits typed so far don't carry over.
+        if (_singleColumnSearchTimeout is not null)
+        {
+            _singleColumnSearchTimeout.Dispose();
+            _singleColumnSearchTimeout = null;
+            SetInput(string.Empty);
+        }
+
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -339,12 +363,24 @@ public class AvonicPicker : ItemsControl
     }
 
     /// <summary>The text of an option, as Ionic's <c>textContent</c>.</summary>
-    internal static string OptionText(AvonicPickerColumnOption option) => option.Content switch
+    internal static string OptionText(AvonicPickerColumnOption option) => TextContent(option.Content);
+
+    private static string TextContent(object? content) => content switch
     {
-        string text => text,
-        TextBlock block => block.Text ?? string.Empty,
         null => string.Empty,
+        string text => text,
+        TextBlock { Inlines: { Count: > 0 } inlines } => string.Concat(inlines.Select(InlineText)),
+        TextBlock block => block.Text ?? string.Empty,
+        Control control => string.Concat(((ILogical)control).LogicalChildren.Select(TextContent)),
         var other => other.ToString() ?? string.Empty,
+    };
+
+    private static string InlineText(Avalonia.Controls.Documents.Inline inline) => inline switch
+    {
+        Avalonia.Controls.Documents.Run run => run.Text ?? string.Empty,
+        Avalonia.Controls.Documents.Span span => string.Concat(span.Inlines.Select(InlineText)),
+        Avalonia.Controls.Documents.InlineUIContainer { Child: { } child } => TextContent(child),
+        _ => string.Empty,
     };
 
     /// <summary>

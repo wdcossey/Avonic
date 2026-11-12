@@ -94,6 +94,14 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
   documentation says it focuses the scroller, which is what this does; the alternative, a method that does nothing, would be dead.
 - **Mobile is Android or iOS** (`isPlatform('mobile')` is `any-pointer: coarse`, which Avalonia doesn't report): it reverses the
   arrows and pages, and turns off the focused background (`any-hover`). `AvonicPickerColumn.IsMobile` is internal, for tests.
+- **A column shown again clears an old active option.** Ionic's `visibleCallback` means to (`oldActive`), but looks in the
+  column's shadow root, where slotted options aren't, so an option active before the column was hidden stays coloured beside the
+  new one. The alternative was to copy that; the comment says what Ionic intends.
+- **With one numeric column, a tap on an option in the highlight takes digits for that column.** Ionic passes the tapped element,
+  the option, as the input mode's column, so no column becomes active and typing selects nothing. The alternative was to copy
+  that; `ion-datetime` always has two numeric columns, where both agree.
+- **Items from `ItemsSource` that aren't controls get an `AvonicPickerColumnOption`** with the item as its `Content` and
+  `Value`, as a framework's template would make one for each.
 - **A touchpad's small scrolls snap 100 ms after the last one**, as Chromium snaps at the gesture's end, which Avalonia doesn't
   report. Not measured.
 
@@ -102,8 +110,8 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 - **A touch on the picker reaches gestures outside it** (Ionic stops `touchstart`, so that scrolling a wheel in a card modal doesn't
   swipe the modal). Avonic's `Gesture` listens to handled presses too, so the picker can't stop it.
 - **Snapping after a touch drag is Avalonia's**: it jumps to the snap point on release, or aims a fling at one, where Chromium eases.
-- **A hidden ancestor isn't noticed until the viewport changes**: Ionic's `IntersectionObserver` tells the column at once. Only the
-  scroll for a value set while hidden is affected; it runs on a hidden scroller, which is harmless.
+- **A hidden ancestor is noticed when the column next acts** (a value, a render), not at once as Ionic's `IntersectionObserver`
+  does, as Avalonia doesn't say when an ancestor hides. Showing it again is noticed at once (`HiddenChainWatcher`).
 - **The first-of-type rules count every item**, not only columns, as Avalonia has no `:first-of-type`.
 - **No haptics**: Ionic's are iOS only, so md has none either.
 

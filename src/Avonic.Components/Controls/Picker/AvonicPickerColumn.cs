@@ -93,6 +93,7 @@ public class AvonicPickerColumn : ItemsControl
         RoutedEvent.Register<AvonicPickerColumn, PickerColumnChangeEventArgs>(nameof(IonChange), RoutingStrategies.Bubble);
 
     private readonly StyleValue<string?> _defaultColor = new();
+    private readonly HiddenChainWatcher _hiddenChain;
     private ScrollViewer? _scroll;
     private PickerSmoothScroll? _smooth;
     private AvonicPicker? _parent;
@@ -112,6 +113,7 @@ public class AvonicPickerColumn : ItemsControl
     private bool _numericInput;
     private bool _centrePosted;
     private IDisposable? _wheelSnap;
+    private string? _peerValue;
 
     static AvonicPickerColumn()
     {
@@ -123,6 +125,8 @@ public class AvonicPickerColumn : ItemsControl
 
     public AvonicPickerColumn()
     {
+        // display: none on the column or an ancestor ends its intersection, and showing it starts one.
+        _hiddenChain = new HiddenChainWatcher(CheckVisible);
         // color = 'primary', at style priority so that an app's style still wins.
         Bind(ColorProperty, _defaultColor, BindingPriority.Style);
         _defaultColor.Set("primary");
@@ -228,8 +232,21 @@ public class AvonicPickerColumn : ItemsControl
     /// <summary>Ionic <c>setFocus()</c>: focuses the column, which is the scroller's focusable element here.</summary>
     public void SetFocus() => Focus(NavigationMethod.Unspecified);
 
+    /// <summary>A control is its own row; anything else, from <c>ItemsSource</c>, gets an option to show it, whose value it is.</summary>
     protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey) =>
         NeedsContainer<Control>(item, out recycleKey);
+
+    protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey) =>
+        new AvonicPickerColumnOption();
+
+    protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
+    {
+        base.PrepareContainerForItemOverride(container, item, index);
+        if (container is AvonicPickerColumnOption option && item is not Control)
+        {
+            option.SetCurrentValue(AvonicPickerColumnOption.ValueProperty, item);
+        }
+    }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -282,7 +299,11 @@ public class AvonicPickerColumn : ItemsControl
 
         _viewport = null;
         SetColumnVisible(false);
+        _hiddenChain.Dispose();
         _smooth?.Stop();
+        // Avonic's own snap for a touchpad goes with the column. Ionic's scroll-end timeout outlives the element, so it stays.
+        _wheelSnap?.Dispose();
+        _wheelSnap = null;
         _renderFrame?.Dispose();
         _renderFrame = null;
         base.OnDetachedFromVisualTree(e);
@@ -327,9 +348,29 @@ public class AvonicPickerColumn : ItemsControl
             return;
         }
 
+        if (!IsEffectivelyVisible)
+        {
+            _hiddenChain.Watch(this);
+        }
+
         var size = Bounds.Size;
         var shown = IsEffectivelyVisible && size.Width > 0 && size.Height > 0;
         SetColumnVisible(shown && (_parent is not null || AvonicImg.Intersects(_viewport!.Value, size)));
+    }
+
+    /// <summary>
+    /// Whether it's visible now. Avalonia doesn't tell a control when an ancestor hides it, so a column that thought it was visible
+    /// looks before it acts, as the observer would have told it.
+    /// </summary>
+    private bool IsVisibleNow()
+    {
+        if (_isColumnVisible && !IsEffectivelyVisible)
+        {
+            SetColumnVisible(false);
+            _hiddenChain.Watch(this);
+        }
+
+        return _isColumnVisible;
     }
 
     private void SetColumnVisible(bool visible)
@@ -342,7 +383,14 @@ public class AvonicPickerColumn : ItemsControl
         _isColumnVisible = visible;
         if (visible)
         {
-            // The first call has to come before the scroll listener, so the active option is marked here.
+            // The first call has to come before the scroll listener, so the active option is marked here, and an old one cleared.
+            // Ionic looks for the old one in the column's shadow root, where slotted options aren't, so it never finds it: see
+            // "Decided" in the README.
+            foreach (var option in Options.Where(option => option.IsActive))
+            {
+                option.SetActive(false);
+            }
+
             var active = ActiveItem;
             ScrollActiveItemIntoView();
             active?.SetActive(true);
@@ -506,7 +554,7 @@ public class AvonicPickerColumn : ItemsControl
     /// </summary>
     internal void CenterPickerItemInView(AvonicPickerColumnOption target, bool smooth = true, bool canExitInputMode = true)
     {
-        if (!_isColumnVisible || _scroll is null || _smooth is null)
+        if (!IsVisibleNow() || _scroll is null || _smooth is null)
         {
             return;
         }
@@ -578,7 +626,7 @@ public class AvonicPickerColumn : ItemsControl
     /// <summary>Ionic's <c>valueChange</c> watcher: only a visible column scrolls to its value.</summary>
     private void OnValueChanged()
     {
-        if (_isColumnVisible)
+        if (IsVisibleNow())
         {
             ScrollActiveItemIntoView(smooth: true);
         }
@@ -599,6 +647,7 @@ public class AvonicPickerColumn : ItemsControl
             _renderFrame = null;
             PseudoClasses.Set(ColumnActive, _isActive);
             ComponentDidRender();
+            UpdatePeerValue();
         });
     }
 
@@ -608,7 +657,7 @@ public class AvonicPickerColumn : ItemsControl
     /// </summary>
     private void ComponentDidRender()
     {
-        if (_isColumnVisible && ActiveItem is null && Options.FirstOrDefault() is { } first && !Equals(first.Value, Value))
+        if (IsVisibleNow() && ActiveItem is null && Options.FirstOrDefault() is { } first && !Equals(first.Value, Value))
         {
             SetValue(first.Value);
         }
@@ -765,6 +814,28 @@ public class AvonicPickerColumn : ItemsControl
 
     protected override AutomationPeer OnCreateAutomationPeer() => new PickerColumnPeer(this);
 
+    /// <summary>The render's <c>aria-valuetext</c>, which a screen reader announces when it changes.</summary>
+    private void UpdatePeerValue()
+    {
+        var now = ValueText();
+        if (now == _peerValue)
+        {
+            return;
+        }
+
+        var old = _peerValue;
+        _peerValue = now;
+        if (ControlAutomationPeer.FromElement(this) is { } peer)
+        {
+            peer.RaisePropertyChangedEvent(ValuePatternIdentifiers.ValueProperty, old, now);
+        }
+    }
+
+    /// <summary>Ionic's <c>getOptionValueText</c>: the active option's <c>aria-label</c>, or its text.</summary>
+    internal string ValueText() => ActiveItem is { } item
+        ? AutomationProperties.GetName(item) is { Length: > 0 } label ? label : AvonicPicker.OptionText(item)
+        : string.Empty;
+
     /// <summary>
     /// <c>.picker-opts</c>' <c>role="slider"</c>, named by <c>aria-label</c> or "Select a value", with the active option's text as
     /// its <c>aria-valuetext</c>.
@@ -779,9 +850,7 @@ public class AvonicPickerColumn : ItemsControl
 
         public bool IsReadOnly => true;
 
-        public string? Value => Column.ActiveItem is { } item
-            ? AutomationProperties.GetName(item) is { Length: > 0 } label ? label : item.Content?.ToString()
-            : string.Empty;
+        public string? Value => Column.ValueText();
 
         public void SetValue(string? value) => throw new InvalidOperationException("The column's value is set by choosing an option.");
     }
