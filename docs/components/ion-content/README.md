@@ -90,9 +90,10 @@ Ionic: not a second call, and not the user's finger.
 
 A child of the default slot is as high as its content, and a child of the fixed slot is as big as its content, at the host's corner, because that's what
 CSS does. Its own `HorizontalAlignment` and `VerticalAlignment` beat that, and a `Margin` is how to set `right: 10px`. Ionic takes any number
-of `slot="fixed"` elements and a slot holds one child here, so a plain `Panel` in the fixed slot stands for the slot: it fills the host,
-and each child places itself in it, as several `AvonicFab`s do. Where it has no child, a press reaches the content under it. A panel of
-another type, such as a `StackPanel`, is a `div` around its children, so it's one block at the corner.
+of `slot="fixed"` elements and a slot holds one child here, so a panel that overlaps its children (a plain `Panel`, a `Grid` or a
+`Canvas`) stands for the slot: it fills the host, and each child places itself in it, as several `AvonicFab`s do. Where it has no
+child, a press reaches the content under it, so give it no `Background`, which would take every press. A panel that flows its
+children, such as a `StackPanel`, is a `div` around them, so it's one block at the corner.
 
 ### Resource keys
 

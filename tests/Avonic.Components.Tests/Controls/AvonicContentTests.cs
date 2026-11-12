@@ -2463,6 +2463,26 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B26_In_Tabs_A_Content_That_Is_The_Tabs_Page_Counts_From_The_Tabs_Inner_Box()
+    {
+        // A tab's component is the page: it has class ion-page, the tab doesn't, and its offset parent is .tabs-inner
+        // (position: relative), under the top bar, so the top is 0 there too, and the bottom is 400 less its 343.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var tabs = new AvonicTabs
+        {
+            Height = 400,
+            VerticalAlignment = VerticalAlignment.Top,
+            TopContent = new Border { Height = 57 },
+            Content = new AvonicTab { Tab = "a", Component = content },
+        };
+        using var scene = new Scene(tabs);
+
+        Assert.Contains("ion-page", content.Classes);
+        Assert.Equal(new Rect(0, 57, 390, 343), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 57), Container(content).Padding);
+    }
+
+    [AvaloniaFact]
     public void B26_In_Tabs_The_Background_Shows_Behind_A_See_Through_Tab_Bar() => InstalledTheme.Run(_ =>
     {
         // Measured tabs-fs: the content's background shows through a translucent tab bar, as the tab doesn't clip (overflow: visible).
@@ -2714,6 +2734,19 @@ public class AvonicContentTests
         Assert.Equal(Box(aloneStartTop, alone2), Box(startTop, shared));
         Assert.True(Box(endBottom, shared).Right > 300 && Box(endBottom, shared).Bottom > 200);
     });
+
+    [AvaloniaFact]
+    public void B29_A_Grid_Or_A_Canvas_Overlaps_Its_Children_So_It_Stands_For_The_Slot_Too()
+    {
+        var grid = new Grid { Children = { new Border { Width = 60, Height = 60 } } };
+        var canvas = new Canvas { Children = { new Border { Width = 60, Height = 60 } } };
+        var withGrid = new AvonicContent { FixedContent = grid };
+        var withCanvas = new AvonicContent { FixedContent = canvas };
+        using var scene = new Scene(new StackPanel { Children = { InBox(withGrid), InBox(withCanvas) } });
+
+        Assert.Equal(new Rect(0, 0, 390, 300), Box(grid, withGrid));
+        Assert.Equal(new Rect(0, 0, 390, 300), Box(canvas, withCanvas));
+    }
 
     [AvaloniaFact]
     public void B29_Another_Kind_Of_Panel_In_The_Fixed_Slot_Is_One_Block_At_The_Corner()

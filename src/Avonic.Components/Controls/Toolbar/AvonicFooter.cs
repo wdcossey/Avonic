@@ -1,9 +1,9 @@
+using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
-using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
 
@@ -33,25 +33,22 @@ public class AvonicFooter : ItemsControl
         PseudoClasses.Set(FooterToolbarPadding, true);
     }
 
-    /// <summary><c>render()</c> reads the tabs around it, and the first render is at the attach.</summary>
-    protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    /// <summary>
+    /// <c>render()</c> reads the tabs around it, and the first render is at the attach. A bar a slot's template makes is there by
+    /// then, as the tabs' template fills every slot before it lays any out.
+    /// </summary>
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        UpdateToolbarPadding();
-    }
-
-    /// <summary>Again at the load, for a tab bar that a tabs' slot template made, which isn't there at the attach.</summary>
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
         UpdateToolbarPadding();
     }
 
     /// <summary>
     /// <c>'footer-toolbar-padding': !keyboardVisible &amp;&amp; (!tabBar || tabBar.slot !== 'bottom')</c>, with the closest tabs'
     /// tab bar. Avonic has no keyboard controller, so the keyboard half isn't here. Read when Ionic renders, so not again when the
-    /// tabs' slots change later.
+    /// tabs' slots change later. The tabs are the visual ancestor, as <see cref="AvonicContent"/>'s page is, since an overlay's
+    /// content is in its layer, as Ionic moves an overlay out to <c>ion-app</c>.
     /// </summary>
     private void UpdateToolbarPadding() =>
-        PseudoClasses.Set(FooterToolbarPadding, this.FindLogicalAncestorOfType<AvonicTabs>() is not { } tabs || !tabs.HasBottomTabBar());
+        PseudoClasses.Set(FooterToolbarPadding, this.FindAncestorOfType<AvonicTabs>() is not { } tabs || !tabs.HasBottomTabBar());
 }

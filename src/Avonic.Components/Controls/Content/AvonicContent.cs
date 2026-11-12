@@ -661,20 +661,23 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// <c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins, its
-    /// style too, as for <see cref="UpdateContainerChild"/>. A slot holds one child here, so a plain <see cref="Panel"/>, which
-    /// overlaps its children, stands for the slot, as Ionic takes any number of <c>slot="fixed"</c> elements: it's left to fill
-    /// the host, and its children, such as several <see cref="AvonicFab"/>s, place themselves in it. A panel of another type, a
-    /// <see cref="StackPanel"/> say, lays its children out as a <c>div</c> around them would, so it's one block at the corner.
+    /// style too, as for <see cref="UpdateContainerChild"/>. A slot holds one child here, so a panel that overlaps its children (a
+    /// plain <see cref="Panel"/>, a <see cref="Grid"/> or a <see cref="Canvas"/>) stands for the slot, as Ionic takes any number of
+    /// <c>slot="fixed"</c> elements: it's left to fill the host, and its children, such as several <see cref="AvonicFab"/>s, place
+    /// themselves in it. A panel that flows its children, a <see cref="StackPanel"/> say, is a <c>div</c> around them, so it's one
+    /// block at the corner.
     /// </summary>
     private void UpdateFixedChild()
     {
         Reset(_fixedChildDefaults);
-        if (_fixed?.Child is { } child && child.GetType() != typeof(Panel))
+        if (_fixed?.Child is { } child && !StandsForTheSlot(child))
         {
             Add(_fixedChildDefaults, child.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Left, BindingPriority.Style));
             Add(_fixedChildDefaults, child.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top, BindingPriority.Style));
         }
     }
+
+    private static bool StandsForTheSlot(Control child) => child.GetType() == typeof(Panel) || child is Grid or Canvas;
 
     private static void Reset(List<IDisposable> frames)
     {
@@ -714,9 +717,9 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// <c>readDimensions</c>: <c>offsetTop</c>, and the page's height less that and the host's. <c>offsetTop</c> counts from the
-    /// offset parent, the closest <c>.ion-page</c>, which is the page itself except in tabs, where it's the tab: the offsets
-    /// reach the tabs' bottom (a bottom tab bar and a footer), and with a top tab bar the top is 0 and the bottom runs past the
-    /// tabs by the bar, as measured in Chromium.
+    /// offset parent: the closest <c>.ion-page</c> above the host, or in tabs their <c>.tabs-inner</c> (<c>position: relative</c>),
+    /// whichever is nearer, and the page itself otherwise. So in tabs the offsets reach the tabs' bottom (a bottom tab bar and a
+    /// footer), and with a top tab bar the top is 0 and the bottom runs past the tabs by the bar, as measured in Chromium.
     /// </summary>
     private void ReadDimensions()
     {
@@ -725,10 +728,11 @@ public class AvonicContent : TemplatedControl
             return;
         }
 
+        var tabsInner = (page as AvonicTabs)?.Inner;
         var top = 0d;
         for (Visual? visual = this; visual is not null && visual != page; visual = visual.GetVisualParent())
         {
-            if (visual != this && IsIonPage(visual))
+            if (visual != this && (IsIonPage(visual) || visual == tabsInner))
             {
                 break;
             }

@@ -504,21 +504,28 @@ public class AvonicListTests
     {
         // Measured slide-inset: .list-inset ion-item-sliding:last-of-type ion-item, with the options after the item or before it.
         // An item last in a sliding item that isn't the last keeps its line, as it's the only ion-item there (:only-of-type).
+        // ion-item:only-child still takes the line off an item alone in its sliding item.
         var optionsBefore = Item();
         var optionsAfter = Item();
+        var alone = Item();
         var lastOptionsAfter = Item();
         var lastOptionsBefore = Item();
         using var scene = new Scene(new StackPanel
         {
             Children =
             {
-                new AvonicList { Inset = true, Items = { Sliding(optionsBefore, optionsFirst: true), Sliding(optionsAfter), Sliding(lastOptionsAfter) } },
+                new AvonicList
+                {
+                    Inset = true,
+                    Items = { Sliding(optionsBefore, optionsFirst: true), Sliding(optionsAfter), new AvonicItemSliding { Items = { alone } }, Sliding(lastOptionsAfter) },
+                },
                 new AvonicList { Inset = true, Items = { Sliding(Item()), Sliding(lastOptionsBefore, optionsFirst: true) } },
             },
         });
 
         Assert.Equal((NoBorder, Bottom), Borders(optionsBefore));
         Assert.Equal((NoBorder, Bottom), Borders(optionsAfter));
+        Assert.Equal((NoBorder, NoBorder), Borders(alone));
         Assert.Equal((NoBorder, NoBorder), Borders(lastOptionsAfter));
         Assert.Equal((NoBorder, NoBorder), Borders(lastOptionsBefore));
     });
@@ -581,6 +588,27 @@ public class AvonicListTests
         clock.At(2000);
         Assert.True(list.CloseSlidingItems());
         Assert.Equal(0, elsewhere.GetOpenAmount());
+    }
+
+    [AvaloniaFact]
+    public void L15_CloseSlidingItems_Finds_Sliding_Items_A_Template_Made()
+    {
+        using var clock = new TestClock();
+        var list = new AvonicList
+        {
+            ItemsSource = new[] { "a", "b" },
+            ItemTemplate = new FuncDataTemplate<string>((text, _) => Sliding(new AvonicItem { MinHeight = 48, Content = text })),
+        };
+        using var scene = new Scene(new StackPanel { Children = { list } });
+        Avonic.Components.Tests.Gestures.GestureTests.Render();
+        var second = list.GetVisualDescendants().OfType<AvonicItemSliding>().Last();
+
+        second.Open();
+        clock.At(1000);
+        Assert.Equal(70, second.GetOpenAmount(), 3);
+
+        Assert.True(list.CloseSlidingItems());
+        Assert.Equal(0, second.GetOpenAmount());
     }
 
     [AvaloniaFact]

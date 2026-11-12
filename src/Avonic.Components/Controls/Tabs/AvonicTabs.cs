@@ -199,6 +199,12 @@ public class AvonicTabs : TemplatedControl
         new[] { InSlot(TopContent, _topPresenter), InSlot(BottomContent, _bottomPresenter), InSlot(Content, _contentPresenter) }.OfType<ILogical>();
 
     /// <summary>
+    /// <c>.tabs-inner</c>, the default slot's box, which is <c>position: relative</c>, so an offset parent, for
+    /// <see cref="AvonicContent"/>'s <c>offsetTop</c>.
+    /// </summary>
+    internal Visual? Inner => _contentPresenter;
+
+    /// <summary>
     /// <c>tabs.querySelector(':scope > ion-tab-bar').slot === 'bottom'</c>, which <see cref="AvonicFooter"/> reads: the first
     /// <see cref="AvonicTabBar"/> directly in a bar slot, the top's first as in <see cref="BarsFirst"/>, is in the bottom one.
     /// </summary>
