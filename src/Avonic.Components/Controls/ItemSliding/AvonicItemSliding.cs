@@ -126,7 +126,17 @@ public class AvonicItemSliding : ItemsControl
 
     public AvonicItemSliding()
     {
-        Items.CollectionChanged += (_, _) => OptionsChanged();
+        // Bound as the children arrive, before an app's styles reach them at attach, so that an app's style wins over these
+        // values, as a later rule of the same weight does in CSS.
+        Items.CollectionChanged += (_, _) =>
+        {
+            if (!_attached)
+            {
+                SetItem(FindItem());
+            }
+
+            OptionsChanged();
+        };
     }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────
@@ -270,13 +280,7 @@ public class AvonicItemSliding : ItemsControl
     }
 
     /// <summary>Ionic's <c>MutationObserver</c> on the subtree: any change of the children, here or in an options, finds them again.</summary>
-    internal void OptionsChanged()
-    {
-        if (_attached)
-        {
-            UpdateOptions();
-        }
-    }
+    internal void OptionsChanged() => UpdateOptions();
 
     /// <summary><c>el.querySelector('ion-item')</c>: the first item among the light DOM's descendants, in document order.</summary>
     private AvonicItem? FindItem() => this.GetLogicalDescendants().OfType<AvonicItem>().FirstOrDefault();
@@ -373,6 +377,9 @@ public class AvonicItemSliding : ItemsControl
         {
             // style.transition = 'none', which ends a running transition where it was going.
             _transitionNone = true;
+            _transitionFrame?.Dispose();
+            _transitionFrame = null;
+            _transition.Snap(_transition.Target);
             ApplyTranslate(_transition.Target);
         }
     }

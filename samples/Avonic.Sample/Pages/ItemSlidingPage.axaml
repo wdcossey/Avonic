@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ItemSlidingPage">
+
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicList Name="List">
+                <c:AvonicItemSliding>
+                    <c:AvonicItemOptions Side="Start">
+                        <c:AvonicItemOption Color="success" Content="Archive" Click="OnOption" />
+                    </c:AvonicItemOptions>
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="Options on both sides" />
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions IonSwipe="OnSwipe">
+                        <c:AvonicItemOption Content="Favorite" Click="OnOption" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" Click="OnOption" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+                <c:AvonicItemSliding>
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="Icons" />
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="tertiary" Click="OnOption">
+                            <c:AvonicItemOption.IconOnlyContent>
+                                <c:AvonicIcon IconName="pin" />
+                            </c:AvonicItemOption.IconOnlyContent>
+                        </c:AvonicItemOption>
+                        <c:AvonicItemOption Color="warning" Content="Star" Click="OnOption">
+                            <c:AvonicItemOption.TopContent>
+                                <c:AvonicIcon IconName="star" />
+                            </c:AvonicItemOption.TopContent>
+                        </c:AvonicItemOption>
+                        <c:AvonicItemOption Color="medium" Content="Off" IsEnabled="False">
+                            <c:AvonicItemOption.StartContent>
+                                <c:AvonicIcon IconName="trash" />
+                            </c:AvonicItemOption.StartContent>
+                        </c:AvonicItemOption>
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+                <c:AvonicItemSliding Name="Methods">
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="Opened by the buttons below" />
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions Side="Start">
+                        <c:AvonicItemOption Color="secondary" Content="Start" Click="OnOption" />
+                    </c:AvonicItemOptions>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="secondary" Content="End" Click="OnOption" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+                <c:AvonicItemSliding IsEnabled="False">
+                    <c:AvonicItem>
+                        <c:AvonicLabel Content="Disabled" />
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Content="Never" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+            </c:AvonicList>
+
+            <WrapPanel Margin="8">
+                <c:AvonicButton Content="Open start" Click="OnOpenStart" />
+                <c:AvonicButton Content="Open end" Click="OnOpenEnd" />
+                <c:AvonicButton Content="Close opened" Click="OnCloseOpened" />
+            </WrapPanel>
+            <TextBlock Name="Log" Margin="16,8" Text="Swipe an item sideways." />
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>

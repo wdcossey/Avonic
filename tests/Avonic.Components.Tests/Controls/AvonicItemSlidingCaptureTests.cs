@@ -75,6 +75,22 @@ public class AvonicItemSlidingCaptureTests
         clock.At(3000);
         Save(scene, "avonic-item-sliding-open-b.png");
         Assert.True(b.GetOpenAmount() > 0);
+
+        // A full swipe held: from 300 to 40 in 8 px steps a frame apart, held 700 ms, as in Chromium.
+        b.Close();
+        clock.At(4000);
+        var finger = new Gestures.GestureTests.Finger(scene, clock).Down(300, 32, 5000);
+        double t = 5000;
+        for (var x = 296.0; x >= 40; x -= 8)
+        {
+            t += 16;
+            finger.Move(x, 32, t);
+        }
+
+        clock.At(t + 700);
+        Save(scene, "avonic-item-sliding-swipe.png");
+        Assert.True(a.GetOpenAmount() > 180);
+        finger.Up(40, 32, t + 716);
     });
 
     private static void Save(Scene scene, string name)
