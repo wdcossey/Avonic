@@ -51,7 +51,7 @@
                         <c:AvonicItemOption Color="secondary" Content="End" Click="OnOption" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
-                <c:AvonicItemSliding IsEnabled="False">
+                <c:AvonicItemSliding Disabled="True">
                     <c:AvonicItem>
                         <c:AvonicLabel Content="Disabled" />
                     </c:AvonicItem>

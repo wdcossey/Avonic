@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -1047,11 +1048,18 @@ public class AvonicInputTests
     {
         var input = new AvonicInput { Label = "Disabled", Value = "Value" };
         using var scene = new Scene(Page(input));
-        Assert.Equal(1, input.Opacity);
+        Assert.Null(input.OpacityMask);
 
+        // As one: a mask, not Opacity, which fades each overlapping part on its own.
         input.IsEnabled = false;
         Settle();
-        Assert.Equal(0.38, input.Opacity, 3);
+        Assert.Equal(1, input.Opacity);
+        var mask = Assert.IsAssignableFrom<ISolidColorBrush>(input.OpacityMask);
+        Assert.Equal(0.38, mask.Opacity * mask.Color.A / 255.0, 3);
+
+        input.IsEnabled = true;
+        Settle();
+        Assert.Null(input.OpacityMask);
     });
 
     [AvaloniaFact]
@@ -1204,6 +1212,59 @@ public class AvonicInputTests
         input.LabelContent = new TextBlock { Text = "Slotted" };
         Settle();
         Assert.Equal("Slotted", AutomationProperties.GetName(native));
+    }
+
+    [AvaloniaFact]
+    public void B26_Required_Says_The_Native_Input_Is_Required()
+    {
+        // required on the <input>: aria-required, from the first render and on each change.
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email", Required = true });
+        using var _ = scene;
+        var native = Native(input);
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = false;
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = true;
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+    }
+
+    [AvaloniaFact]
+    public void B26_An_Apps_Own_Required_On_The_Native_Input_Wins()
+    {
+        // The mapping rule's style priority: an app's style on the native input beats what Required gives it.
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email" });
+        using var _ = scene;
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicInput>().Template().OfType<TextBox>())
+        {
+            Setters = { new Setter(AutomationProperties.IsRequiredForFormProperty, true) },
+        });
+        Settle();
+        var native = Native(input);
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = true;
+        input.Required = false;
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+    }
+
+    [AvaloniaFact]
+    public void B26_An_Apps_Not_Required_On_The_Native_Input_Wins_Over_Required()
+    {
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email", Required = true });
+        using var _ = scene;
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicInput>().Template().OfType<TextBox>())
+        {
+            Setters = { new Setter(AutomationProperties.IsRequiredForFormProperty, false) },
+        });
+        Settle();
+        var native = Native(input);
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = false;
+        input.Required = true;
+        Assert.False(AutomationProperties.GetIsRequiredForForm(native));
     }
 
     // ── 27: the password toggle ──────────────────────────────────────────────────────────────
