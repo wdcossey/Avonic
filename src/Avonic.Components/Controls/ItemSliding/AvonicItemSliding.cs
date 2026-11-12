@@ -135,6 +135,11 @@ public class AvonicItemSliding : ItemsControl
             {
                 SetItem(FindItem());
             }
+            else if (_item is not null && !this.GetLogicalDescendants().Contains(_item))
+            {
+                // Gone from the sliding item: .item-sliding-active-slide .item no longer reaches it, and its transform goes too.
+                SetItem(null);
+            }
 
             OptionsChanged();
         };
@@ -315,6 +320,7 @@ public class AvonicItemSliding : ItemsControl
 
         foreach (var gone in _options.Keys.Except(found).ToList())
         {
+            gone.SetSwiping(false);
             foreach (var binding in _options[gone].Bindings)
             {
                 binding.Dispose();
@@ -480,6 +486,7 @@ public class AvonicItemSliding : ItemsControl
     {
         _optsWidthRightSide = MeasureOptions(_rightOptions);
         _optsWidthLeftSide = MeasureOptions(_leftOptions);
+        UpdateClasses();
         _optsDirty = false;
     }
 
@@ -491,11 +498,9 @@ public class AvonicItemSliding : ItemsControl
         }
 
         values.Visible.Clear();
-        var shown = options.IsVisible;
-        options.Measure(new Size(double.PositiveInfinity, Bounds.Height));
-        var width = shown ? options.DesiredSize.Width : 0;
-        UpdateClasses();
-        return width;
+        var height = (ItemsPanelRoot as ItemSlidingPanel)?.FlowHeight ?? Bounds.Height;
+        options.Measure(new Size(double.PositiveInfinity, height));
+        return options.IsVisible ? options.DesiredSize.Width : 0;
     }
 
     // ── setOpenAmount ────────────────────────────────────────────────────────────────────────

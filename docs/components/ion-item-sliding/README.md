@@ -100,6 +100,8 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
 
 - **An option wider than the row doesn't shrink** (`flex-shrink: 1`); options keep their own width and the row overflows inwards.
   Options are short, so this needs a row narrower than its options to show.
+- **The item's `z-index: 2` is `ZIndex` on the item,** which only sorts siblings: an item wrapped in another control inside the
+  sliding item draws under the options (`ZIndex` 1). Put the `AvonicItem` straight in `Items`, as Ionic's examples do.
 - **One open item per process,** where Ionic's is one per document, as with `GestureController`.
 - **An app's margin on slotted content adds to the slot's,** where Ionic's `::slotted` rule replaces it: the 5 px and 10 px are on
   the slot's presenter, which the option's `ControlTheme` can reach without a rule in `Styles/`.

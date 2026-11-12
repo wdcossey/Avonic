@@ -753,6 +753,49 @@ public class AvonicItemSlidingTests
         Assert.Equal(0, f.ItemX);
     }
 
+    [AvaloniaFact]
+    public void S20_An_Item_Taken_Out_While_Open_Is_Left_As_It_Was_Before()
+    {
+        using var f = Make();
+        f.Sliding.Open(ItemOptionsSide.End);
+        f.At(1000);
+        Assert.False(f.Item.IsHitTestVisible);
+
+        f.Sliding.Items.Remove(f.Item);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(f.Item.IsHitTestVisible);
+        Assert.Null(f.Item.RenderTransform);
+    }
+
+    [AvaloniaFact]
+    public void O02_Options_Taken_Out_Mid_Swipe_Lose_The_Expansion()
+    {
+        using var f = Make();
+        var delete = f.End!.Items.OfType<AvonicItemOption>().Last();
+        var finger = f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(60, Y, 32);
+        f.At(400);
+        Assert.True(delete.Expansion > 0);
+
+        f.Sliding.Items.Remove(f.End);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, delete.Expansion);
+        finger.Up(60, Y, 416);
+    }
+
+    [AvaloniaFact]
+    public void O04_Padding_Follows_The_Font_Size_And_An_Icon_Only_Slot_Is_At_Least_0_9em() => InstalledTheme.Run(_ =>
+    {
+        var big = new AvonicItemOption { FontSize = 20, Content = new Border { Width = 40, Height = 10 } };
+        var narrow = new AvonicItemOption { IconOnlyContent = new Border { Width = 5, Height = 10 } };
+        using var scene = new Scene(new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, Height = 48, Children = { big, narrow } });
+        GestureTests.Render();
+
+        // 0.7em each side at 20 is 14.
+        Assert.InRange(big.Bounds.Width, 67.5, 68.5);
+        // min-width: 0.9em of 1.8em of 14 is 22.68, with 10 each side and 9.8 each side.
+        Assert.InRange(narrow.Bounds.Width, 62, 63);
+    });
+
     // ── Options and option ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

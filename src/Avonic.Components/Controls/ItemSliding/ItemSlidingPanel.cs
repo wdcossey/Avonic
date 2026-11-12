@@ -10,6 +10,9 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public class ItemSlidingPanel : Panel
 {
+    /// <summary>The height of what's in the flow, from the last measure: what the options are as tall as.</summary>
+    internal double FlowHeight { get; private set; }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         double width = 0, height = 0;
@@ -25,6 +28,7 @@ public class ItemSlidingPanel : Panel
             height += child.DesiredSize.Height;
         }
 
+        FlowHeight = height;
         foreach (var child in Children)
         {
             if (child is AvonicItemOptions)

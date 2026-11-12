@@ -47,12 +47,18 @@ internal sealed class SlideTransition(Easing easing)
             return;
         }
 
+        if (running && to == current)
+        {
+            Snap(to);
+            return;
+        }
+
         if (running && to == _reversingStart)
         {
-            // How far the running one got, in output progress, scaled by its own factor.
+            // CSS Transitions 3: |output progress x the old factor + 1 - the old factor|, the output progress being eased.
             var span = _to - _from;
             var got = span == 0 ? 1 : (current - _from) / span;
-            _shortening = Math.Clamp(Math.Abs(got * _shortening) + 1 - _shortening, 0, 1);
+            _shortening = Math.Clamp(Math.Abs(got * _shortening + 1 - _shortening), 0, 1);
             _reversingStart = _to;
         }
         else

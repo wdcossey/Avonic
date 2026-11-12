@@ -12,7 +12,7 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public class ItemOptionsPanel : Panel
 {
-    private AvonicItemOptions? Options => this.FindAncestorOfType<AvonicItemOptions>();
+    private AvonicItemOptions? Options => TemplatedParent as AvonicItemOptions ?? this.FindAncestorOfType<AvonicItemOptions>();
 
     protected override Size MeasureOverride(Size availableSize)
     {

@@ -132,9 +132,24 @@
             </Setter>
         </Style>
 
-        <!-- .button-native: padding-inline: 0.7em, which is 9.8 at the 14 above -->
+        <!-- .button-native: padding-inline: 0.7em; padding-block: 0 -->
         <Style Selector="^ /template/ Border#PART_Native">
-            <Setter Property="Padding" Value="9.8,0" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.7">
+                        <Binding Path="$parent[c:AvonicItemOption].FontSize" />
+                    </MultiBinding>
+                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0">
+                        <Binding Path="$parent[c:AvonicItemOption].FontSize" />
+                    </MultiBinding>
+                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.7">
+                        <Binding Path="$parent[c:AvonicItemOption].FontSize" />
+                    </MultiBinding>
+                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0">
+                        <Binding Path="$parent[c:AvonicItemOption].FontSize" />
+                    </MultiBinding>
+                </MultiBinding>
+            </Setter>
         </Style>
 
         <!-- ion-ripple-effect's colour is the current colour -->
@@ -153,6 +168,12 @@
         <!-- ::slotted([slot=icon-only]): margin-inline: 10px; font-size: 1.8em -->
         <Style Selector="^ /template/ ContentPresenter#PART_IconOnly">
             <Setter Property="Margin" Value="10,0" />
+            <!-- min-width: 0.9em, of its own 1.8em -->
+            <Setter Property="MinWidth">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.9">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
             <Setter Property="FontSize">
                 <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.8">
                     <Binding Path="$parent[c:AvonicItemOption].FontSize" />

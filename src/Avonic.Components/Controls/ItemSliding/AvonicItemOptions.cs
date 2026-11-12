@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Interactivity;
+using Avalonia.Reactive;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 
@@ -177,7 +178,7 @@ public class AvonicItemOptions : ItemsControl
     {
         base.OnAttachedToVisualTree(e);
         _list = this.FindAncestorOfType<AvonicList>();
-        _linesSubscription = _list?.GetObservable(AvonicList.LinesProperty).Subscribe(new LinesObserver(this));
+        _linesSubscription = _list?.GetObservable(AvonicList.LinesProperty).Subscribe(new AnonymousObserver<ListLines?>(_ => UpdateLines()));
         UpdateLines();
         FindSliding()?.OptionsChanged();
     }
@@ -188,8 +189,7 @@ public class AvonicItemOptions : ItemsControl
         _linesSubscription?.Dispose();
         _linesSubscription = null;
         _list = null;
-        _frame?.Dispose();
-        _frame = null;
+        SetSwiping(false);
         UpdateLines();
     }
 
@@ -207,17 +207,4 @@ public class AvonicItemOptions : ItemsControl
 
     /// <summary>A plain element, where an <see cref="ItemsControl"/>'s own peer would call it a list.</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new AvonicItemSliding.GroupPeer(this);
-
-    private sealed class LinesObserver(AvonicItemOptions owner) : IObserver<ListLines?>
-    {
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(ListLines? value) => owner.UpdateLines();
-    }
 }
