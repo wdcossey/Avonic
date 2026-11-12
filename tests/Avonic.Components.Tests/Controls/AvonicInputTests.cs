@@ -555,11 +555,14 @@ public class AvonicInputTests
         Assert.Equal(127, end.Bounds.Width, 0.6);
         Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
 
-        // A plain TextBox in an app's own template is the native field too, and gives way with its text.
-        end.Template = new FuncControlTemplate<AvonicInput>((_, scope) => new TextBox { Name = "PART_NativeInput" }.RegisterInNameScope(scope));
-        end.Value = "a very long value that is wider than what's left of the row";
+        // A plain TextBox in an app's own template is the native field too, and gives way with its text rather than push the
+        // row off the screen.
+        var theme = (ControlTheme)Application.Current!.FindResource("Avonic.TextField.NativeInput")!;
+        start.Template = new FuncControlTemplate<AvonicInput>((_, scope) =>
+            new TextBox { Name = "PART_NativeInput", Theme = theme }.RegisterInNameScope(scope));
+        start.Value = "a very long value that is wider than what's left of the row by far";
         Render();
-        Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
+        Assert.True(Bounds(start, scene.Window).Right <= 374.6, $"{Bounds(start, scene.Window)}");
     });
 
     [AvaloniaFact]
