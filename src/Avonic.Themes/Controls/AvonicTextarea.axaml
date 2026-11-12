@@ -81,7 +81,7 @@
         </Style>
     </ControlTheme>
 
-    <!-- A translation of textarea.md.css. Slotted content is styled in Styles/Textarea.axaml, because a ControlTheme's styles
+    <!-- A translation of textarea.md.css. Slotted content is styled in Styles/TextField.axaml, because a ControlTheme's styles
          can't reach it. -->
     <ControlTheme x:Key="{x:Type c:AvonicTextarea}" TargetType="c:AvonicTextarea">
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />

@@ -120,10 +120,10 @@ Not in Ionic's API, but needed by the theme:
 - `FieldConverters.TextareaPlacement` and `FieldConverters.VerticalPadding`, for the theme, beside the input's in `FieldConverters`.
   It also uses `ion-input`'s `InputWrapperPanel`.
 - `IInputHost`, which the textarea and the input implement, for the slotted margins both have.
+- `TextareaNativeInput`: the native `<textarea>`, a `TextBox` with `Rows`, `Cols` and `AutoGrow`, and Chromium's `line-height: normal`.
 
 The textarea shares its native field with the input and the searchbar (`Controls/TextField/`): the value kept in step through
 `Text`, `maxlength` 0, the keyboard options, `debounce`, and, with the input, the label's activation, automation and counter.
-- `TextareaNativeInput`: the native `<textarea>`, a `TextBox` with `Rows`, `Cols` and `AutoGrow`, and Chromium's `line-height: normal`.
 
 ## Known gaps
 

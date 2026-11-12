@@ -177,7 +177,8 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         AddHandler(PointerPressedEvent, OnPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
 
         // cancelButtonIcon's default, config.get('backButtonIcon', arrowBackSharp), read once here as Ionic reads it. At style
-        // priority, and before any style, so that an app's value, set or styled, wins.
+        // priority, and before any style, so that an app's value, set or in a style, wins, as an attribute does in Ionic. A
+        // setter in a ControlTheme that replaces the searchbar's doesn't: CSS can't set the prop at all.
         if (AvonicConfig.BackButtonIcon is { } backButtonIcon)
         {
             SetValue(CancelButtonIconProperty, backButtonIcon, Avalonia.Data.BindingPriority.Style);

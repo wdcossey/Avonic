@@ -571,9 +571,10 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
     /// <summary><c>render</c>'s host classes, and the reflected <c>cols</c> and <c>auto-grow</c> attributes.</summary>
     private void UpdateClasses()
     {
-        LabelledTextField.SetClasses(PseudoClasses, LabelledTextField.Placement(LabelPlacement), HasValue, _hasFocus,
-            StartContent is not null || EndContent is not null, Fill == TextareaFill.Outline, Fill == TextareaFill.Solid,
-            Shape == TextareaShape.Round, _item is not null);
+        LabelledTextField.SetClasses(PseudoClasses, LabelledTextField.Placement(LabelPlacement), hasValue: HasValue,
+            hasFocus: _hasFocus, hasStartEnd: StartContent is not null || EndContent is not null,
+            outline: Fill == TextareaFill.Outline, solid: Fill == TextareaFill.Solid, round: Shape == TextareaShape.Round,
+            inItem: _item is not null);
         PseudoClasses.Set(":textarea-disabled", !IsEnabled);
         PseudoClasses.Set(":auto-grow", AutoGrow);
         PseudoClasses.Set(":cols", Cols is not null);

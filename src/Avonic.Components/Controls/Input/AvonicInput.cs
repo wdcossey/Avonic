@@ -612,8 +612,9 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     private void UpdateClasses()
     {
         var item = _item;
-        LabelledTextField.SetClasses(PseudoClasses, LabelPlacement, HasValue, _hasFocus, StartContent is not null || EndContent is not null,
-            Fill == InputFill.Outline, Fill == InputFill.Solid, Shape == InputShape.Round, item is not null);
+        LabelledTextField.SetClasses(PseudoClasses, LabelPlacement, hasValue: HasValue, hasFocus: _hasFocus,
+            hasStartEnd: StartContent is not null || EndContent is not null, outline: Fill == InputFill.Outline,
+            solid: Fill == InputFill.Solid, round: Shape == InputShape.Round, inItem: item is not null);
         PseudoClasses.Set(":in-item-color", item?.Classes.Contains(":ion-color") == true);
         PseudoClasses.Set(":input-disabled", !IsEnabled);
         PseudoClasses.Set(":readonly", Readonly);

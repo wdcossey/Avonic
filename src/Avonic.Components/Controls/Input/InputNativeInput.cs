@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -22,6 +23,9 @@ public sealed class InputNativeInput : TextBox
 {
     /// <summary>HTML's <c>size</c> when it isn't set, which <c>ion-input</c> doesn't set.</summary>
     public const int DefaultSize = 20;
+
+    /// <summary>Each typeface's widest glyph per em, or null, read once: the font's file is read whole for it.</summary>
+    private static readonly ConditionalWeakTable<GlyphTypeface, StrongBox<double?>> s_widest = new();
 
     private bool _sizesToCharacters;
     private double _sizedWidth = double.NaN;
@@ -83,19 +87,20 @@ public sealed class InputNativeInput : TextBox
         var width = Math.Ceiling(character * DefaultSize);
 
         if (FontManager.Current.TryGetGlyphTypeface(typeface, out var glyphTypeface)
-            && WidestGlyph(glyphTypeface, FontSize) is { } widest)
+            && s_widest.GetValue(glyphTypeface, static face => new StrongBox<double?>(WidestGlyphPerEm(face))).Value is { } perEm)
         {
-            width += widest - character;
+            width += Math.Round(perEm * FontSize, MidpointRounding.AwayFromZero) - character;
         }
 
         return width;
     }
 
     /// <summary>
-    /// The <c>head</c> table's <c>xMax - xMin</c> at <paramref name="size"/>, rounded, when the <c>OS/2</c> table gives an average
-    /// width, as Chromium's <c>HasValidAvgCharWidth</c> asks. Null if the font's tables can't be read.
+    /// The <c>head</c> table's <c>xMax - xMin</c> over its units per em, when the <c>OS/2</c> table gives an average width, as
+    /// Chromium's <c>HasValidAvgCharWidth</c> asks. Null if the font's tables can't be read, or it's a collection. Read once per
+    /// typeface, as the file is read whole.
     /// </summary>
-    private static double? WidestGlyph(GlyphTypeface glyphTypeface, double size)
+    private static double? WidestGlyphPerEm(GlyphTypeface glyphTypeface)
     {
         try
         {
@@ -106,8 +111,14 @@ public sealed class InputNativeInput : TextBox
 
             using (stream)
             {
-                var font = new byte[stream.Length];
-                stream.ReadExactly(font);
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
+
+                using var copy = new MemoryStream();
+                stream.CopyTo(copy);
+                var font = copy.ToArray();
                 if (Table(font, "head") is not { Length: >= 44 } head || Table(font, "OS/2") is not { Length: >= 4 } os2
                     || BinaryPrimitives.ReadInt16BigEndian(os2[2..]) == 0)
                 {
@@ -117,18 +128,24 @@ public sealed class InputNativeInput : TextBox
                 var unitsPerEm = BinaryPrimitives.ReadUInt16BigEndian(head[18..]);
                 var xMin = BinaryPrimitives.ReadInt16BigEndian(head[36..]);
                 var xMax = BinaryPrimitives.ReadInt16BigEndian(head[40..]);
-                return unitsPerEm == 0 ? null : Math.Round((xMax - xMin) * size / unitsPerEm, MidpointRounding.AwayFromZero);
+                return unitsPerEm == 0 ? null : (double)(xMax - xMin) / unitsPerEm;
             }
         }
-        catch (Exception exception) when (exception is IOException or NotSupportedException or ArgumentOutOfRangeException)
+        catch (Exception exception) when (exception is IOException or NotSupportedException or ArgumentOutOfRangeException
+                                              or ObjectDisposedException)
         {
             return null;
         }
     }
 
-    /// <summary>A table of a single font's file, by its tag. Null for a collection, or a tag it hasn't got.</summary>
+    /// <summary>A table of a single font's file, by its tag. Empty for a collection (<c>ttcf</c>), or a tag it hasn't got.</summary>
     private static ReadOnlySpan<byte> Table(byte[] font, string tag)
     {
+        if (font.Length < 12 || (font[0] == 't' && font[1] == 't' && font[2] == 'c' && font[3] == 'f'))
+        {
+            return default;
+        }
+
         var tables = BinaryPrimitives.ReadUInt16BigEndian(font.AsSpan(4));
         for (var i = 0; i < tables; i++)
         {
@@ -141,6 +158,6 @@ public sealed class InputNativeInput : TextBox
             }
         }
 
-        return null;
+        return default;
     }
 }
