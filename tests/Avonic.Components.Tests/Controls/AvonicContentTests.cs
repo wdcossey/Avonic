@@ -27,6 +27,9 @@ public class AvonicContentTests
 {
     private static AvonicContent Tall(double height = 1000) => new() { Content = new Border { Height = height } };
 
+    /// <summary>An app's own element, of a type of its own, so that a plain style, with no class, can reach it alone.</summary>
+    private sealed class AppBlock : Border;
+
     private static Control InBox(Control content, double height = 300) =>
         new Panel { Height = height, VerticalAlignment = VerticalAlignment.Top, Children = { content } };
 
@@ -554,12 +557,12 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B9_An_Apps_Style_For_The_Alignment_Wins()
     {
-        var stretched = new Border { Classes = { "page" } };
+        var stretched = new AppBlock();
         var content = new AvonicContent();
-        var made = new AvonicContent { ContentTemplate = new FuncDataTemplate<string>((_, _) => new Border { Classes = { "page" } }) };
+        var made = new AvonicContent { ContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock()) };
         using var scene = Scene.Styled(
             new StackPanel { Children = { InBox(content), InBox(made) } },
-            new Style(x => x.OfType<Border>().Class("page"))
+            new Style(x => x.OfType<AppBlock>())
             {
                 Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Stretch) },
             });
@@ -567,9 +570,13 @@ public class AvonicContentTests
         content.Content = stretched;
         made.Content = "made from a template";
         Settle();
+        scene.Window.UpdateLayout();
 
+        var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
+        Assert.Equal(VerticalAlignment.Stretch, stretched.VerticalAlignment);
+        Assert.Equal(VerticalAlignment.Stretch, fromTemplate.VerticalAlignment);
         Assert.Equal(300, stretched.Bounds.Height);
-        Assert.Equal(300, made.GetVisualDescendants().OfType<Border>().Single(border => border.Classes.Contains("page")).Bounds.Height);
+        Assert.Equal(300, fromTemplate.Bounds.Height);
     }
 
     [AvaloniaFact]
@@ -2557,15 +2564,15 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B29_An_Apps_Style_For_The_Alignments_Wins()
     {
-        var slot = new Border { Width = 60, Height = 60, Classes = { "fab" } };
+        var slot = new AppBlock { Width = 60, Height = 60 };
         var made = new AvonicContent
         {
-            FixedContentTemplate = new FuncDataTemplate<string>((_, _) => new Border { Width = 60, Height = 60, Classes = { "fab" } }),
+            FixedContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock { Width = 60, Height = 60 }),
         };
         var content = new AvonicContent();
         using var scene = Scene.Styled(
             new StackPanel { Children = { InBox(content), InBox(made) } },
-            new Style(x => x.OfType<Border>().Class("fab"))
+            new Style(x => x.OfType<AppBlock>())
             {
                 Setters =
                 {
@@ -2577,9 +2584,16 @@ public class AvonicContentTests
         content.FixedContent = slot;
         made.FixedContent = "made from a template";
         Settle();
+        scene.Window.UpdateLayout();
 
+        var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
+        Assert.All(new[] { slot, fromTemplate }, border =>
+        {
+            Assert.Equal(HorizontalAlignment.Right, border.HorizontalAlignment);
+            Assert.Equal(VerticalAlignment.Bottom, border.VerticalAlignment);
+        });
         Assert.Equal(new Rect(330, 240, 60, 60), Box(slot, content));
-        Assert.Equal(new Rect(330, 240, 60, 60), Box(made.GetVisualDescendants().OfType<Border>().Single(border => border.Classes.Contains("fab")), made));
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(fromTemplate, made));
     }
 
     [AvaloniaFact]
