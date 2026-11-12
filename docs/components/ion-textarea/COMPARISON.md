@@ -68,7 +68,7 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 | 10 | Rows: 45, 64, 102 for 1, 2, 4; a longer value scrolls inside | Match to 0.5 px |
 | 11 | `AutoGrow`: 45, 64, 83, back to 64, 102 when set in code; never under `Rows` | Match |
 | 12 | `Cols`: 84, 164, 324; full width with `AutoGrow`; 133 for 20 columns of 13 px, and 10 more sizes and counts (#155) | Match in a phone viewport. See the gaps for other platforms |
-| 12 | In an item's start or end slot, `width: auto` (#155): 164 (20 columns) whatever the value or placeholder, the label's 58.52 more, `cols` 10 84; with `AutoGrow` 160 (no scroll bar's room), 80 for 10 columns, and a long line 342, what's left; an end one gives way to a start one, 162 | Match |
+| 12a | In an item's start or end slot, `width: auto` (#155): 164 (20 columns) whatever the value or placeholder, the label's 58.52 more, `cols` 10 84; with `AutoGrow` 160 (no scroll bar's room), 80 for 10 columns, and a long line 342, what's left; an end one gives way to a start one, 162 | Match |
 | 13 | `Wrap="Off"`; line breaks as line feeds; an unfocused field at its first lines | Match: one line, scrolling sideways. A pasted CR LF or CR becomes LF, with the caret after it. A value set in code leaves an unfocused field at its first lines, though the caret is at the end |
 | 14 | Row placements: the label 45 high at the top, its text 18 down, 16 from the field; end; fixed 100; at most 200 | Match to 0.8 px |
 | 15 | Column placements: 75 high, the label on the field and raised, the field 8 under it (12 with the outline, 58 high); hidden until focus or a value | Match to 0.8 px |
