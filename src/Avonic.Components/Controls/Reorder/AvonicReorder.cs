@@ -30,15 +30,29 @@ public class AvonicReorder : ContentControl
         // onClick, a capture listener: stopImmediatePropagation, unless a disabled group is around it. A handled press is no click to
         // an item (NativeButton) or a Button, inside or around this. The group's gesture and tap-click listen to handled presses too.
         AddHandler(PointerPressedEvent, OnPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
+
+        // A keyboard click on something inside, a button's Enter or Space, is a click too. Not a text box's, which types them.
+        AddHandler(KeyDownEvent, OnKeyTunnel, RoutingStrategies.Tunnel);
+        AddHandler(KeyUpEvent, OnKeyTunnel, RoutingStrategies.Tunnel);
     }
+
+    private void OnKeyTunnel(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.Enter or Key.Space && e.Source is not TextBox && StopsClicks())
+        {
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>Unless a disabled group is around it: <c>el.closest('ion-reorder-group')</c>.</summary>
+    private bool StopsClicks() => this.FindAncestorOfType<AvonicReorderGroup>() is not { Disabled: true };
 
     /// <summary><c>cursor: grab</c>. Avalonia has no grab cursor; the hand is the nearest.</summary>
     private static Cursor Grab => s_grab ??= new Cursor(StandardCursorType.Hand);
 
     private void OnPressedTunnel(object? sender, PointerPressedEventArgs e)
     {
-        // el.closest('ion-reorder-group')
-        if (this.FindAncestorOfType<AvonicReorderGroup>() is not { Disabled: true })
+        if (StopsClicks())
         {
             e.Handled = true;
         }

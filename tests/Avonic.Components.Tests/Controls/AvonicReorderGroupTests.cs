@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Controls.Templates;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -283,6 +285,47 @@ public class AvonicReorderGroupTests
         new Finger(page.Scene, page.Clock).Down(at.X, at.Y, page.At + 100).Up(at.X, at.Y, page.At + 150);
         Assert.Equal(0, clicks);
         Assert.Single(page.Log, l => l.StartsWith("start"));
+    }
+
+    [AvaloniaFact]
+    public void B3_Enter_On_An_Item_In_A_Handle_Does_Not_Click_Unless_The_Group_Is_Disabled()
+    {
+        var clicks = 0;
+        var item = new AvonicItem { Button = true, Height = 48 };
+        item.Click += (_, _) => clicks++;
+        var group = new AvonicReorderGroup { Disabled = false, Items = { new AvonicReorder { Content = item } } };
+        using var scene = new Scene(group);
+        item.Focus();
+        Assert.True(item.IsFocused);
+
+        void Enter()
+        {
+            scene.Window.KeyPressQwerty(Avalonia.Input.PhysicalKey.Enter, RawInputModifiers.None);
+            scene.Window.KeyReleaseQwerty(Avalonia.Input.PhysicalKey.Enter, RawInputModifiers.None);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        Enter();
+        Assert.Equal(0, clicks);
+
+        group.Disabled = true;
+        Enter();
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B3_A_Text_Box_In_A_Handle_Still_Takes_Space()
+    {
+        var box = new TextBox { Width = 200 };
+        var group = new AvonicReorderGroup { Disabled = false, Items = { new AvonicReorder { Content = box } } };
+        using var scene = new Scene(group);
+        box.Focus();
+        scene.Window.KeyPressQwerty(Avalonia.Input.PhysicalKey.Space, RawInputModifiers.None);
+        scene.Window.KeyTextInput(" ");
+        scene.Window.KeyReleaseQwerty(Avalonia.Input.PhysicalKey.Space, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(" ", box.Text);
     }
 
     // ── 4: cursor ─────────────────────────────────────────────────────────────────────────────
@@ -621,6 +664,36 @@ public class AvonicReorderGroupTests
         Assert.NotSame(data, returned);
         Assert.Equal(["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"], page.Order);
         Assert.Equal(0, page.Shift(1));
+    }
+
+    [AvaloniaFact]
+    public void B12_Complete_Moves_The_Dragged_Entry_When_Items_Hold_Equal_Values()
+    {
+        using var page = new Page(count: 0, setup: g =>
+        {
+            g.ItemTemplate = new FuncDataTemplate<string>((text, _) => Page.Item(text));
+            foreach (var text in new[] { "x", "y", "x" })
+            {
+                g.Items.Add(text);
+            }
+        });
+        Render();
+
+        // The second x, at 2, up to 0
+        var press = page.Press(2);
+        page.Up(press.Finger, page.Move(press, -96));
+        page.Group.Complete();
+        page.Tick();
+        Assert.Equal(["x", "x", "y"], page.Group.Items.Cast<string>());
+    }
+
+    [AvaloniaFact]
+    public void Its_Automation_Peer_Is_No_List_Of_Its_Own()
+    {
+        using var page = new Page(count: 1);
+        var peer = ControlAutomationPeer.CreatePeerForElement(page.Group);
+        Assert.False(peer.IsControlElement());
+        Assert.NotEqual(AutomationControlType.List, peer.GetAutomationControlType());
     }
 
     [AvaloniaFact]

@@ -24,7 +24,7 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 |---|---|---|
 | Handle box | 31 x 31 at (343, 16), 16 px slot margin before it | the same (`B2_The_Handle_Is_31_Px…`) |
 | Icon | `reorder-two-sharp`, black at 0.3: 177 at its bar | 179 |
-| Lifted item | opacity 0.8, `box-shadow: 0 0 10px rgba(0,0,0,.4)` | the same; the shadow's fall-off within 1 of Chromium's at every pixel from 252 to 272 and 366 to 388 |
+| Lifted item | opacity 0.8, `box-shadow: 0 0 10px rgba(0,0,0,.4)` | the same, the shadow drawn by the group's `PART_Lift`; its fall-off within 1 of Chromium's at every pixel from 252 to 272 and 366 to 388, and there with any lines (`B14_The_Shadow_Shows_Whatever_The_Items_Lines`) |
 | Siblings | item 3 and 4 at −48 | the same |
 | Disabled group | slotted handles `display: none` | hidden |
 | A custom icon in the handle | 16 px: the item's font size, as the `dynamic-font()` rule is invalid CSS | the icon's own size, from the font size it inherits |
@@ -35,7 +35,7 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 |---|---|---|
 | 1 | Slotted handle hidden unless an enabled group is around it, at any depth; one that wraps its item always shows | match |
 | 2 | The icon is the slot's fallback | match |
-| 3 | A click on the handle stops, unless its group is disabled; with no group it stops too | match (the press is handled, which an item and a `Button` ignore) |
+| 3 | A click on the handle stops, unless its group is disabled; with no group it stops too; a keyboard click on a button inside too | match (the press, and Enter and Space, are handled, which an item and a `Button` ignore) |
 | 4 | `cursor: grab` in an enabled group | deliberate difference: the hand cursor; Avalonia has no grab cursor |
 | 5 | `disabled`, true by default, turns the gesture off | match |
 | 6 | Starts at the press on a handle (threshold 0), never elsewhere | match |
@@ -57,8 +57,13 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
   source has it, as Ionic's `complete(array)` leaves the DOM to the framework. `Complete(list)` reorders the list given, with `Move` on
   an `ObservableCollection<T>`.
 - **The cursor** is the hand in an enabled group, and nothing changes while dragging: Avalonia has no `grab` or `grabbing` cursor.
-- **The lifted look applies to `AvonicItem` and to a handle that wraps its item.** Ionic's class can style any child; an app styles
-  its own type with `:reorder-selected`. The z-index works for any child.
+- **The lifted opacity applies to `AvonicItem` and to a handle that wraps its item.** Ionic's class can style any child; an app styles
+  its own type with `:reorder-selected`. The z-index and the shadow work for any child: the shadow is the group's `PART_Lift`, a
+  `Border` it puts over the dragged child, as only a `Border` has a box shadow, and Avalonia draws none for a border of uneven
+  thickness, which an item with full lines has.
+- **A press on a handle is handled**, where Ionic stops only the click: a text box inside a handle with no group, or one waiting for
+  `Complete()`, isn't focused by a tap. In an enabled group Ionic's drag prevents the focus too.
+- **A slot is an item's start or end**: in another host's named slot a handle isn't hidden.
 - **The shadow's blur is 15.6 in the token**, which is CSS's 10: Avalonia's Skia turns a blur into a Gaussian differently. Measured
   equal.
 - **The opacity fades each part of the item**, as Avalonia's `Opacity` does, not the item as one layer: the item's text shows a little

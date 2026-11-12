@@ -74,6 +74,8 @@ No props, events, methods or CSS variables.
 - `item.md.css`'s `::slotted(ion-reorder[slot]) { margin-top: 0; margin-bottom: 0 }`: no md rule gives a slotted control a vertical
   margin that it could beat (the multi-line and stacked rules are more specific and win).
 - Haptics (`hapticSelectionStart`, …): Capacitor's, native only. Avonic has none.
+- `:host([slot]) { line-height: 0; z-index: 100 }`: the handle's box is its 31 px icon either way (measured 31 x 31), and in an
+  item's slot it's already over the ripple, which comes before the slots.
 - `user-select: none`, `touch-action: none`, `pointer-events: all`, `will-change`, `display: block` on the children: browser
   concerns. A captured gesture already keeps the scroller off the pointer.
 
@@ -91,8 +93,13 @@ No props, events, methods or CSS variables.
   app's sheet; this gives the app's own value back when it's cleared), eased on `AvonicConfig`'s clock with `cubic-bezier(.25,.1,.25,1)`
   and CSS's reversing rule, as `AvonicProgressBar`'s transition.
 - The lift: the pseudoclass `:reorder-selected` on the element, and `ZIndex` 100 at style priority on the child in the panel (it has
-  to be over its siblings to be seen, whatever its type). The shadow and opacity are the theme's: `Styles/ReorderGroup.axaml` for
-  `AvonicItem`, `AvonicReorder`'s own theme for a wrapping handle.
+  to be over its siblings to be seen, whatever its type). The shadow is `PART_Lift`, a `Border` in the group's template over the
+  children, which the group sizes and moves with the dragged child: only a `Border` has a box shadow, Avalonia draws one only for a
+  uniform border (an item with full lines has none), and an `Effect` would show through the translucent child. The opacity is the
+  theme's: `Styles/ReorderGroup.axaml` for `AvonicItem`, `AvonicReorder`'s own theme for a wrapping handle.
+- The keyboard: Enter and Space, handled in the tunnel under a handle unless its group is disabled, as a browser's keyboard click
+  on a button inside reaches the capture listener too; not a text box's, which types them.
+- The group's automation peer is a `NoneAutomationPeer`: `ion-reorder-group` has no role, so its items stay the list's.
 - The host classes `reorder-enabled` and `reorder-list-active` are the pseudoclasses `:reorder-enabled` and `:reorder-list-active`.
   The group doesn't clip (`ClipToBounds` false by default), as a lifted child can be outside it.
 - The scroll element: the closest `AvonicContent`'s `GetScrollElement()`, or a control with the class `ion-content-scroll-host`, as

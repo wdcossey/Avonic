@@ -54,6 +54,8 @@ public class AvonicReorderCaptureTests
         }
     }
 
+    private static Border Lift(AvonicReorderGroup group) => group.GetVisualDescendants().OfType<Border>().First(b => b.Name == "PART_Lift");
+
     [AvaloniaFact]
     public void B2_The_Handle_Is_31_Px_At_0_3_After_The_Items_End_Margin() => InstalledTheme.Run(_ =>
     {
@@ -73,15 +75,26 @@ public class AvonicReorderCaptureTests
     {
         using var page = new Page();
         var item = (AvonicItem)page.Group.ItemsPanelRoot!.Children[1];
-        var native = item.GetVisualDescendants().OfType<Border>().First(b => b.Name == "PART_Native");
-        Assert.Equal(default, native.BoxShadow);
+        var lift = Lift(page.Group);
+        Assert.False(lift.IsVisible);
 
+        // The lift is the item's box, and moves with it
         var at = page.Box(page.Handle(1)).Center;
-        new Finger(page.Scene, page.Clock).Down(at.X, at.Y, 1000);
+        var finger = new Finger(page.Scene, page.Clock).Down(at.X, at.Y, 1000);
         Assert.Equal(0.8, item.Opacity);
-        Assert.Equal(BoxShadows.Parse("0 0 15.6 0 #66000000"), native.BoxShadow);
-        Assert.False(item.ClipToBounds);
-        Assert.False(native.ClipToBounds);
+        Assert.True(lift.IsVisible);
+        Assert.Equal(BoxShadows.Parse("0 0 15.6 0 #66000000"), lift.BoxShadow);
+        Assert.Equal(0.8, lift.Opacity);
+        finger.Move(at.X, at.Y + 30, 1016);
+        page.Clock.At(1032);
+        Render();
+        Assert.Equal(new Rect(0, 56 + 30, 390, 48), page.Box(item));
+        Assert.Equal(page.Box(item), new Rect(lift.TranslatePoint(default, page.Scene.Window)!.Value, lift.Bounds.Size));
+
+        // Gone with the class, when it's completed
+        finger.Up(at.X, at.Y + 30, 1048);
+        page.Group.Complete();
+        Assert.False(lift.IsVisible);
     });
 
     [AvaloniaFact]
@@ -92,14 +105,11 @@ public class AvonicReorderCaptureTests
         var group = new AvonicReorderGroup { Disabled = false, Items = { handle } };
         using var scene = new Scene(new AvonicList { Items = { group } });
         Render();
-        var host = handle.GetVisualDescendants().OfType<Border>().First(b => b.Name == "PART_Host");
-        Assert.False(handle.ClipToBounds);
-        Assert.Equal(default, host.BoxShadow);
-
         var at = handle.TranslatePoint(new Point(100, 20), scene.Window)!.Value;
         new Finger(scene, clock).Down(at.X, at.Y, 1000);
         Assert.Equal(0.8, handle.Opacity);
-        Assert.Equal(BoxShadows.Parse("0 0 15.6 0 #66000000"), host.BoxShadow);
+        Assert.True(Lift(group).IsVisible);
+        Assert.Equal(handle.Bounds.Size, Lift(group).Bounds.Size);
     });
 
     [AvaloniaFact]
@@ -127,6 +137,36 @@ public class AvonicReorderCaptureTests
         // Held at the group's bottom, 290, from the press at 266: the item reaches 314, and its shadow is below that, outside the group
         Assert.Equal(290, group.Bounds.Bottom);
         Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 200, 316));
+    });
+
+    [AvaloniaTheory]
+    [InlineData(ItemLines.Full)]
+    [InlineData(ItemLines.Inset)]
+    [InlineData(ItemLines.None)]
+    public void B14_The_Shadow_Shows_Whatever_The_Items_Lines(ItemLines lines) => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var group = new AvonicReorderGroup { Disabled = false };
+        for (var i = 1; i <= 3; i++)
+        {
+            group.Items.Add(new AvonicItem { Lines = lines, Content = new AvonicLabel { Content = $"Item {i}" }, EndContent = new AvonicReorder() });
+        }
+
+        using var scene = new Scene(new StackPanel { Children = { new Border { Height = 50 }, group } });
+        scene.Window.Background = Brushes.White;
+        Render();
+        var handle = group.ItemsPanelRoot!.Children[1].GetVisualDescendants().OfType<AvonicReorder>().First();
+        var at = handle.TranslatePoint(new Point(15, 15), scene.Window)!.Value;
+        new Finger(scene, clock).Down(at.X, at.Y, 1000);
+        clock.At(1100);
+        Render();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        // Its shadow is over the items around it, 3 px above it and below it
+        var item = group.ItemsPanelRoot!.Children[1];
+        var top = (int)item.TranslatePoint(default, scene.Window)!.Value.Y;
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 200, top - 3));
+        Assert.NotEqual(Colors.White, Frames.PixelAt(frame, 200, top + (int)item.Bounds.Height + 2));
     });
 
     [AvaloniaFact]

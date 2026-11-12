@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -18,6 +20,12 @@ namespace Avonic.Components.Controls;
 /// app calls <see cref="Complete()"/>, usually from <see cref="IonReorderEnd"/>. A virtualising panel isn't supported: the drag reads
 /// every child.
 /// </summary>
+/// <remarks>
+/// <c>PART_Lift</c>, optional, is a <see cref="Border"/> over the children that the group puts where the dragged child is, as big as it
+/// and moving with it, for the theme's shadow: <c>.reorder-selected</c>'s <c>box-shadow</c>, which can't be the child's own, as only a
+/// <see cref="Border"/> has one, and Avalonia draws it only for one of uniform thickness.
+/// </remarks>
+[TemplatePart("PART_Lift", typeof(Border))]
 [PseudoClasses(":reorder-enabled", ":reorder-list-active")]
 public class AvonicReorderGroup : ItemsControl
 {
@@ -82,6 +90,8 @@ public class AvonicReorderGroup : ItemsControl
     private double _containerTop;
     private double _containerBottom;
     private IDisposable? _tick;
+    private Border? _lift;
+    private TranslateTransform? _liftTransform;
 
     static AvonicReorderGroup()
     {
@@ -159,6 +169,21 @@ public class AvonicReorderGroup : ItemsControl
             _gesture?.Enable(!Disabled);
             PseudoClasses.Set(":reorder-enabled", !Disabled);
             DisabledChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        _lift = e.NameScope.Find<Border>("PART_Lift");
+        if (_lift is not null)
+        {
+            _liftTransform = new TranslateTransform();
+            _lift.IsVisible = false;
+            _lift.IsHitTestVisible = false;
+            _lift.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+            _lift.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+            _lift.RenderTransform = _liftTransform;
         }
     }
 
@@ -405,16 +430,17 @@ public class AvonicReorderGroup : ItemsControl
         var children = Children;
         var index = fromIndex < toIndex ? toIndex + 1 : toIndex;
         var reference = index >= 0 && index < children.Count ? children[index] : null;
-        var item = ItemFromContainer(selected);
-        if (ItemsSource is not null || reference == selected || item is null || Items.IndexOf(item) < 0)
+        // By container, not by value: Items can hold equal values
+        var from = IndexFromContainer(selected);
+        var before = reference is null ? Items.Count : IndexFromContainer(reference);
+        if (ItemsSource is not null || reference == selected || from < 0 || before < 0)
         {
             return;
         }
 
-        var before = reference is null ? null : ItemFromContainer(reference);
-        Items.Remove(item);
-        var at = before is null ? -1 : Items.IndexOf(before);
-        Items.Insert(at < 0 ? Items.Count : at, item);
+        var item = Items[from];
+        Items.RemoveAt(from);
+        Items.Insert(before > from ? before - 1 : before, item);
     }
 
     /// <summary><c>reorderArray</c>: the list changed in place, and a copy returned.</summary>
@@ -531,6 +557,20 @@ public class AvonicReorderGroup : ItemsControl
         ((IPseudoClasses)element.Classes).Set(SelectedPseudoClass, selected);
         _selectedZIndex?.Dispose();
         _selectedZIndex = selected ? child.SetValue(ZIndexProperty, SelectedZIndex, BindingPriority.Style) : null;
+
+        if (_lift is { } lift)
+        {
+            lift.IsVisible = selected;
+            if (selected && lift.GetVisualParent() is Visual over && child.GetVisualParent() is Visual panel &&
+                panel.TranslatePoint(default, over) is { } origin)
+            {
+                // The child's place before its transform, which the lift's own follows
+                lift.Margin = new Thickness(origin.X + child.Bounds.X, origin.Y + child.Bounds.Y, 0, 0);
+                lift.Width = child.Bounds.Width;
+                lift.Height = child.Bounds.Height;
+                _liftTransform!.Y = 0;
+            }
+        }
     }
 
     /// <summary>
@@ -565,6 +605,11 @@ public class AvonicReorderGroup : ItemsControl
         {
             shift.Transition.Snap(y);
             shift.Transform.Y = y;
+        }
+
+        if (child == _selectedItemEl && _liftTransform is not null)
+        {
+            _liftTransform.Y = y;
         }
     }
 
@@ -606,6 +651,9 @@ public class AvonicReorderGroup : ItemsControl
             _tick = null;
         }
     }
+
+    /// <summary><c>ion-reorder-group</c> has no role: its children belong to the list around it.</summary>
+    protected override AutomationPeer OnCreateAutomationPeer() => new NoneAutomationPeer(this);
 
     private sealed class Shift(TranslateTransform transform, IDisposable? frame)
     {
