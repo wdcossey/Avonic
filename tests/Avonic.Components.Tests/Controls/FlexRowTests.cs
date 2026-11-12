@@ -654,12 +654,29 @@ public class FlexRowTests
     [AvaloniaFact]
     public void A_Basis_Is_Held_Between_Min_And_Max_Width()
     {
-        Border small = Basis(10, 30), big = Basis(100, 0);
+        // The room each takes in the row, not only its own box, which Avalonia holds to MinWidth and MaxWidth anyway.
+        Border small = Basis(10, 30), big = Basis(100, 0), after = Fixed(5), last = Fixed(5);
         big.MaxWidth = 60;
-        using var scene = InRow(300, out _, small, big);
+        using var scene = InRow(300, out _, small, after, big, last);
 
-        Assert.Equal(30, small.Bounds.Width);
-        Assert.Equal(60, big.Bounds.Width);
+        Assert.Equal(30, after.Bounds.X);
+        Assert.Equal(95, last.Bounds.X);
+    }
+
+    [AvaloniaFact]
+    public void Padding_Narrows_What_The_Children_Are_Measured_In()
+    {
+        // Text in 20 of a 100 wide row wraps as it does in a row 20 wide.
+        var padded = Numbered(10);
+        using var paddedScene = InRow(100, out var row, padded);
+        row.Padding = new Thickness(40, 0);
+        Settle();
+
+        var narrow = Numbered(10);
+        using var narrowScene = InRow(20, out var narrowRow, narrow);
+
+        Assert.Equal(narrowRow.Bounds.Height, row.Bounds.Height);
+        Assert.True(row.Bounds.Height > 40, $"{row.Bounds.Height}");
     }
 
     [AvaloniaFact]
