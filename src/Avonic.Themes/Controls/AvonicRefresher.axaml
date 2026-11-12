@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <!-- Inactive, it shows nothing: the sample's page and docs/components/ion-refresher/compare show a pull. -->
+        <Grid Width="390" Height="300">
+            <c:AvonicContent>
+                <c:AvonicContent.FixedContent>
+                    <c:AvonicRefresher>
+                        <c:AvonicRefresherContent />
+                    </c:AvonicRefresher>
+                </c:AvonicContent.FixedContent>
+                <TextBlock Text="Pull down" Margin="16" />
+            </c:AvonicContent>
+        </Grid>
+    </Design.PreviewWith>
+
+    <!-- A translation of refresher.md.css's ion-refresher: top: 0; position: absolute; width: 100%; height: 60px. The width and
+         pointer-events: none are the control's own. The native refresher is display: block, and z-index: 1 over the scroll,
+         where the fixed slot already is. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRefresher}" TargetType="c:AvonicRefresher">
+        <Setter Property="Height" Value="60" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-refresher-content: structure only, and which part shows in which state. md's icon, its sizes and colours are in
+         Avonic.Themes/Controls/AvonicRefresherContent.axaml. -->
+    <ControlTheme x:Key="{x:Type c:AvonicRefresherContent}" TargetType="c:AvonicRefresherContent">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel VerticalAlignment="Center">
+                    <Panel Name="PART_Pulling" IsVisible="False">
+                        <Border Name="PART_PullingIcon" HorizontalAlignment="Center">
+                            <Panel Name="PART_SpinnerArrowContainer">
+                                <Panel Name="PART_PullingSpinner">
+                                    <c:RefresherCircle Name="PART_PullingCircle" IsVisible="False" />
+                                    <c:AvonicSpinner Name="PART_PullingOtherSpinner" Paused="True" SpinnerName="{TemplateBinding PullingIcon}" />
+                                </Panel>
+                                <Panel Name="PART_ArrowContainer" IsVisible="False">
+                                    <c:AvonicIcon Name="PART_Arrow" IconName="caret-back-sharp" />
+                                </Panel>
+                            </Panel>
+                        </Border>
+                    </Panel>
+                    <Panel Name="PART_Refreshing" IsVisible="False">
+                        <Border Name="PART_RefreshingIcon" HorizontalAlignment="Center">
+                            <Panel>
+                                <c:RefresherCircle Name="PART_RefreshingCircle" IsVisible="False" />
+                                <c:AvonicSpinner Name="PART_RefreshingSpinner" SpinnerName="{TemplateBinding RefreshingSpinner}" />
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- md's circular pulling icon: the circle with the pull's dash in place of its animation, and the arrow -->
+        <Style Selector="^:pulling-circular /template/ c|RefresherCircle#PART_PullingCircle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:pulling-circular /template/ c|AvonicSpinner#PART_PullingOtherSpinner">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:pulling-circular /template/ Panel#PART_ArrowContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- A circular refreshing spinner is drawn with its animation-delay of -655ms, which AvonicSpinner can't take -->
+        <Style Selector="^:refreshing-circular /template/ c|RefresherCircle#PART_RefreshingCircle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:refreshing-circular /template/ c|AvonicSpinner#PART_RefreshingSpinner">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- .refresher-pulling ion-refresher-content .refresher-pulling, and ready's and cancelling's -->
+        <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling, ^:cancelling /template/ Panel#PART_Pulling">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- .refresher-refreshing, and native's completing and cancelling -->
+        <Style Selector="^:refreshing /template/ Panel#PART_Refreshing, ^:completing /template/ Panel#PART_Refreshing, ^:cancelling /template/ Panel#PART_Refreshing">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
