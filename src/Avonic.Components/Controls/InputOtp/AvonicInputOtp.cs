@@ -1,5 +1,4 @@
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Automation;
@@ -7,7 +6,6 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Input.TextInput;
@@ -126,29 +124,6 @@ public class AvonicInputOtp : ContentControl
 
     public static readonly RoutedEvent<RoutedEventArgs> IonBlurEvent =
         RoutedEvent.Register<AvonicInputOtp, RoutedEventArgs>(nameof(IonBlur), RoutingStrategies.Bubble);
-
-    // ── Converters for the theme ─────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// <c>border-radius: var(--border-radius)</c> where the variable falls back to a value per shape: the first value that's set,
-    /// of all but the last two, read by <see cref="BorderRadius.ToCornerRadius"/> with the last two, the element's <c>Bounds</c>
-    /// and <c>FlowDirection</c>. So a key can hold a percentage.
-    /// </summary>
-    public static readonly IMultiValueConverter RadiusConverter = new RadiusConverterImpl();
-
-    private sealed class RadiusConverterImpl : IMultiValueConverter
-    {
-        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (values.Count < 3)
-            {
-                return AvaloniaProperty.UnsetValue;
-            }
-
-            var radius = values.Take(values.Count - 2).FirstOrDefault(Css.IsSet);
-            return BorderRadius.ToCornerRadius.Convert([radius, values[^2], values[^1]], targetType, parameter, culture);
-        }
-    }
 
     // ── State: Ionic's fields ────────────────────────────────────────────────────────────────
 

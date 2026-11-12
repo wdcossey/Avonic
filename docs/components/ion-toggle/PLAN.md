@@ -167,7 +167,8 @@ throughout, as Ionic is with `dir` on the document or the toggle.
 The item already counts a toggle as an input (`IItemControl`, `ItemControlType.Toggle`), and forwards a tap on its padding to the
 first interactive control, which calls `OnItemTap`, Ionic's `click()`. `::slotted(ion-toggle[slot=start|end]) { margin: 0 }`
 belongs in `Styles/Item.axaml`, which is the item's file, so it's in `Styles/Toggle.axaml` for now, after the item's rule for any
-child in a slot, by ordinal file order. It's under "Proposed for shared files".
+child in a slot, by ordinal file order. It's under "Proposed for shared files". (The #131 roll-up moved it into
+`Styles/Item.axaml`, after that rule.)
 
 ## Dependencies
 

@@ -1236,6 +1236,34 @@ public class AvonicToggleTests
         }
     });
 
+    // The rule is in Item.axaml, after the item's rule for any child in a slot. In a file of its own, a plain rule would lose to
+    // that one with the item's file merged last, so this fails with the rule back there.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void T24_The_Slot_Rule_Holds_Whatever_Order_The_Items_File_Merges_In(bool first) =>
+        AvonicAvatarTests.InMergeOrder("Item.axaml", first, () =>
+        {
+            var end = new AvonicToggle { Content = "End slot" };
+            var start = new AvonicToggle { Content = "Start slot" };
+            var main = new AvonicToggle { Content = "Default slot" };
+            using var scene = Themed(new StackPanel
+            {
+                Children =
+                {
+                    new AvonicItem { Content = new AvonicLabel { Content = "Label beside" }, EndContent = end },
+                    new AvonicItem { StartContent = start, Content = new AvonicLabel { Content = "Label beside" } },
+                    new AvonicItem { Content = main },
+                },
+            });
+
+            Assert.Equal(new Thickness(0), end.Margin);
+            Assert.Equal(new Thickness(0), start.Margin);
+
+            // The default slot has no rule in Ionic.
+            Assert.Equal(new Thickness(0), main.Margin);
+        });
+
     [AvaloniaFact]
     public void T24_In_The_Default_Slot_An_App_Themes_Margin_Stays() => InstalledTheme.Run(_ =>
     {

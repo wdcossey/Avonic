@@ -564,6 +564,74 @@ public class AvonicFabButtonTests
         }
     });
 
+    // ::slotted(ion-icon) loses to an app's own rule on ion-icon, in a list and out of one, as any page rule beats a ::slotted one.
+    [AvaloniaFact]
+    public void B12_An_Apps_Plain_Icon_Style_Beats_The_Slots_Size_In_A_List_And_Out() => InstalledTheme.Run(_ =>
+    {
+        var app = new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.OfType<AvonicIcon>(x))
+        {
+            Setters = { new Avalonia.Styling.Setter(AvonicIcon.FontSizeProperty, 30.0) },
+        };
+        Application.Current!.Styles.Add(app);
+        try
+        {
+            var alone = new AvonicIcon { IconName = "add" };
+            var (_, scene) = Themed(new AvonicFabButton { Content = alone });
+            using (scene)
+            {
+                Assert.Equal(30, alone.FontSize);
+            }
+
+            var listed = new AvonicIcon { IconName = "heart" };
+            var (listButton, _, listScene) = InList(new AvonicFabButton { Content = listed });
+            using (listScene)
+            {
+                Assert.Equal(30, listed.FontSize);
+
+                // An icon given to a button already shown, and the app's style added after the buttons are.
+                var later = new AvonicIcon { IconName = "star" };
+                listButton.Content = later;
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(30, later.FontSize);
+
+                Application.Current!.Styles.Remove(app);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(18, later.FontSize);
+                Application.Current!.Styles.Add(app);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(30, later.FontSize);
+            }
+        }
+        finally
+        {
+            Application.Current!.Styles.Remove(app);
+        }
+    });
+
+    // The slot's own child only, as ::slotted is: an icon in a panel in the button inherits the button's 14, and one moved out of a
+    // button loses the size.
+    [AvaloniaFact]
+    public void B12_Only_The_Slots_Own_Icon_Takes_The_Size() => InstalledTheme.Run(_ =>
+    {
+        var nested = new AvonicIcon { IconName = "add" };
+        var direct = new AvonicIcon { IconName = "add" };
+        var button = new AvonicFabButton { Content = direct };
+        var (_, scene) = Themed(button);
+        using (scene)
+        {
+            Assert.Equal(24, direct.FontSize);
+
+            button.Content = new StackPanel { Children = { nested } };
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(14, nested.FontSize);
+
+            var holder = (StackPanel)button.GetVisualParent()!;
+            holder.Children.Add(direct);
+            Dispatcher.UIThread.RunJobs();
+            Assert.NotEqual(24, direct.FontSize);
+        }
+    });
+
     [AvaloniaFact]
     public void B12_In_A_List_Focus_Is_The_Light_Shade_And_Hover_The_Light_Tint() => InstalledTheme.Run(_ =>
     {

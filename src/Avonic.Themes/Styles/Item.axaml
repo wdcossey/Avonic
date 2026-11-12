@@ -71,6 +71,13 @@
         <Setter Property="Margin" Value="16,4,2,4" />
     </Style>
 
+    <!-- ::slotted(ion-toggle[slot=start]), ::slotted(ion-toggle[slot=end]): margin 0, over the 16 that the rule for any child of
+         those slots gives. No activator, so this, later, wins over that, and an app's plain style beats it. Not the default
+         slot, which has no rule in Ionic. -->
+    <Style Selector="c|AvonicItem /template/ ContentPresenter#PART_Start > c|AvonicToggle, c|AvonicItem /template/ ContentPresenter#PART_End > c|AvonicToggle">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
     <!-- ::slotted(ion-label), and a panel standing for the slot. The rest of a label's rules are in Label.axaml. -->
     <Style Selector="c|AvonicItem /template/ ContentPresenter > c|AvonicLabel, c|AvonicItem /template/ ContentPresenter > :is(Panel) > c|AvonicLabel">
         <Setter Property="Margin" Value="0,10,0,10" />

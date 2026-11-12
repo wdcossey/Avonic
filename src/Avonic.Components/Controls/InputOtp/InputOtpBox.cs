@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Layout;
 
 namespace Avonic.Components.Controls;
 
@@ -15,6 +16,12 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(":ion-valid", ":ion-invalid", ":ion-touched")]
 public sealed class InputOtpBox : TextBox
 {
+    static InputOtpBox()
+    {
+        // The group's align-items: center, which a FlexRow leaves to each child. A default, not the theme's, so an app's value wins.
+        VerticalAlignmentProperty.OverrideDefaultValue<InputOtpBox>(VerticalAlignment.Center);
+    }
+
     internal InputOtpBox(int index)
     {
         Index = index;

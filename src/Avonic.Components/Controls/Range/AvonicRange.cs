@@ -6,7 +6,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -151,16 +150,6 @@ public class AvonicRange : TemplatedControl, IItemControl
     /// <summary>Ionic <c>ionBlur</c>: focus left the range.</summary>
     public static readonly RoutedEvent<RoutedEventArgs> IonBlurEvent =
         RoutedEvent.Register<AvonicRange, RoutedEventArgs>(nameof(IonBlur), RoutingStrategies.Bubble);
-
-    // ── For the theme ────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// <c>margin-inline-start: calc(0px - var(--knob-handle-size) / 2)</c>, with the handle twice the knob: the value is the knob's
-    /// size, and the margin is minus that, at the start.
-    /// </summary>
-    public static readonly IMultiValueConverter KnobHandleMarginConverter =
-        new FuncMultiValueConverter<object?, Thickness>(values =>
-            new Thickness(values.FirstOrDefault() is double size && double.IsFinite(size) ? -size : 0, 0, 0, 0));
 
     private RangeSlider? _slider;
     private Control? _barActive;

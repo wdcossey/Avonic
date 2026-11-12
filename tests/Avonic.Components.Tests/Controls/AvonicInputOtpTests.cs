@@ -216,7 +216,7 @@ public class AvonicInputOtpTests
         var otp = new AvonicInputOtp
         {
             Template = new FuncControlTemplate<AvonicInputOtp>((_, scope) =>
-                new InputOtpGroupPanel { Name = "PART_Group" }.RegisterInNameScope(scope)),
+                new FlexRow { Name = "PART_Group" }.RegisterInNameScope(scope)),
         };
         otp.ApplyTemplate();
         otp.Length = 6;
@@ -933,6 +933,37 @@ public class AvonicInputOtpTests
         // overflow: visible. Left of the host, the first box still takes a click.
         Render();
         Assert.Same(Boxes(eight)[0], (scene.Window.InputHitTest(new Point(5, 40)) as Visual)?.GetSelfAndVisualAncestors().OfType<InputOtpBox>().FirstOrDefault());
+    });
+
+    // justify-content: center is the group's structure, so the functional stub, with no theme, centres the boxes too.
+    [AvaloniaFact]
+    public void B20_The_Stubs_Boxes_Are_Centred_Across()
+    {
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
+        using var __ = scene;
+        Render();
+
+        var boxes = Boxes(otp);
+        var first = Bounds(boxes[0], scene.Window);
+        var last = Bounds(boxes[^1], scene.Window);
+        Assert.True(first.X > 0, $"{first.X}");
+        Assert.Equal(first.X, otp.Bounds.Width - last.Right, tolerance: 1);
+    }
+
+    // align-items: center. A box with no height of its own is as tall as its text, in the middle of the row, not stretched to it.
+    [AvaloniaFact]
+    public void B20_A_Box_With_No_Height_Is_Centred_Down_The_Row() => InstalledTheme.Run(_ =>
+    {
+        var (otp, _, scene) = Themed();
+        using var __ = scene;
+        var box = Boxes(otp)[1];
+        box.Height = double.NaN;
+        Render();
+
+        var bounds = Bounds(box, scene.Window);
+        var row = Bounds(Boxes(otp)[0], scene.Window);
+        Assert.True(bounds.Height < row.Height, $"{bounds.Height}");
+        Assert.Equal(row.Center.Y, bounds.Center.Y, tolerance: 1);
     });
 
     [AvaloniaFact]

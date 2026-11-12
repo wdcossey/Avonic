@@ -1061,6 +1061,25 @@ public class AvonicBreadcrumbsTests
         Assert.Equal(["ionCollapsedClick", "click", "ionCollapsedClick", "click"], log);
     }
 
+    // A <button> of the app's in a breadcrumb, clicked from a key: its DOM click bubbles to the host, which clicks. Only the indicator's
+    // is collapsedIndicatorClick.
+    [AvaloniaFact]
+    public void E1_A_Key_On_A_Stock_Button_In_A_Breadcrumb_Clicks_It_And_Is_Not_The_Indicators()
+    {
+        var button = new Button { Content = "x" };
+        var trail = Trail(new AvonicBreadcrumb { Content = button });
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[0];
+        var log = new List<string>();
+        trail.IonCollapsedClick += (_, _) => log.Add("ionCollapsedClick");
+        b.Click += (_, _) => log.Add("click");
+
+        button.Focus(NavigationMethod.Tab);
+        PressKey(scene, PhysicalKey.Enter);
+
+        Assert.Equal(["click"], log);
+    }
+
     [AvaloniaFact]
     public void E1_A_Key_On_The_Indicator_Leaves_Nothing_Behind_For_The_Next_Click()
     {
