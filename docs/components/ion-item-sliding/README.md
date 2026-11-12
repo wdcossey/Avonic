@@ -32,7 +32,7 @@ leaves deleting the item to the app). Only one sliding item is open at a time: p
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `disabled` | `IsEnabled` | No sliding |
+| [x] | `disabled` | `Disabled`, default `false` | No sliding, and nothing else: the item stays enabled and clickable. Not `IsEnabled`, which disables the item too |
 | [x] | `ionDrag` | `IonDrag` (`ItemSlidingDragEventArgs`: `Amount`, `Ratio`) | On every move and where it rests; not for 0 |
 | [x] | `close()` | `Close()` | |
 | [x] | `closeOpened()` | `CloseOpened()` → `bool` | Closes whichever sliding item is open |
@@ -75,7 +75,7 @@ only one has options, the elastic 0.55 past the options' width, the full swipe 3
 0.3 px/ms; the close zone is under half), `IonSwipe` after it rests open, `IonDrag`, the 500 ms
 `cubic-bezier(0.36, 0.66, 0.04, 1)` ease, the 600 ms close in which the options take no input and the gesture is off, the open
 item taking no taps, one open at a time, the 15 px edge, the methods, the options shown only on the open side and behind the item,
-RTL, `IsEnabled`, an enclosing `AvonicContent`'s `ScrollY` off during a drag, children found again when they change, a vertical
+RTL, `Disabled`, an enclosing `AvonicContent`'s `ScrollY` off during a drag, children found again when they change, a vertical
 drag scrolling a scroller, the expandable option's 600 ms `cubic-bezier(0.65, 0.05, 0.36, 1)` growth, and the outermost option padded by
 `Avonic.SafeAreaLeft` or `Right` on its side.
 
@@ -109,8 +109,6 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
   the timer that ends the close, so the options take no taps and the gesture stays off until the next close (measured: Chromium
   kept `item-sliding-closing` after `open('start')` on an item open at the end); and in RTL `Open()` with no side opens the
   physical right when only the left has options.
-- **`IsEnabled = false` disables the item and the options too,** as Avalonia's `IsEnabled` is inherited: the item takes the
-  disabled look and no clicks. Ionic's `disabled` only turns the gesture off. Kept, as `disabled` maps to `IsEnabled` everywhere.
 - **In an inset list,** Ionic takes the line off the item in the last sliding item, and keeps it on an item that's last inside its
   sliding item; `AvonicList`'s rule looks at the item's own position, so it does the opposite in both cases. The fix is in the
   list's `Styles/List.axaml`, proposed in the PR.

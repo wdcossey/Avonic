@@ -51,6 +51,21 @@ public class AvonicItemSliding : ItemsControl
     /// <summary>Ionic's module-level <c>openSlidingItem</c>: one per process here, as <see cref="GestureController"/> is.</summary>
     private static AvonicItemSliding? s_openSlidingItem;
 
+    // ── Properties ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Ionic <c>disabled</c>: true turns the drag off, and nothing else. Not <c>IsEnabled</c>, which would disable and fade the
+    /// item and the options too, where Ionic's item stays enabled and clickable.
+    /// </summary>
+    public static readonly StyledProperty<bool> DisabledProperty =
+        AvaloniaProperty.Register<AvonicItemSliding, bool>(nameof(Disabled));
+
+    public bool Disabled
+    {
+        get => GetValue(DisabledProperty);
+        set => SetValue(DisabledProperty, value);
+    }
+
     // ── Events ───────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Ionic <c>ionDrag</c>: the item moved, by a drag or to where it rests. Not raised for 0, when it closes.</summary>
@@ -256,7 +271,7 @@ public class AvonicItemSliding : ItemsControl
             OnMove = OnMove,
             OnEnd = OnEnd,
         });
-        _gesture.Enable(IsEnabled);
+        _gesture.Enable(!Disabled);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -280,10 +295,10 @@ public class AvonicItemSliding : ItemsControl
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == IsEnabledProperty)
+        if (change.Property == DisabledProperty)
         {
             // disabledChanged
-            _gesture?.Enable(change.GetNewValue<bool>());
+            _gesture?.Enable(!change.GetNewValue<bool>());
         }
         else if (change.Property == FlowDirectionProperty)
         {
@@ -544,7 +559,7 @@ public class AvonicItemSliding : ItemsControl
                 _tmr = null;
                 _closing = false;
                 SetState(SlidingState.Disabled);
-                _gesture?.Enable(IsEnabled);
+                _gesture?.Enable(!Disabled);
             }, CloseDelay);
             s_openSlidingItem = null;
             UpdateClasses();

@@ -11,7 +11,7 @@ with touch from CDP's `Input.dispatchTouchEvent`, wrapped in `ion-app` so that `
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `disabled` | `IsEnabled` | Mapping rule. Turns the gesture off; Avalonia also stops all input to a disabled control |
+| [x] | `disabled` | `Disabled`, default `false` | **Not `IsEnabled`**, which would disable and fade the item and the options: Ionic's only turns the gesture off, and the item stays clickable. A `disabled` that doesn't disable the children, as `AvonicReorderGroup.Disabled` |
 | [x] | `ionDrag` | `IonDrag` (`ItemSlidingDragEventArgs`: `Amount`, `Ratio`) | Bubbles, as Ionic's does |
 | [x] | `close()` | `Close()` | Sync: nothing to wait for |
 | [x] | `closeOpened()` | `CloseOpened()` → `bool` | Closes the one open sliding item, wherever it is |
@@ -76,7 +76,7 @@ Each becomes a test. Read from `item-sliding.js`, `item-options.js` and `item-op
 | S15 | `GetOpenAmount()` is the amount; `GetSlidingRatio()` the amount over that side's width, negative for start | `getSlidingRatio` |
 | S16 | Options: hidden (`display: none`) until the item is active; then only the open side's are shown, as wide as the item, behind it | `item-options.md.css`, `item-sliding.css` |
 | S17 | In RTL, start and end swap: `Side="End"` options are on the left, and a drag right opens them | `isEndSide`, `:dir(rtl)` rules |
-| S18 | `IsEnabled = false` stops the gesture | `disabledChanged` |
+| S18 | `Disabled` stops the gesture, and nothing else: the item stays enabled and clickable, and the close's timer leaves it off | `disabledChanged`, `setOpenAmount` |
 | S19 | During the drag, an enclosing `AvonicContent`'s `ScrollY` is off, and put back as it was at the end | `disableContentScrollY` |
 | S20 | Options and the item are found again when the children change (`MutationObserver`) and at each drag (`onStart`) | `updateOptions`, `onStart` |
 

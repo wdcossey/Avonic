@@ -576,15 +576,58 @@ public class AvonicItemSlidingTests
     public void S18_Disabled_It_Does_Not_Slide()
     {
         using var f = Make();
-        f.Sliding.IsEnabled = false;
+        f.Sliding.Disabled = true;
         f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32);
         f.At(48);
         Assert.Equal(0, f.Sliding.GetOpenAmount());
 
-        f.Sliding.IsEnabled = true;
+        f.Sliding.Disabled = false;
         f.Finger().Down(300, Y, 100).Move(290, Y, 116).Move(200, Y, 132);
         f.At(148);
         Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
+    }
+
+    [AvaloniaFact]
+    public void S18_Disabled_Only_Turns_The_Drag_Off_The_Item_Stays_Enabled_And_Clicks()
+    {
+        // item-sliding.js's disabledChanged only does gesture.enable(!disabled): the item inside keeps its input and its look.
+        var item = new AvonicItem { MinHeight = 48, Content = "Item", Button = true };
+        using var f = Make(item: item);
+        var clicks = 0;
+        item.Click += (_, _) => clicks++;
+        f.Sliding.Disabled = true;
+        GestureTests.Render();
+
+        Assert.True(f.Sliding.IsEffectivelyEnabled);
+        Assert.True(item.IsEffectivelyEnabled);
+        Assert.True(f.End!.IsEffectivelyEnabled);
+
+        f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32).Up(200, Y, 48);
+        f.At(64);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+        Assert.Equal(0, f.ItemX);
+
+        f.Finger().Down(100, Y, 100).Up(100, Y, 116);
+        Assert.Equal(1, clicks);
+    }
+
+    [AvaloniaFact]
+    public void S18_Disabled_While_Open_The_Close_Leaves_The_Drag_Off()
+    {
+        // setOpenAmount(0)'s 600 ms timer turns the gesture back on with enable(!this.disabled), not on regardless.
+        using var f = Make();
+        f.Sliding.Open(ItemOptionsSide.End);
+        f.At(1000);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+
+        f.Sliding.Disabled = true;
+        f.Sliding.Close();
+        f.At(2000);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+
+        f.Finger().Down(300, Y, 2100).Move(290, Y, 2116).Move(200, Y, 2132);
+        f.At(2148);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
     }
 
     [AvaloniaFact]
@@ -727,7 +770,7 @@ public class AvonicItemSlidingTests
     {
         using var f = Make();
         var t = SlowDrag(f, 0, 300, 190, false, out var finger); // 100 open, slow
-        f.Sliding.IsEnabled = false;
+        f.Sliding.Disabled = true;
         f.At(t + 16);
         // gesture.enable(false) ends the drag: onEnd rests it open, past half.
         Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
