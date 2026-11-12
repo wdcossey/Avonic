@@ -4,6 +4,7 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using System.Collections.Specialized;
@@ -36,6 +37,9 @@ public partial class AvonicList : ItemsControl
     /// <summary>Waiting for the panel to finish realising this row, so that it has an index.</summary>
     private bool _awaitingRowIndex;
 
+    /// <summary>This row's index when it was last seen, or -1.</summary>
+    private int _rowIndex = -1;
+
     public ListLines? Lines
     {
         get => GetValue(LinesProperty);
@@ -58,6 +62,11 @@ public partial class AvonicList : ItemsControl
             PseudoClasses.Set(":lines-full", lines == ListLines.Full);
             PseudoClasses.Set(":lines-inset", lines == ListLines.Inset);
             PseudoClasses.Set(":lines-none", lines == ListLines.None);
+        }
+        else if (change.Property == ItemTemplateProperty)
+        {
+            // What the template makes may stick differently, so the list looks again.
+            ForgetStickyRows();
         }
         else if (change.Property == InsetProperty)
         {
@@ -88,10 +97,6 @@ public partial class AvonicList : ItemsControl
                 _rowsOwner = owner;
                 owner.ContainerPrepared += OnRowPrepared;
                 owner.ContainerIndexChanged += OnRowIndexChanged;
-
-                // Until the pass is over, as for a row whose item before isn't realised, so that a run of sections
-                // alike doesn't lay out twice.
-                PseudoClasses.Set(":after-inset", Inset);
             }
         }
         else if (_inParent.GetVisualParent() is Panel panel)
@@ -125,6 +130,7 @@ public partial class AvonicList : ItemsControl
 
         LayoutUpdated -= OnRowRealised;
         _awaitingRowIndex = false;
+        _rowIndex = -1;
         StopWatchingStickyRows();
 
         _inParent = null;
@@ -137,21 +143,24 @@ public partial class AvonicList : ItemsControl
 
     private void OnSiblingsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateAfterInset();
 
-    /// <summary>A row realised just before this one, or this one realised for another item.</summary>
-    private void OnRowPrepared(object? sender, ContainerPreparedEventArgs e)
-    {
-        if (e.Container == _inParent || e.Index == RowIndex() - 1)
-        {
-            UpdateAfterInset();
-        }
-    }
+    private void OnRowPrepared(object? sender, ContainerPreparedEventArgs e) => OnRowChanged(e.Container, e.Index);
 
-    /// <summary>An item inserted or removed before this one.</summary>
-    private void OnRowIndexChanged(object? sender, ContainerIndexChangedEventArgs e)
+    private void OnRowIndexChanged(object? sender, ContainerIndexChangedEventArgs e) => OnRowChanged(e.Container, e.NewIndex);
+
+    /// <summary>
+    /// This row given another item or index, as a template that recycles its content keeps the list, or the row just
+    /// before it realised or moved. The index is the last one seen, so that each row's check is cheap.
+    /// </summary>
+    private void OnRowChanged(Control container, int index)
     {
-        if (e.Container == _inParent || e.NewIndex == RowIndex() - 1)
+        if (container == _inParent)
         {
-            UpdateAfterInset();
+            _rowIndex = index;
+            ScheduleRowCheck();
+        }
+        else if (index >= 0 && index == _rowIndex - 1)
+        {
+            ScheduleRowCheck();
         }
     }
 
@@ -230,6 +239,7 @@ public partial class AvonicList : ItemsControl
         _awaitingRowIndex = false;
 
         var index = RowIndex();
+        _rowIndex = index;
         if (index >= 0)
         {
             UpdateAfterInsetRow(index);
@@ -242,9 +252,9 @@ public partial class AvonicList : ItemsControl
 
     /// <summary>
     /// <c>.list-inset + ion-list</c>, for a row of a virtualising panel: the row before is the item before. If that
-    /// isn't realised, as at the top while scrolling up, an item that's a list is read, and an item made by a template
-    /// is taken to be a list like this one, as a template makes a run of sections alike, until it's realised and says
-    /// otherwise. A recycled row is hidden, with no index, and the next item it's given decides.
+    /// isn't realised, as at the top while scrolling up, it's made from its template to see, with the item as its data,
+    /// and not shown, as the DOM has every row. A recycled row is hidden, with no index, and the next item it's given
+    /// decides.
     /// </summary>
     private void UpdateAfterInsetRow(int index)
     {
@@ -257,13 +267,17 @@ public partial class AvonicList : ItemsControl
         {
             after = ListIn(before) is { Inset: true };
         }
-        else if (index - 1 < _rowsOwner.ItemsView.Count && _rowsOwner.ItemsView[index - 1] is Control item)
-        {
-            after = item is AvonicList { Inset: true };
-        }
         else
         {
-            after = Inset;
+            var item = _rowsOwner.ItemsView[index - 1];
+            var made = item as Control;
+            if (made is null && _rowsOwner.FindDataTemplate(item, _rowsOwner.ItemTemplate)?.Build(item) is { } built)
+            {
+                built.DataContext = item;
+                made = built;
+            }
+
+            after = made is AvonicList { Inset: true };
         }
 
         PseudoClasses.Set(":after-inset", after);

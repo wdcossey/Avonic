@@ -97,11 +97,14 @@ panel prepared, controls the `ItemTemplate` made, measures, arranges, and style 
 | | after | 2,030 | 1,981 | 4,258 | 35,440 | 61,328 | 6,405,274 |
 | A divider every 20 rows, not sticky | before and after | 1,930 | 1,981 | 3,962 | 34,350 | 60,237 | 6,181,072 |
 | Inset lists of one item | before #68 | 3,964 | 1,982 | 3,964 | 37,658 | 69,370 | 8,136,110 |
-| | after | 3,299 | 1,978 | 3,956 | 36,940 | 63,343 | 8,119,690 |
+| | after | 5,275 | 1,978 | 4,944 | 50,776 | 89,057 | 8,119,690 |
 
 **Sticky dividers cost 2 to 7% more on each count** to scroll than before, which didn't keep them stuck: the list's copy of the stuck divider
 is made again at each change of section, and that's a layout pass and its styles. Dividers that don't stick cost nothing more.
-**Inset lists cost a little less,** as a row takes the one before to be alike until the pass is over, and so a run of alike rows lays out once.
+**Inset lists cost about a third more layout,** and the same in styles: a new row reads the one before only once the pass is
+over, as the panel gives it an index only then, and so it's laid out again when its margin changes. A row whose item before isn't
+realised makes that item from its template to read it: about one a row, scrolling up. A guess before the pass, tried, laid out
+once where the sections are alike, but where they differ the panel recycled and remade the top row for ever.
 
 In both, about 3,000 style checks a step are the rows the panel makes as they come in, whatever they are. That's what
 `StyleBudgetTests` keeps down.

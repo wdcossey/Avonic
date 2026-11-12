@@ -24,7 +24,6 @@ public partial class AvonicList
     private readonly HashSet<int> _knownRows = [];
 
     private readonly TranslateTransform _stuckOffset = new();
-    private readonly RectangleGeometry _stuckClip = new();
     private readonly List<(int Index, double Top)> _realisedDividers = [];
 
     /// <summary>The last row <see cref="SectionDividerBefore"/> was asked about, or -1, and its answer.</summary>
@@ -69,10 +68,16 @@ public partial class AvonicList
             _watchedItems = null;
         }
 
+        ForgetStickyRows();
+        RemoveStuckDivider();
+    }
+
+    private void ForgetStickyRows()
+    {
         _stickyRows.Clear();
         _knownRows.Clear();
         _sectionRow = -1;
-        RemoveStuckDivider();
+        _stuckIndex = -1;
     }
 
     /// <summary>The indexes after a change move with their items, as the DOM's elements would.</summary>
@@ -207,7 +212,9 @@ public partial class AvonicList
     /// <summary>A scroll is a change of arrangement, so a layout pass is the one thing that follows every cause.</summary>
     private void OnLayoutUpdatedForStickyRows(object? sender, EventArgs e)
     {
+        // A horizontal panel's rows are side by side, and position: sticky here is top: 0.
         if (ItemsPanelRoot is not VirtualizingPanel panel
+            || panel is VirtualizingStackPanel { Orientation: Orientation.Horizontal }
             || this.FindAncestorOfType<ScrollViewer>() is not { } scrollViewer
             || scrollViewer.TranslatePoint(new Point(0, scrollViewer.Padding.Top), this) is not { } scrollport
             || IsInAnInsetList(scrollViewer))
@@ -276,6 +283,11 @@ public partial class AvonicList
         {
             _stuckDivider = new ContentPresenter { RenderTransform = _stuckOffset };
             LogicalChildren.Add(_stuckDivider);
+        }
+
+        // Applying a template again clears the visual children.
+        if (_stuckDivider.GetVisualParent() != this)
+        {
             VisualChildren.Add(_stuckDivider);
         }
 
@@ -301,6 +313,15 @@ public partial class AvonicList
             return;
         }
 
+        // Its item may have stopped it sticking since its row was last realised.
+        if (!divider.Sticky)
+        {
+            _stickyRows.Remove(index);
+            _sectionRow = -1;
+            HideStuckDivider();
+            return;
+        }
+
         _stuckDivider.IsVisible = true;
 
         // As the divider's own offset: the border box at the top of the scrollport, and never out of its parent.
@@ -317,13 +338,12 @@ public partial class AvonicList
             return;
         }
 
+        // A new geometry, as the property changing is what redraws it.
         var clip = new Rect(0, 0, _stuckDivider.Bounds.Width, divider.Margin.Top + shown);
-        if (_stuckClip.Rect != clip)
+        if (_stuckDivider.Clip is not RectangleGeometry { } current || current.Rect != clip)
         {
-            _stuckClip.Rect = clip;
+            _stuckDivider.Clip = new RectangleGeometry(clip);
         }
-
-        _stuckDivider.Clip = _stuckClip;
     }
 
     private void HideStuckDivider()
@@ -390,6 +410,12 @@ public partial class AvonicList
 
         if (ItemsPanelRoot is { } panel && panel.TranslatePoint(default, this) is { } at)
         {
+            // The panel's width may have changed since the measure, which read the last one.
+            if (_stuckDivider.IsVisible && _stuckDivider.Bounds.Width != panel.Bounds.Width)
+            {
+                _stuckDivider.Measure(new Size(panel.Bounds.Width, double.PositiveInfinity));
+            }
+
             _stuckDivider.Arrange(new Rect(at.X, 0, panel.Bounds.Width, _stuckDivider.DesiredSize.Height));
         }
 

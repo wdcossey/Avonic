@@ -628,14 +628,9 @@ public class AvonicListTests
         foreach (var (list, index) in rows)
         {
             // .list-inset + ion-list.list-inset: a margin of 0 on top, so the gap is the one before's 16. A row whose
-            // item before isn't realised, at the top, keeps what it had, or if it's new, takes that item to be a list
-            // like itself.
+            // item before isn't realised, at the top, reads that item too.
             var expected = inset(index) && !(index > 0 && inset(index - 1)) ? 16 : 0;
-            var assumed = inset(index) && index == 0 ? 16 : 0;
-            var realisedBefore = index == 0 || rows.Any(row => row.Index == index - 1);
-            Assert.True(
-                expected == list.Margin.Top || (!realisedBefore && assumed == list.Margin.Top),
-                $"row {index}: {list.Margin.Top}, not {expected}");
+            Assert.True(expected == list.Margin.Top, $"row {index}: {list.Margin.Top}, not {expected}");
         }
 
         // Between two realised inset lists, the gap is 16, as in CSS, not 32.
@@ -718,6 +713,49 @@ public class AvonicListTests
         rows[1].List.Inset = true;
         Run();
         Assert.Equal(0, rows[2].List.Margin.Top);
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_A_Removed_Item_Moves_The_Rows_After_It() => Scrolling(() =>
+    {
+        var data = new System.Collections.ObjectModel.ObservableCollection<bool> { true, false, true };
+        var sections = new ItemsControl
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = data,
+            ItemTemplate = new FuncDataTemplate<bool>((inset, _) => new AvonicList { Inset = inset, Items = { Item() } }),
+        };
+        using var scene = new Scene(new ScrollViewer { Content = sections }, 390, 400);
+        var third = Realised(sections)[2].List;
+        Assert.Equal(16, third.Margin.Top);
+
+        data.RemoveAt(1);
+        Run();
+
+        Assert.Equal(0, third.Margin.Top);
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_A_Template_That_Keeps_Its_List_Is_Read_Again() => Scrolling(() =>
+    {
+        // A recycling template gives a row's list the next item, so the list isn't attached again.
+        static bool Inset(int index) => index % 3 != 1;
+        var sections = new ItemsControl
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = Enumerable.Range(0, 200).Select(Inset).ToList(),
+            ItemTemplate = new FuncDataTemplate<bool>(
+                (_, _) => new AvonicList { [!AvonicList.InsetProperty] = new Avalonia.Data.Binding("."), Items = { Item() } },
+                supportsRecycling: true),
+        };
+        var scroller = new ScrollViewer { Content = sections };
+        using var scene = new Scene(scroller, 390, 400);
+        for (var offset = 0.0; offset < 3000; offset += 41)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
     });
 
     [AvaloniaFact]

@@ -43,7 +43,7 @@ Text is drawn from the same Roboto files on both sides since #100 ([`tools/fonts
 | 15 | Tab stops, arrow keys | Match |
 | 16 | Roles | Match for the list and a plain item. **Deliberate difference:** a button item is a `Button`, not a `ListItem` |
 | 17 | Doesn't scroll | Match |
-| 18 | Virtualising | No equivalent in Ionic. Tested at 10,000 items. Inset lists as rows: 16 between each, as row 14, scrolling both ways, with a plain list among them, an insert, and a change ([#68](https://github.com/wdcossey/Avonic/issues/68)). The top row, when the item before isn't realised, takes it to be alike until it is. A sticky divider in a flat virtualising list stays stuck: see `ion-item-divider`'s row 18 |
+| 18 | Virtualising | No equivalent in Ionic. Tested at 10,000 items. Inset lists as rows: 16 between each, as row 14, scrolling both ways, with a plain list among them, an insert, and a change ([#68](https://github.com/wdcossey/Avonic/issues/68)). The top row, when the item before isn't realised, makes it from the template to read it. A sticky divider in a flat virtualising list stays stuck: see `ion-item-divider`'s row 18 |
 
 ## Found here, not by the tests
 

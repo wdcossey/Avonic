@@ -1198,6 +1198,80 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Stops_When_Its_Item_Stops_It() => Scrolling(() =>
+    {
+        var rows = Enumerable.Range(0, 1000).Select(index => new StickyRow(index == 0 ? "d1" : "r", index == 0)).ToList();
+        var list = new AvonicList
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = rows,
+            ItemTemplate = new FuncDataTemplate<StickyRow>((row, _) => row is { Text: "d1" }
+                ? new AvonicItemDivider { [!AvonicItemDivider.StickyProperty] = new Avalonia.Data.Binding(nameof(StickyRow.Sticky)), Content = row.Text }
+                : new AvonicItem { Content = row?.Text }),
+        };
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        rows[0].Sticky = false;
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+    });
+
+    /// <summary>A row whose divider's Sticky an app changes.</summary>
+    private sealed class StickyRow(string text, bool sticky) : System.ComponentModel.INotifyPropertyChanged
+    {
+        public string Text { get; } = text;
+
+        public bool Sticky
+        {
+            get => sticky;
+            set
+            {
+                sticky = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Sticky)));
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    [AvaloniaFact]
+    public void D18_In_A_Horizontal_Virtualising_Panel_Nothing_Is_Drawn_On_Top() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal });
+        scroller.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+        scroller.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(5000, 0);
+        Run();
+
+        Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsEffectivelyVisible);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_New_Template_Is_Read_Again() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        list.ItemTemplate = new FuncDataTemplate<object>((value, _) => value is string text
+            ? new AvonicItemDivider { Sticky = true, Content = text + "!" }
+            : new AvonicItem { Content = "r" });
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Equal("d1!", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
     public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
     {
         var (list, scroller, _) = Virtualised();
