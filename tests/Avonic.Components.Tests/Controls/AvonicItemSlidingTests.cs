@@ -591,12 +591,15 @@ public class AvonicItemSlidingTests
     public void S18_Disabled_Only_Turns_The_Drag_Off_The_Item_Stays_Enabled_And_Clicks()
     {
         // item-sliding.js's disabledChanged only does gesture.enable(!disabled): the item inside keeps its input and its look.
+        // Set before it's attached, as XAML does.
         var item = new AvonicItem { MinHeight = 48, Content = "Item", Button = true };
-        using var f = Make(item: item);
+        using var f = Make(item: item, wrap: sliding =>
+        {
+            sliding.Disabled = true;
+            return new StackPanel { Children = { sliding } };
+        });
         var clicks = 0;
         item.Click += (_, _) => clicks++;
-        f.Sliding.Disabled = true;
-        GestureTests.Render();
 
         Assert.True(f.Sliding.IsEffectivelyEnabled);
         Assert.True(item.IsEffectivelyEnabled);
