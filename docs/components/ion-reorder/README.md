@@ -100,4 +100,4 @@ None. `:reorder-selected`, `:reorder-enabled` and `:reorder-list-active` are Ion
 - **The lifted item's opacity fades each part**, not the item as one layer. Over a white item it's the same.
 - **No haptics.**
 - **An `AvonicList` around the group clips** an item lifted past the list's edge, where `ion-list` doesn't.
-- Not tried in a real window, or on a device.
+- Tried in a real window with touch and the mouse by `tools/real-window`; not on a device.

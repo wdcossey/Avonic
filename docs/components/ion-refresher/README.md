@@ -91,4 +91,4 @@ None.
   gesture; and the scroll element isn't made `overflow: hidden` during a pull. See [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - Ionic's dark palette sets the step colours the icon's border and background read; `Tokens/Palettes/Dark.axaml` doesn't follow
   them yet.
-- Not tried in a real window, nor on a device.
+- Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

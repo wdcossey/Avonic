@@ -128,6 +128,29 @@ public class AvonicItemSlidingTests
 
     // ── S1–S3: the drag ──────────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// A mouse drags it as a finger does. Windows sends a move with the mouse where it was when the gesture takes the capture; Ionic
+    /// never sees one, and here it set the open amount to 0, which closed the item and turned its gesture off (found in a real window).
+    /// </summary>
+    [AvaloniaFact]
+    public void S01_A_Mouse_Drag_Opens_It_Past_The_Move_Windows_Sends_At_The_Capture()
+    {
+        using var f = Make();
+        var window = f.Scene.Window;
+        f.At(0);
+        window.MouseDown(new Point(300, Y), MouseButton.Left, RawInputModifiers.None);
+        f.At(16);
+        window.MouseMove(new Point(290, Y), RawInputModifiers.LeftMouseButton);
+        f.At(32);
+        window.MouseMove(new Point(290, Y), RawInputModifiers.LeftMouseButton);
+        f.At(48);
+        window.MouseMove(new Point(200, Y), RawInputModifiers.LeftMouseButton);
+        f.At(64);
+
+        Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
+        Assert.Equal(-90, f.ItemX, 3);
+    }
+
     [AvaloniaFact]
     public void S01_A_Drag_Moves_The_Item_From_The_Capturing_Move_At_Once()
     {

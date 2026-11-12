@@ -317,11 +317,15 @@ public class AvonicRangeTests
         mouse.Down(start, 0).Move(start - new Point(8, 0), 16);
         Assert.Equal(["focus"], log.Take());
 
-        // Past the threshold: the capture. The next move is the first frame's.
+        // Past the threshold: the capture. A move to where the mouse already is isn't a mousemove, and changes nothing; the next one
+        // that moves is the first frame's.
         mouse.Move(start - new Point(39, 0), 32);
         Assert.Equal(["start 75"], log.Take());
-        mouse.Move(start - new Point(39, 0), 48);
-        clock.At(64);
+        mouse.Move(start - new Point(39, 0), 34);
+        clock.At(50);
+        Assert.Empty(log.Take());
+        mouse.Move(start - new Point(40, 0), 52);
+        clock.At(68);
         Assert.Equal(["input 65"], log.Take());
         Assert.Contains(":range-pressed", range.Classes);
         Assert.Contains(":range-knob-pressed", HandleA(range).Classes);
@@ -1025,7 +1029,7 @@ public class AvonicRangeTests
         var mouse = new Mouse(scene, clock);
         var start = At(range, scene, 0.5);
 
-        mouse.Down(start, 0).Move(start + new Point(30, 0), 16).Move(start + new Point(30, 0), 32);
+        mouse.Down(start, 0).Move(start + new Point(30, 0), 16).Move(start + new Point(31, 0), 32);
         clock.At(48);
         GestureTests.Render();
         Assert.False(content.ScrollY);

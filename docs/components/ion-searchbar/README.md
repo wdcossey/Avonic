@@ -102,5 +102,5 @@ default cancel arrow isn't mirrored).
 ## Known gaps
 
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `dir` set on the searchbar itself mirrors everything; no
-`backButtonIcon` config for the cancel icon's default; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear; a disabled searchbar's buttons can't be reached, where Ionic's still can by Tab; the buttons have no automation invoke. Not tried in a real window, with a soft
+`backButtonIcon` config for the cancel icon's default; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear; a disabled searchbar's buttons can't be reached, where Ionic's still can by Tab; the buttons have no automation invoke. Tried in a real window by `tools/real-window`; not with a soft
 keyboard, or on a device.

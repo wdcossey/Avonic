@@ -47,6 +47,9 @@ public sealed class Gesture : IDisposable
     // release isn't a cancel, as the release is still to reach the element.
     private IPointer? _releasing;
 
+    // Where the tracked mouse or pen last was, so that a move that doesn't move it is dropped: see IsStill.
+    private Point _mouseAt;
+
     // Inside PointerDown or PointerMove, whose callbacks may move the capture. A cancel then waits until they return, as a browser's
     // touchcancel can't arrive in the middle of a callback.
     private bool _deciding;
@@ -432,7 +435,9 @@ public sealed class Gesture : IDisposable
         // Followed during PointerDown, so that the capture moving away during a capture at the press, in OnStart, is a cancel. One
         // pointer at a time: a second press is refused by hasStartedPan, and the first stays followed.
         var previous = _tracking;
+        var previousMouseAt = _mouseAt;
         _tracking = e.Pointer;
+        _mouseAt = e.GetPosition(null);
         _cancelPending = false;
         bool started;
         _deciding = true;
@@ -451,6 +456,7 @@ public sealed class Gesture : IDisposable
             if (ReferenceEquals(_tracking, e.Pointer))
             {
                 _tracking = previous;
+                _mouseAt = previousMouseAt;
             }
 
             return;
@@ -470,7 +476,7 @@ public sealed class Gesture : IDisposable
             return;
         }
 
-        if (ReferenceEquals(_held, e.Pointer))
+        if (ReferenceEquals(_held, e.Pointer) || IsStill(e))
         {
             return;
         }
@@ -479,12 +485,28 @@ public sealed class Gesture : IDisposable
         RecognitionHold.Hold(this, e.Pointer);
     }
 
+    /// <summary>
+    /// A mouse or pen move with the pointer where it was. Windows sends a mouse move when the capture changes, as this gesture's own
+    /// capture does, and a pen may send one when only its pressure changes. Ionic hears a mouse or a pen through the DOM's mousemove,
+    /// which is for a pointer that moved, so it never sees one: here it reached OnMove with no delta, and ion-item-sliding, at 0,
+    /// closed and turned its gesture off (found in a real window). It's dropped before the tunnel holds the scroller for it, too.
+    /// Touch is left as it comes.
+    /// </summary>
+    private bool IsStill(PointerEventArgs e) => e.Pointer.Type != PointerType.Touch && e.GetPosition(null) == _mouseAt;
+
     private void OnMoved(object? sender, PointerEventArgs e)
     {
         if (!ReferenceEquals(e.Pointer, _tracking))
         {
             return;
         }
+
+        if (IsStill(e))
+        {
+            return;
+        }
+
+        _mouseAt = e.GetPosition(null);
 
         _deciding = true;
         try

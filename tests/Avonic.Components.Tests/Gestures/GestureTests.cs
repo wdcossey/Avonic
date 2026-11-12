@@ -1298,4 +1298,42 @@ public class GestureTests
 
         Assert.Equal(["g.canStart", "g.onStart", "g.onEnd"], log.Names);
     }
+
+    // ── G17: a mouse that doesn't move ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Windows sends a mouse move when the capture changes, with the mouse where it was, and the gesture's capture changes it. A
+    /// DOM mousemove is for a mouse that moved, so Ionic's onMove never sees one; it closed ion-item-sliding in a real window.
+    /// </summary>
+    [AvaloniaFact]
+    public void G17_A_Mouse_Move_To_Where_The_Mouse_Already_Is_Is_No_Move()
+    {
+        using var clock = new TestClock();
+        var box = Box();
+        using var scene = new Scene(box);
+        var log = new Log(clock);
+        using var gesture = Make(box, log);
+        var window = scene.Window;
+
+        clock.At(1000);
+        Render();
+        window.MouseDown(new Point(100, 100), MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        clock.At(1016);
+        window.MouseMove(new Point(120, 100), RawInputModifiers.LeftMouseButton);
+        Settle();
+        clock.At(1032);
+        window.MouseMove(new Point(120, 100), RawInputModifiers.LeftMouseButton);
+        Settle();
+        clock.At(1048);
+        clock.At(1064);
+        window.MouseMove(new Point(150, 100), RawInputModifiers.LeftMouseButton);
+        Settle();
+        clock.At(1080);
+        window.MouseUp(new Point(150, 100), MouseButton.Left, RawInputModifiers.None);
+        Settle();
+
+        Assert.Equal(["g.canStart", "g.onStart", "g.onMove", "g.onEnd"], log.Names);
+        Assert.Equal(30, log.Single("g.onMove").DeltaX, 6);
+    }
 }
