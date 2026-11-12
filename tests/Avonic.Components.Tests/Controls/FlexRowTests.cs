@@ -531,6 +531,146 @@ public class FlexRowTests
         Assert.Equal(90, flex.Bounds.Width);
     }
 
+    // ── gap, padding, justify-content and a basis: ion-input-otp's group ─────────────────────
+
+    private static Border Basis(double basis, double minWidth) => new() { MinWidth = minWidth, Height = 10, [FlexRow.FlexBasisProperty] = basis };
+
+    [AvaloniaFact]
+    public void A_Gap_Goes_Between_Shown_Children_Only()
+    {
+        Border one = Fixed(30), two = Fixed(30), three = Fixed(30);
+        using var scene = InRow(300, out var row, one, new Border { Width = 50, IsVisible = false }, two, three);
+        row.Spacing = 10;
+        Settle();
+
+        Assert.Equal([0d, 40d, 80d], [one.Bounds.X, two.Bounds.X, three.Bounds.X]);
+        row.ClearValue(Layoutable.WidthProperty);
+        row.Measure(Size.Infinity);
+        Assert.Equal(110, row.DesiredSize.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Gap_Is_Taken_Before_Flex_Shares_What_Is_Left()
+    {
+        var one = new Border { [FlexRow.FlexProperty] = 1d };
+        var other = new Border { [FlexRow.FlexProperty] = 1d };
+        using var scene = InRow(210, out var row, one, other);
+        row.Spacing = 10;
+        Settle();
+
+        Assert.Equal(100, one.Bounds.Width);
+        Assert.Equal(110, other.Bounds.X);
+    }
+
+    [AvaloniaFact]
+    public void Padding_Insets_The_Row_And_Counts_In_Its_Size()
+    {
+        var box = Fixed(30);
+        var flex = new Border { [FlexRow.FlexProperty] = 1d };
+        using var scene = InRow(100, out var row, box, flex);
+        row.Padding = new Thickness(5, 2, 7, 3);
+        Settle();
+
+        Assert.Equal(new Rect(5, 2, 30, 10), box.Bounds);
+        Assert.Equal(58, flex.Bounds.Width);
+        Assert.Equal(15, row.Bounds.Height);
+        row.ClearValue(Layoutable.WidthProperty);
+        row.Measure(Size.Infinity);
+        Assert.Equal(42, row.DesiredSize.Width);
+    }
+
+    [AvaloniaTheory]
+    [InlineData(HorizontalAlignment.Left, 0)]
+    [InlineData(HorizontalAlignment.Stretch, 0)]
+    [InlineData(HorizontalAlignment.Center, 35)]
+    [InlineData(HorizontalAlignment.Right, 70)]
+    public void Justify_Content_Puts_What_Fits_At_The_Start_Centre_Or_End(HorizontalAlignment alignment, double x)
+    {
+        var box = Fixed(30);
+        using var scene = InRow(100, out var row, box);
+        Assert.Equal(0, box.Bounds.X);
+
+        // Only an arrange.
+        row.HorizontalContentAlignment = alignment;
+        Settle();
+
+        Assert.Equal(x, box.Bounds.X);
+    }
+
+    [AvaloniaFact]
+    public void Centred_Content_That_Does_Not_Fit_Overflows_Both_Sides()
+    {
+        Border one = Fixed(60), other = Fixed(60);
+        using var scene = InRow(100, out var row, one, other);
+        row.HorizontalContentAlignment = HorizontalAlignment.Center;
+        row.Spacing = 4;
+        Settle();
+
+        Assert.Equal(-12, one.Bounds.X);
+        Assert.Equal(52, other.Bounds.X);
+    }
+
+    [AvaloniaFact]
+    public void A_Basis_Is_The_Width_And_Does_Not_Grow()
+    {
+        var box = Basis(48, 20);
+        using var scene = InRow(300, out var row, box);
+
+        Assert.Equal(48, box.Bounds.Width);
+        row.ClearValue(Layoutable.WidthProperty);
+        row.Measure(new Size(300, 100));
+        Assert.Equal(48, row.DesiredSize.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Basis_Shrinks_In_Proportion_Down_To_Its_Min_Width()
+    {
+        Border big = Basis(100, 40), small = Basis(50, 10);
+        using var scene = InRow(120, out var row, big, small);
+
+        // 30 over, shared 2 : 1.
+        Assert.Equal(80, big.Bounds.Width);
+        Assert.Equal(40, small.Bounds.Width);
+
+        // 100 over: the big one stops at 40, and the small one takes the rest, to its 10.
+        row.Width = 50;
+        Settle();
+        Assert.Equal(40, big.Bounds.Width);
+        Assert.Equal(10, small.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Fixed_Width_Beside_Basis_Children_Keeps_Its_Width()
+    {
+        // The OTP's separator: flex-shrink: 0 between two boxes that shrink.
+        Border one = Basis(48, 20), dot = Fixed(8), other = Basis(48, 20);
+        using var scene = InRow(80, out _, one, dot, other);
+
+        Assert.Equal(8, dot.Bounds.Width);
+        Assert.Equal(36, one.Bounds.Width);
+        Assert.Equal(36, other.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Change_Of_Basis_Gap_Or_Padding_Lays_It_Out_Again()
+    {
+        var box = Basis(48, 20);
+        var after = Fixed(10);
+        using var scene = InRow(300, out var row, box, after);
+
+        FlexRow.SetFlexBasis(box, 60);
+        Settle();
+        Assert.Equal(60, box.Bounds.Width);
+
+        row.Spacing = 5;
+        Settle();
+        Assert.Equal(65, after.Bounds.X);
+
+        row.Padding = new Thickness(3, 0, 0, 0);
+        Settle();
+        Assert.Equal(68, after.Bounds.X);
+    }
+
     [AvaloniaFact]
     public void Arranged_Narrower_Than_Measured_Shrinks()
     {

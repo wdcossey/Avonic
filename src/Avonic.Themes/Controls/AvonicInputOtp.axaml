@@ -25,7 +25,7 @@
         <Setter Property="Padding" Value="2,1" />
         <Setter Property="FocusAdorner" Value="{x:Null}" />
         <!-- width: var(width), as a basis the row can shrink to min-width; height: var(height) -->
-        <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+        <Setter Property="c:FlexRow.FlexBasis">
             <MultiBinding Converter="{x:Static b:Css.Var}">
                 <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
                 <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeMedium" />
@@ -98,7 +98,7 @@
 
         <!-- :host(.input-otp-size-*): width and height 40 or 56; medium is the default above -->
         <Style Selector="^:size-small">
-            <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+            <Setter Property="c:FlexRow.FlexBasis">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
                     <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeSmall" />
@@ -112,7 +112,7 @@
             </Setter>
         </Style>
         <Style Selector="^:size-large">
-            <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+            <Setter Property="c:FlexRow.FlexBasis">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
                     <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeLarge" />
@@ -245,7 +245,7 @@
         </Style>
     </ControlTheme>
 
-    <!-- .input-otp-separator: a round dot, flex-shrink 0 -->
+    <!-- .input-otp-separator: a round dot, flex-shrink 0, which its Width is in a FlexRow -->
     <ControlTheme x:Key="{x:Type c:InputOtpSeparator}" TargetType="c:InputOtpSeparator">
         <Setter Property="Width" Value="{DynamicResource Avonic.InputOtp.SeparatorWidth}" />
         <Setter Property="Height">
@@ -287,7 +287,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <StackPanel>
-                    <c:InputOtpGroupPanel Name="PART_Group" />
+                    <c:FlexRow Name="PART_Group" HorizontalContentAlignment="Center" />
                     <ContentPresenter Name="PART_Description"
                                       Content="{TemplateBinding Content}"
                                       ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -319,7 +319,7 @@
         </Style>
 
         <!-- .input-otp-group: margin and padding, a centred row with a gap of 12, or 8 when small -->
-        <Style Selector="^ /template/ c|InputOtpGroupPanel#PART_Group">
+        <Style Selector="^ /template/ c|FlexRow#PART_Group">
             <Setter Property="Spacing" Value="12" />
             <Setter Property="Margin">
                 <MultiBinding Converter="{x:Static b:Css.Box}">
@@ -338,7 +338,7 @@
                 </MultiBinding>
             </Setter>
         </Style>
-        <Style Selector="^:size-small /template/ c|InputOtpGroupPanel#PART_Group">
+        <Style Selector="^:size-small /template/ c|FlexRow#PART_Group">
             <Setter Property="Spacing" Value="8" />
         </Style>
 

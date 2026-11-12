@@ -52,7 +52,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 
 ### Template parts
 
-`PART_Group` (an `InputOtpGroupPanel`, which the control fills with an `InputOtpBox` and an `InputOtpSeparator` per box) and
+`PART_Group` (a `FlexRow`, centred with a gap, which the control fills with an `InputOtpBox` and an `InputOtpSeparator` per box) and
 `PART_Description` (a `ContentPresenter`). The box and the separator have `ControlTheme`s of their own, and each box carries the
 host's state as pseudoclasses (`:fill-*`, `:shape-*`, `:size-*`, `:has-focus`, `:readonly`, `:ion-color`, `:ion-valid`,
 `:ion-invalid`, `:ion-touched`) beside its own `:focus` and `:disabled`, so a theme styles it as `input-otp.md.css` does.

@@ -216,7 +216,7 @@ public class AvonicInputOtpTests
         var otp = new AvonicInputOtp
         {
             Template = new FuncControlTemplate<AvonicInputOtp>((_, scope) =>
-                new InputOtpGroupPanel { Name = "PART_Group" }.RegisterInNameScope(scope)),
+                new FlexRow { Name = "PART_Group" }.RegisterInNameScope(scope)),
         };
         otp.ApplyTemplate();
         otp.Length = 6;
