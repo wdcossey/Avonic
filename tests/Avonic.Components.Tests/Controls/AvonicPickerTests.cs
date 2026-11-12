@@ -198,6 +198,13 @@ public class AvonicPickerTests
         Assert.Equal("30", time.Minute.Value);
         Assert.Contains("12", changes);
         Assert.Contains("30", changes);
+
+        // A fifth digit keeps the last four, 2304: 23 is no hour, so 2, and the next two are the minute.
+        scene.Window.KeyTextInput("4");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("2304", time.Picker.InputValue);
+        Assert.Equal("2", time.Hour.Value);
+        Assert.Equal("30", time.Minute.Value);
     });
 
     [AvaloniaFact]
@@ -229,6 +236,11 @@ public class AvonicPickerTests
         scene.Window.KeyTextInput("7");
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("7", time.Hour.Value);
+        // "75": no hour 75, so the 7, and the rest is the minute, 05.
+        scene.Window.KeyTextInput("5");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("7", time.Hour.Value);
+        Assert.Equal("05", time.Minute.Value);
 
         Key(scene, PhysicalKey.Enter);
         Later(clock, 16);
@@ -252,6 +264,10 @@ public class AvonicPickerTests
         Assert.False(Active(time.Minute));
 
         // "1" then "2": 12. A second's pause, then "7": 7, not 127 or 27.
+        // A key that isn't a digit doesn't go in.
+        scene.Window.KeyTextInput("a");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("", time.Picker.InputValue);
         scene.Window.KeyTextInput("1");
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("1", time.Hour.Value);
@@ -333,6 +349,108 @@ public class AvonicPickerTests
         }
 
         Assert.Equal("07", minute.Value);
+    });
+
+    [AvaloniaFact]
+    public void P3_Leaving_Input_Mode_Mid_Scroll_Waits_For_The_Scroll_To_End() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var time = ShowTime(clock, out var scene);
+        using var _scene = scene;
+        Click(scene, Centre(time.Hour.Scroller!, scene));
+        Later(clock, 600);
+        Assert.True(Active(time.Minute));
+
+        time.Minute.Scroller!.Offset = new Vector(0, time.Minute.Scroller.Offset.Y + 34);
+        Later(clock, 16);
+        Assert.True(time.Minute.IsScrolling);
+        time.Picker.ExitInputMode();
+        Later(clock, 16);
+        Assert.False(Active(time.Hour));
+        Assert.True(Active(time.Minute));
+        Later(clock, 300);
+        Assert.False(Active(time.Minute));
+    });
+
+    [AvaloniaFact]
+    public void P3_Focus_Leaving_The_Picker_Leaves_Input_Mode() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var hour = Column("1", Hours, numeric: true);
+        var minute = Column("00", Minutes, numeric: true);
+        var picker = new AvonicPicker { Items = { hour, minute } };
+        var outside = new Button { Content = "Outside" };
+        using var scene = new Scene(new StackPanel { VerticalAlignment = VerticalAlignment.Top, Children = { picker, outside } });
+        Show(clock);
+
+        hour.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(picker.UseInputMode);
+        minute.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(picker.UseInputMode);
+        Assert.Same(minute, picker.InputModeColumn);
+
+        outside.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(picker.UseInputMode);
+    });
+
+    [AvaloniaFact]
+    public void P3_The_Inputs_Blur_Clears_What_Was_Typed() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var time = ShowTime(clock, out var scene);
+        using var _scene = scene;
+        Click(scene, Centre(time.Hour.Scroller!, scene));
+        Later(clock, 16);
+        scene.Window.KeyTextInput("1");
+        Dispatcher.UIThread.RunJobs();
+
+        // Focus goes from the input to a column: the blur leaves input mode, emptying the input, and the column's focus enters
+        // it again for itself, so "2" is 2 and not 12.
+        time.Hour.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(time.Hour, time.Picker.InputModeColumn);
+        scene.Window.KeyTextInput("2");
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("2", time.Hour.Value);
+    });
+
+    [AvaloniaFact]
+    public void P3_With_No_Numeric_Column_A_Tap_Doesnt_Enter_Input_Mode() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var column = Column("1", Hours);
+        var picker = new AvonicPicker { Items = { column }, VerticalAlignment = VerticalAlignment.Top };
+        using var scene = new Scene(picker);
+        Show(clock);
+
+        Click(scene, Centre(column.Scroller!, scene));
+        Later(clock, 16);
+        Assert.False(picker.UseInputMode);
+    });
+
+    [AvaloniaFact]
+    public void P3_In_Input_Mode_A_Tap_On_A_Columns_Own_Part_Takes_It_And_A_Second_Takes_Every_Column_Again() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var time = ShowTime(clock, out var scene);
+        using var _scene = scene;
+        Click(scene, Centre(time.Hour.Scroller!, scene));
+        Later(clock, 16);
+        Assert.Null(time.Picker.InputModeColumn);
+
+        // The column's padding, beside its options, in the highlight's row: the column itself, as its shadow root retargets.
+        var padding = new Point(BoundsIn(time.Hour.Scroller!, scene.Window).X + 4, Centre(time.Hour.Scroller!, scene).Y);
+        Click(scene, padding);
+        Later(clock, 16);
+        Assert.Same(time.Hour, time.Picker.InputModeColumn);
+        Assert.False(Active(time.Minute));
+        Click(scene, padding);
+        Later(clock, 16);
+        Assert.Null(time.Picker.InputModeColumn);
+        Assert.True(Active(time.Minute));
     });
 
     // ── The compare frame ────────────────────────────────────────────────────────────────────

@@ -259,6 +259,23 @@ public class AvonicPickerColumnTests
         }
     });
 
+    [AvaloniaFact]
+    public void C4_A_Touchpads_Small_Scroll_Moves_At_Once_And_Snaps_When_It_Stops() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Green");
+        using var scene = new Scene(page.Picker);
+        Show(clock);
+
+        scene.Window.MouseWheel(Centre(page.Scroll, scene), new Vector(0, -0.3), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(151, page.Scroll.Offset.Y, 0.5);
+        Later(clock, 90);
+        Assert.Equal(151, page.Scroll.Offset.Y, 0.5);
+        Later(clock, 200);
+        Assert.Equal(155, page.Scroll.Offset.Y, 0.5);
+    });
+
     // ── C5: a click ──────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -324,6 +341,22 @@ public class AvonicPickerColumnTests
         Later(clock, 800);
         Assert.Equal(87, page.Scroll.Offset.Y, 0.5);
         Assert.Equal("", page.Active);
+        Assert.Empty(page.Changes);
+    });
+
+    [AvaloniaFact]
+    public void C6_A_Disabled_Column_Keeps_A_Value_With_No_Option() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Red");
+        page.Column.IsEnabled = false;
+        using var scene = new Scene(page.Picker);
+        Show(clock);
+
+        // setValue does nothing on a disabled column, so the render's correction to the first option doesn't happen.
+        page.Column.Value = "nothing";
+        Later(clock, 400);
+        Assert.Equal("nothing", page.Column.Value);
         Assert.Empty(page.Changes);
     });
 

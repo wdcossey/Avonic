@@ -101,7 +101,6 @@ public class AvonicPickerColumn : ItemsControl
     private bool _attached;
     private bool _isColumnVisible;
     private bool _listening;
-    private IDisposable? _listenFrame;
     private IDisposable? _scrollFrame;
     private IDisposable? _scrollTimeout;
     private IDisposable? _renderFrame;
@@ -408,22 +407,18 @@ public class AvonicPickerColumn : ItemsControl
 
     // ── Scrolling ────────────────────────────────────────────────────────────────────────────
 
-    /// <summary>The listener starts a frame later, so that the first jump into view isn't a user's scroll.</summary>
+    /// <summary>
+    /// Ionic adds the listener a frame later, so that the first jump into view isn't a user's scroll. Here that jump has already set
+    /// the offset, synchronously, before this runs, so the listener can start at once.
+    /// </summary>
     private void InitializeScrollListener()
     {
-        _listenFrame?.Dispose();
         _listenerActive = ActiveItem;
-        _listenFrame = AvonicConfig.RequestFrame(this, () =>
-        {
-            _listenFrame = null;
-            _listening = true;
-        });
+        _listening = true;
     }
 
     private void DestroyScrollListener()
     {
-        _listenFrame?.Dispose();
-        _listenFrame = null;
         _listening = false;
         _scrollFrame?.Dispose();
         _scrollFrame = null;
@@ -503,7 +498,8 @@ public class AvonicPickerColumn : ItemsControl
     /// </summary>
     private void OnWheel(object? sender, PointerWheelEventArgs e)
     {
-        if (_scroll is null || _smooth is null || IsColumnDisabled || e.Delta.Y == 0
+        // A disabled column gets no wheel: Avalonia gives a disabled control no input, as overflow-y: hidden is.
+        if (_scroll is null || _smooth is null || e.Delta.Y == 0
             || e.Source is not Visual source || (source != _scroll && !_scroll.IsVisualAncestorOf(source)))
         {
             return;
