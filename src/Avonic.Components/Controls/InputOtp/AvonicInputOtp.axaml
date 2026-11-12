@@ -1,0 +1,62 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- One box, the native <input>: no padding or background, the text centred. Functional, so that a test with no base theme
+         can type into it. The look is the theme's. -->
+    <ControlTheme x:Key="{x:Type c:InputOtpBox}" TargetType="c:InputOtpBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <TextPresenter Name="PART_TextPresenter"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   Text="{TemplateBinding Text, Mode=TwoWay}"
+                                   CaretIndex="{TemplateBinding CaretIndex}"
+                                   SelectionStart="{TemplateBinding SelectionStart}"
+                                   SelectionEnd="{TemplateBinding SelectionEnd}"
+                                   TextAlignment="{TemplateBinding TextAlignment}"
+                                   TextWrapping="{TemplateBinding TextWrapping}"
+                                   SelectionBrush="{TemplateBinding SelectionBrush}"
+                                   SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                   CaretBrush="{TemplateBinding CaretBrush}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The separator: nothing to see until the theme gives it a size. -->
+    <ControlTheme x:Key="{x:Type c:InputOtpSeparator}" TargetType="c:InputOtpSeparator" />
+
+    <!-- Functional stub for ion-input-otp: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInputOtp}" TargetType="c:AvonicInputOtp">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel>
+                    <!-- .input-otp-group: the control puts the boxes and separators in it -->
+                    <c:InputOtpGroupPanel Name="PART_Group" />
+                    <!-- .input-otp-description: the default slot, display: none with nothing in it -->
+                    <ContentPresenter Name="PART_Description"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      IsVisible="False" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:has-description /template/ ContentPresenter#PART_Description">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

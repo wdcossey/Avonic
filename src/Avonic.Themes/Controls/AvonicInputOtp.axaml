@@ -1,0 +1,358 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Margin="16,0">
+            <c:AvonicInputOtp Value="12" />
+            <c:AvonicInputOtp Fill="Solid" Value="12">Didn't get a code? Resend</c:AvonicInputOtp>
+            <c:AvonicInputOtp Length="6" Separators="3" Shape="Soft" Size="Small" Value="123" />
+            <c:AvonicInputOtp Shape="Rectangular" Size="Large" Type="Text" Value="AB" />
+            <c:AvonicInputOtp Color="danger" Value="1" />
+            <c:AvonicInputOtp IsEnabled="False" Value="12" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of input-otp.md.css's .native-input. The host copies its classes here as pseudoclasses, as a ControlTheme's
+         template rules can't reach a box the control makes in code; :focus and :disabled are the box's own. -->
+    <ControlTheme x:Key="{x:Type c:InputOtpBox}" TargetType="c:InputOtpBox">
+        <Setter Property="AcceptsReturn" Value="False" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <!-- text-align: center, and Chromium's 1px 2px padding for an <input> -->
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="2,1" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- width: var(width), as a basis the row can shrink to min-width; height: var(height) -->
+        <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeMedium" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Height">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.Height" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeMedium" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="MinWidth" Value="{DynamicResource Avonic.InputOtp.MinWidth}" />
+        <Setter Property="CornerRadius">
+            <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusRound" />
+                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="BorderThickness">
+            <MultiBinding Converter="{x:Static b:Css.Box}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderWidth" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderWidth" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderWidth" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderWidth" />
+            </MultiBinding>
+        </Setter>
+        <!-- fill outline: border-color step 300, background none -->
+        <Setter Property="BorderBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.BorderColor" />
+                <DynamicResource ResourceKey="Avonic.BackgroundColorStep300Brush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.Background" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.Md.Background" />
+            </MultiBinding>
+        </Setter>
+        <!-- color: var(color), which is initial: the inherited colour, unless it's set -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <TextPresenter Name="PART_TextPresenter"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   Text="{TemplateBinding Text, Mode=TwoWay}"
+                                   CaretIndex="{TemplateBinding CaretIndex}"
+                                   SelectionStart="{TemplateBinding SelectionStart}"
+                                   SelectionEnd="{TemplateBinding SelectionEnd}"
+                                   TextAlignment="{TemplateBinding TextAlignment}"
+                                   TextWrapping="{TemplateBinding TextWrapping}"
+                                   SelectionBrush="{TemplateBinding SelectionBrush}"
+                                   SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                   CaretBrush="{TemplateBinding CaretBrush}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.input-otp-size-*): width and height 40 or 56; medium is the default above -->
+        <Style Selector="^:size-small">
+            <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeSmall" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Height">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Height" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeSmall" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:size-large">
+            <Setter Property="c:InputOtpGroupPanel.FlexBasis">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Width" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeLarge" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Height">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Height" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.SizeLarge" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.input-otp-shape-*): border-radius 8 or 0; round is the default above -->
+        <Style Selector="^:shape-soft">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusSoft" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-rectangular">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusRectangular" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.input-otp-fill-solid): border and background step 50 -->
+        <Style Selector="^:fill-solid">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.input-otp-disabled): color text step 650 -->
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Color" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep650Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.input-otp-fill-outline.input-otp-disabled): background step 50, border step 100 -->
+        <Style Selector="^:fill-outline:disabled">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep100Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.input-otp-fill-outline.input-otp-readonly): background step 50 -->
+        <Style Selector="^:fill-outline:readonly">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.input-otp-fill-solid.input-otp-disabled), :host(.input-otp-fill-solid.input-otp-readonly): step 100 -->
+        <Style Selector="^:fill-solid:disabled, ^:fill-solid:readonly">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep100Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep100Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.has-focus) .native-input: caret-color highlight-color -->
+        <Style Selector="^:has-focus">
+            <Setter Property="CaretBrush" Value="{Binding $parent[c:AvonicInputOtp].HighlightBrush}" />
+        </Style>
+        <!-- :host(.has-focus.ion-valid), :host(.ion-touched.ion-invalid): border-color highlight-color, on every box. It's set on the
+             host, more specific than the fill's, so it beats a key there too. -->
+        <Style Selector="^:has-focus:ion-valid, ^:ion-touched:ion-invalid">
+            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicInputOtp].HighlightBrush}" />
+        </Style>
+        <!-- :host(.has-focus) .native-input:focus: border-color highlight-color, border-width 2, on the box itself -->
+        <Style Selector="^:has-focus:focus">
+            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicInputOtp].HighlightBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+
+        <!-- :host(.input-otp-fill-outline.ion-color) .native-input, :host(.input-otp-fill-solid.ion-color) .native-input:focus:
+             border-color the base at 0.6, which beats the variable, focused or not -->
+        <Style Selector="^:fill-outline:ion-color, ^:fill-solid:ion-color:focus">
+            <Setter Property="BorderBrush" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.6}" />
+        </Style>
+        <!-- .ion-color.ion-invalid: danger; .ion-color.ion-valid: success; with or without focus or touch -->
+        <Style Selector="^:ion-color:ion-invalid">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.DangerBrush}" />
+        </Style>
+        <Style Selector="^:ion-color:ion-valid">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.SuccessBrush}" />
+        </Style>
+        <!-- :host(.input-otp-fill-outline.input-otp-disabled.ion-color) .native-input: the base at 0.3 -->
+        <Style Selector="^:fill-outline:disabled:ion-color">
+            <Setter Property="BorderBrush" Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self}, Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.3}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .input-otp-separator: a round dot, flex-shrink 0 -->
+    <ControlTheme x:Key="{x:Type c:InputOtpSeparator}" TargetType="c:InputOtpSeparator">
+        <Setter Property="Width" Value="{DynamicResource Avonic.InputOtp.SeparatorWidth}" />
+        <Setter Property="Height">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.SeparatorHeight" />
+                <DynamicResource ResourceKey="Avonic.InputOtp.SeparatorWidth" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.SeparatorColor" />
+                <DynamicResource ResourceKey="Avonic.BackgroundColorStep150Brush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="CornerRadius">
+            <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.SeparatorBorderRadius" />
+                <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+            </MultiBinding>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A translation of input-otp.md.css's host, group and description. -->
+    <ControlTheme x:Key="{x:Type c:AvonicInputOtp}" TargetType="c:AvonicInputOtp">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- font-size: 0.875rem -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <!-- A row that doesn't fit overflows both sides, as overflow is visible. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <!-- highlight-color: highlight-color-focused, which a known colour's base replaces -->
+        <Setter Property="HighlightBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.InputOtp.HighlightColorFocused" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel>
+                    <c:InputOtpGroupPanel Name="PART_Group" />
+                    <ContentPresenter Name="PART_Description"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      IsVisible="False" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.ion-color): highlight-color-focused is the colour's base -->
+        <Style Selector="^:ion-color">
+            <Setter Property="HighlightBrush" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <!-- :host(.ion-valid), then :host(.ion-touched.ion-invalid), which beats it -->
+        <Style Selector="^.ion-valid">
+            <Setter Property="HighlightBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.HighlightColorValid" />
+                    <DynamicResource ResourceKey="Avonic.Color.SuccessBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid">
+            <Setter Property="HighlightBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.HighlightColorInvalid" />
+                    <DynamicResource ResourceKey="Avonic.Color.DangerBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .input-otp-group: margin and padding, a centred row with a gap of 12, or 8 when small -->
+        <Style Selector="^ /template/ c|InputOtpGroupPanel#PART_Group">
+            <Setter Property="Spacing" Value="12" />
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.MarginStart" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.MarginTop" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.MarginEnd" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.MarginBottom" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.InputOtp.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.InputOtp.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:size-small /template/ c|InputOtpGroupPanel#PART_Group">
+            <Setter Property="Spacing" Value="8" />
+        </Style>
+
+        <!-- .input-otp-description: 12px on a 20px line, centred, text step 300; display: none with nothing in it -->
+        <Style Selector="^ /template/ ContentPresenter#PART_Description">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextBlock.LineHeight" Value="20" />
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep300Brush}" />
+        </Style>
+        <Style Selector="^:has-description /template/ ContentPresenter#PART_Description">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
