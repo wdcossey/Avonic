@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ion-reorder and ion-reorder-group have no CSS variables. This is reorder-group.css's
+         .reorder-selected { box-shadow: 0 0 10px rgba(0, 0, 0, 0.4) }. A CSS blur of 10 is a Gaussian of sigma 5; Avalonia's
+         Skia takes a blur B as sigma 0.288675 B + 0.5, so 15.6 is the same shadow. Measured beside Chromium's, within 1 of 255 at
+         every pixel of its fall-off; 10 here falls off in 7 px instead of 10. -->
+    <BoxShadows x:Key="Avonic.ReorderGroup.SelectedBoxShadow">0 0 15.6 0 #66000000</BoxShadows>
+
+</ResourceDictionary>
