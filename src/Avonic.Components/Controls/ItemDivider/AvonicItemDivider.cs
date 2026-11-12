@@ -147,6 +147,15 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
 
         // What's beside the divider, and what it has to be drawn above, is the presenter's if it has one.
         _inParent = AvonicList.ContainerOf(this);
+        if (AvonicList.IsStuckCopy(_inParent))
+        {
+            // The list's copy of a recycled row, which the list sticks.
+            _inParent = null;
+            return;
+        }
+
+        // A virtualising panel recycles the row once its place is above the top, so the list sticks a copy then.
+        AvonicList.WatchStickyRow(_inParent);
         FindScrollport();
 
         // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.

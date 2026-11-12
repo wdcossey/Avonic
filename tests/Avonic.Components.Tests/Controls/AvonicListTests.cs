@@ -598,27 +598,146 @@ public class AvonicListTests
         Assert.Equal(0, b.Margin.Top);
     });
 
-    [AvaloniaFact]
-    public void L14_Known_Gap_In_A_Virtualising_Panel_Rows_Keep_Their_Margin() => Scrolling(() =>
+    /// <summary>Data-driven sections in a virtualising panel, as many as it takes to scroll a long way.</summary>
+    private static (ItemsControl Sections, ScrollViewer Scroller) VirtualisedSections(Func<int, bool> inset, int count = 200)
     {
-        // Its children are what's realised, in no set order, so a row's margin would change as it's recycled.
         var sections = new ItemsControl
         {
             ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
-            ItemsSource = Enumerable.Range(0, 200).ToList(),
-            ItemTemplate = new FuncDataTemplate<int>((_, _) => new AvonicList { Inset = true, Items = { Item() } }),
+            ItemsSource = Enumerable.Range(0, count).ToList(),
+            ItemTemplate = new FuncDataTemplate<int>((index, _) =>
+                new AvonicList { Inset = inset(index), Tag = index, Items = { Item() } }),
         };
-        var scroller = new ScrollViewer { Content = sections };
+        return (sections, new ScrollViewer { Content = sections });
+    }
+
+    /// <summary>What's realised and shown, in order, with the gap above each from the list before it.</summary>
+    private static List<(AvonicList List, int Index)> Realised(ItemsControl sections) =>
+        sections.GetVisualDescendants().OfType<AvonicList>()
+            .Where(list => list.IsEffectivelyVisible && sections.IndexFromContainer(AvonicListContainer(list)) >= 0)
+            .Select(list => (list, sections.IndexFromContainer(AvonicListContainer(list))))
+            .OrderBy(row => row.Item2)
+            .ToList();
+
+    private static Control AvonicListContainer(AvonicList list) => list.GetVisualParent() as Avalonia.Controls.Presenters.ContentPresenter ?? (Control)list;
+
+    private static void AssertIonicGaps(ItemsControl sections, Func<int, bool> inset)
+    {
+        var rows = Realised(sections);
+        Assert.NotEmpty(rows);
+        foreach (var (list, index) in rows)
+        {
+            // .list-inset + ion-list.list-inset: a margin of 0 on top, so the gap is the one before's 16. A row whose
+            // item before isn't realised, at the top, keeps what it had, or if it's new, takes that item to be a list
+            // like itself.
+            var expected = inset(index) && !(index > 0 && inset(index - 1)) ? 16 : 0;
+            var assumed = inset(index) && index == 0 ? 16 : 0;
+            var realisedBefore = index == 0 || rows.Any(row => row.Index == index - 1);
+            Assert.True(
+                expected == list.Margin.Top || (!realisedBefore && assumed == list.Margin.Top),
+                $"row {index}: {list.Margin.Top}, not {expected}");
+        }
+
+        // Between two realised inset lists, the gap is 16, as in CSS, not 32.
+        for (var i = 1; i < rows.Count; i++)
+        {
+            if (inset(rows[i].Index) && inset(rows[i - 1].Index) && rows[i].Index == rows[i - 1].Index + 1)
+            {
+                var gap = rows[i].List.TranslatePoint(default, sections)!.Value.Y
+                    - (rows[i - 1].List.TranslatePoint(default, sections)!.Value.Y + rows[i - 1].List.Bounds.Height);
+                Assert.Equal(16, gap, 3);
+            }
+        }
+    }
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_The_Row_Before_Is_The_Item_Before() => Scrolling(() =>
+    {
+        // Measured: 16 between two inset lists. Its children are what's realised, in no set order, so the panel's
+        // children can't say which list is before which.
+        static bool Inset(int _) => true;
+        var (sections, scroller) = VirtualisedSections(Inset);
         using var scene = new Scene(scroller, 390, 400);
+        AssertIonicGaps(sections, Inset);
 
-        Assert.All(sections.GetVisualDescendants().OfType<AvonicList>(), list => Assert.Equal(16, list.Margin.Top));
+        foreach (var offset in new[] { 2000.0, 1000, 5000, 4990, 4900, 4000, 0 })
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
 
-        scroller.Offset = new Vector(0, 2000);
+        // Scrolling up a little at a time realises each list above the top after the one below it.
+        scroller.Offset = new Vector(0, 3000);
         Run();
-        scroller.Offset = new Vector(0, 1000);
+        for (var offset = 3000.0; offset > 2000; offset -= 37)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_A_Plain_List_Between_Inset_Ones_Is_Read() => Scrolling(() =>
+    {
+        // Every third section isn't inset, so the one after it keeps its 16.
+        static bool Inset(int index) => index % 3 != 1;
+        var (sections, scroller) = VirtualisedSections(Inset);
+        using var scene = new Scene(scroller, 390, 400);
+        AssertIonicGaps(sections, Inset);
+
+        for (var offset = 0.0; offset < 3000; offset += 41)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
+
+        for (var offset = 3000.0; offset > 0; offset -= 53)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            AssertIonicGaps(sections, Inset);
+        }
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_A_Change_Reaches_The_Next_Row() => Scrolling(() =>
+    {
+        static bool Inset(int _) => true;
+        var (sections, scroller) = VirtualisedSections(Inset);
+        using var scene = new Scene(scroller, 390, 400);
+        var rows = Realised(sections);
+        Assert.Equal(0, rows[2].List.Margin.Top);
+
+        rows[1].List.Inset = false;
+        Run();
+        Assert.Equal(16, rows[2].List.Margin.Top);
+
+        rows[1].List.Inset = true;
+        Run();
+        Assert.Equal(0, rows[2].List.Margin.Top);
+    });
+
+    [AvaloniaFact]
+    public void L14_In_A_Virtualising_Panel_An_Inserted_Item_Moves_The_Rows_After_It() => Scrolling(() =>
+    {
+        var data = new System.Collections.ObjectModel.ObservableCollection<bool> { true, true, true };
+        var sections = new ItemsControl
+        {
+            ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel()),
+            ItemsSource = data,
+            ItemTemplate = new FuncDataTemplate<bool>((inset, _) => new AvonicList { Inset = inset, Items = { Item() } }),
+        };
+        using var scene = new Scene(new ScrollViewer { Content = sections }, 390, 400);
+        var second = Realised(sections)[1].List;
+        Assert.Equal(0, second.Margin.Top);
+
+        data.Insert(1, false);
         Run();
 
-        Assert.All(sections.GetVisualDescendants().OfType<AvonicList>(), list => Assert.Equal(16, list.Margin.Top));
+        Assert.Equal(16, second.Margin.Top);
     });
 
     [AvaloniaFact]

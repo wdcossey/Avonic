@@ -1002,21 +1002,178 @@ public class AvonicItemDividerTests
         Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
     });
 
-    [AvaloniaFact]
-    public void D18_Known_Gap_In_A_Flat_Virtualising_Panel_It_Goes_With_Its_Row() => Scrolling(() =>
+    /// <summary>Sections of 500 rows, each after a sticky divider named "d" and its number, in a virtualising panel.</summary>
+    private static (AvonicList List, ScrollViewer Scroller, System.Collections.ObjectModel.ObservableCollection<object> Data)
+        Virtualised(int sections = 2)
     {
-        // Ionic would keep it stuck. A virtualising panel recycles the row, so a sticky divider there needs a group.
+        var data = new System.Collections.ObjectModel.ObservableCollection<object>();
+        for (var section = 1; section <= sections; section++)
+        {
+            data.Add("d" + section);
+            foreach (var row in Enumerable.Range(0, 500))
+            {
+                data.Add(row);
+            }
+        }
+
         var list = FromTemplate();
         list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel());
-        list.ItemsSource = new object[] { "d1" }.Concat(Enumerable.Range(0, 1000).Cast<object>()).ToList();
-        var scroller = new ScrollViewer { Content = list };
-        using var scene = new Scene(scroller, 390, 200);
-        Assert.Single(list.GetVisualDescendants().OfType<AvonicItemDivider>());
+        list.ItemsSource = data;
+        return (list, new ScrollViewer { Content = list }, data);
+    }
 
+    /// <summary>The divider drawn at a point of the window, the top one where they overlap, as a hit test finds it.</summary>
+    private static AvonicItemDivider? DividerAt(Scene scene, Point point)
+    {
+        scene.Window.CaptureRenderedFrame();
+        return scene.Window.InputHitTest(point) is Visual hit
+            ? hit.GetSelfAndVisualAncestors().OfType<AvonicItemDivider>().FirstOrDefault()
+            : null;
+    }
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Stays_Stuck_While_Its_Section_Scrolls() => Scrolling(() =>
+    {
+        // CSS keeps it stuck to the end of its parent, the list. The panel recycles its row once that's above the top.
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scene.Window.Background = Brushes.White;
+
+        for (var offset = 8.0; offset < 1500; offset += 23)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            var divider = DividerAt(scene, new Point(100, 5));
+            Assert.True(divider is { Content: "d1" }, $"at {offset}: {divider?.Content}");
+            Assert.Equal(0, Top(divider!, scroller), 3);
+            Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
+        }
+
+        // A jump far into the section.
+        scroller.Offset = new Vector(0, 15000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+        Assert.NotEqual(Colors.White, Frames.PixelAt(scene.Window.CaptureRenderedFrame()!, 300, 10));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Next_Divider_Covers_It() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 15000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Scrolling down to the second: it comes up over the first, and then it's the one stuck.
+        string? last = "d1";
+        var both = false;
+        for (var offset = 15000.0; offset < 30000 && last == "d1"; offset += 7)
+        {
+            scroller.Offset = new Vector(0, offset);
+            Run();
+            last = DividerAt(scene, new Point(100, 2))?.Content as string;
+            var second = list.GetVisualDescendants().OfType<AvonicItemDivider>().FirstOrDefault(d => d.Content is "d2" && d.IsEffectivelyVisible);
+            if (second is not null && Top(second, scroller) is > 5 and < 30)
+            {
+                // Half way over: the first above it, the second below.
+                Assert.Equal("d1", DividerAt(scene, new Point(100, 2))?.Content);
+                Assert.Equal("d2", DividerAt(scene, new Point(100, Top(second, scroller) + 2))?.Content);
+                both = true;
+            }
+        }
+
+        Assert.True(both);
+        Assert.Equal("d2", last);
+        scroller.Offset = new Vector(0, scroller.Offset.Y + 5000);
+        Run();
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // And back up into the first section.
         scroller.Offset = new Vector(0, 5000);
         Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+    });
 
-        Assert.DoesNotContain(list.GetVisualDescendants().OfType<AvonicItemDivider>(), divider => divider.IsVisible);
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_A_Jump_Finds_The_Sections_Own_Divider() => Scrolling(() =>
+    {
+        // Straight from the top into the third section, past two dividers the panel never realised.
+        var (list, scroller, _) = Virtualised(sections: 4);
+        using var scene = new Scene(scroller, 390, 200);
+
+        scroller.Offset = new Vector(0, 60000);
+        Run();
+        Assert.Equal("d3", DividerAt(scene, new Point(100, 5))?.Content);
+
+        scroller.Offset = new Vector(0, 30000);
+        Run();
+        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        scroller.Offset = default;
+        Run();
+
+        var shown = list.GetVisualDescendants().OfType<AvonicItemDivider>().Where(d => d.IsEffectivelyVisible).ToList();
+        var divider = Assert.Single(shown);
+        Assert.Equal(8, Top(divider, scroller));
+        Assert.IsNotType<AvonicItemDivider>(DividerAt(scene, new Point(100, 4)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Follows_Its_Item_When_Items_Change() => Scrolling(() =>
+    {
+        var (list, scroller, data) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        // Rows before it move it down, and a divider put in before the top starts a section there.
+        data.Insert(0, -1);
+        data.Insert(0, -2);
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Insert(50, "d0");
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        Assert.Equal("d0", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Remove("d0");
+        Run();
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+
+        data.Remove("d1");
+        Run();
+        Assert.Null(DividerAt(scene, new Point(100, 5)));
+    });
+
+    [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Stuck_Divider_Takes_The_Input() => Scrolling(() =>
+    {
+        var (list, scroller, _) = Virtualised();
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        scene.Window.CaptureRenderedFrame();
+
+        object? pressed = null;
+        list.AddHandler(InputElement.PointerPressedEvent, (_, e) =>
+            pressed = (e.Source as Visual)?.GetSelfAndVisualAncestors().OfType<AvonicItemDivider>().FirstOrDefault()?.Content,
+            handledEventsToo: true);
+        scene.Window.MouseDown(new Point(100, 5), MouseButton.Left, RawInputModifiers.None);
+        scene.Window.MouseUp(new Point(100, 5), MouseButton.Left, RawInputModifiers.None);
+
+        Assert.Equal("d1", pressed);
     });
 
     [AvaloniaFact]

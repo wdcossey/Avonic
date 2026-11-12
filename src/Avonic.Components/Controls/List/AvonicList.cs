@@ -17,7 +17,7 @@ namespace Avonic.Components.Controls;
 /// <see cref="ItemsControl.ItemsPanel"/> to a <see cref="VirtualizingStackPanel"/>.
 /// </summary>
 [PseudoClasses(":lines-full", ":lines-inset", ":lines-none", ":inset", ":after-inset")]
-public class AvonicList : ItemsControl
+public partial class AvonicList : ItemsControl
 {
     /// <summary>Ionic <c>lines</c>: how the bottom border is displayed on the items. Null leaves it to each item.</summary>
     public static readonly StyledProperty<ListLines?> LinesProperty =
@@ -29,6 +29,12 @@ public class AvonicList : ItemsControl
 
     private AvaloniaList<Control>? _siblings;
     private Control? _inParent;
+
+    /// <summary>The items control whose virtualising panel this list is a row of, if it is.</summary>
+    private ItemsControl? _rowsOwner;
+
+    /// <summary>Waiting for the panel to finish realising this row, so that it has an index.</summary>
+    private bool _awaitingRowIndex;
 
     public ListLines? Lines
     {
@@ -66,9 +72,19 @@ public class AvonicList : ItemsControl
 
         _inParent = ContainerOf(this);
 
-        // A virtualising panel's children are only what's realised, in no set order. Rows there keep their margin,
-        // rather than move as they're recycled.
-        if (_inParent.GetVisualParent() is Panel panel and not VirtualizingPanel)
+        // A virtualising panel's children are only what's realised, in no set order, so there the row before is the
+        // item before, through its owner.
+        if (_inParent.GetVisualParent() is VirtualizingPanel panelOfRows)
+        {
+            // The panel is in its owner's template, so the owner is the first items control above it.
+            if (panelOfRows.FindAncestorOfType<ItemsControl>() is { } owner)
+            {
+                _rowsOwner = owner;
+                owner.ContainerPrepared += OnRowPrepared;
+                owner.ContainerIndexChanged += OnRowIndexChanged;
+            }
+        }
+        else if (_inParent.GetVisualParent() is Panel panel)
         {
             _siblings = panel.Children;
             _siblings.CollectionChanged += OnSiblingsChanged;
@@ -90,6 +106,17 @@ public class AvonicList : ItemsControl
             _siblings = null;
         }
 
+        if (_rowsOwner is not null)
+        {
+            _rowsOwner.ContainerPrepared -= OnRowPrepared;
+            _rowsOwner.ContainerIndexChanged -= OnRowIndexChanged;
+            _rowsOwner = null;
+        }
+
+        LayoutUpdated -= OnRowRealised;
+        _awaitingRowIndex = false;
+        StopWatchingStickyRows();
+
         _inParent = null;
     }
 
@@ -99,6 +126,26 @@ public class AvonicList : ItemsControl
     }
 
     private void OnSiblingsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateAfterInset();
+
+    /// <summary>A row realised just before this one, or this one realised for another item.</summary>
+    private void OnRowPrepared(object? sender, ContainerPreparedEventArgs e)
+    {
+        if (e.Container == _inParent || e.Index == RowIndex() - 1)
+        {
+            UpdateAfterInset();
+        }
+    }
+
+    /// <summary>An item inserted or removed before this one.</summary>
+    private void OnRowIndexChanged(object? sender, ContainerIndexChangedEventArgs e)
+    {
+        if (e.Container == _inParent || e.NewIndex == RowIndex() - 1)
+        {
+            UpdateAfterInset();
+        }
+    }
+
+    private int RowIndex() => _rowsOwner is null || _inParent is null ? -1 : _rowsOwner.IndexFromContainer(_inParent);
 
     /// <summary>
     /// What's beside a control in a panel. An <see cref="ItemsControl"/> wraps templated content in a presenter
@@ -122,6 +169,12 @@ public class AvonicList : ItemsControl
 
     private void UpdateNextList()
     {
+        if (_rowsOwner is not null)
+        {
+            ScheduleRowCheck();
+            return;
+        }
+
         var index = IndexInSiblings();
         if (index >= 0 && index + 1 < _siblings!.Count)
         {
@@ -135,8 +188,76 @@ public class AvonicList : ItemsControl
     /// </summary>
     private void UpdateAfterInset()
     {
+        if (_rowsOwner is not null)
+        {
+            ScheduleRowCheck();
+            return;
+        }
+
         var index = IndexInSiblings();
         PseudoClasses.Set(":after-inset", index > 0 && ListIn(_siblings![index - 1]) is { Inset: true });
+    }
+
+    /// <summary>
+    /// A virtualising panel makes a row's content while it measures the row, before it has the row's index, and
+    /// what it has realised only settles at the end of the pass. So a row looks once the pass is over, which is still
+    /// before it's drawn, and then tells the row after it.
+    /// </summary>
+    private void ScheduleRowCheck()
+    {
+        if (_awaitingRowIndex)
+        {
+            return;
+        }
+
+        _awaitingRowIndex = true;
+        LayoutUpdated += OnRowRealised;
+        InvalidateArrange();
+    }
+
+    private void OnRowRealised(object? sender, EventArgs e)
+    {
+        LayoutUpdated -= OnRowRealised;
+        _awaitingRowIndex = false;
+
+        var index = RowIndex();
+        if (index >= 0)
+        {
+            UpdateAfterInsetRow(index);
+            if (_rowsOwner!.ContainerFromIndex(index + 1) is { } next && ListIn(next) is { _rowsOwner: not null } list)
+            {
+                list.UpdateAfterInsetRow(index + 1);
+            }
+        }
+    }
+
+    /// <summary>
+    /// <c>.list-inset + ion-list</c>, for a row of a virtualising panel: the row before is the item before. If that
+    /// isn't realised, as at the top while scrolling up, an item that's a list is read, and an item made by a template
+    /// is taken to be a list like this one, as a template makes a run of sections alike, until it's realised and says
+    /// otherwise. A recycled row is hidden, with no index, and the next item it's given decides.
+    /// </summary>
+    private void UpdateAfterInsetRow(int index)
+    {
+        bool after;
+        if (index == 0)
+        {
+            after = false;
+        }
+        else if (_rowsOwner!.ContainerFromIndex(index - 1) is { } before && before is not ContentPresenter { Child: null })
+        {
+            after = ListIn(before) is { Inset: true };
+        }
+        else if (index - 1 < _rowsOwner.ItemsView.Count && _rowsOwner.ItemsView[index - 1] is Control item)
+        {
+            after = item is AvonicList { Inset: true };
+        }
+        else
+        {
+            after = Inset;
+        }
+
+        PseudoClasses.Set(":after-inset", after);
     }
 
     protected override AutomationPeer OnCreateAutomationPeer() => new ListAutomationPeer(this);
