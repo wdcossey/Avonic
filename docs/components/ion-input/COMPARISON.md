@@ -93,11 +93,13 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
   input stays `#f2f2f2` at rest, `#e6e6e6` hovered and `#d9d9d9` focused. A resource key has no specificity, so here the app's key
   wins at rest, which is the only way to set it, and the hover and focus colours beat it, as in Ionic.
 - **`:host-context(ion-item)[slot=start|end] { width: auto }`** now matches (#131): the input is as wide as its content, where
-  the native input wants Chromium's width for 20 characters, `ceil(round(x advance) × 20) + round(xMax − xMin) − round(x advance)`
-  from the font's `head` table. Measured in Chromium at 16 px Roboto, 199 wide whatever the value, the label's 34.48 and 16 more,
-  and 298 at 24 px; Avonic gives the same (`B11_In_An_Items_Start_Or_End_Slot…`). The character is the `x` glyph's advance, as
-  Chromium on Windows takes it; Chromium on Android may take the font's average width, 9 rather than 8 at 16 px, which isn't
-  measured. Elsewhere, a container that sizes to its content still gives the input its text's width.
+  the native input wants Chromium's width for 20 characters, `ceil(ceil(20 × x) + round(xMax − xMin) − x)`, where `x` is the
+  `x` glyph's advance and `xMax − xMin` is from the font's `head` table. Measured in Chromium at 16 px Roboto: 199 wide whatever
+  the value, the label's 34.48 and 16 more. Fitted at 14 sizes from 12 to 32 px: the same at 11 (161, 186, 199, 211, 229, 249
+  and 298 at 13, 15, 16, 17, 18.5, 20 and 24 px are tested), and 1 px out at 12, 28 and 32 px (150, 347, 397 against 149, 348,
+  398), where Chromium's own advance seems to be whole. That's Chromium on Windows, which takes the `x` glyph as the character;
+  Chromium on Android may take the font's average width, which isn't measured. Elsewhere, a container that sizes to its content
+  still gives the input its text's width.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto).
 - **A slotted label's text is read when it's set**, and when the slot's element is made, not each time its text changes, where

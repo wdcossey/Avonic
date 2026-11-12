@@ -15,10 +15,10 @@ namespace Avonic.Components.Controls;
 /// </summary>
 /// <remarks>
 /// Chromium's <c>LayoutTextControlSingleLine</c>: 20 × the character's width, rounded up, plus the font's widest glyph less one
-/// character when the font gives an average width, as Roboto does. The character is the <c>x</c> glyph's advance, rounded, as
-/// Chromium on Windows takes it, where the font gives Skia no average, as the textarea's <c>cols</c> do; rounded as <c>roundf</c> rounds. The widest
-/// glyph is the <c>head</c> table's <c>xMax - xMin</c>, rounded. Measured 199 wide at 16 px Roboto and 298 at 24 px, which this
-/// gives.
+/// character when the font gives an average width, as Roboto does, rounded up to a pixel. The character is the <c>x</c> glyph's
+/// advance, as Chromium on Windows takes it where the font gives Skia no average; the widest glyph is the <c>head</c> table's
+/// <c>xMax - xMin</c>, rounded. Fitted to Chromium at 14 sizes of Roboto from 12 to 32 px: the same at 11, among them 16 px's 199
+/// and 24 px's 298, and 1 px out at 12, 28 and 32 px, where Chromium's own advance seems to be whole.
 /// </remarks>
 public sealed class InputNativeInput : TextBox
 {
@@ -84,7 +84,7 @@ public sealed class InputNativeInput : TextBox
     {
         var typeface = new Typeface(FontFamily, FontStyle, FontWeight, FontStretch);
         using var layout = new TextLayout("x", typeface, FontSize, null);
-        var character = Math.Round(layout.WidthIncludingTrailingWhitespace, MidpointRounding.AwayFromZero);
+        var character = layout.WidthIncludingTrailingWhitespace;
         var width = Math.Ceiling(character * DefaultSize);
 
         if (FontManager.Current.TryGetGlyphTypeface(typeface, out var glyphTypeface)
@@ -93,7 +93,7 @@ public sealed class InputNativeInput : TextBox
             width += Math.Round(perEm * FontSize, MidpointRounding.AwayFromZero) - character;
         }
 
-        return width;
+        return Math.Ceiling(width);
     }
 
     /// <summary>

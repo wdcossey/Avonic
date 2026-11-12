@@ -993,12 +993,15 @@ public class AvonicSearchbarTests
             AvonicConfig.BackButtonIcon = "chevron-back";
             var after = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always };
             var own = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always, CancelButtonIcon = "close" };
-            var styled = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always, Classes = { "app" } };
-            var panel = new StackPanel { Children = { before, after, own, styled } };
-            panel.Styles.Add(new Style(x => x.OfType<AvonicSearchbar>().Class("app"))
+            var styled = new AvonicSearchbar { ShowCancelButton = SearchbarShowCancelButton.Always };
+
+            // A plain style, with no activator, which is at style priority as the config's value is.
+            var styledPanel = new StackPanel { Children = { styled } };
+            styledPanel.Styles.Add(new Style(x => x.OfType<AvonicSearchbar>())
             {
                 Setters = { new Setter(AvonicSearchbar.CancelButtonIconProperty, "close-circle") },
             });
+            var panel = new StackPanel { Children = { before, after, own, styledPanel } };
             using var scene = new Scene(panel);
             Settle();
 
