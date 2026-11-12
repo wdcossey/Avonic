@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -23,7 +24,7 @@ public class AvonicReorderGroupTests
     /// <summary>Five items 48 high, each with a handle in its end slot, at the top of the window or in a content.</summary>
     private sealed class Page : IDisposable
     {
-        public Page(int count = 5, bool inContent = false, bool disabled = false, Action<AvonicReorderGroup>? setup = null)
+        public Page(int count = 5, bool inContent = false, bool disabled = false, Action<AvonicReorderGroup>? setup = null, double above = 0)
         {
             Group = new AvonicReorderGroup { Disabled = disabled };
             setup?.Invoke(Group);
@@ -35,7 +36,7 @@ public class AvonicReorderGroupTests
                 }
             }
 
-            Control root = new StackPanel { Children = { Group } };
+            Control root = new StackPanel { Children = { new Border { Height = above }, Group } };
             if (inContent)
             {
                 Content = new AvonicContent { Content = root };
@@ -74,9 +75,9 @@ public class AvonicReorderGroupTests
 
         public double At { get; set; } = 1000;
 
-        public static AvonicItem Item(string text) => new()
+        public static AvonicItem Item(string text, double height = 48) => new()
         {
-            Height = 48,
+            Height = height,
             Content = new TextBlock { Text = text },
             EndContent = new AvonicReorder(),
         };
@@ -328,6 +329,19 @@ public class AvonicReorderGroupTests
         Assert.True(((IPseudoClasses)page.Child(1).Classes).Contains(AvonicReorderGroup.SelectedPseudoClass));
     }
 
+    [AvaloniaFact]
+    public void B6_Its_Priority_Of_110_Beats_A_Gesture_At_109_Around_It()
+    {
+        using var page = new Page(count: 2);
+        var log = new Log(page.Clock);
+        // Created last, so it would win a tie
+        using var outer = Make((InputElement)page.Group.Parent!, log, name: "outer", priority: 109, direction: Avonic.Components.Gestures.GestureDirection.Y, threshold: 0);
+        page.Move(page.Press(1), -40);
+
+        Assert.StartsWith("start", page.Log[0]);
+        Assert.DoesNotContain("outer.onStart", log.Names);
+    }
+
     // ── 7, 9: moving ─────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -378,6 +392,55 @@ public class AvonicReorderGroupTests
     }
 
     [AvaloniaFact]
+    public void B7_The_Index_Comes_From_Each_Childs_Own_Height()
+    {
+        // 48, 96, 48: the bottoms are at 48, 144 and 192
+        using var page = new Page(count: 0, setup: g =>
+        {
+            g.Items.Add(Page.Item("A"));
+            g.Items.Add(Page.Item("B", 96));
+            g.Items.Add(Page.Item("C"));
+        });
+        Render();
+
+        // The last one, from 168 up 48 to 120: over the tall one, which moves down by the dragged one's 48
+        var press = page.Press(2);
+        page.Move(press, -48);
+        page.Tick(400);
+        Assert.Equal(48, page.Shift(1));
+        Assert.Equal(0, page.Shift(0));
+    }
+
+    [AvaloniaFact]
+    public void B7_The_Siblings_Move_By_The_Dragged_Childs_Own_Height()
+    {
+        using var page = new Page(count: 0, setup: g =>
+        {
+            g.Items.Add(Page.Item("A"));
+            g.Items.Add(Page.Item("B", 96));
+            g.Items.Add(Page.Item("C"));
+        });
+        Render();
+
+        // The tall one, from 96 down 56 to 152, past the last one's top: that one moves up by 96
+        page.Move(page.Press(1), 56);
+        page.Tick(400);
+        Assert.Equal(-96, page.Shift(2));
+    }
+
+    [AvaloniaFact]
+    public void B7_The_Group_Below_Other_Content_Holds_The_Item_Inside_Its_Own_Box()
+    {
+        using var page = new Page(above: 100);
+        page.Move(page.Press(1), -200);
+        page.Tick(400);
+
+        // The group's top is 100: from the press at 172 the item goes up 72 at most, and is over the first
+        Assert.Equal(-72, page.Shift(1));
+        Assert.Equal(48, page.Shift(0));
+    }
+
+    [AvaloniaFact]
     public void B9_A_Sibling_Eases_Over_300ms_And_The_Dragged_Item_Does_Not()
     {
         using var page = new Page();
@@ -400,6 +463,28 @@ public class AvonicReorderGroupTests
         Assert.Equal(-48 * ease.Ease(160 / 300.0), page.Shift(2), 6);
         page.Clock.At(started + 304);
         Assert.Equal(-48, page.Shift(2));
+    }
+
+    [AvaloniaFact]
+    public void B9_A_Sibling_Going_Back_Mid_Transition_Takes_The_Shortened_Time()
+    {
+        using var page = new Page();
+        var press = page.Press(1);
+        // Over the next item: it starts toward -48
+        var at = page.MoveFrom(press.Finger, press.At, 24);
+        var started = page.At;
+
+        // Half way through, back over the item's own place: CSS shortens the way back by how far it got, ease(0.5) of 300 ms
+        page.At = started + 150 - 32;
+        page.Clock.At(page.At);
+        page.MoveFrom(press.Finger, at, -8);
+        Assert.Equal(started + 150, page.At);
+        var shortened = 300 * new CubicBezierEasing(0.25, 0.1, 0.25, 1).Ease(0.5);
+
+        page.Clock.At(started + 150 + shortened - 2);
+        Assert.NotEqual(0, page.Shift(2));
+        page.Clock.At(started + 150 + shortened + 16);
+        Assert.Equal(0, page.Shift(2));
     }
 
     // ── 10: auto-scroll ──────────────────────────────────────────────────────────────────────
@@ -432,6 +517,22 @@ public class AvonicReorderGroupTests
         var scroll = page.Content!.GetScrollElement()!;
         page.Move(page.Press(3), 200);
         Assert.Equal(0, scroll.Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B10_Near_The_Top_Of_The_Content_Each_Move_Scrolls_Back_10()
+    {
+        using var page = new Page(count: 30, inContent: true);
+        var scroll = page.Content!.GetScrollElement()!;
+        scroll.Offset = new Vector(0, 300);
+        page.Tick();
+        Render();
+
+        // The item at the top of the viewport, at 336 - 300 = 36 on screen, dragged up to 20: within 60 of the top
+        var press = page.Press(7);
+        Assert.Equal(7 * 48 + 24 - 300, press.At.Y);
+        page.Move(press, -16);
+        Assert.Equal(300 - 20, scroll.Offset.Y);
     }
 
     // ── 11 - 13: the end, and complete ──────────────────────────────────────────────────────
@@ -569,7 +670,7 @@ public class AvonicReorderGroupTests
         using var page = new Page(count: 2, setup: g => g.Items.Insert(0, plain));
         Render();
         var press = page.Press(page.Centre(plain));
-        Assert.Equal(AvonicReorderGroup.SelectedZIndex, plain.ZIndex);
+        Assert.Equal(100, plain.ZIndex);
         Assert.Equal(0, page.Child(1).ZIndex);
 
         page.Up(press.Finger, page.Move(press, 60));
@@ -593,7 +694,7 @@ public class AvonicReorderGroupTests
         Assert.IsAssignableFrom<Avalonia.Controls.Presenters.ContentPresenter>(presenter);
         var item = presenter.GetVisualChildren().OfType<AvonicItem>().Single();
         Assert.True(((IPseudoClasses)item.Classes).Contains(AvonicReorderGroup.SelectedPseudoClass));
-        Assert.Equal(AvonicReorderGroup.SelectedZIndex, presenter.ZIndex);
+        Assert.Equal(100, presenter.ZIndex);
     }
 
     [AvaloniaFact]

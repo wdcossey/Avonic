@@ -85,6 +85,24 @@ public class AvonicReorderCaptureTests
     });
 
     [AvaloniaFact]
+    public void B14_A_Handle_That_Wraps_Its_Item_Is_Lifted_The_Same_Way() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var handle = new AvonicReorder { Content = new AvonicItem { Content = new AvonicLabel { Content = "Wrapped" } } };
+        var group = new AvonicReorderGroup { Disabled = false, Items = { handle } };
+        using var scene = new Scene(new AvonicList { Items = { group } });
+        Render();
+        var host = handle.GetVisualDescendants().OfType<Border>().First(b => b.Name == "PART_Host");
+        Assert.False(handle.ClipToBounds);
+        Assert.Equal(default, host.BoxShadow);
+
+        var at = handle.TranslatePoint(new Point(100, 20), scene.Window)!.Value;
+        new Finger(scene, clock).Down(at.X, at.Y, 1000);
+        Assert.Equal(0.8, handle.Opacity);
+        Assert.Equal(BoxShadows.Parse("0 0 15.6 0 #66000000"), host.BoxShadow);
+    });
+
+    [AvaloniaFact]
     public void Reference_Page() => InstalledTheme.Run(_ =>
     {
         using var page = new Page();
