@@ -67,6 +67,12 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
 14. The refreshing circle starts 655 ms into its animation (`animation-delay: -655ms`). B20, B21
 15. `pointer-events: none`, `width: 100%`, `height: 60px`. B18
 16. An upward drag from the top scrolls the content (Chromium's own scroll, beside Ionic's passive gesture). B10
+17. `complete()` and `cancel()` when it isn't native, detached say, take `close()`: the state at once, inactive and `ionPullEnd`
+    600 ms later. B19, R6
+18. Each `resetNativeRefresher` waits for the refreshing icon's `transitionend`, so two `complete()`s, or a `cancel()` then a
+    `complete()`, all end with the one transition, each raising `ionPullEnd`. R5
+
+R1 to R6 came from the reviews: a press dropped on detach, the fixed slot through a panel, `IsEnabled` kept, a new content used.
 
 ## Visual states and keys
 

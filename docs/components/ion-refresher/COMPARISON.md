@@ -57,8 +57,18 @@ Refreshing:
   followed the press, scrolls. Nothing is raised either way.
 - **The scroll element isn't set to `overflow: hidden`** while pulling: the captured gesture already keeps the scroller off the
   pointer. A mouse wheel during a pull would still scroll.
-- **The pulling animation is computed, not a Web Animation:** `RefresherPullFrame`, on `AvonicConfig`'s clock, as the spinner is.
-  Its values are set on the template's parts at animation priority.
+- **The animations aren't `AvonicAnimation`s.** `createPullingAnimation` is driven by `progressStart`, `progressStep` and
+  `progressEnd`, and animates the circle's `stroke-dasharray`, and `AvonicAnimation` has neither, so the pulling frame is
+  computed, as `RefresherPullFrame`, on `AvonicConfig`'s clock, as the spinner's are, and set on the template's parts at animation
+  priority. The snap back and the completing transition are small loops on the same clock.
+- **The refreshing circle is the refresher's own `RefresherCircle`**, drawn from `AvonicSpinner`'s config, as `AvonicSpinner`
+  can't take the `animation-delay: -655ms` md's native refresher gives it. Other refreshing spinners are an `AvonicSpinner`.
+- **`IsEnabled` is kept after a pull.** Ionic calls `gesture.enable(true)` once a pull has played back or refreshed, whatever
+  `disabled` is, so a refresher disabled in its `ionRefresh` handler could be pulled again. Here it's `Enable(IsEnabled)` (R3).
+- **The fixed slot can be shared through a panel**, as `AvonicContent.FixedContent` holds one child, where Ionic's slot holds an
+  `ion-fab` beside the refresher (R2).
+- **The pulling icon's resting place is `translateY(-52px)`** in the theme, which is `calc(-100% - 10px)` for its 42 px: an app that
+  resizes the icon restyles that too.
 
 ## Gaps
 

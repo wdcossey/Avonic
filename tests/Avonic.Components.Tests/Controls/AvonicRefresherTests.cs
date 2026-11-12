@@ -521,13 +521,20 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void B19_Complete_And_Cancel_Do_Nothing_Unless_Native()
+    public void B19_Complete_And_Cancel_When_Not_Native_Close_In_600ms_Showing_Nothing()
     {
+        // complete() and cancel() take close() when nativeRefresher is false: the state at once, inactive and ionPullEnd 600 ms on
         using var page = new Page(fixedSlot: false);
+        page.Wait(0);
         page.Refresher.Complete();
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":completing"));
+        Assert.False(page.Shows("PART_Refreshing"));
         page.Refresher.Cancel();
-        page.Wait(1000);
+        page.Wait(599);
         Assert.Empty(page.Log);
+        page.Wait(1);
+        Assert.Equal(["ionPullEnd:Complete", "ionPullEnd:Cancel"], page.Names);
+        Assert.False(((IPseudoClasses)page.Refresher.Classes).Contains(":active"));
     }
 
     [AvaloniaFact]
@@ -669,4 +676,26 @@ public class AvonicRefresherTests
             Assert.All(page.Log.Where(e => e.Name.StartsWith("ionPullEnd")), e => Assert.Equal(completing + 200, e.At, 0));
         }
     });
+
+    // ── R6: from the second review ─────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R6_A_Refresh_Completed_While_Detached_Still_Ends_And_It_Pulls_Again_After()
+    {
+        using var page = Refreshing();
+        var grid = (Grid)page.Content.Parent!;
+        grid.Children.Remove(page.Content);
+        page.Wait(16);
+
+        // disconnectedCallback turned the native refresher off, so complete() takes close()
+        page.LastRefresh!.Complete();
+        page.Wait(600);
+        Assert.Contains("ionPullEnd:Complete", page.Names);
+
+        grid.Children.Add(page.Content);
+        page.Wait(16);
+        var starts = page.Names.Count(n => n == "ionStart");
+        page.Drag(8 + 40).Wait(16);
+        Assert.Equal(starts + 1, page.Names.Count(n => n == "ionStart"));
+    }
 }

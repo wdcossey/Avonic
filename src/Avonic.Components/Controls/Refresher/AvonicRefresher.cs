@@ -51,6 +51,9 @@ public class AvonicRefresher : ContentControl
     /// <summary><c>transitionEndAsync</c>'s fallback, past the expected 200 ms, when no transition ends.</summary>
     internal static readonly TimeSpan TransitionFallback = TimeSpan.FromMilliseconds(200 + 500);
 
+    /// <summary><c>close</c>'s fallback timer.</summary>
+    internal static readonly TimeSpan CloseFallback = TimeSpan.FromMilliseconds(600);
+
     private RefresherState _state = RefresherState.Inactive;
     private double _progress;
     private bool _nativeRefresher;
@@ -145,9 +148,12 @@ public class AvonicRefresher : ContentControl
     {
         if (_nativeRefresher)
         {
-
             // needsCompletion and pointerDown are only read by iOS's native refresher, so md's always goes on
             AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Completing));
+        }
+        else
+        {
+            Close(RefresherState.Completing);
         }
     }
 
@@ -161,6 +167,28 @@ public class AvonicRefresher : ContentControl
         {
             AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Cancelling));
         }
+        else
+        {
+            Close(RefresherState.Cancelling);
+        }
+    }
+
+    /// <summary>
+    /// <c>close(state, delay)</c>, which <c>complete()</c> and <c>cancel()</c> take when it isn't the native refresher: detached, say,
+    /// as <c>disconnectedCallback</c> turns the native refresher off, or never set up. The state at once, and inactive and
+    /// <c>ionPullEnd</c> 600 ms later. Its styles are the legacy refresher's, which isn't here, so nothing shows.
+    /// </summary>
+    private void Close(RefresherState state)
+    {
+        AvonicConfig.Schedule(() =>
+        {
+            State = RefresherState.Inactive;
+            _progress = 0;
+            RaiseEvent(new RefresherPullEndEventArgs(
+                IonPullEndEvent,
+                state == RefresherState.Completing ? RefresherPullEndReason.Complete : RefresherPullEndReason.Cancel));
+        }, CloseFallback);
+        State = state;
     }
 
     /// <summary>
@@ -194,8 +222,8 @@ public class AvonicRefresher : ContentControl
     }
 
     /// <summary>
-    /// <c>disconnectedCallback</c>. Destroying the gesture mid-pull calls nothing back, as in Ionic, so the pull's own bookkeeping is
-    /// dropped here, and the next pull starts afresh.
+    /// <c>disconnectedCallback</c>. Destroying the gesture mid-pull calls nothing back, as in Ionic, which leaves its state and its
+    /// pulling frame as they were until the next pull; only the press's own bookkeeping is dropped here.
     /// </summary>
     private void Disconnect()
     {
@@ -222,10 +250,13 @@ public class AvonicRefresher : ContentControl
         }
         else if (change.Property == ContentProperty && VisualRoot is not null)
         {
-            // Ionic reads its ion-refresher-content when it connects, and again after each render (checkNativeRefresher). A new
-            // content is looked at again, from the start.
-            Disconnect();
-            Connect();
+            // Ionic reads its ion-refresher-content when it connects, and again after each render (checkNativeRefresher), and its
+            // animations query the content as they're made. A new content is the one drawn from here on, and makes it native if
+            // it has the spinners and it isn't yet. The gesture stays as it is.
+            if (ShouldUseNativeRefresher() && _contentEl is not null)
+            {
+                SetupNativeRefresher();
+            }
         }
     }
 
@@ -305,6 +336,7 @@ public class AvonicRefresher : ContentControl
 
         _nativeRefresher = true;
         UpdatePseudoClasses();
+        StateChanged?.Invoke(this, EventArgs.Empty);
 
         // Before the gesture's own handlers, so that an upward drag is handed to the scroller before the gesture decides.
         scrollEl.AddHandler(PointerMovedEvent, OnScrollPreviewMoved, RoutingStrategies.Tunnel, handledEventsToo: true);

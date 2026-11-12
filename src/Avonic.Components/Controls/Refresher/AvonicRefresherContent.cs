@@ -223,7 +223,9 @@ public class AvonicRefresherContent : TemplatedControl
     private void UpdateState()
     {
         var previous = _state;
-        _state = _refresher?.State ?? RefresherState.Inactive;
+        // Ionic's rules for these states that show anything are md's native refresher's; the legacy refresher, which md would use
+        // otherwise, isn't here, and it sits behind the content.
+        _state = _refresher is { IsNative: true } refresher ? refresher.State : RefresherState.Inactive;
         PseudoClasses.Set(":pulling", _state == RefresherState.Pulling);
         PseudoClasses.Set(":ready", _state == RefresherState.Ready);
         PseudoClasses.Set(":refreshing", _state == RefresherState.Refreshing);
@@ -253,7 +255,7 @@ public class AvonicRefresherContent : TemplatedControl
     /// <summary>Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority.</summary>
     internal void ApplyPull(RefresherPullFrame frame)
     {
-        ClearPull();
+        ClearAnimated();
         if (_snapBack is null)
         {
             Animate(_pullingIcon, RenderTransformProperty, new MatrixTransform(frame.IconTransform));
@@ -272,12 +274,7 @@ public class AvonicRefresherContent : TemplatedControl
     /// <summary>The pulling animation's <c>destroy()</c>: its values go, and the parts are as the styles leave them.</summary>
     internal void ClearPull()
     {
-        foreach (var value in _animated)
-        {
-            value.Dispose();
-        }
-
-        _animated.Clear();
+        ClearAnimated();
         if (_pullingCircle is not null)
         {
             _pullingCircle.Dash = RefresherPullFrame.BaseCircleDash;
@@ -300,6 +297,16 @@ public class AvonicRefresherContent : TemplatedControl
     {
         _snapBack?.Dispose();
         _snapBack = null;
+    }
+
+    private void ClearAnimated()
+    {
+        foreach (var value in _animated)
+        {
+            value.Dispose();
+        }
+
+        _animated.Clear();
     }
 
     private void Animate(Control? part, AvaloniaProperty property, object value)
