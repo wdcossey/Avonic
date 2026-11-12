@@ -122,6 +122,21 @@ public class AvonicItemTests
 
     // ── Behaviours 1, 2: what Button turns on ────────────────────────────────────────────────
 
+    // ion-activatable and ion-focusable are behaviour at style priority, bound before any style, so that an app's plain style
+    // wins when button turns on after it.
+    [AvaloniaFact]
+    public void B1_An_Apps_Style_For_Activatable_And_FocusVisible_Survives_Button_Turning_On_After_It()
+    {
+        var item = new AvonicItem { Content = "x" };
+        using var scene = Scene.Styled(item, Scene.AppStyle<AvonicItem>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicItem>(FocusVisible.IsEnabledProperty, false));
+
+        item.Button = true;
+
+        Assert.False(Activatable.GetIsEnabled(item));
+        Assert.False(FocusVisible.GetIsEnabled(item));
+    }
+
     [AvaloniaFact]
     public void B1_Button_Is_Activatable_With_A_Ripple()
     {

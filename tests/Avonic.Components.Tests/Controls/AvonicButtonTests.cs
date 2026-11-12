@@ -188,6 +188,18 @@ public class AvonicButtonTests
 
     // ── Behaviour 1: a tap clicks ────────────────────────────────────────────────────────────
 
+    // ion-activatable and ion-focusable are behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void B1_An_Apps_Style_For_Activatable_And_FocusVisible_Wins()
+    {
+        var button = new AvonicButton { Content = "x" };
+        using var scene = Scene.Styled(button, Scene.AppStyle<AvonicButton>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicButton>(FocusVisible.IsEnabledProperty, false));
+
+        Assert.False(Activatable.GetIsEnabled(button));
+        Assert.False(FocusVisible.GetIsEnabled(button));
+    }
+
     [AvaloniaFact]
     public void B1_A_Tap_Clicks_On_Release()
     {

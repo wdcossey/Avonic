@@ -69,9 +69,9 @@ public class AvonicTabButton : ItemsControl
 
     public AvonicTabButton()
     {
-        // ion-activatable and ion-focusable, always.
-        Activatable.SetIsEnabled(this, true);
-        FocusVisible.SetIsEnabled(this, true);
+        // ion-activatable and ion-focusable, always. At style priority, here, before any style, so that an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
+        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
 
         // The host's onClick, which the anchor's click reaches. No keys: the host's onKeyUp takes Enter and Space.
         _ = new NativeButton(this, _ => SelectTab(), () => false, () => { });

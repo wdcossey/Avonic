@@ -4,6 +4,8 @@ using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Data;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -33,6 +35,13 @@ public sealed class RangeKnobHandle : Panel
     {
         // tabindex="0", unless disabled, which Avalonia already leaves out.
         FocusableProperty.OverrideDefaultValue<RangeKnobHandle>(true);
+    }
+
+    public RangeKnobHandle()
+    {
+        // ion-activatable: tap-click's :activated, and :ion-hover. At style priority, here, before any style, so that an app's
+        // style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
     }
 
     public RangeKnob Knob

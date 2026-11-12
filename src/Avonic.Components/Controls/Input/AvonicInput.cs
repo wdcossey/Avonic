@@ -207,10 +207,6 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     private string? _focusedValue;
     private string? _counterText;
 
-    // required on the native input, as aria-required, at style priority, so that an app's own value on it wins.
-    private readonly StyleValue<bool> _required = new();
-    private IDisposable? _requiredBinding;
-
     static AvonicInput()
     {
         // The host isn't a tab stop: the native input inside it is.
@@ -499,15 +495,12 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     {
         base.OnApplyTemplate(e);
 
-        _requiredBinding?.Dispose();
-        _requiredBinding = null;
         _field.Attach(e.NameScope.Find<TextBox>("PART_NativeInput"));
         _label.Attach(e.NameScope.Find<Control>("PART_Wrapper"), e.NameScope.Find<ContentPresenter>("PART_LabelContent"));
         _clearButton = e.NameScope.Find<Control>("PART_ClearButton");
 
-        if (_field.Native is { } native)
+        if (_field.Native is not null)
         {
-            _requiredBinding = native.Bind(AutomationProperties.IsRequiredForFormProperty, _required, BindingPriority.Style);
             UpdateNative();
             UpdateWidth();
             _field.Sync();
@@ -541,7 +534,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     {
         if (_field.Native is InputNativeInput native)
         {
-            native.SizesToCharacters = _item is not null && (Parent as StyledElement)?.Name is "PART_Start" or "PART_End";
+            native.SizesToCharacters = LabelledTextField.InItemStartOrEndSlot(this, _item);
         }
     }
 
@@ -597,8 +590,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
         }
         else if (change.Property == RequiredProperty)
         {
-            // required on the <input>: aria-required to a screen reader. Form validation isn't here.
-            _required.Set(change.GetNewValue<bool>());
+            UpdateAutomation();
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
                  || change.Property == IsEnabledProperty || change.Property == StartContentProperty
@@ -763,12 +755,12 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────
 
-    /// <summary>The native input's <c>aria-labelledby</c> and <c>aria-describedby</c>.</summary>
+    /// <summary>The native input's <c>aria-labelledby</c>, <c>aria-describedby</c> and <c>aria-required</c>.</summary>
     private void UpdateAutomation()
     {
         if (_field.Native is { } native)
         {
-            _label.UpdateAutomation(native, Label, LabelContent, HelperText, ErrorText);
+            _label.UpdateAutomation(native, Label, LabelContent, HelperText, ErrorText, Required);
         }
     }
 }

@@ -31,7 +31,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [x] | `autofocus` | `Autofocus` | Focuses the field when it's first loaded |
 | [x] | `clearOnEdit` | `ClearOnEdit` | The first key after focus, Enter included, clears the value |
 | [x] | `color` | `Color` | The focused highlight |
-| [x] | `cols` | `Cols` (`int?`) | Without `AutoGrow`, the host is as wide as its content |
+| [x] | `cols` | `Cols` (`int?`) | Without `AutoGrow`, the host is as wide as its content; in an item's start or end slot too, with 20 columns when null |
 | [x] | `counter` | `Counter` | With `Maxlength` |
 | [x] | `counterFormatter` | `CounterFormatter` (`Func<int, int, string>?`) | |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | Delays `IonInput` |
@@ -107,9 +107,11 @@ Each has a test in `AvonicTextareaTests`, named after its number in [PLAN.md](PL
 - `ClearOnEdit` clears on the first key that edits, Enter included, once per focus.
 - A click on the label focuses the field; in an item, so does a tap on the item's padding.
 - `Rows`, `AutoGrow`, `Cols` and `Wrap` size the field as Chromium sizes a `<textarea>`: 19 px a line for 16 px Roboto.
+- In an item's start or end slot it's `width: auto`, as wide as 20 columns (164 at 16 px Roboto), or `Cols`, whatever its value.
 - The five label placements, the floating label, the highlight, the solid and outline looks, the notch, round shapes, helper
   and error text, the counter, disabled and read-only, all measured against Chromium.
-- The native textarea is named by the label and described by the helper or error text.
+- The native textarea is named by the label and described by the helper or error text, at style priority, so an app's style
+  for the field wins.
 
 ## Extensions
 

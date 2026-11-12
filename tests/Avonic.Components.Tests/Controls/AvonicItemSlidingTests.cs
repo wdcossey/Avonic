@@ -1053,6 +1053,17 @@ public class AvonicItemSlidingTests
         Assert.Equal(1, commands);
     }
 
+    // ion-activatable is behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void O06_An_Apps_Style_For_Activatable_Wins()
+    {
+        var option = new AvonicItemOption { Content = "Delete" };
+        using var scene = Scene.Styled(option,
+            Scene.AppStyle<AvonicItemOption>(Avonic.Components.Behaviors.Activatable.IsEnabledProperty, false));
+
+        Assert.False(Avonic.Components.Behaviors.Activatable.GetIsEnabled(option));
+    }
+
     [AvaloniaFact]
     public void O07_A_Disabled_Option_Takes_No_Click_And_No_Focus_And_Its_Content_Fades() => InstalledTheme.Run(_ =>
     {

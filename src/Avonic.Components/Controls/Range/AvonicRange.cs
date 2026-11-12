@@ -392,8 +392,7 @@ public class AvonicRange : TemplatedControl, IItemControl
         {
             if (handle is not null)
             {
-                // ion-activatable: tap-click's :activated, and :ion-hover.
-                Activatable.SetIsEnabled(handle, true);
+                // ion-activatable comes from the handle's own constructor, before its styles.
                 handle.KeyDown += OnKnobKeyDown;
                 handle.GotFocus += OnKnobGotFocus;
                 handle.LostFocus += OnKnobLostFocus;

@@ -1211,6 +1211,18 @@ public class AvonicRangeTests
 
     // ── 23: host classes ─────────────────────────────────────────────────────────────────────
 
+    // Each knob's ion-activatable is behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void R23_An_Apps_Style_For_The_Knobs_Activatable_Wins()
+    {
+        var range = new AvonicRange { DualKnobs = true };
+        using var scene = Scene.Styled(new StackPanel { Children = { range } },
+            Scene.AppStyle<RangeKnobHandle>(Avonic.Components.Behaviors.Activatable.IsEnabledProperty, false));
+
+        Assert.False(Avonic.Components.Behaviors.Activatable.GetIsEnabled(HandleA(range)));
+        Assert.False(Avonic.Components.Behaviors.Activatable.GetIsEnabled(HandleB(range)));
+    }
+
     [AvaloniaFact]
     public void R23_The_Host_And_Knob_Classes_Follow_Ionics()
     {

@@ -286,6 +286,18 @@ public class AvonicFabButtonTests
         Assert.True(button.IsFocused);
     }
 
+    // ion-activatable and ion-focusable are behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void B5_An_Apps_Style_For_Activatable_And_FocusVisible_Wins()
+    {
+        var button = new AvonicFabButton();
+        using var scene = Scene.Styled(button, Scene.AppStyle<AvonicFabButton>(Activatable.IsEnabledProperty, false),
+            Scene.AppStyle<AvonicFabButton>(FocusVisible.IsEnabledProperty, false));
+
+        Assert.False(Activatable.GetIsEnabled(button));
+        Assert.False(FocusVisible.GetIsEnabled(button));
+    }
+
     // ── B6: IonFocus and IonBlur ─────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

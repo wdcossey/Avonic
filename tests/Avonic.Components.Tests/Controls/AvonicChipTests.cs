@@ -414,6 +414,16 @@ public class AvonicChipTests
 
     // ── Behaviour 7: activatable, with a ripple ──────────────────────────────────────────────
 
+    // ion-activatable is behaviour at style priority, given before any style, so that an app's plain style wins.
+    [AvaloniaFact]
+    public void B7_An_Apps_Style_For_Activatable_Wins()
+    {
+        var chip = Bare();
+        using var scene = Scene.Styled(chip, Scene.AppStyle<AvonicChip>(Activatable.IsEnabledProperty, false));
+
+        Assert.False(Activatable.GetIsEnabled(chip));
+    }
+
     [AvaloniaFact]
     public void B7_A_Press_Activates_After_100ms_With_A_Ripple()
     {

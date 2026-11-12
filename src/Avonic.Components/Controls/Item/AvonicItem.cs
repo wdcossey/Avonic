@@ -222,6 +222,8 @@ public class AvonicItem : TemplatedControl, IItemHost
     private bool _forwarded;
     private readonly StyleValue<bool> _focusable = new();
     private readonly StyleValue<bool> _noInput = new();
+    private readonly StyleValue<bool> _activatable = new();
+    private readonly StyleValue<bool> _focusVisible = new();
 
     public AvonicItem()
     {
@@ -235,6 +237,8 @@ public class AvonicItem : TemplatedControl, IItemHost
         // value wins, bound once so that it still wins when the state turns on after it.
         Bind(FocusableProperty, _focusable, BindingPriority.Style);
         Bind(IsHitTestVisibleProperty, _noInput, BindingPriority.Style);
+        Bind(Activatable.IsEnabledProperty, _activatable, BindingPriority.Style);
+        Bind(FocusVisible.IsEnabledProperty, _focusVisible, BindingPriority.Style);
         UpdateLines();
         UpdateInteractivity();
     }
@@ -397,8 +401,8 @@ public class AvonicItem : TemplatedControl, IItemHost
         PseudoClasses.Set(":button", clickable);
         PseudoClasses.Set(":ion-activatable", canActivate);
         PseudoClasses.Set(":item-multiple-inputs", _multipleInputs);
-        Activatable.SetIsEnabled(this, canActivate);
-        FocusVisible.SetIsEnabled(this, canActivate || focusableChild);
+        _activatable.SetWhen(canActivate, true);
+        _focusVisible.SetWhen(canActivate || focusableChild, true);
 
         // A <button> takes focus, and a cover's control takes it itself.
         _focusable.SetWhen(clickable, true);

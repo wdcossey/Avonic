@@ -8,6 +8,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -294,9 +295,9 @@ public class AvonicButton : TemplatedControl, IItemControl
     {
         _native = new NativeButton(this, _ => RaiseClick(), () => true, UpdateIsEffectivelyEnabled);
 
-        // ion-activatable and ion-focusable, always.
-        Activatable.SetIsEnabled(this, true);
-        FocusVisible.SetIsEnabled(this, true);
+        // ion-activatable and ion-focusable, always. At style priority, here, before any style, so that an app's style wins.
+        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
+        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
     }
 
     /// <summary>The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>

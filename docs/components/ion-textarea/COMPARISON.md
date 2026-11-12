@@ -32,6 +32,12 @@ set, `rows` 1, 2 and 4, `cols` 10, 20 and 40 with and without `autoGrow`, `wrap=
 shape and a slotted button. The numbers are in [PLAN.md](PLAN.md) and the tests. The colours of focus, hover, validity and RTL
 come from the same rules as `ion-input`'s, word for word in `textarea.md.css`, and their tests reuse the input's measurements.
 
+For #155, `tools/ionic-ref/boxes.js`, run in a mobile context (`isMobile: true, hasTouch: true`, as `render.js` has; without it
+the scroll bar's room is 15, not 4), measured textareas in items' start and end slots: the default, a value, a placeholder, a
+label, `cols="10"`, `auto-grow` with a short line, with `cols="10"` and with a long line, a stacked label, one beside a long
+label and one in each slot; and `cols` 3, 7, 10, 33 at 12.5, 13, 13.5, 14.3, 15, 16, 16.6, 17 and 19.2 px, and 20 at 16 sizes
+from 12 to 32 px.
+
 ## Frames
 
 Ionic on the left, Avonic on the right:
@@ -61,7 +67,8 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 | 9 | An item's padding tap focuses the textarea | Match |
 | 10 | Rows: 45, 64, 102 for 1, 2, 4; a longer value scrolls inside | Match to 0.5 px |
 | 11 | `AutoGrow`: 45, 64, 83, back to 64, 102 when set in code; never under `Rows` | Match |
-| 12 | `Cols`: 84, 164, 324; full width with `AutoGrow` | Match in a phone viewport. See the gaps for other platforms |
+| 12 | `Cols`: 84, 164, 324; full width with `AutoGrow`; 133 for 20 columns of 13 px, and 10 more sizes and counts (#155) | Match in a phone viewport. See the gaps for other platforms |
+| 12a | In an item's start or end slot, `width: auto` (#155): 164 (20 columns) whatever the value or placeholder, the label's 58.52 more, `cols` 10 84; with `AutoGrow` 160 (no scroll bar's room), 80 for 10 columns, and a long line 342, what's left; an end one gives way to a start one, 162 | Match |
 | 13 | `Wrap="Off"`; line breaks as line feeds; an unfocused field at its first lines | Match: one line, scrolling sideways. A pasted CR LF or CR becomes LF, with the caret after it. A value set in code leaves an unfocused field at its first lines, though the caret is at the end |
 | 14 | Row placements: the label 45 high at the top, its text 18 down, 16 from the field; end; fixed 100; at most 200 | Match to 0.8 px |
 | 15 | Column placements: 75 high, the label on the field and raised, the field 8 under it (12 with the outline, 58 high); hidden until focus or a value | Match to 0.8 px |
@@ -81,10 +88,12 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 
 ## Deliberate differences and gaps
 
-- **`cols` on other platforms.** The width is `cols` × the `x` glyph's advance, rounded, + 4, which is what Chromium on Windows
-  does in a phone viewport (it takes `x` when the font reports no average width, and keeps 4 px for a mobile overlay scroll bar;
-  15 in a desktop context). Chromium on Android reads the font's own average width (Roboto's is 9.07 px at 16 px), so a real
-  phone would be wider. Not measured on a phone.
+- **`cols` on other platforms.** The width is `ceil(cols × c) + 4`, where `c` is the `x` glyph's advance, or that rounded when
+  it rounds up, which is what Chromium on Windows does in a phone viewport (it takes `x` when the font reports no average width,
+  and keeps 4 px for a mobile overlay scroll bar; 15 in a desktop context). The rounding is fitted, not read from Chromium's
+  source: it matches all 36 widths measured at 9 sizes (12.5 to 19.2 px) of 3, 7, 10 and 33 columns, and 16 sizes (12 to 32 px)
+  of 20, where rounding `c` always, as before #155, was 9 px narrow at 13 px. Chromium on Android reads the font's own average
+  width (Roboto's is 9.07 px at 16 px), so a real phone would be wider. Not measured on a phone.
 - **A click on the label while the field has focus** keeps focus; Chromium blurs and focuses again, as for the input.
 - **An icon-only `ion-button` in a slot**: `textarea.md.css` makes it 40 px round with 8 px padding; it keeps its own look, as in
   `ion-input` (Chromium's slotted button in the reference is 40 × 40; Avonic's is the default button's size).
@@ -92,7 +101,6 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
   has no specificity, so the app's key wins at rest, where Ionic's host-class rule would beat `ion-textarea { … }`.
 - **`:host-context(ion-item) { align-self: baseline }`** isn't applied: the textarea sits in an item as any child does. Alone in
   an item, as measured, the box is the same.
-- **`:host-context(ion-item)[slot=start|end] { width: auto }`**: a textarea in an item's start or end slot still stretches.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto); a row's label text is 18.75 high, not 19, as the label
   isn't the field and keeps Avalonia's own line height. Neither changes a box above.
