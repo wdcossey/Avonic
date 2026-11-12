@@ -32,8 +32,9 @@ public class AvonicTabButton : ItemsControl
         AvaloniaProperty.Register<AvonicTabButton, string?>(nameof(Tab));
 
     /// <summary>
-    /// Ionic <c>layout</c>: where the icon goes, or what's hidden. <see cref="TabButtonLayout.IconTop"/> by default, Ionic's fallback
-    /// for its <c>tabButtonLayout</c> config.
+    /// Ionic <c>layout</c>: where the icon goes, or what's hidden. Left unset, it becomes <see cref="AvonicConfig.TabButtonLayout"/>,
+    /// else <see cref="TabButtonLayout.IconTop"/>, Ionic's fallback, when it's first attached, as Ionic sets it in
+    /// <c>componentWillLoad</c>.
     /// </summary>
     public static readonly StyledProperty<TabButtonLayout> LayoutProperty =
         AvaloniaProperty.Register<AvonicTabButton, TabButtonLayout>(nameof(Layout));
@@ -52,6 +53,7 @@ public class AvonicTabButton : ItemsControl
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private AvonicTabBar? _bar;
+    private bool _willLoad;
 
     static AvonicTabButton()
     {
@@ -137,6 +139,22 @@ public class AvonicTabButton : ItemsControl
 
         UpdateChildClasses();
         UpdateClasses();
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        if (!_willLoad)
+        {
+            // componentWillLoad, once: if (this.layout === undefined) this.layout = config.get('tabButtonLayout', 'icon-top').
+            // Ionic's fallback is the property's default, so only a value in the config is written.
+            _willLoad = true;
+            if (!IsSet(LayoutProperty) && AvonicConfig.TabButtonLayout is { } layout)
+            {
+                SetCurrentValue(LayoutProperty, layout);
+            }
+        }
     }
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)

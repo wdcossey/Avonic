@@ -772,4 +772,36 @@ public class AvonicRefresherTests
         page.Drag(8 + 40).Wait(16);
         Assert.Equal(starts + 1, page.Names.Count(n => n == "ionStart"));
     }
+
+    // The native icons' border: 1px solid var(ion-color-step-200, var(ion-background-color-step-200, #ececec)) and background:
+    // var(ion-color-step-250, var(ion-background-color-step-250, #ffffff)). Light leaves the steps unset, and dark.always.css
+    // sets them: measured rgb(65, 65, 65) and rgb(77, 77, 77).
+    [AvaloniaFact]
+    public void B23_The_Icons_Border_And_Background_Are_The_Literals_And_In_The_Dark_Palette_Steps_200_And_250() => InstalledTheme.Run(_ =>
+    {
+        static Color Solid(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
+
+        void AssertIcons(AvonicRefresherContent content, string border, string background)
+        {
+            foreach (var name in new[] { "PART_PullingIcon", "PART_RefreshingIcon" })
+            {
+                var icon = content.GetVisualDescendants().OfType<Border>().First(b => b.Name == name);
+                Assert.Equal(Color.Parse(border), Solid(icon.BorderBrush));
+                Assert.Equal(Color.Parse(background), Solid(icon.Background));
+            }
+        }
+
+        var light = new AvonicRefresherContent();
+        using (new Scene(light))
+        {
+            AssertIcons(light, "#ECECEC", "#FFFFFF");
+        }
+
+        ToolbarTest.InDark(() =>
+        {
+            var dark = new AvonicRefresherContent();
+            using var scene = new Scene(dark);
+            AssertIcons(dark, "#414141", "#4D4D4D");
+        });
+    });
 }

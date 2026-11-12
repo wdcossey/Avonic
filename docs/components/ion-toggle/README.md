@@ -24,7 +24,7 @@ and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 | [x] | `checked` | `Checked` | Two-way by default |
 | [x] | `color` | `Color` | The checked track and handle. See the [colour system](../../infra/color-system/README.md) |
 | [x] | `disabled` | `IsEnabled` | 0.38, as a group, and a tap goes to what's behind it. A disabled ancestor doesn't add it |
-| [x] | `enableOnOffLabels` | `EnableOnOffLabels` | `false` by default: Ionic's `toggleOnOffLabels` config isn't in `AvonicConfig` yet |
+| [x] | `enableOnOffLabels` | `EnableOnOffLabels` | Unset, `AvonicConfig.ToggleOnOffLabels` (`false` by default) when the toggle is made, at style priority, so an app's value wins |
 | [x] | `errorText` | `ErrorText` | Shown while the toggle has both style classes `ion-touched` and `ion-invalid` |
 | [x] | `helperText` | `HelperText` | Shown otherwise |
 | [x] | `justify` | `Justify` (`ToggleJustify?`) | `End`, `SpaceBetween`, `Start`. Set, the toggle fills the width |

@@ -68,7 +68,10 @@ public class AvonicToggle : ContentControl, IItemControl
     public static readonly StyledProperty<string?> ValueProperty =
         AvaloniaProperty.Register<AvonicToggle, string?>(nameof(Value), "on");
 
-    /// <summary>Ionic <c>enableOnOffLabels</c>: an icon in the handle that says on or off.</summary>
+    /// <summary>
+    /// Ionic <c>enableOnOffLabels</c>: an icon in the handle that says on or off. Unset, it's
+    /// <see cref="AvonicConfig.ToggleOnOffLabels"/> when the toggle is made.
+    /// </summary>
     public static readonly StyledProperty<bool> EnableOnOffLabelsProperty =
         AvaloniaProperty.Register<AvonicToggle, bool>(nameof(EnableOnOffLabels));
 
@@ -154,6 +157,13 @@ public class AvonicToggle : ContentControl, IItemControl
     {
         // The host's onClick: the plain DOM click on release of every press, with no keys, as it's a <div>.
         _ = new NativeButton(this, OnNativeClick, () => false, UpdateIsEffectivelyEnabled);
+
+        // enableOnOffLabels' default, config.get('toggleOnOffLabels'), read once here as Ionic reads it in the constructor. At
+        // style priority, and before any style, so that an app's value, set or in a style, wins, as an attribute does in Ionic.
+        if (AvonicConfig.ToggleOnOffLabels)
+        {
+            SetValue(EnableOnOffLabelsProperty, true, BindingPriority.Style);
+        }
 
         UpdateClasses();
     }

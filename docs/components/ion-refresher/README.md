@@ -79,6 +79,9 @@ refresher starts 655 ms in (its internal `AnimationDelay`, Ionic's `animation-de
 | `Avonic.Refresher.Md.NativeIconBackgroundBrush` | `#FFFFFF` | `var(--ion-color-step-250, var(--ion-background-color-step-250, #ffffff))` |
 | `Avonic.Refresher.Md.NativeIconBoxShadow` | `0 1 9.4 0 #1A000000` | `0px 1px 6px rgba(0, 0, 0, 0.1)` |
 
+Ionic's dark palette sets the step colours they read, so `Tokens/Palettes/Dark.axaml` gives the two brushes
+`Avonic.BackgroundColorStep200` and `250`: `#414141` and `#4D4D4D`, as measured with `dark.always.css`.
+
 The spinners and the arrow use `Avonic.Color.PrimaryBrush`.
 
 ## Extensions
@@ -93,6 +96,4 @@ None.
   [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - A custom scroll target, an element with `ion-content-scroll-host` inside the content, isn't looked for: the content's own scroller
   is the scroll element. Ionic's `connectedCallback` takes such an element first.
-- Ionic's dark palette sets the step colours the icon's border and background read; `Tokens/Palettes/Dark.axaml` doesn't follow
-  them yet.
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.
