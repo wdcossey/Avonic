@@ -740,6 +740,19 @@ public class AvonicItemSlidingTests
         Assert.True(content.ScrollY);
     }
 
+    [AvaloniaFact]
+    public void S20_Options_Removed_Later_Are_Forgotten()
+    {
+        using var f = Make(start: false);
+        f.Sliding.Items.Remove(f.End);
+        GestureTests.Render();
+
+        f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32);
+        f.At(48);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+        Assert.Equal(0, f.ItemX);
+    }
+
     // ── Options and option ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -963,17 +976,18 @@ public class AvonicItemSlidingTests
     });
 
     [AvaloniaFact]
-    public void A_Style_From_The_App_Wins_Over_The_Options_Being_Shown()
+    public void A_Plain_Style_From_The_App_Wins_Over_The_Options_Being_Shown()
     {
-        var style = new Style(x => x.OfType<AvonicItemOptions>().Class("app-hidden")) { Setters = { new Setter(Visual.IsVisibleProperty, false) } };
+        // No activator: a plain type rule, which would lose to a value bound after it at the same priority. In place before the
+        // window shows, as an app's styles are.
+        var style = new Style(x => x.OfType<AvonicItemOptions>()) { Setters = { new Setter(Visual.IsVisibleProperty, false) } };
         Application.Current!.Styles.Add(style);
         try
         {
             using var f = Make();
-            f.End!.Classes.Add("app-hidden");
-            f.Sliding.Open(ItemOptionsSide.End);
-            f.At(1000);
-            Assert.False(f.End.IsVisible);
+            f.Finger().Down(300, Y, 0).Move(290, Y, 16).Move(200, Y, 32);
+            f.At(48);
+            Assert.False(f.End!.IsVisible);
         }
         finally
         {
