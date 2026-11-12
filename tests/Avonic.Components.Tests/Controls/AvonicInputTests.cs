@@ -5,6 +5,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Input.TextInput;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -1495,6 +1496,18 @@ public class AvonicInputTests
         Assert.Equal("", input.Value);
         Assert.Empty(log.Take());
         Assert.Equal("0 / 0", input.CounterText);
+
+        // Nor a paste, which Avalonia's text box puts in with no text input.
+        var clipboard = scene.Window.Clipboard!;
+        clipboard.SetTextAsync("b").GetAwaiter().GetResult();
+        Settle();
+        scene.Window.KeyPressQwerty(PhysicalKey.V, RawInputModifiers.Control);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.V, RawInputModifiers.Control);
+        Settle();
+        clipboard.ClearAsync().GetAwaiter().GetResult();
+
+        Assert.Equal("", input.Value);
+        Assert.Empty(log.Take());
     }
 
     [AvaloniaFact]
