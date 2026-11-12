@@ -33,6 +33,12 @@ Sticky, scrolled 300: the second group's divider pushes it out, 4 above the top.
 |---|---|
 | ![](compare/ionic-sticky-300.png) | ![](compare/avonic-sticky-300.png) |
 
+In a flat `AvonicList` with a `VirtualizingStackPanel`, 1,000 rows, scrolled 15,000: the panel has recycled the divider's row,
+and the list draws it, stuck (`D18_In_A_Flat_Virtualising_Panel_It_Stays_Stuck_While_Its_Section_Scrolls`, headless, 390 by
+200). Ionic has no virtualising panel; in CSS it stays stuck to the end of the list, as in the frames above.
+
+![](compare/avonic-virtualised.png)
+
 **Match.** Text is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)). A row with a label is 13 + its line + 10 + 1,
 and a line of 14 px text is 16.4, which Chromium rounds to 16, so such a row is 40.5 here against 40.
 
