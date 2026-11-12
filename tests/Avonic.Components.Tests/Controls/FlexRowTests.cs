@@ -652,6 +652,42 @@ public class FlexRowTests
     }
 
     [AvaloniaFact]
+    public void A_Basis_Is_Held_Between_Min_And_Max_Width()
+    {
+        Border small = Basis(10, 30), big = Basis(100, 0);
+        big.MaxWidth = 60;
+        using var scene = InRow(300, out _, small, big);
+
+        Assert.Equal(30, small.Bounds.Width);
+        Assert.Equal(60, big.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Basis_Shrinks_In_Proportion_To_What_Is_Inside_Its_Padding()
+    {
+        // Two of 100, one with 50 of it padding: CSS shrinks each in proportion to its inner size, 50 : 100.
+        var padded = Basis(100, 0);
+        padded.Padding = new Thickness(25, 0);
+        var plain = Basis(100, 0);
+        using var scene = InRow(170, out _, padded, plain);
+
+        Assert.Equal(90, padded.Bounds.Width);
+        Assert.Equal(80, plain.Bounds.Width);
+    }
+
+    [AvaloniaFact]
+    public void A_Child_With_A_Basis_Is_Laid_Out_At_Its_Width()
+    {
+        // Text with a basis narrower than one line wraps there, and the row is as tall as it is then.
+        var text = Numbered(40);
+        FlexRow.SetFlexBasis(text, 30);
+        using var scene = InRow(300, out var row, text);
+
+        Assert.Equal(30, text.Bounds.Width);
+        Assert.True(row.Bounds.Height > 40, $"{row.Bounds.Height}");
+    }
+
+    [AvaloniaFact]
     public void A_Change_Of_Basis_Gap_Or_Padding_Lays_It_Out_Again()
     {
         var box = Basis(48, 20);
