@@ -51,6 +51,21 @@ public class AvonicItemSliding : ItemsControl
     /// <summary>Ionic's module-level <c>openSlidingItem</c>: one per process here, as <see cref="GestureController"/> is.</summary>
     private static AvonicItemSliding? s_openSlidingItem;
 
+    // ── Properties ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Ionic <c>disabled</c>: true turns the drag off, and nothing else. Not <c>IsEnabled</c>, which would disable and fade the
+    /// item and the options too, where Ionic's item stays enabled and clickable.
+    /// </summary>
+    public static readonly StyledProperty<bool> DisabledProperty =
+        AvaloniaProperty.Register<AvonicItemSliding, bool>(nameof(Disabled));
+
+    public bool Disabled
+    {
+        get => GetValue(DisabledProperty);
+        set => SetValue(DisabledProperty, value);
+    }
+
     // ── Events ───────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Ionic <c>ionDrag</c>: the item moved, by a drag or to where it rests. Not raised for 0, when it closes.</summary>
@@ -256,7 +271,7 @@ public class AvonicItemSliding : ItemsControl
             OnMove = OnMove,
             OnEnd = OnEnd,
         });
-        _gesture.Enable(IsEnabled);
+        _gesture.Enable(GestureEnabled);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -280,10 +295,10 @@ public class AvonicItemSliding : ItemsControl
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == IsEnabledProperty)
+        if (change.Property == DisabledProperty || change.Property == IsEffectivelyEnabledProperty)
         {
-            // disabledChanged
-            _gesture?.Enable(change.GetNewValue<bool>());
+            // disabledChanged; and Avalonia's IsEnabled, which stops the input a drag needs, so the drag ends as it does here.
+            _gesture?.Enable(GestureEnabled);
         }
         else if (change.Property == FlowDirectionProperty)
         {
@@ -294,6 +309,12 @@ public class AvonicItemSliding : ItemsControl
 
     /// <summary>Ionic's <c>MutationObserver</c> on the subtree: any change of the children, here or in an options, finds them again.</summary>
     internal void OptionsChanged() => UpdateOptions();
+
+    /// <summary>
+    /// <c>!this.disabled</c>, and Avalonia's <c>IsEnabled</c> on this or an ancestor, as a disabled control takes no input: a drag
+    /// it was in ends, rather than waiting on moves that don't come.
+    /// </summary>
+    private bool GestureEnabled => !Disabled && IsEffectivelyEnabled;
 
     /// <summary><c>el.querySelector('ion-item')</c>: the first item among the light DOM's descendants, in document order.</summary>
     private AvonicItem? FindItem() => this.GetLogicalDescendants().OfType<AvonicItem>().FirstOrDefault();
@@ -544,7 +565,7 @@ public class AvonicItemSliding : ItemsControl
                 _tmr = null;
                 _closing = false;
                 SetState(SlidingState.Disabled);
-                _gesture?.Enable(IsEnabled);
+                _gesture?.Enable(GestureEnabled);
             }, CloseDelay);
             s_openSlidingItem = null;
             UpdateClasses();
