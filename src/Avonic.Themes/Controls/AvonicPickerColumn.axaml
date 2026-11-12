@@ -1,0 +1,83 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicPickerColumn Value="2" PrefixContent="Pre" SuffixContent="Suffix">
+            <c:AvonicPickerColumnOption Value="1" Content="1" />
+            <c:AvonicPickerColumnOption Value="2" Content="2" />
+            <c:AvonicPickerColumnOption Value="3" Content="3" />
+        </c:AvonicPickerColumn>
+    </Design.PreviewWith>
+
+    <!-- picker-column.css: 200 high, 22 px text, centred (text-align: center), the prefix, the options and the suffix in a row in
+         the middle. The scroller (.picker-opts) has 16 either side, at least 26 between, no more than 200 high, and three empty
+         34 px rows above and below the options. The prefix and suffix have 16 either side, are no wider than 200 (border-box,
+         measured), and keep to one line with an ellipsis. Focused, where a pointer hovers, the scroller has the colour's base at
+         0.2 behind it, and no outline. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPickerColumn}" TargetType="c:AvonicPickerColumn">
+        <Setter Property="Height" Value="200" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:PickerColumnPanel Background="Transparent" Padding="16,0" EmptyRowHeight="34" MinWidth="58" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,Auto,Auto" HorizontalAlignment="Center" Background="Transparent">
+                    <ContentPresenter Name="PART_Prefix"
+                                      Grid.Column="0"
+                                      Padding="16,0"
+                                      MaxWidth="200"
+                                      VerticalAlignment="Center"
+                                      TextBlock.TextWrapping="NoWrap"
+                                      TextBlock.TextTrimming="CharacterEllipsis"
+                                      IsVisible="{TemplateBinding PrefixContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      Content="{TemplateBinding PrefixContent}"
+                                      ContentTemplate="{TemplateBinding PrefixContentTemplate}" />
+                    <ScrollViewer Name="PART_Scroll"
+                                  Grid.Column="1"
+                                  MaxHeight="200"
+                                  Theme="{StaticResource AvonicPickerColumnScrollViewer}"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Hidden">
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </ScrollViewer>
+                    <ContentPresenter Name="PART_Suffix"
+                                      Grid.Column="2"
+                                      Padding="16,0"
+                                      MaxWidth="200"
+                                      VerticalAlignment="Center"
+                                      TextBlock.TextWrapping="NoWrap"
+                                      TextBlock.TextTrimming="CharacterEllipsis"
+                                      IsVisible="{TemplateBinding SuffixContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      Content="{TemplateBinding SuffixContent}"
+                                      ContentTemplate="{TemplateBinding SuffixContentTemplate}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- @media (any-hover: hover) { :host(:focus) .picker-opts { background: rgba(var(ion-color-base-rgb), 0.2) } } -->
+        <Style Selector="^:any-hover:focus /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="Background"
+                    Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self},
+                                    Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.2}" />
+        </Style>
+
+        <!-- picker.md.css: ::slotted(ion-picker-column:first-of-type) { text-align: start }, :last-of-type end, :only-child center. -->
+        <Style Selector="^:in-picker:nth-child(1)">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+        <Style Selector="^:in-picker:nth-last-child(1)">
+            <Setter Property="HorizontalContentAlignment" Value="Right" />
+        </Style>
+        <Style Selector="^:in-picker:nth-child(1):nth-last-child(1)">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
