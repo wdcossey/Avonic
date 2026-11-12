@@ -89,5 +89,8 @@ in the frame are asserted in `B21`.
 - **`autocomplete="one-time-code"`**: Avalonia 12's `TextInputOptions` has no such content type, so a phone's keyboard won't
   offer the code from a message on its own. It types it if the user picks it, which is the autofill path.
 - **`cursor: not-allowed`** when disabled.
+- **The paste is read asynchronously.** Avalonia's clipboard is read with `await`, where Chromium hands `onPaste` the text
+  with the event, so a key typed while a slow platform reads it lands first and the paste then replaces it. Headless reads it at
+  once, so this can't be shown in a test; Ionic has no guard for it, so none is added.
 - **A soft keyboard's Backspace on an empty box** isn't measured: Android sends Backspace as a key there, which this handles as a
   keyboard's, but it's not tried on a device.

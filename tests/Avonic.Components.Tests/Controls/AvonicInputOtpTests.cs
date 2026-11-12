@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Templates;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -189,6 +190,61 @@ public class AvonicInputOtpTests
         Assert.True(Separators(six)[4].IsVisible);
         Assert.Equal("AB", text.Value);
         Assert.Equal("A|B||", Shown(text));
+    }
+
+    private sealed class Model : System.ComponentModel.INotifyPropertyChanged
+    {
+        private string? _code;
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+        public string? Code
+        {
+            get => _code;
+            set
+            {
+                _code = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Code)));
+            }
+        }
+    }
+
+    [AvaloniaFact]
+    public void B01_A_Template_Applied_Before_Load_Still_Gets_The_Final_Length()
+    {
+        // An app's own template, applied before the control is on the page, then a length.
+        var otp = new AvonicInputOtp
+        {
+            Template = new FuncControlTemplate<AvonicInputOtp>((_, scope) =>
+                new InputOtpGroupPanel { Name = "PART_Group" }.RegisterInNameScope(scope)),
+        };
+        otp.ApplyTemplate();
+        otp.Length = 6;
+        otp.Value = "123456";
+
+        var (_, _, scene) = Stub(otp);
+        using var _ = scene;
+        Assert.Equal("1|2|3|4|5|6", Shown(otp));
+    }
+
+    [AvaloniaFact]
+    public void B01_A_Bound_Value_Gets_The_Rewritten_Value_Back()
+    {
+        var model = new Model { Code = "1a2" };
+        var otp = new AvonicInputOtp { DataContext = model };
+        otp.Bind(AvonicInputOtp.ValueProperty, new Avalonia.Data.Binding(nameof(Model.Code)));
+        var (_, _, scene) = Stub(otp);
+        using var _ = scene;
+        Settle();
+
+        Assert.Equal("12", otp.Value);
+        Assert.Equal("12", model.Code);
+
+        model.Code = "1b34567";
+        Settle();
+        Assert.Equal("134", otp.Value);
+        Assert.Equal("1|3|4|", Shown(otp));
+        Assert.Equal("134", model.Code);
     }
 
     // ── 2 to 5: typing ───────────────────────────────────────────────────────────────────────
@@ -507,8 +563,11 @@ public class AvonicInputOtpTests
         Settle();
         log.Take();
 
+        // With the box's character selected: input.value collapses the selection, so Backspace afterwards is Ionic's own.
+        Boxes(otp)[0].SelectAll();
         Paste(scene, "x1 2-3");
         Assert.Equal(["input:123"], log.Take());
+        Assert.All(Boxes(otp), box => Assert.Equal(box.SelectionStart, box.SelectionEnd));
         Assert.Equal("1|2|3|", Shown(otp));
         Assert.Equal(3, FocusedBox(otp));
 
@@ -555,6 +614,19 @@ public class AvonicInputOtpTests
         clock.At(20);
         Settle();
         Assert.Equal(2, FocusedBox(otp));
+
+        // Taken off the page and put back before the 20 ms: the focus it was waiting for doesn't come.
+        scene.Window.KeyTextInput("12");
+        Settle();
+        var panel = (StackPanel)otp.Parent!;
+        panel.Children.Remove(otp);
+        panel.Children.Insert(0, otp);
+        var other = panel.Children.OfType<TextBox>().Last();
+        other.Focus();
+        Settle();
+        clock.At(60);
+        Settle();
+        Assert.True(other.IsFocused);
     }
 
     // ── 13, 14: methods and the value in code ────────────────────────────────────────────────
@@ -640,6 +712,48 @@ public class AvonicInputOtpTests
         otp.Separators = "1,4";
         otp.Length = 4;
         Assert.Equal([true, false, false, false], Shown());
+    }
+
+    private sealed class WarningSink : Avalonia.Logging.ILogSink
+    {
+        public List<string> Messages { get; } = [];
+
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Warning;
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) => Messages.Add(messageTemplate);
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues) =>
+            Messages.Add(string.Join(" ", propertyValues));
+    }
+
+    [AvaloniaFact]
+    public void B15_Separators_Warn_As_Ionic_Does_With_The_Final_Length()
+    {
+        var sink = new WarningSink();
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            // Set before the length: read once, at load, with 6. No warning.
+            var (otp, _, scene) = Stub(new AvonicInputOtp { Separators = "5", Length = 6 });
+            using var _ = scene;
+            Assert.DoesNotContain(sink.Messages, m => m.Contains("separator"));
+
+            otp.Separators = "2,2";
+            Assert.Contains(sink.Messages, m => m.Contains("Duplicate separator positions"));
+            otp.Separators = "9";
+            Assert.Contains(sink.Messages, m => m.Contains("greater than the input length (6): 9"));
+
+            // JavaScript's \d is ASCII: an Arabic-Indic three isn't a number to Ionic.
+            sink.Messages.Clear();
+            otp.Separators = "\u0663";
+            Assert.Contains(sink.Messages, m => m.Contains("Invalid separators format"));
+            Assert.All(Separators(otp), separator => Assert.False(separator.IsVisible));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
     }
 
     // ── 16, 17: disabled, read-only, the native inputs ───────────────────────────────────────
@@ -976,7 +1090,7 @@ public class AvonicInputOtpTests
                 ["Avonic.InputOtp.Width"] = 30.0,
                 ["Avonic.InputOtp.Height"] = 36.0,
                 ["Avonic.InputOtp.MinWidth"] = 20.0,
-                ["Avonic.InputOtp.BorderRadius"] = "50%",
+                ["Avonic.InputOtp.BorderRadius"] = "25%",
                 ["Avonic.InputOtp.Background"] = Brushes.Yellow,
                 ["Avonic.InputOtp.PaddingTop"] = 4.0,
             },
@@ -987,8 +1101,12 @@ public class AvonicInputOtpTests
 
         Assert.Equal(30, box.Bounds.Width, 0.6);
         Assert.Equal(36, box.Bounds.Height, 0.6);
-        Assert.Equal(new CornerRadius(15, 15, 15, 15), box.CornerRadius);
+        // 25% of 30 across and 36 down: the smaller, 7.5.
+        Assert.Equal(new CornerRadius(7.5), box.CornerRadius);
         Assert.Equal(Colors.Yellow, BrushColor(box.Background));
         Assert.Equal(4 + 36 + 16, otp.Bounds.Height, 0.6);
+
+        // The box sits under the 4 px padding, not centred in the whole group.
+        Assert.Equal(4, Bounds(box, otp).Y, 0.6);
     });
 }

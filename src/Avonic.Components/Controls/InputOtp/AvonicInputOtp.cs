@@ -350,11 +350,20 @@ public class AvonicInputOtp : ContentControl
         if (!_loaded)
         {
             _loaded = true;
+            Render();
             ProcessSeparators();
             UpdateSeparators();
             InitializeValues();
             UpdateTabIndexes();
         }
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        // A pending autofill focus would take focus back to a control that has left the page.
+        _autofillFocus?.Dispose();
+        _autofillFocus = null;
+        base.OnDetachedFromVisualTree(e);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -589,6 +598,7 @@ public class AvonicInputOtp : ContentControl
         {
             box.Text = text;
             box.CaretIndex = text.Length;
+            box.ClearSelection();
         }
         finally
         {
@@ -694,7 +704,7 @@ public class AvonicInputOtp : ContentControl
         {
             values = Enumerable.Range(1, Math.Max(0, length - 1)).ToList();
         }
-        else if (!Regex.IsMatch(separators, @"^(\d+)(,\d+)*\z"))
+        else if (!Regex.IsMatch(separators, @"^([0-9]+)(,[0-9]+)*\z"))
         {
             Warn($"Invalid separators format. Expected a comma-separated list of numbers, an array of numbers, or \"all\". Received: {separators}");
             _parsedSeparators = [];
@@ -732,6 +742,22 @@ public class AvonicInputOtp : ContentControl
     }
 
     // ── Focus ────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary><c>hasFocus</c>, and its <c>has-focus</c> class on the host and every box, which is all a focus change touches.</summary>
+    private void SetHasFocus(bool on)
+    {
+        if (_hasFocus == on)
+        {
+            return;
+        }
+
+        _hasFocus = on;
+        PseudoClasses.Set(":has-focus", on);
+        foreach (var box in _boxes)
+        {
+            box.SetState(":has-focus", on);
+        }
+    }
 
     /// <summary><c>getFirstEmptyIndex</c>, or -1.</summary>
     private int GetFirstEmptyIndex()
@@ -800,8 +826,7 @@ public class AvonicInputOtp : ContentControl
             _focusedValue = Value;
         }
 
-        _hasFocus = true;
-        UpdateClasses();
+        SetHasFocus(true);
 
         var finalIndex = box.Index;
         if (!_isKeyboardNavigation)
@@ -827,9 +852,8 @@ public class AvonicInputOtp : ContentControl
             return;
         }
 
-        _hasFocus = false;
+        SetHasFocus(false);
         UpdateTabIndexes();
-        UpdateClasses();
         RaiseEvent(new RoutedEventArgs(IonBlurEvent, this));
         if (_focusedValue != Value)
         {
