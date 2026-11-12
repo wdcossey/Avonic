@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicItemOptions Height="48" Width="390">
+            <c:AvonicItemOption Content="Favorite" />
+            <c:AvonicItemOption Color="danger" Content="Delete" />
+        </c:AvonicItemOptions>
+    </Design.PreviewWith>
+
+    <!-- item-options.md.css. Where the options sit, how wide they are and when they show are ItemSlidingPanel's and
+         AvonicItemSliding's, as they're behaviour; this is only the line in a list. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemOptions}" TargetType="c:AvonicItemOptions">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:ItemOptionsPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <!-- .item-options-md: border-bottom: 0 solid var(ion-item-border-color) -->
+        <Setter Property="BorderBrush" Value="{DynamicResource Avonic.ItemBorderColorBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .list-md-lines-full .item-options-md, .list-md-lines-inset .item-options-md.item-options-end: 1px -->
+        <Style Selector="^:in-list-lines-full">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="^:in-list-lines-inset:options-end">
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

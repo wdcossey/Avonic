@@ -1,0 +1,23 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-item-sliding: structure only. ItemSlidingPanel lays out the item and the options as
+         item-sliding.css and item-options.md.css do. The transparent border takes a press anywhere in the box, as a
+         block element does, so that the gesture sees one on an open item, which takes no input. -->
+    <ControlTheme x:Key="{x:Type c:AvonicItemSliding}" TargetType="c:AvonicItemSliding">
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <c:ItemSlidingPanel />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="Transparent">
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
