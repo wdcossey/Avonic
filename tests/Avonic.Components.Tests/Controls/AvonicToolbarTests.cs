@@ -748,10 +748,16 @@ public class AvonicToolbarTests
             tabs.BottomContent = "bar";
             tabs.BottomContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((_, _) => new AvonicTabBar());
         }, out var madeTabs);
+        // querySelector takes the first bar; the top slot's comes first here, as it does for the bar the tabs mark.
+        var both = InTabs((tabs, bar) =>
+        {
+            tabs.TopContent = bar;
+            tabs.BottomContent = new AvonicTabBar();
+        }, out var bothTabs);
         var alone = new AvonicToolbar { Content = "F" };
         var page = new StackPanel
         {
-            Children = { bottomTabs, topTabs, madeTabs, new AvonicFooter { Items = { alone } } },
+            Children = { bottomTabs, topTabs, madeTabs, bothTabs, new AvonicFooter { Items = { alone } } },
             Resources = { ["Avonic.SafeAreaBottom"] = 20d },
         };
         using var scene = new Scene(page);
@@ -759,6 +765,7 @@ public class AvonicToolbarTests
         Assert.Equal(0, bottom.Padding.Bottom);
         Assert.Equal(20, top.Padding.Bottom);
         Assert.Equal(0, made.Padding.Bottom);
+        Assert.Equal(20, both.Padding.Bottom);
         Assert.Equal(20, alone.Padding.Bottom);
         Assert.Equal(56, bottom.Bounds.Height);
         Assert.Equal(76, top.Bounds.Height);
