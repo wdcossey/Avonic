@@ -2,6 +2,10 @@
 
 > Ionic side: `node tools/ionic-ref/render.js ion-label --bare` (Chromium, md, 390×844@2x) → [`ref/`](ref/).
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicLabelCaptureTests` (headless Skia, 2×) → [`compare/`](compare/).
+>
+> Typography: `render.js` loads `ionic.bundle.css`, which includes `typography.css`, so the Ionic side has global typography on,
+> and the Avonic frame is captured with `Css/Typography.axaml` merged to match. Without it, a label's `h1` and `h2` have a normal line height, and its headings follow the
+> typography-off measurements in [docs/infra/typography](../../infra/typography/PLAN.md#measured).
 
 ## Frames
 
@@ -45,8 +49,8 @@ Ionic results were measured in Chromium with `ion-app`. For rules no Ionic 8 com
 | 7 | Margins per slot | `0 10`, `0 10 16 10`, `16 10 0 10`, or `16 7 0 7` beside a stacked label | match |
 | 8 | Long text wraps and grows the item | 3 lines of 19, row 78 | match. Avalonia's lines are 18.75 |
 | 9 | `ion-text-nowrap` | one line, ellipsis, `overflow: hidden`, also on `h2` and `p` | match |
-| 10 | `ion-text-wrap` | 24 per line, 48 for 32 px text; `h2` 19.2 and `p` 20 keep theirs | match, except a sized `TextBlock` deeper than a panel. See the plan |
-| 11 | `h1`–`h6`, `p` | 24, 16, 14, 14, 14, 14, 14; weight 400; 28.8, 19.2, normal, 20 | match directly or in a panel, but not deeper. See the plan. Layout rounding makes a 19.2 line 20 high |
+| 10 | `ion-text-wrap` | 24 per line, 48 for 32 px text; `h2` 19.2 (with `typography.css`) and `p` 20 keep theirs | match, except a sized `TextBlock` deeper than a panel. See the plan |
+| 11 | `h1`–`h6`, `p` | 24, 16, 14, 14, 14, 14, 14; weight 400; 28.8, 19.2, normal, 20 with `typography.css`; without it `h1` and `h2` are normal | match directly or in a panel, but not deeper. See the plan. Layout rounding makes a 19.2 line 20 high |
 | 12 | `p` colour by depth | `rgb(102, 102, 102)` direct; black nested | match. A panel directly in the label counts as direct |
 | 13 | `p` in a coloured item | white; `rgb(197, 0, 15)` in a coloured label; grey in a coloured label in a plain item | match |
 | 14 | Fixed | x = 16, width 100, wraps; x = 274 in RTL | match |

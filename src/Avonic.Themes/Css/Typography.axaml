@@ -1,0 +1,103 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!--
+        Ionic's global typography, from css/typography.css (@ionic/core 8.8.1). Opt-in, as Ionic's file is: AvonicTheme doesn't
+        merge it, so it costs nothing unless an app asks for it. Merge it into the app's resources, not its styles, at startup:
+
+            <Application.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="avares://Avonic.Themes/Css/Typography.axaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </Application.Resources>
+
+        or into any control's resources, before it's shown, for what's inside it only. In the app's styles, AvonicTheme's own keys
+        would win over the two below. Headings are TextBlocks with the classes h1 to h6.
+
+        It's a ControlTheme for TextBlock, not global Styles, for two reasons. CSS's h1 is the least specific rule there is, so
+        a label's or a card's own rules for headings beat it, and a global Style beats a ControlTheme whatever order they're
+        merged in. And a ControlTheme only costs the type it's for: other elements aren't checked against it at all.
+        See docs/infra/typography/README.md.
+    -->
+
+    <!-- A label's and card content's own rules for headings beat this file, as in CSS, except for line-height, which they
+         don't set in Ionic: typography.css's 1.2 beats what they'd inherit. Their rules read it from these. -->
+    <x:Double x:Key="Avonic.Label.HeadingLineHeight">1.2</x:Double>
+    <x:Double x:Key="Avonic.CardContent.HeadingLineHeight">1.2</x:Double>
+
+    <ControlTheme x:Key="{x:Type TextBlock}" TargetType="TextBlock">
+        <!-- h1 to h6: margin-top 16px, margin-bottom 10px, font-weight 500 and line-height 1.2, with each one's own size and
+             h1's and h2's own margin-top. One rule each, with the shared values repeated, as each alternative costs every
+             TextBlock a check. line-height doesn't clip in CSS, and a TextBlock otherwise clips its descenders to it. -->
+        <Style Selector="^.h1">
+            <Setter Property="Margin" Value="0,20,0,10" />
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.h2">
+            <Setter Property="Margin" Value="0,18,0,10" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.h3">
+            <Setter Property="Margin" Value="0,16,0,10" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.h4">
+            <Setter Property="Margin" Value="0,16,0,10" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.h5">
+            <Setter Property="Margin" Value="0,16,0,10" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^.h6">
+            <Setter Property="Margin" Value="0,16,0,10" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

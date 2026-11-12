@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="120">
+            <c:AvonicPickerColumnOption Content="Option" FontSize="22" />
+            <c:AvonicPickerColumnOption Content="Disabled" FontSize="22" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- picker-column-option.md.css: a row 34 high, its text in the middle of the line (line-height: 34px), aligned as the
+         column's text-align (text-align: inherit), on one line with an ellipsis, in the host's colour, with a pointer.
+         Disabled: 0.4, and a column's disabled options too (:host(.picker-column-disabled) ::slotted(...)). Active: the colour's
+         base. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPickerColumnOption}" TargetType="c:AvonicPickerColumnOption">
+        <Setter Property="Height" Value="34" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="{Binding $parent[c:AvonicPickerColumn].HorizontalContentAlignment}" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="Transparent"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+
+        <!-- :host(.option-active) { color: var(ion-color-base) } -->
+        <Style Selector="^:option-active:ion-color">
+            <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

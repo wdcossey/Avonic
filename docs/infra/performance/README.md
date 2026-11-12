@@ -131,6 +131,12 @@ built in, behind a switch that's off by default:
 Tracing activities costs far more than the checks being traced, so use its counts and not its times. The sample's line doesn't
 trace.
 
+## Opt-in files
+
+[Global typography](../typography/README.md) (`Css/Typography.axaml`) isn't in `AvonicTheme`, so the budget above doesn't count it.
+It's a `ControlTheme` for `TextBlock`: merged, it adds 6 alternatives to each `TextBlock` and none to anything else, which
+`TypographyBudgetTests` holds.
+
 ## Known limits
 
 - **`render` can read low,** if a page opens within a frame of the last one, because its own render pass hasn't happened yet.

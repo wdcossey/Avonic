@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-picker's variables, with picker.md.css's values. A CssUnset key is one that md leaves unset, which the theme reads
+         through to the next value. -->
+    <!-- rgba(var(fade-background-rgb, var(background-rgb, var(ion-background-color-rgb, 255, 255, 255))), n): a Color, whose
+         alpha the fades replace; unset, so the fades take Avonic.BackgroundColor. -->
+    <b:CssUnset x:Key="Avonic.Picker.FadeBackgroundRgb" />
+    <!-- background: var(highlight-background), unset in md, so the highlight is transparent (measured rgba(0, 0, 0, 0)). -->
+    <b:CssUnset x:Key="Avonic.Picker.HighlightBackground" />
+    <!-- var(highlight-border-radius, 8px) -->
+    <CornerRadius x:Key="Avonic.Picker.HighlightBorderRadius">8</CornerRadius>
+</ResourceDictionary>

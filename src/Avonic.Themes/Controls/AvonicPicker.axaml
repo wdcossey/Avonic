@@ -1,0 +1,106 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicPicker Width="390">
+            <c:AvonicPickerColumn Value="green">
+                <c:AvonicPickerColumnOption Value="red" Content="Red" />
+                <c:AvonicPickerColumnOption Value="orange" Content="Orange" />
+                <c:AvonicPickerColumnOption Value="yellow" Content="Yellow" IsEnabled="False" />
+                <c:AvonicPickerColumnOption Value="green" Content="Green" />
+                <c:AvonicPickerColumnOption Value="blue" Content="Blue" />
+            </c:AvonicPickerColumn>
+            <c:AvonicPickerColumn Value="2">
+                <c:AvonicPickerColumnOption Value="1" Content="1" />
+                <c:AvonicPickerColumnOption Value="2" Content="2" />
+                <c:AvonicPickerColumnOption Value="3" Content="3" />
+            </c:AvonicPickerColumn>
+        </c:AvonicPicker>
+    </Design.PreviewWith>
+
+    <!-- picker.md.css: 200 high, the columns in a row in the middle (display: flex, justify-content and align-items: center),
+         left to right whatever the direction. The highlight is 34 high, 8 in from each side (width: calc(100% - 16px), margin
+         auto), in the middle (top: 50%, translateY(-50%)), behind the columns. The fades cover 0 to 83 and 116 to 200. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPicker}" TargetType="c:AvonicPicker">
+        <Setter Property="FlowDirection" Value="LeftToRight" />
+        <Setter Property="Height" Value="200" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <TextBox Name="PART_Input"
+                             Theme="{StaticResource Avonic.Picker.Input}"
+                             Opacity="0"
+                             IsTabStop="False"
+                             IsHitTestVisible="False" />
+                    <Border Name="PART_Highlight"
+                            Height="34"
+                            Margin="8,0"
+                            VerticalAlignment="Center"
+                            IsHitTestVisible="False"
+                            CornerRadius="{DynamicResource Avonic.Picker.HighlightBorderRadius}">
+                        <Border.Background>
+                            <MultiBinding Converter="{x:Static b:Css.Var}">
+                                <DynamicResource ResourceKey="Avonic.Picker.HighlightBackground" />
+                            </MultiBinding>
+                        </Border.Background>
+                    </Border>
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    <!-- linear-gradient(to bottom, rgba(fade, 1) 20%, rgba(fade, 0) 90%) -->
+                    <Border Name="PART_Before" Height="83" VerticalAlignment="Top" IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                                <GradientStop Offset="0.2">
+                                    <GradientStop.Color>
+                                        <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="1">
+                                            <DynamicResource ResourceKey="Avonic.Picker.FadeBackgroundRgb" />
+                                            <DynamicResource ResourceKey="Avonic.BackgroundColor" />
+                                        </MultiBinding>
+                                    </GradientStop.Color>
+                                </GradientStop>
+                                <GradientStop Offset="0.9">
+                                    <GradientStop.Color>
+                                        <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="0">
+                                            <DynamicResource ResourceKey="Avonic.Picker.FadeBackgroundRgb" />
+                                            <DynamicResource ResourceKey="Avonic.BackgroundColor" />
+                                        </MultiBinding>
+                                    </GradientStop.Color>
+                                </GradientStop>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <!-- linear-gradient(to top, rgba(fade, 1) 30%, rgba(fade, 0) 90%) -->
+                    <Border Name="PART_After" Height="84" VerticalAlignment="Bottom" IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%">
+                                <GradientStop Offset="0.3">
+                                    <GradientStop.Color>
+                                        <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="1">
+                                            <DynamicResource ResourceKey="Avonic.Picker.FadeBackgroundRgb" />
+                                            <DynamicResource ResourceKey="Avonic.BackgroundColor" />
+                                        </MultiBinding>
+                                    </GradientStop.Color>
+                                </GradientStop>
+                                <GradientStop Offset="0.9">
+                                    <GradientStop.Color>
+                                        <MultiBinding Converter="{x:Static b:Css.Rgba}" ConverterParameter="0">
+                                            <DynamicResource ResourceKey="Avonic.Picker.FadeBackgroundRgb" />
+                                            <DynamicResource ResourceKey="Avonic.BackgroundColor" />
+                                        </MultiBinding>
+                                    </GradientStop.Color>
+                                </GradientStop>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
