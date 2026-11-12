@@ -587,6 +587,23 @@ public class AvonicTextareaTests
         Assert.Equal(374, Bounds(end, scene.Window).Right, 0.6);
     });
 
+    // The slot is read again when the textarea is moved, as hostContext and the slot attribute are at render.
+    [AvaloniaFact]
+    public void B12_A_Textarea_Moved_Into_A_Start_Slot_Becomes_As_Wide_As_Its_Columns() => InstalledTheme.Run(_ =>
+    {
+        var textarea = new AvonicTextarea { [AutomationProperties.NameProperty] = "x" };
+        var first = new AvonicItem { Content = textarea };
+        var second = new AvonicItem { Content = new AvonicLabel { Content = "L" } };
+        using var scene = new Scene(new StackPanel { Children = { first, second } });
+        Render();
+        Assert.Equal(358, textarea.Bounds.Width, 0.6);
+
+        first.Content = null;
+        second.StartContent = textarea;
+        Render();
+        Assert.Equal(164, textarea.Bounds.Width, 0.6);
+    });
+
     [AvaloniaFact]
     public void B13_Wrap_Off_Scrolls_Sideways_On_The_Stub_Too()
     {
