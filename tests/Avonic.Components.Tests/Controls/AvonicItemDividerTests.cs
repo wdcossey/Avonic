@@ -1176,6 +1176,28 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_It_Never_Leaves_The_List() => Scrolling(() =>
+    {
+        // Content after the list scrolls up under the top: the stuck divider goes with the list's end, as in CSS.
+        var (list, own, _) = Virtualised(sections: 1);
+        own.Content = null;
+        var scroller = new ScrollViewer { Content = new StackPanel { Children = { list, new Border { Height = 1000 } } } };
+        using var scene = new Scene(scroller, 390, 200);
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        var stuck = DividerAt(scene, new Point(100, 5));
+        Assert.Equal("d1", stuck?.Content);
+        var height = stuck!.Bounds.Height;
+
+        // The list ends 20 below the top of the scrollport, and 8 of that is its padding.
+        scroller.Offset = new Vector(0, list.Bounds.Height - 20);
+        Run();
+        Assert.Equal(12 - height, Top(stuck, scroller), 3);
+        Assert.Equal("d1", DividerAt(scene, new Point(100, 5))?.Content);
+        Assert.IsNotType<AvonicItemDivider>(DividerAt(scene, new Point(100, 15)));
+    });
+
+    [AvaloniaFact]
     public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
     {
         var (list, scroller, _) = Virtualised();
