@@ -9,7 +9,10 @@ with the repo's Roboto, in `ion-app`:
 ```
 
 `render.js` isn't used, as it always loads `ionic.bundle.css`, which includes `typography.css`. Avonic's frames are the sample's
-`typography` page, from `TypographyCaptureTests` (`AVONIC_CAPTURE_DIR`), with the page's merged file and without it.
+`typography` page, from `TypographyCaptureTests` (`AVONIC_CAPTURE_DIR`), with the page's merged file and without it. They
+save as `avonic-typography-on-page.png` and `avonic-typography-off-page.png`, with each text's box in a `.txt` beside them, and are
+copied here as `compare/avonic-on.png` and `compare/avonic-off.png`; `side.js` makes `side-on.png` and `side-off.png` from them and
+`ref/ionic-on.png`, `ref/ionic-off.png`.
 
 ## With the file
 

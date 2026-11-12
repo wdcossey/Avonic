@@ -88,9 +88,12 @@ the file a heading in a label or card now has what Chromium measures without it:
   global rules in the default theme, costing every element, for 2 px in the case without the file.
 - **A wrapping label without the file:** its `h1` and `h2` would inherit 1.5 in Chromium; here they're normal, as the key holds one
   value. With the file, 1.2, as measured.
-- **A heading in a badge, a button or a card title** keeps that host's line height, as their rules for any child are global
-  styles. In Chromium the file's 1.2 beats what those hosts set on the host and the heading inherits. Not measured; headings
-  there are unlikely.
+- **A heading in a badge or a button.** Measured in Chromium with the file, an `h1` in `ion-button`, `ion-badge` and
+  `ion-card-title` is 26, 31.2 high, 20 above and 10 below, as anywhere ([ref/hosts-on.json](ref/hosts-on.json)). In a card title
+  Avonic matches (`B4_In_A_Card_Title_The_File_Wins`). A button's and a badge's rules for any child are global styles, which beat
+  the file: in a button the `h1` keeps its size and line height but takes the button's half-leading margin, not 20 and 10; in a
+  badge it also takes the badge's line height of 1, 26. Matching would mean excluding headings from those rules, adding
+  alternatives to the default theme for every element, for headings in buttons and badges.
 
 ## Tests
 

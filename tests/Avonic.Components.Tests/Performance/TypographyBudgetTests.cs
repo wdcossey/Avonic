@@ -68,7 +68,6 @@ public class TypographyBudgetTests
         Assert.Equal((0, 0), Added(() => StyleBudgetTests.Make(name)));
     }
 
-    // StyleBudgetTests.CommonElements without TextBlock.
     public static TheoryData<string> OtherElements() =>
-        ["Border", "Panel", "StackPanel", "Grid", "DockPanel", "Image", "Button", "ScrollViewer", "ContentPresenter"];
+        [.. StyleBudgetTests.CommonElements().Select(row => row.Data).Where(name => name != nameof(TextBlock))];
 }

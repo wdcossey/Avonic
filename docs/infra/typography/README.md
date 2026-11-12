@@ -80,5 +80,5 @@ didn't change.
 - **A plain `TextBlock` style with no class** loses to the file's `h1`, as CSS's `*` does to `h1`.
 - **Without the file,** a heading outside a host has Avalonia's defaults, not a browser's; in a divider it lacks Chromium's 2 px
   margins; in a wrapping label `h1` and `h2` are normal, where Chromium inherits 1.5.
-- **A heading in a badge, a button or a card title** keeps that host's line height. Not measured.
+- **A heading in a button or a badge** takes that host's margin, not 20 and 10, and in a badge its line height of 1: measured, in the plan.
 - Not tried in a real window, and not on a device.

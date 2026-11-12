@@ -720,8 +720,7 @@ public class AvonicLabelTests
         var label = WithClass("ion-text-wrap", new StackPanel { Children = { h2, h3, p } });
         using var scene = InScene(new AvonicItem { Content = label });
 
-        // Deliberate: without typography.css h2 inherits the wrap's 1.5 in Chromium, 24. See docs/infra/typography. With it, 1.2.
-        Assert.True(double.IsNaN(h2.LineHeight));
+        // h2 is left out: Chromium gives it the wrap's 1.5 without typography.css, and 1.2 with it (TypographyTests). See docs/infra/typography.
         Assert.True(double.IsNaN(h3.LineHeight));
         Assert.Equal(20, p.LineHeight);
     });

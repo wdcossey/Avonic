@@ -179,7 +179,7 @@ public class TypographyTests
 
     // ── 2. An app's rules win ────────────────────────────────────────────────────────────────
 
-    // An app's own h1 rule beats typography.css's, as it's as specific and later. A plain TextBlock rule loses, as CSS's * does.
+    // An app's own h1 rule beats typography.css's, as it's as specific and later.
     [AvaloniaFact]
     public void B2_An_Apps_Style_Wins() => WithFile(() =>
     {
@@ -193,6 +193,29 @@ public class TypographyTests
 
             Assert.Equal(40, block.FontSize);
             Assert.Equal(48, block.LineHeight, 6);
+        }
+        finally
+        {
+            Application.Current!.Styles.Remove(style);
+        }
+    });
+
+    // A plain TextBlock rule, with no class, loses to the file's h1, as CSS's * does: a rule with a class beats one without in Avalonia,
+    // even from a ControlTheme.
+    [AvaloniaFact]
+    public void B2_An_Apps_Plain_TextBlock_Style_Loses() => WithFile(() =>
+    {
+        var style = new Style(x => x.OfType<TextBlock>());
+        style.Setters.Add(new Setter(TextBlock.FontSizeProperty, 40.0));
+        Application.Current!.Styles.Add(style);
+        try
+        {
+            var block = Heading("h1");
+            var plain = new TextBlock { Text = "x" };
+            using var scene = Show(block, plain);
+
+            Assert.Equal(26, block.FontSize);
+            Assert.Equal(40, plain.FontSize);
         }
         finally
         {
@@ -335,5 +358,28 @@ public class TypographyTests
         using var scene = Show(new AvonicItemDivider { Content = block });
 
         AssertTypography(block, size, top);
+    });
+
+    // Measured in Chromium with the file: an h1 in a card title is 26, 31.2 high, 20 above and 10 below. The title sets its size on itself,
+    // which the h1 doesn't inherit, and its rule for any child gives the same 1.2.
+    [AvaloniaFact]
+    public void B4_In_A_Card_Title_The_File_Wins() => WithFile(() =>
+    {
+        var block = Heading("h1");
+        using var scene = Show(new AvonicCard { Content = new AvonicCardHeader { Content = new AvonicCardTitle { Content = block } } });
+
+        AssertTypography(block, 26, 20);
+    });
+
+    // Measured: an h1 in a button is 26 and 31.2 high, as anywhere. Its margins differ here, deliberately: see the plan.
+    [AvaloniaFact]
+    public void B4_In_A_Button_The_Files_Size_And_Line_Height_Apply() => WithFile(() =>
+    {
+        var block = Heading("h1");
+        using var scene = Show(new AvonicButton { Content = block });
+
+        Assert.Equal(26, block.FontSize);
+        Assert.Equal(31.2, block.LineHeight, 6);
+        Assert.Equal(FontWeight.Medium, block.FontWeight);
     });
 }
