@@ -262,14 +262,12 @@ public partial class AvonicList
             return;
         }
 
-        // A later sticky divider is drawn above it, as it comes later in the DOM.
+        // A later sticky divider is drawn above it, as it comes later in the DOM. What's realised is a run of rows
+        // without the section's divider, so every one is later.
         var nextTop = double.PositiveInfinity;
-        foreach (var (index, top) in _realisedDividers)
+        foreach (var (_, top) in _realisedDividers)
         {
-            if (index > section)
-            {
-                nextTop = Math.Min(nextTop, top);
-            }
+            nextTop = Math.Min(nextTop, top);
         }
 
         ShowStuckDivider(section, panel, scrollport.Y, nextTop);
@@ -327,9 +325,8 @@ public partial class AvonicList
         var top = Math.Min(scrollportTop, panelTop.Y + panel.Bounds.Height - height - divider.Margin.Bottom);
         _stuckOffset.Y = top - divider.Margin.Top;
 
-        // It shows only above a later sticky divider, which is drawn above it.
+        // It shows only above a later sticky divider, which is drawn above it, and the clip is what input finds too.
         var shown = Math.Clamp(nextTop - top, 0, height);
-        _stuckDivider.IsHitTestVisible = shown > 0;
         if (shown >= height)
         {
             _stuckDivider.Clip = null;

@@ -1286,7 +1286,8 @@ public class AvonicItemDividerTests
         scroller.Offset = new Vector(0, natural + 100);
         Run();
 
-        Assert.Equal("d2", DividerAt(scene, new Point(100, 5))?.Content);
+        // The row itself, and no copy of it over it.
+        Assert.Same(second, DividerAt(scene, new Point(100, 5)));
     });
 
     [AvaloniaFact]
