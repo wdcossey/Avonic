@@ -57,7 +57,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` | |
 | [x] | `readonly` | `Readonly` | |
-| [ ] | `required` | — | Not applicable: Avalonia's automation can't say it |
+| [x] | `required` | `Required` | `IsRequiredForForm` on the native input, for a screen reader, though nothing in Avalonia 12.1.4 reads it yet; no form validation |
 | [x] | `shape` | `Shape` (`InputShape?`) | `Round` |
 | [ ] | `spellcheck` | — | Not applicable: no spell checker |
 | [x] | `type` | `Type` (`InputType`) | `Email`, `Number`, `Password`, `Search`, `Tel`, `Text`, `Url`; no date or time types |
@@ -117,7 +117,8 @@ Each has a test in `AvonicInputTests`, named after its number in [PLAN.md](PLAN.
 - A click on the label focuses the field; in an item, so does a tap on the item's padding.
 - The five label placements, the floating label, the highlight, the solid and outline looks, the notch, round shapes, helper
   and error text, the counter, disabled and read-only, all measured against Chromium.
-- The native input is named by the label and described by the helper or error text.
+- The native input is named by the label and described by the helper or error text, and is marked required to automation when `Required`.
+- Disabled fades the input as one, at 0.38, through an `OpacityMask` (`Avonic.Input.Md.DisabledMask`), as its parts overlap.
 
 ## Extensions
 
@@ -134,4 +135,4 @@ Not in Ionic's API, but needed by the theme:
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): a click on the label while focused keeps focus, where
 Chromium blurs and refocuses; no date or time types and no number filtering; an icon-only button in a slot keeps its own look;
 an app's background and border keys win at rest with a fill, where Ionic's fill wins; an input in an item's start or end slot still stretches; the notch has no
-`max-width`; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader. Not tried in a real window, with a soft keyboard, or on a device.
+`max-width`; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader; `Required` is set for automation, but nothing in Avalonia 12.1.4 reads it. Not tried in a real window, with a soft keyboard, or on a device.

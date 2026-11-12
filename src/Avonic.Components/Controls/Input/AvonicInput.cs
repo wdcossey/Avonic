@@ -95,6 +95,10 @@ public class AvonicInput : TemplatedControl, IItemControl
     public static readonly StyledProperty<bool> ReadonlyProperty =
         AvaloniaProperty.Register<AvonicInput, bool>(nameof(Readonly));
 
+    /// <summary>Ionic <c>required</c>: the native input says it's required to a screen reader.</summary>
+    public static readonly StyledProperty<bool> RequiredProperty =
+        AvaloniaProperty.Register<AvonicInput, bool>(nameof(Required));
+
     /// <summary>Ionic <c>maxlength</c>: typing stops there, and the counter counts to it.</summary>
     public static readonly StyledProperty<int?> MaxlengthProperty =
         AvaloniaProperty.Register<AvonicInput, int?>(nameof(Maxlength));
@@ -326,6 +330,10 @@ public class AvonicInput : TemplatedControl, IItemControl
     private string? _counterText;
     private IDisposable? _debounced;
 
+    // required on the native input, as aria-required, at style priority, so that an app's own value on it wins.
+    private readonly StyleValue<bool> _required = new();
+    private IDisposable? _requiredBinding;
+
     static AvonicInput()
     {
         // The host isn't a tab stop: the native input inside it is.
@@ -397,6 +405,12 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         get => GetValue(ReadonlyProperty);
         set => SetValue(ReadonlyProperty, value);
+    }
+
+    public bool Required
+    {
+        get => GetValue(RequiredProperty);
+        set => SetValue(RequiredProperty, value);
     }
 
     public int? Maxlength
@@ -598,6 +612,8 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         base.OnApplyTemplate(e);
 
+        _requiredBinding?.Dispose();
+        _requiredBinding = null;
         if (_native is not null)
         {
             _native.PropertyChanged -= OnNativePropertyChanged;
@@ -641,6 +657,7 @@ public class AvonicInput : TemplatedControl, IItemControl
             // Avalonia's text presenter brings its caret into view whenever the caret moves, focused or not, and the caret
             // moves to the end of an assigned value. Chromium never scrolls to an input that isn't focused.
             _native.AddHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
+            _requiredBinding = _native.Bind(AutomationProperties.IsRequiredForFormProperty, _required, BindingPriority.Style);
             UpdateNative();
             SyncNativeText();
         }
@@ -725,6 +742,11 @@ public class AvonicInput : TemplatedControl, IItemControl
         {
             UpdateClasses();
             UpdateAutomation();
+        }
+        else if (change.Property == RequiredProperty)
+        {
+            // required on the <input>: aria-required to a screen reader. Form validation isn't here.
+            _required.Set(change.GetNewValue<bool>());
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
                  || change.Property == IsEnabledProperty || change.Property == StartContentProperty
