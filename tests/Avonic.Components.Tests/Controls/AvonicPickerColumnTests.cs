@@ -309,6 +309,25 @@ public class AvonicPickerColumnTests
     });
 
     [AvaloniaFact]
+    public void C6_A_Disabled_Column_Scrolls_To_A_Value_From_Code_And_Then_Shows_No_Option_Active() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("b", ["a", "b", "c"], disabled: "b");
+        page.Column.IsEnabled = false;
+        using var scene = new Scene(page.Picker);
+        Show(clock);
+        Assert.Equal("b", page.Active);
+
+        // Measured: value c scrolls to 87 and no option is active after, as elementsFromPoint skips the disabled column's
+        // options (pointer-events: none), and the scroll took the old one's class away.
+        page.Column.Value = "c";
+        Later(clock, 800);
+        Assert.Equal(87, page.Scroll.Offset.Y, 0.5);
+        Assert.Equal("", page.Active);
+        Assert.Empty(page.Changes);
+    });
+
+    [AvaloniaFact]
     public void C7_A_Disabled_Option_Is_Faded_Skipped_By_The_Keys_And_Not_Active_For_Its_Value() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
