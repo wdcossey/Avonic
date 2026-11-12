@@ -551,6 +551,20 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
+    public void B22_Cancel_With_No_Pull_Still_Cancels_With_The_Pulling_Icon_At_Its_Resting_Place_Above() => InstalledTheme.Run(_ =>
+    {
+        // Ionic resets whatever the state: cancelling shows .refresher-pulling, its icon at translateY(calc(-100% - 10px))
+        using var page = new Page();
+        page.Wait(0);
+        page.Refresher.Cancel();
+        page.Wait(32);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":cancelling"));
+        Assert.Equal(-52, page.Part<Border>("PART_PullingIcon").RenderTransform!.Value.M32);
+        page.Wait(700);
+        Assert.Equal(["ionPullEnd:Cancel"], page.Names);
+    });
+
+    [AvaloniaFact]
     public void B21_Another_Refreshing_Spinner_Is_An_AvonicSpinner() => InstalledTheme.Run(_ =>
     {
         using var page = new Page(refresherContent: new AvonicRefresherContent { RefreshingSpinner = SpinnerName.Dots });
