@@ -197,17 +197,8 @@ public class AvonicBreadcrumb : TemplatedControl
 
     public event EventHandler<RoutedEventArgs>? Click
     {
-        add
-        {
-            AddHandler(ClickEvent, value);
-            _clickHandlers++;
-        }
-
-        remove
-        {
-            RemoveHandler(ClickEvent, value);
-            _clickHandlers = Math.Max(0, _clickHandlers - 1);
-        }
+        add => _native.AddClickHandler(ClickEvent, value);
+        remove => _native.RemoveClickHandler(ClickEvent, value);
     }
 
     /// <summary>
@@ -237,12 +228,9 @@ public class AvonicBreadcrumb : TemplatedControl
 
     private readonly NativeButton _native;
     private readonly StyleValue<bool> _link = new();
-    private int _clickHandlers;
     private bool _collapsed;
     private bool _last;
     private bool _showCollapsedIndicator;
-    private bool _releasing;
-    private bool _indicatorReleased;
     private Button? _indicator;
     private Control? _separatorPart;
     private Control? _nativePart;
@@ -265,14 +253,13 @@ public class AvonicBreadcrumb : TemplatedControl
         Bind(FocusVisible.IsEnabledProperty, _link, BindingPriority.Style);
         Bind(FocusableProperty, _link, BindingPriority.Style);
 
-        // The DOM click on release, with no keys of its own: a link takes Enter only, below.
-        _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled);
-
-        // A release on its way through, for the indicator, which clicks during it, before NativeButton sees it: see OnIndicatorClick.
-        // Registered after NativeButton, so the bubble clears both after it. Nothing is left set when a release goes elsewhere, as
-        // one does when a gesture takes the pointer.
-        AddHandler(PointerReleasedEvent, (_, _) => _releasing = true, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(PointerReleasedEvent, (_, _) => _releasing = _indicatorReleased = false, RoutingStrategies.Bubble, handledEventsToo: true);
+        // The DOM click on release, with no keys of its own: a link takes Enter only, below. The collapsed indicator is a stock
+        // button, whose click reaches the host as the DOM click does: see OnStockButtonClicked.
+        _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled)
+        {
+            StockButtonsClick = true,
+            StockButtonClicked = OnStockButtonClicked,
+        };
     }
 
     /// <summary>Ionic's internal <c>collapsed</c>: hidden in the collapsed middle of the trail.</summary>
@@ -337,9 +324,7 @@ public class AvonicBreadcrumb : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        _indicator?.RemoveHandler(Button.ClickEvent, OnIndicatorClick);
         _indicator = e.NameScope.Find<Button>("PART_CollapsedIndicator");
-        _indicator?.AddHandler(Button.ClickEvent, OnIndicatorClick);
         _separatorPart = e.NameScope.Find<Control>("PART_Separator");
         _nativePart = e.NameScope.Find<Control>("PART_Native");
         Update();
@@ -412,20 +397,15 @@ public class AvonicBreadcrumb : TemplatedControl
     // ── Input ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <c>collapsedIndicatorClick</c>, then the DOM click reaching the host. A key or a screen reader clicks the indicator with no
-    /// release, so both are raised here. A release that clicks it only marks it, and <see cref="NativeButton"/> decides, later in the
-    /// same release, whether the press was a click at all, as Chromium cancels the whole click: then both are raised, or neither.
+    /// <c>collapsedIndicatorClick</c>, which <see cref="NativeButton"/> calls just before the DOM click reaches the host: at once for
+    /// a key or a screen reader, which click the indicator with no release, and for a release only once it has decided that the
+    /// press was a click at all, as Chromium cancels the whole click: then both are raised, or neither.
     /// </summary>
-    private void OnIndicatorClick(object? sender, RoutedEventArgs e)
+    private void OnStockButtonClicked(Button button)
     {
-        if (_releasing)
-        {
-            _indicatorReleased = true;
-        }
-        else
+        if (ReferenceEquals(button, _indicator))
         {
             RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
-            OnNativeClick();
         }
     }
 
@@ -435,12 +415,6 @@ public class AvonicBreadcrumb : TemplatedControl
     /// </summary>
     private void OnNativeClick()
     {
-        if (_indicatorReleased)
-        {
-            _indicatorReleased = false;
-            RaiseEvent(new RoutedEventArgs(CollapsedClickEvent, this));
-        }
-
         if (IsEffectivelyEnabled)
         {
             _native.Click(ClickEvent);
@@ -509,7 +483,7 @@ public class AvonicBreadcrumb : TemplatedControl
         }
 
         protected override object? GetProviderCore(Type providerType) =>
-            providerType == typeof(IInvokeProvider) && !IsLink && owner._clickHandlers == 0 && owner.Command is null
+            providerType == typeof(IInvokeProvider) && !IsLink && !owner._native.HasClickListeners
                 ? null
                 : base.GetProviderCore(providerType);
 

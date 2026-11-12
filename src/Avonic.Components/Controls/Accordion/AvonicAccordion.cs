@@ -590,35 +590,21 @@ public class AvonicAccordion : TemplatedControl
             _header.AddHandler(PointerPressedEvent, OnHeaderPressStarts, RoutingStrategies.Tunnel, handledEventsToo: true);
             _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseStarts, RoutingStrategies.Tunnel, handledEventsToo: true);
             _header.AddHandler(PointerReleasedEvent, OnHeaderReleaseEnds, RoutingStrategies.Bubble, handledEventsToo: true);
-            foreach (var click in InnerClicks)
-            {
-                _header.AddHandler(click, OnInnerClick);
-            }
+            _header.AddHandler(NativeButton.ClickInsideEvent, OnNativeButtonClick);
+            _header.AddHandler(Avalonia.Controls.Button.ClickEvent, OnStockButtonClick);
         }
 
         UpdateReadonly();
         Render();
     }
 
-    /// <summary>The clicks a control inside can raise, from a press or from a key: what bubbles to <c>#header</c> as <c>click</c>.</summary>
-    private static readonly RoutedEvent<RoutedEventArgs>[] InnerClicks =
-    [
-        AvonicItem.ClickEvent,
-        AvonicButton.ClickEvent,
-        AvonicChip.ClickEvent,
-        AvonicCard.ClickEvent,
-        Avalonia.Controls.Button.ClickEvent,
-    ];
-
     private void RemoveHeaderHandlers(ContentPresenter header)
     {
         header.RemoveHandler(PointerPressedEvent, OnHeaderPressStarts);
         header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseStarts);
         header.RemoveHandler(PointerReleasedEvent, OnHeaderReleaseEnds);
-        foreach (var click in InnerClicks)
-        {
-            header.RemoveHandler(click, OnInnerClick);
-        }
+        header.RemoveHandler(NativeButton.ClickInsideEvent, OnNativeButtonClick);
+        header.RemoveHandler(Avalonia.Controls.Button.ClickEvent, OnStockButtonClick);
 
         _headerButton?.Reset();
         _headerButton = null;
@@ -646,12 +632,20 @@ public class AvonicAccordion : TemplatedControl
     private void OnHeaderReleaseEnds(object? sender, PointerReleasedEventArgs e) => _releasing = false;
 
     /// <summary>
-    /// A control inside clicked, from a release, a key or automation. A release clicks once, however many controls it passes
-    /// through on the way up, and the header's own click doesn't come again after it.
+    /// The click of any control inside that has a native button, the item's, a button's, a chip's and the rest, once its own
+    /// <c>Click</c> has been through: what bubbles to <c>#header</c> as <c>click</c>, unless a handler stopped it.
     /// </summary>
-    private void OnInnerClick(object? sender, RoutedEventArgs e)
+    private void OnNativeButtonClick(object? sender, NativeButton.ClickInsideArgs e)
     {
-        // A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.
+        if (!e.Stopped)
+        {
+            OnInnerClick();
+        }
+    }
+
+    /// <summary>A stock button's click, which bubbles too. A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.</summary>
+    private void OnStockButtonClick(object? sender, RoutedEventArgs e)
+    {
         if (e.Source is RepeatButton)
         {
             return;
@@ -662,6 +656,15 @@ public class AvonicAccordion : TemplatedControl
             _clickedOnPress = true;
         }
 
+        OnInnerClick();
+    }
+
+    /// <summary>
+    /// A control inside clicked, from a release, a key or automation. A release clicks once, however many controls it passes
+    /// through on the way up, and the header's own click doesn't come again after it.
+    /// </summary>
+    private void OnInnerClick()
+    {
         if (_releasing)
         {
             if (_releaseClicked)

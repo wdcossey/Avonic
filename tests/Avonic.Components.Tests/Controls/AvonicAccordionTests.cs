@@ -750,6 +750,35 @@ public class AvonicAccordionTests
         Assert.Equal(["a", null, "a", null, "a"], changes);
     }
 
+    /// <summary>
+    /// The same for any other control with a native button, which the header hears as one event rather than a list of them:
+    /// a fab button's and a breadcrumb's clicks bubble to <c>#header</c> too. A handled one doesn't.
+    /// </summary>
+    [AvaloniaFact]
+    public void B13_A_Click_From_Any_Native_Button_Inside_Toggles_Unless_Stopped()
+    {
+        var fab = new AvonicFabButton { Content = "Fab" };
+        var breadcrumb = new AvonicBreadcrumb { Content = "Home", Href = "#home" };
+        var stopped = new AvonicFabButton { Content = "Stopped" };
+        stopped.Click += (_, e) => e.Handled = true;
+        var item = Item("a");
+        item.EndContent = new StackPanel { Children = { fab, breadcrumb, stopped } };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+
+        using var clock = new TestClock();
+        var now = 0;
+        foreach (var control in new Control[] { fab, breadcrumb, stopped })
+        {
+            ((IInvokeProvider)ControlAutomationPeer.CreatePeerForElement(control)).Invoke();
+            clock.At(now += 1000);
+        }
+
+        Assert.Equal(["a", null], changes);
+    }
+
     [AvaloniaFact]
     public void B13_Each_Tap_On_The_Header_Item_Toggles()
     {

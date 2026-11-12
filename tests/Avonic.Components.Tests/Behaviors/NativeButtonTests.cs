@@ -482,6 +482,88 @@ public class NativeButtonTests
         Assert.Equal(1, probe.Clicks);
     }
 
+    private static void Enter(Scene scene)
+    {
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        Settle();
+    }
+
+    // A <button> inside the chip clicked from a key: its DOM click bubbles to the chip's host, after the button's own.
+    [AvaloniaFact]
+    public void S4_A_Key_On_A_Stock_Button_Inside_Clicks_The_Chip_After_It()
+    {
+        var order = new List<string>();
+        var child = StockButton();
+        child.Click += (_, _) => order.Add("inner");
+        var probe = Make("chip", child);
+        ((AvonicChip)probe.Control).Click += (_, _) => order.Add("chip");
+        using var scene = new Scene(probe.Control);
+
+        child.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(["inner", "chip"], order);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    // Only a control whose click is the plain DOM click takes a key's click from a stock button inside. One with a native button of
+    // its own clicks on its own keys only, as before.
+    [AvaloniaTheory]
+    [MemberData(nameof(KeyControls))]
+    public void S4_A_Key_On_A_Stock_Button_Inside_Does_Not_Click_A_Control_With_A_Native_Button(string kind)
+    {
+        var inner = 0;
+        var child = StockButton();
+        child.Click += (_, _) => inner++;
+        var probe = Make(kind, child);
+        using var scene = new Scene(probe.Control);
+
+        child.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(1, inner);
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    // A button that clicks on its press clicks before the chip has seen the press, which is still the press's own click, so once.
+    [AvaloniaFact]
+    public void S4_A_Stock_Button_Inside_That_Clicks_On_Press_Clicks_The_Chip_Once()
+    {
+        var inner = 0;
+        var child = StockButton();
+        child.ClickMode = ClickMode.Press;
+        child.Click += (_, _) => inner++;
+        var probe = Make("chip", child);
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(child, scene));
+
+        Assert.Equal(1, inner);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    // stopPropagation() in the button's own click, and a repeat button's click, which a browser doesn't have, click nothing around.
+    [AvaloniaFact]
+    public void S4_A_Stopped_Or_Repeat_Buttons_Click_With_No_Press_Does_Not_Click_The_Chip()
+    {
+        var stopped = StockButton();
+        stopped.Click += (_, e) => e.Handled = true;
+        var repeat = new RepeatButton { Width = 60, Height = 30 };
+        var chip = new AvonicChip { Items = { stopped, repeat } };
+        var clicks = 0;
+        chip.Click += (_, _) => clicks++;
+        using var scene = new Scene(chip);
+
+        stopped.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        repeat.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Settle();
+
+        Assert.Equal(0, clicks);
+    }
+
     [AvaloniaTheory]
     [MemberData(nameof(Controls))]
     public void A_Child_That_Handles_The_Press_Stops_The_Click_Every_Time(string kind)

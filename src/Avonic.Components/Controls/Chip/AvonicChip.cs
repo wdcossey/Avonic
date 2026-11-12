@@ -51,7 +51,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
 
     /// <summary>
     /// Avonic extension: the chip was clicked, on the release of every press on it, as the DOM <c>click</c> an Ionic app listens
-    /// to on the chip. Not on a key, as a chip has no native button: measured, Enter and Space don't click it.
+    /// to on the chip. Not on a key, as a chip has no native button: measured, Enter and Space don't click it. A stock
+    /// <see cref="Button"/> inside that clicks, from a key too, clicks the chip after it, as its DOM click bubbles to the host.
     /// <see cref="InputElement.Tapped"/> misses a second quick tap, which is <see cref="InputElement.DoubleTapped"/> instead.
     /// </summary>
     public static readonly RoutedEvent<RoutedEventArgs> ClickEvent =
@@ -59,17 +60,8 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
 
     public event EventHandler<RoutedEventArgs>? Click
     {
-        add
-        {
-            AddHandler(ClickEvent, value);
-            _clickHandlers++;
-        }
-
-        remove
-        {
-            RemoveHandler(ClickEvent, value);
-            _clickHandlers = Math.Max(0, _clickHandlers - 1);
-        }
+        add => _native.AddClickHandler(ClickEvent, value);
+        remove => _native.RemoveClickHandler(ClickEvent, value);
     }
 
     /// <summary>
@@ -98,7 +90,6 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private readonly NativeButton _native;
-    private int _clickHandlers;
     private EventHandler<ChildIndexChangedEventArgs>? _childIndexChanged;
 
     public AvonicChip()
@@ -106,8 +97,9 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         // ion-activatable, always. Not ion-focusable: the chip takes focus only if an app makes it focusable, as tabindex does.
         Activatable.SetIsEnabled(this, true);
 
-        // The DOM click on release, with no keys. It handles nothing, so Tapped and the rest still reach the app.
-        _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled);
+        // The DOM click on release, with no keys. It handles nothing, so Tapped and the rest still reach the app. A stock button
+        // inside clicks it too, from a key as from a press, as a <button>'s DOM click bubbles to the host.
+        _native = new NativeButton(this, _ => OnNativeClick(), () => false, UpdateIsEffectivelyEnabled) { StockButtonsClick = true };
 
         // :first-child and :last-child follow the children as they come and go. A slot's own index changes after this, when the
         // panel moves it, which ContainerIndexChangedOverride raises. A new template or DisplayMemberBinding remakes the slots.
@@ -270,7 +262,7 @@ public class AvonicChip : ItemsControl, IChildIndexProvider
         protected override bool IsControlElementCore() => true;
 
         protected override object? GetProviderCore(Type providerType) =>
-            providerType == typeof(IInvokeProvider) && owner._clickHandlers == 0 && owner.Command is null ? null : base.GetProviderCore(providerType);
+            providerType == typeof(IInvokeProvider) && !owner._native.HasClickListeners ? null : base.GetProviderCore(providerType);
 
         public void Invoke() => owner.OnNativeClick();
     }

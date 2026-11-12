@@ -23,8 +23,12 @@ internal sealed class NativeButton
     /// <summary>Measured in Chromium: a finger that moved 14 px clicks, and one that moved 16 doesn't. A mouse has no limit.</summary>
     private const double TouchSlop = 15;
 
-    /// <summary>A <see cref="NativeButton"/> clicked inside this one, which is all this needs of the other control's own <c>Click</c>.</summary>
-    private static readonly RoutedEvent<ClickInsideArgs> ClickInsideEvent =
+    /// <summary>
+    /// A <see cref="NativeButton"/> clicked, after its control's own <c>Click</c> has been through, whichever control it is: what a
+    /// control around needs of the DOM <c>click</c> bubbling to it, such as the accordion's header. <see cref="ClickInsideArgs.Stopped"/>
+    /// is a <c>Click</c> handler's <c>Handled</c>, <c>stopPropagation</c>.
+    /// </summary>
+    internal static readonly RoutedEvent<ClickInsideArgs> ClickInsideEvent =
         RoutedEvent.Register<Control, ClickInsideArgs>("NativeButtonClickInside", RoutingStrategies.Bubble);
 
     private readonly Control _owner;
@@ -38,6 +42,9 @@ internal sealed class NativeButton
     private bool _subscribed;
     private bool _stoppedDuringPress;
     private RoutedEvent? _nestedClick;
+    private bool _routingPointer;
+    private Button? _stockButtonClicked;
+    private int _clickHandlers;
     private TopLevel? _watchedForFingers;
 
     /// <param name="owner">The control.</param>
@@ -54,6 +61,7 @@ internal sealed class NativeButton
         owner.AddHandler(InputElement.PointerPressedEvent, OnPressedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
         owner.AddHandler(InputElement.PointerPressedEvent, OnPressedBubble, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(InputElement.PointerMovedEvent, OnMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
+        owner.AddHandler(InputElement.PointerReleasedEvent, OnReleasedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
         owner.AddHandler(InputElement.PointerReleasedEvent, OnReleased, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(Button.ClickEvent, OnStockButtonClick, RoutingStrategies.Bubble, handledEventsToo: true);
         owner.AddHandler(ClickInsideEvent, OnNativeButtonClickInside);
@@ -78,6 +86,40 @@ internal sealed class NativeButton
 
     /// <summary>A command that can't execute disables the control, as it does a <c>Button</c>.</summary>
     public bool CanExecute { get; private set; } = true;
+
+    /// <summary>
+    /// A stock <see cref="Button"/> inside that clicks clicks the control too, as the DOM <c>click</c> of a <c>&lt;button&gt;</c>
+    /// inside bubbles to the host: from a key or automation, with no press, at once; from a press, with the press's own click on
+    /// release, once, so that the two aren't counted twice. Not a <see cref="RepeatButton"/>, a scrollbar's or a spinner's, nor a
+    /// click that a handler stopped. For a control whose click is the plain DOM <c>click</c> on its host.
+    /// </summary>
+    public bool StockButtonsClick { get; init; }
+
+    /// <summary>
+    /// With <see cref="StockButtonsClick"/>, called with the stock <see cref="Button"/> just before its click activates the control:
+    /// the button's own <c>onClick</c>, before the DOM click reaches the host.
+    /// </summary>
+    public Action<Button>? StockButtonClicked { get; init; }
+
+    /// <summary>
+    /// Whether anything listens to the control's click: a handler added through <see cref="AddClickHandler"/>, or a command. Chromium
+    /// offers a screen reader the DOM <c>click</c> only on an element something listens to, so this is when <c>Invoke</c> is offered.
+    /// </summary>
+    public bool HasClickListeners => _clickHandlers > 0 || Command is not null;
+
+    /// <summary>The control's <c>Click</c> event's <c>add</c>, counted for <see cref="HasClickListeners"/>.</summary>
+    public void AddClickHandler(RoutedEvent<RoutedEventArgs> click, EventHandler<RoutedEventArgs>? handler)
+    {
+        _owner.AddHandler(click, handler);
+        _clickHandlers++;
+    }
+
+    /// <summary>The control's <c>Click</c> event's <c>remove</c>.</summary>
+    public void RemoveClickHandler(RoutedEvent<RoutedEventArgs> click, EventHandler<RoutedEventArgs>? handler)
+    {
+        _owner.RemoveHandler(click, handler);
+        _clickHandlers = Math.Max(0, _clickHandlers - 1);
+    }
 
     /// <summary>A control that stops being a button mid-press doesn't finish it.</summary>
     public void Reset()
@@ -122,10 +164,12 @@ internal sealed class NativeButton
         }
     }
 
-    private sealed class ClickInsideArgs(RoutedEvent click, bool stopped) : RoutedEventArgs(ClickInsideEvent)
+    internal sealed class ClickInsideArgs(RoutedEvent click, bool stopped) : RoutedEventArgs(ClickInsideEvent)
     {
+        /// <summary>The control's own <c>Click</c> event.</summary>
         public RoutedEvent Click { get; } = click;
 
+        /// <summary>A <c>Click</c> handler set <c>Handled</c>.</summary>
         public bool Stopped { get; } = stopped;
     }
 
@@ -136,6 +180,8 @@ internal sealed class NativeButton
     {
         _stoppedDuringPress = false;
         _nestedClick = null;
+        _stockButtonClicked = null;
+        _routingPointer = true;
         if (e.Pointer == _pointer)
         {
             EndPress();
@@ -149,6 +195,7 @@ internal sealed class NativeButton
     /// </summary>
     private void OnPressedBubble(object? sender, PointerPressedEventArgs e)
     {
+        _routingPointer = false;
         if (e.Pointer.IsPrimary && !_stoppedDuringPress && (!e.Handled || IsInStockButton(e.Source)))
         {
             _pointer = e.Pointer;
@@ -214,6 +261,9 @@ internal sealed class NativeButton
     /// </summary>
     private void OnReleased(object? sender, PointerReleasedEventArgs e)
     {
+        var stockButton = _stockButtonClicked;
+        _stockButtonClicked = null;
+        _routingPointer = false;
         if (e.Pointer != _pointer)
         {
             return;
@@ -226,9 +276,18 @@ internal sealed class NativeButton
         var isLeft = e.GetCurrentPoint(_owner).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased;
         if (isLeft && _owner.IsEffectivelyVisible && HoldsPointer(e.Pointer) && new Rect(_owner.Bounds.Size).Contains(e.GetPosition(_owner)))
         {
+            // Chromium cancels the whole click, the button's with it, when the press isn't one: so the button's onClick only now.
+            if (stockButton is not null)
+            {
+                StockButtonClicked?.Invoke(stockButton);
+            }
+
             _activate(source);
         }
     }
+
+    /// <summary>A release on its way through, during which a stock button inside clicks, before <see cref="OnReleased"/>.</summary>
+    private void OnReleasedTunnel(object? sender, PointerReleasedEventArgs e) => _routingPointer = true;
 
     /// <summary>A press that lost the pointer was cancelled, as <c>pointercancel</c> does, even if it's released over the control.</summary>
     private bool HoldsPointer(IPointer pointer) =>
@@ -243,7 +302,23 @@ internal sealed class NativeButton
         if (e.Handled)
         {
             Stop();
+            return;
         }
+
+        if (!StockButtonsClick || e.Source is not Button button || button is RepeatButton)
+        {
+            return;
+        }
+
+        // A press's or a release's own click: the release decides whether the press clicks at all.
+        if (_routingPointer)
+        {
+            _stockButtonClicked = button;
+            return;
+        }
+
+        StockButtonClicked?.Invoke(button);
+        _activate(button);
     }
 
     private void OnNativeButtonClickInside(object? sender, ClickInsideArgs e)

@@ -108,6 +108,7 @@ None.
   header's item is kept at its opacity.
 - `role="region"` on the content isn't mapped.
 - The host's transitions and the icon's turn run on real time, as Avalonia's transitions do.
-- From a key, only the `Click` of an `AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard` or stock `Button` in the header
+- From a key, only the click of a control with a native button (`AvonicItem`, `AvonicButton`, `AvonicChip`, `AvonicCard`,
+  `AvonicFabButton`, `AvonicBreadcrumb` and the rest that use `Behaviors/NativeButton`) or of a stock `Button` in the header
   toggles it. A pointer press on anything there does.
 - Not tried in a real window, and not tried on a device.
