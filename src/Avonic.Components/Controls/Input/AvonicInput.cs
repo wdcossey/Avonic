@@ -330,6 +330,10 @@ public class AvonicInput : TemplatedControl, IItemControl
     private string? _counterText;
     private IDisposable? _debounced;
 
+    // required on the native input, as aria-required, at style priority, so that an app's own value on it wins.
+    private readonly StyleValue<bool> _required = new();
+    private IDisposable? _requiredBinding;
+
     static AvonicInput()
     {
         // The host isn't a tab stop: the native input inside it is.
@@ -608,6 +612,8 @@ public class AvonicInput : TemplatedControl, IItemControl
     {
         base.OnApplyTemplate(e);
 
+        _requiredBinding?.Dispose();
+        _requiredBinding = null;
         if (_native is not null)
         {
             _native.PropertyChanged -= OnNativePropertyChanged;
@@ -651,6 +657,7 @@ public class AvonicInput : TemplatedControl, IItemControl
             // Avalonia's text presenter brings its caret into view whenever the caret moves, focused or not, and the caret
             // moves to the end of an assigned value. Chromium never scrolls to an input that isn't focused.
             _native.AddHandler(RequestBringIntoViewEvent, OnNativeRequestBringIntoView);
+            _requiredBinding = _native.Bind(AutomationProperties.IsRequiredForFormProperty, _required, BindingPriority.Style);
             UpdateNative();
             SyncNativeText();
         }
@@ -731,11 +738,16 @@ public class AvonicInput : TemplatedControl, IItemControl
             _debounced = null;
         }
         else if (change.Property == LabelProperty || change.Property == LabelContentProperty || change.Property == HelperTextProperty
-                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty
-                 || change.Property == RequiredProperty)
+                 || change.Property == ErrorTextProperty || change.Property == AutomationProperties.NameProperty)
         {
             UpdateClasses();
             UpdateAutomation();
+        }
+        else if (change.Property == RequiredProperty)
+        {
+            // required on the <input>: aria-required to a screen reader. Form validation isn't here. False is no value, as
+            // Ionic's required: false renders no attribute.
+            _required.SetWhen(change.GetNewValue<bool>(), true);
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
                  || change.Property == IsEnabledProperty || change.Property == StartContentProperty
@@ -1164,8 +1176,5 @@ public class AvonicInput : TemplatedControl, IItemControl
             : !string.IsNullOrEmpty(HelperText) ? HelperText
             : null;
         native.SetValue(AutomationProperties.HelpTextProperty, hint);
-
-        // required on the <input>: aria-required to a screen reader. Form validation isn't here.
-        native.SetValue(AutomationProperties.IsRequiredForFormProperty, Required);
     }
 }

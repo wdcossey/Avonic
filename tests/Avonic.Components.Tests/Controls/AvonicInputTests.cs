@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -1226,6 +1227,25 @@ public class AvonicInputTests
         Assert.False(AutomationProperties.GetIsRequiredForForm(native));
 
         input.Required = true;
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+    }
+
+    [AvaloniaFact]
+    public void B26_An_Apps_Own_Required_On_The_Native_Input_Wins()
+    {
+        // The mapping rule's style priority: an app's style on the native input beats what Required gives it.
+        var (input, _, scene) = Stub(new AvonicInput { Label = "Email" });
+        using var _ = scene;
+        scene.Window.Styles.Add(new Style(x => x.OfType<AvonicInput>().Template().OfType<TextBox>())
+        {
+            Setters = { new Setter(AutomationProperties.IsRequiredForFormProperty, true) },
+        });
+        Settle();
+        var native = Native(input);
+        Assert.True(AutomationProperties.GetIsRequiredForForm(native));
+
+        input.Required = true;
+        input.Required = false;
         Assert.True(AutomationProperties.GetIsRequiredForForm(native));
     }
 

@@ -40,7 +40,7 @@ in a desktop context; the frame in a mobile one). The commands are at the top of
 | [ ] | `name` | — | Not applicable: HTML form |
 | [x] | `placeholder` | `Placeholder` (`string?`) | `TextBox.PlaceholderText` |
 | [x] | `readonly` | `Readonly` (`bool`) | `TextBox.IsReadOnly`; also hides the clear button and the password toggle |
-| [x] | `required` | `Required` (`bool`) | `AutomationProperties.IsRequiredForForm` on the native input, as the mapping rule for `aria-required` says, and as `AvonicTextarea`; form validation isn't here |
+| [x] | `required` | `Required` (`bool`) | `AutomationProperties.IsRequiredForForm` on the native input at style priority, as the mapping rule for `aria-required` says, and as `AvonicTextarea`; form validation isn't here. Nothing in Avalonia 12.1.4 reads it yet ([avalonia-issues](../../infra/avalonia-issues.md)) |
 | [x] | `shape` | `Shape` (`InputShape?`) | `Round`; null is the default |
 | [ ] | `spellcheck` | — | Not applicable: Avalonia's `TextBox` has no spell checker to turn on |
 | [x] | `type` | `Type` (`InputType`, `Text`) | `Email`, `Number`, `Password`, `Search`, `Tel`, `Text`, `Url`: the soft keyboard's `ContentType`, and `Password` masks with `•` and sets `IsSensitive`. The date and time types (`date`, `datetime-local`, `month`, `time`, `week`) aren't declared: Chromium gives them its own picker and segmented field, which is `ion-datetime`'s job here. Chromium also drops a non-number from a `number` input; this doesn't (a known gap) |

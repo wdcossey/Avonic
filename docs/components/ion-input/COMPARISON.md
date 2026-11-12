@@ -77,7 +77,7 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 | 23 | Placeholder at 0.6 | Match |
 | 24 | Type, inputmode, enterkeyhint, autocapitalize, autocorrect reach `TextInputOptions`; password masks | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
 | 25 | Autofocus | Match |
-| 26 | Automation name, help text and required | Match |
+| 26 | Automation name, help text and required | Match; `Required` is set on the native input and tested, but nothing in Avalonia 12.1.4 reads `IsRequiredForForm`, and no screen reader was tried |
 | 27 | The password toggle | Match; it doesn't take focus. 44 × 48 at the end of an item, as measured |
 | 28 | RTL | Match: the row, the outline's start on the right, the label scaled from its top right |
 
