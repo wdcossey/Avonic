@@ -1495,17 +1495,22 @@ public class AvonicItemDividerTests
     {
         var own = new RotateTransform(0);
         var divider = new AvonicItemDivider();
+        // In an items control's wrapper, which isn't in the DOM, the wrapper takes the divider's z-index, the app's here.
+        var wrapped = new AvonicItemDivider();
+        var wrapper = new ContentPresenter { Content = wrapped };
         using var scene = Scene.Styled(
-            new ScrollViewer { Content = new StackPanel { Children = { divider } } },
+            new ScrollViewer { Content = new StackPanel { Children = { divider, wrapper } } },
             new Style(x => x.OfType<AvonicItemDivider>())
             {
                 Setters = { new Setter(Visual.RenderTransformProperty, own), new Setter(Visual.ZIndexProperty, 5) },
             });
 
         divider.Sticky = true;
+        wrapped.Sticky = true;
         Run();
 
         Assert.Same(own, divider.RenderTransform);
         Assert.Equal(5, divider.ZIndex);
+        Assert.Equal(5, wrapper.ZIndex);
     });
 }

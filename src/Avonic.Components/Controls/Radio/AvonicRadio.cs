@@ -86,7 +86,7 @@ public class AvonicRadio : ContentControl, IItemControl
     private Control? _label;
     private readonly StyleValue<bool> _tabStop = new();
     private readonly StyleValue<bool> _activatable = new();
-    private readonly StyleValue<bool> _focusable = new();
+    private readonly StyleValue<bool> _focusVisible = new();
 
     static AvonicRadio()
     {
@@ -132,7 +132,7 @@ public class AvonicRadio : ContentControl, IItemControl
         // app's style still wins when the group or an item changes them after it.
         Bind(IsTabStopProperty, _tabStop, BindingPriority.Style);
         Bind(Activatable.IsEnabledProperty, _activatable, BindingPriority.Style);
-        Bind(FocusVisible.IsEnabledProperty, _focusable, BindingPriority.Style);
+        Bind(FocusVisible.IsEnabledProperty, _focusVisible, BindingPriority.Style);
 
         UpdateClasses();
         UpdateHostContext(inItem: false);
@@ -283,7 +283,7 @@ public class AvonicRadio : ContentControl, IItemControl
         // At style priority, as the classes are, so an app's own value wins. A value it already has raises nothing, so a move
         // doesn't either.
         _activatable.Set(!inItem);
-        _focusable.Set(!inItem);
+        _focusVisible.Set(!inItem);
     }
 
     private void UpdateClasses()

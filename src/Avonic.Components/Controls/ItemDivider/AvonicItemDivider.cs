@@ -169,15 +169,12 @@ public class AvonicItemDivider : TemplatedControl, IItemHost
 
         // Behaviour, so it doesn't depend on the theme, at style priority, as CSS is, so an app's own value wins.
         _transform.Set(_stickyOffset);
-        if (_inParent == this)
+        _zIndex.Set(StickyZIndex);
+        if (_inParent != this)
         {
-            _zIndex.Set(StickyZIndex);
-        }
-        else
-        {
-            // An items control's wrapper, which isn't in the DOM, so no rule of the app's reaches it there: a frame now is
-            // enough.
-            _containerZIndexFrame = _inParent.SetValue(ZIndexProperty, StickyZIndex, BindingPriority.Style);
+            // An items control's wrapper, which is what the panel sorts, and isn't in the DOM: it takes the divider's own
+            // z-index, so that an app's value or style for the divider reaches it, as it does a divider that isn't wrapped.
+            _containerZIndexFrame = _inParent.Bind(ZIndexProperty, this.GetObservable(ZIndexProperty), BindingPriority.Style);
         }
 
         if (_scrollViewer is not null)
