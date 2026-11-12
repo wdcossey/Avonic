@@ -138,24 +138,27 @@ through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.co
 
 ## `BoxShadow`'s blur isn't CSS's
 
-**Measured on one shadow, and the cause not read.** CSS's `box-shadow` blur `B` is a Gaussian of sigma `B / 2`; Avalonia's, drawn by
+**Measured on two shadows, and the cause not read.** CSS's `box-shadow` blur `B` is a Gaussian of sigma `B / 2`; Avalonia's, drawn by
 Skia, matches a Gaussian of sigma `0.288675 B + 0.5`, so the same number falls off in about two thirds of the distance. `ion-reorder`
 (#34, PR #136) measured `0 0 10px rgba(0, 0, 0, 0.4)` in Chromium beside Avonic: a blur of 10 fell off in 7 px instead of 10, and
 15.6, which is sigma 5 by that formula, matched within 1 of 255 at every pixel of the fall-off. `Avonic.ReorderGroup.SelectedBoxShadow`
-holds 15.6; every other `BoxShadows` token still holds CSS's number, so each md elevation draws tighter than Ionic's
+holds 15.6, and `ion-refresher` (#35, PR #142) took the same ratio, 1.56, for `Avonic.Refresher.Md.NativeIconBoxShadow` (6 → 9.4,
+within 3 levels of Chromium below the icon; the formula gives 8.66). Every other `BoxShadows` token still holds CSS's number, so each
+md elevation draws tighter than Ionic's
 ([#139](https://github.com/wdcossey/Avonic/issues/139) measures more blurs and converts them). The offset not scaling (above) is
 another difference. To reproduce: a white 100 × 40 box with `box-shadow: 0 0 10px rgba(0,0,0,.4)` in Chromium, and a `Border` with
 `BoxShadow="0 0 10 0 #66000000"` rendered headlessly at 1×; read the column below each box from its edge until it's 255.
 
 ## No public way to keep a `VirtualizingStackPanel`'s element realised
 
-**Read from 12.1.4.** The panel keeps an element realised outside the viewport only when it's focused or being scrolled to, and both
-are internal; a subclass can't reach its realising. CSS's `position: sticky` keeps a divider stuck to the end of its section, but the
+**Read from 12.1.4.** `CacheLength` realises a buffer of rows on each side of the viewport, but nothing public keeps a given element
+realised: the panel does that only for a focused element or one being scrolled to, internally, and a subclass can't reach its
+realising. CSS's `position: sticky` keeps a divider stuck to the end of its section, but the
 panel recycles the divider's row once its place is above the top. `AvonicList` draws a second container for the same item instead,
 made by its own `PrepareContainerForItemOverride` (`AvonicList.StuckDivider.cs`), which is another instance: state an app set on the
-divider itself doesn't carry over. Found by #68 (PR #146). A public way to pin an element, as a header, would remove the copy. To
+divider itself doesn't carry over, and an item that is itself a control can't be drawn twice, so it gets none. Found by #68 (PR #146). A public way to pin an element, as a header, would remove the copy. To
 reproduce: an `ItemsControl` with a `VirtualizingStackPanel` in a `ScrollViewer`, 1,000 rows of 48, scrolled to 2,000: row 0's
-container is gone, and nothing public brings it back without scrolling to it.
+container is gone, and nothing public brings it back without scrolling to it or raising `CacheLength` past it.
 
 ## An implicit `ControlTheme` merged at runtime doesn't restyle controls already shown
 
