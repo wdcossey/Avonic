@@ -223,8 +223,9 @@ public partial class AvonicList
             return;
         }
 
-        // The first row on screen, and the natural tops of the sticky dividers realised. A row the panel keeps above
-        // the top, as it does a focused one, isn't on screen.
+        // The first row realised, and the natural tops of the sticky dividers realised. A row the panel keeps
+        // elsewhere, as it does a focused one, has no index. One its cache realises above the top is drawn over by any
+        // divider realised after it, which the clip below follows.
         var first = int.MaxValue;
         _realisedDividers.Clear();
         foreach (var child in panel.Children)
@@ -236,10 +237,7 @@ public partial class AvonicList
             }
 
             _knownRows.Add(index);
-            if (at.Y + child.Bounds.Height > scrollport.Y)
-            {
-                first = Math.Min(first, index);
-            }
+            first = Math.Min(first, index);
 
             if (((child as ContentPresenter)?.Child ?? child) is AvonicItemDivider { Sticky: true } divider)
             {
@@ -253,17 +251,17 @@ public partial class AvonicList
             }
         }
 
-        // The section's divider is the last sticky one before the first row on screen. One that's realised sticks by
-        // itself. An item that's a control is its own row, and can be in one place only.
+        // The section's divider is the last sticky one before the first row realised. One that's realised sticks by
+        // itself, and covers the copy. An item that's a control is its own row, and can be in one place only.
         var section = first == int.MaxValue ? -1 : SectionDividerBefore(Math.Min(first, ItemsView.Count));
-        if (section < 0 || ItemsView[section] is Control || ContainerFromIndex(section) is { IsVisible: true })
+        if (section < 0 || ItemsView[section] is Control)
         {
             HideStuckDivider();
             return;
         }
 
         // A later sticky divider is drawn above it, as it comes later in the DOM. What's realised is a run of rows
-        // without the section's divider, so every one is later.
+        // after the section's divider, so every one is later.
         var nextTop = double.PositiveInfinity;
         foreach (var (_, top) in _realisedDividers)
         {

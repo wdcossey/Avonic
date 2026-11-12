@@ -1308,6 +1308,40 @@ public class AvonicItemDividerTests
     });
 
     [AvaloniaFact]
+    public void D18_In_A_Flat_Virtualising_Panel_The_Copy_Is_As_Wide_As_The_Row() => Scrolling(() =>
+    {
+        // A label that wraps at the row's width, which the list's padding makes narrower than the list.
+        var label = string.Join(' ', Enumerable.Repeat("words", 14));
+        var data = new List<object> { label }.Concat(Enumerable.Range(0, 1000).Cast<object>()).ToList();
+        var list = FromTemplate();
+        list.ItemsPanel = new FuncTemplate<Panel?>(() => new VirtualizingStackPanel());
+        list.ItemsSource = data;
+        list.Padding = new Thickness(60, 8);
+        var scroller = new ScrollViewer { Content = list };
+        using var scene = new Scene(scroller, 390, 300);
+        var row = list.GetVisualDescendants().OfType<AvonicItemDivider>().Single();
+        var height = row.Bounds.Height;
+
+        scroller.Offset = new Vector(0, 5000);
+        Run();
+        var copy = DividerAt(scene, new Point(200, 5));
+        Assert.NotSame(row, copy);
+        Assert.Equal(row.Bounds.Width, copy!.Bounds.Width);
+        Assert.Equal(height, copy.Bounds.Height);
+
+        // Narrower: it wraps again, as the row would.
+        scene.Window.Width = 330;
+        Run();
+        scroller.Offset = new Vector(0, 5001);
+        Run();
+        var narrower = copy.Bounds.Height;
+        Assert.True(narrower > height, $"{narrower} at 330, {height} at 390");
+        scroller.Offset = default;
+        Run();
+        Assert.Equal(narrower, list.GetVisualDescendants().OfType<AvonicItemDivider>().First(divider => divider != copy && divider.IsEffectivelyVisible).Bounds.Height);
+    });
+
+    [AvaloniaFact]
     public void D18_In_A_Flat_Virtualising_Panel_At_The_Top_Only_The_Row_Is_Drawn() => Scrolling(() =>
     {
         var (list, scroller, _) = Virtualised();
