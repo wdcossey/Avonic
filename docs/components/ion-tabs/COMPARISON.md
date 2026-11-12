@@ -61,7 +61,7 @@ bottom bar, which selected its first tab; `ion-tabs` 120 high with a top bar.
 | T5 | `GetSelected`, `GetTab` | Match |
 | T6 | Only the first bar is told; a tab with no id leaves it | Match. **Deliberate difference:** the bar slots come before the default slot, where Ionic follows the markup |
 | T7 | The slots stack; the default slot takes the rest | Match |
-| A1 | A tab is hidden until it's active | Match. Hidden at style priority, where Ionic's is `!important`: see the README |
+| A1 | A tab is hidden until it's active | Match. Hidden at a style trigger's priority, above an app's plain style, where Ionic's is `!important`: see the README |
 | A2 | `Component` is built once, at the first activation, as a page | Match, for a `Control` or a `Type`. With content as well, the content stays and the component isn't built, where Ionic appends both |
 | A3 | `SetActive` shows the tab and hides no other | Match |
 | A4 | A tab is a pane named by its button | Match |

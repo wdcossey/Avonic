@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Logging;
 using Avalonia.LogicalTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -34,7 +35,7 @@ public class AvonicTab : ContentControl
 
     private bool _isActive;
     private bool _checkedComponent;
-    private IDisposable? _hidden;
+    private readonly StyleValue<bool> _hidden = new();
 
     static AvonicTab()
     {
@@ -43,6 +44,10 @@ public class AvonicTab : ContentControl
 
     public AvonicTab()
     {
+        // !important: above an app's plain style, whenever the tab is hidden, as a trigger's priority is above a plain style's.
+        // An app's own IsVisible still wins, as everywhere here, and so does its style with a class or a pseudoclass, which comes
+        // after this. Bound once, so that the answer doesn't depend on when the tab was hidden.
+        Bind(IsVisibleProperty, _hidden, BindingPriority.StyleTrigger);
         UpdateHidden();
         UpdatePageClass();
     }
@@ -146,21 +151,10 @@ public class AvonicTab : ContentControl
     }
 
     /// <summary>
-    /// <c>:host(.tab-hidden) { display: none !important }</c>, at style priority, so that it survives a replaced theme. Hidden, it's
-    /// also out of the automation tree, as <c>aria-hidden</c> takes it out.
+    /// <c>:host(.tab-hidden) { display: none !important }</c>, at a style trigger's priority, so that it survives a replaced theme
+    /// and beats an app's plain style. Hidden, it's also out of the automation tree, as <c>aria-hidden</c> takes it out.
     /// </summary>
-    private void UpdateHidden()
-    {
-        if (!_isActive && _hidden is null)
-        {
-            _hidden = SetValue(IsVisibleProperty, false, BindingPriority.Style);
-        }
-        else if (_isActive && _hidden is not null)
-        {
-            _hidden.Dispose();
-            _hidden = null;
-        }
-    }
+    private void UpdateHidden() => _hidden.SetWhen(!_isActive, false);
 
     /// <summary><c>'ion-page': component === undefined</c>, so that an <see cref="AvonicContent"/> in it takes it as its page.</summary>
     private void UpdatePageClass() => Classes.Set("ion-page", Component is null);

@@ -763,6 +763,22 @@ public class AvonicToolbarTests
         Assert.Equal(AutomationLandmarkType.Banner, ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
     });
 
+    // The role an app gives the header in its own style wins, whenever collapse turns to condense after it. A value given at
+    // style priority when it turns would come after the app's style, and win.
+    [AvaloniaFact]
+    public void H5_An_Apps_Style_For_The_Landmark_Survives_Condense_Turning_On_After_It()
+    {
+        var header = new AvonicHeader { Items = { new AvonicToolbar { Content = "Large" } } };
+        using var scene = Scene.Styled(
+            new StackPanel { Children = { header } },
+            Scene.AppStyle<AvonicHeader>(Avalonia.Automation.AutomationProperties.LandmarkTypeProperty, AutomationLandmarkType.Banner));
+
+        header.Collapse = HeaderCollapse.Condense;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(AutomationLandmarkType.Banner, ControlAutomationPeer.CreatePeerForElement(header).GetLandmarkType());
+    }
+
     [AvaloniaFact]
     public void H5_A_Fade_Header_Looks_Like_The_Default_In_Md() => InstalledTheme.Run(_ =>
     {

@@ -149,6 +149,19 @@ public class AvonicCardTests
         Assert.False(card.Focusable);
     }
 
+    // An app's own style for it wins, whenever button turns on after it. A value given at style priority when it turns on would
+    // come after the app's style, and win.
+    [AvaloniaFact]
+    public void B2_An_Apps_Style_Survives_Button_Turning_On_After_It()
+    {
+        var card = new AvonicCard();
+        using var scene = Scene.Styled(card, Scene.AppStyle<AvonicCard>(InputElement.FocusableProperty, false));
+
+        card.Button = true;
+
+        Assert.False(card.Focusable);
+    }
+
     // ── Behaviours 3, 4: Click ───────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

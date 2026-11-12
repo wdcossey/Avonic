@@ -11,6 +11,7 @@ using Avalonia.Input.GestureRecognizers;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -25,6 +26,9 @@ namespace Avonic.Components.Tests.Controls;
 public class AvonicContentTests
 {
     private static AvonicContent Tall(double height = 1000) => new() { Content = new Border { Height = height } };
+
+    /// <summary>An app's own element, of a type of its own, so that a plain style, with no class, can reach it alone.</summary>
+    private sealed class AppBlock : Border;
 
     private static Control InBox(Control content, double height = 300) =>
         new Panel { Height = height, VerticalAlignment = VerticalAlignment.Top, Children = { content } };
@@ -545,6 +549,37 @@ public class AvonicContentTests
         var stretched = new Border { VerticalAlignment = VerticalAlignment.Stretch };
         using var scene = new Scene(InBox(new AvonicContent { Content = stretched }));
         Assert.Equal(300, stretched.Bounds.Height);
+    }
+
+    // A block's height is the app's to give, by its own rule, however and whenever it's slotted. The alignment is given before
+    // the child is styled, as the presenter sets its child before it adds it to the logical tree, so the app's style comes
+    // after it, and wins.
+    [AvaloniaFact]
+    public void B9_An_Apps_Style_For_The_Alignment_Wins()
+    {
+        // Slotted before the window is shown, as from XAML, and after.
+        var early = new AppBlock();
+        var stretched = new AppBlock();
+        var content = new AvonicContent();
+        var made = new AvonicContent { ContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock()) };
+        using var scene = Scene.Styled(
+            new StackPanel { Children = { InBox(new AvonicContent { Content = early }), InBox(content), InBox(made) } },
+            new Style(x => x.OfType<AppBlock>())
+            {
+                Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Stretch) },
+            });
+
+        content.Content = stretched;
+        made.Content = "made from a template";
+        Settle();
+        scene.Window.UpdateLayout();
+
+        var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
+        Assert.All(new[] { early, stretched, fromTemplate }, block =>
+        {
+            Assert.Equal(VerticalAlignment.Stretch, block.VerticalAlignment);
+            Assert.Equal(300, block.Bounds.Height);
+        });
     }
 
     [AvaloniaFact]
@@ -2526,6 +2561,46 @@ public class AvonicContentTests
         using var scene = new Scene(InBox(new AvonicContent { FixedContent = slot }));
 
         Assert.Equal(new Rect(0, 0, 390, 300), Box(slot, scene.Window));
+    }
+
+    // The insets are the app's to give, by its own rule, however and whenever it's slotted, as for the default slot (B9).
+    [AvaloniaFact]
+    public void B29_An_Apps_Style_For_The_Alignments_Wins()
+    {
+        var slot = new AppBlock { Width = 60, Height = 60 };
+        var made = new AvonicContent
+        {
+            FixedContentTemplate = new FuncDataTemplate<string>((_, _) => new AppBlock { Width = 60, Height = 60 }),
+        };
+        var content = new AvonicContent();
+        // Slotted before the window is shown, as from XAML, and after.
+        var early = new AppBlock { Width = 60, Height = 60 };
+        var earlyContent = new AvonicContent { FixedContent = early };
+        using var scene = Scene.Styled(
+            new StackPanel { Children = { InBox(earlyContent), InBox(content), InBox(made) } },
+            new Style(x => x.OfType<AppBlock>())
+            {
+                Setters =
+                {
+                    new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Right),
+                    new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Bottom),
+                },
+            });
+
+        content.FixedContent = slot;
+        made.FixedContent = "made from a template";
+        Settle();
+        scene.Window.UpdateLayout();
+
+        var fromTemplate = made.GetVisualDescendants().OfType<AppBlock>().Single();
+        Assert.All(new[] { early, slot, fromTemplate }, border =>
+        {
+            Assert.Equal(HorizontalAlignment.Right, border.HorizontalAlignment);
+            Assert.Equal(VerticalAlignment.Bottom, border.VerticalAlignment);
+        });
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(early, earlyContent));
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(slot, content));
+        Assert.Equal(new Rect(330, 240, 60, 60), Box(fromTemplate, made));
     }
 
     [AvaloniaFact]

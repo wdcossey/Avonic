@@ -297,6 +297,38 @@ public class AvonicTabsTests
         Assert.True(tab.IsVisible);
     }
 
+    // :host(.tab-hidden) { display: none !important } beats an app's ion-tab rule, whenever the tab is hidden: from the start,
+    // and after it was shown, when a value given at style priority would lose to the style or beat it by the order alone.
+    [AvaloniaFact]
+    public void A1_An_Apps_Plain_Style_Does_Not_Show_A_Hidden_Tab()
+    {
+        var a = Page("a", "A");
+        var b = Page("b", "B");
+        var tabs = new AvonicTabs { Content = new Panel { Children = { a, b } } };
+        using var scene = Scene.Styled(tabs, Scene.AppStyle<AvonicTab>(Visual.IsVisibleProperty, true));
+        // The first is selected at the start, and the second hidden from it.
+        Assert.True(a.IsActive);
+        Assert.False(b.IsVisible);
+
+        tabs.Select("b");
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(a.IsVisible);
+        Assert.True(b.IsVisible);
+    }
+
+    // The deviation in the README: an app's own value shows a hidden tab, as it does everywhere here.
+    [AvaloniaFact]
+    public void A1_An_Apps_Own_IsVisible_Shows_A_Hidden_Tab()
+    {
+        var b = Page("b", "B");
+        b.IsVisible = true;
+        using var scene = new Scene(new AvonicTabs { Content = new Panel { Children = { Page("a", "A"), b } } });
+
+        Assert.False(b.IsActive);
+        Assert.True(b.IsVisible);
+    }
+
     [AvaloniaFact]
     public void A2_A_Component_Is_Built_At_The_First_Activation_Once_As_A_Page()
     {

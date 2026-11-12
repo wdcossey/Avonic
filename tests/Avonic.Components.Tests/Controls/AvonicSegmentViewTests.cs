@@ -129,6 +129,22 @@ public class AvonicSegmentViewTests
         Assert.True(page.View.IsHitTestVisible);
     }
 
+    // :host(.segment-view-scroll-disabled) is the shadow root's rule, and an app's ion-segment-view { pointer-events } beats it,
+    // whenever the class turns on. A value given at style priority when it turns on would come after the app's style, and win.
+    [AvaloniaFact]
+    public void V4_An_Apps_Style_Survives_A_Tap_Turning_Hit_Testing_Off_After_It()
+    {
+        using var clock = new TestClock();
+        var built = Build();
+        using var scene = Scene.Styled(built.Root, Scene.AppStyle<AvonicSegmentView>(InputElement.IsHitTestVisibleProperty, true));
+        var page = Show(built, scene);
+
+        Tap(scene, Centre(page.Segment.Items.OfType<AvonicSegmentButton>().Last(), scene));
+
+        Assert.Equal("v3", page.Segment.Value);
+        Assert.True(page.View.IsHitTestVisible);
+    }
+
     [AvaloniaFact]
     public void V3_A_Persons_Scroll_Moves_The_Checked_Button_Without_Scrolling_Back()
     {

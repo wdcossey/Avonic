@@ -1237,6 +1237,19 @@ public class AvonicCheckboxTests
         Assert.False(AutomationProperties.GetIsRequiredForForm(box));
     }
 
+    // An app's own style for it wins, whenever required turns on after it. A value given at style priority when it turns on
+    // would come after the app's style, and win.
+    [AvaloniaFact]
+    public void B25_An_Apps_Style_Survives_Required_Turning_On_After_It()
+    {
+        var box = new AvonicCheckbox { Content = "Label" };
+        using var scene = Scene.Styled(box, Scene.AppStyle<AvonicCheckbox>(AutomationProperties.IsRequiredForFormProperty, false));
+
+        box.Required = true;
+
+        Assert.False(AutomationProperties.GetIsRequiredForForm(box));
+    }
+
     [AvaloniaFact]
     public void B26_The_Helper_Is_Polite_And_The_Error_Assertive()
     {

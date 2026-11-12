@@ -80,7 +80,11 @@ public class AvonicCard : ContentControl
 
     private NativeButton? _native;
     private AvonicRippleEffect? _ripple;
-    private IDisposable? _focusableFrame;
+    private readonly StyleValue<bool> _focusable = new();
+
+    // A <button> takes focus. Behaviour, so it doesn't depend on the theme, which an app can replace. At style priority, as CSS
+    // is, so an app's own value wins, bound once, before any style, so that an app's style still wins when button turns on after it.
+    public AvonicCard() => Bind(FocusableProperty, _focusable, BindingPriority.Style);
 
     /// <summary>A command only disables a button card. The base class's constructor reads this before there's a <see cref="NativeButton"/>.</summary>
     protected override bool IsEnabledCore => base.IsEnabledCore && (!Button || _native?.CanExecute != false);
@@ -124,17 +128,7 @@ public class AvonicCard : ContentControl
         Activatable.SetIsEnabled(this, clickable);
         FocusVisible.SetIsEnabled(this, clickable);
 
-        // A <button> takes focus. Behaviour, so it doesn't depend on the theme, which an app can replace. At style
-        // priority, as CSS is, so an app's own value wins.
-        if (clickable && _focusableFrame is null)
-        {
-            _focusableFrame = SetValue(FocusableProperty, true, BindingPriority.Style);
-        }
-        else if (!clickable)
-        {
-            _focusableFrame?.Dispose();
-            _focusableFrame = null;
-        }
+        _focusable.SetWhen(clickable, true);
 
         if (_ripple is not null)
         {

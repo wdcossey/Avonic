@@ -109,7 +109,7 @@ public class AvonicCheckbox : ContentControl, IItemControl
     private IDisposable? _firstFrame;
     private bool _invalid;
     private string? _hint;
-    private IDisposable? _requiredFrame;
+    private readonly StyleValue<bool> _required = new();
     private CheckboxAutomationPeer? _peer;
 
     static AvonicCheckbox()
@@ -132,6 +132,10 @@ public class AvonicCheckbox : ContentControl, IItemControl
                 UpdateHint();
             }
         };
+
+        // aria-required, at style priority, so an app's own value wins. Bound once, before any style, so that an app's style still
+        // wins when required turns on after it.
+        Bind(AutomationProperties.IsRequiredForFormProperty, _required, BindingPriority.Style);
 
         UpdateChecked();
         UpdatePlacement();
@@ -261,9 +265,7 @@ public class AvonicCheckbox : ContentControl, IItemControl
         }
         else if (change.Property == RequiredProperty)
         {
-            // aria-required, at style priority, so an app's own value wins.
-            _requiredFrame?.Dispose();
-            _requiredFrame = Required ? SetValue(AutomationProperties.IsRequiredForFormProperty, true, BindingPriority.Style) : null;
+            _required.SetWhen(Required, true);
         }
     }
 
