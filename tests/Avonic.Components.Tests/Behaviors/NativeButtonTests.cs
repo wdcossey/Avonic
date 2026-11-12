@@ -564,6 +564,33 @@ public class NativeButtonTests
         Assert.Equal(0, clicks);
     }
 
+    // One key click on a stock button in a chip in a chip reaches both, once each, and stopPropagation() in the inner chip's
+    // listener stops it before the outer one, as the DOM's one click.
+    [AvaloniaTheory]
+    [InlineData(false, 1)]
+    [InlineData(true, 0)]
+    public void S4_A_Key_Click_In_A_Chip_In_A_Chip_Reaches_The_Outer_One_Unless_Stopped(bool stop, int outerClicks)
+    {
+        var button = StockButton();
+        var inner = new AvonicChip { Items = { button } };
+        var outer = new AvonicChip { Items = { inner } };
+        int innerCount = 0, outerCount = 0;
+        inner.Click += (_, e) =>
+        {
+            innerCount++;
+            e.Handled = stop;
+        };
+        outer.Click += (_, _) => outerCount++;
+        using var scene = new Scene(outer);
+
+        button.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(1, innerCount);
+        Assert.Equal(outerClicks, outerCount);
+    }
+
     // Invoke is offered while something listens: a null handler isn't one, and removing one never added leaves the real one.
     [AvaloniaFact]
     public void A_Chips_Invoke_Follows_The_Handlers_It_Really_Has()

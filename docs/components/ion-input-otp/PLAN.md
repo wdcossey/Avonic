@@ -133,7 +133,7 @@ StackPanel (root)
 `InputOtpGroupPanel.FlexBasis` (`--width`), as a `Width` would stop it shrinking (since the #131 roll-up, a `FlexRow` with
 `FlexRow.FlexBasis`, centred, and each box and separator centred down by default); boxes shrink in proportion to it down to their
 `MinWidth`, separators don't (`flex-shrink: 0`), and a row that still doesn't fit overflows both sides. `FlexRow` has no gap, no
-centring and no basis of its own, so it isn't reused.
+centring and no basis of its own, so it isn't reused. (The #131 roll-up gave `FlexRow` all three and retired `InputOtpGroupPanel`.)
 
 The box's input is handled as Chromium hands it to Ionic: text input (typing, a soft keyboard, an IME's commit) in a tunnel
 handler, which works out what the native input would hold and its caret, and runs `onInput` with them; Backspace and the arrows in a

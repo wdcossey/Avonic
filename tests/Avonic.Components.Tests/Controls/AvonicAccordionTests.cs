@@ -784,6 +784,36 @@ public class AvonicAccordionTests
     }
 
     /// <summary>
+    /// A chip in a chip, both clicked by one key click on a stock button inside, toggles once; a chip that stops its click stops
+    /// that one click before it reaches the header.
+    /// </summary>
+    [AvaloniaFact]
+    public void B13_A_Key_Click_Through_Two_Chips_Toggles_Once_And_Not_At_All_When_Stopped()
+    {
+        var nested = new Button { Content = "Nested" };
+        var stopped = new Button { Content = "Stopped" };
+        var stopping = new AvonicChip { Items = { stopped } };
+        stopping.Click += (_, e) => e.Handled = true;
+        var item = Item("a");
+        item.EndContent = new StackPanel { Children = { new AvonicChip { Items = { new AvonicChip { Items = { nested } } } }, stopping } };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        nested.Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        clock.At(1000);
+        stopped.Focus();
+        scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+
+        Assert.Equal(["a"], changes);
+    }
+
+    /// <summary>
     /// The same for any other control with a native button, which the header hears as one event rather than a list of them:
     /// a fab button's and a breadcrumb's clicks bubble to <c>#header</c> too. A handled one doesn't.
     /// </summary>

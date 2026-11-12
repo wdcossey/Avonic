@@ -45,6 +45,8 @@ internal sealed class NativeButton
     private bool _routingPointer;
     private Button? _stockButtonClicked;
     private RoutedEventArgs? _stockClick;
+    private RoutedEventArgs? _nestedStockClick;
+    private RoutedEvent? _nestedStockClickEvent;
     private readonly List<Delegate> _clickHandlers = [];
     private TopLevel? _watchedForFingers;
 
@@ -153,6 +155,13 @@ internal sealed class NativeButton
         }
 
         _nestedClick = null;
+
+        // stopPropagation() on the DOM's one click, which is the stock button's: it goes no further, past controls around this one.
+        if (handled && _stockClick is { } stockClick)
+        {
+            stockClick.Handled = true;
+        }
+
         _owner.RaiseEvent(new ClickInsideArgs(click, handled, _stockClick));
 
         if (!handled && Command is { } command && command.CanExecute(CommandParameter))
@@ -332,8 +341,14 @@ internal sealed class NativeButton
             return;
         }
 
+        // One of this type inside has already raised its Click for this same click, which reached this control's handlers.
+        var nested = ReferenceEquals(e, _nestedStockClick) ? _nestedStockClickEvent : null;
+        _nestedStockClick = null;
+        _nestedStockClickEvent = null;
+
         StockButtonClicked?.Invoke(button);
         _stockClick = e;
+        _nestedClick = nested;
         try
         {
             _activate(button);
@@ -341,6 +356,7 @@ internal sealed class NativeButton
         finally
         {
             _stockClick = null;
+            _nestedClick = null;
         }
     }
 
@@ -358,6 +374,12 @@ internal sealed class NativeButton
         else if (_pointer is not null)
         {
             _nestedClick = e.Click;
+        }
+        else if (StockButtonsClick && e.StockClick is { } stockClick)
+        {
+            // A key's click on a stock button in one inside, which reaches this one next.
+            _nestedStockClick = stockClick;
+            _nestedStockClickEvent = e.Click;
         }
     }
 

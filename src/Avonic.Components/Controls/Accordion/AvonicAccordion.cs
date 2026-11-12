@@ -638,12 +638,24 @@ public class AvonicAccordion : TemplatedControl
     /// </summary>
     private void OnNativeButtonClick(object? sender, NativeButton.ClickInsideArgs e)
     {
-        if (!e.Stopped)
+        if (e.Stopped)
         {
-            // A chip's click from a key on a stock button in it is that button's click, which reaches the header next.
-            _countedStockClick = e.StockClick;
-            OnInnerClick();
+            return;
         }
+
+        // A chip's click from a key on a stock button in it is that button's click, which reaches the header next, and a chip
+        // around that chip clicks with it: one DOM click, counted once.
+        if (e.StockClick is { } stockClick)
+        {
+            if (ReferenceEquals(stockClick, _countedStockClick))
+            {
+                return;
+            }
+
+            _countedStockClick = stockClick;
+        }
+
+        OnInnerClick();
     }
 
     /// <summary>A stock button's click, which bubbles too. A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.</summary>
