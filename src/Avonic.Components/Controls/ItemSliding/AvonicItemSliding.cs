@@ -271,7 +271,7 @@ public class AvonicItemSliding : ItemsControl
             OnMove = OnMove,
             OnEnd = OnEnd,
         });
-        _gesture.Enable(!Disabled);
+        _gesture.Enable(GestureEnabled);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -295,10 +295,10 @@ public class AvonicItemSliding : ItemsControl
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == DisabledProperty)
+        if (change.Property == DisabledProperty || change.Property == IsEffectivelyEnabledProperty)
         {
-            // disabledChanged
-            _gesture?.Enable(!change.GetNewValue<bool>());
+            // disabledChanged; and Avalonia's IsEnabled, which stops the input a drag needs, so the drag ends as it does here.
+            _gesture?.Enable(GestureEnabled);
         }
         else if (change.Property == FlowDirectionProperty)
         {
@@ -309,6 +309,12 @@ public class AvonicItemSliding : ItemsControl
 
     /// <summary>Ionic's <c>MutationObserver</c> on the subtree: any change of the children, here or in an options, finds them again.</summary>
     internal void OptionsChanged() => UpdateOptions();
+
+    /// <summary>
+    /// <c>!this.disabled</c>, and Avalonia's <c>IsEnabled</c> on this or an ancestor, as a disabled control takes no input: a drag
+    /// it was in ends, rather than waiting on moves that don't come.
+    /// </summary>
+    private bool GestureEnabled => !Disabled && IsEffectivelyEnabled;
 
     /// <summary><c>el.querySelector('ion-item')</c>: the first item among the light DOM's descendants, in document order.</summary>
     private AvonicItem? FindItem() => this.GetLogicalDescendants().OfType<AvonicItem>().FirstOrDefault();
@@ -559,7 +565,7 @@ public class AvonicItemSliding : ItemsControl
                 _tmr = null;
                 _closing = false;
                 SetState(SlidingState.Disabled);
-                _gesture?.Enable(!Disabled);
+                _gesture?.Enable(GestureEnabled);
             }, CloseDelay);
             s_openSlidingItem = null;
             UpdateClasses();

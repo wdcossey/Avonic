@@ -785,6 +785,33 @@ public class AvonicItemSlidingTests
     }
 
     [AvaloniaFact]
+    public void S18_IsEnabled_False_Mid_Drag_Ends_The_Drag_And_Gives_Scrolling_Back()
+    {
+        // Not Ionic's disabled, but Avalonia's IsEnabled, here or on an ancestor: a disabled control takes no input, so its drag
+        // ends as gesture.enable(false) ends it, rather than waiting on moves it no longer gets.
+        AvonicContent? content = null;
+        StackPanel? column = null;
+        using var f = Make(wrap: sliding => content = new AvonicContent { Content = column = new StackPanel { Children = { sliding } } });
+        var t = SlowDrag(f, 0, 300, 190, false, out var finger); // 100 open, slow
+        Assert.False(content!.ScrollY);
+
+        column!.IsEnabled = false;
+        f.At(t + 16);
+        Assert.Equal(EndWidth, f.Sliding.GetOpenAmount(), 3);
+        Assert.True(content.ScrollY);
+        finger.Up(250, Y, t + 32);
+
+        // Enabled again, the drag is back on.
+        column.IsEnabled = true;
+        f.Sliding.Close();
+        f.At(t + 2000);
+        Assert.Equal(0, f.Sliding.GetOpenAmount());
+        f.Finger().Down(300, Y, t + 2100).Move(290, Y, t + 2116).Move(200, Y, t + 2132);
+        f.At(t + 2148);
+        Assert.Equal(90, f.Sliding.GetOpenAmount(), 3);
+    }
+
+    [AvaloniaFact]
     public void S19_A_Sliding_Item_Removed_Mid_Drag_Gives_The_Content_Its_Scrolling_Back()
     {
         AvonicContent? content = null;

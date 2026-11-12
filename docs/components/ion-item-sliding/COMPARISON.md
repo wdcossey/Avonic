@@ -54,7 +54,7 @@ swipe on `a` from 300 to 40 in 8 px steps, held 700 ms.
 | S13–S15 | Methods | `open`, `close`, `closeOpened`, amounts and ratio | `S13`–`S15` | match |
 | S16 | Options shown only on the open side, `width: 100%`, behind | `display: none`, then `visibility: hidden` but the open side; 390 wide | `S16` | match |
 | S17 | RTL | `isEndSide`, `:dir(rtl)` | `S17` | match |
-| S18 | Disabled | `gesture.enable(!disabled)`, and the item still clicks | `S18` ×4 | match |
+| S18 | Disabled | `gesture.enable(!disabled)`, and the item still clicks | `S18` ×5 | match |
 | S19 | Content's `scrollY` off during a drag | `disableContentScrollY` | `S19` ×2 | match |
 | S20 | Children found again | `MutationObserver`, `onStart` | `S20` | match |
 | S21 | In a scroller | Chromium scrolls a vertical drag and the gesture takes a sideways one | `S21` | match |
@@ -72,7 +72,8 @@ swipe on `a` from 300 to 40 in 8 px steps, held 700 ms.
   input or focus in both.
 - **One open item per process**, not per document.
 - **`disabled` is `Disabled`, not `IsEnabled`,** as Avalonia's inherited `IsEnabled` would disable the item too, where Ionic's
-  `disabled` only stops the gesture.
+  `disabled` only stops the gesture. `IsEnabled` false, here or on an ancestor, keeps Avalonia's meaning, and also turns the
+  gesture off, ending a drag where it is, as a disabled control gets no more moves.
 - **A sliding item removed mid-drag gives the content its scrolling back.** Ionic's `destroy()` ends the drag with no `onEnd`,
   which leaves `ion-content`'s `scrollY` off.
 - **One close timer at a time.** A drag back past closed ends the drag, whose `onEnd` closes again from inside the first close;
