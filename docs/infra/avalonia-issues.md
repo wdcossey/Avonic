@@ -170,3 +170,13 @@ theme when it's attached, it seems. The typography README says to merge the file
 shown. Found by #70 (PR #145). To reproduce: show a window with a `TextBlock`, then add a `ResourceDictionary` holding a
 `ControlTheme` for `TextBlock` that sets `FontSize` to the window's `Resources.MergedDictionaries`: the shown `TextBlock` keeps its
 size, and a `TextBlock` added after it takes the new one.
+
+## A pseudoclass before a `:not()` that holds a combinator is dropped
+
+**Measured in #131's roll-up (R4b), and the cause not read.** In `Styles/List.axaml`, the inset list's rule for its last item was
+written `c|AvonicList:inset c|AvonicItem:nth-last-child(1):not(c|AvonicItemSliding > c|AvonicItem) /template/ Border#PART_Native`,
+and it matched every item in the list, as if `:nth-last-child(1)` weren't there (`AvonicListTests.L12_An_Inset_Lists_Last_Item_Has_No_Border`
+failed on the first and middle items). Written the other way round,
+`c|AvonicItem:not(c|AvonicItemSliding > c|AvonicItem):nth-last-child(1)`, it works, and the L12 tests hold it. A `:not()` with no
+combinator inside, after a pseudoclass, works as expected. To reproduce: swap the two in that rule, and the L12 tests fail. A
+reproduction outside Avonic hasn't been tried.

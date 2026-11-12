@@ -67,6 +67,13 @@ public class AvonicTabs : TemplatedControl
     private ContentPresenter? _contentPresenter;
     private ContentPresenter? _bottomPresenter;
 
+    static AvonicTabs()
+    {
+        // contain: layout size style, with no paint, and no overflow rule: it doesn't clip, so a fullscreen content's parts that
+        // run past it, as they do under a top bar, are drawn, as in Chromium. A TemplatedControl clips by default.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicTabs>(false);
+    }
+
     public AvonicTabs()
     {
         // onIonTabButtonClick on the host: a tab button's click, from anywhere in it.

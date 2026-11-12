@@ -110,6 +110,7 @@ The options' line uses `Avonic.ItemBorderColorBrush`, as the item's does.
   kept `item-sliding-closing` after `open('start')` on an item open at the end); and in RTL `Open()` with no side opens the
   physical right when only the left has options.
 - **In an inset list,** the item in the last sliding item loses its line and an item last inside a sliding item that isn't the
-  last keeps it, as in Ionic. "Last" is the last child, as everywhere in the list ([ion-list](../ion-list/README.md)).
+  last keeps it, as in Ionic. "Last" is the last child, as everywhere in the list ([ion-list](../ion-list/README.md)), where
+  Ionic's is the last of its type: a sliding item followed by a plain item or a note keeps its line here.
 - **`AvonicList.CloseSlidingItems()`** is Ionic's `closeSlidingItems()`, which calls `CloseOpened()` on the list's first sliding item.
 - Tried in a real window with touch and the mouse by `tools/real-window`, which found that no mouse could open one (fixed in the gesture); not on a device.

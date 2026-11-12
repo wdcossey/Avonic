@@ -2483,6 +2483,26 @@ public class AvonicContentTests
     }
 
     [AvaloniaFact]
+    public void B26_In_Tabs_A_Page_Inside_The_Tab_Is_The_Offset_Parent()
+    {
+        // An .ion-page between the content and the tabs is position: absolute, so it's the offset parent, and offsetTop counts
+        // from it, not from the tab or .tabs-inner: 0 here, inside a wrapper with 10 of padding, and the bottom is 400 less 380.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var page = new Grid { Children = { content } };
+        page.Classes.Add("ion-page");
+        var tabs = new AvonicTabs
+        {
+            Height = 400,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = new AvonicTab { Tab = "a", Content = new Border { Padding = new Thickness(10), Child = page } },
+        };
+        using var scene = new Scene(tabs);
+
+        Assert.Equal(new Rect(10, 10, 370, 380), Box(content, scene.Window));
+        Assert.Equal(new Thickness(0, 0, 0, 20), Container(content).Padding);
+    }
+
+    [AvaloniaFact]
     public void B26_In_Tabs_The_Background_Shows_Behind_A_See_Through_Tab_Bar() => InstalledTheme.Run(_ =>
     {
         // Measured tabs-fs: the content's background shows through a translucent tab bar, as the tab doesn't clip (overflow: visible).
@@ -2496,6 +2516,23 @@ public class AvonicContentTests
         var frame = scene.Window.CaptureRenderedFrame()!;
         Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 390));
         Assert.Equal(Colors.White, Frames.PixelAt(frame, 200, 410));
+    });
+
+    [AvaloniaFact]
+    public void B26_In_Tabs_With_A_Top_Tab_Bar_What_Runs_Past_The_Tabs_Is_Drawn() => InstalledTheme.Run(_ =>
+    {
+        // Measured tabs-fs, slot="top": the scroll and background parts run 57 past the tabs' bottom, and Chromium draws them
+        // there, as ion-tabs doesn't clip (contain without paint).
+        var content = new AvonicContent { Fullscreen = true };
+        content.Resources["Avonic.Content.Background"] = new SolidColorBrush(Colors.Red);
+        var tabs = InTabs(content, 57, top: true);
+        using var scene = new Scene(tabs);
+        scene.Window.Background = Brushes.White;
+        Render();
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(Colors.Red, Frames.PixelAt(frame, 200, 430));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 200, 470));
     });
 
     [AvaloniaFact]
@@ -2738,14 +2775,18 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B29_A_Grid_Or_A_Canvas_Overlaps_Its_Children_So_It_Stands_For_The_Slot_Too()
     {
+        // A grid with columns lays its children out, as a div would: one block at the corner.
         var grid = new Grid { Children = { new Border { Width = 60, Height = 60 } } };
         var canvas = new Canvas { Children = { new Border { Width = 60, Height = 60 } } };
+        var columns = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto"), Children = { new Border { Width = 60, Height = 60 } } };
         var withGrid = new AvonicContent { FixedContent = grid };
         var withCanvas = new AvonicContent { FixedContent = canvas };
-        using var scene = new Scene(new StackPanel { Children = { InBox(withGrid), InBox(withCanvas) } });
+        var withColumns = new AvonicContent { FixedContent = columns };
+        using var scene = new Scene(new StackPanel { Children = { InBox(withGrid), InBox(withCanvas), InBox(withColumns) } });
 
         Assert.Equal(new Rect(0, 0, 390, 300), Box(grid, withGrid));
         Assert.Equal(new Rect(0, 0, 390, 300), Box(canvas, withCanvas));
+        Assert.Equal(new Rect(0, 0, 60, 60), Box(columns, withColumns));
     }
 
     [AvaloniaFact]

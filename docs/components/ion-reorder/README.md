@@ -93,7 +93,8 @@ None. `:reorder-selected`, `:reorder-enabled` and `:reorder-list-active` are Ion
 
 - **No grab or grabbing cursor** in Avalonia: the hand, and no change while dragging.
 - **The lifted opacity is only for `AvonicItem` and a wrapping handle**; another type of child has the shadow and the z-index, and
-  needs its own `:reorder-selected` style for the 0.8.
+  needs its own `:reorder-selected` style for the 0.8. The item's is in its own theme, so an app's own `ControlTheme` for
+  `AvonicItem` needs it too.
 - **A press on a handle is handled**, as only that stops the click here, where Ionic stops only the click: a text box inside a
   handle with no group, or one waiting for `Complete()`, isn't focused by a tap. In an enabled group Ionic's drag prevents that too.
 - **A slot is an item's start or end**: a handle in another host's named slot isn't hidden, as Ionic's `[slot]` would be.

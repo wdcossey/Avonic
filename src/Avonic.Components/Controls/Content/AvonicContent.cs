@@ -662,10 +662,10 @@ public class AvonicContent : TemplatedControl
     /// <summary>
     /// <c>position: absolute</c> with no inset: it's as big as its content, at the host's corner. An app's own alignment wins, its
     /// style too, as for <see cref="UpdateContainerChild"/>. A slot holds one child here, so a panel that overlaps its children (a
-    /// plain <see cref="Panel"/>, a <see cref="Grid"/> or a <see cref="Canvas"/>) stands for the slot, as Ionic takes any number of
-    /// <c>slot="fixed"</c> elements: it's left to fill the host, and its children, such as several <see cref="AvonicFab"/>s, place
-    /// themselves in it. A panel that flows its children, a <see cref="StackPanel"/> say, is a <c>div</c> around them, so it's one
-    /// block at the corner.
+    /// plain <see cref="Panel"/>, a <see cref="Canvas"/>, or a <see cref="Grid"/> with no rows or columns) stands for the slot, as
+    /// Ionic takes any number of <c>slot="fixed"</c> elements: it's left to fill the host, and its children, such as several
+    /// <see cref="AvonicFab"/>s, place themselves in it. A panel that lays its children out, a <see cref="StackPanel"/> or a
+    /// <see cref="Grid"/> with columns say, is a <c>div</c> around them, so it's one block at the corner. Read when it's slotted.
     /// </summary>
     private void UpdateFixedChild()
     {
@@ -677,7 +677,8 @@ public class AvonicContent : TemplatedControl
         }
     }
 
-    private static bool StandsForTheSlot(Control child) => child.GetType() == typeof(Panel) || child is Grid or Canvas;
+    private static bool StandsForTheSlot(Control child) =>
+        child.GetType() == typeof(Panel) || child is Canvas || child is Grid { RowDefinitions.Count: 0, ColumnDefinitions.Count: 0 };
 
     private static void Reset(List<IDisposable> frames)
     {
