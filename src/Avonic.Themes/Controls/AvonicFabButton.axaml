@@ -20,9 +20,9 @@
     </Design.PreviewWith>
 
     <!-- A translation of fab-button.md.css, in its order: its state rules have equal specificity, and so does everything
-         here with a pseudoclass, so later beats earlier. Its ::slotted rules are in Styles/FabButton.axaml, because a
-         ControlTheme can't reach the content. fab-list.css's rules for a button in a list are here, on :in-list, so that
-         they cost nothing elsewhere. -->
+         here with a pseudoclass, so later beats earlier. A ControlTheme can't reach the content, so its ::slotted(ion-icon)
+         rules are c:AvonicIcon.SlotFontSize here, which an icon that is the button's own child takes, and an app's style
+         beats. fab-list.css's rules for a button in a list are here, on :in-list, so that they cost nothing elsewhere. -->
     <ControlTheme x:Key="{x:Type c:AvonicFabButton}" TargetType="c:AvonicFabButton">
         <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
         <!-- display: block; width: 56px; height: 56px; margin: 0; font-size: 14px -->
@@ -30,6 +30,8 @@
         <Setter Property="Height" Value="56" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="FontSize" Value="14" />
+        <!-- ::slotted(ion-icon) { font-size: 24px } -->
+        <Setter Property="c:AvonicIcon.SlotFontSize" Value="24" />
         <!-- text-align: center; white-space: nowrap; font-kerning: none -->
         <Setter Property="TextBlock.TextAlignment" Value="Center" />
         <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
@@ -240,6 +242,11 @@
             <Setter Property="Width" Value="40" />
             <Setter Property="Height" Value="40" />
             <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <!-- :host(.fab-button-in-list) ::slotted(ion-icon) { font-size: 18px } -->
+        <Style Selector="^:in-list">
+            <Setter Property="c:AvonicIcon.SlotFontSize" Value="18" />
         </Style>
 
         <!-- :host(.fab-button-in-list), which sets the variables' defaults: an app's value still wins -->

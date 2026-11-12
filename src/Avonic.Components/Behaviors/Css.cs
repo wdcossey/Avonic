@@ -68,9 +68,42 @@ public static class Css
     /// </summary>
     public static readonly IMultiValueConverter Rgba = new RgbaConverter();
 
+    /// <summary>
+    /// <c>calc(0px - var(--a, var(--b)))</c>: the first value that's set, a number, negated. As a <see cref="Thickness"/>, the
+    /// <c>ConverterParameter</c> names its one side, <c>Start</c>, <c>Top</c>, <c>End</c> or <c>Bottom</c>, and the others are 0; a
+    /// <see cref="Thickness"/> mirrors with the flow, so <c>Start</c> is the start edge in both directions. A first set value that
+    /// isn't a finite number is an invalid <c>calc()</c>, so it gives nothing.
+    /// </summary>
+    public static readonly IMultiValueConverter Negate = new NegateConverter();
+
     /// <summary>Whether a value from a <c>{DynamicResource}</c> or a binding counts as set: not null, unset or <see cref="CssUnset"/>.</summary>
     internal static bool IsSet(object? value) =>
         value is not (null or CssUnset) && !ReferenceEquals(value, AvaloniaProperty.UnsetValue);
+
+    private sealed class NegateConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values.FirstOrDefault(IsSet) is not double value || !double.IsFinite(value))
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            if (!typeof(Thickness).IsAssignableFrom(targetType))
+            {
+                return -value;
+            }
+
+            return parameter switch
+            {
+                "Start" => new Thickness(-value, 0, 0, 0),
+                "Top" => new Thickness(0, -value, 0, 0),
+                "End" => new Thickness(0, 0, -value, 0),
+                "Bottom" => new Thickness(0, 0, 0, -value),
+                _ => AvaloniaProperty.UnsetValue,
+            };
+        }
+    }
 
     private sealed class RgbaConverter : IMultiValueConverter
     {

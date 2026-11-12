@@ -22,6 +22,13 @@ public static class BorderRadius
     /// <summary>The radius as a <c>Clip</c>, for an image with <c>overflow: hidden</c>. Null when there are no round corners.</summary>
     public static readonly IMultiValueConverter ToClip = new ClipConverter();
 
+    /// <summary>
+    /// <c>border-radius: var(--a, var(--b))</c>, where the variable falls back to another: <see cref="ToCornerRadius"/> of the first
+    /// value that's set, of all but the last two, which are the element's <c>Bounds</c> and <c>FlowDirection</c>. So any of the
+    /// keys can hold a percentage. With none set it's 0, as an invalid <c>var()</c> is.
+    /// </summary>
+    public static readonly IMultiValueConverter VarToCornerRadius = new VarCornerRadiusConverter();
+
     /// <summary>The four corners' radii across and down, in the order top left, top right, bottom right, bottom left.</summary>
     private readonly record struct Radii(Size TopLeft, Size TopRight, Size BottomRight, Size BottomLeft)
     {
@@ -127,6 +134,20 @@ public static class BorderRadius
             return values.Count > 2 && values[2] is FlowDirection.RightToLeft
                 ? new CornerRadius(Of(r.TopRight), Of(r.TopLeft), Of(r.BottomLeft), Of(r.BottomRight))
                 : new CornerRadius(Of(r.TopLeft), Of(r.TopRight), Of(r.BottomRight), Of(r.BottomLeft));
+        }
+    }
+
+    private sealed class VarCornerRadiusConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values.Count < 3)
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var radius = values.Take(values.Count - 2).FirstOrDefault(Css.IsSet);
+            return ToCornerRadius.Convert([radius, values[^2], values[^1]], targetType, parameter, culture);
         }
     }
 

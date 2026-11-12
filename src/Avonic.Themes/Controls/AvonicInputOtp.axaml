@@ -39,7 +39,7 @@
         </Setter>
         <Setter Property="MinWidth" Value="{DynamicResource Avonic.InputOtp.MinWidth}" />
         <Setter Property="CornerRadius">
-            <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+            <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
                 <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusRound" />
                 <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -129,7 +129,7 @@
         <!-- :host(.input-otp-shape-*): border-radius 8 or 0; round is the default above -->
         <Style Selector="^:shape-soft">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
                     <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusSoft" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -139,7 +139,7 @@
         </Style>
         <Style Selector="^:shape-rectangular">
             <Setter Property="CornerRadius">
-                <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
                     <DynamicResource ResourceKey="Avonic.InputOtp.BorderRadius" />
                     <DynamicResource ResourceKey="Avonic.InputOtp.Md.BorderRadiusRectangular" />
                     <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
@@ -261,7 +261,7 @@
             </MultiBinding>
         </Setter>
         <Setter Property="CornerRadius">
-            <MultiBinding Converter="{x:Static c:AvonicInputOtp.RadiusConverter}">
+            <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
                 <DynamicResource ResourceKey="Avonic.InputOtp.SeparatorBorderRadius" />
                 <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
                 <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
