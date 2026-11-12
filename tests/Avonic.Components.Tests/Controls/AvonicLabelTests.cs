@@ -720,7 +720,7 @@ public class AvonicLabelTests
         var label = WithClass("ion-text-wrap", new StackPanel { Children = { h2, h3, p } });
         using var scene = InScene(new AvonicItem { Content = label });
 
-        Assert.Equal(19.2, h2.LineHeight);
+        // h2 is left out: Chromium gives it the wrap's 1.5 without typography.css, and 1.2 with it (TypographyTests). See docs/infra/typography.
         Assert.True(double.IsNaN(h3.LineHeight));
         Assert.Equal(20, p.LineHeight);
     });
@@ -737,8 +737,8 @@ public class AvonicLabelTests
     // ── 11. Headings and paragraphs ──────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
-    [InlineData("h1", 24, 0, 2, 28.8)]
-    [InlineData("h2", 16, 2, 2, 19.2)]
+    [InlineData("h1", 24, 0, 2, double.NaN)]
+    [InlineData("h2", 16, 2, 2, double.NaN)]
     [InlineData("h3", 14, 2, 2, double.NaN)]
     [InlineData("h4", 14, 2, 2, double.NaN)]
     [InlineData("h5", 14, 2, 2, double.NaN)]
@@ -804,11 +804,11 @@ public class AvonicLabelTests
             new AvonicLabel { Content = new Grid { Children = { inPanel } } },
             new AvonicLabel { Content = new Border { Child = deeper } });
 
-        Assert.Equal(19.2, direct.LineHeight);
-        Assert.Equal(19.2, inPanel.LineHeight);
+        Assert.Equal(new Thickness(0, 2, 0, 2), direct.Margin);
+        Assert.Equal(new Thickness(0, 2, 0, 2), inPanel.Margin);
 
         // Deliberate: measured, these apply at any depth in Ionic. See the plan for what that would cost.
-        Assert.True(double.IsNaN(deeper.LineHeight));
+        Assert.Equal(default, deeper.Margin);
     });
 
     [AvaloniaTheory]

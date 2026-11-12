@@ -33,8 +33,9 @@ public class AvonicCardCaptureTests
     };
 
     // The same content as the command at the top of docs/components/ion-card/COMPARISON.md.
+    // With Css/Typography.axaml merged, as render.js loads ionic.bundle.css, which includes typography.css.
     [AvaloniaFact]
-    public void Reference_Page() => InstalledTheme.Run(_ =>
+    public void Reference_Page() => Typography.TypographyTests.WithFile(() =>
     {
         var page = new StackPanel
         {

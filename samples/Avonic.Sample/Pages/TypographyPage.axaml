@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.TypographyPage">
+
+    <!-- Ionic's typography.css, merged here only, so that no other page changes. An app merges it once, in its own
+         Application.Resources. See docs/infra/typography/README.md. -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Avonic.Themes/Css/Typography.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <c:AvonicContent>
+        <StackPanel>
+            <StackPanel Margin="16,0">
+                <TextBlock Classes="h1" Text="Heading 1" />
+                <TextBlock Classes="h2" Text="Heading 2" />
+                <TextBlock Classes="h3" Text="Heading 3" />
+                <TextBlock Classes="h4" Text="Heading 4" />
+                <TextBlock Classes="h5" Text="Heading 5" />
+                <TextBlock Classes="h6" Text="Heading 6" />
+                <TextBlock Classes="p" Text="A paragraph" />
+            </StackPanel>
+
+            <c:AvonicItemDivider>
+                <TextBlock Classes="h1" Text="h1 in a divider" />
+            </c:AvonicItemDivider>
+            <c:AvonicItemDivider>
+                <TextBlock Classes="h3" Text="h3 in a divider" />
+            </c:AvonicItemDivider>
+
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <StackPanel>
+                        <TextBlock Classes="h1" Text="h1 in a label" />
+                        <TextBlock Classes="h3" Text="h3 in a label" />
+                        <TextBlock Classes="p" Text="p in a label" />
+                    </StackPanel>
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicCard>
+                <c:AvonicCardContent>
+                    <StackPanel>
+                        <TextBlock Classes="h1" Text="h1 in a card" />
+                        <TextBlock Classes="h2" Text="h2 in a card" />
+                        <TextBlock Classes="p" Text="p in a card" />
+                    </StackPanel>
+                </c:AvonicCardContent>
+            </c:AvonicCard>
+        </StackPanel>
+    </c:AvonicContent>
+
+</UserControl>

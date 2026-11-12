@@ -118,7 +118,7 @@ and layout rounding makes that 25. The tests found this.
 
 | What | Goes with |
 |---|---|
-| `h1`–`h6` in a divider. `::slotted(h1)`'s margins are dead in real Ionic: global typography beats them. Measured `dh1` to `dh6`: sizes 26, 24, 22, 20, 18, 16, weight 500, line height 1.2, 16 above except `h1` 20 and `h2` 18, 10 below | Global typography, which has nowhere to live yet. `ion-text` (#8) or a later global style |
+| `h1`–`h6` in a divider. `::slotted(h1)`'s margins are dead in real Ionic: global typography beats them. Measured `dh1` to `dh6`: sizes 26, 24, 22, 20, 18, 16, weight 500, line height 1.2, 16 above except `h1` 20 and `h2` 18, 10 below | With the opt-in [typography](../../infra/typography/README.md) file ([#70](https://github.com/wdcossey/Avonic/issues/70)), as measured. Without it, Chromium gives `h1` 0 / 2 and `h2` 2 / 2 from `::slotted`, which Avonic doesn't add: a known difference in the typography plan |
 | `ion-avatar`, `ion-thumbnail`, `ion-button`'s `inItem` | Those controls (#16, #10), in their own `Styles` files (their margin rules are in `Styles/ItemDivider.axaml` since #88 and its follow-up). Values are in `item-divider.md.css`. `::slotted(ion-note)` was left to `ion-note` the same way, and fell between the two until [#74](https://github.com/wdcossey/Avonic/issues/74) put it in `Styles/Note.axaml` |
 | `--ion-safe-area-*` | `ion-content` (#11), as for `ion-item` |
 

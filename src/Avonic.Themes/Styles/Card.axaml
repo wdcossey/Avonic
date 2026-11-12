@@ -138,15 +138,17 @@
         <Setter Property="Padding" Value="16,0,16,13" />
     </Style>
 
-    <!-- .card-content-md h1 etc, with a panel standing for the slot. line-height 1.2 on headings is from Ionic's
-         global typography. -->
+    <!-- .card-content-md h1 etc, with a panel standing for the slot. line-height on headings is
+         Avonic.CardContent.HeadingLineHeight: the 1.5 they inherit, or typography.css's 1.2 once an app merges
+         Css/Typography.axaml. -->
     <Style Selector="c|AvonicCardContent > TextBlock.h1, c|AvonicCardContent > :is(Panel) > TextBlock.h1">
         <Setter Property="Margin" Value="0,0,0,2" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight">
-            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+            <MultiBinding Converter="{x:Static b:Css.Em}">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.CardContent.HeadingLineHeight" />
             </MultiBinding>
         </Setter>
     </Style>
@@ -155,8 +157,9 @@
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight">
-            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+            <MultiBinding Converter="{x:Static b:Css.Em}">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.CardContent.HeadingLineHeight" />
             </MultiBinding>
         </Setter>
     </Style>
@@ -165,8 +168,9 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="LineHeight">
-            <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.2">
+            <MultiBinding Converter="{x:Static b:Css.Em}">
                 <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                <DynamicResource ResourceKey="Avonic.CardContent.HeadingLineHeight" />
             </MultiBinding>
         </Setter>
     </Style>
