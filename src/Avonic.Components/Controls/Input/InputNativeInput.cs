@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Media.Fonts;
 using Avalonia.Media.TextFormatting;
 
 namespace Avonic.Components.Controls;
@@ -15,7 +16,7 @@ namespace Avonic.Components.Controls;
 /// <remarks>
 /// Chromium's <c>LayoutTextControlSingleLine</c>: 20 × the character's width, rounded up, plus the font's widest glyph less one
 /// character when the font gives an average width, as Roboto does. The character is the <c>x</c> glyph's advance, rounded, as
-/// Chromium on Windows takes it, where the font gives Skia no average: the textarea's <c>cols</c> measure the same. The widest
+/// Chromium on Windows takes it, where the font gives Skia no average, as the textarea's <c>cols</c> do; rounded as <c>roundf</c> rounds. The widest
 /// glyph is the <c>head</c> table's <c>xMax - xMin</c>, rounded. Measured 199 wide at 16 px Roboto and 298 at 24 px, which this
 /// gives.
 /// </remarks>
@@ -24,7 +25,7 @@ public sealed class InputNativeInput : TextBox
     /// <summary>HTML's <c>size</c> when it isn't set, which <c>ion-input</c> doesn't set.</summary>
     public const int DefaultSize = 20;
 
-    /// <summary>Each typeface's widest glyph per em, or null, read once: the font's file is read whole for it.</summary>
+    /// <summary>Each typeface's widest glyph per em, or null, read once.</summary>
     private static readonly ConditionalWeakTable<GlyphTypeface, StrongBox<double?>> s_widest = new();
 
     private bool _sizesToCharacters;
@@ -97,67 +98,23 @@ public sealed class InputNativeInput : TextBox
 
     /// <summary>
     /// The <c>head</c> table's <c>xMax - xMin</c> over its units per em, when the <c>OS/2</c> table gives an average width, as
-    /// Chromium's <c>HasValidAvgCharWidth</c> asks. Null if the font's tables can't be read, or it's a collection. Read once per
-    /// typeface, as the file is read whole.
+    /// Chromium's <c>HasValidAvgCharWidth</c> asks. Null if the font hasn't the tables. Read once per typeface.
     /// </summary>
     private static double? WidestGlyphPerEm(GlyphTypeface glyphTypeface)
     {
-        try
-        {
-            if (!glyphTypeface.PlatformTypeface.TryGetStream(out var stream))
-            {
-                return null;
-            }
-
-            using (stream)
-            {
-                if (stream.CanSeek)
-                {
-                    stream.Position = 0;
-                }
-
-                using var copy = new MemoryStream();
-                stream.CopyTo(copy);
-                var font = copy.ToArray();
-                if (Table(font, "head") is not { Length: >= 44 } head || Table(font, "OS/2") is not { Length: >= 4 } os2
-                    || BinaryPrimitives.ReadInt16BigEndian(os2[2..]) == 0)
-                {
-                    return null;
-                }
-
-                var unitsPerEm = BinaryPrimitives.ReadUInt16BigEndian(head[18..]);
-                var xMin = BinaryPrimitives.ReadInt16BigEndian(head[36..]);
-                var xMax = BinaryPrimitives.ReadInt16BigEndian(head[40..]);
-                return unitsPerEm == 0 ? null : (double)(xMax - xMin) / unitsPerEm;
-            }
-        }
-        catch (Exception exception) when (exception is IOException or NotSupportedException or ArgumentOutOfRangeException
-                                              or ObjectDisposedException)
+        var font = glyphTypeface.PlatformTypeface;
+        if (!font.TryGetTable(new OpenTypeTag('h', 'e', 'a', 'd'), out var headTable) || headTable.Length < 44
+            || !font.TryGetTable(new OpenTypeTag('O', 'S', '/', '2'), out var os2Table) || os2Table.Length < 4)
         {
             return null;
         }
-    }
 
-    /// <summary>A table of a single font's file, by its tag. Empty for a collection (<c>ttcf</c>), or a tag it hasn't got.</summary>
-    private static ReadOnlySpan<byte> Table(byte[] font, string tag)
-    {
-        if (font.Length < 12 || (font[0] == 't' && font[1] == 't' && font[2] == 'c' && font[3] == 'f'))
-        {
-            return default;
-        }
-
-        var tables = BinaryPrimitives.ReadUInt16BigEndian(font.AsSpan(4));
-        for (var i = 0; i < tables; i++)
-        {
-            var record = font.AsSpan(12 + i * 16, 16);
-            if (record[0] == tag[0] && record[1] == tag[1] && record[2] == tag[2] && record[3] == tag[3])
-            {
-                var offset = (int)BinaryPrimitives.ReadUInt32BigEndian(record[8..]);
-                var length = (int)BinaryPrimitives.ReadUInt32BigEndian(record[12..]);
-                return font.AsSpan(offset, length);
-            }
-        }
-
-        return default;
+        var head = headTable.Span;
+        var unitsPerEm = BinaryPrimitives.ReadUInt16BigEndian(head[18..]);
+        var xMin = BinaryPrimitives.ReadInt16BigEndian(head[36..]);
+        var xMax = BinaryPrimitives.ReadInt16BigEndian(head[40..]);
+        return unitsPerEm == 0 || BinaryPrimitives.ReadInt16BigEndian(os2Table.Span[2..]) == 0
+            ? null
+            : (double)(xMax - xMin) / unitsPerEm;
     }
 }

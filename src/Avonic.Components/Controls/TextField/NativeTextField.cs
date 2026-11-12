@@ -74,9 +74,6 @@ internal sealed class NativeTextField
     /// <summary>While true, the value isn't shown in the text box: the textarea's text is being normalised.</summary>
     public bool IsHeld { get; set; }
 
-    /// <summary>The value is being set from the user's edit, inside <see cref="UserEdit"/>.</summary>
-    public bool IsInUserEdit => _inUserEdit;
-
     /// <summary><c>getValue</c>: null is <c>""</c>.</summary>
     private string CurrentValue => _host.GetValue(_value) ?? "";
 

@@ -35,13 +35,13 @@ namespace Avonic.Components.Controls;
 public class AvonicInput : TemplatedControl, IItemControl, IInputHost
 {
     /// <summary>The style class an app sets once the user has been in the field, read with <see cref="InvalidClass"/>.</summary>
-    public const string TouchedClass = "ion-touched";
+    public const string TouchedClass = LabelledTextField.TouchedClass;
 
     /// <summary>The style class an app sets when the value is invalid.</summary>
-    public const string InvalidClass = "ion-invalid";
+    public const string InvalidClass = LabelledTextField.InvalidClass;
 
     /// <summary>The style class an app sets when the value is valid.</summary>
-    public const string ValidClass = "ion-valid";
+    public const string ValidClass = LabelledTextField.ValidClass;
 
     /// <summary><c>checkClearOnEdit</c>'s <c>IGNORED_KEYS</c>: these don't edit, so they don't clear.</summary>
     private static readonly HashSet<Key> IgnoredKeys =

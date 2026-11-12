@@ -18,6 +18,15 @@ namespace Avonic.Components.Controls;
 /// </summary>
 internal sealed class LabelledTextField
 {
+    /// <summary>The style class an app sets once the user has been in the field.</summary>
+    public const string TouchedClass = "ion-touched";
+
+    /// <summary>The style class an app sets when the value is invalid.</summary>
+    public const string InvalidClass = "ion-invalid";
+
+    /// <summary>The style class an app sets when the value is valid.</summary>
+    public const string ValidClass = "ion-valid";
+
     private readonly TemplatedControl _host;
     private readonly NativeTextField _field;
     private readonly Action _setFocus;
@@ -42,7 +51,7 @@ internal sealed class LabelledTextField
     public void FollowClasses() => _host.Classes.CollectionChanged += OnClassesChanged;
 
     /// <summary><c>checkInvalidState</c>: the app has marked it both touched and invalid.</summary>
-    public bool IsInvalid => _host.Classes.Contains(AvonicInput.TouchedClass) && _host.Classes.Contains(AvonicInput.InvalidClass);
+    public bool IsInvalid => _host.Classes.Contains(TouchedClass) && _host.Classes.Contains(InvalidClass);
 
     /// <summary>Follows the template's wrapper, the <c>&lt;label&gt;</c>, and the presenter of the <c>label</c> slot.</summary>
     public void Attach(Control? wrapper, ContentPresenter? labelContent)
@@ -198,7 +207,7 @@ internal sealed class LabelledTextField
     }
 
     private static bool Mentions(System.Collections.IList? classes) =>
-        classes?.OfType<string>().Any(name => name is AvonicInput.TouchedClass or AvonicInput.InvalidClass) == true;
+        classes?.OfType<string>().Any(name => name is TouchedClass or InvalidClass) == true;
 
     private void OnLabelContentPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
