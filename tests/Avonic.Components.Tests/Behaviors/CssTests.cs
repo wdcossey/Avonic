@@ -84,6 +84,31 @@ public class CssTests
     public void Box_With_A_Missing_Value_Is_Unset() =>
         Assert.Same(AvaloniaProperty.UnsetValue, Convert(Css.Box, null, 1d, 2d, 3d, AvaloniaProperty.UnsetValue));
 
+    [Theory]
+    [InlineData("Start", -18, 0, 0, 0)]
+    [InlineData("Top", 0, -18, 0, 0)]
+    [InlineData("End", 0, 0, -18, 0)]
+    [InlineData("Bottom", 0, 0, 0, -18)]
+    public void Negate_Puts_The_First_Set_Value_Negated_On_The_Side_It_Is_Told(string side, double start, double top, double end, double bottom) =>
+        Assert.Equal(
+            new Thickness(start, top, end, bottom),
+            Css.Negate.Convert([new CssUnset(), null, 18d, 5d], typeof(Thickness), side, CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void Negate_Gives_A_Number_To_A_Number() =>
+        Assert.Equal(-7.5, Css.Negate.Convert([AvaloniaProperty.UnsetValue, 7.5], typeof(double), null, CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void Negate_Of_Nothing_Or_Of_Something_That_Is_Not_A_Finite_Number_Is_Unset()
+    {
+        Assert.Same(AvaloniaProperty.UnsetValue, Css.Negate.Convert([new CssUnset(), null], typeof(Thickness), "Start", CultureInfo.InvariantCulture));
+        // calc(0px - var(--a)) with --a not a length is invalid, even with a number after it, as var() takes the first that's set.
+        Assert.Same(AvaloniaProperty.UnsetValue, Css.Negate.Convert(["auto", 18d], typeof(double), null, CultureInfo.InvariantCulture));
+        Assert.Same(AvaloniaProperty.UnsetValue, Css.Negate.Convert([double.NaN], typeof(double), null, CultureInfo.InvariantCulture));
+        // A Thickness with no side named.
+        Assert.Same(AvaloniaProperty.UnsetValue, Css.Negate.Convert([18d], typeof(Thickness), null, CultureInfo.InvariantCulture));
+    }
+
     // Avalonia facts: a brush is an AvaloniaObject, and making one on a test thread claims the dispatcher before the headless
     // session can, which fails the session's first test.
     [AvaloniaFact]

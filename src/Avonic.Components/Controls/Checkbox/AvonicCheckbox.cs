@@ -377,7 +377,7 @@ public class AvonicCheckbox : ContentControl, IItemControl
     /// </summary>
     private void UpdateLabel()
     {
-        if (_label is not null && HasText(Content) is var shown && _label.IsVisible != shown)
+        if (_label is not null && TextContent.HasText(Content, _content) is var shown && _label.IsVisible != shown)
         {
             _label.IsVisible = shown;
         }
@@ -422,30 +422,6 @@ public class AvonicCheckbox : ContentControl, IItemControl
             _error.Text = invalid ? ErrorText : null;
             _error.IsVisible = invalid && !string.IsNullOrEmpty(ErrorText);
         }
-    }
-
-    /// <summary>
-    /// <c>textContent !== ''</c>: any text inside, shown or not, stopping at the first. Data is in the DOM as what its template
-    /// makes, which is the presenter's child, or as its text when it has none yet.
-    /// </summary>
-    private bool HasText(object? content)
-    {
-        if (content is not (null or string or Control) && _content?.Child is { } made)
-        {
-            content = made;
-        }
-
-        return Has(content);
-
-        static bool Has(object? content) => content switch
-        {
-            null => false,
-            string value => value.Length > 0,
-            TextBlock block => (block.Inlines is { Count: > 0 } inlines ? inlines.Text : block.Text) is { Length: > 0 },
-            ContentControl control => Has(control.Content),
-            ILogical logical => logical.LogicalChildren.Any(Has),
-            _ => content.ToString() is { Length: > 0 },
-        };
     }
 
     /// <summary><c>aria-checked</c>: <c>mixed</c> when indeterminate, whatever <c>checked</c> is.</summary>

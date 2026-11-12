@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Layout;
 
 namespace Avonic.Components.Controls;
 
@@ -9,6 +10,12 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public sealed class InputOtpSeparator : Border
 {
+    static InputOtpSeparator()
+    {
+        // The group's align-items: center, as for InputOtpBox.
+        VerticalAlignmentProperty.OverrideDefaultValue<InputOtpSeparator>(VerticalAlignment.Center);
+    }
+
     internal InputOtpSeparator()
     {
     }

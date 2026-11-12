@@ -73,7 +73,7 @@ Ionic's chip has no click of its own: an app listens to the element's own DOM `c
 
 | Member | What |
 |---|---|
-| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button. Automation's `Invoke`, a screen reader's activation, does, on a chip with a `Click` handler of its own or a `Command`, as Chromium offers a click action only on an element with a listener. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
+| `Click` | A routed event, on the release of every press on the chip, as the DOM `click`: a quick second tap counts, where `Tapped` raises `DoubleTapped` instead. A finger that moves more than 15 px, a release off the chip, another mouse button, a second finger, a child that handles the press and a disabled chip don't click. Enter and Space don't either, as the chip has no native button, but a stock `Button` inside that clicks from a key clicks the chip after it, as its DOM `click` bubbles to the host; one that clicks from a press clicks the chip once, with the press. Automation's `Invoke`, a screen reader's activation, does, on a chip with a `Click` handler of its own or a `Command`, as Chromium offers a click action only on an element with a listener. Through `Behaviors/NativeButton`, as `AvonicCard`'s button mode |
 | `Command`, `CommandParameter` | Run after `Click`, unless a handler set `Handled`. A command that can't execute disables the chip, as on `AvonicButton` |
 
 ```xml

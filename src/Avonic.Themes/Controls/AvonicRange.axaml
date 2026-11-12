@@ -207,7 +207,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="Margin">
-                <MultiBinding Converter="{x:Static c:AvonicRange.KnobHandleMarginConverter}">
+                <MultiBinding Converter="{x:Static b:Css.Negate}" ConverterParameter="Start">
                     <DynamicResource ResourceKey="Avonic.Range.KnobSize" />
                 </MultiBinding>
             </Setter>

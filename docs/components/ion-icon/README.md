@@ -149,9 +149,16 @@ node tools/ionicons/generate.js
 Use the names Ionic's own component uses, from the `import … from "ionicons/icons"` line in its `.js`. A control's styles
 set the icon's `FontSize` and `Foreground`, translating rules such as `::slotted(ion-icon) { font-size: 1.5em; }`.
 
+A host whose `::slotted(ion-icon)` font size changes with its own state can set `AvonicIcon.SlotFontSize` on itself instead, per
+state in its own `ControlTheme`: an icon that is its logical child takes it, at style priority, so an app's style still beats
+it, as a page's rule beats a `::slotted` one, and it costs no rule in `Styles/`. `AvonicFabButton` does, with 24 and 18 in a
+list. A rule with a pseudoclass in the icon's own `ControlTheme` wouldn't do: it beats an app's plain style (measured, 24 over
+an app's 30).
+
 ## Extensions
 
-None. `Foreground` and `FontSize` are Avalonia's own text properties, standing in for CSS `color` and `font-size`.
+`SlotFontSize`, an attached property for themes (above). `Foreground` and `FontSize` are Avalonia's own text properties,
+standing in for CSS `color` and `font-size`.
 
 ## Licence
 

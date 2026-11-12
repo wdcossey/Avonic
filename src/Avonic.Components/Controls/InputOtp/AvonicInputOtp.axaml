@@ -45,7 +45,7 @@
             <ControlTemplate>
                 <StackPanel>
                     <!-- .input-otp-group: the control puts the boxes and separators in it -->
-                    <c:InputOtpGroupPanel Name="PART_Group" />
+                    <c:FlexRow Name="PART_Group" HorizontalContentAlignment="Center" />
                     <!-- .input-otp-description: the default slot, display: none with nothing in it -->
                     <ContentPresenter Name="PART_Description"
                                       Content="{TemplateBinding Content}"

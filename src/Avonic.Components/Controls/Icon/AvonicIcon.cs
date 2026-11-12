@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Automation.Peers;
 using Avalonia.Controls.Documents;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -73,10 +74,21 @@ public class AvonicIcon : Control
     public static readonly StyledProperty<double> FontSizeProperty =
         TextElement.FontSizeProperty.AddOwner<AvonicIcon>();
 
+    /// <summary>
+    /// For themes: set on a host, the <c>font-size</c> its <c>::slotted(ion-icon)</c> rule gives the icons that are its own children,
+    /// per state in the host's own <c>ControlTheme</c>. Not inherited, as <c>::slotted</c> reaches only the slot's children. NaN, the
+    /// default, gives nothing.
+    /// </summary>
+    public static readonly AttachedProperty<double> SlotFontSizeProperty =
+        AvaloniaProperty.RegisterAttached<AvonicIcon, Control, double>("SlotFontSize", double.NaN);
+
     private SvgArtwork _artwork = SvgArtwork.Empty;
     private string? _iconName;
     private double _strokeWidth = DefaultStrokeWidth;
     private IDisposable? _strokeWidthSubscription;
+    private readonly StyleValue<double> _slotFontSize = new();
+    private IDisposable? _slotFontSizeSubscription;
+    private IDisposable? _slotFontSizeBinding;
 
     static AvonicIcon()
     {
@@ -98,6 +110,16 @@ public class AvonicIcon : Control
         SizeProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.UpdatePseudoClasses());
         FlipRtlProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.UpdatePseudoClasses());
     }
+
+    public AvonicIcon()
+    {
+        // Before any style: see OnPropertyChanged.
+        _slotFontSizeBinding = Bind(FontSizeProperty, _slotFontSize, BindingPriority.Style);
+    }
+
+    public static double GetSlotFontSize(Control host) => host.GetValue(SlotFontSizeProperty);
+
+    public static void SetSlotFontSize(Control host, double value) => host.SetValue(SlotFontSizeProperty, value);
 
     /// <inheritdoc cref="IconNameProperty"/>
     public string? IconName
@@ -229,6 +251,50 @@ public class AvonicIcon : Control
 
         UpdatePseudoClasses();
         InvalidateVisual();
+    }
+
+    /// <summary>
+    /// <c>::slotted(ion-icon) { font-size }</c> in a host's CSS: the host's <see cref="SlotFontSizeProperty"/>, given to this
+    /// while it's the host's own child, worked out from its logical parent, as <see cref="AvonicImg"/>'s <c>:in-avatar</c> is. So a
+    /// host's state can change it with no rule in <c>Styles/</c>, which every element pays for. Not as a rule in the icon's own
+    /// <c>ControlTheme</c>: one with a pseudoclass beats an app's plain style, and an app's style beats a <c>::slotted</c> rule.
+    /// </summary>
+    /// <remarks>
+    /// Through the binding the constructor made, at style priority, so that an app's style, applied after, beats it: of two
+    /// values at one priority the later wins. Taken away while there's no size, as a binding that gives nothing gives the
+    /// default, not the inherited <c>font-size</c>, and made again when there is one, which then beats an app's style that was
+    /// already there: only for an icon moved into a host from another parent, or a host whose size comes after its icon is styled.
+    /// </remarks>
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == ParentProperty)
+        {
+            _slotFontSizeSubscription?.Dispose();
+            _slotFontSizeSubscription = null;
+            if (Parent is Control host)
+            {
+                _slotFontSizeSubscription = host.GetObservable(SlotFontSizeProperty)
+                    .Subscribe(new Avalonia.Reactive.AnonymousObserver<double>(OnSlotFontSize));
+            }
+            else
+            {
+                OnSlotFontSize(double.NaN);
+            }
+        }
+    }
+
+    private void OnSlotFontSize(double size)
+    {
+        if (double.IsNaN(size))
+        {
+            _slotFontSizeBinding?.Dispose();
+            _slotFontSizeBinding = null;
+            return;
+        }
+
+        _slotFontSize.Set(size);
+        _slotFontSizeBinding ??= Bind(FontSizeProperty, _slotFontSize, BindingPriority.Style);
     }
 
     private void UpdatePseudoClasses()
