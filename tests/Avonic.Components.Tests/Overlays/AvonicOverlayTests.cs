@@ -994,9 +994,15 @@ public class AvonicOverlayTests
     [AvaloniaFact]
     public async Task O15_A_Top_Level_With_No_Overlay_Layer_Cannot_Present()
     {
-        // TestApp has no base theme, so its window has no template and no layers.
-        using var clock = new TestClock();
+        // TestApp has no base theme, so its window has no template and no layers. The clock is gone before the await, as one
+        // held across it would refuse a test that runs in the gap.
         using var scene = new Scene(new Panel());
-        await Assert.ThrowsAsync<InvalidOperationException>(() => new TestOverlay().Present(scene.Window));
+        Task present;
+        using (new TestClock())
+        {
+            present = new TestOverlay().Present(scene.Window);
+        }
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => present);
     }
 }

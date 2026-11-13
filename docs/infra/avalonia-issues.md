@@ -180,3 +180,14 @@ failed on the first and middle items). Written the other way round,
 `c|AvonicItem:not(c|AvonicItemSliding > c|AvonicItem):nth-last-child(1)`, it works, and the L12 tests hold it. A `:not()` with no
 combinator inside, after a pseudoclass, works as expected. To reproduce: swap the two in that rule, and the L12 tests fail. A
 reproduction outside Avonic hasn't been tried.
+
+## No public way to stop the headless render timer ticking on its own
+
+**Read from 12.1.4, and held by tests.** Avalonia.Headless drives its render loop from `HeadlessRenderTimer`, a real `DispatcherTimer`
+at the platform's frame rate, and `MediaContext` has a 16 ms `_animationsTimer` of its own, so any `Dispatcher.UIThread.RunJobs()` can
+compose a frame no test asked for, more often on a slower machine. `AvaloniaHeadlessPlatformOptions` has no option to tick only on
+`AvaloniaHeadlessPlatform.ForceRenderTimerTick()`, and `IRenderTimer` is `[PrivateApi]`. The tests' `ManualRenderTimer` swaps the
+timer by reflection, into `DefaultRenderLoop._timer`, `HeadlessRenderTimer._forceTick`, `MediaContext.Instance`,
+`MediaContext._animationsTimer` and `MediaContext.ScheduleRender(bool)`, and throws naming the member if one has moved. **Check it on
+every Avalonia upgrade.** `Harness/ManualRenderTimerTests.cs` holds what it does. From CornflowerUI's harness (PR #157). An option on
+the headless platform for a manual render timer would remove the reflection.

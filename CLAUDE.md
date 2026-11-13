@@ -65,6 +65,9 @@ src/Avonic.Themes/       md-mode templates + resource keys (one per Ionic CSS va
                          (docs/infra/typography/README.md)
 src/Avonic/              umbrella NuGet package — references both, no code
 tests/Avonic.Components.Tests/   Avalonia.Headless (Skia) + xUnit v3 behaviour tests; frame capture for the compare step;
+                                 TestClock drives AvonicConfig's clock (one at a time, never back, no negative delay);
+                                 ManualRenderTimer composes a frame only on a forced tick (by reflection into Avalonia 12.1.4:
+                                 check it on an upgrade, docs/infra/avalonia-issues.md); Harness/ tests both;
                                  Performance/ holds the style budget (docs/infra/performance/README.md)
 samples/Avonic.Sample/   the sample, a library its heads share: SampleShell (the page list, a page, Back), one page per
                          control, each marked [SamplePage], and a device page; a Debug build shows what each page cost
