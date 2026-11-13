@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Controls;
+using Avonic.Components.Controls;
 using Avalonia.Threading;
 using Avonic.Sample.Diagnostics;
 
@@ -36,13 +38,32 @@ internal static class StyleTrace
         }
     }
 
-    /// <summary>The checks for one element, attached to a window that's already open, so nothing else is counted.</summary>
+    /// <summary>
+    /// The names of Avonic's own controls, which stop an ancestor walk (<see cref="WalksAncestors(string)"/>): every
+    /// <see cref="StyledElement"/> the components export, those without the <c>Avonic</c> prefix too (<c>FlexSlot</c>,
+    /// <c>LabelledControlPanel</c>, <c>ButtonInner</c>).
+    /// </summary>
+    internal static readonly IReadOnlySet<string> Ours = typeof(AvonicButton).Assembly.GetExportedTypes()
+        .Where(type => type.IsSubclassOf(typeof(StyledElement)))
+        .Select(type => type.Name)
+        .ToHashSet(StringComparer.Ordinal);
+
+    /// <summary>
+    /// The checks for one element, attached to a window that's already open, so nothing else is counted. Only the element's
+    /// own: it's styled as it joins the tree, and its template's parts later, in layout, after the listening stops.
+    /// </summary>
     public static IReadOnlyList<Check> ChecksFor(Control element)
     {
+        if (!AppContext.TryGetSwitch(PerformanceMonitor.DiagnosticsSwitch, out var enabled) || !enabled)
+        {
+            throw new InvalidOperationException(
+                $"Avalonia's diagnostics are off, so the trace would see nothing and every budget would pass. Is {StyleCostBenchmark.Variable} set? The benchmark runs on its own.");
+        }
+
         using var scene = new Scene(new Panel());
         var host = (Panel)scene.Window.Content!;
         var checks = new List<Check>();
-        using var listener = new ActivityListener
+        using (var listener = new ActivityListener
         {
             ShouldListenTo = source => source.Name == Source,
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
@@ -55,10 +76,12 @@ internal static class StyleTrace
                         activity.GetTagItem("SelectorResult")?.ToString() ?? string.Empty));
                 }
             },
-        };
-        ActivitySource.AddActivityListener(listener);
+        })
+        {
+            ActivitySource.AddActivityListener(listener);
+            host.Children.Add(element);
+        }
 
-        host.Children.Add(element);
         Dispatcher.UIThread.RunJobs();
         return checks;
     }
@@ -100,12 +123,15 @@ internal static class StyleTrace
         return -1;
     }
 
+    /// <inheritdoc cref="WalksAncestors(string, IReadOnlySet{string})"/>
+    public static bool WalksAncestors(string alternative) => WalksAncestors(alternative, Ours);
+
     /// <summary>
-    /// Whether a common element can get as far as a descendant combinator, which then looks at every ancestor. A type of
-    /// ours after it stops that, as in <c>c|Host c|Label &gt; TextBlock</c>, where only a label's child gets that far. So
-    /// does a name on the element, because it can't change.
+    /// Whether a common element can get as far as a descendant combinator, which then looks at every ancestor. One of
+    /// <paramref name="ours"/> after it stops that, as in <c>c|Host c|Label &gt; TextBlock</c>, where only a label's child
+    /// gets that far. So does a name on the element, because it can't change; a <c>#</c> in a property's value isn't one.
     /// </summary>
-    public static bool WalksAncestors(string alternative)
+    public static bool WalksAncestors(string alternative, IReadOnlySet<string> ours)
     {
         var parts = WithoutSpacedCombinators(alternative);
         var space = LastOutsideBrackets(parts, ' ');
@@ -116,8 +142,16 @@ internal static class StyleTrace
 
         var after = parts[(space + 1)..];
         var subject = after[(LastOutsideBrackets(after, '>') + 1)..];
-        return !subject.Contains('#', StringComparison.Ordinal)
-            && !after.Split('>').Any(part => part.StartsWith("Avonic", StringComparison.Ordinal));
+        return LastOutsideBrackets(subject, '#') < 0
+            && !after.Split('>').Any(part => ours.Contains(TypeName(part)));
+    }
+
+    /// <summary>The type a part of a selector names, without its namespace prefix, classes, pseudoclasses, name or properties.</summary>
+    private static string TypeName(string part)
+    {
+        var end = part.IndexOfAny(['.', ':', '#', '[']);
+        var type = end < 0 ? part : part[..end];
+        return type[(type.IndexOf('|') + 1)..];
     }
 
     /// <summary>
@@ -142,8 +176,7 @@ internal static class StyleTrace
             return false;
         }
 
-        var end = subject.IndexOfAny(['.', ':', '#', '[']);
-        var target = end < 0 ? subject : subject[..end];
+        var target = TypeName(subject);
         return target.Length == 0 || target == element.Name;
     }
 }

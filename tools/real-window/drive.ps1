@@ -4,8 +4,14 @@
 # It takes over the cursor and focus for about four minutes, so ask before running it on someone's PC.
 # Windows only, and PowerShell 5.1 or later: powershell -ExecutionPolicy Bypass -File tools\real-window\drive.ps1
 param(
-    # The sample to run. Build it first. A Debug build also has the performance line to check.
-    [string]$Exe = (Join-Path $PSScriptRoot '..\..\samples\Avonic.Sample.Desktop\bin\Debug\net10.0\Avonic.Sample.Desktop.exe'),
+    # The build to run, built first from the repo. A Debug build also has the performance line to check.
+    [ValidateSet('Debug', 'Release')]
+    [string]$Configuration = 'Debug',
+    # Run the build as it is, without building it first. A stale build runs the old code, and its failures look like the new
+    # code's.
+    [switch]$NoBuild,
+    # A sample to run as it is, instead, with no build: another build or copy of it.
+    [string]$Exe = '',
     # Where the frames go. By default a new folder for each run, so that an old frame can't pass for a new one.
     [string]$Out = (Join-Path ([IO.Path]::GetTempPath()) ('avonic-real-window\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))),
     # Runs only the sections whose title is like one of these, such as 'ion-picker,ion-re*', to work on them. The whole run is the gate.
@@ -13,7 +19,42 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-if (-not (Test-Path $Exe)) { throw "No sample at $Exe. Build it first." }
+function Step([string]$text) { Write-Host "-- $text" }
+
+# The build step is CornflowerUI's, from its copy of this driver.
+$repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$project = Join-Path $repo 'samples\Avonic.Sample.Desktop'
+if ($Exe) {
+    if (-not (Test-Path $Exe)) { throw "No sample at $Exe." }
+} else {
+    $Exe = Join-Path $project "bin\$Configuration\net10.0\Avonic.Sample.Desktop.exe"
+    if (-not $NoBuild) {
+        # A sample left open locks its files, and the build would fail with only MSBuild's copy errors to say why.
+        $open = @(Get-Process -Name 'Avonic.Sample.Desktop' -ErrorAction SilentlyContinue |
+            Where-Object { $_.Path -and ($_.Path -ieq $Exe) })
+        if ($open.Count) {
+            throw "The $Configuration sample is open (process $($open[0].Id)), which locks its files. Close it, or pass -NoBuild."
+        }
+        Step "Building the $Configuration desktop sample"
+        # From the repo, so that its global.json picks the SDK. 'Continue', as Windows PowerShell 5.1 turns a line dotnet
+        # writes to a redirected stderr into a stopping error; the exit code is what counts.
+        Push-Location $repo
+        $ErrorActionPreference = 'Continue'
+        try {
+            & dotnet build $project -c $Configuration -nologo -v q
+            $built = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = 'Stop'
+            Pop-Location
+        }
+        if ($built -ne 0) { throw "dotnet build failed ($built)." }
+        if (-not (Test-Path $Exe)) {
+            throw "Built, but there's no sample at $Exe. Has the sample's target framework or output path changed?"
+        }
+    } elseif (-not (Test-Path $Exe)) {
+        throw "No sample at $Exe. Build it, or leave out -NoBuild."
+    }
+}
 New-Item -ItemType Directory -Force $Out | Out-Null
 $Exe = (Resolve-Path $Exe).Path
 $debugBuild = $Exe -match '\\Debug\\'

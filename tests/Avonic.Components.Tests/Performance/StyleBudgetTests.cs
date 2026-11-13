@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless.XUnit;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -142,6 +143,36 @@ public class StyleBudgetTests
         return rule;
     }
 
+    // The benchmark's variable leaves the diagnostics off, and then the trace sees nothing: every budget would pass.
+    [AvaloniaFact]
+    public void The_Trace_Refuses_To_Run_With_Avalonias_Diagnostics_Off()
+    {
+        AppContext.SetSwitch(PerformanceMonitor.DiagnosticsSwitch, false);
+        try
+        {
+            var refused = Assert.Throws<InvalidOperationException>(() => StyleTrace.ChecksFor(new TextBlock()));
+            Assert.Contains(StyleCostBenchmark.Variable, refused.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            AppContext.SetSwitch(PerformanceMonitor.DiagnosticsSwitch, true);
+        }
+    }
+
+    // A part of the element's template is styled in layout, as an element of its own, with its own budget.
+    [AvaloniaFact]
+    public void Only_The_Elements_Own_Checks_Are_Counted_Not_Its_Templates()
+    {
+        var element = new ContentControl { Template = new FuncControlTemplate((_, _) => new TextBlock()) };
+
+        WithRule(Rule(x => x.OfType<TextBlock>()), () =>
+        {
+            var check = Assert.Single(StyleTrace.ChecksFor(element), c => c.Selector == "TextBlock");
+            Assert.False(check.ReachedElement);
+            Assert.IsType<TextBlock>(Assert.Single(element.GetTemplateDescendants()));
+        });
+    }
+
     [AvaloniaFact]
     public void A_Rule_That_Cannot_Match_Is_Still_Counted()
     {
@@ -252,6 +283,11 @@ public class StyleBudgetTests
     [InlineData("A > TextBlock:not(B C)", false)]
     [InlineData("A[Tag=x y]", false)]
     [InlineData("A TextBlock[Tag=x > y]", true)]
+    [InlineData("A TextBlock[Tag=#x]", true)]
+    [InlineData("AvonicItem:a FlexSlot > TextBlock", false)]
+    [InlineData("AvonicItem:a LabelledControlPanel > TextBlock", false)]
+    [InlineData("c|AvonicItem:a c|AvonicLabel > TextBlock", false)]
+    [InlineData("AvonicItem:a AvonicNoSuchType > TextBlock", true)]
     public void A_Descendant_Combinator_At_The_End_Walks_Ancestors(string alternative, bool walks)
     {
         Assert.Equal(walks, StyleTrace.WalksAncestors(alternative));

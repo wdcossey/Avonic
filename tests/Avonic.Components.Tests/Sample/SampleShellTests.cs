@@ -68,6 +68,22 @@ public class SampleShellTests
         }
     }
 
+    // A Debug build's monitor hears every measurement in the process, so a shell gone from its window mustn't leave one.
+    [AvaloniaFact]
+    public void A_Shell_That_Has_Left_Its_Window_Stops_Listening()
+    {
+        var before = PerformanceMonitor.Listening;
+        using (var stage = new Stage())
+        {
+            stage.OpenAPage();
+#if DEBUG
+            Assert.Equal(before + 1, PerformanceMonitor.Listening);
+#endif
+        }
+
+        Assert.Equal(before, PerformanceMonitor.Listening);
+    }
+
     [AvaloniaFact]
     public void Back_From_A_Page_Shows_The_List_And_Is_Handled()
     {
