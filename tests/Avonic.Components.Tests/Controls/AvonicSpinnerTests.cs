@@ -290,12 +290,16 @@ public class AvonicSpinnerTests
             // matrix(1, 0, 0, 1, 0, 0) at every instant measured.
             Assert.Equal(0, frame.Rotation);
             Assert.Equal(1, frame.Scale);
-        }
 
-        // At 1050 the dash is from 70 along to the circle's end, 2π·20, with no wrap back to the start.
-        var arc = Assert.Single(f.At(1050)[0].Arcs!);
-        Near(70, arc.Start, 1e-3);
-        Near(2 * Math.PI * 20, arc.End);
+            if (time == 1050)
+            {
+                // At 1050 the dash is from 70 along to the circle's end, 2π·20, with no wrap back to the start. Read on the
+                // way, as the clock doesn't go back.
+                var arc = Assert.Single(frame.Arcs!);
+                Near(70, arc.Start, 1e-3);
+                Near(2 * Math.PI * 20, arc.End);
+            }
+        }
     }
 
     // ── B9: paused ───────────────────────────────────────────────────────────────────────────
@@ -303,16 +307,18 @@ public class AvonicSpinnerTests
     [AvaloniaFact]
     public void B9_Paused_Freezes_And_Clearing_It_Carries_On_From_There()
     {
-        using var f = new Fixture(SpinnerName.Lines);
+        using (var f = new Fixture(SpinnerName.Lines))
+        {
+            f.At(200);
+            f.Spinner.Paused = true;
+            Near(0.8, f.At(500)[0].Opacity);     // still 200 ms in
 
-        f.At(200);
-        f.Spinner.Paused = true;
-        Near(0.8, f.At(500)[0].Opacity);     // still 200 ms in
+            f.Spinner.Paused = false;
+            Near(0.7, f.At(600)[0].Opacity);     // 300 ms in, not 600 and not 100
+        }
 
-        f.Spinner.Paused = false;
-        Near(0.7, f.At(600)[0].Opacity);     // 300 ms in, not 600 and not 100
-
-        // Paused from the start, it shows the first instant.
+        // Paused from the start, it shows the first instant. A fixture of its own, once the first is gone, as one clock runs
+        // at a time.
         using var g = new Fixture(SpinnerName.Lines, paused: true);
         Equal([1, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], g.At(400).Select(e => e.Opacity));
     }
