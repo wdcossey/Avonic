@@ -19,21 +19,36 @@ public sealed class PerformanceMonitor : IDisposable
     public const string LayoutArrange = "avalonia.ui.arrange.time";
     public const string Render = "avalonia.ui.render.time";
 
+    private static int _listening;
+
     private readonly MeterListener _listener = new();
     private readonly object _gate = new();
     private double _layout;
     private double _render;
     private long _started;
-    private (int Rules, int Alternatives)? _census;
+    private int _disposed;
 
     /// <summary>Avalonia's switch for its diagnostics, off by default.</summary>
     public const string DiagnosticsSwitch = "Avalonia.Diagnostics.Diagnostic.IsEnabled";
 
-    /// <summary>Avalonia reads the switch once, so call this before it starts.</summary>
+    /// <summary>
+    /// Avalonia reads the switch once, so call this before it starts. Without it the meter is silent, and the line says so
+    /// rather than show zeros.
+    /// </summary>
     public static void EnableDiagnostics() => AppContext.SetSwitch(DiagnosticsSwitch, true);
+
+    /// <summary>Whether the switch is on.</summary>
+    public static bool DiagnosticsEnabled => AppContext.TryGetSwitch(DiagnosticsSwitch, out var enabled) && enabled;
+
+    /// <summary>
+    /// How many monitors are listening, in the whole process: each hears every one of Avalonia's measurements until it's
+    /// disposed, so one should live no longer than the shell it measures for.
+    /// </summary>
+    public static int Listening => Volatile.Read(ref _listening);
 
     public PerformanceMonitor()
     {
+        Interlocked.Increment(ref _listening);
         _listener.InstrumentPublished = (instrument, listener) =>
         {
             if (instrument.Meter.Name == Meter && instrument.Name is LayoutMeasure or LayoutArrange or Render)
@@ -88,8 +103,14 @@ public sealed class PerformanceMonitor : IDisposable
                     return;
                 }
 
+                if (!DiagnosticsEnabled)
+                {
+                    report($"{title}: Avalonia's diagnostics are off. Call PerformanceMonitor.EnableDiagnostics() before Avalonia starts.");
+                    return;
+                }
+
                 var elapsed = Stopwatch.GetElapsedTime(started);
-                var (rules, alternatives) = _census ??= StyleCensus.Count(Application.Current!.Styles);
+                var (rules, alternatives) = Census(page);
                 double layout;
                 double render;
                 lock (_gate)
@@ -109,5 +130,30 @@ public sealed class PerformanceMonitor : IDisposable
             CultureInfo.InvariantCulture,
             $"{title}: {openMs:0} ms, {elements} elements, {rules} rules ({alternatives}), layout {layoutMs:0.0}, render {renderMs:0.0}");
 
-    public void Dispose() => _listener.Dispose();
+    /// <summary>
+    /// The global rules <paramref name="page"/> is checked against: the application's, and those in the <c>Styles</c> of the
+    /// page and each of its logical ancestors, its top level among them. Rules lower down cost only their own part of the
+    /// page, and aren't counted. Counted for each page, as a page can bring rules of its own.
+    /// </summary>
+    public static (int Rules, int Alternatives) Census(StyledElement page)
+    {
+        var (rules, alternatives) = Application.Current is { } app ? StyleCensus.Count(app.Styles) : (0, 0);
+        for (var element = page; element is not null; element = element.Parent)
+        {
+            var (own, ownAlternatives) = StyleCensus.Count(element.Styles);
+            rules += own;
+            alternatives += ownAlternatives;
+        }
+
+        return (rules, alternatives);
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) == 0)
+        {
+            _listener.Dispose();
+            Interlocked.Decrement(ref _listening);
+        }
+    }
 }

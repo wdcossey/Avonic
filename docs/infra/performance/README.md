@@ -138,7 +138,9 @@ ion-card: 160 ms, 143 elements, 98 rules (174), layout 86.2, render 5.8
 This one is from headless capture, and it hasn't been tried in a real window yet.
 
 That's the time to open the page, from before it's made, the elements in it, the global rules and their alternatives, and Avalonia's own layout and
-render times over that time. A Release build doesn't have it. **Nothing is added to the library,** because Avalonia has this
+render times over that time. The rules are the application's and those in the `Styles` of the page and each of its ancestors, counted
+for each page; rules further down cost only their own part, and aren't counted. With Avalonia's diagnostics off, the line says so,
+rather than show zeros. A Release build doesn't have it. **Nothing is added to the library,** because Avalonia has this
 built in, behind a switch that's off by default:
 
 - `AppContext.SetSwitch("Avalonia.Diagnostics.Diagnostic.IsEnabled", true)`, before Avalonia starts

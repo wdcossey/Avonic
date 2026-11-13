@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avonic.Sample.Diagnostics;
 
@@ -205,4 +207,74 @@ public class PerformanceMonitorTests
         Assert.True(rules > 0 && alternatives >= rules);
         Assert.Contains($"{rules} rules ({alternatives})", line!, StringComparison.Ordinal);
     });
+
+    // The rules of the page and of each of its ancestors are checked against it too; a rule further down isn't.
+    [AvaloniaFact]
+    public void It_Counts_The_Rules_Of_The_Application_The_Window_And_The_Page()
+    {
+        static Style Rule(Func<Selector?, Selector> selector)
+        {
+            var rule = new Style(selector);
+            rule.Setters.Add(new Setter(Visual.OpacityProperty, 0.5));
+            return rule;
+        }
+
+        var (appRules, appAlternatives) = StyleCensus.Count(Application.Current!.Styles);
+        var appRule = Rule(x => x.OfType<Border>());
+        using var monitor = new PerformanceMonitor();
+        var below = new Panel { Styles = { Rule(x => x.OfType<Canvas>()) } };
+        var page = new Panel { Styles = { Rule(x => x.OfType<TextBox>()) }, Children = { below } };
+        using var scene = Scene.Styled(page, Rule(x => Selectors.Or(x.OfType<Image>(), x.OfType<Grid>())));
+        Application.Current.Styles.Add(appRule);
+        string? line = null;
+        try
+        {
+            monitor.Begin();
+            monitor.Report("a page", page, text => line = text);
+            Dispatcher.UIThread.RunJobs();
+        }
+        finally
+        {
+            Application.Current.Styles.Remove(appRule);
+        }
+
+        Assert.Contains($"{appRules + 3} rules ({appAlternatives + 4})", line!, StringComparison.Ordinal);
+    }
+
+    // Avalonia reads the switch once, at start, so turning it off now changes only what the monitor reads.
+    [AvaloniaFact]
+    public void Without_Avalonias_Diagnostics_The_Line_Says_So()
+    {
+        using var monitor = new PerformanceMonitor();
+        var page = new Panel();
+        using var scene = new Scene(page);
+        string? line = null;
+        AppContext.SetSwitch(PerformanceMonitor.DiagnosticsSwitch, false);
+        try
+        {
+            monitor.Begin();
+            monitor.Report("a page", page, text => line = text);
+            Dispatcher.UIThread.RunJobs();
+        }
+        finally
+        {
+            AppContext.SetSwitch(PerformanceMonitor.DiagnosticsSwitch, true);
+        }
+
+        Assert.Equal("a page: Avalonia's diagnostics are off. Call PerformanceMonitor.EnableDiagnostics() before Avalonia starts.", line);
+    }
+
+    // Each monitor hears every measurement in the process until it's disposed.
+    [AvaloniaFact]
+    public void A_Monitor_Listens_Until_It_Is_Disposed_And_Disposing_Twice_Counts_Once()
+    {
+        var before = PerformanceMonitor.Listening;
+        var monitor = new PerformanceMonitor();
+        Assert.Equal(before + 1, PerformanceMonitor.Listening);
+
+        monitor.Dispose();
+        monitor.Dispose();
+
+        Assert.Equal(before, PerformanceMonitor.Listening);
+    }
 }
