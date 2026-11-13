@@ -39,6 +39,12 @@ it's a decision.
 
 A selector with `> :is(Panel) >` is two alternatives for each thing it targets, so it's worth a thought.
 
+**What the trace counts.** `StyleTrace` counts an element's own checks, made as it joins the tree. Its template's parts are
+elements with counts of their own, styled later in layout, and aren't added to it. A `ControlTheme`'s checks are counted, as an
+opt-in file's are a real cost ([below](#opt-in-files)). Any type of Avonic's own stops an ancestor walk, with or without the prefix
+(`FlexSlot`, `LabelledControlPanel`), and a `#` in a property's value isn't a name. With Avalonia's diagnostics off, as the
+benchmark's variable leaves them, it refuses to run, where it would see nothing and pass every budget. From CornflowerUI's copy.
+
 **600 alternatives is a checkpoint,** about 18 µs per element, decided in [ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md). A test stops the limit going past it. About 67
 Ionic tags remain, and at today's 10 or so each the library ends near 820, or about 25 µs, so **we expect to reach it, after about 44 more.** When we do, stop, and
 run the benchmark on a real phone, to decide on real numbers. The way out is controls working out their host's state in code, with the theme reading a pseudoclass,
