@@ -96,7 +96,9 @@ public static class RealInput {
   public static void TouchUp(int x, int y) { Send(x, y, 0x40000); }
 }
 '@
-Add-Type -ReferencedAssemblies System.Drawing @'
+# Under PowerShell 7, System.Drawing is a facade that forwards Bitmap to System.Drawing.Common.
+$drawing = if ($PSVersionTable.PSEdition -eq 'Core') { 'System.Drawing.Common', 'System.Drawing.Primitives' } else { 'System.Drawing' }
+Add-Type -ReferencedAssemblies $drawing @'
 using System; using System.Drawing; using System.Drawing.Imaging; using System.Runtime.InteropServices;
 public static class Pixels {
   // How many of every other pixel differ between two regions of one size.
