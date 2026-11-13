@@ -7,8 +7,10 @@ on each batch before it's called ready to merge.
 it opened.
 
 ```
-powershell -ExecutionPolicy Bypass -File tools/real-window/drive.ps1
+pwsh -ExecutionPolicy Bypass -File tools/real-window/drive.ps1
 ```
+
+Windows PowerShell 5.1 (`powershell`) runs it too. Windows only, for now (#133).
 
 It builds the sample first, from the repo so that `global.json` picks the SDK: a stale build runs the old code, and fails checks
 the new code passes. `-Configuration Release` builds and runs Release instead of Debug; only a Debug build checks the performance
