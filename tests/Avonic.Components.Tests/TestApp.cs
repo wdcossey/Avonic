@@ -10,6 +10,7 @@ namespace Avonic.Components.Tests;
 /// <summary>
 /// Headless application used by every <c>[AvaloniaFact]</c> test. Renders with Skia so tests
 /// can capture real frames for the compare step; loads the Components stub templates only.
+/// Frames are composed only on a forced render tick (<see cref="ManualRenderTimer"/>).
 /// </summary>
 public class TestApp : Application
 {
@@ -17,7 +18,8 @@ public class TestApp : Application
         AppBuilder.Configure<TestApp>()
             .UseSkia()
             .WithRoboto()
-            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+            .AfterSetup(_ => ManualRenderTimer.Install());
 
     public override void Initialize()
     {
