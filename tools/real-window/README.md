@@ -7,11 +7,13 @@ on each batch before it's called ready to merge.
 it opened.
 
 ```
-dotnet build samples/Avonic.Sample.Desktop
 powershell -ExecutionPolicy Bypass -File tools/real-window/drive.ps1
 ```
 
-A Debug build also checks the performance line. For a Release build, pass `-Exe`. Frames go to a new folder in the temp folder for
+It builds the sample first, from the repo so that `global.json` picks the SDK: a stale build runs the old code, and fails checks
+the new code passes. `-Configuration Release` builds and runs Release instead of Debug; only a Debug build checks the performance
+line. `-NoBuild` runs the build as it is, and `-Exe <path>` runs another build or copy of the sample as it is. **Close the sample
+first** if it's open: it locks its files, so the script stops rather than build. Frames go to a new folder in the temp folder for
 each run, which it prints, unless you pass `-Out`. `-Only 'ion-picker,ion-re*'` runs only the sections with those titles, to work
 on one, and fails if none matches; the whole run is the one that counts. It exits 1 if a check fails.
 
