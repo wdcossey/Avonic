@@ -684,6 +684,8 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B10_Page_Keys_Scroll_With_ScrollY_On_And_Not_Off()
     {
+        // A browser's 87.5% of the viewport, eased: B39 and B42 in AvonicContentKeyboardTests.
+        using var clock = new TestClock();
         var target = Focusable("target");
         var content = new AvonicContent { Content = new StackPanel { Children = { target, new Border { Height = 1000 } } } };
         var keys = 0;
@@ -695,20 +697,23 @@ public class AvonicContentTests
 
         scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
         Settle();
-        Assert.Equal(300, Scroll(content).Offset.Y);
+        clock.At(400);
+        Assert.Equal(262, Scroll(content).Offset.Y);
         Assert.Equal(0, keys);
 
         content.ScrollY = false;
         Settle();
         scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
         Settle();
-        Assert.Equal(300, Scroll(content).Offset.Y);
+        clock.At(800);
+        Assert.Equal(262, Scroll(content).Offset.Y);
         // It goes on to whatever's outside.
         Assert.Equal(1, keys);
 
         scene.Window.KeyPressQwerty(PhysicalKey.PageUp, RawInputModifiers.None);
         Settle();
-        Assert.Equal(300, Scroll(content).Offset.Y);
+        clock.At(1200);
+        Assert.Equal(262, Scroll(content).Offset.Y);
         Assert.Equal(2, keys);
     }
 

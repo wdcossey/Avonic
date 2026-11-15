@@ -59,8 +59,16 @@
         </Style>
 
         <!-- .inner-scroll: color: var(color), which is var(ion-text-color, #000). Only here, so the fixed slot
-             keeps what the host inherits, as in Ionic. -->
+             keeps what the host inherits, as in Ionic.
+             The focus ring is a browser's, not Ionic's: Chromium's outline: auto on a scroller Tab focuses, measured
+             in Android emulation, 2 px from 1 outside to 1 inside, with rounded corners. -->
         <Style Selector="^ /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="FocusAdorner">
+                <FocusAdornerTemplate>
+                    <Border Margin="-1" BorderThickness="2" CornerRadius="3.5"
+                            BorderBrush="{DynamicResource Avonic.Content.FocusRingBrush}" />
+                </FocusAdornerTemplate>
+            </Setter>
             <Setter Property="Foreground">
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.Content.Color" />

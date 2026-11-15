@@ -13,4 +13,12 @@
     <x:Double x:Key="Avonic.Content.PaddingStart">0</x:Double>
     <x:Double x:Key="Avonic.Content.PaddingEnd">0</x:Double>
 
+    <!-- Not Ionic's: what a phone's browser draws on a scroller, measured in Chromium's Android emulation. The scroll indicator's
+         thumb, rgba(128, 128, 128, 0.5), the same on a dark page; and the focus ring a scroller gets from Tab, Android's
+         focus ring colour. -->
+    <Color x:Key="Avonic.Content.ScrollIndicatorColor">#80808080</Color>
+    <SolidColorBrush x:Key="Avonic.Content.ScrollIndicatorBrush" Color="{DynamicResource Avonic.Content.ScrollIndicatorColor}" />
+    <Color x:Key="Avonic.Content.FocusRingColor">#E59700</Color>
+    <SolidColorBrush x:Key="Avonic.Content.FocusRingBrush" Color="{DynamicResource Avonic.Content.FocusRingColor}" />
+
 </ResourceDictionary>
