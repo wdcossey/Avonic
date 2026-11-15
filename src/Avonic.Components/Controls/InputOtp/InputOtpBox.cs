@@ -1,6 +1,9 @@
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Data;
 using Avalonia.Layout;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -28,10 +31,21 @@ public sealed class InputOtpBox : TextBox
 
         // Chromium's history goes when a script sets the value, which Ionic does after every edit.
         IsUndoEnabled = false;
+
+        // aria-label and the box's place in the accessibility tree, from the host, at style priority, bound before any style
+        // reaches the box, so that an app's style for them wins.
+        Bind(AutomationProperties.NameProperty, AutomationName, BindingPriority.Style);
+        Bind(AutomationProperties.AccessibilityViewProperty, AutomationView, BindingPriority.Style);
     }
 
     /// <summary>Its place in the row, from 0.</summary>
     internal int Index { get; }
+
+    /// <summary><c>aria-label</c>: <c>Input 1 of 4</c>.</summary>
+    internal StyleValue<string?> AutomationName { get; } = new();
+
+    /// <summary>Raw for an empty box that isn't the tab stop, which a screen reader skips, as Ionic's <c>aria-hidden</c>.</summary>
+    internal StyleValue<AccessibilityView> AutomationView { get; } = new();
 
     internal void SetState(string pseudoClass, bool on) => PseudoClasses.Set(pseudoClass, on);
 }

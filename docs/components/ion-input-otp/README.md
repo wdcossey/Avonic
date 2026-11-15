@@ -78,7 +78,9 @@ Each has a test in `AvonicInputOtpTests`, named by its number:
 15. Separators show after the listed boxes, never after the last.
 16. Disabled boxes can't be focused; read-only ones can, and ignore typing.
 17. `Type`, `Inputmode` and `Autocapitalize` reach each box.
-18. The group is named "One-time password input", or by the host's `AutomationProperties.Name`; each box "Input n of length".
+18. The group is named "One-time password input", or by the host's `AutomationProperties.Name`; each box "Input n of length",
+    and an empty box past the tab stop is `Raw`, as Ionic's `aria-hidden`. Both at style priority, bound as the box is made, so an
+    app's style for `InputOtpBox` wins.
 19. The description shows only with content.
 20. The layout by size, the gap, shrinking and overflow, and the separators, measured.
 21. The colours of each state, measured.

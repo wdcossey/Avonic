@@ -70,9 +70,10 @@ internal static class MinContent
             return Math.Min(control.DesiredSize.Width, Horizontal(text.Margin) + Horizontal(text.Padding) + LongestWord(text));
         }
 
-        // The input's and the textarea's native field are width: 100%, which makes them compressible: a min-content of nothing but
-        // their box. Even a growing textarea's, whose copy of the text doesn't hold it open: measured with a 34-letter word.
-        if (control is TextBox { TemplatedParent: IInputHost })
+        // The input's, the textarea's and the searchbar's native field are width: 100%, which makes them compressible: a
+        // min-content of nothing but their box. Even a growing textarea's, whose copy of the text doesn't hold it open: measured
+        // with a 34-letter word. A searchbar's is its padding and the input's, 126 at md, whatever its value: measured.
+        if (control is TextBox { TemplatedParent: IInputHost or AvonicSearchbar })
         {
             return OwnBox(control);
         }

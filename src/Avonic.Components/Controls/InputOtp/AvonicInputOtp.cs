@@ -603,7 +603,7 @@ public class AvonicInputOtp : ContentControl
             TextInputOptions.SetContentType(box, contentType);
             TextInputOptions.SetAutoCapitalization(box, capitalize is "on" or "sentences" or "words");
             TextInputOptions.SetUppercase(box, capitalize == "characters");
-            AutomationProperties.SetName(box, $"Input {box.Index + 1} of {Length}");
+            box.AutomationName.Set($"Input {box.Index + 1} of {Length}");
         }
     }
 
@@ -764,7 +764,7 @@ public class AvonicInputOtp : ContentControl
             var tabbable = firstEmpty == -1 ? box.Index == Length - 1 : firstEmpty == box.Index;
             box.IsTabStop = tabbable;
             var empty = At(_inputValues, box.Index).Length == 0;
-            AutomationProperties.SetAccessibilityView(box, empty && !tabbable ? AccessibilityView.Raw : AccessibilityView.Content);
+            box.AutomationView.Set(empty && !tabbable ? AccessibilityView.Raw : AccessibilityView.Content);
         }
     }
 

@@ -787,6 +787,51 @@ public class AvonicToggleTests
         Assert.False(Label(none).IsVisible);
     });
 
+    private sealed record Choice(string Name);
+
+    // hasLabel is el.textContent !== '': measured in Chromium, an ion-icon alone, or a div with an empty span, hides the label, and
+    // the toggle is its 36 by 14 track, with no aria-labelledby, so aria-label names it; text nested in a panel shows it.
+    [AvaloniaFact]
+    public void T14_A_Label_With_No_Text_Is_Hidden_And_The_Toggle_Is_Its_Track() => InstalledTheme.Run(_ =>
+    {
+        var icon = new AvonicToggle { Content = new AvonicIcon { IconName = "star" } };
+        AutomationProperties.SetName(icon, "Named");
+        var span = new AvonicToggle { Content = new StackPanel { Children = { new TextBlock() } } };
+        var nested = new AvonicToggle { Content = new StackPanel { Children = { new TextBlock { Text = "Nested" } } } };
+        var data = new AvonicToggle
+        {
+            Content = new Choice("Star"),
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Choice>((_, _) => new AvonicIcon { IconName = "star" }),
+        };
+        using var scene = Themed(new StackPanel { Children = { icon, span, nested, data } });
+
+        Assert.False(Label(icon).IsVisible);
+        Assert.False(Label(span).IsVisible);
+        Assert.False(Label(data).IsVisible);
+        Assert.True(Label(nested).IsVisible);
+        Assert.Equal(new Size(36, 14), icon.Bounds.Size);
+        Assert.Equal("Named", ControlAutomationPeer.CreatePeerForElement(icon).GetName());
+    });
+
+    // Ionic reads textContent at its next render, which a change of a prop causes; here a measure, which a shown label's text causes.
+    [AvaloniaFact]
+    public void T14_Text_That_Comes_Later_Shows_The_Label() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock();
+        var toggle = new AvonicToggle { Content = text };
+        using var scene = Themed(new StackPanel { Children = { toggle } });
+        Assert.False(Label(toggle).IsVisible);
+
+        text.Text = "Loaded";
+        toggle.Checked = true;
+        Settle();
+        Assert.True(Label(toggle).IsVisible);
+
+        text.Text = "";
+        Settle();
+        Assert.False(Label(toggle).IsVisible);
+    });
+
     // ── 15: placements ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

@@ -94,7 +94,7 @@ None.
 
 ## Known gaps
 
-- `ionChange` has no `event`; a label is any content but null or an empty string; a radio belongs to its nearest group only; no
+- `ionChange` has no `event`; a radio belongs to its nearest group only; no
   `aria-invalid`; an arrow onto a radio in a disabled item checks it without focusing it. See
   [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - `ion-select`'s interfaces, which keep the arrows from changing the value, don't exist yet.

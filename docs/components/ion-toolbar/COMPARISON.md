@@ -153,7 +153,8 @@ Recorded with their reasons in [PLAN.md](PLAN.md#deliberate-differences). The on
 - **A clear or outline button in `AvonicButtons`** keeps the toolbar's text when it's focused, hovered or pressed, even with an app's
   `Avonic.Button.ColorFocused` and the rest, which Ionic's follows (`s8` `#clr`).
 - **`ion-buttons` in a coloured item**, not a toolbar, doesn't take the coloured rules (`s5` `#g`).
-- **The footer's bottom safe area** stays while the keyboard is open.
+- **The footer's bottom safe area** goes while the keyboard is open only on a phone, where the `TopLevel` has an `InputPane` (#155),
+  as Ionic's goes only in a native app; tested with a stand-in pane, not on a device.
 - **A pressed outline button in an uncoloured toolbar** is white, where Ionic's light palette fills one directly in the toolbar with
   primary and leaves one in `ion-buttons` transparent, as B10 says.
 - **The keyboard's order** comes from `TabIndex` on the slots, so an app's own `TabIndex` only orders things within a slot.

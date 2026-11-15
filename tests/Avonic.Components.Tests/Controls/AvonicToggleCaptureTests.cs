@@ -77,6 +77,38 @@ public class AvonicToggleCaptureTests
         Assert.True(page.Bounds.Height > 0);
     });
 
+    /// <summary>
+    /// #155: a label with no text, an icon alone, is hidden, for a radio and a toggle, as Ionic's <c>textContent</c> check hides it;
+    /// one with text beside each. Ionic's side: render.js --bare with the snippet in the toggle's README.
+    /// </summary>
+    [AvaloniaFact]
+    public void Empty_Label_Page() => InstalledTheme.Run(_ =>
+    {
+        var group = new AvonicRadioGroup { Value = "a" };
+        group.Items.Add(new AvonicRadio { Value = "a", Content = new AvonicIcon { IconName = "star" } });
+        group.Items.Add(new AvonicRadio { Value = "b", Content = "Text" });
+        var page = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 8,
+            [TextElement.FontSizeProperty] = 16.0,
+            Children =
+            {
+                group,
+                new AvonicToggle { Checked = true, Content = new AvonicIcon { IconName = "star" }, HorizontalAlignment = HorizontalAlignment.Left },
+                new AvonicToggle { Content = "Text", HorizontalAlignment = HorizontalAlignment.Left },
+            },
+        };
+        page.Bind(TextElement.FontFamilyProperty, page.GetResourceObservable("Avonic.FontFamily"));
+        using var scene = new Scene(page, 390, 160);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        Save(scene, "avonic-toggle-155-empty-label.png");
+
+        Assert.True(page.Bounds.Height > 0);
+    });
+
     private static void Save(Scene scene, string name)
     {
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();

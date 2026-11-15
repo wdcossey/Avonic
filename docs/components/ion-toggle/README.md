@@ -94,13 +94,16 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 None.
 
+A label with no text, an icon alone, is hidden, as Ionic's `textContent` check hides it, for the toggle and the radio (#155):
+[compare/155-empty-label.png](compare/155-empty-label.png), headless, Ionic on the left, from
+`AvonicToggleCaptureTests.Empty_Label_Page` and `node tools/ionic-ref/render.js ion-toggle --bare --html '<div style="padding:16px;font-size:16px;display:flex;flex-direction:column;align-items:flex-start;gap:8px"><ion-radio-group value="a" style="display:flex;flex-direction:column;align-items:flex-start"><ion-radio value="a"><ion-icon name="star"></ion-icon></ion-radio><ion-radio value="b">Text</ion-radio></ion-radio-group><ion-toggle checked><ion-icon name="star"></ion-icon></ion-toggle><ion-toggle>Text</ion-toggle></div>'`.
+
 ## Known gaps
 
 | Gap | Why |
 |---|---|
 | A finger flips the toggle 16 px into a drag, where Chromium takes 27 | Chromium holds a finger's moves back for its 15 px slop; Avonic follows Ionic's code. See [COMPARISON.md](COMPARISON.md#deliberate-differences) |
 | `dir="rtl"` on an ancestor, not the document or the toggle, leaves Ionic's handle and drag in LTR | Avalonia's `FlowDirection` can't say where it came from, so RTL is RTL throughout. Deliberate |
-| A control as the label counts as a label even if it has no text | Ionic reads `textContent`, so an icon alone hides its label part there |
 | The focus ring is the base theme's, not Chromium's | Measured `outline: auto 1px` in Chromium; Avalonia draws the base theme's adorner |
 | `required`, `aria-invalid` aren't exposed | Avalonia 12's automation has neither |
 | The track's colour mid-transition | Avalonia's `BrushTransition` doesn't blend as CSS does; the ends match. See [COMPARISON.md](COMPARISON.md#gaps) |

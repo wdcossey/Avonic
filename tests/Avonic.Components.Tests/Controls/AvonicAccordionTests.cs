@@ -814,6 +814,60 @@ public class AvonicAccordionTests
     }
 
     /// <summary>
+    /// The same with an <see cref="AvonicButton"/> in the chips, whose key click clicks each chip around it, as an ion-button's
+    /// does in Chromium: one DOM click, which toggles once, through one chip, through two, and from a press; and none when a chip
+    /// stops it.
+    /// </summary>
+    [AvaloniaFact]
+    public void B13_An_AvonicButton_In_Chips_Toggles_Once_And_Not_At_All_When_Stopped()
+    {
+        var keyed = new AvonicButton { Content = "Key" };
+        var nested = new AvonicButton { Content = "Nested" };
+        var pressed = new AvonicButton { Content = "Press", Width = 60, Height = 36 };
+        var stopped = new AvonicButton { Content = "Stopped" };
+        var stopping = new AvonicChip { Items = { stopped } };
+        stopping.Click += (_, e) => e.Handled = true;
+        var item = Item("a");
+        item.EndContent = new StackPanel
+        {
+            Children =
+            {
+                new AvonicChip { Items = { keyed } },
+                new AvonicChip { Items = { new AvonicChip { Items = { nested } } } },
+                new AvonicChip { Items = { pressed } },
+                stopping,
+            },
+        };
+        var a = new AvonicAccordion { Value = "a", HeaderContent = item };
+        var group = Group(null, a);
+        var changes = Changes(group);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        void Key(Control control)
+        {
+            control.Focus();
+            scene.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+            scene.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        }
+
+        Key(keyed);
+        Assert.Equal(["a"], changes);
+
+        clock.At(1000);
+        Key(nested);
+        Assert.Equal(["a", null], changes);
+
+        clock.At(2000);
+        Click(scene, CentreOf(scene, pressed));
+        Assert.Equal(["a", null, "a"], changes);
+
+        clock.At(3000);
+        Key(stopped);
+        Assert.Equal(["a", null, "a"], changes);
+    }
+
+    /// <summary>
     /// The same for any other control with a native button, which the header hears as one event rather than a list of them:
     /// a fab button's and a breadcrumb's clicks bubble to <c>#header</c> too. A handled one doesn't.
     /// </summary>
@@ -1003,6 +1057,86 @@ public class AvonicAccordionTests
         Assert.Equal(ContentHeight * Ease.Ease(112 / 300.0), Content(b).MaxHeight, 6);
     }
 
+    /// <summary>
+    /// Measured in Chromium, 200 high: an expand 133 ms into a collapse reverses at its first frame, from where the collapse had got
+    /// to, and is done 250 ms later, not 300: CSS's reversing shortening factor, the collapse's eased progress, 0.834. The collapse's
+    /// inline <c>max-height</c> beats the expanding rule's 0, so the value goes back to where the collapse began.
+    /// </summary>
+    [AvaloniaFact]
+    public void B14_An_Expand_During_A_Collapse_Reverses_It_Shortened()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        // a's collapse: its height inline at 16, and from 32 the transition to 0.
+        Tap(scene, b);
+        clock.At(160);
+        Tap(scene, a);
+        Assert.Equal("a", group.Value);
+
+        // The expand's first frame, at 176: the collapse had got 144 of its 300 ms.
+        var progress = Ease.Ease(144 / 300.0);
+        var from = ContentHeight * (1 - progress);
+        var duration = 300 * progress;
+        clock.At(176);
+        Assert.Equal(from, Content(a).MaxHeight, 6);
+
+        clock.At(176 + 112);
+        // The shortened duration is kept in whole ticks.
+        Assert.Equal(from + (ContentHeight - from) * Ease.Ease(112 / duration), Content(a).MaxHeight, 4);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanding, a.State);
+
+        // Done at the first frame at or after 176 + 300 × the eased progress, where a whole 300 ms would go on to 476.
+        var end = 176 + (int)Math.Ceiling(duration / 16) * 16;
+        clock.At(end - 16);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanding, a.State);
+        clock.At(end);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanded, a.State);
+        Assert.True(double.IsPositiveInfinity(Content(a).MaxHeight));
+        Assert.Equal(ContentHeight, Shown(scene, a));
+    }
+
+    /// <summary>
+    /// Measured in Chromium, 200 high: a collapse 150 ms into an expand holds at the height it read, 175, for two frames, and then
+    /// takes the whole 300 ms to 0. Its first frame sets <c>offsetHeight</c>, a whole number, inline, which is a transition of its
+    /// own, from where the expand was; the collapsing rule's 0 comes a frame later, with that one running, so it's no reversal.
+    /// </summary>
+    [AvaloniaFact]
+    public void B14_A_Collapse_During_An_Expand_Is_Not_Shortened()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        // b's expand: 0 at 16, and from 32 the transition to its height.
+        Tap(scene, b);
+        clock.At(128);
+        Tap(scene, b);
+        Assert.Null(group.Value);
+
+        // At 144, offsetHeight inline: a transition from where the expand was to that whole number.
+        var at144 = ContentHeight * Ease.Ease(112 / 300.0);
+        var offsetHeight = Math.Round(at144);
+        clock.At(144);
+        Assert.Equal(at144, Content(b).MaxHeight, 6);
+
+        // At 160, the collapsing rule's 0: a new transition, from that one's value then, of the whole 300 ms.
+        var at160 = at144 + (offsetHeight - at144) * Ease.Ease(16 / 300.0);
+        clock.At(160);
+        Assert.Equal(at160, Content(b).MaxHeight, 6);
+        clock.At(160 + 144);
+        Assert.Equal(at160 * (1 - Ease.Ease(144 / 300.0)), Content(b).MaxHeight, 6);
+
+        clock.At(160 + 288);
+        Assert.Equal(AvonicAccordion.AccordionState.Collapsing, b.State);
+        clock.At(464);
+        Assert.Equal(AvonicAccordion.AccordionState.Collapsed, b.State);
+        Assert.False(Content(b).IsVisible);
+    }
+
     [AvaloniaFact]
     public void B14_Collapsing_Reads_The_Height_Then_Eases_To_Zero_And_Hides()
     {
@@ -1083,16 +1217,26 @@ public class AvonicAccordionTests
         using var scene = Show(group);
         using var clock = new TestClock();
 
-        // a has been open once, so its next expansion animates.
+        // Measured with a content 0 high, the group's value "a" at 0, "b" at 1,000 and a tap at 2,000: expanding at 2, collapsing
+        // at 1,036, expanding at 2,035, then expanded at 2,535, collapsed at 3,569 and expanded at 4,551. Each wait has its own
+        // timeout of 2,000 + 500 ms from its own second frame, and a later move cancels none of them, as Ionic awaits each.
         group.Value = "a";
         clock.At(1000);
         group.Value = "b";
         clock.At(2000);
 
         Tap(scene, a);
-        clock.At(2000 + 32 + 1000);
+        clock.At(2500);
         Assert.Equal(AvonicAccordion.AccordionState.Expanding, a.State);
-        clock.At(2000 + 32 + 2000);
+        clock.At(2600);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanded, a.State);
+        clock.At(3500);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanded, a.State);
+        clock.At(3600);
+        Assert.Equal(AvonicAccordion.AccordionState.Collapsed, a.State);
+        clock.At(4500);
+        Assert.Equal(AvonicAccordion.AccordionState.Collapsed, a.State);
+        clock.At(4600);
         Assert.Equal(AvonicAccordion.AccordionState.Expanded, a.State);
     }
 

@@ -468,6 +468,7 @@ public class NativeButtonTests
     [AvaloniaTheory]
     [InlineData("item")]
     [InlineData("card")]
+    [InlineData("chip")]
     public void S4_An_AvonicButton_Inside_Clicks_Both(string kind)
     {
         var inner = 0;
@@ -591,6 +592,111 @@ public class NativeButtonTests
         Assert.Equal(outerClicks, outerCount);
     }
 
+    // Measured in Chromium: Enter and Space on an ion-button in an ion-chip raise the button's click, then the chip's, as the
+    // native <button>'s DOM click bubbles out of its shadow root to the chip's host. So does the button's own .click().
+    [AvaloniaTheory]
+    [InlineData(PhysicalKey.Enter)]
+    [InlineData(PhysicalKey.Space)]
+    public void S4_A_Key_On_An_AvonicButton_Inside_Clicks_The_Chip_After_It(PhysicalKey key)
+    {
+        var order = new List<string>();
+        var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        child.Click += (_, _) => order.Add("inner");
+        var probe = Make("chip", child);
+        ((AvonicChip)probe.Control).Click += (_, _) => order.Add("chip");
+        using var scene = new Scene(probe.Control);
+
+        child.Focus();
+        Settle();
+        scene.Window.KeyPressQwerty(key, RawInputModifiers.None);
+        scene.Window.KeyReleaseQwerty(key, RawInputModifiers.None);
+        Settle();
+
+        Assert.Equal(["inner", "chip"], order);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    [AvaloniaFact]
+    public void S4_Automation_Invoke_On_An_AvonicButton_Inside_Clicks_The_Chip_And_Runs_Its_Command()
+    {
+        var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        var probe = Make("chip", child);
+        var command = new Command();
+        ((AvonicChip)probe.Control).Command = command;
+        using var scene = new Scene(probe.Control);
+
+        ControlAutomationPeer.CreatePeerForElement(child).GetProvider<Avalonia.Automation.Provider.IInvokeProvider>()!.Invoke();
+        Settle();
+
+        Assert.Equal(1, probe.Clicks);
+        Assert.Equal(1, command.Executed);
+    }
+
+    // stopPropagation() in the button's own click listener: the chip's never runs.
+    [AvaloniaFact]
+    public void S4_An_AvonicButton_That_Stops_Its_Key_Click_Does_Not_Click_The_Chip()
+    {
+        var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        child.Click += (_, e) => e.Handled = true;
+        var probe = Make("chip", child);
+        using var scene = new Scene(probe.Control);
+
+        child.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(0, probe.Clicks);
+    }
+
+    // A press on the button is still one click of the chip, on release, not one from the button's click and one from the release.
+    [AvaloniaFact]
+    public void S4_A_Press_On_An_AvonicButton_Inside_Clicks_The_Chip_Once_And_Runs_Its_Command_Once()
+    {
+        var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        var probe = Make("chip", child);
+        var command = new Command();
+        ((AvonicChip)probe.Control).Command = command;
+        using var scene = new Scene(probe.Control);
+
+        Tap(scene, CentreOf(child, scene));
+
+        Assert.Equal(1, probe.Clicks);
+        Assert.Equal(1, command.Executed);
+    }
+
+    // The DOM's one click, from a key on an ion-button in a chip in a chip, reaches each chip's listeners once, and each command
+    // runs once; stopPropagation() in the inner chip's listener stops it before the outer one.
+    [AvaloniaTheory]
+    [InlineData(false, 1)]
+    [InlineData(true, 0)]
+    public void S4_A_Key_On_An_AvonicButton_In_A_Chip_In_A_Chip_Reaches_Each_Once_Unless_Stopped(bool stop, int outerClicks)
+    {
+        var button = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        var inner = new AvonicChip { Items = { button } };
+        var outer = new AvonicChip { Items = { inner } };
+        var innerCommand = new Command();
+        var outerCommand = new Command();
+        inner.Command = innerCommand;
+        outer.Command = outerCommand;
+        int innerCount = 0, outerCount = 0;
+        inner.Click += (_, e) =>
+        {
+            innerCount++;
+            e.Handled = stop;
+        };
+        outer.Click += (_, _) => outerCount++;
+        using var scene = new Scene(outer);
+
+        button.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(1, innerCount);
+        Assert.Equal(outerClicks, outerCount);
+        Assert.Equal(stop ? 0 : 1, innerCommand.Executed);
+        Assert.Equal(outerClicks, outerCommand.Executed);
+    }
+
     // Invoke is offered while something listens: a null handler isn't one, and removing one never added leaves the real one.
     [AvaloniaFact]
     public void A_Chips_Invoke_Follows_The_Handlers_It_Really_Has()
@@ -660,6 +766,7 @@ public class NativeButtonTests
     [AvaloniaTheory]
     [InlineData("item")]
     [InlineData("card")]
+    [InlineData("chip")]
     public void An_AvonicButtons_Handled_Click_Stops_The_One_Around_It(string kind)
     {
         var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };

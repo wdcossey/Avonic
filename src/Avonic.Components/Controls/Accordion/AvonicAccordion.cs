@@ -35,8 +35,11 @@ public class AvonicAccordion : TemplatedControl
     /// <summary><c>transition: max-height 300ms</c> on <c>#content</c>.</summary>
     internal static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(300);
 
-    /// <summary><c>transitionEndAsync(contentEl, 2000)</c>: how long it waits for a transition that never starts.</summary>
-    internal static readonly TimeSpan TransitionEndTimeout = TimeSpan.FromMilliseconds(2000);
+    /// <summary>
+    /// <c>transitionEndAsync(contentEl, 2000)</c>: how long it waits for a transition that never starts, the expected duration and
+    /// <c>transitionEnd</c>'s fallback of 500. Measured in Chromium: an expand with nothing to ease ends 2,543 ms after the tap.
+    /// </summary>
+    internal static readonly TimeSpan TransitionEndTimeout = TimeSpan.FromMilliseconds(2000 + 500);
 
     /// <summary><c>cubic-bezier(0.25, 0.8, 0.5, 1)</c>.</summary>
     internal static readonly CubicBezierEasing TransitionEasing = new(0.25, 0.8, 0.5, 1);
@@ -153,17 +156,41 @@ public class AvonicAccordion : TemplatedControl
     private bool _releasing;
     private bool _releaseClicked;
     private bool _clickedOnPress;
-    private RoutedEventArgs? _countedStockClick;
+    private RoutedEventArgs? _countedDomClick;
 
     /// <summary>The next frame, or the timeout, that the expand or collapse waits on: Ionic's <c>currentRaf</c>.</summary>
     private IDisposable? _pending;
 
-    /// <summary>The running transition of <c>max-height</c>, if any.</summary>
+    /// <summary>
+    /// <c>#content</c>'s <c>max-height</c> as CSS transitions it: from the value shown, and a reversal shortened, as Chromium does.
+    /// </summary>
+    private readonly CssTransition _maxHeight = new(TransitionEasing, 0);
+
+    /// <summary>The transition of <c>max-height</c> is running, and will raise <c>transitionend</c> when it finishes.</summary>
     private bool _transitioning;
-    private double _from;
-    private double _to;
-    private TimeSpan _start;
-    private Action? _onTransitionEnd;
+
+    /// <summary>The frame that moves the transition on.</summary>
+    private IDisposable? _frame;
+
+    /// <summary><c>contentEl.style</c>'s <c>max-height</c>, which beats the expanding rule's 0 and loses to the collapsing one's.</summary>
+    private double? _inlineMaxHeight;
+
+    /// <summary>The computed <c>max-height</c> last applied, null for <c>none</c>; and whether <c>#content</c> was shown then.</summary>
+    private double? _computedMaxHeight;
+    private bool _contentWasShown;
+
+    /// <summary>
+    /// What waits on <c>transitionEndAsync</c>: each is called at the next <c>transitionend</c>, or at its own timeout, as each
+    /// <c>transitionEnd</c> listens on its own.
+    /// </summary>
+    private readonly List<TransitionEndWaiter> _transitionEndWaiters = [];
+
+    private sealed class TransitionEndWaiter(Action onEnd)
+    {
+        public Action OnEnd { get; } = onEnd;
+
+        public IDisposable? Timeout { get; set; }
+    }
 
     public AvonicAccordion()
     {
@@ -240,7 +267,6 @@ public class AvonicAccordion : TemplatedControl
             AccordionState.Collapsing => AccordionState.Collapsed,
             _ => _state,
         };
-        _content?.ClearValue(MaxHeightProperty);
     }
 
     /// <summary>
@@ -356,7 +382,7 @@ public class AvonicAccordion : TemplatedControl
             if (_pending is not null)
             {
                 CancelPending();
-                content.ClearValue(MaxHeightProperty);
+                StopTransition();
             }
 
             return;
@@ -366,29 +392,29 @@ public class AvonicAccordion : TemplatedControl
         _hasEverBeenExpanded = true;
         if (ShouldAnimate())
         {
-            var from = ShownHeight();
-            StopTransition();
             _pending = AvonicConfig.RequestFrame(this, () =>
             {
+                // .accordion-expanding #content { max-height: 0 }, under a collapse's inline max-height, which wins: that one is the
+                // height the collapse began at, so a running collapse reverses, shortened, as Chromium's does.
                 _state = AccordionState.Expanding;
-                content.MaxHeight = from;
                 Render();
                 _pending = AvonicConfig.RequestFrame(this, () =>
                 {
                     _pending = null;
-                    var to = ContentHeight();
-                    StartTransition(from, to, () =>
+                    var height = ContentHeight();
+                    WaitForTransitionEnd(() =>
                     {
                         _state = AccordionState.Expanded;
+                        _inlineMaxHeight = null;
                         Render();
                     });
+                    SetInlineMaxHeight(height);
                 });
             });
         }
         else
         {
             StopTransition();
-            content.ClearValue(MaxHeightProperty);
             _state = AccordionState.Expanded;
         }
     }
@@ -414,38 +440,32 @@ public class AvonicAccordion : TemplatedControl
         {
             _pending = AvonicConfig.RequestFrame(this, () =>
             {
-                // offsetHeight, a frame on: a transition that was running has gone on until now, as Chromium's does.
-                var from = _transitioning ? HeightAt(AvonicConfig.Now()) : ContentShownHeight();
-                StopTransition();
-                content.MaxHeight = from;
+                // offsetHeight, a frame on: a transition that was running has gone on until now, as Chromium's does. Set inline,
+                // it's the end of a running expand's transition, which Chromium turns into a new one from where it was to there.
+                SetInlineMaxHeight(ContentShownHeight());
                 _pending = AvonicConfig.RequestFrame(this, () =>
                 {
                     _pending = null;
-                    _state = AccordionState.Collapsing;
-                    Render();
-                    StartTransition(from, 0, () =>
+                    WaitForTransitionEnd(() =>
                     {
                         _state = AccordionState.Collapsed;
-                        content.ClearValue(MaxHeightProperty);
+                        _inlineMaxHeight = null;
                         Render();
                     });
+
+                    // .accordion-collapsing #content { max-height: 0 !important }: a new transition, not a reversal, as the one
+                    // running is the one to the inline height. Measured: a collapse 150 ms into an expand takes the whole 300 ms.
+                    _state = AccordionState.Collapsing;
+                    Render();
                 });
             });
         }
         else
         {
             StopTransition();
-            content.ClearValue(MaxHeightProperty);
             _state = AccordionState.Collapsed;
         }
     }
-
-    /// <summary>The height the content shows now: the transition's, or 0 if it's hidden or held shut.</summary>
-    private double ShownHeight() =>
-        _transitioning ? HeightAt(AvonicConfig.Now())
-        : _content is null || _state == AccordionState.Collapsed ? 0
-        : double.IsFinite(_content.MaxHeight) ? _content.MaxHeight
-        : 0;
 
     /// <summary><c>contentElWrapper.offsetHeight</c>, which lays the page out first if it has to.</summary>
     private double ContentHeight()
@@ -454,73 +474,143 @@ public class AvonicAccordion : TemplatedControl
         return _content?.NaturalHeight ?? 0;
     }
 
-    /// <summary><c>contentEl.offsetHeight</c>.</summary>
+    /// <summary>
+    /// <c>contentEl.offsetHeight</c>: a whole number of pixels, rounded, of the transition's height while one runs, as Chromium lays
+    /// the box out at the transition's value.
+    /// </summary>
     private double ContentShownHeight()
     {
+        if (_transitioning)
+        {
+            return Math.Round(_maxHeight.At(AvonicConfig.Now()));
+        }
+
         _content?.UpdateLayout();
         return _content?.Bounds.Height ?? 0;
     }
 
-    private double HeightAt(TimeSpan now)
+    private void SetInlineMaxHeight(double height)
     {
-        var progress = Math.Clamp((now - _start).Ticks / (double)TransitionDuration.Ticks, 0, 1);
-        return progress >= 1 ? _to : _from + (_to - _from) * TransitionEasing.Ease(progress);
+        _inlineMaxHeight = height;
+        ApplyMaxHeight();
     }
 
     /// <summary>
-    /// <c>max-height</c> eased from one height to another, then <paramref name="onEnd"/>, at the first frame after the end, as
-    /// <c>transitionend</c> comes. With nothing to ease there's no transition, so <c>transitionEndAsync</c> waits out its timeout.
+    /// The computed <c>max-height</c>, from the state's rule and the inline value, given to <c>#content</c> as CSS does: a change
+    /// eases over 300 ms with <c>:host(.accordion-animated)</c>, through <see cref="CssTransition"/>, which starts from the value
+    /// shown and shortens a reversal; to or from <c>none</c>, which doesn't interpolate, or while <c>display: none</c>, it doesn't.
     /// </summary>
-    private void StartTransition(double from, double to, Action onEnd)
+    private void ApplyMaxHeight()
     {
-        _onTransitionEnd = onEnd;
-        if (from == to || _content is null)
+        if (_content is not { } content)
         {
-            _pending = AvonicConfig.Schedule(EndTransition, TransitionEndTimeout);
             return;
         }
 
-        _transitioning = true;
-        _from = from;
-        _to = to;
-        _start = AvonicConfig.Now();
-        _content.MaxHeight = from;
-        _pending = AvonicConfig.RequestFrame(this, OnFrame);
+        double? computed = _state == AccordionState.Collapsing ? 0
+            : _inlineMaxHeight ?? (_state == AccordionState.Expanding ? 0 : null);
+        var shown = _state != AccordionState.Collapsed;
+        var now = AvonicConfig.Now();
+
+        if (computed is not { } to)
+        {
+            CancelTransition(0);
+            content.ClearValue(MaxHeightProperty);
+        }
+        else if (!shown || !_contentWasShown || _computedMaxHeight is null || !ShouldAnimate())
+        {
+            CancelTransition(to);
+            content.MaxHeight = to;
+        }
+        else
+        {
+            _maxHeight.Start(to, now, TransitionDuration);
+            _transitioning = _maxHeight.IsRunning(now);
+            content.MaxHeight = _maxHeight.At(now);
+            if (_transitioning)
+            {
+                _frame ??= AvonicConfig.RequestFrame(this, OnFrame);
+            }
+            else
+            {
+                _frame?.Dispose();
+                _frame = null;
+            }
+        }
+
+        _computedMaxHeight = computed;
+        _contentWasShown = shown;
     }
 
+    /// <summary>The value at once, ending a running transition with no <c>transitionend</c>, as <c>transitioncancel</c>.</summary>
+    private void CancelTransition(double value)
+    {
+        _maxHeight.Snap(value);
+        _transitioning = false;
+        _frame?.Dispose();
+        _frame = null;
+    }
+
+    /// <summary>The transition moves on; at the first frame at or after its end, <c>transitionend</c>.</summary>
     private void OnFrame()
     {
-        _pending = null;
+        _frame = null;
         if (!_transitioning || _content is null)
         {
             return;
         }
 
         var now = AvonicConfig.Now();
-        _content.MaxHeight = HeightAt(now);
-        if (now - _start >= TransitionDuration)
+        _content.MaxHeight = _maxHeight.At(now);
+        if (_maxHeight.IsRunning(now))
         {
-            EndTransition();
+            _frame = AvonicConfig.RequestFrame(this, OnFrame);
+            return;
         }
-        else
-        {
-            _pending = AvonicConfig.RequestFrame(this, OnFrame);
-        }
-    }
 
-    private void EndTransition()
-    {
-        _pending = null;
         _transitioning = false;
-        var onEnd = _onTransitionEnd;
-        _onTransitionEnd = null;
-        onEnd?.Invoke();
+        var waiters = _transitionEndWaiters.ToArray();
+        _transitionEndWaiters.Clear();
+        foreach (var waiter in waiters)
+        {
+            waiter.Timeout?.Dispose();
+            waiter.OnEnd();
+        }
     }
 
+    /// <summary>
+    /// <c>await transitionEndAsync(contentEl, 2000)</c>, then <paramref name="onEnd"/>: at the next <c>transitionend</c>, or after
+    /// <see cref="TransitionEndTimeout"/> if none comes, as when there's nothing to ease.
+    /// </summary>
+    private void WaitForTransitionEnd(Action onEnd)
+    {
+        var waiter = new TransitionEndWaiter(onEnd);
+        waiter.Timeout = AvonicConfig.Schedule(() =>
+        {
+            if (_transitionEndWaiters.Remove(waiter))
+            {
+                waiter.OnEnd();
+            }
+        }, TransitionEndTimeout);
+        _transitionEndWaiters.Add(waiter);
+    }
+
+    /// <summary>
+    /// No transition, nothing waiting on one, and no inline <c>max-height</c>: an end that comes at once, which the state that's
+    /// set next follows.
+    /// </summary>
     private void StopTransition()
     {
-        _transitioning = false;
-        _onTransitionEnd = null;
+        foreach (var waiter in _transitionEndWaiters)
+        {
+            waiter.Timeout?.Dispose();
+        }
+
+        _transitionEndWaiters.Clear();
+        _inlineMaxHeight = null;
+        CancelTransition(0);
+        _computedMaxHeight = null;
+        _content?.ClearValue(MaxHeightProperty);
     }
 
     private void CancelPending()
@@ -547,10 +637,7 @@ public class AvonicAccordion : TemplatedControl
         // :host(.accordion-collapsed) #content { display: none }
         _content?.Hidden.SetWhen(_state == AccordionState.Collapsed, false);
 
-        if (_content is not null && _state == AccordionState.Expanded && !_transitioning && _pending is null)
-        {
-            _content.ClearValue(MaxHeightProperty);
-        }
+        ApplyMaxHeight();
 
         // setAria: aria-expanded on the header item's button, found again each time.
         HeaderItem()?.RaiseExpandCollapseChanged();
@@ -643,16 +730,23 @@ public class AvonicAccordion : TemplatedControl
             return;
         }
 
-        // A chip's click from a key on a stock button in it is that button's click, which reaches the header next, and a chip
-        // around that chip clicks with it: one DOM click, counted once.
-        if (e.StockClick is { } stockClick)
+        // The click inside that a chip's click from a key has just been counted for, reaching the header after it.
+        if (ReferenceEquals(e, _countedDomClick))
         {
-            if (ReferenceEquals(stockClick, _countedStockClick))
+            _countedDomClick = null;
+            return;
+        }
+
+        // A chip's click from a key on a button in it is that button's click, which reaches the header next, and a chip
+        // around that chip clicks with it: one DOM click, counted once.
+        if (e.DomClick is { } domClick)
+        {
+            if (ReferenceEquals(domClick, _countedDomClick))
             {
                 return;
             }
 
-            _countedStockClick = stockClick;
+            _countedDomClick = domClick;
         }
 
         OnInnerClick();
@@ -661,9 +755,9 @@ public class AvonicAccordion : TemplatedControl
     /// <summary>A stock button's click, which bubbles too. A RepeatButton is a scrollbar's or a spinner's, which a browser doesn't click on.</summary>
     private void OnStockButtonClick(object? sender, RoutedEventArgs e)
     {
-        if (e.Source is RepeatButton || ReferenceEquals(e, _countedStockClick))
+        if (e.Source is RepeatButton || ReferenceEquals(e, _countedDomClick))
         {
-            _countedStockClick = null;
+            _countedDomClick = null;
             return;
         }
 

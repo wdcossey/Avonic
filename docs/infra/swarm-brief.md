@@ -81,6 +81,9 @@ These are mistakes this project has already made, so don't repeat them.
 - **Never write a descendant selector whose target is a `TextBlock`, or any other common type.** It's about 385 ns at a depth of 20. A type of yours after it stops that:
   `c|Host c|Label > TextBlock` only looks further for a label's child. `StyleBudgetTests` fails on it.
 - **`c|Host ^` in a `ControlTheme` compiles, ignores `c|Host`, and applies everywhere.** Host-dependent rules go in `Styles/`.
+- **A pseudoclass written before a `:not()` that holds a combinator is dropped:** `c|Foo:nth-last-child(1):not(c|Bar > c|Foo)` matches
+  every `Foo`. Write the pseudoclass after it, `c|Foo:not(c|Bar > c|Foo):nth-last-child(1)`, and test that it matches only what it
+  should. See `docs/infra/avalonia-issues.md`.
 - **Specificity:** a rule with a pseudoclass or class beats one without, then later beats earlier. Global `Styles` beat a `ControlTheme`. Files in `Styles/` merge in ordinal
   order, so don't rely on being after another control's file.
 - **Template-set values beat plain styles,** but pseudoclass styles beat the template.

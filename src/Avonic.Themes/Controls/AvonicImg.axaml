@@ -24,7 +24,7 @@
                 <Panel Background="{TemplateBinding Background}">
                     <!-- img { display: block; width: 100%; height: 100%; object-fit: inherit }, and the host's object-fit: contain.
                          As wide as the host, and as tall as the picture's aspect ratio makes it, centred in a box of its own size. -->
-                    <Image Name="PART_Image" Stretch="Uniform" IsVisible="False" />
+                    <c:ImgNativeImage Name="PART_Image" IsVisible="False" />
                     <!-- A browser's alt text, in the inherited font and colour, after its broken-image icon, which sits in the first
                          line as an inline image does, so the text starts 16 to the right and wraps to the left edge. Measured in
                          Chromium: the icon at the top left, the text from x 16. The line keeps an empty 16 by 16 space for it, and the
@@ -67,16 +67,11 @@
 
         <!-- ::slotted(ion-img) in avatar.md.css and thumbnail.css: border-radius: var(border-radius); width: 100%;
              height: 100%; object-fit: cover; overflow: hidden. Here, not in Styles/, as the control works out where it is: see
-             docs/components/ion-img/PLAN.md. UniformToFill is cover, cropped from the middle. The clip is on the Image, which
-             Avalonia doesn't mirror in right-to-left, so its corners are physical, as CSS's are. Cover fills the box by itself: it
-             measures to the whole of it, but where there is no picture, height: 100% is the host stretching to the box, which
-             the broken-image box needs. -->
-        <Style Selector="^:in-avatar, ^:in-thumbnail">
-            <Setter Property="VerticalAlignment" Value="Stretch" />
-        </Style>
-        <Style Selector="^:in-avatar /template/ Image#PART_Image, ^:in-thumbnail /template/ Image#PART_Image">
-            <Setter Property="Stretch" Value="UniformToFill" />
-        </Style>
+             docs/components/ion-img/PLAN.md. The control gives height: 100% and object-fit: cover itself, at style priority, so
+             that an app's plain style for them wins, as a page's rule beats ::slotted; a rule here, with a pseudoclass, would
+             beat it. The clip is on the Image, which Avalonia doesn't mirror in right-to-left, so its corners are physical, as
+             CSS's are. It's a rule with a pseudoclass, which beats an app's plain style for the part's Clip: the radius is the
+             resource key, which an app sets as it would the variable. -->
         <!-- Chromium cuts what it shows for a missing picture to the circle too. These don't need their corners physical: a radius
              the same at every corner is the same mirrored. -->
         <Style Selector="^:in-avatar /template/ Border#PART_Broken, ^:in-avatar /template/ Panel#PART_Alt">

@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Input.TextInput;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -847,6 +848,35 @@ public class AvonicInputOtpTests
 
         otp.Length = 6;
         Assert.Equal("Input 2 of 6", AutomationProperties.GetName(Boxes(otp)[1]));
+    }
+
+    // Each box's aria-label and aria-hidden are the host's at style priority, bound as the box is made, so that an app's style for
+    // them wins, before and after the host changes them.
+    [AvaloniaFact]
+    public void B18_An_Apps_Style_For_A_Boxs_Name_And_Accessibility_View_Wins()
+    {
+        var otp = new AvonicInputOtp { Value = "12" };
+        var style = new Style(x => x.OfType<InputOtpBox>())
+        {
+            Setters =
+            {
+                new Setter(AutomationProperties.NameProperty, "Digit"),
+                new Setter(AutomationProperties.AccessibilityViewProperty, AccessibilityView.Control),
+            },
+        };
+        var page = new StackPanel { Children = { otp }, Styles = { style } };
+        using var scene = new Scene(page);
+
+        Assert.All(Boxes(otp), box => Assert.Equal("Digit", AutomationProperties.GetName(box)));
+        Assert.All(Boxes(otp), box => Assert.Equal(AccessibilityView.Control, AutomationProperties.GetAccessibilityView(box)));
+
+        // The host changes them: a new length, and a value that moves the tab stop.
+        otp.Length = 6;
+        otp.Value = "";
+        Settle();
+        Assert.All(Boxes(otp), box => Assert.Equal("Digit", AutomationProperties.GetName(box)));
+        Assert.All(Boxes(otp), box => Assert.Equal(AccessibilityView.Control, AutomationProperties.GetAccessibilityView(box)));
+
     }
 
     [AvaloniaFact]
