@@ -32,12 +32,15 @@ public class AvonicRefresherTests
         private double _y;
 
         /// <param name="body">What the content holds around the column of rows, which is the column itself when null.</param>
+        /// <param name="fixedBody">What the fixed slot holds around the refresher, which is the refresher itself when null.</param>
         public Page(
             bool header = true,
             AvonicRefresherContent? refresherContent = null,
             bool fixedSlot = true,
             double rows = 40,
-            Func<StackPanel, Control>? body = null)
+            Func<StackPanel, Control>? body = null,
+            Func<AvonicRefresher, Control>? fixedBody = null,
+            ContentFixedSlotPlacement placement = ContentFixedSlotPlacement.After)
         {
             RefresherContent = refresherContent ?? new AvonicRefresherContent();
             Refresher = new AvonicRefresher { Content = RefresherContent };
@@ -47,10 +50,10 @@ public class AvonicRefresherTests
                 Column.Children.Add(new Border { Height = 48, Background = Brushes.Transparent, Focusable = true });
             }
 
-            Content = new AvonicContent { Content = body?.Invoke(Column) ?? Column };
+            Content = new AvonicContent { Content = body?.Invoke(Column) ?? Column, FixedSlotPlacement = placement };
             if (fixedSlot)
             {
-                Content.FixedContent = Refresher;
+                Content.FixedContent = fixedBody?.Invoke(Refresher) ?? Refresher;
             }
             else
             {
@@ -847,6 +850,12 @@ public class AvonicRefresherTests
                 page.Wait(16);
                 Assert.Equal(SpinnerName.Lines, page.RefresherContent.PullingIcon);
                 Assert.Equal(SpinnerName.Dots, page.RefresherContent.RefreshingSpinner);
+
+                // and cleared after it, a prop is undefined: none, not the config's again
+                page.RefresherContent.ClearValue(AvonicRefresherContent.PullingIconProperty);
+                page.RefresherContent.ClearValue(AvonicRefresherContent.RefreshingSpinnerProperty);
+                Assert.Null(page.RefresherContent.PullingIcon);
+                Assert.Null(page.RefresherContent.RefreshingSpinner);
             }
 
             // Its own values win
@@ -928,11 +937,11 @@ public class AvonicRefresherTests
     /// nothing to scroll. The host has <c>ion-content-scroll-host</c>: on the scroller itself, on a border around it, or on a control
     /// with it in its template.
     /// </summary>
-    private static Page ScrollHostPage(string kind, out ScrollViewer inner)
+    private static Page ScrollHostPage(string kind, out ScrollViewer inner, ContentFixedSlotPlacement placement = ContentFixedSlotPlacement.After)
     {
         var scroller = InnerScroller();
         inner = scroller;
-        var page = new Page(body: column =>
+        var page = new Page(placement: placement, body: column =>
         {
             Control host = kind switch
             {
@@ -950,20 +959,31 @@ public class AvonicRefresherTests
             return host;
         });
 
-        // A touch drag scrolls it, as the content's own scroller's does: AvonicContent turns its recognizer on itself
-        scroller.GetVisualDescendants().OfType<ScrollContentPresenter>().Single()
-            .GestureRecognizers.OfType<ScrollGestureRecognizer>().Single().CanVerticallyScroll = true;
+        ScrollsByTouch(scroller);
         return page;
     }
 
+    /// <summary>A touch drag scrolls it, as the content's own scroller's does: <see cref="AvonicContent"/> turns its recognizer on itself.</summary>
+    private static void ScrollsByTouch(ScrollViewer scroller) =>
+        scroller.GetVisualDescendants().OfType<ScrollContentPresenter>().Single()
+            .GestureRecognizers.OfType<ScrollGestureRecognizer>().Single().CanVerticallyScroll = true;
+
+    public static TheoryData<string, ContentFixedSlotPlacement> ScrollHostsAndPlacements => new()
+    {
+        { "ScrollViewer", ContentFixedSlotPlacement.After },
+        { "Border", ContentFixedSlotPlacement.After },
+        { "Templated", ContentFixedSlotPlacement.After },
+        { "Templated", ContentFixedSlotPlacement.Before },
+    };
+
     // connectedCallback: getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl). The pull starts only
     // when that element is at its top, as canStart reads its scrollTop, and the content's own scroller, always at its top here,
-    // doesn't count.
+    // doesn't count. With the fixed slot before the scroller, the refresher is attached first.
     [AvaloniaTheory]
-    [MemberData(nameof(ScrollHosts))]
-    public void B24_A_Scroll_Host_In_The_Content_Is_The_Scroll_Element(string kind)
+    [MemberData(nameof(ScrollHostsAndPlacements))]
+    public void B24_A_Scroll_Host_In_The_Content_Is_The_Scroll_Element(string kind, ContentFixedSlotPlacement placement)
     {
-        using (var page = ScrollHostPage(kind, out var inner))
+        using (var page = ScrollHostPage(kind, out var inner, placement))
         {
             // The host is scrolled: it scrolls back, and it doesn't pull
             inner.Offset = new Vector(0, 100);
@@ -974,10 +994,59 @@ public class AvonicRefresherTests
             Assert.True(inner.Offset.Y < 100, $"scrolled to {inner.Offset.Y}");
         }
 
-        using (var page = ScrollHostPage(kind, out var inner))
+        using (var page = ScrollHostPage(kind, out var inner, placement))
         {
             // At its top, it pulls
             Assert.Equal(0, inner.Offset.Y);
+            page.Drag(40).Wait(16);
+            Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
+        }
+    }
+
+    // querySelector searches all of the content's light DOM, so a host in the fixed slot counts too. Of a host in each slot, the
+    // one in the content's own slot is taken here.
+    [AvaloniaFact]
+    public void B24_A_Scroll_Host_In_The_Fixed_Slot_Counts_After_One_In_The_Content()
+    {
+        ScrollViewer FixedHost(StackPanel? rows = null)
+        {
+            var scroller = InnerScroller();
+            scroller.Classes.Add(AvonicContent.ScrollHostClass);
+            scroller.Height = 400;
+            if (rows is null)
+            {
+                // The fixed slot places its child at its own size, and the panel there is as high as the refresher's content
+                scroller.Width = 390;
+                scroller.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+            }
+
+            scroller.Content = rows ?? new StackPanel { Children = { new Border { Height = 2000, Background = Brushes.Transparent } } };
+            return scroller;
+        }
+
+        // The fixed host, over the content, takes the press, and the pull starts from it
+        var fixedHost = FixedHost();
+        using (var page = new Page(fixedBody: refresher => new Panel { Children = { fixedHost, refresher } }))
+        {
+            ScrollsByTouch(fixedHost);
+            page.Drag(40).Wait(16);
+            Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
+        }
+
+        // With one in the content too, the content's is taken: the fixed one, lower down and scrolled, doesn't stop the pull
+        var second = FixedHost();
+        second.Height = 100;
+        second.Margin = new Thickness(0, 600, 0, 0);
+        ScrollViewer? contentHost = null;
+        using (var page = new Page(
+                   fixedBody: refresher => new Panel { Children = { refresher, second } },
+                   body: column => contentHost = FixedHost(column)))
+        {
+            ScrollsByTouch(second);
+            ScrollsByTouch(contentHost!);
+            second.Offset = new Vector(0, 100);
+            page.Wait(16);
+            Assert.Equal(0, contentHost!.Offset.Y);
             page.Drag(40).Wait(16);
             Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
         }
