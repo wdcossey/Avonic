@@ -44,9 +44,9 @@ internal sealed class NativeButton
     private RoutedEvent? _nestedClick;
     private bool _routingPointer;
     private Button? _stockButtonClicked;
-    private RoutedEventArgs? _stockClick;
-    private RoutedEventArgs? _nestedStockClick;
-    private RoutedEvent? _nestedStockClickEvent;
+    private RoutedEventArgs? _domClick;
+    private RoutedEventArgs? _nestedDomClick;
+    private RoutedEvent? _nestedDomClickEvent;
     private readonly List<Delegate> _clickHandlers = [];
     private TopLevel? _watchedForFingers;
 
@@ -94,7 +94,10 @@ internal sealed class NativeButton
     /// A stock <see cref="Button"/> inside that clicks clicks the control too, as the DOM <c>click</c> of a <c>&lt;button&gt;</c>
     /// inside bubbles to the host: from a key or automation, with no press, at once; from a press, with the press's own click on
     /// release, once, so that the two aren't counted twice. Not a <see cref="RepeatButton"/>, a scrollbar's or a spinner's, nor a
-    /// click that a handler stopped. For a control whose click is the plain DOM <c>click</c> on its host.
+    /// click that a handler stopped. So does a control inside with a native button of its own, an <see cref="AvonicButton"/> or
+    /// an item or a card in button mode, clicked from a key or automation, after its own <c>Click</c>: measured in Chromium, Enter
+    /// and Space on an <c>ion-button</c>, a button <c>ion-item</c> or a button <c>ion-card</c> in an <c>ion-chip</c> click the
+    /// chip. For a control whose click is the plain DOM <c>click</c> on its host.
     /// </summary>
     public bool StockButtonsClick { get; init; }
 
@@ -156,13 +159,13 @@ internal sealed class NativeButton
 
         _nestedClick = null;
 
-        // stopPropagation() on the DOM's one click, which is the stock button's: it goes no further, past controls around this one.
-        if (handled && _stockClick is { } stockClick)
+        // stopPropagation() on the DOM's one click, the one inside's: it goes no further, past controls around this one.
+        if (handled && _domClick is { } domClick)
         {
-            stockClick.Handled = true;
+            domClick.Handled = true;
         }
 
-        _owner.RaiseEvent(new ClickInsideArgs(click, handled, _stockClick));
+        _owner.RaiseEvent(new ClickInsideArgs(click, handled, _domClick));
 
         if (!handled && Command is { } command && command.CanExecute(CommandParameter))
         {
@@ -182,7 +185,7 @@ internal sealed class NativeButton
         }
     }
 
-    internal sealed class ClickInsideArgs(RoutedEvent click, bool stopped, RoutedEventArgs? stockClick) : RoutedEventArgs(ClickInsideEvent)
+    internal sealed class ClickInsideArgs(RoutedEvent click, bool stopped, RoutedEventArgs? domClick) : RoutedEventArgs(ClickInsideEvent)
     {
         /// <summary>The control's own <c>Click</c> event.</summary>
         public RoutedEvent Click { get; } = click;
@@ -191,10 +194,11 @@ internal sealed class NativeButton
         public bool Stopped { get; } = stopped;
 
         /// <summary>
-        /// The stock <see cref="Button"/>'s <c>Click</c> that this click is, from a key or automation, which goes on bubbling after
-        /// it: the DOM's one click, which a control around counts once.
+        /// The click inside that this click is, from a key or automation, which goes on bubbling after it: a stock
+        /// <see cref="Button"/>'s <c>Click</c>, or the <see cref="ClickInsideEvent"/> of a control with a native button. The DOM's
+        /// one click, which a control around counts once.
         /// </summary>
-        public RoutedEventArgs? StockClick { get; } = stockClick;
+        public RoutedEventArgs? DomClick { get; } = domClick;
     }
 
     // ── A press ──────────────────────────────────────────────────────────────────────────────
@@ -341,21 +345,27 @@ internal sealed class NativeButton
             return;
         }
 
-        // One of this type inside has already raised its Click for this same click, which reached this control's handlers.
-        var nested = ReferenceEquals(e, _nestedStockClick) ? _nestedStockClickEvent : null;
-        _nestedStockClick = null;
-        _nestedStockClickEvent = null;
-
         StockButtonClicked?.Invoke(button);
-        _stockClick = e;
+        ActivateFromInside(e, button);
+    }
+
+    /// <summary>A key's or automation's click inside, <paramref name="domClick"/>, which is the DOM's one click, reaching this control.</summary>
+    private void ActivateFromInside(RoutedEventArgs domClick, object? source)
+    {
+        // One of this type inside has already raised its Click for this same click, which reached this control's handlers.
+        var nested = ReferenceEquals(domClick, _nestedDomClick) ? _nestedDomClickEvent : null;
+        _nestedDomClick = null;
+        _nestedDomClickEvent = null;
+
+        _domClick = domClick;
         _nestedClick = nested;
         try
         {
-            _activate(button);
+            _activate(source);
         }
         finally
         {
-            _stockClick = null;
+            _domClick = null;
             _nestedClick = null;
         }
     }
@@ -371,15 +381,24 @@ internal sealed class NativeButton
         {
             Stop();
         }
+        else if (StockButtonsClick && !_routingPointer)
+        {
+            // Not a press's: a key's or automation's, even while a press is held, or a press whose release never came here.
+            if (e.DomClick is { } domClick)
+            {
+                // A key's click on a button in one inside, which reaches this one next.
+                _nestedDomClick = domClick;
+                _nestedDomClickEvent = e.Click;
+            }
+            else
+            {
+                // A key's or automation's click on a native button inside, such as an AvonicButton's, which is the DOM click.
+                ActivateFromInside(e, e.Source);
+            }
+        }
         else if (_pointer is not null)
         {
             _nestedClick = e.Click;
-        }
-        else if (StockButtonsClick && e.StockClick is { } stockClick)
-        {
-            // A key's click on a stock button in one inside, which reaches this one next.
-            _nestedStockClick = stockClick;
-            _nestedStockClickEvent = e.Click;
         }
     }
 

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Templates;
 using Avalonia.Themes.Simple;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -10,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Controls;
@@ -879,6 +881,70 @@ public class AvonicImgTests
         Assert.Equal(TestPicture.Yellow, Frames.PixelAt(frame, 44, 44));
         Assert.Equal(Colors.White, Frames.PixelAt(frame, 2, 2));
         Assert.Equal(Colors.White, Frames.PixelAt(frame, 61, 61));
+    });
+
+    // ::slotted(ion-img) loses to a page's rule in CSS, so an app's plain style for the fill and the fit wins, in an avatar and in a
+    // thumbnail. Measured before: the theme's rules with :in-avatar beat it, Stretch and UniformToFill over the app's Top and Uniform.
+    [AvaloniaFact]
+    public void B14_An_Apps_Plain_Style_Beats_The_Avatars_And_The_Thumbnails_Fill_And_Fit() => InstalledTheme.Run(_ =>
+    {
+        static ImgNativeImage Picture(AvonicImg img) => img.GetVisualDescendants().OfType<ImgNativeImage>().Single();
+        AvonicImg ownAvatar = new(), ownThumbnail = new(), inAvatar = new(), inThumbnail = new(), plain = new();
+        var own = new StackPanel { Children = { new AvonicAvatar { Content = ownAvatar }, new AvonicThumbnail { Content = ownThumbnail } } };
+        var styled = new StackPanel
+        {
+            Children = { new AvonicAvatar { Content = inAvatar }, new AvonicThumbnail { Content = inThumbnail }, plain },
+            Styles =
+            {
+                new Style(x => x.OfType<AvonicImg>()) { Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Center) } },
+                new Style(x => x.OfType<AvonicImg>().Template().OfType<ImgNativeImage>().Name("PART_Image"))
+                {
+                    Setters = { new Setter(Image.StretchProperty, Stretch.Fill) },
+                },
+            },
+        };
+        using var scene = new Scene(new StackPanel { Children = { own, styled } }, 390, 400);
+        Layout(scene);
+
+        Assert.All([ownAvatar, ownThumbnail], img => Assert.Equal(VerticalAlignment.Stretch, img.VerticalAlignment));
+        Assert.All([ownAvatar, ownThumbnail], img => Assert.Equal(Stretch.UniformToFill, Picture(img).Stretch));
+        Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(VerticalAlignment.Center, img.VerticalAlignment));
+        Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(Stretch.Fill, Picture(img).Stretch));
+    });
+
+    // A page's img rule doesn't reach into ion-img's shadow root: an app's style for every Image leaves PART_Image alone, which is
+    // a type of its own to styles, in an avatar and out of one.
+    [AvaloniaFact]
+    public void B14_An_Apps_Style_For_Every_Image_Does_Not_Reach_The_Picture() => InstalledTheme.Run(_ =>
+    {
+        AvonicImg inAvatar = new(), plain = new();
+        var page = new StackPanel
+        {
+            Children = { new AvonicAvatar { Content = inAvatar }, plain },
+            Styles = { new Style(x => x.OfType<Image>()) { Setters = { new Setter(Image.StretchProperty, Stretch.Fill) } } },
+        };
+        using var scene = new Scene(page, 390, 300);
+        Layout(scene);
+
+        Assert.Equal(Stretch.UniformToFill, inAvatar.GetVisualDescendants().OfType<ImgNativeImage>().Single().Stretch);
+        Assert.Equal(Stretch.Uniform, plain.GetVisualDescendants().OfType<ImgNativeImage>().Single().Stretch);
+    });
+
+    // An app's own template with a plain Image as PART_Image still covers an avatar, as the theme's rule did.
+    [AvaloniaFact]
+    public void B14_A_Plain_Image_In_An_Apps_Own_Template_Still_Covers_An_Avatar() => InstalledTheme.Run(_ =>
+    {
+        var img = new AvonicImg
+        {
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<AvonicImg>((_, scope) =>
+                new Panel { Children = { new Image { Name = "PART_Image" }.RegisterInNameScope(scope) } }),
+        };
+        var plain = new AvonicImg { Template = img.Template };
+        using var scene = new Scene(new StackPanel { Children = { new AvonicAvatar { Content = img }, plain } }, 390, 300);
+        Layout(scene);
+
+        Assert.Equal(Stretch.UniformToFill, img.GetVisualDescendants().OfType<Image>().Single().Stretch);
+        Assert.Equal(Stretch.Uniform, plain.GetVisualDescendants().OfType<Image>().Single().Stretch);
     });
 
     [AvaloniaFact]

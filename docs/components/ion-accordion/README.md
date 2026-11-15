@@ -90,7 +90,14 @@ its own height and clips it, so the content slides rather than squeezes.
   has its own, and adds a toggle icon to its end slot (or start), unless the item already holds a control with the style class
   `ion-accordion-toggle-icon`. The icon turns 180° while open.
 - Nothing animates until the first interaction. After it, the content's height eases over 300 ms, on `AvonicConfig`'s clock,
-  unless `Animated` on the group or `AvonicConfig.Animated` is off.
+  unless `Animated` on the group or `AvonicConfig.Animated` is off. It's CSS's transition of `max-height`, through
+  `Animation/CssTransition`, from the value the state's rule and the inline height give, as Ionic sets them. Measured in Chromium,
+  200 high: an expand 133 ms into a collapse reverses at once and takes 250 ms, CSS's reversing shortening factor; a collapse
+  150 ms into an expand holds for two frames at the whole pixel it read and then takes the whole 300 ms, as Ionic's inline height
+  makes a new transition, not a reversal.
+- Each wait for the end of a transition has its own timeout, 2,500 ms (`transitionEndAsync`'s 2,000 and its fallback's 500), and
+  a later move cancels none: measured, with nothing to ease, an expand, a collapse and an expand each end 2,500 ms after their own
+  second frame, in turn.
 - Inset: the group has a 16 px margin, each accordion a shadow, and an open one 16 px above and below and rounded corners. The
   header item's line goes while open, on the last accordion, and inset on one before an open one.
 - With focus in a header, ArrowDown and ArrowUp move it to the next or previous accordion, wrapping, and Home and End to the first

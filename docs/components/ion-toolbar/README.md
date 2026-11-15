@@ -142,6 +142,13 @@ These are in [PLAN.md](PLAN.md#behaviours), numbered, each with tests named afte
   `AvonicTabs` whose tab bar is in `BottomContent`, which pads itself (`footer-toolbar-padding`, as `:footer-toolbar-padding` on
   the footer). The footer reads the tabs when it's attached, as Ionic does when it renders. The app fills these keys;
   see [`ion-content`](../ion-content/README.md).
+- **While the on-screen keyboard is open the footer gives up the bottom safe area** (`footer-toolbar-padding` needs
+  `!keyboardVisible`), as the keyboard covers it: the `TopLevel`'s `InputPane` opening, which Avalonia raises as the keyboard
+  starts to move, is Ionic's `keyboardWillShow`, and closing is `keyboardWillHide`. Measured in Chromium with a stand-in Capacitor
+  keyboard plugin, resize mode `ionic`, `ion-app` 800 high: closing gives it back at once, unless the app shrank while the
+  keyboard was open, when it comes back once the app is 800 again, and not at 600. Only a change counts: a footer attached with
+  the keyboard open has the padding, and one moved while it's open keeps it off until the next change, as Ionic keeps the state.
+  `Controls/Toolbar/KeyboardController.cs` is Ionic's `createKeyboardController`.
 - **A header's and footer's shadow is drawn over what comes after,** as `z-index: 10` does, through `ZIndex` 10.
 - **Automation:** a header is the `Banner` landmark and a footer the `ContentInfo` one.
 
@@ -167,7 +174,12 @@ None.
   [ion-button](../ion-button/README.md#in-a-toolbar).
 - **A header's first toolbar has to be its first child,** and a footer's last its last, to get the safe area. Ionic finds the first
   toolbar among other children, and inside a wrapper.
-- **A footer's bottom safe area stays while the keyboard is open,** where Ionic drops it. It needs the keyboard's state, which
-  headless tests can't open.
+- **The footer hears the keyboard only on a phone,** through the `TopLevel`'s `InputPane`, which a desktop doesn't have, as Ionic
+  hears it only from a native app's keyboard plugin and never in a browser. When the keyboard closes after the app shrank for it,
+  the footer waits for the app's height to come back, as Ionic does; Ionic's resize mode isn't known here, so with none the height
+  doesn't change and there's nothing to wait on. Tested headlessly with a stand-in input pane, not on a device. As in Ionic, the
+  height to wait for is read once, at the keyboard's first opening, and a wait isn't given up: an app whose height changes for
+  good while the keyboard is open, such as a rotation, keeps the footer unpadded until it's that height again, and a close that's
+  still waiting when the keyboard opens again turns the padding back on when the height comes back.
 - **A header and footer don't place themselves on a page,** as Avonic has no page yet. Put them in a `Grid`, as above.
 - **Text in a toolbar is Avalonia's default size,** where a web page's is 16 ([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)).

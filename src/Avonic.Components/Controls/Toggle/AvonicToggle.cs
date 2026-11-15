@@ -243,8 +243,11 @@ public class AvonicToggle : ContentControl, IItemControl
     /// <summary><c>checkInvalidState</c>: the app has marked it both touched and invalid.</summary>
     private bool IsInvalid => Classes.Contains(TouchedClass) && Classes.Contains(InvalidClass);
 
-    /// <summary><c>hasLabel</c>: <c>textContent !== ''</c>. Any control counts, as its text isn't read here.</summary>
-    private bool HasLabel => Content is not (null or "");
+    /// <summary>
+    /// <c>hasLabel</c>: <c>textContent !== ''</c>, any text inside, shown or not, so an icon alone is no label, measured in
+    /// Chromium.
+    /// </summary>
+    private bool HasLabel => TextContent.HasText(Content, _labelContent);
 
     // ── Lifecycle ────────────────────────────────────────────────────────────────────────────
 
@@ -252,8 +255,37 @@ public class AvonicToggle : ContentControl, IItemControl
     {
         base.OnApplyTemplate(e);
         _track = e.NameScope.Find<Control>("PART_Track");
+        if (_labelContent is not null)
+        {
+            _labelContent.PropertyChanged -= OnLabelContentChanged;
+        }
+
         _labelContent = e.NameScope.Find<ContentPresenter>("PART_LabelContent");
+        if (_labelContent is not null)
+        {
+            _labelContent.PropertyChanged += OnLabelContentChanged;
+        }
+
         SetupGesture();
+    }
+
+    /// <summary>Data is what its template makes, once the presenter has made it.</summary>
+    private void OnLabelContentChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
+        }
+    }
+
+    /// <summary>
+    /// Ionic reads <c>hasLabel</c> at each render; here at each change of a prop, and at each measure too, which a change of a shown
+    /// label's text causes, as the checkbox does.
+    /// </summary>
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
+        return base.MeasureOverride(availableSize);
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -509,7 +541,9 @@ public class AvonicToggle : ContentControl, IItemControl
             // classes checkInvalidState reads, as the list also holds every pseudoclass.
             owner.Classes.CollectionChanged += (_, e) =>
             {
-                if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset)
+                // And the label's hiding, which takes aria-labelledby away, so the name changes.
+                if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset
+                    || HidesLabel(e.NewItems) || HidesLabel(e.OldItems))
                 {
                     RaiseTextChanged();
                 }
@@ -521,6 +555,9 @@ public class AvonicToggle : ContentControl, IItemControl
 
         private static bool Mentions(System.Collections.IList? classes) =>
             classes?.OfType<string>().Any(name => name is TouchedClass or InvalidClass) == true;
+
+        private static bool HidesLabel(System.Collections.IList? classes) =>
+            classes?.OfType<string>().Any(name => name == ":label-text-wrapper-hidden") == true;
 
         private string? _name;
         private string? _help;

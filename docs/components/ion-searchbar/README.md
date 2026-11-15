@@ -93,6 +93,12 @@ Each has a test in `AvonicSearchbarTests`, named after its number in [PLAN.md](P
 - `Debounce`, `Maxlength`, the type and the keyboard hints, as `ion-input`.
 - md's look, measured: the white card with md's shadow, the icons, the toolbar's tighter padding, `Color`, disabled at 0.4, RTL.
 - An item takes it as `item-searchbar` and counts it as an input; the host is a search landmark.
+- In a flex row it shrinks to its padding and the input's, 126 at md, whatever its value, as the `<input>` is `width: 100%`:
+  measured in Chromium, its `min-content` is 126 with or without a value or the cancel button, and beside text that doesn't wrap in
+  a row 358 wide it's 126. `MinContent` takes its field as it does the input's and the textarea's. Compared headless in
+  [compare/155-flex-row.png](compare/155-flex-row.png), Ionic on the left, from `AvonicSearchbarCaptureTests.Flex_Row_Page` and
+  `node tools/ionic-ref/render.js ion-searchbar --bare --html '<div style="padding:16px;font-size:16px"><div style="display:flex;width:358px"><div style="flex:none;white-space:nowrap">Text that doesn't wrap</div><ion-searchbar value="A long search value that is wider than the box"></ion-searchbar></div></div>'`.
+  That frame shows a gap too: a value longer than the field shows its end, where Chromium's unfocused input shows its start.
 
 ## Extensions
 
@@ -104,3 +110,9 @@ textarea (`Controls/TextField/`).
 
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `dir` set on the searchbar itself mirrors everything; the typed text sits 0.5 px lower; only a tunnel key handler can stop Escape's clear; a disabled searchbar's buttons can't be reached, where Ionic's still can by Tab; the buttons have no automation invoke. Tried in a real window by `tools/real-window`; not with a soft
 keyboard, or on a device.
+
+Measured in Chromium in #155, and not done: the host's `width: 100%` as a flex basis, and the `<input>`'s width from its `size`
+of 20 when nothing stretches it. In an item's start or end slot Chromium's searchbar is 310 wide at 390, Avonic's 176; shrunk to
+fit (`display: inline-block`) it's 325, its padding, the input's and 199 for 20 characters, where Avonic's is 176; beside a label
+in an item's default slot, the label keeps its narrowest, 53, and the searchbar the rest, 273. Avonic's wants its field's own
+width, the text's and the padding's, and takes no more unless something stretches it.

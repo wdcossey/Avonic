@@ -30,7 +30,12 @@ public class AvonicRadioTests
     private static readonly Color Danger = Color.Parse("#C5000F");
 
     /// <summary>A label of a known size: a line of 16 px Roboto is 19 high.</summary>
-    private static Border Box(double width = 40, double height = 19) => new() { Width = width, Height = height };
+    /// <summary>
+    /// A label of a measured size. It holds text, unseen, as a label with no <c>textContent</c> is hidden: Ionic's
+    /// <c>label-text-wrapper-hidden</c>.
+    /// </summary>
+    private static Border Box(double width = 40, double height = 19) =>
+        new() { Width = width, Height = height, Child = new TextBlock { Text = "Label", Opacity = 0 } };
 
     private static AvonicRadio Radio(object? value, bool enabled = true) => new() { Value = value, Content = Box(), IsEnabled = enabled };
 
@@ -1088,6 +1093,50 @@ public class AvonicRadioTests
         // measured n1: ring 0, 13.5; n2: ring 338, 13.5
         AssertBox(0, 13.5, 20, 20, Layout(start).Ring);
         AssertBox(338, 13.5, 20, 20, Layout(end).Ring);
+    });
+
+    private sealed record Shape(string Name);
+
+    // label-text-wrapper-hidden is el.textContent === '': measured in Chromium, an ion-icon alone, or an empty span, hides the
+    // label, and the radio is its 20 by 20 ring; text nested in a panel shows it.
+    [AvaloniaFact]
+    public void V6_A_Label_With_No_Text_Is_Hidden_And_The_Radio_Is_Its_Ring() => InstalledTheme.Run(_ =>
+    {
+        var icon = new AvonicRadio { Value = "i", Content = new AvonicIcon { IconName = "star" } };
+        var span = new AvonicRadio { Value = "s", Content = new StackPanel { Children = { new TextBlock() } } };
+        var nested = new AvonicRadio { Value = "n", Content = new StackPanel { Children = { new TextBlock { Text = "Nested" } } } };
+        var data = new AvonicRadio
+        {
+            Value = "d",
+            Content = new Shape("Star"),
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<Shape>((_, _) => new AvonicIcon { IconName = "star" }),
+        };
+        using var scene = Show(Group(icon, span, nested, data));
+
+        Assert.False(Part<ContentPresenter>(icon, "PART_Label").IsVisible);
+        Assert.False(Part<ContentPresenter>(span, "PART_Label").IsVisible);
+        Assert.False(Part<ContentPresenter>(data, "PART_Label").IsVisible);
+        Assert.True(Part<ContentPresenter>(nested, "PART_Label").IsVisible);
+        Assert.Equal(new Size(20, 20), icon.Bounds.Size);
+    });
+
+    // Ionic reads textContent at its next render, which a change of a prop causes; here a measure, which a shown label's text causes.
+    [AvaloniaFact]
+    public void V6_Text_That_Comes_Later_Shows_The_Label() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock();
+        var radio = new AvonicRadio { Value = "a", Content = text };
+        using var scene = Show(Group(radio));
+        Assert.False(Part<ContentPresenter>(radio, "PART_Label").IsVisible);
+
+        text.Text = "Loaded";
+        radio.Color = "danger";
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Part<ContentPresenter>(radio, "PART_Label").IsVisible);
+
+        text.Text = "";
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Part<ContentPresenter>(radio, "PART_Label").IsVisible);
     });
 
     [AvaloniaFact]

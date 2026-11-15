@@ -11,7 +11,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel Background="{TemplateBinding Background}">
-                    <Image Name="PART_Image" IsVisible="False" />
+                    <c:ImgNativeImage Name="PART_Image" IsVisible="False" />
                     <TextBlock Name="PART_Alt" Text="{TemplateBinding Alt}" IsVisible="False" />
                     <Border Name="PART_Broken" IsVisible="False">
                         <Panel Name="PART_BrokenIcon" />

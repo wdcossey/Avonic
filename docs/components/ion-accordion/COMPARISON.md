@@ -102,10 +102,13 @@ A click on the second header, with the first open. Chromium's frames are about 1
   The content's height, which is the control's own, is on the clock.
 - **A request reversed within a frame.** Ionic lets a collapse that hasn't started yet run, even after the group has reopened the
   accordion, and the other way round. Here the pending one is cancelled, so the accordion follows its group.
-- **An interrupted transition.** Measured: Ionic's expand clicked again 112 ms in, at 36.7 px. The collapse sets the shown
-  height inline, which ends the running transition, so there's no reversing shortening: the height creeps to 39.9 over the two
-  frames, then eases to 0 over the full 300 ms (8.68 px 100 ms in). Here the collapse reads the height the transition has reached a
-  frame on, and eases from it over 300 ms; the two frames between hold it still, where Chromium's go on growing, about 3 px.
+- **An interrupted transition** (#155: now a match). Measured: Ionic's expand clicked again 112 ms in, at 36.7 px. The collapse
+  sets the shown height inline, which ends the running transition, so there's no reversing shortening: the height creeps to 39.9
+  over the two frames, then eases to 0 over the full 300 ms (8.68 px 100 ms in). Here the expand runs on until the collapse's first
+  frame, which sets `offsetHeight`, a whole pixel, inline: a transition of its own, from where the expand was; the collapsing rule's
+  0 a frame later is a new 300 ms one. The other way, an expand 133 ms into a collapse of 200 px reverses at its first frame and is
+  done 250 ms later, as the collapse's inline height beats the expanding rule's 0, and CSS shortens a reversal by the collapse's
+  eased progress, 0.834: `Animation/CssTransition`, and `B14_An_Expand_During_A_Collapse_Reverses_It_Shortened`.
 - **Keys pass over a disabled accordion.** In Ionic `focus()` lands on the disabled one's item, which isn't disabled itself; here
   `IsEnabled` reaches it, so it can't take focus, and the keys go on to the next one rather than stop.
 - **The toggle icon beside other content.** A slot holds one child here: a horizontal `StackPanel` there, which stands for the slot's

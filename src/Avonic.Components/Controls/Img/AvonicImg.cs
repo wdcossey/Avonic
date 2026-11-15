@@ -3,8 +3,10 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avonic.Components.Behaviors;
 
@@ -102,11 +104,22 @@ public class AvonicImg : TemplatedControl
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicImg>(VerticalAlignment.Top);
     }
 
-    public AvonicImg() => _hiddenChain = new HiddenChainWatcher(RequestCheck);
+    public AvonicImg()
+    {
+        _hiddenChain = new HiddenChainWatcher(RequestCheck);
+
+        // ::slotted(ion-img) { height: 100% } in an avatar or a thumbnail, at style priority, bound before any style reaches the
+        // control, so that an app's style for it wins, as a page's rule beats ::slotted. A rule with a pseudoclass in the theme
+        // would beat an app's plain style: measured.
+        Bind(VerticalAlignmentProperty, _fill, BindingPriority.Style);
+    }
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     private Image? _image;
+    private readonly StyleValue<VerticalAlignment> _fill = new();
+    private readonly StyleValue<Stretch> _plainFit = new();
+    private IDisposable? _plainImageFit;
     private Control? _alt;
     private Control? _broken;
     private Control? _brokenIcon;
@@ -143,12 +156,24 @@ public class AvonicImg : TemplatedControl
     /// <summary>The picture shown, if any.</summary>
     internal Bitmap? Picture => _bitmap;
 
+    /// <summary>A direct child of an avatar or a thumbnail, which <c>::slotted(ion-img)</c> reaches.</summary>
+    private bool InSlot => PseudoClasses.Contains(":in-avatar") || PseudoClasses.Contains(":in-thumbnail");
+
     // ── Lifecycle ────────────────────────────────────────────────────────────────────────────
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        _plainImageFit?.Dispose();
+        _plainImageFit = null;
         _image = e.NameScope.Find<Image>("PART_Image");
+
+        // A plain Image in an app's own template gets the fit bound now, after its styles, which then lose to it.
+        if (_image is not null and not ImgNativeImage)
+        {
+            _plainImageFit = _image.Bind(Image.StretchProperty, _plainFit, BindingPriority.Style);
+        }
+
         _alt = e.NameScope.Find<Control>("PART_Alt");
         _broken = e.NameScope.Find<Control>("PART_Broken");
         _brokenIcon = e.NameScope.Find<Control>("PART_BrokenIcon");
@@ -160,9 +185,11 @@ public class AvonicImg : TemplatedControl
         base.OnAttachedToVisualTree(e);
         _attached = true;
 
-        // ::slotted(ion-img) in an avatar or a thumbnail: a direct child, which is the logical parent here
+        // ::slotted(ion-img) in an avatar or a thumbnail: a direct child, which is the logical parent here. Cover fills the box by
+        // itself, but where there's no picture, height: 100% is the control stretching to the box, which the broken-image box needs.
         PseudoClasses.Set(":in-avatar", Parent is AvonicAvatar);
         PseudoClasses.Set(":in-thumbnail", Parent is AvonicThumbnail);
+        _fill.SetWhen(InSlot, VerticalAlignment.Stretch);
         UpdateParts();
 
         if (!_didLoad)
@@ -430,13 +457,16 @@ public class AvonicImg : TemplatedControl
     private void UpdateParts()
     {
         // A size of its own: a Height, or an avatar's or a thumbnail's, which height: 100% fills
-        var sized = !double.IsNaN(Height) || PseudoClasses.Contains(":in-avatar") || PseudoClasses.Contains(":in-thumbnail");
+        var sized = !double.IsNaN(Height) || InSlot;
         PseudoClasses.Set(":sized", sized);
 
         if (_image is not null)
         {
             _image.Source = _bitmap;
             _image.IsVisible = _bitmap is not null;
+
+            // object-fit: cover, which UniformToFill is, cropped from the middle.
+            ((_image as ImgNativeImage)?.Fit ?? _plainFit).SetWhen(InSlot, Stretch.UniformToFill);
         }
 
         var none = _bitmap is null && !_loading;

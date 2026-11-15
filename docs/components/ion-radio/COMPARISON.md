@@ -147,8 +147,8 @@ Second `/code-review` at high effort, on the fixed code:
 - **`ionChange` has no `event`.** Ionic's detail carries the DOM event that caused the change. A click here comes through
   `NativeButton`, which has no single event to give, and the routed event's `Source` says where it came from.
 - **`name` isn't declared** on either control: it's for an HTML form.
-- **No label is no content, or an empty string.** Ionic hides the label's wrapper when the radio's `textContent` is empty, so an icon
-  alone would hide it. Here any control counts as a label, as most have text, and reading a control's text needs it laid out first.
+- **No label is no text** (#155: now a match). Ionic hides the label's wrapper when the radio's `textContent` is empty, so an icon
+  alone hides it, measured: the radio is its 20 by 20 ring. `Behaviors/TextContent` reads it, as the checkbox's does.
 - **A radio belongs to its nearest group.** Ionic's group takes every `ion-radio` inside it, a nested group's too, for its keys and its
   tab stop. Nested radio groups aren't a real layout, and this keeps each radio in one group.
 - **`aria-invalid`** has no automation property in Avalonia, so it isn't given.

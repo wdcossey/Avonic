@@ -38,7 +38,7 @@ All three bubble. No methods or slots, as in Ionic.
 
 | ✓ | Ionic | Avonic |
 |---|---|---|
-| [x] | `image` | `PART_Image`, an `Image`, whose `Source` the control sets |
+| [x] | `image` | `PART_Image`, an `ImgNativeImage`, an `Image` whose `Source` the control sets. A type of its own to styles, so an app's style for every `Image` doesn't reach it, as a page's `img` rule doesn't reach into the shadow root; `c\|AvonicImg /template/ c\|ImgNativeImage` does, as `::part(image)`. A plain `Image` in an app's own template still gets the cover, but not the theme's clip |
 
 Where there's no picture, a browser shows something of its own, and the template has it: `PART_Alt`, the alt text after the
 broken-image icon, and `PART_Broken`, a box with a border, with the icon, `PART_BrokenIcon`, in it. The control shows which, as
@@ -47,7 +47,10 @@ Chromium does: see Behaviours.
 ### Pseudoclasses
 
 `:in-avatar` and `:in-thumbnail`, when it's the direct child of an `AvonicAvatar` or an `AvonicThumbnail`, which Ionic's
-`::slotted(ion-img)` reaches: there it fills the box, covers it, and is cut to its radius. `:sized` when it has a size of its own,
+`::slotted(ion-img)` reaches: there it fills the box, covers it, and is cut to its radius. The fill (`VerticalAlignment`) and the
+cover (`PART_Image`'s `Stretch`) come from the control at style priority, bound before any style, so an app's plain style for them
+wins, as a page's rule beats `::slotted`; a rule with a pseudoclass in the theme would beat it, measured. The cut is a theme rule
+on the parts' `Clip`, which beats an app's plain style for it: change the radius through its resource key. `:sized` when it has a size of its own,
 a `Height` or an avatar's or a thumbnail's, so that the broken-image box fills it.
 
 ### Resource keys

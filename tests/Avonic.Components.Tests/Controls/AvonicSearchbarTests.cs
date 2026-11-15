@@ -650,6 +650,38 @@ public class AvonicSearchbarTests
 
     // ── 14 to 16: the look ───────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// The native input is <c>width: 100%</c>, so compressible: measured in Chromium, a searchbar's <c>min-content</c> is its padding
+    /// and the input's, 8 + 55 + 55 + 8 = 126, with or without a value or the cancel button, and in a flex row 358 wide beside text
+    /// that doesn't wrap, it shrinks to that, whatever its value.
+    /// </summary>
+    [AvaloniaFact]
+    public void B14_In_A_Flex_Row_It_Shrinks_To_Its_Padding_And_The_Inputs() => InstalledTheme.Run(_ =>
+    {
+        var squeezed = new AvonicSearchbar { Value = "A long search value that is wider than the box" };
+        var row = new FlexRow
+        {
+            Width = 358,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children = { new TextBlock { Text = "A label long enough that it would rather take the whole row for itself" }, squeezed },
+        };
+        var plain = new AvonicSearchbar { Value = "Some value" };
+        var cancel = new AvonicSearchbar
+        {
+            Value = "Some value",
+            ShowCancelButton = SearchbarShowCancelButton.Always,
+            ShowClearButton = SearchbarShowClearButton.Always,
+        };
+        using var scene = new Scene(Page(row, plain, cancel));
+        Settle();
+        scene.Window.UpdateLayout();
+
+        Assert.Equal(126, squeezed.Bounds.Width, 0.5);
+        Assert.Equal(110, Native(squeezed).Bounds.Width, 0.5);
+        Assert.Equal(126, MinContent.Of(plain), 0.5);
+        Assert.Equal(126, MinContent.Of(cancel), 0.5);
+    });
+
     [AvaloniaFact]
     public void B14_The_Md_Layout_Matches_Chromium() => InstalledTheme.Run(_ =>
     {

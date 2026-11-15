@@ -104,7 +104,6 @@ public class AvonicRadio : ContentControl, IItemControl
         JustifyProperty.Changed.AddClassHandler<AvonicRadio>((radio, _) => radio.UpdateClasses());
         AlignmentProperty.Changed.AddClassHandler<AvonicRadio>((radio, _) => radio.UpdateClasses());
         ValueProperty.Changed.AddClassHandler<AvonicRadio>((radio, _) => radio.UpdateState());
-        ContentProperty.Changed.AddClassHandler<AvonicRadio>((radio, _) => radio.UpdateLabel());
     }
 
     public AvonicRadio()
@@ -309,20 +308,58 @@ public class AvonicRadio : ContentControl, IItemControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        if (_label is not null)
+        {
+            _label.PropertyChanged -= OnLabelChanged;
+        }
+
         _label = e.NameScope.Find<Control>("PART_Label");
+        if (_label is not null)
+        {
+            _label.PropertyChanged += OnLabelChanged;
+        }
+
         UpdateLabel();
     }
 
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        // Ionic renders again when any of its props changes, and reads the label's textContent then.
+        if (change.Property.OwnerType == typeof(AvonicRadio) || change.Property == ContentProperty
+            || change.Property == ColorProperty || change.Property == IsEnabledProperty)
+        {
+            UpdateLabel();
+        }
+    }
+
+    /// <summary>Data is what its template makes, once the presenter has made it.</summary>
+    private void OnLabelChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == ContentPresenter.ChildProperty)
+        {
+            UpdateLabel();
+        }
+    }
+
     /// <summary>
-    /// <c>label-text-wrapper-hidden</c>, when <c>textContent</c> is empty: no content, or an empty string. A control counts as
-    /// text, as most have some.
+    /// <c>label-text-wrapper-hidden</c>: <c>el.textContent === ''</c>, which Ionic reads at each render, so an icon alone, with no
+    /// text, hides the label, measured in Chromium. Here at each change of the content and each measure too, which a change of a
+    /// shown label's text causes, as the checkbox does.
     /// </summary>
     private void UpdateLabel()
     {
-        if (_label is not null)
+        if (_label is not null && TextContent.HasText(Content, _label as ContentPresenter) is var shown && _label.IsVisible != shown)
         {
-            _label.IsVisible = Content is not (null or "");
+            _label.IsVisible = shown;
         }
+    }
+
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        UpdateLabel();
+        return base.MeasureOverride(availableSize);
     }
 
     protected override AutomationPeer OnCreateAutomationPeer() => new RadioAutomationPeer(this);
