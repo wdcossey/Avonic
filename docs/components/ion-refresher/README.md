@@ -72,8 +72,9 @@ the first in the content's `Content` and then its `FixedContent`, is the scroll 
 starts from it, and only when it's at its top. A host that is a `ScrollViewer` is the scroll element itself; otherwise the first
 `ScrollViewer` in it, depth first, such as a `ListBox`'s template has, as only a `ScrollViewer` scrolls here: so put the class on the
 control that scrolls, as Ionic needs it on the element that scrolls. It's looked for when the refresher is attached; a host whose
-scroller isn't there yet (a `ListBox` not yet styled, with the fixed slot placed before the scroller) is looked at again after the
-content's next layout, as Ionic waits for the content to be ready, and with none then the error is logged and nothing pulls.
+scroller isn't there yet (a `ListBox` not yet styled, with the fixed slot placed before the scroller, or a hidden one, which isn't
+templated) is looked at again after each layout of the content until it has one, as Ionic waits for the content to be ready. If the
+first layout gives it none, the error is logged, once, and nothing pulls until it has one.
 
 ## Checklist
 

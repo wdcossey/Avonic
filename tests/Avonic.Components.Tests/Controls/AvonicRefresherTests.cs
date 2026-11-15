@@ -1053,6 +1053,44 @@ public class AvonicRefresherTests
         }
     }
 
+    // A host hidden when the refresher is attached has no template, so no scroller: it's logged once, and when it's shown and laid
+    // out it's the scroll element, as Ionic's would be all along.
+    [AvaloniaFact]
+    public void B24_A_Hidden_Scroll_Host_Is_The_Scroll_Element_Once_It_Shows()
+    {
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            var scroller = InnerScroller();
+            TemplatedHost? host = null;
+            using var page = new Page(styles: [TemplatedHost.Styled], body: column =>
+            {
+                host = new TemplatedHost(column, scroller, styled: true) { Height = 400, IsVisible = false };
+                host.Classes.Add(AvonicContent.ScrollHostClass);
+                return host;
+            });
+            page.Wait(16).Wait(16);
+            Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
+            Assert.Empty(scroller.GetVisualDescendants());
+
+            host!.IsVisible = true;
+            page.Wait(16);
+            ScrollsByTouch(scroller);
+            scroller.Offset = new Vector(0, 100);
+            page.Wait(16);
+            page.Drag(60).Lift().Wait(200);
+            Assert.Empty(page.Log);
+            Assert.True(scroller.Offset.Y < 100, $"scrolled to {scroller.Offset.Y}");
+            Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
+
     // querySelector searches all of the content's light DOM, so a host in the fixed slot counts too. Of a host in each slot, the
     // one in the content's own slot is taken here.
     [AvaloniaFact]

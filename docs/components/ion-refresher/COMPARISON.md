@@ -83,10 +83,10 @@ Refreshing:
 - **A scroll host's scroller is the first `ScrollViewer` in it**, depth first, unless the host is one (#155). In a browser the
   element with the class scrolls itself; here only a `ScrollViewer` can, so a panel with the class around a `TextBox` and a list
   would give the text box's. Put the class on the control that scrolls.
-- **A scroll host whose scroller isn't there yet is looked at once more, after the content's next layout** (#155), as Ionic waits
-  for the content with `componentOnReady`; a `ListBox` that is styled only once it's in the tree has none when the fixed slot comes
-  first. With none then, the error is logged, as the infinite scroll's is, and nothing pulls: Ionic's scroll element would be the
-  host itself, which can't scroll here.
+- **A scroll host whose scroller isn't there yet is looked at again after each layout of the content** (#155), as Ionic waits for
+  the content with `componentOnReady`: a `ListBox` that is styled only once it's in the tree has none when the fixed slot comes
+  first, and a hidden one isn't templated until it shows. If the first layout gives none, the error is logged once, as the infinite
+  scroll's is, and nothing pulls until there is one: Ionic's scroll element would be the host itself, which can't scroll here.
 
 ## Gaps
 
