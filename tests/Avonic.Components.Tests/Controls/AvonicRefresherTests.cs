@@ -1341,4 +1341,18 @@ public class AvonicRefresherTests
             Assert.Contains("ionPullEnd:Cancel", page.Names);
         }
     });
+
+    [AvaloniaFact]
+    public void C8_The_Functional_Template_Also_Stretches_The_Pulling_Icon_In_Cancelling_With_Its_Spinner_At_The_Start()
+    {
+        // No theme: Avonic.Components' own template, which has the structure and no sizes
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        page.Wait(32);
+        var icon = Box(page, "PART_PullingIcon");
+        var container = Box(page, "PART_SpinnerArrowContainer");
+        Assert.Equal(page.Refresher.Bounds.Width, icon.Width);
+        Assert.Equal(icon.X, container.X);
+        Assert.True(container.Width < icon.Width, $"{container.Width} of {icon.Width}");
+    }
 }
