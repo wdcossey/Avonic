@@ -169,6 +169,34 @@ public class CssShadowTests
         return shadows[0];
     }
 
+    // ── The theme's tokens ──────────────────────────────────────────────────────────────────
+
+    [AvaloniaTheory]
+    // Each from its .md.css (or reorder-group.css), as Ionic writes it
+    [InlineData("Avonic.AccordionGroup.Md.InsetBoxShadow", "0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Breadcrumb.Md.FocusedBoxShadow", "0px 1px 2px rgba(0, 0, 0, 0.2), 0px 2px 8px rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Button.Md.BoxShadowSolid", "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Button.Md.BoxShadowSolidActivated", "0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Card.BoxShadow", "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.FabButton.Md.BoxShadow", "0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.FabButton.Md.BoxShadowActivated", "0 7px 8px -4px rgba(0, 0, 0, 0.2), 0 12px 17px 2px rgba(0, 0, 0, 0.14), 0 5px 22px 4px rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Item.InnerBoxShadow", "none")]
+    [InlineData("Avonic.Range.KnobBoxShadow", "none")]
+    // outline: 5px solid #fff, as a spread
+    [InlineData("Avonic.Range.Md.DisabledKnobOutline", "0 0 0 5px #fff")]
+    [InlineData("Avonic.Refresher.Md.NativeIconBoxShadow", "0px 1px 6px rgba(0, 0, 0, 0.1)")]
+    [InlineData("Avonic.ReorderGroup.SelectedBoxShadow", "0 0 10px rgba(0, 0, 0, 0.4)")]
+    [InlineData("Avonic.Searchbar.BoxShadow", "0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.SegmentButton.IndicatorBoxShadow", "none")]
+    [InlineData("Avonic.Toggle.HandleBoxShadow", "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Header.BoxShadow", "0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12)")]
+    [InlineData("Avonic.Footer.BoxShadow", "0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12)")]
+    public void Each_Token_Is_Ionics_Css_Converted(string key, string css) => InstalledTheme.Run(theme =>
+    {
+        Assert.True(theme.TryGetResource(key, null, out var value), key);
+        Assert.Equal(CssBoxShadow.Parse(css), Assert.IsType<BoxShadows>(value));
+    });
+
     // ── In XAML ─────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
