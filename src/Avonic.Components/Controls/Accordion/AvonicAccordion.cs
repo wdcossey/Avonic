@@ -175,9 +175,8 @@ public class AvonicAccordion : TemplatedControl
     /// <summary><c>contentEl.style</c>'s <c>max-height</c>, which beats the expanding rule's 0 and loses to the collapsing one's.</summary>
     private double? _inlineMaxHeight;
 
-    /// <summary>The computed <c>max-height</c> last applied, null for <c>none</c>; and whether <c>#content</c> was shown then.</summary>
+    /// <summary>The computed <c>max-height</c> last applied, null for <c>none</c>.</summary>
     private double? _computedMaxHeight;
-    private bool _contentWasShown;
 
     /// <summary>
     /// What waits on <c>transitionEndAsync</c>: each is called at the next <c>transitionend</c>, or at its own timeout, as each
@@ -406,7 +405,6 @@ public class AvonicAccordion : TemplatedControl
                     {
                         _state = AccordionState.Expanded;
                         _inlineMaxHeight = null;
-                        Render();
                     });
                     SetInlineMaxHeight(height);
                 });
@@ -450,7 +448,6 @@ public class AvonicAccordion : TemplatedControl
                     {
                         _state = AccordionState.Collapsed;
                         _inlineMaxHeight = null;
-                        Render();
                     });
 
                     // .accordion-collapsing #content { max-height: 0 !important }: a new transition, not a reversal, as the one
@@ -498,7 +495,9 @@ public class AvonicAccordion : TemplatedControl
     /// <summary>
     /// The computed <c>max-height</c>, from the state's rule and the inline value, given to <c>#content</c> as CSS does: a change
     /// eases over 300 ms with <c>:host(.accordion-animated)</c>, through <see cref="CssTransition"/>, which starts from the value
-    /// shown and shortens a reversal; to or from <c>none</c>, which doesn't interpolate, or while <c>display: none</c>, it doesn't.
+    /// shown and shortens a reversal; to or from <c>none</c>, which doesn't interpolate, it doesn't. A value that hasn't changed
+    /// leaves a running transition alone, and one that has just ended to its <c>transitionend</c> at the next frame. <c>display:
+    /// none</c> needs nothing of its own: a collapsed accordion's value is <c>none</c>.
     /// </summary>
     private void ApplyMaxHeight()
     {
@@ -509,15 +508,19 @@ public class AvonicAccordion : TemplatedControl
 
         double? computed = _state == AccordionState.Collapsing ? 0
             : _inlineMaxHeight ?? (_state == AccordionState.Expanding ? 0 : null);
-        var shown = _state != AccordionState.Collapsed;
         var now = AvonicConfig.Now();
+
+        if (computed == _computedMaxHeight)
+        {
+            return;
+        }
 
         if (computed is not { } to)
         {
             CancelTransition(0);
             content.ClearValue(MaxHeightProperty);
         }
-        else if (!shown || !_contentWasShown || _computedMaxHeight is null || !ShouldAnimate())
+        else if (_computedMaxHeight is null || !ShouldAnimate())
         {
             CancelTransition(to);
             content.MaxHeight = to;
@@ -539,7 +542,6 @@ public class AvonicAccordion : TemplatedControl
         }
 
         _computedMaxHeight = computed;
-        _contentWasShown = shown;
     }
 
     /// <summary>The value at once, ending a running transition with no <c>transitionend</c>, as <c>transitioncancel</c>.</summary>
@@ -568,6 +570,7 @@ public class AvonicAccordion : TemplatedControl
             return;
         }
 
+        // Every wait hears the one transitionend, in the order they began, and Ionic renders once after them all.
         _transitioning = false;
         var waiters = _transitionEndWaiters.ToArray();
         _transitionEndWaiters.Clear();
@@ -576,11 +579,13 @@ public class AvonicAccordion : TemplatedControl
             waiter.Timeout?.Dispose();
             waiter.OnEnd();
         }
+
+        Render();
     }
 
     /// <summary>
-    /// <c>await transitionEndAsync(contentEl, 2000)</c>, then <paramref name="onEnd"/>: at the next <c>transitionend</c>, or after
-    /// <see cref="TransitionEndTimeout"/> if none comes, as when there's nothing to ease.
+    /// <c>await transitionEndAsync(contentEl, 2000)</c>, then <paramref name="onEnd"/>, which sets the state, and a render: at the
+    /// next <c>transitionend</c>, or after <see cref="TransitionEndTimeout"/> if none comes, as when there's nothing to ease.
     /// </summary>
     private void WaitForTransitionEnd(Action onEnd)
     {
@@ -590,6 +595,7 @@ public class AvonicAccordion : TemplatedControl
             if (_transitionEndWaiters.Remove(waiter))
             {
                 waiter.OnEnd();
+                Render();
             }
         }, TransitionEndTimeout);
         _transitionEndWaiters.Add(waiter);

@@ -1130,7 +1130,7 @@ public class AvonicRadioTests
         Assert.False(Part<ContentPresenter>(radio, "PART_Label").IsVisible);
 
         text.Text = "Loaded";
-        radio.Justify = RadioJustify.End;
+        radio.Color = "danger";
         Dispatcher.UIThread.RunJobs();
         Assert.True(Part<ContentPresenter>(radio, "PART_Label").IsVisible);
 

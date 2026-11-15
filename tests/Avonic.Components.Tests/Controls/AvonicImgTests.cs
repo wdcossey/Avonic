@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Templates;
 using Avalonia.Themes.Simple;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -909,6 +910,23 @@ public class AvonicImgTests
         Assert.All([ownAvatar, ownThumbnail], img => Assert.Equal(Stretch.UniformToFill, Picture(img).Stretch));
         Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(VerticalAlignment.Center, img.VerticalAlignment));
         Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(Stretch.Fill, Picture(img).Stretch));
+    });
+
+    // An app's own template with a plain Image as PART_Image still covers an avatar, as the theme's rule did.
+    [AvaloniaFact]
+    public void B14_A_Plain_Image_In_An_Apps_Own_Template_Still_Covers_An_Avatar() => InstalledTheme.Run(_ =>
+    {
+        var img = new AvonicImg
+        {
+            Template = new Avalonia.Controls.Templates.FuncControlTemplate<AvonicImg>((_, scope) =>
+                new Panel { Children = { new Image { Name = "PART_Image" }.RegisterInNameScope(scope) } }),
+        };
+        var plain = new AvonicImg { Template = img.Template };
+        using var scene = new Scene(new StackPanel { Children = { new AvonicAvatar { Content = img }, plain } }, 390, 300);
+        Layout(scene);
+
+        Assert.Equal(Stretch.UniformToFill, img.GetVisualDescendants().OfType<Image>().Single().Stretch);
+        Assert.Equal(Stretch.Uniform, plain.GetVisualDescendants().OfType<Image>().Single().Stretch);
     });
 
     [AvaloniaFact]

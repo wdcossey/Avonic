@@ -813,6 +813,32 @@ public class AvonicToggleTests
         Assert.Equal("Named", ControlAutomationPeer.CreatePeerForElement(icon).GetName());
     });
 
+    // Hidden, the label is no longer aria-labelledby, so the name changes, and a screen reader hears it.
+    [AvaloniaFact]
+    public void T14_A_Label_That_Hides_Changes_The_Name() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "Wi-Fi" };
+        var toggle = new AvonicToggle { Content = text };
+        AutomationProperties.SetName(toggle, "Named");
+        using var scene = Themed(new StackPanel { Children = { toggle } });
+        var peer = ControlAutomationPeer.CreatePeerForElement(toggle);
+        var names = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.NameProperty)
+            {
+                names.Add(e.NewValue);
+            }
+        };
+        Assert.Equal("Wi-Fi", peer.GetName());
+
+        text.Text = "";
+        Settle();
+
+        Assert.Equal("Named", peer.GetName());
+        Assert.Equal(["Named"], names);
+    });
+
     // Ionic reads textContent at its next render, which a change of a prop causes; here a measure, which a shown label's text causes.
     [AvaloniaFact]
     public void T14_Text_That_Comes_Later_Shows_The_Label() => InstalledTheme.Run(_ =>

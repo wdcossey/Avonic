@@ -118,6 +118,8 @@ public class AvonicImg : TemplatedControl
 
     private Image? _image;
     private readonly StyleValue<VerticalAlignment> _fill = new();
+    private readonly StyleValue<Stretch> _plainFit = new();
+    private IDisposable? _plainImageFit;
     private Control? _alt;
     private Control? _broken;
     private Control? _brokenIcon;
@@ -162,7 +164,16 @@ public class AvonicImg : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        _plainImageFit?.Dispose();
+        _plainImageFit = null;
         _image = e.NameScope.Find<Image>("PART_Image");
+
+        // A plain Image in an app's own template gets the fit bound now, after its styles, which then lose to it.
+        if (_image is not null and not ImgNativeImage)
+        {
+            _plainImageFit = _image.Bind(Image.StretchProperty, _plainFit, BindingPriority.Style);
+        }
+
         _alt = e.NameScope.Find<Control>("PART_Alt");
         _broken = e.NameScope.Find<Control>("PART_Broken");
         _brokenIcon = e.NameScope.Find<Control>("PART_BrokenIcon");
@@ -455,7 +466,7 @@ public class AvonicImg : TemplatedControl
             _image.IsVisible = _bitmap is not null;
 
             // object-fit: cover, which UniformToFill is, cropped from the middle.
-            (_image as ImgNativeImage)?.Fit.SetWhen(InSlot, Stretch.UniformToFill);
+            ((_image as ImgNativeImage)?.Fit ?? _plainFit).SetWhen(InSlot, Stretch.UniformToFill);
         }
 
         var none = _bitmap is null && !_loading;

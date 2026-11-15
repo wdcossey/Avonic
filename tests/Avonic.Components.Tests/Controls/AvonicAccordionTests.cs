@@ -1117,6 +1117,11 @@ public class AvonicAccordionTests
         Tap(scene, b);
         Assert.Null(group.Value);
 
+        // Ionic renders once after the transitionend that ends both waits: the state never passes through expanded.
+        var expandedAgain = 0;
+        b.Classes.CollectionChanged += (_, e) =>
+            expandedAgain += e.NewItems?.OfType<string>().Count(name => name is ":accordion-expanded" or ":expanded") ?? 0;
+
         // At 144, offsetHeight inline: a transition from where the expand was to that whole number.
         var at144 = ContentHeight * Ease.Ease(112 / 300.0);
         var offsetHeight = Math.Round(at144);
@@ -1135,6 +1140,55 @@ public class AvonicAccordionTests
         clock.At(464);
         Assert.Equal(AvonicAccordion.AccordionState.Collapsed, b.State);
         Assert.False(Content(b).IsVisible);
+        Assert.Equal(0, expandedAgain);
+    }
+
+    /// <summary>
+    /// A render in the last frame's gap, after the transition's end and before the frame that raises <c>transitionend</c>, leaves
+    /// it to that frame: the expand ends then, not at the timeout.
+    /// </summary>
+    [AvaloniaFact]
+    public void B14_A_Render_Just_After_The_End_Still_Ends_It_At_The_Next_Frame()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        // b's transition runs from 32 to 332; the frames are at 320 and 336.
+        Tap(scene, b);
+        clock.At(334);
+        group.Readonly = true;
+        group.Readonly = false;
+        Assert.Equal(AvonicAccordion.AccordionState.Expanding, b.State);
+
+        clock.At(336);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanded, b.State);
+    }
+
+    /// <summary>
+    /// <c>:host(.accordion-animated) #content</c> has the transition: with the group's animated turned off between an expand's two
+    /// frames, its height is there at once, with no transition, so <c>transitionEndAsync</c> waits out its timeout.
+    /// </summary>
+    [AvaloniaFact]
+    public void B14_Animated_Turned_Off_Mid_Expand_Shows_The_Height_At_Once_And_Waits_Out_The_Timeout()
+    {
+        AvonicAccordion a = Accordion("a"), b = Accordion("b");
+        var group = Group("a", a, b);
+        using var scene = Show(group);
+        using var clock = new TestClock();
+
+        Tap(scene, b);
+        clock.At(16);
+        group.Animated = false;
+        clock.At(32);
+        Assert.Equal(ContentHeight, Content(b).MaxHeight);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanding, b.State);
+
+        clock.At(32 + 2496);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanding, b.State);
+        clock.At(32 + 2512);
+        Assert.Equal(AvonicAccordion.AccordionState.Expanded, b.State);
     }
 
     [AvaloniaFact]

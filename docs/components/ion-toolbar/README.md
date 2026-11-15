@@ -177,6 +177,9 @@ None.
 - **The footer hears the keyboard only on a phone,** through the `TopLevel`'s `InputPane`, which a desktop doesn't have, as Ionic
   hears it only from a native app's keyboard plugin and never in a browser. When the keyboard closes after the app shrank for it,
   the footer waits for the app's height to come back, as Ionic does; Ionic's resize mode isn't known here, so with none the height
-  doesn't change and there's nothing to wait on. Tested headlessly with a stand-in input pane, not on a device.
+  doesn't change and there's nothing to wait on. Tested headlessly with a stand-in input pane, not on a device. As in Ionic, the
+  height to wait for is read once, at the keyboard's first opening, and a wait isn't given up: an app whose height changes for
+  good while the keyboard is open, such as a rotation, keeps the footer unpadded until it's that height again, and a close that's
+  still waiting when the keyboard opens again turns the padding back on when the height comes back.
 - **A header and footer don't place themselves on a page,** as Avonic has no page yet. Put them in a `Grid`, as above.
 - **Text in a toolbar is Avalonia's default size,** where a web page's is 16 ([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)).

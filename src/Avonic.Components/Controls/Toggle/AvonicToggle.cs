@@ -541,7 +541,9 @@ public class AvonicToggle : ContentControl, IItemControl
             // classes checkInvalidState reads, as the list also holds every pseudoclass.
             owner.Classes.CollectionChanged += (_, e) =>
             {
-                if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset)
+                // And the label's hiding, which takes aria-labelledby away, so the name changes.
+                if (Mentions(e.NewItems) || Mentions(e.OldItems) || e.Action == NotifyCollectionChangedAction.Reset
+                    || HidesLabel(e.NewItems) || HidesLabel(e.OldItems))
                 {
                     RaiseTextChanged();
                 }
@@ -553,6 +555,9 @@ public class AvonicToggle : ContentControl, IItemControl
 
         private static bool Mentions(System.Collections.IList? classes) =>
             classes?.OfType<string>().Any(name => name is TouchedClass or InvalidClass) == true;
+
+        private static bool HidesLabel(System.Collections.IList? classes) =>
+            classes?.OfType<string>().Any(name => name == ":label-text-wrapper-hidden") == true;
 
         private string? _name;
         private string? _help;
