@@ -88,7 +88,7 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 
 | Extension | Notes |
 |---|---|
-| `Click` on `AvonicBreadcrumb` | The DOM `click` an Ionic app listens to: on the release of every press, link or not, and Enter on a link. A click on the indicator clicks its breadcrumb too, after `IonCollapsedClick`, as the DOM event bubbles to the host. Until there's a router, this is how to follow `Href` |
+| `Click` on `AvonicBreadcrumb` | The DOM `click` an Ionic app listens to: on the release of every press, link or not, and Enter on a link. A click on the indicator clicks its breadcrumb too, after `IonCollapsedClick`, as the DOM event bubbles to the host. So does a stock `Button`, an `AvonicButton` or another control with a native button inside it, from Enter, Space or automation, after its own `Click`, as the chip's does ([#162](https://github.com/wdcossey/Avonic/pull/162)). Until there's a router, this is how to follow `Href` |
 | `Command`, `CommandParameter` | Run on `Click`, unless a handler sets `Handled`. One that can't execute disables the breadcrumb |
 
 ## Known gaps

@@ -6,8 +6,9 @@ namespace Avonic.Components.Animation;
 /// A CSS transition of one number with a timing function, on <see cref="AvonicConfig"/>'s clock, with CSS's rules for an interrupted
 /// one: it starts from the value shown, and one that goes back to where the running one began is shortened by how far that one got
 /// through its timing function (the reversing shortening factor, CSS Transitions §3). No delay. Used by the progress bar
-/// (<c>transform 150ms linear</c>), the reorder group (<c>transform 300ms</c>, <c>ease</c>) and the sliding item
-/// (<c>transform 500ms cubic-bezier(0.36, 0.66, 0.04, 1)</c>).
+/// (<c>transform 150ms linear</c>), the reorder group (<c>transform 300ms</c>, <c>ease</c>), the sliding item
+/// (<c>transform 500ms cubic-bezier(0.36, 0.66, 0.04, 1)</c>) and the accordion's content
+/// (<c>max-height 300ms cubic-bezier(0.25, 0.8, 0.5, 1)</c>).
 /// </summary>
 /// <param name="easing">The timing function.</param>
 /// <param name="value">The value before anything has started: what <see cref="At"/> and <see cref="Target"/> give.</param>
