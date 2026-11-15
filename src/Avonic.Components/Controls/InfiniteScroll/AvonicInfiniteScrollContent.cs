@@ -24,7 +24,8 @@ public class AvonicInfiniteScrollContent : TemplatedControl
     /// <summary>
     /// Ionic <c>loadingSpinner</c>. Left unset, it becomes <see cref="AvonicConfig.InfiniteLoadingSpinner"/>, else
     /// <see cref="AvonicConfig.Spinner"/>, else <see cref="SpinnerName.Crescent"/>,
-    /// md's default here, when it's first attached, as Ionic sets it in <c>componentDidLoad</c>. Null: no spinner.
+    /// md's default here, when it's first attached, as Ionic sets it in <c>componentDidLoad</c>; a config set to
+    /// <see cref="ConfigSpinner.None"/> gives null. Null: no spinner.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> LoadingSpinnerProperty =
         AvaloniaProperty.Register<AvonicInfiniteScrollContent, SpinnerName?>(nameof(LoadingSpinner));
@@ -35,8 +36,14 @@ public class AvonicInfiniteScrollContent : TemplatedControl
     public static readonly StyledProperty<string?> LoadingTextProperty =
         AvaloniaProperty.Register<AvonicInfiniteScrollContent, string?>(nameof(LoadingText));
 
-    private bool _didLoad;
+    private readonly ConfigOnLoad<SpinnerName?> _loadingSpinner;
     private AvonicInfiniteScroll? _infiniteScroll;
+
+    public AvonicInfiniteScrollContent()
+    {
+        // Left unset, the config's spinner as the current value, so that clearing it later gives no spinner, Ionic's undefined.
+        _loadingSpinner = ConfigOnLoad<SpinnerName?>.IfUnset(this, LoadingSpinnerProperty);
+    }
 
     /// <inheritdoc cref="LoadingSpinnerProperty"/>
     public SpinnerName? LoadingSpinner
@@ -57,15 +64,9 @@ public class AvonicInfiniteScrollContent : TemplatedControl
     {
         base.OnAttachedToVisualTree(e);
 
-        if (!_didLoad)
-        {
-            // componentDidLoad, once: config.get('infiniteLoadingSpinner', config.get('spinner', 'crescent')).
-            _didLoad = true;
-            if (!IsSet(LoadingSpinnerProperty))
-            {
-                SetCurrentValue(LoadingSpinnerProperty, AvonicConfig.InfiniteLoadingSpinner ?? AvonicConfig.Spinner ?? SpinnerName.Crescent);
-            }
-        }
+        // componentDidLoad, once: config.get('infiniteLoadingSpinner', config.get('spinner', 'crescent')), whose null is none.
+        _loadingSpinner.Load(static () =>
+            ConfigSpinner.Get(AvonicConfig.InfiniteLoadingSpinner, ConfigSpinner.Get(AvonicConfig.Spinner, SpinnerName.Crescent)));
 
         _infiniteScroll = this.FindAncestorOfType<AvonicInfiniteScroll>();
         if (_infiniteScroll is not null)

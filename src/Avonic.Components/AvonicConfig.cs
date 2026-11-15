@@ -31,16 +31,19 @@ public static class AvonicConfig
     public static bool RippleEffect { get; set; } = true;
 
     /// <summary>
-    /// Ionic's <c>spinner</c> config: the name of an <see cref="AvonicSpinner"/> that has none. Null is md's default,
-    /// <see cref="SpinnerName.Circular"/>.
+    /// Ionic's <c>spinner</c> config: the name of an <see cref="AvonicSpinner"/> that has none. Null, not set, and
+    /// <see cref="ConfigSpinner.None"/> are md's default there, <see cref="SpinnerName.Circular"/>, as Ionic's <c>getName()</c>
+    /// reads <c>this.name || config.get('spinner')</c>. The infinite scroll's and the refresher's contents fall back to it when
+    /// their own keys aren't set, and there <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is no spinner.
     /// </summary>
     /// <remarks>
     /// Read when the spinner renders, as Ionic's <c>getName()</c> reads it in <c>render()</c>: when it's first attached, and at each
     /// change of its <see cref="AvonicSpinner.SpinnerName"/>, <see cref="AvonicSpinner.Paused"/>,
     /// <see cref="AvonicSpinner.Duration"/> or <see cref="AvonicSpinner.Color"/>. A change of this alone redraws nothing, and
-    /// neither does a spinner leaving the tree and coming back, or being hidden and shown, as measured in Chromium.
+    /// neither does a spinner leaving the tree and coming back, or being hidden and shown, as measured in Chromium. Ionic's own type
+    /// for it has no <c>null</c>, though its code passes one on: <see cref="ConfigSpinner.None"/> is that.
     /// </remarks>
-    public static SpinnerName? Spinner { get; set; }
+    public static ConfigSpinner? Spinner { get; set; }
 
     /// <summary>
     /// Ionic's <c>backButtonIcon</c> config: the icon of an <see cref="AvonicSearchbar"/>'s md cancel button, an
@@ -65,13 +68,36 @@ public static class AvonicConfig
 
     /// <summary>
     /// Ionic's <c>infiniteLoadingSpinner</c> config: the <see cref="AvonicInfiniteScrollContent.LoadingSpinner"/> of a content that
-    /// has none, before <see cref="Spinner"/>. Null falls back to <see cref="Spinner"/>, then md's <see cref="SpinnerName.Crescent"/>.
+    /// has none, before <see cref="Spinner"/>. Null, not set, falls back to <see cref="Spinner"/>, then md's
+    /// <see cref="SpinnerName.Crescent"/>; <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is no spinner.
     /// </summary>
     /// <remarks>
     /// Read when the content is first attached, as Ionic reads it in <c>componentDidLoad</c>: a change of this reaches only contents
     /// attached for the first time after it.
     /// </remarks>
-    public static SpinnerName? InfiniteLoadingSpinner { get; set; }
+    public static ConfigSpinner? InfiniteLoadingSpinner { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>refreshingIcon</c> config: the <see cref="AvonicRefresherContent.PullingIcon"/> of a content that has none, which
+    /// Ionic names after the icon its legacy refresher pulls with. Null, not set, is md's <see cref="SpinnerName.Circular"/>, which
+    /// doesn't fall back to <see cref="Spinner"/> in md; <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is none, and with
+    /// no pulling spinner the refresher isn't md's native one, so it does nothing here.
+    /// </summary>
+    /// <remarks>
+    /// Read when the content first loads, as Ionic reads it in <c>componentWillLoad</c>: when it's first attached, or when its
+    /// refresher first looks at it. A change of this reaches only contents loaded for the first time after it. Ionic's is any icon's
+    /// name; only spinners are here, as an icon is the legacy refresher's.
+    /// </remarks>
+    public static ConfigSpinner? RefreshingIcon { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>refreshingSpinner</c> config: the <see cref="AvonicRefresherContent.RefreshingSpinner"/> of a content that has
+    /// none, before <see cref="Spinner"/>. Null, not set, falls back to <see cref="Spinner"/>, then md's
+    /// <see cref="SpinnerName.Circular"/>; <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is none, and the refresher then
+    /// isn't md's native one, so it does nothing here.
+    /// </summary>
+    /// <remarks>Read when the content first loads, as <see cref="RefreshingIcon"/> is.</remarks>
+    public static ConfigSpinner? RefreshingSpinner { get; set; }
 
     /// <summary>
     /// Ionic's <c>tabButtonLayout</c> config: the <see cref="AvonicTabButton.Layout"/> of a tab button that has none. Null is

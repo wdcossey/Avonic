@@ -39,7 +39,7 @@ public class AvonicSpinner : Control
 
     /// <summary>
     /// Ionic's <c>name</c>, renamed because <see cref="StyledElement.Name"/> already exists. Null is
-    /// <see cref="AvonicConfig.Spinner"/>, and if that's null too, md's default, <see cref="Controls.SpinnerName.Circular"/>.
+    /// <see cref="AvonicConfig.Spinner"/>, and if that's null or <see cref="ConfigSpinner.None"/>, md's default, <see cref="Controls.SpinnerName.Circular"/>.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> SpinnerNameProperty =
         AvaloniaProperty.Register<AvonicSpinner, SpinnerName?>(nameof(SpinnerName));
@@ -231,7 +231,7 @@ public class AvonicSpinner : Control
     /// <summary>
     /// Ionic's <c>getName()</c>: <c>this.name || config.get('spinner')</c>, or md's default. Read at each render, as there.
     /// </summary>
-    private SpinnerName GetName() => SpinnerName ?? AvonicConfig.Spinner ?? Controls.SpinnerName.Circular;
+    private SpinnerName GetName() => SpinnerName ?? AvonicConfig.Spinner?.Name ?? Controls.SpinnerName.Circular;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {

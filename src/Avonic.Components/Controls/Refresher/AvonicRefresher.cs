@@ -60,6 +60,10 @@ public class AvonicRefresher : ContentControl
 
     private AvonicContent? _contentEl;
     private ScrollViewer? _scrollEl;
+
+    // a scroll host whose scroller it waits for, at each layout of the content
+    private Control? _pendingHost;
+    private bool _loggedPendingHost;
     private Gesture? _gesture;
     private AvonicRefresherContent? _refresherContent;
 
@@ -223,6 +227,7 @@ public class AvonicRefresher : ContentControl
     /// </summary>
     private void Disconnect()
     {
+        StopWaitingForHost();
         _nativeRefresher = false;
         _scrollEl = null;
         _contentEl = null;
@@ -266,20 +271,76 @@ public class AvonicRefresher : ContentControl
             return;
         }
 
-        // getScrollElement(contentEl). Ionic would take an .ion-content-scroll-host inside the content first, which isn't here.
+        // getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl): a custom scroll host in the content
+        // first, as a virtual scroller has, and the content's own scroller otherwise. The content is still the content: the header
+        // before it, say, is read from it.
         _contentEl = content;
-        _scrollEl = ContentUtils.GetScrollElement(content, this);
+        var host = ContentUtils.FindScrollHost(content) ?? content;
+        if (TryConnectScrollElement(host))
+        {
+            return;
+        }
+
+        if (ReferenceEquals(host, content))
+        {
+            LogNoScrollViewer(host);
+            return;
+        }
+
+        // A host whose scroller isn't there yet, as one still to be styled when the fixed slot comes first, or one hidden, which
+        // isn't templated, is looked at again after each layout of the content until it has one, as Ionic waits for the content to
+        // be ready (componentOnReady). Logged once, if the first layout gives it none.
+        _pendingHost = host;
+        content.LayoutUpdated += OnContentLayout;
+    }
+
+    private bool TryConnectScrollElement(Control host)
+    {
+        _scrollEl = ContentUtils.GetScrollElementWithin(host);
         if (_scrollEl is null)
         {
-            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", content);
-            return;
+            return false;
         }
 
         if (ShouldUseNativeRefresher())
         {
             SetupNativeRefresher();
         }
+
+        return true;
     }
+
+    private void OnContentLayout(object? sender, EventArgs e)
+    {
+        if (_pendingHost is not { } host)
+        {
+            return;
+        }
+
+        if (TryConnectScrollElement(host))
+        {
+            StopWaitingForHost();
+        }
+        else if (!_loggedPendingHost)
+        {
+            _loggedPendingHost = true;
+            LogNoScrollViewer(host);
+        }
+    }
+
+    private void StopWaitingForHost()
+    {
+        if (_pendingHost is not null && _contentEl is { } content)
+        {
+            content.LayoutUpdated -= OnContentLayout;
+        }
+
+        _pendingHost = null;
+        _loggedPendingHost = false;
+    }
+
+    private void LogNoScrollViewer(Control host) =>
+        Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", host);
 
     /// <summary>
     /// The content whose fixed slot it's in, through any panel there, as an <c>ion-fab</c> can share the slot: the nearest

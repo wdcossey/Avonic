@@ -23,7 +23,9 @@ xmlns:c="using:Avonic.Components.Controls"
 the enum `SpinnerName`: `Bubbles`, `Circles`, `Circular`, `Crescent`, `Dots`, `Lines`, `LinesSmall`, `LinesSharp`,
 `LinesSharpSmall`, for Ionic's `bubbles` … `lines-sharp-small`.
 
-**With no name it's `AvonicConfig.Spinner`,** Ionic's `spinner` config, and if that's null too, `Circular`, md's default.
+**With no name it's `AvonicConfig.Spinner`,** Ionic's `spinner` config, and if that's null too, or `ConfigSpinner.None`,
+`Circular`, md's default, as Ionic's `this.name || config.get('spinner')` takes a `null` as no name. The infinite scroll's and the
+refresher's contents read the same key, and there `ConfigSpinner.None` is no spinner (see their READMEs).
 As in Ionic, the config is read when the spinner renders: when it's first attached, and at each change of `SpinnerName`,
 `Paused`, `Duration` or `Color`. Setting the config alone redraws nothing, and neither does moving a spinner or hiding and
 showing it, as measured in Chromium. So set it at startup, before any spinner is shown:
@@ -78,7 +80,7 @@ None in Ionic, none here.
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `spinner` | `AvonicConfig.Spinner` (`SpinnerName?`) | The name of a spinner with none. Read at each render, as above. Null is `Circular` |
+| [x] | `spinner` | `AvonicConfig.Spinner` (`ConfigSpinner?`, which a `SpinnerName` converts to) | The name of a spinner with none. Read at each render, as above. Null and `ConfigSpinner.None` are `Circular` here. Ionic's type for it has no `null`, though its code passes one on (#155) |
 | [ ] | `_testing` | — | Not applicable: a private config for Ionic's own screenshot tests, which pauses every spinner |
 | [ ] | `animated` | — | Not read, as in Ionic. `AvonicConfig.Animated` off leaves spinners turning |
 
