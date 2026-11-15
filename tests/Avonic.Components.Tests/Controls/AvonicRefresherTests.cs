@@ -1046,6 +1046,11 @@ public class AvonicRefresherTests
             Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
             page.Drag(100).Lift().Wait(600);
             Assert.Empty(page.Log);
+
+            // Once: a later layout, which looks again, logs nothing more
+            page.Column.Children.Add(new Border { Height = 48 });
+            page.Wait(16);
+            Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
         }
         finally
         {
