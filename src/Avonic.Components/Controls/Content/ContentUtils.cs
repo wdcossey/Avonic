@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 
@@ -48,7 +47,7 @@ internal static class ContentUtils
     /// <see cref="ScrollViewer"/>; otherwise the first <see cref="ScrollViewer"/> in it, depth first, such as a <c>ListBox</c>'s
     /// template has, as a host with the class scrolls itself in a browser and only a <see cref="ScrollViewer"/> can here. So the class
     /// goes on the control that scrolls, as in Ionic: on a panel around a <c>TextBox</c> and a list, the text box's would be first.
-    /// Null while the host has no template yet, as before an unstyled control is in the tree.
+    /// Null while the host's template isn't applied yet, which a layout pass does.
     /// </summary>
     public static ScrollViewer? GetScrollElementWithin(Control host)
     {
@@ -57,7 +56,6 @@ internal static class ContentUtils
             return OwnScrollElement(host);
         }
 
-        (host as TemplatedControl)?.ApplyTemplate();
         return host.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
     }
 
