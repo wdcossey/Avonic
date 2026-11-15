@@ -31,7 +31,7 @@ Refreshing:
 | Icon pulled to 0.5 | y 115.49 (`translateY(50.49px)`) | 115.5 (the capture test) | Match |
 | Pulling frame at any step | e.g. dash 53.5331, `translateY(1.71567px)`, turn 25.7°, arrow `matrix(0.342892, …, 0.799879, 0)` | the same to 3 places (B2) | Match |
 | Scale type, no header | `matrix(0.452466, 0, 0, 0.452466, 0, 5.60811)` | the same (B2) | Match |
-| Icon chrome | white, `1px solid rgb(236, 236, 236)`, `0 1px 6px rgba(0,0,0,.1)`, round | the same, CSS's numbers through `{a:CssShadow}` (blur 9.32; [#139](../../infra/box-shadow/README.md)) | Match: every pixel sampled 1 to 13 px below and beside the icon is within 3 levels of 255 of Chromium's, as with the 9.4 before |
+| Icon chrome | white, `1px solid rgb(236, 236, 236)`, `0 1px 6px rgba(0,0,0,.1)`, round | the same, CSS's numbers through `{a:CssShadow}` (blur 9.42; [#139](../../infra/box-shadow/README.md)) | Match: every pixel sampled 1 to 13 px below and beside the icon is within 3 levels of 255 of Chromium's, as with the 9.4 before |
 | Spinner colour | `rgb(0, 84, 233)`, primary | `Avonic.Color.PrimaryBrush` | Match |
 | The arrow | `caret-back-sharp`, 12 px, 4 px below the spinner's box | the same | Match, by eye at 4x |
 | Refreshing arc on showing | 655 ms into `spinner-circular-inner` | the same (B20) | Match |

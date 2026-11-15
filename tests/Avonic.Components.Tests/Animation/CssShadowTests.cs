@@ -42,13 +42,27 @@ public class CssShadowTests
     [Fact]
     public void The_Blur_Is_The_Formula()
     {
-        // 2 sqrt(3) (4 B / (3 sqrt(2 pi)) - 0.5)
-        Assert.Equal(1.8426 * 10 - 1.7321, CssBoxShadow.Blur(10), 3);
-        Assert.Equal(1.8426 * 1 - 1.7321, CssBoxShadow.Blur(1), 3);
-        // Below about 0.94 px it would go negative: none, as Avalonia draws no blur for anything under 1.04 at 1x anyway
+        // 2 sqrt(3) ((B + 0.05) / (3 sqrt(2 pi) / 4) - 0.5)
+        Assert.Equal(1.8426 * 10 - 1.6399, CssBoxShadow.Blur(10), 3);
+        Assert.Equal(1.8426 * 1 - 1.6399, CssBoxShadow.Blur(1), 3);
+        // Below about 0.89 px it would go negative: none, as Avalonia draws no blur for anything under 1.04 at 1x anyway
         Assert.Equal(0, CssBoxShadow.Blur(0));
         Assert.Equal(0, CssBoxShadow.Blur(0.5));
         Assert.Throws<ArgumentOutOfRangeException>(() => CssBoxShadow.Blur(-1));
+    }
+
+    [Theory]
+    // A half-pixel blur takes the wider of the two windows it falls between, not whichever float rounding picks: Skia's window is
+    // floor(sigma * 3 sqrt(2 pi) / 4 + 0.5), from Avalonia's sigma A / (2 sqrt(3)) + 0.5. At 1.5 px the wider was 7 out, the
+    // narrower 27.
+    [InlineData(1.5, 2)]
+    [InlineData(2.5, 3)]
+    [InlineData(4.5, 5)]
+    [InlineData(10.5, 11)]
+    public void A_Half_Pixel_Blur_Takes_The_Wider_Window(double css, int window)
+    {
+        var sigma = (float)(CssBoxShadow.Blur(css) / (2 * Math.Sqrt(3)) + 0.5);
+        Assert.Equal(window, (int)Math.Floor(sigma * 3 * Math.Sqrt(2 * Math.PI) / 4 + 0.5));
     }
 
     [AvaloniaTheory]
@@ -131,6 +145,7 @@ public class CssShadowTests
     [InlineData("transparent", 0, 0, 0, 0)]
     [InlineData("red", 0xFF, 255, 0, 0)]
     [InlineData("DarkSlateGray", 0xFF, 0x2F, 0x4F, 0x4F)]
+    [InlineData("hsl(0, 100%, 50%)", 0xFF, 255, 0, 0)]
     public void Colours_Read_As_Css_Does(string color, byte a, byte r, byte g, byte b)
     {
         Assert.Equal(Color.FromArgb(a, r, g, b), Single($"0 0 4px {color}").Color);
@@ -155,6 +170,10 @@ public class CssShadowTests
     [InlineData("0 0 4px #12345")]
     [InlineData("0 0 4px rgba(0, 0, 0)x")]
     [InlineData("0 0 4px notacolour")]
+    [InlineData("0 0 4px rgb(255 128 0 50%)")] // four channels with no slash
+    [InlineData("0 0 4px rgb(100%, 0, 0)")] // a percentage beside numbers, with commas
+    [InlineData("0 0 4px hsv(0, 100%, 100%)")] // Avalonia's, not CSS's
+    [InlineData("0 0 4px #ff000080x")]
     [InlineData("0 0 4px red,")]
     [InlineData("inset inset 0 0 red")]
     public void Anything_Else_Is_Refused(string css)

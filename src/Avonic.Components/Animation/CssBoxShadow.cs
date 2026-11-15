@@ -19,9 +19,15 @@ public static class CssBoxShadow
     private static readonly double BlurPerSigma = 2 * Math.Sqrt(3);
     private const double SigmaAtZero = 0.5;
 
+    // A whole-pixel blur lands in the middle of its window, and a half-pixel one exactly on the edge between two, where float
+    // rounding in Avalonia or Skia would pick either. A twentieth of a pixel makes it the wider, which measured closer: 1.5 px was
+    // 7 levels out with a 2 px window and 27 with none.
+    private const double HalfPixelNudge = 0.05;
+
     /// <summary>
-    /// The <see cref="BoxShadow.Blur"/> that draws as CSS's blur <paramref name="cssBlur"/> does in Chromium:
-    /// <c>2√3 (4B / (3√(2π)) − 0.5)</c>, about <c>1.8426 B − 1.7321</c>, and 0 below about 0.94 px, where Avalonia draws no blur.
+    /// The <see cref="BoxShadow.Blur"/> that draws as CSS's blur <paramref name="cssBlur"/> does in Chromium, measured on Skia's CPU
+    /// rasteriser: <c>2√3 ((B + 0.05) / (3√(2π)/4) − 0.5)</c>, about <c>1.8426 B − 1.6399</c>, and 0 below about 0.89 px, where
+    /// Avalonia would draw no blur anyway.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">A negative blur, which CSS rejects.</exception>
     public static double Blur(double cssBlur)
@@ -31,13 +37,13 @@ public static class CssBoxShadow
             throw new ArgumentOutOfRangeException(nameof(cssBlur), cssBlur, "A box-shadow's blur can't be negative.");
         }
 
-        return Math.Max(0, BlurPerSigma * (cssBlur / BoxWindowPerSigma - SigmaAtZero));
+        return Math.Max(0, BlurPerSigma * ((cssBlur + HalfPixelNudge) / BoxWindowPerSigma - SigmaAtZero));
     }
 
     /// <summary>
     /// Reads a CSS <c>box-shadow</c>: <c>none</c>, or shadows between commas, each two to four lengths (offset x, offset y, blur,
     /// spread) in <c>px</c> or unitless, a colour before or after them, and <c>inset</c>. A colour is <c>rgb()</c> or <c>rgba()</c>,
-    /// <c>#rgb</c>, <c>#rgba</c>, <c>#rrggbb</c>, <c>#rrggbbaa</c> (CSS's order, alpha last), <c>transparent</c>, or a name Avalonia
+    /// <c>#rgb</c>, <c>#rgba</c>, <c>#rrggbb</c>, <c>#rrggbbaa</c> (CSS's order, alpha last), <c>transparent</c>, or a name or <c>hsl()</c> Avalonia
     /// knows. Each blur goes through <see cref="Blur"/>.
     /// </summary>
     /// <exception cref="FormatException">Anything else, including a shadow with no colour: CSS's would be <c>currentColor</c>,
@@ -155,8 +161,9 @@ public static class CssBoxShadow
             }
         }
 
-        // Names, and hsl(), as Avalonia reads them. Not '#', which Avalonia reads as #aarrggbb.
-        return Color.TryParse(token, out var parsed) ? parsed : throw Error(css, $"the colour '{token}'");
+        // Names and hsl(), as Avalonia reads them; not its other forms (#aarrggbb, hsv()), which CSS rejects.
+        var cssForm = open > 0 ? token[..open].Trim().ToLowerInvariant() is "hsl" or "hsla" : token.All(char.IsAsciiLetter);
+        return cssForm && Color.TryParse(token, out var parsed) ? parsed : throw Error(css, $"the colour '{token}'");
     }
 
     private static Color? ParseHex(string hex)
@@ -177,7 +184,8 @@ public static class CssBoxShadow
         };
     }
 
-    // rgb(r, g, b), rgba(r, g, b, a), and the space syntax, rgb(r g b / a); each a number or a percentage.
+    // rgb(r, g, b), rgba(r, g, b, a), and the space syntax, rgb(r g b) or rgb(r g b / a); each a number or a percentage, the three
+    // channels all one or all the other with commas, as CSS's legacy syntax has them.
     private static Color? ParseRgb(string args)
     {
         string[] parts;
@@ -185,6 +193,16 @@ public static class CssBoxShadow
         if (args.Contains(','))
         {
             parts = args.Split(',', StringSplitOptions.TrimEntries);
+            if (parts.Length == 4)
+            {
+                alpha = parts[3];
+                parts = parts[..3];
+            }
+
+            if (parts.Length == 3 && parts.Select(p => p.EndsWith('%')).Distinct().Count() != 1)
+            {
+                return null;
+            }
         }
         else
         {
@@ -196,17 +214,9 @@ public static class CssBoxShadow
 
             parts = slash[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             alpha = slash.Length == 2 ? slash[1] : null;
-            if (alpha is not null && parts.Length != 3)
-            {
-                return null;
-            }
         }
 
-        if (parts.Length == 4)
-        {
-            alpha = parts[3];
-        }
-        else if (parts.Length != 3)
+        if (parts.Length != 3)
         {
             return null;
         }

@@ -16,7 +16,7 @@ far it reaches below a box:
 
 So the spread and blur scale, and the offset doesn't. On `ion-card`, straight below a card, 1× gives 164 against Chromium's 170, 2×
 gives 205 against 167, and 3× gives 212 against 166. It only shows on a high-density screen, which is every phone. Avonic accepts it
-as best effort, and holds CSS's numbers. It hasn't been tried on a real device or a non-headless renderer.
+as best effort, and passes CSS's offsets through unchanged. It hasn't been tried on a real device or a non-headless renderer.
 
 #139 confirms it, at 2× on its own scenes, and finds it's the only difference left there: with the blur converted, an offset of 10
 and no blur is still 102 levels out at 2× (the whole 102 of black at 0.4, on the rows it misses), and doubling the offsets by hand
@@ -147,7 +147,7 @@ through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.co
 `B` is a Gaussian of sigma `B / 2`. Avalonia hands Skia a blur `A` as sigma `A / (2√3) + 0.5`, and Skia's CPU rasteriser draws that
 as three box blurs `floor(sigma · 3√(2π)/4 + 0.5)` pixels wide, which is about 0.94 of the sigma asked for. So the same number falls
 off in about two thirds of CSS's distance: a blur of 10 in 7 px instead of 12, at worst 12 levels out, and 4 to 22 for blurs of 4 px
-and up. The best Avalonia blur for each CSS blur moves in steps of about 1.84, one box width, and `2√3 (4B / (3√(2π)) − 0.5)` lands
+and up. The best Avalonia blur for each CSS blur moves in steps of about 1.84, one box width, and `2√3 ((B + 0.05) / (3√(2π)/4) − 0.5)` lands
 in the right one from 1 to 25 px, within 1 to 3 of Chromium. Avalonia draws no blur at all below 1.03, so a CSS blur of 1 px can't
 be matched at 1× (17 levels out at alpha 0.4, either way). Avonic converts every token through `{a:CssShadow}`
 ([#139](https://github.com/wdcossey/Avonic/issues/139), [docs](box-shadow/README.md)). A blur meaning CSS's, or documented as

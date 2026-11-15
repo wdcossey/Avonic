@@ -27,7 +27,7 @@ theme: write CSS through `CssShadow`.
 Only the blur differs. A CSS blur `B` becomes Avalonia's
 
 ```
-A = 2√3 · (4B / (3√(2π)) − 0.5)  ≈  1.8426 B − 1.7321,  and 0 below B ≈ 0.94
+A = 2√3 · ((B + 0.05) / (3√(2π)/4) − 0.5)  ≈  1.8426 B − 1.6399,  and 0 below B ≈ 0.89
 ```
 
 Why that shape, read from where the fit lands rather than from Skia's source: Avalonia hands Skia a blur `A` as a Gaussian of sigma
@@ -35,7 +35,14 @@ Why that shape, read from where the fit lands rather than from Skia's source: Av
 `floor(s · 3√(2π)/4 + 0.5)` wide, which is a Gaussian of about half that width. CSS's blur `B` is a Gaussian of sigma `B / 2`, so the
 box Avalonia needs is `B` pixels wide, and `s` is `B / (3√(2π)/4)`. The edges of the measured windows agree with both: the best range
 for each blur starts where the box widens by one, at `A = 2√3 ((k − 0.5) / 1.88 − 0.5)`, 1.03, 2.87, …, 15.77, and the measured
-ranges start at 1.05, 2.90, …, 15.80 on a grid of 0.05. The formula puts `A` in the middle of the window for a whole-pixel blur.
+ranges start at 1.05, 2.90, …, 15.80 on a grid of 0.05. `B` alone puts `A` in the middle of the window for a whole-pixel blur, and
+a half-pixel blur exactly on the edge between two, where float rounding in Avalonia or Skia would pick either. The twentieth of a
+pixel added makes it the wider, which measured closer (1.5 px: 7 out with a 2 px window, 27 with none), and moves nothing else: the
+whole table below is the same with and without it, but for a 1 px inset at 2×, 38 out without it and 30 with.
+
+This is fitted to Skia's CPU rasteriser, which is what the headless tests and the compare step draw with. A GPU renderer (a real
+window, Android) draws a true Gaussian of the sigma Avalonia asks for instead; there the plain sigma-for-sigma rule below would be
+exact, and this formula's sigma is about 6% wider than CSS's. Not measured; see the last point under "What's left".
 
 The rule in `CLAUDE.md` before this was sigma for sigma, `(B / 2 − 0.5) / 0.288675`, which lands one window narrow for 9 px and up
 (max error 2 to 5 where this has 1). The reorder's hand-made 15.6 for CSS's 10 was that; the refresher's 9.4 for 6 was a ratio of 1.56.
@@ -101,7 +108,7 @@ out. What's left:
   246, 250, 253, 254.
 - **The smallest blurs at 1×.** Avalonia draws no blur below a blur of 1.03 (one box of 1 px), and a 2 px box above it. Chromium's
   1 px blur falls between: 238 in the one row outside, where no blur gives 255 and the 2 px box 221 then 247. Either is 17 out at
-  alpha 0.4, and md's `0 3px 1px -2px` at alpha 0.2 is 6 out (the 7 in md 2 dp). The formula gives 0.11, no blur, which is the closer
+  alpha 0.4, and md's `0 3px 1px -2px` at alpha 0.2 is 6 out (the 7 in md 2 dp). The formula gives 0.20, no blur, which is the closer
   of the two for md's shadows. At 2× the same blur is a 2 px box in device pixels, and within 1.
 - **Blurs over 25.** Chromium's are narrower than a Gaussian of `B / 2` there: 30 and 40 matched best one or two windows down, 3 out
   with this formula. md's largest blur is 22.
