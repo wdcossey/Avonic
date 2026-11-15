@@ -1121,6 +1121,28 @@ public class AvonicBreadcrumbsTests
         Assert.Equal(["click"], log);
     }
 
+    // An ion-button in a breadcrumb, clicked from a key: its native <button>'s DOM click bubbles out of its shadow root to the
+    // breadcrumb, after the button's own, as #162 measured for ion-chip.
+    [AvaloniaTheory]
+    [InlineData(PhysicalKey.Enter)]
+    [InlineData(PhysicalKey.Space)]
+    public void E1_A_Key_On_An_AvonicButton_In_A_Breadcrumb_Clicks_It_After_The_Button(PhysicalKey key)
+    {
+        var button = new AvonicButton { Content = "x" };
+        var trail = Trail(new AvonicBreadcrumb { Content = button });
+        using var scene = Show(trail);
+        var b = Crumbs(trail)[0];
+        var log = new List<string>();
+        trail.IonCollapsedClick += (_, _) => log.Add("ionCollapsedClick");
+        button.Click += (_, _) => log.Add("button");
+        b.Click += (_, _) => log.Add("click");
+
+        button.Focus(NavigationMethod.Tab);
+        PressKey(scene, key);
+
+        Assert.Equal(["button", "click"], log);
+    }
+
     [AvaloniaFact]
     public void E1_A_Key_On_The_Indicator_Leaves_Nothing_Behind_For_The_Next_Click()
     {
