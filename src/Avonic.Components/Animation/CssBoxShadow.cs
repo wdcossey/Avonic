@@ -162,7 +162,7 @@ public static class CssBoxShadow
         }
 
         // Names and hsl(), as Avalonia reads them; not its other forms (#aarrggbb, hsv()), which CSS rejects.
-        var cssForm = open > 0 ? token[..open].Trim().ToLowerInvariant() is "hsl" or "hsla" : token.All(char.IsAsciiLetter);
+        var cssForm = open <= 0 || token[..open].Trim().ToLowerInvariant() is "hsl" or "hsla";
         return cssForm && Color.TryParse(token, out var parsed) ? parsed : throw Error(css, $"the colour '{token}'");
     }
 
