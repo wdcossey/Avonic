@@ -616,6 +616,48 @@ public class NativeButtonTests
         Assert.Equal(1, probe.Clicks);
     }
 
+    // Measured in Chromium too: Enter and Space on a button ion-item, or a button ion-card, in an ion-chip click the chip.
+    [AvaloniaTheory]
+    [InlineData("item")]
+    [InlineData("card")]
+    public void S4_A_Key_On_An_Item_Or_A_Card_Inside_Clicks_The_Chip(string kind)
+    {
+        var inner = Make(kind);
+        inner.Control.Width = 60;
+        inner.Control.Height = 30;
+        var probe = Make("chip", inner.Control);
+        using var scene = new Scene(probe.Control);
+
+        inner.Control.Focus();
+        Settle();
+        Enter(scene);
+
+        Assert.Equal(1, inner.Clicks);
+        Assert.Equal(1, probe.Clicks);
+    }
+
+    // A key's click isn't a press's: with a press held on the chip, Enter on the button inside clicks the chip at once, and the
+    // release clicks it again, as Chromium's are two clicks.
+    [AvaloniaFact]
+    public void S4_A_Key_On_An_AvonicButton_During_A_Press_On_The_Chip_Clicks_It_Too()
+    {
+        var child = new AvonicButton { Content = "x", Width = 60, Height = 30 };
+        var probe = Make("chip", child);
+        using var scene = new Scene(probe.Control);
+        var spot = new Point(150, 25);
+
+        scene.Window.MouseDown(spot, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        child.Focus();
+        Settle();
+        Enter(scene);
+        Assert.Equal(1, probe.Clicks);
+
+        scene.Window.MouseUp(spot, MouseButton.Left, RawInputModifiers.None);
+        Settle();
+        Assert.Equal(2, probe.Clicks);
+    }
+
     [AvaloniaFact]
     public void S4_Automation_Invoke_On_An_AvonicButton_Inside_Clicks_The_Chip_And_Runs_Its_Command()
     {

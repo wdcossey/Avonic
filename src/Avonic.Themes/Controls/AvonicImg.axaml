@@ -82,7 +82,7 @@
                 </MultiBinding>
             </Setter>
         </Style>
-        <Style Selector="^:in-avatar /template/ Image#PART_Image">
+        <Style Selector="^:in-avatar /template/ c|ImgNativeImage#PART_Image">
             <Setter Property="Clip">
                 <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
                     <DynamicResource ResourceKey="Avonic.Avatar.BorderRadius" />
@@ -90,7 +90,7 @@
                 </MultiBinding>
             </Setter>
         </Style>
-        <Style Selector="^:in-thumbnail /template/ Image#PART_Image">
+        <Style Selector="^:in-thumbnail /template/ c|ImgNativeImage#PART_Image">
             <Setter Property="Clip">
                 <MultiBinding Converter="{x:Static b:BorderRadius.ToClip}">
                     <DynamicResource ResourceKey="Avonic.Thumbnail.BorderRadius" />

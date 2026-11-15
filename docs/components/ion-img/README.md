@@ -38,7 +38,7 @@ All three bubble. No methods or slots, as in Ionic.
 
 | ✓ | Ionic | Avonic |
 |---|---|---|
-| [x] | `image` | `PART_Image`, an `ImgNativeImage`, an `Image` styled as one, whose `Source` the control sets |
+| [x] | `image` | `PART_Image`, an `ImgNativeImage`, an `Image` whose `Source` the control sets. A type of its own to styles, so an app's style for every `Image` doesn't reach it, as a page's `img` rule doesn't reach into the shadow root; `c\|AvonicImg /template/ c\|ImgNativeImage` does, as `::part(image)`. A plain `Image` in an app's own template still gets the cover, but not the theme's clip |
 
 Where there's no picture, a browser shows something of its own, and the template has it: `PART_Alt`, the alt text after the
 broken-image icon, and `PART_Broken`, a box with a border, with the icon, `PART_BrokenIcon`, in it. The control shows which, as

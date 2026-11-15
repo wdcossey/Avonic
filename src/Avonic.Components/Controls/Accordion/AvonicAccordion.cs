@@ -483,7 +483,7 @@ public class AvonicAccordion : TemplatedControl
         }
 
         _content?.UpdateLayout();
-        return _content?.Bounds.Height ?? 0;
+        return Math.Round(_content?.Bounds.Height ?? 0);
     }
 
     private void SetInlineMaxHeight(double height)

@@ -31,6 +31,12 @@ internal sealed class KeyboardController : IDisposable
     /// </summary>
     private double? _initialHeight;
 
+    /// <summary>
+    /// The wait for the app's height, while one is pending. Ionic makes an observer for each change; one here serves them all, as
+    /// they end at the same moment, so they don't pile up on the top level.
+    /// </summary>
+    private TaskCompletionSource? _resized;
+
     private KeyboardController(TopLevel top, IInputPane pane, Action<bool, Task?> callback)
     {
         _top = top;
@@ -75,12 +81,19 @@ internal sealed class KeyboardController : IDisposable
             return null;
         }
 
-        var resized = new TaskCompletionSource();
+        if (_resized is { } pending)
+        {
+            return pending.Task;
+        }
+
+        // Its continuations run later, as a promise's do, not inside the top level's notification.
+        var resized = _resized = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         void OnTopChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
         {
             if (e.Property == TopLevel.ClientSizeProperty && _top.ClientSize.Height == initial)
             {
                 _top.PropertyChanged -= OnTopChanged;
+                _resized = null;
                 resized.TrySetResult();
             }
         }

@@ -1145,21 +1145,22 @@ public class AvonicAccordionTests
 
     /// <summary>
     /// A render in the last frame's gap, after the transition's end and before the frame that raises <c>transitionend</c>, leaves
-    /// it to that frame: the expand ends then, not at the timeout.
+    /// it to that frame: the expand ends then, not at the timeout. Here the render is the group's value set again, to a new list
+    /// that still holds b, which runs b's expand again, as Ionic's <c>expandAccordion</c> does while it's still expanding.
     /// </summary>
     [AvaloniaFact]
     public void B14_A_Render_Just_After_The_End_Still_Ends_It_At_The_Next_Frame()
     {
         AvonicAccordion a = Accordion("a"), b = Accordion("b");
-        var group = Group("a", a, b);
+        var group = Group(new List<string> { "a" }, a, b);
+        group.Multiple = true;
         using var scene = Show(group);
         using var clock = new TestClock();
 
         // b's transition runs from 32 to 332; the frames are at 320 and 336.
         Tap(scene, b);
         clock.At(334);
-        group.Readonly = true;
-        group.Readonly = false;
+        group.Value = new List<string>((IEnumerable<string>)group.Value!);
         Assert.Equal(AvonicAccordion.AccordionState.Expanding, b.State);
 
         clock.At(336);

@@ -94,9 +94,10 @@ internal sealed class NativeButton
     /// A stock <see cref="Button"/> inside that clicks clicks the control too, as the DOM <c>click</c> of a <c>&lt;button&gt;</c>
     /// inside bubbles to the host: from a key or automation, with no press, at once; from a press, with the press's own click on
     /// release, once, so that the two aren't counted twice. Not a <see cref="RepeatButton"/>, a scrollbar's or a spinner's, nor a
-    /// click that a handler stopped. So does a control inside with a native button of its own, an <see cref="AvonicButton"/>,
-    /// clicked from a key or automation, after its own <c>Click</c>: measured in Chromium, Enter and Space on an <c>ion-button</c>
-    /// in an <c>ion-chip</c> click the chip. For a control whose click is the plain DOM <c>click</c> on its host.
+    /// click that a handler stopped. So does a control inside with a native button of its own, an <see cref="AvonicButton"/> or
+    /// an item or a card in button mode, clicked from a key or automation, after its own <c>Click</c>: measured in Chromium, Enter
+    /// and Space on an <c>ion-button</c>, a button <c>ion-item</c> or a button <c>ion-card</c> in an <c>ion-chip</c> click the
+    /// chip. For a control whose click is the plain DOM <c>click</c> on its host.
     /// </summary>
     public bool StockButtonsClick { get; init; }
 
@@ -380,12 +381,9 @@ internal sealed class NativeButton
         {
             Stop();
         }
-        else if (_pointer is not null)
-        {
-            _nestedClick = e.Click;
-        }
         else if (StockButtonsClick && !_routingPointer)
         {
+            // Not a press's: a key's or automation's, even while a press is held, or a press whose release never came here.
             if (e.DomClick is { } domClick)
             {
                 // A key's click on a button in one inside, which reaches this one next.
@@ -397,6 +395,10 @@ internal sealed class NativeButton
                 // A key's or automation's click on a native button inside, such as an AvonicButton's, which is the DOM click.
                 ActivateFromInside(e, e.Source);
             }
+        }
+        else if (_pointer is not null)
+        {
+            _nestedClick = e.Click;
         }
     }
 

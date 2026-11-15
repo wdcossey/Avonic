@@ -897,7 +897,7 @@ public class AvonicImgTests
             Styles =
             {
                 new Style(x => x.OfType<AvonicImg>()) { Setters = { new Setter(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Center) } },
-                new Style(x => x.OfType<AvonicImg>().Template().OfType<Image>().Name("PART_Image"))
+                new Style(x => x.OfType<AvonicImg>().Template().OfType<ImgNativeImage>().Name("PART_Image"))
                 {
                     Setters = { new Setter(Image.StretchProperty, Stretch.Fill) },
                 },
@@ -910,6 +910,24 @@ public class AvonicImgTests
         Assert.All([ownAvatar, ownThumbnail], img => Assert.Equal(Stretch.UniformToFill, Picture(img).Stretch));
         Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(VerticalAlignment.Center, img.VerticalAlignment));
         Assert.All([inAvatar, inThumbnail, plain], img => Assert.Equal(Stretch.Fill, Picture(img).Stretch));
+    });
+
+    // A page's img rule doesn't reach into ion-img's shadow root: an app's style for every Image leaves PART_Image alone, which is
+    // a type of its own to styles, in an avatar and out of one.
+    [AvaloniaFact]
+    public void B14_An_Apps_Style_For_Every_Image_Does_Not_Reach_The_Picture() => InstalledTheme.Run(_ =>
+    {
+        AvonicImg inAvatar = new(), plain = new();
+        var page = new StackPanel
+        {
+            Children = { new AvonicAvatar { Content = inAvatar }, plain },
+            Styles = { new Style(x => x.OfType<Image>()) { Setters = { new Setter(Image.StretchProperty, Stretch.Fill) } } },
+        };
+        using var scene = new Scene(page, 390, 300);
+        Layout(scene);
+
+        Assert.Equal(Stretch.UniformToFill, inAvatar.GetVisualDescendants().OfType<ImgNativeImage>().Single().Stretch);
+        Assert.Equal(Stretch.Uniform, plain.GetVisualDescendants().OfType<ImgNativeImage>().Single().Stretch);
     });
 
     // An app's own template with a plain Image as PART_Image still covers an avatar, as the theme's rule did.
