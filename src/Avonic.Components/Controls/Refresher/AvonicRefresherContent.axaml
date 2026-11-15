@@ -7,7 +7,7 @@
     <ControlTheme x:Key="{x:Type c:AvonicRefresherContent}" TargetType="c:AvonicRefresherContent">
         <Setter Property="Template">
             <ControlTemplate>
-                <StackPanel VerticalAlignment="Center">
+                <c:RefresherColumn>
                     <Panel Name="PART_Pulling" IsVisible="False">
                         <Border Name="PART_PullingIcon" HorizontalAlignment="Center">
                             <Panel Name="PART_SpinnerArrowContainer">
@@ -28,7 +28,7 @@
                             </Panel>
                         </Border>
                     </Panel>
-                </StackPanel>
+                </c:RefresherColumn>
             </ControlTemplate>
         </Setter>
 
@@ -46,6 +46,13 @@
         <!-- .refresher-pulling ion-refresher-content .refresher-pulling, and ready's and cancelling's -->
         <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling, ^:cancelling /template/ Panel#PART_Pulling">
             <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- cancelling's .refresher-pulling is display: block, so the icon fills its width, its spinner at the start -->
+        <Style Selector="^:cancelling /template/ Border#PART_PullingIcon">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:cancelling /template/ Panel#PART_SpinnerArrowContainer">
+            <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
         <!-- .refresher-refreshing, and native's completing and cancelling -->
         <Style Selector="^:refreshing /template/ Panel#PART_Refreshing, ^:completing /template/ Panel#PART_Refreshing, ^:cancelling /template/ Panel#PART_Refreshing">

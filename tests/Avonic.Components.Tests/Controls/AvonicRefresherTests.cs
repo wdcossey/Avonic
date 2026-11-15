@@ -1172,4 +1172,173 @@ public class AvonicRefresherTests
             Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
         }
     }
+
+    // ── C1–C7: after a cancel (#167) ───────────────────────────────────────────────────────────
+    // Measured in Chromium with docs/components/ion-refresher/ref/cancel.js.txt, into ref/measure-cancel.json.
+
+    private static Rect Box(Page page, string part) => BoundsInWindow(page.Part<Control>(part), page.Scene.Window);
+
+    /// <summary>
+    /// How many of the refresher's two icons a user sees: shown, not scaled to nothing, and reaching below the content's top. Above
+    /// it, the header covers an icon in Chromium, with its z-index, and the content clips it here.
+    /// </summary>
+    internal static int IconsSeen(Page page)
+    {
+        var top = BoundsInWindow(page.Content, page.Scene.Window).Y;
+        return new[] { "PART_PullingIcon", "PART_RefreshingIcon" }.Count(name =>
+        {
+            var icon = page.Part<Border>(name);
+            var box = BoundsInWindow(icon, page.Scene.Window);
+            return icon.IsEffectivelyVisible && box.Width > 0.5 && box.Height > 0.5 && box.Bottom > top;
+        });
+    }
+
+    [AvaloniaFact]
+    public void C1_Cancelling_Shows_Both_Icons_Where_Chromium_Does_And_None_Once_It_Ends() => InstalledTheme.Run(_ =>
+    {
+        using var page = Refreshing();
+        Assert.Equal(1, IconsSeen(page));
+        page.Refresher.Cancel();
+        page.Wait(32);
+
+        // .refresher-cancelling shows .refresher-pulling, display: block, and .refresher-refreshing. The pulling icon, held at the
+        // snap back's translateY(0), fills the block's 390, its spinner at the start; the column of both, 84 high, is centred on
+        // the 60 px refresher at 56, so it starts 12 above it.
+        Assert.Equal(new Rect(0, 44, 390, 42), Box(page, "PART_PullingIcon"));
+        Assert.Equal(new Rect(9, 53, 24, 24), Box(page, "PART_PullingSpinner"));
+        Assert.Equal(new Rect(174, 86, 42, 42), Box(page, "PART_RefreshingIcon"));
+        Assert.Equal(2, IconsSeen(page));
+
+        page.Wait(700);
+        Assert.Contains("ionPullEnd:Cancel", page.Names);
+        Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C2_A_Pull_Started_While_Cancelling_Moves_The_Icon() => InstalledTheme.Run(_ =>
+    {
+        // Chromium: the new pull's animation is newer than the held snap back, so it moves the icon (translateY 24.8, then 55.2)
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        page.Wait(32 + 60);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":cancelling"));
+
+        page.Drag(8 + 180).Wait(16);
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":pulling"));
+        var expected = RefresherPullFrame.At(page.Refresher.GetProgress(), RefresherAnimationType.Translate, 60);
+        Assert.Equal(expected.IconTransform, page.Part<Border>("PART_PullingIcon").RenderTransform!.Value);
+        Assert.Equal(1, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C3_As_Ionics_A_Pull_Overtaken_By_The_Cancels_End_Leaves_The_Refresher_Off_Once_It_Lets_Go() => InstalledTheme.Run(_ =>
+    {
+        // Measured in Chromium: resetNativeRefresher destroys the pull's animation mid-pull and sets the progress to 0, so letting
+        // go plays a destroyed animation back, whose onFinish never comes, and gesture.enable(true) with it. Nothing pulls again.
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        page.Wait(32 + 60);
+        page.Drag(8 + 180).Wait(16);
+        page.Wait(700);
+        Assert.Equal(0, IconsSeen(page));
+        Assert.False(((IPseudoClasses)page.Refresher.Classes).Contains(":active"));
+
+        page.Lift().Wait(600);
+        Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd"));
+        var starts = page.Names.Count(n => n == "ionStart");
+        page.Drag(8 + 180).Wait(16).Lift().Wait(600);
+        Assert.Equal(starts, page.Names.Count(n => n == "ionStart"));
+        Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C4_A_Short_Pull_Shows_One_Icon_As_It_Goes_Back_And_None_After() => InstalledTheme.Run(_ =>
+    {
+        using var page = new Page();
+        page.Drag(8 + 108).Wait(16);
+        Assert.Equal(1, IconsSeen(page));
+        page.Lift();
+        for (var i = 0; i < 10; i++)
+        {
+            page.Wait(16);
+            Assert.True(IconsSeen(page) <= 1);
+            Assert.False(page.Shows("PART_Refreshing"));
+        }
+
+        page.Wait(100);
+        Assert.Contains("ionPullEnd:Cancel", page.Names);
+        Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C5_Cancel_With_No_Pull_Shows_Only_The_Refreshing_Icon_Where_Chromium_Does() => InstalledTheme.Run(_ =>
+    {
+        // The pulling icon is at its resting translateY(-52), above the content, under the header in Chromium
+        using var page = new Page();
+        page.Wait(0);
+        page.Refresher.Cancel();
+        page.Wait(32);
+        Assert.Equal(new Rect(0, -8, 390, 42), Box(page, "PART_PullingIcon"));
+        Assert.Equal(new Rect(174, 86, 42, 42), Box(page, "PART_RefreshingIcon"));
+        Assert.Equal(1, IconsSeen(page));
+
+        page.Wait(700);
+        Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C6_After_A_Cancel_A_Refresh_Shows_One_Icon_And_None_Once_Complete() => InstalledTheme.Run(_ =>
+    {
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        page.Wait(32 + 700);
+        Assert.Equal(0, IconsSeen(page));
+
+        page.Drag(8 + 200).Wait(16);
+        Assert.Equal(1, IconsSeen(page));
+        page.Lift().Wait(160);
+        Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
+        Assert.Equal(1, IconsSeen(page));
+        Assert.Equal(new Rect(174, 65, 42, 42), Box(page, "PART_RefreshingIcon"));
+
+        page.LastRefresh!.Complete();
+        page.Wait(32 + 200 + 16);
+        Assert.Equal("ionPullEnd:Complete", page.Names.Last());
+        Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C7_A_Page_Closed_While_Cancelling_And_Opened_Again_Shows_What_The_State_Does() => InstalledTheme.Run(_ =>
+    {
+        // Opened again after the cancel's end: nothing, and a pull shows one icon
+        using (var page = Refreshing())
+        {
+            page.Refresher.Cancel();
+            page.Wait(32 + 100);
+            var grid = (Grid)page.Content.Parent!;
+            grid.Children.Remove(page.Content);
+            page.Wait(700);
+            grid.Children.Add(page.Content);
+            page.Wait(16);
+            Assert.Equal(0, IconsSeen(page));
+            page.Drag(8 + 180).Wait(16);
+            Assert.Equal(1, IconsSeen(page));
+        }
+
+        // Opened again before it: still cancelling, so both, then none
+        using (var page = Refreshing())
+        {
+            page.Refresher.Cancel();
+            page.Wait(32 + 100);
+            var grid = (Grid)page.Content.Parent!;
+            grid.Children.Remove(page.Content);
+            page.Wait(100);
+            grid.Children.Add(page.Content);
+            page.Wait(16);
+            Assert.Equal(2, IconsSeen(page));
+            page.Wait(600);
+            Assert.Equal(0, IconsSeen(page));
+            Assert.Contains("ionPullEnd:Cancel", page.Names);
+        }
+    });
 }

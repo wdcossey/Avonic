@@ -134,4 +134,71 @@ public class AvonicRefresherCaptureTests
         Render();
         Save(page.Scene, "refreshing");
     });
+
+
+    /// <summary>The primary-coloured pixels, the spinners' and the arrow's, in <paramref name="box"/> of a frame at a scale of 2.</summary>
+    private static int Primary(Avalonia.Media.Imaging.WriteableBitmap frame, Rect box)
+    {
+        var count = 0;
+        for (var y = Math.Max(0, (int)(box.Y * 2)); y < (int)(box.Bottom * 2); y++)
+        {
+            for (var x = Math.Max(0, (int)(box.X * 2)); x < (int)(box.Right * 2); x++)
+            {
+                if (Frames.PixelAt(frame, x, y) is { B: > 200, G: < 120, R: < 60 })
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// #167: Chromium's frames after <c>cancel()</c> (docs/components/ion-refresher/ref/cancel-*.png): during a refresh, both icons
+    /// for the cancel's 700 ms, the pulling one 390 wide with its spinner at the start; with no pull, only the refreshing one below
+    /// the header; and none once it's over.
+    /// </summary>
+    [AvaloniaFact]
+    public void Cancel_Frames() => InstalledTheme.Run(_ =>
+    {
+        // Below the header: the refresher and the overflow of its column
+        var strip = new Rect(0, 56, 390, 100);
+        using (var page = new Page())
+        {
+            page.Drag(8 + 180).Wait(16).Lift().Wait(400);
+            page.Refresher.Cancel();
+            page.Wait(100);
+            Render();
+            Save(page.Scene, "cancelling");
+            var frame = page.Scene.Window.CaptureRenderedFrame()!;
+            var pulling = page.Box("PART_PullingSpinner");
+            var refreshing = page.Box("PART_RefreshingSpinner");
+            Assert.Equal(new Rect(9, 53, 24, 24), pulling);
+            Assert.True(Primary(frame, pulling.Intersect(strip)) > 50, "the pulling spinner shows");
+            Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
+
+            page.Wait(700);
+            Render();
+            Save(page.Scene, "cancelled");
+            Assert.Equal(0, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+        }
+
+        using (var page = new Page())
+        {
+            page.Wait(300);
+            page.Refresher.Cancel();
+            page.Wait(100);
+            Render();
+            Save(page.Scene, "cancel-inactive");
+            var frame = page.Scene.Window.CaptureRenderedFrame()!;
+            var refreshing = page.Box("PART_RefreshingSpinner");
+            Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
+            Assert.Equal(Primary(frame, strip), Primary(frame, page.Box("PART_RefreshingIcon")));
+
+            page.Wait(700);
+            Render();
+            Assert.Equal(0, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+        }
+    });
 }

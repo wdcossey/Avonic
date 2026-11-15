@@ -273,14 +273,16 @@ public class AvonicRefresherContent : TemplatedControl
 
     // ── The pulling animation ─────────────────────────────────────────────────────────────────
 
-    /// <summary>Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority.</summary>
+    /// <summary>
+    /// Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority. Each is set again, so it's the
+    /// newest value there, as the pull being stepped is the newest animation: a pull that starts while a cancel still holds the
+    /// last refresh's snap back moves the icon, as Chromium's does (#167). The snap back of the same pull comes after its last
+    /// step, so it wins there.
+    /// </summary>
     internal void ApplyPull(RefresherPullFrame frame)
     {
         ClearAnimated();
-        if (_snapBack is null)
-        {
-            Animate(_pullingIcon, RenderTransformProperty, new MatrixTransform(frame.IconTransform));
-        }
+        Animate(_pullingIcon, RenderTransformProperty, new MatrixTransform(frame.IconTransform));
 
         Animate(_spinnerArrowContainer, OpacityProperty, frame.SpinnerArrowOpacity);
         Animate(_pullingSpinner, RenderTransformProperty, new RotateTransform(frame.SpinnerRotation));

@@ -45,11 +45,46 @@ Refreshing:
 | Let go at 0.3 | plays back, `ionPullEnd` `cancel` about 163 ms later | 150 ms plus a frame (B6) | Match |
 | Let go at 0.5 | snaps back 50 → 0 px, 0.4 px/ms; `ionRefresh` about 142 ms after | 16 + 125 ms, plus up to a frame (B5) | Match |
 | `complete()` | `refresher-completing` after two frames; scale 0.4239 at about 88 ms; `ionPullEnd` `complete` about 235 ms after the call | two frames, then 200 ms `ease` (B7) | Match |
-| `cancel()` | inactive after `transitionEndAsync`'s 700 ms fallback | 2 frames + 700 ms (B8) | Match, from `helpers.js`; not measured |
+| `cancel()` | inactive after `transitionEndAsync`'s 700 ms fallback | 2 frames + 700 ms (B8) | Match, measured since #167: still cancelling 650 ms after the call, inactive at 760 |
+| `cancel()` during a refresh | both icons for the 700 ms: the pulling one `{0, 44, 390, 42}`, its spinner at (9, 53), the refreshing one at (174, 86); none after | the same boxes (C1, `Cancel_Frames`) | Match, but the pulling icon is a pill where Chromium's is an ellipse, below |
+| `cancel()` with no pull | the refreshing icon at (174, 86); the pulling one at y -8, under the header | the same (C5) | Match |
+| A short pull let go | one icon as it goes back, none after | the same (C4) | Match |
+| A pull during cancelling | the icon follows the finger (`translateY` 24.8, then 55.2) | the same (C2) | Match since #167: it stayed at the held snap back |
+| That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0; letting go does nothing, and nothing pulls again | the same (C3) | Match, an Ionic bug, below |
 | Upward drag at the top | Chromium scrolls the content; the gesture cancels itself at its first move | the content scrolls; the gesture lets go at its threshold (B10) | Deliberate difference, below |
 | `overflow: hidden` on the scroll while pulling | yes | no | Deliberate difference, below |
 
+## After a cancel (#167)
+
+Measured by [`ref/cancel.js.txt`](ref/cancel.js.txt), run as `node cancel.js <repo> <out>`. It uses the page above and does a refresh
+then `cancel()`, a short pull, `cancel()` with no pull, two pulls during cancelling, and a refresh and `complete()` after a cancel.
+Every probe is in [`ref/measure-cancel.json`](ref/measure-cancel.json). Avonic's frames are from `AvonicRefresherCaptureTests.Cancel_Frames`.
+
+**Ionic shows both icons after `cancel()` during a refresh, for its 700 ms.** `.refresher-cancelling` shows `.refresher-pulling`,
+as `display: block`, and also the native refresher's `.refresher-refreshing`. The pull's snap back has `fill: both` and is destroyed
+only when the reset ends, so it holds the pulling icon at `translateY(0)`. `.refresher-cancelling .refresher-pulling-icon
+{ transform: scale(0) }` loses to the native refresher's later `translateY` rule, which has the same specificity. In a block, the
+icon is a block-level flex box with no width, so it fills the 390, with its spinner at the start. The column of both icons is 84 high
+and is centred on the 60 px refresher, so it starts 12 above the refresher's top.
+
+Avonic now does the same. The template's column is a `RefresherColumn`, centred both ways, where the `StackPanel` before it
+overflowed only downward (the icons were at 56 and 98). In cancelling, the pulling icon stretches. Chromium is on the left, Avonic
+before #167 in the middle, and Avonic after on the right:
+
+![Cancelling](compare/before-after-cancelling.png)
+
+With no pull, only the refreshing icon shows below the header. The pulling one stays at its resting `translateY(-52px)`, above it:
+
+![Cancel with no pull](compare/side-by-side-cancel-inactive.png)
+
 ## Deliberate differences
+
+- **The pulling icon in cancelling is a pill,** 390 x 42 with a radius of 21, where Chromium's `border-radius: 100%` makes an
+  ellipse of 195 by 21: a `CornerRadius` has one radius for each corner. For those 700 ms the pill covers the start of the first
+  row's text, which shows under the ellipse's curve in Chromium.
+- **Ionic's own bug is kept: a pull that the cancel's end overtakes leaves the refresher off** (C3). `resetNativeRefresher` destroys
+  every animation, including the new pull's, and sets the progress to 0. Letting go then plays back a destroyed animation, whose
+  `onFinish` never comes, and so neither does `gesture.enable(true)`. In Chromium, nothing pulls again afterwards.
 
 - **An upward drag from the top.** In Chromium Ionic's passive gesture captures it and the browser scrolls anyway; the first move,
   with `velocityY < 0`, cancels the pull. Avalonia gives a pointer to one owner, so a captured gesture would stop the scroll: the

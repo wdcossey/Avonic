@@ -869,9 +869,46 @@ try {
         Check 'and the spinner goes' ($after -lt 10) "$after sampled pixels differ"
         $plain.Dispose()
 
+        # #167: no icon is left after any kind of cancel. Ionic's cancel() shows both icons for its 700 ms fallback, the pulling one
+        # as wide as the content with its spinner at the start (x 9 to 33, from 3 above the content's top), and the refreshing one
+        # below the middle, so they're looked for across the content's width, and gone after. A cancel adds no row.
+        $strip = { Region $content.X $content.Y $content.Width (Px 110) }
+        $start = { Region ($content.X + (Px 4)) $content.Y (Px 36) (Px 24) }
+        $plainStrip = & $strip
+        $plainStart = & $start
+        $plainIcon = & $iconArea
+
         TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 80) 10
         Start-Sleep -Milliseconds 800
         Check 'a short pull snaps back and cancels' (((WaitForText 'Cancelled' 2) -eq 'Cancelled') -and -not (Named $CT::Text 'Item 22')) ((Texts | Select-Object -Last 1))
+        $left = Changed $plainStrip (& $strip)
+        Check 'and leaves no icon' ($left -lt 10) "$left sampled pixels differ"
+
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
+        Start-Sleep -Milliseconds 300
+        $refreshing = WaitForText 'Refreshing*' 1
+        ClickOn (Named $CT::Button 'Cancel the refresh')
+        Start-Sleep -Milliseconds 250
+        Shot 'ion-refresher-cancelling'
+        $atStart = Changed $plainStart (& $start)
+        $inMiddle = Changed $plainIcon (& $iconArea)
+        Check 'Cancel during a refresh shows both icons, as Ionic: the pulling spinner at the start' ([bool]$refreshing -and $atStart -gt 20) "$atStart sampled pixels differ; $refreshing"
+        Check 'and the refreshing spinner in the middle' ($inMiddle -gt 50) "$inMiddle sampled pixels differ"
+        Check 'then cancels' ((WaitForText 'Cancelled' 2) -eq 'Cancelled') ((Texts | Select-Object -Last 1))
+        Start-Sleep -Milliseconds 1200
+        Shot 'ion-refresher-cancelled'
+        $left = Changed $plainStrip (& $strip)
+        Check 'and leaves no icon, and no row' ($left -lt 10 -and -not (Named $CT::Text 'Item 22')) "$left sampled pixels differ"
+
+        ClickOn (Named $CT::Button 'Cancel the refresh')
+        Start-Sleep -Milliseconds 250
+        $atStart = Changed $plainStart (& $start)
+        $inMiddle = Changed $plainIcon (& $iconArea)
+        Check 'Cancel with no pull shows only the refreshing spinner, as Ionic' ($inMiddle -gt 50 -and $atStart -lt 10) "$inMiddle in the middle and $atStart at the start differ"
+        Start-Sleep -Milliseconds 1200
+        $left = Changed $plainStrip (& $strip)
+        Check 'and leaves no icon either' ($left -lt 10) "$left sampled pixels differ"
+        $plainStrip.Dispose(); $plainStart.Dispose(); $plainIcon.Dispose()
 
         [void][RealInput]::SetCursorPos($cx, ([int]($content.Y + $content.Height / 2))); Start-Sleep -Milliseconds 150
         Wheel 6

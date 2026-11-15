@@ -151,7 +151,7 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-input-otp` | `AvonicInputOtp` (+ `InputOtpBox` and `InputOtpSeparator`, the boxes it makes in a `FlexRow`) | done — [docs](docs/components/ion-input-otp/README.md) |
 | `ion-item-sliding`, `ion-item-options`, `ion-item-option` | `AvonicItemSliding`, `AvonicItemOptions`, `AvonicItemOption` (+ `Click`, `Command` and `TextTransform` on the option, as extensions; `Disabled` turns only the swipe off) | done — [docs](docs/components/ion-item-sliding/README.md) |
 | `ion-reorder`, `ion-reorder-group` | `AvonicReorder`, `AvonicReorderGroup` (`Disabled`, true by default as Ionic's, turns only the drag off; `Complete(list)` reorders a list) | done — [docs](docs/components/ion-reorder/README.md) |
-| `ion-refresher`, `ion-refresher-content` | `AvonicRefresher`, `AvonicRefresherContent` (md's native refresher; Ionic's legacy one isn't here) | done — [docs](docs/components/ion-refresher/README.md) |
+| `ion-refresher`, `ion-refresher-content` | `AvonicRefresher`, `AvonicRefresherContent` (md's native refresher; Ionic's legacy one isn't here; + `RefresherColumn`, the content's column, centred both ways as a flex column is) | done — [docs](docs/components/ion-refresher/README.md) |
 | `ion-picker`, `ion-picker-column`, `ion-picker-column-option` | `AvonicPicker`, `AvonicPickerColumn`, `AvonicPickerColumnOption` (+ `PickerColumnPanel`, the column's snapping panel; `HorizontalContentAlignment` on the column, as an extension) | done — [docs](docs/components/ion-picker/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
