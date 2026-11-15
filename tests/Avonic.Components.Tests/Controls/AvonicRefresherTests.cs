@@ -1053,6 +1053,36 @@ public class AvonicRefresherTests
         }
     }
 
+    // A content whose replaced template has no scroller: logged, as getScrollElement would have nothing to scroll.
+    [AvaloniaFact]
+    public void B14_A_Content_With_No_Scroller_Is_Logged()
+    {
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            var refresher = new AvonicRefresher { Content = new AvonicRefresherContent() };
+            var content = new AvonicContent
+            {
+                FixedContent = refresher,
+                Template = new FuncControlTemplate<AvonicContent>((c, scope) =>
+                {
+                    var slot = new ContentPresenter { Name = "PART_Fixed", [!ContentPresenter.ContentProperty] = c[!AvonicContent.FixedContentProperty] };
+                    scope.Register(slot.Name, slot);
+                    return new Panel { Children = { slot } };
+                }),
+            };
+            using var scene = new Scene(content);
+            Assert.True(refresher.IsAttachedToVisualTree());
+            Assert.Contains(sink.Errors, e => ReferenceEquals(e.Source, refresher) && e.Message == "AvonicRefresher found no ScrollViewer in {Host}.");
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
+
     // A host hidden when the refresher is attached has no template, so no scroller: it's logged once, and when it's shown and laid
     // out it's the scroll element, as Ionic's would be all along.
     [AvaloniaFact]
@@ -1075,14 +1105,12 @@ public class AvonicRefresherTests
             Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
             Assert.Empty(scroller.GetVisualDescendants());
 
+            // Shown: the pull starts from it
             host!.IsVisible = true;
             page.Wait(16);
             ScrollsByTouch(scroller);
-            scroller.Offset = new Vector(0, 100);
-            page.Wait(16);
-            page.Drag(60).Lift().Wait(200);
-            Assert.Empty(page.Log);
-            Assert.True(scroller.Offset.Y < 100, $"scrolled to {scroller.Offset.Y}");
+            page.Drag(40).Wait(16);
+            Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
             Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
         }
         finally
