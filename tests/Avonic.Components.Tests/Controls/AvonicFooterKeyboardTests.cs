@@ -170,6 +170,15 @@ public sealed class AvonicFooterKeyboardTests
         Assert.False(Padded(footer));
         pane.Set(InputPaneState.Closed);
         Assert.True(Padded(footer));
+
+        // Read once, at the first keyboardWillShow, as Ionic's initialResizeContainerHeight is: an app that's 700 when the keyboard
+        // opens again still waits for 800 after it closes.
+        Resize(window, 700);
+        pane.Set(InputPaneState.Open);
+        pane.Set(InputPaneState.Closed);
+        Assert.False(Padded(footer));
+        Resize(window, 800);
+        Assert.True(Padded(footer));
         window.Close();
     }
 
