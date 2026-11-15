@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-breadcrumb's variables. breadcrumb.md.css sets them on :host, so a value from outside wins: unset here, and read
@@ -27,6 +28,6 @@
     <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorBackgroundFocused" Color="#DFE5E8" />
     <SolidColorBrush x:Key="Avonic.Breadcrumb.Md.CollapsedIndicatorColor" Color="#73849A" />
     <!-- :host(.ion-focused) .breadcrumb-native { box-shadow } -->
-    <BoxShadows x:Key="Avonic.Breadcrumb.Md.FocusedBoxShadow">0 1 2 0 #33000000, 0 2 8 0 #1F000000</BoxShadows>
+    <a:CssShadow x:Key="Avonic.Breadcrumb.Md.FocusedBoxShadow">0px 1px 2px rgba(0, 0, 0, 0.2), 0px 2px 8px rgba(0, 0, 0, 0.12)</a:CssShadow>
 
 </ResourceDictionary>

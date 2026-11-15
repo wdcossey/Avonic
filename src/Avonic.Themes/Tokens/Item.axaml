@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- Global variables only ion-item reads. They fall back to another variable in Ionic. -->
@@ -34,7 +35,7 @@
     <x:Double x:Key="Avonic.Item.DetailIconOpacity">0.25</x:Double>
 
     <Thickness x:Key="Avonic.Item.InnerBorderWidth">0,0,0,1</Thickness>
-    <BoxShadows x:Key="Avonic.Item.InnerBoxShadow">none</BoxShadows>
+    <a:CssShadow x:Key="Avonic.Item.InnerBoxShadow">none</a:CssShadow>
     <x:Double x:Key="Avonic.Item.InnerPaddingTop">0</x:Double>
     <x:Double x:Key="Avonic.Item.InnerPaddingBottom">0</x:Double>
     <x:Double x:Key="Avonic.Item.InnerPaddingStart">0</x:Double>

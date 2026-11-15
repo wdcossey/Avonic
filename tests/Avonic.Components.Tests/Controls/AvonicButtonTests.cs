@@ -15,6 +15,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 
@@ -1287,8 +1288,9 @@ public class AvonicButtonTests
     [AvaloniaFact]
     public void B9_Solid_Has_A_Shadow_That_Rises_While_Pressed() => InstalledTheme.Run(_ =>
     {
-        var low = BoxShadows.Parse("0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000");
-        var high = BoxShadows.Parse("0 5 5 -3 #33000000, 0 8 10 1 #24000000, 0 3 14 2 #1F000000");
+        // button.md.css, through the one converter (docs/infra/box-shadow/README.md)
+        var low = CssBoxShadow.Parse("0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)");
+        var high = CssBoxShadow.Parse("0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)");
         var (button, scene, centre) = Themed();
         using (scene)
         {
@@ -3105,8 +3107,9 @@ public class AvonicButtonTests
         using (scene)
         {
             using var clock = new TestClock();
-            var low = BoxShadows.Parse("0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000");
-            var high = BoxShadows.Parse("0 5 5 -3 #33000000, 0 8 10 1 #24000000, 0 3 14 2 #1F000000");
+            // button.md.css, through the one converter (docs/infra/box-shadow/README.md)
+            var low = CssBoxShadow.Parse("0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)");
+            var high = CssBoxShadow.Parse("0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)");
             Settle(() => Native(button).BoxShadow == low);
 
             Press(scene, centre);

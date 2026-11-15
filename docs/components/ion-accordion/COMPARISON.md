@@ -47,7 +47,7 @@ Ionic on the left, Avonic on the right:
 | Inset A (first, before an open one) | radius 8 8 6 6, margin 0 | the same | match |
 | Inset B (open) | radius 6, margin 16 0 | the same | match |
 | Inset C (last, after an open one) | radius 6 6 8 8, margin 0 | the same | match |
-| Inset shadow | `0 3 1 -2 .2, 0 2 2 0 .14, 0 1 5 0 .12` | the same | match |
+| Inset shadow | `0 3 1 -2 .2, 0 2 2 0 .14, 0 1 5 0 .12` | the same CSS, its blurs converted ([#139](../../infra/box-shadow/README.md)) | match; the offsets aren't scaled at 2×, as `ion-card`'s |
 | Header item's bottom border: open, closed, last | 0, 1 px, 0 | the same | match |
 | Inset: before an open one, last | 0, 0 | the same | match |
 | Disabled | `#header` and `#content` at 0.4, the host at 1 | the same | match |

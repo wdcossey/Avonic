@@ -6,6 +6,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Controls;
 using static Avonic.Components.Tests.Gestures.GestureTests;
 
@@ -83,7 +84,8 @@ public class AvonicReorderCaptureTests
         var finger = new Finger(page.Scene, page.Clock).Down(at.X, at.Y, 1000);
         Assert.Equal(0.8, item.Opacity);
         Assert.True(lift.IsVisible);
-        Assert.Equal(BoxShadows.Parse("0 0 15.6 0 #66000000"), lift.BoxShadow);
+        // reorder-group.css: 0 0 10px rgba(0, 0, 0, 0.4), the blur converted
+        Assert.Equal(new BoxShadows(new BoxShadow { Blur = CssBoxShadow.Blur(10), Color = Color.Parse("#66000000") }), lift.BoxShadow);
         Assert.Equal(0.8, lift.Opacity);
         finger.Move(at.X, at.Y + 30, 1016);
         page.Clock.At(1032);

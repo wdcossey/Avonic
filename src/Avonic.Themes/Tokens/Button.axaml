@@ -50,7 +50,7 @@
     <x:Double x:Key="Avonic.Button.Md.BackgroundFocusedOpacityFlat">0.12</x:Double>
     <x:Double x:Key="Avonic.Button.Md.BackgroundHoverOpacitySolid">0.08</x:Double>
     <x:Double x:Key="Avonic.Button.Md.BackgroundHoverOpacityFlat">0.04</x:Double>
-    <BoxShadows x:Key="Avonic.Button.Md.BoxShadowSolid">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
-    <BoxShadows x:Key="Avonic.Button.Md.BoxShadowSolidActivated">0 5 5 -3 #33000000, 0 8 10 1 #24000000, 0 3 14 2 #1F000000</BoxShadows>
+    <a:CssShadow x:Key="Avonic.Button.Md.BoxShadowSolid">0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
+    <a:CssShadow x:Key="Avonic.Button.Md.BoxShadowSolidActivated">0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)</a:CssShadow>
 
 </ResourceDictionary>

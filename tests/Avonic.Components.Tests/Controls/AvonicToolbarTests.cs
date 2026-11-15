@@ -14,6 +14,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 using static Avonic.Components.Tests.Controls.AvonicToolbarCaptureTests;
@@ -588,9 +589,10 @@ public class AvonicToolbarTests
 
         var native = (Border)host.GetVisualDescendants().First(v => v is Border { Name: "PART_Native" });
         Assert.Equal(3, native.BoxShadow.Count);
-        Assert.Equal(new BoxShadow { OffsetX = 0, OffsetY = 2, Blur = 4, Spread = -1, Color = Color.Parse("#33000000") }, native.BoxShadow[0]);
-        Assert.Equal(new BoxShadow { OffsetY = 4, Blur = 5, Color = Color.Parse("#24000000") }, native.BoxShadow[1]);
-        Assert.Equal(new BoxShadow { OffsetY = 1, Blur = 10, Color = Color.Parse("#1F000000") }, native.BoxShadow[2]);
+        // 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), each blur converted
+        Assert.Equal(new BoxShadow { OffsetX = 0, OffsetY = 2, Blur = CssBoxShadow.Blur(4), Spread = -1, Color = Color.Parse("#33000000") }, native.BoxShadow[0]);
+        Assert.Equal(new BoxShadow { OffsetY = 4, Blur = CssBoxShadow.Blur(5), Color = Color.Parse("#24000000") }, native.BoxShadow[1]);
+        Assert.Equal(new BoxShadow { OffsetY = 1, Blur = CssBoxShadow.Blur(10), Color = Color.Parse("#1F000000") }, native.BoxShadow[2]);
 
         host.Classes.Add("ion-no-border");
         Dispatcher.UIThread.RunJobs();

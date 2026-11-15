@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:c="using:Avonic.Components.Controls">
 
     <Design.PreviewWith>
@@ -26,7 +27,7 @@
 
         <!-- .footer-md.ion-no-border { box-shadow: none } -->
         <Style Selector="^.ion-no-border /template/ Border#PART_Native">
-            <Setter Property="BoxShadow" Value="none" />
+            <Setter Property="BoxShadow" Value="{a:CssShadow none}" />
         </Style>
     </ControlTheme>
 

@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-toolbar's variables. A CssUnset key falls back as Ionic's var() does; any value overrides it. -->
@@ -38,7 +39,7 @@
     <CornerRadius x:Key="Avonic.Buttons.Md.ButtonBorderRadiusIconOnly">24</CornerRadius>
 
     <!-- header.md.css and footer.md.css hard-code the shadow, with no variable. It needs colours, which rule 5 keeps here. -->
-    <BoxShadows x:Key="Avonic.Header.BoxShadow">0 2 4 -1 #33000000, 0 4 5 0 #24000000, 0 1 10 0 #1F000000</BoxShadows>
-    <BoxShadows x:Key="Avonic.Footer.BoxShadow">0 2 4 -1 #33000000, 0 4 5 0 #24000000, 0 1 10 0 #1F000000</BoxShadows>
+    <a:CssShadow x:Key="Avonic.Header.BoxShadow">0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
+    <a:CssShadow x:Key="Avonic.Footer.BoxShadow">0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
 
 </ResourceDictionary>
