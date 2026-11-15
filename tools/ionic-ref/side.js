@@ -15,7 +15,8 @@ const { chromium } = require('playwright-core');
     // Wide enough for any pair of phone frames. `fullPage` is for anything wider, which would otherwise lose the right one.
     const page = await browser.newPage({ viewport: { width: 1600, height: Number(height) } });
     await page.setContent(`<body style="margin:0;background:#888;display:inline-flex;gap:8px">${image(left)}${image(right)}</body>`);
-    await page.waitForTimeout(200);
+    // setContent waits for the load event; decode() then waits until each picture can be painted.
+    await page.evaluate(() => Promise.all([...document.images].map(i => i.decode())));
     await page.screenshot({ path: out, fullPage: true });
     await browser.close();
 })();

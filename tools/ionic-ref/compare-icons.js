@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { chromium } = require('playwright-core');
+// Waits for the page to keep still, instead of a fixed delay.
+const settle = require('./settle');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const dir = process.argv[2];
@@ -53,7 +55,7 @@ const server = http.createServer((req, res) => {
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
     await page.waitForFunction(count => [...document.querySelectorAll('ion-icon')].length === count &&
         [...document.querySelectorAll('ion-icon')].every(e => e.shadowRoot && e.shadowRoot.querySelector('svg')), names.length, { timeout: 120000 });
-    await page.waitForTimeout(500);
+    await settle.settle(page, { timeout: 120000 });
 
     const chromiumFile = path.join(dir, 'icons-chromium.png');
     await page.screenshot({ path: chromiumFile, clip: { x: 0, y: 0, width: WIDTH, height: HEIGHT } });
