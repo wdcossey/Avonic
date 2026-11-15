@@ -772,6 +772,29 @@ public class AvonicSpinnerTests
         }
     }
 
+    [AvaloniaFact]
+    public void B20_A_Spinner_Config_Of_None_Is_Mds_Default()
+    {
+        // getName(): this.name || config.get('spinner'), then circular for a falsy one, so a config of null is md's default here,
+        // where the infinite scroll's and the refresher's contents take it as no spinner.
+        using var clock = new TestClock();
+        var previous = AvonicConfig.Spinner;
+        try
+        {
+            AvonicConfig.Spinner = ConfigSpinner.None;
+            var spinner = new AvonicSpinner { Width = 28, Height = 28 };
+            var named = new AvonicSpinner { SpinnerName = SpinnerName.Dots, Width = 28, Height = 28 };
+            using var scene = new Scene(new StackPanel { Children = { spinner, named } });
+            Assert.Equal(SpinnerName.Circular, spinner.ResolvedName);
+            Assert.Single(spinner.CurrentFrame());
+            Assert.Equal(SpinnerName.Dots, named.ResolvedName);
+        }
+        finally
+        {
+            AvonicConfig.Spinner = previous;
+        }
+    }
+
     // ── B18: it draws the frame ──────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

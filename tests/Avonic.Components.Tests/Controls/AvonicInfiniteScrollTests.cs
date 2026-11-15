@@ -771,6 +771,52 @@ public class AvonicInfiniteScrollTests
         }
     }
 
+    [AvaloniaFact]
+    public void B16_A_Config_Of_None_Is_No_Spinner_As_Ionics_Null()
+    {
+        // config.get only falls back when the key is undefined: infiniteLoadingSpinner: null, or spinner: null with it unset,
+        // gives loadingSpinner null, and render draws no spinner.
+        using var clock = new TestClock();
+        var previousSpinner = AvonicConfig.Spinner;
+        var previousInfinite = AvonicConfig.InfiniteLoadingSpinner;
+        try
+        {
+            var host = new StackPanel();
+            using var scene = new Scene(host);
+            AvonicInfiniteScrollContent Attach(AvonicInfiniteScrollContent content)
+            {
+                host.Children.Add(content);
+                Dispatcher.UIThread.RunJobs();
+                return content;
+            }
+
+            AvonicConfig.Spinner = SpinnerName.Dots;
+            AvonicConfig.InfiniteLoadingSpinner = ConfigSpinner.None;
+            var none = Attach(new AvonicInfiniteScrollContent());
+            Assert.Null(none.LoadingSpinner);
+            Assert.False(Spinner(none).IsVisible);
+
+            // Its own spinner wins over a none
+            Assert.Equal(SpinnerName.Lines, Attach(new AvonicInfiniteScrollContent { LoadingSpinner = SpinnerName.Lines }).LoadingSpinner);
+
+            // Not set, the spinner config's none is next
+            AvonicConfig.InfiniteLoadingSpinner = null;
+            AvonicConfig.Spinner = ConfigSpinner.None;
+            var fromSpinner = Attach(new AvonicInfiniteScrollContent());
+            Assert.Null(fromSpinner.LoadingSpinner);
+            Assert.False(Spinner(fromSpinner).IsVisible);
+
+            // and with neither set, md's crescent
+            AvonicConfig.Spinner = null;
+            Assert.Equal(SpinnerName.Crescent, Attach(new AvonicInfiniteScrollContent()).LoadingSpinner);
+        }
+        finally
+        {
+            AvonicConfig.Spinner = previousSpinner;
+            AvonicConfig.InfiniteLoadingSpinner = previousInfinite;
+        }
+    }
+
     // ── B18: the text as it's written ────────────────────────────────────────────────────────
 
     [AvaloniaFact]

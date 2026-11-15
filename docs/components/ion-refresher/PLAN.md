@@ -39,9 +39,10 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
 
 | ✓ | Ionic | Avonic | |
 |---|---|---|---|
-| [x] | `pullingIcon` | `PullingIcon`, `SpinnerName?` | narrowed to spinners: an icon name is the legacy refresher's. Unset → `Circular` on first attach (`componentWillLoad`) |
+| [x] | `pullingIcon` | `PullingIcon`, `SpinnerName?` | narrowed to spinners: an icon name is the legacy refresher's. Unset → `AvonicConfig.RefreshingIcon`, else `Circular`, on first load (`componentWillLoad`) |
 | [ ] | `pullingText` | — | hidden in md's native refresher; legacy only |
-| [x] | `refreshingSpinner` | `RefreshingSpinner`, `SpinnerName?` | unset → `AvonicConfig.Spinner ?? Circular` on first attach |
+| [x] | `refreshingSpinner` | `RefreshingSpinner`, `SpinnerName?` | unset → `AvonicConfig.RefreshingSpinner`, else `AvonicConfig.Spinner`, else `Circular`, on first load |
+| [x] | config `refreshingIcon`, `refreshingSpinner` | `AvonicConfig.RefreshingIcon`, `.RefreshingSpinner`, `ConfigSpinner?` | added in #155; `ConfigSpinner.None` is Ionic's `null` |
 | [ ] | `refreshingText` | — | hidden in md's native refresher; legacy only |
 
 ## Behaviours (the test list, `AvonicRefresherTests`)
@@ -71,6 +72,11 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
     600 ms later. B19, R6
 18. Each `resetNativeRefresher` waits for the refreshing icon's `transitionend`, so two `complete()`s, or a `cancel()` then a
     `complete()`, all end with the one transition, each raising `ionPullEnd`. R5
+19. A control with `ion-content-scroll-host` in the content is the scroll element, before the content's own
+    (`getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl)`): the gesture is on it, and `canStart`
+    reads its offset. The host itself if it's a `ScrollViewer`, else the first one in it. B24 (#155)
+20. The config keys `refreshingIcon` and `refreshingSpinner` come before md's defaults and `spinner`, read once, when the content
+    first loads; a key of `null` gives no spinner, and so not the native refresher. B25 (#155)
 
 R1 to R6 came from the reviews: a press dropped on detach, the fixed slot through a panel, `IsEnabled` kept, a new content used.
 

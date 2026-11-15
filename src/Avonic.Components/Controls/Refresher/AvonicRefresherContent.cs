@@ -35,17 +35,19 @@ public class AvonicRefresherContent : TemplatedControl
 {
     /// <summary>
     /// Ionic <c>pullingIcon</c>, as a spinner: md's native refresher shows a spinner, and Ionic's icon names are its legacy
-    /// refresher's, which isn't here. Left unset it becomes <see cref="SpinnerName.Circular"/> when it's first attached, as Ionic
-    /// sets md's in <c>componentWillLoad</c>. <see cref="SpinnerName.Circular"/> also shows md's arrow. Null: none, which in Ionic
-    /// is the legacy refresher.
+    /// refresher's, which isn't here. Left unset it becomes <see cref="AvonicConfig.RefreshingIcon"/>, or md's
+    /// <see cref="SpinnerName.Circular"/>, when it first loads, as Ionic sets it in <c>componentWillLoad</c>; a config set to
+    /// <see cref="ConfigSpinner.None"/> gives null. <see cref="SpinnerName.Circular"/> also shows md's arrow. Null: none, which in
+    /// Ionic is the legacy refresher.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> PullingIconProperty =
         AvaloniaProperty.Register<AvonicRefresherContent, SpinnerName?>(nameof(PullingIcon));
 
     /// <summary>
-    /// Ionic <c>refreshingSpinner</c>. Left unset it becomes <see cref="AvonicConfig.Spinner"/>, or md's
-    /// <see cref="SpinnerName.Circular"/>, when it's first attached, as Ionic sets it in <c>componentWillLoad</c>. Null: none,
-    /// which in Ionic is the legacy refresher.
+    /// Ionic <c>refreshingSpinner</c>. Left unset it becomes <see cref="AvonicConfig.RefreshingSpinner"/>, else
+    /// <see cref="AvonicConfig.Spinner"/>, else md's <see cref="SpinnerName.Circular"/>, when it first loads, as Ionic sets it in
+    /// <c>componentWillLoad</c>; a config set to <see cref="ConfigSpinner.None"/> gives null. Null: none, which in Ionic is the
+    /// legacy refresher.
     /// </summary>
     public static readonly StyledProperty<SpinnerName?> RefreshingSpinnerProperty =
         AvaloniaProperty.Register<AvonicRefresherContent, SpinnerName?>(nameof(RefreshingSpinner));
@@ -60,7 +62,8 @@ public class AvonicRefresherContent : TemplatedControl
         ClipToBoundsProperty.OverrideDefaultValue<AvonicRefresherContent>(false);
     }
 
-    private bool _didLoad;
+    private readonly ConfigOnLoad<SpinnerName?> _pullingIconOnLoad;
+    private readonly ConfigOnLoad<SpinnerName?> _refreshingSpinnerOnLoad;
     private AvonicRefresher? _refresher;
     private RefresherState _state = RefresherState.Inactive;
 
@@ -82,6 +85,13 @@ public class AvonicRefresherContent : TemplatedControl
     private IDisposable? _iconScale;
     private IDisposable? _transitionFrame;
 
+    public AvonicRefresherContent()
+    {
+        // Left unset, the config's as the current value, so that clearing it later gives none, Ionic's undefined.
+        _pullingIconOnLoad = ConfigOnLoad<SpinnerName?>.IfUnset(this, PullingIconProperty);
+        _refreshingSpinnerOnLoad = ConfigOnLoad<SpinnerName?>.IfUnset(this, RefreshingSpinnerProperty);
+    }
+
     /// <inheritdoc cref="PullingIconProperty"/>
     public SpinnerName? PullingIcon
     {
@@ -102,22 +112,12 @@ public class AvonicRefresherContent : TemplatedControl
     /// </summary>
     internal void WillLoad()
     {
-        if (_didLoad)
-        {
-            return;
-        }
+        // config.get('refreshingIcon', 'circular') in md, which has no rubber band scrolling: not the spinner config
+        _pullingIconOnLoad.Load(static () => ConfigSpinner.Get(AvonicConfig.RefreshingIcon, SpinnerName.Circular));
 
-        _didLoad = true;
-        if (!IsSet(PullingIconProperty))
-        {
-            // config.get('refreshingIcon', 'circular') in md, which has no rubber band scrolling
-            SetCurrentValue(PullingIconProperty, SpinnerName.Circular);
-        }
-
-        if (!IsSet(RefreshingSpinnerProperty))
-        {
-            SetCurrentValue(RefreshingSpinnerProperty, AvonicConfig.Spinner ?? SpinnerName.Circular);
-        }
+        // config.get('refreshingSpinner', config.get('spinner', 'circular'))
+        _refreshingSpinnerOnLoad.Load(static () =>
+            ConfigSpinner.Get(AvonicConfig.RefreshingSpinner, ConfigSpinner.Get(AvonicConfig.Spinner, SpinnerName.Circular)));
     }
 
     /// <summary>Whether the refresher can use md's native refresher: a pulling spinner and a refreshing spinner (<c>shouldUseNativeRefresher</c>).</summary>

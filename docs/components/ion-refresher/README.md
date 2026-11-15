@@ -41,8 +41,34 @@ With an `AvonicHeader` just before the content in their panel, the icon comes ou
 | `ionRefresh` | `IonRefresh` (`RefresherEventArgs.Complete()`) |
 | `complete()`, `cancel()`, `getProgress()` | `Complete()`, `Cancel()`, `GetProgress()`, synchronous |
 | default slot | `Content` |
-| `ion-refresher-content` `pullingIcon` | `PullingIcon`, a `SpinnerName?`, `Circular` when unset |
-| `ion-refresher-content` `refreshingSpinner` | `RefreshingSpinner`, a `SpinnerName?`, `AvonicConfig.Spinner ?? Circular` when unset |
+| `ion-refresher-content` `pullingIcon` | `PullingIcon`, a `SpinnerName?`; unset, `AvonicConfig.RefreshingIcon`, else `Circular` |
+| `ion-refresher-content` `refreshingSpinner` | `RefreshingSpinner`, a `SpinnerName?`; unset, `AvonicConfig.RefreshingSpinner`, else `AvonicConfig.Spinner`, else `Circular` |
+| config `refreshingIcon`, `refreshingSpinner` | `AvonicConfig.RefreshingIcon`, `AvonicConfig.RefreshingSpinner` |
+
+## Config
+
+Ionic's `refresher-content.js` reads three config keys in `componentWillLoad`, for a prop that's unset: `pullingIcon` is
+`config.get('refreshingIcon', 'circular')` in md (not `spinner`, which only iOS reads there), and `refreshingSpinner` is
+`config.get('refreshingSpinner', config.get('spinner', 'circular'))`. Here they're read once, when the content first loads: its
+first attach, or its refresher's first look at it, if that's sooner. A change of the config reaches only contents that load after it.
+An app's own value wins, and clearing it later gives null, none, as Ionic's `undefined` does after its load.
+
+The keys are `ConfigSpinner?`: null is not set, so the next fallback applies, and `ConfigSpinner.None` is Ionic's `null`, which
+`config.get` returns as it is. A pulling icon or a refreshing spinner of none makes it not md's native refresher, so it does nothing
+here (the legacy refresher isn't here).
+
+```csharp
+AvonicConfig.RefreshingSpinner = SpinnerName.Dots;   // every refresher content's refreshing spinner, unless it has its own
+AvonicConfig.Spinner = ConfigSpinner.None;           // with RefreshingSpinner not set: none, so not the native refresher
+```
+
+## Scroll host
+
+As Ionic's `connectedCallback`, a control in the content with the class `ion-content-scroll-host` (`AvonicContent.ScrollHostClass`),
+the first in the content's `Content` and then its `FixedContent`, is the scroll element, before the content's own scroller: the pull
+starts from it, and only when it's at its top. A host that is a `ScrollViewer` is the scroll element itself; otherwise the first
+`ScrollViewer` in it, such as a `ListBox`'s template has, as only a `ScrollViewer` scrolls here. It's looked for when the refresher
+is attached.
 
 Not declared, as they belong to Ionic's legacy refresher, which isn't here: `pullMin`, `pullMax`, `pullFactor`, `closeDuration`,
 `snapbackDuration`, `pullingText`, `refreshingText`. `mode` isn't exposed (ADR 0001).
@@ -54,7 +80,7 @@ The full checklist, ticked, is in [PLAN.md](PLAN.md#checklist-ion-refresher).
 ## Behaviours
 
 Each is a test in `AvonicRefresherTests`, listed in [PLAN.md](PLAN.md#behaviours-the-test-list-avonicrefreshertests). In short: the
-gesture on the content's scroll element (priority 31, `y`, 5 px) starts only at the top and not while refreshing; the first move after
+gesture on the content's scroll element, or a scroll host's in it (priority 31, `y`, 5 px), starts only at the top and not while refreshing; the first move after
 it captures starts the pull, and each later one steps md's pulling animation to `deltaY / 360`; let go at 0.4 or less and it plays
 back over progress × 500 ms and cancels; past it, the icon snaps back in 125 ms and the refresher refreshes, clearing the focus;
 `Complete()` and `Cancel()` close it two frames later, after the icon's 200 ms transition, or Ionic's 700 ms fallback.
@@ -94,9 +120,8 @@ None.
 - An upward drag from the top hands the press to the scroller at the gesture's threshold (`GestureConfig.ReleaseAgainstDirection`),
   where Chromium scrolls beside Ionic's passive gesture; and the scroll element isn't made `overflow: hidden` during a pull. See
   [COMPARISON.md](COMPARISON.md#deliberate-differences).
-- A custom scroll target, an element with `ion-content-scroll-host` inside the content, isn't looked for: the content's own scroller
-  is the scroll element. Ionic's `connectedCallback` takes such an element first.
-- Ionic's `refreshingSpinner` and `refreshingIcon` config keys, which `refresher-content.js` reads before `spinner` and
-  `circular`, have no `AvonicConfig` member: `RefreshingSpinner` falls back to `AvonicConfig.Spinner`, and `PullingIcon` to
-  `Circular`.
+- A scroll host in content that is data, shown through the content's `ContentTemplate`, isn't found: the search reads the controls
+  an app puts in the slots and their logical descendants. Of two hosts, one in `Content` and one in `FixedContent`, the one in
+  `Content` wins, where Ionic takes the first in the markup.
+- `AvonicConfig.RefreshingIcon` takes only spinners, as `PullingIcon` does: Ionic's can name any icon, for its legacy refresher.
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

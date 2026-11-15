@@ -266,12 +266,15 @@ public class AvonicRefresher : ContentControl
             return;
         }
 
-        // getScrollElement(contentEl). Ionic would take an .ion-content-scroll-host inside the content first, which isn't here.
+        // getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl): a custom scroll host in the content
+        // first, as a virtual scroller has, and the content's own scroller otherwise. The content is still the content: the
+        // header before it, say, is read from it.
         _contentEl = content;
-        _scrollEl = ContentUtils.GetScrollElement(content, this);
+        var host = ContentUtils.FindScrollHost(content) ?? content;
+        _scrollEl = ContentUtils.GetScrollElementWithin(host);
         if (_scrollEl is null)
         {
-            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", content);
+            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", host);
             return;
         }
 

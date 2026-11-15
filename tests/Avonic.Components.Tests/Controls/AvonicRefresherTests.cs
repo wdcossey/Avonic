@@ -1,8 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Input.GestureRecognizers;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 using Avonic.Components.Controls;
@@ -26,7 +31,13 @@ public class AvonicRefresherTests
         private Finger? _finger;
         private double _y;
 
-        public Page(bool header = true, AvonicRefresherContent? refresherContent = null, bool fixedSlot = true, double rows = 40)
+        /// <param name="body">What the content holds around the column of rows, which is the column itself when null.</param>
+        public Page(
+            bool header = true,
+            AvonicRefresherContent? refresherContent = null,
+            bool fixedSlot = true,
+            double rows = 40,
+            Func<StackPanel, Control>? body = null)
         {
             RefresherContent = refresherContent ?? new AvonicRefresherContent();
             Refresher = new AvonicRefresher { Content = RefresherContent };
@@ -36,7 +47,7 @@ public class AvonicRefresherTests
                 Column.Children.Add(new Border { Height = 48, Background = Brushes.Transparent, Focusable = true });
             }
 
-            Content = new AvonicContent { Content = Column };
+            Content = new AvonicContent { Content = body?.Invoke(Column) ?? Column };
             if (fixedSlot)
             {
                 Content.FixedContent = Refresher;
@@ -804,4 +815,171 @@ public class AvonicRefresherTests
             AssertIcons(dark, "#414141", "#4D4D4D");
         });
     });
+
+    // ── B25: the refresher's own config keys ───────────────────────────────────────────────────
+
+    private static bool IsNative(Page page) => ((IPseudoClasses)page.Refresher.Classes).Contains(":native");
+
+    // componentWillLoad: pullingIcon = config.get('refreshingIcon', 'circular') in md, and
+    // refreshingSpinner = config.get('refreshingSpinner', config.get('spinner', 'circular')), each only if it's undefined. A key set
+    // to null gives null, and with a spinner missing from either place it's not the native refresher.
+    [AvaloniaFact]
+    public void B25_The_RefreshingIcon_And_RefreshingSpinner_Configs_Come_First_And_None_Is_No_Spinner()
+    {
+        var (icon, refreshing, spinner) = (AvonicConfig.RefreshingIcon, AvonicConfig.RefreshingSpinner, AvonicConfig.Spinner);
+        try
+        {
+            AvonicConfig.RefreshingIcon = SpinnerName.Lines;
+            AvonicConfig.RefreshingSpinner = SpinnerName.Dots;
+            AvonicConfig.Spinner = SpinnerName.Crescent;
+            using (var page = new Page())
+            {
+                Assert.Equal(SpinnerName.Lines, page.RefresherContent.PullingIcon);
+                Assert.Equal(SpinnerName.Dots, page.RefresherContent.RefreshingSpinner);
+                Assert.True(IsNative(page));
+
+                // Read once: the content keeps what its first load gave
+                AvonicConfig.RefreshingIcon = SpinnerName.Bubbles;
+                AvonicConfig.RefreshingSpinner = SpinnerName.Bubbles;
+                page.Content.FixedContent = null;
+                page.Wait(16);
+                page.Content.FixedContent = page.Refresher;
+                page.Wait(16);
+                Assert.Equal(SpinnerName.Lines, page.RefresherContent.PullingIcon);
+                Assert.Equal(SpinnerName.Dots, page.RefresherContent.RefreshingSpinner);
+            }
+
+            // Its own values win
+            using (var page = new Page(refresherContent: new AvonicRefresherContent
+                   {
+                       PullingIcon = SpinnerName.Circular, RefreshingSpinner = SpinnerName.Circles,
+                   }))
+            {
+                Assert.Equal(SpinnerName.Circular, page.RefresherContent.PullingIcon);
+                Assert.Equal(SpinnerName.Circles, page.RefresherContent.RefreshingSpinner);
+            }
+
+            // Not set, the refreshing spinner is the spinner config's
+            AvonicConfig.RefreshingSpinner = null;
+            using (var page = new Page())
+            {
+                Assert.Equal(SpinnerName.Crescent, page.RefresherContent.RefreshingSpinner);
+            }
+
+            // None is null, and the refresher isn't native, so it doesn't pull
+            AvonicConfig.RefreshingIcon = ConfigSpinner.None;
+            using (var page = new Page())
+            {
+                Assert.Null(page.RefresherContent.PullingIcon);
+                Assert.False(IsNative(page));
+                page.Drag(100).Lift().Wait(600);
+                Assert.Empty(page.Log);
+            }
+
+            AvonicConfig.RefreshingIcon = null;
+            AvonicConfig.RefreshingSpinner = ConfigSpinner.None;
+            using (var page = new Page())
+            {
+                Assert.Equal(SpinnerName.Circular, page.RefresherContent.PullingIcon);
+                Assert.Null(page.RefresherContent.RefreshingSpinner);
+                Assert.False(IsNative(page));
+            }
+
+            // The spinner config's none reaches the refreshing spinner when its own key isn't set
+            AvonicConfig.RefreshingSpinner = null;
+            AvonicConfig.Spinner = ConfigSpinner.None;
+            using (var page = new Page())
+            {
+                Assert.Null(page.RefresherContent.RefreshingSpinner);
+                Assert.False(IsNative(page));
+            }
+
+            // and an own spinner beats a none
+            using (var page = new Page(refresherContent: new AvonicRefresherContent { RefreshingSpinner = SpinnerName.Circular }))
+            {
+                Assert.True(IsNative(page));
+            }
+        }
+        finally
+        {
+            (AvonicConfig.RefreshingIcon, AvonicConfig.RefreshingSpinner, AvonicConfig.Spinner) = (icon, refreshing, spinner);
+        }
+    }
+
+    // ── B24: a custom scroll host ──────────────────────────────────────────────────────────────
+
+    /// <summary>A host whose scroller is in its template, as a <c>ListBox</c>'s is.</summary>
+    private sealed class TemplatedHost : TemplatedControl
+    {
+        public TemplatedHost(Control content, ScrollViewer scroller)
+        {
+            scroller.Content = content;
+            Template = new FuncControlTemplate<TemplatedHost>((_, _) => scroller);
+        }
+    }
+
+    private static ScrollViewer InnerScroller() =>
+        new() { Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!, IsScrollInertiaEnabled = false };
+
+    public static TheoryData<string> ScrollHosts => ["ScrollViewer", "Border", "Templated"];
+
+    /// <summary>
+    /// The content holds a host 400 high, which scrolls the rows, as a virtual scroller does, so the content's own scroller has
+    /// nothing to scroll. The host has <c>ion-content-scroll-host</c>: on the scroller itself, on a border around it, or on a control
+    /// with it in its template.
+    /// </summary>
+    private static Page ScrollHostPage(string kind, out ScrollViewer inner)
+    {
+        var scroller = InnerScroller();
+        inner = scroller;
+        var page = new Page(body: column =>
+        {
+            Control host = kind switch
+            {
+                "ScrollViewer" => scroller,
+                "Border" => new Border { Child = scroller },
+                _ => new TemplatedHost(column, scroller),
+            };
+            if (kind != "Templated")
+            {
+                scroller.Content = column;
+            }
+
+            host.Height = 400;
+            host.Classes.Add(AvonicContent.ScrollHostClass);
+            return host;
+        });
+
+        // A touch drag scrolls it, as the content's own scroller's does: AvonicContent turns its recognizer on itself
+        scroller.GetVisualDescendants().OfType<ScrollContentPresenter>().Single()
+            .GestureRecognizers.OfType<ScrollGestureRecognizer>().Single().CanVerticallyScroll = true;
+        return page;
+    }
+
+    // connectedCallback: getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl). The pull starts only
+    // when that element is at its top, as canStart reads its scrollTop, and the content's own scroller, always at its top here,
+    // doesn't count.
+    [AvaloniaTheory]
+    [MemberData(nameof(ScrollHosts))]
+    public void B24_A_Scroll_Host_In_The_Content_Is_The_Scroll_Element(string kind)
+    {
+        using (var page = ScrollHostPage(kind, out var inner))
+        {
+            // The host is scrolled: it scrolls back, and it doesn't pull
+            inner.Offset = new Vector(0, 100);
+            page.Wait(16);
+            Assert.Equal(0, page.Scroll.Offset.Y);
+            page.Drag(60).Lift().Wait(200);
+            Assert.Empty(page.Log);
+            Assert.True(inner.Offset.Y < 100, $"scrolled to {inner.Offset.Y}");
+        }
+
+        using (var page = ScrollHostPage(kind, out var inner))
+        {
+            // At its top, it pulls
+            Assert.Equal(0, inner.Offset.Y);
+            page.Drag(40).Wait(16);
+            Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
+        }
+    }
 }

@@ -50,7 +50,7 @@ Boxes in CSS pixels, from Chromium's `getBoundingClientRect` and Avonic's `Bound
 | B13 | Removed | stops listening; back before the frame, it hears the scroll | the same | Match |
 | B14 | Hidden by an ancestor | `offsetHeight` 0, no check | the same | Match |
 | B15 | The content outside a loading scroll | nothing shown | nothing shown | Match |
-| B16 | The content's default spinner | `crescent`, or the config's | `Crescent`, or `AvonicConfig.InfiniteLoadingSpinner`, then `AvonicConfig.Spinner` | Match, except a config of null: see below |
+| B16 | The content's default spinner | `crescent`, or the config's | `Crescent`, or `AvonicConfig.InfiniteLoadingSpinner`, then `AvonicConfig.Spinner` | Match, with `ConfigSpinner.None` for a config of null: see below |
 | B18 | `<b>bold</b> &amp;amp; x` | shown as written | shown as written | Match |
 
 ## Deliberate differences
@@ -60,8 +60,9 @@ Boxes in CSS pixels, from Chromium's `getBoundingClientRect` and Avonic's `Bound
   forcing it keeps what Ionic means: the rows shown stay put. With plain DOM appends before `complete()`, Chromium keeps the same
   `scrollTop` and the rows jump (measured: 30 stays 30).
 - **`infiniteLoadingSpinner: null`** in Ionic's config means no spinner, as `config.get` falls back only on `undefined`. Here
-  `AvonicConfig.InfiniteLoadingSpinner` is a `SpinnerName?`, whose null means unset, so it falls back to `AvonicConfig.Spinner`,
-  as `AvonicConfig.Spinner`'s null does. A content's own `LoadingSpinner = null` still shows none. (#131)
+  `AvonicConfig.InfiniteLoadingSpinner` is a `ConfigSpinner?`: its null is `undefined`, not set, so it falls back to
+  `AvonicConfig.Spinner`, and `ConfigSpinner.None` is Ionic's `null`, no spinner, as is `AvonicConfig.Spinner = ConfigSpinner.None`
+  with it not set. Not a difference since #155; before, there was no way to say none (#131).
 - **`loadingText`** is plain text, always: Ionic's default. Its opt-in HTML (`innerHTMLTemplatesEnabled`) has no counterpart.
 
 ## Not tried
