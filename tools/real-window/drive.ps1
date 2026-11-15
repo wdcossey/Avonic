@@ -101,7 +101,15 @@ $drawing = if ($PSVersionTable.PSEdition -eq 'Core') { 'System.Drawing.Common', 
 Add-Type -ReferencedAssemblies $drawing @'
 using System; using System.Drawing; using System.Drawing.Imaging; using System.Runtime.InteropServices;
 public static class Pixels {
-  // How many of every other pixel differ between two regions of one size.
+  // How many of every other pixel differ by more than 4 levels in a channel between two regions of one size. The checks look
+  // for a glyph or a spinner coming or going, dozens of levels; a shadow's fall-off can come back a level or two off once the
+  // window has redrawn under it (the header's, at the top of ion-refresher's content, measured 1).
+  const int Tolerance = 4;
+  static bool Same(int p, int q) {
+    for (int s = 0; s < 32; s += 8)
+      if (Math.Abs(((p >> s) & 0xFF) - ((q >> s) & 0xFF)) > Tolerance) return false;
+    return true;
+  }
   public static int Differ(Bitmap a, Bitmap b) {
     if (a.Width != b.Width || a.Height != b.Height) throw new ArgumentException("The regions differ in size");
     var r = new Rectangle(0, 0, a.Width, a.Height);
@@ -111,7 +119,7 @@ public static class Pixels {
       int n = 0;
       for (int y = 0; y < a.Height; y += 2)
         for (int x = 0; x < a.Width; x += 2)
-          if (Marshal.ReadInt32(da.Scan0, y * da.Stride + x * 4) != Marshal.ReadInt32(db.Scan0, y * db.Stride + x * 4)) n++;
+          if (!Same(Marshal.ReadInt32(da.Scan0, y * da.Stride + x * 4), Marshal.ReadInt32(db.Scan0, y * db.Stride + x * 4))) n++;
       return n;
     } finally { a.UnlockBits(da); b.UnlockBits(db); }
   }
@@ -271,7 +279,7 @@ function Region($x, $y, $wd, $ht) {
     $bmp = New-Object Drawing.Bitmap ([int]$wd), ([int]$ht)
     $g = [Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen([int]$x, [int]$y, 0, 0, $bmp.Size); $g.Dispose(); $bmp
 }
-# How many of every other pixel differ between a region taken earlier, which the caller keeps, and one taken now, which this
+# How many of every other pixel differ (by more than 4 levels) between a region taken earlier, which the caller keeps, and one taken now, which this
 # disposes of. A disposed bitmap's size reads as nothing in PowerShell, so a reused one would compare nothing and pass.
 function Changed($before, $now) {
     try { [Pixels]::Differ($before, $now) } finally { $now.Dispose() }
