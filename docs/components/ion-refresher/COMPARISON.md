@@ -76,6 +76,17 @@ Refreshing:
   `ion-fab` beside the refresher (R2).
 - **The pulling icon's resting place is `translateY(-52px)`** in the theme, which is `calc(-100% - 10px)` for its 42 px: an app that
   resizes the icon restyles that too.
+- **A scroll host is looked for in `Content`, then `FixedContent`** (#155). Ionic's `querySelector('.ion-content-scroll-host')` takes
+  the first in the markup, where `<ion-refresher slot="fixed">` is usually written before the list. Avalonia's two slots have no
+  order between them, and a host in the fixed slot beside one in the content is unusual, so the content's, where a virtual scroller
+  is, comes first. With one host, as an app has, the two agree.
+- **A scroll host's scroller is the first `ScrollViewer` in it**, depth first, unless the host is one (#155). In a browser the
+  element with the class scrolls itself; here only a `ScrollViewer` can, so a panel with the class around a `TextBox` and a list
+  would give the text box's. Put the class on the control that scrolls.
+- **A scroll host whose scroller isn't there yet is looked at once more, after the content's next layout** (#155), as Ionic waits
+  for the content with `componentOnReady`; a `ListBox` that is styled only once it's in the tree has none when the fixed slot comes
+  first. With none then, the error is logged, as the infinite scroll's is, and nothing pulls: Ionic's scroll element would be the
+  host itself, which can't scroll here.
 
 ## Gaps
 

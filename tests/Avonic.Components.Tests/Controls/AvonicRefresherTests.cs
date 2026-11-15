@@ -40,7 +40,8 @@ public class AvonicRefresherTests
             double rows = 40,
             Func<StackPanel, Control>? body = null,
             Func<AvonicRefresher, Control>? fixedBody = null,
-            ContentFixedSlotPlacement placement = ContentFixedSlotPlacement.After)
+            ContentFixedSlotPlacement placement = ContentFixedSlotPlacement.After,
+            IStyle[]? styles = null)
         {
             RefresherContent = refresherContent ?? new AvonicRefresherContent();
             Refresher = new AvonicRefresher { Content = RefresherContent };
@@ -69,7 +70,7 @@ public class AvonicRefresherTests
 
             Grid.SetRow(Content, 1);
             grid.Children.Add(Content);
-            Scene = new Scene(grid);
+            Scene = styles is null ? new Scene(grid) : Scene.Styled(grid, styles);
             Scroll = Content.GetScrollElement()!;
             Scroll.IsScrollInertiaEnabled = false;
 
@@ -920,17 +921,29 @@ public class AvonicRefresherTests
     /// <summary>A host whose scroller is in its template, as a <c>ListBox</c>'s is.</summary>
     private sealed class TemplatedHost : TemplatedControl
     {
-        public TemplatedHost(Control content, ScrollViewer scroller)
+        public TemplatedHost(Control content, ScrollViewer scroller, bool styled)
         {
             scroller.Content = content;
-            Template = new FuncControlTemplate<TemplatedHost>((_, _) => scroller);
+            Scroller = scroller;
+            if (!styled)
+            {
+                Template = Make;
+            }
         }
+
+        public ScrollViewer Scroller { get; }
+
+        /// <summary>
+        /// Its template from an app's style, as a <c>ListBox</c>'s comes from its theme: applied only once it's in the logical tree,
+        /// which, with the fixed slot first, is after the refresher is attached.
+        /// </summary>
+        public static Style Styled => new(x => x.OfType<TemplatedHost>()) { Setters = { new Setter(TemplateProperty, Make) } };
+
+        private static FuncControlTemplate<TemplatedHost> Make => new((host, _) => host.Scroller);
     }
 
     private static ScrollViewer InnerScroller() =>
         new() { Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!, IsScrollInertiaEnabled = false };
-
-    public static TheoryData<string> ScrollHosts => ["ScrollViewer", "Border", "Templated"];
 
     /// <summary>
     /// The content holds a host 400 high, which scrolls the rows, as a virtual scroller does, so the content's own scroller has
@@ -941,15 +954,15 @@ public class AvonicRefresherTests
     {
         var scroller = InnerScroller();
         inner = scroller;
-        var page = new Page(placement: placement, body: column =>
+        var page = new Page(placement: placement, styles: kind == "Styled" ? [TemplatedHost.Styled] : null, body: column =>
         {
             Control host = kind switch
             {
                 "ScrollViewer" => scroller,
                 "Border" => new Border { Child = scroller },
-                _ => new TemplatedHost(column, scroller),
+                _ => new TemplatedHost(column, scroller, styled: kind == "Styled"),
             };
-            if (kind != "Templated")
+            if (host is not TemplatedHost)
             {
                 scroller.Content = column;
             }
@@ -974,6 +987,8 @@ public class AvonicRefresherTests
         { "Border", ContentFixedSlotPlacement.After },
         { "Templated", ContentFixedSlotPlacement.After },
         { "Templated", ContentFixedSlotPlacement.Before },
+        { "Styled", ContentFixedSlotPlacement.After },
+        { "Styled", ContentFixedSlotPlacement.Before },
     };
 
     // connectedCallback: getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl). The pull starts only
@@ -1000,6 +1015,41 @@ public class AvonicRefresherTests
             Assert.Equal(0, inner.Offset.Y);
             page.Drag(40).Wait(16);
             Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
+        }
+    }
+
+    private sealed class ErrorSink : Avalonia.Logging.ILogSink
+    {
+        public List<(object? Source, string Message)> Errors { get; } = [];
+
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Error;
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) =>
+            Errors.Add((source, messageTemplate));
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues) =>
+            Errors.Add((source, messageTemplate));
+    }
+
+    // A host with nothing that scrolls: it waits for the content's layout, then logs, and doesn't take the content's own scroller,
+    // as Ionic's would be the host itself.
+    [AvaloniaFact]
+    public void B24_A_Scroll_Host_With_No_ScrollViewer_Is_Logged_After_The_Layout_And_Nothing_Pulls()
+    {
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            using var page = new Page(body: column => new Border { Classes = { AvonicContent.ScrollHostClass }, Child = column });
+            Assert.Contains(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher) && e.Message == "AvonicRefresher found no ScrollViewer in {Host}.");
+            Assert.Single(sink.Errors, e => ReferenceEquals(e.Source, page.Refresher));
+            page.Drag(100).Lift().Wait(600);
+            Assert.Empty(page.Log);
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
         }
     }
 

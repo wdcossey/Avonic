@@ -18,24 +18,25 @@ internal static class ContentUtils
     /// <c>contentEl.querySelector('.ion-content-scroll-host')</c>: the first control in <paramref name="content"/>, in document
     /// order, with <see cref="AvonicContent.ScrollHostClass"/>. What an app puts in it, as a <c>querySelector</c> searches the light
     /// DOM and not the content's shadow root: its <see cref="AvonicContent.Content"/> and <see cref="AvonicContent.FixedContent"/>,
-    /// in that order, and their logical descendants, as the slots' presenters, not the content, are their logical parents. Content
-    /// that is data, shown through a template, isn't searched.
+    /// in that order, and their logical descendants, as the slots' presenters, not the content, are their logical parents. The slots
+    /// have no order between them here; the content's own comes first, as it's where a virtual scroller is. Content that is data,
+    /// shown through a template, isn't searched.
     /// </summary>
-    public static Control? FindScrollHost(AvonicContent content)
-    {
-        foreach (var slot in new[] { content.Content, content.FixedContent })
-        {
-            if (slot is not Control root)
-            {
-                continue;
-            }
+    public static Control? FindScrollHost(AvonicContent content) =>
+        FindScrollHostIn(content.Content) ?? FindScrollHostIn(content.FixedContent);
 
-            foreach (var logical in root.GetSelfAndLogicalDescendants())
+    private static Control? FindScrollHostIn(object? slot)
+    {
+        if (slot is not Control root)
+        {
+            return null;
+        }
+
+        foreach (var logical in root.GetSelfAndLogicalDescendants())
+        {
+            if (logical is Control control && control.Classes.Contains(AvonicContent.ScrollHostClass))
             {
-                if (logical is Control control && control.Classes.Contains(AvonicContent.ScrollHostClass))
-                {
-                    return control;
-                }
+                return control;
             }
         }
 
@@ -43,26 +44,30 @@ internal static class ContentUtils
     }
 
     /// <summary>
-    /// <c>getScrollElement(host)</c>, for a caller outside the host: an <see cref="AvonicContent"/>'s
-    /// <see cref="AvonicContent.GetScrollElement"/>; the host, if it's a <see cref="ScrollViewer"/>; otherwise the first one in it,
-    /// such as a <c>ListBox</c>'s template has, as a host with the class scrolls itself in a browser and only a
-    /// <see cref="ScrollViewer"/> can here.
+    /// <c>getScrollElement(host)</c>, for a caller outside the host: as <see cref="GetScrollElement"/> for a content or a
+    /// <see cref="ScrollViewer"/>; otherwise the first <see cref="ScrollViewer"/> in it, depth first, such as a <c>ListBox</c>'s
+    /// template has, as a host with the class scrolls itself in a browser and only a <see cref="ScrollViewer"/> can here. So the class
+    /// goes on the control that scrolls, as in Ionic: on a panel around a <c>TextBox</c> and a list, the text box's would be first.
+    /// Null while the host has no template yet, as before an unstyled control is in the tree.
     /// </summary>
     public static ScrollViewer? GetScrollElementWithin(Control host)
     {
-        switch (host)
+        if (host is AvonicContent or ScrollViewer)
         {
-            case AvonicContent content:
-                return content.GetScrollElement();
-            case ScrollViewer scroller:
-                return scroller;
-            case TemplatedControl templated:
-                templated.ApplyTemplate();
-                break;
+            return OwnScrollElement(host);
         }
 
+        (host as TemplatedControl)?.ApplyTemplate();
         return host.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
     }
+
+    /// <summary>A content's scroll element, or a <see cref="ScrollViewer"/> itself.</summary>
+    private static ScrollViewer? OwnScrollElement(Control host) => host switch
+    {
+        AvonicContent content => content.GetScrollElement(),
+        ScrollViewer scroller => scroller,
+        _ => null,
+    };
 
     /// <summary>
     /// <c>findClosestIonContent</c>: <c>el.closest('ion-content, .ion-content-scroll-host')</c>, which starts at the element itself
@@ -88,14 +93,9 @@ internal static class ContentUtils
     /// </summary>
     public static ScrollViewer? GetScrollElement(Control host, Visual from)
     {
-        if (host is AvonicContent content)
+        if (host is AvonicContent or ScrollViewer)
         {
-            return content.GetScrollElement();
-        }
-
-        if (host is ScrollViewer scroller)
-        {
-            return scroller;
+            return OwnScrollElement(host);
         }
 
         for (var visual = from; visual is not null && !ReferenceEquals(visual, host); visual = visual.GetVisualParent())

@@ -60,6 +60,9 @@ public class AvonicRefresher : ContentControl
 
     private AvonicContent? _contentEl;
     private ScrollViewer? _scrollEl;
+
+    // the content whose next layout it waits for, to find a scroll host's scroller
+    private AvonicContent? _contentReady;
     private Gesture? _gesture;
     private AvonicRefresherContent? _refresherContent;
 
@@ -223,6 +226,7 @@ public class AvonicRefresher : ContentControl
     /// </summary>
     private void Disconnect()
     {
+        StopWaitingForContent();
         _nativeRefresher = false;
         _scrollEl = null;
         _contentEl = null;
@@ -266,14 +270,30 @@ public class AvonicRefresher : ContentControl
             return;
         }
 
-        // getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl): a custom scroll host in the content
-        // first, as a virtual scroller has, and the content's own scroller otherwise. The content is still the content: the
-        // header before it, say, is read from it.
         _contentEl = content;
+        ConnectScrollElement(content, mayWait: true);
+    }
+
+    /// <summary>
+    /// <c>getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl)</c>: a custom scroll host in the
+    /// content first, as a virtual scroller has, and the content's own scroller otherwise. The content is still the content: the
+    /// header before it, say, is read from it. A host whose scroller isn't there yet, as one still to be placed and styled when the
+    /// fixed slot comes first is, is looked at again after the content's next layout, as Ionic waits for the content to be ready
+    /// (<c>componentOnReady</c>); with none then, it logs.
+    /// </summary>
+    private void ConnectScrollElement(AvonicContent content, bool mayWait)
+    {
         var host = ContentUtils.FindScrollHost(content) ?? content;
         _scrollEl = ContentUtils.GetScrollElementWithin(host);
         if (_scrollEl is null)
         {
+            if (mayWait && !ReferenceEquals(host, content))
+            {
+                _contentReady = content;
+                content.LayoutUpdated += OnContentReady;
+                return;
+            }
+
             Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "AvonicRefresher found no ScrollViewer in {Host}.", host);
             return;
         }
@@ -281,6 +301,29 @@ public class AvonicRefresher : ContentControl
         if (ShouldUseNativeRefresher())
         {
             SetupNativeRefresher();
+        }
+    }
+
+    private void OnContentReady(object? sender, EventArgs e)
+    {
+        if (_contentReady is not { } content)
+        {
+            return;
+        }
+
+        StopWaitingForContent();
+        if (ReferenceEquals(content, _contentEl))
+        {
+            ConnectScrollElement(content, mayWait: false);
+        }
+    }
+
+    private void StopWaitingForContent()
+    {
+        if (_contentReady is { } content)
+        {
+            content.LayoutUpdated -= OnContentReady;
+            _contentReady = null;
         }
     }
 

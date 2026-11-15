@@ -45,6 +45,9 @@ With an `AvonicHeader` just before the content in their panel, the icon comes ou
 | `ion-refresher-content` `refreshingSpinner` | `RefreshingSpinner`, a `SpinnerName?`; unset, `AvonicConfig.RefreshingSpinner`, else `AvonicConfig.Spinner`, else `Circular` |
 | config `refreshingIcon`, `refreshingSpinner` | `AvonicConfig.RefreshingIcon`, `AvonicConfig.RefreshingSpinner` |
 
+Not declared, as they belong to Ionic's legacy refresher, which isn't here: `pullMin`, `pullMax`, `pullFactor`, `closeDuration`,
+`snapbackDuration`, `pullingText`, `refreshingText`. `mode` isn't exposed (ADR 0001).
+
 ## Config
 
 Ionic's `refresher-content.js` reads three config keys in `componentWillLoad`, for a prop that's unset: `pullingIcon` is
@@ -67,11 +70,10 @@ AvonicConfig.Spinner = ConfigSpinner.None;           // with RefreshingSpinner n
 As Ionic's `connectedCallback`, a control in the content with the class `ion-content-scroll-host` (`AvonicContent.ScrollHostClass`),
 the first in the content's `Content` and then its `FixedContent`, is the scroll element, before the content's own scroller: the pull
 starts from it, and only when it's at its top. A host that is a `ScrollViewer` is the scroll element itself; otherwise the first
-`ScrollViewer` in it, such as a `ListBox`'s template has, as only a `ScrollViewer` scrolls here. It's looked for when the refresher
-is attached.
-
-Not declared, as they belong to Ionic's legacy refresher, which isn't here: `pullMin`, `pullMax`, `pullFactor`, `closeDuration`,
-`snapbackDuration`, `pullingText`, `refreshingText`. `mode` isn't exposed (ADR 0001).
+`ScrollViewer` in it, depth first, such as a `ListBox`'s template has, as only a `ScrollViewer` scrolls here: so put the class on the
+control that scrolls, as Ionic needs it on the element that scrolls. It's looked for when the refresher is attached; a host whose
+scroller isn't there yet (a `ListBox` not yet styled, with the fixed slot placed before the scroller) is looked at again after the
+content's next layout, as Ionic waits for the content to be ready, and with none then the error is logged and nothing pulls.
 
 ## Checklist
 

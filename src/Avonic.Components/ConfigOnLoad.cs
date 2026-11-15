@@ -32,8 +32,8 @@ internal sealed class ConfigOnLoad<T>
         _styleValue = styleValue;
     }
 
-    /// <summary>Whether <see cref="Load"/> has run.</summary>
-    public bool IsLoaded { get; private set; }
+    // whether Load has run
+    private bool _loaded;
 
     /// <summary>
     /// The config's value at style priority. Binds now, so call it from the constructor: of two values at one priority the later
@@ -52,17 +52,18 @@ internal sealed class ConfigOnLoad<T>
     /// <summary>
     /// The first time only: <paramref name="read"/>'s value, which it gives as Ionic's <c>config.get</c> would, with Ionic's
     /// fallback in it. A value with none (<see cref="Optional{T}.Empty"/>) gives nothing, for a fallback that is the prop's own
-    /// default. <paramref name="read"/> is called only when the value is needed, as Ionic reads the config only for a prop
-    /// that's <c>undefined</c>.
+    /// default. <see cref="IfUnset"/> calls <paramref name="read"/> only for a prop that isn't set, as Ionic reads the config only
+    /// for one that's <c>undefined</c>; <see cref="AtStylePriority"/> always does, as its value stays under whatever an app sets,
+    /// now or later.
     /// </summary>
     public void Load(Func<Optional<T>> read)
     {
-        if (IsLoaded)
+        if (_loaded)
         {
             return;
         }
 
-        IsLoaded = true;
+        _loaded = true;
         if (_styleValue is not null)
         {
             if (read() is { HasValue: true } value)

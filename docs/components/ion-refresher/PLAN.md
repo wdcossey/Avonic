@@ -74,7 +74,8 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
     `complete()`, all end with the one transition, each raising `ionPullEnd`. R5
 19. A control with `ion-content-scroll-host` in the content is the scroll element, before the content's own
     (`getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl)`): the gesture is on it, and `canStart`
-    reads its offset. The host itself if it's a `ScrollViewer`, else the first one in it. B24 (#155)
+    reads its offset. The host itself if it's a `ScrollViewer`, else the first one in it; one not there yet is looked for again
+    after the content's next layout (`componentOnReady`), then logged. B24 (#155)
 20. The config keys `refreshingIcon` and `refreshingSpinner` come before md's defaults and `spinner`, read once, when the content
     first loads; a key of `null` gives no spinner, and so not the native refresher. B25 (#155)
 
