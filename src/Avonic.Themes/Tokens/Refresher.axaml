@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation">
 
     <!-- ion-refresher has no CSS variables. md's native icon reads global ones with literal fallbacks, which Ionic's light
          theme doesn't set, so these are the literals Chromium shows: border: 1px solid var(ion-color-step-200,
@@ -11,7 +12,7 @@
     <!-- border-radius: 100%, of the icon's own size -->
     <x:String x:Key="Avonic.Refresher.Md.NativeIconBorderRadius">100%</x:String>
 
-    <!-- box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.1). Avalonia's blur isn't CSS's: 6 is 9.4 here, the ratio of 1.56 found for ion-reorder, which puts every pixel sampled below the icon within 3 levels of Chromium's (COMPARISON.md). -->
-    <BoxShadows x:Key="Avonic.Refresher.Md.NativeIconBoxShadow">0 1 9.4 0 #1A000000</BoxShadows>
+    <!-- box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.1), CSS's numbers, which CssShadow converts (docs/infra/box-shadow/README.md). -->
+    <a:CssShadow x:Key="Avonic.Refresher.Md.NativeIconBoxShadow">0px 1px 6px rgba(0, 0, 0, 0.1)</a:CssShadow>
 
 </ResourceDictionary>

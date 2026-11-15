@@ -83,7 +83,7 @@ over its own `Color`. A coloured header keeps its background. This is Ionic's `.
 | `ion-card-subtitle` `--color` | `Avonic.CardSubtitle.Color` | brush | Unset → `Avonic.TextColorStep450Brush` |
 | `--ion-card-background` | `Avonic.CardBackgroundBrush` | brush | Unset → `Avonic.ItemBackgroundBrush` |
 | `--ion-card-color` | `Avonic.CardColorBrush` | brush | Follows `Avonic.TextColorStep450` |
-| none: `box-shadow` | `Avonic.Card.BoxShadow` | `BoxShadows` | CSS's three layers. See [COMPARISON.md](COMPARISON.md) for how they draw above 1× |
+| none: `box-shadow` | `Avonic.Card.BoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | CSS's three layers. See [COMPARISON.md](COMPARISON.md) for how they draw above 1× |
 
 `Background` and `CornerRadius` are the card's own properties, and `Foreground` is what CSS calls `color`, so all can be
 set directly.

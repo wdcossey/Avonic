@@ -106,7 +106,7 @@ One per Ionic CSS variable, with md's defaults, in `Avonic.Themes/Tokens/Range.a
 | `--height` | `Avonic.Range.Height` | 42 |
 | `--knob-background` | `Avonic.Range.KnobBackground` | unset: the active bar's |
 | `--knob-border-radius` | `Avonic.Range.KnobBorderRadius` | `50%` |
-| `--knob-box-shadow` | `Avonic.Range.KnobBoxShadow` | none |
+| `--knob-box-shadow` | `Avonic.Range.KnobBoxShadow` | none; CSS through `{a:CssShadow}` |
 | `--knob-size` | `Avonic.Range.KnobSize` | 18; the handle is twice it |
 | `--pin-background` | `Avonic.Range.PinBackground` | primary |
 | `--pin-color` | `Avonic.Range.PinColor` | primary's contrast |

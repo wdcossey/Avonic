@@ -16,7 +16,12 @@ far it reaches below a box:
 
 So the spread and blur scale, and the offset doesn't. On `ion-card`, straight below a card, 1× gives 164 against Chromium's 170, 2×
 gives 205 against 167, and 3× gives 212 against 166. It only shows on a high-density screen, which is every phone. Avonic accepts it
-as best effort, and holds CSS's numbers. It hasn't been tried on a real device or a non-headless renderer.
+as best effort, and passes CSS's offsets through unchanged. It hasn't been tried on a real device or a non-headless renderer.
+
+#139 confirms it, at 2× on its own scenes, and finds it's the only difference left there: with the blur converted, an offset of 10
+and no blur is still 102 levels out at 2× (the whole 102 of black at 0.4, on the rows it misses), and doubling the offsets by hand
+puts md's 2 dp, 8 dp, fab, pressed fab and header shadows within 5 of Chromium away from the box's edge
+([box-shadow](box-shadow/README.md)).
 
 ## `c|Host ^` in a `ControlTheme` ignores `c|Host`
 
@@ -138,16 +143,18 @@ through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.co
 
 ## `BoxShadow`'s blur isn't CSS's
 
-**Measured on two shadows, and the cause not read.** CSS's `box-shadow` blur `B` is a Gaussian of sigma `B / 2`; Avalonia's, drawn by
-Skia, matches a Gaussian of sigma `0.288675 B + 0.5`, so the same number falls off in about two thirds of the distance. `ion-reorder`
-(#34, PR #136) measured `0 0 10px rgba(0, 0, 0, 0.4)` in Chromium beside Avonic: a blur of 10 fell off in 7 px instead of 10, and
-15.6, which is sigma 5 by that formula, matched within 1 of 255 at every pixel of the fall-off. `Avonic.ReorderGroup.SelectedBoxShadow`
-holds 15.6, and `ion-refresher` (#35, PR #142) took the same ratio, 1.56, for `Avonic.Refresher.Md.NativeIconBoxShadow` (6 → 9.4,
-within 3 levels of Chromium below the icon; the formula gives 8.66). Every other `BoxShadows` token still holds CSS's number, so each
-md elevation draws tighter than Ionic's
-([#139](https://github.com/wdcossey/Avonic/issues/139) measures more blurs and converts them). The offset not scaling (above) is
-another difference. To reproduce: a white 100 × 40 box with `box-shadow: 0 0 10px rgba(0,0,0,.4)` in Chromium, and a `Border` with
-`BoxShadow="0 0 10 0 #66000000"` rendered headlessly at 1×; read the column below each box from its edge until it's 255.
+**Measured on 55 shadows at 1× and 2×, headless Skia only, and the cause inferred from the fit, not read.** CSS's `box-shadow` blur
+`B` is a Gaussian of sigma `B / 2`. Avalonia hands Skia a blur `A` as sigma `A / (2√3) + 0.5`, and Skia's CPU rasteriser draws that
+as three box blurs `floor(sigma · 3√(2π)/4 + 0.5)` pixels wide, which is about 0.94 of the sigma asked for. So the same number falls
+off in about two thirds of CSS's distance: a blur of 10 in 7 px instead of 12, at worst 12 levels out, and 4 to 22 for blurs of 4 px
+and up. The best Avalonia blur for each CSS blur moves in steps of about 1.84, one box width, and `2√3 ((B + 0.05) / (3√(2π)/4) − 0.5)` lands
+in the best one from 1.5 to 25 px: within 1 to 3 of Chromium from 4 px up, 3 and 7 at 2.5 and 1.5. Avalonia draws no blur at all below 1.03, so a CSS blur of 1 px can't
+be matched at 1× (17 levels out at alpha 0.4, either way). Avonic converts every token through `{a:CssShadow}`
+([#139](https://github.com/wdcossey/Avonic/issues/139), [docs](box-shadow/README.md)). A blur meaning CSS's, or documented as
+Skia's radius, would remove the need. A GPU renderer, which draws a true Gaussian, wasn't measured. To reproduce: a white 100 × 40
+box with `box-shadow: 0 0 10px rgba(0,0,0,.4)` in Chromium, and a `Border` with `BoxShadow="0 0 10 0 #66000000"` rendered headlessly
+at 1×; read the column below each box from its edge until it's 255: Chromium 208, 215, 222, 229, 235, 240, 244, 248, 250, 252, 254,
+254, 255; Avalonia 210, 222, 232, 241, 247, 251, 253, 255.
 
 ## No public way to keep a `VirtualizingStackPanel`'s element realised
 

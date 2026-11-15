@@ -23,8 +23,10 @@ Hover, press at 300 ms and keyboard focus, for each fill, with Ionic on the left
 - **Block and full buttons in a column** are 8 apart where CSS collapses their margins to 4. There are three such pairs in the
   scene, so everything below them sits 12 px lower in the frame. Avalonia has no margin collapsing.
 - **Solid's shadow is lighter at 2x.** Reading the column under the first button, from its edge: Chromium 165, 179, 204, 221,
-  232, 239, 246, 251; Avalonia 205, 219, 229, 238, 246, 250, 253, 254. The values are the same, so this is how Avalonia draws
-  them. At 1x, Avalonia reads 164, 219, 235, 248, 253.
+  232, 239, 246, 251; Avalonia 209, 221, 228, 236, 243, 247, 249, 251 (205, 219, 229, 238, 246, 250, 253, 254 before #139). The
+  tokens hold Ionic's CSS and the blur is converted to CSS's ([box-shadow](../../infra/box-shadow/README.md)); what's left is the
+  offset, which Avalonia doesn't scale with the render scale. At 1x, on #139's own scene, Avalonia reads 164, 219, 234, 247, 253
+  against Chromium's 168, 212, 238, 249, 253.
 
 ## Found here, not by the tests
 

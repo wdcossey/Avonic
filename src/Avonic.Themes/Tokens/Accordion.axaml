@@ -4,7 +4,7 @@
     <!-- ion-accordion and ion-accordion-group have no CSS variables. These are md literals, kept here so they can be restyled. -->
 
     <!-- box-shadow on an inset group's accordions, from accordion-group.md.css -->
-    <BoxShadows x:Key="Avonic.AccordionGroup.Md.InsetBoxShadow">0 3 1 -2 #33000000, 0 2 2 0 #24000000, 0 1 5 0 #1F000000</BoxShadows>
+    <a:CssShadow x:Key="Avonic.AccordionGroup.Md.InsetBoxShadow">0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12)</a:CssShadow>
 
     <!-- :host(.accordion-animated) { transition: all 300ms cubic-bezier(0.25, 0.8, 0.5, 1) }: what changes on the host, inset -->
     <Transitions x:Key="Avonic.Accordion.Md.Transition">

@@ -64,8 +64,8 @@ At rest, and with the second item lifted 80 px, the siblings settled (the images
 - **A press on a handle is handled**, where Ionic stops only the click: a text box inside a handle with no group, or one waiting for
   `Complete()`, isn't focused by a tap. In an enabled group Ionic's drag prevents the focus too.
 - **A slot is an item's start or end**: in another host's named slot a handle isn't hidden.
-- **The shadow's blur is 15.6 in the token**, which is CSS's 10: Avalonia's Skia turns a blur into a Gaussian differently. Measured
-  equal.
+- **The shadow's token holds CSS's `0 0 10px`**, which `{a:CssShadow}` draws as Avalonia's 16.79 ([#139](../../infra/box-shadow/README.md));
+  the hand-made 15.6 before it was within 1 too. Re-measured on #139's frame: within 1 at every pixel of both fall-offs.
 - **The opacity fades each part of the item**, as Avalonia's `Opacity` does, not the item as one layer: the item's text shows a little
   of what's under its background. Over a white item, which is what's under it, the two are the same.
 - **No haptics**: Ionic's are Capacitor's.

@@ -45,10 +45,13 @@ fab's half opacity match.
   has to be above the header and footer (`ZIndex="11"`, over their 10) for the fab to be, and then the content's background covers
   the header's shadow and the footer's border too. Without it, the fab's outer half is under them. It's the app's choice; the
   sample and the reference page put the content on top. Forced by Avalonia.
-- **The shadows are lighter**, as `ion-button`'s are: the same `box-shadow` values, drawn by Avalonia. Reading the column under the
-  centre-start button from its edge, at 2×: Chromium 182, 189, 200, 210, 220, 228, 233, 237; Avalonia 191, 204, 217, 227, 235, 242,
-  246, 249. Beside it, from its right edge: Chromium 218, 228, 235, 240, 243, 246, 248, 250; Avalonia 214, 226, 236, 242, 246, 249,
-  251, 253.
+- **The shadows are lighter below and darker beside**, as `ion-button`'s are: the same `box-shadow` values, their blurs converted
+  to CSS's since #139 ([box-shadow](../../infra/box-shadow/README.md)), with offsets Avalonia doesn't scale at 2×. Reading the column
+  under the centre-start button from its edge, every second device pixel, at 2×: Chromium 182, 189, 200, 210, 220, 228, 233, 237;
+  Avalonia 195, 205, 214, 222, 228, 235, 239, 242 (191, 204, 217, 227, 235, 242, 246, 249 before #139). Beside it, from its right
+  edge: Chromium 218, 228, 235, 240, 243, 246, 248, 250; Avalonia 213, 222, 228, 235, 239, 243, 246, 247 (214, 226, 236, 242, 246,
+  249, 251, 253 before). The shadow sits higher than Chromium's, so the wider blur reaches further beside it. At 1×, on #139's own
+  scene, every pixel away from the button's edge is within 4.
 - **Several fabs in the one fixed slot need a panel.** `FixedContent` holds one child, which `AvonicContent` puts at its top start
   as `position: absolute` would, unless it's a `Panel`, which stands for the slot: it covers the content, and the fabs place
   themselves in it. (Until #131's roll-up the app had to set the panel's alignments to `Stretch`.)

@@ -54,8 +54,27 @@ And pressed, 160 ms in, where the ripple has the same shape and reach:
   | 3 | Avonic | 212 221 227 233 239 243 | 247 244 240 235 |
 
   So at 1× it matches, and on a phone's scale the bottom edge is lighter and the top a little darker. It's visible as a
-  softer line under each card. **Known gap,** accepted as best effort. The token holds CSS's own numbers, so it's right if
-  Avalonia changes. Faking it would need a converter that knows the render scale.
+  softer line under each card. **Known gap,** accepted as best effort. The token holds CSS's own numbers, and the offsets go to Avalonia as they are, so they're right if
+  Avalonia scales them. Faking it would need a converter that knows the render scale.
+
+  Since #139 the token goes through `{a:CssShadow}`, which converts each blur to CSS's
+  ([box-shadow](../../infra/box-shadow/README.md)). Re-measured on #139's own scene, a 200 × 90 box with a radius of 4 and the
+  card's shadow, both sides drawn the same way, from each edge outward:
+
+  | Scale | | Rows straight below the card | Rows straight above it |
+  |---|---|---|---|
+  | 1 | Chromium | 168 212 238 249 253 254 | 247 250 253 254 |
+  | 1 | Avonic, before | 164 219 235 248 253 255 | 247 251 253 255 |
+  | 1 | Avonic | 164 219 234 247 253 254 | 246 250 253 254 |
+  | 2 | Chromium | 165 179 204 221 232 239 | 246 248 250 252 |
+  | 2 | Avonic, before | 205 219 229 238 246 250 | 240 245 250 252 |
+  | 2 | Avonic | 209 221 228 236 243 247 | 239 243 247 249 |
+  | 3 | Chromium | 164 171 182 199 213 223 | 245 247 248 249 |
+  | 3 | Avonic, before | 212 221 227 233 239 243 | 235 240 244 247 |
+  | 3 | Avonic | 216 221 226 231 237 241 | 234 238 242 245 |
+
+  At 1× each row is within 7, the 1 px blur of the first layer, which Avalonia can't draw at 1×. At 2× and 3× the offset is still
+  the gap: with the wider blur the top is a little darker than before, by 1 to 4.
 - **Margins between headings** add up to 4 where CSS collapses them to 2. See the plan.
 
 ### Keyboard focus

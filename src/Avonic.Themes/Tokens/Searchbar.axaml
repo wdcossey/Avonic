@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-searchbar's variables, with their md values from searchbar.md.css. A CssUnset key falls back to something else in
@@ -10,7 +11,7 @@
     <!-- border-radius: 2px -->
     <CornerRadius x:Key="Avonic.Searchbar.BorderRadius">2</CornerRadius>
     <!-- box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12) -->
-    <BoxShadows x:Key="Avonic.Searchbar.BoxShadow">0 2 2 0 #24000000, 0 3 1 -2 #33000000, 0 1 5 0 #1F000000</BoxShadows>
+    <a:CssShadow x:Key="Avonic.Searchbar.BoxShadow">0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
     <!-- cancel-button-color: var(ion-color-step-900, var(ion-text-color-step-100, #1a1a1a)). A known Color's contrast beats it. -->
     <SolidColorBrush x:Key="Avonic.Searchbar.CancelButtonColor" Color="{DynamicResource Avonic.TextColorStep100}" />
     <!-- clear-button-color: initial, which makes color inherit: the host's colour, measured #262626 -->

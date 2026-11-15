@@ -105,7 +105,7 @@ also moves the hover colour. Any brush replaces it.
 | [x] | `--detail-icon-font-size` | `Avonic.Item.DetailIconFontSize` | `double`, in em | 1.25 |
 | [x] | `--detail-icon-opacity` | `Avonic.Item.DetailIconOpacity` | `double` | 0.25 |
 | [x] | `--inner-border-width` | `Avonic.Item.InnerBorderWidth` | `Thickness` | `0,0,0,1` |
-| [x] | `--inner-box-shadow` | `Avonic.Item.InnerBoxShadow` | `BoxShadows` | none |
+| [x] | `--inner-box-shadow` | `Avonic.Item.InnerBoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | none |
 | [x] | `--inner-padding-top` | `Avonic.Item.InnerPaddingTop` | `double` | 0 |
 | [x] | `--inner-padding-bottom` | `Avonic.Item.InnerPaddingBottom` | `double` | 0 |
 | [x] | `--inner-padding-start` | `Avonic.Item.InnerPaddingStart` | `double` | 0 |
