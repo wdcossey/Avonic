@@ -161,9 +161,16 @@ public static class CssBoxShadow
             }
         }
 
-        // Names and hsl(), as Avalonia reads them; not its other forms (#aarrggbb, hsv()), which CSS rejects.
-        var cssForm = open <= 0 || token[..open].Trim().ToLowerInvariant() is "hsl" or "hsla";
-        return cssForm && Color.TryParse(token, out var parsed) ? parsed : throw Error(css, $"the colour '{token}'");
+        // Names and hsl(), as Avalonia reads them; not its other forms (#aarrggbb, hsv()), which CSS rejects. Lower case, as CSS
+        // ignores it, with CSS's names Avalonia's list doesn't have.
+        var lower = token.ToLowerInvariant();
+        if (open <= 0)
+        {
+            lower = lower == "rebeccapurple" ? "#663399" : lower.Replace("grey", "gray", StringComparison.Ordinal);
+        }
+
+        var cssForm = open <= 0 || lower[..open].Trim() is "hsl" or "hsla";
+        return cssForm && Color.TryParse(lower, out var parsed) ? parsed : throw Error(css, $"the colour '{token}'");
     }
 
     private static Color? ParseHex(string hex)
@@ -212,7 +219,7 @@ public static class CssBoxShadow
                 return null;
             }
 
-            parts = slash[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            parts = slash[0].Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries); // any whitespace
             alpha = slash.Length == 2 ? slash[1] : null;
         }
 

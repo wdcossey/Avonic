@@ -15,9 +15,11 @@ The resource is the `BoxShadows`, not the extension. In code, `CssBoxShadow.Pars
 converts one blur. It reads `none`, or shadows between commas, each with two to four lengths (`px` or unitless), `inset`, and a colour
 before or after them: `rgb()`/`rgba()` (commas, or spaces and `/ alpha`, numbers or percentages), `#rgb`, `#rgba`, `#rrggbb`,
 `#rrggbbaa` (CSS's order, alpha last, where Avalonia's own `#aarrggbb` has it first), `transparent` (`rgba(0, 0, 0, 0)`, where
-Avalonia's `Transparent` is white), and names and `hsl()` as Avalonia reads them. A shadow with no colour, which CSS draws in
-`currentColor`, is refused: a `BoxShadow` can't follow the text colour. So are other units, a negative blur, and anything else CSS
-rejects.
+Avalonia's `Transparent` is white), and names (with CSS's `grey` spellings and `rebeccapurple`, which Avalonia's list lacks) and
+`hsl()` as Avalonia reads them, in any case. A shadow with no colour, which CSS draws in `currentColor`, is refused: a `BoxShadow`
+can't follow the text colour. So are other units, a negative blur, Avalonia-only colours such as `hsv()`, and the rest of what CSS
+rejects, but for one thing: a unitless length other than 0 is read as px, as #139 asked. So an Avalonia string pasted in, such as
+`0 2 4 -1 #33000000`, parses, with its colour read in CSS's order: rewrite it in CSS rather than renaming the element.
 
 Avalonia's own `BoxShadow="0 0 10 0 #66000000"` reads the blur as its own, about two thirds as wide as CSS's. Don't write one in a
 theme: write CSS through `CssShadow`.
@@ -105,7 +107,11 @@ out. What's left:
   header 3, `5px 8px 6px` 3). Not fixed here: the extension doesn't know the scale. On a phone, until it is, md's elevations sit
   higher than Ionic's, and the wider blur now reaches a little further above a card than before: rows above a card at 2×, from its
   edge, Chromium 246, 248, 250, 252; before 240, 245, 250, 252; now 239, 243, 247, 249. At 1×, Chromium 247, 250, 253, 254, now
-  246, 250, 253, 254.
+  246, 250, 253, 254. So at 2×, with the offset as it is, the conversion is a mixed result: across each whole frame, the mean
+  channel error falls for the pressed button (0.222 to 0.207), the fab (0.094 to 0.072), the pressed fab (0.173 to 0.166) and the
+  header (0.195 to 0.149), and rises for md's 2 dp, the card's, button's and toggle's (0.064 to 0.070); the worst single pixel
+  rises by 2 to 4 on all but the header (down 7) and the refresher (the same). The tokens convert anyway: the blur is right, and once the offset is scaled every one is
+  within 5.
 - **The smallest blurs at 1×.** Avalonia draws no blur below a blur of 1.03 (one box of 1 px), and a 2 px box above it. Chromium's
   1 px blur falls between: 238 in the one row outside, where no blur gives 255 and the 2 px box 221 then 247. Either is 17 out at
   alpha 0.4, and md's `0 3px 1px -2px` at alpha 0.2 is 6 out (the 7 in md 2 dp). The formula gives 0.20, no blur, which is the closer

@@ -45,7 +45,7 @@ public class CssShadowTests
         // 2 sqrt(3) ((B + 0.05) / (3 sqrt(2 pi) / 4) - 0.5)
         Assert.Equal(1.8426 * 10 - 1.6399, CssBoxShadow.Blur(10), 3);
         Assert.Equal(1.8426 * 1 - 1.6399, CssBoxShadow.Blur(1), 3);
-        // Below about 0.89 px it would go negative: none, as Avalonia draws no blur for anything under 1.04 at 1x anyway
+        // Below about 0.89 px it would go negative: none, as Avalonia draws no blur for anything under 1.03 at 1x anyway
         Assert.Equal(0, CssBoxShadow.Blur(0));
         Assert.Equal(0, CssBoxShadow.Blur(0.5));
         Assert.Throws<ArgumentOutOfRangeException>(() => CssBoxShadow.Blur(-1));
@@ -67,7 +67,10 @@ public class CssShadowTests
 
     [AvaloniaTheory]
     // Chromium's column below the box, from its edge, and the most any pixel of the frame was out when measured. Avalonia's own
-    // reading of the same numbers was out by 9 to 20 on each.
+    // reading of the same numbers was out by 9 to 20 on each from 4 px up. The half-pixel blurs draw in the wider window; the
+    // narrower is 27 out at 1.5 px.
+    [InlineData("0 0 1.5px rgba(0, 0, 0, 0.4)", 7, new[] { 228, 253, 255 })]
+    [InlineData("0 0 2.5px rgba(0, 0, 0, 0.4)", 3, new[] { 219, 243, 253, 255 })]
     [InlineData("0 0 4px rgba(0, 0, 0, 0.4)", 2, new[] { 214, 231, 244, 251, 254, 255 })]
     [InlineData("0 0 10px rgba(0, 0, 0, 0.4)", 1, new[] { 208, 215, 222, 229, 235, 240, 244, 248, 250, 252, 254, 254, 255 })]
     [InlineData("0 0 20px rgba(0, 0, 0, 0.4)", 1, new[] { 206, 210, 214, 217, 221, 224, 228, 231, 234, 237, 239, 242, 244, 246, 247, 248, 250, 251, 252, 252, 253, 254, 254, 254, 255 })]
@@ -145,6 +148,13 @@ public class CssShadowTests
     [InlineData("transparent", 0, 0, 0, 0)]
     [InlineData("red", 0xFF, 255, 0, 0)]
     [InlineData("DarkSlateGray", 0xFF, 0x2F, 0x4F, 0x4F)]
+    // CSS's names that Avalonia's list doesn't have, and case, which CSS ignores
+    [InlineData("grey", 0xFF, 0x80, 0x80, 0x80)]
+    [InlineData("DarkSlateGrey", 0xFF, 0x2F, 0x4F, 0x4F)]
+    [InlineData("rebeccapurple", 0xFF, 0x66, 0x33, 0x99)]
+    [InlineData("HSL(0, 100%, 50%)", 0xFF, 255, 0, 0)]
+    [InlineData("RGBA(0, 0, 0, 0.4)", 0x66, 0, 0, 0)]
+    [InlineData("rgb(0\t0\t0 / 40%)", 0x66, 0, 0, 0)]
     [InlineData("hsl(0, 100%, 50%)", 0xFF, 255, 0, 0)]
     public void Colours_Read_As_Css_Does(string color, byte a, byte r, byte g, byte b)
     {

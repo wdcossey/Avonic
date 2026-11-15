@@ -148,7 +148,7 @@ through `SplineEasing`, where Chromium computes 5.04952 ([#92](https://github.co
 as three box blurs `floor(sigma · 3√(2π)/4 + 0.5)` pixels wide, which is about 0.94 of the sigma asked for. So the same number falls
 off in about two thirds of CSS's distance: a blur of 10 in 7 px instead of 12, at worst 12 levels out, and 4 to 22 for blurs of 4 px
 and up. The best Avalonia blur for each CSS blur moves in steps of about 1.84, one box width, and `2√3 ((B + 0.05) / (3√(2π)/4) − 0.5)` lands
-in the right one from 1 to 25 px, within 1 to 3 of Chromium. Avalonia draws no blur at all below 1.03, so a CSS blur of 1 px can't
+in the best one from 1.5 to 25 px: within 1 to 3 of Chromium from 4 px up, 3 and 7 at 2.5 and 1.5. Avalonia draws no blur at all below 1.03, so a CSS blur of 1 px can't
 be matched at 1× (17 levels out at alpha 0.4, either way). Avonic converts every token through `{a:CssShadow}`
 ([#139](https://github.com/wdcossey/Avonic/issues/139), [docs](box-shadow/README.md)). A blur meaning CSS's, or documented as
 Skia's radius, would remove the need. A GPU renderer, which draws a true Gaussian, wasn't measured. To reproduce: a white 100 × 40
