@@ -121,6 +121,28 @@ public static class AvonicConfig
     /// </remarks>
     public static bool ContentScrollBars { get; set; }
 
+    // ── ion-app (#65): read by AvonicApp when it's attached ─────────────────────────────────────
+
+    /// <summary>
+    /// Ionic's <c>hardwareBackButton</c> config: whether Avonic handles a back request (<see cref="TopLevel.BackRequested"/>):
+    /// <see cref="AvonicApp"/> raises <see cref="Controls.HardwareBackButton.IonBackButtonEvent"/> for it, and without one an overlay still
+    /// dismisses on it. Default <see langword="true"/>, as in a Capacitor or Cordova app, which an Avalonia app is like: Ionic's is
+    /// false only in a browser.
+    /// </summary>
+    /// <remarks>
+    /// Read by an <see cref="AvonicApp"/> when it's attached, as Ionic reads it when <c>ion-app</c> loads, and by an overlay at each
+    /// back request when there's no app. False leaves the request to the app and the platform, where Ionic's
+    /// <c>blockHardwareBackButton</c> takes it and does nothing: here that would also hide it from the app's own handlers.
+    /// </remarks>
+    public static bool HardwareBackButton { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>statusTap</c> config: whether <see cref="Controls.StatusTap.StatusTapEvent"/> scrolls the content under the
+    /// middle of the window to its top. Default <see langword="true"/>, as in a Capacitor or Cordova app. Read by an
+    /// <see cref="AvonicApp"/> when it's attached.
+    /// </summary>
+    public static bool StatusTap { get; set; } = true;
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>
