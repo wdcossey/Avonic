@@ -92,16 +92,17 @@ With no pull, only the refreshing icon shows below the header. The pulling one s
     whose `onFinish` never comes, and so neither does `gesture.enable(true)`: nothing pulls again, ever. Here the gesture comes back
     on as `IsEnabled` says, as the end of any pull does here (R3), so a refresher disabled meanwhile stays off: at the let go, when
     the reset has destroyed the pull's animation already, and at the reset, which destroys a play back under way (not measured in
-    Chromium, the same `destroy()`). Nothing else changes: the reset has already made it inactive and
-    raised `ionPullEnd` `cancel`, so nothing more is raised. `onMove` goes on setting the progress, so one moved on past 0.4
+    Chromium, the same `destroy()`). Nothing else changes: the reset has already made it inactive and raised `ionPullEnd`
+    `cancel`, so nothing more is raised. `onMove` goes on setting the progress, so one moved on past 0.4
     refreshes when let go (D, C10), as in Ionic.
   - **C9: a refresh begun during cancelling.** Measured in Chromium (H): a pull let go past the threshold before the cancel's end
     refreshes (`ionRefresh` 416 ms after `cancel()`), and the reset then ends that refresh as cancelled (`ionPullEnd` `cancel` at
     733) while the app is still loading. Let go just before the reset, while its 125 ms snap back runs, the same `destroy()` ends
     the snap back, so no refresh comes and the gesture stays off (read from the code, not measured). Here a reset does nothing once a
     pull has been let go past the threshold since `cancel()` was called: the refresh goes on until the app's `complete()`, whose own
-    reset ends it with `ionPullEnd` `complete`. A pull let go before the call is the refresh the cancel ends, as in Ionic. No `cancel` comes for the refresh the cancel ended, as
-    the refresher never went back to inactive in between; a cancel with no refresh since still ends as before (B8, C1).
+    reset ends it with `ionPullEnd` `complete`. A pull let go before the call is the refresh the cancel ends, as in Ionic. No
+    `cancel` comes for the refresh the cancel ended, as the refresher never went back to inactive in between; a cancel with no
+    refresh since still ends as before (B8, C1).
 
 - **An upward drag from the top.** In Chromium Ionic's passive gesture captures it and the browser scrolls anyway; the first move,
   with `velocityY < 0`, cancels the pull. Avalonia gives a pointer to one owner, so a captured gesture would stop the scroll: the
