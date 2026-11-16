@@ -87,7 +87,7 @@ gesture on the content's scroll element, or a scroll host's in it (priority 31, 
 it captures starts the pull, and each later one steps md's pulling animation to `deltaY / 360`; let go at 0.4 or less and it plays
 back over progress × 500 ms and cancels; past it, the icon snaps back in 125 ms and the refresher refreshes, clearing the focus;
 `Complete()` and `Cancel()` close it two frames later, after the icon's 200 ms transition, or Ionic's 700 ms fallback. Cancelling
-shows both icons until then, as Ionic's does, the pulling one as wide as the content ([#167](COMPARISON.md#after-a-cancel-167)).
+during a refresh shows both icons until then, as Ionic's does, the pulling one as wide as the content ([#167](COMPARISON.md#after-a-cancel-167)).
 
 The refresher's state shows as pseudoclasses on both controls: `:pulling`, `:ready`, `:refreshing`, `:cancelling`, `:completing`,
 `:native`, and `:active` on the refresher.
@@ -129,5 +129,5 @@ None.
   `Content` wins, where Ionic takes the first in the markup.
 - `AvonicConfig.RefreshingIcon` takes only spinners, as `PullingIcon` does: Ionic's can name any icon, for its legacy refresher.
 - In cancelling, the pulling icon is a pill where Chromium draws an ellipse, and a pull that a cancel's end overtakes leaves the
-  refresher off, as Ionic's bug does ([#167](COMPARISON.md#deliberate-differences)).
+  refresher off, and a refresh begun while cancelling ends as cancelled, as Ionic's do ([#167](COMPARISON.md#deliberate-differences)).
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

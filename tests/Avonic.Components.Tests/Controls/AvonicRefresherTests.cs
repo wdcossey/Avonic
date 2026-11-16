@@ -1173,7 +1173,7 @@ public class AvonicRefresherTests
         }
     }
 
-    // ── C1–C7: after a cancel (#167) ───────────────────────────────────────────────────────────
+    // ── C1–C9: after a cancel (#167) ───────────────────────────────────────────────────────────
     // Measured in Chromium with docs/components/ion-refresher/ref/cancel.js.txt, into ref/measure-cancel.json.
 
     private static Rect Box(Page page, string part) => BoundsInWindow(page.Part<Control>(part), page.Scene.Window);
@@ -1221,10 +1221,10 @@ public class AvonicRefresherTests
         using var page = Refreshing();
         page.Refresher.Cancel();
         page.Wait(32 + 60);
-        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":cancelling"));
+        Assert.Equal(RefresherState.Cancelling, page.Refresher.State);
 
         page.Drag(8 + 180).Wait(16);
-        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":pulling"));
+        Assert.Equal(RefresherState.Pulling, page.Refresher.State);
         var expected = RefresherPullFrame.At(page.Refresher.GetProgress(), RefresherAnimationType.Translate, 60);
         Assert.Equal(expected.IconTransform, page.Part<Border>("PART_PullingIcon").RenderTransform!.Value);
         Assert.Equal(1, IconsSeen(page));
@@ -1241,7 +1241,7 @@ public class AvonicRefresherTests
         page.Drag(8 + 180).Wait(16);
         page.Wait(700);
         Assert.Equal(0, IconsSeen(page));
-        Assert.False(((IPseudoClasses)page.Refresher.Classes).Contains(":active"));
+        Assert.Equal(RefresherState.Inactive, page.Refresher.State);
 
         page.Lift().Wait(600);
         Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd"));
@@ -1355,4 +1355,28 @@ public class AvonicRefresherTests
         Assert.Equal(icon.X, container.X);
         Assert.True(container.Width < icon.Width, $"{container.Width} of {icon.Width}");
     }
+
+    [AvaloniaFact]
+    public void C9_As_Ionics_A_Refresh_Begun_While_Cancelling_Is_Ended_By_The_Cancel() => InstalledTheme.Run(_ =>
+    {
+        // Measured in Chromium (ref/measure-cancel.json, H): cancel() at 2483, a pull let go at 2769, ionRefresh at 2914, then the
+        // cancel's reset at 3212 ends it as cancelled while the app is still refreshing, and a pull after refreshes again
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        var cancelled = page.At;
+        page.Wait(32 + 60);
+        page.Drag(8 + 200, step: 50).Wait(16).Lift().Wait(160);
+        Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
+        Assert.Equal(RefresherState.Refreshing, page.Refresher.State);
+        Assert.Equal(1, IconsSeen(page));
+
+        page.Wait(cancelled + 32 + 700 - page.At);
+        var end = Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd"));
+        Assert.Equal("ionPullEnd:Cancel", end.Name);
+        Assert.Equal(RefresherState.Inactive, page.Refresher.State);
+        Assert.Equal(0, IconsSeen(page));
+
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        Assert.Equal(3, page.Names.Count(n => n == "ionRefresh"));
+    });
 }

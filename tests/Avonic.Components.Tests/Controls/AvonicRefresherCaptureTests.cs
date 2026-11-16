@@ -112,20 +112,7 @@ public class AvonicRefresherCaptureTests
 
         // It draws below the refresher's 60 px, where Avalonia would clip a templated control: the primary circle shows
         var frame = page.Scene.Window.CaptureRenderedFrame()!;
-        var spinner = page.Box("PART_PullingSpinner");
-        var blue = 0;
-        for (var y = (int)(spinner.Y * 2); y < (int)(spinner.Bottom * 2); y++)
-        {
-            for (var x = (int)(spinner.X * 2); x < (int)(spinner.Right * 2); x++)
-            {
-                var pixel = Frames.PixelAt(frame, x, y);
-                if (pixel is { B: > 200, R: < 60 })
-                {
-                    blue++;
-                }
-            }
-        }
-
+        var blue = Primary(frame, page.Box("PART_PullingSpinner"));
         Assert.True(blue > 100, $"{blue} primary pixels");
 
         // Chromium's refreshing frame: the refreshing icon at (174, 65)
@@ -135,14 +122,15 @@ public class AvonicRefresherCaptureTests
         Save(page.Scene, "refreshing");
     });
 
-
-    /// <summary>The primary-coloured pixels, the spinners' and the arrow's, in <paramref name="box"/> of a frame at a scale of 2.</summary>
+    /// <summary>The primary-coloured pixels, the spinners' and the arrow's, in <paramref name="box"/> of a frame at a scale of 2, within the frame.</summary>
     private static int Primary(Avalonia.Media.Imaging.WriteableBitmap frame, Rect box)
     {
         var count = 0;
-        for (var y = Math.Max(0, (int)(box.Y * 2)); y < (int)(box.Bottom * 2); y++)
+        var bottom = Math.Min(frame.PixelSize.Height, (int)(box.Bottom * 2));
+        var right = Math.Min(frame.PixelSize.Width, (int)(box.Right * 2));
+        for (var y = Math.Max(0, (int)(box.Y * 2)); y < bottom; y++)
         {
-            for (var x = Math.Max(0, (int)(box.X * 2)); x < (int)(box.Right * 2); x++)
+            for (var x = Math.Max(0, (int)(box.X * 2)); x < right; x++)
             {
                 if (Frames.PixelAt(frame, x, y) is { B: > 200, G: < 120, R: < 60 })
                 {

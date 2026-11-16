@@ -27,14 +27,22 @@ public class RefresherColumn : Panel
         return new Size(width, height);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Each child at the column's width, or its own if that's wider, as a <see cref="StackPanel"/> gives it, so that a child too
+    /// wide for the column keeps its size.
+    /// </summary>
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var height = Children.Sum(control => control.DesiredSize.Height);
+        var height = 0.0;
+        foreach (var control in Children)
+        {
+            height += control.DesiredSize.Height;
+        }
+
         var y = (finalSize.Height - height) / 2;
         foreach (var control in Children)
         {
-            control.Arrange(new Rect(0, y, finalSize.Width, control.DesiredSize.Height));
+            control.Arrange(new Rect(0, y, Math.Max(finalSize.Width, control.DesiredSize.Width), control.DesiredSize.Height));
             y += control.DesiredSize.Height;
         }
 
