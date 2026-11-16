@@ -1,0 +1,253 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.Showcase.InboxScreen">
+
+    <!-- An inbox: a header with a searchbar under its toolbar, and a list of messages. Swipe a message right to archive it,
+         or left for more. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
+    <Grid RowDefinitions="Auto,*">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="menu" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="Inbox" />
+                <c:AvonicToolbar.EndContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="create-outline" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.EndContent>
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicSearchbar Placeholder="Search mail" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <c:AvonicList>
+                <c:AvonicItemSliding>
+                    <c:AvonicItemOptions Side="Start">
+                        <c:AvonicItemOption Color="success" Content="Archive">
+                            <c:AvonicItemOption.TopContent>
+                                <c:AvonicIcon IconName="archive" />
+                            </c:AvonicItemOption.TopContent>
+                        </c:AvonicItemOption>
+                    </c:AvonicItemOptions>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar>
+                                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/portrait.png" Alt="Sarah Chen" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Sarah Chen" FontWeight="Medium" />
+                                <TextBlock Classes="h3" Text="Weekend hike?" />
+                                <TextBlock Classes="p" Text="Are we still on for Saturday? I found a trail with a view of the whole valley." />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <StackPanel Spacing="6">
+                                <c:AvonicNote Content="9:41" />
+                                <c:AvonicBadge Content="2" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.TertiaryBrush}">
+                                <TextBlock Text="PT" Foreground="{DynamicResource Avonic.Color.TertiaryContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Product Team" FontWeight="Medium" />
+                                <TextBlock Classes="h3" Text="Release notes 2.4" />
+                                <TextBlock Classes="p" Text="The new build is out. Here's what changed since last week, and what comes next." />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <StackPanel Spacing="6">
+                                <c:AvonicNote Content="8:15" />
+                                <c:AvonicBadge Content="1" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.SuccessBrush}">
+                                <TextBlock Text="MW" Foreground="{DynamicResource Avonic.Color.SuccessContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Marcus Webb" />
+                                <TextBlock Classes="h3" Text="Lunch tomorrow" />
+                                <TextBlock Classes="p" Text="There's a new ramen place around the corner. Want to try it?" />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Yesterday" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.WarningBrush}">
+                                <TextBlock Text="PN" Foreground="{DynamicResource Avonic.Color.WarningContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Priya Nair" />
+                                <TextBlock Classes="h3" Text="Photos from the trip" />
+                                <TextBlock Classes="p" Text="I've put them in the shared album. The sunset ones came out great!" />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Yesterday" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.DangerBrush}">
+                                <TextBlock Text="JL" Foreground="{DynamicResource Avonic.Color.DangerContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Jordan Lee" />
+                                <TextBlock Classes="h3" Text="Re: Design review" />
+                                <TextBlock Classes="p" Text="Looks good to me. Let's ship it on Thursday." />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Mon" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.SecondaryBrush}">
+                                <TextBlock Text="BK" Foreground="{DynamicResource Avonic.Color.SecondaryContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Book Club" />
+                                <TextBlock Classes="h3" Text="November's pick" />
+                                <TextBlock Classes="p" Text="We're reading The Left Hand of Darkness. Meet at the library at 7." />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Sun" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.PrimaryBrush}">
+                                <TextBlock Text="AM" Foreground="{DynamicResource Avonic.Color.PrimaryContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Alex Morgan" />
+                                <TextBlock Classes="h3" Text="Flat white?" />
+                                <TextBlock Classes="p" Text="Coffee at the usual place before the meeting?" />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Sat" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+
+                <c:AvonicItemSliding>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.MediumBrush}">
+                                <TextBlock Text="RC" Foreground="{DynamicResource Avonic.Color.MediumContrastBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Classes="ion-text-nowrap">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Running Club" />
+                                <TextBlock Classes="h3" Text="Sunday's route" />
+                                <TextBlock Classes="p" Text="10 km along the river, starting at the bridge at 8 sharp." />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Fri" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItemOptions>
+                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
+                    </c:AvonicItemOptions>
+                </c:AvonicItemSliding>
+            </c:AvonicList>
+        </c:AvonicContent>
+    </Grid>
+
+</UserControl>

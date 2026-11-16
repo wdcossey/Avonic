@@ -122,6 +122,17 @@ control's PR leaves them alone and parallel PRs can't conflict on them. When eve
 priority tier is closed, or sooner if the human asks, one session raises a single PR that adds the
 finished rows to both tables. Only one roll-up PR is open at a time.
 
+The same PR brings the pictures in `README.md` and `PREVIEW.md` up to date, as the human asked (#196):
+
+1. Regenerate them with the command in [`PREVIEW.md`](../PREVIEW.md#regenerating), and look at every one: clipped text, empty
+   areas, broken pictures, half-finished animations, wrong colours in dark. Fix the page, not the capture.
+2. Add each new control's sample page to `PREVIEW.md`'s gallery, linked to its `docs/components/<ion-tag>/README.md`. The
+   picture of a new page is captured by itself; only the table is by hand.
+3. Use the new controls in the showcase (`samples/Avonic.Sample/Pages/Showcase/`) where an app would: in a screen that has a
+   place for them, or a screen of their own, added to `ShowcasePage.Screens` and to `PREVIEW.md`. Swap a screen in
+   `README.md`'s strip if a new one shows more.
+4. Update the counts in `README.md`'s status.
+
 The tables lag between roll-ups, so don't read a missing row as "not built". The current record is
 the status lines, which `git grep -l "^Status: done" docs/components docs/infra` lists, and blockers
 are checked against closed issues.

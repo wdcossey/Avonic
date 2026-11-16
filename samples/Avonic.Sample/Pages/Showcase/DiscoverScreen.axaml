@@ -1,0 +1,137 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.Showcase.DiscoverScreen">
+
+    <!-- A feed of cards: chips to filter it, a card with a picture, a header and actions, and a card with its author in an
+         item. The fab sits in the content's fixed slot, so it stays put while the cards scroll. -->
+    <Grid RowDefinitions="Auto,*">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Discover" />
+                <c:AvonicToolbar.EndContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="search" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                        <c:AvonicButton>
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="notifications-outline" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.EndContent>
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="6,8,6,0">
+                    <c:AvonicChip Color="primary">
+                        <c:AvonicIcon IconName="sparkles" />
+                        <c:AvonicLabel Content="For you" />
+                    </c:AvonicChip>
+                    <c:AvonicChip>
+                        <c:AvonicIcon IconName="leaf" />
+                        <c:AvonicLabel Content="Nature" />
+                    </c:AvonicChip>
+                    <c:AvonicChip>
+                        <c:AvonicIcon IconName="airplane" />
+                        <c:AvonicLabel Content="Travel" />
+                    </c:AvonicChip>
+                </StackPanel>
+
+                <!-- CSS collapses the margins between cards to 10, and Avalonia adds them up to 20. -->
+                <StackPanel Spacing="-10">
+                    <c:AvonicCard>
+                        <StackPanel>
+                            <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/hills.png" Alt="Hills at dusk" />
+                            <c:AvonicCardHeader>
+                                <StackPanel>
+                                    <c:AvonicCardSubtitle Content="Trail of the week" />
+                                    <c:AvonicCardTitle Content="Sunset Ridge" />
+                                </StackPanel>
+                            </c:AvonicCardHeader>
+                            <c:AvonicCardContent Content="An easy 6 km loop through rolling hills, with the best view in the valley just as the sun goes down." />
+                            <StackPanel Orientation="Horizontal" Margin="8,0,8,8">
+                                <c:AvonicButton Fill="Clear" Content="Save">
+                                    <c:AvonicButton.StartContent>
+                                        <c:AvonicIcon IconName="bookmark-outline" />
+                                    </c:AvonicButton.StartContent>
+                                </c:AvonicButton>
+                                <c:AvonicButton Fill="Clear" Content="Share">
+                                    <c:AvonicButton.StartContent>
+                                        <c:AvonicIcon IconName="share-social-outline" />
+                                    </c:AvonicButton.StartContent>
+                                </c:AvonicButton>
+                            </StackPanel>
+                        </StackPanel>
+                    </c:AvonicCard>
+
+                    <c:AvonicCard>
+                        <StackPanel>
+                            <c:AvonicItem Lines="None">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicAvatar>
+                                        <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/portrait.png" Alt="Sarah Chen" />
+                                    </c:AvonicAvatar>
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel>
+                                    <StackPanel>
+                                        <TextBlock Classes="h2" Text="Sarah Chen" />
+                                        <TextBlock Classes="p" Text="2 hours ago" />
+                                    </StackPanel>
+                                </c:AvonicLabel>
+                                <c:AvonicItem.EndContent>
+                                    <c:AvonicButton Fill="Clear" Color="medium">
+                                        <c:AvonicButton.IconOnlyContent>
+                                            <c:AvonicIcon IconName="ellipsis-vertical" />
+                                        </c:AvonicButton.IconOnlyContent>
+                                    </c:AvonicButton>
+                                </c:AvonicItem.EndContent>
+                            </c:AvonicItem>
+                            <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/sea.png" Alt="The sea" />
+                            <c:AvonicCardContent Content="Found the quietest beach on the coast. No one else for miles, and the water was perfect." />
+                            <StackPanel Orientation="Horizontal" Margin="8,0,8,8">
+                                <c:AvonicButton Fill="Clear" Color="danger" Content="128">
+                                    <c:AvonicButton.StartContent>
+                                        <c:AvonicIcon IconName="heart" />
+                                    </c:AvonicButton.StartContent>
+                                </c:AvonicButton>
+                                <c:AvonicButton Fill="Clear" Color="medium" Content="24">
+                                    <c:AvonicButton.StartContent>
+                                        <c:AvonicIcon IconName="chatbubble-outline" />
+                                    </c:AvonicButton.StartContent>
+                                </c:AvonicButton>
+                            </StackPanel>
+                        </StackPanel>
+                    </c:AvonicCard>
+
+                    <c:AvonicCard>
+                        <StackPanel>
+                            <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/mountains.png" Alt="Mountains" />
+                            <c:AvonicCardHeader>
+                                <StackPanel>
+                                    <c:AvonicCardSubtitle Content="Weekend trip" />
+                                    <c:AvonicCardTitle Content="High Peaks" />
+                                </StackPanel>
+                            </c:AvonicCardHeader>
+                            <c:AvonicCardContent Content="Three days, two huts and one summit. Pack for every kind of weather." />
+                        </StackPanel>
+                    </c:AvonicCard>
+                </StackPanel>
+            </StackPanel>
+
+            <c:AvonicContent.FixedContent>
+                <c:AvonicFab Horizontal="End" Vertical="Bottom">
+                    <c:AvonicFabButton>
+                        <c:AvonicIcon IconName="add" />
+                    </c:AvonicFabButton>
+                </c:AvonicFab>
+            </c:AvonicContent.FixedContent>
+        </c:AvonicContent>
+    </Grid>
+
+</UserControl>

@@ -3,9 +3,25 @@
 A faithful recreation of [Ionic Framework](https://ionicframework.com/)'s components for
 [AvaloniaUI](https://avaloniaui.net/) — mobile and tablet first, desktop supported.
 
-> **Status: v2 bootstrap.** No components yet. v1 was reviewed and discarded; see
-> [`docs/LESSONS_LEARNED.md`](docs/LESSONS_LEARNED.md). Components are added one at a time via
-> [`docs/PROCESS.md`](docs/PROCESS.md); the order is in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+<table>
+  <tr>
+    <td><img src="docs/preview/showcase-inbox-light.png" width="190" alt="An inbox: a searchbar, messages with avatars, notes and badges, one swiped open" /></td>
+    <td><img src="docs/preview/showcase-discover-dark.png" width="190" alt="A feed of cards with pictures, chips and a fab, in dark" /></td>
+    <td><img src="docs/preview/showcase-profile-light.png" width="190" alt="A form: a segment, inputs, a textarea, radios, a checkbox and a button" /></td>
+    <td><img src="docs/preview/showcase-settings-dark.png" width="190" alt="Settings: toggles, a range, notes and a progress bar, in dark" /></td>
+  </tr>
+</table>
+
+Built only from Avonic controls, rendered by Avalonia, in light and Ionic's dark palette. More in **[PREVIEW.md](PREVIEW.md)**:
+every screen in both, and a page for each control.
+
+> **Status: in development, with no release yet.** 49 of Ionic's components and families are done, 72 of its elements in all:
+> items and lists, buttons, cards, toolbars, the grid, form controls from checkbox to input and searchbar, segment, tabs, fab,
+> sliding items, accordion, reorder, refresher, infinite scroll and picker. Each went through every step of
+> [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
+> rolled up at the end of each tier, so the newest may be missing; the `Status:` line of each `docs/components/<tag>/README.md`
+> is current. The overlays (toast, alert, modal, popover, menu and the rest), select and datetime are next, in
+> [`docs/ROADMAP.md`](docs/ROADMAP.md). v1 was reviewed and discarded; see [`docs/LESSONS_LEARNED.md`](docs/LESSONS_LEARNED.md).
 
 ## What "faithful" means here
 
@@ -24,7 +40,7 @@ A faithful recreation of [Ionic Framework](https://ionicframework.com/)'s compon
 | `Avonic.Components` | Controls only, no visual opinion — bring your own theme |
 | `Avonic.Themes` | The md-mode theme and resource keys |
 
-Targets .NET 8, Avalonia 12.
+Targets .NET 8, Avalonia 12. None is on NuGet yet: until the first release, reference the projects from a clone.
 
 ## Building
 

@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             xmlns:s="using:Avonic.Sample.Pages.Showcase"
+             x:Class="Avonic.Sample.Pages.ShowcasePage">
+
+    <!-- A small app made only of Avonic controls: four screens behind a tab bar, as an Ionic app's tabs starter is. Each
+         screen is a page of its own, with a header, a toolbar and a content, in Showcase/. The README's and PREVIEW.md's
+         pictures are these screens, captured by PreviewCaptureTests. -->
+    <c:AvonicTabs Name="Tabs">
+        <Panel>
+            <c:AvonicTab Tab="inbox">
+                <s:InboxScreen />
+            </c:AvonicTab>
+            <c:AvonicTab Tab="discover">
+                <s:DiscoverScreen />
+            </c:AvonicTab>
+            <c:AvonicTab Tab="profile">
+                <s:ProfileScreen />
+            </c:AvonicTab>
+            <c:AvonicTab Tab="settings">
+                <s:SettingsScreen />
+            </c:AvonicTab>
+        </Panel>
+        <c:AvonicTabs.BottomContent>
+            <c:AvonicTabBar>
+                <c:AvonicTabButton Tab="inbox">
+                    <c:AvonicIcon IconName="mail" />
+                    <c:AvonicLabel Content="Inbox" />
+                    <c:AvonicBadge Content="3" />
+                </c:AvonicTabButton>
+                <c:AvonicTabButton Tab="discover">
+                    <c:AvonicIcon IconName="compass" />
+                    <c:AvonicLabel Content="Discover" />
+                </c:AvonicTabButton>
+                <c:AvonicTabButton Tab="profile">
+                    <c:AvonicIcon IconName="person-circle" />
+                    <c:AvonicLabel Content="Profile" />
+                </c:AvonicTabButton>
+                <c:AvonicTabButton Tab="settings">
+                    <c:AvonicIcon IconName="settings" />
+                    <c:AvonicLabel Content="Settings" />
+                </c:AvonicTabButton>
+            </c:AvonicTabBar>
+        </c:AvonicTabs.BottomContent>
+    </c:AvonicTabs>
+
+</UserControl>
