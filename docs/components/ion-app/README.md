@@ -1,7 +1,7 @@
 # ion-app
 
 `AvonicApp`, Ionic's `ion-app`: the root of an app. It starts what a native app needs from Ionic for the `TopLevel` it's in: the
-hardware back button, the keyboard's events and the safe area, and its theme gives what's in it a page's text. Plan:
+hardware back button, the keyboard's events, the input shims and the safe area, and its theme gives what's in it a page's text. Plan:
 [PLAN.md](PLAN.md); comparison: [COMPARISON.md](COMPARISON.md).
 
 ```xml
@@ -61,6 +61,22 @@ topLevel.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) =>
 Ionic's `ionKeyboardDidShow` and `ionKeyboardDidHide`: `KeyboardAssist.IonKeyboardDidShowEvent`, with `KeyboardHeight`, and
 `IonKeyboardDidHideEvent`, on the `TopLevel`, each time the on-screen keyboard has opened or closed. They come from
 `TopLevel.InputPane`, once its animation has finished. A desktop has no pane, and nothing comes.
+
+## The input shims
+
+Ionic's scroll assist and scroll padding. On a phone the keyboard covers the app, which Avalonia doesn't resize or scroll, so a
+field low in the page would end up under it. When an `AvonicInput` or `AvonicTextarea` in an `AvonicContent` takes focus there,
+the content is padded at its end by the keyboard's height (`KeyboardOffset`) and scrolled so that the field's item is 50 above the
+keyboard. The padding goes 120 ms after the field loses focus.
+
+| Config | Ionic | Default | |
+|---|---|---|---|
+| `AvonicConfig.InputShims` | `inputShims` | on for Android and iOS | Read when the app is attached |
+| `AvonicConfig.ScrollAssist` | `scrollAssist` | true | Read at each focus |
+| `AvonicConfig.ScrollPadding` | `scrollPadding` | true | Read at each focus |
+| `AvonicConfig.KeyboardHeight` | `keyboardHeight` | 290 | The height reckoned with until the keyboard says its own |
+
+Once the keyboard says its own height, the assist runs again with it, where Ionic leaves that to the browser.
 
 ## The safe area
 

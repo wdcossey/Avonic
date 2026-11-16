@@ -717,6 +717,30 @@ public class AvonicAppTests
         Assert.Equal(193, stage.Offset);
     }
 
+    // Measured on a Pixel 8: the keyboard's 354.3 is above the 24 high navigation bar, which the top level reaches under, edge to
+    // edge. Without the bar taken off, the item ended 26 above the keyboard. With it, the bottom at 632 is 152 below
+    // 844 - 24 - 290 - 50.
+    [AvaloniaFact]
+    public void I9_The_Navigation_Bar_Under_The_Keyboard_Is_Not_Room()
+    {
+        var previous = AppSafeArea.InsetsOf;
+        var fake = new FakeInsets();
+        fake.Set(new Thickness(0, 50.3, 0, 24));
+        AppSafeArea.InsetsOf = _ => fake.Insets;
+        try
+        {
+            using var stage = new ShimStage();
+            stage.Native.Focus();
+            Dispatcher.UIThread.RunJobs();
+            stage.At(600);
+            Assert.Equal(152, stage.Offset);
+        }
+        finally
+        {
+            AppSafeArea.InsetsOf = previous;
+        }
+    }
+
     // The same height as the estimate changes nothing.
     [AvaloniaFact]
     public void I8_A_Keyboard_Of_The_Estimated_Height_Changes_Nothing()

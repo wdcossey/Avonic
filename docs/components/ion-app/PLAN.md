@@ -30,7 +30,7 @@ There are no props, events, slots, shadow parts or CSS custom properties.
 |---|---|---|
 | `startTapClick` | unless `_testing` | Already each control's, through `Behaviors.Activatable`. Unchanged |
 | `startStatusTap` | `statusTap`, `isHybrid` | Not in this PR: an issue of its own. Avalonia doesn't report a tap on the status bar, and only iOS has one |
-| `startInputShims` | `inputShims`, `needInputShims()`: iOS, or Android in a browser | See [input shims](#input-shims) |
+| `startInputShims` | `inputShims`, `needInputShims()`: iOS, or Android in a browser | `InputShims`. `AvonicConfig.InputShims`, default on Android and iOS: see [input shims](#input-shims) |
 | `startHardwareBackButton`, or `blockHardwareBackButton` | `hardwareBackButton`, `isHybrid \|\| closeWatcher` | `HardwareBackButton`, started for the app's `TopLevel`. `AvonicConfig.HardwareBackButton`, default true |
 | `startKeyboardAssist` | always | `KeyboardAssist`, started for the app's `TopLevel` |
 | `startFocusVisible` | always | Already each control's, through `Behaviors.FocusVisible`. `SetFocus` reaches it |
@@ -120,6 +120,8 @@ Each becomes a test in `AvonicAppTests`, named after its number.
 | `HardwareBackButton` | `Controls/App/HardwareBackButton.cs` | `IonBackButtonEvent` (direct, on the `TopLevel`), `BackButtonEventArgs.Register(priority, handler)`, `OverlayBackButtonPriority` 100, `MenuBackButtonPriority` 99. It listens to `TopLevel.BackRequested`, which Avalonia raises for Android's back, a mouse's back button and Alt+Left |
 | `KeyboardAssist` | `Controls/App/KeyboardAssist.cs` | `IonKeyboardDidShowEvent` (`KeyboardDidShowEventArgs.KeyboardHeight`), `IonKeyboardDidHideEvent`, from `TopLevel.InputPane` |
 | `AppSafeArea` | `Controls/App/AppSafeArea.cs`, internal | The four keys, from `TopLevel.InsetsManager` |
+| `InputShims` | `Controls/App/InputShims.cs`, internal | Scroll assist and scroll padding |
+| `TopLevelStarts` | `Controls/App/TopLevelStarts.cs`, internal | One start count per `TopLevel`, for each utility |
 | The theme | `Avonic.Themes/Controls/AvonicApp.axaml` | Font size 16, `Avonic.FontFamily`, `Avonic.TextColorBrush`, `Avonic.BackgroundColorBrush` |
 | `FocusVisible.SetFocus` | `Behaviors/FocusVisible.cs`, internal | Ionic's `setFocus`, beside the per-surface code that's there |
 | The overlays | `Overlays/OverlayHost.cs` | They register at 100 through `IonBackButtonEvent`, and handle `BackRequested` directly only when no app has started the registry for the `TopLevel` |
@@ -132,9 +134,39 @@ the same meaning, and a back press during load would otherwise go unanswered.
 ### Input shims
 
 Ionic turns them on for iOS, and for Android in Chrome, where since Chrome 108 the keyboard covers the page instead of resizing
-it. In a Capacitor or Cordova Android app the webview resizes, so they're off. The question for Avalonia is which of those it is
-like. Avalonia 12 on Android 15 and later forces edge to edge, its `SafeAreaPadding` leaves out the IME, and nothing resizes the
-view for the keyboard. **To be measured on the Pixel** before deciding: see COMPARISON.md.
+it. In a Capacitor or Cordova Android app the webview resizes, so they're off. **Measured on the Pixel 8:** Avalonia 12 on
+Android 15 and later draws edge to edge, and the keyboard covers the view, which doesn't resize and doesn't scroll: the lowest
+field of the `ion-input` page ended under it ([frame](compare/pixel8-input-covered.png)). That's Chrome's case, so they're on by
+default on Android and iOS (the user's answer, D8), and off on a desktop.
+
+`InputShims` does `scroll-assist` and `scroll-padding` for an `AvonicInput` or `AvonicTextarea` in an `AvonicContent`, as Ionic
+registers `ion-input` and `ion-textarea`. Measured in Chromium with a Pixel's user agent, which makes Ionic's `needInputShims()`
+true (`plt-android plt-mobile plt-mobileweb`), on a page with a 56 header and the field's item at 584 to 632:
+
+| | Case | Result |
+|---|---|---|
+| S1 | Focus, room to scroll (scrollHeight 1104) | `--keyboard-offset: 290px` at once; `scrollTop` 15 in the next frame, 128 by 408 ms: `calcScrollData`'s 632 − (844 − 290 − 50), over min(400, 128 / 0.3) |
+| S2 | Blur | `0px` about 120 ms later |
+| S3 | Focus, no room (scrollHeight 788, the padding gives 78) | It waits for `ionKeyboardDidShow`, or 1000 ms, then scrolls as far as it can: 78 |
+
+Behaviours, in `AvonicAppTests`:
+
+- I1 A field the keyboard would cover pads the content by the keyboard's height (`AvonicContent.KeyboardOffset`, at animation
+  priority, as an inline `--keyboard-offset`) and scrolls it so that the item is 50 above the keyboard, over Ionic's duration;
+  the padding goes 120 ms after the field loses focus (S1, S2).
+- I2 With too little room, it waits for the keyboard to show, or a second (S3).
+- I3 A field already clear of the keyboard neither pads nor scrolls.
+- I4 Nothing with `AvonicConfig.InputShims` off, or without an `AvonicApp`.
+- I5 A later keyboard show runs it again with the keyboard's own height, without waiting.
+- I6 `ScrollAssist`, `ScrollPadding` and `KeyboardHeight` come from the config, read at each focus.
+- I7 A password field with too little room waits for a second keyboard show (iOS's passwords bar).
+- I8 **A deviation:** once the keyboard says its real height, if that isn't what the assist reckoned with, it runs again with it
+  when its scroll ends. Ionic keeps its estimate, as Chrome then scrolls the focused field into the visual viewport itself.
+  Avalonia doesn't, and on the Pixel the keyboard is about 355, so 290 left the field under it.
+
+Not done: moving the native input away and focusing it again (`relocateInput`), which stops a browser scrolling the page itself,
+as Avalonia doesn't; hide caret on scroll (WebKit draws the caret over a scrolling page); input blurring (off since Ionic 8, and
+going); a footer's field, for which Ionic only relocates.
 
 ## Not in this PR
 
@@ -171,7 +203,7 @@ And the other choices that change what every app sees:
 | D5 Back without `AvonicApp` | Overlays still dismiss on it. Registering handlers needs an `AvonicApp`, as `ionBackButton` needs `ion-app` |
 | D6 `HardwareBackButton` off | Back is left alone. A deviation: Ionic's `blockHardwareBackButton` takes it and does nothing, which here would also hide it from the app's own `BackRequested` handlers |
 | D7 A back request nothing takes | Handled, so the app stays, as in Ionic on Capacitor. An extension, `AvonicConfig.HandleUnclaimedBack`, turns that off |
-| D8 Input shims | On for Android and iOS, off on desktop, if the Pixel shows the keyboard covering the view |
+| D8 Input shims | On for Android and iOS, off on desktop: the Pixel showed the keyboard covering the view |
 | D9 Status tap | An issue of its own |
 
 ## Avonic extensions

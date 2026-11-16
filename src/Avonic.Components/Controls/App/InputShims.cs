@@ -199,7 +199,7 @@ internal static class InputShims
             }
 
             _usedHeight = keyboardHeight;
-            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, topLevel.ClientSize.Height);
+            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, PlatformHeight());
             var padding = AvonicConfig.ScrollPadding;
             if (Math.Abs(scrollAmount) < 4)
             {
@@ -306,6 +306,15 @@ internal static class InputShims
                 }, PaddingClearDelay);
             }
         }
+
+        /// <summary>
+        /// <c>win.innerHeight</c>: the height the page has, above the navigation bar. Edge to edge, the top level's client area reaches
+        /// under the bar, and the keyboard's height is measured above it, as Avalonia's <c>OccludedRect</c> is, so the bottom inset
+        /// comes off (measured on a Pixel 8: without it, the item ended 26 above the keyboard, where it's 50). Not edge to edge, the
+        /// inset is 0 and the client area ends at the bar.
+        /// </summary>
+        private double PlatformHeight() =>
+            topLevel.ClientSize.Height - (AppSafeArea.InsetsOf(topLevel)?.SafeAreaPadding.Bottom ?? 0);
 
         /// <summary><c>getBoundingClientRect()</c>: the visual's box in the top level.</summary>
         private Rect? BoxOf(Visual visual) =>
