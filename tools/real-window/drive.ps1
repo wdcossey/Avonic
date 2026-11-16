@@ -217,6 +217,12 @@ function LetGo {
 }
 function TouchDown($x, $y) { Guard; Within $x $y; $script:touching = $true; $script:touchX = $x; $script:touchY = $y; [RealInput]::TouchDown($x, $y) }
 function TouchUp($x, $y) { [RealInput]::TouchUp($x, $y); $script:touching = $false }
+# A finger held still. Windows drops an injected contact with no update for about 100 ms (TouchUp then fails, 1460), and a real
+# screen keeps reporting a still finger, so the contact is updated at the same place every 40 ms.
+function TouchHold($x, $y, $ms) {
+    $until = (Get-Date).AddMilliseconds($ms)
+    while ((Get-Date) -lt $until) { Start-Sleep -Milliseconds 40; [RealInput]::TouchMove($x, $y) }
+}
 # What a page reports comes after layout, so it can take a moment.
 function WaitForText($like, $seconds = 5) {
     $until = (Get-Date).AddSeconds($seconds)
@@ -1041,7 +1047,7 @@ try {
         $px = $cx; $py = [int]($content.Y + (Px 40))
         TouchDown $px $py
         for ($i = 1; $i -le 10; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove($px, [int]($py + (Px 100) * $i / 10)) }
-        Start-Sleep -Milliseconds 1000
+        TouchHold $px ([int]($py + (Px 100))) 1000
         TouchUp $px ([int]($py + (Px 100)))
         Start-Sleep -Milliseconds 800
         TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
