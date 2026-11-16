@@ -727,6 +727,27 @@ public class AvonicContentKeyboardTests
     }
 
     [AvaloniaFact]
+    public void B48_A_Tap_On_A_Nested_Content_Part_Way_Out_Of_View_Doesnt_Scroll_The_Outer()
+    {
+        // Avalonia focuses a finger's tap on its release, not its press.
+        var inner = new AvonicContent { Content = new Border { Height = 1000, Background = Brushes.Transparent } };
+        var outer = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new Border { Height = 250 }, new Panel { Height = 200, Children = { inner } }, new Border { Height = 3000 } } },
+        };
+        using var scene = new Scene(Box(outer));
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Settle();
+
+        var tap = scene.Window.TouchBegin(new Point(100, 280), RawInputModifiers.None);
+        scene.Window.TouchEnd(tap, new Point(100, 280), RawInputModifiers.None);
+        Settle();
+
+        Assert.True(Scroll(inner).IsFocused);
+        Assert.Equal(0, Scroll(outer).Offset.Y);
+    }
+
+    [AvaloniaFact]
     public void B48_A_Tap_On_A_Nested_Content_Focuses_It_Even_With_The_Outer_Focused()
     {
         var inner = new AvonicContent { Content = new Border { Height = 1000, Background = Brushes.Transparent } };

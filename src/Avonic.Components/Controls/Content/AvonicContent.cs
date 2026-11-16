@@ -120,7 +120,6 @@ public class AvonicContent : TemplatedControl
     private ScrollGestureRecognizer? _recognizer;
     private ContentKeyboardScroll? _keyboard;
     private bool _pressing;
-    private bool _unfocusableForPress;
     private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
@@ -422,9 +421,8 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(KeyDownEvent, OnScrollKeyDown);
             _scroll.RemoveHandler(GotFocusEvent, OnScrollGotFocus);
             _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressing);
-            _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressed);
+            _scroll.RemoveHandler(PointerReleasedEvent, OnScrollReleased);
             _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
-            _scroll.RemoveHandler(TappedEvent, OnScrollTapped);
         }
 
         if (_container is not null)
@@ -457,9 +455,8 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(KeyDownEvent, OnScrollKeyDown, RoutingStrategies.Tunnel);
             _scroll.AddHandler(GotFocusEvent, OnScrollGotFocus);
             _scroll.AddHandler(PointerPressedEvent, OnScrollPressing, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _scroll.AddHandler(PointerPressedEvent, OnScrollPressed, RoutingStrategies.Bubble, handledEventsToo: true);
+            _scroll.AddHandler(PointerReleasedEvent, OnScrollReleased, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
-            _scroll.AddHandler(TappedEvent, OnScrollTapped, RoutingStrategies.Bubble, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -733,48 +730,12 @@ public class AvonicContent : TemplatedControl
     }
 
     /// <summary>
-    /// A press, from its way down to its way up: Avalonia focuses what's pressed in between, on the way down at the element pressed.
-    /// A finger's or a pen's press doesn't focus the scroller, as it may be the start of a scroll, which in Chromium sends no
-    /// <c>mousedown</c> and moves no focus, so a field being typed in keeps it: <see cref="OnScrollTapped"/> does it, for a tap.
+    /// A press, from its way down to its release: Avalonia focuses what's pressed in between, a mouse's on the way down and a finger's
+    /// or a pen's on release if it was a tap, not a scroll, as Chromium does, which sends a tap's <c>mousedown</c> after it.
     /// </summary>
-    private void OnScrollPressing(object? sender, PointerPressedEventArgs e)
-    {
-        _pressing = true;
-        if (e.Pointer.Type != PointerType.Mouse && _scroll is { Focusable: true } scroll)
-        {
-            _unfocusableForPress = true;
-            scroll.SetCurrentValue(FocusableProperty, false);
-        }
-    }
+    private void OnScrollPressing(object? sender, PointerPressedEventArgs e) => _pressing = true;
 
-    private void OnScrollPressed(object? sender, PointerPressedEventArgs e)
-    {
-        _pressing = false;
-        if (_unfocusableForPress)
-        {
-            _unfocusableForPress = false;
-            UpdateFocusable();
-        }
-    }
-
-    /// <summary>
-    /// A tap by a finger or a pen focuses the scroller, as a press by the mouse does, unless what was tapped took focus itself: Chromium
-    /// sends a tap's <c>mousedown</c> after it. Not a drag, which raises no tap.
-    /// </summary>
-    private void OnScrollTapped(object? sender, TappedEventArgs e)
-    {
-        if (e.Pointer.Type == PointerType.Mouse || _scroll is not { Focusable: true } scroll
-            || TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is Visual focused
-               && (scroll == focused || scroll.IsVisualAncestorOf(focused))
-               && (ReferenceEquals(focused, e.Source) || (e.Source is Visual source && focused.IsVisualAncestorOf(source))))
-        {
-            return;
-        }
-
-        _pressing = true;
-        scroll.Focus(NavigationMethod.Pointer, e.KeyModifiers);
-        _pressing = false;
-    }
+    private void OnScrollReleased(object? sender, PointerReleasedEventArgs e) => _pressing = false;
 
     /// <summary>
     /// A press focuses the scroller only so that the keys reach it, where Chromium moves no focus, so it mustn't bring the scroller

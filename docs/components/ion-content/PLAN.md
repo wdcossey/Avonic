@@ -318,9 +318,10 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
 - **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
   focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
   **By a finger or a pen, only a tap does:** a touch that becomes a scroll sends no `mousedown` in Chromium and moves no focus, so a
-  field being typed in keeps it, and its keyboard on a phone. So the scroller isn't focusable during a finger's press, and its `Tapped`
-  focuses it, unless what was tapped took focus itself (the first review found this). Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
-  found; the scroller refuses its own bring-into-view during a press, and Tab still brings it in. A press on a focused `ion-input`'s label
+  field being typed in keeps it, and its keyboard on a phone. Avalonia already does this: it focuses a finger's tap on release, and
+  nothing after a scroll. The first review raised it; tests hold it, and a breakage run showed code for it did nothing, so there's none.
+  Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
+  found; the scroller refuses its own bring-into-view from a press to its release, and Tab still brings it in. A press on a focused `ion-input`'s label
   now blurs the field and focuses it again, as the scroller takes focus on the way down and the label gives it back on release: Chromium
   does the same, measured `ionBlur`, `blur`, `ionFocus`, `focus`.
 - **The ring** is `PART_FocusRing`, a `Border` first in the scroller's template, so under the content, at a margin of -1, shown on
