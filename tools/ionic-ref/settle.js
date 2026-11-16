@@ -12,7 +12,7 @@
 // 3. The snippet goes in, from the <template> defer() made.
 // 4. componentOnReady() for every ion-* element, in the light DOM and in shadow roots, until a pass finds no new one.
 // 5. Two animation frames, as components do work in a frame after they load (ion-item's componentDidLoad).
-// 6. Then frames until the page is still: the same layout box and classes for every element, the fonts loaded, every image
+// 6. Then frames until the page is still: the same layout box, scroll position and classes for every element, the fonts loaded, every image
 //    complete and no finite animation or transition running, for `frames` frames in a row. Infinite ones (a spinner) are left
 //    out. If that doesn't happen within `timeout`, it throws, naming what kept changing, rather than reading the page early.
 
@@ -82,8 +82,9 @@ async function settle(page, { timeout = 20000, frames = 3 } = {}) {
         await frame();
 
         // 6. Still. offset* is the layout box, which a transform doesn't move, so a spinning spinner doesn't count; an SVG element
-        //    has none, so it counts by being there.
-        const box = e => e instanceof HTMLElement ? `${e.offsetLeft},${e.offsetTop},${e.offsetWidth},${e.offsetHeight}` : '';
+        //    has none, so it counts by being there. A scroll position counts too, for a scroll driven from script.
+        const box = e => (e instanceof HTMLElement ? `${e.offsetLeft},${e.offsetTop},${e.offsetWidth},${e.offsetHeight}` : '') +
+            (e.scrollTop || e.scrollLeft ? `@${e.scrollLeft},${e.scrollTop}` : '');
         const snapshot = () => {
             const elements = everything();
             return { elements, keys: elements.map(e => `${e.localName}|${e.getAttribute('class') ?? ''}|${box(e)}`) };
@@ -110,7 +111,7 @@ async function settle(page, { timeout = 20000, frames = 3 } = {}) {
             if (same && !reasons.length) {
                 still++;
             } else {
-                still = 1;
+                still = reasons.length ? 0 : 1;
                 const changed = now.keys.length !== last.keys.length
                     ? [`${last.keys.length} elements, then ${now.keys.length}`]
                     : now.elements.filter((e, i) => now.keys[i] !== last.keys[i]).slice(0, 5).map(describe);

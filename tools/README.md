@@ -23,12 +23,13 @@ Developer tooling. Nothing here ships in a package.
    and the ids Ionic counts (`ion-cb-0`, `ion-tg-0`, `ion-r-0`) follow the document too.
 3. `componentOnReady()` on every `ion-*` element, in the light DOM and in shadow roots, until no new one appears.
 4. Two animation frames, for what components do in a frame after they load.
-5. Frames until the page keeps still for three in a row: every element's layout box (`offset*`, which a transform doesn't move)
-   and classes unchanged, the fonts loaded, every image complete, and no finite animation or transition running. Infinite ones,
+5. Frames until the page keeps still for three in a row: every element's layout box (`offset*`, which a transform doesn't move),
+   scroll position and classes unchanged, the fonts loaded, every image complete, and no finite animation or transition running. Infinite ones,
    a spinner's or a skeleton's shimmer, are left out, so the moment they're captured at is still arbitrary.
 
 If that doesn't happen within 20 s (120 s for the icons), the tool fails and names what kept changing, rather than reading early.
-`page.html` holds the snippet in place, not in the `<template>`, so it opens in a browser as it is. `side.js` waits for its two
+`page.html` holds the snippet in place, not in the `<template>`, so it opens in a browser as it is, but there the components start
+in whatever order their modules arrive, as before. `side.js` waits for its two
 pictures to decode.
 
 `ion-app` isn't needed for this: wrapped in it, the stacked-label row still changed from run to run. `render.js` wraps a snippet in
