@@ -515,6 +515,11 @@ try {
     # edge, 15 wide, and the content's right is 16 past the fixed button's; the thumb starts 18 down, so at the top it covers Row 1.
     Section 'ion-content: the scroll bar' {
         Open 'ion-content'
+        # A page just opened has scrolled nowhere, so it shows no "Ended at": a notch down, then Top, gives it one.
+        $r1x, $r1y = Centre (Named $CT::Text 'Row 1')
+        [void][RealInput]::SetCursorPos($r1x, $r1y); Start-Sleep -Milliseconds 150
+        Wheel 1
+        Start-Sleep -Milliseconds 400
         ClickOn (Named $CT::Button 'Top')
         Start-Sleep -Milliseconds 700
         $toggle = Named $CT::Button 'Scroll bar'
