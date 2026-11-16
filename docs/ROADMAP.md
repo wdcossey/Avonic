@@ -77,6 +77,12 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 
+## After the tiers
+
+**A Material 3 theme** (`Avonic.Themes.Material3`), as a second theme over the same components. On hold until P3 and P4 are
+done: no work starts before then, not even its spike of Content, Card and Button. What was measured, the nine decisions and
+the controls with no Material 3 counterpart are in [ADR 0003](decisions/0003-material-3-as-a-second-theme.md).
+
 ## Out of scope
 
 `ion-router`, `ion-route`, `ion-route-redirect`, `ion-router-link`, `ion-router-outlet`, `ion-picker-legacy`.

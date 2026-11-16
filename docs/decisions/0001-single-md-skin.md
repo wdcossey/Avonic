@@ -2,6 +2,9 @@
 
 **Date:** October 2026 · **Status:** accepted
 
+A second theme, Material 3, is planned for after P4: [ADR 0003](0003-material-3-as-a-second-theme.md). Until that work
+starts, this stands as written.
+
 ## Context
 
 Ionic ships every component with two visual modes (`ios`, `md`) and a `mode` property.
