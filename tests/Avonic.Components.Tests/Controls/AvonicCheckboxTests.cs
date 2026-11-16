@@ -1492,20 +1492,30 @@ public class AvonicCheckboxTests
     {
         var text = new TextBlock();
         var box = new AvonicCheckbox { Content = text };
-        var holder = new StackPanel { Children = { box } };
+        var otherText = new TextBlock();
+        var other = new AvonicCheckbox { Content = otherText };
+        var holder = new StackPanel { Children = { box, other } };
         using var scene = Themed(holder);
         Assert.False(Label(box).IsVisible);
 
-        holder.Children.Remove(box);
+        holder.Children.Clear();
 
-        // A prop changing while detached reads the label, and still doesn't watch it.
-        box.Checked = true;
+        // Detached, text arriving changes nothing.
         text.Text = "While detached";
         Dispatcher.UIThread.RunJobs();
         Assert.False(Label(box).IsVisible);
 
+        // A prop changing while detached reads the label, and still doesn't watch it.
+        other.Checked = true;
+        otherText.Text = "While detached";
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Label(other).IsVisible);
+
+        // Attached again, both are read.
         holder.Children.Add(box);
+        holder.Children.Add(other);
         Dispatcher.UIThread.RunJobs();
         Assert.True(Label(box).IsVisible);
+        Assert.True(Label(other).IsVisible);
     });
 }
