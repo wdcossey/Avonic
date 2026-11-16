@@ -20,6 +20,8 @@ const { chromium } = require('playwright-core');
 const roboto = require('../fonts/roboto/roboto');
 // Waits for the components to load, in document order, and the page to keep still, instead of a fixed delay.
 const settle = require('./settle');
+// A Pixel 8's viewport, mobile and touch, which boxes.js --mobile shares.
+const phone = require('./phone');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
@@ -123,10 +125,7 @@ const server = http.createServer((req, res) => {
     fs.mkdirSync(outDir, { recursive: true });
 
     const browser = await chromium.launch();
-    const ctx = await browser.newContext({
-        viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
-        userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Mobile Safari/537.36',
-    });
+    const ctx = await browser.newContext(phone.CONTEXT);
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(String(e)));

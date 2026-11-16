@@ -58,9 +58,9 @@ there run from pixel 0 to 635 at a scale of 2, as Chromium's do. So nothing is f
 The page is [`ref/rtl/page.html`](ref/rtl/page.html). It has items, dividers, list headers and two items in a list in right to
 left, all taking the direction from a `div dir="rtl"` around them, as the tests take it from a panel. It has them once with no
 safe area and once with `--ion-safe-area-left: 20px` and `--ion-safe-area-right: 10px`, and an item in left to right with each.
-Chromium's boxes are in [`ref/rtl/boxes.txt`](ref/rtl/boxes.txt). They were measured by
-[`ref/rtl/boxes.js.txt`](ref/rtl/boxes.js.txt), which is `tools/ionic-ref/boxes.js` with `ion-list-header` added, run from the
-repo's root as `node docs/components/ion-item/ref/rtl/boxes.js.txt docs/components/ion-item/ref/rtl/page.html docs/components/ion-item/ref/rtl/page.png`.
+Chromium's boxes are in [`ref/rtl/boxes.txt`](ref/rtl/boxes.txt), from
+`node tools/ionic-ref/boxes.js docs/components/ion-item/ref/rtl/page.html docs/components/ion-item/ref/rtl/page.png`. They were
+first measured by a copy of `boxes.js` with `ion-list-header` added, which #177 put in `boxes.js` itself: it gives the same 16 rows.
 Avonic's frame is `AvonicItemRtlTests`' `avonic-item-rtl-page.png`, cut to Chromium's 844 high. Chromium is on the left and
 Avonic on the right, both headless:
 

@@ -5,10 +5,14 @@ Developer tooling. Nothing here ships in a package.
 | Tool | Purpose | Step in `docs/PROCESS.md` |
 |---|---|---|
 | `ionic-api.js <ion-tag>` | Prints the component's complete public API from `@ionic/docs` as a Markdown checklist — the spec a control is built from. `--list` for all tags, `--json` for raw data. | **Plan** |
-| `ionic-ref/render.js <ion-tag>` | Renders the real Ionic web component in headless Chromium (md mode, 390×844 phone viewport) and writes screenshots, light/shadow DOM, bounding boxes, computed layout and every resolved CSS variable to `docs/components/<tag>/ref/`. `--html` for a custom snippet, `--tap` for press/release frames. | **Plan** (baseline) and **Compare** |
+| `ionic-ref/render.js <ion-tag>` | Renders the real Ionic web component in headless Chromium (md mode, 390×844 phone viewport) and writes screenshots, light/shadow DOM, bounding boxes, computed layout and every resolved CSS variable to `docs/components/<tag>/ref/`. `--html` for a custom snippet, `--tap` for press/release frames. Each `ref/README.md` starts with the command that made it: run it again to regenerate. | **Plan** (baseline) and **Compare** |
+| `ionic-ref/boxes.js <page.html> [shot.png] [--mobile]` | Prints one line for each `ion-item`, `ion-item-divider` and `ion-list-header` in a page of them: its height, its inner part and its wrapper as `x width height` (`.item-inner` and `.input-wrapper`, `.item-divider-inner` and `.item-divider-wrapper`, `.list-header-inner` and `-`, as a list header has no wrapper), and each element inside with an `id`, its `y` from the top of the row. A desktop page 390×844 at 2× by default; `--mobile` measures on `render.js`'s phone instead (390×844 at 2×, mobile and touch, Chrome for Android's user agent: [`ionic-ref/phone.js`](ionic-ref/phone.js)), where a `<textarea>` keeps 4 px for its scroll bar, not 15. The page isn't wrapped in `ion-app`. | **Plan** and **Compare** (layouts) |
 
-`render.js`, and `ionic-ref/boxes.js <page.html>`, which prints the boxes in a page of items and dividers, load Roboto from
+`render.js` and `boxes.js` load Roboto from
 [`fonts/roboto/`](fonts/roboto/README.md), the files the tests and the sample embed, so that text measures the same on both sides.
+
+For example, `ion-textarea` in an item's start slot, with no `cols` and with `cols="10"`, measures 175 and 95 wide by default, and 164
+and 84 with `--mobile`, which is what `AvonicTextarea` matches.
 
 ### How the Chromium tools wait
 
