@@ -316,6 +316,10 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   it sends it on, to that, or with Shift past the scroller, read at that moment, as what's inside changes.
 - **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
   focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
+  Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
+  found; the scroller refuses its own bring-into-view during a press, and Tab still brings it in. A press on a focused `ion-input`'s label
+  now blurs the field and focuses it again, as the scroller takes focus on the way down and the label gives it back on release: Chromium
+  does the same, measured `ionBlur`, `blur`, `ionFocus`, `focus`.
 - **The ring** is `PART_FocusRing`, a `Border` first in the scroller's template, so under the content, at a margin of -1, shown on
   `:focus-visible`, which Avalonia sets for focus by key only, as CSS does. It draws the scroller's own `BorderBrush`, `BorderThickness`
   and `CornerRadius`, which the theme sets: `Avonic.Content.FocusRingBrush` (`#E59700`), 2 and 3.5. The scroller doesn't clip, so the ring
@@ -350,7 +354,7 @@ Tests in `AvonicContentTests` and `ContentScrollIndicatorTests`, named after the
 | 45 | An axis that's off, or a limit, sends the key on to the content around | `noscrolly`, `scrollXOnly`, `nested…AtEnd` |
 | 46 | Tab stops on a content that can scroll with nothing focusable inside, and Shift+Tab; not on one that fits or has `ScrollY` off; `ForceOverscroll`'s pixel counts | `tab`, `fits`, `noscrolly`, `shiftTab`, `overscrollTab` |
 | 47 | With something focusable inside, Tab goes into it and Shift+Tab past it; nested, the inner is the stop | `button`, `nested`, `nestedFits` |
-| 48 | A press on the content lets the keys scroll it after | `click`, `tap`, `clickWithButton` |
+| 48 | A press on the content lets the keys scroll it after, and doesn't scroll a content around it | `click`, `tap`, `clickWithButton` |
 | 49 | A focused control that takes Space keeps it; the arrows and pages still scroll | `button`, `checkbox`, `ion-item` |
 | 50 | A text field keeps the arrows, Home, End and Space, and Page Up and Page Down scroll | `input`, `ion-input` |
 | 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half | ring, `ring2` |

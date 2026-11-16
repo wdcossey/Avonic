@@ -279,7 +279,9 @@ public class AvonicContentIndicatorTests
         Wheel(scene, 100);
         Render();
 
-        Assert.Equal(under, scene.Window.InputHitTest(new Point(388, 150)));
+        // The thumb is 75 long at 25, so this is on it.
+        Assert.Equal(new Rect(0, 25, 4, 75), Vertical(content).Thumb);
+        Assert.Equal(under, scene.Window.InputHitTest(new Point(388, 50)));
         // In the scroll part, which comes before the fixed slot.
         Assert.Contains(Scroll(content), Vertical(content).GetVisualAncestors());
     });

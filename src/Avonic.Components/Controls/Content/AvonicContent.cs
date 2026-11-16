@@ -116,6 +116,7 @@ public class AvonicContent : TemplatedControl
     private ContentPresenter? _fixed;
     private ScrollGestureRecognizer? _recognizer;
     private ContentKeyboardScroll? _keyboard;
+    private bool _pressing;
     private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
@@ -416,6 +417,9 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(KeyDownEvent, OnPassedOver);
             _scroll.RemoveHandler(KeyDownEvent, OnScrollKeyDown);
             _scroll.RemoveHandler(GotFocusEvent, OnScrollGotFocus);
+            _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressing);
+            _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressed);
+            _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
         }
 
         if (_container is not null)
@@ -447,6 +451,9 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(KeyDownEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(KeyDownEvent, OnScrollKeyDown, RoutingStrategies.Tunnel);
             _scroll.AddHandler(GotFocusEvent, OnScrollGotFocus);
+            _scroll.AddHandler(PointerPressedEvent, OnScrollPressing, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _scroll.AddHandler(PointerPressedEvent, OnScrollPressed, RoutingStrategies.Bubble, handledEventsToo: true);
+            _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -510,6 +517,7 @@ public class AvonicContent : TemplatedControl
         _frame?.Dispose();
         _frame = null;
         _queued = false;
+        _keyboard?.Stop();
         OnScrollEnd();
 
         _wasDetached = true;
@@ -688,12 +696,14 @@ public class AvonicContent : TemplatedControl
             _ => null,
         };
 
+        // ScrollY off is still a scroller to a script, with somewhere to go, so it's asked. ScrollX off has nowhere to go, as it's
+        // Disabled, which the limit below sees.
         if (dy is { } y && ScrollY)
         {
             return new Vector(from.X, Math.Clamp(from.Y + y, 0, maxY));
         }
 
-        if (dx is { } x && ScrollX)
+        if (dx is { } x)
         {
             return new Vector(Math.Clamp(from.X + x, 0, maxX), from.Y);
         }
@@ -714,8 +724,27 @@ public class AvonicContent : TemplatedControl
         }
 
         var canScroll = (ScrollY && scroll.Extent.Height - scroll.Viewport.Height >= 0.5)
-            || (ScrollX && scroll.Extent.Width - scroll.Viewport.Width >= 0.5);
+            || scroll.Extent.Width - scroll.Viewport.Width >= 0.5;
         scroll.SetCurrentValue(FocusableProperty, canScroll);
+    }
+
+    /// <summary>
+    /// A press, from its way down to its way up: Avalonia focuses what's pressed in between, on the way down at the element pressed.
+    /// </summary>
+    private void OnScrollPressing(object? sender, PointerPressedEventArgs e) => _pressing = true;
+
+    private void OnScrollPressed(object? sender, PointerPressedEventArgs e) => _pressing = false;
+
+    /// <summary>
+    /// A press focuses the scroller only so that the keys reach it, where Chromium moves no focus, so it mustn't bring the scroller
+    /// into view in a content around it, as focus would: a nested content part way out of view would jump. Tab still does.
+    /// </summary>
+    private void OnScrollRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
+    {
+        if (_pressing && ReferenceEquals(e.TargetObject, _scroll))
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>

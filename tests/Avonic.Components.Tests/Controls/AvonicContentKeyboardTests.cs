@@ -601,6 +601,28 @@ public class AvonicContentKeyboardTests
         Assert.Equal(40, Scroll(content).Offset.Y);
     }
 
+    [AvaloniaFact]
+    public void B48_A_Press_On_A_Nested_Content_Part_Way_Out_Of_View_Doesnt_Scroll_The_Outer()
+    {
+        // Chromium moves no focus on a press, so nothing is brought into view. Here the inner one takes focus, by pointer.
+        var inner = new AvonicContent { Content = new Border { Height = 1000, Background = Brushes.Transparent } };
+        var outer = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new Border { Height = 250 }, new Panel { Height = 200, Children = { inner } }, new Border { Height = 3000 } } },
+        };
+        using var scene = new Scene(Box(outer));
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Settle();
+
+        // The inner one is from 250 to 450, so only 50 of it shows.
+        scene.Window.MouseDown(new Point(100, 280), MouseButton.Left);
+        scene.Window.MouseUp(new Point(100, 280), MouseButton.Left);
+        Settle();
+
+        Assert.True(Scroll(inner).IsFocused);
+        Assert.Equal(0, Scroll(outer).Offset.Y);
+    }
+
     // ── 49, 50 ───────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
