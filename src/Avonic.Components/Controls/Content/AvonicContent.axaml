@@ -7,21 +7,49 @@
          scroll bars, and TestApp has no base theme. The theme's template uses this one too.
          The recognizer isn't given Offset, Viewport and Extent, as a base theme's is: with those it gives up at
          the limit, and an outer scroller takes the drag, where overscroll-behavior: contain keeps it here. The control sets
-         CanVerticallyScroll, because ScrollY can be off while it's still a scroller to a script. -->
+         CanVerticallyScroll, because ScrollY can be off while it's still a scroller to a script.
+         The two indicators are what a phone's browser draws while the user scrolls, over the content and taking no input, an
+         extension. Here they're placed at the end edge and the bottom, and have no size or brush: the theme gives them those.
+         The focus ring is a browser's outline on a scroller focused by key, under the content as Chromium paints it, so
+         content with a background of its own covers its inner half. It's the scroller's own border properties, which the
+         theme sets, and a margin from the theme, -1, so that it reaches a pixel outside: the presenter clips the content,
+         and the scroller doesn't clip. Avalonia's adorner would draw over the content, so there's none. The scroller's own
+         background, a Color's, is under the ring too, as an element's own background is under its outline: the presenter
+         is only transparent where it has one, to take input where it did. -->
     <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <ScrollContentPresenter Name="PART_ContentPresenter"
-                                        Background="{TemplateBinding Background}"
-                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
-                    <ScrollContentPresenter.GestureRecognizers>
-                        <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
-                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
-                    </ScrollContentPresenter.GestureRecognizers>
-                </ScrollContentPresenter>
+                <Panel>
+                    <Border Name="PART_ScrollBackground" Background="{TemplateBinding Background}" />
+                    <Border Name="PART_FocusRing"
+                            Margin="{DynamicResource Avonic.Content.FocusRingMargin}"
+                            IsVisible="False"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+                    <ScrollContentPresenter Name="PART_ContentPresenter"
+                                            Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:ContentConverters.TransparentIfSet}}"
+                                            ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                        <ScrollContentPresenter.GestureRecognizers>
+                            <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                                     IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                        </ScrollContentPresenter.GestureRecognizers>
+                    </ScrollContentPresenter>
+                    <c:ContentScrollIndicator Name="PART_VerticalIndicator" Orientation="Vertical" HorizontalAlignment="Right" />
+                    <c:ContentScrollIndicator Name="PART_HorizontalIndicator" Orientation="Horizontal" VerticalAlignment="Bottom" />
+                </Panel>
             </ControlTemplate>
         </Setter>
+
+        <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
     </ControlTheme>
+
+    <!-- The scroll indicator, structure only: its thickness and its brush are the theme's. -->
+    <ControlTheme x:Key="{x:Type c:ContentScrollIndicator}" TargetType="c:ContentScrollIndicator" />
 
     <!-- Functional stub for ion-content: structure only. The look is in Avonic.Themes. The container's transparent
          background is what makes all of the area take input, including with an unknown Color, which leaves the

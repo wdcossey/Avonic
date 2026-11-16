@@ -13,7 +13,7 @@ namespace Avonic.Components.Animation;
 /// </summary>
 internal sealed class SmoothScroll(ScrollViewer scroller, Orientation orientation = Orientation.Horizontal)
 {
-    internal static readonly CubicBezierEasing Easing = new(0.42, 0, 0.58, 1);
+    internal static readonly CubicBezierEasing Easing = CubicBezierEasing.CssEaseInOut;
 
     private readonly bool _vertical = orientation == Orientation.Vertical;
     private IDisposable? _frame;

@@ -460,6 +460,57 @@ try {
         "        once it stops: $ended"
     }
 
+    # A browser's keys and scroll indicator on ion-content (#67): positions from the page's 'Ended at' line, and the indicator by whether
+    # a strip at the end edge changes, never by exact pixels.
+    Section 'ion-content: keys and the scroll indicator' {
+        Open 'ion-content'
+        ClickOn (Named $CT::Button 'Top')
+        Start-Sleep -Milliseconds 700
+        $fixed = Named $CT::Button 'Fixed'
+        $f = $fixed.Current.BoundingRectangle
+        # The fixed button is 16 in from the content's end edge. The strip is the track, from the top row to above the button, as
+        # where the thumb is depends on the scroll: one notch from the top puts it at the top.
+        $right = [int]($f.Right + (Px 16))
+        $rx, $ry = Centre (Named $CT::Text 'Row 2')
+        $stripX = $right - (Px 6); $stripY = [int]($ry - (Px 30)); $stripW = Px 6; $stripH = [int]($f.Top - (Px 8) - $stripY)
+        # A press on a row, which can't take focus, focuses the content, so the keys scroll it.
+        Click $rx $ry
+        Key '{DOWN}' 600
+        Check 'Down scrolls 40' ((EndedAt) -eq 40) (FirstText 'Ended at*')
+        Key '{HOME}' 600
+        Check 'Home goes to the top' ((EndedAt) -eq 0) (FirstText 'Ended at*')
+        Key '{PGDN}' 600
+        $page = EndedAt
+        $viewport = ($f.Bottom - $win.Current.BoundingRectangle.Top) / $scale
+        Check 'Page Down goes most of a viewport' (($page -gt 100) -and ($page -lt $viewport)) "$page of under $viewport"
+        Key ' ' 600
+        Check 'Space goes another page' ([math]::Abs((EndedAt) - 2 * $page) -le 1) "$(FirstText 'Ended at*') against $(2 * $page)"
+        Key '+ ' 600
+        Check 'Shift+Space goes back a page' ([math]::Abs((EndedAt) - $page) -le 1) "$(FirstText 'Ended at*') against $page"
+        Key '{END}' 600
+        $end = EndedAt
+        Check 'End goes to the bottom' ($end -gt 2 * $page) "at $end"
+        Key '{DOWN}' 600
+        Check 'Down at the bottom stays there' ((EndedAt) -eq $end) (FirstText 'Ended at*')
+        Key '{HOME}' 600
+        Check 'Home comes back' ((EndedAt) -eq 0) (FirstText 'Ended at*')
+
+        # The indicator: a wheel shows it, and it's gone 1.5 s later, at the same place. A key shows none.
+        [void][RealInput]::SetCursorPos($rx, $ry); Start-Sleep -Milliseconds 150
+        Guard; [RealInput]::Wheel(-120); Start-Sleep -Milliseconds 120
+        $during = Region $stripX $stripY $stripW $stripH
+        Start-Sleep -Milliseconds 1500
+        $shown = Changed $during (Region $stripX $stripY $stripW $stripH)
+        Check 'a wheel shows the indicator, and it fades' ($shown -gt 0) "$shown pixels"
+        Key '{DOWN}' 250
+        $afterKey = Region $stripX $stripY $stripW $stripH
+        Start-Sleep -Milliseconds 1500
+        $keyShown = Changed $afterKey (Region $stripX $stripY $stripW $stripH)
+        Check 'a key shows no indicator' ($keyShown -eq 0) "$keyShown pixels"
+        $during.Dispose(); $afterKey.Dispose()
+        Key '{HOME}' 600
+    }
+
     Section 'ion-list: sticky dividers' {
         Open 'ion-list'
         $w = $win.Current.BoundingRectangle

@@ -1,6 +1,6 @@
 # ion-content
 
-Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11)
+Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11) · keys and the scroll indicator: [#67](https://github.com/wdcossey/Avonic/issues/67)
 
 `AvonicContent` is the scrolling area of a page: a background, content that scrolls, and a slot for content that doesn't. It reports
 scrolling on Ionic's timeline, and can extend behind what's around it. The design and evidence are in [PLAN.md](PLAN.md), and the
@@ -145,8 +145,8 @@ if (TopLevel.GetTopLevel(this) is { InsetsManager: { } insets })
 ## What's inherited from Avalonia
 
 The drag and momentum are Avalonia's `ScrollGestureRecognizer`, not a browser's, with its own feel. Its `ScrollViewer` also scrolls a focused child
-into view. **None of this has been tried on real touch hardware**, only with Avalonia's headless touch events. There's no bounce, and no scroll indicator
-while scrolling. See [PLAN.md](PLAN.md#known-gaps).
+into view. **None of this has been tried on real touch hardware**, only with Avalonia's headless touch events. There's no bounce. See
+[PLAN.md](PLAN.md#known-gaps). The keys and the scroll indicator are a browser's, recreated: see the extensions below.
 
 ## Behaviours
 
@@ -155,3 +155,47 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours).
 ## Extensions
 
 - **`KeyboardOffset`** (`double`): what `--keyboard-offset` sets, as a property, so that `Padding` on the control doesn't lose it. The token sets it.
+
+What a browser gives Ionic for free, measured in Chromium 141 in Android emulation ([#67](https://github.com/wdcossey/Avonic/issues/67)), with no
+property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrolling-and-the-scroll-indicator-67).
+
+- **Keyboard scrolling.**
+
+  | Key | Scrolls |
+  |---|---|
+  | Up, Down | 40 |
+  | Left, Right | 40, with `ScrollX` on. Physical: in RTL, Left goes towards the end |
+  | Page Up, Page Down, Space, Shift+Space, Alt+Up, Alt+Down | a page, 87.5% of the viewport, rounded down: 262 of 300 |
+  | Home, End, with or without Ctrl | to the top, the bottom |
+  | Cmd+Up, Cmd+Down, on macOS | to the top, the bottom: Chromium's macOS bindings, not measured |
+
+  Any other modifier does nothing, and nor does Avalonia's own `ScrollViewer`, whose Page Down went a whole viewport. Each scroll takes 150 ms of
+  `cubic-bezier(0.42, 0, 0.58, 1)`, from the key, whatever the distance, and a key during one adds to where it's going and keeps its speed,
+  as Chromium's does. Something else scrolling it stops it, and the next key starts from there. A key that can't scroll it, at its limit or on an axis that's off, goes on to
+  the content around, so nested contents chain as Chromium's do. The scroll events report it as any other.
+
+  **Which content.** The one with focus, or the closest around what has it. A content that can scroll **is a tab stop when nothing in it can
+  take focus**, and Shift+Tab comes back to it; with something focusable inside, Tab goes into it. Content that fits, or with `ScrollY`
+  off, isn't one. **A mouse press on the content, or a tap, focuses it** (Avalonia sends keys only to what has focus, where Chromium
+  remembers the press and leaves focus on the page), so the keys work after it, and a focused field loses focus, as in a browser. A
+  finger that scrolls moves no focus, so a field being typed in keeps its keyboard. A focused control that
+  takes a key keeps it: a button its Space, a text field its arrows, Home, End and Space. Page Up and Page Down in a one-line `TextBox`
+  scroll, and a multi-line one keeps them.
+
+  **The focus ring** shows for focus by key only: Chromium's `outline: auto`, 2 px from a pixel outside to a pixel inside, under the content,
+  so rows with a background of their own cover its inner half, as they do in Chromium. Its colour is `Avonic.Content.FocusRingBrush`.
+
+- **A scroll indicator,** `ContentScrollIndicator`: two, `PART_VerticalIndicator` and `PART_HorizontalIndicator`, in the content's `ScrollViewer`
+  template, over the content and under the fixed slot, taking no input. A 4 px thumb, flush with the end edge (the left in RTL) or the bottom,
+  as long as the viewport's share of the extent, rounded down, and at least 4, in `rgba(128, 128, 128, 0.5)`. It shows on a scroll by the user,
+  the wheel, a finger or a fling, and not on a script, `ScrollToPoint` and the rest, or a key, all as measured. It stays 300 ms after the
+  last scroll, then fades out over 300 ms. Each track leaves the corner when both axes can scroll. **It isn't Avalonia's `ScrollBar`:** the
+  content's `ScrollViewer` has none, on desktop too, as md here is a phone's.
+
+  | Key | md default |
+  |---|---|
+  | `Avonic.Content.ScrollIndicatorColor`, `…Brush` | `#80808080` |
+  | `Avonic.Content.FocusRingColor`, `…Brush` | `#E59700`, Android's |
+
+  `Avonic.Content.FocusRingMargin`, -1, places the ring a pixel outside. The thickness, 4, and the ring's 2 and radius of 3.5 are literals in the theme, as Chromium has no variable for them. A transparent brush
+  hides either.

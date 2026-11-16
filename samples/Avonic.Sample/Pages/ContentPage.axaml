@@ -26,7 +26,7 @@
         </c:AvonicContent>
 
         <Border Grid.Row="2" ZIndex="10" Background="#660054E9" Padding="8">
-            <TextBlock Name="Status" Text="Scroll to see the events" />
+            <TextBlock Name="Status" Text="Scroll, or tap a row and use the keys, to see the events" />
         </Border>
     </Grid>
 

@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicContent Width="390" Height="300">
+            <Border Height="1200" />
+        </c:AvonicContent>
+    </Design.PreviewWith>
+
+    <!-- The scroll indicator in ion-content's scroller, an extension: Chromium's Android overlay scroll bar, measured in mobile
+         emulation. A thumb 4 px thick, at least as long, flush with the end edge or the bottom, with square ends. -->
+    <ControlTheme x:Key="{x:Type c:ContentScrollIndicator}" TargetType="c:ContentScrollIndicator">
+        <Setter Property="Background" Value="{DynamicResource Avonic.Content.ScrollIndicatorBrush}" />
+
+        <Style Selector="^:vertical">
+            <Setter Property="Width" Value="4" />
+        </Style>
+
+        <Style Selector="^:horizontal">
+            <Setter Property="Height" Value="4" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -206,6 +206,7 @@ carries on to whatever's outside. A drag at an angle can't be blocked that way, 
 ### Extensions
 
 - **`KeyboardOffset`**, a property the token sets, so that a local `Padding` doesn't lose it, and a keyboard utility has somewhere to write.
+- **Keyboard scrolling, and the scroll indicator,** since #67: what a browser gives Ionic. No property: see [below](#keyboard-scrolling-and-the-scroll-indicator-67).
 
 ## Deliberate differences
 
@@ -224,16 +225,165 @@ carries on to whatever's outside. A drag at an angle can't be blocked that way, 
 | A waiting `IonScroll` is dropped on removal | Ionic's `readTask` still emits on the removed element, where no ancestor can hear it |
 | `ScrollTop` can be fractional | Chromium rounds `scrollTop`, measured 60.5 → 61. Avalonia's offset is a double, and its layout rounds what's drawn |
 | RTL `Offset.X` counts up from the start edge | CSS counts down from 0, measured `-100`. `ScrollToPoint(100, ...)` in RTL scrolls where `scrollToPoint(-100, ...)` does in Ionic |
-| A browser scrolls by key when focus is on the scroller | See known gaps |
+| Keyboard scrolling and the scroll indicator | Since #67: see [below](#keyboard-scrolling-and-the-scroll-indicator-67), with their own differences |
 
 ## Known gaps
 
 | Gap | Why |
 |---|---|
-| **The keyboard.** A browser makes a scroller with no focusable child a tab stop, and scrolls it by arrow (40), Page Down and Space (262 of 300), Home and End, measured `keys`. Avalonia's `ScrollViewer` only takes Page Up and Page Down, by a full viewport, with focus inside | Browser behaviour, not Ionic's, on a phone-first control. Doing it means a tab stop and a key handler that defers to a focused text box. Raised under "For you to decide" |
-| **No scroll indicator.** A phone browser draws one while scrolling, and this draws none | It's the browser's, not Ionic's: the reference, with hidden scroll bars, shows none. A base theme's `ScrollBar` is desktop-sized. Raised under "For you to decide" |
 | **No elastic overscroll.** Avalonia's `ScrollContentPresenter` limits the offset, so `ForceOverscroll`'s pixel doesn't bounce, as it does with iOS's OS-level bounce | Avalonia has none to inherit. What can be measured, the extent, matches. The bounce itself can't be compared in headless Chromium either |
 | **Momentum** is Avalonia's `ScrollGestureRecognizer`, with its own curve, not a browser's | Issue: document what's inherited. Not compared, and not tried on hardware |
+
+## Keyboard scrolling and the scroll indicator (#67)
+
+A browser gives these to Ionic for free, so they aren't in `core.json`, and they're **extensions**: behaviour with no property, so nothing
+shadows an Ionic name. Everything here was measured in Chromium 141 (Playwright 1.56's), md, on `ion-content` in `ion-app`, with the
+scripts kept in the issue's temp folder: the headless shell in Android emulation (390 wide, 2×, touch, a Pixel 8's user agent) for
+every number, and again in Chromium's full headless mode and with no emulation, which gave the same numbers. **No phone was attached**
+(`adb devices` was empty), so nothing here is from a device.
+
+### What Chromium does with the keys
+
+A content 300 high with 3000 or 5000 of content, focused by Tab unless it says otherwise.
+
+| Key | Measured |
+|---|---|
+| Up, Down | 40 |
+| Left, Right | 40, only with `scroll-x`. Physical: in RTL, Left goes towards the end (`scrollLeft` -40) |
+| Page Up, Page Down | 87.5% of the viewport, rounded down: 87, 175, 262, 350, 525 and 738 for 100, 200, 300, 400, 600 and 844 |
+| Space, Shift+Space | a page down, a page up |
+| Alt+Up, Alt+Down | a page |
+| Home, End, Ctrl+Home, Ctrl+End | the top, the bottom. Vertical only: with only `scroll-x` they do nothing |
+| Cmd+Up, Cmd+Down, on macOS | the top, the bottom: Chromium's macOS key bindings, **not measured** (no Mac here). Meta+Down measured nothing on Windows |
+| Ctrl, Shift or Meta with an arrow; any modifier with Page Down; Shift+Home, Shift+End; Ctrl+Space, Alt+Space | nothing |
+| With `scroll-x` only | Up, Down, Page Down, Space, Home and End do nothing |
+| At the limit | nothing; nested, the key goes on to the content around, **even with `overscroll-behavior: contain`**: an inner one at its end, and then Down scrolls the outer by 40, Page Down by 262, End to its end |
+
+**It's animated,** whatever the key: 150 ms of `cubic-bezier(0.42, 0, 0.58, 1)`, from the key, for 40 px as for 4,398. That's Chromium's
+`ScrollOffsetAnimationCurve` with a constant duration (`kConstantDuration` 9 / `kDurationDivisor` 60 s), and a frame-by-frame fit at 240 Hz
+in full headless matched it. **A key during one adds to its target,** not to where it's got to: two Downs 57 ms apart end at 80, at about
+207 ms; two Page Downs 50 ms apart at 524; ten repeats of a held Down, 47 ms apart, at 400, 150 ms after the last. The new segment keeps
+the speed it has, and lasts at most 150 ms and at most 2.5 times what the distance left takes at that speed: Page Down, then Up 70 ms
+later, ends at 222 at about 135 ms. A model of the curve's `UpdateTarget` (Chromium's `scroll_offset_animation_curve.cc`) gave every frame
+of the 240 Hz traces of those two to within a pixel.
+
+**Focus.**
+
+| Case | Measured |
+|---|---|
+| Tab, with nothing focusable inside | the scroller takes focus (`ion-content`'s shadow `.inner-scroll`); Shift+Tab from after it too |
+| Content that fits; `scroll-y="false"` | not a tab stop. `forceOverscroll`'s one pixel makes it one |
+| Nested, the inner can scroll | the outer isn't a tab stop, as it has the inner; Tab goes to the inner |
+| Nested, the inner fits | the outer is the tab stop |
+| A button inside, then Tab | the button. Tab again leaves the content |
+| A press on blank content, by mouse or touch | focus doesn't move (`document.activeElement` is `body`), and the keys scroll the content after it: Down 40, Page Down 262. Nothing pressed: nothing scrolls. A focused button or input loses focus |
+| The ring | `outline: auto 1px`, 2 px, from 1 outside to 1 inside, about 3.5 px round at its outer corner: `rgb(229, 151, 0)` in emulation, Android's, and `rgb(16, 16, 16)` without |
+
+**What's focused inside.**
+
+| Focus | Measured |
+|---|---|
+| A button, a checkbox, a button `ion-item` | Space clicks or toggles it and doesn't scroll; the arrows, Page Down, Home and End scroll |
+| An `<input>`, an `ion-input` | the arrows, Home, End and Space edit, and don't scroll; Page Up and Page Down scroll by a page. A caret that moves out of view scrolls the field back into view |
+| A `<textarea>` | Page Up and Page Down move the caret first, and scroll once it's at the end; the arrows, Home and End edit |
+
+### What Chromium draws while scrolling
+
+With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screenshots and a CDP screencast's frame times.
+
+| What | Measured |
+|---|---|
+| The thumb | 4 px thick, flush with the end edge (the left in RTL) or the bottom, square ends, `rgba(128, 128, 128, 0.5)`: 191 on white, 64 on black |
+| Its length | the track × viewport / extent, rounded down, at least 4: 75 for 1200 in 300, 237 for 3000 in 844, 4 for 30,000 in 300 |
+| Its place | (track − length) × offset / (extent − viewport), rounded down: 75, 84, 2 |
+| The track | the scroller's whole side; less 4 at the corner when both axes scroll (74 long at 74 for 1200 in 300, and 96 at 74 across for 1560 in 390). Not inset by the padding |
+| When | a scroll by the user: the wheel, a finger, the fling. **Not** a script's `scrollTop`, `scrollTo({ behavior: 'smooth' })`, Ionic's `scrollToPoint`, or a key |
+| How long | all there until about 300 ms after the last scroll, then a fade at a steady rate over about 300 ms: 0.5, 0.47, 0.44 … 0.02 and 0, a frame apart from 302 to 584 ms. A finger held still fades it too |
+| Both axes | one fades with the other |
+| Desktop, no emulation | a classic 15 px scroll bar, which takes the width: `clientWidth` 335 of 350 |
+| From load | **emulation shows the thumb from the page's load until the first scroll by the user**, and only then fades it |
+
+### Design
+
+- **Keys:** `PART_Container` takes a key from something in the content that didn't take it, and `PART_Scroll`'s tunnel takes one with focus on
+  the scroller itself, so both come before Avalonia's `ScrollViewer`, whose own Page Up and Page Down go a whole viewport. A key that scrolls
+  is handled. One that can't, at the limit or on an axis that's off, is passed over Avalonia's scroller, as the wheel is with no axis on, and
+  goes on to the content around, as Chromium's does. A `TextBox`, or anything in one, keeps all but Page Up and Page Down, which it doesn't
+  handle itself. The target is from where an animation is going, so a key during one adds to it, and the limit is checked there.
+- **The curve** is `ContentKeyboardScroll`, internal, Chromium's `ScrollOffsetAnimationCurve` for a key, on `AvonicConfig`'s clock, with
+  `CubicBezierEasing.Slope` (internal, new) for the speed a retarget keeps. Not `SmoothScroll`, which is Chromium's programmatic curve:
+  √distance / 60 s, and no retarget. Anything else that scrolls it in the middle stops it, as in `SmoothScroll`.
+- **Tab:** `PART_Scroll` is `Focusable` while it can scroll on an axis that's on, and gives up focus when it stops, as Chromium blurs what stops being focusable. An overlay's focus trap skips it (`OverlayHost.Focusables`), as Ionic's `focusableQueryString` can't see into `ion-content`'s shadow root; Tab still stops at it inside an overlay, as Chromium's does. When Tab brings focus to it and something in it can take focus,
+  it sends it on, to that, or with Shift past the scroller, read at that moment, as what's inside changes.
+- **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
+  focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
+  **By a finger or a pen, only a tap does:** a touch that becomes a scroll sends no `mousedown` in Chromium and moves no focus, so a
+  field being typed in keeps it, and its keyboard on a phone. Avalonia already does this: it focuses a finger's tap on release, and
+  nothing after a scroll. The first review raised it; tests hold it, and a breakage run showed code for it did nothing, so there's none.
+  Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
+  found; the scroller refuses its own bring-into-view from a press to its release, and Tab still brings it in. A press on a focused `ion-input`'s label
+  now blurs the field and focuses it again, as the scroller takes focus on the way down and the label gives it back on release: Chromium
+  does the same, measured `ionBlur`, `blur`, `ionFocus`, `focus`.
+- **The ring** is `PART_FocusRing`, a `Border` first in the scroller's template, so under the content, at a margin of -1, shown on
+  `:focus-visible`, which Avalonia sets for focus by key only, as CSS does. The margin is the theme's, `Avonic.Content.FocusRingMargin`. It draws the scroller's own `BorderBrush`, `BorderThickness`
+  and `CornerRadius`, which the theme sets: `Avonic.Content.FocusRingBrush` (`#E59700`), 2 and 3.5. The scroller doesn't clip, so the ring
+  reaches a pixel outside, and its presenter still clips the content. **Not a `FocusAdorner`,** which was tried first: Avalonia's adorner
+  layer draws over everything, so the ring was 2 px over rows with a background, where Chromium paints the outline under the scrolling
+  content and shows only the pixel outside (measured: 2 device pixels at 2×, against 4 over a transparent child). The base theme's adorner
+  is turned off on it, as the ring stands for `outline: auto`. The scroller's own background, a `Color`'s, is `PART_ScrollBackground`,
+  under the ring, as an element's own background is under its outline (the second review found it covered the inner pixel), and
+  the presenter's background is transparent where it has one, so it takes input where it did.
+- **The indicator** is `ContentScrollIndicator`, two of them in the content's `ScrollViewer` template, `PART_VerticalIndicator` and
+  `PART_HorizontalIndicator`, over the presenter, so the fixed slot stays on top, and Fullscreen takes them behind the header, as Chromium's
+  bar is on the scroller. Behaviour is in Components, and the look in the theme: `Background` from `Avonic.Content.ScrollIndicatorBrush`
+  (`#80808080`), and a `Width` or `Height` of 4 on `:vertical` and `:horizontal`. It draws the thumb itself, rounded down as measured, the
+  minimum its own thickness. It shows when the offset changes while a wheel or a scroll gesture is being dispatched to its scroller, which a
+  static class handler marks (a wheel's tunnel at the `ScrollViewer`, a gesture at its `ScrollContentPresenter` before the presenter's own
+  handler), only for a scroller with an indicator, and fades on `AvonicConfig`'s clock: 300 ms after the last, with one wait that looks
+  again when it's up, then 300 ms down to nothing. An axis that can't scroll doesn't show. It takes no input.
+- **Its relation to Avalonia's `ScrollBar`:** the content's `ScrollViewer` has its own theme with no bars, since #11, and keeps it: a base theme's
+  `ScrollBar` is a desktop control that takes input, and on a phone Chromium draws only this thumb. On desktop too, md here is the phone's:
+  the reference is a phone, and #11's behaviour 2 is that nothing takes room for a bar. A desktop browser's 15 px bar is recorded below.
+
+### Behaviours
+
+Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTests` (I1 to I6), named after these numbers.
+
+| # | Behaviour | Measured |
+|---|---|---|
+| 38 | Up and Down scroll 40, Left and Right 40 with `ScrollX`, physical in RTL | `tab`, `scrollx`, `scrollx-rtl` |
+| 39 | Page Up, Page Down and Space go 87.5% of the viewport, rounded down; Shift+Space up; Alt with Up or Down a page | `page100` … `page844`, `mods` |
+| 40 | Home and End, with or without Ctrl, go to the top and the bottom, vertical only | `tab`, `mods`, `scrollXOnly` |
+| 41 | Other modifiers do nothing, and nor do other keys; Avalonia's own page keys never act | `mods` |
+| 42 | 150 ms of `cubic-bezier(0.42, 0, 0.58, 1)` from the key, whatever the distance | `arrow`, `pageDown`, `end` |
+| 43 | A key during one adds to its target, and keeps its speed: two Downs end at 80 at 207 ms; Page Down then Up ends at 222 at about 135 | `twoQuick`, `reverse`, `held`, `twoPages` |
+| 44 | Something else scrolling it stops it, and the next key starts from where that left it | not measured; as `SmoothScroll` |
+| 45 | An axis that's off, or a limit, sends the key on to the content around | `noscrolly`, `scrollXOnly`, `nested…AtEnd` |
+| 46 | Tab stops on a content that can scroll with nothing focusable inside, and Shift+Tab; not on one that fits or has `ScrollY` off; `ForceOverscroll`'s pixel counts. One that stops being able to scroll gives up focus. An overlay's focus trap never lands on it | `tab`, `fits`, `noscrolly`, `shiftTab`, `overscrollTab` |
+| 47 | With something focusable inside, Tab goes into it and Shift+Tab past it; nested, the inner is the stop | `button`, `nested`, `nestedFits` |
+| 48 | A press on the content lets the keys scroll it after, and doesn't scroll a content around it. A finger that scrolls leaves a field its focus; a tap takes it | `click`, `tap`, `clickWithButton` |
+| 49 | A focused control that takes Space keeps it; the arrows and pages still scroll | `button`, `checkbox`, `ion-item` |
+| 50 | A text field keeps the arrows, Home, End and Space, and Page Up and Page Down scroll | `input`, `ion-input` |
+| 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half, and over the content's own `Color` | ring, `ring2` |
+| 52 | The scroll events report a key's scroll, as any other | Ionic's `onScroll` on the scroll element |
+| I1 | The thumb's thickness, length, place, minimum, edge and RTL side, and the corner with both axes | `short`, `long`, `page`, `x`, `both`, `rtl`, `padded` |
+| I2 | It shows on the wheel and a drag, not on a script, `ScrollToPoint` or a key | `wheel`, `script`, `scrollToPoint`, `smooth scrollTo`, `keys`, `touch drag` |
+| I3 | 300 ms, then a steady fade over 300 ms, and a new scroll brings it straight back | screencast |
+| I4 | Nothing on an axis that can't scroll | `x` |
+| I5 | It takes no input, and draws over the content, under the fixed slot | Chromium's overlay bar |
+| I6 | The colour is a token, the same on a dark page | `dark` |
+
+### Deliberate differences
+
+| Difference | Why |
+|---|---|
+| A press on the content focuses its scroller, where Chromium leaves focus on `body` and remembers the press | Avalonia sends keys to what has focus, and has no last-pressed node. Focus moves off a focused button or input either way, as measured `clickBlurs`, `clickBlursInput`; the scroller is what has it here, with no ring, as Avalonia shows the adorner only for focus by key. Tab from there goes into the content, to its first focusable child, where Chromium's measured `clickWithButtonTab` went too |
+| A field's caret moving out of view doesn't scroll the content back to it | Measured `input`: `scrollTop` 262 back to 3 on a Down in the field. Avalonia's `TextBox` keeps its caret in view in its own scroller only. Not a key scroll, so not in this issue |
+| A multi-line `TextBox` with Page Down: whatever Avalonia's `TextBox` does | Chromium's `<textarea>` moves the caret to the end first, then scrolls. Avalonia's `TextBox` in a base theme decides, and this scrolls only if it doesn't take the key. Not measured with a base theme |
+| The thumb isn't there from the page's load | Measured in emulation only, where it shows from load until the first scroll by the user. A phone isn't believed to: raised under "For you to decide", with no device to measure |
+| The track loses the indicator's own thickness at the corner | Chromium leaves the other bar's: both are 4 here, so it's the same, unless a theme makes them differ |
+| Nothing follows the OS's "reduce motion" | Chromium's smooth keyboard scroll follows the system's animation setting on Windows. Not measured, and Avalonia doesn't expose it. `AvonicConfig.Animated` doesn't turn it off, as Ionic's `animated` doesn't reach a browser's scrolling |
+| On desktop, the same 4 px thumb, where a desktop Chromium has a 15 px bar that takes the width | md here is a phone's, as the reference is. #11 decided nothing takes room for a bar |
 
 ## Not in this PR
 

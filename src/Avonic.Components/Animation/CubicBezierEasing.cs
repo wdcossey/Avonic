@@ -15,6 +15,9 @@ public sealed class CubicBezierEasing : Easing
     /// <summary>CSS's <c>ease</c>, <c>cubic-bezier(0.25, 0.1, 0.25, 1)</c>: a transition's timing function when it names none.</summary>
     internal static readonly CubicBezierEasing CssEase = new(0.25, 0.1, 0.25, 1);
 
+    /// <summary>CSS's <c>ease-in-out</c>, <c>cubic-bezier(0.42, 0, 0.58, 1)</c>: Chromium's smooth scroll's, by script and by key.</summary>
+    internal static readonly CubicBezierEasing CssEaseInOut = new(0.42, 0, 0.58, 1);
+
     /// <exception cref="ArgumentOutOfRangeException">An x outside 0..1, which CSS rejects.</exception>
     public CubicBezierEasing(double x1, double y1, double x2, double y2)
     {
@@ -49,6 +52,18 @@ public sealed class CubicBezierEasing : Easing
         if (progress <= 0) return 0;
         if (progress >= 1) return 1;
         return SampleY(SolveX(progress));
+    }
+
+    /// <summary>
+    /// The curve's slope, d(output) / d(input), at an input progress, as Chromium's <c>CubicBezier::Slope</c>: what a scroll
+    /// animation that changes its target keeps its speed by (<c>ContentKeyboardScroll</c>).
+    /// </summary>
+    internal double Slope(double progress)
+    {
+        var t = SolveX(Math.Clamp(progress, 0, 1));
+        var dx = SampleDerivativeX(t);
+        var dy = (3 * _ay * t + 2 * _by) * t + _cy;
+        return dx == 0 ? 0 : dy / dx;
     }
 
     /// <summary>

@@ -6,6 +6,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -37,6 +38,9 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>How long after the last scroll the watchdog calls it ended.</summary>
     internal static readonly TimeSpan WatchDogIdle = TimeSpan.FromMilliseconds(120);
+
+    /// <summary>Whether the keys are macOS's, where Cmd with an arrow goes to the top or the bottom. Tests replace it.</summary>
+    internal static Func<bool> IsMacOS { get; set; } = OperatingSystem.IsMacOS;
 
     /// <summary><c>scrollToPoint</c> jumps below this duration, in milliseconds.</summary>
     internal const double MinAnimatedDuration = 32;
@@ -114,6 +118,8 @@ public class AvonicContent : TemplatedControl
     private ContentPresenter? _container;
     private ContentPresenter? _fixed;
     private ScrollGestureRecognizer? _recognizer;
+    private ContentKeyboardScroll? _keyboard;
+    private bool _focusedByPointer;
     private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
@@ -412,14 +418,21 @@ public class AvonicContent : TemplatedControl
             _scroll.TemplateApplied -= OnScrollTemplateApplied;
             _scroll.RemoveHandler(PointerWheelChangedEvent, OnPassedOver);
             _scroll.RemoveHandler(KeyDownEvent, OnPassedOver);
+            _scroll.RemoveHandler(KeyDownEvent, OnScrollKeyDown);
+            _scroll.RemoveHandler(GotFocusEvent, OnScrollGotFocus);
+            _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
         }
 
         if (_container is not null)
         {
             _container.PropertyChanged -= OnContainerPropertyChanged;
             _container.RemoveHandler(PointerWheelChangedEvent, OnContainerInput);
-            _container.RemoveHandler(KeyDownEvent, OnContainerInput);
+            _container.RemoveHandler(KeyDownEvent, OnScrollKey);
+            _container.RemoveHandler(KeyDownEvent, OnContainerKeyDownTunnel);
         }
+
+        _keyboard?.Stop();
+        _keyboard = null;
 
         if (_fixed is not null)
         {
@@ -437,15 +450,20 @@ public class AvonicContent : TemplatedControl
             _scroll.TemplateApplied += OnScrollTemplateApplied;
             _scroll.AddHandler(PointerWheelChangedEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(KeyDownEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
+            _scroll.AddHandler(KeyDownEvent, OnScrollKeyDown, RoutingStrategies.Tunnel);
+            _scroll.AddHandler(GotFocusEvent, OnScrollGotFocus);
+            _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
+            _keyboard = new ContentKeyboardScroll(_scroll);
         }
 
         if (_container is not null)
         {
             _container.PropertyChanged += OnContainerPropertyChanged;
             _container.AddHandler(PointerWheelChangedEvent, OnContainerInput);
-            _container.AddHandler(KeyDownEvent, OnContainerInput);
+            _container.AddHandler(KeyDownEvent, OnScrollKey);
+            _container.AddHandler(KeyDownEvent, OnContainerKeyDownTunnel, RoutingStrategies.Tunnel);
         }
 
         if (_fixed is not null)
@@ -457,6 +475,7 @@ public class AvonicContent : TemplatedControl
         UpdateFixedPlacement();
         UpdateContainerChild();
         UpdateFixedChild();
+        UpdateFocusable();
     }
 
     /// <inheritdoc/>
@@ -468,6 +487,7 @@ public class AvonicContent : TemplatedControl
         {
             UpdateAxes();
             UpdateOverscroll();
+            UpdateFocusable();
         }
         else if (change.Property == ForceOverscrollProperty)
         {
@@ -496,6 +516,7 @@ public class AvonicContent : TemplatedControl
         _frame?.Dispose();
         _frame = null;
         _queued = false;
+        _keyboard?.Stop();
         OnScrollEnd();
 
         _wasDetached = true;
@@ -528,6 +549,11 @@ public class AvonicContent : TemplatedControl
         else if (e.Property == ScrollViewer.ViewportProperty)
         {
             UpdateOverscroll();
+            UpdateFocusable();
+        }
+        else if (e.Property == ScrollViewer.ExtentProperty)
+        {
+            UpdateFocusable();
         }
     }
 
@@ -539,17 +565,23 @@ public class AvonicContent : TemplatedControl
     }
 
     /// <summary>
-    /// With no axis on, the wheel and the page keys belong to whatever's outside, as with <c>overflow: hidden</c>. Avalonia's
-    /// presenter and viewer don't ask whether an axis is on, only whether there's somewhere to go, so input is marked handled
-    /// to get past them, and <see cref="OnPassedOver"/> takes that back on the other side.
+    /// With no axis on, the wheel belongs to whatever's outside, as with <c>overflow: hidden</c>. Avalonia's presenter doesn't ask
+    /// whether an axis is on, only whether there's somewhere to go, so the wheel is marked handled to get past it, and
+    /// <see cref="OnPassedOver"/> takes that back on the other side. Keys go through <see cref="OnScrollKey"/>.
     /// </summary>
     private void OnContainerInput(object? sender, RoutedEventArgs e)
     {
         if (!ScrollX && !ScrollY)
         {
-            _passedOver = e;
-            e.Handled = true;
+            PassOver(e);
         }
+    }
+
+    /// <summary>Marks input handled to get it past Avalonia's scroller, for <see cref="OnPassedOver"/> to take back.</summary>
+    private void PassOver(RoutedEventArgs e)
+    {
+        _passedOver = e;
+        e.Handled = true;
     }
 
     private void OnPassedOver(object? sender, RoutedEventArgs e)
@@ -559,6 +591,181 @@ public class AvonicContent : TemplatedControl
             _passedOver = null;
             e.Handled = false;
         }
+    }
+
+    /// <summary>
+    /// Page Up and Page Down in a one-line text field scroll the content in Chromium, where a base theme's <see cref="TextBox"/>
+    /// takes them and does nothing with them, so they're taken on the way down, by the content closest to the field. A multi-line
+    /// one keeps them, as a <c>&lt;textarea&gt;</c> moves its caret with them.
+    /// </summary>
+    private void OnContainerKeyDownTunnel(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.PageUp or Key.PageDown && TextFieldOf(e.Source) is { AcceptsReturn: false } field
+            && field.FindAncestorOfType<AvonicContent>() == this)
+        {
+            OnScrollKey(sender, e);
+        }
+    }
+
+    /// <summary>
+    /// A key with focus on the scroll part itself, before Avalonia's <see cref="ScrollViewer"/> takes Page Up and Page Down by a
+    /// whole viewport. Nothing's under it to take the key first.
+    /// </summary>
+    private void OnScrollKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (ReferenceEquals(e.Source, _scroll))
+        {
+            OnScrollKey(sender, e);
+        }
+    }
+
+    /// <summary>
+    /// A browser's keyboard scrolling, measured in Chromium: an extension, as it isn't Ionic's. A key it would scroll by that can't
+    /// scroll this way, at the limit or on an axis that's off, goes on to whatever's outside, as Chromium's does even past
+    /// <c>overscroll-behavior: contain</c>, and never to Avalonia's own page keys. A text field keeps all but the page keys.
+    /// </summary>
+    private void OnScrollKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Handled || _scroll is not { } scroll || _keyboard is not { } keyboard
+            || e.Key is not (Key.Up or Key.Down or Key.Left or Key.Right or Key.PageUp or Key.PageDown or Key.Home or Key.End or Key.Space))
+        {
+            return;
+        }
+
+        var from = keyboard.Target;
+        if ((TextFieldOf(e.Source) is null || e.Key is Key.PageUp or Key.PageDown) && KeyTarget(scroll, from, e.Key, e.KeyModifiers) is { } target
+            && (Math.Abs(target.X - from.X) >= 0.5 || Math.Abs(target.Y - from.Y) >= 0.5))
+        {
+            keyboard.To(target);
+            e.Handled = true;
+        }
+        else
+        {
+            PassOver(e);
+        }
+    }
+
+    /// <summary>The text field the source is, or is in, inside this content's scroll part.</summary>
+    private TextBox? TextFieldOf(object? source)
+    {
+        for (var visual = source as Visual; visual is not null && visual != _scroll; visual = visual.GetVisualParent())
+        {
+            if (visual is TextBox field)
+            {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Where a key goes from <paramref name="from"/>, limited to the range, or null if it doesn't scroll. An arrow is 40, a page
+    /// 87.5% of the viewport, rounded down; Space a page down and Shift+Space up; Alt with an up or down arrow a page; Home and End,
+    /// and with Ctrl, the top and the bottom. Left and Right are physical, so in RTL Left goes towards the end. Other modifiers do
+    /// nothing, as in Chromium.
+    /// </summary>
+    private Vector? KeyTarget(ScrollViewer scroll, Vector from, Key key, KeyModifiers modifiers)
+    {
+        const double line = 40;
+        var page = Math.Max(1, Math.Floor(scroll.Viewport.Height * 0.875));
+        var maxX = Math.Max(0, scroll.Extent.Width - scroll.Viewport.Width);
+        var maxY = Math.Max(0, scroll.Extent.Height - scroll.Viewport.Height);
+        var rtl = scroll.FlowDirection == Avalonia.Media.FlowDirection.RightToLeft;
+
+        double? dy = (key, modifiers) switch
+        {
+            (Key.Up, KeyModifiers.None) => -line,
+            (Key.Down, KeyModifiers.None) => line,
+            (Key.Up, KeyModifiers.Alt) or (Key.PageUp, KeyModifiers.None) or (Key.Space, KeyModifiers.Shift) => -page,
+            (Key.Down, KeyModifiers.Alt) or (Key.PageDown, KeyModifiers.None) or (Key.Space, KeyModifiers.None) => page,
+            (Key.Home, KeyModifiers.None or KeyModifiers.Control) => double.NegativeInfinity,
+            (Key.End, KeyModifiers.None or KeyModifiers.Control) => double.PositiveInfinity,
+            // macOS's own: Cmd with an up or down arrow, the top and the bottom. From Chromium's macOS key bindings, not measured.
+            (Key.Up, KeyModifiers.Meta) when IsMacOS() => double.NegativeInfinity,
+            (Key.Down, KeyModifiers.Meta) when IsMacOS() => double.PositiveInfinity,
+            _ => null,
+        };
+        double? dx = (key, modifiers) switch
+        {
+            (Key.Left, KeyModifiers.None) => rtl ? line : -line,
+            (Key.Right, KeyModifiers.None) => rtl ? -line : line,
+            _ => null,
+        };
+
+        // ScrollY off is still a scroller to a script, with somewhere to go, so it's asked. ScrollX off has nowhere to go, as it's
+        // Disabled, which the limit below sees.
+        if (dy is { } y && ScrollY)
+        {
+            return new Vector(from.X, Math.Clamp(from.Y + y, 0, maxY));
+        }
+
+        if (dx is { } x)
+        {
+            return new Vector(Math.Clamp(from.X + x, 0, maxX), from.Y);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// A scroller that can scroll takes focus, as Chromium's does: from Tab, as a tab stop when nothing in it can take focus, and
+    /// from a press, which Chromium routes the keys by without moving focus. Avalonia sends keys only to what has focus, so here a
+    /// press on the content focuses it. Content that fits, or an axis that's off, doesn't count, as <c>overflow: hidden</c> doesn't.
+    /// One that stops being able to scroll while it has focus loses it, as Chromium blurs what stops being focusable.
+    /// </summary>
+    private void UpdateFocusable()
+    {
+        if (_scroll is not { } scroll)
+        {
+            return;
+        }
+
+        var canScroll = (ScrollY && ContentScrollIndicator.HasRange(scroll.Extent.Height, scroll.Viewport.Height))
+            || ContentScrollIndicator.HasRange(scroll.Extent.Width, scroll.Viewport.Width);
+        scroll.SetCurrentValue(FocusableProperty, canScroll);
+        if (!canScroll && scroll.IsFocused)
+        {
+            (TopLevel.GetTopLevel(this)?.FocusManager as FocusManager)?.Focus(null);
+        }
+    }
+
+    /// <summary>
+    /// A press focuses the scroller only so that the keys reach it, where Chromium moves no focus, so it mustn't bring the scroller
+    /// into view in a content around it, as that focus would: a nested content part way out of view would jump. Avalonia focuses a
+    /// mouse's press on the way down, and a finger's or a pen's tap on release, not a scroll, as Chromium sends a tap's
+    /// <c>mousedown</c> after it, and asks to bring it into view straight after. Tab still brings it in.
+    /// </summary>
+    private void OnScrollRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
+    {
+        if (_focusedByPointer && ReferenceEquals(e.TargetObject, _scroll))
+        {
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>
+    /// Tab doesn't stop on a scroller with something in it that can take focus: Chromium's keyboard-focusable scroller has none. So
+    /// Tab goes on into it, and Shift+Tab, coming back out of it, goes on past it. Read at the time, as what's in it can change.
+    /// </summary>
+    private void OnScrollGotFocus(object? sender, FocusChangedEventArgs e)
+    {
+        if (ReferenceEquals(e.Source, _scroll) && e.NavigationMethod == NavigationMethod.Pointer)
+        {
+            // Only for the request that comes with this focus.
+            _focusedByPointer = true;
+            Dispatcher.UIThread.Post(() => _focusedByPointer = false, DispatcherPriority.Background);
+        }
+
+        if (!ReferenceEquals(e.Source, _scroll) || e.NavigationMethod != NavigationMethod.Tab
+            || TopLevel.GetTopLevel(this)?.FocusManager is not { } focus
+            || focus.FindNextElement(NavigationDirection.Next) is not Visual next || !_scroll.IsVisualAncestorOf(next))
+        {
+            return;
+        }
+
+        var target = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? focus.FindNextElement(NavigationDirection.Previous) : next as IInputElement;
+        target?.Focus(NavigationMethod.Tab, e.KeyModifiers);
     }
 
     private void OnContainerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
