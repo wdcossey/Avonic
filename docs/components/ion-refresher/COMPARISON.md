@@ -84,9 +84,9 @@ With no pull, only the refreshing icon shows below the header. The pulling one s
 - **The pulling icon in cancelling is a pill,** 390 x 42 with a radius of 21, where Chromium's `border-radius: 100%` makes an
   ellipse of 195 by 21: a `CornerRadius` has one radius for each corner. For those 700 ms the pill covers the start of the first
   row's text, which shows under the ellipse's curve in Chromium.
-- **Two of Ionic's own bugs are fixed** (#176; kept, as measured, by #167, then fixed at the user's decision, CLAUDE.md rule 8).
-  Avalonia could copy both, and did, so this isn't a difference Avalonia forces: it's a bug a user would hit, with no way out but
-  a page reload in Ionic's case.
+- **Two of Ionic's own bugs are fixed** (#176). #167 measured and copied them; the user then decided to fix both, recorded as
+  rule 8 asks of a deviation, with the measurement and the reason. Unlike rule 8's usual case, Avalonia doesn't force this one: it
+  could copy both, and did. The reason is that each is a bug a user would hit, with no way out but reloading the page in Ionic's case.
   - **C3: a pull overtaken by the cancel's end, let go with no move since.** Measured in Chromium (F, G): `resetNativeRefresher`
     destroys every animation, including the new pull's, and sets the progress to 0, so letting go plays back a destroyed animation,
     whose `onFinish` never comes, and so neither does `gesture.enable(true)`: nothing pulls again, ever. Here the gesture comes back
@@ -99,8 +99,9 @@ With no pull, only the refreshing icon shows below the header. The pulling one s
     refreshes (`ionRefresh` 416 ms after `cancel()`), and the reset then ends that refresh as cancelled (`ionPullEnd` `cancel` at
     733) while the app is still loading. Let go just before the reset, while its 125 ms snap back runs, the same `destroy()` ends
     the snap back, so no refresh comes and the gesture stays off (read from the code, not measured). Here a reset does nothing once a
-    pull has been let go past the threshold since `cancel()` was called: the refresh goes on until the app's `complete()`, whose own
-    reset ends it with `ionPullEnd` `complete`. A pull let go before the call is the refresh the cancel ends, as in Ionic. No
+    pull started after `cancel()` was called has been let go past the threshold: the refresh goes on until the app's `complete()`,
+    whose own reset ends it with `ionPullEnd` `complete`. A pull held at the call, or let go before it, is the cancel's to end, as in
+    Ionic: an app that cancels while the user pulls refuses that pull. No
     `cancel` comes for the refresh the cancel ended, as the refresher never went back to inactive in between; a cancel with no
     refresh since still ends as before (B8, C1).
 
