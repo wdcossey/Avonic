@@ -316,8 +316,13 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   it sends it on, to that, or with Shift past the scroller, read at that moment, as what's inside changes.
 - **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
   focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
-- **The ring** is the scroller's `FocusAdorner` in the theme, which Avalonia shows for focus by key only, as `:focus-visible` is: a `Border`
-  of 2 at a margin of -1, a radius of 3.5, `Avonic.Content.FocusRingBrush` (`#E59700`).
+- **The ring** is `PART_FocusRing`, a `Border` first in the scroller's template, so under the content, at a margin of -1, shown on
+  `:focus-visible`, which Avalonia sets for focus by key only, as CSS does. It draws the scroller's own `BorderBrush`, `BorderThickness`
+  and `CornerRadius`, which the theme sets: `Avonic.Content.FocusRingBrush` (`#E59700`), 2 and 3.5. The scroller doesn't clip, so the ring
+  reaches a pixel outside, and its presenter still clips the content. **Not a `FocusAdorner`,** which was tried first: Avalonia's adorner
+  layer draws over everything, so the ring was 2 px over rows with a background, where Chromium paints the outline under the scrolling
+  content and shows only the pixel outside (measured: 2 device pixels at 2×, against 4 over a transparent child). The base theme's adorner
+  is turned off on it, as the ring stands for `outline: auto`.
 - **The indicator** is `ContentScrollIndicator`, two of them in the content's `ScrollViewer` template, `PART_VerticalIndicator` and
   `PART_HorizontalIndicator`, over the presenter, so the fixed slot stays on top, and Fullscreen takes them behind the header, as Chromium's
   bar is on the scroller. Behaviour is in Components, and the look in the theme: `Background` from `Avonic.Content.ScrollIndicatorBrush`
@@ -348,7 +353,7 @@ Tests in `AvonicContentTests` and `ContentScrollIndicatorTests`, named after the
 | 48 | A press on the content lets the keys scroll it after | `click`, `tap`, `clickWithButton` |
 | 49 | A focused control that takes Space keeps it; the arrows and pages still scroll | `button`, `checkbox`, `ion-item` |
 | 50 | A text field keeps the arrows, Home, End and Space, and Page Up and Page Down scroll | `input`, `ion-input` |
-| 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only | ring |
+| 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half | ring, `ring2` |
 | 52 | The scroll events report a key's scroll, as any other | Ionic's `onScroll` on the scroll element |
 | I1 | The thumb's thickness, length, place, minimum, edge and RTL side, and the corner with both axes | `short`, `long`, `page`, `x`, `both`, `rtl`, `padded` |
 | I2 | It shows on the wheel and a drag, not on a script, `ScrollToPoint` or a key | `wheel`, `script`, `scrollToPoint`, `smooth scrollTo`, `keys`, `touch drag` |

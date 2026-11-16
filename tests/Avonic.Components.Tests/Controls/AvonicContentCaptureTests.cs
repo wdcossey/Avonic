@@ -94,4 +94,73 @@ public class AvonicContentCaptureTests
         Assert.Equal(390, padded.Bounds.Width);
         Assert.Equal(20, padded.GetScrollElement()!.Offset.Y);
     });
+
+    private static AvonicContent Rows(int count)
+    {
+        var rows = new StackPanel();
+        for (var i = 1; i <= count; i++)
+        {
+            rows.Children.Add(Row($"Row {i}"));
+        }
+
+        return new AvonicContent { Content = rows };
+    }
+
+    // ref/indicator.png: 30 rows in 390 by 300, a wheel of 300, 100 ms later.
+    [AvaloniaFact]
+    public void Indicator_Frame() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var content = Rows(30);
+        using var scene = new Scene(content, 390, 300);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+
+        scene.Window.MouseWheel(new Point(100, 100), new Vector(0, -6), Avalonia.Input.RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        clock.At(100);
+        Frames.Save(scene.Window.CaptureRenderedFrame()!, "avonic-content-indicator.png");
+        Assert.Equal(300, content.GetScrollElement()!.Offset.Y);
+
+        clock.At(1000);
+        Frames.Save(scene.Window.CaptureRenderedFrame()!, "avonic-content-indicator-gone.png");
+    });
+
+    // ref/focus-ring.png: the same rows, 10 in from the edges, Tab, then Page Down.
+    [AvaloniaFact]
+    public void Focus_Ring_Frame()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                using var clock = new TestClock();
+                var content = Rows(30);
+                content.Margin = new Thickness(10);
+                using var scene = new Scene(content, 390, 300);
+                scene.Window.Background = Brushes.White;
+                scene.Window.SetRenderScaling(2);
+                Dispatcher.UIThread.RunJobs();
+
+                scene.Window.KeyPressQwerty(Avalonia.Input.PhysicalKey.Tab, Avalonia.Input.RawInputModifiers.None);
+                scene.Window.KeyPressQwerty(Avalonia.Input.PhysicalKey.PageDown, Avalonia.Input.RawInputModifiers.None);
+                Dispatcher.UIThread.RunJobs();
+                clock.At(400);
+                Frames.Save(scene.Window.CaptureRenderedFrame()!, "avonic-content-focus-ring.png");
+
+                // 87.5% of 280, rounded down, as Chromium's 245.
+                Assert.Equal(245, content.GetScrollElement()!.Offset.Y);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
 }

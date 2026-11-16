@@ -88,10 +88,62 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 35 | Templates | — | Avonic only |
 | 36, 37 | Token defaults | `--padding-*` etc. `0px` | match |
 
+## Keyboard scrolling and the scroll indicator (#67)
+
+> Ionic side: Chromium 141 (Playwright 1.56's headless shell), md, Android emulation at 390 × 300, 2×, **with `--hide-scrollbars` off**, which
+> `render.js` can't do, so with a script of its own, as the rest of #67's measuring was: 30 `ion-item`s in an `ion-content` 300 high in
+> `ion-app`; for the indicator, a first wheel and its fade to clear the thumb emulation shows from load, then a wheel of 300 and a
+> screenshot 100 ms later; for the ring, the content 10 in from the edges, Tab, Page Down and 400 ms. → [`ref/indicator.png`](ref/indicator.png),
+> [`ref/indicator-gone.png`](ref/indicator-gone.png), [`ref/focus-ring.png`](ref/focus-ring.png).
+>
+> Avonic side: `AvonicContentCaptureTests.Indicator_Frame` and `Focus_Ring_Frame`, headless Skia at 2×, the same scenes, on `TestClock`.
+> **Not tried in a real window**: `tools/real-window/drive.ps1` has a new section for it, not yet run.
+
+| | Ionic | Avonic |
+|---|---|---|
+| The indicator, 100 ms after a wheel of 300 | ![](ref/indicator.png) | ![](compare/avonic-indicator.png) |
+| Tab, then Page Down | ![](ref/focus-ring.png) | ![](compare/avonic-focus-ring.png) |
+
+**The thumb matches to the pixel:** 386 to 390 across and 62 to 124 down on both, 191 grey on white (read from the frames at 2×). Both
+frames are white there a second later. **The ring matches:** one orange pixel outside the content beside the rows, as their own background
+covers its inner pixel on both sides, and the same rounded corners. Both scrolled to 245 on Page Down, 87.5% of 280. The text and the rows
+are the page's, as in the frame above.
+
+**Found here, not by the plan:** the ring was first Avalonia's `FocusAdorner`, which the adorner layer drew over the rows, 2 px wide, and
+clipped on two sides, where Chromium paints the outline under the scrolling content. It's now a part under the content. See
+[PLAN.md](PLAN.md#design-1).
+
+| # | Behaviour | Chromium | Avonic |
+|---|---|---|---|
+| 38 | Arrows | 40; sideways only with `scroll-x`; physical in RTL | match |
+| 39 | Pages | 87, 175, 262, 350, 525, 738 for 100 to 844; Space, Shift+Space, Alt+Up, Alt+Down | match |
+| 40 | Home, End | top, bottom, with Ctrl too; vertical only | match |
+| 41 | Other modifiers | nothing | match, and Avalonia's own page keys don't act either |
+| 42 | The curve | 150 ms of `cubic-bezier(0.42, 0, 0.58, 1)` from the key, for 40 as for 4,398 | match: within 1.5 px of Chromium's 240 Hz frames at 64, 96 and 128 ms |
+| 43 | A key during one | 80 at about 207 ms; 524; 400; Page Down then Up: 222 at about 135 | match, the model of Chromium's `UpdateTarget` within a pixel of every frame |
+| 44 | Something else scrolls | not measured | stops, as `SmoothScroll` |
+| 45 | At the limit | the content around, past `overscroll-behavior: contain` | match |
+| 46 | Tab stop | when it can scroll and has nothing focusable; not when it fits or with `scroll-y="false"`; `forceOverscroll` counts | match |
+| 47 | Something focusable inside | Tab goes into it; nested, the inner is the stop | match |
+| 48 | A press on the content | keys scroll it, focus stays on `body` | **deliberate difference**: the scroller takes focus, with no ring |
+| 49 | A focused button or checkbox | keeps Space, the rest scroll | match |
+| 50 | A text field | keeps the arrows, Home, End and Space; pages scroll; a caret out of view scrolls back | match for the keys, over a base theme too, whose `TextBox` takes the page keys and does nothing with them. **Known gap**: a caret isn't brought back into the content's view |
+| 50 | A `<textarea>` | Page Down moves the caret, then scrolls | **deliberate difference**: a multi-line `TextBox` keeps the page keys, as a base theme's takes them |
+| 51 | The ring | 2 px, a pixel outside, `#E59700`, by key only, under the content | match |
+| 52 | Scroll events | Ionic's `onScroll` | match |
+| I1 | The thumb's size and place | 4 px; 75 at 75, 237 at 84, 4 at 2; the corner left with both axes; left in RTL | match |
+| I2 | What shows it | the wheel, a finger; not a script, `scrollToPoint`, `scrollTo` smooth, a key | match. Headless touch, with Avalonia's gesture |
+| I3 | Timing | about 300 ms, then a steady fade over about 300 ms | match, at exactly 300 and 300 |
+| I4 | An axis that can't scroll | nothing | match; `ForceOverscroll`'s pixel draws a thumb of 299 |
+| I5 | Input, order | none, over the content, under the fixed slot | match |
+| I6 | Colour | `rgba(128, 128, 128, 0.5)`, the same on black | match, from a token |
+| — | From the page's load | emulation shows the thumb until the first scroll by the user | **deliberate difference**: hidden until a scroll. See "For you to decide" |
+| — | Desktop | a 15 px bar that takes the width | **deliberate difference**: the phone's thumb everywhere |
+
 ## Deliberate differences and known gaps
 
-These are in [PLAN.md](PLAN.md#deliberate-differences), each with its measurement and reason, and [known gaps](PLAN.md#known-gaps): the keyboard, no scroll
-indicator, no bounce, and Avalonia's momentum.
+These are in [PLAN.md](PLAN.md#deliberate-differences), each with its measurement and reason, and [known gaps](PLAN.md#known-gaps): no bounce, and
+Avalonia's momentum. #67's are in [its own table](PLAN.md#deliberate-differences-1).
 
 ## What this doesn't show
 

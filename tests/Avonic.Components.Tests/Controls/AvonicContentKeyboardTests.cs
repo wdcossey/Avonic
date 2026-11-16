@@ -749,12 +749,20 @@ public class AvonicContentKeyboardTests
                 before.Focus(NavigationMethod.Tab);
                 Settle();
 
+                var ring = Scroll(content).GetVisualDescendants().OfType<Border>().First(border => border.Name == "PART_FocusRing");
+                Assert.False(ring.IsVisible);
+
                 Press(scene, PhysicalKey.Tab);
                 Assert.True(Scroll(content).IsFocused);
-                var ring = Assert.Single(Ring(content));
+                Assert.True(ring.IsVisible);
                 Assert.Equal(new Thickness(2), ring.BorderThickness);
                 Assert.Equal(new Thickness(-1), ring.Margin);
+                Assert.Equal(new CornerRadius(3.5), ring.CornerRadius);
                 Assert.Equal(Color.Parse("#E59700"), Assert.IsAssignableFrom<ISolidColorBrush>(ring.BorderBrush).Color);
+                // Under the content, as Chromium paints the outline, so it's first in the scroller's template.
+                Assert.Equal(0, ((Panel)ring.GetVisualParent()!).Children.IndexOf(ring));
+                // And the base theme's adorner isn't drawn over it.
+                Assert.Empty(Adorners(content));
 
                 // A press focuses it too, with no ring.
                 before.Focus(NavigationMethod.Tab);
@@ -763,7 +771,7 @@ public class AvonicContentKeyboardTests
                 scene.Window.MouseUp(new Point(100, 150), MouseButton.Left);
                 Settle();
                 Assert.True(Scroll(content).IsFocused);
-                Assert.Empty(Ring(content));
+                Assert.False(ring.IsVisible);
             });
         }
         finally
@@ -772,13 +780,34 @@ public class AvonicContentKeyboardTests
         }
     }
 
-    /// <summary>What the adorner layer draws over the scroller, a focus ring.</summary>
-    private static IEnumerable<Border> Ring(AvonicContent content)
+    [AvaloniaFact]
+    public void B51_The_Ring_Reaches_A_Pixel_Outside_And_Content_With_A_Background_Covers_Its_Inner_Half() => InstalledTheme.Run(_ =>
+    {
+        // Chromium: 2 px straddling the edge over a transparent child, the outer 1 px only over rows with a background.
+        var rows = new StackPanel { Children = { new Border { Height = 100, Background = Brushes.White }, new Border { Height = 3000 } } };
+        var content = new AvonicContent { Content = rows, Margin = new Thickness(10) };
+        using var scene = new Scene(new Panel { Height = 300, VerticalAlignment = VerticalAlignment.Top, Children = { content } });
+        scene.Window.Background = Brushes.White;
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(Scroll(content).IsFocused);
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        var orange = Color.Parse("#E59700");
+        // Beside the white row, at 50: only the pixel outside.
+        Assert.Equal(orange, Frames.PixelAt(frame, 9, 50));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 10, 50));
+        // Beside nothing, at 200: both.
+        Assert.Equal(orange, Frames.PixelAt(frame, 9, 200));
+        Assert.Equal(orange, Frames.PixelAt(frame, 10, 200));
+        Assert.Equal(Colors.White, Frames.PixelAt(frame, 11, 200));
+    });
+
+    /// <summary>What the adorner layer draws over the scroller.</summary>
+    private static IEnumerable<Control> Adorners(AvonicContent content)
     {
         var scroll = Scroll(content);
-        var layer = AdornerLayer.GetAdornerLayer(scroll)!;
-        return layer.Children.Where(child => AdornerLayer.GetAdornedElement(child) == scroll && child.IsVisible)
-            .SelectMany(child => child.GetVisualDescendants().Prepend(child)).OfType<Border>();
+        return AdornerLayer.GetAdornerLayer(scroll)?.Children.Where(child => AdornerLayer.GetAdornedElement(child) == scroll && child.IsVisible)
+            ?? [];
     }
 
     // ── 52 ───────────────────────────────────────────────────────────────────────────────────
