@@ -150,10 +150,13 @@ public class AvonicRefresherCaptureTests
     [AvaloniaFact]
     public void Cancel_Frames() => InstalledTheme.Run(_ =>
     {
-        // Below the header: the refresher and the overflow of its column
+        // Below the header: the refresher and the overflow of its column. Its text can have a few fringe pixels of the primary
+        // colour, which depend on the platform's text rendering, so it's compared with the page before anything happened.
         var strip = new Rect(0, 56, 390, 100);
         using (var page = new Page())
         {
+            Render();
+            var before = Primary(page.Scene.Window.CaptureRenderedFrame()!, strip);
             page.Drag(8 + 180).Wait(16).Lift().Wait(400);
             page.Refresher.Cancel();
             page.Wait(100);
@@ -169,12 +172,15 @@ public class AvonicRefresherCaptureTests
             page.Wait(700);
             Render();
             Save(page.Scene, "cancelled");
-            Assert.Equal(0, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+            Assert.Equal(before, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
         }
 
         using (var page = new Page())
         {
             page.Wait(300);
+            Render();
+            var plain = page.Scene.Window.CaptureRenderedFrame()!;
+            var before = Primary(plain, strip);
             page.Refresher.Cancel();
             page.Wait(100);
             Render();
@@ -182,11 +188,13 @@ public class AvonicRefresherCaptureTests
             var frame = page.Scene.Window.CaptureRenderedFrame()!;
             var refreshing = page.Box("PART_RefreshingSpinner");
             Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
-            Assert.Equal(Primary(frame, strip), Primary(frame, page.Box("PART_RefreshingIcon")));
+            // Only the refreshing icon: outside it the strip is as it was
+            var icon = page.Box("PART_RefreshingIcon");
+            Assert.Equal(before - Primary(plain, icon), Primary(frame, strip) - Primary(frame, icon));
 
             page.Wait(700);
             Render();
-            Assert.Equal(0, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+            Assert.Equal(before, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
         }
     });
 }

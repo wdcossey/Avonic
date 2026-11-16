@@ -890,17 +890,21 @@ try {
         # #167: no icon is left after any kind of cancel. Ionic's cancel() shows both icons for its 700 ms fallback, the pulling one
         # as wide as the content with its spinner at the start (x 9 to 33, from 3 above the content's top), and the refreshing one
         # below the middle. The spinners are looked for by their primary colour, as the pulling icon's white pill changes the
-        # pixels at the start without its spinner, and the content's whole width is compared with before for anything left.
+        # pixels at the start without its spinner, and the content's whole width is compared with before for anything left. Text can
+        # have a few fringe pixels of the primary colour, so the counts are compared with the page's before anything happened.
         $strip = { Region $content.X $content.Y $content.Width (Px 110) }
         $start = { Region ($content.X + (Px 4)) $content.Y (Px 36) (Px 24) }
         $plainStrip = & $strip
+        $plainBlue = [Pixels]::Primary($plainStrip)
+        $plainStartBlue = PrimaryIn (& $start)
+        $plainIconBlue = PrimaryIn (& $iconArea)
 
         TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 80) 10
         Start-Sleep -Milliseconds 800
         Check 'a short pull snaps back and cancels' (((WaitForText 'Cancelled' 2) -eq 'Cancelled') -and -not (Named $CT::Text 'Item 22')) ((Texts | Select-Object -Last 1))
         $left = Changed $plainStrip (& $strip)
         $blue = PrimaryIn (& $strip)
-        Check 'and leaves no icon' ($left -lt 10 -and $blue -eq 0) "$left sampled pixels differ, $blue primary"
+        Check 'and leaves no icon' ($left -lt 10 -and $blue -le $plainBlue) "$left sampled pixels differ, $blue primary"
 
         TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
         Start-Sleep -Milliseconds 300
@@ -910,24 +914,24 @@ try {
         Shot 'ion-refresher-cancelling'
         $atStart = PrimaryIn (& $start)
         $inMiddle = PrimaryIn (& $iconArea)
-        Check 'Cancel during a refresh shows both icons, as Ionic: the pulling spinner at the start' ([bool]$refreshing -and $atStart -gt 5) "$atStart primary pixels sampled; $refreshing"
-        Check 'and the refreshing spinner in the middle' ($inMiddle -gt 5) "$inMiddle primary pixels sampled"
+        Check 'Cancel during a refresh shows both icons, as Ionic: the pulling spinner at the start' ([bool]$refreshing -and $atStart -gt $plainStartBlue + 5) "$atStart primary pixels sampled; $refreshing"
+        Check 'and the refreshing spinner in the middle' ($inMiddle -gt $plainIconBlue + 5) "$inMiddle primary pixels sampled"
         Check 'then cancels' ((WaitForText 'Cancelled' 2) -eq 'Cancelled') ((Texts | Select-Object -Last 1))
         Start-Sleep -Milliseconds 1200
         Shot 'ion-refresher-cancelled'
         $left = Changed $plainStrip (& $strip)
         $blue = PrimaryIn (& $strip)
-        Check 'and leaves no icon, and no row' ($left -lt 10 -and $blue -eq 0 -and -not (Named $CT::Text 'Item 22')) "$left sampled pixels differ, $blue primary"
+        Check 'and leaves no icon, and no row' ($left -lt 10 -and $blue -le $plainBlue -and -not (Named $CT::Text 'Item 22')) "$left sampled pixels differ, $blue primary"
 
         ClickOn (Named $CT::Button 'Cancel the refresh')
         Start-Sleep -Milliseconds 250
         $atStart = PrimaryIn (& $start)
         $inMiddle = PrimaryIn (& $iconArea)
-        Check 'Cancel with no pull shows only the refreshing spinner, as Ionic' ($inMiddle -gt 5 -and $atStart -eq 0) "$inMiddle primary in the middle, $atStart at the start"
+        Check 'Cancel with no pull shows only the refreshing spinner, as Ionic' ($inMiddle -gt $plainIconBlue + 5 -and $atStart -le $plainStartBlue) "$inMiddle primary in the middle, $atStart at the start"
         Start-Sleep -Milliseconds 1200
         $left = Changed $plainStrip (& $strip)
         $blue = PrimaryIn (& $strip)
-        Check 'and leaves no icon either' ($left -lt 10 -and $blue -eq 0) "$left sampled pixels differ, $blue primary"
+        Check 'and leaves no icon either' ($left -lt 10 -and $blue -le $plainBlue) "$left sampled pixels differ, $blue primary"
         $plainStrip.Dispose()
 
         [void][RealInput]::SetCursorPos($cx, ([int]($content.Y + $content.Height / 2))); Start-Sleep -Milliseconds 150
