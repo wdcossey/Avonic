@@ -50,8 +50,8 @@ once if the window doesn't fit on the screen.
     doesn't. Added without being run: the first run is the one that proves it.
   - `ion-content: the scroll bar` (#175): the page's `Scroll bar` toggle on, then a mouse drag of the thumb, which has to scroll the
     content, and a click on the down arrow, 40 more, read from the `Ended at` line; then the toggle off. Added without being run.
-- **211 checks** in all, the ten for `ion-content: keys and the scroll indicator` and the three for `ion-content: the scroll bar` not yet
-  run, in about four minutes before those.
+- **215 checks** in all, the ten for `ion-content: keys and the scroll indicator`, the three for `ion-content: the scroll bar` and the
+  four of #176 in `ion-refresher` not yet run, in about four minutes before those.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 
