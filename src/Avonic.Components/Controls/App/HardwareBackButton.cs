@@ -103,6 +103,7 @@ public static class HardwareBackButton
                 return;
             }
 
+            // Something took it, so the platform's own back doesn't happen.
             e.Handled = true;
 
             void ProcessHandlers()
