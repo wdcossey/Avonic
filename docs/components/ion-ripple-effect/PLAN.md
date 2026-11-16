@@ -3,7 +3,7 @@
 > Status: **approved 2026-10-15** — D1 include `Activatable`; D2 constants in Components;
 > D3 `AddRipple` returns `Action`; D4 Skia in the headless harness. Now in **Build**.
 > Sources read: `dist/collection/components/ripple-effect/ripple-effect.js` + `.css`,
-> `dist/collection/utils/tap-click/index.js`, `@ionic/docs` core.json 8.8.1.
+> `dist/collection/utils/tap-click/index.js`, `@ionic/docs` core.json 8.8.19.
 > Reference render: [`ref/README.md`](ref/README.md) (`node tools/ionic-ref/render.js ion-ripple-effect --tap`).
 
 ## What it is

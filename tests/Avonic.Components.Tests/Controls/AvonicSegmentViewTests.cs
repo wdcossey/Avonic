@@ -171,6 +171,67 @@ public class AvonicSegmentViewTests
         Assert.Equal(620, page.Scroll.Offset.X);
     }
 
+    // Since Ionic 8.8.6. Measured on 8.8.19 with the second button disabled after load, as a button with content can only be: a
+    // scroll to the middle left the value at a, to the end checked c, back to the middle left c, and back to the start checked a.
+    [AvaloniaFact]
+    public void V3_A_Scroll_To_A_Disabled_Buttons_Content_Checks_Nothing()
+    {
+        using var clock = new TestClock();
+        var built = Build();
+        using var scene = new Scene(built.Root);
+        var page = Show(built, scene);
+        page.Segment.Items.OfType<AvonicSegmentButton>().ElementAt(1).IsEnabled = false;
+        clock.At(200);
+
+        page.Scroll.Offset = new Vector(390, 0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("v1", page.Segment.Value);
+
+        page.Scroll.Offset = new Vector(780, 0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("v3", page.Segment.Value);
+
+        page.Scroll.Offset = new Vector(390, 0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("v3", page.Segment.Value);
+
+        page.Scroll.Offset = new Vector(0, 0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("v1", page.Segment.Value);
+        Assert.Equal(["v3", "v1"], page.Changes);
+    }
+
+    private sealed class NeverCommand : System.Windows.Input.ICommand
+    {
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+
+        public bool CanExecute(object? parameter) => false;
+
+        public void Execute(object? parameter)
+        {
+        }
+    }
+
+    // A button its command disables looks disabled, as a Button does, so a scroll passes it over too.
+    [AvaloniaFact]
+    public void V3_A_Scroll_Passes_Over_A_Button_Its_Command_Disables()
+    {
+        using var clock = new TestClock();
+        var built = Build();
+        using var scene = new Scene(built.Root);
+        var page = Show(built, scene);
+        var middle = page.Segment.Items.OfType<AvonicSegmentButton>().ElementAt(1);
+        middle.SetValue(AvonicButton.CommandProperty, new NeverCommand());
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(middle.IsEffectivelyEnabled);
+        clock.At(200);
+
+        page.Scroll.Offset = new Vector(390, 0);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal("v1", page.Segment.Value);
+        Assert.Empty(page.Changes);
+    }
+
     [AvaloniaFact]
     public void V3_The_First_Manual_Scroll_Raises_IonChange_Even_At_The_Same_Content()
     {

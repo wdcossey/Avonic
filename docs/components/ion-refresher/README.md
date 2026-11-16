@@ -74,7 +74,8 @@ starts from it, and only when it's at its top. A host that is a `ScrollViewer` i
 control that scrolls, as Ionic needs it on the element that scrolls. It's looked for when the refresher is attached; a host whose
 scroller isn't there yet (a `ListBox` not yet styled, with the fixed slot placed before the scroller, or a hidden one, which isn't
 templated) is looked at again after each layout of the content until it has one, as Ionic waits for the content to be ready. If the
-first layout gives it none, the error is logged, once, and nothing pulls until it has one.
+first layout gives it none, the error is logged, once, and nothing pulls until it has one. Taken out of the tree meanwhile, it stops
+waiting and makes no gesture, as Ionic 8.8.17's does. Only the first host counts (Ionic 8.8.18's `findRefresherScrollHost`).
 
 ## Checklist
 

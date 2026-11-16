@@ -77,7 +77,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicCon
 | 24 | `animated: false` | 264 of 500 at 60 ms: Ionic ignores it | match: it still eases |
 | 25 | The other methods | `bottom` 700, `by` 61 from 30 and 30.5, `byNeg` 0; `short` 0; `added then bottom` 1300; `before attached` waits, then 100 | match, except `by`: Chromium rounds to 61, and Avonic keeps 60.5: **deliberate difference** |
 | 26 | `Fullscreen` | `fs` host 466–770, parts 410–810, first child 466, `56`/`40`; `nest` 18/182; `hit at head` the head | match |
-| 27 | `Fullscreen` changes | `toggle on`, `toggle off`; `head grows` 56 until a resize and 100 ms | match for toggles. **Deliberate difference** for the head: it follows at once |
+| 27 | `Fullscreen` changes | `toggle on`, `toggle off`; on 8.8.19, `head grows` 100 and 40 a frame later, from the host's `ResizeObserver` (56 until a resize and 100 ms on 8.8.1); `head and foot`, a move of the same size, 56 and 40 until a resize | match for toggles and `head grows`, here in the layout pass. **Deliberate difference** for a move of the same size: it follows at once |
 | 28 | The fixed slot in `Fullscreen` | `fs` fixed at 466 | match |
 | 29 | Fixed sizes | `nop-f` own size at the corner; `ri-f`; `wh-f` | match, with alignments for insets |
 | 30 | Fixed doesn't scroll | `scroll keeps fixed` | match |

@@ -71,7 +71,7 @@ everywhere in Avonic.
 | B8 | A button with a content id can't be disabled | warning, enabled | warning in the log, enabled | match |
 | V1 | `setContent` scrolls smoothly; no pointer events until 100 ms after | `segment-view-scroll-disabled` on, then off | no hit testing, then back | match |
 | V2 | `ionSegmentViewScroll` with `isManualScroll` false meanwhile | yes | yes | match |
-| V3 | A person's scroll moves the checked button | `manual 600` → `v3` | the same; the first one always raises `ionChange` | match |
+| V3 | A person's scroll moves the checked button, and not to a disabled one (8.8.6) | `manual 600` → `v3`; on 8.8.19 a disabled second button is passed over | the same; the first one always raises `ionChange` | match |
 | V4 | The view follows taps and code, and jumps to the value at load | yes | yes | match |
 | V5 | A finger pages the view | `scroll-snap-type: x mandatory`, `scroll-snap-stop: always` | Avalonia's `MandatorySingle` snap points | deliberate difference |
 | V6 | Each content is the view's size | 390 × 64 | 390 × 64 | match |

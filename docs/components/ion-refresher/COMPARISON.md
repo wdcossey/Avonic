@@ -1,6 +1,6 @@
 # ion-refresher — Comparison
 
-Ionic 8.8.1, md, headless Chromium at 390 x 844, 2x, beside Avonic headless (Skia) at the same size and scale. The static render:
+Ionic 8.8.19 for the static render and 8.8.1 for the pull, which 8.8.19 doesn't change, md, headless Chromium at 390 x 844, 2x, beside Avonic headless (Skia) at the same size and scale. The static render:
 
 ```
 node tools/ionic-ref/render.js ion-refresher --bare --html '<ion-app><ion-header><ion-toolbar><ion-title>Refresher</ion-title></ion-toolbar></ion-header><ion-content><ion-refresher slot="fixed"><ion-refresher-content></ion-refresher-content></ion-refresher><ion-list><ion-item><ion-label>Item 1</ion-label></ion-item><ion-item><ion-label>Item 2</ion-label></ion-item><ion-item><ion-label>Item 3</ion-label></ion-item></ion-list></ion-content></ion-app>'

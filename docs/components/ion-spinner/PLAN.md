@@ -1,6 +1,6 @@
 # ion-spinner → `AvonicSpinner` — Plan
 
-> Sources read: `@ionic/core` 8.8.1 `dist/collection/components/spinner/spinner.js`, `spinner-configs.js` and
+> Sources read: `@ionic/core` 8.8.19 `dist/collection/components/spinner/spinner.js`, `spinner-configs.js` and
 > `spinner.css` (there is no `spinner.md.css`: the spinner has one stylesheet for both modes), `utils/theme.js`
 > `createColorClasses`, and `@ionic/docs` `core.json`. Reference render: [`ref/README.md`](ref/README.md).
 > Measurements are from real Ionic in Chromium (md, 390 wide, 2×), wrapped in `ion-app`, with every animation paused

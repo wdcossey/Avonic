@@ -752,11 +752,11 @@
       "attributes": {
         "style": "--padding-start: 50px; --offset-top: 0px; --offset-bottom: 0px;",
         "role": "main",
-        "class": "md content-ltr hydrated"
+        "class": "md content-rtl hydrated"
       },
       "classes": [
         "md",
-        "content-ltr",
+        "content-rtl",
         "hydrated"
       ],
       "rect": {

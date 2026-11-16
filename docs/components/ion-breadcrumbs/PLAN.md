@@ -4,7 +4,7 @@ A row of links to where the user came from, with a separator after each but the 
 indicator standing for the middle of a long trail. `ion-breadcrumbs` works out which breadcrumb is last, active, separated
 and collapsed; `ion-breadcrumb` draws itself from that. One family, one folder, as `ion-card` and `ion-grid` are.
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, wrapped in `ion-app` so that tap-click and
+Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in `ion-app` so that tap-click and
 focus-visible run, from `ref/` (the scene in `COMPARISON.md`) and from a throwaway script that changed props and children,
 pressed keys and hovered (the numbers are quoted where they're used).
 

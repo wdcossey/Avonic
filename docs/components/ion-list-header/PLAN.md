@@ -2,7 +2,7 @@
 
 A heading row for a list. It has lines of its own, which a list's `Lines` doesn't reach, and it isn't an "item": unlike a
 divider, it has no class `item`, so a label inside it has none of a label's item rules. Measurements are from real Ionic
-8.8.1 in Chromium, md, at 390 px wide.
+8.8.19 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist
 

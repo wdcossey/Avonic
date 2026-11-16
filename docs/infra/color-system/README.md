@@ -160,6 +160,9 @@ keys to follow it. It can be added or removed at runtime:
 
 `AvonicTheme` doesn't merge anything under `Tokens/Palettes/`. Theme-variant switching isn't wired up.
 
+Ionic's other dark palette, `high-contrast-dark.always.css`, isn't here: Avonic has no high-contrast palette, light or dark. Its
+8.8.19 change is the same new `--ion-tab-bar-background-focused`, `#353535` for md, for when one is added.
+
 ## Testing
 
 Tests that read colours need the theme installed, as in `ColorTokensTests`. The brushes follow their `Color`

@@ -2,7 +2,7 @@
 
 `ion-fab`, `ion-fab-button` and `ion-fab-list` ([#30](https://github.com/wdcossey/Avonic/issues/30)): a floating action button,
 placed over `ion-content` from its `fixed` slot, which opens lists of smaller buttons beside it. Measurements are from real Ionic
-8.8.1 in Chromium, md, at 390 × 844, wrapped in `ion-app` so that `tap-click` runs. The reference page is in [`ref/`](ref/), with
+8.8.19 in Chromium (8.8.1 when written; 8.8.19 adds only `form`, not applicable), md, at 390 × 844, wrapped in `ion-app` so that `tap-click` runs. The reference page is in [`ref/`](ref/), with
 its command in [`COMPARISON.md`](COMPARISON.md). The mobile context has no `any-hover`, so hover is read from the CSS.
 
 ## Fidelity checklist
@@ -36,7 +36,7 @@ No events, slots, parts or variables. The default slot holds the button and the 
 | [x] | `show` | `Show` (`bool`) | `:show`. Only does anything in a list, measured |
 | [x] | `size` | `Size` (`FabButtonSize?`: `Small`) | `:size-small` |
 | [ ] | `translucent` | — | Not applicable: only ios draws it (`backdrop-filter` has no md value), as on `ion-header` |
-| [ ] | `type` | — | Not applicable: HTML form |
+| [ ] | `type`, `form` | — | Not applicable: HTML form. `form` is new in 8.8.17, with the hidden form button `ion-button` has; there's no form here |
 | [x] | `ionBlur`, `ionFocus` | `IonBlur`, `IonFocus` | On the button itself, as on `AvonicButton` |
 | [x] | default slot | `Content` | One slot, so a `ContentControl`: the content is the button's logical child |
 | [x] | part `native` | `PART_Native` | |

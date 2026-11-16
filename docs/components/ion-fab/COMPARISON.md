@@ -90,7 +90,7 @@ fab's half opacity match.
 
 ## Behaviours
 
-Measured in Chromium on Ionic 8.8.1. The ids are the behaviours in [PLAN.md](PLAN.md).
+Measured in Chromium on Ionic 8.8.19. The ids are the behaviours in [PLAN.md](PLAN.md).
 
 | # | Behaviour | Ionic | Avonic | Result |
 |---|---|---|---|---|

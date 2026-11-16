@@ -2,7 +2,7 @@
 
 `ion-reorder` is a drag handle; `ion-reorder-group` is the container whose direct children are dragged up and down by it.
 Avonic: `AvonicReorder` and `AvonicReorderGroup`. Read from `reorder.js`, `reorder.md.css`, `reorder-group.js` and
-`reorder-group.css` (Ionic 8.8.1), and measured in Chromium: [`ref/measurements.json`](ref/measurements.json).
+`reorder-group.css` (Ionic 8.8.19), and measured in Chromium: [`ref/measurements.json`](ref/measurements.json).
 
 ## Fidelity checklist
 

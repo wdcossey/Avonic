@@ -2,7 +2,7 @@
 
 `AvonicInfiniteScroll` and `AvonicInfiniteScrollContent`, one family (#36). The scroll watches the nearest `ion-content`'s scroller
 and raises `IonInfinite` when it comes within a threshold of the end; the app loads more and calls `Complete()`. The content is
-what shows while it loads: a spinner and an optional line of text. Measurements are from real Ionic 8.8.1 in Chromium, md,
+what shows while it loads: a spinner and an optional line of text. Measurements are from real Ionic 8.8.19 in Chromium, md,
 390 x 844, in `ion-app` and `ion-content`, by scripts kept out of the repo; their output is in `ref/measurements.json`.
 
 ## Fidelity checklist

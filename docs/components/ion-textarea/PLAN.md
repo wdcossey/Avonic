@@ -2,7 +2,7 @@
 
 A multi-line text field: `ion-input`'s label in one of five placements, start and end slots, helper and error text, a counter
 and md's three looks (no fill, `solid`, `outline` with a notch), around a native `<textarea>` with `rows`, `cols`, `wrap` and
-`autoGrow`. No clear button and no `type`. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, wrapped in
+`autoGrow`. No clear button and no `type`. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in
 `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the events; a mobile context for
 the boxes). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 

@@ -4,7 +4,7 @@ A row of tabs and the pages they switch: `ion-segment` holds `ion-segment-button
 under it that slides from the last one; `ion-segment-view` holds `ion-segment-content`s side by side in a horizontal scroller,
 and a button with a `contentId` pages it. One family, one PR (#28).
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`. The page is in
+Measurements are from real Ionic 8.8.1 in Chromium, and V3's disabled button on 8.8.19, md, 390 px wide, wrapped in `ion-app`. The page is in
 [COMPARISON.md](COMPARISON.md). The behaviours were measured with throwaway Playwright scripts on the same page: mouse taps and
 drags, held presses, the keys, the indicator's transform sampled during its transition, and `scrollLeft` sampled every frame
 during each smooth scroll.
@@ -155,7 +155,7 @@ Each becomes a test. "Measured" is from the scripts above.
 |---|---|---|
 | V1 | `SetContent`: scrolls to the content's index × its width, smoothly (S12) or at once; no hit testing while it does, until 100 ms after the last scroll | `setContent`, `segment-view-scroll-disabled`, `checkForScrollEnd`; measured class on during, off after |
 | V2 | `IonSegmentViewScroll` on each scroll: `ScrollRatio` = offset / (extent − viewport), `IsManualScroll` false during `SetContent` | `handleScroll` |
-| V3 | A user's scroll moves the segment's checked button to `round(ratio × (n − 1))`, with `IonChange`, without scrolling back; the first one always raises it | `handleSegmentViewScroll`, `lastNextIndex`; measured `manual 600` → `v3` |
+| V3 | A user's scroll moves the segment's checked button to `round(ratio × (n − 1))`, with `IonChange`, without scrolling back; the first one always raises it. Since 8.8.6, not to a disabled button: the scroll checks nothing, and isn't remembered | `handleSegmentViewScroll`, `lastNextIndex`; measured `manual 600` → `v3`; on 8.8.19, with the second button disabled after load, the middle left `a`, the end checked `c`, the middle again left `c`, the start checked `a` |
 | V4 | A segment whose buttons have a `ContentId` finds the view; at load the view jumps to the checked button's content; when the value changes, by tap, drag, key or code, it scrolls smoothly; a null value becomes the first button's | `getSegmentView`, `updateSegmentView`, `valueChanged`; measured `view click`, `view programmatic` |
 | V5 | A touch drag pages, one content at a time, snapping to the nearest; `SwipeGesture="False"` or disabled stops it, and code still pages | `scroll-snap-type: x mandatory`, `scroll-snap-stop: always`, `overflow-x: hidden` |
 | V6 | Each content is the view's width and the view's height, and scrolls vertically | `segment-content.css` |

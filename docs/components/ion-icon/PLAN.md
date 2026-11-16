@@ -12,7 +12,7 @@ It paints in the current text colour, and it can mirror itself in right-to-left 
 
 ## Corrections to the issue
 
-Measured in real Ionic 8.8.1 (md, Chromium, computed styles):
+Measured in real Ionic 8.8.19 (md, Chromium, computed styles):
 
 | The issue says | What Ionic does |
 |---|---|

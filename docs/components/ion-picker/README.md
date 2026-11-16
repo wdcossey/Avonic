@@ -68,7 +68,9 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 
 - At load the column centres its value's option, which is active (its colour). A value with no option is kept, with the first
   option at the centre and none active; set while the column is visible, it becomes the first option's, with `IonChange`.
-- A value from code scrolls there smoothly (√distance / 60 s, eased), with no event. A hidden column waits until it's shown.
+- A value from code scrolls there smoothly (√distance / 60 s, eased), with no event. A hidden column waits until it's shown, and
+  then only its value's option is active: an old one is cleared, as Ionic 8.8.19 does (8.8.1 looked for it in the column's shadow
+  root, where slotted options aren't, and left it coloured; Avonic cleared it from the start, as Ionic meant).
 - While the user scrolls, the option at the centre is active; 250 ms after the last scroll it becomes the value, with one
   `IonChange`. A disabled option is never active. A wheel notch scrolls 100 px and snaps to the nearest option; a touch drag snaps
   when it ends.
@@ -88,16 +90,13 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 - **`disabled` is `IsEnabled`** on the column and the option, as the mapping says. Ionic's column only stops its options
   (`pointer-events: none`), so a control in its prefix or suffix stays live there and is disabled here. The alternative was a
   `Disabled` property, as for #34's reorder group, but the column does stop its children, and a prefix or suffix is text in practice.
-- **A click on a disabled option does nothing.** Ionic 8.8.1 sets the column to it, raises `ionChange`, then, as the value has no
+- **A click on a disabled option does nothing.** Ionic 8.8.19 sets the column to it, raises `ionChange`, then, as the value has no
   active option, sets it to the first option and raises `ionChange` again (measured: `b`, then `a`). The alternative was to copy
   that, which `IsEnabled` doesn't allow; it reads as a bug no app relies on.
-- **`SetFocus()` focuses the column.** Ionic 8.8.1's focuses `assistiveFocusable`, which nothing sets, so it does nothing. Its
+- **`SetFocus()` focuses the column.** Ionic 8.8.19's focuses `assistiveFocusable`, which nothing sets, so it does nothing. Its
   documentation says it focuses the scroller, which is what this does; the alternative, a method that does nothing, would be dead.
 - **Mobile is Android or iOS** (`isPlatform('mobile')` is `any-pointer: coarse`, which Avalonia doesn't report): it reverses the
   arrows and pages, and turns off the focused background (`any-hover`). `AvonicPickerColumn.IsMobile` is internal, for tests.
-- **A column shown again clears an old active option.** Ionic's `visibleCallback` means to (`oldActive`), but looks in the
-  column's shadow root, where slotted options aren't, so an option active before the column was hidden stays coloured beside the
-  new one. The alternative was to copy that; the comment says what Ionic intends.
 - **With one numeric column, a tap on an option in the highlight takes digits for that column.** Ionic passes the tapped element,
   the option, as the input mode's column, so no column becomes active and typing selects nothing. The alternative was to copy
   that; `ion-datetime` always has two numeric columns, where both agree.

@@ -88,7 +88,10 @@ All 23 in [PLAN.md](PLAN.md#behaviours), each with a test in `AvonicRangeTests`,
 - A drag on the slider decides at 10 px, at priority 100, so a vertical drag still scrolls; then the nearer knob follows the pointer
   exactly, and the value rounds to `Step`. In an `AvonicContent`, its `ScrollY` is off until the release.
 - A tap, or a move under 10 px, moves the nearer knob to the release. With two knobs, a tie goes to B, and the knobs can cross.
-- Right and Up add a step on a focused knob, Left and Down take one away, in RTL too.
+- A change of `DualKnobs` puts the knobs on the value as the new number of knobs reads it: a pair's upper for one, a number's 0 and
+  itself for two (Ionic 8.8.19's `dualKnobsChanged`).
+- Right and Up add a step on a focused knob, Left and Down take one away, in RTL too. RTL is the inherited `FlowDirection`, as
+  Ionic 8.8.19 reads `dir` from the nearest ancestor.
 - In an item, 18 px of padding at an end with nothing there, so that a knob at the limit isn't cut off by the item. In an item's
   start or end slot it grows, with `FlexRow.Flex` 3, as `flex: 3`.
 - Each knob is a slider for automation, named by `AutomationProperties.Name`, or else as Chromium names it from the label element.

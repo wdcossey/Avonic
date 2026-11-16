@@ -2,7 +2,7 @@
 
 A small API over a lot of CSS: nearly everything `ion-label` does depends on the `ion-item` around it. So this PR is
 mostly how a child control's look follows its host, which `ion-note`, `ion-text` and the form controls will reuse.
-Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide.
+Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist
 

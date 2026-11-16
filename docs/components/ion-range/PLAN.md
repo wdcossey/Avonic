@@ -17,7 +17,7 @@ and Chromium's accessibility tree through CDP. The pages are at the top of [COMP
 | [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`. Bars, knob, halo, pin and ticks |
 | [x] | `debounce` | `Debounce` (`int?`, ms) | `IonInput` only, through `AvonicConfig.Schedule`, as `debounceEvent` is `setTimeout`. `int?` as in `AvonicInput` (#120) |
 | [x] | `disabled` | `IsEnabled` | Mapping rule. `:range-disabled` follows the effective `IsEnabled`, where Ionic's class follows only its own prop: decided at the PR, so that a range in a disabled panel fades |
-| [x] | `dualKnobs` | `DualKnobs` (`bool`) | Ionic has no watch on it: the ratios are worked out from `Value` when the range is attached and when `Value`, `Min` or `Max` change, as there |
+| [x] | `dualKnobs` | `DualKnobs` (`bool`) | The ratios are worked out from `Value` when the range is attached and when `Value`, `Min`, `Max` or, since Ionic 8.8.19's `dualKnobsChanged`, `DualKnobs` change, as there. 8.8.1 had no watch on it, and left the knobs where they were |
 | [x] | `label` | `Label` (`string?`) | Beats `LabelContent`, as Ionic renders the slot only when `label` is undefined. `""` still counts as a label |
 | [x] | `labelPlacement` | `LabelPlacement` (`RangeLabelPlacement`) | `End`, `Fixed`, `Stacked`, `Start` (default) |
 | [x] | `max` | `Max` (`double`, 100) | Not finite: 100, as `maxChanged` does with `isSafeNumber` |
@@ -106,7 +106,7 @@ From `range.js` and `range.md.css`, each checked in Chromium. Each becomes a tes
 | 4 | A drag on the slider captures at 10 px, priority 100: `IonKnobMoveStart` at the capture, `IonInput` once a frame, `IonChange` and `IonKnobMoveEnd` at the release. The knob follows the pointer exactly, and the value rounds to `Step`. Meanwhile the range is `:range-pressed` and the knob `:pressed` | `setupGesture`, `onMove`, `update`; measured `drag` |
 | 5 | `Snaps` puts the knob on a step as it moves. With `Ticks` too, a tick per step from `Min` to `Max`, active between the two ends of the active bar | `update`, `renderRangeSlider`; measured `r8` (11 ticks, 6 active) |
 | 6 | Right and Up on a focused knob add a step, Left and Down take one away, in RTL too; no other key does anything. Each raises start, input (if it changed), change and end, at the limit too | `handleKeyboard`; measured `ArrowRight` to `Enter`, `Right at max` |
-| 7 | Two knobs: `Value` is `{ lower, upper }`. A press moves the nearer knob, B on a tie. They can cross: A and B keep their identity, and `:lower` and `:upper` swap. A value set in code goes to the knobs so that they move least. A number given to two knobs is `{ 0, n }`, and a pair given to one is its upper | `setPressedKnob`, `updateRatio`, `getValue`; measured `A drag`, `click 50%`, `equidistant`, `set 70 number`, `single obj` |
+| 7 | Two knobs: `Value` is `{ lower, upper }`. A press moves the nearer knob, B on a tie. They can cross: A and B keep their identity, and `:lower` and `:upper` swap. A value set in code goes to the knobs so that they move least. A number given to two knobs is `{ 0, n }`, and a pair given to one is its upper. Since 8.8.19, a change of `DualKnobs` puts the knobs on the value read that way, moving least, and raises nothing | `setPressedKnob`, `updateRatio`, `getValue`, `dualKnobsChanged`; measured `A drag`, `click 50%`, `equidistant`, `set 70 number`, `single obj`; on 8.8.19, two knobs at 20 and 80 made one: 80; one on that pair made two: A 80, B 20; 50 made two: A 50, B 0 |
 | 8 | `ActiveBarStart`: the bar runs between it and the knob, on whichever side the knob is; the ticks between are active | `renderRangeSlider`; measured `r9` (bar from 20 % to 50 %) |
 | 9 | `Pin`: a pin over the knob with `PinFormatter(value)`, scaled from 0.01 to 1 and raised 24 px while the knob is pressed or keyboard-focused, with the knob staying at 0.67. Room for it: 28 px of padding above, or under a stacked label | md.css; measured `press`, `release 500`, `r3` (host 70 tall) |
 | 10 | The knobs are tab stops, A then B. `IonFocus` as focus enters the range and `IonBlur` as it leaves; nothing between its knobs. A knob focused by keyboard or code is `:ion-focused` (halo 2×, pin up, knob at 1 with no pin), and one focused by a press isn't. A press on a knob focuses it | `onKnobFocus`, `onKnobBlur`, `focusFromPointer`; measured `tabs`, `focused part`, `click same` |
@@ -114,7 +114,7 @@ From `range.js` and `range.md.css`, each checked in Chromium. Each becomes a tes
 | 12 | In an item, at any depth: `:in-item`; with nothing at the start (a start or fixed label, or a start slot) 18 px of padding there, and the same at the end, so that a knob at the limit isn't cut off; a stacked label gets 10 px above. The item counts it as an input. In an item's start or end slot, `flex: 3` (measured: 265.5 of the row, the slider 229.5) | `hostContext('ion-item')`, `needsStartAdjustment`; measured `r1`, `r2`, `r6`, `r4` |
 | 13 | The label: start puts it before the slider with 16 px between, end after; fixed is 100 px wide, wrapping; stacked is above at 0.75 from its top start corner, 16 px over the slider. With none, it takes no room. A long label squeezes the slider, to nothing (measured `r12`). A label in the slot is at most 200 px, on one line, with an ellipsis | md.css; measured `r1`, `r4`, `r5`, `r6`, `r12` |
 | 14 | Start and end slots: 14 px toward the slider, text at 12 px, an icon at 24 px | md.css; measured `r8`, `r11` |
-| 15 | RTL mirrors it: the knob is near the right for a low value, and a press counts from the right. The arrows don't swap | `isRTL`; measured `rtl` |
+| 15 | RTL mirrors it: the knob is near the right for a low value, and a press counts from the right. The arrows don't swap. RTL from an ancestor counts too | `isRTL`; measured `rtl`; on 8.8.19, with `dir="rtl"` on a `div` around it only: the knob's centre at 292.5 for 25, a press 20 % from the left 80 |
 | 16 | `Color`: the bar in the colour at 0.26, and the active bar, knob, halo, pin and ticks in it | md.css `:host(.ion-color)` |
 | 17 | `Debounce`: `IonInput` waits until that long after the last change, with the last value; `IonChange` doesn't | `debounceEvent`; measured `debounced r3 twice` (changes at 795 and 856 ms, input at 1058) |
 | 18 | While a knob is dragged inside an `AvonicContent`, its `ScrollY` is off, and back after. A vertical drag doesn't capture, and scrolls | `disableContentScrollY`; measured `vertical drag`, `sideways then up` |
@@ -172,10 +172,11 @@ The rules that read the range's state, and the slots' rules, are in the `Control
 presenter, and `::slotted(ion-icon[slot])` is a pseudoclass that the range works out from what's in each slot, `:start-icon` and
 `:end-icon`. Nothing is added to `Styles/`, so the style budget is untouched.
 
-### RTL: a deliberate difference
+### RTL
 
-As in #116: Ionic's `isRTL` reads only the range's own `dir` and the document's. `FlowDirection` inherits, so here RTL is RTL
-throughout.
+RTL is the range's `FlowDirection`, which inherits. Since Ionic 8.8.19, `isRTL(el)` walks up to the nearest element with `dir` (skipping
+`auto` and empty), then the document, so `dir` on an ancestor counts there too, and the two agree. In 8.8.1 it read only the range's own
+`dir` and the document's, and this was a deliberate difference, as in #116.
 
 ## Dependencies
 

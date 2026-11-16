@@ -2,7 +2,7 @@
 
 A search field: a native `<input type="search">` with a search icon at its start, a clear button at its end, and in md a
 cancel button (a back arrow) that takes the search icon's place. md draws the input as a white card: 2 px corners, md's
-three-part shadow, 55 px of padding at each side for the icons. Measurements are from real Ionic 8.8.1 in Chromium, md, at
+three-part shadow, 55 px of padding at each side for the icons. Measurements are from real Ionic 8.8.19 in Chromium, md, at
 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the events;
 a mobile one for the boxes). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 

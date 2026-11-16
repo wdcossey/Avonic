@@ -1,7 +1,7 @@
 # ion-item-divider — Plan
 
 A heading row between items, with three slots like an item, and a `sticky` prop that Ionic gets for free from CSS and
-Avalonia has no equivalent for. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide.
+Avalonia has no equivalent for. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist
 

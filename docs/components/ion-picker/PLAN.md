@@ -5,7 +5,7 @@ The inline wheel picker: `ion-picker` holds `ion-picker-column`s side by side, e
 rows above and below it. One family, one PR (#37). `ion-datetime` (#46) is built on it, so the column's API and behaviour, and the
 picker's internal numeric input mode, follow Ionic's `.js` exactly.
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: the
+Measurements are from real Ionic 8.8.1 in Chromium, and a column shown again on 8.8.19 (C1), md, 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: the
 boxes and colours, `scrollTop` at load and sampled every frame during a programmatic change, a wheel notch, a click on an option, the
 keys, a value with no option, a click on a disabled option and a disabled column. The page is in [COMPARISON.md](COMPARISON.md).
 
@@ -50,7 +50,7 @@ Internal: `numericInput` → `internal NumericInput`; `setValue()` and `scrollAc
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `ionChange` | `IonChange` (`IonChangeEvent`, bubbles, `PickerColumnChangeEventArgs.Value`) | From the user only: a scroll that comes to rest, a click, a key, typing. Not for a programmatic `Value` |
-| [x] | `setFocus()` | `SetFocus()` | Focuses the column. Ionic 8.8.1's focuses `assistiveFocusable`, which nothing sets, so it does nothing: see "Decided" |
+| [x] | `setFocus()` | `SetFocus()` | Focuses the column. Ionic 8.8.19's focuses `assistiveFocusable`, which nothing sets, so it does nothing: see "Decided" |
 | [x] | `prefix` slot | `PrefixContent` (+ `PrefixContentTemplate`) | Left of the options |
 | [x] | `suffix` slot | `SuffixContent` (+ `SuffixContentTemplate`) | Right of the options |
 
@@ -74,7 +74,7 @@ From `picker-column.js`, `picker-column-option.js` and `picker.js`; every number
 
 | # | Behaviour | Ionic |
 |---|---|---|
-| C1 | Once it's visible, the column jumps to centre the option whose value is `value`, and that option is active (`option-active`): its text is its colour's base. No `ionChange`. Measured: `scrollTop` 121 for the 4th option, 34 × 3 + 19 | IO callback → `scrollActiveItemIntoView()`; `scroll-snap-align: center` |
+| C1 | Once it's visible, the column jumps to centre the option whose value is `value`, and that option is active (`option-active`): its text is its colour's base. No `ionChange`. Measured: `scrollTop` 121 for the 4th option, 34 × 3 + 19. Shown again, an old active option is cleared (8.8.19's `el.querySelector`; measured on 8.8.19, hidden at Red, value Blue, shown: only Blue active). 8.8.19's `picker-column-option.md.css` also colours `[part~=active]`, which only `ion-datetime` sets: for #46 | IO callback → `scrollActiveItemIntoView()`; `scroll-snap-align: center` |
 | C2 | A programmatic `value` while visible scrolls smoothly to its option, √distance / 60 s, Chromium's ease in-out (measured 136 px in 200 ms), and no `ionChange` | `valueChange` → `scrollActiveItemIntoView(true)` |
 | C3 | A scroll by the user moves the active option with the centre at every frame, and 250 ms after the last scroll sets `value` to the centred option and raises `ionChange` once. A disabled option at the centre is never active | `initializeScrollListener` |
 | C4 | A scroll comes to rest centred on an enabled option. Measured: a 100 px wheel notch from 121 rests at 223, the nearest | `scroll-snap-type: y mandatory`; `scroll-snap-align: none` on disabled options unless the column is disabled |

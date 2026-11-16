@@ -2,7 +2,8 @@
 
 The scrolling area of a page. Scrolling is Avalonia's `ScrollViewer`, including momentum and the touch gesture, so this PR
 is mostly what Ionic adds around it: scroll events on Ionic's timeline, scroll methods, fullscreen and the fixed slot.
-Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide. **Touch hasn't been tried on real hardware**, here
+Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, and those 8.8.19 changed (`Fullscreen` after a header's
+change, 27) again on 8.8.19. **Touch hasn't been tried on real hardware**, here
 or anywhere in this project. Touch below means Avalonia's headless `TouchBegin`, `TouchMove` and `TouchEnd`.
 
 ## Fidelity checklist
@@ -119,7 +120,7 @@ Each becomes a test, named after its number in `AvonicContentTests`. Scene names
 | 24 | `AvonicConfig.Animated` off changes nothing: it still eases | measured `animated:false`: 264 of 500 after 60 ms |
 | 25 | `ScrollToTop`, `ScrollToBottom` and `ScrollByPoint` go through it. Content added just now counts. Before load, a scroll waits for load | measured `bottom`, `short`, `added then bottom`, `before attached` |
 | 26 | `Fullscreen` takes the background and scroll parts to the page's edges, and pads the content back, so it starts where it would have and can scroll clear. They paint and take input there, unless something with a higher `ZIndex` is on top. The page is the closest `.ion-page`, or else the parent | `readDimensions`, `getPageElement`; measured `fs`, `nest`, `hit at head` |
-| 27 | `Fullscreen` follows a change, and the page's layout, at once | measured `toggle on`, `toggle off`, `head grows` |
+| 27 | `Fullscreen` follows a change, and the page's layout, at once | measured `toggle on`, `toggle off`, `head grows`; on 8.8.19, `head grows` (the content resized) and `head and foot` (moved, same size) |
 | 28 | The fixed slot is at the host's corner, not the page's | measured `fs` fixed: 466 |
 | 29 | The fixed slot is as big as its content, at the corner. An alignment places it, or stretches it | `position: absolute`; measured `nop-f`, `ri-f`, `wh-f` |
 | 30 | It doesn't scroll, and only takes input on its own child | measured `scroll keeps fixed` |
@@ -220,7 +221,7 @@ carries on to whatever's outside. A drag at an angle can't be blocked that way, 
 | `GetScrollElement()` is null before it's in a tree | Ionic's promise waits. A theme is found through the tree, so there's no template to apply in a constructor. `ScrollToPoint` and the others do wait, so use those, or read it on `Loaded` |
 | A `Margin` on the control is honoured | `content.css` has `:host { margin: 0 !important }`. A control's margin is how Avalonia lays out, so it isn't removed. Read from the CSS, not measured |
 | A child's alignment from its own `ControlTheme` loses to the slot's default | Global `Styles` beat a `ControlTheme`, and this is set at style priority, as the project's other slot defaults are. A local value or a `Style` wins. A control like `ion-fab` needs to set its alignment in code or with a style |
-| `Fullscreen` follows the layout at once | Measured `head grows`: Ionic stays at 56 until a window resize and 100 ms after it. Its comment says that's to limit thrashing, and a layout pass here already batches |
+| `Fullscreen` follows the layout at once, a move included | Since 8.8.19 Ionic's `ResizeObserver` on the host re-reads the offsets a frame after the host's own size changes, while `fullscreen` is on (not in a popover, and not while hidden): measured `head grows` 56 → 100, where 8.8.1 stayed at 56 until a window resize and 100 ms after it. A move that keeps the size fires nothing: measured `head and foot`, the head 20 taller and the foot 20 shorter, stays at 56 and 40 there, and follows here. A layout pass already batches, so following it costs nothing more |
 | A wrapper's position counts from the page, whatever's positioned | `offsetTop` is from the nearest positioned ancestor. Avalonia has no such idea. The same in the measured `nest` |
 | A removed and re-added control keeps its scroll position | A browser resets it, measured `afterReattachTop` 0. Avalonia's doesn't, and a page that's been navigated away from and back is better for it |
 | A waiting `IonScroll` is dropped on removal | Ionic's `readTask` still emits on the removed element, where no ancestor can hear it |
@@ -483,6 +484,8 @@ Tests in `AvonicContentScrollBarTests` (S1 to S9), named after these numbers.
 |---|---|
 | `role` off inside `ion-menu`, `ion-popover`, `ion-modal` | Those controls don't exist. Each can turn it off with a style: `c\|AvonicModal c\|AvonicContent { AutomationProperties.LandmarkType: null }` |
 | `.content-sizing` inside `ion-popover`, and `recalculateDimensions`, `getBackgroundElement` | #5's overlays. A popover's content sizes to its content, so it needs the `contain: size` in `MeasureOverride` turned off |
+| `--internal-content-safe-area-padding-bottom`, added to the scroll part's bottom padding in 8.8.19's `content.css` | Only `ion-modal` sets it (`applyFullscreenSafeAreaTo`): `var(--ion-safe-area-bottom, 0px)` on its content, in a modal that isn't a sheet or a card and has no footer, so the content scrolls clear of the system's bar. 0 everywhere else, as here. The modal (#42) adds it |
+| A popover's exclusion from 8.8.19's fullscreen `ResizeObserver` | No popover yet; `contain: none` there would feed the offsets back into the host's size. The popover (#43) adds it |
 | `ion-tabs` as the page, and `ionTabBarLoaded` | The tabs control. Until then, a class `ion-page` on the tabs' host does it |
 | `ion-app` as the page | No such control. Measured: it would win over a plain parent |
 | `.transition-effect`, `.content-ltr`, `.content-rtl` | iOS only: `transitionShadow = mode === 'ios'` |

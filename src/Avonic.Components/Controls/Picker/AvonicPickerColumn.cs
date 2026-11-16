@@ -383,9 +383,8 @@ public class AvonicPickerColumn : ItemsControl
         _isColumnVisible = visible;
         if (visible)
         {
-            // The first call has to come before the scroll listener, so the active option is marked here, and an old one cleared.
-            // Ionic looks for the old one in the column's shadow root, where slotted options aren't, so it never finds it: see
-            // "Decided" in the README.
+            // The first call has to come before the scroll listener, so the active option is marked here, and an old one cleared,
+            // as Ionic 8.8.19 finds it among the column's own options (8.8.1 looked in its shadow root, and never found it).
             foreach (var option in Options.Where(option => option.IsActive))
             {
                 option.SetActive(false);

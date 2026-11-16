@@ -485,9 +485,10 @@ public class AvonicRange : TemplatedControl, IItemControl
                 Render();
             }
         }
-        else if (change.Property == MinProperty || change.Property == MaxProperty)
+        else if (change.Property == MinProperty || change.Property == MaxProperty || change.Property == DualKnobsProperty)
         {
-            // minChanged, maxChanged
+            // minChanged, maxChanged, and since 8.8.19 dualKnobsChanged: the knobs go where the value puts them, a pair's upper for
+            // one knob, a number's 0 and itself for two. Before the range is attached, attaching works them out again.
             _places = null;
             if (!_noUpdate)
             {
@@ -516,7 +517,7 @@ public class AvonicRange : TemplatedControl, IItemControl
             _places = null;
             Render();
         }
-        else if (change.Property == DualKnobsProperty || change.Property == PinProperty
+        else if (change.Property == PinProperty
                  || change.Property == PinFormatterProperty || change.Property == SnapsProperty
                  || change.Property == TicksProperty || change.Property == LabelProperty || change.Property == LabelContentProperty
                  || change.Property == LabelPlacementProperty || change.Property == StartContentProperty
