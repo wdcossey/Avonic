@@ -1485,4 +1485,24 @@ public class AvonicCheckboxTests
         Dispatcher.UIThread.RunJobs();
         Assert.True(Label(box).IsVisible);
     });
+
+    // disconnectedCallback disconnects the observer, and connectedCallback reads textContent again.
+    [AvaloniaFact]
+    public void B18_Detached_It_Watches_Nothing_And_Reads_The_Text_Again_When_Attached() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock();
+        var box = new AvonicCheckbox { Content = text };
+        var holder = new StackPanel { Children = { box } };
+        using var scene = Themed(holder);
+        Assert.False(Label(box).IsVisible);
+
+        holder.Children.Remove(box);
+        text.Text = "While detached";
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Label(box).IsVisible);
+
+        holder.Children.Add(box);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Label(box).IsVisible);
+    });
 }
