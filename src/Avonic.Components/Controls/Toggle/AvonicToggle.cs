@@ -130,18 +130,17 @@ public class AvonicToggle : ContentControl, IItemControl
         new FuncMultiValueConverter<object?, Thickness>(values => new Thickness(Number(values.FirstOrDefault()), 0, 0, 0));
 
     /// <summary>
-    /// The focus circle's place, as a margin: <c>left: calc(var(--handle-spacing) + (var(--handle-width) - 36px) / 2)</c>, so
-    /// centred on the handle, and half its height off above and below, so that, centred, it's centred on whatever height the track
-    /// has, as <c>inset-block-start: 50%; transform: translateY(-50%)</c> is, and takes no room. The values are the spacing, the
-    /// handle's width, then the circle's own width and height.
+    /// The focus circle's place across, as a margin: <c>left: calc(var(--handle-spacing) + (var(--handle-width) - 36px) / 2)</c>,
+    /// so centred on the handle. Down, it's centred by its alignment on whatever height the track has, as
+    /// <c>inset-block-start: 50%; transform: translateY(-50%)</c> is: Avalonia centres a child taller than its slot. The values are
+    /// the spacing, the handle's width, then the circle's own width.
     /// </summary>
     public static readonly IMultiValueConverter FocusIndicatorMarginConverter =
         new FuncMultiValueConverter<object?, Thickness>(values =>
         {
             var numbers = values.Select(Number).ToArray();
             double At(int index) => numbers.ElementAtOrDefault(index);
-            var vertical = -At(3) / 2;
-            return new Thickness(At(0) + ((At(1) - At(2)) / 2), vertical, 0, vertical);
+            return new Thickness(At(0) + ((At(1) - At(2)) / 2), 0, 0, 0);
         });
 
     private static double Number(object? value) => value is double number && double.IsFinite(number) ? number : 0;

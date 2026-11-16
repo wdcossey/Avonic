@@ -112,7 +112,6 @@
                                             <DynamicResource ResourceKey="Avonic.Toggle.HandleSpacing" />
                                             <DynamicResource ResourceKey="Avonic.Toggle.HandleWidth" />
                                             <Binding Path="Width" RelativeSource="{RelativeSource Self}" />
-                                            <Binding Path="Height" RelativeSource="{RelativeSource Self}" />
                                         </MultiBinding>
                                     </Border.Margin>
                                 </Border>
