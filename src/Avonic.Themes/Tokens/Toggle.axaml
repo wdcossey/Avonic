@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:a="using:Avonic.Components.Animation">
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors">
     <!-- ion-toggle's variables, with their md values on :host. -->
     <!-- track-background: rgba(var(ion-text-color-rgb, 0, 0, 0), 0.39) -->
     <SolidColorBrush x:Key="Avonic.Toggle.TrackBackground" Color="{DynamicResource Avonic.TextColor}" Opacity="0.39" />
@@ -16,7 +17,7 @@
     <!-- handle-border-radius: 50%, of the handle's size. As border-radius. -->
     <x:String x:Key="Avonic.Toggle.HandleBorderRadius">50%</x:String>
     <!-- handle-box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12) -->
-    <a:CssShadow x:Key="Avonic.Toggle.HandleBoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
+    <b:CssShadow x:Key="Avonic.Toggle.HandleBoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</b:CssShadow>
     <!-- handle-width: 20px -->
     <x:Double x:Key="Avonic.Toggle.HandleWidth">20</x:Double>
     <!-- handle-height: 20px -->

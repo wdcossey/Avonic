@@ -102,7 +102,7 @@ class, as a variable set from outside does. A known `Color` still beats `Backgro
 | [x] | `--border-radius` | `Avonic.Button.BorderRadius` | `CornerRadius` | 4. Round 999. Full and not round is 0, which beats it |
 | [ ] | `--border-style` | — | | Not applicable: Avalonia's `Border` only draws solid |
 | [x] | `--border-width` | `Avonic.Button.BorderWidth` | `Thickness` | Outline: 2. Only read on outline |
-| [x] | `--box-shadow` | `Avonic.Button.BoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | Solid: 2 dp, 8 dp while pressed |
+| [x] | `--box-shadow` | `Avonic.Button.BoxShadow` | `BoxShadows`: write CSS through `{b:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | Solid: 2 dp, 8 dp while pressed |
 | [x] | `--color` | `Avonic.Button.Color` | brush | Solid: primary contrast. Outline, clear: primary. Default: inherits |
 | [x] | `--color-activated` | `Avonic.Button.ColorActivated` | brush | Follows `Color` |
 | [x] | `--color-focused` | `Avonic.Button.ColorFocused` | brush | Follows `Color` |

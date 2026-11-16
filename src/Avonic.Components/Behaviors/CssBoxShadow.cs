@@ -1,12 +1,12 @@
 using System.Globalization;
 using Avalonia.Media;
 
-namespace Avonic.Components.Animation;
+namespace Avonic.Components.Behaviors;
 
 /// <summary>
 /// A CSS <c>box-shadow</c> as Avalonia's <see cref="BoxShadows"/>, with the blur converted, so that a theme or an app keeps CSS's
 /// numbers: <c>CssBoxShadow.Parse("0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14)")</c>, or
-/// <c>{a:CssShadow '…'}</c> in XAML. The offsets and the spread are CSS's already; only the blur differs (see <see cref="Blur"/>).
+/// <c>{b:CssShadow '…'}</c> in XAML. The offsets and the spread are CSS's already; only the blur differs (see <see cref="Blur"/>).
 /// Measured against Chromium in <c>docs/infra/box-shadow/README.md</c>.
 /// </summary>
 public static class CssBoxShadow

@@ -79,7 +79,7 @@ A virtualising panel isn't supported, as the drag reads every child.
 
 | Key | Value | Ionic |
 |---|---|---|
-| `Avonic.ReorderGroup.SelectedBoxShadow` | `0 0 10px rgba(0, 0, 0, 0.4)`, through `{a:CssShadow}` | `.reorder-selected { box-shadow: 0 0 10px rgba(0,0,0,.4) }` |
+| `Avonic.ReorderGroup.SelectedBoxShadow` | `0 0 10px rgba(0, 0, 0, 0.4)`, through `{b:CssShadow}` | `.reorder-selected { box-shadow: 0 0 10px rgba(0,0,0,.4) }` |
 
 Neither has CSS variables. The shadow is on `PART_Lift` in `Controls/AvonicReorderGroup.axaml`, at 0.8, as CSS fades it with the
 child. The handle's 31 px and 0.3 are literals in `Controls/AvonicReorder.axaml`; the lifted item's 0.8 is in the item's own theme,

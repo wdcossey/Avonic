@@ -1,10 +1,10 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:a="using:Avonic.Components.Animation">
+                    xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-reorder and ion-reorder-group have no CSS variables. This is reorder-group.css's
          .reorder-selected { box-shadow: 0 0 10px rgba(0, 0, 0, 0.4) }, CSS's numbers, which CssShadow converts
          (docs/infra/box-shadow/README.md). -->
-    <a:CssShadow x:Key="Avonic.ReorderGroup.SelectedBoxShadow">0 0 10px rgba(0, 0, 0, 0.4)</a:CssShadow>
+    <b:CssShadow x:Key="Avonic.ReorderGroup.SelectedBoxShadow">0 0 10px rgba(0, 0, 0, 0.4)</b:CssShadow>
 
 </ResourceDictionary>

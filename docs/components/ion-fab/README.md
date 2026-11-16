@@ -87,7 +87,7 @@ focus.
 | [x] | `--border-radius` | `Avonic.FabButton.BorderRadius` | `CornerRadius`, number or CSS string | `50%` |
 | [ ] | `--border-style` | — | | Not applicable: Avalonia's `Border` only draws solid |
 | [x] | `--border-width` | `Avonic.FabButton.BorderWidth` | `Thickness` | 0 |
-| [x] | `--box-shadow` | `Avonic.FabButton.BoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | 6 dp; 12 dp pressed |
+| [x] | `--box-shadow` | `Avonic.FabButton.BoxShadow` | `BoxShadows`: write CSS through `{b:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | 6 dp; 12 dp pressed |
 | [x] | `--close-icon-font-size` | `Avonic.FabButton.CloseIconFontSize` | `double` | 24 |
 | [x] | `--color` | `Avonic.FabButton.Color` | brush | Primary contrast; in a list, `rgba(text, 0.54)` |
 | [x] | `--color-activated` | `Avonic.FabButton.ColorActivated` | brush | Follows `Color` |

@@ -14,7 +14,6 @@ using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 using static Avonic.Components.Tests.Controls.AvonicToolbarCaptureTests;

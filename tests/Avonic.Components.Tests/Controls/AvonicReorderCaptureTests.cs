@@ -6,7 +6,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Avonic.Components.Animation;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 using static Avonic.Components.Tests.Gestures.GestureTests;
 

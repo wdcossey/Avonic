@@ -38,6 +38,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
                          BorderRadius = border-radius with percentages, for themes;
+                         CssBoxShadow = box-shadow as Avalonia's BoxShadows with the blur converted, and
+                         {b:CssShadow} for it in XAML (docs/infra/box-shadow/README.md);
                          HiddenChainWatcher = waits for display: none on a control or an ancestor to end;
                          StyleValue = a value the control's code gives a property at style priority, or nothing;
                          KeepFocus = a pointerdown's preventDefault(), so that a press moves no focus)
@@ -51,8 +53,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js;
                          SmoothScroll, Chromium's scrollTo({ behavior: 'smooth' }) on either axis; CssTransition, a CSS
-                         transition of one number with a timing function; CssBoxShadow, CSS's box-shadow as Avalonia's
-                         BoxShadows with the blur converted, and {a:CssShadow} for it in XAML (docs/infra/box-shadow/README.md)
+                         transition of one number with a timing function
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -324,7 +325,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `display: flex; justify-content: center; gap`, with a `width` that's a basis and can shrink to `min-width` | `FlexRow` with `Spacing`, `Padding`, `HorizontalContentAlignment="Center"` (overflowing both sides) and the attached `FlexRow.FlexBasis`, as an Avalonia `Width` can't shrink | `ion-input-otp`'s group, `PART_Group` |
 | `setTimeout(fn, ms)` | `AvonicConfig.Schedule(fn, TimeSpan)`, internal, which tests drive on the same clock as `RequestFrame`. A wait counted in frames (`16 * 4`) is still a timer of that many ms | `AvonicSearchbar`'s clear, 64 ms |
 | A native `change` event, on Enter or blur | Raised only after a user's edit, and only if the text isn't what it was at focus or at the last change; on blur, before the control's own blur event, as Chromium does | `AvonicSearchbar`: its `onChange` raises `IonChange` before `IonBlur` after an edit |
-| `box-shadow` | The token holds Ionic's CSS as the `.md.css` has it, through `{a:CssShadow}` (`Animation/CssShadowExtension`), which reads CSS's syntax and converts each blur `B` to Avalonia's `1.8426 B − 1.6399` (0 below 0.89), as Skia's CPU box blur draws CSS's Gaussian: within 1 to 3 of Chromium from 4 px up, measured headless; a GPU renderer is unmeasured. `CssBoxShadow.Parse` in code. Offsets and spread are CSS's already; at 2× and up the offset isn't scaled ([docs](docs/infra/box-shadow/README.md)) | `<a:CssShadow x:Key="Avonic.Card.BoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), …</a:CssShadow>`; `Value="{a:CssShadow none}"` |
+| `box-shadow` | The token holds Ionic's CSS as the `.md.css` has it, through `{b:CssShadow}` (`Behaviors/CssShadowExtension`), which reads CSS's syntax and converts each blur `B` to Avalonia's `1.8426 B − 1.6399` (0 below 0.89), as Skia's CPU box blur draws CSS's Gaussian: within 1 to 3 of Chromium from 4 px up, measured headless; a GPU renderer is unmeasured. `CssBoxShadow.Parse` in code. Offsets and spread are CSS's already; at 2× and up the offset isn't scaled ([docs](docs/infra/box-shadow/README.md)) | `<b:CssShadow x:Key="Avonic.Card.BoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), …</b:CssShadow>`; `Value="{b:CssShadow none}"` |
 | A class a container puts on a child (`reorder-selected`) | A pseudoclass set on the child through `IPseudoClasses`, styled per type of child; what every type needs (the z-index, a shadow) comes from the container | `:reorder-selected`; `AvonicReorderGroup`'s `ZIndex` at style priority and `PART_Lift` |
 | An inline `style.transform` a component sets on a child | The child's `RenderTransform`, eased by a `CssTransition` as the CSS transition: at `Animation` priority, so the app's own value comes back when it's cleared, or local and cleared at rest | `AvonicReorderGroup` (animation priority), `AvonicItemSliding`'s item (local) |
 | A module-level singleton (`let openSlidingItem`) | A static, one per process, as `GestureController` is | `AvonicItemSliding`'s open item |

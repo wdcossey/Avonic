@@ -5,12 +5,12 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Avonic.Components.Animation;
+using Avonic.Components.Behaviors;
 
-namespace Avonic.Components.Tests.Animation;
+namespace Avonic.Components.Tests.Behaviors;
 
 /// <summary>
-/// <see cref="CssBoxShadow"/> and <c>{a:CssShadow}</c>: CSS's box-shadow read as Avalonia's, with the blur converted. The numbers are
+/// <see cref="CssBoxShadow"/> and <c>{b:CssShadow}</c>: CSS's box-shadow read as Avalonia's, with the blur converted. The numbers are
 /// Chromium's, measured as docs/infra/box-shadow/README.md says: a white 120 x 80 box on white at 1x, the column below its centre.
 /// </summary>
 public class CssShadowTests
@@ -233,15 +233,15 @@ public class CssShadowTests
     {
         var usage = new ResourceInclude(new Uri("avares://Avonic.Components.Tests/"))
         {
-            Source = new Uri("avares://Avonic.Components.Tests/Animation/CssShadowUsage.axaml"),
+            Source = new Uri("avares://Avonic.Components.Tests/Behaviors/CssShadowUsage.axaml"),
         };
         var expected = new BoxShadows(new BoxShadow { Blur = CssBoxShadow.Blur(10), Color = Black40 });
 
-        // <a:CssShadow x:Key="...">...</a:CssShadow>: the resource is the shadow, not the extension
+        // <b:CssShadow x:Key="...">...</b:CssShadow>: the resource is the shadow, not the extension
         Assert.True(usage.TryGetResource("Test.CssShadow.Element", null, out var element));
         Assert.Equal(expected, Assert.IsType<BoxShadows>(element));
 
-        // Value="{a:CssShadow '...'}" on a setter
+        // Value="{b:CssShadow '...'}" on a setter
         Assert.True(usage.TryGetResource("Test.CssShadow.Theme", null, out var theme));
         var border = new Border { Theme = (ControlTheme)theme! };
         using var scene = new Scene(border);

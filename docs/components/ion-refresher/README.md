@@ -107,7 +107,7 @@ refresher starts 655 ms in (its internal `AnimationDelay`, Ionic's `animation-de
 |---|---|---|
 | `Avonic.Refresher.Md.NativeIconBorderBrush` | `#ECECEC` | `var(--ion-color-step-200, var(--ion-background-color-step-200, #ececec))` |
 | `Avonic.Refresher.Md.NativeIconBackgroundBrush` | `#FFFFFF` | `var(--ion-color-step-250, var(--ion-background-color-step-250, #ffffff))` |
-| `Avonic.Refresher.Md.NativeIconBoxShadow` | `0px 1px 6px rgba(0, 0, 0, 0.1)`, through `{a:CssShadow}` | the same |
+| `Avonic.Refresher.Md.NativeIconBoxShadow` | `0px 1px 6px rgba(0, 0, 0, 0.1)`, through `{b:CssShadow}` | the same |
 
 Ionic's dark palette sets the step colours they read, so `Tokens/Palettes/Dark.axaml` gives the two brushes
 `Avonic.BackgroundColorStep200` and `250`: `#414141` and `#4D4D4D`, as measured with `dark.always.css`.
