@@ -53,16 +53,19 @@ Each row in the plan has a test in `AvonicItemLayoutTests` named after it, so F1
 **doesn't reproduce** on v2 (c0a8ed6), and it doesn't show in the frames committed with #81, where it was seen either: both lines
 there run from pixel 0 to 635 at a scale of 2, as Chromium's do. So nothing is fixed here, and these rows pin it.
 
-The page is [`ref/rtl/page.html`](ref/rtl/page.html): items, dividers and list headers in right to left, once with no safe area
-and once with `--ion-safe-area-left: 20px` and `--ion-safe-area-right: 10px`, plus an item in left to right with each. Chromium's
-boxes are in [`ref/rtl/boxes.txt`](ref/rtl/boxes.txt), measured by
-[`ref/rtl/boxes.js.txt`](ref/rtl/boxes.js.txt): that's `tools/ionic-ref/boxes.js` with `ion-list-header` added, run as
-`node boxes.js ref/rtl/page.html ref/rtl/page.png`. Chromium is on the left and Avonic on the right, both headless:
+The page is [`ref/rtl/page.html`](ref/rtl/page.html). It has items, dividers, list headers and two items in a list in right to
+left, all taking the direction from a `div dir="rtl"` around them, as the tests take it from a panel. It has them once with no
+safe area and once with `--ion-safe-area-left: 20px` and `--ion-safe-area-right: 10px`, and an item in left to right with each.
+Chromium's boxes are in [`ref/rtl/boxes.txt`](ref/rtl/boxes.txt). They were measured by
+[`ref/rtl/boxes.js.txt`](ref/rtl/boxes.js.txt), which is `tools/ionic-ref/boxes.js` with `ion-list-header` added, run from the
+repo's root as `node docs/components/ion-item/ref/rtl/boxes.js.txt docs/components/ion-item/ref/rtl/page.html docs/components/ion-item/ref/rtl/page.png`.
+Avonic's frame is `AvonicItemRtlTests`' `avonic-item-rtl-page.png`, cut to Chromium's 844 high. Chromium is on the left and
+Avonic on the right, both headless:
 
 ![Right to left](compare/side-rtl.png)
 
 **Match.** In `AvonicItemRtlTests`, every row's inner part and container are at Chromium's x and width (R1). Each row's lowest
-line also starts and ends on Chromium's pixel (R2). For example, the item with icons and a detail icon has its inner part at
+line is unbroken, and starts and ends on Chromium's pixel (R2). For example, the item with icons and a detail icon has its inner part at
 x 0, 318 wide, and its line on pixels 0 to 635. With a 20 px left safe area, it's 0, 308 wide, and the list header's inner part
 starts at 20. The divider rows are 40.5 high against Chromium's 40, as [above](#the-flex-layout) (Chromium rounds a line of text).
 

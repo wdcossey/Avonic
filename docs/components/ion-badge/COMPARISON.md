@@ -27,8 +27,9 @@ and one thumbnail of 64 at 50%; and an RTL item with an avatar and a badge.
   same height to within half a pixel.
 - **The first line** is shorter in Avonic, as its text is Avalonia's default size, where a page's is 16
   ([ADR 0002](../../decisions/0002-decisions-from-the-first-swarm.md)). Every row below sits a little higher for it.
-- **The line under the RTL item** reaches the left edge in Ionic, and stops 16 short of it in Avonic. That's `ion-item`'s
-  inner border in RTL, not these controls: measured `.item-inner` at x = 0, 318 wide. Listed for `ion-item` in the PR.
+- **The line under the RTL item** was listed here as stopping 16 short of the left edge in Avonic. It doesn't: in the frames
+  committed with this comparison, both lines run from pixel 0 to 635 at a scale of 2, `.item-inner` at x = 0 and 318 wide on
+  both sides. #90 measured it again and pinned it ([ion-item's comparison](../ion-item/COMPARISON.md#right-to-left-90)).
 
 ## Found here, not by the tests
 
