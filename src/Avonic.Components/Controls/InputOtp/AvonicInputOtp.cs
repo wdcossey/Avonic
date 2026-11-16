@@ -846,13 +846,14 @@ public class AvonicInputOtp : ContentControl
             return;
         }
 
-        // Since 8.8.3: nothing while disabled, and in a read-only box Backspace and Delete do nothing at all.
+        // Since 8.8.3: nothing while disabled, and in a read-only box Backspace does nothing at all. Ionic stops Delete there too,
+        // which a read-only text box ignores already, here as in Chromium.
         if (!IsEffectivelyEnabled)
         {
             return;
         }
 
-        if (Readonly && e.Key is Key.Back or Key.Delete)
+        if (Readonly && e.Key == Key.Back)
         {
             e.Handled = true;
             return;
