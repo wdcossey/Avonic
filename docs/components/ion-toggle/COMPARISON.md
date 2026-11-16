@@ -5,6 +5,10 @@
 > exact command, and `ref/page.html` the page.
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicToggleCaptureTests.Reference_Page` (headless Skia, 2×) → [`compare/`](compare/).
 > Not tried in a real window, or on a device.
+>
+> First compared against Ionic 8.8.1. For #188 the reference was rendered again with 8.8.19: the frame and the boxes are the same;
+> each toggle now has `ion-focusable`, the ones alone in an item `toggle-defers-indicator`, and `--handle-spacing` reads `0px`.
+> 8.8.17's focus indicator is in [its own section](#keyboard-focus-ionic-8817).
 
 ```html
 <ion-app style="position:static;display:block;contain:none;overflow:visible"><ion-list>
@@ -73,9 +77,9 @@ rounding of a pixel: the track at 338, 16.5 in an item, the stacked label's box 
 | 7 | A click 50 ms after a drag; 400 ms after | dropped; flips | the same | match |
 | 8 | The drag's start | focuses, `toggle-activated` until the end | focuses, `:activated` | match |
 | 9 | RTL, `dir` on the document or the toggle | handle at the right when off, a drag left turns it on | the same | match |
-| 9 | RTL, `dir` on an ancestor only | layout mirrored, handle and drag LTR | RTL throughout | deliberate difference, below |
+| 9 | RTL, `dir` on an ancestor only | 8.8.1: layout mirrored, handle and drag LTR. 8.8.19: `isRTL` walks up to the nearest `dir`, so `toggle-rtl`, measured with `dir` on a `<div>` | RTL throughout | match since 8.8.19 |
 | 10 | Focus: a press, a tap, Tab; focus in the label | `ionFocus`, `ionBlur`; neither | the same | match |
-| 11 | Keyboard focus | Chromium's ring, `outline: auto 1px` | the base theme's adorner | deliberate difference, below |
+| 11 | Keyboard focus | 8.8.17: `outline: none`, and a 36 px circle behind the handle; see [Keyboard focus](#keyboard-focus-ionic-8817) | no adorner, the circle | match |
 | 12 | A tap on the item's padding; on a disabled toggle's | flips; nothing | the same | match |
 | 13 | In an item | fills the row, 47 high, label margins 10, stacked 10 and 16, track 10 off the bottom | the same | match |
 | 14 | No label | label part hidden, track at the row's start | the same | match |
@@ -98,12 +102,38 @@ rounding of a pixel: the track at 338, 16.5 in an item, the stacked label's box 
   later, which a mouse shows: 16. Chromium holds a finger's `touchmove`s back until it's 15 px from the press, so Ionic first
   hears of the finger at 16 px, captures there, and flips at 27. That's Chromium's input pipeline, not Ionic, and Avalonia has
   no such slop, so Avonic follows Ionic's code.
-- **RTL from an ancestor.** Ionic's `isRTL` reads only the toggle's own `dir` and the document's. A `dir="rtl"` between them
-  mirrors the layout, as CSS direction inherits, but leaves the handle and the drag in LTR: measured, the checked handle sat at
-  the right of the track, and a drag left of 25 px didn't flip it. Avalonia's `FlowDirection` inherits and can't say where it
-  came from, so RTL is RTL throughout, as Ionic is with `dir` on the document. The frame uses `dir` on the toggle for that reason.
-- **The focus ring** is the platform's on both sides: Chromium's dark ring, and here the base theme's adorner, which the theme
-  leaves alone, as Ionic leaves the outline alone.
+- **RTL from an ancestor** was one against 8.8.1, whose `isRTL` read only the toggle's own `dir` and the document's: a
+  `dir="rtl"` between them left the handle and the drag in LTR. 8.8.19's `isRTL` walks up to the nearest `dir`, as Avalonia's
+  `FlowDirection` inherits, so it's a match now: measured, a toggle in a `<div dir="rtl">` has `toggle-rtl`.
+
+## Keyboard focus (Ionic 8.8.17)
+
+8.8.17 gave the toggle a focus circle behind the handle, took Chromium's outline away, and made the toggle `ion-focusable` always,
+so that an item around it is focusable; when the item draws the row's focus, `toggle-defers-indicator` hides the toggle's own. The
+frame has `class="ion-focused"` where keyboard focus puts it, measured:
+
+```
+node tools/ionic-ref/render.js ion-toggle --bare --html '<ion-app style="position:static;display:block;contain:none;overflow:visible"><div style="padding:16px;display:flex;flex-direction:column;gap:24px;align-items:flex-start"><ion-toggle class="ion-focused">Unchecked</ion-toggle><ion-toggle class="ion-focused" checked>Checked</ion-toggle><ion-toggle class="ion-focused" checked color="danger">Danger, checked</ion-toggle><ion-toggle class="ion-focused" color="danger">Danger</ion-toggle><div dir="rtl"><ion-toggle class="ion-focused">RTL</ion-toggle></div><div dir="rtl"><ion-toggle class="ion-focused" checked>RTL, checked</ion-toggle></div></div><ion-list><ion-item class="ion-focused"><ion-toggle class="ion-focused">Single input: the item draws it</ion-toggle></ion-item><ion-item class="ion-focused"><ion-checkbox slot="start"></ion-checkbox><ion-toggle class="ion-focused">Multi-input</ion-toggle></ion-item><ion-item class="ion-focused" button><ion-toggle class="ion-focused" checked>Clickable item, checked</ion-toggle></ion-item><ion-item class="ion-focused"><ion-toggle class="ion-focused" label-placement="end">Label at the end</ion-toggle><ion-toggle slot="end"></ion-toggle></ion-item><ion-item class="ion-focused"><ion-toggle class="ion-focused">With a button: single input</ion-toggle><ion-button slot="end">B</ion-button></ion-item></ion-list></ion-app>' --out docs/components/ion-toggle/ref/focus
+```
+
+Avonic's is `AvonicFocusIndicatorCaptureTests.Toggle_Focus_Page`. Ionic left:
+
+![Ionic left, Avonic right](compare/side-focus.png)
+
+Measured by focusing each toggle from the keyboard in Chromium (the `::after`'s computed style, its box, and pixels):
+
+| Case | Ionic 8.8.19 | Avonic | |
+|---|---|---|---|
+| Alone, unchecked | 36 × 36, `left: -8px` from the track (`calc(var(--handle-spacing) + (var(--handle-width) - 36px) / 2)`), centred down it, `rgba(0, 0, 0, 0.12)`: 224 on white, 137 over the track, the handle white over it, 156 past it on the track | `PART_Focus` in the icon wrapper, before the handle: the same box and pixels | match, `T13_Keyboard_Focus…` |
+| Checked | moves with the wrapper, centred on the handle; `rgba(0, 84, 233, 0.2)`: (204, 221, 251) on white, (101, 152, 242) over the track | the same | match, `T13_Checked…` |
+| `color="danger"` | checked: the base at 0.2, (243, 204, 207); unchecked: still black at 0.12 | the same | match, `T13_With_A_Colour…` |
+| RTL, unchecked and checked | `right: -8px`, on the handle | mirrored, on the handle | match, `T13_In_RTL…` |
+| `--handle-spacing` | the circle's `left` adds it, and checked it moves back by twice it, as the handle | the same, through `Avonic.Toggle.HandleSpacing` | match, `T13_The_Circle_Follows_The_Handle_Spacing` |
+| `:host(:focus)` | `outline: none` | no adorner over a base theme | match, `T11_There_Is_No_Focus_Adorner…` |
+| Single-input item; with an `ion-button`, which isn't a second input; alone in the start slot | `ion-focusable` and `toggle-defers-indicator`: no circle; the item `ion-focusable` through the toggle, so `ion-focused`, with its 0.12 overlay | the same | match, `T13_It_Is_Always_Focusable…`, `T13_A_Button_In_The_Item…` |
+| Multi-input item, clickable item | no deferring: the circle, and the item focused too | the same | match, `T13_In_A_Multi_Input_Or_Clickable_Item…` |
+| The item changing later | `button` on, or a second toggle added inside a `<div>`: the deferring ends; undone, it's back (with the `button` attribute removed, as a framework sets the property) | the same | match, `T13_It_Follows_The_Item_Changing` |
+| Over the track, under the handle | `z-index: -1` in the wrapper, which `will-change: transform` makes a stacking context | before the handle in the wrapper | match, by pixel |
 
 ## Gaps
 

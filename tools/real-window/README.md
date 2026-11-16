@@ -53,6 +53,9 @@ once if the window doesn't fit on the screen.
     doesn't. Added without being run: the first run is the one that proves it.
   - `ion-content: the scroll bar` (#175): the page's `Scroll bar` toggle on, then a mouse drag of the thumb, which has to scroll the
     content, and a click on the down arrow, 40 more, read from the `Ended at` line; then the toggle off. Added without being run.
+  - `focus indicators` (#188): a checkbox in a multi-input item, focused by Shift+Tab then Tab, shows its circle 5 past the default
+    slot's end (the item's room), and a letter clears it; a toggle in a multi-input item shows its circle beside the handle, told
+    from the item's own focus overlay. Added without being run.
 - **226 checks** in all, every one run on v2 `0877c72` (2026-11-16), in about five minutes.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.

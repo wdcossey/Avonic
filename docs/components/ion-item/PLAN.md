@@ -2,7 +2,8 @@
 
 The first control with a real styled template, so this PR also settles how a host control is done: where
 `::slotted` rules live, how `currentColor`, `em` and fallback variables map, and how later controls talk to the
-item without editing it. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide.
+item without editing it. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, and behaviours 36 and 37 from
+8.8.19, the base since #188.
 
 ## Fidelity checklist
 
@@ -119,6 +120,8 @@ Each becomes a test.
 | 33 | RTL mirrors the padding and slots | measured |
 | 34 | Overlay and ripple clip to `Avonic.Item.BorderRadius` | `overflow: inherit` |
 | 35 | Automation: a `Button` item is a button that can be invoked, and a plain one can't. Disabled and `:item-interactive-disabled` report it | native `<button>`; `aria-disabled`; `onClick` only when clickable |
+| 36 | `:item-focus-indicator-room` (8.8.17): a checkbox, radio or toggle in the default slot, directly or inside a wrapper, in a multi-input or clickable item. `PART_Container` gets −12 margins and 12 padding at each side, so nothing moves and a control's focus circle isn't clipped at the slot's end; `PART_Inner` still clips. A control coming or going inside a wrapper updates it, and the multi-input state, with no slot change | `setHasSlottedIndicatorControl`, `slottedIndicatorNeedsRoom`, `watchForIndicatorControls`; `.input-wrapper` margins; measured icb2 (wrapper 38 to 386, content 50 to 374, `.item-inner` clipping from 50), cb6 and cb7 |
+| 37 | A toggle's `ion-focusable` (8.8.17: always) makes the item focusable, and a checkbox's or a radio's never does: the item reads `.ion-focusable` once, in the frame after load, before they've rendered again for `item-multiple-inputs` | `isFocusable` in `componentDidLoad`'s `raf`; measured itg1 `ion-focusable`, icb2 and ird2 not |
 
 ## Design
 
@@ -410,7 +413,8 @@ Each row and rule above has one. In `NativeButtonTests` for the rules, on all th
 | A word wider than its box, outside a label, breaks in the word if the box is 64 or wider. In CSS it overflows and is clipped | `TextWrapping.Wrap` breaks it, and looking for `min-content` on every default slot would measure every item twice. Below 64 it does look, as a slot 6 wide would be a row 400 high |
 | A child with no height of its own, directly in a panel in a slot, collapses. So a `Grid` holding a background behind text loses the background | The panel stands for the slot, so its children are centred, as `align-items: center` does in CSS. A panel can't say it's one unit rather than several. `VerticalAlignment="Stretch"` on the child, or a `Border` around the `Grid`, gets it back |
 | Setting `VerticalAlignment="Stretch"` on a slotted child after it's laid out doesn't move it until something else lays it out | That's also its default, so Avalonia raises no change, and `IsSet` has nothing to tell it. Set it in XAML, or `InvalidateArrange` the slot |
-| `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row |
+| `PART_Inner` doesn't clip, where `.item-inner` has `overflow: hidden`, so with `Avonic.Item.PaddingEnd` above 0 a word wider than the row draws over that padding, up to the host's edge. It does clip with `:item-focus-indicator-room` (#188), where the default slot reaches 12 past its content on each side, and a focus circle at the row's start has to be clipped at its edge, as measured | `ClipToBounds` on a `Border` clips its own shadow, and CSS's doesn't, so it would take away `--inner-box-shadow`. A word that wide already overflows Ionic's row. With room, an outer `--inner-box-shadow` is clipped: md's is `none` |
+| The item's `focusable` is worked out again whenever its controls change, where Ionic's is read once, in the frame after load (#188): measured, an item that lost its second checkbox later has a cover and no `ion-focusable`, so Ionic shows no focus at all on Tab, and one that gained a toggle inside a `<div>` stays unfocusable | A stale state, not a design. Behaviour 37 copies what that one read gives for the usual case: a checkbox's or a radio's own `ion-focusable` never counts |
 | An icon in a panel keeps its 12 above and below beside a stacked label, where one directly in the slot has 7 | Another two alternatives, for something rare |
 | A child that handles the press, around a stock `Button`, doesn't stop the click | The press is handled either way, so the two can't be told apart |
 | A `TextBox`'s watermark counts in a button item's name while it's showing, as it's drawn text | An input in a `<button>` isn't valid HTML, so there's nothing to measure |

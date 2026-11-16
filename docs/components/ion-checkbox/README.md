@@ -68,7 +68,8 @@ The default slot is `Content`, the label. With no text in it, the label and its 
 
 `LabelledControlPanel` (`PART_Wrapper`), shared with the radio and the toggle, lays out the label and the box for each placement, and `CheckboxMark` draws md's tick or bar.
 Pseudoclasses for a theme: `:checked`, `:indeterminate`, `:label-placement-*`, `:justify-*`, `:alignment-*`, `:in-item`,
-`:slot-start`, `:slot-end`, `:ion-color`, and `:drawn` from the first frame, for the transition.
+`:slot-start`, `:slot-end`, `:ion-color`, `:ion-focused` (from `FocusVisible`, Ionic's `ion-focused`), and `:drawn` from the
+first frame, for the transition. `PART_NativeWrapper` holds the box and `PART_Focus`, the keyboard focus circle.
 
 ### Resource keys
 
@@ -91,11 +92,18 @@ Pseudoclasses for a theme: `:checked`, `:indeterminate`, `:label-placement-*`, `
 - A click anywhere on it toggles it once and raises `IonChange`; Space does on every key down, repeats too; Enter doesn't.
 - Clicking an indeterminate checkbox checks it, and clears `Indeterminate` after `IonChange`.
 - A tab stop. Disabled: no click, no Space, no focus, label 0.38 and box 0.63.
+- **Keyboard focus** (Ionic 8.8.17): `ion-focusable` (`FocusVisible.IsEnabled`, at style priority, so an app's style wins) alone or
+  in a multi-input item, and not in a single-input item, whose cover draws the row's focus instead. Focused by keyboard, a 36 px
+  circle of the primary tint at 0.2 is drawn over the box, centred on it and past the checkbox's own bounds, whatever its colour.
+  No focus adorner (`outline: none`). It follows the item turning multi-input or single again, as Ionic's
+  `createItemMultipleInputsObserver` does. Its own `ion-focusable` doesn't make the item focusable: see the item's README.
 - Label start, end, fixed (100 wide, ellipsis) or stacked (above at 0.75); `Justify` and `Alignment` fill the width.
 - Checking draws the mark after 90 ms over 90 ms, and the background eases over 180 ms; unchecking removes the mark at once. Not
   on the first frame.
 - In an item it fills the row, with 10 above and below; in a start or end slot it's its own size. The item makes itself
   activatable, and a tap on its padding toggles the checkbox.
+- The label shows as soon as text arrives anywhere inside it, and hides when the last goes, with no other change (Ionic 8.8.2 and
+  8.8.4's `MutationObserver`).
 - Automation: a check box with `On`, `Off` or `Indeterminate`, named by its label, described by the helper or the error.
 
 ## Extensions
@@ -104,7 +112,6 @@ None.
 
 ## Known gaps
 
-- Chromium's own focus ring on keyboard focus is the base theme's focus adorner here.
 - `aria-invalid` has no Avalonia equivalent.
 - The few pixels an `inline-block` line box adds around a standalone checkbox aren't there.
 - A standalone label longer than the page ends in an ellipsis, where Ionic's `inline-block` overflows the page with its box off screen.

@@ -10,11 +10,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-0-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-start",
         "toggle-ltr",
         "hydrated"
@@ -33,7 +35,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -209,11 +211,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-tg-1-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-checked",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -233,7 +237,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -393,7 +397,7 @@
             "contain": "strict",
             "pointer-events": "auto",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"
@@ -410,13 +414,15 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-tg-2-lbl",
         "tabindex": "0",
-        "class": "ion-color ion-color-danger md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
+        "class": "ion-color ion-color-danger md in-item ion-focusable toggle-defers-indicator toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "ion-color",
         "ion-color-danger",
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-checked",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -436,7 +442,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -596,7 +602,7 @@
             "contain": "strict",
             "pointer-events": "auto",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"
@@ -612,11 +618,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-3-lbl",
         "aria-disabled": "true",
-        "class": "md in-item toggle-disabled toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-disabled toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-disabled",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -636,7 +644,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -813,11 +821,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-tg-4-lbl",
         "aria-disabled": "true",
-        "class": "md in-item toggle-checked toggle-disabled toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-checked toggle-disabled toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-checked",
         "toggle-disabled",
         "toggle-label-placement-start",
@@ -838,7 +848,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -998,7 +1008,7 @@
             "contain": "strict",
             "pointer-events": "none",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"
@@ -1014,11 +1024,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-5-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-label-placement-end toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-label-placement-end toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-end",
         "toggle-ltr",
         "hydrated"
@@ -1037,7 +1049,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -1213,11 +1225,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-6-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-label-placement-fixed toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-label-placement-fixed toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-fixed",
         "toggle-ltr",
         "hydrated"
@@ -1236,7 +1250,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -1413,11 +1427,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-7-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-alignment-start toggle-label-placement-stacked toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-alignment-start toggle-label-placement-stacked toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-alignment-start",
         "toggle-label-placement-stacked",
         "toggle-ltr",
@@ -1437,7 +1453,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -1613,11 +1629,13 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-8-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-start",
         "toggle-ltr",
         "hydrated"
@@ -1636,7 +1654,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -1813,11 +1831,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-tg-9-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-checked",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -1837,7 +1857,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -1997,7 +2017,7 @@
             "contain": "strict",
             "pointer-events": "auto",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"
@@ -2014,11 +2034,13 @@
         "aria-describedby": "ion-tg-10-helper-text",
         "aria-labelledby": "ion-tg-10-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-start",
         "toggle-ltr",
         "hydrated"
@@ -2037,7 +2059,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -2294,7 +2316,7 @@
     },
     {
       "attributes": {
-        "class": "ion-touched ion-invalid md in-item toggle-label-placement-start toggle-ltr hydrated",
+        "class": "ion-touched ion-invalid md in-item ion-focusable toggle-defers-indicator toggle-label-placement-start toggle-ltr hydrated",
         "helper-text": "Helper text",
         "error-text": "Error text",
         "role": "switch",
@@ -2309,6 +2331,8 @@
         "ion-invalid",
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-label-placement-start",
         "toggle-ltr",
         "hydrated"
@@ -2327,7 +2351,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -2587,10 +2611,11 @@
         "role": "switch",
         "aria-checked": "false",
         "tabindex": "0",
-        "class": "md toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md ion-focusable toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
+        "ion-focusable",
         "toggle-label-placement-start",
         "toggle-ltr",
         "hydrated"
@@ -2609,7 +2634,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -2785,10 +2810,11 @@
         "role": "switch",
         "aria-checked": "true",
         "tabindex": "0",
-        "class": "md toggle-checked toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md ion-focusable toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
+        "ion-focusable",
         "toggle-checked",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -2808,7 +2834,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -2969,7 +2995,7 @@
             "contain": "strict",
             "pointer-events": "auto",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"
@@ -2986,10 +3012,11 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-tg-14-lbl",
         "tabindex": "0",
-        "class": "md toggle-justify-end toggle-label-placement-start toggle-ltr hydrated"
+        "class": "md ion-focusable toggle-justify-end toggle-label-placement-start toggle-ltr hydrated"
       },
       "classes": [
         "md",
+        "ion-focusable",
         "toggle-justify-end",
         "toggle-label-placement-start",
         "toggle-ltr",
@@ -3009,7 +3036,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -3186,11 +3213,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-tg-15-lbl",
         "tabindex": "0",
-        "class": "md in-item toggle-checked toggle-label-placement-start toggle-rtl hydrated"
+        "class": "md in-item ion-focusable toggle-defers-indicator toggle-checked toggle-label-placement-start toggle-rtl hydrated"
       },
       "classes": [
         "md",
         "in-item",
+        "ion-focusable",
+        "toggle-defers-indicator",
         "toggle-checked",
         "toggle-label-placement-start",
         "toggle-rtl",
@@ -3210,7 +3239,7 @@
         "--handle-box-shadow": "0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)",
         "--handle-height": "20px",
         "--handle-max-height": "calc(100% + 6px)",
-        "--handle-spacing": "0",
+        "--handle-spacing": "0px",
         "--handle-transition": "transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1)",
         "--handle-width": "20px",
         "--track-background": "rgba(0, 0, 0, 0.39)",
@@ -3370,7 +3399,7 @@
             "contain": "strict",
             "pointer-events": "auto",
             "transition": "transform 0.16s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1)",
-            "transform": "none",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
             "box-shadow": "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px",
             "outline": "rgb(255, 255, 255) none 0px",
             "cursor": "pointer"

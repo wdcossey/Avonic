@@ -4,6 +4,10 @@
 > `ref/README.md` holds the exact command, and `ref/page.html` the page.
 > Avonic side: `AVONIC_CAPTURE_DIR=… dotnet test` → `AvonicRadioCaptureTests.Reference_Page` (headless Skia, 2×) → [`compare/`](compare/).
 > Not tried in a real window (real-window run queued), and not tried on a device.
+>
+> First compared against Ionic 8.8.1. For #188 the reference was rendered again with 8.8.19: the frame, the boxes and the classes
+> are the same. 8.8.17's focus change, the radio's own circle in a multi-input item, is in
+> [its own section](#keyboard-focus-in-an-item-ionic-8817).
 
 ```html
 <ion-app style="position:static;display:block;contain:none;overflow:visible">
@@ -121,7 +125,7 @@ Second `/code-review` at high effort, on the fixed code:
 | R6 | `ionFocus` and `ionBlur` for the radio itself; a click focuses it | match | `R6_…` |
 | R7 | One tab stop in a group, following the value; none alone | match | `R7_…` |
 | R8 | In an item: the item is the cover, a tap on its padding clicks the radio, 358 by 47; in the start slot 45.5 by 39 | match | `R8_…` |
-| R9 | Keyboard focus shows the 36 px circle, `rgb(26, 101, 235)` at 0.2; no outline | match | `R9_…` |
+| R9 | Keyboard focus shows the 36 px circle, `rgb(26, 101, 235)` at 0.2; no outline. 8.8.17: in a multi-input item too | match | `R9_…` |
 | R10 | A radio button, named from its label, selected when checked, `Select()` is a click | match | `R10_…` |
 | R11 | No label: just the ring, 20 by 20 | match | `R11_…` |
 | V1 | 20 ring, border 2 at `rgba(0, 0, 0, 0.6)`, 10 mark centred, both round | match | `V1_…` |
@@ -141,6 +145,30 @@ Second `/code-review` at high effort, on the fixed code:
 | G6 | Helper text, error text when touched and invalid, 16 at the sides in a list, a 24 line | match | `G6_…` |
 | G7 | A group, described by its hint, labelled by its header or divider | match | `G7_…` |
 | G8 | An item in a group isn't a list item | match | `G8_…` |
+
+## Keyboard focus in an item (Ionic 8.8.17)
+
+8.8.17 moved the radio's `:host(.ion-focused) .radio-icon::after` rule within the file, unchanged, and made the radio
+`ion-focusable` in a multi-input item (`!inItem || inMultipleInputsItem`), re-read when the item's `item-multiple-inputs` turns
+on or off. It's still never `ion-activatable` in an item. The frame has `class="ion-focused"` where keyboard focus puts it,
+measured:
+
+```
+node tools/ionic-ref/render.js ion-radio --bare --html '<ion-app style="position:static;display:block;contain:none;overflow:visible"><ion-radio-group value="x"><div style="padding:16px;display:flex;flex-direction:column;gap:24px;align-items:flex-start"><ion-radio class="ion-focused" value="y">Unchecked</ion-radio><ion-radio class="ion-focused" value="x" color="success">Checked, success</ion-radio><div dir="rtl"><ion-radio class="ion-focused" value="z">RTL</ion-radio></div></div></ion-radio-group><ion-list><ion-radio-group value="a"><ion-item class="ion-focused"><ion-radio value="a">Single input: the item draws it</ion-radio></ion-item><ion-item><ion-radio class="ion-focused" value="b">Multi-input</ion-radio><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item class="ion-focused" button><ion-radio class="ion-focused" value="c">Clickable item</ion-radio></ion-item><ion-item class="ion-focused"><ion-radio class="ion-focused" value="d" label-placement="end">Label at the end</ion-radio><ion-button slot="end">B</ion-button></ion-item></ion-radio-group></ion-list></ion-app>' --out docs/components/ion-radio/ref/focus
+```
+
+Avonic's is `AvonicFocusIndicatorCaptureTests.Radio_Focus_Page`. Ionic left:
+
+![Ionic left, Avonic right](compare/side-focus.png)
+
+| Case | Ionic 8.8.19 | Avonic | |
+|---|---|---|---|
+| Single-input item | not `ion-focusable`; the item, with its cover, is `ion-focused` | the same | match, `R8_In_An_Item…`, `G3_Focus_By_Arrow…` |
+| Multi-input item (a radio and a checkbox) | `ion-focusable`, the circle at −10, −10 from the 20 ring; the item `item-focus-indicator-room`, not `ion-focusable` | the same; (209, 224, 251) 7 past the ring, beyond the default slot's own end | match, `R9_In_A_Multi_Input_Item…` |
+| Clickable item | multi-input: the circle, and the item focused too | the same | match |
+| A radio and an `ion-button` | multi-input (a cover and a clickable); the item is `ion-focusable` through the button, so both | the same | match |
+| The item turning multi-input later, and back | followed | followed | match, `R9_It_Follows_The_Item…` |
+| A circle at the start of the row | clipped at `.item-inner`'s edge, 16 | the same | match, the item's `B36_…` |
 
 ## Deliberate differences
 

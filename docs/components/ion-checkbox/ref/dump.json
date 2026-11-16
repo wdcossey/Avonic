@@ -11,11 +11,12 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-cb-0-lbl",
         "tabindex": "0",
-        "class": "md interactive checkbox-label-placement-start hydrated"
+        "class": "md interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -207,12 +208,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-cb-1-lbl",
         "tabindex": "0",
-        "class": "md checkbox-checked interactive checkbox-label-placement-start hydrated"
+        "class": "md checkbox-checked interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "checkbox-checked",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -404,12 +406,13 @@
         "aria-checked": "mixed",
         "aria-labelledby": "ion-cb-2-lbl",
         "tabindex": "0",
-        "class": "md checkbox-indeterminate interactive checkbox-label-placement-start hydrated"
+        "class": "md checkbox-indeterminate interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "checkbox-indeterminate",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -601,11 +604,12 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-cb-3-lbl",
         "tabindex": "0",
-        "class": "md interactive checkbox-label-placement-end hydrated"
+        "class": "md interactive ion-focusable checkbox-label-placement-end hydrated"
       },
       "classes": [
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-end",
         "hydrated"
       ],
@@ -797,11 +801,12 @@
         "aria-checked": "false",
         "aria-labelledby": "ion-cb-4-lbl",
         "tabindex": "0",
-        "class": "md interactive checkbox-label-placement-fixed hydrated"
+        "class": "md interactive ion-focusable checkbox-label-placement-fixed hydrated"
       },
       "classes": [
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-fixed",
         "hydrated"
       ],
@@ -994,12 +999,13 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-cb-5-lbl",
         "tabindex": "0",
-        "class": "md checkbox-checked interactive checkbox-label-placement-stacked hydrated"
+        "class": "md checkbox-checked interactive ion-focusable checkbox-label-placement-stacked hydrated"
       },
       "classes": [
         "md",
         "checkbox-checked",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-stacked",
         "hydrated"
       ],
@@ -1193,7 +1199,7 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-cb-6-lbl",
         "tabindex": "0",
-        "class": "ion-color ion-color-danger md checkbox-checked interactive checkbox-justify-space-between checkbox-label-placement-start hydrated"
+        "class": "ion-color ion-color-danger md checkbox-checked interactive ion-focusable checkbox-justify-space-between checkbox-label-placement-start hydrated"
       },
       "classes": [
         "ion-color",
@@ -1201,6 +1207,7 @@
         "md",
         "checkbox-checked",
         "interactive",
+        "ion-focusable",
         "checkbox-justify-space-between",
         "checkbox-label-placement-start",
         "hydrated"
@@ -1394,13 +1401,14 @@
         "aria-checked": "true",
         "aria-labelledby": "ion-cb-7-lbl",
         "aria-disabled": "true",
-        "class": "md checkbox-checked checkbox-disabled interactive checkbox-label-placement-start hydrated"
+        "class": "md checkbox-checked checkbox-disabled interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "checkbox-checked",
         "checkbox-disabled",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -1593,11 +1601,12 @@
         "aria-describedby": "ion-cb-8-helper-text",
         "aria-labelledby": "ion-cb-8-lbl",
         "tabindex": "0",
-        "class": "md interactive checkbox-label-placement-start hydrated"
+        "class": "md interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -1870,7 +1879,7 @@
     {
       "attributes": {
         "id": "c10",
-        "class": "ion-touched ion-invalid md interactive checkbox-label-placement-start hydrated",
+        "class": "ion-touched ion-invalid md interactive ion-focusable checkbox-label-placement-start hydrated",
         "helper-text": "Helper text",
         "error-text": "Error text",
         "role": "checkbox",
@@ -1885,6 +1894,7 @@
         "ion-invalid",
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],
@@ -2160,11 +2170,12 @@
         "role": "checkbox",
         "aria-checked": "false",
         "tabindex": "0",
-        "class": "md interactive checkbox-label-placement-start hydrated"
+        "class": "md interactive ion-focusable checkbox-label-placement-start hydrated"
       },
       "classes": [
         "md",
         "interactive",
+        "ion-focusable",
         "checkbox-label-placement-start",
         "hydrated"
       ],

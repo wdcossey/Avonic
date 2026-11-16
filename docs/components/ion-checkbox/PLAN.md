@@ -4,8 +4,8 @@ A box with a drawn mark and a label beside it, or above it. Ionic 8's checkbox i
 label text, and `labelPlacement`, `justify` and `alignment` lay the two out. It's the first form control here, so it's the
 first with a user-mutable value (`checked`), helper and error text, and the `ion-touched`/`ion-invalid` classes.
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`, with Roboto from `tools/fonts`.
-The scene and the commands are in [COMPARISON.md](COMPARISON.md).
+Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`, with Roboto from `tools/fonts`, and
+for B18 and B27 from 8.8.19, the base since #188. The scene and the commands are in [COMPARISON.md](COMPARISON.md).
 
 ## Fidelity checklist
 
@@ -104,7 +104,7 @@ Each becomes a test. Ids are the checkboxes in the measurement scene.
 | 15 | Checking draws the mark: nothing for 90 ms, then the dash grows linearly to the end over 90 ms; unchecking removes it at once. Programmatic too. Not at first render | `stroke-dashoffset: 30 → 0`, `transition: stroke-dashoffset 90ms linear 90ms` only on the checked rule; measured: 30 until 80 ms, 26.67 at 97, 0 at 181; uncheck 30 at the first frame |
 | 16 | The box background eases 180 ms `cubic-bezier(0.4, 0, 0.2, 1)` both ways; the border changes at once | `--transition`; measured 48 ms `rgb(177, 203, 248)`, border `rgb(0, 84, 233)` at 0 |
 | 17 | `Color` colours the checked background, border and mark; an app's key beats it | `:host(.ion-color)`; measured `c7` `rgb(197, 0, 15)` |
-| 18 | No text content hides the label, so the host is the box alone, 18 × 18 | `label-text-wrapper-hidden`; measured `c11`, `i3` |
+| 18 | No text content hides the label, so the host is the box alone, 18 × 18. Text arriving or going inside later shows or hides it at once (8.8.2, 8.8.4) | `label-text-wrapper-hidden`, `hasLabelContent` and the `MutationObserver`'s `characterData`, `childList`; measured `c11`, `i3`, and `textContent` set later |
 | 19 | Helper text under the label, 4 below it, 12 px, `--ion-text-color-step-300`; error text instead, in danger, while it has both `ion-touched` and `ion-invalid`; `ion-invalid` alone shows the helper. Classes changed later are followed | `renderHintText`, `checkInvalidState`, the `MutationObserver`; measured `c9` helper `rgb(77, 77, 77)` 12px at y + 23, `c10` error `rgb(197, 0, 15)`; `c9` after classes, invalid only |
 | 20 | Stacked supporting text is 16 px (12 after the scale) | `:host(.checkbox-label-placement-stacked) .checkbox-bottom` |
 | 21 | In an item: the host fills the item's default slot, full width and height (`flex: 1 1 0`); label and box get 10 above and below, so the label is at y + 14 and the box at x 356 in a 48 row | `:host(.in-item)`, margins; measured `i1` 358 × 47 |
@@ -113,6 +113,7 @@ Each becomes a test. Ids are the checkboxes in the measurement scene.
 | 24 | An item with one checkbox forwards a tap on its padding to it: toggles, `IonChange` | `ion-item` `getFirstInteractive` → `click()`; measured `i1` at x 5. `ItemControlType.Checkbox` in `IItemControl` |
 | 25 | Automation: a check box, `On`, `Off` or `Indeterminate`; named by the label text unless `AutomationProperties.Name` is set; help text from the shown hint (the error while invalid with error text, else the helper); `Toggle` is a click; required | `role="checkbox"`, `aria-checked` `mixed`, `aria-labelledby`, `aria-describedby` `hintTextId`, `aria-required` |
 | 26 | The helper is a polite live region, and the error an assertive one | `aria-live="polite"`, `role="alert"` |
+| 27 | Keyboard focus (8.8.17): `ion-focusable` when not in an item, or in a multi-input item, followed as the item changes; focused by keyboard, a 36 px circle of the primary tint at 0.2 over the box, centred on it, past the host, whatever the colour; no outline | `ion-focusable: !inItem \|\| inMultipleInputsItem`, `createItemMultipleInputsObserver`, `:host(.ion-focused) .native-wrapper::after`, `:host(:focus) { outline: none }`; measured (COMPARISON) |
 
 ## Design
 
@@ -132,6 +133,10 @@ Each becomes a test. Ids are the checkboxes in the measurement scene.
 - **Helper and error**: the control sets each part's text and visibility, as `render` does, since `isInvalid` is exactly the
   CSS's `.ion-touched.ion-invalid`. `Classes.CollectionChanged` is the `MutationObserver`.
 - **Font**: `Avonic.FontFamily` and 16, as `body`'s, since Avalonia's default is 14.
+- **Focus (#188)**: `FocusVisible.IsEnabled` through a `StyleValue`, from `ItemMultipleInputsObserver` (Ionic's
+  `createItemMultipleInputsObserver`, in `Controls/Item/`), which watches the item's `:item-multiple-inputs`. `PART_Focus` in the
+  theme, after the box, so over it; `ClipToBounds` off, as the host is `overflow: visible`. `FocusAdorner` null.
+- **The label's text (#188)**: `TextContentWatch`, while the label is hidden, as a hidden label isn't measured.
 
 ## Extensions
 

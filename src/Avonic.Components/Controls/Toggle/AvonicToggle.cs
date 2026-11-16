@@ -161,11 +161,12 @@ public class AvonicToggle : ContentControl, IItemControl
     /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
     private const string ItemMultipleInputs = ":item-multiple-inputs";
 
-    /// <summary>The item's <c>ion-activatable</c>, which it has when it's clickable.</summary>
+    /// <summary>
+    /// The item's <c>ion-activatable</c>: <c>ion-item.ion-activatable, ion-item[button], ion-item[href]</c>. Ionic reads the
+    /// attributes too, as the class needs the item to have rendered; here the item sets it with <see cref="AvonicItem.Button"/>, in
+    /// the same pass, and an item with a toggle has it only through <c>Button</c>, as a cover beside a toggle is multi-input.
+    /// </summary>
     private const string ItemActivatable = ":ion-activatable";
-
-    /// <summary>The item's <c>[button]</c>, which <see cref="AvonicItem.Button"/> sets.</summary>
-    private const string ItemButton = ":button";
 
     static AvonicToggle()
     {
@@ -322,7 +323,7 @@ public class AvonicToggle : ContentControl, IItemControl
         // hostContext('ion-item'), at render. Read again here, as a moved toggle is attached again. itemFocusObserver: the item's
         // item-multiple-inputs and ion-activatable come after this has rendered, so watch for them.
         _item?.Dispose();
-        _item = ItemMultipleInputsObserver.Create(this, UpdateClasses, ItemMultipleInputs, ItemActivatable, ItemButton);
+        _item = ItemMultipleInputsObserver.Create(this, UpdateClasses, ItemMultipleInputs, ItemActivatable);
         UpdateClasses();
         SetupGesture();
     }
@@ -384,11 +385,10 @@ public class AvonicToggle : ContentControl, IItemControl
         PseudoClasses.Set(":in-item", _item is not null);
 
         // toggle-defers-indicator: in a single-input item that isn't clickable, the item draws the row's indicator. A clickable
-        // item is a second tab stop, which item-multiple-inputs misses, as it counts covers, not toggles: ion-item.ion-activatable,
-        // or [button].
+        // item is a second tab stop, which item-multiple-inputs misses, as it counts covers, not toggles.
         PseudoClasses.Set(
             ":toggle-defers-indicator",
-            _item is { } item && !item.Has(ItemMultipleInputs) && !item.Has(ItemActivatable) && !item.Has(ItemButton));
+            _item is { } item && !item.Has(ItemMultipleInputs) && !item.Has(ItemActivatable));
         PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
 
         var justify = Justify;
