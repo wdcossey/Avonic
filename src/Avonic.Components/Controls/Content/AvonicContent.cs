@@ -139,6 +139,7 @@ public class AvonicContent : TemplatedControl
     private bool _focusedByPointer;
     private RoutedEventArgs? _passedOver;
     private RepeatButton? _barPressed;
+    private IPointer? _barPressPointer;
     private int _barClicks;
     private Point _barPointer;
     private readonly List<IDisposable> _containerChildDefaults = [];
@@ -461,7 +462,6 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(Button.ClickEvent, OnScrollBarClick);
             _scroll.RemoveHandler(PointerPressedEvent, OnScrollBarPointer);
             _scroll.RemoveHandler(PointerMovedEvent, OnScrollBarPointer);
-            _scroll.RemoveHandler(PointerReleasedEvent, OnScrollBarPointer);
         }
 
         if (_container is not null)
@@ -497,7 +497,6 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(Button.ClickEvent, OnScrollBarClick);
             _scroll.AddHandler(PointerPressedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
             _scroll.AddHandler(PointerMovedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _scroll.AddHandler(PointerReleasedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -793,7 +792,8 @@ public class AvonicContent : TemplatedControl
         var from = keyboard.Target;
         var max = vertical ? Math.Max(0, scroll.Extent.Height - viewport) : Math.Max(0, scroll.Extent.Width - viewport);
         var at = vertical ? from.Y : from.X;
-        var repeat = ReferenceEquals(_barPressed, button) && _barClicks++ > 0;
+        // A repeat comes from the button's timer while it's held; a click with the button not pressed, as automation's, is a first.
+        var repeat = button.IsPressed && ReferenceEquals(_barPressed, button) && _barClicks++ > 0;
         if (repeat && button.Name is PageUpPart or PageDownPart && ThumbReachedPointer(button, at, max, delta > 0))
         {
             return;
@@ -840,8 +840,16 @@ public class AvonicContent : TemplatedControl
     {
         if (e.RoutedEvent == PointerPressedEvent)
         {
-            var bar = (e.Source as Visual)?.FindAncestorOfType<ScrollBar>(includeSelf: true);
-            if (bar is null || !ReferenceEquals(bar.TemplatedParent, _scroll))
+            // Only the scroller's own bars, which are inside it: no further up than the scroller.
+            RepeatButton? button = null;
+            var visual = e.Source as Visual;
+            while (visual is not null && visual is not ScrollBar && !ReferenceEquals(visual, _scroll))
+            {
+                button ??= visual as RepeatButton;
+                visual = visual.GetVisualParent();
+            }
+
+            if (visual is not ScrollBar bar || !ReferenceEquals(bar.TemplatedParent, _scroll))
             {
                 return;
             }
@@ -851,19 +859,17 @@ public class AvonicContent : TemplatedControl
                 KeepFocus.During((PointerPressedEventArgs)e);
             }
 
-            _barPressed = (e.Source as Visual)?.FindAncestorOfType<RepeatButton>(includeSelf: true);
+            _barPressed = button;
+            _barPressPointer = e.Pointer;
             _barClicks = 0;
         }
-        else if (e.RoutedEvent == PointerReleasedEvent)
+        else if (!ReferenceEquals(e.Pointer, _barPressPointer) || _barPressed is not { IsPressed: true })
         {
-            _barPressed = null;
+            // Another pointer's move, or one with no button held, isn't the held one's.
             return;
         }
 
-        if (_barPressed is not null)
-        {
-            _barPointer = e.GetPosition(this);
-        }
+        _barPointer = e.GetPosition(this);
     }
 
     /// <summary>

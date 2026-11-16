@@ -705,4 +705,30 @@ public class AvonicContentScrollBarTests
         Assert.Equal(390, scroller.Viewport.Width);
         Assert.DoesNotContain(scroller.GetVisualDescendants().OfType<ScrollBar>(), Shown);
     });
+
+    [AvaloniaFact]
+    public void S10_Another_Pointer_Does_Not_Move_Where_A_Held_Track_Stops() => InstalledTheme.Run(_ =>
+    {
+        // The mouse holds the track at 150, as in S8, while a finger touches the content further down: it still stops at 524.
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        var button = Part<RepeatButton>(Bar(content, Orientation.Vertical), "PART_PageDown");
+
+        Press(scene, new Point(382, 150));
+        var finger = scene.Window.TouchBegin(new Point(200, 250), RawInputModifiers.None);
+        scene.Window.TouchMove(finger, new Point(200, 251), RawInputModifiers.None);
+        Settle();
+        for (var i = 0; i < 6; i++)
+        {
+            clock.At(clock.Now.TotalMilliseconds + 50);
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        }
+
+        scene.Window.TouchEnd(finger, new Point(200, 251), RawInputModifiers.None);
+        Release(scene, new Point(382, 150));
+        clock.At(1000);
+
+        Assert.Equal(524, Scroll(content).Offset.Y);
+    });
 }
