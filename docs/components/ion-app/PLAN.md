@@ -166,7 +166,7 @@ Behaviours, in `AvonicAppTests`:
   Avalonia doesn't, and on the Pixel the keyboard is about 355, so 290 left the field under it.
 
 Not done: moving the native input away and focusing it again (`relocateInput`), which stops a browser scrolling the page itself,
-as Avalonia doesn't; hide caret on scroll (WebKit draws the caret over a scrolling page); input blurring (off since Ionic 8, and
+as Avalonia doesn't, and so neither the click 8.8.1 fired on the component a frame after it, which 8.8.19 no longer fires; hide caret on scroll (WebKit draws the caret over a scrolling page); input blurring (off since Ionic 8, and
 going); a footer's field, for which Ionic only relocates.
 
 ## Not in this PR

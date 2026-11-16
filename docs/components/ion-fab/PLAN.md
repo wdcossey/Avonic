@@ -36,7 +36,7 @@ No events, slots, parts or variables. The default slot holds the button and the 
 | [x] | `show` | `Show` (`bool`) | `:show`. Only does anything in a list, measured |
 | [x] | `size` | `Size` (`FabButtonSize?`: `Small`) | `:size-small` |
 | [ ] | `translucent` | — | Not applicable: only ios draws it (`backdrop-filter` has no md value), as on `ion-header` |
-| [ ] | `type` | — | Not applicable: HTML form |
+| [ ] | `type`, `form` | — | Not applicable: HTML form. `form` is new in 8.8.17, with the hidden form button `ion-button` has; there's no form here |
 | [x] | `ionBlur`, `ionFocus` | `IonBlur`, `IonFocus` | On the button itself, as on `AvonicButton` |
 | [x] | default slot | `Content` | One slot, so a `ContentControl`: the content is the button's logical child |
 | [x] | part `native` | `PART_Native` | |

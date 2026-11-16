@@ -62,7 +62,7 @@ can sit about 1 px apart. The rows are the same heights (48; 71 with a pin; 88 s
 | 4 | A drag: capture at 10 px, input once a frame, change and end at the release, `:range-pressed` meanwhile | Match. Ionic's first `ionInput` is from the first frame after the capture, as here |
 | 5 | Snaps and ticks | Match: 11 ticks, 6 active, as measured |
 | 6 | Arrows step, no other key does, also at the limit and in RTL | Match |
-| 7 | Two knobs: the nearer moves, B on a tie; crossing swaps lower and upper; a value set in code moves them least | Match, each case measured |
+| 7 | Two knobs: the nearer moves, B on a tie; crossing swaps lower and upper; a value set in code moves them least; a change of `DualKnobs` moves them to the value (8.8.19) | Match, each case measured; `DualKnobs` on 8.8.19 |
 | 8 | `ActiveBarStart` | Match: from 20 % to 50 % in the frame |
 | 9 | The pin: `Math.round`, scaled up and raised 24 px while pressed or focused, 28 px of room | Match; the pin frame lines up |
 | 10 | Focus: tab stops A then B, one `IonFocus` in and one `IonBlur` out; `:ion-focused` by keyboard or code, not by a press | Match. **Deliberate difference:** a tap on a knob. Chromium focuses it from the compatibility mouse events after `pointerup`, so the knob looks keyboard-focused, pin up, until it's blurred (measured `release 500`). Avalonia focuses on the press with `NavigationMethod.Pointer`, so a tap is like a mouse click in Chromium, which doesn't show it |
@@ -70,7 +70,7 @@ can sit about 1 px apart. The rows are the same heights (48; 71 with a pin; 88 s
 | 12 | In an item: `:in-item`, 18 px adjustments, an input to the item; `flex: 3` in a start or end slot | Match: `r1`, `r2`, `r6` boxes, and 265.5 px in the start slot |
 | 13 | Label placements, a long label squeezing the slider, the slot's 200 px | Match: boxes within 1 px |
 | 14 | Slots: 14 px gaps, 12 px text, 24 px icons | Match |
-| 15 | RTL | Match in the frame; a press counts from the right. As in #116, `FlowDirection` inherits, where Ionic's `isRTL` reads only the range's own `dir` and the document's |
+| 15 | RTL | Match in the frame; a press counts from the right. RTL from an ancestor matches too, measured on 8.8.19, whose `isRTL(el)` walks up to the nearest `dir` as `FlowDirection` inherits. 8.8.1 read only the range's own `dir` and the document's, a deliberate difference then, as in #116 |
 | 16 | `Color` | Match: danger in the frame |
 | 17 | `Debounce` | Match: change at each key, one input 200 ms after the last |
 | 18 | `ScrollY` off while dragging in an `AvonicContent`; a vertical drag doesn't capture | Match. **Deliberate difference:** Ionic's `onEnd` sets the content's `scrollY` back to true after a tap that never turned it off, so a tap turns on a scroll the app had off; here only a drag that turned it off turns it back |

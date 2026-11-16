@@ -38,7 +38,8 @@ router (it's out of scope), so the tabs select their first tab at load, and a ta
   `SelectedTab`.
 - A **tab button's click** asks the tabs around it to select its `Tab`. A bar on its own does nothing on a click: set its
   `SelectedTab`.
-- **`Component`** is built the first time its tab is shown, once: a `Control`, or a `Type` with a parameterless constructor.
+- **`Component`** is built the first time its tab is shown, once: a `Control`, or a `Type` with a parameterless constructor. If
+  building it throws, the error is logged and it's tried again the next time the tab is shown, as in Ionic 8.8.19.
 
 ## API
 

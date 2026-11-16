@@ -846,13 +846,9 @@ public class AvonicInputOtp : ContentControl
             return;
         }
 
-        // Since 8.8.3: nothing while disabled, and in a read-only box Backspace does nothing at all. Ionic stops Delete there too,
-        // which a read-only text box ignores already, here as in Chromium.
-        if (!IsEffectivelyEnabled)
-        {
-            return;
-        }
-
+        // Since 8.8.3, in a read-only box Backspace does nothing at all. Ionic stops Delete there too, which a read-only text box
+        // ignores already, here as in Chromium. Its check for disabled has nothing to do: disabling moves focus out of the box, so
+        // no key reaches it, as in Chromium.
         if (Readonly && e.Key == Key.Back)
         {
             e.Handled = true;
@@ -1106,8 +1102,9 @@ public class AvonicInputOtp : ContentControl
 
     private async void PasteFromClipboard()
     {
-        // onPaste, since 8.8.3: after its preventDefault, nothing when disabled or read-only.
-        if (!IsEffectivelyEnabled || Readonly)
+        // onPaste, since 8.8.3: after its preventDefault, nothing when read-only. Disabled too, which can't happen here, as a
+        // disabled box has no focus to paste into.
+        if (Readonly)
         {
             return;
         }

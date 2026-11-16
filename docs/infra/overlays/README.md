@@ -127,4 +127,11 @@ Avonic additions, which shadow no Ionic name:
   or shows two of its activities in split screen, would need `Present(TopLevel)`. So would `Present()` from a view's constructor
   under the factory, which runs before its activity's top level exists, and an app that adds `AvonicTheme` or
   `AvonicComponentsStyles` only after its first activity, rather than in its `App.axaml`.
+- **Focus at present, for the modal ([#42](https://github.com/wdcossey/Avonic/issues/42)).** Since Ionic 8.8.19, `present()` with
+  `keyboardClose` focuses the first element in the overlay's root with `role="dialog"` and a `tabindex`, with `preventScroll`, and
+  the host only when there's none. Of Ionic's overlays, only `ion-modal`'s `.modal-wrapper` is one: the action sheet and loading
+  put the role on the host, which `querySelector` doesn't search, and the alert's is `alertdialog`. `AvonicOverlay` focuses itself,
+  which is right for every overlay but the modal, which will need a protected member for its wrapper, and to check that focusing it
+  doesn't scroll a sheet that's partly off screen. 8.8.19's modal also pads its content's end by the bottom safe area, in a modal
+  that isn't a sheet or a card and has no footer (`--internal-content-safe-area-padding-bottom`, which `content.css` reads).
 - Not tried in a real window: `tools/real-window/drive.ps1` has a section for the sample page, which the batch's runner runs.

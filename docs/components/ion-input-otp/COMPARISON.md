@@ -57,7 +57,7 @@ in the frame are asserted in `B21`.
 | 4 | `IonComplete` after `IonInput` whenever an edit leaves every box filled | Match (`type 34`, `type 5 in full last box`) |
 | 5 | In a filled box: insert and shift while the last is empty; otherwise the character before the caret replaces the box's | Match (`type 9 in filled box 0` → `9|1||`, `type 7 caret start` → `7|9|1|`, `box2 caret 0 type 7 full` → `1579`) |
 | 6 | Backspace: a filled box loses its character, the rest shift left; an empty box moves back and deletes there. Delete edits natively, and the emptied box is refocused by the redirect | Match (`backspace on last`, `backspace again`, `backspace 3`, `box1 caret0 backspace`, `box0 caret0 Delete` → `79`, focus 1) |
-| 7 | Right only from a filled box; Left back; swapped in RTL | Match (`ArrowLeft`, `ArrowRight`); RTL from `onKeyDown`, not measured |
+| 7 | Right only from a filled box; Left back; swapped in RTL | Match (`ArrowLeft`, `ArrowRight`). RTL on 8.8.19 with `dir="rtl"` on an ancestor only, as `isRTL(el)` now walks up: Left from a filled first box goes to the second, as here with an ancestor's `FlowDirection` |
 | 8 | A click lands on a filled box or the first empty one; not after Tab in a box | Match (`click empty box 2` → 0, `click filled box 0` → 0, `click empty box 3 after Tab` → 3) |
 | 9 | One tab stop; empty boxes past it hidden from automation | Match (`tab`, `hidden` columns of every trace). **Difference:** Stencil can leave two boxes at `tabIndex` 0 after an autofill (`-1,0,0,-1`); here there's one |
 | 10 | `IonFocus` and `IonBlur` once for the group; `IonChange` after `IonBlur` if the value isn't what it was at focus, even set in code | Match (`blur to other`: `ionBlur`, `ionChange:91`; `value 43 while focused` then `blur`) |
@@ -66,7 +66,7 @@ in the frame are asserted in `B21`.
 | 13 | `SetFocus(index)` clamps and is redirected; `SetFocus()` the tab stop | Match (`setFocus(1)`, `setFocus(3) on empty` → 2) |
 | 14 | A value set in code raises nothing, shows, moves the tab stop | Match (`value set in code`) |
 | 15 | Separators after listed boxes, not the last; `all`; duplicates and positions past the length warn | Match (rows 3 and 9, and `1,1,9` on three boxes → one separator, two warnings) |
-| 16 | Disabled can't be focused; read-only can, ignores typing, but Backspace and paste still edit | Match (`click disabled`; `readonly backspace` → `1`, `readonly type`, `readonly paste 55` → `55`) |
+| 16 | Disabled can't be focused, and disabling a focused one moves focus out; read-only can, and ignores typing, Backspace and paste (8.8.3) | Match (`click disabled`, `readonly type`; on 8.8.19, `readonly` Backspace and a paste of `9876` leave `12`, focus on box 1, the arrows still move, and a box disabled while focused loses focus and takes neither). 8.8.1's handlers didn't check readonly, and Backspace and paste edited (measured then: `1`, `55`) |
 | 17 | `Type`, `Inputmode`, `Autocapitalize` reach each box | Match, as `TextInputOptions` (no keyboard to see headless) |
 | 18 | The group is named "One-time password input", or by the host; each box "Input n of length" | Match, through the automation peer |
 | 19 | The description: 12 px on 20, centred, `#4d4d4d`; none without content | Match (`desc` rows: 20 high with text, 0 without) |
@@ -75,8 +75,6 @@ in the frame are asserted in `B21`.
 
 ## Deliberate differences
 
-- **Read-only Backspace and paste edit the value**, as Ionic's own handlers do (measured). Avalonia's `TextBox` keeps a paste on a
-  read-only box to itself, so the control raises Ionic's paste for the platform's paste gesture there.
 - **Backspace in an empty box** deletes in the box focus moved to, as Chromium's default action follows focus; Avalonia's key
   stays with the box it started in, so the control does that deletion itself.
 - **An invalid `Pattern`** accepts nothing and logs a warning; Ionic's handlers throw.

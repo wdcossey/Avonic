@@ -60,7 +60,7 @@ top start in `FixedContent`. Pseudoclasses: `:horizontal-start`, `:horizontal-ce
 | [x] | `size` | `Size` (`FabButtonSize?`) | `Small`: 40 with 8 margins |
 | [ ] | `href`, `download`, `rel`, `target`, `routerAnimation`, `routerDirection` | — | Out of scope: router, as on `ion-button`. Use `Click` |
 | [ ] | `translucent` | — | Not applicable: only ios draws it |
-| [ ] | `type` | — | Not applicable: HTML form |
+| [ ] | `type`, `form` | — | Not applicable: HTML form (`form` since 8.8.17) |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [x] | `ionFocus`, `ionBlur` | `IonFocus`, `IonBlur` | |
 | [x] | default slot | `Content` | A `ContentControl`, so the content is the button's logical child |

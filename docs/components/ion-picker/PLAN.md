@@ -74,7 +74,7 @@ From `picker-column.js`, `picker-column-option.js` and `picker.js`; every number
 
 | # | Behaviour | Ionic |
 |---|---|---|
-| C1 | Once it's visible, the column jumps to centre the option whose value is `value`, and that option is active (`option-active`): its text is its colour's base. No `ionChange`. Measured: `scrollTop` 121 for the 4th option, 34 × 3 + 19 | IO callback → `scrollActiveItemIntoView()`; `scroll-snap-align: center` |
+| C1 | Once it's visible, the column jumps to centre the option whose value is `value`, and that option is active (`option-active`): its text is its colour's base. No `ionChange`. Measured: `scrollTop` 121 for the 4th option, 34 × 3 + 19. Shown again, an old active option is cleared (8.8.19's `el.querySelector`; measured on 8.8.19, hidden at Red, value Blue, shown: only Blue active). 8.8.19's `picker-column-option.md.css` also colours `[part~=active]`, which only `ion-datetime` sets: for #46 | IO callback → `scrollActiveItemIntoView()`; `scroll-snap-align: center` |
 | C2 | A programmatic `value` while visible scrolls smoothly to its option, √distance / 60 s, Chromium's ease in-out (measured 136 px in 200 ms), and no `ionChange` | `valueChange` → `scrollActiveItemIntoView(true)` |
 | C3 | A scroll by the user moves the active option with the centre at every frame, and 250 ms after the last scroll sets `value` to the centred option and raises `ionChange` once. A disabled option at the centre is never active | `initializeScrollListener` |
 | C4 | A scroll comes to rest centred on an enabled option. Measured: a 100 px wheel notch from 121 rests at 223, the nearest | `scroll-snap-type: y mandatory`; `scroll-snap-align: none` on disabled options unless the column is disabled |
