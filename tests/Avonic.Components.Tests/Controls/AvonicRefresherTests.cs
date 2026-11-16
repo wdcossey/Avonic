@@ -1261,11 +1261,15 @@ public class AvonicRefresherTests
     [AvaloniaFact]
     public void C3_A_Pull_Let_Go_Short_Whose_Play_Back_The_Cancels_End_Destroys_Leaves_The_Refresher_On() => InstalledTheme.Run(_ =>
     {
-        // The same bug from the other side: let go under 0.4 just before the cancel's end, the play back is destroyed while it runs.
+        // The same bug from the other side: let go under 0.4 just before the cancel's end, the play back, about 140 ms, is
+        // destroyed while it runs, and its end never comes in Ionic either.
         using var page = Refreshing();
         page.Refresher.Cancel();
-        page.Wait(32 + 600);
-        page.Drag(8 + 100).Wait(16).Lift();
+        var cancelled = page.At;
+        page.Wait(32 + 500);
+        page.Drag(8 + 100, step: 50).Wait(16);
+        page.Wait(cancelled + 32 + 700 - 50 - page.At);
+        page.Lift();
         page.Wait(200);
         Assert.Equal(RefresherState.Inactive, page.Refresher.State);
         Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd"));
@@ -1277,16 +1281,19 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void C3_Disabled_While_Overtaken_It_Stays_Off() => InstalledTheme.Run(_ =>
+    public void C3_Disabled_While_Its_Play_Back_Runs_It_Stays_Off() => InstalledTheme.Run(_ =>
     {
-        // As R3: the gesture comes back as IsEnabled says, so a refresher disabled meanwhile stays off.
+        // As R3: the gesture comes back as IsEnabled says, so one disabled after letting go, before the reset destroys the play
+        // back, stays off.
         using var page = Refreshing();
         page.Refresher.Cancel();
-        page.Wait(32 + 60);
-        page.Drag(8 + 180).Wait(16);
-        page.Wait(700);
+        var cancelled = page.At;
+        page.Wait(32 + 500);
+        page.Drag(8 + 100, step: 50).Wait(16);
+        page.Wait(cancelled + 32 + 700 - 50 - page.At);
+        page.Lift();
         page.Refresher.IsEnabled = false;
-        page.Lift().Wait(600);
+        page.Wait(200);
 
         var before = page.Log.Count;
         page.Drag(8 + 200).Wait(16).Lift().Wait(400);
