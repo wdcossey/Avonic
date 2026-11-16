@@ -90,10 +90,10 @@ All measured in Chromium, or read from the `.js` where they can't be seen; see [
 - **`disabled` is `IsEnabled`** on the column and the option, as the mapping says. Ionic's column only stops its options
   (`pointer-events: none`), so a control in its prefix or suffix stays live there and is disabled here. The alternative was a
   `Disabled` property, as for #34's reorder group, but the column does stop its children, and a prefix or suffix is text in practice.
-- **A click on a disabled option does nothing.** Ionic 8.8.1 sets the column to it, raises `ionChange`, then, as the value has no
+- **A click on a disabled option does nothing.** Ionic 8.8.19 sets the column to it, raises `ionChange`, then, as the value has no
   active option, sets it to the first option and raises `ionChange` again (measured: `b`, then `a`). The alternative was to copy
   that, which `IsEnabled` doesn't allow; it reads as a bug no app relies on.
-- **`SetFocus()` focuses the column.** Ionic 8.8.1's focuses `assistiveFocusable`, which nothing sets, so it does nothing. Its
+- **`SetFocus()` focuses the column.** Ionic 8.8.19's focuses `assistiveFocusable`, which nothing sets, so it does nothing. Its
   documentation says it focuses the scroller, which is what this does; the alternative, a method that does nothing, would be dead.
 - **Mobile is Android or iOS** (`isPlatform('mobile')` is `any-pointer: coarse`, which Avalonia doesn't report): it reverses the
   arrows and pages, and turns off the focused background (`any-hover`). `AvonicPickerColumn.IsMobile` is internal, for tests.

@@ -1,6 +1,6 @@
 # ion-skeleton-text → `AvonicSkeletonText` — Plan
 
-Ionic 8.8.1, from `dist/collection/components/skeleton-text/skeleton-text.js`, `skeleton-text.css` (there's no
+Ionic 8.8.19, from `dist/collection/components/skeleton-text/skeleton-text.js`, `skeleton-text.css` (there's no
 `skeleton-text.md.css`), `label.md.css` and `core.json`. Every number here was measured in Chromium, md, at 390 wide, by
 throwaway `playwright-core` scripts, which paused the shimmer with the Web Animations API (`animation.pause();
 animation.currentTime = ms`) to read it at a known time. The reference render is [`ref/`](ref/), and the comparison is

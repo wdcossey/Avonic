@@ -2,7 +2,7 @@
 
 `ion-fab`, `ion-fab-button` and `ion-fab-list` ([#30](https://github.com/wdcossey/Avonic/issues/30)): a floating action button,
 placed over `ion-content` from its `fixed` slot, which opens lists of smaller buttons beside it. Measurements are from real Ionic
-8.8.1 in Chromium, md, at 390 × 844, wrapped in `ion-app` so that `tap-click` runs. The reference page is in [`ref/`](ref/), with
+8.8.19 in Chromium (8.8.1 when written; 8.8.19 adds only `form`, not applicable), md, at 390 × 844, wrapped in `ion-app` so that `tap-click` runs. The reference page is in [`ref/`](ref/), with
 its command in [`COMPARISON.md`](COMPARISON.md). The mobile context has no `any-hover`, so hover is read from the CSS.
 
 ## Fidelity checklist

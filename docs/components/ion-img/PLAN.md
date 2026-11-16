@@ -1,6 +1,6 @@
 # ion-img → `AvonicImg` — Plan
 
-Ionic 8.8.1, from `dist/collection/components/img/img.js`, `img.css` (there's no `img.md.css`) and `core.json`. Every number here
+Ionic 8.8.19, from `dist/collection/components/img/img.js`, `img.css` (there's no `img.md.css`) and `core.json`. Every number here
 was measured in Chromium, md, at 390 wide, by throwaway `playwright-core` scripts that served the repo, a 300 × 200 PNG of four
 coloured quarters, a 404 and a file that isn't an image, each with a delay a query string sets, and logged every `ionImg*` and
 `ionError` event with `performance.now()`. The reference render is [`ref/`](ref/), and the comparison is

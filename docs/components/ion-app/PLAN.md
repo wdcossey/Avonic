@@ -6,7 +6,7 @@ that: hardware back, keyboard assist, status tap and `setFocus`. The status tap 
 iPhone, as only iOS has one. **An app doesn't need it to get working controls**: every control
 still works without it, and an overlay still dismisses on back.
 
-Sources, `@ionic/core` 8.8.1, `dist/collection/`: `components/app/app.js` and `app.css`; `utils/hardware-back-button.js`;
+Sources, `@ionic/core` 8.8.19, `dist/collection/`: `components/app/app.js` and `app.css`; `utils/hardware-back-button.js`;
 `utils/keyboard/keyboard.js` and `keyboard-controller.js`; `utils/status-tap.js`; `utils/focus-visible.js`; `utils/input-shims/`
 (`input-shims.js`, `hacks/scroll-assist.js`, `scroll-data.js`, `scroll-padding.js`, `common.js`, `hide-caret.js`, `input-blurring.js`);
 `utils/helpers.js` (`focusVisibleElement`); `utils/overlays.js` and `utils/menu-controller/index.js` for who registers at what priority;
@@ -40,7 +40,7 @@ config, which sets `--ion-safe-area-top: 20px`). `app.css` adds `user-select: no
 
 ## Measured
 
-Real Ionic 8.8.1, md, headless Chromium (Playwright 1.56's), 390 x 844 at 2×, from a throwaway script outside the repo. Capacitor's
+Real Ionic 8.8.19, md, headless Chromium (Playwright 1.56's), 390 x 844 at 2×, from a throwaway script outside the repo. Capacitor's
 events were dispatched by hand: `backbutton` on the document, `statusTap` on the window, and `keyboardDidShow` and `keyboardDidHide`
 on the window with a fake Capacitor Keyboard plugin, so that keyboard assist takes its native path.
 

@@ -1,6 +1,6 @@
 # ion-refresher, ion-refresher-content — plan
 
-Issue [#35](https://github.com/wdcossey/Avonic/issues/35). Ionic 8.8.1, md. Read from `refresher.js`, `refresher.utils.js`,
+Issue [#35](https://github.com/wdcossey/Avonic/issues/35). Ionic 8.8.19 (8.8.1 when written; its two changes are under behaviour 19), md. Read from `refresher.js`, `refresher.utils.js`,
 `refresher-content.js`, `refresher.md.css`, and measured in Chromium (`ref/`, below).
 
 ## Which refresher

@@ -5,7 +5,7 @@ It's infrastructure, not a control: `ion-alert`, `ion-action-sheet`, `ion-loadin
 `ion-menu` build on it. `ion-backdrop`, its first consumer, has its own plan in
 [`docs/components/ion-backdrop/PLAN.md`](../../components/ion-backdrop/PLAN.md).
 
-Sources, `@ionic/core` 8.8.1, `dist/collection/`: `utils/overlays.js` (`prepareOverlay`, `present`, `dismiss`, `eventMethod`,
+Sources, `@ionic/core` 8.8.19 (8.8.1 when written; 8.8.19 changes only what `present()` focuses, for the modal: see the README), `dist/collection/`: `utils/overlays.js` (`prepareOverlay`, `present`, `dismiss`, `eventMethod`,
 `trapKeyboardFocus`, `connectListeners`, `getPresentedOverlay`), `utils/animation/animation.js` (`createAnimation`),
 `utils/animation/cubic-bezier.js` (`getTimeGivenProgression`), `utils/focus-trap.js`, `utils/hardware-back-button.js`,
 `utils/lock-controller.js`, `components/loading/loading.js` as the simplest consumer, and the md `animations/md.enter.js` and

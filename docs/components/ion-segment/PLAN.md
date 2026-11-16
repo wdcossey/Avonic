@@ -4,7 +4,7 @@ A row of tabs and the pages they switch: `ion-segment` holds `ion-segment-button
 under it that slides from the last one; `ion-segment-view` holds `ion-segment-content`s side by side in a horizontal scroller,
 and a button with a `contentId` pages it. One family, one PR (#28).
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`. The page is in
+Measurements are from real Ionic 8.8.1 in Chromium, and V3's disabled button on 8.8.19, md, 390 px wide, wrapped in `ion-app`. The page is in
 [COMPARISON.md](COMPARISON.md). The behaviours were measured with throwaway Playwright scripts on the same page: mouse taps and
 drags, held presses, the keys, the indicator's transform sampled during its transition, and `scrollLeft` sampled every frame
 during each smooth scroll.

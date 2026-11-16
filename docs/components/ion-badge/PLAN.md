@@ -2,7 +2,7 @@
 
 Three display atoms in one PR: `AvonicBadge`, a small coloured count; `AvonicAvatar`, a round picture; `AvonicThumbnail`,
 a square one. None has behaviour of its own beyond showing up and hiding when empty, and what matters is how each sits
-in `ion-item`. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide, wrapped in `ion-app`; they're in
+in `ion-item`. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in `ion-app`; they're in
 [`ref/measurements.json`](ref/measurements.json), keyed by the names in brackets below, with the page in
 [`ref/measurements.png`](ref/measurements.png).
 

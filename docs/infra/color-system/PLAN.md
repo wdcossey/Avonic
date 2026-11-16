@@ -1,6 +1,6 @@
 # Plan: colour system (#2)
 
-Sources: `@ionic/core` 8.8.1 `css/core.css`, `css/palettes/dark.always.css`,
+Sources: `@ionic/core` 8.8.19 `css/core.css`, `css/palettes/dark.always.css` (8.8.19 adds `--ion-tab-bar-background-focused`),
 `dist/collection/utils/theme.js`, and every `*.md.css` under `dist/collection/components`. 42
 components declare a `color` prop, so this is the most reused API in the library.
 
@@ -22,7 +22,7 @@ Component CSS then reads those under `:host(.ion-color)`, for example
 
 ## Measured behaviour
 
-Rendered in real Ionic 8.8.1 (md, headless Chromium), reading computed styles. "Native" is
+Rendered in real Ionic 8.8.19 (md, headless Chromium), reading computed styles. "Native" is
 `ion-button`'s `.button-native`; a badge shows the same behaviour on its host.
 
 | Case | `ion-color` class | `--ion-color-base` | Result |

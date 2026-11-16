@@ -2,7 +2,7 @@
 
 The smallest control in Ionic: a `display: block` element with `role="group"`, no props, and no CSS of its own. What it does is
 what it's a parent of. A sticky divider stays inside it, and its class `item` makes a label inside it act as if it's in
-an item. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide.
+an item. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist
 

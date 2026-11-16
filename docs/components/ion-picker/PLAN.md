@@ -5,7 +5,7 @@ The inline wheel picker: `ion-picker` holds `ion-picker-column`s side by side, e
 rows above and below it. One family, one PR (#37). `ion-datetime` (#46) is built on it, so the column's API and behaviour, and the
 picker's internal numeric input mode, follow Ionic's `.js` exactly.
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: the
+Measurements are from real Ionic 8.8.1 in Chromium, and a column shown again on 8.8.19 (C1), md, 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: the
 boxes and colours, `scrollTop` at load and sampled every frame during a programmatic change, a wheel notch, a click on an option, the
 keys, a value with no option, a click on a disabled option and a disabled column. The page is in [COMPARISON.md](COMPARISON.md).
 
@@ -50,7 +50,7 @@ Internal: `numericInput` → `internal NumericInput`; `setValue()` and `scrollAc
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `ionChange` | `IonChange` (`IonChangeEvent`, bubbles, `PickerColumnChangeEventArgs.Value`) | From the user only: a scroll that comes to rest, a click, a key, typing. Not for a programmatic `Value` |
-| [x] | `setFocus()` | `SetFocus()` | Focuses the column. Ionic 8.8.1's focuses `assistiveFocusable`, which nothing sets, so it does nothing: see "Decided" |
+| [x] | `setFocus()` | `SetFocus()` | Focuses the column. Ionic 8.8.19's focuses `assistiveFocusable`, which nothing sets, so it does nothing: see "Decided" |
 | [x] | `prefix` slot | `PrefixContent` (+ `PrefixContentTemplate`) | Left of the options |
 | [x] | `suffix` slot | `SuffixContent` (+ `SuffixContentTemplate`) | Right of the options |
 

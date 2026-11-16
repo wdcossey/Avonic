@@ -2,7 +2,7 @@
 
 A row of one-character boxes for a one-time code: `length` native inputs in a flex row with a gap, optional separator dots
 between them, and a description slot underneath. Typing fills a box and moves on, Backspace walks back, a paste or an autofill
-spreads over the boxes, and the value is the boxes joined. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px
+spreads over the boxes, and the value is the boxes joined. Measurements are from real Ionic 8.8.1 in Chromium, and read-only and disabled again on 8.8.19 (behaviour 16), md, at 390 px
 wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the behaviours; the
 frame in a mobile one). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 

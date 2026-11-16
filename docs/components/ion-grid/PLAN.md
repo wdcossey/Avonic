@@ -1,7 +1,7 @@
 # ion-grid family — Plan
 
 Three controls in one PR: `AvonicGrid`, `AvonicRow` and `AvonicCol`. They only make sense together, so they share this folder,
-as the card family does. Measurements are from real Ionic 8.8.1 in Chromium, md, wrapped in `ion-app`, with scripts kept outside
+as the card family does. Measurements are from real Ionic 8.8.19 in Chromium, md, wrapped in `ion-app`, with scripts kept outside
 the repo. Every number below was measured unless it says otherwise. Widths are CSS px, and Avalonia's are device-independent
 pixels, which are the same unit.
 

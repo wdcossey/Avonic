@@ -1,7 +1,7 @@
 # ion-item-sliding family — Plan
 
 `ion-item-sliding`, `ion-item-options` and `ion-item-option` ([#31](https://github.com/wdcossey/Avonic/issues/31)): an item that
-slides sideways under a finger to show buttons behind it. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 × 844,
+slides sideways under a finger to show buttons behind it. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 × 844,
 with touch from CDP's `Input.dispatchTouchEvent`, wrapped in `ion-app` so that `tap-click` runs. The reference page is in
 [`ref/`](ref/), with its command in [`COMPARISON.md`](COMPARISON.md).
 

@@ -1,7 +1,7 @@
 # ion-card family — Plan
 
 Five controls in one PR: `AvonicCard`, `AvonicCardHeader`, `AvonicCardTitle`, `AvonicCardSubtitle` and
-`AvonicCardContent`. They only make sense together, so they share this folder. Measurements are from real Ionic 8.8.1
+`AvonicCardContent`. They only make sense together, so they share this folder. Measurements are from real Ionic 8.8.19
 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist

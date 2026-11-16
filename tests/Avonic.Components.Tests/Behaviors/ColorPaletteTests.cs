@@ -25,7 +25,7 @@ public class ColoredControl : TemplatedControl
 }
 
 /// <summary>
-/// Each case was measured in real Ionic 8.8.1 (md); see "Measured behaviour" in
+/// Each case was measured in real Ionic 8.8.19 (md); see "Measured behaviour" in
 /// docs/infra/color-system/PLAN.md.
 /// </summary>
 public class ColorPaletteTests

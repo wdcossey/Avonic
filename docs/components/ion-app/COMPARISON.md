@@ -6,7 +6,7 @@
 > node tools/ionic-ref/render.js ion-app --bare --html '<ion-app><ion-header><ion-toolbar><ion-title>ion-app</ion-title></ion-toolbar></ion-header><ion-content><div style="padding:16px">Plain text in ion-app is 16px Roboto, in the text colour.</div><ion-item><ion-label>An item</ion-label></ion-item></ion-content></ion-app>' --out docs/components/ion-app/ref
 > ```
 >
-> The behaviours were measured with a throwaway Playwright script outside the repo, in Chromium (Playwright 1.56's), Ionic 8.8.1,
+> The behaviours were measured with a throwaway Playwright script outside the repo, in Chromium (Playwright 1.56's), Ionic 8.8.19,
 > md, 390 x 844 at 2×, with Capacitor's events dispatched by hand: see [PLAN.md](PLAN.md#measured).
 
 ## The frame
