@@ -78,6 +78,13 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
     after each layout of the content until it's there (`componentOnReady`), logged once if the first gives none. B24 (#155)
 20. The config keys `refreshingIcon` and `refreshingSpinner` come before md's defaults and `spinner`, read once, when the content
     first loads; a key of `null` gives no spinner, and so not the native refresher. B25 (#155)
+21. After a cancel (#167, measured in Chromium): during a refresh, both icons for the 700 ms, the pulling one as wide as the
+    content with its spinner at the start, the column of both centred on the refresher and overflowing it both ways; with no pull,
+    the refreshing one only; a short pull, one; none once it's over, after a refresh and `complete()` that follow, or with the page
+    closed and opened again. C1, C4 to C8
+22. A pull started while cancelling moves the icon, as its animation is newer than the held snap back. C2
+23. A cancel's reset ends whatever runs then, as Ionic's does: a pull under way, let go with no move since, is left off for good,
+    and one moved on past 0.4 refreshes; a refresh begun during cancelling ends as cancelled. C3, C9, C10
 
 R1 to R6 came from the reviews: a press dropped on detach, the fixed slot through a panel, `IsEnabled` kept, a new content used.
 

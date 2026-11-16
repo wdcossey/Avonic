@@ -86,7 +86,8 @@ Each is a test in `AvonicRefresherTests`, listed in [PLAN.md](PLAN.md#behaviours
 gesture on the content's scroll element, or a scroll host's in it (priority 31, `y`, 5 px), starts only at the top and not while refreshing; the first move after
 it captures starts the pull, and each later one steps md's pulling animation to `deltaY / 360`; let go at 0.4 or less and it plays
 back over progress × 500 ms and cancels; past it, the icon snaps back in 125 ms and the refresher refreshes, clearing the focus;
-`Complete()` and `Cancel()` close it two frames later, after the icon's 200 ms transition, or Ionic's 700 ms fallback.
+`Complete()` and `Cancel()` close it two frames later, after the icon's 200 ms transition, or Ionic's 700 ms fallback. Cancelling
+during a refresh shows both icons until then, as Ionic's does, the pulling one as wide as the content ([#167](COMPARISON.md#after-a-cancel-167)).
 
 The refresher's state shows as pseudoclasses on both controls: `:pulling`, `:ready`, `:refreshing`, `:cancelling`, `:completing`,
 `:native`, and `:active` on the refresher.
@@ -127,4 +128,7 @@ None.
   an app puts in the slots and their logical descendants. Of two hosts, one in `Content` and one in `FixedContent`, the one in
   `Content` wins, where Ionic takes the first in the markup.
 - `AvonicConfig.RefreshingIcon` takes only spinners, as `PullingIcon` does: Ionic's can name any icon, for its legacy refresher.
+- In cancelling, the pulling icon is a pill where Chromium draws an ellipse. Two of Ionic's own bugs are kept: a pull that a
+  cancel's end overtakes, let go with no move past 0.4 since, leaves the refresher off, and a refresh begun while cancelling ends as
+  cancelled ([#167](COMPARISON.md#deliberate-differences)).
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

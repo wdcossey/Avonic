@@ -16,7 +16,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <!-- display: flex; flex-direction: column; justify-content: center; height: 100% -->
-                <StackPanel VerticalAlignment="Center">
+                <c:RefresherColumn>
                     <!-- .refresher-pulling: display: none; width: 100% -->
                     <Panel Name="PART_Pulling" IsVisible="False">
                         <!-- .refresher-pulling-icon, native: margin: 0 auto; border-radius: 100% (below); padding: 8px; display: flex;
@@ -78,7 +78,7 @@
                             </Panel>
                         </Border>
                     </Panel>
-                </StackPanel>
+                </c:RefresherColumn>
             </ControlTemplate>
         </Setter>
 
@@ -107,6 +107,15 @@
         <!-- display: flex for pulling and ready in the native refresher; display: block for cancelling -->
         <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling, ^:cancelling /template/ Panel#PART_Pulling">
             <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- In cancelling, .refresher-pulling is display: block, not flex, so the icon, a block-level flex box with no width,
+             fills it, with its spinner at the start: 390 wide in Chromium after cancel() (#167). border-radius: 100% makes that
+             an ellipse there; a CornerRadius can't, so it's a pill here. -->
+        <Style Selector="^:cancelling /template/ Border#PART_PullingIcon">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:cancelling /template/ Panel#PART_SpinnerArrowContainer">
+            <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
         <!-- the native refresher's refreshing, completing and cancelling. Completing's scale(0), with its 200 ms transition, is
              the control's own, as AvonicRefresher waits for it to end. -->

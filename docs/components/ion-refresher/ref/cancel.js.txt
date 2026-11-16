@@ -1,0 +1,144 @@
+// #167: what ion-refresher's md native refresher shows after a cancel, in Chromium. A: cancel() during a refresh; B: a short pull;
+// C: cancel() with no pull; D: a pull again during cancelling, slowly, which the reset overtakes; E: a refresh and complete() after;
+// H: a fast pull let go past the threshold during cancelling, whose refresh the cancel's reset ends, and a pull after it;
+// F: a fast pull during cancelling, held past its end; G: a pull after F, which never starts, as F left the gesture off.
+// node cancel.js <repoRoot> <outDir>
+const path = require('path');
+const fs = require('fs');
+const http = require('http');
+const ROOT = path.resolve(process.argv[2]);
+const OUT = path.resolve(process.argv[3]);
+const { chromium } = require(path.join(ROOT, 'node_modules', 'playwright-core'));
+const roboto = require(path.join(ROOT, 'tools', 'fonts', 'roboto', 'roboto'));
+
+const items = Array.from({ length: 20 }, (_, i) => `<ion-item><ion-label>Item ${i + 1}</ion-label></ion-item>`).join('');
+const header = process.argv[4] !== 'noheader';
+const snippet = `<ion-app>${header ? '<ion-header><ion-toolbar><ion-title>Refresher</ion-title></ion-toolbar></ion-header>' : ''}<ion-content><ion-refresher slot="fixed"><ion-refresher-content></ion-refresher-content></ion-refresher><ion-list>${items}</ion-list></ion-content></ion-app>`;
+const MIME = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.json': 'application/json', '.svg': 'image/svg+xml', ...roboto.MIME };
+const pageHtml = `<!doctype html><html mode="md"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="/node_modules/@ionic/core/css/ionic.bundle.css">${roboto.LINK}
+<script>window.Ionic = { config: { mode: 'md' } };</script>
+<script type="module" src="/node_modules/@ionic/core/dist/ionic/ionic.esm.js"></script>
+<style>html,body{margin:0;height:100%;background:var(--ion-background-color,#fff)} *{user-select:none;-webkit-user-select:none}</style>
+</head><body>${snippet}</body></html>`;
+const server = http.createServer((req, res) => {
+    const url = decodeURIComponent(req.url.split('?')[0]);
+    if (url === '/') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(pageHtml); }
+    const file = path.join(ROOT, url);
+    if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
+    fs.createReadStream(file).pipe(res);
+});
+
+(async () => {
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    fs.mkdirSync(OUT, { recursive: true });
+    const browser = await chromium.launch();
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(String(e)));
+    await page.goto(`http://127.0.0.1:${server.address().port}/`);
+    await page.waitForFunction(() => document.querySelector('ion-refresher')?.classList.contains('hydrated') && document.querySelector('ion-refresher-content')?.classList.contains('hydrated'));
+    await roboto.loadRoboto(page);
+    await page.waitForTimeout(800);
+    await page.evaluate(() => {
+        window.__log = [];
+        const r = document.querySelector('ion-refresher');
+        for (const n of ['ionPull', 'ionPullStart', 'ionPullEnd', 'ionStart', 'ionRefresh'])
+            r.addEventListener(n, e => window.__log.push({ n, t: performance.now(), d: e.detail ? JSON.stringify(e.detail.reason ?? 'complete-fn') : null }));
+    });
+    const probe = async label => page.evaluate(label => {
+        const r = document.querySelector('ion-refresher');
+        const q = s => r.querySelector(s);
+        const rect = e => { if (!e) return null; const b = e.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map(v => Math.round(v * 100) / 100); };
+        const cs = (e, p) => e ? getComputedStyle(e).getPropertyValue(p) : null;
+        const pi = q('.refresher-pulling-icon'), sp = q('.refresher-pulling ion-spinner');
+        const circle = sp?.shadowRoot?.querySelector('circle');
+        const ri = q('.refresher-refreshing-icon'), rsp = q('.refresher-refreshing ion-spinner');
+        return {
+            label, t: performance.now(), classes: r.className, refresher: rect(r),
+            pulling: { display: cs(q('.refresher-pulling'), 'display'), rect: rect(pi), transform: cs(pi, 'transform'),
+                spinner: cs(sp, 'transform'), dash: cs(circle, 'stroke-dasharray'), dashoffset: cs(circle, 'stroke-dashoffset'),
+                sac: cs(q('.spinner-arrow-container'), 'opacity'), arrowContainer: cs(q('.arrow-container'), 'transform'),
+                arrow: cs(q('.arrow-container ion-icon'), 'transform'), arrowRect: rect(q('.arrow-container ion-icon')),
+                bg: cs(pi, 'background-color'), border: cs(pi, 'border'), shadow: cs(pi, 'box-shadow'), radius: cs(pi, 'border-radius'),
+                color: cs(sp, 'color'), spinnerRect: rect(sp) },
+            refreshing: { display: cs(q('.refresher-refreshing'), 'display'), rect: rect(ri), transform: cs(ri, 'transform'), transition: cs(ri, 'transition'),
+                spinnerRect: rect(rsp) },
+            scrollTop: document.querySelector('ion-content').shadowRoot.querySelector('.inner-scroll').scrollTop,
+        };
+    }, label);
+    const results = [];
+    const clip = { x: 0, y: 0, width: 390, height: 200 };
+    const shot = async name => { await page.screenshot({ path: path.join(OUT, name + '.png'), clip }); };
+    const x = 195, y0 = 200;
+    let y = y0;
+    const moveTo = async target => { while (y < target) { y = Math.min(target, y + 6); await page.mouse.move(x, y); await page.waitForTimeout(16); } };
+    const sample = async (prefix, list, shots) => {
+        const t = await page.evaluate(() => performance.now());
+        for (const ms of list) {
+            const now = await page.evaluate(() => performance.now()); if (t + ms > now) await page.waitForTimeout(t + ms - now);
+            results.push(await probe(prefix + '-' + ms)); if (shots) await shot(prefix + '-' + ms);
+        }
+    };
+    const pull = async p => {
+        y = y0; await page.mouse.move(x, y0); await page.mouse.down();
+        await moveTo(y0 + 8); await page.waitForTimeout(50);
+        const cap = y; await moveTo(Math.round(cap + 360 * p)); await page.waitForTimeout(60);
+    };
+    const cancel = () => page.evaluate(() => document.querySelector('ion-refresher').cancel());
+    // A: pull past the threshold, refresh, cancel()
+    await pull(0.5); results.push(await probe('A-pulled')); await page.mouse.up();
+    await page.waitForTimeout(400); results.push(await probe('A-refreshing')); await shot('A-refreshing');
+    await cancel(); await sample('A-cancel', [10, 40, 100, 200, 400, 650, 760, 900], true);
+    // B: short pull, let go
+    await page.waitForTimeout(300);
+    await pull(0.3); results.push(await probe('B-pulled')); await shot('B-pulled'); await page.mouse.up();
+    await sample('B-release', [40, 100, 160, 260, 400], true);
+    // C: cancel() while inactive
+    await page.waitForTimeout(300);
+    await cancel(); await sample('C-cancel', [40, 100, 400, 760], true);
+    // D: refresh, cancel, then pull again straight after (during cancelling)
+    await page.waitForTimeout(800);
+    await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400);
+    await cancel(); await page.waitForTimeout(100);
+    await pull(0.5); results.push(await probe('D-pull-during-cancelling')); await shot('D-pull-during-cancelling');
+    await sample('D-held', [300, 700], true);
+    await page.mouse.up(); await sample('D-release', [100, 400, 900], true);
+    // E: cancel then a full refresh, complete
+    await cancel(); await page.waitForTimeout(900);
+    await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400); results.push(await probe('E-refreshing')); await shot('E-refreshing');
+    await page.evaluate(() => document.querySelector('ion-refresher').complete());
+    await sample('E-complete', [40, 120, 300], true);
+    await page.waitForTimeout(1000);
+    // H: refresh, cancel, then a fast pull past the threshold let go before the cancel's end
+    await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400);
+    await page.evaluate(() => { window.__cancelAt = performance.now(); });
+    await cancel(); await page.waitForTimeout(60);
+    y = y0; await page.mouse.move(x, y0); await page.mouse.down();
+    for (const t of [y0 + 8, y0 + 16, y0 + 80, y0 + 140, y0 + 200, y0 + 220]) { y = t; await page.mouse.move(x, y); await page.waitForTimeout(16); }
+    results.push(await probe('H-pulled')); await page.mouse.up();
+    await page.evaluate(() => { window.__releaseAt = performance.now(); });
+    await sample('H-release', [60, 200, 400, 800, 1500], false);
+    await pull(0.5); results.push(await probe('H-pull-after')); await page.mouse.up(); await page.waitForTimeout(400); results.push(await probe('H-after-release'));
+    results.push({ label: 'times', classes: '', pulling: {}, refreshing: {}, cancelAt: await page.evaluate(() => window.__cancelAt), releaseAt: await page.evaluate(() => window.__releaseAt) });
+    await page.waitForTimeout(1000);
+    // F: refresh, cancel, then a fast pull while still cancelling
+    await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400);
+    await cancel(); await page.waitForTimeout(60); results.push(await probe('F-cancelling'));
+    y = y0; await page.mouse.move(x, y0); await page.mouse.down();
+    for (const t of [y0 + 8, y0 + 16, y0 + 60, y0 + 100, y0 + 140]) { y = t; await page.mouse.move(x, y); await page.waitForTimeout(16); }
+    results.push(await probe('F-pull-in-cancelling')); await shot('F-pull-in-cancelling');
+    for (const t of [y0 + 180, y0 + 200]) { y = t; await page.mouse.move(x, y); await page.waitForTimeout(16); }
+    results.push(await probe('F-pull-in-cancelling-2')); await shot('F-pull-in-cancelling-2');
+    await page.waitForTimeout(800); results.push(await probe('F-after-reset')); await page.mouse.up();
+    await sample('F-release', [100, 400], false);
+    await pull(0.5); results.push(await probe('G-pull-after')); await page.mouse.up(); await page.waitForTimeout(400); results.push(await probe('G-after-release'));
+    await page.waitForTimeout(1000);
+    const log = await page.evaluate(() => window.__log);
+    fs.writeFileSync(path.join(OUT, 'cancel.json'), JSON.stringify({ snippet, errors, results, log }, null, 1));
+    console.log('done', results.length, 'probes', log.length, 'events', errors.length, 'errors');
+    await browser.close(); server.close();
+})().catch(e => { console.error(e); server.close(); process.exit(1); });

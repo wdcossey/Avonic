@@ -273,7 +273,10 @@ public class AvonicRefresherContent : TemplatedControl
 
     // ── The pulling animation ─────────────────────────────────────────────────────────────────
 
-    /// <summary>Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority.</summary>
+    /// <summary>
+    /// Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority. A snap back on the icon is newer
+    /// than the pull it ends, so the icon is left to it; a new pull lets the last one's go first (<see cref="ClearSnapBack"/>).
+    /// </summary>
     internal void ApplyPull(RefresherPullFrame frame)
     {
         ClearAnimated();

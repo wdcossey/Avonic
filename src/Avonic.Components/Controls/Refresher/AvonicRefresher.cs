@@ -448,6 +448,12 @@ public class AvonicRefresher : ContentControl
             data.Type = GetRefresherAnimationType();
             data.Height = Bounds.Height;
 
+            // A new pull's animation is newer than a snap back still held on the icon, the last refresh's, which a cancel keeps
+            // until its reset, so it moves the icon, as Chromium's does (#167). That snap back is let go here, rather than left
+            // under the pull, so that which wins doesn't depend on the order of Avalonia's value frames; it would be destroyed
+            // with the pull anyway, at the reset or the pull's end. A pull's own snap back comes only after its last move.
+            _refresherContent?.ClearSnapBack();
+
             // progressStart(false, 0)
             var pulling = new PullingAnimation(this, data);
             data.Animation = pulling;

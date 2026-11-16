@@ -112,20 +112,7 @@ public class AvonicRefresherCaptureTests
 
         // It draws below the refresher's 60 px, where Avalonia would clip a templated control: the primary circle shows
         var frame = page.Scene.Window.CaptureRenderedFrame()!;
-        var spinner = page.Box("PART_PullingSpinner");
-        var blue = 0;
-        for (var y = (int)(spinner.Y * 2); y < (int)(spinner.Bottom * 2); y++)
-        {
-            for (var x = (int)(spinner.X * 2); x < (int)(spinner.Right * 2); x++)
-            {
-                var pixel = Frames.PixelAt(frame, x, y);
-                if (pixel is { B: > 200, R: < 60 })
-                {
-                    blue++;
-                }
-            }
-        }
-
+        var blue = Primary(frame, page.Box("PART_PullingSpinner"));
         Assert.True(blue > 100, $"{blue} primary pixels");
 
         // Chromium's refreshing frame: the refreshing icon at (174, 65)
@@ -133,5 +120,81 @@ public class AvonicRefresherCaptureTests
         Assert.Equal(new Rect(174, 65, 42, 42), page.Box("PART_RefreshingIcon"));
         Render();
         Save(page.Scene, "refreshing");
+    });
+
+    /// <summary>The primary-coloured pixels, the spinners' and the arrow's, in <paramref name="box"/> of a frame at a scale of 2, within the frame.</summary>
+    private static int Primary(Avalonia.Media.Imaging.WriteableBitmap frame, Rect box)
+    {
+        var count = 0;
+        var bottom = Math.Min(frame.PixelSize.Height, (int)(box.Bottom * 2));
+        var right = Math.Min(frame.PixelSize.Width, (int)(box.Right * 2));
+        for (var y = Math.Max(0, (int)(box.Y * 2)); y < bottom; y++)
+        {
+            for (var x = Math.Max(0, (int)(box.X * 2)); x < right; x++)
+            {
+                if (Frames.PixelAt(frame, x, y) is { B: > 200, G: < 120, R: < 60 })
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// #167: Chromium's frames after <c>cancel()</c> (docs/components/ion-refresher/ref/cancel-*.png): during a refresh, both icons
+    /// for the cancel's 700 ms, the pulling one 390 wide with its spinner at the start; with no pull, only the refreshing one below
+    /// the header; and none once it's over.
+    /// </summary>
+    [AvaloniaFact]
+    public void Cancel_Frames() => InstalledTheme.Run(_ =>
+    {
+        // Below the header: the refresher and the overflow of its column. Its text can have a few fringe pixels of the primary
+        // colour, which depend on the platform's text rendering, so it's compared with the page before anything happened.
+        var strip = new Rect(0, 56, 390, 100);
+        using (var page = new Page())
+        {
+            Render();
+            var before = Primary(page.Scene.Window.CaptureRenderedFrame()!, strip);
+            page.Drag(8 + 180).Wait(16).Lift().Wait(400);
+            page.Refresher.Cancel();
+            page.Wait(100);
+            Render();
+            Save(page.Scene, "cancelling");
+            var frame = page.Scene.Window.CaptureRenderedFrame()!;
+            var pulling = page.Box("PART_PullingSpinner");
+            var refreshing = page.Box("PART_RefreshingSpinner");
+            Assert.Equal(new Rect(9, 53, 24, 24), pulling);
+            Assert.True(Primary(frame, pulling.Intersect(strip)) > 50, "the pulling spinner shows");
+            Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
+
+            page.Wait(700);
+            Render();
+            Save(page.Scene, "cancelled");
+            Assert.Equal(before, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+        }
+
+        using (var page = new Page())
+        {
+            page.Wait(300);
+            Render();
+            var plain = page.Scene.Window.CaptureRenderedFrame()!;
+            var before = Primary(plain, strip);
+            page.Refresher.Cancel();
+            page.Wait(100);
+            Render();
+            Save(page.Scene, "cancel-inactive");
+            var frame = page.Scene.Window.CaptureRenderedFrame()!;
+            var refreshing = page.Box("PART_RefreshingSpinner");
+            Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
+            // Only the refreshing icon: outside it the strip is as it was
+            var icon = page.Box("PART_RefreshingIcon");
+            Assert.Equal(before - Primary(plain, icon), Primary(frame, strip) - Primary(frame, icon));
+
+            page.Wait(700);
+            Render();
+            Assert.Equal(before, Primary(page.Scene.Window.CaptureRenderedFrame()!, strip));
+        }
     });
 }
