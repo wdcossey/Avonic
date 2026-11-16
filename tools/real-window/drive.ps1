@@ -1044,7 +1044,7 @@ try {
         Check 'and that refresh completes' ([bool](WaitForText 'Refreshed*' 4)) ((Texts | Select-Object -Last 1))
         Start-Sleep -Milliseconds 1000
         ClickOn (Named $CT::Button 'Cancel the refresh')
-        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 10
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 5
         Start-Sleep -Milliseconds 900
         Check 'a refresh begun while cancelling goes on past the cancel''s end (#176, C9)' ([bool](FirstText 'Refreshing*')) ((Texts | Select-Object -Last 1))
         Check 'until the page completes it' ([bool](WaitForText 'Refreshed*' 4)) ((Texts | Select-Object -Last 1))

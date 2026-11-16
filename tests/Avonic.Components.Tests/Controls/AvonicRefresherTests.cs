@@ -1281,10 +1281,10 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void C3_Disabled_While_Its_Play_Back_Runs_It_Stays_Off() => InstalledTheme.Run(_ =>
+    public void C3_The_Gesture_Comes_Back_As_IsEnabled_Says_So_One_Disabled_Meanwhile_Stays_Off() => InstalledTheme.Run(_ =>
     {
-        // As R3: the gesture comes back as IsEnabled says, so one disabled after letting go, before the reset destroys the play
-        // back, stays off.
+        // As R3: the gesture comes back as IsEnabled says, not simply on, so one disabled after letting go, before the reset destroys
+        // the play back, stays off. The fix itself is held by the two tests above; Ionic's bug would pass this one too.
         using var page = Refreshing();
         page.Refresher.Cancel();
         var cancelled = page.At;
@@ -1473,5 +1473,49 @@ public class AvonicRefresherTests
         page.Wait(32 + 700);
         Assert.Equal("ionPullEnd:Cancel", Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd")).Name);
         Assert.Equal(RefresherState.Inactive, page.Refresher.State);
+    });
+
+    [AvaloniaFact]
+    public void C9_A_Pull_Let_Go_Past_0_4_Just_Before_The_Cancels_End_Still_Refreshes() => InstalledTheme.Run(_ =>
+    {
+        // The same bug inside the snap back: let go past 0.4 just before the cancel's end, the 125 ms snap back is still running when
+        // the reset comes. Ionic's destroys it, so no ionRefresh comes and the gesture stays off. Here the refresh begun by letting
+        // go goes on.
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        var cancelled = page.At;
+        page.Wait(32 + 500);
+        page.Drag(8 + 200, step: 50).Wait(16);
+        page.Wait(cancelled + 32 + 700 - 30 - page.At);
+        page.Lift().Wait(300);
+
+        Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
+        Assert.Equal(RefresherState.Refreshing, page.Refresher.State);
+        Assert.DoesNotContain(page.Log, e => e.Name.StartsWith("ionPullEnd"));
+        Assert.Equal(1, IconsSeen(page));
+
+        page.LastRefresh!.Complete();
+        page.Wait(32 + 200 + 16);
+        Assert.Equal("ionPullEnd:Complete", Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd")).Name);
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        Assert.Equal(3, page.Names.Count(n => n == "ionRefresh"));
+    });
+
+    [AvaloniaFact]
+    public void C9_A_Cancel_Called_During_A_Snap_Back_Ends_That_Refresh() => InstalledTheme.Run(_ =>
+    {
+        // A pull let go before the call is the refresh the cancel ends, as in Ionic: it begins when its snap back ends, and the reset
+        // ends it. The gesture is on after.
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16).Lift();
+        page.Refresher.Cancel();
+        page.Wait(160);
+        Assert.Equal(1, page.Names.Count(n => n == "ionRefresh"));
+        page.Wait(700);
+
+        Assert.Equal("ionPullEnd:Cancel", Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd")).Name);
+        Assert.Equal(RefresherState.Inactive, page.Refresher.State);
+        page.Drag(8 + 200).Wait(16).Lift().Wait(160);
+        Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
     });
 }

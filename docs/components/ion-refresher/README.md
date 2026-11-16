@@ -136,7 +136,9 @@ None.
     the gesture comes back on as `IsEnabled` says, as it does after any pull (R3), and the next pull works. The reset has already
     made it inactive and raised `IonPullEnd`, so nothing more is raised. One moved on past 0.4 still refreshes, as Ionic's does.
   - A refresh begun during cancelling is ended by the cancel's reset, as cancelled, while the app still loads (H: `ionRefresh` 416 ms
-    after `cancel()`, `ionPullEnd` `cancel` at 733). Here the reset leaves a refresh begun after it alone: it goes on until the app
-    calls `Complete()`, which ends it with `IonPullEnd` `Complete`, and no `Cancel` comes for the refresh the cancel ended, as the
-    refresher never went back to inactive in between.
+    after `cancel()`, `ionPullEnd` `cancel` at 733); let go past 0.4 just before the reset, while its 125 ms snap back runs, the
+    reset destroys it, and no refresh comes and the gesture stays off. Here a reset does nothing once a pull has been let go past
+    the threshold since `Cancel()` was called: the refresh goes on until the app calls `Complete()`, which ends it with `IonPullEnd`
+    `Complete`, and no `Cancel` comes for the refresh the cancel ended, as the refresher never went back to inactive in between. A
+    pull let go before the call is the refresh the cancel ends, as in Ionic.
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

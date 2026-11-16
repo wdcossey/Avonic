@@ -85,8 +85,8 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
 22. A pull started while cancelling moves the icon, as its animation is newer than the held snap back. C2
 23. A cancel's reset ends a pull under way: one let go with no move since goes back, and one moved on past 0.4 refreshes. C3, C10.
     Ionic leaves the refresher off for good after the first, and ends a refresh begun during cancelling as cancelled; both are
-    fixed here, as deliberate differences (#176): the gesture comes back on as `IsEnabled` says, and the reset leaves a refresh
-    begun after it alone. C3, C9
+    fixed here, as deliberate differences (#176): the gesture comes back on as `IsEnabled` says, and a reset leaves alone a pull
+    let go past the threshold since its call. C3, C9
 
 R1 to R6 came from the reviews: a press dropped on detach, the fixed slot through a panel, `IsEnabled` kept, a new content used.
 
