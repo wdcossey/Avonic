@@ -499,13 +499,7 @@ public class AvonicRefresher : ContentControl
                     State = RefresherState.Inactive;
                     RaiseEvent(new RefresherPullEndEventArgs(IonPullEndEvent, RefresherPullEndReason.Cancel));
                 },
-                () =>
-                {
-                    if (ReferenceEquals(_gesture, gesture))
-                    {
-                        gesture.Enable(IsEnabled);
-                    }
-                });
+                () => gesture.Enable(IsEnabled));
             return;
         }
 

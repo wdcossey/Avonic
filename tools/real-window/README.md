@@ -34,7 +34,9 @@ once if the window doesn't fit on the screen.
   - `ion-reorder`: touch and mouse drags on a handle, the page scrolling under a drag held near its bottom, a drag off the handles
     scrolling, and the toggle turning it off.
   - `ion-refresher`: a pull past the threshold refreshes, with the spinner, and completes; a short one cancels; a pull when
-    scrolled down only scrolls; Disabled stops it.
+    scrolled down only scrolls; Disabled stops it. Since #176, four checks not yet run: after `Cancel the refresh`, a pull held still
+    past the cancel's end and let go leaves it on, so the next pull refreshes (Ionic's C3), and a refresh begun while cancelling goes
+    on past the cancel's end until the page completes it (C9).
   - `ion-picker`: a wheel notch moving three rows and back, as in Chromium, a tap on an option, the arrows on the focused column
     skipping a disabled option, and a touch drag that snaps.
   - `ion-searchbar`: focus showing the cancel arrow, typing with the debounce, the clear button by mouse and touch keeping the
