@@ -728,6 +728,47 @@ public class AvonicRadioTests
         }
     }
 
+    // Ionic 8.8.17: ion-focusable is !inItem || inMultipleInputsItem. Measured rd4: a radio and a checkbox in an item, the radio
+    // ion-focused with its circle, and the item neither ion-focusable nor ion-focused.
+    [AvaloniaFact]
+    public void R9_In_A_Multi_Input_Item_The_Radio_Shows_Its_Own_Circle_And_The_Item_Does_Not() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var radio = Radio("a");
+        var item = new AvonicItem { Content = radio, EndContent = new AvonicCheckbox() };
+        var group = Group(item);
+        group.Value = "a";
+        using var scene = Show(new StackPanel { Children = { before, group } }, white: true);
+        Assert.True(FocusVisible.GetIsEnabled(radio));
+
+        before.Focus();
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(radio.IsFocused);
+        Assert.True(Part<Border>(radio, "PART_Focus").IsEffectivelyVisible);
+        Assert.DoesNotContain(FocusVisible.FocusedPseudoClass, item.Classes);
+
+        // In the default slot, 10 past the ring: the item makes room at the end, so (209, 224, 251) shows there.
+        var ring = Bounds(Part<Border>(radio, "PART_Container"), scene.Window);
+        AssertClose(Color.FromRgb(209, 224, 251), Pixel(scene, (int)ring.Right + 7, (int)ring.Center.Y));
+    });
+
+    [AvaloniaFact]
+    public void R9_It_Follows_The_Item_Becoming_Multi_Input_And_Single_Again()
+    {
+        var radio = Radio("a");
+        var item = Item(radio);
+        using var scene = Show(Group(item));
+        Assert.False(FocusVisible.GetIsEnabled(radio));
+
+        item.EndContent = new AvonicCheckbox();
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(FocusVisible.GetIsEnabled(radio));
+
+        item.EndContent = null;
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(FocusVisible.GetIsEnabled(radio));
+    }
+
     // ── R10: automation ──────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

@@ -80,6 +80,26 @@
                     </c:AvonicItem>
                 </c:AvonicRadioGroup>
             </c:AvonicList>
+
+            <!-- Tab, then the arrows: a single-input item draws the row's focus; in a multi-input or a clickable item the radio
+                 draws its own circle. -->
+            <TextBlock Margin="16,8,16,0" Text="Keyboard focus: Tab, then the arrows" />
+            <c:AvonicList>
+                <c:AvonicRadioGroup Value="single">
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="single" Content="Single input: the item shows focus" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicRadio Value="multi" Content="Multi-input: the radio's circle" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicCheckbox />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItem Button="True">
+                        <c:AvonicRadio Value="clickable" Content="Clickable item: both show focus" />
+                    </c:AvonicItem>
+                </c:AvonicRadioGroup>
+            </c:AvonicList>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

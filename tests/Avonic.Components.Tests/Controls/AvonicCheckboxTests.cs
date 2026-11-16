@@ -14,6 +14,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 
 namespace Avonic.Components.Tests.Controls;
@@ -1259,4 +1260,229 @@ public class AvonicCheckboxTests
         Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(Helper(box)));
         Assert.Equal(AutomationLiveSetting.Assertive, AutomationProperties.GetLiveSetting(Error(box)));
     }
+
+    // ── B27: the keyboard focus indicator (Ionic 8.8.17) ─────────────────────────────────────
+
+    private static Border Focus(AvonicCheckbox box) => Part<Border>(box, "PART_Focus");
+
+    private static bool ShowsFocus(Control control) => control.Classes.Contains(FocusVisible.FocusedPseudoClass);
+
+    /// <summary>Tab from a button before them, as a keyboard user does.</summary>
+    private static void TabTo(Scene scene, Button before, Control target)
+    {
+        before.Focus();
+        Dispatcher.UIThread.RunJobs();
+        for (var i = 0; i < 6 && !target.IsFocused; i++)
+        {
+            Key(scene, PhysicalKey.Tab);
+        }
+
+        Assert.True(target.IsFocused);
+    }
+
+    [AvaloniaFact]
+    public void B27_Keyboard_Focus_Shows_A_36_Circle_Of_The_Primary_Tint_At_0_2_Over_The_Box() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var box = new AvonicCheckbox { Content = "Alone" };
+        using var scene = Themed(before, box);
+        Assert.False(Focus(box).IsEffectivelyVisible);
+
+        TabTo(scene, before, box);
+        Assert.True(ShowsFocus(box));
+        Assert.True(Focus(box).IsEffectivelyVisible);
+
+        // Measured cb1: 36 by 36, centred on the 18 box, 9 past it on each side.
+        var square = Bounds(Box(box), scene.Window);
+        AssertBox(square.X - 9, square.Y - 9, 36, 36, Bounds(Focus(box), scene.Window));
+
+        // position: absolute: it takes no room.
+        Assert.Equal(18, Part<Control>(box, "PART_NativeWrapper").Bounds.Height, 0.5);
+
+        // rgb(26, 101, 235) at 0.2 over white, measured (209, 224, 251): 7 above the box, outside the host, which doesn't clip it,
+        // and inside the box, which it's drawn over.
+        AssertClose(Color.FromRgb(209, 224, 251), Pixel(scene, Box(box), 9, -7));
+        AssertClose(Color.FromRgb(209, 224, 251), Pixel(scene, Box(box), 9, 9));
+    });
+
+    [AvaloniaFact]
+    public void B27_The_Circle_Is_The_Primary_Tint_Whatever_The_Colour() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var box = new AvonicCheckbox { Content = "Danger", Checked = true, Color = "danger" };
+        using var scene = Themed(before, box);
+
+        TabTo(scene, before, box);
+
+        // Measured cb3: the same (209, 224, 251) beside a danger box.
+        AssertClose(Color.FromRgb(209, 224, 251), Pixel(scene, Box(box), 9, -7));
+    });
+
+    [AvaloniaFact]
+    public void B27_A_Click_Shows_No_Circle() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Alone" };
+        using var scene = Themed(box);
+
+        Click(scene, Centre(Box(box), scene));
+        Assert.True(box.IsFocused);
+        Assert.False(Focus(box).IsEffectivelyVisible);
+    });
+
+    // outline: none. The adorner comes from the app's base theme, which TestApp doesn't load, so this adds it underneath, as the
+    // sample has it. FocusAdorner reads null either way, so only the layer shows what's drawn.
+    [AvaloniaFact]
+    public void B27_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
+    {
+        var styles = Application.Current!.Styles;
+        var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
+        styles.Insert(0, baseTheme);
+        try
+        {
+            InstalledTheme.Run(_ =>
+            {
+                var before = new Button { Content = "Before" };
+                var box = new AvonicCheckbox { Content = "Label" };
+                var after = new Button { Content = "After" };
+                using var scene = Themed(before, box, after);
+                var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(box)!;
+
+                TabTo(scene, before, box);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                Key(scene, PhysicalKey.Tab);
+                Assert.True(after.IsFocused);
+                Assert.Single(layer.Children);
+            });
+        }
+        finally
+        {
+            styles.Remove(baseTheme);
+        }
+    }
+
+    [AvaloniaFact]
+    public void B27_In_A_Single_Input_Item_The_Item_Shows_Focus_And_The_Checkbox_Does_Not() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var box = new AvonicCheckbox { Content = "Single" };
+        var item = new AvonicItem { Content = box };
+        using var scene = Themed(before, item);
+
+        // Measured cb5: no ion-focusable on the checkbox; the item has ion-focused.
+        Assert.False(FocusVisible.GetIsEnabled(box));
+        TabTo(scene, before, box);
+        Assert.False(ShowsFocus(box));
+        Assert.False(Focus(box).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(item));
+    });
+
+    [AvaloniaFact]
+    public void B27_In_A_Multi_Input_Item_The_Checkbox_Shows_Its_Own_And_The_Item_Does_Not() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var start = new AvonicCheckbox();
+        var box = new AvonicCheckbox { Content = "Multi" };
+        var item = new AvonicItem { StartContent = start, Content = box };
+        using var scene = Themed(before, item);
+
+        // Measured cb6a and cb6: both ion-focusable and ion-focused in turn; the item isn't ion-focusable, so never ion-focused.
+        TabTo(scene, before, start);
+        Assert.True(ShowsFocus(start));
+        Assert.True(Focus(start).IsEffectivelyVisible);
+        Assert.False(ShowsFocus(item));
+
+        Key(scene, PhysicalKey.Tab);
+        Assert.True(box.IsFocused);
+        Assert.True(ShowsFocus(box));
+        Assert.True(Focus(box).IsEffectivelyVisible);
+        Assert.False(ShowsFocus(item));
+    });
+
+    [AvaloniaFact]
+    public void B27_In_A_Clickable_Item_Both_Show_Focus() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var box = new AvonicCheckbox { Content = "Clickable" };
+        var item = new AvonicItem { Content = box, Button = true };
+        using var scene = Themed(before, item);
+
+        // Measured cb8: a clickable item with a cover is multi-input, and the item is focusable as a button.
+        TabTo(scene, before, box);
+        Assert.True(Focus(box).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(item));
+    });
+
+    [AvaloniaFact]
+    public void B27_It_Follows_The_Item_Becoming_Multi_Input_And_Single_Again()
+    {
+        var box = new AvonicCheckbox { Content = "Single" };
+        var wrapper = new StackPanel();
+        var item = new AvonicItem { Content = new StackPanel { Children = { box, wrapper } } };
+        using var scene = Plain(item);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(FocusVisible.GetIsEnabled(box));
+
+        // Measured: a second checkbox inside a wrapper makes the item multi-input, and the first one ion-focusable.
+        var added = new AvonicCheckbox { Content = "Added" };
+        wrapper.Children.Add(added);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(FocusVisible.GetIsEnabled(box));
+        Assert.True(FocusVisible.GetIsEnabled(added));
+
+        wrapper.Children.Remove(added);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(FocusVisible.GetIsEnabled(box));
+    }
+
+    [AvaloniaFact]
+    public void B27_An_Apps_Style_For_FocusVisible_Survives_The_Item_Changing_It()
+    {
+        var box = new AvonicCheckbox { Content = "Single" };
+        var item = new AvonicItem { Content = box };
+        using var scene = Scene.Styled(item, Scene.AppStyle<AvonicCheckbox>(FocusVisible.IsEnabledProperty, true));
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(FocusVisible.GetIsEnabled(box));
+    }
+
+    [AvaloniaFact]
+    public void B18_Text_That_Comes_Later_Shows_The_Label_With_No_Other_Change() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock();
+        var panel = new StackPanel();
+        var box = new AvonicCheckbox { Content = text };
+        var inPanel = new AvonicCheckbox { Content = panel };
+        using var scene = Themed(box, inPanel);
+        Assert.False(Label(box).IsVisible);
+        Assert.False(Label(inPanel).IsVisible);
+
+        // 8.8.4: the MutationObserver's characterData and childList, with no render of the checkbox's own.
+        text.Text = "Loaded";
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Label(box).IsVisible);
+
+        // A child with no text yet, and then its text: what's added is watched too.
+        var added = new TextBlock();
+        panel.Children.Add(added);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Label(inPanel).IsVisible);
+        added.Text = "Added";
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Label(inPanel).IsVisible);
+    });
+
+    [AvaloniaFact]
+    public void B18_A_Child_With_Text_Added_Later_Shows_The_Label() => InstalledTheme.Run(_ =>
+    {
+        var panel = new StackPanel();
+        var box = new AvonicCheckbox { Content = panel };
+        using var scene = Themed(box);
+        Assert.False(Label(box).IsVisible);
+
+        panel.Children.Add(new TextBlock { Text = "Added" });
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Label(box).IsVisible);
+    });
 }

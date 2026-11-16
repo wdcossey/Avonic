@@ -260,17 +260,33 @@ public class AvonicRadio : ContentControl, IItemControl
 
     // ── Host context ─────────────────────────────────────────────────────────────────────────
 
+    /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
+    private const string ItemMultipleInputs = ":item-multiple-inputs";
+
+    private ItemMultipleInputsObserver? _item;
+
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
 
-        // hostContext('ion-item'), read at render, which is when it's attached here.
-        UpdateHostContext(this.GetVisualAncestors().OfType<AvonicItem>().Any());
+        // hostContext('ion-item'), read at render, which is when it's attached here. itemFocusObserver: item-multiple-inputs
+        // comes after this has rendered, so watch for it.
+        _item?.Dispose();
+        _item = ItemMultipleInputsObserver.Create(this, () => UpdateHostContext(inItem: true), ItemMultipleInputs);
+        UpdateHostContext(_item is not null);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _item?.Dispose();
+        _item = null;
     }
 
     /// <summary>
-    /// <c>in-item</c>, and <c>ion-activatable</c> and <c>ion-focusable</c> only when not in one: the item is, as the radio is its
-    /// cover. <c>[slot=start]</c> and <c>[slot=end]</c> are a host's start and end slots, an item's or a toolbar's.
+    /// <c>in-item</c>, and <c>ion-activatable</c> only when not in one: the item is, as the radio is its cover. <c>ion-focusable</c>
+    /// when not in one, or in a multi-input item, which has no cover, so each control draws its own indicator. <c>[slot=start]</c>
+    /// and <c>[slot=end]</c> are a host's start and end slots, an item's or a toolbar's.
     /// </summary>
     private void UpdateHostContext(bool inItem)
     {
@@ -282,7 +298,7 @@ public class AvonicRadio : ContentControl, IItemControl
         // At style priority, as the classes are, so an app's own value wins. A value it already has raises nothing, so a move
         // doesn't either.
         _activatable.Set(!inItem);
-        _focusVisible.Set(!inItem);
+        _focusVisible.Set(!inItem || _item?.Has(ItemMultipleInputs) == true);
     }
 
     private void UpdateClasses()

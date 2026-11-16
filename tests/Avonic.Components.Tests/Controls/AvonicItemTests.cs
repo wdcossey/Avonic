@@ -2187,6 +2187,122 @@ public class AvonicItemTests
             Avalonia.Automation.AutomationProperties.GetAccessibilityView(DetailIcon(item)));
     }
 
+    // ── Behaviours 36-37: room for a control's focus indicator (Ionic 8.8.17) ────────────────
+
+    private const string Room = ":item-focus-indicator-room";
+
+    [AvaloniaFact]
+    public void B36_Room_When_A_Control_With_An_Indicator_Is_In_The_Default_Slot_Of_A_Multi_Input_Or_Clickable_Item()
+    {
+        var single = new AvonicItem { Content = new AvonicCheckbox() };
+        var multi = new AvonicItem { StartContent = new AvonicCheckbox(), Content = new AvonicCheckbox() };
+        var clickable = new AvonicItem { Content = new AvonicToggle(), Button = true };
+        var wrapped = new AvonicItem { Content = new StackPanel { Children = { new AvonicRadio() } }, EndContent = new AvonicCheckbox() };
+        var slotsOnly = new AvonicItem { StartContent = new AvonicCheckbox(), Content = new AvonicLabel { Content = "x" }, EndContent = new AvonicToggle() };
+        var clickableEnd = new AvonicItem { Content = new AvonicLabel { Content = "x" }, EndContent = new AvonicCheckbox(), Button = true };
+        var otherInputs = new AvonicItem { Content = StubControl(ItemControlType.Input), EndContent = StubControl(ItemControlType.Input) };
+        using var scene = new Scene(new StackPanel { Children = { single, multi, clickable, wrapped, slotsOnly, clickableEnd, otherInputs } });
+        Dispatcher.UIThread.RunJobs();
+
+        // Measured: icb1 no, icb2 yes, itg3 yes, icb5 yes, iroom no, iroom2 no.
+        Assert.False(Has(single, Room));
+        Assert.True(Has(multi, Room));
+        Assert.True(Has(clickable, Room));
+        Assert.True(Has(wrapped, Room));
+        Assert.False(Has(slotsOnly, Room));
+        Assert.False(Has(clickableEnd, Room));
+        Assert.False(Has(otherInputs, Room));
+    }
+
+    [AvaloniaFact]
+    public void B36_A_Control_Coming_Or_Going_Inside_A_Wrapper_Updates_It()
+    {
+        var wrapper = new StackPanel();
+        var item = new AvonicItem { Content = new StackPanel { Children = { new AvonicCheckbox(), wrapper } } };
+        using var scene = new Scene(item);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Has(item, ":item-multiple-inputs"));
+        Assert.False(Has(item, Room));
+
+        // Measured: a checkbox added inside a div in the default slot makes it multi-input, with room. No slot changes.
+        wrapper.Children.Add(new AvonicCheckbox());
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Has(item, ":item-multiple-inputs"));
+        Assert.True(Has(item, Room));
+
+        wrapper.Children.Clear();
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Has(item, ":item-multiple-inputs"));
+        Assert.False(Has(item, Room));
+    }
+
+    [AvaloniaFact]
+    public void B36_The_Room_Is_12_Each_Side_Given_Back_As_Padding_So_Nothing_Moves() => InstalledTheme.Run(_ =>
+    {
+        var box = new AvonicCheckbox { Content = "Multi" };
+        var item = new AvonicItem { StartContent = new AvonicCheckbox(), Content = box };
+        using var scene = new Scene(new StackPanel { Children = { item } });
+        Dispatcher.UIThread.RunJobs();
+
+        // Measured icb2: .input-wrapper 38 to 386, the checkbox 50 to 374, .item-inner clipping from 50.
+        AssertBox(38, 0, 348, 47, Box(Container(item), scene.Window));
+        AssertBox(50, 0, 324, 47, Box(box, scene.Window));
+        Assert.True(Inner(item).ClipToBounds);
+        AssertBox(50, 0, 340, 48, Box(Inner(item), scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void B36_The_Circle_Shows_Past_The_Slots_End_And_Is_Clipped_At_The_Inner_Start() => InstalledTheme.Run(_ =>
+    {
+        var atEnd = new AvonicCheckbox { Content = "At the end" };
+        var atStart = new AvonicCheckbox { Content = "At the start", LabelPlacement = CheckboxLabelPlacement.End };
+        var first = new AvonicItem { StartContent = new AvonicCheckbox(), Content = atEnd };
+        var second = new AvonicItem { Content = atStart, EndContent = new AvonicCheckbox() };
+        using var scene = new Scene(new StackPanel { Children = { first, second } });
+        scene.Window.Background = Brushes.White;
+        Dispatcher.UIThread.RunJobs();
+        ((IPseudoClasses)atEnd.Classes).Add(FocusVisible.FocusedPseudoClass);
+        ((IPseudoClasses)atStart.Classes).Add(FocusVisible.FocusedPseudoClass);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        // Measured cb6: the circle 347 to 383, past the slot's own end at 374, where it shows (209, 224, 251).
+        var tint = Color.FromRgb(209, 224, 251);
+        var y = (int)Box(first, scene.Window).Center.Y;
+        Assert.Equal(tint, Opaque(Frames.PixelAt(frame, 380, y)), new ColorNear());
+
+        // Measured cb7: the circle 7 to 43, clipped at .item-inner's start, 16, so white at 10, and shown at 20.
+        y = (int)Box(second, scene.Window).Center.Y;
+        Assert.Equal(Colors.White, Opaque(Frames.PixelAt(frame, 10, y)), new ColorNear());
+        Assert.Equal(tint, Opaque(Frames.PixelAt(frame, 20, y - 12)), new ColorNear());
+    });
+
+    private static Color Opaque(Color color) => Color.FromRgb(color.R, color.G, color.B);
+
+    private sealed class ColorNear : IEqualityComparer<Color>
+    {
+        public bool Equals(Color a, Color b) => Math.Abs(a.R - b.R) <= 3 && Math.Abs(a.G - b.G) <= 3 && Math.Abs(a.B - b.B) <= 3;
+
+        public int GetHashCode(Color color) => 0;
+    }
+
+    [AvaloniaFact]
+    public void B37_A_Toggle_Makes_The_Item_Focusable_And_A_Checkbox_Or_Radio_In_A_Multi_Input_Item_Does_Not()
+    {
+        var withToggle = new AvonicItem { Content = new AvonicToggle() };
+        var twoCheckboxes = new AvonicItem { StartContent = new AvonicCheckbox(), Content = new AvonicCheckbox() };
+        var radioAndCheckbox = new AvonicItem { Content = new AvonicRadio(), EndContent = new AvonicCheckbox() };
+        using var scene = new Scene(new StackPanel { Children = { withToggle, twoCheckboxes, radioAndCheckbox } });
+        Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
+
+        // Measured itg1: ion-focusable. icb2, ird2: not, as isFocusable reads them before item-multiple-inputs makes them focusable.
+        Assert.True(FocusVisible.GetIsEnabled(withToggle));
+        Assert.False(FocusVisible.GetIsEnabled(twoCheckboxes));
+        Assert.False(FocusVisible.GetIsEnabled(radioAndCheckbox));
+        Assert.True(twoCheckboxes.GetVisualDescendants().OfType<AvonicCheckbox>().All(FocusVisible.GetIsEnabled));
+    }
+
     // ── Transition ───────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

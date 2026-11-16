@@ -31,7 +31,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
 [PseudoClasses(
     ":lines-default", ":lines-full", ":lines-inset", ":lines-none", ":button", ":ion-activatable",
-    ":item-multiple-inputs", ":item-control-needs-pointer-cursor")]
+    ":item-multiple-inputs", ":item-control-needs-pointer-cursor", ":item-focus-indicator-room")]
 public class AvonicItem : TemplatedControl, IItemHost
 {
     /// <summary><c>margin-inline-end: -6px</c> on <c>.item-detail-icon</c>. There's no variable for it.</summary>
@@ -196,6 +196,14 @@ public class AvonicItem : TemplatedControl, IItemHost
 
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
+    /// <summary><c>INDICATOR_CONTROL_SELECTOR</c>: the controls that draw a focus indicator past their own bounds.</summary>
+    private static readonly HashSet<ItemControlType> IndicatorControlTypes =
+    [
+        ItemControlType.Checkbox,
+        ItemControlType.Radio,
+        ItemControlType.Toggle,
+    ];
+
     /// <summary><c>getFirstInteractive</c>'s selector.</summary>
     private static readonly HashSet<ItemControlType> FirstInteractiveTypes =
     [
@@ -318,6 +326,28 @@ public class AvonicItem : TemplatedControl, IItemHost
         }
     }
 
+    private bool _indicatorChangePosted;
+
+    /// <summary>
+    /// <c>watchForIndicatorControls</c>: a checkbox, a radio or a toggle came or went anywhere inside, which a slot doesn't see
+    /// when it's inside a wrapper, so it runs <c>updateInteractivityOnSlotChange</c>. Ionic's <c>MutationObserver</c> reports
+    /// later, once for any number of changes, as this does.
+    /// </summary>
+    internal void IndicatorControlChanged()
+    {
+        if (_indicatorChangePosted)
+        {
+            return;
+        }
+
+        _indicatorChangePosted = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _indicatorChangePosted = false;
+            UpdateInteractivity();
+        }, DispatcherPriority.Loaded);
+    }
+
     private void UpdateLines()
     {
         var lines = Lines;
@@ -377,7 +407,11 @@ public class AvonicItem : TemplatedControl, IItemHost
         var focusableChild = false;
         foreach (var control in SlottedControls())
         {
-            focusableChild |= FocusVisible.GetIsEnabled(control);
+            // isFocusable reads .ion-focusable once, in the frame after load, before a checkbox or a radio in a multi-input item
+            // has rendered again with its own ion-focusable, which item-multiple-inputs gives it. So theirs never makes the item
+            // focusable: measured, an item with two checkboxes, or a radio and a checkbox, isn't ion-focusable. A toggle's is
+            // there from its first render.
+            focusableChild |= FocusVisible.GetIsEnabled(control) && TypeOf(control) is not (ItemControlType.Checkbox or ItemControlType.Radio);
             switch (TypeOf(control))
             {
                 case ItemControlType.Checkbox or ItemControlType.Datetime or ItemControlType.Select or ItemControlType.Radio:
@@ -401,6 +435,10 @@ public class AvonicItem : TemplatedControl, IItemHost
         PseudoClasses.Set(":button", clickable);
         PseudoClasses.Set(":ion-activatable", canActivate);
         PseudoClasses.Set(":item-multiple-inputs", _multipleInputs);
+
+        // slottedIndicatorNeedsRoom: a control in a single-input item leaves its indicator to the item, so only a multi-input or a
+        // clickable item has one to make room for.
+        PseudoClasses.Set(":item-focus-indicator-room", (_multipleInputs || clickable) && HasSlottedIndicatorControl());
         _activatable.SetWhen(canActivate, true);
         _focusVisible.SetWhen(canActivate || focusableChild, true);
 
@@ -420,6 +458,14 @@ public class AvonicItem : TemplatedControl, IItemHost
             ":item-control-needs-pointer-cursor",
             _firstInteractive is { ItemControlType: not (ItemControlType.Input or ItemControlType.Textarea) });
     }
+
+    /// <summary>
+    /// <c>setHasSlottedIndicatorControl</c>: a checkbox, a radio or a toggle in the default slot, directly or inside what's in it.
+    /// Only the default slot clips, so one in the start or end slot needs no room.
+    /// </summary>
+    private bool HasSlottedIndicatorControl() =>
+        _slots.ElementAtOrDefault(1)?.Child is Control slotted
+        && slotted.GetSelfAndLogicalDescendants().OfType<IItemControl>().Any(control => IndicatorControlTypes.Contains(control.ItemControlType));
 
     /// <summary><c>clickedWithinShadowRoot</c>, inverted. Plain text in a slot has no element of its own, so it's padding.</summary>
     private bool IsOnSlottedControl(object? source)

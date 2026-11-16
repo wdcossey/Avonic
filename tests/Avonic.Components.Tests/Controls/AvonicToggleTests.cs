@@ -643,10 +643,11 @@ public class AvonicToggleTests
 
     // ── 11: the focus ring ───────────────────────────────────────────────────────────────────
 
-    // There's no outline: none, so Chromium draws its own ring on keyboard focus: measured outline: auto 1px. Here that's the
-    // base theme's adorner, so the test adds one, as the sample has it.
+    // Ionic 8.8.17: :host(:focus) { outline: none }, where 8.8.1 left Chromium's own ring. The adorner comes from the app's base
+    // theme, which TestApp doesn't load, so this adds it underneath, as the sample has it. FocusAdorner reads null either way, so
+    // only the layer shows what's drawn.
     [AvaloniaFact]
-    public void T11_Keyboard_Focus_Shows_The_Base_Themes_Focus_Adorner()
+    public void T11_There_Is_No_Focus_Adorner_Over_A_Base_Theme()
     {
         var styles = Application.Current!.Styles;
         var baseTheme = new Avalonia.Themes.Simple.SimpleTheme();
@@ -656,11 +657,17 @@ public class AvonicToggleTests
             InstalledTheme.Run(_ =>
             {
                 var toggle = new AvonicToggle { Content = "Label" };
-                using var scene = new Scene(new StackPanel { Children = { toggle } });
+                var after = new Button { Content = "After" };
+                using var scene = new Scene(new StackPanel { Children = { toggle, after } });
                 var layer = Avalonia.Controls.Primitives.AdornerLayer.GetAdornerLayer(toggle)!;
 
                 PressKey(scene, PhysicalKey.Tab);
                 Assert.True(toggle.IsFocused);
+                Assert.Empty(layer.Children);
+
+                // Proves the base theme really does give a focused control one.
+                PressKey(scene, PhysicalKey.Tab);
+                Assert.True(after.IsFocused);
                 Assert.Single(layer.Children);
             });
         }
@@ -668,6 +675,236 @@ public class AvonicToggleTests
         {
             styles.Remove(baseTheme);
         }
+    }
+
+    // ── 13: the keyboard focus circle (Ionic 8.8.17) ─────────────────────────────────────────
+
+    private static Border Focus(AvonicToggle toggle) => Part<Border>(toggle, "PART_Focus");
+
+    private static bool ShowsFocus(Control control) => control.Classes.Contains(Avonic.Components.Behaviors.FocusVisible.FocusedPseudoClass);
+
+    /// <summary>Tab from a button before them, as a keyboard user does.</summary>
+    private static void TabTo(Scene scene, Button before, Control target)
+    {
+        before.Focus();
+        Settle();
+        for (var i = 0; i < 6 && !target.IsFocused; i++)
+        {
+            PressKey(scene, PhysicalKey.Tab);
+            ReleaseKey(scene, PhysicalKey.Tab);
+        }
+
+        Assert.True(target.IsFocused);
+    }
+
+    private static (AvonicToggle Toggle, Scene Scene, Button Before) Alone(AvonicToggle toggle, FlowDirection direction = FlowDirection.LeftToRight)
+    {
+        var before = new Button { Content = "Before" };
+        toggle.HorizontalAlignment = HorizontalAlignment.Left;
+        var row = new StackPanel { FlowDirection = direction, Margin = new Thickness(16), Children = { toggle } };
+        var scene = Themed(new StackPanel { Children = { before, row } });
+        TabTo(scene, before, toggle);
+        Settle();
+        return (toggle, scene, before);
+    }
+
+    [AvaloniaFact]
+    public void T13_Keyboard_Focus_Shows_A_36_Circle_Centred_On_The_Handle_Over_The_Track_And_Under_The_Handle() => InstalledTheme.Run(_ =>
+    {
+        var (toggle, scene, _) = Alone(new AvonicToggle { Content = "Alone" });
+        using var __ = scene;
+        Assert.True(ShowsFocus(toggle));
+        Assert.True(Focus(toggle).IsEffectivelyVisible);
+
+        // Measured tg1: left -8 from the track, centred down it: 36 by 36 around the handle's centre.
+        var handle = Bounds(Handle(toggle), scene.Window);
+        var circle = Bounds(Focus(toggle), scene.Window);
+        AssertBox(handle.Center.X - 18, handle.Center.Y - 18, 36, 36, circle);
+
+        // rgba(0, 0, 0, 0.12): 224 on white, 137 over the track, measured; the handle covers it; past it, the track alone.
+        var (x, y) = ((int)handle.Center.X, (int)handle.Center.Y);
+        AssertClose(Color.FromRgb(224, 224, 224), Pixel(scene, x - 16, y));
+        AssertClose(Color.FromRgb(137, 137, 137), Pixel(scene, x + 16, y));
+        AssertClose(Color.FromRgb(224, 224, 224), Pixel(scene, x, y - 16));
+        AssertClose(Colors.White, Pixel(scene, x, y));
+        AssertClose(Color.FromRgb(156, 156, 156), Pixel(scene, x + 22, y));
+    });
+
+    [AvaloniaFact]
+    public void T13_Checked_It_Follows_The_Handle_In_The_Primary_At_0_2() => InstalledTheme.Run(_ =>
+    {
+        var (toggle, scene, _) = Alone(new AvonicToggle { Content = "Checked", Checked = true });
+        using var __ = scene;
+
+        var handle = Bounds(Handle(toggle), scene.Window);
+        AssertBox(handle.Center.X - 18, handle.Center.Y - 18, 36, 36, Bounds(Focus(toggle), scene.Window));
+
+        // Measured tg2: (204, 221, 251) on white, (101, 152, 242) over the checked track.
+        var (x, y) = ((int)handle.Center.X, (int)handle.Center.Y);
+        AssertClose(Color.FromRgb(204, 221, 251), Pixel(scene, x, y - 16));
+        AssertClose(Color.FromRgb(101, 152, 242), Pixel(scene, x - 16, y));
+    });
+
+    [AvaloniaFact]
+    public void T13_With_A_Colour_Checked_It_Is_The_Colour_At_0_2_And_Unchecked_The_Text_At_0_12() => InstalledTheme.Run(_ =>
+    {
+        var (on, scene, before) = Alone(new AvonicToggle { Content = "Danger", Checked = true, Color = "danger" });
+        using var __ = scene;
+
+        // Measured tg3: (243, 204, 207) on white.
+        var handle = Bounds(Handle(on), scene.Window);
+        AssertClose(Color.FromRgb(243, 204, 207), Pixel(scene, (int)handle.Center.X, (int)handle.Center.Y - 16));
+
+        // Measured tg4: unchecked, the colour doesn't count.
+        on.Checked = false;
+        Settle();
+        handle = Bounds(Handle(on), scene.Window);
+        AssertClose(Color.FromRgb(224, 224, 224), Pixel(scene, (int)handle.Center.X, (int)handle.Center.Y - 16));
+    });
+
+    [AvaloniaFact]
+    public void T13_In_RTL_It_Is_Mirrored_With_The_Handle() => InstalledTheme.Run(_ =>
+    {
+        var (toggle, scene, _) = Alone(new AvonicToggle { Content = "RTL" }, FlowDirection.RightToLeft);
+        using var __ = scene;
+
+        // Measured tg5 and tg6: right: -8, on the handle, checked or not.
+        var handle = Bounds(Handle(toggle), scene.Window);
+        AssertBox(handle.Center.X - 18, handle.Center.Y - 18, 36, 36, Bounds(Focus(toggle), scene.Window));
+        Assert.True(handle.Center.X > Bounds(Track(toggle), scene.Window).Center.X);
+
+        toggle.Checked = true;
+        Settle();
+        handle = Bounds(Handle(toggle), scene.Window);
+        AssertBox(handle.Center.X - 18, handle.Center.Y - 18, 36, 36, Bounds(Focus(toggle), scene.Window));
+        Assert.True(handle.Center.X < Bounds(Track(toggle), scene.Window).Center.X);
+    });
+
+    [AvaloniaFact]
+    public void T13_The_Circle_Follows_The_Handle_Spacing() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Spaced", Checked = true };
+        toggle.Resources["Avonic.Toggle.HandleSpacing"] = 4d;
+        var (_, scene, _) = Alone(toggle);
+        using var __ = scene;
+
+        // left: calc(spacing + (20px - 36px) / 2), and translate(spacing * -2) when checked, as the handle.
+        var handle = Bounds(Handle(toggle), scene.Window);
+        AssertBox(handle.Center.X - 18, handle.Center.Y - 18, 36, 36, Bounds(Focus(toggle), scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void T13_A_Click_Shows_No_Circle() => InstalledTheme.Run(_ =>
+    {
+        var toggle = new AvonicToggle { Content = "Alone" };
+        using var scene = Themed(new StackPanel { Children = { toggle } });
+
+        Click(scene, Centre(Track(toggle), scene));
+        Assert.True(toggle.IsFocused);
+        Assert.False(Focus(toggle).IsEffectivelyVisible);
+    });
+
+    [AvaloniaFact]
+    public void T13_It_Is_Always_Focusable_So_A_Single_Input_Item_Shows_Focus_And_The_Toggle_Defers() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var toggle = new AvonicToggle { Content = "Single" };
+        var item = new AvonicItem { Content = toggle };
+        using var scene = Themed(new StackPanel { Children = { before, item } });
+
+        // Measured tg7: ion-focusable and toggle-defers-indicator; the item ion-focusable, ion-focused, at 0.12.
+        Assert.True(Avonic.Components.Behaviors.FocusVisible.GetIsEnabled(toggle));
+        TabTo(scene, before, toggle);
+        Assert.True(ShowsFocus(toggle));
+        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+        Assert.False(Focus(toggle).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(item));
+        AssertClose(Color.FromRgb(224, 224, 224), Pixel(scene, 4, (int)Bounds(item, scene.Window).Center.Y));
+    });
+
+    [AvaloniaFact]
+    public void T13_A_Button_In_The_Item_Or_The_Start_Slot_Leaves_It_Single_Input() => InstalledTheme.Run(_ =>
+    {
+        var withButton = new AvonicToggle { Content = "With a button" };
+        var start = new AvonicToggle();
+        using var scene = Themed(new StackPanel
+        {
+            Children =
+            {
+                new AvonicItem { Content = withButton, EndContent = new AvonicButton { Content = "B" } },
+                new AvonicItem { StartContent = start, Content = new AvonicLabel { Content = "Start slot" } },
+            },
+        });
+
+        // Measured tg16 and tg17: both defer.
+        Assert.Contains(":toggle-defers-indicator", withButton.Classes);
+        Assert.Contains(":toggle-defers-indicator", start.Classes);
+    });
+
+    [AvaloniaFact]
+    public void T13_In_A_Multi_Input_Or_Clickable_Item_It_Draws_Its_Own() => InstalledTheme.Run(_ =>
+    {
+        var before = new Button { Content = "Before" };
+        var multi = new AvonicToggle { Content = "Multi" };
+        var clickable = new AvonicToggle { Content = "Clickable", Checked = true };
+        var multiItem = new AvonicItem { StartContent = new AvonicCheckbox(), Content = multi };
+        var clickableItem = new AvonicItem { Content = clickable, Button = true };
+        using var scene = Themed(new StackPanel { Children = { before, multiItem, clickableItem } });
+
+        // Measured tg8 and tg9b: no deferring; the item is ion-focused too, as it's focusable.
+        TabTo(scene, before, multi);
+        Assert.DoesNotContain(":toggle-defers-indicator", multi.Classes);
+        Assert.True(Focus(multi).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(multiItem));
+
+        TabTo(scene, before, clickable);
+        Assert.DoesNotContain(":toggle-defers-indicator", clickable.Classes);
+        Assert.True(Focus(clickable).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(clickableItem));
+    });
+
+    [AvaloniaFact]
+    public void T13_It_Follows_The_Item_Changing()
+    {
+        var toggle = new AvonicToggle { Content = "Toggle" };
+        var wrapper = new StackPanel();
+        var item = new AvonicItem { Content = new StackPanel { Children = { toggle, wrapper } } };
+        using var scene = new Scene(new StackPanel { Children = { item } });
+        Settle();
+        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+
+        // Measured: becoming a button, then a second toggle inside a wrapper, each ends the deferring, and undoing them brings it back.
+        item.Button = true;
+        Settle();
+        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
+
+        item.Button = false;
+        Settle();
+        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+
+        wrapper.Children.Add(new AvonicToggle());
+        Settle();
+        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
+
+        wrapper.Children.Clear();
+        Settle();
+        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+
+        // Out of the item, it has nothing to defer to.
+        ((Panel)toggle.Parent!).Children.Remove(toggle);
+        ((Panel)scene.Window.Content!).Children.Add(toggle);
+        Settle();
+        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
+    }
+
+    [AvaloniaFact]
+    public void T13_An_Apps_Style_For_FocusVisible_Wins()
+    {
+        var toggle = new AvonicToggle { Content = "Toggle" };
+        using var scene = Scene.Styled(toggle, Scene.AppStyle<AvonicToggle>(Avonic.Components.Behaviors.FocusVisible.IsEnabledProperty, false));
+        Settle();
+
+        Assert.False(Avonic.Components.Behaviors.FocusVisible.GetIsEnabled(toggle));
     }
 
     // ── 12: in an item ───────────────────────────────────────────────────────────────────────

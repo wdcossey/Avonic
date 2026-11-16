@@ -24,7 +24,7 @@
     <x:Double x:Key="Avonic.Toggle.HandleHeight">20</x:Double>
     <!-- handle-max-height: calc(100% + 6px), of md's 14 px track. A number, so a track restyled to another height needs this too. -->
     <x:Double x:Key="Avonic.Toggle.HandleMaxHeight">20</x:Double>
-    <!-- handle-spacing: 0. The handle's inset from the track's start, and twice it back when checked. -->
+    <!-- handle-spacing: 0px. The handle's inset from the track's start, and twice it back when checked. The focus circle follows it. -->
     <x:Double x:Key="Avonic.Toggle.HandleSpacing">0</x:Double>
     <!-- handle-transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1), background-color 160ms cubic-bezier(0.4, 0, 0.2, 1).
          On the handle and on the wrapper that moves it, as Ionic sets it on both. -->
@@ -37,6 +37,12 @@
          These aren't Ionic's variables. -->
     <SolidColorBrush x:Key="Avonic.Toggle.Md.HandleColor" Color="#000000" />
     <SolidColorBrush x:Key="Avonic.Toggle.Md.HandleColorChecked" Color="#FFFFFF" />
+
+    <!-- What toggle.md.css gives the keyboard focus circle behind the handle, with no variable: rgba(var(ion-text-color-rgb), 0.12),
+         and rgba(var(ion-color-primary-rgb), 0.2) when checked. A known Color beats the checked one, with its base at 0.2. These
+         aren't Ionic's variables. -->
+    <SolidColorBrush x:Key="Avonic.Toggle.Md.FocusIndicatorBackground" Color="{DynamicResource Avonic.TextColor}" Opacity="0.12" />
+    <SolidColorBrush x:Key="Avonic.Toggle.Md.FocusIndicatorBackgroundChecked" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.2" />
 
     <!-- :host(.toggle-disabled): opacity: 0.38, which CSS applies to the toggle as a group: the white handle hides the track
          under it. Avalonia's Opacity fades each part on its own, so the track shows through, measured. A mask is a group, and

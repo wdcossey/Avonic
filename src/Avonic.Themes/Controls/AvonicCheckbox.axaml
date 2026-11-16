@@ -28,6 +28,8 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
         <!-- cursor: pointer -->
         <Setter Property="Cursor" Value="Hand" />
+        <!-- :host(:focus) { outline: none }. ion-focused draws the circle instead. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel Background="Transparent">
@@ -56,7 +58,7 @@
                                            Foreground="{DynamicResource Avonic.Color.DangerBrush}" />
                             </Panel>
                         </StackPanel>
-                        <!-- .native-wrapper -->
+                        <!-- .native-wrapper, position: relative, for the focus circle -->
                         <Panel Name="PART_NativeWrapper" VerticalAlignment="Center">
                             <!-- .checkbox-icon, the SVG: box-sizing: border-box, so the view box fills what the border leaves -->
                             <Border Name="PART_Container"
@@ -71,6 +73,20 @@
                                                 Indeterminate="{TemplateBinding Indeterminate}"
                                                 StrokeThickness="{DynamicResource Avonic.Checkbox.CheckmarkWidth}" />
                             </Border>
+                            <!-- :host(.ion-focused) .native-wrapper::after: 36 by 36, a circle, at calc(50% - 36px / 2) both ways, so
+                                 centred on the box whatever its size, and over it, as it comes after it. Literals in checkbox.md.css,
+                                 with no variable. The margin keeps it out of the layout, as position: absolute does. -->
+                            <Border Name="PART_Focus"
+                                    Width="36"
+                                    Height="36"
+                                    Margin="-18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    CornerRadius="18"
+                                    IsVisible="False"
+                                    IsHitTestVisible="False"
+                                    Background="{DynamicResource Avonic.Color.PrimaryTintBrush}"
+                                    Opacity="0.2" />
                         </Panel>
                     </c:LabelledControlPanel>
                 </Panel>
@@ -236,6 +252,11 @@
         </Style>
         <Style Selector="^[IsEnabled=False] /template/ Panel#PART_NativeWrapper">
             <Setter Property="Opacity" Value="0.63" />
+        </Style>
+
+        <!-- :host(.ion-focused) .native-wrapper::after: var(ion-color-primary-tint) at 0.2, whatever the checkbox's colour. -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Focus">
+            <Setter Property="IsVisible" Value="True" />
         </Style>
     </ControlTheme>
 

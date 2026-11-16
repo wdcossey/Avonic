@@ -41,6 +41,8 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
         <!-- cursor: pointer -->
         <Setter Property="Cursor" Value="Hand" />
+        <!-- :host(:focus) { outline: none }. ion-focused draws the circle instead. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
                 <c:LabelledControlPanel Name="PART_Wrapper"
@@ -94,6 +96,27 @@
                             </Border.CornerRadius>
                             <!-- .toggle-icon-wrapper: the whole track, moved by the handle's travel when checked. -->
                             <Panel Name="PART_IconWrapper">
+                                <!-- :host(.ion-focused:not(.toggle-defers-indicator)) .toggle-icon-wrapper::after: 36 by 36, a circle,
+                                     centred on the handle, moving with the wrapper. z-index: -1 in the wrapper, whose will-change:
+                                     transform makes it a stacking context: over the track, and under the handle, measured. -->
+                                <Border Name="PART_Focus"
+                                        Width="36"
+                                        Height="36"
+                                        CornerRadius="18"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        IsVisible="False"
+                                        IsHitTestVisible="False">
+                                    <Border.Margin>
+                                        <MultiBinding Converter="{x:Static c:AvonicToggle.FocusIndicatorMarginConverter}">
+                                            <DynamicResource ResourceKey="Avonic.Toggle.HandleSpacing" />
+                                            <DynamicResource ResourceKey="Avonic.Toggle.HandleWidth" />
+                                            <Binding Path="Width" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="Height" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="$parent[Border].Height" />
+                                        </MultiBinding>
+                                    </Border.Margin>
+                                </Border>
                                 <!-- .toggle-inner: position: absolute, centred down by the wrapper's align-items, so it hangs over
                                      the track by 3 px above and below. -->
                                 <Border Name="PART_Handle"
@@ -259,6 +282,27 @@
         <!-- :host(.ion-color.toggle-checked) .toggle-inner: var(ion-color-base), which beats the variable. -->
         <Style Selector="^:ion-color:checked /template/ Border#PART_Handle">
             <Setter Property="Background" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.Base)}" />
+        </Style>
+
+        <!-- The focus circle: rgba(var(ion-text-color-rgb), 0.12), and rgba(var(ion-color-primary-rgb), 0.2) when checked, or the
+             colour's base at 0.2. Only while focused by keyboard, and not when an item draws the row's indicator. -->
+        <Style Selector="^:ion-focused:not(:toggle-defers-indicator) /template/ Border#PART_Focus">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Focus">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.Md.FocusIndicatorBackground}" />
+        </Style>
+        <!-- Checked: translate(calc(var(handle-spacing) * -2), -50%), as the handle moves back by twice the spacing. -->
+        <Style Selector="^:checked /template/ Border#PART_Focus">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toggle.Md.FocusIndicatorBackgroundChecked}" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static c:AvonicToggle.CheckedSpacingConverter}">
+                    <DynamicResource ResourceKey="Avonic.Toggle.HandleSpacing" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-color:checked /template/ Border#PART_Focus">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToggle].(b:ColorPalette.BaseColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.2}" />
         </Style>
 
         <!-- The on/off icon, md: checkmark-outline when checked, remove-outline when not. Checked, color: var(ion-color-contrast, #fff),
