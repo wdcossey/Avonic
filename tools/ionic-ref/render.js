@@ -18,6 +18,8 @@ const http = require('http');
 const { chromium } = require('playwright-core');
 // The same Roboto files as the tests and the sample, so that text measures the same on both sides.
 const roboto = require('../fonts/roboto/roboto');
+// Waits for the components to load, in document order, and the page to keep still, instead of a fixed delay.
+const settle = require('./settle');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
@@ -89,10 +91,12 @@ const cssVars = comp ? [...new Set(comp.styles.map(s => s.name))] : CSS_VARS_OUT
 // ── tiny static server rooted at the repo so the ESM bundle can lazy-load its chunks ───────
 const MIME = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.html': 'text/html',
                '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', ...roboto.MIME };
-const bodyWrap = has('--bare')
-    ? `<div id="stage">${snippet}</div>`
-    : `<ion-app><ion-content><div id="stage" style="padding:16px">${snippet}</div></ion-content></ion-app>`;
-const pageHtml = `<!doctype html>
+// The page as written to page.html has the snippet in place. The page served holds it back in a <template> until settle() has
+// loaded Ionic's modules, so that the components start in document order.
+const bodyWrap = content => has('--bare')
+    ? `<div id="stage">${content}</div>`
+    : `<ion-app><ion-content><div id="stage" style="padding:16px">${content}</div></ion-content></ion-app>`;
+const html = content => `<!doctype html>
 <html mode="md"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="/node_modules/@ionic/core/css/ionic.bundle.css">
@@ -100,11 +104,13 @@ ${roboto.LINK}
 <script>window.Ionic = { config: { mode: 'md' } };</script>
 <script type="module" src="/node_modules/@ionic/core/dist/ionic/ionic.esm.js"></script>
 <style>html,body{margin:0;height:100%;background:var(--ion-background-color,#fff)}</style>
-</head><body>${bodyWrap}</body></html>`;
+</head><body>${bodyWrap(content)}</body></html>`;
+const pageHtml = html(snippet);
+const servedHtml = html(settle.defer(snippet));
 
 const server = http.createServer((req, res) => {
     const url = decodeURIComponent(req.url.split('?')[0]);
-    if (url === '/' || url === '/index.html') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(pageHtml); }
+    if (url === '/' || url === '/index.html') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(servedHtml); }
     const file = path.join(ROOT, url);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
@@ -127,12 +133,9 @@ const server = http.createServer((req, res) => {
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 
     await page.goto(base + '/');
-    await page.waitForFunction(t => {
-        const els = [...document.querySelectorAll(t)];
-        return els.length > 0 && els.every(e => e.classList.contains('hydrated'));
-    }, tag, { timeout: 20000 });
     await roboto.loadRoboto(page);
-    await page.waitForTimeout(300);
+    await settle.settle(page);
+    if (!await page.evaluate(t => document.querySelector(t) !== null, tag)) throw new Error(`no <${tag}> in the page`);
 
     const LAYOUT = ['display', 'position', 'box-sizing', 'width', 'height', 'min-height', 'min-width', 'padding', 'margin',
         'border', 'border-radius', 'background-color', 'color', 'font-size', 'font-weight', 'font-family', 'line-height',

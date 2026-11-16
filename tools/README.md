@@ -10,6 +10,31 @@ Developer tooling. Nothing here ships in a package.
 `render.js`, and `ionic-ref/boxes.js <page.html>`, which prints the boxes in a page of items and dividers, load Roboto from
 [`fonts/roboto/`](fonts/roboto/README.md), the files the tests and the sample embed, so that text measures the same on both sides.
 
+### How the Chromium tools wait
+
+`render.js`, `boxes.js` and `compare-icons.js` wait through [`ionic-ref/settle.js`](ionic-ref/settle.js), never a fixed delay:
+
+1. Every `ion-*` tag in the page is defined (`customElements.whenDefined`).
+2. Every lazy module of Ionic's bundle (`node_modules/@ionic/core/dist/ionic/*.entry.js`) is imported, and only then does the
+   snippet go into the page, from the `<template>` that `settle.defer()` holds it in. Each component waits for its own module, so
+   without this they start in whatever order their modules arrive. That order decides some layouts: an `ion-item` with two
+   `ion-label`s takes the style of the one that starts last, and the stacked-label row of the item cases was 48 high in some runs
+   and 55 in others (#104). With the modules in first, components start in document order, as in Ionic's custom-elements build,
+   and the ids Ionic counts (`ion-cb-0`, `ion-tg-0`, `ion-r-0`) follow the document too.
+3. `componentOnReady()` on every `ion-*` element, in the light DOM and in shadow roots, until no new one appears.
+4. Two animation frames, for what components do in a frame after they load.
+5. Frames until the page keeps still for three in a row: every element's layout box (`offset*`, which a transform doesn't move),
+   scroll position and classes unchanged, the fonts loaded, every image complete, and no finite animation or transition running. Infinite ones,
+   a spinner's or a skeleton's shimmer, are left out, so the moment they're captured at is still arbitrary.
+
+If that doesn't happen within 20 s (120 s for the icons), the tool fails and names what kept changing, rather than reading early.
+`page.html` holds the snippet in place, not in the `<template>`, so it opens in a browser as it is, but there the components start
+in whatever order their modules arrive, as before. `side.js` waits for its two
+pictures to decode.
+
+`ion-app` isn't needed for this: wrapped in it, the stacked-label row still changed from run to run. `render.js` wraps a snippet in
+`ion-app` and `ion-content` unless `--bare`; `boxes.js` doesn't, so that the page is as tall as its rows.
+
 Both need `npm install`. `playwright-core` is pinned to the Chromium build the cloud environment
 preinstalls (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`); on a machine without it, run
 `npx playwright-core install chromium` once.
