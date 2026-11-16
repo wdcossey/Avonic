@@ -392,10 +392,13 @@ public class AvonicItem : TemplatedControl, IItemHost
     /// Everything slotted, in slot order. A presenter is its child's logical parent, so the host's own
     /// logical descendants don't include these.
     /// </summary>
-    private IEnumerable<Control> SlottedControls() =>
-        _slots.Select(slot => slot?.Child)
-            .OfType<Control>()
-            .SelectMany(child => child.GetSelfAndLogicalDescendants().OfType<Control>());
+    private IEnumerable<Control> SlottedControls() => SlottedControlsBySlot().Select(pair => pair.Control);
+
+    /// <summary><see cref="SlottedControls"/>, each with its slot: 0 start, 1 default, 2 end.</summary>
+    private IEnumerable<(int Slot, Control Control)> SlottedControlsBySlot() =>
+        _slots.Select((slot, index) => (Index: index, Child: slot?.Child))
+            .Where(pair => pair.Child is not null)
+            .SelectMany(pair => pair.Child!.GetSelfAndLogicalDescendants().OfType<Control>().Select(control => (pair.Index, control)));
 
     private static ItemControlType? TypeOf(Control control) => control switch
     {
@@ -426,40 +429,32 @@ public class AvonicItem : TemplatedControl, IItemHost
         int covers = 0, inputs = 0, clickables = 0;
         var focusableChild = false;
         var slottedIndicatorControl = false;
-        for (var slot = 0; slot < _slots.Length; slot++)
+        foreach (var (slot, control) in SlottedControlsBySlot())
         {
-            if (_slots[slot]?.Child is not Control slotted)
+            var type = TypeOf(control);
+
+            // isFocusable reads .ion-focusable once, in the frame after load, before a checkbox or a radio in a multi-input item
+            // has rendered again with its own ion-focusable, which item-multiple-inputs gives it. So theirs never makes the item
+            // focusable: measured, an item with two checkboxes, or a radio and a checkbox, isn't ion-focusable. A toggle's is
+            // there from its first render.
+            focusableChild |= FocusVisible.GetIsEnabled(control) && type is not (ItemControlType.Checkbox or ItemControlType.Radio);
+
+            // setHasSlottedIndicatorControl: INDICATOR_CONTROL_SELECTOR in the default slot, directly or inside what's in it.
+            // Only the default slot clips, so one in the start or end slot needs no room.
+            slottedIndicatorControl |= slot == 1 && type is (ItemControlType.Checkbox or ItemControlType.Radio or ItemControlType.Toggle);
+
+            switch (type)
             {
-                continue;
-            }
-
-            foreach (var control in slotted.GetSelfAndLogicalDescendants().OfType<Control>())
-            {
-                var type = TypeOf(control);
-
-                // isFocusable reads .ion-focusable once, in the frame after load, before a checkbox or a radio in a multi-input item
-                // has rendered again with its own ion-focusable, which item-multiple-inputs gives it. So theirs never makes the item
-                // focusable: measured, an item with two checkboxes, or a radio and a checkbox, isn't ion-focusable. A toggle's is
-                // there from its first render.
-                focusableChild |= FocusVisible.GetIsEnabled(control) && type is not (ItemControlType.Checkbox or ItemControlType.Radio);
-
-                // setHasSlottedIndicatorControl: INDICATOR_CONTROL_SELECTOR in the default slot, directly or inside what's in it.
-                // Only the default slot clips, so one in the start or end slot needs no room.
-                slottedIndicatorControl |= slot == 1 && type is (ItemControlType.Checkbox or ItemControlType.Radio or ItemControlType.Toggle);
-
-                switch (type)
-                {
-                    case ItemControlType.Checkbox or ItemControlType.Datetime or ItemControlType.Select or ItemControlType.Radio:
-                        covers++;
-                        break;
-                    case ItemControlType.Input or ItemControlType.Range or ItemControlType.Searchbar
-                        or ItemControlType.Segment or ItemControlType.Textarea or ItemControlType.Toggle:
-                        inputs++;
-                        break;
-                    case ItemControlType.Button:
-                        clickables++;
-                        break;
-                }
+                case ItemControlType.Checkbox or ItemControlType.Datetime or ItemControlType.Select or ItemControlType.Radio:
+                    covers++;
+                    break;
+                case ItemControlType.Input or ItemControlType.Range or ItemControlType.Searchbar
+                    or ItemControlType.Segment or ItemControlType.Textarea or ItemControlType.Toggle:
+                    inputs++;
+                    break;
+                case ItemControlType.Button:
+                    clickables++;
+                    break;
             }
         }
 

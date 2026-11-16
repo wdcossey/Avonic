@@ -825,20 +825,23 @@ public class AvonicToggleTests
     [AvaloniaFact]
     public void T13_A_Button_In_The_Item_Or_The_Start_Slot_Leaves_It_Single_Input() => InstalledTheme.Run(_ =>
     {
+        var before = new Button { Content = "Before" };
         var withButton = new AvonicToggle { Content = "With a button" };
         var start = new AvonicToggle();
-        using var scene = Themed(new StackPanel
-        {
-            Children =
-            {
-                new AvonicItem { Content = withButton, EndContent = new AvonicButton { Content = "B" } },
-                new AvonicItem { StartContent = start, Content = new AvonicLabel { Content = "Start slot" } },
-            },
-        });
+        var buttonItem = new AvonicItem { Content = withButton, EndContent = new AvonicButton { Content = "B" } };
+        var startItem = new AvonicItem { StartContent = start, Content = new AvonicLabel { Content = "Start slot" } };
+        using var scene = Themed(new StackPanel { Children = { before, buttonItem, startItem } });
 
-        // Measured tg16 and tg17: both defer.
-        Assert.Contains(":toggle-defers-indicator", withButton.Classes);
-        Assert.Contains(":toggle-defers-indicator", start.Classes);
+        // Measured tg16 and tg17: both defer, so no circle, and the item shows focus instead.
+        TabTo(scene, before, withButton);
+        Assert.True(ShowsFocus(withButton));
+        Assert.False(Focus(withButton).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(buttonItem));
+
+        TabTo(scene, before, start);
+        Assert.True(ShowsFocus(start));
+        Assert.False(Focus(start).IsEffectivelyVisible);
+        Assert.True(ShowsFocus(startItem));
     });
 
     [AvaloniaFact]
@@ -864,38 +867,43 @@ public class AvonicToggleTests
     });
 
     [AvaloniaFact]
-    public void T13_It_Follows_The_Item_Changing()
+    public void T13_It_Follows_The_Item_Changing() => InstalledTheme.Run(_ =>
     {
         var toggle = new AvonicToggle { Content = "Toggle" };
         var wrapper = new StackPanel();
         var item = new AvonicItem { Content = new StackPanel { Children = { toggle, wrapper } } };
-        using var scene = new Scene(new StackPanel { Children = { item } });
+        using var scene = Themed(new StackPanel { Children = { item } });
+
+        // ion-focused as keyboard focus gives it, kept on through the changes, so the circle shows whenever the toggle doesn't defer.
+        ((IPseudoClasses)toggle.Classes).Add(Avonic.Components.Behaviors.FocusVisible.FocusedPseudoClass);
         Settle();
-        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+        Assert.False(Focus(toggle).IsEffectivelyVisible);
 
         // Measured: becoming a button, then a second toggle inside a wrapper, each ends the deferring, and undoing them brings it back.
         item.Button = true;
         Settle();
-        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
+        Assert.True(Focus(toggle).IsEffectivelyVisible);
 
         item.Button = false;
         Settle();
-        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+        Assert.False(Focus(toggle).IsEffectivelyVisible);
 
         wrapper.Children.Add(new AvonicToggle());
         Settle();
-        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
+        Assert.True(Focus(toggle).IsEffectivelyVisible);
 
         wrapper.Children.Clear();
         Settle();
-        Assert.Contains(":toggle-defers-indicator", toggle.Classes);
+        Assert.False(Focus(toggle).IsEffectivelyVisible);
 
         // Out of the item, it has nothing to defer to.
         ((Panel)toggle.Parent!).Children.Remove(toggle);
         ((Panel)scene.Window.Content!).Children.Add(toggle);
         Settle();
-        Assert.DoesNotContain(":toggle-defers-indicator", toggle.Classes);
-    }
+        ((IPseudoClasses)toggle.Classes).Add(Avonic.Components.Behaviors.FocusVisible.FocusedPseudoClass);
+        Settle();
+        Assert.True(Focus(toggle).IsEffectivelyVisible);
+    });
 
     [AvaloniaFact]
     public void T13_An_Apps_Style_For_FocusVisible_Wins()

@@ -2189,10 +2189,12 @@ public class AvonicItemTests
 
     // ── Behaviours 36-37: room for a control's focus indicator (Ionic 8.8.17) ────────────────
 
-    private const string Room = ":item-focus-indicator-room";
+    /// <summary>The room: the default slot reaching 12 before its content, as <c>.input-wrapper</c>'s −12 margin and 12 padding.</summary>
+    private static bool HasRoom(AvonicItem item) =>
+        Container(item).Bounds.X < -11 && Container(item).Padding.Left > 11 && ((Control)Inner(item).Child!).Clip is not null;
 
     [AvaloniaFact]
-    public void B36_Room_When_A_Control_With_An_Indicator_Is_In_The_Default_Slot_Of_A_Multi_Input_Or_Clickable_Item()
+    public void B36_Room_When_A_Control_With_An_Indicator_Is_In_The_Default_Slot_Of_A_Multi_Input_Or_Clickable_Item() => InstalledTheme.Run(_ =>
     {
         var single = new AvonicItem { Content = new AvonicCheckbox() };
         var multi = new AvonicItem { StartContent = new AvonicCheckbox(), Content = new AvonicCheckbox() };
@@ -2205,36 +2207,38 @@ public class AvonicItemTests
         Dispatcher.UIThread.RunJobs();
 
         // Measured: icb1 no, icb2 yes, itg3 yes, icb5 yes, iroom no, iroom2 no.
-        Assert.False(Has(single, Room));
-        Assert.True(Has(multi, Room));
-        Assert.True(Has(clickable, Room));
-        Assert.True(Has(wrapped, Room));
-        Assert.False(Has(slotsOnly, Room));
-        Assert.False(Has(clickableEnd, Room));
-        Assert.False(Has(otherInputs, Room));
-    }
+        Assert.False(HasRoom(single));
+        Assert.True(HasRoom(multi));
+        Assert.True(HasRoom(clickable));
+        Assert.True(HasRoom(wrapped));
+        Assert.False(HasRoom(slotsOnly));
+        Assert.False(HasRoom(clickableEnd));
+        Assert.False(HasRoom(otherInputs));
+    });
 
     [AvaloniaFact]
-    public void B36_A_Control_Coming_Or_Going_Inside_A_Wrapper_Updates_It()
+    public void B36_A_Control_Coming_Or_Going_Inside_A_Wrapper_Updates_It() => InstalledTheme.Run(_ =>
     {
         var wrapper = new StackPanel();
-        var item = new AvonicItem { Content = new StackPanel { Children = { new AvonicCheckbox(), wrapper } } };
+        var first = new AvonicCheckbox();
+        var item = new AvonicItem { Content = new StackPanel { Children = { first, wrapper } } };
         using var scene = new Scene(item);
         Dispatcher.UIThread.RunJobs();
-        Assert.False(Has(item, ":item-multiple-inputs"));
-        Assert.False(Has(item, Room));
+        Assert.False(FocusVisible.GetIsEnabled(first));
+        Assert.False(HasRoom(item));
 
-        // Measured: a checkbox added inside a div in the default slot makes it multi-input, with room. No slot changes.
+        // Measured: a checkbox added inside a div in the default slot makes it multi-input, so the first one is ion-focusable, with
+        // room. No slot changes.
         wrapper.Children.Add(new AvonicCheckbox());
         Dispatcher.UIThread.RunJobs();
-        Assert.True(Has(item, ":item-multiple-inputs"));
-        Assert.True(Has(item, Room));
+        Assert.True(FocusVisible.GetIsEnabled(first));
+        Assert.True(HasRoom(item));
 
         wrapper.Children.Clear();
         Dispatcher.UIThread.RunJobs();
-        Assert.False(Has(item, ":item-multiple-inputs"));
-        Assert.False(Has(item, Room));
-    }
+        Assert.False(FocusVisible.GetIsEnabled(first));
+        Assert.False(HasRoom(item));
+    });
 
     [AvaloniaFact]
     public void B36_The_Room_Is_12_Each_Side_Given_Back_As_Padding_So_Nothing_Moves() => InstalledTheme.Run(_ =>
