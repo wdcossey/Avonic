@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.Showcase.ProfileScreen">
+
+    <!-- A form: a segment under the toolbar, inputs with floating and stacked labels, a textarea that grows with its text,
+         a radio group, a checkbox, and a block button. -->
+    <Grid RowDefinitions="Auto,*">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Edit profile" />
+                <c:AvonicToolbar.EndContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton Content="Done" Strong="True" />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.EndContent>
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicSegment Value="personal">
+                    <c:AvonicSegmentButton Value="personal"><c:AvonicLabel Content="Personal" /></c:AvonicSegmentButton>
+                    <c:AvonicSegmentButton Value="work"><c:AvonicLabel Content="Work" /></c:AvonicSegmentButton>
+                    <c:AvonicSegmentButton Value="privacy"><c:AvonicLabel Content="Privacy" /></c:AvonicSegmentButton>
+                </c:AvonicSegment>
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <StackPanel>
+                <c:AvonicList>
+                    <c:AvonicItem>
+                        <c:AvonicInput Label="Full name" LabelPlacement="Floating" Value="Alex Morgan" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicInput Label="Email" LabelPlacement="Floating" Type="Email" Value="alex.morgan@example.com" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicInput Label="Phone" LabelPlacement="Stacked" Type="Tel" Placeholder="+1 555 0100" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicTextarea Label="About you" LabelPlacement="Stacked" AutoGrow="True"
+                                          Value="Weekend hiker, coffee lover and occasional photographer." />
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <c:AvonicList>
+                    <c:AvonicRadioGroup Value="email">
+                        <c:AvonicListHeader>
+                            <c:AvonicLabel Content="Contact me by" />
+                        </c:AvonicListHeader>
+                        <c:AvonicItem>
+                            <c:AvonicRadio Value="email" Content="Email" />
+                        </c:AvonicItem>
+                        <c:AvonicItem>
+                            <c:AvonicRadio Value="phone" Content="Phone" />
+                        </c:AvonicItem>
+                        <c:AvonicItem>
+                            <c:AvonicRadio Value="never" Content="Don't contact me" />
+                        </c:AvonicItem>
+                    </c:AvonicRadioGroup>
+                </c:AvonicList>
+
+                <c:AvonicList>
+                    <c:AvonicItem Lines="None">
+                        <c:AvonicCheckbox Content="Send me the weekly newsletter" Checked="True" />
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <c:AvonicButton Expand="Block" Content="Save changes" Margin="16,8,16,16" />
+            </StackPanel>
+        </c:AvonicContent>
+    </Grid>
+
+</UserControl>

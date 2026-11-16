@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.Showcase.SettingsScreen">
+
+    <!-- Settings: the account at the top, then lists under headers, with icons at the start of each item, toggles, a range
+         between two icons, notes for the current value, a progress bar, and the chevron of an item that opens a page. -->
+    <Grid RowDefinitions="Auto,*">
+        <c:AvonicHeader>
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Settings" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent Grid.Row="1">
+            <StackPanel>
+                <c:AvonicList>
+                    <c:AvonicItem Button="True" Detail="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicAvatar>
+                                <c:AvonicImg Src="avares://Avonic.Sample/Assets/Img/portrait.png" Alt="Alex Morgan" />
+                            </c:AvonicAvatar>
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel>
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Alex Morgan" />
+                                <TextBlock Classes="p" Text="alex.morgan@example.com" />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <c:AvonicList>
+                    <c:AvonicListHeader>
+                        <c:AvonicLabel Content="Connections" />
+                    </c:AvonicListHeader>
+                    <c:AvonicItem>
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="wifi" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicToggle Content="Wi-Fi" Checked="True" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="bluetooth" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicToggle Content="Bluetooth" Checked="True" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="airplane-outline" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicToggle Content="Airplane mode" />
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <c:AvonicList>
+                    <c:AvonicListHeader>
+                        <c:AvonicLabel Content="Display" />
+                    </c:AvonicListHeader>
+                    <c:AvonicItem>
+                        <c:AvonicRange Label="Brightness" LabelPlacement="Stacked" Value="65">
+                            <c:AvonicRange.StartContent>
+                                <c:AvonicIcon IconName="sunny-outline" />
+                            </c:AvonicRange.StartContent>
+                            <c:AvonicRange.EndContent>
+                                <c:AvonicIcon IconName="sunny" />
+                            </c:AvonicRange.EndContent>
+                        </c:AvonicRange>
+                    </c:AvonicItem>
+                    <c:AvonicItem Button="True" Detail="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="language" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Content="Language" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="English" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItem Button="True" Detail="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="notifications-outline" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Content="Notifications" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicBadge Color="danger" Content="New" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                </c:AvonicList>
+
+                <c:AvonicList>
+                    <c:AvonicListHeader>
+                        <c:AvonicLabel Content="Storage" />
+                    </c:AvonicListHeader>
+                    <c:AvonicItem>
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="cloud-outline" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel>
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="18.6 GB of 64 GB used" />
+                                <c:AvonicProgressBar Value="0.29" />
+                            </StackPanel>
+                        </c:AvonicLabel>
+                    </c:AvonicItem>
+                    <c:AvonicItem Button="True" Detail="True">
+                        <c:AvonicItem.StartContent>
+                            <c:AvonicIcon IconName="information-circle-outline" />
+                        </c:AvonicItem.StartContent>
+                        <c:AvonicLabel Content="About" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicNote Content="Version 1.0" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                </c:AvonicList>
+            </StackPanel>
+        </c:AvonicContent>
+    </Grid>
+
+</UserControl>
