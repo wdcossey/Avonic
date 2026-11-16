@@ -1030,6 +1030,31 @@ try {
         Start-Sleep -Milliseconds 800
         Shot 'ion-refresher-disabled'
         Check 'Disabled stops it' ((-not (FirstText 'Refreshing*')) -and -not (Named $CT::Text 'Item 22')) ((Texts | Select-Object -Last 1))
+
+        # #176: two of Ionic's bugs, fixed. C3: a pull that the cancel's end (700 ms) overtakes, held still past it and let go, left
+        # Ionic's refresher off for good; here the next pull refreshes. C9: a refresh begun while cancelling was ended by the
+        # cancel's end, as cancelled, while the app loaded; here it goes on until the page completes it, 2 s after it began.
+        ClickOn (Named $CT::Button 'Disabled')
+        Start-Sleep -Milliseconds 300
+        ClickOn (Named $CT::Button 'Cancel the refresh')
+        $px = $cx; $py = [int]($content.Y + (Px 40))
+        TouchDown $px $py
+        for ($i = 1; $i -le 10; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove($px, [int]($py + (Px 100) * $i / 10)) }
+        Start-Sleep -Milliseconds 1000
+        TouchUp $px ([int]($py + (Px 100)))
+        Start-Sleep -Milliseconds 800
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 25
+        Start-Sleep -Milliseconds 300
+        Check 'a pull the cancel''s end overtook leaves it on: the next pull refreshes (#176, C3)' ([bool](WaitForText 'Refreshing*' 1)) ((Texts | Select-Object -Last 1))
+        Check 'and that refresh completes' ([bool](WaitForText 'Refreshed*' 4)) ((Texts | Select-Object -Last 1))
+        Start-Sleep -Milliseconds 1000
+        ClickOn (Named $CT::Button 'Cancel the refresh')
+        TouchDrag $cx ($content.Y + (Px 40)) 0 (Px 250) 5
+        Start-Sleep -Milliseconds 900
+        Check 'a refresh begun while cancelling goes on past the cancel''s end (#176, C9)' ([bool](FirstText 'Refreshing*')) ((Texts | Select-Object -Last 1))
+        Check 'until the page completes it' ([bool](WaitForText 'Refreshed*' 4)) ((Texts | Select-Object -Last 1))
+        Start-Sleep -Milliseconds 1000
+        Shot 'ion-refresher-after-cancels'
     }
 
     # The page says each ionChange. A wheel notch scrolls 100 px and snaps to the nearest option (Chromium: three rows of 34),

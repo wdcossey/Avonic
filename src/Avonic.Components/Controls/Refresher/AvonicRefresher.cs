@@ -73,6 +73,11 @@ public class AvonicRefresher : ContentControl
     private readonly List<IDisposable> _animations = [];
     private readonly List<PendingReset> _resets = [];
 
+    // How many pulls have started, and the last of them let go past the threshold, a refresh begun, so that a cancel's reset knows
+    // of a refresh begun by a pull started since its call (C9)
+    private int _pulls;
+    private int _committedPull;
+
     static AvonicRefresher()
     {
         // pointer-events: none
@@ -149,7 +154,8 @@ public class AvonicRefresher : ContentControl
         if (_nativeRefresher)
         {
             // needsCompletion and pointerDown are only read by iOS's native refresher, so md's always goes on
-            AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Completing));
+            var pulls = _pulls;
+            AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Completing, pulls));
         }
         else
         {
@@ -165,7 +171,8 @@ public class AvonicRefresher : ContentControl
     {
         if (_nativeRefresher)
         {
-            AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Cancelling));
+            var pulls = _pulls;
+            AfterTwoFrames(() => ResetNativeRefresher(RefresherState.Cancelling, pulls));
         }
         else
         {
@@ -442,6 +449,7 @@ public class AvonicRefresher : ContentControl
         if (!data.DidStart)
         {
             data.DidStart = true;
+            data.Number = ++_pulls;
             State = RefresherState.Pulling;
 
             // overflow: hidden on the scroll element: the captured gesture already keeps the scroller off the pointer.
@@ -483,6 +491,16 @@ public class AvonicRefresher : ContentControl
         var animation = data.Animation!;
         if (_progress <= RefresherPullFrame.RefreshThreshold)
         {
+            // A cancel's reset destroyed this pull's animation while it was held (C3). In Ionic playing it back now never ends, nor
+            // turns the gesture on again, and nothing pulls again. Here, a deliberate difference, the gesture comes back on as
+            // IsEnabled says. Whatever destroyed it has ended the pull: the reset, or an earlier pull's play back, which both make it
+            // inactive and raise ionPullEnd.
+            if (animation.IsDisposed)
+            {
+                gesture.Enable(IsEnabled);
+                return;
+            }
+
             // progressEnd(0, progress, 500): back to 0, over what's left of 500 ms in reverse
             animation.PlayBack(_progress, () =>
             {
@@ -493,6 +511,9 @@ public class AvonicRefresher : ContentControl
             });
             return;
         }
+
+        // A refresh begun, which a cancel's reset called before this pull started leaves alone (C9)
+        _committedPull = data.Number;
 
         // getTimeGivenProgression on a linear curve is the progress itself
         var progress = _progress;
@@ -542,14 +563,14 @@ public class AvonicRefresher : ContentControl
     /// <c>resetNativeRefresher</c> in md: the state, then the refreshing icon's transition, or Ionic's fallback when none runs,
     /// then inactive.
     /// </summary>
-    private void ResetNativeRefresher(RefresherState state)
+    private void ResetNativeRefresher(RefresherState state, int pulls)
     {
         State = state;
 
         // transitionEndAsync(.refresher-refreshing-icon, 200): the icon's transitionend, which ends every wait on it, or the
         // fallback. The completing state's scale runs one when the icon was showing; the content says when it ends.
         var now = AvonicConfig.Now();
-        var reset = new PendingReset(state, now + TransitionFallback);
+        var reset = new PendingReset(state, now + TransitionFallback, pulls);
         _resets.Add(reset);
         if (_refresherContent?.IconTransitionEndsAt is { } endsAt && endsAt >= now)
         {
@@ -567,22 +588,38 @@ public class AvonicRefresher : ContentControl
         }
     }
 
-    /// <summary>The rest of <c>resetNativeRefresher</c>, once the wait is over: inactive, and <c>ionPullEnd</c>.</summary>
+    /// <summary>
+    /// The rest of <c>resetNativeRefresher</c>, once the wait is over: inactive, and <c>ionPullEnd</c>. Two deliberate differences
+    /// from Ionic. A reset does nothing once a pull started since <see cref="Cancel"/> or <see cref="Complete"/> was called has
+    /// been let go past the threshold (C9): Ionic's ends that refresh as cancelled while the app is still loading, or, before its
+    /// snap back has ended, destroys it, so no refresh comes and the gesture stays off. A pull held at the call is the cancel's
+    /// to end, as in Ionic. And the gesture comes back on as <see cref="InputElement.IsEnabled"/> says (C3), last: what the reset
+    /// destroys includes a pull's play back, whose end would have.
+    /// </summary>
     private void FinishReset(PendingReset reset)
     {
         _resets.Remove(reset);
+        if (_committedPull > reset.Pulls)
+        {
+            return;
+        }
+
         DestroyAnimations();
         _progress = 0;
         State = RefresherState.Inactive;
         RaiseEvent(new RefresherPullEndEventArgs(
             IonPullEndEvent,
             reset.State == RefresherState.Completing ? RefresherPullEndReason.Complete : RefresherPullEndReason.Cancel));
+        _gesture?.Enable(IsEnabled);
     }
 
     /// <summary>A <c>resetNativeRefresher</c> waiting for the icon's transition.</summary>
-    private sealed class PendingReset(RefresherState state, TimeSpan due)
+    private sealed class PendingReset(RefresherState state, TimeSpan due, int pulls)
     {
         public RefresherState State { get; } = state;
+
+        /// <summary>How many pulls had started when it was called for.</summary>
+        public int Pulls { get; } = pulls;
 
         public TimeSpan Due { get; set; } = due;
 
@@ -621,6 +658,9 @@ public class AvonicRefresher : ContentControl
     {
         public bool DidStart;
         public bool Cancelled;
+
+        /// <summary>Which pull this is, from 1, counted as it starts.</summary>
+        public int Number;
         public RefresherAnimationType Type;
         public double Height;
         public PullingAnimation? Animation;
@@ -634,6 +674,9 @@ public class AvonicRefresher : ContentControl
     {
         private IDisposable? _frame;
         private bool _disposed;
+
+        /// <summary>Destroyed, by the pull's end or a reset: it draws nothing more, and a play back never finishes.</summary>
+        public bool IsDisposed => _disposed;
 
         public void Step(double step)
         {

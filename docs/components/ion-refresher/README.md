@@ -1,6 +1,6 @@
 # ion-refresher, ion-refresher-content
 
-Status: done · [#35](https://github.com/wdcossey/Avonic/issues/35)
+Status: done · [#35](https://github.com/wdcossey/Avonic/issues/35) · two of Ionic's bugs fixed: [#176](https://github.com/wdcossey/Avonic/issues/176)
 
 `AvonicRefresher` and `AvonicRefresherContent`: Ionic's pull-to-refresh, as md's native refresher. A round icon follows the finger
 down from the top of an `AvonicContent`; let go past 0.4 of the pull and it refreshes, with a spinning icon, until the app calls
@@ -128,7 +128,18 @@ None.
   an app puts in the slots and their logical descendants. Of two hosts, one in `Content` and one in `FixedContent`, the one in
   `Content` wins, where Ionic takes the first in the markup.
 - `AvonicConfig.RefreshingIcon` takes only spinners, as `PullingIcon` does: Ionic's can name any icon, for its legacy refresher.
-- In cancelling, the pulling icon is a pill where Chromium draws an ellipse. Two of Ionic's own bugs are kept: a pull that a
-  cancel's end overtakes, let go with no move past 0.4 since, leaves the refresher off, and a refresh begun while cancelling ends as
-  cancelled ([#167](COMPARISON.md#deliberate-differences)).
-- Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.
+- In cancelling, the pulling icon is a pill where Chromium draws an ellipse ([#167](COMPARISON.md#deliberate-differences)).
+- **Two of Ionic's own bugs are fixed,** as deliberate differences ([#176](COMPARISON.md#deliberate-differences)), measured in
+  Chromium with Ionic 8.8.1:
+  - A pull that a `Cancel()`'s end overtakes, let go with no move past 0.4 since, leaves Ionic's refresher off for good: its reset
+    destroys the pull's animation, whose end then never comes, nor `gesture.enable(true)` with it (F, G: nothing pulls again). Here
+    the gesture comes back on as `IsEnabled` says, as it does after any pull (R3), and the next pull works. The reset has already
+    made it inactive and raised `IonPullEnd`, so nothing more is raised. One moved on past 0.4 still refreshes, as Ionic's does.
+  - A refresh begun during cancelling is ended by the cancel's reset, as cancelled, while the app still loads (H: `ionRefresh` 416 ms
+    after `cancel()`, `ionPullEnd` `cancel` at 733); let go past 0.4 just before the reset, while its 125 ms snap back runs, the
+    reset destroys it, and no refresh comes and the gesture stays off. Here a reset does nothing once a pull started after
+    `Cancel()` was called has been let go past the threshold: the refresh goes on until the app calls `Complete()`, which ends it
+    with `IonPullEnd` `Complete`, and no `Cancel` comes for the refresh the cancel ended, as the refresher never went back to
+    inactive in between. A pull held at the call, or let go before it, is the cancel's to end, as in Ionic.
+- Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device. #176's four checks there
+  haven't been run yet.
