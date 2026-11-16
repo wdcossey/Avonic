@@ -131,15 +131,16 @@ public class AvonicToggle : ContentControl, IItemControl
 
     /// <summary>
     /// The focus circle's place, as a margin: <c>left: calc(var(--handle-spacing) + (var(--handle-width) - 36px) / 2)</c>, so
-    /// centred on the handle, and <c>inset-block-start: 50%; transform: translateY(-50%)</c>, so centred down the track, taking
-    /// no room. The values are the spacing, the handle's width, then the circle's own width and height, and the track's height.
+    /// centred on the handle, and half its height off above and below, so that, centred, it's centred on whatever height the track
+    /// has, as <c>inset-block-start: 50%; transform: translateY(-50%)</c> is, and takes no room. The values are the spacing, the
+    /// handle's width, then the circle's own width and height.
     /// </summary>
     public static readonly IMultiValueConverter FocusIndicatorMarginConverter =
         new FuncMultiValueConverter<object?, Thickness>(values =>
         {
             var numbers = values.Select(Number).ToArray();
             double At(int index) => numbers.ElementAtOrDefault(index);
-            var vertical = (At(4) - At(3)) / 2;
+            var vertical = -At(3) / 2;
             return new Thickness(At(0) + ((At(1) - At(2)) / 2), vertical, 0, vertical);
         });
 
@@ -159,14 +160,14 @@ public class AvonicToggle : ContentControl, IItemControl
     private ItemMultipleInputsObserver? _item;
 
     /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
-    private const string ItemMultipleInputs = ":item-multiple-inputs";
+    private const string ItemMultipleInputs = AvonicItem.MultipleInputsPseudoClass;
 
     /// <summary>
     /// The item's <c>ion-activatable</c>: <c>ion-item.ion-activatable, ion-item[button], ion-item[href]</c>. Ionic reads the
     /// attributes too, as the class needs the item to have rendered; here the item sets it with <see cref="AvonicItem.Button"/>, in
     /// the same pass, and an item with a toggle has it only through <c>Button</c>, as a cover beside a toggle is multi-input.
     /// </summary>
-    private const string ItemActivatable = ":ion-activatable";
+    private const string ItemActivatable = AvonicItem.ActivatablePseudoClass;
 
     static AvonicToggle()
     {

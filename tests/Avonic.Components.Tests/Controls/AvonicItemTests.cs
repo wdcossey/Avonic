@@ -2247,8 +2247,12 @@ public class AvonicItemTests
         // Measured icb2: .input-wrapper 38 to 386, the checkbox 50 to 374, .item-inner clipping from 50.
         AssertBox(38, 0, 348, 47, Box(Container(item), scene.Window));
         AssertBox(50, 0, 324, 47, Box(box, scene.Window));
-        Assert.True(Inner(item).ClipToBounds);
         AssertBox(50, 0, 340, 48, Box(Inner(item), scene.Window));
+
+        // The clip is the inner part's padding box, on the row inside it, so the part's own shadow isn't clipped, as CSS's isn't.
+        Assert.False(Inner(item).ClipToBounds);
+        var row = (Control)Inner(item).Child!;
+        Assert.Equal(new Rect(-Inner(item).Padding.Left, 0, 340, 47), row.Clip!.Bounds);
     });
 
     [AvaloniaFact]

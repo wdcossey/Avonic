@@ -316,10 +316,13 @@ public class AvonicCheckbox : ContentControl, IItemControl
         _item = ItemMultipleInputsObserver.Create(this, UpdateFocusable, ItemMultipleInputs);
         UpdateHostContext();
         HoldTransitions();
+
+        // The validationObserver comes back with connectedCallback, and reads textContent again.
+        UpdateLabel();
     }
 
     /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
-    private const string ItemMultipleInputs = ":item-multiple-inputs";
+    private const string ItemMultipleInputs = AvonicItem.MultipleInputsPseudoClass;
 
     /// <summary><c>hostContext('ion-item')</c>, read at each render, and <c>[slot]</c>: the item slot holding it.</summary>
     private void UpdateHostContext()
@@ -350,6 +353,9 @@ public class AvonicCheckbox : ContentControl, IItemControl
         base.OnDetachedFromVisualTree(e);
         _item?.Dispose();
         _item = null;
+
+        // disconnectedCallback: the validationObserver goes, so a detached checkbox holds nothing in its content.
+        _labelWatch?.Dispose();
         ReleaseTransitions();
         PseudoClasses.Set(":drawn", false);
     }
@@ -415,7 +421,7 @@ public class AvonicCheckbox : ContentControl, IItemControl
             _label.IsVisible = shown;
         }
 
-        if (shown)
+        if (shown || !this.IsAttachedToVisualTree())
         {
             _labelWatch?.Dispose();
         }

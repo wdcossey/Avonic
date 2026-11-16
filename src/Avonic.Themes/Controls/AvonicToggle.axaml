@@ -104,7 +104,7 @@
                                         Height="36"
                                         CornerRadius="18"
                                         HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
+                                        VerticalAlignment="Center"
                                         IsVisible="False"
                                         IsHitTestVisible="False">
                                     <Border.Margin>
@@ -113,7 +113,6 @@
                                             <DynamicResource ResourceKey="Avonic.Toggle.HandleWidth" />
                                             <Binding Path="Width" RelativeSource="{RelativeSource Self}" />
                                             <Binding Path="Height" RelativeSource="{RelativeSource Self}" />
-                                            <Binding Path="$parent[Border].Height" />
                                         </MultiBinding>
                                     </Border.Margin>
                                 </Border>

@@ -187,5 +187,6 @@ Avonic's is `AvonicFocusIndicatorCaptureTests.Radio_Focus_Page`. Ionic left:
 
 ## Gaps
 
-- `ion-select`'s popover and modal, which stop the arrows from changing the value, don't exist yet.
+- `ion-select`'s popover and modal, which stop the arrows from changing the value, don't exist yet. Since 8.8.19 the group also
+  commits the focused radio on Enter inside a select interface: for #45 (select), nothing to build now.
 - Not tried in a real window, nor on a device.

@@ -261,7 +261,7 @@ public class AvonicRadio : ContentControl, IItemControl
     // ── Host context ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
-    private const string ItemMultipleInputs = ":item-multiple-inputs";
+    private const string ItemMultipleInputs = AvonicItem.MultipleInputsPseudoClass;
 
     private ItemMultipleInputsObserver? _item;
 

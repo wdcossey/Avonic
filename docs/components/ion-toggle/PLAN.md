@@ -156,12 +156,12 @@ Pseudoclasses, from Ionic's host classes: `:checked`, `:activated` (`toggle-acti
 `:label-placement-*`, `:label-text-wrapper-hidden`, and `:ion-color` from `ColorPalette`.
 RTL is the toggle's `FlowDirection`.
 
-### RTL: a deliberate difference
+### RTL from an ancestor: a match since 8.8.19
 
-Ionic's `isRTL` reads only the toggle's own `dir` and the document's. A `dir="rtl"` on an ancestor between them mirrors the layout
-(CSS direction inherits) but leaves the handle and the drag in LTR: measured, the checked handle sits at the right of the
-track, and a drag left doesn't flip it. Avalonia's `FlowDirection` inherits and can't say where it came from, so here RTL is RTL
-throughout, as Ionic is with `dir` on the document or the toggle.
+Since Ionic 8.8.19, `isRTL(el)` walks up to the nearest `dir`, so `dir="rtl"` on an ancestor flips the handle and the drag, as the
+inherited `FlowDirection` does here: a match. Measured on 8.8.19 with `dir="rtl"` on an ancestor only: off, the handle sits at the
+right (x 310.6 on a track at 294.6, 36 wide), a 30 px drag left turns it on, and the host has `toggle-rtl`. 8.8.1 read only the
+toggle's own `dir` and the document's, and this was a deliberate difference.
 
 ### Item
 
