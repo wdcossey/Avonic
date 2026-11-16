@@ -187,7 +187,8 @@ property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrollin
 
 - **A scroll indicator,** `ContentScrollIndicator`: two, `PART_VerticalIndicator` and `PART_HorizontalIndicator`, in the content's `ScrollViewer`
   template, over the content and under the fixed slot, taking no input. A 4 px thumb, flush with the end edge (the left in RTL) or the bottom,
-  as long as the viewport's share of the extent, rounded down, and at least 4, in `rgba(128, 128, 128, 0.5)`. It shows on a scroll by the user,
+  as long as the viewport's share of the extent, rounded down, and at least 4, in `rgba(128, 128, 128, 0.5)`. It shows from the load (its
+  attach) until the first scroll by the user, as Chrome on a phone does, and then on each scroll by the user,
   the wheel, a finger or a fling, and not on a script, `ScrollToPoint` and the rest, or a key, all as measured. It stays 300 ms after the
   last scroll, then fades out over 300 ms. Each track leaves the corner when both axes can scroll. **It isn't Avalonia's `ScrollBar`,** and a
   content has no bar to drag, on desktop too, as md here is a phone's, unless an app turns one on: see the next item.

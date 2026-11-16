@@ -342,7 +342,8 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   minimum its own thickness. It shows when the offset changes while a wheel or a scroll gesture is being dispatched to its scroller, which a
   static class handler marks (a wheel's tunnel at the `ScrollViewer`, a gesture at its `ScrollContentPresenter` before the presenter's own
   handler), only for a scroller with an indicator, and fades on `AvonicConfig`'s clock: 300 ms after the last, with one wait that looks
-  again when it's up, then 300 ms down to nothing. An axis that can't scroll doesn't show. It takes no input.
+  again when it's up, then 300 ms down to nothing. Since #182 it also shows from its attach, the load, with no wait, until the first scroll
+  by the user starts that. An axis that can't scroll doesn't show. It takes no input.
 - **Its relation to Avalonia's `ScrollBar`:** the content's `ScrollViewer` has its own theme with no bars, since #11, and keeps it: a base theme's
   `ScrollBar` is a desktop control that takes input, and on a phone Chromium draws only this thumb. On desktop too, md here is the phone's:
   the reference is a phone, and #11's behaviour 2 is that nothing takes room for a bar. A desktop browser's 15 px bar is recorded below, and
@@ -350,7 +351,7 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
 
 ### Behaviours
 
-Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTests` (I1 to I6), named after these numbers.
+Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTests` (I1 to I7), named after these numbers.
 
 | # | Behaviour | Measured |
 |---|---|---|
@@ -375,6 +376,7 @@ Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTe
 | I4 | Nothing on an axis that can't scroll | `x` |
 | I5 | It takes no input, and draws over the content, under the fixed slot | Chromium's overlay bar |
 | I6 | The colour is a token, the same on a dark page | `dark` |
+| I7 | It shows from the load, with no input, and stays until the first scroll by the user, which fades it as any (#182); a script, `ScrollToPoint` or a key doesn't end it | emulation: from load until the first user's scroll; Chrome on the Pixel (#65's device check): there at load, still a minute later |
 
 ### Deliberate differences
 
@@ -383,7 +385,7 @@ Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTe
 | A press on the content focuses its scroller, where Chromium leaves focus on `body` and remembers the press | Avalonia sends keys to what has focus, and has no last-pressed node. Focus moves off a focused button or input either way, as measured `clickBlurs`, `clickBlursInput`; the scroller is what has it here, with no ring, as Avalonia shows the adorner only for focus by key. Tab from there goes into the content, to its first focusable child, where Chromium's measured `clickWithButtonTab` went too |
 | A field's caret moving out of view doesn't scroll the content back to it | Measured `input`: `scrollTop` 262 back to 3 on a Down in the field. Avalonia's `TextBox` keeps its caret in view in its own scroller only. Not a key scroll, so not in this issue |
 | A multi-line `TextBox` with Page Down: whatever Avalonia's `TextBox` does | Chromium's `<textarea>` moves the caret to the end first, then scrolls. Avalonia's `TextBox` in a base theme decides, and this scrolls only if it doesn't take the key. Not measured with a base theme |
-| The thumb isn't there from the page's load | Measured in emulation only, where it shows from load until the first scroll by the user. A phone isn't believed to: raised under "For you to decide", with no device to measure |
+| A load is the indicator's attach: one attached again (a content moved, or a page put back) shows the thumb again until a user's scroll | Not measured: a page doesn't reload in Chromium, and whether a `display: none` scroller shown again flashes its thumb wasn't measured. A content that only becomes able to scroll after its load, with no user's scroll yet, shows it then, as Chromium's thumb is there for any scroller it draws one on, until a scroll by the user ([#182](https://github.com/wdcossey/Avonic/issues/182)) |
 | The track loses the indicator's own thickness at the corner | Chromium leaves the other bar's: both are 4 here, so it's the same, unless a theme makes them differ |
 | Nothing follows the OS's "reduce motion" | Chromium's smooth keyboard scroll follows the system's animation setting on Windows. Not measured, and Avalonia doesn't expose it. `AvonicConfig.Animated` doesn't turn it off, as Ionic's `animated` doesn't reach a browser's scrolling |
 | On desktop, the same 4 px thumb, where a desktop Chromium has a 15 px bar that takes the width | md here is a phone's, as the reference is. #11 decided nothing takes room for a bar. Since #175, `ScrollBars` or `AvonicConfig.ContentScrollBars` gives the bar |

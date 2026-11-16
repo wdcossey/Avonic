@@ -16,8 +16,9 @@ namespace Avonic.Components.Controls;
 /// <see cref="ScrollViewer"/> it's in, one for each <see cref="Orientation"/>, and it takes no input.
 /// </summary>
 /// <remarks>
-/// It shows on a scroll by the user, the wheel or a finger and the fling after it, and not on one by a script, Ionic's scroll methods
-/// or a key, as measured. It stays for <see cref="FadeDelay"/> after the last, then fades out over <see cref="FadeDuration"/>. The
+/// It shows from the load, which is its attach, and stays until the first scroll by the user, as Chrome on a phone does (still there a
+/// minute later, on a Pixel). It shows on a scroll by the user, the wheel or a finger and the fling after it, and not on one by a script,
+/// Ionic's scroll methods or a key, as measured. It stays for <see cref="FadeDelay"/> after the last, then fades out over <see cref="FadeDuration"/>. The
 /// thumb is <see cref="TemplatedControl.Background"/>, as thick as the control, and at least as long as it is thick. Its length is the
 /// track's share that the viewport is of the extent, and its place the share of the way there is to scroll, both rounded down to a whole
 /// pixel. The track is the control's length, less its thickness when the other axis can scroll too, as Chromium leaves the corner.
@@ -79,8 +80,8 @@ public class ContentScrollIndicator : TemplatedControl
         set => SetValue(OrientationProperty, value);
     }
 
-    /// <summary>How much of the thumb shows, from 1 to 0, for tests.</summary>
-    internal double ThumbOpacity => _opacity;
+    /// <summary>How much of the thumb shows, from 1 to 0, for tests: 0 on an axis that can't scroll, which draws nothing.</summary>
+    internal double ThumbOpacity => CanScroll ? _opacity : 0;
 
     /// <summary>Where the thumb is in the control, or null if its axis can't scroll.</summary>
     internal Rect? Thumb
@@ -150,6 +151,11 @@ public class ContentScrollIndicator : TemplatedControl
             scroller.PropertyChanged += OnScrollerPropertyChanged;
             s_watched[scroller] = s_watched.GetValueOrDefault(scroller) + 1;
         }
+
+        // Shown from the load, with no fade, until the first scroll by the user, as Chrome on the Pixel and Android emulation do (#182).
+        // An attach is a load: a scroller that can't scroll yet draws nothing, and shows the thumb once it can.
+        _opacity = 1;
+        InvalidateVisual();
     }
 
     /// <inheritdoc/>

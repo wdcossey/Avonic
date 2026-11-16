@@ -137,7 +137,7 @@ clipped on two sides, where Chromium paints the outline under the scrolling cont
 | I4 | An axis that can't scroll | nothing | match; `ForceOverscroll`'s pixel draws a thumb of 299 |
 | I5 | Input, order | none, over the content, under the fixed slot | match |
 | I6 | Colour | `rgba(128, 128, 128, 0.5)`, the same on black | match, from a token |
-| — | From the page's load | emulation shows the thumb until the first scroll by the user | **deliberate difference**: hidden until a scroll. See "For you to decide" |
+| I7 | From the page's load | emulation shows the thumb until the first scroll by the user; so does Chrome on the Pixel, still there a minute later | match, since #182 (hidden until a scroll before it): [the showcase at load](compare/avonic-thumb-at-load.png), beside [the Pixel's](../ion-app/compare/pixel8-chrome-indicator-at-load.png) |
 | — | Desktop | a 15 px bar that takes the width | **deliberate difference**: the phone's thumb everywhere, unless an app turns on `ScrollBars` (#175, below) |
 
 ## A draggable scroll bar, by config (#175)
