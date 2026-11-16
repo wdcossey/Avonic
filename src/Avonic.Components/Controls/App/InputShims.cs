@@ -1,0 +1,275 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+
+namespace Avonic.Components.Controls;
+
+/// <summary>
+/// Ionic's <c>startInputShims</c> (<c>utils/input-shims</c>), its scroll assist and scroll padding: when an
+/// <see cref="AvonicInput"/> or <see cref="AvonicTextarea"/> in an <see cref="AvonicContent"/> takes focus where the on-screen
+/// keyboard would cover it, the content is padded at its end by the keyboard's height and scrolled to bring its item above the
+/// keyboard. Started by <see cref="AvonicApp"/> when <see cref="AvonicConfig.InputShims"/> is on.
+/// </summary>
+/// <remarks>
+/// Ionic needs it where the keyboard covers the page instead of resizing it: on iOS, and in Chrome on Android. Avalonia is like
+/// that on Android, where it draws edge to edge and leaves the keyboard over the view (measured on a Pixel 8; see
+/// <c>docs/components/ion-app/COMPARISON.md</c>). What Ionic does to stop a browser scrolling the page itself to the field, moving
+/// the native input away and focusing a clone, has nothing to stop here, as Avalonia doesn't, so it isn't done. Nor are hide caret
+/// on scroll (WebKit's caret drawn over a scrolling page) or input blurring (off since Ionic 8, and on its way out).
+/// </remarks>
+internal static class InputShims
+{
+    /// <summary>Ionic <c>SCROLL_AMOUNT_PADDING</c>: room for a bar the keyboard may show above itself later.</summary>
+    internal const double ScrollAmountPadding = 50;
+
+    /// <summary>Ionic <c>SCROLL_ASSIST_SPEED</c>, pixels a millisecond.</summary>
+    internal const double ScrollAssistSpeed = 0.3;
+
+    /// <summary>Ionic's 120 ms before scroll padding goes, so that focus moving to another field keeps it.</summary>
+    internal static readonly TimeSpan PaddingClearDelay = TimeSpan.FromMilliseconds(120);
+
+    /// <summary>Ionic's 1000 ms wait for the keyboard before scrolling anyway.</summary>
+    internal static readonly TimeSpan KeyboardWait = TimeSpan.FromSeconds(1);
+
+    private static readonly TopLevelStarts<Assist> s_started = new(top => new Assist(top), a => a.Attach(), a => a.Detach());
+
+    internal static IDisposable Start(TopLevel topLevel) => s_started.Start(topLevel);
+
+    /// <summary>
+    /// Ionic's <c>calcScrollData</c>: how far to scroll so that the item is between 15 below the content's top and 50 above the
+    /// keyboard, no further than its top, and how long, from the item's and the content's boxes in the top level.
+    /// </summary>
+    internal static (double ScrollAmount, double ScrollDuration, double ScrollPadding) ScrollData(
+        Rect input, Rect content, double keyboardHeight, double platformHeight)
+    {
+        var visibleAreaTop = content.Top;
+        var visibleAreaBottom = Math.Min(content.Bottom, platformHeight - keyboardHeight);
+        var safeAreaTop = visibleAreaTop + 15;
+        var safeAreaBottom = visibleAreaBottom - ScrollAmountPadding;
+        var distanceToBottom = safeAreaBottom - input.Bottom;
+        var distanceToTop = safeAreaTop - input.Top;
+        var desired = Math.Round(distanceToBottom < 0 ? -distanceToBottom : distanceToTop > 0 ? -distanceToTop : 0, MidpointRounding.AwayFromZero);
+        var scrollAmount = Math.Min(desired, input.Top - visibleAreaTop);
+        var duration = Math.Min(400, Math.Max(150, Math.Abs(scrollAmount) / ScrollAssistSpeed));
+        return (scrollAmount, duration, keyboardHeight);
+    }
+
+    /// <summary>One top level's assist: Ionic's per-input <c>enableScrollAssist</c>, listening once for all of them.</summary>
+    private sealed class Assist(TopLevel topLevel)
+    {
+        /// <summary>Ionic's module-level <c>currentPadding</c>.</summary>
+        private double _currentPadding;
+
+        private Control? _component;
+        private bool _keyboardPresented;
+        private IDisposable? _paddingTimer;
+        private IDisposable? _padding;
+        private AvonicContent? _padded;
+
+        public void Attach()
+        {
+            topLevel.AddHandler(InputElement.GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
+            topLevel.AddHandler(InputElement.LostFocusEvent, OnLostFocus, RoutingStrategies.Bubble, handledEventsToo: true);
+            topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
+        }
+
+        public void Detach()
+        {
+            topLevel.RemoveHandler(InputElement.GotFocusEvent, OnGotFocus);
+            topLevel.RemoveHandler(InputElement.LostFocusEvent, OnLostFocus);
+            topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
+            _paddingTimer?.Dispose();
+            _paddingTimer = null;
+            _padding?.Dispose();
+            _padding = null;
+            _component = null;
+        }
+
+        /// <summary>The input or textarea around what has focus: Ionic registers <c>ion-input</c> and <c>ion-textarea</c>.</summary>
+        private static Control? ComponentOf(object? source) =>
+            source is Visual visual
+                ? visual.GetSelfAndVisualAncestors().FirstOrDefault(v => v is AvonicInput or AvonicTextarea) as Control
+                : null;
+
+        /// <summary>Ionic's <c>focusIn</c> on the component.</summary>
+        private void OnGotFocus(object? sender, FocusChangedEventArgs e)
+        {
+            if (!AvonicConfig.ScrollAssist || ComponentOf(e.Source) is not { } component || ReferenceEquals(component, _component))
+            {
+                return;
+            }
+
+            _component = component;
+            _keyboardPresented = false;
+            SetFocus(component, AvonicConfig.KeyboardHeight, waitForResize: true);
+        }
+
+        /// <summary>Ionic's <c>focusOut</c>, and the padding's <c>setClearScrollPaddingListener</c>.</summary>
+        private void OnLostFocus(object? sender, RoutedEventArgs e)
+        {
+            if (_component is not { } component || ComponentOf(e.Source) != component)
+            {
+                return;
+            }
+
+            // Focus moving inside the component, as from the field to its clear button, isn't leaving it.
+            if (topLevel.FocusManager?.GetFocusedElement() is Visual now && component.IsVisualAncestorOf(now))
+            {
+                return;
+            }
+
+            _component = null;
+            _keyboardPresented = false;
+            if (AvonicConfig.ScrollPadding && _padded is { } content)
+            {
+                SetScrollPadding(content, 0, () => _currentPadding = 0);
+            }
+        }
+
+        /// <summary>
+        /// Ionic's <c>keyboardShow</c>: the first one after focus is the keyboard opening for it, which focus has already dealt with;
+        /// a later one is the keyboard changing size, so it runs again with the keyboard's real height, without waiting.
+        /// </summary>
+        private void OnKeyboardShow(object? sender, KeyboardDidShowEventArgs e)
+        {
+            if (_component is not { } component)
+            {
+                return;
+            }
+
+            if (!_keyboardPresented)
+            {
+                _keyboardPresented = true;
+                return;
+            }
+
+            SetFocus(component, e.KeyboardHeight, waitForResize: false);
+        }
+
+        /// <summary>Ionic's <c>jsSetFocus</c>, with nothing to relocate or refocus.</summary>
+        private void SetFocus(Control component, double keyboardHeight, bool waitForResize)
+        {
+            if (ContentUtils.FindClosestIonContent(component) is not AvonicContent content || content.GetScrollElement() is not { } scroll)
+            {
+                // A footer's input: Ionic only relocates its native input there, which has nothing to do here.
+                return;
+            }
+
+            var item = (Visual?)component.GetSelfAndVisualAncestors().OfType<AvonicItem>().FirstOrDefault() ?? component;
+            if (BoxOf(item) is not { } input || BoxOf(content) is not { } box)
+            {
+                return;
+            }
+
+            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, topLevel.ClientSize.Height);
+            var padding = AvonicConfig.ScrollPadding;
+            if (Math.Abs(scrollAmount) < 4)
+            {
+                // Safe where it is: the padding stays as it was, so that moving from a field that needed it doesn't jump.
+                if (padding)
+                {
+                    SetScrollPadding(content, _currentPadding);
+                }
+
+                return;
+            }
+
+            if (padding)
+            {
+                _currentPadding = scrollPadding;
+                SetScrollPadding(content, _currentPadding);
+            }
+
+            IDisposable? timeout = null;
+            var done = false;
+            async void ScrollContent()
+            {
+                if (done)
+                {
+                    return;
+                }
+
+                done = true;
+                timeout?.Dispose();
+                topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                await content.ScrollByPoint(0, scrollAmount, scrollDuration);
+            }
+
+            void OnShowForScroll(object? s, KeyboardDidShowEventArgs args) => ScrollContent();
+
+            // Reading scrollHeight lays the page out, with the padding just set.
+            scroll.UpdateLayout();
+            var total = scroll.Extent.Height - scroll.Viewport.Height;
+            if (waitForResize && scrollAmount > total - scroll.Offset.Y)
+            {
+                // Not enough room yet: wait for the keyboard, or a second at most. A password field waits for a second show, as
+                // iOS shows a passwords bar after the keyboard, and scrolls 50 more for it.
+                if (component is AvonicInput { Type: InputType.Password })
+                {
+                    scrollAmount += ScrollAmountPadding;
+                    var first = true;
+                    void OnFirstShow(object? s, KeyboardDidShowEventArgs args)
+                    {
+                        if (first)
+                        {
+                            first = false;
+                            topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnFirstShow);
+                            topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                        }
+                    }
+
+                    topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnFirstShow);
+                }
+                else
+                {
+                    topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                }
+
+                timeout = AvonicConfig.Schedule(ScrollContent, KeyboardWait);
+                return;
+            }
+
+            ScrollContent();
+        }
+
+        /// <summary>
+        /// Ionic's <c>setScrollPadding</c>: <c>--keyboard-offset</c> inline on the content at once, or back to 0 after 120 ms, which a
+        /// new padding before then cancels. Inline beats the theme, so it's set at <see cref="BindingPriority.Animation"/>; at 0 it's
+        /// taken off, so that the app's own value comes back, where Ionic leaves an inline <c>0px</c>.
+        /// </summary>
+        private void SetScrollPadding(AvonicContent content, double amount, Action? cleared = null)
+        {
+            _paddingTimer?.Dispose();
+            _paddingTimer = null;
+            if (amount > 0)
+            {
+                if (!ReferenceEquals(content, _padded))
+                {
+                    _padding?.Dispose();
+                    _padded = content;
+                }
+
+                _padding?.Dispose();
+                _padding = content.SetValue(AvonicContent.KeyboardOffsetProperty, amount, BindingPriority.Animation);
+            }
+            else
+            {
+                _paddingTimer = AvonicConfig.Schedule(() =>
+                {
+                    _paddingTimer = null;
+                    _padding?.Dispose();
+                    _padding = null;
+                    _padded = null;
+                    cleared?.Invoke();
+                }, PaddingClearDelay);
+            }
+        }
+
+        /// <summary><c>getBoundingClientRect()</c>: the visual's box in the top level.</summary>
+        private Rect? BoxOf(Visual visual) =>
+            visual.TranslatePoint(default, topLevel) is { } origin ? new Rect(origin, visual.Bounds.Size) : null;
+    }
+}

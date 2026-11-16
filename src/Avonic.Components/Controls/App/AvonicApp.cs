@@ -68,6 +68,11 @@ public class AvonicApp : ContentControl
         }
 
         _started.Add(KeyboardAssist.Start(topLevel));
+        if (AvonicConfig.InputShims)
+        {
+            _started.Add(InputShims.Start(topLevel));
+        }
+
         _started.Add(AppSafeArea.Start(topLevel));
     }
 

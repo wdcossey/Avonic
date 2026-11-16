@@ -145,6 +145,32 @@ public static class AvonicConfig
     /// </summary>
     public static bool HandleUnclaimedBack { get; set; } = true;
 
+    /// <summary>
+    /// Ionic's <c>inputShims</c> config: whether an <see cref="AvonicApp"/> starts the scroll assist and scroll padding for its
+    /// fields. Default on Android and iOS, where the on-screen keyboard covers the app instead of resizing it, as Ionic's
+    /// <c>needInputShims()</c> is for iOS and for Chrome on Android; off elsewhere. Read when the app is attached.
+    /// </summary>
+    public static bool InputShims { get; set; } = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+
+    /// <summary>
+    /// Ionic's <c>scrollAssist</c> config: whether a field that takes focus where the keyboard would cover it scrolls its content
+    /// to bring it above the keyboard. Default <see langword="true"/>. Read at each focus.
+    /// </summary>
+    public static bool ScrollAssist { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>scrollPadding</c> config: whether the scroll assist pads the end of the content by the keyboard's height
+    /// (<see cref="AvonicContent.KeyboardOffset"/>), so that a field near the end can scroll above it. Default
+    /// <see langword="true"/>. Read at each focus.
+    /// </summary>
+    public static bool ScrollPadding { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>keyboardHeight</c> config: the keyboard's height the scroll assist reckons with when a field takes focus,
+    /// before the keyboard has said its own. Default 290. Read at each focus.
+    /// </summary>
+    public static double KeyboardHeight { get; set; } = 290;
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>

@@ -8,6 +8,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 using Avonic.Components.Tests.Overlays;
@@ -550,6 +551,181 @@ public class AvonicAppTests
         Assert.True(Shows(stage.Second));
     }
 
+    // ── I: input shims (scroll assist and scroll padding) ────────────────────────────────────
+
+    /// <summary>
+    /// The measured page: a 56 high header, then a content with 11 rows of 48, the field's item, and <paramref name="after"/> more
+    /// rows, in 390 by 844, in an app with the shims on.
+    /// </summary>
+    private sealed class ShimStage : IDisposable
+    {
+        private readonly bool _shims = AvonicConfig.InputShims;
+
+        public ShimStage(int after = 11, bool inApp = true, bool safe = false, bool shims = true)
+        {
+            AvonicConfig.InputShims = shims;
+            Clock = new TestClock();
+            var rows = new StackPanel();
+            for (var i = 0; i < (safe ? 1 : 11); i++)
+            {
+                rows.Children.Add(new Border { Height = 48 });
+            }
+
+            Input = new AvonicInput();
+            Item = new AvonicItem { Content = Input, Height = 48 };
+            rows.Children.Add(Item);
+            for (var i = 0; i < after; i++)
+            {
+                rows.Children.Add(new Border { Height = 48 });
+            }
+
+            Content = new AvonicContent { Content = rows };
+            var header = Other;
+            DockPanel.SetDock(header, Dock.Top);
+            var page = new DockPanel { Children = { header, Content } };
+            Scene = new Scene(inApp ? new AvonicApp { Content = page } : page);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        public TestClock Clock { get; }
+
+        public AvonicInput Input { get; }
+
+        public AvonicItem Item { get; }
+
+        /// <summary>The header: a button, to move focus to.</summary>
+        public Button Other { get; } = new() { Height = 56, Content = "Other" };
+
+        public AvonicContent Content { get; }
+
+        public Scene Scene { get; }
+
+        public double Offset => Content.GetScrollElement()!.Offset.Y;
+
+        public TextBox Native => Input.GetVisualDescendants().OfType<TextBox>().First();
+
+        public void At(double ms)
+        {
+            while (Clock.Now.TotalMilliseconds < ms)
+            {
+                Clock.At(Math.Min(Math.Floor(Clock.Now.TotalMilliseconds) + 1, ms));
+                Dispatcher.UIThread.RunJobs();
+            }
+        }
+
+        public void Dispose()
+        {
+            Scene.Dispose();
+            Clock.Dispose();
+            AvonicConfig.InputShims = _shims;
+        }
+    }
+
+    // Measured: the item at 584 to 632 in a content from 56, 844 high: --keyboard-offset 290px at once, scrollTop 15 in the next
+    // frame, 128 by 408 ms (min(400, 128 / 0.3)), and 0px about 120 ms after the blur.
+    [AvaloniaFact]
+    public void I1_A_Field_The_Keyboard_Would_Cover_Pads_The_Content_And_Scrolls_It_Above_The_Keyboard()
+    {
+        using var stage = new ShimStage();
+        Assert.Equal(new Rect(0, 584, 390, 48), new Rect(stage.Item.TranslatePoint(default, stage.Scene.Window)!.Value, stage.Item.Bounds.Size));
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+        Assert.Equal(0, stage.Offset);
+
+        stage.At(100);
+        Assert.InRange(stage.Offset, 1, 127);
+        stage.At(450);
+        Assert.Equal(128, stage.Offset);
+
+        stage.Other.Focus();
+        Dispatcher.UIThread.RunJobs();
+        var blurred = stage.Clock.Now.TotalMilliseconds;
+        stage.At(blurred + 119);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+        stage.At(blurred + 120);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+    }
+
+    // Measured on the short page: room for 78 only, so it waits a second for the keyboard, then scrolls as far as it can.
+    [AvaloniaFact]
+    public void I2_With_Too_Little_Room_It_Waits_For_The_Keyboard_Or_A_Second()
+    {
+        using var stage = new ShimStage(after: 0);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+        stage.At(999);
+        Assert.Equal(0, stage.Offset);
+        stage.At(1500);
+        Assert.Equal(78, stage.Offset);
+    }
+
+    private static void KeyboardShows(Window window, double height) =>
+        window.RaiseEvent(new KeyboardDidShowEventArgs(KeyboardAssist.IonKeyboardDidShowEvent, window, height));
+
+    [AvaloniaFact]
+    public void I2_The_Keyboard_Showing_Ends_The_Wait()
+    {
+        using var stage = new ShimStage(after: 0);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(300);
+        KeyboardShows(stage.Scene.Window, 290);
+        stage.At(350);
+        Assert.InRange(stage.Offset, 1, 77);
+        stage.At(800);
+        Assert.Equal(78, stage.Offset);
+    }
+
+    // scroll-assist.js: the first ionKeyboardDidShow after focus is the keyboard opening for it; a later one is the keyboard
+    // changing, and runs it again with the keyboard's own height, without waiting. With 400, the item's bottom at 504 is 110 below
+    // 844 - 400 - 50.
+    [AvaloniaFact]
+    public void I5_A_Later_Keyboard_Show_Runs_It_Again_With_The_Keyboard_s_Height()
+    {
+        using var stage = new ShimStage();
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(450);
+        KeyboardShows(stage.Scene.Window, 300);
+        stage.At(900);
+        Assert.Equal(128, stage.Offset);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+
+        KeyboardShows(stage.Scene.Window, 400);
+        Assert.Equal(400, stage.Content.KeyboardOffset);
+        stage.At(1400);
+        Assert.Equal(238, stage.Offset);
+    }
+
+    [AvaloniaFact]
+    public void I3_A_Field_Already_Clear_Of_The_Keyboard_Neither_Pads_Nor_Scrolls()
+    {
+        using var stage = new ShimStage(safe: true);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(500);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+        Assert.Equal(0, stage.Offset);
+    }
+
+    [AvaloniaFact]
+    public void I4_Nothing_With_The_Shims_Off_Or_Without_An_App()
+    {
+        foreach (var make in new Func<ShimStage>[] { () => new ShimStage(shims: false), () => new ShimStage(inApp: false) })
+        {
+            using (var stage = make())
+            {
+                stage.Native.Focus();
+                Dispatcher.UIThread.RunJobs();
+                stage.At(500);
+                Assert.Equal(0, stage.Content.KeyboardOffset);
+                Assert.Equal(0, stage.Offset);
+            }
+        }
+    }
+
     // ── T: the text a page gets from html and body ──────────────────────────────────────────
 
     // Measured H: font-size 16px in ion-app, the browser's default; html's font-family and body's colours are Ionic's core.css.
@@ -568,6 +744,12 @@ public class AvonicAppTests
         Assert.Equal(((Avalonia.Media.ISolidColorBrush)app.FindResource("Avonic.BackgroundColorBrush")!).Color,
             ((Avalonia.Media.ISolidColorBrush)app.Background!).Color);
         Assert.NotEqual(16, outside.FontSize);
+        Assert.False(app.ClipToBounds);
+
+        // Avonic's text colour is black, as Avalonia's default is, so a colour of its own shows the key is what's read.
+        app.Resources["Avonic.TextColorBrush"] = Avalonia.Media.Brushes.Red;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(Avalonia.Media.Colors.Red, ((Avalonia.Media.ISolidColorBrush)text.Foreground!).Color);
     });
 
     [AvaloniaFact]
