@@ -1,5 +1,7 @@
 # ion-app
 
+Status: done · [#65](https://github.com/wdcossey/Avonic/issues/65)
+
 `AvonicApp`, Ionic's `ion-app`: the root of an app. It starts what a native app needs from Ionic for the `TopLevel` it's in: the
 hardware back button, the keyboard's events, the input shims and the safe area, and its theme gives what's in it a page's text. Plan:
 [PLAN.md](PLAN.md); comparison: [COMPARISON.md](COMPARISON.md).
@@ -122,5 +124,12 @@ fills `Avonic.SafeArea*`.
 ## Known gaps
 
 - **The status bar tap** isn't here: an issue of its own, as only iOS has one.
-- Ionic starts its utilities after an idle callback; here they start when the app is attached.
-- Ionic never stops them; here they stop when the app is taken out.
+- **The input shims run again with the keyboard's own height,** where Ionic keeps its estimate of 290 and leaves the rest to the
+  browser, which scrolls a focused field above the keyboard itself. Avalonia doesn't, and on a Pixel 8 the keyboard is 354.
+- **Not done from Ionic's shims:** moving the native input away while it takes focus (nothing here scrolls the page by itself),
+  hide caret on scroll (WebKit's), input blurring (off since Ionic 8), a footer's field.
+- `AvonicConfig.HardwareBackButton` off leaves back alone, where Ionic's `blockHardwareBackButton` swallows it.
+- Ionic starts its utilities after an idle callback; here they start when the app is attached. Ionic never stops them; here they
+  stop when the app is taken out.
+- Tried on a Pixel 8 (Android 17) and headless; not on iOS, and not in a real window (`tools/real-window` has an `ion-app`
+  section to run).

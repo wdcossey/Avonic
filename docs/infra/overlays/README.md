@@ -82,8 +82,11 @@ issue: see [PLAN.md](PLAN.md#deferred).
 - **Dismiss**: not hit-testable, `WillDismiss`, the leave animation (not for `gesture`), `DidDismiss`, every animation it
   played destroyed, hidden and removed; focus given back to what had it at present, if nothing has it now.
 - **Top overlay**: the last presented that's showing. Escape and `TopLevel.BackRequested` (Android's back, Alt+Left, the mouse's
-  back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. An Escape a
-  control inside has handled, as a `ComboBox` closing its drop-down does, is left alone.
+  back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. In an
+  [`AvonicApp`](../../components/ion-app/README.md), back goes through `HardwareBackButton.IonBackButtonEvent`, where the overlay
+  registers at 100 (`OverlayBackButtonPriority`), so an app's own handler above that comes first; without one, the overlay takes
+  the back request itself. Neither with `AvonicConfig.HardwareBackButton` off. An Escape a control inside has handled, as a
+  `ComboBox` closing its drop-down does, is left alone.
 - **Focus trap**: the top overlay that steals focus. Shadow variant: focus anywhere outside comes back inside, to the first focusable
   element, or the last if the first was where it came from. Scoped: focus outside is left alone, and the sentinels wrap. A popup
   opened from inside (a `ComboBox`'s drop-down) counts as inside, by its logical parent.
