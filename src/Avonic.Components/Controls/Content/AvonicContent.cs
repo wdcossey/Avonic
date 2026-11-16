@@ -119,7 +119,7 @@ public class AvonicContent : TemplatedControl
     private ContentPresenter? _fixed;
     private ScrollGestureRecognizer? _recognizer;
     private ContentKeyboardScroll? _keyboard;
-    private bool _pressing;
+    private bool _focusedByPointer;
     private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
@@ -420,8 +420,6 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(KeyDownEvent, OnPassedOver);
             _scroll.RemoveHandler(KeyDownEvent, OnScrollKeyDown);
             _scroll.RemoveHandler(GotFocusEvent, OnScrollGotFocus);
-            _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressing);
-            _scroll.RemoveHandler(PointerReleasedEvent, OnScrollReleased);
             _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
         }
 
@@ -454,8 +452,6 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(KeyDownEvent, OnPassedOver, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(KeyDownEvent, OnScrollKeyDown, RoutingStrategies.Tunnel);
             _scroll.AddHandler(GotFocusEvent, OnScrollGotFocus);
-            _scroll.AddHandler(PointerPressedEvent, OnScrollPressing, RoutingStrategies.Tunnel, handledEventsToo: true);
-            _scroll.AddHandler(PointerReleasedEvent, OnScrollReleased, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
@@ -716,6 +712,7 @@ public class AvonicContent : TemplatedControl
     /// A scroller that can scroll takes focus, as Chromium's does: from Tab, as a tab stop when nothing in it can take focus, and
     /// from a press, which Chromium routes the keys by without moving focus. Avalonia sends keys only to what has focus, so here a
     /// press on the content focuses it. Content that fits, or an axis that's off, doesn't count, as <c>overflow: hidden</c> doesn't.
+    /// One that stops being able to scroll while it has focus loses it, as Chromium blurs what stops being focusable.
     /// </summary>
     private void UpdateFocusable()
     {
@@ -724,26 +721,24 @@ public class AvonicContent : TemplatedControl
             return;
         }
 
-        var canScroll = (ScrollY && scroll.Extent.Height - scroll.Viewport.Height >= 0.5)
-            || scroll.Extent.Width - scroll.Viewport.Width >= 0.5;
+        var canScroll = (ScrollY && ContentScrollIndicator.HasRange(scroll.Extent.Height, scroll.Viewport.Height))
+            || ContentScrollIndicator.HasRange(scroll.Extent.Width, scroll.Viewport.Width);
         scroll.SetCurrentValue(FocusableProperty, canScroll);
+        if (!canScroll && scroll.IsFocused)
+        {
+            (TopLevel.GetTopLevel(this)?.FocusManager as FocusManager)?.Focus(null);
+        }
     }
 
     /// <summary>
-    /// A press, from its way down to its release: Avalonia focuses what's pressed in between, a mouse's on the way down and a finger's
-    /// or a pen's on release if it was a tap, not a scroll, as Chromium does, which sends a tap's <c>mousedown</c> after it.
-    /// </summary>
-    private void OnScrollPressing(object? sender, PointerPressedEventArgs e) => _pressing = true;
-
-    private void OnScrollReleased(object? sender, PointerReleasedEventArgs e) => _pressing = false;
-
-    /// <summary>
     /// A press focuses the scroller only so that the keys reach it, where Chromium moves no focus, so it mustn't bring the scroller
-    /// into view in a content around it, as focus would: a nested content part way out of view would jump. Tab still does.
+    /// into view in a content around it, as that focus would: a nested content part way out of view would jump. Avalonia focuses a
+    /// mouse's press on the way down, and a finger's or a pen's tap on release, not a scroll, as Chromium sends a tap's
+    /// <c>mousedown</c> after it, and asks to bring it into view straight after. Tab still brings it in.
     /// </summary>
     private void OnScrollRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
     {
-        if (_pressing && ReferenceEquals(e.TargetObject, _scroll))
+        if (_focusedByPointer && ReferenceEquals(e.TargetObject, _scroll))
         {
             e.Handled = true;
         }
@@ -755,6 +750,13 @@ public class AvonicContent : TemplatedControl
     /// </summary>
     private void OnScrollGotFocus(object? sender, FocusChangedEventArgs e)
     {
+        if (ReferenceEquals(e.Source, _scroll) && e.NavigationMethod == NavigationMethod.Pointer)
+        {
+            // Only for the request that comes with this focus.
+            _focusedByPointer = true;
+            Dispatcher.UIThread.Post(() => _focusedByPointer = false, DispatcherPriority.Background);
+        }
+
         if (!ReferenceEquals(e.Source, _scroll) || e.NavigationMethod != NavigationMethod.Tab
             || TopLevel.GetTopLevel(this)?.FocusManager is not { } focus
             || focus.FindNextElement(NavigationDirection.Next) is not Visual next || !_scroll.IsVisualAncestorOf(next))

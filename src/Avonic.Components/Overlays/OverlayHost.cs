@@ -221,10 +221,15 @@ internal sealed class OverlayHost : Panel
     internal static bool Contains(Visual container, IInputElement target) =>
         target is Visual visual && (visual == container || container.IsVisualAncestorOf(visual) || container.IsLogicalAncestorOf(visual));
 
-    /// <summary>Ionic's <c>focusableQueryString</c> in Avalonia's words: what Tab would stop at, in visual-tree order.</summary>
+    /// <summary>
+    /// Ionic's <c>focusableQueryString</c> in Avalonia's words: what Tab would stop at, in visual-tree order. Not an
+    /// <see cref="AvonicContent"/>'s scroller, which Tab stops at as Chromium's does, but which the query, of elements and
+    /// <c>tabindex</c>, never finds in its shadow root.
+    /// </summary>
     private static IEnumerable<InputElement> Focusables(Visual container) =>
         container.GetVisualDescendants().OfType<InputElement>()
-            .Where(e => e.Focusable && e.IsEffectivelyEnabled && e.IsEffectivelyVisible && KeyboardNavigation.GetIsTabStop(e));
+            .Where(e => e.Focusable && e.IsEffectivelyEnabled && e.IsEffectivelyVisible && KeyboardNavigation.GetIsTabStop(e)
+                && e is not ScrollViewer { TemplatedParent: AvonicContent });
 
     private static void FocusFirstDescendant(Visual container, AvonicOverlay fallback, NavigationMethod method) =>
         FocusElementInContext(Focusables(container).FirstOrDefault(), fallback, method);

@@ -313,7 +313,7 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
 - **The curve** is `ContentKeyboardScroll`, internal, Chromium's `ScrollOffsetAnimationCurve` for a key, on `AvonicConfig`'s clock, with
   `CubicBezierEasing.Slope` (internal, new) for the speed a retarget keeps. Not `SmoothScroll`, which is Chromium's programmatic curve:
   √distance / 60 s, and no retarget. Anything else that scrolls it in the middle stops it, as in `SmoothScroll`.
-- **Tab:** `PART_Scroll` is `Focusable` while it can scroll on an axis that's on. When Tab brings focus to it and something in it can take focus,
+- **Tab:** `PART_Scroll` is `Focusable` while it can scroll on an axis that's on, and gives up focus when it stops, as Chromium blurs what stops being focusable. An overlay's focus trap skips it (`OverlayHost.Focusables`), as Ionic's `focusableQueryString` can't see into `ion-content`'s shadow root; Tab still stops at it inside an overlay, as Chromium's does. When Tab brings focus to it and something in it can take focus,
   it sends it on, to that, or with Shift past the scroller, read at that moment, as what's inside changes.
 - **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
   focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
@@ -330,7 +330,9 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   reaches a pixel outside, and its presenter still clips the content. **Not a `FocusAdorner`,** which was tried first: Avalonia's adorner
   layer draws over everything, so the ring was 2 px over rows with a background, where Chromium paints the outline under the scrolling
   content and shows only the pixel outside (measured: 2 device pixels at 2×, against 4 over a transparent child). The base theme's adorner
-  is turned off on it, as the ring stands for `outline: auto`.
+  is turned off on it, as the ring stands for `outline: auto`. The scroller's own background, a `Color`'s, is `PART_ScrollBackground`,
+  under the ring, as an element's own background is under its outline (the second review found it covered the inner pixel), and
+  the presenter's background is transparent where it has one, so it takes input where it did.
 - **The indicator** is `ContentScrollIndicator`, two of them in the content's `ScrollViewer` template, `PART_VerticalIndicator` and
   `PART_HorizontalIndicator`, over the presenter, so the fixed slot stays on top, and Fullscreen takes them behind the header, as Chromium's
   bar is on the scroller. Behaviour is in Components, and the look in the theme: `Background` from `Avonic.Content.ScrollIndicatorBrush`
@@ -345,7 +347,7 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
 
 ### Behaviours
 
-Tests in `AvonicContentTests` and `ContentScrollIndicatorTests`, named after these numbers.
+Tests in `AvonicContentKeyboardTests` (B38 to B52) and `AvonicContentIndicatorTests` (I1 to I6), named after these numbers.
 
 | # | Behaviour | Measured |
 |---|---|---|
@@ -357,12 +359,12 @@ Tests in `AvonicContentTests` and `ContentScrollIndicatorTests`, named after the
 | 43 | A key during one adds to its target, and keeps its speed: two Downs end at 80 at 207 ms; Page Down then Up ends at 222 at about 135 | `twoQuick`, `reverse`, `held`, `twoPages` |
 | 44 | Something else scrolling it stops it, and the next key starts from where that left it | not measured; as `SmoothScroll` |
 | 45 | An axis that's off, or a limit, sends the key on to the content around | `noscrolly`, `scrollXOnly`, `nested…AtEnd` |
-| 46 | Tab stops on a content that can scroll with nothing focusable inside, and Shift+Tab; not on one that fits or has `ScrollY` off; `ForceOverscroll`'s pixel counts | `tab`, `fits`, `noscrolly`, `shiftTab`, `overscrollTab` |
+| 46 | Tab stops on a content that can scroll with nothing focusable inside, and Shift+Tab; not on one that fits or has `ScrollY` off; `ForceOverscroll`'s pixel counts. One that stops being able to scroll gives up focus. An overlay's focus trap never lands on it | `tab`, `fits`, `noscrolly`, `shiftTab`, `overscrollTab` |
 | 47 | With something focusable inside, Tab goes into it and Shift+Tab past it; nested, the inner is the stop | `button`, `nested`, `nestedFits` |
 | 48 | A press on the content lets the keys scroll it after, and doesn't scroll a content around it. A finger that scrolls leaves a field its focus; a tap takes it | `click`, `tap`, `clickWithButton` |
 | 49 | A focused control that takes Space keeps it; the arrows and pages still scroll | `button`, `checkbox`, `ion-item` |
 | 50 | A text field keeps the arrows, Home, End and Space, and Page Up and Page Down scroll | `input`, `ion-input` |
-| 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half | ring, `ring2` |
+| 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half, and over the content's own `Color` | ring, `ring2` |
 | 52 | The scroll events report a key's scroll, as any other | Ionic's `onScroll` on the scroll element |
 | I1 | The thumb's thickness, length, place, minimum, edge and RTL side, and the corner with both axes | `short`, `long`, `page`, `x`, `both`, `rtl`, `padded` |
 | I2 | It shows on the wheel and a drag, not on a script, `ScrollToPoint` or a key | `wheel`, `script`, `scrollToPoint`, `smooth scrollTo`, `keys`, `touch drag` |

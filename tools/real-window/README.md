@@ -46,7 +46,7 @@ once if the window doesn't fit on the screen.
   - `ion-content: keys and the scroll indicator` (#67): a press on a row, then Down, Home, Page Down, Space, Shift+Space and End,
     read from the page's `Ended at` line; and a strip at the end edge that a wheel changes until the indicator fades, and a key
     doesn't. Added without being run: the first run is the one that proves it.
-- **208 checks** in all, in about four minutes.
+- **208 checks** in all, the ten for `ion-content: keys and the scroll indicator` not yet run, in about four minutes before those.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 

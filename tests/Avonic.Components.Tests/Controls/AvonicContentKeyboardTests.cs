@@ -574,6 +574,38 @@ public class AvonicContentKeyboardTests
     }
 
     [AvaloniaFact]
+    public void B46_A_Content_That_Stops_Being_Able_To_Scroll_Gives_Up_Focus()
+    {
+        // Chromium blurs what stops being focusable.
+        var content = Tall();
+        using var scene = Focused(content, out _);
+        Assert.True(Scroll(content).IsFocused);
+
+        ((Border)((StackPanel)content.Content!).Children[^1]).Height = 100;
+        Settle();
+
+        Assert.False(Scroll(content).Focusable);
+        Assert.False(Scroll(content).IsFocused);
+    }
+
+    [AvaloniaFact]
+    public void B46_An_Overlays_Focus_Trap_Doesnt_Land_On_The_Scroller()
+    {
+        // Ionic's focusableQueryString can't find the scroller in ion-content's shadow root, so the first is the button in it.
+        using var stage = new Overlays.AvonicOverlayTests.Stage();
+        var inside = Overlays.TestOverlay.Button("inside");
+        var content = new AvonicContent { Height = 100, Content = new StackPanel { Children = { inside, new Border { Height = 1000 } } } };
+        var overlay = new Overlays.TestOverlay(content);
+        overlay.Present(stage.Window);
+        stage.At(200);
+        Assert.True(Scroll(content).Focusable);
+
+        stage.Other.Focus();
+
+        Assert.Same(inside, stage.Focused);
+    }
+
+    [AvaloniaFact]
     public void B47_With_Something_Focusable_Inside_Tab_Goes_Into_It_And_Shift_Tab_Past_It()
     {
         var before = new Button { Content = "before" };
@@ -925,8 +957,9 @@ public class AvonicContentKeyboardTests
                 Assert.Equal(new Thickness(-1), ring.Margin);
                 Assert.Equal(new CornerRadius(3.5), ring.CornerRadius);
                 Assert.Equal(Color.Parse("#E59700"), Assert.IsAssignableFrom<ISolidColorBrush>(ring.BorderBrush).Color);
-                // Under the content, as Chromium paints the outline, so it's first in the scroller's template.
-                Assert.Equal(0, ((Panel)ring.GetVisualParent()!).Children.IndexOf(ring));
+                // Under the content, as Chromium paints the outline, so before the presenter in the scroller's template.
+                var parts = ((Panel)ring.GetVisualParent()!).Children;
+                Assert.True(parts.IndexOf(ring) < parts.IndexOf(parts.OfType<Avalonia.Controls.Presenters.ScrollContentPresenter>().Single()));
                 // And the base theme's adorner isn't drawn over it.
                 Assert.Empty(Adorners(content));
 
@@ -945,6 +978,23 @@ public class AvonicContentKeyboardTests
             styles.Remove(baseTheme);
         }
     }
+
+    [AvaloniaFact]
+    public void B51_Over_A_Color_Of_Its_Own_The_Ring_Is_Whole() => InstalledTheme.Run(_ =>
+    {
+        // An element's own background is under its outline: a primary content shows both pixels, as a transparent child does.
+        var content = new AvonicContent { Color = "primary", Content = new Border { Height = 3000 }, Margin = new Thickness(10) };
+        using var scene = new Scene(new Panel { Height = 300, VerticalAlignment = VerticalAlignment.Top, Children = { content } });
+        scene.Window.Background = Brushes.White;
+        Press(scene, PhysicalKey.Tab);
+        Assert.True(Scroll(content).IsFocused);
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        var orange = Color.Parse("#E59700");
+        Assert.Equal(orange, Frames.PixelAt(frame, 9, 50));
+        Assert.Equal(orange, Frames.PixelAt(frame, 10, 50));
+        Assert.Equal(Color.Parse("#0054E9"), Frames.PixelAt(frame, 11, 50));
+    });
 
     [AvaloniaFact]
     public void B51_The_Ring_Reaches_A_Pixel_Outside_And_Content_With_A_Background_Covers_Its_Inner_Half() => InstalledTheme.Run(_ =>

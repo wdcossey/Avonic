@@ -22,7 +22,7 @@ internal sealed class ContentKeyboardScroll(ScrollViewer scroller)
     private const double Epsilon = 0.01;
     private const double DurationBoundFactor = 2.5;
 
-    internal static readonly CubicBezierEasing EaseInOut = new(0.42, 0, 0.58, 1);
+    internal static readonly CubicBezierEasing EaseInOut = CubicBezierEasing.CssEaseInOut;
 
     private IDisposable? _frame;
     private CubicBezierEasing _timing = EaseInOut;
@@ -96,20 +96,17 @@ internal sealed class ContentKeyboardScroll(ScrollViewer scroller)
             return;
         }
 
-        var segment = Math.Max(0, Duration - delayedBy);
-        var oldDuration = _total - _lastRetarget;
-        if (oldDuration <= 0)
+        // The curve's case of a last segment of no duration can't come here: To() starts afresh once a segment has ended.
+        var velocity = VelocityAt(t);
+        var newDuration = Math.Min(Math.Max(0, Duration - delayedBy), DurationBound(velocity, newDelta));
+        if (newDuration < Epsilon * 1000)
         {
-            _timing = EaseInOut;
-            _initial = current;
+            // Too short to bother: there at once, as the curve does under kEpsilon seconds.
             _target = target;
-            _lastRetarget = t;
-            _total = t + segment;
+            _lastRetarget = _total = t;
             return;
         }
 
-        var velocity = VelocityAt(t);
-        var newDuration = Math.Min(segment, DurationBound(velocity, newDelta));
         var slope = velocity * (newDuration / 1000) / MaximumDimension(newDelta);
         _timing = new CubicBezierEasing(EaseInOut.X1, EaseInOut.X1 * Math.Clamp(slope, -1000, 1000), EaseInOut.X2, EaseInOut.Y2);
         _initial = current;

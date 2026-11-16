@@ -95,16 +95,16 @@ public class ContentScrollIndicator : TemplatedControl
             var vertical = Orientation == Orientation.Vertical;
             var extent = vertical ? scroller.Extent.Height : scroller.Extent.Width;
             var viewport = vertical ? scroller.Viewport.Height : scroller.Viewport.Width;
-            if (extent - viewport < 0.5 || viewport <= 0)
+            if (!HasRange(extent, viewport) || viewport <= 0)
             {
                 return null;
             }
 
             var other = vertical
-                ? scroller.Extent.Width - scroller.Viewport.Width
-                : scroller.Extent.Height - scroller.Viewport.Height;
+                ? HasRange(scroller.Extent.Width, scroller.Viewport.Width)
+                : HasRange(scroller.Extent.Height, scroller.Viewport.Height);
             var thickness = vertical ? Bounds.Width : Bounds.Height;
-            var track = (vertical ? Bounds.Height : Bounds.Width) - (other >= 0.5 ? thickness : 0);
+            var track = (vertical ? Bounds.Height : Bounds.Width) - (other ? thickness : 0);
             if (track <= 0 || thickness <= 0)
             {
                 return null;
@@ -220,8 +220,11 @@ public class ContentScrollIndicator : TemplatedControl
     }
 
     private bool CanScroll => _scroller is { } scroller && (Orientation == Orientation.Vertical
-        ? scroller.Extent.Height - scroller.Viewport.Height
-        : scroller.Extent.Width - scroller.Viewport.Width) >= 0.5;
+        ? HasRange(scroller.Extent.Height, scroller.Viewport.Height)
+        : HasRange(scroller.Extent.Width, scroller.Viewport.Width));
+
+    /// <summary>Whether an axis has somewhere to scroll to: what the indicator draws on, and what makes the content a tab stop.</summary>
+    internal static bool HasRange(double extent, double viewport) => extent - viewport >= 0.5;
 
     private void OnFadeWait()
     {
