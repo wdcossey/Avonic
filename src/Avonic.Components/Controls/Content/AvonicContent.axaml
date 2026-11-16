@@ -43,13 +43,11 @@
                                     Background="{Binding #PART_VerticalScrollBar.Background}" />
                             <ScrollBar Name="PART_VerticalScrollBar"
                                        Orientation="Vertical"
-                                       AllowAutoHide="False"
                                        Theme="{DynamicResource AvonicContentScrollBar}" />
                         </DockPanel>
                         <ScrollBar Name="PART_HorizontalScrollBar"
                                    DockPanel.Dock="Bottom"
                                    Orientation="Horizontal"
-                                   AllowAutoHide="False"
                                    Theme="{DynamicResource AvonicContentScrollBar}" />
                         <ScrollContentPresenter Name="PART_ContentPresenter"
                                                 Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:ContentConverters.TransparentIfSet}}"

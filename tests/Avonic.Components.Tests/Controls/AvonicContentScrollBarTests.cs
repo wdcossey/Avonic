@@ -464,6 +464,47 @@ public class AvonicContentScrollBarTests
     });
 
     [AvaloniaFact]
+    public void S8_A_Second_Press_Pages_Again_Though_The_First_Is_Still_Going() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+
+        // The first is going to 262, where the thumb, 66 to 121, would cover 100; a new press isn't a repeat, so it pages.
+        Press(scene, new Point(382, 76));
+        Release(scene, new Point(382, 76));
+        Press(scene, new Point(382, 100));
+        Release(scene, new Point(382, 100));
+        clock.At(600);
+
+        Assert.Equal(524, Scroll(content).Offset.Y);
+    });
+
+    [AvaloniaFact]
+    public void S8_A_Held_Track_Follows_The_Pointer() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        var button = Part<RepeatButton>(Bar(content, Orientation.Vertical), "PART_PageDown");
+
+        // Pressed at 100, then held at 250: it goes on until the thumb, ending at 73, 121, 169, 217 and 265, covers 250.
+        Press(scene, new Point(382, 100));
+        scene.Window.MouseMove(new Point(382, 250));
+        Settle();
+        for (var i = 0; i < 6; i++)
+        {
+            clock.At(clock.Now.TotalMilliseconds + 50);
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        }
+
+        Release(scene, new Point(382, 250));
+        clock.At(1000);
+
+        Assert.Equal(1048, Scroll(content).Offset.Y);
+    });
+
+    [AvaloniaFact]
     public void S8_A_Held_Track_Up_Stops_Once_The_Thumb_Covers_The_Pointer() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
