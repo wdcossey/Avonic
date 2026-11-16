@@ -109,6 +109,18 @@ public static class AvonicConfig
     /// </remarks>
     public static TabButtonLayout? TabButtonLayout { get; set; }
 
+    // ── Avonic's own: no Ionic config has these ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Not Ionic's: the default of <see cref="AvonicContent.ScrollBars"/>, whether an <see cref="AvonicContent"/> has a scroll bar to
+    /// drag, a desktop browser's, in place of md's phone thumb. False by default, which is Ionic's md, as a phone draws it.
+    /// </summary>
+    /// <remarks>
+    /// Read when the content is made, as a prop's default is: a change of this reaches only contents made after it, so set it at
+    /// start-up. The value is the content's at style priority, so an app's own, set or in a style, wins.
+    /// </remarks>
+    public static bool ContentScrollBars { get; set; }
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>

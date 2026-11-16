@@ -957,9 +957,10 @@ public class AvonicContentKeyboardTests
                 Assert.Equal(new Thickness(-1), ring.Margin);
                 Assert.Equal(new CornerRadius(3.5), ring.CornerRadius);
                 Assert.Equal(Color.Parse("#E59700"), Assert.IsAssignableFrom<ISolidColorBrush>(ring.BorderBrush).Color);
-                // Under the content, as Chromium paints the outline, so before the presenter in the scroller's template.
+                // Under the content, as Chromium paints the outline, so before the presenter, or what holds it, in the scroller's template.
                 var parts = ((Panel)ring.GetVisualParent()!).Children;
-                Assert.True(parts.IndexOf(ring) < parts.IndexOf(parts.OfType<Avalonia.Controls.Presenters.ScrollContentPresenter>().Single()));
+                var presenter = Scroll(content).GetVisualDescendants().OfType<Avalonia.Controls.Presenters.ScrollContentPresenter>().Single();
+                Assert.True(parts.IndexOf(ring) < parts.IndexOf(parts.Single(part => part == presenter || part.IsVisualAncestorOf(presenter))));
                 // And the base theme's adorner isn't drawn over it.
                 Assert.Empty(Adorners(content));
 

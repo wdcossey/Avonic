@@ -1,0 +1,132 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicContent Width="390" Height="300" ScrollBars="True" ScrollX="True">
+            <Border Width="1560" Height="1440" />
+        </c:AvonicContent>
+    </Design.PreviewWith>
+
+    <!-- The content's scroll bar, an extension, with ScrollBars on: Chromium's on Windows 11, its Fluent bar, measured with no
+         emulation. 15 thick, in the track's colour, with an 18 long button at each end holding an arrow, a rounded triangle 9 across
+         and 7 deep, 4.5 from the bar's end; and a thumb drawn 9 thick in the middle, with round ends, at least 17 long, which takes
+         the pointer across the whole bar. The arrows and the thumb darken under the pointer, and the thumb while it's dragged.
+         The structure is the stub's, with the buttons' names, the press and the repeat, which the content scrolls by. -->
+    <ControlTheme x:Key="AvonicContentScrollBar" TargetType="ScrollBar">
+        <Setter Property="Background" Value="{DynamicResource Avonic.Content.ScrollBarTrackBrush}" />
+
+        <Style Selector="^:vertical">
+            <Setter Property="Width" Value="15" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid RowDefinitions="Auto,*,Auto" Background="{TemplateBinding Background}">
+                        <RepeatButton Name="PART_LineUp" Grid.Row="0" Height="18" ClickMode="Press" Delay="250" Interval="50" Focusable="False">
+                            <Path Width="9" Height="7" Margin="0,4.5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
+                                  Data="M 0.6,6.4 L 4.5,0.6 L 8.4,6.4 Z" />
+                        </RepeatButton>
+                        <Track Name="PART_Track"
+                               Grid.Row="1"
+                               IsDirectionReversed="True"
+                               Maximum="{TemplateBinding Maximum}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Orientation="{TemplateBinding Orientation}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
+                               Value="{TemplateBinding Value, Mode=TwoWay}">
+                            <Track.DecreaseButton>
+                                <RepeatButton Name="PART_PageUp" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.DecreaseButton>
+                            <Track.IncreaseButton>
+                                <RepeatButton Name="PART_PageDown" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.IncreaseButton>
+                            <Thumb Name="PART_Thumb" MinHeight="17" />
+                        </Track>
+                        <RepeatButton Name="PART_LineDown" Grid.Row="2" Height="18" ClickMode="Press" Delay="250" Interval="50" Focusable="False">
+                            <Path Width="9" Height="7" Margin="0,0,0,4.5" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                  Data="M 0.6,0.6 L 8.4,0.6 L 4.5,6.4 Z" />
+                        </RepeatButton>
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="^:horizontal">
+            <Setter Property="Height" Value="15" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Background="{TemplateBinding Background}">
+                        <RepeatButton Name="PART_LineUp" Grid.Column="0" Width="18" ClickMode="Press" Delay="250" Interval="50" Focusable="False">
+                            <Path Width="7" Height="9" Margin="4.5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                  Data="M 6.4,0.6 L 6.4,8.4 L 0.6,4.5 Z" />
+                        </RepeatButton>
+                        <Track Name="PART_Track"
+                               Grid.Column="1"
+                               Maximum="{TemplateBinding Maximum}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Orientation="{TemplateBinding Orientation}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
+                               Value="{TemplateBinding Value, Mode=TwoWay}">
+                            <Track.DecreaseButton>
+                                <RepeatButton Name="PART_PageUp" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.DecreaseButton>
+                            <Track.IncreaseButton>
+                                <RepeatButton Name="PART_PageDown" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.IncreaseButton>
+                            <Thumb Name="PART_Thumb" MinWidth="17" />
+                        </Track>
+                        <RepeatButton Name="PART_LineDown" Grid.Column="2" Width="18" ClickMode="Press" Delay="250" Interval="50" Focusable="False">
+                            <Path Width="7" Height="9" Margin="0,0,4.5,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Data="M 0.6,0.6 L 6.4,4.5 L 0.6,8.4 Z" />
+                        </RepeatButton>
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="^ /template/ RepeatButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Content.ScrollBarThumbBrush}" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Background="{TemplateBinding Background}" Content="{TemplateBinding Content}" />
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ RepeatButton:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Content.ScrollBarThumbHoverBrush}" />
+        </Style>
+        <!-- The arrow: its corners rounded by a stroke of its own colour. -->
+        <Style Selector="^ /template/ RepeatButton > Path">
+            <Setter Property="Fill" Value="{Binding $parent[RepeatButton].Foreground}" />
+            <Setter Property="Stroke" Value="{Binding $parent[RepeatButton].Foreground}" />
+            <Setter Property="StrokeThickness" Value="1.2" />
+            <Setter Property="StrokeJoin" Value="Round" />
+        </Style>
+
+        <Style Selector="^ /template/ Thumb">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Content.ScrollBarThumbBrush}" />
+        </Style>
+        <Style Selector="^ /template/ Thumb:pointerover, ^ /template/ Thumb:pressed">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Content.ScrollBarThumbHoverBrush}" />
+        </Style>
+        <Style Selector="^:vertical /template/ Thumb">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="Transparent">
+                        <Border Name="PART_ThumbFill" Width="9" Background="{TemplateBinding Background}" CornerRadius="4.5" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^:horizontal /template/ Thumb">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="Transparent">
+                        <Border Name="PART_ThumbFill" Height="9" Background="{TemplateBinding Background}" CornerRadius="4.5" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

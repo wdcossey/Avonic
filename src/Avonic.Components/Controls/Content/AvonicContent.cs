@@ -100,6 +100,23 @@ public class AvonicContent : TemplatedControl
     public static readonly StyledProperty<double> KeyboardOffsetProperty =
         AvaloniaProperty.Register<AvonicContent, double>(nameof(KeyboardOffset));
 
+    /// <summary>
+    /// Not Ionic's: a scroll bar to drag on each axis that can scroll, a desktop browser's, in place of the phone's thumb, and taking
+    /// its width, as Chromium's does. Off by default, Ionic's md, as a phone draws it; <see cref="AvonicConfig.ContentScrollBars"/>
+    /// gives the default when the content is made, at style priority, so a value set here or in a style wins.
+    /// </summary>
+    public static readonly StyledProperty<bool> ScrollBarsProperty =
+        AvaloniaProperty.Register<AvonicContent, bool>(nameof(ScrollBars));
+
+    /// <summary>What a scroll bar's arrow scrolls by, as a key's: Chromium's 40.</summary>
+    internal const double LineStep = 40;
+
+    /// <summary>The names of the scroll bar's buttons, which the content scrolls by, not Avalonia's <see cref="ScrollBar"/>.</summary>
+    internal const string LineUpPart = "PART_LineUp";
+    internal const string LineDownPart = "PART_LineDown";
+    internal const string PageUpPart = "PART_PageUp";
+    internal const string PageDownPart = "PART_PageDown";
+
     /// <summary>Ionic <c>ionScrollStart</c>.</summary>
     public static readonly RoutedEvent<ScrollBaseDetailEventArgs> IonScrollStartEvent =
         RoutedEvent.Register<AvonicContent, ScrollBaseDetailEventArgs>(nameof(IonScrollStart), RoutingStrategies.Bubble);
@@ -121,6 +138,9 @@ public class AvonicContent : TemplatedControl
     private ContentKeyboardScroll? _keyboard;
     private bool _focusedByPointer;
     private RoutedEventArgs? _passedOver;
+    private RepeatButton? _barPressed;
+    private int _barClicks;
+    private Point _barPointer;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
 
@@ -146,6 +166,16 @@ public class AvonicContent : TemplatedControl
 
         // The host has no overflow rule, and Fullscreen and the fixed slot reach outside it. Avalonia clips by default.
         ClipToBoundsProperty.OverrideDefaultValue<AvonicContent>(false);
+    }
+
+    public AvonicContent()
+    {
+        // ScrollBars' default, read once here, as a prop's default from the config is. At style priority, and before any style, so
+        // that an app's value, set or in a style, wins.
+        if (AvonicConfig.ContentScrollBars)
+        {
+            SetValue(ScrollBarsProperty, true, BindingPriority.Style);
+        }
     }
 
     /// <inheritdoc cref="ColorProperty"/>
@@ -231,6 +261,13 @@ public class AvonicContent : TemplatedControl
     {
         get => GetValue(ScrollYProperty);
         set => SetValue(ScrollYProperty, value);
+    }
+
+    /// <inheritdoc cref="ScrollBarsProperty"/>
+    public bool ScrollBars
+    {
+        get => GetValue(ScrollBarsProperty);
+        set => SetValue(ScrollBarsProperty, value);
     }
 
     /// <inheritdoc cref="IonScrollStartEvent"/>
@@ -421,6 +458,9 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(KeyDownEvent, OnScrollKeyDown);
             _scroll.RemoveHandler(GotFocusEvent, OnScrollGotFocus);
             _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
+            _scroll.RemoveHandler(Button.ClickEvent, OnScrollBarClick);
+            _scroll.RemoveHandler(PointerPressedEvent, OnScrollBarPointer);
+            _scroll.RemoveHandler(PointerMovedEvent, OnScrollBarPointer);
         }
 
         if (_container is not null)
@@ -453,6 +493,9 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(KeyDownEvent, OnScrollKeyDown, RoutingStrategies.Tunnel);
             _scroll.AddHandler(GotFocusEvent, OnScrollGotFocus);
             _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
+            _scroll.AddHandler(Button.ClickEvent, OnScrollBarClick);
+            _scroll.AddHandler(PointerPressedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _scroll.AddHandler(PointerMovedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -488,6 +531,10 @@ public class AvonicContent : TemplatedControl
             UpdateAxes();
             UpdateOverscroll();
             UpdateFocusable();
+        }
+        else if (change.Property == ScrollBarsProperty)
+        {
+            UpdateAxes();
         }
         else if (change.Property == ForceOverscrollProperty)
         {
@@ -667,8 +714,8 @@ public class AvonicContent : TemplatedControl
     /// </summary>
     private Vector? KeyTarget(ScrollViewer scroll, Vector from, Key key, KeyModifiers modifiers)
     {
-        const double line = 40;
-        var page = Math.Max(1, Math.Floor(scroll.Viewport.Height * 0.875));
+        const double line = LineStep;
+        var page = PageStep(scroll.Viewport.Height);
         var maxX = Math.Max(0, scroll.Extent.Width - scroll.Viewport.Width);
         var maxY = Math.Max(0, scroll.Extent.Height - scroll.Viewport.Height);
         var rtl = scroll.FlowDirection == Avalonia.Media.FlowDirection.RightToLeft;
@@ -706,6 +753,91 @@ public class AvonicContent : TemplatedControl
         }
 
         return null;
+    }
+
+    /// <summary>A page, a key's or the scroll bar's track's: 87.5% of the viewport, rounded down, as Chromium's.</summary>
+    internal static double PageStep(double viewport) => Math.Max(1, Math.Floor(viewport * 0.875));
+
+    /// <summary>
+    /// The scroll bar's arrows and track, when <see cref="ScrollBars"/> is on: as Chromium scrolls by them, an arrow 40 and the track a
+    /// page along the bar, eased as a key is, a step during one adding to it, rather than Avalonia's 16 and a whole viewport at once.
+    /// Their buttons have names of their own, so that the <see cref="ScrollBar"/> doesn't take them. A repeat of the track stops once
+    /// the thumb covers the pointer, as Chromium's does; the click of the press always pages.
+    /// </summary>
+    private void OnScrollBarClick(object? sender, RoutedEventArgs e)
+    {
+        if (e.Source is not RepeatButton { TemplatedParent: ScrollBar bar } button || !ReferenceEquals(bar.TemplatedParent, _scroll)
+            || _scroll is not { } scroll || _keyboard is not { } keyboard)
+        {
+            return;
+        }
+
+        var vertical = bar.Orientation == Orientation.Vertical;
+        var viewport = vertical ? scroll.Viewport.Height : scroll.Viewport.Width;
+        double? step = button.Name switch
+        {
+            LineUpPart => -LineStep,
+            LineDownPart => LineStep,
+            PageUpPart => -PageStep(viewport),
+            PageDownPart => PageStep(viewport),
+            _ => null,
+        };
+        if (step is not { } delta)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        var from = keyboard.Target;
+        var max = vertical ? Math.Max(0, scroll.Extent.Height - viewport) : Math.Max(0, scroll.Extent.Width - viewport);
+        var at = vertical ? from.Y : from.X;
+        var repeat = ReferenceEquals(_barPressed, button) && _barClicks++ > 0;
+        if (repeat && button.Name is PageUpPart or PageDownPart && ThumbReachedPointer(button, at, max, delta > 0))
+        {
+            return;
+        }
+
+        var to = Math.Clamp(at + delta, 0, max);
+        if (Math.Abs(to - at) >= 0.5)
+        {
+            keyboard.To(vertical ? from.WithY(to) : from.WithX(to));
+        }
+    }
+
+    /// <summary>
+    /// Whether the thumb, where it will be at <paramref name="offset"/>, already covers the pointer held on the track, or is past it:
+    /// Chromium's track scroll stops there. Where the thumb is comes from the <see cref="Track"/>'s own sizes, as it places it.
+    /// </summary>
+    private bool ThumbReachedPointer(RepeatButton button, double offset, double max, bool forward)
+    {
+        if (button.GetVisualParent() is not Track { Thumb: { } thumb } track || max <= 0)
+        {
+            return false;
+        }
+
+        var vertical = track.Orientation == Orientation.Vertical;
+        var length = vertical ? track.Bounds.Height : track.Bounds.Width;
+        var thumbLength = vertical ? thumb.Bounds.Height : thumb.Bounds.Width;
+        var start = (length - thumbLength) * offset / max;
+        if (this.TranslatePoint(_barPointer, track) is not { } point)
+        {
+            return false;
+        }
+
+        var position = vertical ? point.Y : point.X;
+        return forward ? start + thumbLength >= position : start <= position;
+    }
+
+    /// <summary>Where the pointer is while one of the scroll bar's buttons is held, for <see cref="ThumbReachedPointer"/>.</summary>
+    private void OnScrollBarPointer(object? sender, PointerEventArgs e)
+    {
+        if (e.RoutedEvent == PointerPressedEvent)
+        {
+            _barPressed = (e.Source as Visual)?.FindAncestorOfType<RepeatButton>(includeSelf: true);
+            _barClicks = 0;
+        }
+
+        _barPointer = e.GetPosition(this);
     }
 
     /// <summary>
@@ -786,7 +918,8 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// <c>.scroll-x</c> and <c>.scroll-y</c>. On is <see cref="ScrollBarVisibility.Hidden"/>, because a phone's scroll
-    /// bars aren't Ionic's: the template has none. Horizontal off is <see cref="ScrollBarVisibility.Disabled"/>, so text
+    /// bars aren't Ionic's: the template's are shown only with <see cref="ScrollBars"/>, which makes it
+    /// <see cref="ScrollBarVisibility.Auto"/>, and its indicators only where an axis is hidden. Horizontal off is <see cref="ScrollBarVisibility.Disabled"/>, so text
     /// wraps to the width, where hidden measures it as if the width had no end. Vertical off is still hidden, with no
     /// gesture, because <c>overflow: hidden</c> is a scroller to a script and keeps its position, where disabled would
     /// reset it. That takes blocking input by hand, and a drag at an angle can't be blocked with horizontal on, so
@@ -799,8 +932,11 @@ public class AvonicContent : TemplatedControl
             return;
         }
 
-        _scroll.SetCurrentValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollX ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
-        _scroll.SetCurrentValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollY || !ScrollX ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
+        // ScrollBars: overflow: auto, a bar where there's somewhere to scroll. Never with ScrollY off, as overflow: hidden has none.
+        var on = ScrollBars ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
+        _scroll.SetCurrentValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollX ? on : ScrollBarVisibility.Disabled);
+        _scroll.SetCurrentValue(ScrollViewer.VerticalScrollBarVisibilityProperty,
+            ScrollY ? on : !ScrollX ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Disabled);
         _recognizer?.SetCurrentValue(ScrollGestureRecognizer.CanVerticallyScrollProperty, ScrollY);
     }
 

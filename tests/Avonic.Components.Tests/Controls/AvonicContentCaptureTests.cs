@@ -129,6 +129,33 @@ public class AvonicContentCaptureTests
         Frames.Save(scene.Window.CaptureRenderedFrame()!, "avonic-content-indicator-gone.png");
     });
 
+    // ref/scroll-bar.png: the same rows with ScrollBars on, desktop Chromium's bar, scrolled to 300, and both axes, 1560 wide.
+    [AvaloniaFact]
+    public void Scroll_Bar_Frame() => InstalledTheme.Run(_ =>
+    {
+        var content = Rows(30);
+        content.ScrollBars = true;
+        var wide = Rows(30);
+        wide.ScrollBars = true;
+        wide.ScrollX = true;
+        ((StackPanel)wide.Content!).Width = 1560;
+        var stage = new Grid { RowDefinitions = new RowDefinitions("300,300"), Children = { content, wide } };
+        Grid.SetRow(wide, 1);
+        using var scene = new Scene(stage, 390, 600);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        content.GetScrollElement()!.Offset = new Vector(0, 300);
+        wide.GetScrollElement()!.Offset = new Vector(300, 300);
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+        Frames.Save(scene.Window.CaptureRenderedFrame()!, "avonic-content-scroll-bar.png");
+
+        Assert.Equal(new Size(375, 300), content.GetScrollElement()!.Viewport);
+        Assert.Equal(new Size(375, 285), wide.GetScrollElement()!.Viewport);
+    });
+
     // ref/focus-ring.png: the same rows, 10 in from the edges, Tab, then Page Down.
     [AvaloniaFact]
     public void Focus_Ring_Frame()

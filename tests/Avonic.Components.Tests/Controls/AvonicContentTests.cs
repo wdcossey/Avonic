@@ -176,7 +176,7 @@ public class AvonicContentTests
         // Measured: clientWidth is 390 with a 1000 high scrollHeight. Nothing takes room from the content.
         Assert.Equal(new Size(390, 300), Scroll(content).Viewport);
         Assert.Equal(new Size(390, 1000), Scroll(content).Extent);
-        Assert.Empty(scene.Window.GetVisualDescendants().OfType<Avalonia.Controls.Primitives.ScrollBar>());
+        Assert.DoesNotContain(scene.Window.GetVisualDescendants().OfType<Avalonia.Controls.Primitives.ScrollBar>(), bar => bar.IsEffectivelyVisible);
     }
 
     // ── 3–6. The look ────────────────────────────────────────────────────────────────────────

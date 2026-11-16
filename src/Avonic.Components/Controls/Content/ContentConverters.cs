@@ -1,3 +1,4 @@
+using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -12,4 +13,11 @@ internal static class ContentConverters
     /// </summary>
     public static readonly IValueConverter TransparentIfSet =
         new FuncValueConverter<IBrush?, IBrush?>(brush => brush is null ? null : Brushes.Transparent);
+
+    /// <summary>
+    /// Whether an axis draws no scroll bar, so its indicator shows: a bar is drawn only where it's <see cref="ScrollBarVisibility.Auto"/>
+    /// or <see cref="ScrollBarVisibility.Visible"/>, and a browser draws one or the other, never both.
+    /// </summary>
+    public static readonly IValueConverter NoScrollBar =
+        new FuncValueConverter<ScrollBarVisibility, bool>(visibility => visibility is ScrollBarVisibility.Hidden or ScrollBarVisibility.Disabled);
 }
