@@ -2,7 +2,7 @@
 
 `AvonicBackdrop`: the dark layer under an overlay that a tap goes to. It's the first consumer of the overlay system (#5), whose
 plan is [`docs/infra/overlays/PLAN.md`](../../infra/overlays/PLAN.md). On its own it's nearly invisible: md's opacity is 0.01, and
-each overlay's enter animation takes it to `--backdrop-opacity`. Measurements are from real Ionic 8.8.1 in Chromium, md, 390 x 844,
+each overlay's enter animation takes it to `--backdrop-opacity`. Measurements are from real Ionic 8.8.19 in Chromium, md, 390 x 844,
 in `ion-app`.
 
 ## Fidelity checklist

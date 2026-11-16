@@ -3,7 +3,7 @@
 A one-line text field: a label in one of five placements, an Avalonia `TextBox` as the native `<input>`, start and end slots, a
 clear button, helper and error text, a counter, and md's three looks (no fill, `solid`, `outline` with a notch). The password
 toggle is a round clear `ion-button` in the end slot that flips the input between `password` and `text`. Measurements are from
-real Ionic 8.8.1 in Chromium, md, at 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard
+real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard
 in a desktop context; the frame in a mobile one). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 
 ## Fidelity checklist: ion-input

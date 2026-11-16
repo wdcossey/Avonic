@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Ionic's dark palette for md, from css/palettes/dark.always.css (@ionic/core 8.8.1).
+        Ionic's dark palette for md, from css/palettes/dark.always.css (@ionic/core 8.8.19).
         Not merged by AvonicTheme, because it would replace the light values. Merge it yourself:
 
             <ResourceInclude Source="avares://Avonic.Themes/Tokens/Palettes/Dark.axaml" />
@@ -119,6 +119,9 @@
     <SolidColorBrush x:Key="Avonic.ToolbarBackgroundBrush" Color="#1F1F1F" />
     <SolidColorBrush x:Key="Avonic.TabBarBackgroundBrush" Color="#1F1F1F" />
     <SolidColorBrush x:Key="Avonic.CardBackgroundBrush" Color="#1E1E1E" />
+    <!-- ion-tab-bar-background-focused, set by dark since 8.8.4: a focused tab button's background. Tokens/Tabs.axaml's
+         Avonic.TabBarBackgroundFocusedBrush follows this key, as it follows the light #e0e0e0. -->
+    <Color x:Key="Avonic.TabBarBackgroundFocused">#353535</Color>
 
     <!-- toolbar.md.css's color and border-color fall back to ion-text-color, #ffffff, and ion-border-color, which isn't set,
          then ion-background-color-step-150, #363636. Ionic's dark palette sets ion-text-color, where its light one leaves it

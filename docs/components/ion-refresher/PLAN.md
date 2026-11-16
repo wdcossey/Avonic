@@ -1,6 +1,6 @@
 # ion-refresher, ion-refresher-content — plan
 
-Issue [#35](https://github.com/wdcossey/Avonic/issues/35). Ionic 8.8.1, md. Read from `refresher.js`, `refresher.utils.js`,
+Issue [#35](https://github.com/wdcossey/Avonic/issues/35). Ionic 8.8.19 (8.8.1 when written; its two changes are under behaviour 19), md. Read from `refresher.js`, `refresher.utils.js`,
 `refresher-content.js`, `refresher.md.css`, and measured in Chromium (`ref/`, below).
 
 ## Which refresher
@@ -76,7 +76,11 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
 19. A control with `ion-content-scroll-host` in the content is the scroll element, before the content's own
     (`getScrollElement(contentEl.querySelector('.ion-content-scroll-host') ?? contentEl)`): the gesture is on it, and `canStart`
     reads its offset. The host itself if it's a `ScrollViewer`, else the first one in it; one not there yet is looked for again
-    after each layout of the content until it's there (`componentOnReady`), logged once if the first gives none. B24 (#155)
+    after each layout of the content until it's there (`componentOnReady`), logged once if the first gives none. B24 (#155).
+    8.8.18 names the query `findRefresherScrollHost`: the refresher pairs with the first host only, a second's offset counting for
+    nothing (`ContentUtils.FindScrollHost`, B24). Its partner, `findRefresherInContent`, is for `ion-modal`'s sheet gesture (#42).
+    8.8.17: a refresher that disconnects before its setup ends makes no gesture, as Ionic's setup awaits the gesture's module; here
+    the setup is synchronous, and leaving the tree while it waits for a host stops the wait (`Disconnect`, B24)
 20. The config keys `refreshingIcon` and `refreshingSpinner` come before md's defaults and `spinner`, read once, when the content
     first loads; a key of `null` gives no spinner, and so not the native refresher. B25 (#155)
 21. After a cancel (#167): Chromium shows both icons for the 700 ms during a refresh, the pulling one as wide as the content

@@ -1,7 +1,7 @@
 # ion-text — Plan
 
 All of `text.css` is one rule, `:host(.ion-color) { color: var(--ion-color-base) }`, on an element that's inline. The
-question is what shape that is in Avalonia. Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide. It
+question is what shape that is in Avalonia. Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide. It
 shares a PR with [`ion-note`](../ion-note/PLAN.md).
 
 ## Fidelity checklist

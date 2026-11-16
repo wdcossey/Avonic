@@ -119,7 +119,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | # | Behaviour | Source |
 |---|---|---|
 | A1 | Hidden until it's active (`display: none`), and hidden from automation | `tab-hidden`, `aria-hidden` |
-| A2 | `Component` is built at the first activation, once, with class `ion-page`; without one the tab has class `ion-page` | `prepareLazyLoaded`, `attachComponent`, `render` |
+| A2 | `Component` is built at the first activation, once, with class `ion-page`; without one the tab has class `ion-page`. One whose construction throws is logged, and built again at the next activation, as Ionic 8.8.19 keeps its attach only once it succeeds (8.8.1 marked it loaded first, and never tried again) | `prepareLazyLoaded`, `attachComponent`, `render` |
 | A3 | `SetActive` builds the component and shows the tab, hiding no other | `setActive` |
 | A4 | Automation: a pane, named by the tab button with the same `Tab` | `role="tabpanel"`, `aria-labelledby` |
 

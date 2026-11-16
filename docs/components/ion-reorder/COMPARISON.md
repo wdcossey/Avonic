@@ -1,6 +1,6 @@
 # ion-reorder, ion-reorder-group — Comparison
 
-Ionic 8.8.1, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale. Five items in a
+Ionic 8.8.19, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale. Five items in a
 list in a content, each with a handle in its end slot, in an enabled group. The reference frame:
 
 ```

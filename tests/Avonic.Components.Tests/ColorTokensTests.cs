@@ -343,6 +343,9 @@ public partial class ColorTokensTests
             Assert.Equal(Color.Parse(md["--ion-toolbar-background"]), BrushColor("Avonic.ToolbarBackgroundBrush"));
             Assert.Equal(Color.Parse(md["--ion-tab-bar-background"]), BrushColor("Avonic.TabBarBackgroundBrush"));
             Assert.Equal(Color.Parse(md["--ion-card-background"]), BrushColor("Avonic.CardBackgroundBrush"));
+            // Since 8.8.4. The brush is Tokens/Tabs.axaml's, following the colour.
+            Assert.Equal(Color.Parse(md["--ion-tab-bar-background-focused"]), Resource<Color>("Avonic.TabBarBackgroundFocused"));
+            Assert.Equal(Color.Parse(md["--ion-tab-bar-background-focused"]), BrushColor("Avonic.TabBarBackgroundFocusedBrush"));
 
             // Not set in dark: follows its fallback, or the background.
             Assert.Equal(Color.Parse(md["--ion-background-color-step-150"]), Resource<Color>("Avonic.BorderColor"));

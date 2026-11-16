@@ -1,6 +1,6 @@
 # ion-infinite-scroll — Comparison
 
-Ionic 8.8.1, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale. Each row is an
+Ionic 8.8.19, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale. Each row is an
 `ion-infinite-scroll` holding an `ion-infinite-scroll-content`, in a grey box that shows its size. In Chromium the loading ones
 have the class `infinite-scroll-loading` set by hand, which the md rule reads as it reads Ionic's own; the behaviour is measured
 separately, by scripts kept out of the repo, into [`ref/measurements.json`](ref/measurements.json).

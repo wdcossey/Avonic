@@ -437,6 +437,21 @@ public class AvonicInputOtpTests
         Assert.Equal(1, FocusedBox(otp));
     }
 
+    // Since 8.8.19, isRTL(el) walks up to the nearest ancestor with dir. Measured with dir="rtl" on a div around it only: ArrowLeft
+    // from the first box, which has a value, goes on to the second.
+    [AvaloniaFact]
+    public void B07_RTL_From_An_Ancestor_Swaps_The_Arrows_Too()
+    {
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
+        using var _ = scene;
+        ((Control)otp.Parent!).FlowDirection = FlowDirection.RightToLeft;
+        otp.SetFocus(0);
+        Settle();
+
+        Key(scene, PhysicalKey.ArrowLeft);
+        Assert.Equal(1, FocusedBox(otp));
+    }
+
     // ── 8 to 10: focus ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -772,7 +787,7 @@ public class AvonicInputOtpTests
     }
 
     [AvaloniaFact]
-    public void B16_Read_Only_Takes_Focus_Not_Typing_But_Backspace_And_Paste_Still_Edit_As_In_Ionic()
+    public void B16_Read_Only_Takes_Focus_And_The_Arrows_But_No_Typing_Deleting_Or_Paste()
     {
         var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12", Readonly = true });
         using var _ = scene;
@@ -786,18 +801,83 @@ public class AvonicInputOtpTests
         Assert.Empty(log.Take());
         Assert.Equal("12", otp.Value);
 
-        // Measured in Chromium: Ionic's own handlers don't check readonly.
+        // Since Ionic 8.8.3, measured on 8.8.19: Backspace and Delete do nothing, focus stays, and a paste writes nothing. Ionic
+        // 8.8.1's own handlers didn't check readonly, and both edited.
         Key(scene, PhysicalKey.Backspace);
-        Assert.Equal(["input:1"], log.Take());
-
-        // In the now empty box, focus moves back, and the native deletion does nothing in a read-only input.
-        Key(scene, PhysicalKey.Backspace);
+        Key(scene, PhysicalKey.Delete);
         Assert.Empty(log.Take());
-        Assert.Equal(0, FocusedBox(otp));
-        Assert.Equal("1", otp.Value);
+        Assert.Equal(1, FocusedBox(otp));
+        Assert.Equal("12", otp.Value);
+        Assert.Equal("1|2||", Shown(otp));
 
         Paste(scene, "55");
-        Assert.Equal(["input:55"], log.Take());
+        Assert.Empty(log.Take());
+        Assert.Equal("12", otp.Value);
+
+        // The arrows still move: from a box with a value, on to the next.
+        otp.SetFocus(0);
+        Settle();
+        Key(scene, PhysicalKey.ArrowRight);
+        Assert.Equal(1, FocusedBox(otp));
+    }
+
+    // Since 8.8.3, onKeyDown and onPaste do nothing while disabled. Measured on 8.8.19: disabling the control moves focus out of its
+    // box, so no key reaches it; a paste dispatched to it anyway changes nothing.
+    [AvaloniaFact]
+    public void B16_Disabled_While_Focused_Takes_No_Backspace_Or_Paste()
+    {
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
+        using var _ = scene;
+        var log = Log.Of(otp);
+        otp.SetFocus(1);
+        Settle();
+        log.Take();
+
+        otp.IsEnabled = false;
+        Settle();
+        // Focus leaves the box, as in Chromium, which is why the control needs no check of its own on a key: this pins it.
+        Assert.Equal(-1, FocusedBox(otp));
+        log.Take();
+        Key(scene, PhysicalKey.Backspace);
+        Paste(scene, "55");
+
+        Assert.Empty(log.Take());
+        Assert.Equal("12", otp.Value);
+        Assert.Equal("1|2||", Shown(otp));
+    }
+
+    // The clipboard is read asynchronously, so an app can make the control read-only, or disable it, between the paste and its
+    // text. Ionic's onPaste runs at once and checks then; here onPaste checks once the text has come, so nothing is written either
+    // way. Headless, the clipboard answers at once, so the change can't be staged during a real read: this calls the text's arrival
+    // directly, which pins where the check is, not the race.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B16_Read_Only_Or_Disabled_When_The_Pasted_Text_Comes_Writes_Nothing(bool readOnly)
+    {
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
+        using var _ = scene;
+        var log = Log.Of(otp);
+        otp.SetFocus(0);
+        Settle();
+        log.Take();
+
+        if (readOnly)
+        {
+            otp.Readonly = true;
+        }
+        else
+        {
+            otp.IsEnabled = false;
+        }
+
+        Settle();
+        log.Take();
+        otp.OnPaste("9876");
+        Settle();
+        Assert.Empty(log.Take());
+        Assert.Equal("12", otp.Value);
+        Assert.Equal("1|2||", Shown(otp));
     }
 
     [AvaloniaFact]

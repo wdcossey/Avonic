@@ -1,6 +1,6 @@
 # ion-backdrop — Comparison
 
-Ionic 8.8.1, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale.
+Ionic 8.8.19, md, headless Chromium, 390 x 844 at 2x, beside Avonic headless (Skia) at the same size and scale.
 
 ```
 node tools/ionic-ref/render.js ion-backdrop --bare --html '<div style="font:16px Roboto;color:#000"><div style="position:relative;height:200px;background:#fff"><p style="margin:0;padding:16px">Default: opacity 0.01</p><ion-backdrop></ion-backdrop></div><div style="position:relative;height:200px;background:#fff"><p style="margin:0;padding:16px">As an overlay leaves it: 0.32</p><ion-backdrop style="opacity:0.32"></ion-backdrop></div><div style="position:relative;height:200px;background:#fff"><p style="margin:0;padding:16px">Not visible, at 0.32</p><ion-backdrop visible="false" style="opacity:0.32"></ion-backdrop></div></div>'

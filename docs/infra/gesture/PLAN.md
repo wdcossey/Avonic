@@ -4,7 +4,7 @@ Ionic's `utils/gesture` on Avalonia: `createGesture`, the pan recognizer's thres
 controller's priority and capture arbitration, and its scroll blocker. It's infrastructure, not a control: `ion-item-sliding`,
 `ion-range`, `ion-toggle`, `ion-refresher`, `ion-reorder-group`, `ion-menu`, `ion-picker-column` and the sheet modal are built on it.
 
-Sources, `@ionic/core` 8.8.1, `dist/collection/utils/gesture/`: `index.js` (createGesture), `gesture-controller.js`,
+Sources, `@ionic/core` 8.8.19 (whose `listener.js` only drops 8.8.1's probe for passive listeners), `dist/collection/utils/gesture/`: `index.js` (createGesture), `gesture-controller.js`,
 `recognizers.js` (createPanRecognizer), `pointer-events.js`, `listener.js`; `utils/tap-click/index.js` for what a captured
 gesture does to a press; `css/core.css` for `body.backdrop-no-scroll`; and every `createGesture` call in `components/` for the
 options the controls really use.

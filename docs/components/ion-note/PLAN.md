@@ -1,7 +1,7 @@
 # ion-note — Plan
 
 A small grey piece of text, usually a date or a count at the end of an item. It has one CSS variable and no behaviour
-of its own, and what matters is how it sits in `ion-item`. Measurements are from real Ionic 8.8.1 in Chromium, md, at
+of its own, and what matters is how it sits in `ion-item`. Measurements are from real Ionic 8.8.19 in Chromium, md, at
 390 px wide. It shares a PR with [`ion-text`](../ion-text/PLAN.md).
 
 ## Fidelity checklist

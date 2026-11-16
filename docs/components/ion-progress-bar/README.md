@@ -51,7 +51,7 @@ Ionic's host classes: `:type-determinate`, `:type-indeterminate`, `:reversed` (t
 | [x] | `--background` | `Avonic.ProgressBar.Background` | `Avonic.Color.Primary` at 0.3: the track and the dots |
 | [x] | `--progress-background` | `Avonic.ProgressBar.ProgressBackground` | `Avonic.Color.Primary`: the progress and the indeterminate bars |
 
-The height of 4 is a literal in the theme, as Ionic has no variable for it. `--buffer-background` isn't in Ionic 8.8.1.
+The height of 4 is a literal in the theme, as Ionic has no variable for it. `--buffer-background` isn't in Ionic 8.8.19.
 
 ## Behaviours
 

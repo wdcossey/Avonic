@@ -1,6 +1,6 @@
 # Plan: colour system (#2)
 
-Sources: `@ionic/core` 8.8.1 `css/core.css`, `css/palettes/dark.always.css`,
+Sources: `@ionic/core` 8.8.19 `css/core.css`, `css/palettes/dark.always.css` (8.8.19 adds `--ion-tab-bar-background-focused`),
 `dist/collection/utils/theme.js`, and every `*.md.css` under `dist/collection/components`. 42
 components declare a `color` prop, so this is the most reused API in the library.
 
@@ -22,7 +22,7 @@ Component CSS then reads those under `:host(.ion-color)`, for example
 
 ## Measured behaviour
 
-Rendered in real Ionic 8.8.1 (md, headless Chromium), reading computed styles. "Native" is
+Rendered in real Ionic 8.8.19 (md, headless Chromium), reading computed styles. "Native" is
 `ion-button`'s `.button-native`; a badge shows the same behaviour on its host.
 
 | Case | `ion-color` class | `--ion-color-base` | Result |
@@ -157,6 +157,7 @@ already serves that purpose, so a second key would be the same value under a sec
 | `--ion-toolbar-background` | `Avonic.ToolbarBackgroundBrush` | → background | Fallback chain; dark sets it |
 | `--ion-tab-bar-background` | `Avonic.TabBarBackgroundBrush` | → background | Fallback chain; dark sets it |
 | `--ion-card-background` | `Avonic.CardBackgroundBrush` | → background | Fallback chain; dark sets it |
+| `--ion-tab-bar-background-focused` | `Avonic.TabBarBackgroundFocused` (+ `…Brush`), in `Tokens/Tabs.axaml` | `#e0e0e0` | Dark sets `#353535` since 8.8.4 |
 | `--ion-font-family` | `Avonic.FontFamily` | `Roboto, Helvetica Neue, sans-serif` | `html.md` |
 
 **The light ramps aren't defined anywhere as variables.** Ionic only sets them for dark and reads them

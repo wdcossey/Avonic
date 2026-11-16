@@ -1,6 +1,6 @@
 # ion-progress-bar → `AvonicProgressBar` — Plan
 
-Ionic 8.8.1, from `dist/collection/components/progress-bar/progress-bar.js` and `progress-bar.md.css`, and `core.json`.
+Ionic 8.8.19, from `dist/collection/components/progress-bar/progress-bar.js` and `progress-bar.md.css`, and `core.json`.
 Every number here was measured in Chromium, md, at 390 wide, with the bars 358 wide, by a throwaway `playwright-core` script
 that paused the CSS animations with the Web Animations API (`animation.pause(); animation.currentTime = ms`) to read them at
 a known time. The reference render is [`ref/`](ref/), and the comparison is [COMPARISON.md](COMPARISON.md). During the build,
@@ -42,7 +42,7 @@ track's end. Indeterminate: two bars sliding across on a 2 s loop. Everything is
 | [x] | `--background` | `Avonic.ProgressBar.Background` | brush | `rgba(var(--ion-color-primary-rgb), 0.3)`: a brush of `Avonic.Color.Primary` at opacity 0.3 |
 | [x] | `--progress-background` | `Avonic.ProgressBar.ProgressBackground` | brush | `var(--ion-color-primary)`: a brush of `Avonic.Color.Primary` |
 
-There's no `--buffer-background` in 8.8.1: `core.json`, the CSS and the JS don't have it. The dots use `--background`.
+There's no `--buffer-background` in 8.8.19: `core.json`, the CSS and the JS don't have it. The dots use `--background`.
 
 ## Measured
 

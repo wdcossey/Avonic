@@ -1,7 +1,7 @@
 # ion-accordion and ion-accordion-group — Plan
 
 One family: `ion-accordion-group` holds the value, and each `ion-accordion` works out from it whether it's open, and animates
-its content open and shut. Read from Ionic 8.8.1 (`accordion.js`, `accordion-group.js`, `accordion.md.css`,
+its content open and shut. Read from Ionic 8.8.19 (`accordion.js`, `accordion-group.js`, `accordion.md.css`,
 `accordion-group.md.css`, and the accordion rules in `css/core.css`), and measured in Chromium, md, at 390 px wide, with the
 page in [COMPARISON.md](COMPARISON.md) and throwaway Playwright scripts against it.
 

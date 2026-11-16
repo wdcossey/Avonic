@@ -713,7 +713,9 @@ public class AvonicSegment : ItemsControl, IItemControl
         }
 
         var nextIndex = (int)Math.Round(e.ScrollRatio * (buttons.Count - 1), MidpointRounding.AwayFromZero);
-        if (nextIndex < 0 || nextIndex >= buttons.Count)
+        // Since 8.8.6, a scroll to a disabled button's content checks nothing, and isn't remembered as the last index. Effectively
+        // disabled, so that a button its command disables counts too, as it looks disabled.
+        if (nextIndex < 0 || nextIndex >= buttons.Count || !buttons[nextIndex].IsEffectivelyEnabled)
         {
             return;
         }

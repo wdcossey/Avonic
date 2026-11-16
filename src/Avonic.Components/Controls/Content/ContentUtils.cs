@@ -14,7 +14,8 @@ namespace Avonic.Components.Controls;
 internal static class ContentUtils
 {
     /// <summary>
-    /// <c>contentEl.querySelector('.ion-content-scroll-host')</c>: the first control in <paramref name="content"/>, in document
+    /// <c>findRefresherScrollHost</c> (8.8.18), which is <c>contentEl.querySelector('.ion-content-scroll-host')</c>, as 8.8.1's
+    /// refresher wrote it, so a refresher pairs with this one host only: the first control in <paramref name="content"/>, in document
     /// order, with <see cref="AvonicContent.ScrollHostClass"/>. What an app puts in it, as a <c>querySelector</c> searches the light
     /// DOM and not the content's shadow root: its <see cref="AvonicContent.Content"/> and <see cref="AvonicContent.FixedContent"/>,
     /// in that order, and their logical descendants, as the slots' presenters, not the content, are their logical parents. The slots

@@ -31,7 +31,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [x] | `inputmode` | `Inputmode` (`InputOtpInputmode?`) | `TextInputOptions.ContentType`; null is numeric for `Number`, text for `Text`. No `none` |
 | [x] | `length` | `Length` (`int`, 4) | |
 | [x] | `pattern` | `Pattern` (`string?`) | One character's regular expression, .NET's syntax; null is `[\p{N}]` or `[\p{L}\p{N}]` by type |
-| [x] | `readonly` | `Readonly` | Typing does nothing; Backspace and paste still edit, as in Ionic |
+| [x] | `readonly` | `Readonly` | Typing, Backspace and paste do nothing, as in Ionic since 8.8.3; the arrows still move |
 | [x] | `separators` | `Separators` (`string?`) | `"all"` or positions such as `"1,3"`; Ionic's array is the same numbers with commas |
 | [x] | `shape` | `Shape` (`InputOtpShape`) | `Rectangular`, `Round` (default), `Soft` |
 | [x] | `size` | `Size` (`InputOtpSize`) | `Large`, `Medium` (default), `Small` |
@@ -67,7 +67,8 @@ Each has a test in `AvonicInputOtpTests`, named by its number:
 4. `IonComplete` follows `IonInput` whenever an edit leaves every box filled.
 5. Typing in a filled box inserts and shifts right while the last box is empty, and otherwise replaces it.
 6. Backspace removes a filled box's character and shifts the rest left; in an empty box it moves back and deletes there.
-7. Right moves on only from a filled box, Left moves back, swapped in RTL.
+7. Right moves on only from a filled box, Left moves back, swapped in RTL, which an ancestor's `FlowDirection` gives too, as `dir` on
+   an ancestor does in Ionic 8.8.19.
 8. A click or `SetFocus` lands on the box if it's filled, else the first empty box; not after Tab was pressed in a box.
 9. One box is the tab stop; empty boxes past it are hidden from automation.
 10. `IonFocus` and `IonBlur` are the group's; `IonChange` follows `IonBlur` when the value changed.
@@ -76,7 +77,7 @@ Each has a test in `AvonicInputOtpTests`, named by its number:
 13. `SetFocus(index)` clamps; `SetFocus()` focuses the tab stop.
 14. A value set in code raises nothing.
 15. Separators show after the listed boxes, never after the last.
-16. Disabled boxes can't be focused; read-only ones can, and ignore typing.
+16. Disabled boxes can't be focused, and disabling moves focus out; read-only ones can, and ignore typing, Backspace and paste.
 17. `Type`, `Inputmode` and `Autocapitalize` reach each box.
 18. The group is named "One-time password input", or by the host's `AutomationProperties.Name`; each box "Input n of length",
     and an empty box past the tab stop is `Raw`, as Ionic's `aria-hidden`. Both at style priority, bound as the box is made, so an
@@ -117,6 +118,5 @@ The per-size, per-shape and outline defaults are `Avonic.InputOtp.Md.SizeSmall`,
 ## Known gaps
 
 - `autocomplete="one-time-code"`: Avalonia 12 has no content type for it, so a phone won't offer a code from a message by itself.
-- Read-only Backspace and paste edit the value, as Ionic's do: see COMPARISON.md.
 - A paste reads the clipboard asynchronously, so a key typed during a slow read comes first.
 - Tried in a real window with keys and the mouse by `tools/real-window`; not on a device.

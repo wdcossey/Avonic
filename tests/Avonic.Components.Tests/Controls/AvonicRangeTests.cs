@@ -537,6 +537,38 @@ public class AvonicRangeTests
         Assert.Equal(80, HandleB(range).Value);
     }
 
+    // dualKnobsChanged, since Ionic 8.8.19. Measured there: two knobs at 20 and 80 made one go to 80, the pair's upper; one knob
+    // on that pair made two put A at 80 and B at 20, moving least; a number, 50, made two put A at 50 and B at 0. The value and the
+    // events don't change.
+    [AvaloniaFact]
+    public void R07_Changing_DualKnobs_Moves_The_Knobs_To_The_Value()
+    {
+        var a = new AvonicRange { DualKnobs = true, Value = new RangeValue(20, 80) };
+        var b = new AvonicRange { Value = new RangeValue(20, 80) };
+        var c = new AvonicRange { Value = 50 };
+        using var scene = Stub(a);
+        ((StackPanel)a.Parent!).Children.AddRange([b, c]);
+        GestureTests.Render();
+        var logs = new[] { a, b, c }.Select(Log.Of).ToList();
+
+        a.DualKnobs = false;
+        b.DualKnobs = true;
+        c.DualKnobs = true;
+        GestureTests.Render();
+
+        Assert.Equal(80, HandleA(a).Value);
+        AssertNear(312 - 18, Bounds(HandleA(a), scene.Window).X - Bounds(a, scene.Window).X);
+        Assert.Equal(80, HandleA(b).Value);
+        Assert.Equal(20, HandleB(b).Value);
+        AssertNear(78 - 18, Bounds(HandleB(b), scene.Window).X - Bounds(b, scene.Window).X);
+        Assert.Equal(50, HandleA(c).Value);
+        Assert.Equal(0, HandleB(c).Value);
+
+        Assert.All(logs, log => Assert.Empty(log.All));
+        Assert.Equal(new RangeValue(20, 80), a.Value);
+        Assert.Equal(new RangeValue(50), c.Value);
+    }
+
     // ── 8: activeBarStart ────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -950,6 +982,21 @@ public class AvonicRangeTests
 
         Click(scene, At(range, scene, 0.1));
         Assert.Equal(new RangeValue(90), range.Value);
+    }
+
+    // Since 8.8.19, isRTL(el) walks up to the nearest ancestor with dir. Measured with dir="rtl" on a div around the range only, the
+    // document's left alone: the knob's centre at 292.5 for 25, and a press 20 % from the left gives 80.
+    [AvaloniaFact]
+    public void R15_RTL_From_An_Ancestor_Counts_As_The_Ranges_Own()
+    {
+        var range = new AvonicRange { Value = 25 };
+        using var scene = new Scene(new StackPanel { FlowDirection = FlowDirection.RightToLeft, Children = { range } }, 390);
+        GestureTests.Render();
+
+        AssertNear(292.5 - 18, Bounds(HandleA(range), scene.Window).X);
+
+        Click(scene, At(range, scene, 0.2));
+        Assert.Equal(new RangeValue(80), range.Value);
     }
 
     [AvaloniaFact]

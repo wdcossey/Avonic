@@ -2,7 +2,7 @@
 
 A small activatable box holding a row of children: an icon, a label, an avatar. Ionic's chip has four props, two variables
 and no events, so most of this plan is which state beats which, and how the row holds its children. Measurements are from
-real Ionic 8.8.1 in Chromium, md, at 390 px wide, wrapped in `ion-app` so that `tap-click` runs. States were measured
+real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in `ion-app` so that `tap-click` runs. States were measured
 with a mouse in a context with `any-hover: hover`, and with a finger (CDP touch events) in a mobile context without it, as
 a phone has neither hover nor `:hover`.
 

@@ -1,7 +1,7 @@
 # ion-button — Plan
 
 The first control with `fill`, `shape`, `size` and `expand`, so most of this is which class beats which, and how a
-variable with a different default per class maps to one key. Measurements are from real Ionic 8.8.1 in Chromium, md, at
+variable with a different default per class maps to one key. Measurements are from real Ionic 8.8.19 in Chromium (8.8.1 when written; 8.8.19 changes only the hidden form button, which has no counterpart here), md, at
 390 px wide, wrapped in `ion-app` so `tap-click` and `focus-visible` run.
 
 ## Fidelity checklist

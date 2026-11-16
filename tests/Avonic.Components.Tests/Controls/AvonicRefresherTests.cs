@@ -1125,6 +1125,71 @@ public class AvonicRefresherTests
         }
     }
 
+    // findRefresherScrollHost, named in 8.8.18: the refresher pairs with the first host in the content only, as querySelector
+    // returns it. A second host's position counts for nothing.
+    [AvaloniaFact]
+    public void B24_Of_Two_Scroll_Hosts_Only_The_First_Is_The_Scroll_Element()
+    {
+        foreach (var firstScrolled in new[] { false, true })
+        {
+            var (first, second) = (InnerScroller(), InnerScroller());
+            using var page = new Page(body: column =>
+            {
+                first.Content = column;
+                second.Content = new StackPanel { Children = { new Border { Height = 2000, Background = Brushes.Transparent } } };
+                foreach (var host in new[] { first, second })
+                {
+                    host.Height = 400;
+                    host.Classes.Add(AvonicContent.ScrollHostClass);
+                }
+
+                return new StackPanel { Children = { first, second } };
+            });
+            ScrollsByTouch(first);
+            ScrollsByTouch(second);
+
+            (firstScrolled ? first : second).Offset = new Vector(0, 100);
+            page.Wait(16);
+            page.Drag(40).Wait(16);
+
+            if (firstScrolled)
+            {
+                Assert.Empty(page.Log);
+            }
+            else
+            {
+                Assert.Equal(["ionStart", "ionPullStart"], page.Names.Take(2));
+            }
+        }
+    }
+
+    // Since 8.8.17, a refresher that disconnects while it's still setting up makes no gesture, where Ionic awaited the gesture's
+    // module and made one anyway. Here the setup waits for a host that isn't templated yet; taken out first, the refresher stops
+    // waiting, and the host that comes after pulls nothing.
+    [AvaloniaFact]
+    public void B24_A_Refresher_Removed_While_Waiting_For_Its_Host_Makes_No_Gesture()
+    {
+        var scroller = InnerScroller();
+        TemplatedHost? host = null;
+        using var page = new Page(styles: [TemplatedHost.Styled], body: column =>
+        {
+            host = new TemplatedHost(column, scroller, styled: true) { Height = 400, IsVisible = false };
+            host.Classes.Add(AvonicContent.ScrollHostClass);
+            return host;
+        });
+        page.Wait(16);
+
+        page.Content.FixedContent = null;
+        page.Wait(16);
+        host!.IsVisible = true;
+        page.Wait(16);
+        ScrollsByTouch(scroller);
+        page.Drag(100).Lift().Wait(600);
+
+        Assert.False(page.Refresher.IsAttachedToVisualTree());
+        Assert.Empty(page.Log);
+    }
+
     // querySelector searches all of the content's light DOM, so a host in the fixed slot counts too. Of a host in each slot, the
     // one in the content's own slot is taken here.
     [AvaloniaFact]

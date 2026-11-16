@@ -6,7 +6,7 @@
 
 ## The spec
 
-`node_modules/@ionic/core/css/typography.css` (8.8.1), whole:
+`node_modules/@ionic/core/css/typography.css` (8.8.19), whole:
 
 | Rule | What it sets |
 |---|---|

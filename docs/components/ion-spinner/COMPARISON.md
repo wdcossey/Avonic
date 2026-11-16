@@ -58,7 +58,7 @@ spinner, so the reference uses 80 px, which fits.
 ## Measurements
 
 Every number in the plan and the tests is a computed style in Chromium, from a throwaway script in a temp folder, not the
-repo. It loads Ionic 8.8.1 in md mode inside `ion-app`, as `render.js` does, and for each spinner reads the shadow DOM's
+repo. It loads Ionic 8.8.19 in md mode inside `ion-app`, as `render.js` does, and for each spinner reads the shadow DOM's
 elements, then pauses every animation and seeks it to 0, 100, 175, 250, 350, 375, 500, 700, 750, 1000, 1050 and 1400 ms,
 reading each `svg`'s `opacity` and `transform` and each `circle`'s `stroke-dasharray` and `stroke-dashoffset`. Another
 part leaves the animations running, as a page does, and changes `paused`, `duration` and `name`, and removes and
@@ -133,8 +133,9 @@ gave `circles`. `B20` asserts the same steps.
 
 ### Measured: what `animated` reaches (#87)
 
-`grep -r "getBoolean('animated'" node_modules/@ionic/core/dist/collection`, and `config.get('animated'`, in `@ionic/core` 8.8.1:
-`utils/tap-click` (the ripple), `accordion`, `menu`, `nav`, `router-outlet`, `searchbar`, `skeleton-text` and `utils/overlays`.
+`grep -r "getBoolean('animated'" node_modules/@ionic/core/dist/collection`, and `config.get('animated'`, in `@ionic/core` 8.8.19:
+`utils/tap-click` (the ripple), `accordion`, `menu`, `nav`, `router-outlet`, `searchbar`, `skeleton-text`, `utils/overlays`, and since
+8.8.19 `datetime`, for its months' scroll.
 Not `spinner`, `progress-bar` or `content`. `ionic-global.js` sets `animated` to false when `_testing` is on, which is the
 other way round: `_testing` reaches `animated`, not `animated` the spinner.
 

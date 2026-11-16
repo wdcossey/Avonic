@@ -3,7 +3,7 @@
 The family's container. It draws very little: nearly all of `list.md.css` reaches into the items around it, so this PR is
 mostly how a container's rules reach many children, including ones a virtualising panel creates later. Its siblings have
 their own plans: [`ion-list-header`](../ion-list-header/PLAN.md), [`ion-item-divider`](../ion-item-divider/PLAN.md) and
-[`ion-item-group`](../ion-item-group/PLAN.md). Measurements are from real Ionic 8.8.1 in Chromium, md, at 390 px wide.
+[`ion-item-group`](../ion-item-group/PLAN.md). Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide.
 
 ## Fidelity checklist
 
