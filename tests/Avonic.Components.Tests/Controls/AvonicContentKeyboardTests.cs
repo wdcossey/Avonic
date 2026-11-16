@@ -621,6 +621,19 @@ public class AvonicContentKeyboardTests
 
         Assert.True(Scroll(inner).IsFocused);
         Assert.Equal(0, Scroll(outer).Offset.Y);
+
+        // Tab still brings it into view, as a browser's focus does, after a press.
+        var before = new Button { Content = "before" };
+        ((StackPanel)outer.Content!).Children.Insert(0, before);
+        Settle();
+        before.Focus(NavigationMethod.Tab);
+        Settle();
+        Scroll(outer).Offset = new Vector(0, 0);
+        Settle();
+        Press(scene, PhysicalKey.Tab);
+
+        Assert.True(Scroll(inner).IsFocused);
+        Assert.True(Scroll(outer).Offset.Y > 0);
     }
 
     // ── 49, 50 ───────────────────────────────────────────────────────────────────────────────
