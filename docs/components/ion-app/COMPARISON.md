@@ -59,7 +59,7 @@ Two things the coordinator asked to look at while the phone was out, which aren'
 - **[#172](https://github.com/wdcossey/Avonic/pull/172)'s scroll indicator at load.** Chrome on the phone, Ionic's `ion-content` with 40 items in `ion-app`, no scroll:
   the thumb is there from load, 10 device pixels wide (3.8), grey 191 on white, from y 296 to 1000, and still there about a minute
   later ([frame](compare/pixel8-chrome-indicator-at-load.png)). So a real phone shows it as Chromium's emulation did, where Avonic
-  hides it until the first scroll. Not changed here.
+  hid it until the first scroll. Not changed here: [#182](https://github.com/wdcossey/Avonic/issues/182) shows it from load since.
 - **[#139](https://github.com/wdcossey/Avonic/issues/139) and [#174](https://github.com/wdcossey/Avonic/issues/174), shadows on a GPU at 2.625×.** A danger `ion-fab-button` in the middle of
   an `ion-content`, in Chrome ([frame](compare/pixel8-chrome-fab.png)) and in the sample ([frame](compare/pixel8-avonic-fab.png)). Darkness
   (255 less the grey) outward from the disc's edge, in device pixels:

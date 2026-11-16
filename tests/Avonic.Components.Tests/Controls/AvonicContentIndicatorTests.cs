@@ -114,17 +114,25 @@ public class AvonicContentIndicatorTests
 
     // ── I2 ───────────────────────────────────────────────────────────────────────────────────
 
+    /// <summary>A user's scroll, and the fade after it: the load's thumb is gone, so what shows next is from what comes after.</summary>
+    private static void PastTheLoad(Scene scene, TestClock clock, ContentScrollIndicator indicator)
+    {
+        Wheel(scene, 1);
+        clock.At(1000);
+        Assert.Equal(0, indicator.ThumbOpacity);
+    }
+
     [AvaloniaFact]
     public void I2_It_Shows_On_The_Wheel()
     {
         using var clock = new TestClock();
         var content = Tall();
         using var scene = new Scene(Box(content));
-        Assert.Equal(0, Vertical(content).ThumbOpacity);
+        PastTheLoad(scene, clock, Vertical(content));
 
         Wheel(scene, 100);
 
-        Assert.Equal(100, Scroll(content).Offset.Y);
+        Assert.Equal(101, Scroll(content).Offset.Y);
         Assert.Equal(1, Vertical(content).ThumbOpacity);
         // Not on an axis that can't scroll, which draws nothing.
         Assert.Equal(0, Horizontal(content).ThumbOpacity);
@@ -138,16 +146,39 @@ public class AvonicContentIndicatorTests
         using var scene = new Scene(Box(content));
         Scroll(content).IsScrollInertiaEnabled = false;
         Settle();
+        PastTheLoad(scene, clock, Vertical(content));
 
         Drag(scene, 100);
 
-        Assert.True(Scroll(content).Offset.Y > 0);
+        Assert.True(Scroll(content).Offset.Y > 1);
         Assert.Equal(1, Vertical(content).ThumbOpacity);
     }
 
     [AvaloniaFact]
     public void I2_Not_On_A_Script_A_Scroll_Method_Or_A_Key()
     {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        PastTheLoad(scene, clock, Vertical(content));
+
+        Scroll(content).Offset = new Vector(0, 100);
+        Settle();
+        _ = content.ScrollToPoint(null, 400, 300);
+        clock.At(1400);
+        Scroll(content).Focus(NavigationMethod.Tab);
+        scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
+        Settle();
+        clock.At(1800);
+
+        Assert.Equal(662, Scroll(content).Offset.Y);
+        Assert.Equal(0, Vertical(content).ThumbOpacity);
+    }
+
+    [AvaloniaFact]
+    public void I2_None_Of_Them_Ends_The_Loads_Thumb() => InstalledTheme.Run(__ =>
+    {
+        // Not the user's, so the thumb from the load stays, and follows the offset.
         using var clock = new TestClock();
         var content = Tall();
         using var scene = new Scene(Box(content));
@@ -159,11 +190,12 @@ public class AvonicContentIndicatorTests
         Scroll(content).Focus(NavigationMethod.Tab);
         scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.None);
         Settle();
-        clock.At(800);
+        clock.At(5000);
 
         Assert.Equal(662, Scroll(content).Offset.Y);
-        Assert.Equal(0, Vertical(content).ThumbOpacity);
-    }
+        Assert.Equal(1, Vertical(content).ThumbOpacity);
+        Assert.Equal(new Rect(0, 165, 4, 75), Vertical(content).Thumb);
+    });
 
     [AvaloniaTheory]
     [InlineData(false)]
@@ -326,6 +358,93 @@ public class AvonicContentIndicatorTests
         frame = scene.Window.CaptureRenderedFrame()!;
         Assert.Equal(Colors.Red, Pixel(frame, 388, 110));
     });
+
+    // ── I7 (#182) ────────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void I7_It_Shows_From_The_Load_Until_The_Users_First_Scroll_Then_Fades_As_After_Any()
+    {
+        // Chrome on the Pixel shows it at load with no input, and still a minute later; emulation fades it only after a user's scroll.
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        var indicator = Vertical(content);
+        Assert.Equal(1, indicator.ThumbOpacity);
+
+        clock.At(60000);
+        Assert.Equal(1, indicator.ThumbOpacity);
+
+        Wheel(scene, 100);
+        clock.At(60299);
+        Assert.Equal(1, indicator.ThumbOpacity);
+        clock.At(60316);
+        Assert.Equal(1 - 16 / 300d, indicator.ThumbOpacity, 6);
+        clock.At(60604);
+        Assert.Equal(0, indicator.ThumbOpacity);
+    }
+
+    [AvaloniaFact]
+    public void I7_A_Drag_Ends_It_Too()
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        Scroll(content).IsScrollInertiaEnabled = false;
+        Settle();
+
+        Drag(scene, 100);
+        clock.At(1000);
+
+        Assert.Equal(0, Vertical(content).ThumbOpacity);
+    }
+
+    [AvaloniaFact]
+    public void I7_It_Is_Drawn_At_Load() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        scene.Window.Background = Brushes.White;
+        Render();
+
+        // At the top, 75 long, with no input: 191 on white, as after a scroll.
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Assert.Equal(191, Pixel(frame, 388, 40).R, 1.5);
+        Assert.Equal(255, Pixel(frame, 388, 90).R, 1.5);
+    });
+
+    [AvaloniaFact]
+    public void I7_Content_That_Becomes_Scrollable_Before_A_Scroll_Shows_It() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var inside = new Border { Height = 200 };
+        var content = new AvonicContent { Content = inside };
+        using var scene = new Scene(Box(content));
+        Assert.Equal(0, Vertical(content).ThumbOpacity);
+
+        inside.Height = 1200;
+        Settle();
+
+        Assert.Equal(1, Vertical(content).ThumbOpacity);
+        Assert.Equal(new Rect(0, 0, 4, 75), Vertical(content).Thumb);
+    });
+
+    [AvaloniaFact]
+    public void I7_Attached_Again_Is_A_New_Load()
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        var box = Box(content);
+        using var scene = new Scene(box);
+        PastTheLoad(scene, clock, Vertical(content));
+
+        box.Children.Remove(content);
+        Settle();
+        box.Children.Add(content);
+        Settle();
+
+        Assert.Equal(1, Vertical(content).ThumbOpacity);
+    }
 
     private static Color Pixel(Avalonia.Media.Imaging.WriteableBitmap frame, int x, int y) => Frames.PixelAt(frame, x, y);
 }
