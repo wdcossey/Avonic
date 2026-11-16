@@ -1518,4 +1518,18 @@ public class AvonicRefresherTests
         page.Drag(8 + 200).Wait(16).Lift().Wait(160);
         Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
     });
+
+    [AvaloniaFact]
+    public void C9_A_Pull_Let_Go_In_The_Two_Frames_After_The_Call_Is_After_The_Cancel() => InstalledTheme.Run(_ =>
+    {
+        // Cancel() waits two frames before its reset; a pull let go past 0.4 in them is let go after the call, so it refreshes on.
+        using var page = new Page();
+        page.Drag(8 + 200).Wait(16);
+        page.Refresher.Cancel();
+        page.Lift().Wait(1000);
+
+        Assert.Equal(1, page.Names.Count(n => n == "ionRefresh"));
+        Assert.Equal(RefresherState.Refreshing, page.Refresher.State);
+        Assert.DoesNotContain(page.Log, e => e.Name.StartsWith("ionPullEnd"));
+    });
 }
