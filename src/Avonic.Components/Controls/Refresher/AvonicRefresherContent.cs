@@ -274,17 +274,16 @@ public class AvonicRefresherContent : TemplatedControl
     // ── The pulling animation ─────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority. A pull being stepped is the newest
-    /// animation on the icon, so it beats a snap back still held there, which is the last refresh's: a pull that starts while a
-    /// cancel holds it moves the icon, as Chromium's does (#167). That snap back is let go, rather than left under the pull's
-    /// value, so that which wins doesn't depend on the order of Avalonia's value frames; it's destroyed with the pull anyway, at
-    /// the reset or the pull's end. A pull's own snap back comes after its last step.
+    /// Sets the parts to the pulling animation's <paramref name="frame"/>, at animation priority. A snap back on the icon is newer
+    /// than the pull it ends, so the icon is left to it; a new pull lets the last one's go first (<see cref="ClearSnapBack"/>).
     /// </summary>
     internal void ApplyPull(RefresherPullFrame frame)
     {
         ClearAnimated();
-        ClearSnapBack();
-        Animate(_pullingIcon, RenderTransformProperty, new MatrixTransform(frame.IconTransform));
+        if (_snapBack is null)
+        {
+            Animate(_pullingIcon, RenderTransformProperty, new MatrixTransform(frame.IconTransform));
+        }
 
         Animate(_spinnerArrowContainer, OpacityProperty, frame.SpinnerArrowOpacity);
         Animate(_pullingSpinner, RenderTransformProperty, new RotateTransform(frame.SpinnerRotation));

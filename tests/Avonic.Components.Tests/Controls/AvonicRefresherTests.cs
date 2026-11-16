@@ -1173,7 +1173,7 @@ public class AvonicRefresherTests
         }
     }
 
-    // ── C1–C9: after a cancel (#167) ───────────────────────────────────────────────────────────
+    // ── C1–C10: after a cancel (#167) ───────────────────────────────────────────────────────────
     // Measured in Chromium with docs/components/ion-refresher/ref/cancel.js.txt, into ref/measure-cancel.json.
 
     private static Rect Box(Page page, string part) => BoundsInWindow(page.Part<Control>(part), page.Scene.Window);
@@ -1231,10 +1231,11 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void C3_As_Ionics_A_Pull_Overtaken_By_The_Cancels_End_Leaves_The_Refresher_Off_Once_It_Lets_Go() => InstalledTheme.Run(_ =>
+    public void C3_As_Ionics_A_Pull_Overtaken_By_The_Cancels_End_And_Let_Go_With_No_Move_After_Leaves_The_Refresher_Off() => InstalledTheme.Run(_ =>
     {
-        // Measured in Chromium: resetNativeRefresher destroys the pull's animation mid-pull and sets the progress to 0, so letting
-        // go plays a destroyed animation back, whose onFinish never comes, and gesture.enable(true) with it. Nothing pulls again.
+        // Measured in Chromium (F, G): resetNativeRefresher destroys the pull's animation mid-pull and sets the progress to 0, so
+        // letting go with no move since plays a destroyed animation back, whose onFinish never comes, and gesture.enable(true) with
+        // it. Nothing pulls again. A move past 0.4 after the reset refreshes instead (C10).
         using var page = Refreshing();
         page.Refresher.Cancel();
         page.Wait(32 + 60);
@@ -1249,6 +1250,33 @@ public class AvonicRefresherTests
         page.Drag(8 + 180).Wait(16).Lift().Wait(600);
         Assert.Equal(starts, page.Names.Count(n => n == "ionStart"));
         Assert.Equal(0, IconsSeen(page));
+    });
+
+    [AvaloniaFact]
+    public void C10_As_Ionics_A_Pull_Overtaken_By_The_Cancels_End_That_Moves_On_Past_0_4_Refreshes_When_Let_Go() => InstalledTheme.Run(_ =>
+    {
+        // Measured in Chromium (D): onMove goes on setting the progress after the reset, so a release past 0.4 takes the snap back,
+        // which refreshes and turns the gesture on again: inactive 100 ms after letting go, refreshing at 400, and it pulls after
+        using var page = Refreshing();
+        page.Refresher.Cancel();
+        page.Wait(32 + 60);
+        page.Drag(8 + 100).Wait(16);
+        page.Wait(700);
+        Assert.Equal(RefresherState.Inactive, page.Refresher.State);
+        Assert.Single(page.Log, e => e.Name.StartsWith("ionPullEnd"));
+
+        page.Drag(100).Wait(16);
+        Assert.True(page.Refresher.GetProgress() > RefresherPullFrame.RefreshThreshold);
+        page.Lift().Wait(16 + 125 + 32);
+        Assert.Equal(2, page.Names.Count(n => n == "ionRefresh"));
+        Assert.Equal(RefresherState.Refreshing, page.Refresher.State);
+        Assert.Equal(1, IconsSeen(page));
+
+        page.LastRefresh!.Complete();
+        page.Wait(32 + 200 + 16);
+        var starts = page.Names.Count(n => n == "ionStart");
+        page.Drag(8 + 40).Wait(16);
+        Assert.Equal(starts + 1, page.Names.Count(n => n == "ionStart"));
     });
 
     [AvaloniaFact]
@@ -1359,8 +1387,8 @@ public class AvonicRefresherTests
     [AvaloniaFact]
     public void C9_As_Ionics_A_Refresh_Begun_While_Cancelling_Is_Ended_By_The_Cancel() => InstalledTheme.Run(_ =>
     {
-        // Measured in Chromium (ref/measure-cancel.json, H): cancel() at 2483, a pull let go at 2769, ionRefresh at 2914, then the
-        // cancel's reset at 3212 ends it as cancelled while the app is still refreshing, and a pull after refreshes again
+        // Measured in Chromium (ref/measure-cancel.json, H): cancel() at 17132, a pull let go at 17418, ionRefresh at 17548, then the
+        // cancel's reset at 17865 ends it as cancelled while the app is still refreshing, and a pull after refreshes again
         using var page = Refreshing();
         page.Refresher.Cancel();
         var cancelled = page.At;

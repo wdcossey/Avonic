@@ -50,7 +50,7 @@ Refreshing:
 | `cancel()` with no pull | the refreshing icon at (174, 86); the pulling one at y -8, under the header | the same (C5) | Match |
 | A short pull let go | one icon as it goes back, none after | the same (C4) | Match |
 | A pull during cancelling | the icon follows the finger (`translateY` 24.8, then 55.2) | the same (C2) | Match since #167: it stayed at the held snap back |
-| That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0; letting go does nothing, and nothing pulls again | the same (C3) | Match, an Ionic bug, below |
+| That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0. Let go with no move since (F): nothing, and nothing pulls again (G). Moved on past 0.4 and let go (D): it refreshes | the same (C3, C10) | Match, an Ionic bug, below |
 | A refresh begun during cancelling | `ionRefresh`, then the cancel's reset ends it, `ionPullEnd` `cancel`, while the app refreshes; a pull after refreshes | the same (C9) | Match, an Ionic bug, below |
 | Upward drag at the top | Chromium scrolls the content; the gesture cancels itself at its first move | the content scrolls; the gesture lets go at its threshold (B10) | Deliberate difference, below |
 | `overflow: hidden` on the scroll while pulling | yes | no | Deliberate difference, below |
@@ -58,7 +58,8 @@ Refreshing:
 ## After a cancel (#167)
 
 Measured by [`ref/cancel.js.txt`](ref/cancel.js.txt), run as `node cancel.js <repo> <out>`. It uses the page above and does a refresh
-then `cancel()`, a short pull, `cancel()` with no pull, two pulls during cancelling, and a refresh and `complete()` after a cancel.
+then `cancel()` (A), a short pull (B), `cancel()` with no pull (C), pulls during cancelling (D, F and H, with G after F), and a refresh
+and `complete()` after a cancel (E). The comment at its top says what each does.
 Every probe is in [`ref/measure-cancel.json`](ref/measure-cancel.json). Avonic's frames are from `AvonicRefresherCaptureTests.Cancel_Frames`.
 
 **Ionic shows both icons after `cancel()` during a refresh, for its 700 ms.** `.refresher-cancelling` shows `.refresher-pulling`,
@@ -83,11 +84,12 @@ With no pull, only the refreshing icon shows below the header. The pulling one s
 - **The pulling icon in cancelling is a pill,** 390 x 42 with a radius of 21, where Chromium's `border-radius: 100%` makes an
   ellipse of 195 by 21: a `CornerRadius` has one radius for each corner. For those 700 ms the pill covers the start of the first
   row's text, which shows under the ellipse's curve in Chromium.
-- **Ionic's own bug is kept: a pull that the cancel's end overtakes leaves the refresher off** (C3). `resetNativeRefresher` destroys
-  every animation, including the new pull's, and sets the progress to 0. Letting go then plays back a destroyed animation, whose
-  `onFinish` never comes, and so neither does `gesture.enable(true)`. In Chromium, nothing pulls again afterwards. A pull
-  let go past the threshold before the cancel's end refreshes, and the reset then ends that refresh as cancelled while the app is
-  still loading (C9; Chromium: `ionRefresh` 431 ms after `cancel()`, `ionPullEnd` `cancel` at 729).
+- **Two of Ionic's own bugs are kept.** A pull that the cancel's end overtakes, let go with no move since, leaves the refresher
+  off (C3): `resetNativeRefresher` destroys every animation, including the new pull's, and sets the progress to 0, so letting go
+  plays back a destroyed animation, whose `onFinish` never comes, and so neither does `gesture.enable(true)`. In Chromium nothing
+  pulls again afterwards (F, G). `onMove` goes on setting the progress, so one moved on past 0.4 refreshes when let go instead (D,
+  C10). And a pull let go past the threshold before the cancel's end refreshes, and the reset then ends that refresh as cancelled
+  while the app is still loading (C9; H in Chromium: `ionRefresh` 416 ms after `cancel()`, `ionPullEnd` `cancel` at 733).
 
 - **An upward drag from the top.** In Chromium Ionic's passive gesture captures it and the browser scrolls anyway; the first move,
   with `velocityY < 0`, cancels the pull. Avalonia gives a pointer to one owner, so a captured gesture would stop the scroll: the

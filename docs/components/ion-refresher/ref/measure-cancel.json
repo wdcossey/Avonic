@@ -4,7 +4,7 @@
  "results": [
   {
    "label": "A-pulled",
-   "t": 2096.699999988079,
+   "t": 2111.900000035763,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -66,7 +66,7 @@
   },
   {
    "label": "A-refreshing",
-   "t": 2504,
+   "t": 2527.400000035763,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
    "refresher": [
     0,
@@ -128,7 +128,7 @@
   },
   {
    "label": "A-cancel-10",
-   "t": 2565.199999988079,
+   "t": 2605.2000000476837,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
    "refresher": [
     0,
@@ -190,7 +190,7 @@
   },
   {
    "label": "A-cancel-40",
-   "t": 2613.399999976158,
+   "t": 2645,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -252,7 +252,7 @@
   },
   {
    "label": "A-cancel-100",
-   "t": 2660,
+   "t": 2683.600000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -314,7 +314,7 @@
   },
   {
    "label": "A-cancel-200",
-   "t": 2753,
+   "t": 2794,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -376,7 +376,7 @@
   },
   {
    "label": "A-cancel-400",
-   "t": 2955.199999988079,
+   "t": 2981.100000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -438,7 +438,7 @@
   },
   {
    "label": "A-cancel-650",
-   "t": 3201.399999976158,
+   "t": 3233.600000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -500,7 +500,7 @@
   },
   {
    "label": "A-cancel-760",
-   "t": 3309.600000023842,
+   "t": 3342.100000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -562,7 +562,7 @@
   },
   {
    "label": "A-cancel-900",
-   "t": 3450,
+   "t": 3484.300000011921,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -624,7 +624,7 @@
   },
   {
    "label": "B-pulled",
-   "t": 4554.100000023842,
+   "t": 4643.200000047684,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -686,7 +686,7 @@
   },
   {
    "label": "B-release-40",
-   "t": 4631.5,
+   "t": 4705,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -698,20 +698,20 @@
     "display": "flex",
     "rect": [
      174,
-     63.09,
+     63.07,
      42,
      42
     ],
-    "transform": "matrix(1, 0, 0, 1, 0, -1.90965)",
-    "spinner": "matrix(0.945976, 0.324238, -0.324238, 0.945976, 0, 0)",
-    "dash": "47.124px, 200px",
+    "transform": "matrix(1, 0, 0, 1, 0, -1.93217)",
+    "spinner": "matrix(0.946214, 0.323541, -0.323541, 0.946214, 0, 0)",
+    "dash": "47.0842px, 200px",
     "dashoffset": "0px",
     "sac": "0.3",
-    "arrowContainer": "matrix(0.331626, 0.943411, -0.943411, 0.331626, 0, 0)",
-    "arrow": "matrix(0.252259, 0, 0, 0.252259, 1.11709, 0)",
+    "arrowContainer": "matrix(0.334221, 0.942495, -0.942495, 0.334221, 0, 0)",
+    "arrow": "matrix(0.251696, 0, 0, 0.251696, 1.11906, 0)",
     "arrowRect": [
-     184.01,
-     86.53,
+     184.02,
+     86.54,
      3.86,
      3.86
     ],
@@ -722,9 +722,9 @@
     "color": "rgb(0, 84, 233)",
     "spinnerRect": [
      179.76,
-     68.85,
-     30.49,
-     30.49
+     68.83,
+     30.47,
+     30.47
     ]
    },
    "refreshing": {
@@ -748,7 +748,7 @@
   },
   {
    "label": "B-release-100",
-   "t": 4693.600000023842,
+   "t": 4768.700000047684,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -760,12 +760,12 @@
     "display": "flex",
     "rect": [
      174,
-     32.07,
+     32.1,
      42,
      42
     ],
-    "transform": "matrix(1, 0, 0, 1, 0, -32.9283)",
-    "spinner": "matrix(0.774497, -0.632578, 0.632578, 0.774497, 0, 0)",
+    "transform": "matrix(1, 0, 0, 1, 0, -32.9044)",
+    "spinner": "matrix(0.774992, -0.631971, 0.631971, 0.774992, 0, 0)",
     "dash": "1px, 200px",
     "dashoffset": "0px",
     "sac": "0.3",
@@ -773,7 +773,7 @@
     "arrow": "matrix(0, 0, 0, 0, 2, 0)",
     "arrowRect": [
      197,
-     63.07,
+     63.1,
      0,
      0
     ],
@@ -784,7 +784,7 @@
     "color": "rgb(0, 84, 233)",
     "spinnerRect": [
      178.12,
-     36.19,
+     36.21,
      33.77,
      33.77
     ]
@@ -810,7 +810,7 @@
   },
   {
    "label": "B-release-160",
-   "t": 4740.899999976158,
+   "t": 4829.600000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -822,12 +822,12 @@
     "display": "flex",
     "rect": [
      174,
-     6.53,
+     6.5,
      42,
      42
     ],
-    "transform": "matrix(1, 0, 0, 1, 0, -58.4686)",
-    "spinner": "matrix(0.0500937, -0.998745, 0.998745, 0.0500937, 0, 0)",
+    "transform": "matrix(1, 0, 0, 1, 0, -58.4961)",
+    "spinner": "matrix(0.0491938, -0.998789, 0.998789, 0.0491938, 0, 0)",
     "dash": "1px, 200px",
     "dashoffset": "0px",
     "sac": "0.3",
@@ -835,7 +835,7 @@
     "arrow": "matrix(0, 0, 0, 0, 2, 0)",
     "arrowRect": [
      197,
-     37.53,
+     37.5,
      0,
      0
     ],
@@ -845,10 +845,10 @@
     "radius": "100%",
     "color": "rgb(0, 84, 233)",
     "spinnerRect": [
-     182.41,
-     14.95,
-     25.17,
-     25.17
+     182.42,
+     14.93,
+     25.15,
+     25.15
     ]
    },
    "refreshing": {
@@ -872,7 +872,7 @@
   },
   {
    "label": "B-release-260",
-   "t": 4852.600000023842,
+   "t": 4925.300000011921,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -934,7 +934,7 @@
   },
   {
    "label": "B-release-400",
-   "t": 4991.699999988079,
+   "t": 5066.200000047684,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -996,7 +996,7 @@
   },
   {
    "label": "C-cancel-40",
-   "t": 5365.199999988079,
+   "t": 5442.600000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -1058,7 +1058,7 @@
   },
   {
    "label": "C-cancel-100",
-   "t": 5427.199999988079,
+   "t": 5504.700000047684,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -1120,7 +1120,7 @@
   },
   {
    "label": "C-cancel-400",
-   "t": 5724.600000023842,
+   "t": 5800.400000035763,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -1182,7 +1182,7 @@
   },
   {
    "label": "C-cancel-760",
-   "t": 6087.199999988079,
+   "t": 6158.700000047684,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1244,7 +1244,7 @@
   },
   {
    "label": "D-pull-during-cancelling",
-   "t": 9855,
+   "t": 9927.400000035763,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1306,7 +1306,7 @@
   },
   {
    "label": "D-held-300",
-   "t": 10194,
+   "t": 10273.400000035763,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1368,7 +1368,7 @@
   },
   {
    "label": "D-held-700",
-   "t": 10581,
+   "t": 10662.100000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1430,7 +1430,7 @@
   },
   {
    "label": "D-release-100",
-   "t": 10723.600000023842,
+   "t": 10803.400000035763,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1492,7 +1492,7 @@
   },
   {
    "label": "D-release-400",
-   "t": 11020.800000011921,
+   "t": 11099.700000047684,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
    "refresher": [
     0,
@@ -1554,7 +1554,7 @@
   },
   {
    "label": "D-release-900",
-   "t": 11521.199999988079,
+   "t": 11599.300000011921,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
    "refresher": [
     0,
@@ -1616,7 +1616,7 @@
   },
   {
    "label": "E-refreshing",
-   "t": 14046.600000023842,
+   "t": 14126.900000035763,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
    "refresher": [
     0,
@@ -1678,7 +1678,7 @@
   },
   {
    "label": "E-complete-40",
-   "t": 14125.5,
+   "t": 14203.900000035763,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-completing",
    "refresher": [
     0,
@@ -1740,7 +1740,7 @@
   },
   {
    "label": "E-complete-120",
-   "t": 14203.600000023842,
+   "t": 14282.100000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-completing",
    "refresher": [
     0,
@@ -1786,23 +1786,23 @@
     "rect": [
      188.81,
      79.81,
-     12.37,
-     12.37
+     12.38,
+     12.38
     ],
-    "transform": "matrix(0.294546, 0, 0, 0.294546, 0, 0)",
+    "transform": "matrix(0.294875, 0, 0, 0.294875, 0, 0)",
     "transition": "0.2s",
     "spinnerRect": [
-     191.47,
-     82.47,
-     7.07,
-     7.07
+     191.46,
+     82.46,
+     7.08,
+     7.08
     ]
    },
    "scrollTop": 0
   },
   {
    "label": "E-complete-300",
-   "t": 14389,
+   "t": 14466.900000035763,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -1863,8 +1863,512 @@
    "scrollTop": 0
   },
   {
+   "label": "H-pulled",
+   "t": 17414.100000023842,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     128.95,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 63.9492)",
+    "spinner": "matrix(-0.79234, 0.61008, -0.61008, -0.79234, 0, 0)",
+    "dash": "100px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "matrix(0.939186, -0.343409, 0.343409, 0.939186, 0, 0)",
+    "arrow": "matrix(1, 0, 0, 1, -1.5, 0)",
+    "arrowRect": [
+     189.33,
+     152.16,
+     15.39,
+     15.39
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     178.17,
+     133.12,
+     33.66,
+     33.66
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-release-60",
+   "t": 17492.80000001192,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     92.44,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 27.4408)",
+    "spinner": "matrix(-0.79234, 0.61008, -0.61008, -0.79234, 0, 0)",
+    "dash": "100px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "matrix(0.939186, -0.343409, 0.343409, 0.939186, 0, 0)",
+    "arrow": "matrix(1, 0, 0, 1, -1.5, 0)",
+    "arrowRect": [
+     189.33,
+     115.65,
+     15.39,
+     15.39
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     178.17,
+     96.61,
+     33.66,
+     33.66
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-release-200",
+   "t": 17618.80000001192,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "flex",
+    "rect": [
+     174,
+     65,
+     42,
+     42
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-release-400",
+   "t": 17823.100000023842,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "flex",
+    "rect": [
+     174,
+     65,
+     42,
+     42
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-release-800",
+   "t": 18232,
+   "classes": "md refresher-md hydrated refresher-native",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-release-1500",
+   "t": 18934.5,
+   "classes": "md refresher-md hydrated refresher-native",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-pull-after",
+   "t": 20102.900000035763,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "flex",
+    "rect": [
+     174,
+     115.49,
+     42,
+     42
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 50.4943)",
+    "spinner": "matrix(-0.456738, 0.889601, -0.889601, -0.456738, 0, 0)",
+    "dash": "100px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "matrix(0.737165, -0.675712, 0.675712, 0.737165, 0, 0)",
+    "arrow": "matrix(1, 0, 0, 1, -1.5, 0)",
+    "arrowRect": [
+     192.17,
+     136.4,
+     16.95,
+     16.95
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     178.84,
+     120.34,
+     32.31,
+     32.31
+    ]
+   },
+   "refreshing": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "H-after-release",
+   "t": 20519.200000047684,
+   "classes": "md refresher-md hydrated refresher-native refresher-active refresher-refreshing",
+   "refresher": [
+    0,
+    56,
+    390,
+    60
+   ],
+   "pulling": {
+    "display": "none",
+    "rect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "transform": "none",
+    "spinner": "none",
+    "dash": "80px, 200px",
+    "dashoffset": "0px",
+    "sac": "1",
+    "arrowContainer": "none",
+    "arrow": "none",
+    "arrowRect": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(236, 236, 236)",
+    "shadow": "rgba(0, 0, 0, 0.1) 0px 1px 6px 0px",
+    "radius": "100%",
+    "color": "rgb(0, 84, 233)",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "refreshing": {
+    "display": "flex",
+    "rect": [
+     174,
+     65,
+     42,
+     42
+    ],
+    "transform": "none",
+    "transition": "0.2s",
+    "spinnerRect": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scrollTop": 0
+  },
+  {
+   "label": "times",
+   "classes": "",
+   "pulling": {},
+   "refreshing": {},
+   "cancelAt": 17132.400000035763,
+   "releaseAt": 17417.900000035763
+  },
+  {
    "label": "F-cancelling",
-   "t": 17074.19999998808,
+   "t": 23263.5,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-cancelling",
    "refresher": [
     0,
@@ -1926,7 +2430,7 @@
   },
   {
    "label": "F-pull-in-cancelling",
-   "t": 17266,
+   "t": 23452.600000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -1988,7 +2492,7 @@
   },
   {
    "label": "F-pull-in-cancelling-2",
-   "t": 17372.69999998808,
+   "t": 23561.100000023842,
    "classes": "md refresher-md hydrated refresher-native refresher-active refresher-pulling",
    "refresher": [
     0,
@@ -2050,7 +2554,7 @@
   },
   {
    "label": "F-after-reset",
-   "t": 18214.19999998808,
+   "t": 24405.100000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -2112,7 +2616,7 @@
   },
   {
    "label": "F-release-100",
-   "t": 18323.399999976158,
+   "t": 24514.100000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -2174,7 +2678,7 @@
   },
   {
    "label": "F-release-400",
-   "t": 18620.30000001192,
+   "t": 24811.100000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -2236,7 +2740,7 @@
   },
   {
    "label": "G-pull-after",
-   "t": 19818.30000001192,
+   "t": 26025.600000023842,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -2298,7 +2802,7 @@
   },
   {
    "label": "G-after-release",
-   "t": 20225.600000023842,
+   "t": 26441.80000001192,
    "classes": "md refresher-md hydrated refresher-native",
    "refresher": [
     0,
@@ -2362,997 +2866,1202 @@
  "log": [
   {
    "n": "ionStart",
-   "t": 943.1999999880791,
+   "t": 963.6000000238419,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 943.1999999880791,
+   "t": 963.6000000238419,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1036.8999999761581,
+   "t": 1055.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1068.5,
+   "t": 1088.1000000238419,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1101.1000000238419,
+   "t": 1117.6000000238419,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1134.1000000238419,
+   "t": 1148.9000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1167.3999999761581,
+   "t": 1182.9000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1201.1000000238419,
+   "t": 1215.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1235.300000011921,
+   "t": 1250.1000000238419,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1268.1000000238419,
+   "t": 1282.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1303,
+   "t": 1315.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1334.800000011921,
+   "t": 1350,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1368.3999999761581,
+   "t": 1382.9000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1401,
+   "t": 1415.4000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1434.8999999761581,
+   "t": 1449.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1467.699999988079,
+   "t": 1482.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1501,
+   "t": 1516.2000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1534.800000011921,
+   "t": 1549.2000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1568.1000000238419,
+   "t": 1582.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1601.199999988079,
+   "t": 1615.4000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1635,
+   "t": 1649.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1667.5,
+   "t": 1682.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1701.1000000238419,
+   "t": 1717.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1734.300000011921,
+   "t": 1749.9000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1768.1000000238419,
+   "t": 1783.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1802.6000000238419,
+   "t": 1815.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1834.699999988079,
+   "t": 1848.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1867.800000011921,
+   "t": 1882.9000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1901.800000011921,
+   "t": 1915.4000000357628,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1934.8999999761581,
+   "t": 1949,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 1967.699999988079,
+   "t": 1982.2000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 2002.3999999761581,
+   "t": 2015.800000011921,
    "d": null
   },
   {
    "n": "ionRefresh",
-   "t": 2235,
+   "t": 2249.2000000476837,
    "d": "\"complete-fn\""
   },
   {
    "n": "ionPullEnd",
-   "t": 3277.899999976158,
+   "t": 3299.7000000476837,
    "d": "\"cancel\""
   },
   {
    "n": "ionStart",
-   "t": 3824.899999976158,
+   "t": 3892.7000000476837,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 3824.899999976158,
+   "t": 3892.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 3916.399999976158,
+   "t": 3987.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 3947,
+   "t": 4017.7000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 3977.699999988079,
+   "t": 4050.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4008.699999988079,
+   "t": 4082.2000000476837,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4039.399999976158,
+   "t": 4121.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4071.199999988079,
+   "t": 4161,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4101.899999976158,
+   "t": 4189.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4134.300000011921,
+   "t": 4220.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4167.600000023842,
+   "t": 4251.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4200.699999988079,
+   "t": 4282.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4234.5,
+   "t": 4316,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4267.699999988079,
+   "t": 4349.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4300.699999988079,
+   "t": 4383.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4334.800000011921,
+   "t": 4416.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4367.100000023842,
+   "t": 4448.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4400.800000011921,
+   "t": 4482,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4435.100000023842,
+   "t": 4516,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 4469,
+   "t": 4549.900000035763,
    "d": null
   },
   {
    "n": "ionPullEnd",
-   "t": 4751.699999988079,
+   "t": 4832.200000047684,
    "d": "\"cancel\""
   },
   {
    "n": "ionPullEnd",
-   "t": 6034.699999988079,
+   "t": 6110.400000035763,
    "d": "\"cancel\""
   },
   {
    "n": "ionStart",
-   "t": 6977.300000011921,
+   "t": 7020.200000047684,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 6977.300000011921,
+   "t": 7020.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7071.5,
+   "t": 7113.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7103,
+   "t": 7143.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7134.800000011921,
+   "t": 7174.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7167.899999976158,
+   "t": 7204.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7200.899999976158,
+   "t": 7236,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7234.100000023842,
+   "t": 7266.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7268,
+   "t": 7299.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7301.300000011921,
+   "t": 7366.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7335.300000011921,
+   "t": 7399.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7367.100000023842,
+   "t": 7468.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7400.800000011921,
+   "t": 7504,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7434.800000011921,
+   "t": 7533.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7467.600000023842,
+   "t": 7565.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7500.5,
+   "t": 7599.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7534,
+   "t": 7631.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7567.300000011921,
+   "t": 7671.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7601.399999976158,
+   "t": 7703.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7635,
+   "t": 7732.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7667.199999988079,
+   "t": 7765.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7701.300000011921,
+   "t": 7799.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7733.899999976158,
+   "t": 7833,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7768.100000023842,
+   "t": 7865.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7801.100000023842,
+   "t": 7898.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7834.699999988079,
+   "t": 7932.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7867.5,
+   "t": 7965.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7901,
+   "t": 7999.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7934.399999976158,
+   "t": 8032.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 7967.699999988079,
+   "t": 8065.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8001.300000011921,
+   "t": 8098.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8033.899999976158,
+   "t": 8133,
    "d": null
   },
   {
    "n": "ionRefresh",
-   "t": 8250.899999976158,
+   "t": 8348.600000023842,
    "d": "\"complete-fn\""
   },
   {
    "n": "ionStart",
-   "t": 8717.800000011921,
+   "t": 8782.700000047684,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 8717.800000011921,
+   "t": 8782.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8810.300000011921,
+   "t": 8875,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8843.199999988079,
+   "t": 8906.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8873.199999988079,
+   "t": 8938.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8903.699999988079,
+   "t": 8968.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8935.300000011921,
+   "t": 8999.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 8967.199999988079,
+   "t": 9032.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9000.800000011921,
+   "t": 9065.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9034.399999976158,
+   "t": 9098.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9067.899999976158,
+   "t": 9132.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9100.899999976158,
+   "t": 9165.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9134.600000023842,
+   "t": 9198.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9168,
+   "t": 9232.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9200.600000023842,
+   "t": 9266.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9234.199999988079,
+   "t": 9298.800000011921,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 9331.800000011921,
    "d": null
   },
   {
    "n": "ionPullEnd",
-   "t": 9264.300000011921,
+   "t": 9348.700000047684,
    "d": "\"cancel\""
   },
   {
    "n": "ionPull",
-   "t": 9268,
+   "t": 9366.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9300.899999976158,
+   "t": 9398.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9333.899999976158,
+   "t": 9432.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9367.899999976158,
+   "t": 9466,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9401.300000011921,
+   "t": 9498.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9434.199999988079,
+   "t": 9532.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9469.699999988079,
+   "t": 9565.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9500.899999976158,
+   "t": 9598.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9534,
+   "t": 9632.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9567.300000011921,
+   "t": 9665.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9600.899999976158,
+   "t": 9698.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9633.699999988079,
+   "t": 9732.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9667.5,
+   "t": 9766,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9701.800000011921,
+   "t": 9799.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 9734.199999988079,
-   "d": null
-  },
-  {
-   "n": "ionPull",
-   "t": 9767.600000023842,
+   "t": 9833.400000035763,
    "d": null
   },
   {
    "n": "ionRefresh",
-   "t": 10751,
+   "t": 10831.5,
    "d": "\"complete-fn\""
   },
   {
    "n": "ionPullEnd",
-   "t": 12297.5,
+   "t": 12365.900000035763,
    "d": "\"cancel\""
   },
   {
    "n": "ionStart",
-   "t": 12505,
+   "t": 12586.5,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 12505,
+   "t": 12586.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12599.100000023842,
+   "t": 12680.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12629.899999976158,
+   "t": 12711.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12661,
+   "t": 12742.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12692.899999976158,
+   "t": 12773.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12723.800000011921,
+   "t": 12804.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12754.800000011921,
+   "t": 12836.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12785.899999976158,
+   "t": 12865.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12817.300000011921,
+   "t": 12898.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12851.100000023842,
+   "t": 12933.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12884.399999976158,
+   "t": 12964.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12918.100000023842,
+   "t": 12998.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12951.199999988079,
+   "t": 13031.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 12983.600000023842,
+   "t": 13065.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13018.699999988079,
+   "t": 13098.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13051.300000011921,
+   "t": 13132.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13084.300000011921,
+   "t": 13165.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13117.300000011921,
+   "t": 13198.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13150.899999976158,
+   "t": 13231.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13184.399999976158,
+   "t": 13266.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13217.199999988079,
+   "t": 13298.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13250.5,
+   "t": 13332.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13285,
+   "t": 13367.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13318.100000023842,
+   "t": 13410.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13350.199999988079,
+   "t": 13447.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13385.399999976158,
+   "t": 13477.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13417.399999976158,
+   "t": 13511.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13451.699999988079,
+   "t": 13547.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13486.5,
+   "t": 13569.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13517.899999976158,
+   "t": 13601.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 13551,
+   "t": 13632.300000011921,
    "d": null
   },
   {
    "n": "ionRefresh",
-   "t": 13766.899999976158,
+   "t": 13848.800000011921,
    "d": "\"complete-fn\""
   },
   {
    "n": "ionPullEnd",
-   "t": 14317.300000011921,
+   "t": 14398.600000023842,
    "d": "\"complete\""
   },
   {
    "n": "ionStart",
-   "t": 15458.300000011921,
+   "t": 15536.200000047684,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 15458.300000011921,
+   "t": 15536.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15552.800000011921,
+   "t": 15631.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15584.399999976158,
+   "t": 15664.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15616.699999988079,
+   "t": 15699.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15650.5,
+   "t": 15731.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15684,
+   "t": 15765.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15717.399999976158,
+   "t": 15798.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15750.699999988079,
+   "t": 15831.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15784.5,
+   "t": 15865.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15817.100000023842,
+   "t": 15898.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15850.899999976158,
+   "t": 15932.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15884.100000023842,
+   "t": 15965,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15917,
+   "t": 15998.900000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15951.699999988079,
+   "t": 16032.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 15985.100000023842,
+   "t": 16065.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16018.300000011921,
+   "t": 16099.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16050.199999988079,
+   "t": 16131.800000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16083.899999976158,
+   "t": 16166.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16117.5,
+   "t": 16199.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16150.899999976158,
+   "t": 16232.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16184.800000011921,
+   "t": 16265.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16218.199999988079,
+   "t": 16299.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16251,
+   "t": 16332.300000011921,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16283.5,
+   "t": 16365.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16317.699999988079,
+   "t": 16398.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16350.399999976158,
+   "t": 16431.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16383.899999976158,
+   "t": 16465.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16416.899999976158,
+   "t": 16498.600000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16451.100000023842,
+   "t": 16532.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16483.899999976158,
+   "t": 16570.5,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 16517.30000001192,
+   "t": 16605.30000001192,
    "d": null
   },
   {
    "n": "ionRefresh",
-   "t": 16733.899999976158,
+   "t": 16848.30000001192,
    "d": "\"complete-fn\""
   },
   {
    "n": "ionStart",
-   "t": 17134.100000023842,
+   "t": 17249.100000023842,
    "d": null
   },
   {
    "n": "ionPullStart",
-   "t": 17134.100000023842,
+   "t": 17249.100000023842,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 17168,
+   "t": 17282.200000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 17201.80000001192,
+   "t": 17315.700000047684,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 17233.5,
+   "t": 17349.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 17317.100000023842,
+   "t": 17381.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionRefresh",
+   "t": 17547.900000035763,
+   "d": "\"complete-fn\""
+  },
+  {
+   "n": "ionPullEnd",
+   "t": 17865.100000023842,
+   "d": "\"cancel\""
+  },
+  {
+   "n": "ionStart",
+   "t": 18967.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPullStart",
+   "t": 18967.400000035763,
    "d": null
   },
   {
    "n": "ionPull",
-   "t": 17350.399999976158,
+   "t": 19063.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19093.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19124.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19156.100000023842,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19187.5,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19218.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19249.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19282.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19315.200000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19348.80000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19381.80000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19415.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19449.5,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19481.5,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19515.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19549.200000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19581.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19615.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19648.80000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19682.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19715,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19748.80000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19781.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19814.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19848.700000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19882.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19916.30000001192,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19948.5,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 19982.700000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 20014.600000023842,
+   "d": null
+  },
+  {
+   "n": "ionRefresh",
+   "t": 20231.200000047684,
+   "d": "\"complete-fn\""
+  },
+  {
+   "n": "ionStart",
+   "t": 23332.200000047684,
+   "d": null
+  },
+  {
+   "n": "ionPullStart",
+   "t": 23332.200000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 23365,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 23398.400000035763,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 23432.5,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 23498.200000047684,
+   "d": null
+  },
+  {
+   "n": "ionPull",
+   "t": 23531.200000047684,
    "d": null
   },
   {
    "n": "ionPullEnd",
-   "t": 17744.899999976158,
+   "t": 23935.700000047684,
    "d": "\"cancel\""
   }
  ]

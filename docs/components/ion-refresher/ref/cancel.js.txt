@@ -1,6 +1,7 @@
 // #167: what ion-refresher's md native refresher shows after a cancel, in Chromium. A: cancel() during a refresh; B: a short pull;
 // C: cancel() with no pull; D: a pull again during cancelling, slowly, which the reset overtakes; E: a refresh and complete() after;
-// F: a fast pull during cancelling; G: a pull after F, which never starts, as F left the gesture off.
+// H: a fast pull let go past the threshold during cancelling, whose refresh the cancel's reset ends, and a pull after it;
+// F: a fast pull during cancelling, held past its end; G: a pull after F, which never starts, as F left the gesture off.
 // node cancel.js <repoRoot> <outDir>
 const path = require('path');
 const fs = require('fs');
@@ -112,6 +113,18 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => document.querySelector('ion-refresher').complete());
     await sample('E-complete', [40, 120, 300], true);
     await page.waitForTimeout(1000);
+    // H: refresh, cancel, then a fast pull past the threshold let go before the cancel's end
+    await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400);
+    await page.evaluate(() => { window.__cancelAt = performance.now(); });
+    await cancel(); await page.waitForTimeout(60);
+    y = y0; await page.mouse.move(x, y0); await page.mouse.down();
+    for (const t of [y0 + 8, y0 + 16, y0 + 80, y0 + 140, y0 + 200, y0 + 220]) { y = t; await page.mouse.move(x, y); await page.waitForTimeout(16); }
+    results.push(await probe('H-pulled')); await page.mouse.up();
+    await page.evaluate(() => { window.__releaseAt = performance.now(); });
+    await sample('H-release', [60, 200, 400, 800, 1500], false);
+    await pull(0.5); results.push(await probe('H-pull-after')); await page.mouse.up(); await page.waitForTimeout(400); results.push(await probe('H-after-release'));
+    results.push({ label: 'times', classes: '', pulling: {}, refreshing: {}, cancelAt: await page.evaluate(() => window.__cancelAt), releaseAt: await page.evaluate(() => window.__releaseAt) });
+    await page.waitForTimeout(1000);
     // F: refresh, cancel, then a fast pull while still cancelling
     await pull(0.5); await page.mouse.up(); await page.waitForTimeout(400);
     await cancel(); await page.waitForTimeout(60); results.push(await probe('F-cancelling'));
@@ -123,6 +136,7 @@ const server = http.createServer((req, res) => {
     await page.waitForTimeout(800); results.push(await probe('F-after-reset')); await page.mouse.up();
     await sample('F-release', [100, 400], false);
     await pull(0.5); results.push(await probe('G-pull-after')); await page.mouse.up(); await page.waitForTimeout(400); results.push(await probe('G-after-release'));
+    await page.waitForTimeout(1000);
     const log = await page.evaluate(() => window.__log);
     fs.writeFileSync(path.join(OUT, 'cancel.json'), JSON.stringify({ snippet, errors, results, log }, null, 1));
     console.log('done', results.length, 'probes', log.length, 'events', errors.length, 'errors');

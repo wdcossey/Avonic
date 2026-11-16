@@ -128,6 +128,7 @@ None.
   an app puts in the slots and their logical descendants. Of two hosts, one in `Content` and one in `FixedContent`, the one in
   `Content` wins, where Ionic takes the first in the markup.
 - `AvonicConfig.RefreshingIcon` takes only spinners, as `PullingIcon` does: Ionic's can name any icon, for its legacy refresher.
-- In cancelling, the pulling icon is a pill where Chromium draws an ellipse, and a pull that a cancel's end overtakes leaves the
-  refresher off, and a refresh begun while cancelling ends as cancelled, as Ionic's do ([#167](COMPARISON.md#deliberate-differences)).
+- In cancelling, the pulling icon is a pill where Chromium draws an ellipse. Two of Ionic's own bugs are kept: a pull that a
+  cancel's end overtakes, let go with no move past 0.4 since, leaves the refresher off, and a refresh begun while cancelling ends as
+  cancelled ([#167](COMPARISON.md#deliberate-differences)).
 - Tried in a real window with touch, the wheel and the mouse by `tools/real-window`; not on a device.

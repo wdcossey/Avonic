@@ -11,6 +11,9 @@ namespace Avonic.Components.Controls;
 /// </summary>
 public class RefresherColumn : Panel
 {
+    // The children's heights added up at the last measure, which their DesiredSize keeps until the next
+    private double _height;
+
     /// <inheritdoc/>
     protected override Size MeasureOverride(Size availableSize)
     {
@@ -24,6 +27,7 @@ public class RefresherColumn : Panel
             height += control.DesiredSize.Height;
         }
 
+        _height = height;
         return new Size(width, height);
     }
 
@@ -33,13 +37,7 @@ public class RefresherColumn : Panel
     /// </summary>
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var height = 0.0;
-        foreach (var control in Children)
-        {
-            height += control.DesiredSize.Height;
-        }
-
-        var y = (finalSize.Height - height) / 2;
+        var y = (finalSize.Height - _height) / 2;
         foreach (var control in Children)
         {
             control.Arrange(new Rect(0, y, Math.Max(finalSize.Width, control.DesiredSize.Width), control.DesiredSize.Height));
