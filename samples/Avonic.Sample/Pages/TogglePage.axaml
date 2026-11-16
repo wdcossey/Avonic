@@ -62,6 +62,24 @@
                 <c:AvonicToggle IonChange="OnIonChange" />
                 <TextBlock Name="Changes" Text="Flip a toggle, or drag its track" />
             </StackPanel>
+
+            <!-- Tab through these: in a single-input item the item draws the row's focus; in a multi-input or a clickable item
+                 the toggle draws its circle behind the handle too. -->
+            <TextBlock Margin="16,8,16,0" Text="Keyboard focus: Tab through these" />
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicToggle Content="Single input: the item shows focus" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicCheckbox />
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicToggle Content="Multi-input: a circle too" IonChange="OnIonChange" />
+                </c:AvonicItem>
+                <c:AvonicItem Button="True">
+                    <c:AvonicToggle Content="Clickable item: a circle too" Checked="True" IonChange="OnIonChange" />
+                </c:AvonicItem>
+            </c:AvonicList>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -81,7 +81,9 @@ The group has no variables: its helper text is `Avonic.TextColorStep300Brush` an
   choice and out again.
 - **In an item**, the radio fills the row, and the item is the cover: it ripples and shows focus, and a tap on its padding clicks the
   radio. In the start or end slot it's as wide as its content.
-- **Focus by keyboard** on a radio outside an item shows a 36 px circle of the primary tint at 0.2.
+- **Focus by keyboard** on a radio outside an item, or since Ionic 8.8.17 in a multi-input item, shows a 36 px circle of the primary
+  tint at 0.2: `FocusVisible.IsEnabled` at style priority, followed as the item turns multi-input or single again. In a
+  single-input item the item shows focus instead.
 - **The mark** scales in over 280 ms, `cubic-bezier(0.4, 0, 0.2, 1)`, and out again.
 - **The hint** is at the top, 16 at each side in a list. The error text shows instead of the helper text while the group has both
   `ion-touched` and `ion-invalid`, which an app's validation sets.

@@ -590,6 +590,36 @@ try {
         'frames only: look at them'
     }
 
+    # #188, Ionic 8.8.17: the keyboard focus circle. Focus from automation shows none, and Shift+Tab then Tab brings it back by
+    # keyboard. The checkbox's circle reaches 9 past its box, which is at the end of the default slot, so a pixel 5 past the host
+    # shows only through the item's room. The toggle's circle is 14 above the handle's middle, outside the track and the handle.
+    Section 'focus indicators' {
+        Open 'ion-checkbox'
+        $multi = Named $CT::CheckBox 'Multi-input*'
+        $multi.SetFocus(); Start-Sleep -Milliseconds 400
+        $b = $multi.Current.BoundingRectangle
+        $x = [int]($b.Right + 5 * $scale); $y = [int]($b.Y + $b.Height / 2)
+        $plain = Pixel $x $y
+        Key '+{TAB}' 300
+        Key '{TAB}' 450
+        Shot 'focus-checkbox-multi-input'
+        Check 'a checkbox in a multi-input item shows its circle past the slot' ((IsFocused $multi) -and (Pixel $x $y) -ne $plain) "$plain, then $(Pixel $x $y)"
+        Key 'a'
+        Check 'a letter key clears it' ((Pixel $x $y) -eq $plain)
+
+        Open 'ion-toggle'
+        $toggle = Named $CT::Button 'Multi-input: a circle too*'
+        $toggle.SetFocus(); Start-Sleep -Milliseconds 400
+        $b = $toggle.Current.BoundingRectangle
+        $x = [int]($b.Right - 26 * $scale); $y = [int]($b.Y + $b.Height / 2 - 14 * $scale)
+        # The item shows focus too, as the toggle makes it focusable, so the circle is told from the row 40 to its left.
+        $away = [int]($x - 40 * $scale)
+        Key '+{TAB}' 300
+        Key '{TAB}' 450
+        Shot 'focus-toggle-multi-input'
+        Check 'a toggle in a multi-input item shows its circle by the handle' ((IsFocused $toggle) -and (Pixel $x $y) -ne (Pixel $away $y)) "$(Pixel $away $y), then $(Pixel $x $y)"
+    }
+
     Section 'ion-item: touch' {
         Open 'ion-item'
         $x, $y = Centre (Named $CT::Button 'Button with detail')

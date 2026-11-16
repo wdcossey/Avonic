@@ -1,7 +1,11 @@
 # ion-checkbox — Comparison
 
-Ionic 8.8.1 in headless Chromium, md, 390 wide at a scale of 2, against Avonic in Avalonia.Headless (Skia) at the same size and
+Ionic 8.8.19 in headless Chromium, md, 390 wide at a scale of 2, against Avonic in Avalonia.Headless (Skia) at the same size and
 scale. Both use Roboto from `tools/fonts`. Headless only: not tried in a real window, and not tried on a device.
+
+The comparison was first made against 8.8.1. For #188 the reference was rendered again with 8.8.19: the boxes and the frame are
+the same, and the only change is the new `ion-focusable` on every standalone checkbox. 8.8.17's keyboard focus indicator is in
+[its own section](#keyboard-focus-ionic-8817).
 
 ## The scene
 
@@ -69,8 +73,6 @@ again.
 
 ### Deliberate differences and gaps
 
-- **The focus ring.** Chromium draws its own focus ring (`outline: auto`) on a checkbox focused from the keyboard; Ionic doesn't
-  style it. Avonic leaves `FocusAdorner` to the base theme, which draws its own on keyboard focus. The same rule, a different ring.
 - **Inline layout.** As above, the few pixels a line box adds around an `inline-block` aren't there.
 - **A long standalone label.** Ionic's `inline-block` is as wide as its label's one line even when that's wider than the page:
   measured, a 485.2 label makes a 519.2 host in a 390 page, with the box off screen at 501.2. Avalonia gives a control no more than
@@ -82,10 +84,42 @@ again.
   change raises the help text's property-changed event, which is what a screen reader announces.
 - **`name` and the form.** The hidden `<input>` exists for form submission, which Avalonia doesn't have; `value` is still in
   `IonChange`.
-- **A label's text changed later.** Ionic reads `textContent` when it renders, which a change inside the label doesn't cause, so
-  text coming into an empty label shows at the next change of a prop. Avonic reads it at the same moments, and at each measure too,
-  which a shown label's text changing causes, so a label emptied later hides at once. A hidden label isn't measured, so text coming
-  into it waits for a prop, as in Ionic.
+- **A label's text changed later.** Since 8.8.4 Ionic reads `textContent` again whenever text or children change inside the
+  checkbox (a `MutationObserver` with `characterData`, `childList` and `subtree`), so text coming into an empty label shows at once:
+  measured, `textContent = 'Later'` and a `<span>`'s text both show the label with no other change. Avonic reads it at each change
+  of a prop and each measure, which a shown label's text changing causes, and, while the label is hidden and so not measured,
+  watches the text and the children of what's inside (`TextContentWatch`). A match: `B18_Text_That_Comes_Later…`,
+  `B18_A_Child_With_Text_Added_Later…`. The watch covers a `TextBlock`'s `Text` and `Inlines`, a `Run`'s `Text`, a content
+  control's `Content`, a presenter's child, and any logical children coming or going.
+
+## Keyboard focus (Ionic 8.8.17)
+
+8.8.17 gave the checkbox a focus indicator and took Chromium's outline away. The frame has `class="ion-focused"` where keyboard
+focus puts it, measured: on the checkbox when it's `ion-focusable`, and on the item when that is.
+
+```
+node tools/ionic-ref/render.js ion-checkbox --bare --html '<ion-app style="position:static;display:block;contain:none;overflow:visible"><div style="padding:16px;display:flex;flex-direction:column;gap:24px;align-items:flex-start"><ion-checkbox class="ion-focused">Unchecked</ion-checkbox><ion-checkbox class="ion-focused" checked>Checked</ion-checkbox><ion-checkbox class="ion-focused" checked color="danger">Danger</ion-checkbox><ion-checkbox class="ion-focused" label-placement="end">Label at the end</ion-checkbox><div dir="rtl"><ion-checkbox class="ion-focused">RTL</ion-checkbox></div></div><ion-list><ion-item class="ion-focused"><ion-checkbox>Single input: the item draws it</ion-checkbox></ion-item><ion-item><ion-checkbox slot="start"></ion-checkbox><ion-checkbox class="ion-focused">Multi-input</ion-checkbox></ion-item><ion-item class="ion-focused" button><ion-checkbox class="ion-focused">Clickable item</ion-checkbox></ion-item><ion-item><ion-checkbox class="ion-focused" label-placement="end">Label at the end, clipped</ion-checkbox><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item><div><ion-checkbox class="ion-focused">Wrapped</ion-checkbox></div><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item><ion-checkbox slot="start" class="ion-focused"></ion-checkbox><ion-label>Start slot</ion-label><ion-checkbox slot="end"></ion-checkbox></ion-item></ion-list></ion-app>' --out docs/components/ion-checkbox/ref/focus
+```
+
+Avonic's is `AvonicFocusIndicatorCaptureTests.Checkbox_Focus_Page`, with `:ion-focused` on the same controls. Ionic left:
+
+![Ionic left, Avonic right](compare/side-focus.png)
+
+The states were measured by focusing each checkbox from the keyboard (Playwright, in `ion-app`), reading the host's and the item's
+classes, the `::after`'s computed style, its box, every clipping ancestor in the composed tree, and pixels from a screenshot:
+
+| Case | Ionic 8.8.19 | Avonic | |
+|---|---|---|---|
+| Alone | `ion-focusable`; `ion-focused` by Tab; `.native-wrapper::after` 36 × 36 at −9, −9 from the 18 box, `rgb(26, 101, 235)` at 0.2, radius 50%, over the box: `rgb(209, 224, 251)` on white | `PART_Focus`, the same box and colour, over the box | match, `B27_Keyboard_Focus…` |
+| Checked, `danger`, RTL, label at the end | the same circle, the primary tint whatever the colour, centred on the box | the same | match, `B27_The_Circle_Is_The_Primary_Tint…` |
+| `:host(:focus)` | `outline: none` | `FocusAdorner` null: no adorner over a base theme | match, `B27_There_Is_No_Focus_Adorner…` |
+| A click | no `ion-focused` | no circle | match, `B27_A_Click_Shows_No_Circle` |
+| Single-input item | not `ion-focusable`; the item is, and draws its 0.12 overlay | the same | match, `B27_In_A_Single_Input_Item…` |
+| Multi-input item (two checkboxes; a checkbox and a toggle) | `ion-focusable`, the circle; the item `item-focus-indicator-room`, and not `ion-focusable` with checkboxes alone | the same | match, `B27_In_A_Multi_Input_Item…` |
+| Clickable item (`button`) | multi-input, so the circle; the item focused too | the same | match, `B27_In_A_Clickable_Item…` |
+| Turning multi-input later | a second checkbox added inside a `<div>`: the first becomes `ion-focusable`; removed, it isn't | the same | match, `B27_It_Follows_The_Item…` |
+| Clipping | the circle at the end of the default slot shows to 383 (`.input-wrapper` reaches 386); at the start it's clipped at `.item-inner`'s edge, 16 | the same | match, the item's `B36_…` |
+| Inside a wrapper `<div>` | the `<div>` is as wide as the checkbox, so the box is after the label | an Avalonia panel in the slot stretches, so the box is at the slot's end; the frame aligns the panel left | not focus: a slotted panel's width, as before |
 
 ## The mark, zoomed
 

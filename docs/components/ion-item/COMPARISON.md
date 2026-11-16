@@ -168,6 +168,32 @@ The shared press, from #72, the same way, on 2026-11-07: all 51 checks passed, w
 
 <img src="compare/real-window-shared.png" alt="The sample's ion-item page, with a button in a button row, in a real window" width="300">
 
+## Room for a focus indicator (Ionic 8.8.17, #188)
+
+The reference was rendered again with 8.8.19 for #188 (`ref/`, `ref/layout/`): the frames and boxes are the same. 8.8.17 added
+`item-focus-indicator-room`, for the checkbox's, radio's and toggle's new focus circles. The frame has `class="ion-focused"` where
+keyboard focus puts it, measured:
+
+```
+node tools/ionic-ref/render.js ion-item --bare --html '<ion-app style="position:static;display:block;contain:none;overflow:visible"><ion-list><ion-item class="ion-focused"><ion-checkbox class="ion-focused" label-placement="end">Room: clipped at the start</ion-checkbox><ion-toggle slot="end"></ion-toggle></ion-item><ion-item><ion-checkbox slot="start"></ion-checkbox><ion-checkbox class="ion-focused">Room: shown at the end</ion-checkbox></ion-item><ion-item class="ion-focused"><ion-checkbox slot="start"></ion-checkbox><ion-label>No room: slots only</ion-label><ion-toggle slot="end" class="ion-focused"></ion-toggle></ion-item><ion-item class="ion-focused" button><ion-label>No room: clickable, end slot</ion-label><ion-checkbox slot="end" class="ion-focused"></ion-checkbox></ion-item><ion-item class="ion-focused" button><ion-toggle class="ion-focused" checked>Room: clickable</ion-toggle></ion-item></ion-list><div dir="rtl"><ion-list><ion-item><ion-checkbox class="ion-focused">RTL multi</ion-checkbox><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item class="ion-focused"><ion-toggle class="ion-focused" checked>RTL multi</ion-toggle><ion-toggle slot="end"></ion-toggle></ion-item></ion-list></div></ion-app>' --out docs/components/ion-item/ref/focus
+```
+
+Avonic's is `AvonicFocusIndicatorCaptureTests.Item_Focus_Page`. Ionic left:
+
+![Ionic left, Avonic right](compare/side-focus.png)
+
+| Case | Ionic 8.8.19 | Avonic | |
+|---|---|---|---|
+| A checkbox in the default slot, beside one in the start slot | `item-multiple-inputs item-focus-indicator-room`; `.input-wrapper` −12 and 12 padding each side, 38 to 386; the checkbox stays at 50 to 374; `.item-inner` clips from 50 | `:item-focus-indicator-room`; `PART_Container` 38 to 386, the checkbox 50 to 374, `PART_Inner` clipping | match, `B36_The_Room_Is_12…` |
+| Its circle at the end | 347 to 383, shown past the slot's own end | the same, by pixel | match, `B36_The_Circle_Shows…` |
+| A circle at the row's start (label at the end) | 7 to 43, clipped at `.item-inner`'s start, 16: only 16 to 43 shows | the same | match |
+| Single input; indicator controls only in the start or end slot; a clickable item with one in the end slot | no room | no room | match, `B36_Room_When…` |
+| A clickable item, a toggle in the default slot | room, though it isn't multi-input | room | match |
+| Inside a wrapper `<div>` | room | room | match |
+| A checkbox added inside a `<div>` later, then removed | multi-input and room, then neither, with no `slotchange` (the item's `MutationObserver`) | the same, the control telling the item | match, `B36_A_Control_Coming_Or_Going…` |
+| `ion-focusable` on the item | through a toggle (itg1) or a button; not through checkboxes or radios (icb2, ird2) | the same | match, `B37_…` |
+| RTL | mirrored | mirrored | match |
+
 ## Deliberate differences
 
 See [PLAN.md](PLAN.md#deliberate-differences).

@@ -46,8 +46,9 @@ and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 
 The default slot is `Content`, the label: a string, or any control. Parts: `PART_Label`, `PART_HelperText` and `PART_ErrorText`
 (each with the style class `supporting-text`, Ionic's part on both), `PART_Track` (the drag's element) and `PART_Handle`. Also
-`PART_Wrapper` (a `LabelledControlPanel`, shared with the checkbox and the radio), `PART_LabelContent`, `PART_Bottom`, `PART_NativeWrapper`, `PART_IconWrapper` and
-`PART_SwitchIcon`.
+`PART_Wrapper` (a `LabelledControlPanel`, shared with the checkbox and the radio), `PART_LabelContent`, `PART_Bottom`, `PART_NativeWrapper`, `PART_IconWrapper`,
+`PART_Focus` (the keyboard focus circle) and `PART_SwitchIcon`. Pseudoclasses for a theme include `:ion-focused` and
+`:toggle-defers-indicator`.
 
 ### Resource keys
 
@@ -62,12 +63,13 @@ The default slot is `Content`, the label: a string, or any control. Parts: `PART
 | [x] | `--handle-box-shadow` | `Avonic.Toggle.HandleBoxShadow` | `BoxShadows`: write CSS through `{b:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | md's 1 dp elevation |
 | [x] | `--handle-height` | `Avonic.Toggle.HandleHeight` | `double` | 20 |
 | [x] | `--handle-max-height` | `Avonic.Toggle.HandleMaxHeight` | `double` | 20: `calc(100% + 6px)` of md's 14 px track |
-| [x] | `--handle-spacing` | `Avonic.Toggle.HandleSpacing` | `double` | 0 |
+| [x] | `--handle-spacing` | `Avonic.Toggle.HandleSpacing` | `double` | 0, which the focus circle follows too |
 | [x] | `--handle-transition` | `Avonic.Toggle.HandleTransition` | `Transitions` | Transform and background, 160 ms `cubic-bezier(0.4, 0, 0.2, 1)` |
 | [x] | `--handle-width` | `Avonic.Toggle.HandleWidth` | `double` | 20 |
 
 A known `Color` beats the two checked keys, as its rule beats the variables in Ionic. `Avonic.Toggle.Md.*` holds what md sets
-with no variable: the on/off icon's colours and the disabled fade.
+with no variable: the on/off icon's colours, the disabled fade, and the focus circle's `FocusIndicatorBackground` (text colour at
+0.12) and `FocusIndicatorBackgroundChecked` (primary at 0.2).
 
 ## Behaviours
 
@@ -88,7 +90,11 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
 - **Automation:** a button with the toggle pattern, named by the label and the helper text, which beats
   `AutomationProperties.Name` as `aria-labelledby` beats `aria-label`, with the hint as its help text, and both announced when
   they change. Toggling it is a click.
-- **Keyboard focus** shows the platform's focus adorner, as Chromium draws its own ring.
+- **Keyboard focus** (Ionic 8.8.17): no focus adorner (`outline: none`), and a 36 px circle behind the handle, over the track,
+  centred on the handle and moving with it: the text colour at 0.12, the primary at 0.2 when checked, or a `Color`'s base at 0.2.
+  The toggle is always `ion-focusable` (`FocusVisible.IsEnabled`, at style priority), so an item around it is focusable too; in a
+  single-input item that isn't clickable, `:toggle-defers-indicator` hides the circle and the item draws the row's focus. A
+  multi-input or clickable item, and the item changing later, end the deferring.
 
 ## Extensions
 
@@ -103,8 +109,6 @@ A label with no text, an icon alone, is hidden, as Ionic's `textContent` check h
 | Gap | Why |
 |---|---|
 | A finger flips the toggle 16 px into a drag, where Chromium takes 27 | Chromium holds a finger's moves back for its 15 px slop; Avonic follows Ionic's code. See [COMPARISON.md](COMPARISON.md#deliberate-differences) |
-| `dir="rtl"` on an ancestor, not the document or the toggle, leaves Ionic's handle and drag in LTR | Avalonia's `FlowDirection` can't say where it came from, so RTL is RTL throughout. Deliberate |
-| The focus ring is the base theme's, not Chromium's | Measured `outline: auto 1px` in Chromium; Avalonia draws the base theme's adorner |
 | `required`, `aria-invalid` aren't exposed | Avalonia 12's automation has neither |
 | The track's colour mid-transition | Avalonia's `BrushTransition` doesn't blend as CSS does; the ends match. See [COMPARISON.md](COMPARISON.md#gaps) |
 | An item that met its toggle disabled doesn't forward a padding tap once it's enabled | `AvonicItem`'s, proposed in the PR |

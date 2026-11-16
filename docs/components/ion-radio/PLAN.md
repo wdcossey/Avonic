@@ -4,7 +4,8 @@ A radio and the group that makes its radios one choice. Ionic 8's radio has no n
 and its `checked` is internal state, set from the group's `value`. The group does the rest: a click on a radio inside it, the
 arrow keys and Space, `ionChange`, which radio is the tab stop, and helper or error text at the top. One family, one PR (#22).
 
-Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`. The page is in
+Measurements are from real Ionic 8.8.1 in Chromium, md, 390 px wide, wrapped in `ion-app`, and R8 and R9's focus in an item from
+8.8.19, the base since #188. The page is in
 [COMPARISON.md](COMPARISON.md), and the behaviours were measured with a throwaway Playwright script on the same page: clicks,
 a tap on an item's padding, the keys, focus and blur, and the mark's transition sampled every 70 ms.
 
@@ -93,7 +94,7 @@ Each becomes a test. Measured values are from the page in COMPARISON.md.
 | R6 | `IonFocus` and `IonBlur` when the radio itself gets and loses focus; a click focuses it | `onFocus`, `onBlur`; measured `log1` `focus`, `clickA` `blur`, `focus` |
 | R7 | Not a tab stop alone (`tabindex="-1"`). In a group, the first enabled radio whose value is the group's (strictly) is the one tab stop, or the first enabled radio if none is, set on load and whenever the group's value changes | `buttonTabindex = -1`, `setRadioTabindex`; measured `0-1-1…`, `tab`, `shtab` |
 | R8 | In an item: `:in-item`, not activatable or focusable itself (the item is, as a cover), fills the item's row, and a tap on the item's padding clicks it. The label has 10 above and below | `inItem`, `:host(.in-item)`; item.js `getFirstInteractive`, `hasCover`; measured `padTap` `change:b` |
-| R9 | Alone, it's activatable and focusable: `:ion-focused` by keyboard shows a 36 px circle of the primary tint at 0.2 behind the ring | `ion-activatable`, `ion-focusable`, `.ion-focused .radio-icon::after` |
+| R9 | Alone, it's activatable and focusable: `:ion-focused` by keyboard shows a 36 px circle of the primary tint at 0.2 over the ring. Since 8.8.17 it's focusable in a multi-input item too, followed as the item changes, and still not activatable | `ion-activatable`, `ion-focusable: !inItem \|\| inMultipleInputsItem`, `createItemMultipleInputsObserver`, `.ion-focused .radio-icon::after`; measured rd1–rd8 (COMPARISON) |
 | R10 | Accessibility: a radio button, selected when checked, named from its label, disabled when disabled. Selecting it from automation is a click | `role="radio"`, `aria-checked`, `aria-disabled` |
 | R11 | No content: the label's wrapper is hidden, with its margin | `label-text-wrapper-hidden`; measured standalone radios 20 by 20 |
 
@@ -141,7 +142,8 @@ automation peer's `IsSelected` shows it, as `aria-checked` does.
 The tab stop is `IsTabStop`, at style priority so an app's own value wins, and `false` by default, as `tabindex="-1"` is.
 
 `:in-item` is worked out from the visual ancestors on attach, as `hostContext('ion-item')` is, and turns off `Activatable` and
-`FocusVisible` on the radio.
+`FocusVisible` on the radio; since #188 `FocusVisible` comes back while the item has `:item-multiple-inputs`, which
+`ItemMultipleInputsObserver` watches.
 
 ### The wrapper
 

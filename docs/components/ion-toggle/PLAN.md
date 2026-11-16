@@ -2,7 +2,8 @@
 
 A switch: a track and a handle beside a label, flipped by a click, Space, or a drag on the track. It's the first control with
 `labelPlacement`, `justify`, `alignment`, helper and error text, which `ion-checkbox` (#20) and `ion-radio` (#22) share, and the
-first to use the [gesture utility](../../infra/gesture/README.md) in a control. Measurements are from real Ionic 8.8.1 in Chromium,
+first to use the [gesture utility](../../infra/gesture/README.md) in a control. Behaviour 11 is from 8.8.19, the base since #188, and
+the rest of the measurements are from real Ionic 8.8.1 in Chromium,
 md, at 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts: a mouse in a desktop context, and CDP touch events in a
 mobile one. The commands are at the top of [COMPARISON.md](COMPARISON.md).
 
@@ -92,7 +93,7 @@ From `toggle.js` and `toggle.md.css`, each checked in Chromium. Each becomes a t
 | 8 | The drag's start focuses the toggle, and it's `:activated` until the end. `IonFocus` on that focus | `onStart`, `setFocus`, `toggle-activated`; measured `focused`, `activated` |
 | 9 | RTL flips the drag: off to on is a drag left of more than 10 px. The handle sits at the right when off | `isRTL`, `shouldToggle`; measured `hostRtlDragLeft`, `hostRtl` |
 | 10 | `IonFocus` and `IonBlur` on the toggle's own focus, including a press; a press focuses it; it's a tab stop | `onFocus`, `onBlur`, `tabindex=0`; measured `mouseClickLabel`, `touchTap`, `focusVisible` |
-| 11 | Keyboard focus shows the platform's focus ring: there's no `outline: none`, so Chromium draws its own | measured `focusVisible`: `outline: auto 1px` |
+| 11 | Keyboard focus (8.8.17): no outline; always `ion-focusable`, so an item around it is too; focused by keyboard, a 36 px circle behind the handle and over the track, centred on it and moving with it, the text colour at 0.12, primary at 0.2 checked, a colour's base at 0.2; hidden (`toggle-defers-indicator`) in a single-input item that isn't clickable, re-read when the item's `item-multiple-inputs` or `ion-activatable` changes (Ionic also matches `[button]` and `[href]`, as the class waits for the item's render; an item here sets `:ion-activatable` with `Button`, and has no `href`) | `:host(:focus) { outline: none }`, `'ion-focusable': true`, `toggle-defers-indicator`, `.toggle-icon-wrapper::after`, `createItemMultipleInputsObserver(…, ['item-multiple-inputs', 'ion-activatable'])`; measured tg1–tg18 (COMPARISON). Against 8.8.1 it was Chromium's `outline: auto 1px` |
 | 12 | In an item, a tap on the item's padding clicks the toggle. A disabled toggle isn't the first interactive control | `ion-item`'s `getFirstInteractive`; measured `mouseClickItemPadding`, `mouseClickItemEnd` |
 | 13 | In an item (any depth), `:in-item`: the toggle fills the row, the label gets 10 px above and below, stacked 10 and 16, and the track 10 below when stacked | `hostContext('ion-item')`; measured boxes `host`, `t3` |
 | 14 | With no label, the label part isn't shown, so its margin goes too, and the track is at the start of the row | `label-text-wrapper-hidden`; measured `t4track` |
@@ -155,12 +156,12 @@ Pseudoclasses, from Ionic's host classes: `:checked`, `:activated` (`toggle-acti
 `:label-placement-*`, `:label-text-wrapper-hidden`, and `:ion-color` from `ColorPalette`.
 RTL is the toggle's `FlowDirection`.
 
-### RTL: a deliberate difference
+### RTL from an ancestor: a match since 8.8.19
 
-Ionic's `isRTL` reads only the toggle's own `dir` and the document's. A `dir="rtl"` on an ancestor between them mirrors the layout
-(CSS direction inherits) but leaves the handle and the drag in LTR: measured, the checked handle sits at the right of the
-track, and a drag left doesn't flip it. Avalonia's `FlowDirection` inherits and can't say where it came from, so here RTL is RTL
-throughout, as Ionic is with `dir` on the document or the toggle.
+Since Ionic 8.8.19, `isRTL(el)` walks up to the nearest `dir`, so `dir="rtl"` on an ancestor flips the handle and the drag, as the
+inherited `FlowDirection` does here: a match. Measured on 8.8.19 with `dir="rtl"` on an ancestor only: off, the handle sits at the
+right (x 310.6 on a track at 294.6, 36 wide), a 30 px drag left turns it on, and the host has `toggle-rtl`. 8.8.1 read only the
+toggle's own `dir` and the document's, and this was a deliberate difference.
 
 ### Item
 

@@ -33,7 +33,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_LabelContent", typeof(ContentPresenter))]
 [TemplatePart("PART_HelperText", typeof(TextBlock))]
 [TemplatePart("PART_ErrorText", typeof(TextBlock))]
-[PseudoClasses(":checked", ":activated", ":in-item", ":label-text-wrapper-hidden", ":toggle-disabled")]
+[PseudoClasses(":checked", ":activated", ":in-item", ":label-text-wrapper-hidden", ":toggle-disabled", ":toggle-defers-indicator")]
 [PseudoClasses(":justify-end", ":justify-space-between", ":justify-start", ":alignment-center", ":alignment-start")]
 [PseudoClasses(":label-placement-end", ":label-placement-fixed", ":label-placement-stacked", ":label-placement-start")]
 public class AvonicToggle : ContentControl, IItemControl
@@ -129,6 +129,20 @@ public class AvonicToggle : ContentControl, IItemControl
     public static readonly IMultiValueConverter SpacingMarginConverter =
         new FuncMultiValueConverter<object?, Thickness>(values => new Thickness(Number(values.FirstOrDefault()), 0, 0, 0));
 
+    /// <summary>
+    /// The focus circle's place across, as a margin: <c>left: calc(var(--handle-spacing) + (var(--handle-width) - 36px) / 2)</c>,
+    /// so centred on the handle. Down, it's centred by its alignment on whatever height the track has, as
+    /// <c>inset-block-start: 50%; transform: translateY(-50%)</c> is: Avalonia centres a child taller than its slot. The values are
+    /// the spacing, the handle's width, then the circle's own width.
+    /// </summary>
+    public static readonly IMultiValueConverter FocusIndicatorMarginConverter =
+        new FuncMultiValueConverter<object?, Thickness>(values =>
+        {
+            var numbers = values.Select(Number).ToArray();
+            double At(int index) => numbers.ElementAtOrDefault(index);
+            return new Thickness(At(0) + ((At(1) - At(2)) / 2), 0, 0, 0);
+        });
+
     private static double Number(object? value) => value is double number && double.IsFinite(number) ? number : 0;
 
     private static ITransform Translate(double x)
@@ -142,7 +156,17 @@ public class AvonicToggle : ContentControl, IItemControl
     private ContentPresenter? _labelContent;
     private Gesture? _gesture;
     private TimeSpan? _lastDrag;
-    private bool _inItem;
+    private ItemMultipleInputsObserver? _item;
+
+    /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
+    private const string ItemMultipleInputs = AvonicItem.MultipleInputsPseudoClass;
+
+    /// <summary>
+    /// The item's <c>ion-activatable</c>: <c>ion-item.ion-activatable, ion-item[button], ion-item[href]</c>. Ionic reads the
+    /// attributes too, as the class needs the item to have rendered; here the item sets it with <see cref="AvonicItem.Button"/>, in
+    /// the same pass, and an item with a toggle has it only through <c>Button</c>, as a cover beside a toggle is multi-input.
+    /// </summary>
+    private const string ItemActivatable = AvonicItem.ActivatablePseudoClass;
 
     static AvonicToggle()
     {
@@ -157,6 +181,10 @@ public class AvonicToggle : ContentControl, IItemControl
     {
         // The host's onClick: the plain DOM click on release of every press, with no keys, as it's a <div>.
         _ = new NativeButton(this, OnNativeClick, () => false, UpdateIsEffectivelyEnabled);
+
+        // ion-focusable, always: it's what makes an item around it focusable. When the item draws the row's indicator,
+        // :toggle-defers-indicator hides the toggle's own. At style priority, before any style, so that an app's style wins.
+        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
 
         // enableOnOffLabels' default, config.get('toggleOnOffLabels'), read once here as Ionic reads it in the constructor. At
         // style priority, and before any style, so that an app's value, set or in a style, wins, as an attribute does in Ionic.
@@ -292,8 +320,10 @@ public class AvonicToggle : ContentControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
-        // hostContext('ion-item'), at render. Read again here, as a moved toggle is attached again.
-        _inItem = this.FindAncestorOfType<AvonicItem>() is not null;
+        // hostContext('ion-item'), at render. Read again here, as a moved toggle is attached again. itemFocusObserver: the item's
+        // item-multiple-inputs and ion-activatable come after this has rendered, so watch for them.
+        _item?.Dispose();
+        _item = ItemMultipleInputsObserver.Create(this, UpdateClasses, ItemMultipleInputs, ItemActivatable);
         UpdateClasses();
         SetupGesture();
     }
@@ -303,6 +333,8 @@ public class AvonicToggle : ContentControl, IItemControl
         // disconnectedCallback
         _gesture?.Destroy();
         _gesture = null;
+        _item?.Dispose();
+        _item = null;
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -350,7 +382,13 @@ public class AvonicToggle : ContentControl, IItemControl
     {
         PseudoClasses.Set(":checked", Checked);
         PseudoClasses.Set(":toggle-disabled", !IsEnabled);
-        PseudoClasses.Set(":in-item", _inItem);
+        PseudoClasses.Set(":in-item", _item is not null);
+
+        // toggle-defers-indicator: in a single-input item that isn't clickable, the item draws the row's indicator. A clickable
+        // item is a second tab stop, which item-multiple-inputs misses, as it counts covers, not toggles.
+        PseudoClasses.Set(
+            ":toggle-defers-indicator",
+            _item is { } item && !item.Has(ItemMultipleInputs) && !item.Has(ItemActivatable));
         PseudoClasses.Set(":label-text-wrapper-hidden", !HasLabel);
 
         var justify = Justify;

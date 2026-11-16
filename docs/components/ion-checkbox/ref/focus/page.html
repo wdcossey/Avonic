@@ -1,0 +1,9 @@
+<!doctype html>
+<html mode="md"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="/node_modules/@ionic/core/css/ionic.bundle.css">
+<link rel="stylesheet" href="/tools/fonts/roboto/roboto.css">
+<script>window.Ionic = { config: { mode: 'md' } };</script>
+<script type="module" src="/node_modules/@ionic/core/dist/ionic/ionic.esm.js"></script>
+<style>html,body{margin:0;height:100%;background:var(--ion-background-color,#fff)}</style>
+</head><body><div id="stage"><ion-app style="position:static;display:block;contain:none;overflow:visible"><div style="padding:16px;display:flex;flex-direction:column;gap:24px;align-items:flex-start"><ion-checkbox class="ion-focused">Unchecked</ion-checkbox><ion-checkbox class="ion-focused" checked>Checked</ion-checkbox><ion-checkbox class="ion-focused" checked color="danger">Danger</ion-checkbox><ion-checkbox class="ion-focused" label-placement="end">Label at the end</ion-checkbox><div dir="rtl"><ion-checkbox class="ion-focused">RTL</ion-checkbox></div></div><ion-list><ion-item class="ion-focused"><ion-checkbox>Single input: the item draws it</ion-checkbox></ion-item><ion-item><ion-checkbox slot="start"></ion-checkbox><ion-checkbox class="ion-focused">Multi-input</ion-checkbox></ion-item><ion-item class="ion-focused" button><ion-checkbox class="ion-focused">Clickable item</ion-checkbox></ion-item><ion-item><ion-checkbox class="ion-focused" label-placement="end">Label at the end, clipped</ion-checkbox><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item><div><ion-checkbox class="ion-focused">Wrapped</ion-checkbox></div><ion-checkbox slot="end"></ion-checkbox></ion-item><ion-item><ion-checkbox slot="start" class="ion-focused"></ion-checkbox><ion-label>Start slot</ion-label><ion-checkbox slot="end"></ion-checkbox></ion-item></ion-list></ion-app></div></body></html>

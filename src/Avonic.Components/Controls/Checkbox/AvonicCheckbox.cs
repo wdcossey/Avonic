@@ -110,12 +110,17 @@ public class AvonicCheckbox : ContentControl, IItemControl
     private bool _invalid;
     private string? _hint;
     private readonly StyleValue<bool> _required = new();
+    private readonly StyleValue<bool> _focusVisible = new();
+    private ItemMultipleInputsObserver? _item;
     private CheckboxAutomationPeer? _peer;
 
     static AvonicCheckbox()
     {
         // tabindex: 0, unless disabled, which a disabled control already isn't.
         FocusableProperty.OverrideDefaultValue<AvonicCheckbox>(true);
+
+        // overflow: visible, for the focus circle, 9 past the box on each side. A ContentControl clips by default.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicCheckbox>(false);
     }
 
     public AvonicCheckbox()
@@ -136,6 +141,11 @@ public class AvonicCheckbox : ContentControl, IItemControl
         // aria-required, at style priority, so an app's own value wins. Bound once, before any style, so that an app's style still
         // wins when required turns on after it.
         Bind(AutomationProperties.IsRequiredForFormProperty, _required, BindingPriority.Style);
+
+        // ion-focusable, at style priority, as the class is, so an app's own value wins. Bound once, before any style, so that it
+        // still wins when an item around it changes it.
+        Bind(FocusVisible.IsEnabledProperty, _focusVisible, BindingPriority.Style);
+        _focusVisible.Set(true);
 
         UpdateChecked();
         UpdatePlacement();
@@ -301,18 +311,31 @@ public class AvonicCheckbox : ContentControl, IItemControl
     {
         base.OnAttachedToVisualTree(e);
 
+        // itemFocusObserver: item-multiple-inputs comes after this has rendered, so watch for it.
+        _item?.Dispose();
+        _item = ItemMultipleInputsObserver.Create(this, UpdateFocusable, ItemMultipleInputs);
         UpdateHostContext();
         HoldTransitions();
     }
 
+    /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
+    private const string ItemMultipleInputs = AvonicItem.MultipleInputsPseudoClass;
+
     /// <summary><c>hostContext('ion-item')</c>, read at each render, and <c>[slot]</c>: the item slot holding it.</summary>
     private void UpdateHostContext()
     {
-        PseudoClasses.Set(":in-item", this.FindAncestorOfType<AvonicItem>() is not null);
+        PseudoClasses.Set(":in-item", _item is not null);
         var slot = (Parent as StyledElement)?.Name;
         PseudoClasses.Set(":slot-start", slot == "PART_Start");
         PseudoClasses.Set(":slot-end", slot == "PART_End");
+        UpdateFocusable();
     }
+
+    /// <summary>
+    /// <c>ion-focusable</c>: <c>!inItem || inMultipleInputsItem</c>. A single-input item has the input cover, and draws the
+    /// indicator itself; a multi-input item has none, so each control draws its own.
+    /// </summary>
+    private void UpdateFocusable() => _focusVisible.Set(_item is null || _item.Has(ItemMultipleInputs));
 
     private void OnContentPresenterChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
@@ -325,6 +348,12 @@ public class AvonicCheckbox : ContentControl, IItemControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        _item?.Dispose();
+        _item = null;
+
+        // disconnectedCallback: the validationObserver goes, so a detached checkbox holds nothing in its content. Attached again, it's
+        // measured, which reads the label again and watches it while it's hidden, as connectedCallback does.
+        _labelWatch?.Dispose();
         ReleaseTransitions();
         PseudoClasses.Set(":drawn", false);
     }
@@ -372,16 +401,37 @@ public class AvonicCheckbox : ContentControl, IItemControl
     }
 
     /// <summary>
-    /// <c>label-text-wrapper-hidden</c>: <c>el.textContent === ''</c>, which Ionic reads at each render, so text that comes later
-    /// shows at the next change of a prop, as there. Here at each measure too, which a change of a shown label's text causes.
+    /// <c>label-text-wrapper-hidden</c>: <c>!hasLabelContent</c>, <c>el.textContent !== ''</c>, which Ionic 8.8.4 reads when it
+    /// connects, and again whenever text or children change inside (its <c>MutationObserver</c>). Here at each change of a prop and
+    /// each measure, which a change of a shown label's text causes, and, while it's hidden and so not measured, through
+    /// <see cref="TextContentWatch"/>.
     /// </summary>
     private void UpdateLabel()
     {
-        if (_label is not null && TextContent.HasText(Content, _content) is var shown && _label.IsVisible != shown)
+        if (_label is null)
+        {
+            return;
+        }
+
+        var shown = TextContent.HasText(Content, _content);
+        if (_label.IsVisible != shown)
         {
             _label.IsVisible = shown;
         }
+
+        if (shown || !this.IsAttachedToVisualTree())
+        {
+            _labelWatch?.Dispose();
+        }
+        else
+        {
+            // Data is what its template made of it.
+            _labelWatch ??= new TextContentWatch(UpdateLabel);
+            _labelWatch.Watch(Content is Control ? Content : _content?.Child);
+        }
     }
+
+    private TextContentWatch? _labelWatch;
 
     protected override Size MeasureOverride(Size availableSize)
     {

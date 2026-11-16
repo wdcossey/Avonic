@@ -74,6 +74,7 @@ A squeezed label wraps at every character, which makes its row tall, as Ionic's 
 | `:hover`, with `any-hover` | `:ion-hover`. Mouse and pen only |
 | `item-disabled` | `:disabled` |
 | `item-multiple-inputs` | `:item-multiple-inputs` |
+| `item-focus-indicator-room` | `:item-focus-indicator-room`: a checkbox, radio or toggle in the default slot of a multi-input or clickable item. The theme widens `PART_Container` 12 each side, given back as padding, and clips at `PART_Inner`, so a control's focus circle isn't cut at the slot's end (Ionic 8.8.17) |
 | `item-control-needs-pointer-cursor` | `:item-control-needs-pointer-cursor` |
 | `item-<key>`, from `ionStyle` | `:item-<key>` |
 
@@ -163,7 +164,13 @@ public class AvonicToggle : TemplatedControl, IItemControl
 | `Button` | Avalonia's `Button` counts without implementing this |
 
 A control with `FocusVisible.IsEnabled` makes an item around it focusable too, so the item shows `:ion-focused` when
-focus reaches the control by keyboard.
+focus reaches the control by keyboard. A toggle always is (Ionic 8.8.17), so an item with one shows focus. A checkbox's or a
+radio's doesn't count, as Ionic's item reads `.ion-focusable` once, in the frame after load, before they have it: they're
+focusable only in a multi-input item, which isn't focusable through them.
+
+A checkbox, radio or toggle in an item watches the item's pseudoclasses through `ItemMultipleInputsObserver` (Ionic's
+`createItemMultipleInputsObserver`, internal), which also tells the item when one of them comes or goes, even inside a wrapper in
+a slot, as Ionic's item watches its light DOM for them.
 
 ### Telling the item about yourself
 

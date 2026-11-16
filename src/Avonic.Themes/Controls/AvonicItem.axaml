@@ -210,6 +210,26 @@
             <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
 
+        <!-- :host(.item-focus-indicator-room) .input-wrapper: 12 more on each side, given back as padding, so the content stays where
+             it was and a control's focus circle, 9 or 10 past its box, isn't clipped at the default slot's edge. .item-inner still
+             clips (overflow: inherit, so hidden), at its padding box: 16 of room at the end in md, and none at the start, measured. A
+             literal in item.md.css, with no variable. -->
+        <Style Selector="^:item-focus-indicator-room /template/ ContentPresenter#PART_Container">
+            <Setter Property="Margin" Value="-12,0" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <!-- .item-inner's overflow: hidden, which clips at its padding box. Only here, where the default slot reaches past its
+             content: elsewhere the slot clips itself inside it. On the row inside it, not on the Border, whose ClipToBounds would clip
+             its own inner box shadow, which CSS's doesn't. -->
+        <Style Selector="^:item-focus-indicator-room /template/ Border#PART_Inner > c|FlexRow">
+            <Setter Property="Clip">
+                <MultiBinding Converter="{x:Static c:AvonicItem.PaddingBoxClipConverter}">
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Border].Padding" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
         <!-- :host(.item-textarea) { align-items: stretch }. An icon has its own height, so it sits at the top. -->
         <Style Selector="^:item-textarea /template/ ContentPresenter">
             <Setter Property="VerticalContentAlignment" Value="Stretch" />

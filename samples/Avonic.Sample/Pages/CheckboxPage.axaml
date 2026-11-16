@@ -35,6 +35,24 @@
                     <c:AvonicCheckbox Content="Stacked, start" LabelPlacement="Stacked" Alignment="Start" />
                 </c:AvonicItem>
             </c:AvonicList>
+
+            <!-- Tab through these: a single-input item draws the row's focus; in a multi-input or a clickable item each checkbox
+                 draws its own circle, with room past the end of the default slot. -->
+            <TextBlock Text="Keyboard focus: Tab through these" />
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicCheckbox Content="Single input: the item shows focus" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicCheckbox />
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicCheckbox Content="Multi-input: each draws a circle" />
+                </c:AvonicItem>
+                <c:AvonicItem Button="True">
+                    <c:AvonicCheckbox Content="Clickable item: both show focus" />
+                </c:AvonicItem>
+            </c:AvonicList>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

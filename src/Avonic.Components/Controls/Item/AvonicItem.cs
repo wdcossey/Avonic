@@ -13,6 +13,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Media;
 using Avalonia.Metadata;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -31,7 +32,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
 [PseudoClasses(
     ":lines-default", ":lines-full", ":lines-inset", ":lines-none", ":button", ":ion-activatable",
-    ":item-multiple-inputs", ":item-control-needs-pointer-cursor")]
+    ":item-multiple-inputs", ":item-control-needs-pointer-cursor", ":item-focus-indicator-room")]
 public class AvonicItem : TemplatedControl, IItemHost
 {
     /// <summary><c>margin-inline-end: -6px</c> on <c>.item-detail-icon</c>. There's no variable for it.</summary>
@@ -194,6 +195,32 @@ public class AvonicItem : TemplatedControl, IItemHost
                 DetailIconMarginEnd,
                 0));
 
+    /// <summary>
+    /// For the theme: <c>overflow: hidden</c> on <c>.item-inner</c>, which clips at its padding box, as a clip for the row inside
+    /// it. The values are the row's <c>Bounds</c>, then the inner part's <c>Padding</c>.
+    /// </summary>
+    public static readonly IMultiValueConverter PaddingBoxClipConverter =
+        new FuncMultiValueConverter<object?, Geometry?>(values =>
+        {
+            if (values.ElementAtOrDefault(0) is not Rect bounds)
+            {
+                return null;
+            }
+
+            var padding = values.ElementAtOrDefault(1) is Thickness thickness ? thickness : default;
+            return new RectangleGeometry(new Rect(
+                -padding.Left,
+                -padding.Top,
+                bounds.Width + padding.Left + padding.Right,
+                bounds.Height + padding.Top + padding.Bottom));
+        });
+
+    /// <summary><c>item-multiple-inputs</c>, which the controls inside read.</summary>
+    internal const string MultipleInputsPseudoClass = ":item-multiple-inputs";
+
+    /// <summary><c>ion-activatable</c>, which a toggle inside reads.</summary>
+    internal const string ActivatablePseudoClass = ":ion-activatable";
+
     // ── State ────────────────────────────────────────────────────────────────────────────────
 
     /// <summary><c>getFirstInteractive</c>'s selector.</summary>
@@ -318,6 +345,29 @@ public class AvonicItem : TemplatedControl, IItemHost
         }
     }
 
+    private bool _indicatorChangePosted;
+
+    /// <summary>
+    /// <c>watchForIndicatorControls</c>: a checkbox, a radio or a toggle came or went inside a wrapper in a slot, which the slot
+    /// doesn't see, so it runs <c>updateInteractivityOnSlotChange</c>. Ionic's <c>MutationObserver</c> reports later, once for any
+    /// number of changes, as this does. One directly in a slot is the slot's change, and a detached item reads its slots again
+    /// when its controls come back.
+    /// </summary>
+    internal void IndicatorControlChanged(Control control)
+    {
+        if (_indicatorChangePosted || !this.IsAttachedToVisualTree() || _slots.Any(slot => slot is not null && slot.Child == control))
+        {
+            return;
+        }
+
+        _indicatorChangePosted = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _indicatorChangePosted = false;
+            UpdateInteractivity();
+        }, DispatcherPriority.Loaded);
+    }
+
     private void UpdateLines()
     {
         var lines = Lines;
@@ -342,10 +392,13 @@ public class AvonicItem : TemplatedControl, IItemHost
     /// Everything slotted, in slot order. A presenter is its child's logical parent, so the host's own
     /// logical descendants don't include these.
     /// </summary>
-    private IEnumerable<Control> SlottedControls() =>
-        _slots.Select(slot => slot?.Child)
-            .OfType<Control>()
-            .SelectMany(child => child.GetSelfAndLogicalDescendants().OfType<Control>());
+    private IEnumerable<Control> SlottedControls() => SlottedControlsBySlot().Select(pair => pair.Control);
+
+    /// <summary><see cref="SlottedControls"/>, each with its slot: 0 start, 1 default, 2 end.</summary>
+    private IEnumerable<(int Slot, Control Control)> SlottedControlsBySlot() =>
+        _slots.Select((slot, index) => (Index: index, Child: slot?.Child))
+            .Where(pair => pair.Child is not null)
+            .SelectMany(pair => pair.Child!.GetSelfAndLogicalDescendants().OfType<Control>().Select(control => (pair.Index, control)));
 
     private static ItemControlType? TypeOf(Control control) => control switch
     {
@@ -375,10 +428,22 @@ public class AvonicItem : TemplatedControl, IItemHost
 
         int covers = 0, inputs = 0, clickables = 0;
         var focusableChild = false;
-        foreach (var control in SlottedControls())
+        var slottedIndicatorControl = false;
+        foreach (var (slot, control) in SlottedControlsBySlot())
         {
-            focusableChild |= FocusVisible.GetIsEnabled(control);
-            switch (TypeOf(control))
+            var type = TypeOf(control);
+
+            // isFocusable reads .ion-focusable once, in the frame after load, before a checkbox or a radio in a multi-input item
+            // has rendered again with its own ion-focusable, which item-multiple-inputs gives it. So theirs never makes the item
+            // focusable: measured, an item with two checkboxes, or a radio and a checkbox, isn't ion-focusable. A toggle's is
+            // there from its first render.
+            focusableChild |= FocusVisible.GetIsEnabled(control) && type is not (ItemControlType.Checkbox or ItemControlType.Radio);
+
+            // setHasSlottedIndicatorControl: INDICATOR_CONTROL_SELECTOR in the default slot, directly or inside what's in it.
+            // Only the default slot clips, so one in the start or end slot needs no room.
+            slottedIndicatorControl |= slot == 1 && type is (ItemControlType.Checkbox or ItemControlType.Radio or ItemControlType.Toggle);
+
+            switch (type)
             {
                 case ItemControlType.Checkbox or ItemControlType.Datetime or ItemControlType.Select or ItemControlType.Radio:
                     covers++;
@@ -399,8 +464,12 @@ public class AvonicItem : TemplatedControl, IItemHost
         var canActivate = clickable || hasCover;
 
         PseudoClasses.Set(":button", clickable);
-        PseudoClasses.Set(":ion-activatable", canActivate);
-        PseudoClasses.Set(":item-multiple-inputs", _multipleInputs);
+        PseudoClasses.Set(ActivatablePseudoClass, canActivate);
+        PseudoClasses.Set(MultipleInputsPseudoClass, _multipleInputs);
+
+        // slottedIndicatorNeedsRoom: a control in a single-input item leaves its indicator to the item, so only a multi-input or a
+        // clickable item has one to make room for.
+        PseudoClasses.Set(":item-focus-indicator-room", (_multipleInputs || clickable) && slottedIndicatorControl);
         _activatable.SetWhen(canActivate, true);
         _focusVisible.SetWhen(canActivate || focusableChild, true);
 
