@@ -843,7 +843,6 @@ public class AvonicContent : TemplatedControl
             var bar = (e.Source as Visual)?.FindAncestorOfType<ScrollBar>(includeSelf: true);
             if (bar is null || !ReferenceEquals(bar.TemplatedParent, _scroll))
             {
-                _barPressed = null;
                 return;
             }
 
