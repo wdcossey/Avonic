@@ -165,6 +165,34 @@ public class AvonicContentIndicatorTests
         Assert.Equal(0, Vertical(content).ThumbOpacity);
     }
 
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void I2_A_Script_After_The_Users_Scroll_Shows_Nothing(bool drag)
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        Scroll(content).IsScrollInertiaEnabled = false;
+        Settle();
+        if (drag)
+        {
+            Drag(scene, 100);
+        }
+        else
+        {
+            Wheel(scene, 100);
+        }
+
+        clock.At(1000);
+        Assert.Equal(0, Vertical(content).ThumbOpacity);
+
+        Scroll(content).Offset = new Vector(0, 500);
+        Settle();
+
+        Assert.Equal(0, Vertical(content).ThumbOpacity);
+    }
+
     [AvaloniaFact]
     public void I2_A_Nested_Scroller_The_Wheel_Passes_To_Shows_Its_Own()
     {
