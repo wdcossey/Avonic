@@ -89,6 +89,9 @@ in the frame are asserted in `B21`.
 - **`cursor: not-allowed`** when disabled.
 - **The paste is read asynchronously.** Avalonia's clipboard is read with `await`, where Chromium hands `onPaste` the text
   with the event, so a key typed while a slow platform reads it lands first and the paste then replaces it. Headless reads it at
-  once, so this can't be shown in a test; Ionic has no guard for it, so none is added.
+  once, so this can't be shown in a test; Ionic has no guard for it, so none is added. Its 8.8.3 check for read-only and disabled
+  is made when the text comes (`OnPaste`), not when the paste starts: a control made read-only or disabled during a slow read
+  takes nothing, where Ionic, whose paste is synchronous, would have written it already. Disabled is the effective `IsEnabled`, as
+  an ancestor disables the boxes too.
 - **A soft keyboard's Backspace on an empty box** isn't measured: Android sends Backspace as a key there, which this handles as a
   keyboard's, but it's not tried on a device.

@@ -848,11 +848,12 @@ public class AvonicInputOtpTests
 
     // The clipboard is read asynchronously, so an app can make the control read-only, or disable it, between the paste and its
     // text. Ionic's onPaste runs at once and checks then; here onPaste checks once the text has come, so nothing is written either
-    // way. Headless, the clipboard answers at once, so the text's arrival is called directly.
+    // way. Headless, the clipboard answers at once, so the change can't be staged during a real read: this calls the text's arrival
+    // directly, which pins where the check is, not the race.
     [AvaloniaTheory]
     [InlineData(true)]
     [InlineData(false)]
-    public void B16_Made_Read_Only_Or_Disabled_During_A_Paste_Writes_Nothing(bool readOnly)
+    public void B16_Read_Only_Or_Disabled_When_The_Pasted_Text_Comes_Writes_Nothing(bool readOnly)
     {
         var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
         using var _ = scene;
