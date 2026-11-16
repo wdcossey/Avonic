@@ -117,7 +117,7 @@ clipped on two sides, where Chromium paints the outline under the scrolling cont
 |---|---|---|---|
 | 38 | Arrows | 40; sideways only with `scroll-x`; physical in RTL | match |
 | 39 | Pages | 87, 175, 262, 350, 525, 738 for 100 to 844; Space, Shift+Space, Alt+Up, Alt+Down | match |
-| 40 | Home, End | top, bottom, with Ctrl too; vertical only | match |
+| 40 | Home, End | top, bottom, with Ctrl too; vertical only | match. Cmd+Up and Cmd+Down on macOS too, from Chromium's bindings, not measured |
 | 41 | Other modifiers | nothing | match, and Avalonia's own page keys don't act either |
 | 42 | The curve | 150 ms of `cubic-bezier(0.42, 0, 0.58, 1)` from the key, for 40 as for 4,398 | match: within 1.5 px of Chromium's 240 Hz frames at 64, 96 and 128 ms |
 | 43 | A key during one | 80 at about 207 ms; 524; 400; Page Down then Up: 222 at about 135 | match, the model of Chromium's `UpdateTarget` within a pixel of every frame |
@@ -125,7 +125,7 @@ clipped on two sides, where Chromium paints the outline under the scrolling cont
 | 45 | At the limit | the content around, past `overscroll-behavior: contain` | match |
 | 46 | Tab stop | when it can scroll and has nothing focusable; not when it fits or with `scroll-y="false"`; `forceOverscroll` counts | match |
 | 47 | Something focusable inside | Tab goes into it; nested, the inner is the stop | match |
-| 48 | A press on the content | keys scroll it, focus stays on `body` | **deliberate difference**: the scroller takes focus, with no ring |
+| 48 | A press on the content | keys scroll it, focus stays on `body`; a touch that scrolls moves no focus | **deliberate difference**: a mouse press or a tap focuses the scroller, with no ring. A finger that scrolls moves no focus: match |
 | 49 | A focused button or checkbox | keeps Space, the rest scroll | match |
 | 50 | A text field | keeps the arrows, Home, End and Space; pages scroll; a caret out of view scrolls back | match for the keys, over a base theme too, whose `TextBox` takes the page keys and does nothing with them. **Known gap**: a caret isn't brought back into the content's view |
 | 50 | A `<textarea>` | Page Down moves the caret, then scrolls | **deliberate difference**: a multi-line `TextBox` keeps the page keys, as a base theme's takes them |

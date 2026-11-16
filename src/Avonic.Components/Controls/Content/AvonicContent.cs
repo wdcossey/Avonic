@@ -39,6 +39,9 @@ public class AvonicContent : TemplatedControl
     /// <summary>How long after the last scroll the watchdog calls it ended.</summary>
     internal static readonly TimeSpan WatchDogIdle = TimeSpan.FromMilliseconds(120);
 
+    /// <summary>Whether the keys are macOS's, where Cmd with an arrow goes to the top or the bottom. Tests replace it.</summary>
+    internal static Func<bool> IsMacOS { get; set; } = OperatingSystem.IsMacOS;
+
     /// <summary><c>scrollToPoint</c> jumps below this duration, in milliseconds.</summary>
     internal const double MinAnimatedDuration = 32;
 
@@ -117,6 +120,7 @@ public class AvonicContent : TemplatedControl
     private ScrollGestureRecognizer? _recognizer;
     private ContentKeyboardScroll? _keyboard;
     private bool _pressing;
+    private bool _unfocusableForPress;
     private RoutedEventArgs? _passedOver;
     private readonly List<IDisposable> _containerChildDefaults = [];
     private readonly List<IDisposable> _fixedChildDefaults = [];
@@ -420,13 +424,14 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressing);
             _scroll.RemoveHandler(PointerPressedEvent, OnScrollPressed);
             _scroll.RemoveHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
+            _scroll.RemoveHandler(TappedEvent, OnScrollTapped);
         }
 
         if (_container is not null)
         {
             _container.PropertyChanged -= OnContainerPropertyChanged;
             _container.RemoveHandler(PointerWheelChangedEvent, OnContainerInput);
-            _container.RemoveHandler(KeyDownEvent, OnContainerKeyDown);
+            _container.RemoveHandler(KeyDownEvent, OnScrollKey);
             _container.RemoveHandler(KeyDownEvent, OnContainerKeyDownTunnel);
         }
 
@@ -454,6 +459,7 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(PointerPressedEvent, OnScrollPressing, RoutingStrategies.Tunnel, handledEventsToo: true);
             _scroll.AddHandler(PointerPressedEvent, OnScrollPressed, RoutingStrategies.Bubble, handledEventsToo: true);
             _scroll.AddHandler(RequestBringIntoViewEvent, OnScrollRequestBringIntoView);
+            _scroll.AddHandler(TappedEvent, OnScrollTapped, RoutingStrategies.Bubble, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -463,7 +469,7 @@ public class AvonicContent : TemplatedControl
         {
             _container.PropertyChanged += OnContainerPropertyChanged;
             _container.AddHandler(PointerWheelChangedEvent, OnContainerInput);
-            _container.AddHandler(KeyDownEvent, OnContainerKeyDown);
+            _container.AddHandler(KeyDownEvent, OnScrollKey);
             _container.AddHandler(KeyDownEvent, OnContainerKeyDownTunnel, RoutingStrategies.Tunnel);
         }
 
@@ -594,9 +600,6 @@ public class AvonicContent : TemplatedControl
         }
     }
 
-    /// <summary>A key from something in the content, that it didn't take.</summary>
-    private void OnContainerKeyDown(object? sender, KeyEventArgs e) => OnScrollKey(e);
-
     /// <summary>
     /// Page Up and Page Down in a one-line text field scroll the content in Chromium, where a base theme's <see cref="TextBox"/>
     /// takes them and does nothing with them, so they're taken on the way down, by the content closest to the field. A multi-line
@@ -607,7 +610,7 @@ public class AvonicContent : TemplatedControl
         if (e.Key is Key.PageUp or Key.PageDown && TextFieldOf(e.Source) is { AcceptsReturn: false } field
             && field.FindAncestorOfType<AvonicContent>() == this)
         {
-            OnScrollKey(e);
+            OnScrollKey(sender, e);
         }
     }
 
@@ -619,7 +622,7 @@ public class AvonicContent : TemplatedControl
     {
         if (ReferenceEquals(e.Source, _scroll))
         {
-            OnScrollKey(e);
+            OnScrollKey(sender, e);
         }
     }
 
@@ -628,7 +631,7 @@ public class AvonicContent : TemplatedControl
     /// scroll this way, at the limit or on an axis that's off, goes on to whatever's outside, as Chromium's does even past
     /// <c>overscroll-behavior: contain</c>, and never to Avalonia's own page keys. A text field keeps all but the page keys.
     /// </summary>
-    private void OnScrollKey(KeyEventArgs e)
+    private void OnScrollKey(object? sender, KeyEventArgs e)
     {
         if (e.Handled || _scroll is not { } scroll || _keyboard is not { } keyboard
             || e.Key is not (Key.Up or Key.Down or Key.Left or Key.Right or Key.PageUp or Key.PageDown or Key.Home or Key.End or Key.Space))
@@ -637,7 +640,7 @@ public class AvonicContent : TemplatedControl
         }
 
         var from = keyboard.Target;
-        if ((!InTextField(e.Source) || e.Key is Key.PageUp or Key.PageDown) && KeyTarget(scroll, from, e.Key, e.KeyModifiers) is { } target
+        if ((TextFieldOf(e.Source) is null || e.Key is Key.PageUp or Key.PageDown) && KeyTarget(scroll, from, e.Key, e.KeyModifiers) is { } target
             && (Math.Abs(target.X - from.X) >= 0.5 || Math.Abs(target.Y - from.Y) >= 0.5))
         {
             keyboard.To(target);
@@ -648,8 +651,6 @@ public class AvonicContent : TemplatedControl
             PassOver(e);
         }
     }
-
-    private bool InTextField(object? source) => TextFieldOf(source) is not null;
 
     /// <summary>The text field the source is, or is in, inside this content's scroll part.</summary>
     private TextBox? TextFieldOf(object? source)
@@ -687,6 +688,9 @@ public class AvonicContent : TemplatedControl
             (Key.Down, KeyModifiers.Alt) or (Key.PageDown, KeyModifiers.None) or (Key.Space, KeyModifiers.None) => page,
             (Key.Home, KeyModifiers.None or KeyModifiers.Control) => double.NegativeInfinity,
             (Key.End, KeyModifiers.None or KeyModifiers.Control) => double.PositiveInfinity,
+            // macOS's own: Cmd with an up or down arrow, the top and the bottom. From Chromium's macOS key bindings, not measured.
+            (Key.Up, KeyModifiers.Meta) when IsMacOS() => double.NegativeInfinity,
+            (Key.Down, KeyModifiers.Meta) when IsMacOS() => double.PositiveInfinity,
             _ => null,
         };
         double? dx = (key, modifiers) switch
@@ -730,10 +734,47 @@ public class AvonicContent : TemplatedControl
 
     /// <summary>
     /// A press, from its way down to its way up: Avalonia focuses what's pressed in between, on the way down at the element pressed.
+    /// A finger's or a pen's press doesn't focus the scroller, as it may be the start of a scroll, which in Chromium sends no
+    /// <c>mousedown</c> and moves no focus, so a field being typed in keeps it: <see cref="OnScrollTapped"/> does it, for a tap.
     /// </summary>
-    private void OnScrollPressing(object? sender, PointerPressedEventArgs e) => _pressing = true;
+    private void OnScrollPressing(object? sender, PointerPressedEventArgs e)
+    {
+        _pressing = true;
+        if (e.Pointer.Type != PointerType.Mouse && _scroll is { Focusable: true } scroll)
+        {
+            _unfocusableForPress = true;
+            scroll.SetCurrentValue(FocusableProperty, false);
+        }
+    }
 
-    private void OnScrollPressed(object? sender, PointerPressedEventArgs e) => _pressing = false;
+    private void OnScrollPressed(object? sender, PointerPressedEventArgs e)
+    {
+        _pressing = false;
+        if (_unfocusableForPress)
+        {
+            _unfocusableForPress = false;
+            UpdateFocusable();
+        }
+    }
+
+    /// <summary>
+    /// A tap by a finger or a pen focuses the scroller, as a press by the mouse does, unless what was tapped took focus itself: Chromium
+    /// sends a tap's <c>mousedown</c> after it. Not a drag, which raises no tap.
+    /// </summary>
+    private void OnScrollTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Pointer.Type == PointerType.Mouse || _scroll is not { Focusable: true } scroll
+            || TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is Visual focused
+               && (scroll == focused || scroll.IsVisualAncestorOf(focused))
+               && (ReferenceEquals(focused, e.Source) || (e.Source is Visual source && focused.IsVisualAncestorOf(source))))
+        {
+            return;
+        }
+
+        _pressing = true;
+        scroll.Focus(NavigationMethod.Pointer, e.KeyModifiers);
+        _pressing = false;
+    }
 
     /// <summary>
     /// A press focuses the scroller only so that the keys reach it, where Chromium moves no focus, so it mustn't bring the scroller

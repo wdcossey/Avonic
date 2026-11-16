@@ -126,8 +126,8 @@ public class AvonicContentIndicatorTests
 
         Assert.Equal(100, Scroll(content).Offset.Y);
         Assert.Equal(1, Vertical(content).ThumbOpacity);
-        // Both fade together, as one controller does both in Chromium, though only one draws here.
-        Assert.Equal(1, Horizontal(content).ThumbOpacity);
+        // Not on an axis that can't scroll, which draws nothing.
+        Assert.Equal(0, Horizontal(content).ThumbOpacity);
     }
 
     [AvaloniaFact]
@@ -248,6 +248,23 @@ public class AvonicContentIndicatorTests
         Assert.Equal(1, indicator.ThumbOpacity);
         clock.At(1100);
         Assert.Equal(0, indicator.ThumbOpacity);
+    }
+
+    [AvaloniaFact]
+    public void I3_A_Scroll_During_The_Wait_Waits_From_That_Scroll()
+    {
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+        var indicator = Vertical(content);
+
+        Wheel(scene, 100);
+        clock.At(200);
+        Wheel(scene, 100);
+        clock.At(499);
+        Assert.Equal(1, indicator.ThumbOpacity);
+        clock.At(516);
+        Assert.Equal(1 - 16 / 300d, indicator.ThumbOpacity, 6);
     }
 
     // ── I4 ───────────────────────────────────────────────────────────────────────────────────

@@ -35,16 +35,19 @@ public class ContentScrollIndicator : TemplatedControl
     public static readonly StyledProperty<Orientation> OrientationProperty =
         AvaloniaProperty.Register<ContentScrollIndicator, Orientation>(nameof(Orientation), Orientation.Vertical);
 
+    /// <summary>The scrollers that have an indicator, with how many: only these are marked below.</summary>
+    private static readonly Dictionary<ScrollViewer, int> s_watched = [];
+
     /// <summary>
-    /// On a <see cref="ScrollViewer"/> while a wheel or a scroll gesture is dispatched to it: an offset that changes in the meantime
-    /// is the user's. A wheel sets it on its way down, and a gesture, which only bubbles, at the presenter, before the presenter's
-    /// own handler takes it. Both clear it at the scroller, on the way up.
+    /// The scrollers a wheel or a scroll gesture is being dispatched to: an offset that changes in the meantime is the user's. A wheel
+    /// adds its scroller on its way down, and a gesture, which only bubbles, at the presenter, before the presenter's own handler
+    /// takes it. Both take it out at the scroller, on the way up. A set, as a wheel goes down through every scroller around.
     /// </summary>
-    internal static readonly AttachedProperty<bool> UserScrollingProperty =
-        AvaloniaProperty.RegisterAttached<ContentScrollIndicator, ScrollViewer, bool>("UserScrolling");
+    private static readonly HashSet<ScrollViewer> s_userScrolling = [];
 
     private ScrollViewer? _scroller;
     private double _opacity;
+    private TimeSpan _lastScroll;
     private TimeSpan _fadeStart;
     private IDisposable? _fadeWait;
     private IDisposable? _fadeFrame;
@@ -53,14 +56,18 @@ public class ContentScrollIndicator : TemplatedControl
     {
         IsHitTestVisibleProperty.OverrideDefaultValue<ContentScrollIndicator>(false);
         AffectsRender<ContentScrollIndicator>(BackgroundProperty, OrientationProperty);
-        PointerWheelChangedEvent.AddClassHandler<ScrollViewer>(
-            (scroller, _) => scroller.SetValue(UserScrollingProperty, true), RoutingStrategies.Tunnel, handledEventsToo: true);
-        PointerWheelChangedEvent.AddClassHandler<ScrollViewer>(
-            (scroller, _) => scroller.SetValue(UserScrollingProperty, false), RoutingStrategies.Bubble, handledEventsToo: true);
-        ScrollGestureEvent.AddClassHandler<ScrollContentPresenter>(
-            (presenter, _) => (presenter.TemplatedParent as ScrollViewer)?.SetValue(UserScrollingProperty, true), handledEventsToo: true);
-        ScrollGestureEvent.AddClassHandler<ScrollViewer>(
-            (scroller, _) => scroller.SetValue(UserScrollingProperty, false), handledEventsToo: true);
+        PointerWheelChangedEvent.AddClassHandler<ScrollViewer>((scroller, _) => Mark(scroller), RoutingStrategies.Tunnel, handledEventsToo: true);
+        PointerWheelChangedEvent.AddClassHandler<ScrollViewer>((scroller, _) => s_userScrolling.Remove(scroller), RoutingStrategies.Bubble, handledEventsToo: true);
+        ScrollGestureEvent.AddClassHandler<ScrollContentPresenter>((presenter, _) => Mark(presenter.TemplatedParent as ScrollViewer), handledEventsToo: true);
+        ScrollGestureEvent.AddClassHandler<ScrollViewer>((scroller, _) => s_userScrolling.Remove(scroller), handledEventsToo: true);
+    }
+
+    private static void Mark(ScrollViewer? scroller)
+    {
+        if (scroller is not null && s_watched.ContainsKey(scroller))
+        {
+            s_userScrolling.Add(scroller);
+        }
     }
 
     public ContentScrollIndicator() => UpdatePseudoClasses();
@@ -141,6 +148,7 @@ public class ContentScrollIndicator : TemplatedControl
         {
             _scroller = scroller;
             scroller.PropertyChanged += OnScrollerPropertyChanged;
+            s_watched[scroller] = s_watched.GetValueOrDefault(scroller) + 1;
         }
     }
 
@@ -151,6 +159,16 @@ public class ContentScrollIndicator : TemplatedControl
         if (_scroller is { } scroller)
         {
             scroller.PropertyChanged -= OnScrollerPropertyChanged;
+            if (s_watched[scroller] > 1)
+            {
+                s_watched[scroller]--;
+            }
+            else
+            {
+                s_watched.Remove(scroller);
+                s_userScrolling.Remove(scroller);
+            }
+
             _scroller = null;
         }
 
@@ -163,12 +181,11 @@ public class ContentScrollIndicator : TemplatedControl
         PseudoClasses.Set(":horizontal", Orientation == Orientation.Horizontal);
     }
 
-
     private void OnScrollerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ScrollViewer.OffsetProperty)
         {
-            if (_scroller?.GetValue(UserScrollingProperty) == true)
+            if (_scroller is { } scroller && s_userScrolling.Contains(scroller))
             {
                 Show();
             }
@@ -183,19 +200,38 @@ public class ContentScrollIndicator : TemplatedControl
         }
     }
 
-    /// <summary>A scroll by the user: all there, and the fade waits again.</summary>
+    /// <summary>
+    /// A scroll by the user: all there, and the fade waits again, from now. One wait, which looks again when it's up, rather than one
+    /// for each step of a fling. Nothing on an axis that can't scroll, which draws nothing.
+    /// </summary>
     private void Show()
     {
+        if (!CanScroll)
+        {
+            return;
+        }
+
+        _lastScroll = AvonicConfig.Now();
         _fadeFrame?.Dispose();
         _fadeFrame = null;
-        _fadeWait?.Dispose();
-        _fadeWait = AvonicConfig.Schedule(StartFade, FadeDelay);
+        _fadeWait ??= AvonicConfig.Schedule(OnFadeWait, FadeDelay);
         _opacity = 1;
         InvalidateVisual();
     }
 
-    private void StartFade()
+    private bool CanScroll => _scroller is { } scroller && (Orientation == Orientation.Vertical
+        ? scroller.Extent.Height - scroller.Viewport.Height
+        : scroller.Extent.Width - scroller.Viewport.Width) >= 0.5;
+
+    private void OnFadeWait()
     {
+        var left = _lastScroll + FadeDelay - AvonicConfig.Now();
+        if (left > TimeSpan.Zero)
+        {
+            _fadeWait = AvonicConfig.Schedule(OnFadeWait, left);
+            return;
+        }
+
         _fadeWait = null;
         _fadeStart = AvonicConfig.Now();
         _fadeFrame = AvonicConfig.RequestFrame(this, OnFadeFrame);

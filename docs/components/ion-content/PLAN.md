@@ -254,6 +254,7 @@ A content 300 high with 3000 or 5000 of content, focused by Tab unless it says o
 | Space, Shift+Space | a page down, a page up |
 | Alt+Up, Alt+Down | a page |
 | Home, End, Ctrl+Home, Ctrl+End | the top, the bottom. Vertical only: with only `scroll-x` they do nothing |
+| Cmd+Up, Cmd+Down, on macOS | the top, the bottom: Chromium's macOS key bindings, **not measured** (no Mac here). Meta+Down measured nothing on Windows |
 | Ctrl, Shift or Meta with an arrow; any modifier with Page Down; Shift+Home, Shift+End; Ctrl+Space, Alt+Space | nothing |
 | With `scroll-x` only | Up, Down, Page Down, Space, Home and End do nothing |
 | At the limit | nothing; nested, the key goes on to the content around, **even with `overscroll-behavior: contain`**: an inner one at its end, and then Down scrolls the outer by 40, Page Down by 262, End to its end |
@@ -316,12 +317,14 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   it sends it on, to that, or with Shift past the scroller, read at that moment, as what's inside changes.
 - **A press:** Avalonia sends keys only to what has focus, and has nothing like Chromium's last-pressed node, so **a press on the content
   focuses the scroller**, as Avalonia focuses the closest focusable ancestor of what's pressed. That's a deliberate difference, below.
-  Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
+  **By a finger or a pen, only a tap does:** a touch that becomes a scroll sends no `mousedown` in Chromium and moves no focus, so a
+  field being typed in keeps it, and its keyboard on a phone. So the scroller isn't focusable during a finger's press, and its `Tapped`
+  focuses it, unless what was tapped took focus itself (the first review found this). Focus brings what it lands on into view, so a press on a nested content part way out of view made the outer one jump, which a test
   found; the scroller refuses its own bring-into-view during a press, and Tab still brings it in. A press on a focused `ion-input`'s label
   now blurs the field and focuses it again, as the scroller takes focus on the way down and the label gives it back on release: Chromium
   does the same, measured `ionBlur`, `blur`, `ionFocus`, `focus`.
 - **The ring** is `PART_FocusRing`, a `Border` first in the scroller's template, so under the content, at a margin of -1, shown on
-  `:focus-visible`, which Avalonia sets for focus by key only, as CSS does. It draws the scroller's own `BorderBrush`, `BorderThickness`
+  `:focus-visible`, which Avalonia sets for focus by key only, as CSS does. The margin is the theme's, `Avonic.Content.FocusRingMargin`. It draws the scroller's own `BorderBrush`, `BorderThickness`
   and `CornerRadius`, which the theme sets: `Avonic.Content.FocusRingBrush` (`#E59700`), 2 and 3.5. The scroller doesn't clip, so the ring
   reaches a pixel outside, and its presenter still clips the content. **Not a `FocusAdorner`,** which was tried first: Avalonia's adorner
   layer draws over everything, so the ring was 2 px over rows with a background, where Chromium paints the outline under the scrolling
@@ -333,7 +336,8 @@ With `--hide-scrollbars` off, as Playwright's headless sets it. Read from screen
   (`#80808080`), and a `Width` or `Height` of 4 on `:vertical` and `:horizontal`. It draws the thumb itself, rounded down as measured, the
   minimum its own thickness. It shows when the offset changes while a wheel or a scroll gesture is being dispatched to its scroller, which a
   static class handler marks (a wheel's tunnel at the `ScrollViewer`, a gesture at its `ScrollContentPresenter` before the presenter's own
-  handler), and fades on `AvonicConfig`'s clock: 300 ms, then 300 ms down to nothing, with `Schedule` and `RequestFrame`. It takes no input.
+  handler), only for a scroller with an indicator, and fades on `AvonicConfig`'s clock: 300 ms after the last, with one wait that looks
+  again when it's up, then 300 ms down to nothing. An axis that can't scroll doesn't show. It takes no input.
 - **Its relation to Avalonia's `ScrollBar`:** the content's `ScrollViewer` has its own theme with no bars, since #11, and keeps it: a base theme's
   `ScrollBar` is a desktop control that takes input, and on a phone Chromium draws only this thumb. On desktop too, md here is the phone's:
   the reference is a phone, and #11's behaviour 2 is that nothing takes room for a bar. A desktop browser's 15 px bar is recorded below.
@@ -350,11 +354,11 @@ Tests in `AvonicContentTests` and `ContentScrollIndicatorTests`, named after the
 | 41 | Other modifiers do nothing, and nor do other keys; Avalonia's own page keys never act | `mods` |
 | 42 | 150 ms of `cubic-bezier(0.42, 0, 0.58, 1)` from the key, whatever the distance | `arrow`, `pageDown`, `end` |
 | 43 | A key during one adds to its target, and keeps its speed: two Downs end at 80 at 207 ms; Page Down then Up ends at 222 at about 135 | `twoQuick`, `reverse`, `held`, `twoPages` |
-| 44 | Something else scrolling it stops it | not measured; as `SmoothScroll` |
+| 44 | Something else scrolling it stops it, and the next key starts from where that left it | not measured; as `SmoothScroll` |
 | 45 | An axis that's off, or a limit, sends the key on to the content around | `noscrolly`, `scrollXOnly`, `nested…AtEnd` |
 | 46 | Tab stops on a content that can scroll with nothing focusable inside, and Shift+Tab; not on one that fits or has `ScrollY` off; `ForceOverscroll`'s pixel counts | `tab`, `fits`, `noscrolly`, `shiftTab`, `overscrollTab` |
 | 47 | With something focusable inside, Tab goes into it and Shift+Tab past it; nested, the inner is the stop | `button`, `nested`, `nestedFits` |
-| 48 | A press on the content lets the keys scroll it after, and doesn't scroll a content around it | `click`, `tap`, `clickWithButton` |
+| 48 | A press on the content lets the keys scroll it after, and doesn't scroll a content around it. A finger that scrolls leaves a field its focus; a tap takes it | `click`, `tap`, `clickWithButton` |
 | 49 | A focused control that takes Space keeps it; the arrows and pages still scroll | `button`, `checkbox`, `ion-item` |
 | 50 | A text field keeps the arrows, Home, End and Space, and Page Up and Page Down scroll | `input`, `ion-input` |
 | 51 | The ring: 2 px, from 1 outside to 1 inside, Android's colour, by key only, under the content, so a row with a background covers its inner half | ring, `ring2` |

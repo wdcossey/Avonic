@@ -167,16 +167,18 @@ property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrollin
   | Left, Right | 40, with `ScrollX` on. Physical: in RTL, Left goes towards the end |
   | Page Up, Page Down, Space, Shift+Space, Alt+Up, Alt+Down | a page, 87.5% of the viewport, rounded down: 262 of 300 |
   | Home, End, with or without Ctrl | to the top, the bottom |
+  | Cmd+Up, Cmd+Down, on macOS | to the top, the bottom: Chromium's macOS bindings, not measured |
 
   Any other modifier does nothing, and nor does Avalonia's own `ScrollViewer`, whose Page Down went a whole viewport. Each scroll takes 150 ms of
   `cubic-bezier(0.42, 0, 0.58, 1)`, from the key, whatever the distance, and a key during one adds to where it's going and keeps its speed,
-  as Chromium's does. Something else scrolling it stops it. A key that can't scroll it, at its limit or on an axis that's off, goes on to
+  as Chromium's does. Something else scrolling it stops it, and the next key starts from there. A key that can't scroll it, at its limit or on an axis that's off, goes on to
   the content around, so nested contents chain as Chromium's do. The scroll events report it as any other.
 
   **Which content.** The one with focus, or the closest around what has it. A content that can scroll **is a tab stop when nothing in it can
   take focus**, and Shift+Tab comes back to it; with something focusable inside, Tab goes into it. Content that fits, or with `ScrollY`
-  off, isn't one. **A press on the content focuses it** (Avalonia sends keys only to what has focus, where Chromium remembers the press
-  and leaves focus on the page), so the keys work after a tap, and a focused field loses focus, as in a browser. A focused control that
+  off, isn't one. **A mouse press on the content, or a tap, focuses it** (Avalonia sends keys only to what has focus, where Chromium
+  remembers the press and leaves focus on the page), so the keys work after it, and a focused field loses focus, as in a browser. A
+  finger that scrolls moves no focus, so a field being typed in keeps its keyboard. A focused control that
   takes a key keeps it: a button its Space, a text field its arrows, Home, End and Space. Page Up and Page Down in a one-line `TextBox`
   scroll, and a multi-line one keeps them.
 
@@ -195,5 +197,5 @@ property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrollin
   | `Avonic.Content.ScrollIndicatorColor`, `…Brush` | `#80808080` |
   | `Avonic.Content.FocusRingColor`, `…Brush` | `#E59700`, Android's |
 
-  The thickness, 4, and the ring's 2 and radius of 3.5 are literals in the theme, as Chromium has no variable for them. A transparent brush
+  `Avonic.Content.FocusRingMargin`, -1, places the ring a pixel outside. The thickness, 4, and the ring's 2 and radius of 3.5 are literals in the theme, as Chromium has no variable for them. A transparent brush
   hides either.

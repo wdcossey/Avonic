@@ -12,8 +12,8 @@
          extension. Here they're placed at the end edge and the bottom, and have no size or brush: the theme gives them those.
          The focus ring is a browser's outline on a scroller focused by key, under the content as Chromium paints it, so
          content with a background of its own covers its inner half. It's the scroller's own border properties, which the
-         theme sets, and a margin of -1, so that it reaches a pixel outside: the presenter clips the content, and the
-         scroller doesn't clip. Avalonia's adorner would draw over the content, so there's none. -->
+         theme sets, and a margin from the theme, -1, so that it reaches a pixel outside: the presenter clips the content,
+         and the scroller doesn't clip. Avalonia's adorner would draw over the content, so there's none. -->
     <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="FocusAdorner" Value="{x:Null}" />
@@ -21,7 +21,7 @@
             <ControlTemplate>
                 <Panel>
                     <Border Name="PART_FocusRing"
-                            Margin="-1"
+                            Margin="{DynamicResource Avonic.Content.FocusRingMargin}"
                             IsVisible="False"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"

@@ -245,6 +245,31 @@ public class AvonicContentKeyboardTests
         Assert.Equal(new Vector(40, 0), Scroll(content).Offset);
     }
 
+    [AvaloniaFact]
+    public void B40_On_MacOS_Cmd_With_An_Arrow_Goes_To_The_Top_And_The_Bottom()
+    {
+        var wasMac = AvonicContent.IsMacOS;
+        AvonicContent.IsMacOS = () => true;
+        try
+        {
+            using var clock = new TestClock();
+            var content = Tall();
+            using var scene = Focused(content, out _);
+
+            Press(scene, PhysicalKey.ArrowDown, RawInputModifiers.Meta);
+            clock.At(400);
+            Assert.Equal(2700, Scroll(content).Offset.Y);
+
+            Press(scene, PhysicalKey.ArrowUp, RawInputModifiers.Meta);
+            clock.At(800);
+            Assert.Equal(0, Scroll(content).Offset.Y);
+        }
+        finally
+        {
+            AvonicContent.IsMacOS = wasMac;
+        }
+    }
+
     // ── 41 ───────────────────────────────────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -272,7 +297,18 @@ public class AvonicContentKeyboardTests
         Scroll(content).Focus(NavigationMethod.Tab);
         Settle();
 
-        Press(scene, key, modifiers);
+        // Not macOS, where Cmd+Down goes to the bottom, so that this holds on a Mac too.
+        var wasMac = AvonicContent.IsMacOS;
+        AvonicContent.IsMacOS = () => false;
+        try
+        {
+            Press(scene, key, modifiers);
+        }
+        finally
+        {
+            AvonicContent.IsMacOS = wasMac;
+        }
+
         clock.At(400);
 
         // Avalonia's own ScrollViewer would take Shift+Page Down by a whole viewport.
@@ -419,6 +455,23 @@ public class AvonicContentKeyboardTests
         clock.At(400);
 
         Assert.Equal(1000, Scroll(content).Offset.Y);
+    }
+
+    [AvaloniaFact]
+    public void B44_A_Key_After_Something_Else_Scrolled_It_Starts_From_There()
+    {
+        // The wheel in the middle of a key's scroll, then another key before the next frame: that key isn't lost.
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = Focused(content, out _);
+
+        Press(scene, PhysicalKey.End);
+        clock.At(48);
+        Scroll(content).Offset = new Vector(0, 1000);
+        Press(scene, PhysicalKey.ArrowDown);
+        clock.At(400);
+
+        Assert.Equal(1040, Scroll(content).Offset.Y);
     }
 
     // ── 45 ───────────────────────────────────────────────────────────────────────────────────
@@ -634,6 +687,63 @@ public class AvonicContentKeyboardTests
 
         Assert.True(Scroll(inner).IsFocused);
         Assert.True(Scroll(outer).Offset.Y > 0);
+    }
+
+    [AvaloniaFact]
+    public void B48_A_Finger_That_Scrolls_Leaves_A_Field_Its_Focus_And_A_Tap_Takes_It()
+    {
+        // A touch that becomes a scroll sends no mousedown in Chromium, so the field being typed in keeps focus, and its keyboard.
+        var field = new TextBox { Text = "abc" };
+        var content = Tall(3000, field);
+        using var scene = new Scene(Box(content));
+        Scroll(content).IsScrollInertiaEnabled = false;
+        field.Focus();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Settle();
+
+        var from = new Point(100, 250);
+        var finger = scene.Window.TouchBegin(from, RawInputModifiers.None);
+        Settle();
+        Assert.True(field.IsFocused);
+        for (var i = 1; i <= 10; i++)
+        {
+            scene.Window.TouchMove(finger, new Point(100, 250 - i * 10), RawInputModifiers.None);
+            Settle();
+        }
+
+        scene.Window.TouchEnd(finger, new Point(100, 150), RawInputModifiers.None);
+        Settle();
+        Assert.True(Scroll(content).Offset.Y > 0);
+        Assert.True(field.IsFocused);
+
+        // A tap does take it, as a tap's mousedown does.
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Settle();
+        var tap = scene.Window.TouchBegin(from, RawInputModifiers.None);
+        scene.Window.TouchEnd(tap, from, RawInputModifiers.None);
+        Settle();
+        Assert.False(field.IsFocused);
+        Assert.True(Scroll(content).IsFocused);
+    }
+
+    [AvaloniaFact]
+    public void B48_A_Tap_On_A_Nested_Content_Focuses_It_Even_With_The_Outer_Focused()
+    {
+        var inner = new AvonicContent { Content = new Border { Height = 1000, Background = Brushes.Transparent } };
+        var outer = new AvonicContent
+        {
+            Content = new StackPanel { Children = { new Panel { Height = 200, Children = { inner } }, new Border { Height = 3000 } } },
+        };
+        using var scene = new Scene(Box(outer));
+        Scroll(outer).Focus(NavigationMethod.Pointer);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Settle();
+
+        var tap = scene.Window.TouchBegin(new Point(100, 100), RawInputModifiers.None);
+        scene.Window.TouchEnd(tap, new Point(100, 100), RawInputModifiers.None);
+        Settle();
+
+        Assert.True(Scroll(inner).IsFocused);
     }
 
     // ── 49, 50 ───────────────────────────────────────────────────────────────────────────────

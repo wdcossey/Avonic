@@ -20,5 +20,7 @@
     <SolidColorBrush x:Key="Avonic.Content.ScrollIndicatorBrush" Color="{DynamicResource Avonic.Content.ScrollIndicatorColor}" />
     <Color x:Key="Avonic.Content.FocusRingColor">#E59700</Color>
     <SolidColorBrush x:Key="Avonic.Content.FocusRingBrush" Color="{DynamicResource Avonic.Content.FocusRingColor}" />
+    <!-- Where the ring sits around the scroller: a pixel outside, with a thickness of 2, so from 1 outside to 1 inside. -->
+    <Thickness x:Key="Avonic.Content.FocusRingMargin">-1</Thickness>
 
 </ResourceDictionary>

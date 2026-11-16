@@ -37,13 +37,26 @@ internal sealed class ContentKeyboardScroll(ScrollViewer scroller)
 
     public bool IsRunning => _frame is not null;
 
-    /// <summary>Where it's going, or where it is when it isn't going anywhere: what the next key adds to.</summary>
-    public Vector Target => IsRunning ? _target : scroller.Offset;
+    /// <summary>
+    /// Where it's going, or where it is when it isn't going anywhere: what the next key adds to. Not where it was going if something
+    /// else has scrolled it since its last frame, which ends it.
+    /// </summary>
+    public Vector Target => IsRunning && !MovedByOthers ? _target : scroller.Offset;
+
+    /// <summary>
+    /// Running, and nobody else has scrolled it since its last frame, and it hasn't reached its end: Chromium removes a finished
+    /// animation, so a key after that starts afresh.
+    /// </summary>
+    private bool Continues => IsRunning && !MovedByOthers && (AvonicConfig.Now() - _start).TotalMilliseconds < _total;
+
+    private bool MovedByOthers =>
+        Math.Abs(scroller.Offset.X - _last.X) > 0.5 || Math.Abs(scroller.Offset.Y - _last.Y) > 0.5;
 
     public void To(Vector target)
     {
-        if (!IsRunning)
+        if (!Continues)
         {
+            Stop();
             _timing = EaseInOut;
             _initial = _last = scroller.Offset;
             _target = target;
@@ -87,8 +100,11 @@ internal sealed class ContentKeyboardScroll(ScrollViewer scroller)
         var oldDuration = _total - _lastRetarget;
         if (oldDuration <= 0)
         {
-            _total = t + segment;
+            _timing = EaseInOut;
+            _initial = current;
             _target = target;
+            _lastRetarget = t;
+            _total = t + segment;
             return;
         }
 
@@ -145,8 +161,7 @@ internal sealed class ContentKeyboardScroll(ScrollViewer scroller)
     private void OnFrame()
     {
         _frame = null;
-        var offset = scroller.Offset;
-        if (Math.Abs(offset.X - _last.X) > 0.5 || Math.Abs(offset.Y - _last.Y) > 0.5)
+        if (MovedByOthers)
         {
             // Someone else scrolled it.
             return;
