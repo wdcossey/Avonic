@@ -43,16 +43,9 @@
             <Setter Property="IsVisible" Value="True" />
         </Style>
 
-        <!-- .refresher-pulling ion-refresher-content .refresher-pulling, and ready's and cancelling's -->
-        <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling, ^:cancelling /template/ Panel#PART_Pulling">
+        <!-- .refresher-pulling ion-refresher-content .refresher-pulling, and ready's; not cancelling's, a deviation (#167) -->
+        <Style Selector="^:pulling /template/ Panel#PART_Pulling, ^:ready /template/ Panel#PART_Pulling">
             <Setter Property="IsVisible" Value="True" />
-        </Style>
-        <!-- cancelling's .refresher-pulling is display: block, so the icon fills its width, its spinner at the start -->
-        <Style Selector="^:cancelling /template/ Border#PART_PullingIcon">
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-        </Style>
-        <Style Selector="^:cancelling /template/ Panel#PART_SpinnerArrowContainer">
-            <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
         <!-- .refresher-refreshing, and native's completing and cancelling -->
         <Style Selector="^:refreshing /template/ Panel#PART_Refreshing, ^:completing /template/ Panel#PART_Refreshing, ^:cancelling /template/ Panel#PART_Refreshing">

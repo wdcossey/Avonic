@@ -143,9 +143,9 @@ public class AvonicRefresherCaptureTests
     }
 
     /// <summary>
-    /// #167: Chromium's frames after <c>cancel()</c> (docs/components/ion-refresher/ref/cancel-*.png): during a refresh, both icons
-    /// for the cancel's 700 ms, the pulling one 390 wide with its spinner at the start; with no pull, only the refreshing one below
-    /// the header; and none once it's over.
+    /// #167: after <c>cancel()</c> during a refresh, Chromium shows both icons for the cancel's 700 ms, the pulling one 390 wide
+    /// with its spinner at the start (docs/components/ion-refresher/ref/cancel-*.png); Avonic shows only the refreshing one, a
+    /// deviation the user chose. With no pull, only the refreshing one; and none once it's over.
     /// </summary>
     [AvaloniaFact]
     public void Cancel_Frames() => InstalledTheme.Run(_ =>
@@ -156,18 +156,19 @@ public class AvonicRefresherCaptureTests
         using (var page = new Page())
         {
             Render();
-            var before = Primary(page.Scene.Window.CaptureRenderedFrame()!, strip);
+            var plain = page.Scene.Window.CaptureRenderedFrame()!;
+            var before = Primary(plain, strip);
             page.Drag(8 + 180).Wait(16).Lift().Wait(400);
             page.Refresher.Cancel();
             page.Wait(100);
             Render();
             Save(page.Scene, "cancelling");
             var frame = page.Scene.Window.CaptureRenderedFrame()!;
-            var pulling = page.Box("PART_PullingSpinner");
             var refreshing = page.Box("PART_RefreshingSpinner");
-            Assert.Equal(new Rect(9, 53, 24, 24), pulling);
-            Assert.True(Primary(frame, pulling.Intersect(strip)) > 50, "the pulling spinner shows");
             Assert.True(Primary(frame, refreshing) > 50, "the refreshing spinner shows");
+            // Only the refreshing icon: outside it the strip is as it was before the pull, with no pulling spinner at the start
+            var icon = page.Box("PART_RefreshingIcon");
+            Assert.Equal(before - Primary(plain, icon), Primary(frame, strip) - Primary(frame, icon));
 
             page.Wait(700);
             Render();

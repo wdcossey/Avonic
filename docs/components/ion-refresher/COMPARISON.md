@@ -46,8 +46,8 @@ Refreshing:
 | Let go at 0.5 | snaps back 50 → 0 px, 0.4 px/ms; `ionRefresh` about 142 ms after | 16 + 125 ms, plus up to a frame (B5) | Match |
 | `complete()` | `refresher-completing` after two frames; scale 0.4239 at about 88 ms; `ionPullEnd` `complete` about 235 ms after the call | two frames, then 200 ms `ease` (B7) | Match |
 | `cancel()` | inactive after `transitionEndAsync`'s 700 ms fallback | 2 frames + 700 ms (B8) | Match, measured since #167: still cancelling 650 ms after the call, inactive at 760 |
-| `cancel()` during a refresh | both icons for the 700 ms: the pulling one `{0, 44, 390, 42}`, its spinner at (9, 53), the refreshing one at (174, 86); none after | the same boxes (C1, `Cancel_Frames`) | Match, but the pulling icon is a pill where Chromium's is an ellipse, below |
-| `cancel()` with no pull | the refreshing icon at (174, 86); the pulling one at y -8, under the header | the same (C5) | Match |
+| `cancel()` during a refresh | both icons for the 700 ms: the pulling one `{0, 44, 390, 42}`, its spinner at (9, 53), the refreshing one at (174, 86); none after | the refreshing icon alone, where the refresh had it, (174, 65); none after (C1, `Cancel_Frames`) | **Deliberate difference** since the user's decision on #167: below |
+| `cancel()` with no pull | the refreshing icon at (174, 86); the pulling one at y -8, under the header | the refreshing icon at (174, 65) (C5) | Deliberate difference, as above: with no pulling icon, the column is the refreshing one alone |
 | A short pull let go | one icon as it goes back, none after | the same (C4) | Match |
 | A pull during cancelling | the icon follows the finger (`translateY` 24.8, then 55.2) | the same (C2) | Match since #167: it stayed at the held snap back |
 | That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0. Let go with no move since (F): nothing, and nothing pulls again (G). Moved on past 0.4 and let go (D): it refreshes | let go with no move since: nothing, and the next pull works (C3); past 0.4: it refreshes (C10) | **Deliberate difference** since #176: Ionic's bug fixed, below. C10 matches |
@@ -69,9 +69,22 @@ only when the reset ends, so it holds the pulling icon at `translateY(0)`. `.ref
 icon is a block-level flex box with no width, so it fills the 390, with its spinner at the start. The column of both icons is 84 high
 and is centred on the 60 px refresher, so it starts 12 above the refresher's top.
 
-Avonic now does the same. The template's column is a `RefresherColumn`, centred both ways, where the `StackPanel` before it
-overflowed only downward (the icons were at 56 and 98). In cancelling, the pulling icon stretches. Chromium is on the left, Avonic
-before #167 in the middle, and Avonic after on the right. The refreshing spinner's arc differs, as each is caught at its own moment:
+#171 matched those boxes. The template's column is a `RefresherColumn`, centred both ways, where the `StackPanel` before it
+overflowed only downward (the icons were at 56 and 98). The frames below are from #171: Chromium on the left, Avonic before #167 in
+the middle, and Avonic after #171 on the right, with the pulling icon stretched as Chromium's. The refreshing spinner's arc differs, as
+each is caught at its own moment.
+
+**Since then Avonic hides the pulling icon while cancelling**, a deliberate difference the user chose after trying both, in the sample
+and in Ionic 8.8.1 itself: the two icons look broken. Ionic's own CSS means to hide it too: `.refresher-cancelling
+.refresher-pulling-icon { transform: scale(0) }` is there, and loses only to the held animation, as above. That rule and the cancel's
+code are the same from Ionic 6.0.0 to 9.0.11, so this isn't a regression in 8.8.1. With the pulling icon hidden, the column is the
+refreshing icon alone, which stays at (174, 65), where the refresh showed it, rather than moving down to 86. A pull during cancelling
+still shows the pulling icon, as the state is `pulling` then (C2).
+
+![After cancel(): Chromium's two icons on the left, Avonic's one on the right](compare/side-by-side-cancelling-one-icon.png)
+
+Chromium on the left (`ref/cancel-refreshing.png`), Avonic since the user's decision on the right, from `Cancel_Frames`.
+ The frames below show #171's two icons, which Avonic no longer draws:
 
 ![Cancelling](compare/before-after-cancelling.png)
 

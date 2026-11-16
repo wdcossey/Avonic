@@ -384,14 +384,15 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void B8_Cancel_Shows_Both_Icons_And_Ends_At_Ionics_700ms_Fallback() => InstalledTheme.Run(_ =>
+    public void B8_Cancel_Shows_Only_The_Refreshing_Icon_And_Ends_At_Ionics_700ms_Fallback() => InstalledTheme.Run(_ =>
     {
+        // Ionic shows the pulling icon too while cancelling; Avonic hides it, a deviation the user chose (#167)
         using var page = Refreshing();
         page.Refresher.Cancel();
         var called = page.At;
         page.Wait(32);
         Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":cancelling"));
-        Assert.True(page.Shows("PART_Pulling"));
+        Assert.False(page.Shows("PART_Pulling"));
         Assert.True(page.Shows("PART_Refreshing"));
 
         page.Wait(699);
@@ -1194,20 +1195,23 @@ public class AvonicRefresherTests
     }
 
     [AvaloniaFact]
-    public void C1_Cancelling_Shows_Both_Icons_Where_Chromium_Does_And_None_Once_It_Ends() => InstalledTheme.Run(_ =>
+    public void C1_Cancelling_Shows_Only_The_Refreshing_Icon_Where_It_Was_And_None_Once_It_Ends() => InstalledTheme.Run(_ =>
     {
+        // A deliberate difference (#167), the user's choice. In Chromium .refresher-cancelling shows .refresher-pulling, display:
+        // block, beside .refresher-refreshing for the 700 ms: the pulling icon, held at the snap back's translateY(0), fills the
+        // block's 390 (0, 44, 390, 42), its spinner at the start (9, 53), and the column of both, 84 high, centred on the 60 px
+        // refresher at 56, puts the refreshing icon at (174, 86). Avonic hides the pulling icon, so the column is the refreshing
+        // icon alone, which stays where the refresh showed it.
         using var page = Refreshing();
         Assert.Equal(1, IconsSeen(page));
+        var refreshing = Box(page, "PART_RefreshingIcon");
+        Assert.Equal(new Rect(174, 65, 42, 42), refreshing);
         page.Refresher.Cancel();
         page.Wait(32);
 
-        // .refresher-cancelling shows .refresher-pulling, display: block, and .refresher-refreshing. The pulling icon, held at the
-        // snap back's translateY(0), fills the block's 390, its spinner at the start; the column of both, 84 high, is centred on
-        // the 60 px refresher at 56, so it starts 12 above it.
-        Assert.Equal(new Rect(0, 44, 390, 42), Box(page, "PART_PullingIcon"));
-        Assert.Equal(new Rect(9, 53, 24, 24), Box(page, "PART_PullingSpinner"));
-        Assert.Equal(new Rect(174, 86, 42, 42), Box(page, "PART_RefreshingIcon"));
-        Assert.Equal(2, IconsSeen(page));
+        Assert.False(page.Shows("PART_Pulling"));
+        Assert.Equal(refreshing, Box(page, "PART_RefreshingIcon"));
+        Assert.Equal(1, IconsSeen(page));
 
         page.Wait(700);
         Assert.Contains("ionPullEnd:Cancel", page.Names);
@@ -1347,15 +1351,17 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void C5_Cancel_With_No_Pull_Shows_Only_The_Refreshing_Icon_Where_Chromium_Does() => InstalledTheme.Run(_ =>
+    public void C5_Cancel_With_No_Pull_Shows_Only_The_Refreshing_Icon() => InstalledTheme.Run(_ =>
     {
-        // The pulling icon is at its resting translateY(-52), above the content, under the header in Chromium
+        // In Chromium the pulling icon is at its resting translateY(-52), under the header, and the column of both puts the
+        // refreshing icon at (174, 86). Avonic hides the pulling icon while cancelling (#167), so the refreshing one is where a
+        // refresh shows it.
         using var page = new Page();
         page.Wait(0);
         page.Refresher.Cancel();
         page.Wait(32);
-        Assert.Equal(new Rect(0, -8, 390, 42), Box(page, "PART_PullingIcon"));
-        Assert.Equal(new Rect(174, 86, 42, 42), Box(page, "PART_RefreshingIcon"));
+        Assert.False(page.Shows("PART_Pulling"));
+        Assert.Equal(new Rect(174, 65, 42, 42), Box(page, "PART_RefreshingIcon"));
         Assert.Equal(1, IconsSeen(page));
 
         page.Wait(700);
@@ -1401,7 +1407,7 @@ public class AvonicRefresherTests
             Assert.Equal(1, IconsSeen(page));
         }
 
-        // Opened again before it: still cancelling, so both, then none
+        // Opened again before it: still cancelling, so the refreshing icon alone (#167), then none
         using (var page = Refreshing())
         {
             page.Refresher.Cancel();
@@ -1411,7 +1417,8 @@ public class AvonicRefresherTests
             page.Wait(100);
             grid.Children.Add(page.Content);
             page.Wait(16);
-            Assert.Equal(2, IconsSeen(page));
+            Assert.Equal(1, IconsSeen(page));
+            Assert.False(page.Shows("PART_Pulling"));
             page.Wait(600);
             Assert.Equal(0, IconsSeen(page));
             Assert.Contains("ionPullEnd:Cancel", page.Names);
@@ -1419,17 +1426,15 @@ public class AvonicRefresherTests
     });
 
     [AvaloniaFact]
-    public void C8_The_Functional_Template_Also_Stretches_The_Pulling_Icon_In_Cancelling_With_Its_Spinner_At_The_Start()
+    public void C8_The_Functional_Template_Also_Hides_The_Pulling_Icon_In_Cancelling()
     {
-        // No theme: Avonic.Components' own template, which has the structure and no sizes
+        // No theme: Avonic.Components' own template, which has the structure and no sizes (#167)
         using var page = Refreshing();
         page.Refresher.Cancel();
         page.Wait(32);
-        var icon = Box(page, "PART_PullingIcon");
-        var container = Box(page, "PART_SpinnerArrowContainer");
-        Assert.Equal(page.Refresher.Bounds.Width, icon.Width);
-        Assert.Equal(icon.X, container.X);
-        Assert.True(container.Width < icon.Width, $"{container.Width} of {icon.Width}");
+        Assert.True(((IPseudoClasses)page.Refresher.Classes).Contains(":cancelling"));
+        Assert.False(page.Shows("PART_Pulling"));
+        Assert.True(page.Shows("PART_Refreshing"));
     }
 
     [AvaloniaFact]

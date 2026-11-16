@@ -996,7 +996,8 @@ try {
         Shot 'ion-refresher-cancelling'
         $atStart = PrimaryIn (& $start)
         $inMiddle = PrimaryIn (& $iconArea)
-        Check 'Cancel during a refresh shows both icons, as Ionic: the pulling spinner at the start' ([bool]$refreshing -and $atStart -gt $plainStartBlue + 5) "$atStart primary pixels sampled; $refreshing"
+        # Ionic shows the pulling icon too, as wide as the content with its spinner at the start; Avonic hides it (#167)
+        Check 'Cancel during a refresh shows no pulling spinner at the start, a deviation from Ionic' ([bool]$refreshing -and $atStart -le $plainStartBlue + 5) "$atStart primary pixels sampled; $refreshing"
         Check 'and the refreshing spinner in the middle' ($inMiddle -gt $plainIconBlue + 5) "$inMiddle primary pixels sampled"
         Check 'then cancels' ((WaitForText 'Cancelled' 2) -eq 'Cancelled') ((Texts | Select-Object -Last 1))
         Start-Sleep -Milliseconds 1200
