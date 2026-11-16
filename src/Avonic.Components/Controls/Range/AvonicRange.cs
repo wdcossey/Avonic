@@ -516,7 +516,18 @@ public class AvonicRange : TemplatedControl, IItemControl
             _places = null;
             Render();
         }
-        else if (change.Property == DualKnobsProperty || change.Property == PinProperty
+        else if (change.Property == DualKnobsProperty)
+        {
+            // dualKnobsChanged (8.8.19): the knobs go where the value puts them for the new number of knobs, as a pair's upper for
+            // one, and a number's 0 and itself for two.
+            if (!_noUpdate)
+            {
+                UpdateRatio();
+            }
+
+            Render();
+        }
+        else if (change.Property == PinProperty
                  || change.Property == PinFormatterProperty || change.Property == SnapsProperty
                  || change.Property == TicksProperty || change.Property == LabelProperty || change.Property == LabelContentProperty
                  || change.Property == LabelPlacementProperty || change.Property == StartContentProperty

@@ -846,6 +846,18 @@ public class AvonicInputOtp : ContentControl
             return;
         }
 
+        // Since 8.8.3: nothing while disabled, and in a read-only box Backspace and Delete do nothing at all.
+        if (!IsEffectivelyEnabled)
+        {
+            return;
+        }
+
+        if (Readonly && e.Key is Key.Back or Key.Delete)
+        {
+            e.Handled = true;
+            return;
+        }
+
         // A read-only text box keeps its paste event to itself, and Chromium still raises it, which onPaste takes.
         if (box.IsReadOnly && Application.Current?.PlatformSettings?.HotkeyConfiguration.Paste.Any(gesture => gesture.Matches(e)) == true)
         {
@@ -1093,6 +1105,12 @@ public class AvonicInputOtp : ContentControl
 
     private async void PasteFromClipboard()
     {
+        // onPaste, since 8.8.3: after its preventDefault, nothing when disabled or read-only.
+        if (!IsEffectivelyEnabled || Readonly)
+        {
+            return;
+        }
+
         // The clipboard is read asynchronously, where Chromium hands onPaste its text with the event.
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
         string? text;

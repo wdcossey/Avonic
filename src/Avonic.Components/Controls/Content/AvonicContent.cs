@@ -1077,8 +1077,9 @@ public class AvonicContent : TemplatedControl
     {
         if (Fullscreen)
         {
-            // Ionic only looks again on a render or a window resize, 100 ms later. A page's layout is what can
-            // change the answer, so this follows it, at once.
+            // Ionic looks again on a render, a window resize 100 ms later, and since 8.8.19 a change of the host's own size, a
+            // frame later (its ResizeObserver). A page's layout is what can change the answer, a move included, so this follows it,
+            // at once.
             LayoutUpdated += OnLayoutUpdated;
             ReadDimensions();
         }

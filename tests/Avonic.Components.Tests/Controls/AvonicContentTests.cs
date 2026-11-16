@@ -2562,7 +2562,8 @@ public class AvonicContentTests
     [AvaloniaFact]
     public void B27_Fullscreen_Follows_The_Page_At_Once()
     {
-        // Deliberate. Measured head grows: Ionic stays at 56 until a window resize and 100 ms.
+        // Measured head grows on 8.8.19: the content shrinks to 260, and its ResizeObserver reads 100 and 40 a frame later. Ionic
+        // 8.8.1 stayed at 56 until a window resize and 100 ms. Here it follows in the layout pass, with no frame between.
         var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
         var (page, _, _) = Page(content);
         using var scene = new Scene(page);
@@ -2572,6 +2573,23 @@ public class AvonicContentTests
 
         Assert.Equal(new Thickness(0, 100, 0, 40), Container(content).Padding);
         Assert.Equal(new Rect(0, 0, 390, 400), Box(Scroll(content), scene.Window));
+    }
+
+    [AvaloniaFact]
+    public void B27_Fullscreen_Follows_A_Move_That_Keeps_Its_Size()
+    {
+        // Deliberate. Measured head and foot on 8.8.19: the head 20 taller and the foot 20 shorter move the content without resizing
+        // it, so its ResizeObserver doesn't fire, and Ionic stays at 56 and 40 until a window resize. Here it follows the layout.
+        var content = new AvonicContent { Fullscreen = true, Content = new Border { Height = 100 } };
+        var (page, _, _) = Page(content);
+        using var scene = new Scene(page);
+
+        page.RowDefinitions[0].Height = new GridLength(76);
+        page.RowDefinitions[2].Height = new GridLength(20);
+        Settle();
+
+        Assert.Equal(304, content.Bounds.Height);
+        Assert.Equal(new Thickness(0, 76, 0, 20), Container(content).Padding);
     }
 
     [AvaloniaFact]

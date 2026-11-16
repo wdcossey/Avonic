@@ -453,4 +453,49 @@ public class AvonicTabsTests
 
         public LazyPage() => Built++;
     }
+
+    /// <summary>A component whose construction fails while <see cref="Fail"/> is set, as a lazy load that throws.</summary>
+    private sealed class FlakyPage : Border
+    {
+        public static bool Fail;
+
+        public FlakyPage()
+        {
+            if (Fail)
+            {
+                throw new InvalidOperationException("Not now");
+            }
+        }
+    }
+
+    // Since Ionic 8.8.19, prepareLazyLoaded keeps its attach only once it succeeds, so a tab whose component failed is tried again at
+    // its next activation, where 8.8.1 marked it loaded first and never tried again. The failure is logged, as printIonError does.
+    [AvaloniaFact]
+    public void A2_A_Component_That_Failed_Is_Built_Again_At_The_Next_Activation()
+    {
+        var previous = Avalonia.Logging.Logger.Sink;
+        var sink = new ErrorSink();
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            FlakyPage.Fail = true;
+            var flaky = new AvonicTab { Tab = "flaky", Component = typeof(FlakyPage) };
+            var tabs = new AvonicTabs { Content = new Panel { Children = { Page("first", "First"), flaky } } };
+            using var scene = new Scene(tabs);
+
+            tabs.Select("flaky");
+            Assert.Null(flaky.Content);
+            Assert.Contains(sink.Errors, error => error.Contains("[ion-tab] - Exception in prepareLazyLoaded"));
+
+            FlakyPage.Fail = false;
+            tabs.Select("first");
+            tabs.Select("flaky");
+            Assert.IsType<FlakyPage>(flaky.Content);
+        }
+        finally
+        {
+            FlakyPage.Fail = false;
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
 }
