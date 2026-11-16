@@ -511,6 +511,32 @@ try {
         Key '{HOME}' 600
     }
 
+    # A scroll bar to drag on ion-content, by its ScrollBars extension (#175), from the page's toggle. The bar is at the content's end
+    # edge, 15 wide, and the content's right is 16 past the fixed button's; the thumb starts 18 down, so at the top it covers Row 1.
+    Section 'ion-content: the scroll bar' {
+        Open 'ion-content'
+        ClickOn (Named $CT::Button 'Top')
+        Start-Sleep -Milliseconds 700
+        $toggle = Named $CT::Button 'Scroll bar'
+        ClickOn $toggle
+        Start-Sleep -Milliseconds 400
+        $f = (Named $CT::Button 'Fixed').Current.BoundingRectangle
+        $barX = [int]($f.Right + (Px 16) - (Px 7.5))
+        $rx, $ry = Centre (Named $CT::Text 'Row 1')
+        Check 'the scroll bar starts at the top' ((EndedAt) -eq 0) (FirstText 'Ended at*')
+        MouseDrag $barX $ry 0 (Px 100)
+        Start-Sleep -Milliseconds 700
+        $dragged = EndedAt
+        Shot 'ion-content-scroll-bar'
+        Check 'dragging the thumb scrolls the content' ($dragged -gt 100) "at $dragged"
+        Click $barX ([int]($f.Bottom + (Px 16) - (Px 9)))
+        Start-Sleep -Milliseconds 700
+        $arrow = EndedAt
+        Check 'the down arrow scrolls 40' ([math]::Abs($arrow - $dragged - 40) -le 1) "$dragged, then $arrow"
+        ClickOn $toggle
+        Start-Sleep -Milliseconds 300
+    }
+
     Section 'ion-list: sticky dividers' {
         Open 'ion-list'
         $w = $win.Current.BoundingRectangle

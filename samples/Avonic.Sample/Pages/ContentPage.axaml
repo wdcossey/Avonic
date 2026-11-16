@@ -13,6 +13,7 @@
                 <Button Content="By 200" Margin="2" Click="OnBy" />
                 <ToggleButton Content="Fullscreen" Margin="2" IsChecked="{Binding #Main.Fullscreen}" />
                 <ToggleButton Content="Primary" Margin="2" Click="OnColor" />
+                <ToggleButton Content="Scroll bar" Margin="2" IsChecked="{Binding #Main.ScrollBars}" />
             </WrapPanel>
         </Border>
 

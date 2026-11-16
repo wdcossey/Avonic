@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -528,18 +529,18 @@ public sealed class Gesture : IDisposable
 
     /// <summary>
     /// <see cref="StopsTouchStartProperty"/> on the press's source or an element between it and this gesture's element, for a touch
-    /// or a pen.
+    /// or a pen; or, for any pointer, a <see cref="ScrollBar"/> there, such as <see cref="Controls.AvonicContent.ScrollBars"/>'.
+    /// Chromium sends a <c>mousedown</c> for a press on a scroller's bar, but no moves while its thumb is dragged, so no Ionic
+    /// gesture with a threshold starts from it: measured, a drag of the thumb at the top of an <c>ion-content</c> scrolled it and
+    /// started no <c>ion-refresher</c> pull, where the same drag on the content pulled. One with no threshold would start on the
+    /// <c>mousedown</c> in Ionic; here it doesn't, as its capture would take the pointer from the thumb, which Chromium's bar keeps.
     /// </summary>
     private bool IsStoppedOnTheWay(PointerPressedEventArgs e)
     {
-        if (e.Pointer.Type == PointerType.Mouse)
-        {
-            return false;
-        }
-
+        var touch = e.Pointer.Type != PointerType.Mouse;
         for (var visual = e.Source as Visual; visual is not null && !ReferenceEquals(visual, _el); visual = visual.GetVisualParent())
         {
-            if (visual is InputElement element && GetStopsTouchStart(element))
+            if (visual is ScrollBar || (touch && visual is InputElement element && GetStopsTouchStart(element)))
             {
                 return true;
             }

@@ -23,4 +23,14 @@
     <!-- Where the ring sits around the scroller: a pixel outside, with a thickness of 2, so from 1 outside to 1 inside. -->
     <Thickness x:Key="Avonic.Content.FocusRingMargin">-1</Thickness>
 
+    <!-- Not Ionic's: the scroll bar a content has with ScrollBars on, desktop Chromium's on Windows 11, measured with no emulation.
+         The track and the corner; the arrows and the thumb; and those under the pointer, and the thumb while it's dragged. Ionic's
+         dark palettes set no color-scheme, so Chromium's bar stays this light on a dark page, and these have no dark values. -->
+    <Color x:Key="Avonic.Content.ScrollBarTrackColor">#FCFCFC</Color>
+    <SolidColorBrush x:Key="Avonic.Content.ScrollBarTrackBrush" Color="{DynamicResource Avonic.Content.ScrollBarTrackColor}" />
+    <Color x:Key="Avonic.Content.ScrollBarThumbColor">#8B8B8B</Color>
+    <SolidColorBrush x:Key="Avonic.Content.ScrollBarThumbBrush" Color="{DynamicResource Avonic.Content.ScrollBarThumbColor}" />
+    <Color x:Key="Avonic.Content.ScrollBarThumbHoverColor">#636363</Color>
+    <SolidColorBrush x:Key="Avonic.Content.ScrollBarThumbHoverBrush" Color="{DynamicResource Avonic.Content.ScrollBarThumbHoverColor}" />
+
 </ResourceDictionary>

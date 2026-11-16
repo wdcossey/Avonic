@@ -15,10 +15,17 @@
          theme sets, and a margin from the theme, -1, so that it reaches a pixel outside: the presenter clips the content,
          and the scroller doesn't clip. Avalonia's adorner would draw over the content, so there's none. The scroller's own
          background, a Color's, is under the ring too, as an element's own background is under its outline: the presenter
-         is only transparent where it has one, to take input where it did. -->
+         is only transparent where it has one, to take input where it did.
+         The scroll bars are an extension too, a desktop browser's, shown only when the content's ScrollBars makes an axis Auto:
+         docked at the end edge and the bottom, so that they take the width, as Chromium's do, with the corner
+         under the vertical one in its background. Docked, not a *,Auto grid: a grid measured with no height kept the
+         content's, 2000, as the viewport when it was arranged at 300. An indicator shows only where its axis draws
+         no bar, as a browser draws one or the other. -->
     <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- No bar on a ScrollViewer an app gives this theme, as before #175: the content turns its bars on itself. -->
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel>
@@ -29,22 +36,117 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{TemplateBinding CornerRadius}" />
-                    <ScrollContentPresenter Name="PART_ContentPresenter"
-                                            Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:ContentConverters.TransparentIfSet}}"
-                                            ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
-                        <ScrollContentPresenter.GestureRecognizers>
-                            <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
-                                                     IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
-                        </ScrollContentPresenter.GestureRecognizers>
-                    </ScrollContentPresenter>
-                    <c:ContentScrollIndicator Name="PART_VerticalIndicator" Orientation="Vertical" HorizontalAlignment="Right" />
-                    <c:ContentScrollIndicator Name="PART_HorizontalIndicator" Orientation="Horizontal" VerticalAlignment="Bottom" />
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Right">
+                            <Border Name="PART_ScrollBarCorner"
+                                    DockPanel.Dock="Bottom"
+                                    Height="{Binding #PART_HorizontalScrollBar.Bounds.Height}"
+                                    IsVisible="{Binding #PART_HorizontalScrollBar.IsVisible}"
+                                    Background="{Binding #PART_VerticalScrollBar.Background}" />
+                            <ScrollBar Name="PART_VerticalScrollBar"
+                                       Orientation="Vertical"
+                                       Theme="{DynamicResource AvonicContentScrollBar}" />
+                        </DockPanel>
+                        <ScrollBar Name="PART_HorizontalScrollBar"
+                                   DockPanel.Dock="Bottom"
+                                   Orientation="Horizontal"
+                                   Theme="{DynamicResource AvonicContentScrollBar}" />
+                        <ScrollContentPresenter Name="PART_ContentPresenter"
+                                                Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:ContentConverters.TransparentIfSet}}"
+                                                ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                            <ScrollContentPresenter.GestureRecognizers>
+                                <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                                         IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                            </ScrollContentPresenter.GestureRecognizers>
+                        </ScrollContentPresenter>
+                    </DockPanel>
+                    <c:ContentScrollIndicator Name="PART_VerticalIndicator"
+                                              Orientation="Vertical" HorizontalAlignment="Right"
+                                              IsVisible="{TemplateBinding VerticalScrollBarVisibility, Converter={x:Static c:ContentConverters.NoScrollBar}}" />
+                    <c:ContentScrollIndicator Name="PART_HorizontalIndicator"
+                                              Orientation="Horizontal" VerticalAlignment="Bottom"
+                                              IsVisible="{TemplateBinding HorizontalScrollBarVisibility, Converter={x:Static c:ContentConverters.NoScrollBar}}" />
                 </Panel>
             </ControlTemplate>
         </Setter>
 
         <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
             <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+    <!-- The content's scroll bar, structure only: the theme gives it its sizes, its brushes and its arrows. The arrows and the
+         track are buttons with names of their own, not Avalonia's PART_LineUpButton and the rest, so that the ScrollBar leaves
+         them alone and the content scrolls by them, as Chromium does: on the press, repeating after 250 ms every 50 ms. The
+         thumb is Avalonia's, dragged through the Track. -->
+    <ControlTheme x:Key="AvonicContentScrollBar" TargetType="ScrollBar">
+        <Style Selector="^:vertical">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid RowDefinitions="Auto,*,Auto" Background="{TemplateBinding Background}">
+                        <RepeatButton Name="PART_LineUp" Grid.Row="0" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                        <Track Name="PART_Track"
+                               Grid.Row="1"
+                               IsDirectionReversed="True"
+                               Maximum="{TemplateBinding Maximum}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Orientation="{TemplateBinding Orientation}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
+                               Value="{TemplateBinding Value, Mode=TwoWay}">
+                            <Track.DecreaseButton>
+                                <RepeatButton Name="PART_PageUp" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.DecreaseButton>
+                            <Track.IncreaseButton>
+                                <RepeatButton Name="PART_PageDown" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.IncreaseButton>
+                            <Thumb Name="PART_Thumb" />
+                        </Track>
+                        <RepeatButton Name="PART_LineDown" Grid.Row="2" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^:horizontal">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Background="{TemplateBinding Background}">
+                        <RepeatButton Name="PART_LineUp" Grid.Column="0" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                        <Track Name="PART_Track"
+                               Grid.Column="1"
+                               Maximum="{TemplateBinding Maximum}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Orientation="{TemplateBinding Orientation}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
+                               Value="{TemplateBinding Value, Mode=TwoWay}">
+                            <Track.DecreaseButton>
+                                <RepeatButton Name="PART_PageUp" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.DecreaseButton>
+                            <Track.IncreaseButton>
+                                <RepeatButton Name="PART_PageDown" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                            </Track.IncreaseButton>
+                            <Thumb Name="PART_Thumb" />
+                        </Track>
+                        <RepeatButton Name="PART_LineDown" Grid.Column="2" ClickMode="Press" Delay="250" Interval="50" Focusable="False" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <!-- Something to press, with no look of its own. -->
+        <Style Selector="^ /template/ RepeatButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Background="{TemplateBinding Background}" Content="{TemplateBinding Content}" />
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Thumb">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Setter>
         </Style>
     </ControlTheme>
 

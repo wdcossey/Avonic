@@ -138,7 +138,40 @@ clipped on two sides, where Chromium paints the outline under the scrolling cont
 | I5 | Input, order | none, over the content, under the fixed slot | match |
 | I6 | Colour | `rgba(128, 128, 128, 0.5)`, the same on black | match, from a token |
 | — | From the page's load | emulation shows the thumb until the first scroll by the user | **deliberate difference**: hidden until a scroll. See "For you to decide" |
-| — | Desktop | a 15 px bar that takes the width | **deliberate difference**: the phone's thumb everywhere |
+| — | Desktop | a 15 px bar that takes the width | **deliberate difference**: the phone's thumb everywhere, unless an app turns on `ScrollBars` (#175, below) |
+
+## A draggable scroll bar, by config (#175)
+
+> Ionic side: Chromium 141 (Playwright 1.56's headless shell) on Windows 11, **no emulation**, 390 × 600 at 2×, **with `--hide-scrollbars`
+> off**, which `render.js` can't do, so with a script of its own, kept in the issue's temp folder: two `ion-content`s 300 high in `ion-app`,
+> 30 `ion-item`s each, the second with `scroll-x` and its rows 1560 wide; the first scrolled to 300, the second to 300, 300; the pointer over
+> the content. → [`ref/scroll-bar.png`](ref/scroll-bar.png).
+>
+> Avonic side: `AvonicContentCaptureTests.Scroll_Bar_Frame`, headless Skia at 2×, the same scene with `ScrollBars` on.
+> **Not tried in a real window**: `tools/real-window/drive.ps1` has a new section for it, `ion-content: the scroll bar`, not yet run.
+
+| Ionic | Avonic |
+|---|---|
+| ![](ref/scroll-bar.png) | ![](compare/avonic-scroll-bar.png) |
+
+Read from the frames at 2×: **the vertical thumbs match to the device pixel**, 147 to 255 down on both, 139 grey on 252; the arrows are in
+the same places to a css pixel and a half (solid 139 down the middle column from 10 to 21 and 578 to 589 on Chromium's, 10 to 22 and
+577 to 586 on Avonic's); the horizontal thumb is 168 to 325 on Chromium's and 168 to 326 on Avonic's. The corner and the track
+are `#FCFCFC` on both. The arrows' rounded corners differ by a device pixel's anti-aliasing: Avonic draws a triangle with a round stroke.
+
+| # | Behaviour | Chromium | Avonic |
+|---|---|---|---|
+| S1 | Off | the thumb, nothing takes the width | match: the default |
+| S2 | On | 15 thick, `clientWidth` 375 of 390, `clientHeight` 285 with `scroll-x`; the left in RTL; the corner | match |
+| S3 | Where | `overflow: auto`: only with somewhere to scroll; none with `overflow: hidden` | match |
+| S4 | The config | not Ionic's | a default read when the content is made, at style priority |
+| S5 | The indicator | one or the other | match |
+| S6 | A drag | 50 scrolls 273 | match, 272.7; **deliberate difference**: no snap-back 182 px to the side (Windows') |
+| S7 | Arrow, track | 40 and 262, eased about 150 ms, on the press | match, through the keys' curve |
+| S8 | Held | after about 250 ms, 800 px/s and 20 pages a second; the track until the thumb reaches the pointer | **deliberate difference**: the same speeds in steps every 50 ms, so the track's last can carry the thumb a page past the pointer |
+| S9 | The look | 18 buttons, a 9 thick thumb, at least 17, `#8B8B8B`, `#636363` under the pointer | match |
+| — | A press on the bar | no focus moves: a field keeps it, and with nothing focused the keys scroll the content after | match with something focused; with nothing focused, **deliberate difference**: the scroller takes focus, as from a press on the content (#67), with no ring, so the keys scroll it |
+| — | An `ion-refresher` at the top | a drag of the thumb scrolls, and pulls nothing | match: a press on a `ScrollBar` starts no gesture |
 
 ## Deliberate differences and known gaps
 

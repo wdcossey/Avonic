@@ -138,6 +138,11 @@ Not in Ionic's config; each is there because Avalonia doesn't do what the browse
   stopped, as only `touchstart` is. A pen counts as a touch, as Chromium on Android and iOS reports a stylus as touches; on a
   desktop Chromium a pen is a mouse, which isn't stopped (not measured, and headless input has no pen). `AvonicPicker` has it on
   by default.
+- **A press on a `ScrollBar` starts no gesture** (#175): one between the press's source and the gesture's `Element`, such as
+  `AvonicContent.ScrollBars`'. Chromium sends a `mousedown` for a press on a scroller's bar, but no moves while its thumb is
+  dragged, so no Ionic gesture starts from it: measured, a drag of the thumb at the top of an `ion-content` scrolled it and started
+  no `ion-refresher` pull, where the same drag on the content pulled. A gesture with no threshold would start on Chromium's
+  `mousedown`; here it doesn't, as its capture would take Avalonia's pointer capture from the thumb, which Chromium's bar keeps.
 
 ## Known gaps
 
