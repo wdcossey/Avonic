@@ -69,7 +69,7 @@ Each is in `Tokens/Searchbar.axaml`.
 |---|---|---|
 | [x] | `--background` | `Avonic.Searchbar.Background` |
 | [x] | `--border-radius` | `Avonic.Searchbar.BorderRadius` |
-| [x] | `--box-shadow` | `Avonic.Searchbar.BoxShadow`, CSS through `{a:CssShadow}` |
+| [x] | `--box-shadow` | `Avonic.Searchbar.BoxShadow`, CSS through `{b:CssShadow}` |
 | [x] | `--cancel-button-color` | `Avonic.Searchbar.CancelButtonColor` |
 | [x] | `--clear-button-color` | `Avonic.Searchbar.ClearButtonColor` |
 | [x] | `--color` | `Avonic.Searchbar.Color` |

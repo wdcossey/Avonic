@@ -57,7 +57,7 @@ And pressed, 160 ms in, where the ripple has the same shape and reach:
   softer line under each card. **Known gap,** accepted as best effort. The token holds CSS's own numbers, and the offsets go to Avalonia as they are, so they're right if
   Avalonia scales them. Faking it would need a converter that knows the render scale.
 
-  Since #139 the token goes through `{a:CssShadow}`, which converts each blur to CSS's
+  Since #139 the token goes through `{b:CssShadow}`, which converts each blur to CSS's
   ([box-shadow](../../infra/box-shadow/README.md)). Re-measured on #139's own scene, a 200 × 90 box with a radius of 4 and the
   card's shadow, both sides drawn the same way, from each edge outward:
 

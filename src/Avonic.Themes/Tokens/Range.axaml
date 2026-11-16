@@ -1,6 +1,5 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:a="using:Avonic.Components.Animation"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- ion-range's variables, with their md defaults. -->
@@ -21,7 +20,7 @@
     <!-- knob-border-radius: 50% -->
     <x:String x:Key="Avonic.Range.KnobBorderRadius">50%</x:String>
     <!-- knob-box-shadow: none -->
-    <a:CssShadow x:Key="Avonic.Range.KnobBoxShadow">none</a:CssShadow>
+    <b:CssShadow x:Key="Avonic.Range.KnobBoxShadow">none</b:CssShadow>
     <!-- knob-size: 18px. The handle around it is twice that. -->
     <x:Double x:Key="Avonic.Range.KnobSize">18</x:Double>
     <!-- pin-background: var(ion-color-primary) -->
@@ -32,6 +31,6 @@
     <!-- md literals with no variable. :host(.range-disabled) .range-knob { outline: 5px solid #fff } -->
     <!-- .range-knob::before { border-radius: 50% }, the halo's own, not knob-border-radius. -->
     <x:String x:Key="Avonic.Range.Md.HaloBorderRadius">50%</x:String>
-    <a:CssShadow x:Key="Avonic.Range.Md.DisabledKnobOutline">0 0 0 5px #fff</a:CssShadow>
+    <b:CssShadow x:Key="Avonic.Range.Md.DisabledKnobOutline">0 0 0 5px #fff</b:CssShadow>
 
 </ResourceDictionary>

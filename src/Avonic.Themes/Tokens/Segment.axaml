@@ -29,7 +29,7 @@
     <b:CssUnset x:Key="Avonic.SegmentButton.ColorFocused" />
     <!-- var(color) -->
     <b:CssUnset x:Key="Avonic.SegmentButton.ColorHover" />
-    <a:CssShadow x:Key="Avonic.SegmentButton.IndicatorBoxShadow">none</a:CssShadow>
+    <b:CssShadow x:Key="Avonic.SegmentButton.IndicatorBoxShadow">none</b:CssShadow>
     <!-- var(color-checked) -->
     <b:CssUnset x:Key="Avonic.SegmentButton.IndicatorColor" />
     <x:Double x:Key="Avonic.SegmentButton.IndicatorHeight">2</x:Double>

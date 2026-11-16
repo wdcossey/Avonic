@@ -8,7 +8,7 @@
       "attributes": {
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-14-lbl",
+        "aria-labelledby": "ion-tg-0-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -200,14 +200,14 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-14>\n      <div#ion-tg-14-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-0>\n      <div#ion-tg-0-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "checked": "",
         "role": "switch",
         "aria-checked": "true",
-        "aria-labelledby": "ion-tg-7-lbl",
+        "aria-labelledby": "ion-tg-1-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -400,7 +400,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-7>\n      <div#ion-tg-7-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-1>\n      <div#ion-tg-1-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -408,7 +408,7 @@
         "color": "danger",
         "role": "switch",
         "aria-checked": "true",
-        "aria-labelledby": "ion-tg-0-lbl",
+        "aria-labelledby": "ion-tg-2-lbl",
         "tabindex": "0",
         "class": "ion-color ion-color-danger md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -603,7 +603,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-0>\n      <div#ion-tg-0-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-2>\n      <div#ion-tg-2-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -811,7 +811,7 @@
         "disabled": "",
         "role": "switch",
         "aria-checked": "true",
-        "aria-labelledby": "ion-tg-6-lbl",
+        "aria-labelledby": "ion-tg-4-lbl",
         "aria-disabled": "true",
         "class": "md in-item toggle-checked toggle-disabled toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -1005,14 +1005,14 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-6>\n      <div#ion-tg-6-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-4>\n      <div#ion-tg-4-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "label-placement": "end",
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-10-lbl",
+        "aria-labelledby": "ion-tg-5-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-label-placement-end toggle-ltr hydrated"
       },
@@ -1204,14 +1204,14 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-10>\n      <div#ion-tg-10-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-5>\n      <div#ion-tg-5-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "label-placement": "fixed",
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-9-lbl",
+        "aria-labelledby": "ion-tg-6-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-label-placement-fixed toggle-ltr hydrated"
       },
@@ -1403,7 +1403,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-9>\n      <div#ion-tg-9-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-6>\n      <div#ion-tg-6-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -1411,7 +1411,7 @@
         "alignment": "start",
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-2-lbl",
+        "aria-labelledby": "ion-tg-7-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-alignment-start toggle-label-placement-stacked toggle-ltr hydrated"
       },
@@ -1604,14 +1604,14 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-2>\n      <div#ion-tg-2-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-7>\n      <div#ion-tg-7-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "enable-on-off-labels": "",
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-4-lbl",
+        "aria-labelledby": "ion-tg-8-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -1803,7 +1803,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-4>\n      <div#ion-tg-4-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n              <ion-icon.toggle-switch-icon.md.hydrated>\n                #shadow-root\n                  <div.icon-inner>\n                    <svg>\n                      <path>\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-8>\n      <div#ion-tg-8-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n              <ion-icon.toggle-switch-icon.md.hydrated>\n                #shadow-root\n                  <div.icon-inner>\n                    <svg>\n                      <path>\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -1811,7 +1811,7 @@
         "checked": "",
         "role": "switch",
         "aria-checked": "true",
-        "aria-labelledby": "ion-tg-11-lbl",
+        "aria-labelledby": "ion-tg-9-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-checked toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -2004,15 +2004,15 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-11>\n      <div#ion-tg-11-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n              <ion-icon.toggle-switch-icon.toggle-switch-icon-checked.md.hydrated>\n                #shadow-root\n                  <div.icon-inner>\n                    <svg>\n                      <path>\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-9>\n      <div#ion-tg-9-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n              <ion-icon.toggle-switch-icon.toggle-switch-icon-checked.md.hydrated>\n                #shadow-root\n                  <div.icon-inner>\n                    <svg>\n                      <path>\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "helper-text": "Helper text",
         "role": "switch",
         "aria-checked": "false",
-        "aria-describedby": "ion-tg-13-helper-text",
-        "aria-labelledby": "ion-tg-13-lbl",
+        "aria-describedby": "ion-tg-10-helper-text",
+        "aria-labelledby": "ion-tg-10-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -2290,7 +2290,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-13>\n      <div#ion-tg-13-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.toggle-bottom>\n          <div#ion-tg-13-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-tg-13-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-10>\n      <div#ion-tg-10-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.toggle-bottom>\n          <div#ion-tg-10-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-tg-10-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2299,9 +2299,9 @@
         "error-text": "Error text",
         "role": "switch",
         "aria-checked": "false",
-        "aria-describedby": "ion-tg-12-error-text",
+        "aria-describedby": "ion-tg-11-error-text",
         "aria-invalid": "true",
-        "aria-labelledby": "ion-tg-12-lbl",
+        "aria-labelledby": "ion-tg-11-lbl",
         "tabindex": "0"
       },
       "classes": [
@@ -2580,7 +2580,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-12>\n      <div#ion-tg-12-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.toggle-bottom>\n          <div#ion-tg-12-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-tg-12-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-11>\n      <div#ion-tg-11-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.toggle-bottom>\n          <div#ion-tg-11-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-tg-11-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2777,7 +2777,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-15>\n      <div#ion-tg-15-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-12>\n      <div#ion-tg-12-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2976,7 +2976,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-8>\n      <div#ion-tg-8-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-13>\n      <div#ion-tg-13-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2984,7 +2984,7 @@
         "style": "flex:1",
         "role": "switch",
         "aria-checked": "false",
-        "aria-labelledby": "ion-tg-1-lbl",
+        "aria-labelledby": "ion-tg-14-lbl",
         "tabindex": "0",
         "class": "md toggle-justify-end toggle-label-placement-start toggle-ltr hydrated"
       },
@@ -3176,7 +3176,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-1>\n      <div#ion-tg-1-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-14>\n      <div#ion-tg-14-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -3184,7 +3184,7 @@
         "checked": "",
         "role": "switch",
         "aria-checked": "true",
-        "aria-labelledby": "ion-tg-5-lbl",
+        "aria-labelledby": "ion-tg-15-lbl",
         "tabindex": "0",
         "class": "md in-item toggle-checked toggle-label-placement-start toggle-rtl hydrated"
       },
@@ -3377,7 +3377,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-5>\n      <div#ion-tg-5-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.toggle-wrapper>\n      <input#ion-tg-15>\n      <div#ion-tg-15-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <div.toggle-icon part=\"track\">\n          <div.toggle-icon-wrapper>\n            <div.toggle-inner part=\"handle\">\n  <input.aux-input>\n"
     }
   ]
 }

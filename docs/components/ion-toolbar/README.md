@@ -113,7 +113,7 @@ As in Ionic, these are set whether or not md has a rule on them, so a rule an ap
 | `--ion-toolbar-background` | `Avonic.ToolbarBackgroundBrush` | brush | `Avonic.BackgroundColor`, white, in `Tokens/Global.axaml`; `#1F1F1F` in the dark palette. Set in the light palette too, where Ionic leaves it unset: see the known gaps |
 | `--ion-toolbar-color` | `Avonic.ToolbarColorBrush` | brush | Unset. When set, a button in an uncoloured toolbar takes it too |
 | `--ion-toolbar-border-color` | `Avonic.ToolbarBorderColorBrush` | brush | Unset |
-| none: the header's and footer's `box-shadow` | `Avonic.Header.BoxShadow`, `Avonic.Footer.BoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | md's three layers |
+| none: the header's and footer's `box-shadow` | `Avonic.Header.BoxShadow`, `Avonic.Footer.BoxShadow` | `BoxShadows`: write CSS through `{b:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | md's three layers |
 | none: `ion-buttons`' button radius | `Avonic.Buttons.Md.ButtonBorderRadius`, `…IconOnly` | `CornerRadius` | 2, and 24 for a clear icon-only button |
 
 `Background`, `Foreground` and `BorderBrush` are the toolbar's own properties, which the theme fills from these keys, so they can be

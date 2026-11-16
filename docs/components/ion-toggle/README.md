@@ -59,7 +59,7 @@ The default slot is `Content`, the label: a string, or any control. Parts: `PART
 | [x] | `--handle-background` | `Avonic.Toggle.HandleBackground` | brush | White |
 | [x] | `--handle-background-checked` | `Avonic.Toggle.HandleBackgroundChecked` | brush | Primary |
 | [x] | `--handle-border-radius` | `Avonic.Toggle.HandleBorderRadius` | as `BorderRadius` | `50%` |
-| [x] | `--handle-box-shadow` | `Avonic.Toggle.HandleBoxShadow` | `BoxShadows`: write CSS through `{a:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | md's 1 dp elevation |
+| [x] | `--handle-box-shadow` | `Avonic.Toggle.HandleBoxShadow` | `BoxShadows`: write CSS through `{b:CssShadow}` ([box-shadow](../../infra/box-shadow/README.md)) | md's 1 dp elevation |
 | [x] | `--handle-height` | `Avonic.Toggle.HandleHeight` | `double` | 20 |
 | [x] | `--handle-max-height` | `Avonic.Toggle.HandleMaxHeight` | `double` | 20: `calc(100% + 6px)` of md's 14 px track |
 | [x] | `--handle-spacing` | `Avonic.Toggle.HandleSpacing` | `double` | 0 |

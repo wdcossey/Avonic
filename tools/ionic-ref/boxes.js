@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-// Prints the boxes in a page of real ion-item and ion-item-divider rows, in Chromium, md, 390 wide, for working out a layout. render.js dumps
-// everything about one component, and this is one line a row: its height, its inner and container parts as `x width height`, and each
-// element with an id, with y from the top of the row.
+// Prints the boxes in a page of real ion-item, ion-item-divider and ion-list-header rows, in Chromium, md, 390 wide, for working out a
+// layout. render.js dumps everything about one component, and this is one line a row: its height, its inner and container parts as
+// `x width height` (an item's .item-inner and .input-wrapper, a divider's .item-divider-inner and .item-divider-wrapper, a list
+// header's .list-header-inner, which has no wrapper), and each element with an id, with y from the top of the row.
 //
-//   node tools/ionic-ref/boxes.js <page.html> [screenshot.png]
+//   node tools/ionic-ref/boxes.js <page.html> [screenshot.png] [--mobile]
+//
+// --mobile measures on render.js's phone (phone.js: 390 x 844 at 2x, mobile and touch, Chrome for Android's user agent) instead of
+// a desktop page of the same size.
 const path = require('path'), fs = require('fs'), http = require('http');
 const ROOT = path.resolve(__dirname, '..', '..');
 const { chromium } = require(path.join(ROOT, 'node_modules/playwright-core'));
@@ -11,12 +15,20 @@ const { chromium } = require(path.join(ROOT, 'node_modules/playwright-core'));
 const roboto = require('../fonts/roboto/roboto');
 // Waits for the components to load, in document order, and the page to keep still, instead of a fixed delay.
 const settle = require('./settle');
-if (!process.argv[2]) {
-    console.error('Usage: node tools/ionic-ref/boxes.js <page.html> [screenshot.png]');
+// render.js's phone, for --mobile.
+const phone = require('./phone');
+
+const args = process.argv.slice(2);
+const mobile = args.includes('--mobile');
+const unknown = args.filter(a => a.startsWith('--') && a !== '--mobile');
+const [input, screenshot] = args.filter(a => !a.startsWith('--'));
+if (!input || unknown.length) {
+    if (unknown.length) console.error(`Unknown option ${unknown.join(', ')}`);
+    console.error('Usage: node tools/ionic-ref/boxes.js <page.html> [screenshot.png] [--mobile]');
     process.exit(1);
 }
 
-const body = fs.readFileSync(process.argv[2], 'utf8');
+const body = fs.readFileSync(input, 'utf8');
 const page = `<!doctype html><html mode="md"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="stylesheet" href="/node_modules/@ionic/core/css/ionic.bundle.css">${roboto.LINK}<script>window.Ionic={config:{mode:'md'}};</script><script type="module" src="/node_modules/@ionic/core/dist/ionic/ionic.esm.js"></script><style>html,body{margin:0;height:auto;overflow:auto;position:static;background:#fff}</style></head><body><div id="stage">${settle.defer(body)}</div></body></html>`;
 const srv = http.createServer((q, s) => {
     const u = q.url.split('?')[0];
@@ -30,17 +42,18 @@ const srv = http.createServer((q, s) => {
 srv.listen(0, async () => {
     const b = await chromium.launch();
     try {
-        const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+        const ctx = await b.newContext(mobile ? phone.CONTEXT : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+        const p = await ctx.newPage();
         await p.goto(`http://localhost:${srv.address().port}/p`);
         await roboto.loadRoboto(p);
         await settle.settle(p);
         const r = await p.evaluate(() => {
             const R = e => { if (!e) return '-'; const b = e.getBoundingClientRect(); return [b.x, b.width, b.height].map(v => +v.toFixed(1)).join(' '); };
             const o = [];
-            for (const h of document.querySelectorAll('ion-item,ion-item-divider')) {
+            for (const h of document.querySelectorAll('ion-item,ion-item-divider,ion-list-header')) {
                 const top = h.getBoundingClientRect().y;
                 const s = h.shadowRoot;
-                const inner = s.querySelector('.item-inner,.item-divider-inner');
+                const inner = s.querySelector('.item-inner,.item-divider-inner,.list-header-inner');
                 const w = s.querySelector('.input-wrapper,.item-divider-wrapper');
                 const kids = [...h.querySelectorAll('[id]')].map(k => {
                     const b = k.getBoundingClientRect();
@@ -51,7 +64,7 @@ srv.listen(0, async () => {
             return o;
         });
         console.log(r.join('\n'));
-        if (process.argv[3]) await p.screenshot({ path: process.argv[3], fullPage: true });
+        if (screenshot) await p.screenshot({ path: screenshot, fullPage: true });
     } catch (e) {
         console.error(e);
         process.exitCode = 1;

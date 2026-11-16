@@ -8,7 +8,7 @@
       "attributes": {
         "label": "Label",
         "value": "40",
-        "id": "ion-r-9",
+        "id": "ion-r-0",
         "class": "md in-item range-label-placement-start range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -293,7 +293,7 @@
     {
       "attributes": {
         "value": "0",
-        "id": "ion-r-12",
+        "id": "ion-r-1",
         "class": "md in-item range-label-placement-start range-item-start-adjustment range-item-end-adjustment range-value-min hydrated"
       },
       "classes": [
@@ -584,7 +584,7 @@
         "label": "Pin",
         "pin": "",
         "value": "60",
-        "id": "ion-r-5",
+        "id": "ion-r-2",
         "class": "md in-item range-has-pin range-label-placement-start range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -915,7 +915,7 @@
         "label": "Stacked",
         "label-placement": "stacked",
         "value": "30",
-        "id": "ion-r-2",
+        "id": "ion-r-3",
         "class": "md in-item range-label-placement-stacked range-item-start-adjustment range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -1203,7 +1203,7 @@
         "label": "A fixed label that wraps",
         "label-placement": "fixed",
         "value": "50",
-        "id": "ion-r-0",
+        "id": "ion-r-4",
         "class": "md in-item range-label-placement-fixed range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -1490,7 +1490,7 @@
         "label": "End",
         "label-placement": "end",
         "value": "70",
-        "id": "ion-r-8",
+        "id": "ion-r-5",
         "class": "md in-item range-label-placement-end range-item-start-adjustment hydrated"
       },
       "classes": [
@@ -2154,7 +2154,7 @@
         "snaps": "",
         "step": "10",
         "value": "50",
-        "id": "ion-r-1",
+        "id": "ion-r-7",
         "class": "md in-item range-label-placement-start hydrated"
       },
       "classes": [
@@ -2921,7 +2921,7 @@
         "active-bar-start": "50",
         "value": "20",
         "color": "danger",
-        "id": "ion-r-4",
+        "id": "ion-r-8",
         "class": "ion-color ion-color-danger md in-item range-label-placement-start range-item-start-adjustment range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -3211,7 +3211,7 @@
       "attributes": {
         "disabled": "",
         "value": "40",
-        "id": "ion-r-11",
+        "id": "ion-r-9",
         "class": "md in-item range-disabled range-label-placement-start range-item-start-adjustment range-item-end-adjustment hydrated"
       },
       "classes": [
@@ -3784,7 +3784,7 @@
     {
       "attributes": {
         "value": "25",
-        "id": "ion-r-6",
+        "id": "ion-r-11",
         "class": "md range-label-placement-start hydrated"
       },
       "classes": [
@@ -4070,7 +4070,7 @@
         "dir": "rtl",
         "label": "RTL",
         "value": "25",
-        "id": "ion-r-7",
+        "id": "ion-r-12",
         "class": "md in-item range-label-placement-start range-item-end-adjustment hydrated"
       },
       "classes": [

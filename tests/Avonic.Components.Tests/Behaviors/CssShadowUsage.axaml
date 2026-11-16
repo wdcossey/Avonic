@@ -1,12 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:a="using:Avonic.Components.Animation">
+                    xmlns:b="using:Avonic.Components.Behaviors">
 
     <!-- The two ways a theme or an app writes a CSS box-shadow: as a resource, and as an attribute. -->
-    <a:CssShadow x:Key="Test.CssShadow.Element">0 0 10px rgba(0, 0, 0, 0.4)</a:CssShadow>
+    <b:CssShadow x:Key="Test.CssShadow.Element">0 0 10px rgba(0, 0, 0, 0.4)</b:CssShadow>
 
     <ControlTheme x:Key="Test.CssShadow.Theme" TargetType="Border">
-        <Setter Property="BoxShadow" Value="{a:CssShadow '0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14)'}" />
+        <Setter Property="BoxShadow" Value="{b:CssShadow '0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14)'}" />
     </ControlTheme>
 
 </ResourceDictionary>

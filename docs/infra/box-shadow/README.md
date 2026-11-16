@@ -5,10 +5,10 @@ Status: done · [#139](https://github.com/wdcossey/Avonic/issues/139)
 A theme token, or an app's resource, holds Ionic's CSS `box-shadow` exactly as the `.md.css` has it, read by one converter:
 
 ```xml
-<!-- xmlns:a="using:Avonic.Components.Animation" -->
-<a:CssShadow x:Key="Avonic.Card.BoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</a:CssShadow>
+<!-- xmlns:b="using:Avonic.Components.Behaviors" -->
+<b:CssShadow x:Key="Avonic.Card.BoxShadow">0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12)</b:CssShadow>
 
-<Setter Property="BoxShadow" Value="{a:CssShadow '0 0 10px rgba(0, 0, 0, 0.4)'}" />
+<Setter Property="BoxShadow" Value="{b:CssShadow '0 0 10px rgba(0, 0, 0, 0.4)'}" />
 ```
 
 The resource is the `BoxShadows`, not the extension. In code, `CssBoxShadow.Parse(css)` gives the same, and `CssBoxShadow.Blur(b)`
@@ -154,6 +154,6 @@ page, 1.5× zoom.
 
 ## Tests
 
-`tests/Avonic.Components.Tests/Animation/CssShadowTests.cs`: the formula against each measured window from 2 to 25 px, columns drawn
+`tests/Avonic.Components.Tests/Behaviors/CssShadowTests.cs`: the formula against each measured window from 2 to 25 px, columns drawn
 through the converter against Chromium's within its measured error, the reading of CSS's syntax and what's refused, and both XAML
 forms (`CssShadowUsage.axaml`). The controls' tests that pin a shadow take Ionic's CSS through the converter.

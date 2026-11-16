@@ -130,7 +130,7 @@ These are mistakes this project has already made, so don't repeat them.
   `ContainerFromIndex` reads the last pass's rows until the pass ends. Read a row's index and its neighbours from `LayoutUpdated`.
   The panel's children are only what's realised, so a rule about the row before (`.foo + .bar`) can't read `Children`: see `AvonicList`.
 - **A `Border` draws a `BoxShadow` only with an even `BorderThickness` and the default `BackgroundSizing`,** and its blur is narrower
-  than CSS's. Write Ionic's CSS as it is, through `{a:CssShadow '0 0 10px rgba(0, 0, 0, 0.4)'}` or `<a:CssShadow x:Key="…">…</a:CssShadow>`,
+  than CSS's. Write Ionic's CSS as it is, through `{b:CssShadow '0 0 10px rgba(0, 0, 0, 0.4)'}` or `<b:CssShadow x:Key="…">…</b:CssShadow>`,
   never Avalonia's own `BoxShadows` numbers (`docs/infra/box-shadow/README.md`). Its offset isn't scaled at 2× (`avalonia-issues.md`).
 - **An implicit `ControlTheme` merged into resources at runtime doesn't restyle a control already shown,** though `DynamicResource`s
   follow. Merge it before the control is attached.

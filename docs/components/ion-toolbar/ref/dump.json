@@ -6,13 +6,13 @@
   "elements": [
     {
       "attributes": {
-        "class": "toolbar-title-default md in-toolbar hydrated"
+        "class": "md in-toolbar hydrated toolbar-title-default"
       },
       "classes": [
-        "toolbar-title-default",
         "md",
         "in-toolbar",
-        "hydrated"
+        "hydrated",
+        "toolbar-title-default"
       ],
       "rect": {
         "x": 0,
@@ -778,13 +778,13 @@
     },
     {
       "attributes": {
-        "class": "toolbar-title-small md in-toolbar hydrated"
+        "class": "md in-toolbar hydrated toolbar-title-small"
       },
       "classes": [
-        "toolbar-title-small",
         "md",
         "in-toolbar",
-        "hydrated"
+        "hydrated",
+        "toolbar-title-small"
       ],
       "rect": {
         "x": 0,
@@ -970,13 +970,13 @@
     },
     {
       "attributes": {
-        "class": "toolbar-title-large md in-toolbar hydrated"
+        "class": "md in-toolbar hydrated toolbar-title-large"
       },
       "classes": [
-        "toolbar-title-large",
         "md",
         "in-toolbar",
-        "hydrated"
+        "hydrated",
+        "toolbar-title-large"
       ],
       "rect": {
         "x": 0,
@@ -1737,13 +1737,13 @@
     },
     {
       "attributes": {
-        "class": "toolbar-title-default md in-toolbar hydrated"
+        "class": "md in-toolbar hydrated toolbar-title-default"
       },
       "classes": [
-        "toolbar-title-default",
         "md",
         "in-toolbar",
-        "hydrated"
+        "hydrated",
+        "toolbar-title-default"
       ],
       "rect": {
         "x": 0,

@@ -66,7 +66,7 @@ Neither has a CSS variable. These are md literals, so that they can be restyled:
 
 | Key | Value | From |
 |---|---|---|
-| `Avonic.AccordionGroup.Md.InsetBoxShadow` | `0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12)`, through `{a:CssShadow}` | `accordion-group.md.css` |
+| `Avonic.AccordionGroup.Md.InsetBoxShadow` | `0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12)`, through `{b:CssShadow}` | `accordion-group.md.css` |
 | `Avonic.Accordion.Md.Transition` | margin and corners, 300 ms, `cubic-bezier(0.25, 0.8, 0.5, 1)` | `:host(.accordion-animated) { transition: all … }` |
 | `Avonic.Accordion.Md.ToggleIconTransition` | `RenderTransform`, 300 ms, the same curve | `core.css` |
 

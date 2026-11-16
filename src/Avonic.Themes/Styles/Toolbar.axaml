@@ -1,6 +1,5 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:a="using:Avonic.Components.Animation"
         xmlns:b="using:Avonic.Components.Behaviors"
         xmlns:c="using:Avonic.Components.Controls">
 
@@ -216,7 +215,7 @@
             </MultiBinding>
         </Setter>
         <Style Selector="^ /template/ Border#PART_Native">
-            <Setter Property="BoxShadow" Value="{a:CssShadow none}" />
+            <Setter Property="BoxShadow" Value="{b:CssShadow none}" />
         </Style>
     </Style>
     <Style Selector="c|AvonicButton:in-buttons:fill-solid:not(:ion-color) /template/ Border#PART_Native">
