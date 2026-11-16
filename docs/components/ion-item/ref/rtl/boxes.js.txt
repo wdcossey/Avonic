@@ -1,17 +1,17 @@
 // #90: tools/ionic-ref/boxes.js with ion-list-header and .list-header-inner added, as boxes.js measures only items and dividers.
-// Run from the repo's root: node docs/components/ion-item/ref/rtl/boxes.js.txt <page.html> [screenshot.png]
+// node docs/components/ion-item/ref/rtl/boxes.js.txt <page.html> [screenshot.png], from any folder: it finds the repo from where it is.
 // Prints the boxes in a page of real ion-item and ion-item-divider rows, in Chromium, md, 390 wide, for working out a layout. render.js dumps
 // everything about one component, and this is one line a row: its height, its inner and container parts as `x width height`, and each
 // element with an id, with y from the top of the row.
 //
 //   (tools/ionic-ref/boxes.js is run the same way, from the root)
 const path = require('path'), fs = require('fs'), http = require('http');
-const ROOT = path.resolve(process.argv[4] || '.');
+const ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 const { chromium } = require(path.join(ROOT, 'node_modules/playwright-core'));
 // The same Roboto files as the tests and the sample, so that text measures the same on both sides.
 const roboto = require(path.join(ROOT, 'tools/fonts/roboto/roboto'));
 if (!process.argv[2]) {
-    console.error('Usage: node tools/ionic-ref/boxes.js <page.html> [screenshot.png]');
+    console.error('Usage: node docs/components/ion-item/ref/rtl/boxes.js.txt <page.html> [screenshot.png]');
     process.exit(1);
 }
 

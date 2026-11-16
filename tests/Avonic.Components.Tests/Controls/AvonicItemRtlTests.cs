@@ -151,12 +151,8 @@ public class AvonicItemRtlTests
         var (scene, rows) = Page();
         using var shown = scene;
         using var frame = scene.Window.CaptureRenderedFrame()!;
-        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
-        {
-            // compare/avonic-rtl-page.png is this, cut to Chromium's 844 high
-            Directory.CreateDirectory(dir);
-            frame.Save(Path.Combine(dir, "avonic-item-rtl-page.png"), PngBitmapEncoderOptions.Default);
-        }
+        // compare/avonic-rtl-page.png is this, cut to Chromium's 844 high
+        Frames.Save(frame, "avonic-item-rtl-page.png");
 
         var wrong = new List<string>();
         foreach (var row in rows)
@@ -178,7 +174,7 @@ public class AvonicItemRtlTests
     private static (int First, int Last, int Count) LowestLine(WriteableBitmap frame, Control row, Visual window)
     {
         var top = row.TransformToVisual(window)!.Value.M32;
-        var bottom = (int)((top + row.Bounds.Height) * 2) - 1;
+        var bottom = (int)Math.Round((top + row.Bounds.Height) * 2) - 1;
         for (var y = bottom; y > bottom - 4; y--)
         {
             int first = -1, last = -1, count = 0;
