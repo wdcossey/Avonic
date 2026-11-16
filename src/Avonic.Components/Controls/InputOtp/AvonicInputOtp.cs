@@ -855,14 +855,6 @@ public class AvonicInputOtp : ContentControl
             return;
         }
 
-        // A read-only text box keeps its paste event to itself, and Chromium still raises it, which onPaste takes.
-        if (box.IsReadOnly && Application.Current?.PlatformSettings?.HotkeyConfiguration.Paste.Any(gesture => gesture.Matches(e)) == true)
-        {
-            e.Handled = true;
-            PasteFromClipboard();
-            return;
-        }
-
         var index = box.Index;
         var length = Length;
         var isTextSelection = box.SelectionStart != box.SelectionEnd;
@@ -1102,13 +1094,6 @@ public class AvonicInputOtp : ContentControl
 
     private async void PasteFromClipboard()
     {
-        // onPaste, since 8.8.3: after its preventDefault, nothing when read-only. Disabled too, which can't happen here, as a
-        // disabled box has no focus to paste into.
-        if (Readonly)
-        {
-            return;
-        }
-
         // The clipboard is read asynchronously, where Chromium hands onPaste its text with the event.
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
         string? text;
@@ -1129,6 +1114,13 @@ public class AvonicInputOtp : ContentControl
     /// <summary><c>onPaste</c>: the valid characters from the first box, then the next empty box, or the last, focused.</summary>
     internal void OnPaste(string? pastedText)
     {
+        // Since 8.8.3, nothing when disabled or read-only. Checked here, once the clipboard has been read, as Ionic checks when its
+        // synchronous paste runs: a read-only box raises no paste here, but an app can make it read-only or disabled meanwhile.
+        if (Readonly || !IsEffectivelyEnabled)
+        {
+            return;
+        }
+
         var length = Length;
         if (string.IsNullOrEmpty(pastedText))
         {

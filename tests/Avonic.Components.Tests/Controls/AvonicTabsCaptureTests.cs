@@ -124,51 +124,36 @@ public class AvonicTabsCaptureTests
     // Ionic 8.8.4's dark palette sets ion-tab-bar-background-focused to #353535 for md, where it fell back to the light #e0e0e0
     // before. Measured in Chromium with dark.always.css: the second button, focused by Tab, is 353535 on the bar's 1f1f1f.
     [AvaloniaFact]
-    public void Dark_A_Focused_Button_Has_The_Dark_Focused_Background() => InstalledTheme.Run(_ =>
+    public void Dark_A_Focused_Button_Has_The_Dark_Focused_Background() => InstalledTheme.Run(_ => ToolbarTest.InDark(() =>
     {
-        var app = Application.Current!;
-        var dark = new Avalonia.Markup.Xaml.Styling.ResourceInclude(new Uri("avares://Avonic.Themes/"))
+        var before = new Avalonia.Controls.Button { Width = 0, Height = 0 };
+        var focused = Button("b", "Speakers", "person-circle");
+        focused.Focusable = true;
+        var page = new StackPanel
         {
-            Source = new Uri("avares://Avonic.Themes/Tokens/Palettes/Dark.axaml"),
+            Margin = new Thickness(0, 8),
+            VerticalAlignment = VerticalAlignment.Top,
+            Children = { before, Bar("a", Button("a", "Schedule", "calendar", "6"), focused, Button("c", "Map", "map")) },
         };
-        app.Resources.MergedDictionaries.Add(dark);
-        try
+
+        using var scene = new Scene(page, 390, 80);
+        scene.Window.Background = new SolidColorBrush(Color.Parse("#121212"));
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        before.Focus();
+        ToolbarTest.PressKey(scene, PhysicalKey.Tab);
+        Assert.True(focused.IsFocused);
+
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
         {
-            var before = new Avalonia.Controls.Button { Width = 0, Height = 0 };
-            var focused = Button("b", "Speakers", "person-circle");
-            focused.Focusable = true;
-            var page = new StackPanel
-            {
-                Margin = new Thickness(0, 8),
-                VerticalAlignment = VerticalAlignment.Top,
-                Children = { before, Bar("a", Button("a", "Schedule", "calendar", "6"), focused, Button("c", "Map", "map")) },
-            };
-
-            using var scene = new Scene(page, 390, 80);
-            scene.Window.Background = new SolidColorBrush(Color.Parse("#121212"));
-            scene.Window.SetRenderScaling(2);
-            Dispatcher.UIThread.RunJobs();
-            before.Focus();
-            scene.Window.KeyPressQwerty(PhysicalKey.Tab, RawInputModifiers.None);
-            scene.Window.KeyReleaseQwerty(PhysicalKey.Tab, RawInputModifiers.None);
-            Dispatcher.UIThread.RunJobs();
-            Assert.True(focused.IsFocused);
-
-            var frame = scene.Window.CaptureRenderedFrame()!;
-            if (Environment.GetEnvironmentVariable("AVONIC_CAPTURE_DIR") is { } dir)
-            {
-                Directory.CreateDirectory(dir);
-                frame.Save(Path.Combine(dir, "avonic-tabs-dark-focused.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
-            }
-
-            // At 2x: 4 px into the focused button, clear of its icon and label, and into the first, unfocused one.
-            var inFocused = focused.TranslatePoint(new Point(4, 4), scene.Window)!.Value * 2;
-            Assert.Equal(Color.Parse("#353535"), Frames.PixelAt(frame, (int)inFocused.X, (int)inFocused.Y));
-            Assert.Equal(Color.Parse("#1F1F1F"), Frames.PixelAt(frame, 8, (int)inFocused.Y));
+            Directory.CreateDirectory(dir);
+            frame.Save(Path.Combine(dir, "avonic-tabs-dark-focused.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
         }
-        finally
-        {
-            app.Resources.MergedDictionaries.Remove(dark);
-        }
-    });
+
+        // At 2x: 4 px into the focused button, clear of its icon and label, and into the first, unfocused one.
+        var inFocused = focused.TranslatePoint(new Point(4, 4), scene.Window)!.Value * 2;
+        Assert.Equal(Color.Parse("#353535"), Frames.PixelAt(frame, (int)inFocused.X, (int)inFocused.Y));
+        Assert.Equal(Color.Parse("#1F1F1F"), Frames.PixelAt(frame, 8, (int)inFocused.Y));
+    }));
 }

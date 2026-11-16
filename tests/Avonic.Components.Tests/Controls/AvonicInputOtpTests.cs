@@ -835,11 +835,45 @@ public class AvonicInputOtpTests
 
         otp.IsEnabled = false;
         Settle();
-        // Focus may leave the box here, as it does in Chromium; what follows is the point.
+        // Focus leaves the box, as in Chromium, which is why the control needs no check of its own on a key: this pins it.
+        Assert.Equal(-1, FocusedBox(otp));
         log.Take();
         Key(scene, PhysicalKey.Backspace);
         Paste(scene, "55");
 
+        Assert.Empty(log.Take());
+        Assert.Equal("12", otp.Value);
+        Assert.Equal("1|2||", Shown(otp));
+    }
+
+    // The clipboard is read asynchronously, so an app can make the control read-only, or disable it, between the paste and its
+    // text. Ionic's onPaste runs at once and checks then; here onPaste checks once the text has come, so nothing is written either
+    // way. Headless, the clipboard answers at once, so the text's arrival is called directly.
+    [AvaloniaTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void B16_Made_Read_Only_Or_Disabled_During_A_Paste_Writes_Nothing(bool readOnly)
+    {
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "12" });
+        using var _ = scene;
+        var log = Log.Of(otp);
+        otp.SetFocus(0);
+        Settle();
+        log.Take();
+
+        if (readOnly)
+        {
+            otp.Readonly = true;
+        }
+        else
+        {
+            otp.IsEnabled = false;
+        }
+
+        Settle();
+        log.Take();
+        otp.OnPaste("9876");
+        Settle();
         Assert.Empty(log.Take());
         Assert.Equal("12", otp.Value);
         Assert.Equal("1|2||", Shown(otp));
