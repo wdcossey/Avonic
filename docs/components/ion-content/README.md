@@ -1,6 +1,6 @@
 # ion-content
 
-Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11) · keys and the scroll indicator: [#67](https://github.com/wdcossey/Avonic/issues/67)
+Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11) · keys and the scroll indicator: [#67](https://github.com/wdcossey/Avonic/issues/67) · a scroll bar by config: [#175](https://github.com/wdcossey/Avonic/issues/175)
 
 `AvonicContent` is the scrolling area of a page: a background, content that scrolls, and a slot for content that doesn't. It reports
 scrolling on Ionic's timeline, and can extend behind what's around it. The design and evidence are in [PLAN.md](PLAN.md), and the
@@ -189,8 +189,8 @@ property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrollin
   template, over the content and under the fixed slot, taking no input. A 4 px thumb, flush with the end edge (the left in RTL) or the bottom,
   as long as the viewport's share of the extent, rounded down, and at least 4, in `rgba(128, 128, 128, 0.5)`. It shows on a scroll by the user,
   the wheel, a finger or a fling, and not on a script, `ScrollToPoint` and the rest, or a key, all as measured. It stays 300 ms after the
-  last scroll, then fades out over 300 ms. Each track leaves the corner when both axes can scroll. **It isn't Avalonia's `ScrollBar`:** the
-  content's `ScrollViewer` has none, on desktop too, as md here is a phone's.
+  last scroll, then fades out over 300 ms. Each track leaves the corner when both axes can scroll. **It isn't Avalonia's `ScrollBar`,** and a
+  content has no bar to drag, on desktop too, as md here is a phone's, unless an app turns one on: see the next item.
 
   | Key | md default |
   |---|---|
@@ -199,3 +199,35 @@ property: the numbers and the reasons are in [PLAN.md](PLAN.md#keyboard-scrollin
 
   `Avonic.Content.FocusRingMargin`, -1, places the ring a pixel outside. The thickness, 4, and the ring's 2 and radius of 3.5 are literals in the theme, as Chromium has no variable for them. A transparent brush
   hides either.
+
+- **A scroll bar to drag, by config** ([#175](https://github.com/wdcossey/Avonic/issues/175)): **`ScrollBars`** (`bool`) on the content, and
+  **`AvonicConfig.ContentScrollBars`** (`bool`), its default. Both off, so a content is Ionic's md, as a phone draws it. On, each axis that can
+  scroll has a desktop browser's scroll bar in place of the indicator: Chromium's on Windows 11, measured with no emulation, 15 thick, at the end
+  edge (the left in RTL) and along the bottom, **taking the width**, as Chromium's does: a content 390 wide has 375 for its content.
+
+  ```xml
+  <c:AvonicContent ScrollBars="True">…</c:AvonicContent>
+  ```
+
+  ```csharp
+  AvonicConfig.ContentScrollBars = true; // at start-up: every content made after this has a bar
+  ```
+
+  The key is read when the content is made, as a prop's default from Ionic's config is, at style priority, so a value set on the content or in a
+  style wins, and a change of the key reaches only contents made after it. With `ScrollY` off there's no bar, as `overflow: hidden` has none,
+  and content that fits has none either.
+
+  The thumb drags, and the content follows it in proportion. An arrow scrolls 40 and the track a page, 87.5% of the viewport along the bar,
+  on the press, eased as a key is, as Chromium does; held, they repeat after 250 ms every 50 ms, Chromium's 800 px/s and 20 pages a second, and
+  the track stops once the thumb reaches the pointer. The bar is `AvonicContentScrollBar`, a `ControlTheme` of its own, so a base theme's
+  `ScrollBar` style doesn't reach it. Differences from Chromium's are in [PLAN.md](PLAN.md#deliberate-differences-2): a thumb dragged far to the
+  side doesn't snap back, as Windows makes it, and held, it steps every 50 ms where Chromium scrolls at a steady speed.
+
+  | Key | Default |
+  |---|---|
+  | `Avonic.Content.ScrollBarTrackColor`, `…Brush` | `#FCFCFC`, the track and the corner |
+  | `Avonic.Content.ScrollBarThumbColor`, `…Brush` | `#8B8B8B`, the thumb and the arrows |
+  | `Avonic.Content.ScrollBarThumbHoverColor`, `…Brush` | `#636363`, under the pointer, and the thumb while it's dragged |
+
+  The sizes, 15 thick, 18 long buttons, a thumb drawn 9 thick and at least 17 long, are literals in the theme. Ionic's dark palettes set no
+  `color-scheme`, so Chromium's bar stays light on a dark page, and these keys have no dark values.
