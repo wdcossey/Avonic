@@ -699,6 +699,68 @@ public class AvonicAppTests
         Assert.Equal(238, stage.Offset);
     }
 
+    // input-shims.js: scrollAssist, scrollPadding and keyboardHeight from the config.
+    [AvaloniaFact]
+    public void I6_ScrollAssist_ScrollPadding_And_KeyboardHeight_Come_From_The_Config()
+    {
+        var (assist, padding, height) = (AvonicConfig.ScrollAssist, AvonicConfig.ScrollPadding, AvonicConfig.KeyboardHeight);
+        try
+        {
+            AvonicConfig.ScrollAssist = false;
+            using (var off = new ShimStage())
+            {
+                off.Native.Focus();
+                Dispatcher.UIThread.RunJobs();
+                off.At(500);
+                Assert.Equal(0, off.Content.KeyboardOffset);
+                Assert.Equal(0, off.Offset);
+            }
+
+            // Without padding there's still room on this page, 1104 - 788, so it scrolls the same.
+            AvonicConfig.ScrollAssist = true;
+            AvonicConfig.ScrollPadding = false;
+            using (var unpadded = new ShimStage())
+            {
+                unpadded.Native.Focus();
+                Dispatcher.UIThread.RunJobs();
+                unpadded.At(500);
+                Assert.Equal(0, unpadded.Content.KeyboardOffset);
+                Assert.Equal(128, unpadded.Offset);
+            }
+
+            // A 400 keyboard: the item's bottom, 632, is 238 below 844 - 400 - 50.
+            AvonicConfig.ScrollPadding = true;
+            AvonicConfig.KeyboardHeight = 400;
+            using var taller = new ShimStage();
+            taller.Native.Focus();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(400, taller.Content.KeyboardOffset);
+            taller.At(500);
+            Assert.Equal(238, taller.Offset);
+        }
+        finally
+        {
+            (AvonicConfig.ScrollAssist, AvonicConfig.ScrollPadding, AvonicConfig.KeyboardHeight) = (assist, padding, height);
+        }
+    }
+
+    // scroll-assist.js: a password field with too little room waits for a second ionKeyboardDidShow, for iOS's passwords bar.
+    [AvaloniaFact]
+    public void I7_A_Password_Field_Waits_For_A_Second_Keyboard_Show()
+    {
+        using var stage = new ShimStage(after: 0);
+        stage.Input.Type = InputType.Password;
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(200);
+        KeyboardShows(stage.Scene.Window, 290);
+        stage.At(500);
+        Assert.Equal(0, stage.Offset);
+        KeyboardShows(stage.Scene.Window, 290);
+        stage.At(950);
+        Assert.Equal(78, stage.Offset);
+    }
+
     [AvaloniaFact]
     public void I3_A_Field_Already_Clear_Of_The_Keyboard_Neither_Pads_Nor_Scrolls()
     {
