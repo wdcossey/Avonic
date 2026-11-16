@@ -187,6 +187,32 @@ public class AvonicAppTests
         Assert.DoesNotContain(stage.Log, entry => entry.StartsWith("bwillDismiss", StringComparison.Ordinal));
     }
 
+    [AvaloniaFact]
+    public void B4_An_Overlay_Shown_Before_The_App_Was_Attached_Still_Goes_Through_The_Registry()
+    {
+        using var stage = new AvonicOverlayTests.Stage();
+        var first = stage.Watch(new TestOverlay(), "first");
+        first.Present(stage.Window);
+        stage.At(200);
+        _ = first.Dismiss();
+        stage.At(400);
+
+        var content = stage.Window.Content;
+        stage.Window.Content = null;
+        stage.Window.Content = new AvonicApp { Content = content };
+        AvonicOverlayTests.Stage.Settle();
+        var log = new List<string>();
+        stage.Window.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) => e.Register(200, _ => log.Add("app@200")));
+        var overlay = stage.Watch(new TestOverlay(), "b");
+        overlay.Present(stage.Window);
+        stage.At(600);
+
+        stage.Window.RaiseEvent(new RoutedEventArgs(TopLevel.BackRequestedEvent));
+        stage.At(800);
+        Assert.Equal(["app@200"], log);
+        Assert.DoesNotContain(stage.Log, entry => entry.StartsWith("bwillDismiss", StringComparison.Ordinal));
+    }
+
     // Measured M7: hardwareBackButton false: no ionBackButton.
     [AvaloniaFact]
     public void B5_With_The_Config_Off_Nothing_Is_Raised_And_An_Overlay_Stays()
@@ -399,7 +425,11 @@ public class AvonicAppTests
         {
             Clock = new TestClock();
             Content = new AvonicContent { Content = new Border { Height = 3000 } };
-            var root = new Panel { Children = { Content } };
+            // A header above, which isn't in the content, as a toolbar isn't: only the middle of the window counts.
+            var header = new Border { Height = 56, Background = Avalonia.Media.Brushes.White };
+            DockPanel.SetDock(header, Dock.Top);
+            var page = new DockPanel { Children = { header, Content } };
+            var root = new Panel { Children = { page } };
             if (covered)
             {
                 root.Children.Add(new Border { Background = Avalonia.Media.Brushes.Transparent });
@@ -633,6 +663,12 @@ public class AvonicAppTests
         stage.First.Focus(NavigationMethod.Tab);
         Dispatcher.UIThread.RunJobs();
         Assert.False(Shows(stage.Second));
+
+        // Given while focus is elsewhere, and then reached by Tab: it shows, as Ionic's focusin gives it its own.
+        stage.App.SetFocus(stage.Second);
+        stage.Second.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Shows(stage.Second));
     }
 
     // ── P: the page ──────────────────────────────────────────────────────────────────────────

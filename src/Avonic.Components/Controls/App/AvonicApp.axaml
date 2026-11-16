@@ -6,8 +6,6 @@
          doesn't clip (measured: overflow visible), where a ContentControl does by default. -->
     <ControlTheme x:Key="{x:Type c:AvonicApp}" TargetType="c:AvonicApp">
         <Setter Property="ClipToBounds" Value="False" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
             <ControlTemplate>
                 <ContentPresenter Name="PART_ContentPresenter"

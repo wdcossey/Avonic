@@ -97,7 +97,7 @@ public static class KeyboardAssist
 
         private void OnStateChanged(object? sender, InputPaneStateEventArgs e)
         {
-            _pending?.Dispose();
+            _pending?.Dispose(); // A newer change replaces one not raised yet.
             var open = e.NewState == InputPaneState.Open;
             var height = e.EndRect.Height;
             _pending = AvonicConfig.Schedule(() =>
