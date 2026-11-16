@@ -73,6 +73,9 @@ public class AvonicRefresher : ContentControl
     private readonly List<IDisposable> _animations = [];
     private readonly List<PendingReset> _resets = [];
 
+    // How many refreshes have begun, so that a reset knows one begun after it (C9)
+    private int _refreshes;
+
     static AvonicRefresher()
     {
         // pointer-events: none
@@ -483,14 +486,26 @@ public class AvonicRefresher : ContentControl
         var animation = data.Animation!;
         if (_progress <= RefresherPullFrame.RefreshThreshold)
         {
-            // progressEnd(0, progress, 500): back to 0, over what's left of 500 ms in reverse
-            animation.PlayBack(_progress, () =>
-            {
-                DestroyAnimations();
-                gesture.Enable(IsEnabled);
-                State = RefresherState.Inactive;
-                RaiseEvent(new RefresherPullEndEventArgs(IonPullEndEvent, RefresherPullEndReason.Cancel));
-            });
+            // progressEnd(0, progress, 500): back to 0, over what's left of 500 ms in reverse. A cancel's reset may have destroyed it
+            // already, or may while it plays: in Ionic its onFinish then never comes, nor the gesture back on, and nothing pulls
+            // again (C3). Here the gesture comes back on as IsEnabled says, a deliberate difference; the reset has already made it
+            // inactive and raised ionPullEnd.
+            animation.PlayBack(
+                _progress,
+                () =>
+                {
+                    DestroyAnimations();
+                    gesture.Enable(IsEnabled);
+                    State = RefresherState.Inactive;
+                    RaiseEvent(new RefresherPullEndEventArgs(IonPullEndEvent, RefresherPullEndReason.Cancel));
+                },
+                () =>
+                {
+                    if (ReferenceEquals(_gesture, gesture))
+                    {
+                        gesture.Enable(IsEnabled);
+                    }
+                });
             return;
         }
 
@@ -530,6 +545,7 @@ public class AvonicRefresher : ContentControl
     /// <summary><c>beginRefresh</c>.</summary>
     private void BeginRefresh()
     {
+        _refreshes++;
         State = RefresherState.Refreshing;
 
         // Clear focus from any active element to prevent scroll jumps after the refresh
@@ -549,7 +565,7 @@ public class AvonicRefresher : ContentControl
         // transitionEndAsync(.refresher-refreshing-icon, 200): the icon's transitionend, which ends every wait on it, or the
         // fallback. The completing state's scale runs one when the icon was showing; the content says when it ends.
         var now = AvonicConfig.Now();
-        var reset = new PendingReset(state, now + TransitionFallback);
+        var reset = new PendingReset(state, now + TransitionFallback, _refreshes);
         _resets.Add(reset);
         if (_refresherContent?.IconTransitionEndsAt is { } endsAt && endsAt >= now)
         {
@@ -567,10 +583,19 @@ public class AvonicRefresher : ContentControl
         }
     }
 
-    /// <summary>The rest of <c>resetNativeRefresher</c>, once the wait is over: inactive, and <c>ionPullEnd</c>.</summary>
+    /// <summary>
+    /// The rest of <c>resetNativeRefresher</c>, once the wait is over: inactive, and <c>ionPullEnd</c>. Not for a reset that a
+    /// refresh has begun since: a deliberate difference from Ionic (C9), whose reset ends that refresh as cancelled while the app is
+    /// still loading. Here the refresh goes on, and its own <see cref="Complete"/> ends it.
+    /// </summary>
     private void FinishReset(PendingReset reset)
     {
         _resets.Remove(reset);
+        if (_refreshes != reset.Refreshes)
+        {
+            return;
+        }
+
         DestroyAnimations();
         _progress = 0;
         State = RefresherState.Inactive;
@@ -580,9 +605,12 @@ public class AvonicRefresher : ContentControl
     }
 
     /// <summary>A <c>resetNativeRefresher</c> waiting for the icon's transition.</summary>
-    private sealed class PendingReset(RefresherState state, TimeSpan due)
+    private sealed class PendingReset(RefresherState state, TimeSpan due, int refreshes)
     {
         public RefresherState State { get; } = state;
+
+        /// <summary>How many refreshes had begun when it was asked for.</summary>
+        public int Refreshes { get; } = refreshes;
 
         public TimeSpan Due { get; set; } = due;
 
@@ -634,6 +662,7 @@ public class AvonicRefresher : ContentControl
     {
         private IDisposable? _frame;
         private bool _disposed;
+        private Action? _onDestroyed;
 
         public void Step(double step)
         {
@@ -645,10 +674,19 @@ public class AvonicRefresher : ContentControl
 
         /// <summary>
         /// Plays in reverse from <paramref name="step"/>: the directed progress falls from it to 0 over <paramref name="step"/> ×
-        /// 500 ms, and the ease-out reads it, as Web Animations apply the easing after the direction.
+        /// 500 ms, and the ease-out reads it, as Web Animations apply the easing after the direction. Destroyed, before it
+        /// starts or while it plays, it calls <paramref name="onDestroyed"/>, as <paramref name="onFinish"/> then never comes. It's
+        /// called too when <paramref name="onFinish"/> destroys it, where it only turns the gesture on again, as that has.
         /// </summary>
-        public void PlayBack(double step, Action onFinish)
+        public void PlayBack(double step, Action onFinish, Action onDestroyed)
         {
+            if (_disposed)
+            {
+                onDestroyed();
+                return;
+            }
+
+            _onDestroyed = onDestroyed;
             var from = Math.Clamp(step, 0, RefresherPullFrame.MaxStep);
             var start = AvonicConfig.Now();
             void Frame()
@@ -681,6 +719,9 @@ public class AvonicRefresher : ContentControl
             _frame?.Dispose();
             _frame = null;
             owner._refresherContent?.ClearPull();
+            var onDestroyed = _onDestroyed;
+            _onDestroyed = null;
+            onDestroyed?.Invoke();
         }
     }
 
