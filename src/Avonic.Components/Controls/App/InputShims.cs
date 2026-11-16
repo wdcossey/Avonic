@@ -69,9 +69,6 @@ internal static class InputShims
         /// <summary>The keyboard's own height, from its last show while this field has focus; null before.</summary>
         private double? _keyboardHeight;
 
-        /// <summary>The height the last run reckoned with.</summary>
-        private double _usedHeight;
-
         /// <summary>Whether a run's scroll is waiting or running.</summary>
         private bool _scrollPending;
         private IDisposable? _paddingTimer;
@@ -147,8 +144,8 @@ internal static class InputShims
         /// </summary>
         /// <remarks>
         /// A deviation: Ionic reckons with its estimate, 290, until the keyboard changes, as a browser then scrolls the focused field
-        /// into the visual viewport itself. Avalonia doesn't, so once the keyboard has said its real height, if that isn't what the
-        /// run reckoned with, it runs again with it when its scroll ends, or at once if there's none: on a Pixel 8 the keyboard is
+        /// into the visual viewport itself. Avalonia doesn't, so once the keyboard has said its real height, it runs again with it when
+        /// its scroll ends, or at once if there's none; at the same height that finds the field safe, and changes nothing: on a Pixel 8 the keyboard is
         /// about 355, and 290 left the field under it.
         /// </remarks>
         private void OnKeyboardShow(object? sender, KeyboardDidShowEventArgs e)
@@ -175,7 +172,7 @@ internal static class InputShims
 
         private void RunAgainWithTheKeyboard(Control component)
         {
-            if (ReferenceEquals(component, _component) && _keyboardHeight is { } height && height != _usedHeight)
+            if (ReferenceEquals(component, _component) && _keyboardHeight is { } height)
             {
                 SetFocus(component, height, waitForResize: false);
             }
@@ -198,7 +195,6 @@ internal static class InputShims
                 return;
             }
 
-            _usedHeight = keyboardHeight;
             var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, PlatformHeight());
             var padding = AvonicConfig.ScrollPadding;
             if (Math.Abs(scrollAmount) < 4)
