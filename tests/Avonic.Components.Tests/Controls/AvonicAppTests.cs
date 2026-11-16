@@ -678,9 +678,9 @@ public class AvonicAppTests
         Assert.Equal(78, stage.Offset);
     }
 
-    // scroll-assist.js: the first ionKeyboardDidShow after focus is the keyboard opening for it; a later one is the keyboard
-    // changing, and runs it again with the keyboard's own height, without waiting. With 400, the item's bottom at 504 is 110 below
-    // 844 - 400 - 50.
+    // scroll-assist.js: a later ionKeyboardDidShow is the keyboard changing, and runs it again with the keyboard's own height,
+    // without waiting. Here the first does too, once the focus's scroll has ended (a deviation: see I8). With 300 after the
+    // scroll to 128, the item's bottom at 504 is 10 below 844 - 300 - 50; with 400 after that, the bottom at 494 is 100 below 394.
     [AvaloniaFact]
     public void I5_A_Later_Keyboard_Show_Runs_It_Again_With_The_Keyboard_s_Height()
     {
@@ -689,14 +689,46 @@ public class AvonicAppTests
         Dispatcher.UIThread.RunJobs();
         stage.At(450);
         KeyboardShows(stage.Scene.Window, 300);
+        Assert.Equal(300, stage.Content.KeyboardOffset);
         stage.At(900);
-        Assert.Equal(128, stage.Offset);
-        Assert.Equal(290, stage.Content.KeyboardOffset);
+        Assert.Equal(138, stage.Offset);
 
         KeyboardShows(stage.Scene.Window, 400);
         Assert.Equal(400, stage.Content.KeyboardOffset);
         stage.At(1400);
         Assert.Equal(238, stage.Offset);
+    }
+
+    // Measured on a Pixel 8: the keyboard is about 355, and Ionic's 290 left the field under it, as Avalonia doesn't scroll a
+    // focused field into what the keyboard leaves, as Chrome does. A first show of 355 during the focus's scroll runs it again when
+    // that ends: the item's bottom at 504 is 65 below 844 - 355 - 50.
+    [AvaloniaFact]
+    public void I8_The_Keyboard_s_Own_Height_Runs_It_Again_When_The_Scroll_Ends()
+    {
+        using var stage = new ShimStage();
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(200);
+        KeyboardShows(stage.Scene.Window, 355);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+        stage.At(450);
+        Assert.Equal(355, stage.Content.KeyboardOffset);
+        stage.At(1000);
+        Assert.Equal(193, stage.Offset);
+    }
+
+    // The same height as the estimate changes nothing.
+    [AvaloniaFact]
+    public void I8_A_Keyboard_Of_The_Estimated_Height_Changes_Nothing()
+    {
+        using var stage = new ShimStage();
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(200);
+        KeyboardShows(stage.Scene.Window, 290);
+        stage.At(1000);
+        Assert.Equal(128, stage.Offset);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
     }
 
     // input-shims.js: scrollAssist, scrollPadding and keyboardHeight from the config.

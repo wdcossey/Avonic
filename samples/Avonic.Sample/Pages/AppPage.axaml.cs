@@ -57,8 +57,16 @@ public partial class AppPage : UserControl
         }
     }
 
-    private void OnKeyboardDidShow(object? sender, KeyboardDidShowEventArgs e) =>
+    // Also to the log (logcat's DOTNET tag on Android), as the status line is under the keyboard.
+    private void OnKeyboardDidShow(object? sender, KeyboardDidShowEventArgs e)
+    {
         Status.Text = $"IonKeyboardDidShow, keyboardHeight {e.KeyboardHeight:0.#}";
+        Console.WriteLine($"AvonicApp: {Status.Text}");
+    }
 
-    private void OnKeyboardDidHide(object? sender, RoutedEventArgs e) => Status.Text = "IonKeyboardDidHide";
+    private void OnKeyboardDidHide(object? sender, RoutedEventArgs e)
+    {
+        Status.Text = "IonKeyboardDidHide";
+        Console.WriteLine($"AvonicApp: {Status.Text}");
+    }
 }

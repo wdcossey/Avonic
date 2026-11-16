@@ -65,6 +65,15 @@ internal static class InputShims
 
         private Control? _component;
         private bool _keyboardPresented;
+
+        /// <summary>The keyboard's own height, from its last show while this field has focus; null before.</summary>
+        private double? _keyboardHeight;
+
+        /// <summary>The height the last run reckoned with.</summary>
+        private double _usedHeight;
+
+        /// <summary>Whether a run's scroll is waiting or running.</summary>
+        private bool _scrollPending;
         private IDisposable? _paddingTimer;
         private IDisposable? _padding;
         private AvonicContent? _padded;
@@ -104,6 +113,8 @@ internal static class InputShims
 
             _component = component;
             _keyboardPresented = false;
+            _keyboardHeight = null;
+            _scrollPending = false;
             SetFocus(component, AvonicConfig.KeyboardHeight, waitForResize: true);
         }
 
@@ -123,6 +134,7 @@ internal static class InputShims
 
             _component = null;
             _keyboardPresented = false;
+            _keyboardHeight = null;
             if (AvonicConfig.ScrollPadding && _padded is { } content)
             {
                 SetScrollPadding(content, 0, () => _currentPadding = 0);
@@ -133,6 +145,12 @@ internal static class InputShims
         /// Ionic's <c>keyboardShow</c>: the first one after focus is the keyboard opening for it, which focus has already dealt with;
         /// a later one is the keyboard changing size, so it runs again with the keyboard's real height, without waiting.
         /// </summary>
+        /// <remarks>
+        /// A deviation: Ionic reckons with its estimate, 290, until the keyboard changes, as a browser then scrolls the focused field
+        /// into the visual viewport itself. Avalonia doesn't, so once the keyboard has said its real height, if that isn't what the
+        /// run reckoned with, it runs again with it when its scroll ends, or at once if there's none: on a Pixel 8 the keyboard is
+        /// about 355, and 290 left the field under it.
+        /// </remarks>
         private void OnKeyboardShow(object? sender, KeyboardDidShowEventArgs e)
         {
             if (_component is not { } component)
@@ -140,13 +158,27 @@ internal static class InputShims
                 return;
             }
 
+            _keyboardHeight = e.KeyboardHeight;
             if (!_keyboardPresented)
             {
                 _keyboardPresented = true;
+                if (!_scrollPending)
+                {
+                    RunAgainWithTheKeyboard(component);
+                }
+
                 return;
             }
 
             SetFocus(component, e.KeyboardHeight, waitForResize: false);
+        }
+
+        private void RunAgainWithTheKeyboard(Control component)
+        {
+            if (ReferenceEquals(component, _component) && _keyboardHeight is { } height && height != _usedHeight)
+            {
+                SetFocus(component, height, waitForResize: false);
+            }
         }
 
         /// <summary>Ionic's <c>jsSetFocus</c>, with nothing to relocate or refocus.</summary>
@@ -158,12 +190,15 @@ internal static class InputShims
                 return;
             }
 
+            // getBoundingClientRect lays the page out, so the boxes are the latest offset's.
+            topLevel.UpdateLayout();
             var item = (Visual?)component.GetSelfAndVisualAncestors().OfType<AvonicItem>().FirstOrDefault() ?? component;
             if (BoxOf(item) is not { } input || BoxOf(content) is not { } box)
             {
                 return;
             }
 
+            _usedHeight = keyboardHeight;
             var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, topLevel.ClientSize.Height);
             var padding = AvonicConfig.ScrollPadding;
             if (Math.Abs(scrollAmount) < 4)
@@ -196,9 +231,13 @@ internal static class InputShims
                 timeout?.Dispose();
                 topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
                 await content.ScrollByPoint(0, scrollAmount, scrollDuration);
+                _scrollPending = false;
+                RunAgainWithTheKeyboard(component);
             }
 
             void OnShowForScroll(object? s, KeyboardDidShowEventArgs args) => ScrollContent();
+
+            _scrollPending = true;
 
             // Reading scrollHeight lays the page out, with the padding just set.
             scroll.UpdateLayout();
