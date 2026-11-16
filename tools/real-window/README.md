@@ -43,6 +43,8 @@ once if the window doesn't fit on the screen.
   - `ion-input-otp`: typing box to box, Backspace, `IonComplete`, a paste and `IonChange` on leaving. The paste puts the
     clipboard's text back afterwards, and is skipped if the clipboard holds anything else.
   - `typography`: frames only.
+  - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
+    to the list at 0; a frame of `SetFocus`'s ring on row 1.
   - `ion-content: keys and the scroll indicator` (#67): a press on a row, then Down, Home, Page Down, Space, Shift+Space and End,
     read from the page's `Ended at` line; and a strip at the end edge that a wheel changes until the indicator fades, and a key
     doesn't. Added without being run: the first run is the one that proves it.
