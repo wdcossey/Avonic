@@ -1497,6 +1497,9 @@ public class AvonicCheckboxTests
         Assert.False(Label(box).IsVisible);
 
         holder.Children.Remove(box);
+
+        // A prop changing while detached reads the label, and still doesn't watch it.
+        box.Checked = true;
         text.Text = "While detached";
         Dispatcher.UIThread.RunJobs();
         Assert.False(Label(box).IsVisible);

@@ -316,9 +316,6 @@ public class AvonicCheckbox : ContentControl, IItemControl
         _item = ItemMultipleInputsObserver.Create(this, UpdateFocusable, ItemMultipleInputs);
         UpdateHostContext();
         HoldTransitions();
-
-        // The validationObserver comes back with connectedCallback, and reads textContent again.
-        UpdateLabel();
     }
 
     /// <summary>The item's <c>item-multiple-inputs</c>.</summary>
@@ -354,7 +351,8 @@ public class AvonicCheckbox : ContentControl, IItemControl
         _item?.Dispose();
         _item = null;
 
-        // disconnectedCallback: the validationObserver goes, so a detached checkbox holds nothing in its content.
+        // disconnectedCallback: the validationObserver goes, so a detached checkbox holds nothing in its content. Attached again, it's
+        // measured, which reads the label again and watches it while it's hidden, as connectedCallback does.
         _labelWatch?.Dispose();
         ReleaseTransitions();
         PseudoClasses.Set(":drawn", false);

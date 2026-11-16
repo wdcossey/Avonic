@@ -2259,6 +2259,28 @@ public class AvonicItemTests
         Assert.Equal(new Rect(-Inner(item).Padding.Left, 0, 340, 47), row.Clip!.Bounds);
     });
 
+    // overflow: hidden clips at the padding box: with --inner-padding-start: 8, a circle at the row's start shows 8 more, from
+    // .item-inner's edge at 16, not from its content at 24.
+    [AvaloniaFact]
+    public void B36_The_Clip_Is_The_Inner_Padding_Box() => InstalledTheme.Run(_ =>
+    {
+        var atStart = new AvonicCheckbox { Content = "At the start", LabelPlacement = CheckboxLabelPlacement.End };
+        var item = new AvonicItem { Content = atStart, EndContent = new AvonicCheckbox() };
+        item.Resources["Avonic.Item.InnerPaddingStart"] = 8d;
+        using var scene = new Scene(new StackPanel { Children = { item } });
+        scene.Window.Background = Brushes.White;
+        Dispatcher.UIThread.RunJobs();
+        ((IPseudoClasses)atStart.Classes).Add(FocusVisible.FocusedPseudoClass);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+
+        // The box at 24, the circle from 15: shown at 20 and white at 12.
+        var y = (int)Box(item, scene.Window).Center.Y;
+        Assert.Equal(24, Box(Part<Border>(atStart, "PART_Container"), scene.Window).X, 0.5);
+        Assert.Equal(Color.FromRgb(209, 224, 251), Opaque(Frames.PixelAt(frame, 20, y)), new ColorNear());
+        Assert.Equal(Colors.White, Opaque(Frames.PixelAt(frame, 12, y)), new ColorNear());
+    });
+
     [AvaloniaFact]
     public void B36_The_Circle_Shows_Past_The_Slots_End_And_Is_Clipped_At_The_Inner_Start() => InstalledTheme.Run(_ =>
     {
