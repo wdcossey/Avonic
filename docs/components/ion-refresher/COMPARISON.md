@@ -50,8 +50,8 @@ Refreshing:
 | `cancel()` with no pull | the refreshing icon at (174, 86); the pulling one at y -8, under the header | the same (C5) | Match |
 | A short pull let go | one icon as it goes back, none after | the same (C4) | Match |
 | A pull during cancelling | the icon follows the finger (`translateY` 24.8, then 55.2) | the same (C2) | Match since #167: it stayed at the held snap back |
-| That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0. Let go with no move since (F): nothing, and nothing pulls again (G). Moved on past 0.4 and let go (D): it refreshes | the same (C3, C10) | Match, an Ionic bug, below |
-| A refresh begun during cancelling | `ionRefresh`, then the cancel's reset ends it, `ionPullEnd` `cancel`, while the app refreshes; a pull after refreshes | the same (C9) | Match, an Ionic bug, below |
+| That pull overtaken by the cancel's end | the reset hides it and sets the progress to 0. Let go with no move since (F): nothing, and nothing pulls again (G). Moved on past 0.4 and let go (D): it refreshes | let go with no move since: nothing, and the next pull works (C3); past 0.4: it refreshes (C10) | **Deliberate difference** since #176: Ionic's bug fixed, below. C10 matches |
+| A refresh begun during cancelling | `ionRefresh`, then the cancel's reset ends it, `ionPullEnd` `cancel`, while the app refreshes; a pull after refreshes | `ionRefresh`, and it goes on refreshing past the cancel's end until `Complete()`, then `ionPullEnd` `complete`; a pull after refreshes (C9) | **Deliberate difference** since #176: Ionic's bug fixed, below |
 | Upward drag at the top | Chromium scrolls the content; the gesture cancels itself at its first move | the content scrolls; the gesture lets go at its threshold (B10) | Deliberate difference, below |
 | `overflow: hidden` on the scroll while pulling | yes | no | Deliberate difference, below |
 
@@ -84,12 +84,26 @@ With no pull, only the refreshing icon shows below the header. The pulling one s
 - **The pulling icon in cancelling is a pill,** 390 x 42 with a radius of 21, where Chromium's `border-radius: 100%` makes an
   ellipse of 195 by 21: a `CornerRadius` has one radius for each corner. For those 700 ms the pill covers the start of the first
   row's text, which shows under the ellipse's curve in Chromium.
-- **Two of Ionic's own bugs are kept.** A pull that the cancel's end overtakes, let go with no move since, leaves the refresher
-  off (C3): `resetNativeRefresher` destroys every animation, including the new pull's, and sets the progress to 0, so letting go
-  plays back a destroyed animation, whose `onFinish` never comes, and so neither does `gesture.enable(true)`. In Chromium nothing
-  pulls again afterwards (F, G). `onMove` goes on setting the progress, so one moved on past 0.4 refreshes when let go instead (D,
-  C10). And a pull let go past the threshold before the cancel's end refreshes, and the reset then ends that refresh as cancelled
-  while the app is still loading (C9; H in Chromium: `ionRefresh` 416 ms after `cancel()`, `ionPullEnd` `cancel` at 733).
+- **Two of Ionic's own bugs are fixed** (#176). #167 measured and copied them; the user then decided to fix both, recorded as
+  rule 8 asks of a deviation, with the measurement and the reason. Unlike rule 8's usual case, Avalonia doesn't force this one: it
+  could copy both, and did. The reason is that each is a bug a user would hit, with no way out but reloading the page in Ionic's case.
+  - **C3: a pull overtaken by the cancel's end, let go with no move since.** Measured in Chromium (F, G): `resetNativeRefresher`
+    destroys every animation, including the new pull's, and sets the progress to 0, so letting go plays back a destroyed animation,
+    whose `onFinish` never comes, and so neither does `gesture.enable(true)`: nothing pulls again, ever. Here the gesture comes back
+    on as `IsEnabled` says, as the end of any pull does here (R3), so a refresher disabled meanwhile stays off: at the let go, when
+    the reset has destroyed the pull's animation already, and at the reset, which destroys a play back under way (not measured in
+    Chromium, the same `destroy()`). Nothing else changes: the reset has already made it inactive and raised `ionPullEnd`
+    `cancel`, so nothing more is raised. `onMove` goes on setting the progress, so one moved on past 0.4
+    refreshes when let go (D, C10), as in Ionic.
+  - **C9: a refresh begun during cancelling.** Measured in Chromium (H): a pull let go past the threshold before the cancel's end
+    refreshes (`ionRefresh` 416 ms after `cancel()`), and the reset then ends that refresh as cancelled (`ionPullEnd` `cancel` at
+    733) while the app is still loading. Let go just before the reset, while its 125 ms snap back runs, the same `destroy()` ends
+    the snap back, so no refresh comes and the gesture stays off (read from the code, not measured). Here a reset does nothing once a
+    pull started after `cancel()` was called has been let go past the threshold: the refresh goes on until the app's `complete()`,
+    whose own reset ends it with `ionPullEnd` `complete`. A pull held at the call, or let go before it, is the cancel's to end, as in
+    Ionic: an app that cancels while the user pulls refuses that pull. No
+    `cancel` comes for the refresh the cancel ended, as the refresher never went back to inactive in between; a cancel with no
+    refresh since still ends as before (B8, C1).
 
 - **An upward drag from the top.** In Chromium Ionic's passive gesture captures it and the browser scrolls anyway; the first move,
   with `velocityY < 0`, cancels the pull. Avalonia gives a pointer to one owner, so a captured gesture would stop the scroll: the
