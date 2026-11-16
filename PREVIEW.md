@@ -1,8 +1,9 @@
 # Avonic preview
 
 What Avonic looks like: Ionic's md mode, recreated for Avalonia. Every picture here is a real frame, rendered headless by
-Avalonia with Skia at 390 × 844 and a scale of 2, as a phone of that size shows it. Nothing is mocked up or retouched. The
-font is Roboto, from `tools/fonts/roboto/`, as the sample has it.
+Avalonia with Skia at 390 × 844 and a scale of 2, a phone's size. Nothing is mocked up or retouched; the one thing the capture
+does is swipe a message open in the inbox, through `AvonicItemSliding.Open()`. The font is Roboto, from `tools/fonts/roboto/`,
+as the sample has it. They're headless frames, not screenshots of a device or a window.
 
 ## Showcase
 
