@@ -1217,6 +1217,26 @@ try {
         'frames only: look at them'
     }
 
+    Section 'ion-app' {
+        Open 'ion-app'
+        # Alt+Left is Avalonia's back on Windows. The page's handler at 10 takes it over the shell's 0.
+        $take = All $CT::Button | Where-Object { $_.Current.Name -like 'Take back*' } | Select-Object -First 1
+        if (-not $take) { $take = All $CT::CheckBox | Where-Object { $_.Current.Name -like 'Take back*' } | Select-Object -First 1 }
+        $take.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep -Milliseconds 200
+        Fore
+        Key '%{LEFT}' 400
+        Check 'a handler at 10 takes back over the shell' ([bool](FirstText 'Back taken at priority 10 (1)')) (Texts -join ' | ')
+        Check 'and the page stays' ([bool](Named $CT::Button 'Back'))
+        $take.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep -Milliseconds 200
+        Fore
+        Key '%{LEFT}' 600
+        Check 'without it the shell goes back at 0' (-not (Named $CT::Button 'Back'))
+        Open 'ion-app'
+        Invoke-Element (Named $CT::Button 'SetFocus on row 1'); Start-Sleep -Milliseconds 300
+        Shot 'app-setfocus'
+        'frames: app-setfocus should show the ring on row 1, in text of 16'
+    }
+
     # A mistyped -Only would otherwise pass with nothing run.
     Check 'a section ran' ($script:sections -gt 0) "none is like '$Only'"
     Check 'the app is still running' (-not $p.HasExited)

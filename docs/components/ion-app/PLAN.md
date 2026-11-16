@@ -2,7 +2,8 @@
 
 `ion-app` is the root of an Ionic app. It has no props, slots, parts or CSS variables, and one method. What it does is start
 Ionic's mobile utilities when it loads, and a native Avalonia app needs those too. ADR 0002 brought it into scope for exactly
-that: hardware back, keyboard assist, status tap and `setFocus`. **An app doesn't need it to get working controls**: every control
+that: hardware back, keyboard assist, status tap and `setFocus`. The status tap is left for an issue of its own, to be tried on an
+iPhone, as only iOS has one. **An app doesn't need it to get working controls**: every control
 still works without it, and an overlay still dismisses on back.
 
 Sources, `@ionic/core` 8.8.1, `dist/collection/`: `components/app/app.js` and `app.css`; `utils/hardware-back-button.js`;
@@ -28,7 +29,7 @@ There are no props, events, slots, shadow parts or CSS custom properties.
 | Ionic | Config, and its default | In Avonic |
 |---|---|---|
 | `startTapClick` | unless `_testing` | Already each control's, through `Behaviors.Activatable`. Unchanged |
-| `startStatusTap` | `statusTap`, `isHybrid` | `StatusTap`, started for the app's `TopLevel`. `AvonicConfig.StatusTap`, default true |
+| `startStatusTap` | `statusTap`, `isHybrid` | Not in this PR: an issue of its own. Avalonia doesn't report a tap on the status bar, and only iOS has one |
 | `startInputShims` | `inputShims`, `needInputShims()`: iOS, or Android in a browser | See [input shims](#input-shims) |
 | `startHardwareBackButton`, or `blockHardwareBackButton` | `hardwareBackButton`, `isHybrid \|\| closeWatcher` | `HardwareBackButton`, started for the app's `TopLevel`. `AvonicConfig.HardwareBackButton`, default true |
 | `startKeyboardAssist` | always | `KeyboardAssist`, started for the app's `TopLevel` |
@@ -69,8 +70,9 @@ Each becomes a test in `AvonicAppTests`, named after its number.
 - B1 For each back request, `IonBackButtonEvent` goes out on the `TopLevel`. Of what's registered, the highest priority runs, and
   of equal ones the last registered. `next` runs the next highest, and each call of it runs one more (M1, M2d).
 - B2 While a handler's task is still running, a back press does nothing. A handler that throws doesn't leave it busy (M2, M2b).
-- B3 The back request is handled only when something registers, so that with nothing registered Android leaves the app, as an
-  app with no handler would.
+- B3 The back request is handled even when nothing registers, so that Android stays in the app: Ionic's docs say "if no previous
+  view exists in the navigation stack, nothing will happen", as Capacitor's App plugin takes every back press, and an app exits
+  through its own handler at -1. The extension `AvonicConfig.HandleUnclaimedBack` off leaves such a request to the platform.
 - B4 Without an `AvonicApp`, nothing is raised (M3b). With one, an overlay registers at 100 to dismiss with `backdrop`, over the
   app's own 0. One that can't be dismissed registers nothing, and the app's handler runs (M8).
 - B5 `AvonicConfig.HardwareBackButton` off: nothing is raised, and an overlay stays (M7).
@@ -85,19 +87,25 @@ Each becomes a test in `AvonicAppTests`, named after its number.
 - K2 A change before the last one has finished replaces it.
 - K3 Without an `AvonicApp`, nothing is raised.
 
-**S: the status bar tap** (`StatusTap`, Ionic's `startStatusTap`)
-
-- S1 `StatusTapEvent` on the `TopLevel`: in the next frame, the content under the middle of the window has its scrolling held off,
-  and scrolls to the top in 300 ms. Then its own `ScrollY` comes back (M4).
-- S2 Nothing when the middle of the window isn't in a content (M4b).
-- S3 Nothing with `AvonicConfig.StatusTap` off, or without an `AvonicApp`.
-
 **F: `SetFocus`** (Ionic's `focusVisible.setFocus`)
 
 - F1 It shows `:ion-focused` on exactly the elements given, and takes it off everything else in the `TopLevel` (M6).
 - F2 A key in `FOCUS_KEYS` keeps it. Any other key, or a press, clears it (M6).
 - F3 Focus moved by code keeps it. Focus moved by keyboard, or focus leaving everything, clears it (M6).
 - F4 Given the element that already has keyboard focus, it lasts until focus moves on.
+
+**T: what a page gets from `html` and `body`** (decided by the user, D1)
+
+- T1 What's in the app has a font size of 16, Avonic's font family and text colour, on Avonic's background, from the theme, so
+  an app's own style wins. Outside it nothing changes.
+
+**A: the safe area** (decided by the user, D3)
+
+- A1 While the root isn't padded by Avalonia (`TopLevel.AutoSafeAreaPadding` off, Avalonia's `viewport-fit=cover`), the four
+  `Avonic.SafeArea*` keys are the insets, in the `TopLevel`'s resources, so that the overlay layer has them too, and they follow
+  `SafeAreaChanged`.
+- A2 While Avalonia pads the root, they're left to the theme's 0, and they follow the property turning off and on.
+- A3 An app taken out takes them away.
 
 **P: the page**
 
@@ -111,7 +119,8 @@ Each becomes a test in `AvonicAppTests`, named after its number.
 | `AvonicApp` | `Controls/App/AvonicApp.cs`, `.axaml` | A `ContentControl`, class `ion-page`. On attach it starts the utilities for its `TopLevel`, as its config says then; on detach it stops them. `SetFocus` |
 | `HardwareBackButton` | `Controls/App/HardwareBackButton.cs` | `IonBackButtonEvent` (direct, on the `TopLevel`), `BackButtonEventArgs.Register(priority, handler)`, `OverlayBackButtonPriority` 100, `MenuBackButtonPriority` 99. It listens to `TopLevel.BackRequested`, which Avalonia raises for Android's back, a mouse's back button and Alt+Left |
 | `KeyboardAssist` | `Controls/App/KeyboardAssist.cs` | `IonKeyboardDidShowEvent` (`KeyboardDidShowEventArgs.KeyboardHeight`), `IonKeyboardDidHideEvent`, from `TopLevel.InputPane` |
-| `StatusTap` | `Controls/App/StatusTap.cs` | `StatusTapEvent`, for the app to raise |
+| `AppSafeArea` | `Controls/App/AppSafeArea.cs`, internal | The four keys, from `TopLevel.InsetsManager` |
+| The theme | `Avonic.Themes/Controls/AvonicApp.axaml` | Font size 16, `Avonic.FontFamily`, `Avonic.TextColorBrush`, `Avonic.BackgroundColorBrush` |
 | `FocusVisible.SetFocus` | `Behaviors/FocusVisible.cs`, internal | Ionic's `setFocus`, beside the per-surface code that's there |
 | The overlays | `Overlays/OverlayHost.cs` | They register at 100 through `IonBackButtonEvent`, and handle `BackRequested` directly only when no app has started the registry for the `TopLevel` |
 
@@ -140,23 +149,37 @@ view for the keyboard. **To be measured on the Pixel** before deciding: see COMP
 | The visual-viewport path of keyboard assist | It's for a browser with no native keyboard plugin. An Avalonia app has the input pane, which is the native path |
 | Tap-click and focus-visible | Already each control's, through `Activatable` and `FocusVisible` |
 | Ionic's router at priority 0 | No router. The sample's shell takes back last, through `BackRequested`'s `RouteFinished` |
+| The status bar tap | Its own issue (D9) |
 | Root `aria-hidden` while an overlay is up (`setRootAriaHidden`) | It's the overlays', recorded in `docs/infra/overlays/PLAN.md` |
 
 ## Decided before, and asked again
 
-ADR 0002 decided three things while `ion-app` was out of scope. The issue asks for them to be asked again now that it's in.
-The answers are under "For you to decide" in the PR, and this section records what was built.
+ADR 0002 decided three things while `ion-app` was out of scope, and the issue asked for them to be asked again. The user's
+answers, 2026-11-16:
 
-| Question | Before | Recommended now |
+| Question | Before | Now |
 |---|---|---|
-| D1 Default text size | Avalonia's | `AvonicApp`'s theme gives 16, Avonic's font, text colour and background to what's inside it, at style priority, as `html` and `body` do for an Ionic page (H: 16px) |
+| D1 Default text size | Avalonia's | Inside `AvonicApp`, 16, Avonic's font, text colour and background, from its theme, as `html` and `body` give an Ionic page (H: 16px). Outside it, Avalonia's |
 | D2 Typography | Opt in | Opt in, as Ionic's `typography.css` is a file the app imports |
-| D3 `Avonic.SafeArea*` | The app fills them | `AvonicApp` fills them in its `TopLevel`'s resources from `InsetsManager`, when the root isn't padded by Avalonia (`AutoSafeAreaPadding` false: Avalonia's `viewport-fit=cover`), and leaves them 0 when it is |
+| D3 `Avonic.SafeArea*` | The app fills them | `AvonicApp` fills them while the root isn't padded by Avalonia |
+
+And the other choices that change what every app sees:
+
+| Question | Answer |
+|---|---|
+| D4 `HardwareBackButton` by default | On everywhere, as in a Capacitor app. On a desktop it's the mouse's back button and Alt+Left |
+| D5 Back without `AvonicApp` | Overlays still dismiss on it. Registering handlers needs an `AvonicApp`, as `ionBackButton` needs `ion-app` |
+| D6 `HardwareBackButton` off | Back is left alone. A deviation: Ionic's `blockHardwareBackButton` takes it and does nothing, which here would also hide it from the app's own `BackRequested` handlers |
+| D7 A back request nothing takes | Handled, so the app stays, as in Ionic on Capacitor. An extension, `AvonicConfig.HandleUnclaimedBack`, turns that off |
+| D8 Input shims | On for Android and iOS, off on desktop, if the Pixel shows the keyboard covering the view |
+| D9 Status tap | An issue of its own |
 
 ## Avonic extensions
 
-None.
+| Extension | Why |
+|---|---|
+| `AvonicConfig.HandleUnclaimedBack`, default true | Whether a back request nothing registers for is still handled. Ionic's is, always, as Capacitor's App plugin takes every press; an Avalonia app may want Android's own back, to leave the app, without writing a handler |
 
 ## Dependencies
 
-`AvonicContent` (#11) for the status tap's scroll and the page; the overlay system (#5) for back; `FocusVisible` (#1). All exist.
+`AvonicContent` (#11) for the page; the overlay system (#5) for back; `FocusVisible` (#1). All exist.

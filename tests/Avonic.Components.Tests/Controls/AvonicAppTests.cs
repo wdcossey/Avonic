@@ -704,6 +704,19 @@ public class AvonicAppTests
     }
 
     [AvaloniaFact]
+    public void A1_A_Key_The_App_Sets_On_The_Top_Level_Itself_Wins()
+    {
+        using var stage = new SafeAreaStage(padded: false);
+        stage.Window.Resources["Avonic.SafeAreaTop"] = 12d;
+        Assert.Equal(12, stage.Key(stage.App, "Top"));
+        Assert.Equal(24, stage.Key(stage.App, "Bottom"));
+
+        stage.Root.Children.Remove(stage.App);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(12, stage.Key(stage.Root, "Top"));
+    }
+
+    [AvaloniaFact]
     public void A3_An_App_Taken_Out_Leaves_The_Keys_To_The_Theme()
     {
         using var stage = new SafeAreaStage(padded: false);
@@ -712,6 +725,26 @@ public class AvonicAppTests
         Assert.Null(stage.Key(stage.Root, "Top"));
         stage.Fake.Set(new Thickness(0, 10, 0, 0));
         Assert.Null(stage.Key(stage.Root, "Top"));
+    }
+
+    // Measured M6: after a touch, a scripted focus() keeps the ring setFocus gave; only focus to the body clears it.
+    [AvaloniaFact]
+    public void F5_On_A_Focusable_Surface_It_Stays_Through_Focus_Moved_By_Code()
+    {
+        using var stage = new FocusStage();
+        stage.App.SetFocus(stage.Second);
+        stage.Second.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Shows(stage.Second));
+
+        stage.First.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Shows(stage.Second));
+
+        stage.Second.Focus();
+        stage.First.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Shows(stage.Second));
     }
 
     // ── P: the page ──────────────────────────────────────────────────────────────────────────

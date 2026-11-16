@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
@@ -33,45 +32,19 @@ public static class HardwareBackButton
     public static readonly RoutedEvent<BackButtonEventArgs> IonBackButtonEvent =
         RoutedEvent.Register<BackButtonEventArgs>("IonBackButton", RoutingStrategies.Direct, typeof(HardwareBackButton));
 
-    private static readonly ConditionalWeakTable<TopLevel, Registry> s_started = new();
+    private static readonly TopLevelStarts<Registry> s_started = new(
+        top => new Registry(top),
+        registry => registry.TopLevel.AddHandler(TopLevel.BackRequestedEvent, registry.OnBackRequested),
+        registry => registry.TopLevel.RemoveHandler(TopLevel.BackRequestedEvent, registry.OnBackRequested));
 
     /// <summary>Whether the registry is started for <paramref name="topLevel"/>.</summary>
-    public static bool IsStarted(TopLevel topLevel) => s_started.TryGetValue(topLevel, out var registry) && registry.Count > 0;
+    public static bool IsStarted(TopLevel topLevel) => s_started.Started(topLevel) is not null;
 
     /// <summary>
     /// Ionic <c>startHardwareBackButton</c>, for one top level, until the result is disposed. Starting it again counts, and it stops
     /// when every start has been disposed.
     /// </summary>
-    internal static IDisposable Start(TopLevel topLevel)
-    {
-        var registry = s_started.GetValue(topLevel, top => new Registry(top));
-        registry.Count++;
-        if (registry.Count == 1)
-        {
-            topLevel.AddHandler(TopLevel.BackRequestedEvent, registry.OnBackRequested);
-        }
-
-        return new Stop(registry);
-    }
-
-    private sealed class Stop(Registry registry) : IDisposable
-    {
-        private bool _disposed;
-
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            if (--registry.Count == 0)
-            {
-                registry.TopLevel.RemoveHandler(TopLevel.BackRequestedEvent, registry.OnBackRequested);
-            }
-        }
-    }
+    internal static IDisposable Start(TopLevel topLevel) => s_started.Start(topLevel);
 
     /// <summary>Ionic's <c>backButtonCallback</c> and its <c>busy</c> flag, for one top level.</summary>
     private sealed class Registry(TopLevel topLevel)
@@ -79,8 +52,6 @@ public static class HardwareBackButton
         private bool _busy;
 
         public TopLevel TopLevel { get; } = topLevel;
-
-        public int Count { get; set; }
 
         /// <summary>
         /// Ionic's <c>backButtonCallback</c>. Handled, so Android stays in the app, as Ionic's back does nothing more when nothing

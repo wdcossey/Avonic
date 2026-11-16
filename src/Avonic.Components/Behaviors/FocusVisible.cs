@@ -66,7 +66,12 @@ public static class FocusVisible
 
         if (e.NavigationMethod is not (NavigationMethod.Tab or NavigationMethod.Directional))
         {
-            Clear(surface);
+            // A ring SetFocus gave stays through focus moved by code, as Ionic's focusin does nothing outside keyboard mode.
+            if (!IsSetByCode(surface))
+            {
+                Clear(surface);
+            }
+
             return;
         }
 
@@ -81,11 +86,14 @@ public static class FocusVisible
 
     private static void OnLostFocus(object? sender, FocusChangedEventArgs e)
     {
-        if (sender is Control surface)
+        // A ring SetFocus gave goes only when focus moves by keyboard or leaves everything, which its window watch hears.
+        if (sender is Control surface && !IsSetByCode(surface))
         {
             Clear(surface);
         }
     }
+
+    private static bool IsSetByCode(Control surface) => surface.GetValue(WatchProperty) is { SetByCode: true };
 
     private static void OnDetached(object? sender, VisualTreeAttachmentEventArgs e)
     {
@@ -158,6 +166,8 @@ public static class FocusVisible
         }
 
         public TopLevel TopLevel => _topLevel;
+
+        public bool SetByCode => _setByCode;
 
         public void Dispose()
         {

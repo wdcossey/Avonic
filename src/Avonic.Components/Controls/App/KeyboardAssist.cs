@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Controls.Platform;
 using Avalonia.Interactivity;
@@ -27,52 +26,15 @@ public static class KeyboardAssist
     public static readonly RoutedEvent<RoutedEventArgs> IonKeyboardDidHideEvent =
         RoutedEvent.Register<RoutedEventArgs>("IonKeyboardDidHide", RoutingStrategies.Direct, typeof(KeyboardAssist));
 
-    private static readonly ConditionalWeakTable<TopLevel, Watch> s_started = new();
-
-    /// <summary>
-    /// Whether the keyboard is open for <paramref name="topLevel"/>, as the last event raised says: Ionic's module-level
-    /// <c>keyboardOpen</c>. False while nothing is started.
-    /// </summary>
-    internal static bool IsOpen(TopLevel topLevel) => s_started.TryGetValue(topLevel, out var watch) && watch.Open;
+    private static readonly TopLevelStarts<Watch> s_started = new(top => new Watch(top), watch => watch.Attach(), watch => watch.Detach());
 
     /// <summary>Starts it for one top level, until the result is disposed. Starts count, as the back button's do.</summary>
-    internal static IDisposable Start(TopLevel topLevel)
-    {
-        var watch = s_started.GetValue(topLevel, top => new Watch(top));
-        watch.Count++;
-        if (watch.Count == 1)
-        {
-            watch.Attach();
-        }
-
-        return new Stop(watch);
-    }
-
-    private sealed class Stop(Watch watch) : IDisposable
-    {
-        private bool _disposed;
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-                if (--watch.Count == 0)
-                {
-                    watch.Detach();
-                }
-            }
-        }
-    }
+    internal static IDisposable Start(TopLevel topLevel) => s_started.Start(topLevel);
 
     private sealed class Watch(TopLevel topLevel)
     {
         private IInputPane? _pane;
         private IDisposable? _pending;
-
-        public int Count { get; set; }
-
-        public bool Open { get; private set; }
 
         public void Attach()
         {
@@ -103,7 +65,6 @@ public static class KeyboardAssist
             _pending = AvonicConfig.Schedule(() =>
             {
                 _pending = null;
-                Open = open;
                 if (open)
                 {
                     topLevel.RaiseEvent(new KeyboardDidShowEventArgs(IonKeyboardDidShowEvent, topLevel, height));
