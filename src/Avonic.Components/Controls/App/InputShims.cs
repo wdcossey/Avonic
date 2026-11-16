@@ -51,7 +51,8 @@ internal static class InputShims
         var safeAreaBottom = visibleAreaBottom - ScrollAmountPadding;
         var distanceToBottom = safeAreaBottom - input.Bottom;
         var distanceToTop = safeAreaTop - input.Top;
-        var desired = Math.Round(distanceToBottom < 0 ? -distanceToBottom : distanceToTop > 0 ? -distanceToTop : 0, MidpointRounding.AwayFromZero);
+        // Math.round: halves go up, toward positive infinity.
+        var desired = Math.Floor((distanceToBottom < 0 ? -distanceToBottom : distanceToTop > 0 ? -distanceToTop : 0) + 0.5);
         var scrollAmount = Math.Min(desired, input.Top - visibleAreaTop);
         var duration = Math.Min(400, Math.Max(150, Math.Abs(scrollAmount) / ScrollAssistSpeed));
         return (scrollAmount, duration, keyboardHeight);
@@ -60,26 +61,53 @@ internal static class InputShims
     /// <summary>One top level's assist: Ionic's per-input <c>enableScrollAssist</c>, listening once for all of them.</summary>
     private sealed class Assist(TopLevel topLevel)
     {
+        // Ionic's config, read when the shims start, as startInputShims reads it when ion-app loads.
+        private bool _scrollAssist;
+        private bool _scrollPadding;
+        private double _configKeyboardHeight;
+
         /// <summary>Ionic's module-level <c>currentPadding</c>.</summary>
         private double _currentPadding;
 
         private Control? _component;
+
+        /// <summary>Ionic's <c>hasKeyboardBeenPresentedForTextField</c>.</summary>
         private bool _keyboardPresented;
 
-        /// <summary>The keyboard's own height, from its last show while this field has focus; null before.</summary>
+        /// <summary>
+        /// The keyboard's own height, from its last show, while it's open; null when it's closed. Kept from field to field, as the
+        /// keyboard stays open when focus moves between them.
+        /// </summary>
         private double? _keyboardHeight;
+
+        /// <summary>The keyboard height the last run reckoned with, so that it runs again only for a new one.</summary>
+        private double _usedHeight;
+
+        /// <summary>
+        /// <c>win.innerHeight</c> as the run reads it: taken while the keyboard is closed, and kept while it's open, as Ionic takes it
+        /// once, so that a view the keyboard has already shrunk doesn't have the keyboard taken off twice.
+        /// </summary>
+        private double _platformHeight;
 
         /// <summary>Whether a run's scroll is waiting or running.</summary>
         private bool _scrollPending;
+
+        /// <summary>Takes away a run's wait for the keyboard: its timeout and its handlers.</summary>
+        private Action? _cancelWait;
+
         private IDisposable? _paddingTimer;
         private IDisposable? _padding;
         private AvonicContent? _padded;
 
         public void Attach()
         {
+            _scrollAssist = AvonicConfig.ScrollAssist;
+            _scrollPadding = AvonicConfig.ScrollPadding;
+            _configKeyboardHeight = AvonicConfig.KeyboardHeight;
             topLevel.AddHandler(InputElement.GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(InputElement.LostFocusEvent, OnLostFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
+            topLevel.AddHandler(KeyboardAssist.IonKeyboardDidHideEvent, OnKeyboardHide);
         }
 
         public void Detach()
@@ -87,11 +115,18 @@ internal static class InputShims
             topLevel.RemoveHandler(InputElement.GotFocusEvent, OnGotFocus);
             topLevel.RemoveHandler(InputElement.LostFocusEvent, OnLostFocus);
             topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
+            topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidHideEvent, OnKeyboardHide);
+            _cancelWait?.Invoke();
+            _cancelWait = null;
             _paddingTimer?.Dispose();
             _paddingTimer = null;
             _padding?.Dispose();
             _padding = null;
+            _padded = null;
+            _currentPadding = 0;
             _component = null;
+            _keyboardHeight = null;
+            _scrollPending = false;
         }
 
         /// <summary>The input or textarea around what has focus: Ionic registers <c>ion-input</c> and <c>ion-textarea</c>.</summary>
@@ -103,16 +138,23 @@ internal static class InputShims
         /// <summary>Ionic's <c>focusIn</c> on the component.</summary>
         private void OnGotFocus(object? sender, FocusChangedEventArgs e)
         {
-            if (!AvonicConfig.ScrollAssist || ComponentOf(e.Source) is not { } component || ReferenceEquals(component, _component))
+            if (!_scrollAssist || ComponentOf(e.Source) is not { } component || ReferenceEquals(component, _component))
             {
                 return;
             }
 
+            _cancelWait?.Invoke();
+            _cancelWait = null;
             _component = component;
             _keyboardPresented = false;
-            _keyboardHeight = null;
             _scrollPending = false;
-            SetFocus(component, AvonicConfig.KeyboardHeight, waitForResize: true);
+            if (_keyboardHeight is null)
+            {
+                _platformHeight = PlatformHeight();
+            }
+
+            // With the keyboard already open, its own height: a deviation, as I8 is.
+            SetFocus(component, _keyboardHeight ?? _configKeyboardHeight, waitForResize: true);
         }
 
         /// <summary>Ionic's <c>focusOut</c>, and the padding's <c>setClearScrollPaddingListener</c>.</summary>
@@ -131,12 +173,13 @@ internal static class InputShims
 
             _component = null;
             _keyboardPresented = false;
-            _keyboardHeight = null;
-            if (AvonicConfig.ScrollPadding && _padded is { } content)
+            if (_scrollPadding && _padded is { } content)
             {
                 SetScrollPadding(content, 0, () => _currentPadding = 0);
             }
         }
+
+        private void OnKeyboardHide(object? sender, RoutedEventArgs e) => _keyboardHeight = null;
 
         /// <summary>
         /// Ionic's <c>keyboardShow</c>: the first one after focus is the keyboard opening for it, which focus has already dealt with;
@@ -144,18 +187,18 @@ internal static class InputShims
         /// </summary>
         /// <remarks>
         /// A deviation: Ionic reckons with its estimate, 290, until the keyboard changes, as a browser then scrolls the focused field
-        /// into the visual viewport itself. Avalonia doesn't, so once the keyboard has said its real height, it runs again with it when
-        /// its scroll ends, or at once if there's none; at the same height that finds the field safe, and changes nothing: on a Pixel 8 the keyboard is
-        /// about 355, and 290 left the field under it.
+        /// into the visual viewport itself. Avalonia doesn't, so once the keyboard has said its real height, it runs again with it
+        /// when its scroll ends, or at once if there's none, once for each height: on a Pixel 8 the keyboard is about 355, and 290
+        /// left the field under it.
         /// </remarks>
         private void OnKeyboardShow(object? sender, KeyboardDidShowEventArgs e)
         {
+            _keyboardHeight = e.KeyboardHeight;
             if (_component is not { } component)
             {
                 return;
             }
 
-            _keyboardHeight = e.KeyboardHeight;
             if (!_keyboardPresented)
             {
                 _keyboardPresented = true;
@@ -170,9 +213,10 @@ internal static class InputShims
             SetFocus(component, e.KeyboardHeight, waitForResize: false);
         }
 
+        /// <summary>Runs again with the keyboard's own height if the last run didn't, so a field that can't reach its place stops.</summary>
         private void RunAgainWithTheKeyboard(Control component)
         {
-            if (ReferenceEquals(component, _component) && _keyboardHeight is { } height)
+            if (ReferenceEquals(component, _component) && _keyboardHeight is { } height && height != _usedHeight)
             {
                 SetFocus(component, height, waitForResize: false);
             }
@@ -195,12 +239,12 @@ internal static class InputShims
                 return;
             }
 
-            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, PlatformHeight());
-            var padding = AvonicConfig.ScrollPadding;
+            _usedHeight = keyboardHeight;
+            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, _platformHeight);
             if (Math.Abs(scrollAmount) < 4)
             {
                 // Safe where it is: the padding stays as it was, so that moving from a field that needed it doesn't jump.
-                if (padding)
+                if (_scrollPadding)
                 {
                     SetScrollPadding(content, _currentPadding);
                 }
@@ -208,14 +252,27 @@ internal static class InputShims
                 return;
             }
 
-            if (padding)
+            if (_scrollPadding)
             {
                 _currentPadding = scrollPadding;
                 SetScrollPadding(content, _currentPadding);
             }
 
             IDisposable? timeout = null;
+            EventHandler<KeyboardDidShowEventArgs>? onFirstShow = null;
             var done = false;
+
+            void StopWaiting()
+            {
+                done = true;
+                timeout?.Dispose();
+                topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                if (onFirstShow is not null)
+                {
+                    topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, onFirstShow);
+                }
+            }
+
             async void ScrollContent()
             {
                 if (done)
@@ -223,9 +280,8 @@ internal static class InputShims
                     return;
                 }
 
-                done = true;
-                timeout?.Dispose();
-                topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                StopWaiting();
+                _cancelWait = null;
                 await content.ScrollByPoint(0, scrollAmount, scrollDuration);
                 _scrollPending = false;
                 RunAgainWithTheKeyboard(component);
@@ -245,18 +301,12 @@ internal static class InputShims
                 if (component is AvonicInput { Type: InputType.Password })
                 {
                     scrollAmount += ScrollAmountPadding;
-                    var first = true;
-                    void OnFirstShow(object? s, KeyboardDidShowEventArgs args)
+                    onFirstShow = (_, _) =>
                     {
-                        if (first)
-                        {
-                            first = false;
-                            topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnFirstShow);
-                            topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
-                        }
-                    }
-
-                    topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnFirstShow);
+                        topLevel.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, onFirstShow!);
+                        topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnShowForScroll);
+                    };
+                    topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, onFirstShow);
                 }
                 else
                 {
@@ -264,6 +314,7 @@ internal static class InputShims
                 }
 
                 timeout = AvonicConfig.Schedule(ScrollContent, KeyboardWait);
+                _cancelWait = StopWaiting;
                 return;
             }
 
@@ -281,13 +332,8 @@ internal static class InputShims
             _paddingTimer = null;
             if (amount > 0)
             {
-                if (!ReferenceEquals(content, _padded))
-                {
-                    _padding?.Dispose();
-                    _padded = content;
-                }
-
                 _padding?.Dispose();
+                _padded = content;
                 _padding = content.SetValue(AvonicContent.KeyboardOffsetProperty, amount, BindingPriority.Animation);
             }
             else

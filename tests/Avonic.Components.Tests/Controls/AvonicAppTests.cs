@@ -844,6 +844,189 @@ public class AvonicAppTests
         }
     }
 
+    // Second review: a field that can't reach its place doesn't run the assist again and again. With 355 the rerun pads by 355,
+    // which gives room for 143 (576 + 355 - 788), short of the 193 it wants: it scrolls that far, once, and everything stops.
+    [AvaloniaFact]
+    public void I10_A_Field_That_Cannot_Reach_Its_Place_Stops()
+    {
+        using var stage = new ShimStage(after: 0);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(300);
+        KeyboardShows(stage.Scene.Window, 355);
+        stage.At(3000);
+        Assert.Equal(143, stage.Offset);
+        Assert.Equal(0, stage.Clock.Pending);
+    }
+
+    /// <summary>Fields with <paramref name="rowsBefore"/> 48 rows before each, then 11 more, under a 56 header, in an app.</summary>
+    private sealed class FieldsStage : IDisposable
+    {
+        private readonly bool _shims = AvonicConfig.InputShims;
+
+        public FieldsStage(params int[] rowsBefore)
+        {
+            AvonicConfig.InputShims = true;
+            Clock = new TestClock();
+            var rows = new StackPanel();
+            foreach (var count in rowsBefore)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    rows.Children.Add(new Border { Height = 48 });
+                }
+
+                var input = new AvonicInput();
+                Inputs.Add(input);
+                rows.Children.Add(new AvonicItem { Content = input, Height = 48 });
+            }
+
+            for (var i = 0; i < 11; i++)
+            {
+                rows.Children.Add(new Border { Height = 48 });
+            }
+
+            Content = new AvonicContent { Content = rows };
+            var header = new Button { Height = 56, Content = "Other" };
+            DockPanel.SetDock(header, Dock.Top);
+            App = new AvonicApp { Content = new DockPanel { Children = { header, Content } } };
+            Other = header;
+            Scene = new Scene(App);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        public TestClock Clock { get; }
+
+        public List<AvonicInput> Inputs { get; } = [];
+
+        public AvonicContent Content { get; }
+
+        public AvonicApp App { get; }
+
+        public Button Other { get; }
+
+        public Scene Scene { get; }
+
+        public double Offset => Content.GetScrollElement()!.Offset.Y;
+
+        public void Focus(int field)
+        {
+            Inputs[field].GetVisualDescendants().OfType<TextBox>().First().Focus();
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        public void At(double ms)
+        {
+            while (Clock.Now.TotalMilliseconds < ms)
+            {
+                Clock.At(Math.Min(Math.Floor(Clock.Now.TotalMilliseconds) + 1, ms));
+                Dispatcher.UIThread.RunJobs();
+            }
+        }
+
+        public void Dispose()
+        {
+            Scene.Dispose();
+            Clock.Dispose();
+            AvonicConfig.InputShims = _shims;
+        }
+    }
+
+    // Second review: a field focused while the keyboard is already open reckons with its own height, as no show comes for it.
+    // A at 488 to 536: 32 with 290, then 65 more with 355, 97. B at 584 to 632, so 535 at 97: with 355, 96 more, 193.
+    [AvaloniaFact]
+    public void I11_A_Second_Field_With_The_Keyboard_Open_Reckons_With_Its_Height()
+    {
+        using var stage = new FieldsStage(9, 1);
+        stage.Focus(0);
+        stage.At(300);
+        KeyboardShows(stage.Scene.Window, 355);
+        stage.At(1000);
+        Assert.Equal(97, stage.Offset);
+
+        stage.Focus(1);
+        stage.At(1600);
+        Assert.Equal(193, stage.Offset);
+
+        // Closed, the next field reckons with the estimate again.
+        stage.Scene.Window.RaiseEvent(new RoutedEventArgs(KeyboardAssist.IonKeyboardDidHideEvent, stage.Scene.Window));
+        stage.Other.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(2000);
+        stage.Content.GetScrollElement()!.Offset = default;
+        Dispatcher.UIThread.RunJobs();
+        stage.Focus(1);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+    }
+
+    // Second review: an app taken out with a padding pending forgets it, so a field clear of the keyboard in the next one isn't
+    // padded by it. Field 0 at 104 to 152 is clear; field 1 at 632 to 680 isn't.
+    [AvaloniaFact]
+    public void I12_An_App_Taken_Out_Forgets_Its_Padding()
+    {
+        using var stage = new FieldsStage(1, 10);
+        stage.Focus(1);
+        stage.At(600);
+        Assert.Equal(290, stage.Content.KeyboardOffset);
+        stage.Other.Focus();
+        Dispatcher.UIThread.RunJobs();
+
+        stage.Scene.Window.Content = null;
+        Dispatcher.UIThread.RunJobs();
+        stage.Scene.Window.Content = stage.App;
+        Dispatcher.UIThread.RunJobs();
+        stage.Content.GetScrollElement()!.Offset = default;
+        Dispatcher.UIThread.RunJobs();
+
+        stage.Focus(0);
+        stage.At(1500);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+    }
+
+    // Second review: a SetFocus ring reached by Tab, then focus moved by code: it goes, as Ionic's keyboard-mode focusin replaces
+    // the set.
+    [AvaloniaFact]
+    public void F6_A_Ring_From_SetFocus_Reached_By_Tab_Goes_When_Code_Moves_Focus()
+    {
+        using var stage = new FocusStage();
+        stage.App.SetFocus(stage.Second);
+        stage.Second.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Shows(stage.Second));
+
+        stage.First.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(Shows(stage.Second));
+    }
+
+    // scroll-data.js rounds with Math.round, which takes a half up: 12.5 above the safe top is -12, not -13.
+    [AvaloniaFact]
+    public void I13_The_Scroll_Amount_Rounds_A_Half_Up_As_Math_Round_Does()
+    {
+        var (amount, _, _) = InputShims.ScrollData(new Rect(0, 58.5, 390, 48), new Rect(0, 56, 390, 788), 290, 844);
+        Assert.Equal(-12, amount);
+    }
+
+    // input-shims.js reads scrollAssist, scrollPadding and keyboardHeight once, when ion-app starts the shims.
+    [AvaloniaFact]
+    public void I14_The_Config_Is_Read_When_The_App_Is_Attached()
+    {
+        var before = AvonicConfig.ScrollAssist;
+        try
+        {
+            using var stage = new ShimStage();
+            AvonicConfig.ScrollAssist = false;
+            stage.Native.Focus();
+            Dispatcher.UIThread.RunJobs();
+            stage.At(500);
+            Assert.Equal(128, stage.Offset);
+        }
+        finally
+        {
+            AvonicConfig.ScrollAssist = before;
+        }
+    }
+
     // ── T: the text a page gets from html and body ──────────────────────────────────────────
 
     // Measured H: font-size 16px in ion-app, the browser's default; html's font-family and body's colours are Ionic's core.css.

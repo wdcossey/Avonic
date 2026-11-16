@@ -74,9 +74,9 @@ keyboard. The padding goes 120 ms after the field loses focus.
 | Config | Ionic | Default | |
 |---|---|---|---|
 | `AvonicConfig.InputShims` | `inputShims` | on for Android and iOS | Read when the app is attached |
-| `AvonicConfig.ScrollAssist` | `scrollAssist` | true | Read at each focus |
-| `AvonicConfig.ScrollPadding` | `scrollPadding` | true | Read at each focus |
-| `AvonicConfig.KeyboardHeight` | `keyboardHeight` | 290 | The height reckoned with until the keyboard says its own |
+| `AvonicConfig.ScrollAssist` | `scrollAssist` | true | Read when the app is attached |
+| `AvonicConfig.ScrollPadding` | `scrollPadding` | true | Read when the app is attached |
+| `AvonicConfig.KeyboardHeight` | `keyboardHeight` | 290 | The height reckoned with until the keyboard says its own. Read when the app is attached |
 
 Once the keyboard says its own height, the assist runs again with it, where Ionic leaves that to the browser.
 

@@ -158,7 +158,8 @@ Behaviours, in `AvonicAppTests`:
 - I3 A field already clear of the keyboard neither pads nor scrolls.
 - I4 Nothing with `AvonicConfig.InputShims` off, or without an `AvonicApp`.
 - I5 A later keyboard show runs it again with the keyboard's own height, without waiting.
-- I6 `ScrollAssist`, `ScrollPadding` and `KeyboardHeight` come from the config, read at each focus.
+- I6 `ScrollAssist`, `ScrollPadding` and `KeyboardHeight` come from the config, read when the app is attached, as Ionic reads them
+  in `startInputShims`.
 - I7 A password field with too little room waits for a second keyboard show (iOS's passwords bar).
 - I8 **A deviation:** once the keyboard says its real height, if that isn't what the assist reckoned with, it runs again with it
   when its scroll ends. Ionic keeps its estimate, as Chrome then scrolls the focused field into the visual viewport itself.

@@ -77,9 +77,11 @@ public static class FocusVisible
 
         ((IPseudoClasses)surface.Classes).Add(FocusedPseudoClass);
 
-        // Only a surface showing it listens to the window, so a long list costs nothing per press.
-        if (surface.GetValue(WatchProperty) is null && TopLevel.GetTopLevel(surface) is { } topLevel)
+        // Only a surface showing it listens to the window, so a long list costs nothing per press. One that SetFocus gave it
+        // becomes a keyboard one now, so that focus leaving it clears it, as Ionic's focusin in keyboard mode replaces the set.
+        if (surface.GetValue(WatchProperty) is not { SetByCode: false } && TopLevel.GetTopLevel(surface) is { } topLevel)
         {
+            surface.GetValue(WatchProperty)?.Dispose();
             surface.SetValue(WatchProperty, new WindowWatch(surface, topLevel));
         }
     }
