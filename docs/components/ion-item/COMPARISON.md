@@ -35,8 +35,10 @@ half a pixel; at 1, as the tests run, the seven lines are 153 and the three 58:
 | Long divider start or end, two lines | 56 | 57 |
 | Everything else | 48 | 48 |
 
-One row differs for another reason. A stacked label in start beside a plain one is 55 in this page, and was 48 in another: two labels report
-to the item, and the last to load wins, which `B5_With_Two_Labels_The_Last_To_Report_Wins` records. The default slot loads last here, so it's 48.
+A stacked label in start beside a plain one is 48, in Ionic and here. Two labels report to the item, and the last to report wins, which
+`B5_With_Two_Labels_The_Last_To_Report_Wins` records. Ionic's lazy build loaded the two in either order, so the reference gave 48 or 55 from
+run to run; `tools/ionic-ref` now starts them in document order (#104), and the plain label, in the default slot, reports last. Avonic takes
+the default slot last whatever the order in the markup (#169).
 
 The RTL row's note loses about 1 px at its right edge. A plain `TextBlock` does too, in Avalonia, with no Avonic control: it's [listed](../../infra/avalonia-issues.md).
 

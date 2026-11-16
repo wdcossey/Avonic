@@ -81,7 +81,8 @@ tools/ionic-api.js       core.json → fidelity checklist (the spec for every co
 tools/ionic-ref/         renders the real Ionic component in headless Chromium (md, phone viewport):
                          screenshots, shadow DOM, boxes, resolved CSS vars → docs/components/<tag>/ref/;
                          compare-icons.js compares every icon against it, pixel by pixel; side.js puts two
-                         frames side by side
+                         frames side by side; settle.js, how they wait: components started in document order,
+                         then three still frames (tools/README.md)
 tools/ionicons/          generates src/Avonic.Components/Icons/ from the ionicons package
 tools/fonts/roboto/      Roboto 400, 500 and 700 (OFL): the sample and the tests embed it (Avonic.Sample.Roboto), and render.js and
                          boxes.js load it, so that text measures the same on both sides. The libraries don't ship it
