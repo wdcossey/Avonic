@@ -87,7 +87,8 @@ gesture on the content's scroll element, or a scroll host's in it (priority 31, 
 it captures starts the pull, and each later one steps md's pulling animation to `deltaY / 360`; let go at 0.4 or less and it plays
 back over progress × 500 ms and cancels; past it, the icon snaps back in 125 ms and the refresher refreshes, clearing the focus;
 `Complete()` and `Cancel()` close it two frames later, after the icon's 200 ms transition, or Ionic's 700 ms fallback. Cancelling
-during a refresh shows both icons until then, as Ionic's does, the pulling one as wide as the content ([#167](COMPARISON.md#after-a-cancel-167)).
+during a refresh shows the refreshing icon alone until then, where Ionic also shows the pulling one, as wide as the content: a deliberate
+difference the user chose ([#167](COMPARISON.md#after-a-cancel-167)).
 
 The refresher's state shows as pseudoclasses on both controls: `:pulling`, `:ready`, `:refreshing`, `:cancelling`, `:completing`,
 `:native`, and `:active` on the refresher.

@@ -61,7 +61,8 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
    `beginRefresh`: `refreshing`, focus cleared, `ionRefresh`. B5, B17
 9. `complete()`: two frames, `completing`; the refreshing icon scales to 0 over its 200 ms transition; at its end inactive,
    `ionPullEnd` `complete`. B7
-10. `cancel()`: two frames, `cancelling`, both icons shown; no transition ends, so inactive at Ionic's 700 ms fallback. B8
+10. `cancel()`: two frames, `cancelling`, the refreshing icon shown (Ionic shows the pulling one too: #167, item 21); no
+    transition ends, so inactive at Ionic's 700 ms fallback. B8
 11. `disabled`. B13
 12. The content's defaults, and no spinner → not native. B15
 13. A non-circular pulling spinner is a paused spinner that turns, with no arrow (md's arrow is only for `circular`). B16
@@ -78,10 +79,10 @@ nor are the content's two texts, which md's native refresher hides (`.refresher-
     after each layout of the content until it's there (`componentOnReady`), logged once if the first gives none. B24 (#155)
 20. The config keys `refreshingIcon` and `refreshingSpinner` come before md's defaults and `spinner`, read once, when the content
     first loads; a key of `null` gives no spinner, and so not the native refresher. B25 (#155)
-21. After a cancel (#167, measured in Chromium): during a refresh, both icons for the 700 ms, the pulling one as wide as the
-    content with its spinner at the start, the column of both centred on the refresher and overflowing it both ways; with no pull,
-    the refreshing one only; a short pull, one; none once it's over, after a refresh and `complete()` that follow, or with the page
-    closed and opened again. C1, C4 to C8
+21. After a cancel (#167): Chromium shows both icons for the 700 ms during a refresh, the pulling one as wide as the content
+    with its spinner at the start. Avonic hides the pulling icon while cancelling, a deliberate difference the user chose, so the
+    refreshing one shows alone where the refresh had it; with no pull, the refreshing one only; a short pull, one; none once it's
+    over, after a refresh and `complete()` that follow, or with the page closed and opened again. C1, C4 to C8
 22. A pull started while cancelling moves the icon, as its animation is newer than the held snap back. C2
 23. A cancel's reset ends a pull under way, as Ionic's does: one moved on past 0.4 after it refreshes when let go. C10
 24. Two of Ionic's bugs, fixed as deliberate differences (#176). A pull the reset overtakes, let go with no move since, and a play
