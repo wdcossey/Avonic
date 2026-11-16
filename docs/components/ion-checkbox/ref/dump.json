@@ -9,7 +9,7 @@
         "id": "c1",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-labelledby": "ion-cb-10-lbl",
+        "aria-labelledby": "ion-cb-0-lbl",
         "tabindex": "0",
         "class": "md interactive checkbox-label-placement-start hydrated"
       },
@@ -197,7 +197,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-10>\n      <div#ion-cb-10-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-0>\n      <div#ion-cb-0-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -205,7 +205,7 @@
         "checked": "",
         "role": "checkbox",
         "aria-checked": "true",
-        "aria-labelledby": "ion-cb-0-lbl",
+        "aria-labelledby": "ion-cb-1-lbl",
         "tabindex": "0",
         "class": "md checkbox-checked interactive checkbox-label-placement-start hydrated"
       },
@@ -394,7 +394,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-0>\n      <div#ion-cb-0-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-1>\n      <div#ion-cb-1-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -402,7 +402,7 @@
         "indeterminate": "",
         "role": "checkbox",
         "aria-checked": "mixed",
-        "aria-labelledby": "ion-cb-8-lbl",
+        "aria-labelledby": "ion-cb-2-lbl",
         "tabindex": "0",
         "class": "md checkbox-indeterminate interactive checkbox-label-placement-start hydrated"
       },
@@ -591,7 +591,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-8>\n      <div#ion-cb-8-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-2>\n      <div#ion-cb-2-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -599,7 +599,7 @@
         "label-placement": "end",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-labelledby": "ion-cb-14-lbl",
+        "aria-labelledby": "ion-cb-3-lbl",
         "tabindex": "0",
         "class": "md interactive checkbox-label-placement-end hydrated"
       },
@@ -787,7 +787,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-14>\n      <div#ion-cb-14-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-3>\n      <div#ion-cb-3-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -795,7 +795,7 @@
         "label-placement": "fixed",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-labelledby": "ion-cb-7-lbl",
+        "aria-labelledby": "ion-cb-4-lbl",
         "tabindex": "0",
         "class": "md interactive checkbox-label-placement-fixed hydrated"
       },
@@ -983,7 +983,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-7>\n      <div#ion-cb-7-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-4>\n      <div#ion-cb-4-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -992,7 +992,7 @@
         "checked": "",
         "role": "checkbox",
         "aria-checked": "true",
-        "aria-labelledby": "ion-cb-11-lbl",
+        "aria-labelledby": "ion-cb-5-lbl",
         "tabindex": "0",
         "class": "md checkbox-checked interactive checkbox-label-placement-stacked hydrated"
       },
@@ -1181,7 +1181,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-11>\n      <div#ion-cb-11-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-5>\n      <div#ion-cb-5-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -1392,7 +1392,7 @@
         "checked": "",
         "role": "checkbox",
         "aria-checked": "true",
-        "aria-labelledby": "ion-cb-5-lbl",
+        "aria-labelledby": "ion-cb-7-lbl",
         "aria-disabled": "true",
         "class": "md checkbox-checked checkbox-disabled interactive checkbox-label-placement-start hydrated"
       },
@@ -1582,7 +1582,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-5>\n      <div#ion-cb-5-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-7>\n      <div#ion-cb-7-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -1590,8 +1590,8 @@
         "helper-text": "Helper text",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-describedby": "ion-cb-12-helper-text",
-        "aria-labelledby": "ion-cb-12-lbl",
+        "aria-describedby": "ion-cb-8-helper-text",
+        "aria-labelledby": "ion-cb-8-lbl",
         "tabindex": "0",
         "class": "md interactive checkbox-label-placement-start hydrated"
       },
@@ -1865,7 +1865,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-12>\n      <div#ion-cb-12-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.checkbox-bottom>\n          <div#ion-cb-12-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-cb-12-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-8>\n      <div#ion-cb-8-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.checkbox-bottom>\n          <div#ion-cb-8-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-cb-8-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2347,14 +2347,14 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-2>\n      <div#ion-cb-2-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-10>\n      <div#ion-cb-10-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
         "id": "i1",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-labelledby": "ion-cb-4-lbl",
+        "aria-labelledby": "ion-cb-11-lbl",
         "tabindex": "0",
         "class": "md in-item interactive checkbox-label-placement-start hydrated"
       },
@@ -2543,7 +2543,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-4>\n      <div#ion-cb-4-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-11>\n      <div#ion-cb-11-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2552,7 +2552,7 @@
         "label-placement": "end",
         "role": "checkbox",
         "aria-checked": "true",
-        "aria-labelledby": "ion-cb-1-lbl",
+        "aria-labelledby": "ion-cb-12-lbl",
         "tabindex": "0",
         "class": "md in-item checkbox-checked interactive checkbox-label-placement-end hydrated"
       },
@@ -2742,7 +2742,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-1>\n      <div#ion-cb-1-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-12>\n      <div#ion-cb-12-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2939,7 +2939,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-3>\n      <div#ion-cb-3-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-13>\n      <div#ion-cb-13-lbl.label-text-wrapper.label-text-wrapper-hidden part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -2948,7 +2948,7 @@
         "alignment": "start",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-labelledby": "ion-cb-15-lbl",
+        "aria-labelledby": "ion-cb-14-lbl",
         "tabindex": "0",
         "class": "md in-item interactive checkbox-alignment-start checkbox-label-placement-stacked hydrated"
       },
@@ -3138,7 +3138,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-15>\n      <div#ion-cb-15-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-14>\n      <div#ion-cb-14-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     },
     {
       "attributes": {
@@ -3146,8 +3146,8 @@
         "helper-text": "Helper text",
         "role": "checkbox",
         "aria-checked": "false",
-        "aria-describedby": "ion-cb-13-helper-text",
-        "aria-labelledby": "ion-cb-13-lbl",
+        "aria-describedby": "ion-cb-15-helper-text",
+        "aria-labelledby": "ion-cb-15-lbl",
         "tabindex": "0",
         "class": "md in-item interactive checkbox-label-placement-start hydrated"
       },
@@ -3422,7 +3422,7 @@
           }
         }
       ],
-      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-13>\n      <div#ion-cb-13-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.checkbox-bottom>\n          <div#ion-cb-13-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-cb-13-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
+      "tree": "  #shadow-root\n    <label.checkbox-wrapper>\n      <input#ion-cb-15>\n      <div#ion-cb-15-lbl.label-text-wrapper part=\"label\">\n        <slot name=\"\">\n        <div.checkbox-bottom>\n          <div#ion-cb-15-helper-text.helper-text part=\"supporting-text helper-text\">\n          <div#ion-cb-15-error-text.error-text part=\"supporting-text error-text\">\n      <div.native-wrapper>\n        <svg part=\"container\">\n          <path part=\"mark\">\n  <input.aux-input>\n"
     }
   ]
 }
