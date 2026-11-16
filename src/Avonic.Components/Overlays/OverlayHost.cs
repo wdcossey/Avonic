@@ -37,6 +37,7 @@ internal sealed class OverlayHost : Panel
         };
         topLevel.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
         topLevel.AddHandler(TopLevel.BackRequestedEvent, OnBackRequested);
+        topLevel.AddHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         topLevel.AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
@@ -116,11 +117,31 @@ internal sealed class OverlayHost : Panel
     }
 
     /// <summary>
-    /// Ionic's <c>ionBackButton</c> listener, at priority 100: the same as Escape. Handled when it dismisses, as Ionic's registered
-    /// handler stops the app's own back; an app's handler that has already handled it keeps it.
+    /// Ionic's <c>ionBackButton</c> listener: the top overlay, if its backdrop can dismiss it, registers at priority 100 to dismiss
+    /// it, the same as Escape. Its dismissal isn't waited for, as Ionic's handler doesn't return it, so that a back press can still
+    /// reach an alert a modal's <c>canDismiss</c> shows.
+    /// </summary>
+    private void OnIonBackButton(object? sender, BackButtonEventArgs e)
+    {
+        if (GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
+        {
+            e.Register(HardwareBackButton.OverlayBackButtonPriority, _ => top.DismissFromInput(OverlayRoles.Backdrop));
+        }
+    }
+
+    /// <summary>
+    /// With no <see cref="AvonicApp"/> to raise <see cref="HardwareBackButton.IonBackButtonEvent"/>, the same straight from the
+    /// back request, so that an overlay dismisses on back without one: handled when it dismisses, as Ionic's registered handler
+    /// stops the app's own back. An app's handler that has already handled it keeps it. Nothing with
+    /// <see cref="AvonicConfig.HardwareBackButton"/> off.
     /// </summary>
     private void OnBackRequested(object? sender, RoutedEventArgs e)
     {
+        if (HardwareBackButton.IsStarted(_topLevel) || !AvonicConfig.HardwareBackButton)
+        {
+            return;
+        }
+
         if (GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
         {
             e.Handled = true;

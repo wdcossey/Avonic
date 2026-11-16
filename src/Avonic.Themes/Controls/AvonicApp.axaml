@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <c:AvonicApp Width="390" Height="200">
+            <TextBlock Margin="16" Text="Text in an app is 16, in Avonic's font and text colour" />
+        </c:AvonicApp>
+    </Design.PreviewWith>
+
+    <!-- ion-app has no CSS of its own but .ion-page's. These are what every Ionic page gets from html and body, which ion-app's
+         content inherits: the browser's 16px (measured in ion-app), html's font-family: var(ion-font-family), and body's
+         background: var(ion-background-color) and color: var(ion-text-color). An app's own values beat them, as they're the
+         theme's. -->
+    <ControlTheme x:Key="{x:Type c:AvonicApp}" TargetType="c:AvonicApp">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <!-- .ion-page: position: absolute with an inset of 0, so it fills what it's in, and overflow: visible. -->
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

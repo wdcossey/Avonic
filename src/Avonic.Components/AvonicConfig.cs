@@ -121,6 +121,57 @@ public static class AvonicConfig
     /// </remarks>
     public static bool ContentScrollBars { get; set; }
 
+    // ── ion-app (#65): read by AvonicApp when it's attached ─────────────────────────────────────
+
+    /// <summary>
+    /// Ionic's <c>hardwareBackButton</c> config: whether Avonic handles a back request (<see cref="TopLevel.BackRequested"/>):
+    /// <see cref="AvonicApp"/> raises <see cref="Controls.HardwareBackButton.IonBackButtonEvent"/> for it, and without one an overlay still
+    /// dismisses on it. Default <see langword="true"/>, as in a Capacitor or Cordova app, which an Avalonia app is like: Ionic's is
+    /// false only in a browser.
+    /// </summary>
+    /// <remarks>
+    /// Read by an <see cref="AvonicApp"/> when it's attached, as Ionic reads it when <c>ion-app</c> loads, and by an overlay at each
+    /// back request when there's no app. False leaves the request to the app and the platform, where Ionic's
+    /// <c>blockHardwareBackButton</c> takes it and does nothing: here that would also hide it from the app's own handlers.
+    /// </remarks>
+    public static bool HardwareBackButton { get; set; } = true;
+
+    /// <summary>
+    /// An Avonic extension: whether a back request that nothing registers a handler for, while an <see cref="AvonicApp"/> has
+    /// started the back button, is still handled, so that Android stays in the app. Default <see langword="true"/>, as in an
+    /// Ionic app on Capacitor, where the App plugin takes every back press and "nothing will happen" when nothing can go back:
+    /// such an app exits through a handler of its own at -1. False leaves that request to the platform, so Android leaves the
+    /// app. Read at each back request.
+    /// </summary>
+    public static bool HandleUnclaimedBack { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>inputShims</c> config: whether an <see cref="AvonicApp"/> starts the scroll assist and scroll padding for its
+    /// fields. Default on Android and iOS, where the on-screen keyboard covers the app instead of resizing it, as Ionic's
+    /// <c>needInputShims()</c> is for iOS and for Chrome on Android; off elsewhere. Read when the app is attached.
+    /// </summary>
+    public static bool InputShims { get; set; } = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+
+    /// <summary>
+    /// Ionic's <c>scrollAssist</c> config: whether a field that takes focus where the keyboard would cover it scrolls its content
+    /// to bring it above the keyboard. Default <see langword="true"/>. Read when the app is attached, as Ionic reads it when
+    /// <c>ion-app</c> loads.
+    /// </summary>
+    public static bool ScrollAssist { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>scrollPadding</c> config: whether the scroll assist pads the end of the content by the keyboard's height
+    /// (<see cref="AvonicContent.KeyboardOffset"/>), so that a field near the end can scroll above it. Default
+    /// <see langword="true"/>. Read when the app is attached.
+    /// </summary>
+    public static bool ScrollPadding { get; set; } = true;
+
+    /// <summary>
+    /// Ionic's <c>keyboardHeight</c> config: the keyboard's height the scroll assist reckons with when a field takes focus,
+    /// before the keyboard has said its own. Default 290. Read when the app is attached.
+    /// </summary>
+    public static double KeyboardHeight { get; set; } = 290;
+
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 
     /// <summary>Monotonic time source for every Avonic timeline. Tests substitute a manual clock.</summary>

@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Reactive;
+using Avonic.Components.Controls;
 
 namespace Avonic.Sample;
 
@@ -73,6 +74,7 @@ public partial class SampleShell : UserControl
         _topLevel = TopLevel.GetTopLevel(this);
         // After every handler on the route, so that an overlay's, which is added when the first one is presented, comes first.
         _back = TopLevel.BackRequestedEvent.RouteFinished.Subscribe(new AnonymousObserver<RoutedEventArgs>(OnBackRequestFinished));
+        _topLevel?.AddHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         _safeArea = SafeAreaMode.PadShell(this, Header, _index, PerformanceLine);
     }
 
@@ -81,6 +83,7 @@ public partial class SampleShell : UserControl
         base.OnDetachedFromVisualTree(e);
         _back?.Dispose();
         _back = null;
+        _topLevel?.RemoveHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         _safeArea?.Dispose();
         _safeArea = null;
         _performance?.Dispose();
@@ -101,6 +104,18 @@ public partial class SampleShell : UserControl
 
         e.Handled = true;
         ShowIndex();
+    }
+
+    /// <summary>
+    /// Inside an <see cref="AvonicApp"/>, which handles every back request, the same at priority 0, as Ionic's router goes back:
+    /// an overlay's 100 comes first.
+    /// </summary>
+    private void OnIonBackButton(object? sender, BackButtonEventArgs e)
+    {
+        if (IsShowingPage)
+        {
+            e.Register(0, _ => ShowIndex());
+        }
     }
 
     // Only called in a Debug build. A Release build still compiles them, so CI sees them.
