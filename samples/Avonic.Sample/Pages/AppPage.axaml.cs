@@ -24,7 +24,6 @@ public partial class AppPage : UserControl
         }
 
         Rows.Children.Add(new AvonicItem { Content = new AvonicInput { Label = "The last row", LabelPlacement = InputLabelPlacement.Floating } });
-        Tap.Click += (_, _) => _topLevel?.RaiseEvent(new RoutedEventArgs(StatusTap.StatusTapEvent));
         Ring.Click += (_, _) =>
         {
             _first.Focus();
@@ -54,7 +53,7 @@ public partial class AppPage : UserControl
     {
         if (TakeBack.IsChecked == true)
         {
-            e.Register(0, _ => Status.Text = $"Back taken at priority 0 ({++_backs})");
+            e.Register(10, _ => Status.Text = $"Back taken at priority 10 ({++_backs})");
         }
     }
 

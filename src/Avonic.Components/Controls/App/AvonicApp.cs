@@ -5,13 +5,15 @@ namespace Avonic.Components.Controls;
 
 /// <summary>
 /// Ionic <c>ion-app</c>: the root of an app, which starts what a native app needs from Ionic: the hardware back button
-/// (<see cref="HardwareBackButton"/>), the keyboard's events (<see cref="KeyboardAssist"/>) and the status bar tap
-/// (<see cref="StatusTap"/>), for the <see cref="TopLevel"/> it's in. See <c>docs/components/ion-app/README.md</c>.
+/// (<see cref="HardwareBackButton"/>) and the keyboard's events (<see cref="KeyboardAssist"/>), for the <see cref="TopLevel"/>
+/// it's in. See <c>docs/components/ion-app/README.md</c>.
 /// </summary>
 /// <remarks>
 /// No control needs it: each works without it, as an overlay still dismisses on back. Tap-click and focus-visible, which
 /// <c>ion-app</c> also starts, are each control's own here, through <see cref="Behaviors.Activatable"/> and
-/// <see cref="Behaviors.FocusVisible"/>. It has the class <c>ion-page</c>, as <c>ion-app</c>'s host does, so an
+/// <see cref="Behaviors.FocusVisible"/>. It fills <c>Avonic.SafeArea*</c> while Avalonia doesn't pad the root by the insets
+/// (<see cref="TopLevel.AutoSafeAreaPadding"/> off), as a page's <c>viewport-fit=cover</c> gives <c>env(safe-area-inset-*)</c>,
+/// and its theme gives what's in it a page's text: 16, Avonic's font and text colour, on Avonic's background. It has the class <c>ion-page</c>, as <c>ion-app</c>'s host does, so an
 /// <see cref="AvonicContent"/> takes it as its page.
 /// </remarks>
 public class AvonicApp : ContentControl
@@ -60,17 +62,13 @@ public class AvonicApp : ContentControl
             return;
         }
 
-        if (AvonicConfig.StatusTap)
-        {
-            _started.Add(Controls.StatusTap.Start(topLevel));
-        }
-
         if (AvonicConfig.HardwareBackButton)
         {
             _started.Add(Controls.HardwareBackButton.Start(topLevel));
         }
 
         _started.Add(KeyboardAssist.Start(topLevel));
+        _started.Add(AppSafeArea.Start(topLevel));
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)

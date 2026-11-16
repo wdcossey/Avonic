@@ -137,11 +137,13 @@ public static class AvonicConfig
     public static bool HardwareBackButton { get; set; } = true;
 
     /// <summary>
-    /// Ionic's <c>statusTap</c> config: whether <see cref="Controls.StatusTap.StatusTapEvent"/> scrolls the content under the
-    /// middle of the window to its top. Default <see langword="true"/>, as in a Capacitor or Cordova app. Read by an
-    /// <see cref="AvonicApp"/> when it's attached.
+    /// An Avonic extension: whether a back request that nothing registers a handler for, while an <see cref="AvonicApp"/> has
+    /// started the back button, is still handled, so that Android stays in the app. Default <see langword="true"/>, as in an
+    /// Ionic app on Capacitor, where the App plugin takes every back press and "nothing will happen" when nothing can go back:
+    /// such an app exits through a handler of its own at -1. False leaves that request to the platform, so Android leaves the
+    /// app. Read at each back request.
     /// </summary>
-    public static bool StatusTap { get; set; } = true;
+    public static bool HandleUnclaimedBack { get; set; } = true;
 
     private static readonly Stopwatch s_clock = Stopwatch.StartNew();
 

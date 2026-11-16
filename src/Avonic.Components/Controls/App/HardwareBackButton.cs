@@ -83,9 +83,10 @@ public static class HardwareBackButton
         public int Count { get; set; }
 
         /// <summary>
-        /// Ionic's <c>backButtonCallback</c>. Handled when something registered, so Android stays in the app; left alone when
-        /// nothing did, so Android leaves it, as an app with no handler would. While a handler's task is still running, a back
-        /// request does nothing, and is handled, as Ionic's <c>busy</c> ignores it.
+        /// Ionic's <c>backButtonCallback</c>. Handled, so Android stays in the app, as Ionic's back does nothing more when nothing
+        /// takes it ("nothing will happen", and an app exits through its own handler at -1 that calls <c>App.exitApp()</c>).
+        /// <see cref="AvonicConfig.HandleUnclaimedBack"/> off leaves a request that nothing registered for to the platform. While
+        /// a handler's task is still running, a back request does nothing, and is handled, as Ionic's <c>busy</c> ignores it.
         /// </summary>
         public void OnBackRequested(object? sender, RoutedEventArgs e)
         {
@@ -100,6 +101,8 @@ public static class HardwareBackButton
             var handlers = ev.Handlers;
             if (handlers.Count == 0)
             {
+                // Ionic's "nothing will happen": Capacitor's App plugin takes every back press. An extension can leave it.
+                e.Handled = AvonicConfig.HandleUnclaimedBack;
                 return;
             }
 

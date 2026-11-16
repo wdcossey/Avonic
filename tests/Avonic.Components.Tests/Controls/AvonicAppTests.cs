@@ -121,25 +121,30 @@ public class AvonicAppTests
         Assert.Equal(["throws", "after"], log);
     }
 
+    // Ionic's docs: "If no previous view exists in the navigation stack, nothing will happen." Capacitor's App plugin takes every
+    // back press, so the app stays.
     [AvaloniaFact]
-    public void B3_The_Back_Request_Is_Handled_Only_When_Something_Registers()
+    public void B3_The_Back_Request_Is_Handled_Even_When_Nothing_Registers_Unless_The_Extension_Says_Not()
     {
         using var scene = InApp(out _);
-        var register = false;
         var raised = 0;
-        scene.Window.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) =>
-        {
-            raised++;
-            if (register)
-            {
-                e.Register(0, _ => { });
-            }
-        });
-
-        Assert.False(Back(scene.Window).Handled);
-        register = true;
+        scene.Window.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, _) => raised++);
         Assert.True(Back(scene.Window).Handled);
-        Assert.Equal(2, raised);
+
+        var before = AvonicConfig.HandleUnclaimedBack;
+        AvonicConfig.HandleUnclaimedBack = false;
+        try
+        {
+            Assert.False(Back(scene.Window).Handled);
+            scene.Window.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) => e.Register(0, _ => { }));
+            Assert.True(Back(scene.Window).Handled);
+        }
+        finally
+        {
+            AvonicConfig.HandleUnclaimedBack = before;
+        }
+
+        Assert.Equal(3, raised);
     }
 
     // Measured M3b: hardwareBackButton true, no ion-app: no ionBackButton.
@@ -417,132 +422,6 @@ public class AvonicAppTests
         Assert.Empty(stage.Log);
     }
 
-    // ── S: the status bar tap ────────────────────────────────────────────────────────────────
-
-    private sealed class StatusStage : IDisposable
-    {
-        public StatusStage(bool inApp = true, bool covered = false)
-        {
-            Clock = new TestClock();
-            Content = new AvonicContent { Content = new Border { Height = 3000 } };
-            // A header above, which isn't in the content, as a toolbar isn't: only the middle of the window counts.
-            var header = new Border { Height = 56, Background = Avalonia.Media.Brushes.White };
-            DockPanel.SetDock(header, Dock.Top);
-            var page = new DockPanel { Children = { header, Content } };
-            var root = new Panel { Children = { page } };
-            if (covered)
-            {
-                root.Children.Add(new Border { Background = Avalonia.Media.Brushes.Transparent });
-            }
-
-            Scene = new Scene(inApp ? new AvonicApp { Content = root } : root);
-            Content.GetScrollElement()!.UpdateLayout();
-            Scroll.Offset = new Vector(0, 600);
-            Render();
-        }
-
-        public TestClock Clock { get; }
-
-        public AvonicContent Content { get; }
-
-        public ScrollViewer Scroll => Content.GetScrollElement()!;
-
-        public Scene Scene { get; }
-
-        public void Render()
-        {
-            for (var i = 0; i < 2; i++)
-            {
-                Dispatcher.UIThread.RunJobs();
-                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-            }
-
-            Dispatcher.UIThread.RunJobs();
-        }
-
-        public void Tap() => Scene.Window.RaiseEvent(new RoutedEventArgs(StatusTap.StatusTapEvent));
-
-        public void At(double ms)
-        {
-            while (Clock.Now.TotalMilliseconds < ms)
-            {
-                Clock.At(Math.Min(Math.Floor(Clock.Now.TotalMilliseconds) + 1, ms));
-                Dispatcher.UIThread.RunJobs();
-            }
-        }
-
-        public void Dispose()
-        {
-            Scene.Dispose();
-            Clock.Dispose();
-        }
-    }
-
-    // Measured M4: scrollTop 600 → 0 by about 300 ms after the frame it starts in, with --overflow hidden throughout, and back after.
-    [AvaloniaFact]
-    public void S1_A_Status_Tap_Scrolls_The_Content_In_The_Middle_To_The_Top_In_300_Ms_With_Its_Scrolling_Held()
-    {
-        using var stage = new StatusStage();
-        stage.Tap();
-        Assert.True(stage.Content.ScrollY);
-
-        stage.At(16);
-        Assert.False(stage.Content.ScrollY);
-        Assert.Equal(600, stage.Scroll.Offset.Y);
-
-        stage.At(160);
-        Assert.InRange(stage.Scroll.Offset.Y, 1, 599);
-        Assert.False(stage.Content.ScrollY);
-
-        stage.At(400);
-        Assert.Equal(0, stage.Scroll.Offset.Y);
-        Assert.True(stage.Content.ScrollY);
-    }
-
-    [AvaloniaFact]
-    public void S1_The_Content_s_Own_ScrollY_Comes_Back()
-    {
-        using var stage = new StatusStage();
-        stage.Content.ScrollY = false;
-        stage.Tap();
-        stage.At(400);
-        Assert.Equal(0, stage.Scroll.Offset.Y);
-        Assert.False(stage.Content.ScrollY);
-    }
-
-    // Measured M4b: a fixed element over the middle: nothing.
-    [AvaloniaFact]
-    public void S2_Nothing_When_The_Middle_Of_The_Window_Is_Not_In_A_Content()
-    {
-        using var stage = new StatusStage(covered: true);
-        stage.Tap();
-        stage.At(400);
-        Assert.Equal(600, stage.Scroll.Offset.Y);
-    }
-
-    [AvaloniaFact]
-    public void S3_Nothing_With_The_Config_Off_Or_Without_An_App()
-    {
-        var before = AvonicConfig.StatusTap;
-        AvonicConfig.StatusTap = false;
-        try
-        {
-            using var stage = new StatusStage();
-            stage.Tap();
-            stage.At(400);
-            Assert.Equal(600, stage.Scroll.Offset.Y);
-        }
-        finally
-        {
-            AvonicConfig.StatusTap = before;
-        }
-
-        using var noApp = new StatusStage(inApp: false);
-        noApp.Tap();
-        noApp.At(400);
-        Assert.Equal(600, noApp.Scroll.Offset.Y);
-    }
-
     // ── F: setFocus ──────────────────────────────────────────────────────────────────────────
 
     private static bool Shows(Control control) => ((IPseudoClasses)control.Classes).Contains(Focused);
@@ -669,6 +548,170 @@ public class AvonicAppTests
         stage.Second.Focus(NavigationMethod.Tab);
         Dispatcher.UIThread.RunJobs();
         Assert.True(Shows(stage.Second));
+    }
+
+    // ── T: the text a page gets from html and body ──────────────────────────────────────────
+
+    // Measured H: font-size 16px in ion-app, the browser's default; html's font-family and body's colours are Ionic's core.css.
+    [AvaloniaFact]
+    public void T1_Text_In_An_App_Is_16_In_Avonic_s_Font_And_Text_Colour_On_Its_Background() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "Text" };
+        var outside = new TextBlock { Text = "Outside" };
+        var app = new AvonicApp { Content = text };
+        using var scene = new Scene(new StackPanel { Children = { app, outside } });
+
+        Assert.Equal(16, text.FontSize);
+        Assert.Equal(app.FindResource("Avonic.FontFamily"), text.FontFamily);
+        Assert.Equal(((Avalonia.Media.ISolidColorBrush)app.FindResource("Avonic.TextColorBrush")!).Color,
+            ((Avalonia.Media.ISolidColorBrush)text.Foreground!).Color);
+        Assert.Equal(((Avalonia.Media.ISolidColorBrush)app.FindResource("Avonic.BackgroundColorBrush")!).Color,
+            ((Avalonia.Media.ISolidColorBrush)app.Background!).Color);
+        Assert.NotEqual(16, outside.FontSize);
+    });
+
+    [AvaloniaFact]
+    public void T1_An_App_s_Own_Style_Wins() => InstalledTheme.Run(_ =>
+    {
+        var text = new TextBlock { Text = "Text" };
+        using var scene = Scene.Styled(new AvonicApp { Content = text }, Scene.AppStyle<AvonicApp>(TemplatedControl.FontSizeProperty, 20d));
+        Assert.Equal(20, text.FontSize);
+    });
+
+    // ── A: the safe area ─────────────────────────────────────────────────────────────────────
+
+    private sealed class FakeInsets
+    {
+        private EventHandler<SafeAreaChangedArgs>? _changed;
+
+        public FakeInsets()
+        {
+            Insets = DispatchProxy.Create<IInsetsManager, Proxy>();
+            ((Proxy)(object)Insets).Owner = this;
+        }
+
+        public IInsetsManager Insets { get; }
+
+        public Thickness Padding { get; private set; }
+
+        public void Set(Thickness padding)
+        {
+            Padding = padding;
+            _changed?.Invoke(Insets, new SafeAreaChangedArgs(padding));
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        public class Proxy : DispatchProxy
+        {
+            public FakeInsets? Owner { get; set; }
+
+            protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+            {
+                var owner = Owner!;
+                switch (targetMethod?.Name)
+                {
+                    case "get_SafeAreaPadding":
+                        return owner.Padding;
+                    case "add_SafeAreaChanged":
+                        owner._changed += (EventHandler<SafeAreaChangedArgs>)args![0]!;
+                        return null;
+                    case "remove_SafeAreaChanged":
+                        owner._changed -= (EventHandler<SafeAreaChangedArgs>)args![0]!;
+                        return null;
+                    default:
+                        return targetMethod?.ReturnType is { IsValueType: true } type && type != typeof(void) ? Activator.CreateInstance(type) : null;
+                }
+            }
+        }
+    }
+
+    private sealed class SafeAreaStage : IDisposable
+    {
+        private readonly Func<TopLevel, IInsetsManager?> _previous = AppSafeArea.InsetsOf;
+        private readonly Avalonia.Themes.Simple.SimpleTheme _theme = new();
+
+        public SafeAreaStage(bool padded)
+        {
+            // A base theme, whose window has the overlay layer.
+            Application.Current!.Styles.Insert(0, _theme);
+            Fake.Set(new Thickness(0, 50.3, 0, 24));
+            Root = new Panel();
+            TopLevel.SetAutoSafeAreaPadding(Root, padded);
+            App = new AvonicApp { Content = new Border() };
+            Root.Children.Add(App);
+            Window = new Window { Width = 390, Height = 844, Content = Root };
+            var insets = Fake.Insets;
+            var window = Window;
+            var previous = _previous;
+            AppSafeArea.InsetsOf = candidate => ReferenceEquals(candidate, window) ? insets : previous(candidate);
+            Window.Show();
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        public FakeInsets Fake { get; } = new();
+
+        public Panel Root { get; }
+
+        public AvonicApp App { get; }
+
+        public Window Window { get; }
+
+        public double? Key(Control from, string side) => from.FindResource("Avonic.SafeArea" + side) as double?;
+
+        public void Dispose()
+        {
+            Window.Close();
+            Dispatcher.UIThread.RunJobs();
+            AppSafeArea.InsetsOf = _previous;
+            Application.Current!.Styles.Remove(_theme);
+        }
+    }
+
+    // Measured on a Pixel 8 (docs/infra/android/COMPARISON.md): top 50.3, bottom 24 in portrait.
+    [AvaloniaFact]
+    public void A1_With_The_Root_Not_Padded_By_Avalonia_The_Keys_Are_The_Insets_For_The_App_And_Its_Overlays()
+    {
+        using var stage = new SafeAreaStage(padded: false);
+        Assert.Equal(50.3, stage.Key(stage.App, "Top"));
+        Assert.Equal(24, stage.Key(stage.App, "Bottom"));
+        Assert.Equal(0, stage.Key(stage.App, "Left"));
+
+        // What's in the window's overlay layer, outside the app, as an overlay is.
+        var layer = Avalonia.Controls.Primitives.OverlayLayer.GetOverlayLayer(stage.Window)!;
+        var inLayer = new Border();
+        layer.Children.Add(inLayer);
+        Assert.Equal(50.3, stage.Key(inLayer, "Top"));
+        layer.Children.Remove(inLayer);
+
+        stage.Fake.Set(new Thickness(50.3, 28.2, 0, 24));
+        Assert.Equal(28.2, stage.Key(stage.App, "Top"));
+        Assert.Equal(50.3, stage.Key(stage.App, "Left"));
+    }
+
+    [AvaloniaFact]
+    public void A2_While_Avalonia_Pads_The_Root_The_Keys_Are_Left_To_The_Theme()
+    {
+        using var stage = new SafeAreaStage(padded: true);
+        Assert.Null(stage.Key(stage.App, "Top"));
+
+        TopLevel.SetAutoSafeAreaPadding(stage.Root, false);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(50.3, stage.Key(stage.App, "Top"));
+
+        TopLevel.SetAutoSafeAreaPadding(stage.Root, true);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Null(stage.Key(stage.App, "Top"));
+    }
+
+    [AvaloniaFact]
+    public void A3_An_App_Taken_Out_Leaves_The_Keys_To_The_Theme()
+    {
+        using var stage = new SafeAreaStage(padded: false);
+        stage.Root.Children.Remove(stage.App);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Null(stage.Key(stage.Root, "Top"));
+        stage.Fake.Set(new Thickness(0, 10, 0, 0));
+        Assert.Null(stage.Key(stage.Root, "Top"));
     }
 
     // ── P: the page ──────────────────────────────────────────────────────────────────────────
