@@ -763,6 +763,7 @@ public class AvonicContent : TemplatedControl
         var target = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? focus.FindNextElement(NavigationDirection.Previous) : next as IInputElement;
         target?.Focus(NavigationMethod.Tab, e.KeyModifiers);
     }
+
     private void OnContainerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ContentPresenter.ChildProperty)

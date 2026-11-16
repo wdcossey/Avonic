@@ -198,3 +198,11 @@ timer by reflection, into `DefaultRenderLoop._timer`, `HeadlessRenderTimer._forc
 `MediaContext._animationsTimer` and `MediaContext.ScheduleRender(bool)`, and throws naming the member if one has moved. **Check it on
 every Avalonia upgrade.** `Harness/ManualRenderTimerTests.cs` holds what it does. From CornflowerUI's harness (PR #157). An option on
 the headless platform for a manual render timer would remove the reflection.
+
+## A one-line `TextBox` takes Page Up and Page Down and does nothing with them
+
+**Measured in a headless test with `SimpleTheme`, and the cause not read.** With a one-line `TextBox` focused, Page Up and Page Down come
+back handled, and the caret doesn't move, so a `ScrollViewer` around it never sees them. A browser's `<input>` leaves them to the page,
+which scrolls by a page (measured in Chromium for #67). Arrows, Home and End move the caret, and Space isn't handled as a key, as
+expected. `AvonicContent` takes the two keys on their way down from a one-line field to get around it (`OnContainerKeyDownTunnel`). A
+multi-line `TextBox` handling them is right, as a `<textarea>` moves its caret with them. Not checked with `FluentTheme`.

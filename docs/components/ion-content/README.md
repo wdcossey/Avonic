@@ -1,6 +1,6 @@
 # ion-content
 
-Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11)
+Status: done · [#11](https://github.com/wdcossey/Avonic/issues/11) · keys and the scroll indicator: [#67](https://github.com/wdcossey/Avonic/issues/67)
 
 `AvonicContent` is the scrolling area of a page: a background, content that scrolls, and a slot for content that doesn't. It reports
 scrolling on Ionic's timeline, and can extend behind what's around it. The design and evidence are in [PLAN.md](PLAN.md), and the
