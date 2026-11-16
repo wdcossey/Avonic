@@ -945,6 +945,7 @@ public class AvonicAppTests
         Assert.Equal(97, stage.Offset);
 
         stage.Focus(1);
+        Assert.Equal(355, stage.Content.KeyboardOffset);
         stage.At(1600);
         Assert.Equal(193, stage.Offset);
 
