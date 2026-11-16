@@ -450,10 +450,11 @@ try {
         Start-Sleep -Milliseconds 700
         $fixed = Named $CT::Button 'Fixed'
         $f = $fixed.Current.BoundingRectangle
-        # The fixed button is 16 in from the content's end edge, and the strip is above it.
+        # The fixed button is 16 in from the content's end edge. The strip is the track, from the top row to above the button, as
+        # where the thumb is depends on the scroll: one notch from the top puts it at the top.
         $right = [int]($f.Right + (Px 16))
-        $stripX = $right - (Px 6); $stripY = [int]($f.Top - (Px 160)); $stripW = Px 6; $stripH = Px 120
         $rx, $ry = Centre (Named $CT::Text 'Row 2')
+        $stripX = $right - (Px 6); $stripY = [int]($ry - (Px 30)); $stripW = Px 6; $stripH = [int]($f.Top - (Px 8) - $stripY)
         # A press on a row, which can't take focus, focuses the content, so the keys scroll it.
         Click $rx $ry
         Key '{DOWN}' 600
