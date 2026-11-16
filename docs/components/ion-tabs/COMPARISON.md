@@ -29,6 +29,16 @@ bottom bar, which selected its first tab; `ion-tabs` 120 high with a top bar.
 
 - **The badges** are half a pixel lower in places, and the wrapped label half a pixel higher: rounding.
 
+### The dark palette's focused button (#188)
+
+Ionic 8.8.4's `dark.always.css` sets `--ion-tab-bar-background-focused` to `#353535` for md, where the dark bar's focused button
+had fallen back to the light `#e0e0e0`. Ionic (left: 8.8.19 with `dark.always.css`, the second button given an `href` so that it
+takes focus, and Tab pressed once) beside Avonic (right: `AvonicTabsCaptureTests.Dark_A_Focused_Button_Has_The_Dark_Focused_Background`,
+`Tokens/Palettes/Dark.axaml` merged, the button made focusable and tabbed to). Both are `353535` on the bar's `1f1f1f`, as the test
+asserts.
+
+![](compare/side-dark-focused.png)
+
 ## Measurements
 
 | What | Ionic | Avonic |

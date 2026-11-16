@@ -106,7 +106,7 @@ All of [PLAN.md](PLAN.md#behaviours): T1–T7, A1–A4, B1–B7, N1–N12, each 
 | [x] | `ion-tab-bar` `--border` | `Avonic.TabBar.BorderWidth`, `Avonic.TabBar.BorderColor` | 1; unset: `Avonic.TabBarBorderColorBrush`, then `rgba(0, 0, 0, 0.07)`; in `Tokens/Palettes/Dark.axaml`, `Avonic.BorderColor`, `#363636` |
 | [x] | `ion-tab-bar` `--color` | `Avonic.TabBar.Color` | Unset: `Avonic.TabBarColorBrush`, which follows `Avonic.TextColorStep350` |
 | [x] | `--background` | `Avonic.TabButton.Background` | Unset: the bar's |
-| [x] | `--background-focused` | `Avonic.TabButton.BackgroundFocused` | Unset: `Avonic.TabBarBackgroundFocusedBrush`, #e0e0e0 |
+| [x] | `--background-focused` | `Avonic.TabButton.BackgroundFocused` | Unset: `Avonic.TabBarBackgroundFocusedBrush`, #e0e0e0; #353535 in `Tokens/Palettes/Dark.axaml`, as Ionic's dark palette since 8.8.4 |
 | [x] | `--background-focused-opacity` | `Avonic.TabButton.BackgroundFocusedOpacity` | 1 |
 | [x] | `--color` | `Avonic.TabButton.Color` | Unset: the bar's |
 | [x] | `--color-focused` | `Avonic.TabButton.ColorFocused` | Unset: the host's colour |
