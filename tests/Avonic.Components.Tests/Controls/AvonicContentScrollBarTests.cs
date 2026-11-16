@@ -594,4 +594,115 @@ public class AvonicContentScrollBarTests
         Assert.Equal(Color.Parse("#636363"), Assert.IsAssignableFrom<ISolidColorBrush>(fill.Background).Color);
         Release(scene, new Point(200, 45));
     });
+
+    // ── S10: what's around and inside it ─────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void S10_A_Drag_Of_The_Thumb_Starts_No_Refresher_Pull() => InstalledTheme.Run(_ =>
+    {
+        // Measured: Chromium sends a mousedown for a press on the bar and no moves while the thumb is dragged, so at the top a drag
+        // of the thumb scrolled to 818 and pulled nothing, where the same drag on the content pulled (ionStart, 18 ionPulls).
+        using var clock = new TestClock();
+        var refresher = new AvonicRefresher { Content = new AvonicRefresherContent() };
+        var content = Tall();
+        content.FixedContent = refresher;
+        var starts = 0;
+        refresher.IonStart += (_, _) => starts++;
+        using var scene = new Scene(Box(content));
+        clock.At(16);
+
+        Press(scene, new Point(382, 45));
+        for (var y = 55; y <= 195; y += 10)
+        {
+            scene.Window.MouseMove(new Point(382, y));
+            Settle();
+        }
+
+        Release(scene, new Point(382, 195));
+        Assert.Equal(0, starts);
+        Assert.True(Scroll(content).Offset.Y > 700, $"{Scroll(content).Offset.Y}");
+
+        // The same drag on the content, at the top, pulls.
+        Scroll(content).Offset = default;
+        Press(scene, new Point(200, 45));
+        for (var y = 55; y <= 195; y += 10)
+        {
+            clock.At(clock.Now.TotalMilliseconds + 16);
+            scene.Window.MouseMove(new Point(200, y));
+            Settle();
+        }
+
+        Release(scene, new Point(200, 195));
+        Assert.Equal(1, starts);
+    });
+
+    [AvaloniaFact]
+    public void S10_A_Press_On_The_Bar_Leaves_A_Focused_Field_Its_Focus() => InstalledTheme.Run(_ =>
+    {
+        // Measured: a field keeps focus through a click on the bar's arrow.
+        using var clock = new TestClock();
+        var field = new TextBox();
+        var content = new AvonicContent
+        {
+            ScrollBars = true,
+            Content = new StackPanel { Children = { field, new Border { Height = 1440 } } },
+        };
+        using var scene = new Scene(Box(content));
+        field.Focus();
+        Settle();
+
+        Press(scene, new Point(382, 292));
+        Release(scene, new Point(382, 292));
+        clock.At(400);
+
+        Assert.True(field.IsFocused);
+        Assert.Equal(40, Scroll(content).Offset.Y);
+    });
+
+    [AvaloniaFact]
+    public void S10_With_Nothing_Focused_The_Keys_Scroll_The_Content_After_A_Press_On_The_Bar() => InstalledTheme.Run(_ =>
+    {
+        // Measured: a click on the thumb, then Down, scrolls 40.
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+
+        Press(scene, new Point(382, 45));
+        Release(scene, new Point(382, 45));
+        scene.Window.KeyPressQwerty(PhysicalKey.ArrowDown, RawInputModifiers.None);
+        Settle();
+        clock.At(400);
+
+        Assert.Equal(40, Scroll(content).Offset.Y);
+    });
+
+    [AvaloniaFact]
+    public void S10_A_Click_With_No_Press_Is_Not_A_Repeat() => InstalledTheme.Run(_ =>
+    {
+        // As automation clicks a button: after a press and its release, a click on the track pages again, wherever the pointer was.
+        using var clock = new TestClock();
+        var content = Tall();
+        using var scene = new Scene(Box(content));
+
+        Press(scene, new Point(382, 76));
+        Release(scene, new Point(382, 76));
+        Part<RepeatButton>(Bar(content, Orientation.Vertical), "PART_PageDown").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        clock.At(600);
+
+        Assert.Equal(524, Scroll(content).Offset.Y);
+    });
+
+    [AvaloniaFact]
+    public void S10_A_ScrollViewer_Given_The_Contents_Theme_Has_No_Bar() => InstalledTheme.Run(_ =>
+    {
+        var scroller = new ScrollViewer
+        {
+            Theme = (ControlTheme)Application.Current!.FindResource("AvonicContentScrollViewer")!,
+            Content = new Border { Height = 1440 },
+        };
+        using var scene = new Scene(Box(scroller));
+
+        Assert.Equal(390, scroller.Viewport.Width);
+        Assert.DoesNotContain(scroller.GetVisualDescendants().OfType<ScrollBar>(), Shown);
+    });
 }

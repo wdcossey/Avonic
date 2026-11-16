@@ -170,7 +170,8 @@ are `#FCFCFC` on both. The arrows' rounded corners differ by a device pixel's an
 | S7 | Arrow, track | 40 and 262, eased about 150 ms, on the press | match, through the keys' curve |
 | S8 | Held | after about 250 ms, 800 px/s and 20 pages a second; the track until the thumb reaches the pointer | **deliberate difference**: the same speeds in steps every 50 ms, so the track's last can carry the thumb a page past the pointer |
 | S9 | The look | 18 buttons, a 9 thick thumb, at least 17, `#8B8B8B`, `#636363` under the pointer | match |
-| — | A press on the bar | no focus moves | **deliberate difference**: the scroller takes focus, as from a press on the content (#67), with no ring |
+| — | A press on the bar | no focus moves: a field keeps it, and with nothing focused the keys scroll the content after | match with something focused; with nothing focused, **deliberate difference**: the scroller takes focus, as from a press on the content (#67), with no ring, so the keys scroll it |
+| — | An `ion-refresher` at the top | a drag of the thumb scrolls, and pulls nothing | match: a press on a `ScrollBar` starts no gesture |
 
 ## Deliberate differences and known gaps
 

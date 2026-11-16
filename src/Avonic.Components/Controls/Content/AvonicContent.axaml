@@ -24,6 +24,8 @@
     <ControlTheme x:Key="AvonicContentScrollViewer" TargetType="ScrollViewer">
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <!-- No bar on a ScrollViewer an app gives this theme, as before #175: the content turns its bars on itself. -->
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Panel>
@@ -38,7 +40,7 @@
                         <DockPanel DockPanel.Dock="Right">
                             <Border Name="PART_ScrollBarCorner"
                                     DockPanel.Dock="Bottom"
-                                    Height="{Binding #PART_HorizontalScrollBar.Height}"
+                                    Height="{Binding #PART_HorizontalScrollBar.Bounds.Height}"
                                     IsVisible="{Binding #PART_HorizontalScrollBar.IsVisible}"
                                     Background="{Binding #PART_VerticalScrollBar.Background}" />
                             <ScrollBar Name="PART_VerticalScrollBar"

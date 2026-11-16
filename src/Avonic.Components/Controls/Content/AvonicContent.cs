@@ -461,6 +461,7 @@ public class AvonicContent : TemplatedControl
             _scroll.RemoveHandler(Button.ClickEvent, OnScrollBarClick);
             _scroll.RemoveHandler(PointerPressedEvent, OnScrollBarPointer);
             _scroll.RemoveHandler(PointerMovedEvent, OnScrollBarPointer);
+            _scroll.RemoveHandler(PointerReleasedEvent, OnScrollBarPointer);
         }
 
         if (_container is not null)
@@ -496,6 +497,7 @@ public class AvonicContent : TemplatedControl
             _scroll.AddHandler(Button.ClickEvent, OnScrollBarClick);
             _scroll.AddHandler(PointerPressedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
             _scroll.AddHandler(PointerMovedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _scroll.AddHandler(PointerReleasedEvent, OnScrollBarPointer, RoutingStrategies.Tunnel, handledEventsToo: true);
             // overscroll-behavior: contain
             _scroll.SetCurrentValue(ScrollViewer.IsScrollChainingEnabledProperty, false);
             _keyboard = new ContentKeyboardScroll(_scroll);
@@ -828,16 +830,41 @@ public class AvonicContent : TemplatedControl
         return forward ? start + thumbLength >= position : start <= position;
     }
 
-    /// <summary>Where the pointer is while one of the scroll bar's buttons is held, for <see cref="ThumbReachedPointer"/>.</summary>
+    /// <summary>
+    /// A press on the scroll bar, and where the pointer is while one of its buttons is held, for <see cref="ThumbReachedPointer"/>.
+    /// The press moves no focus when something has it, as Chromium's doesn't (measured: a field keeps it, and Page Down in it still
+    /// scrolls the content); with nothing focused, the scroller takes it, as from a press on the content, so the keys scroll it after,
+    /// as they do in Chromium.
+    /// </summary>
     private void OnScrollBarPointer(object? sender, PointerEventArgs e)
     {
         if (e.RoutedEvent == PointerPressedEvent)
         {
+            var bar = (e.Source as Visual)?.FindAncestorOfType<ScrollBar>(includeSelf: true);
+            if (bar is null || !ReferenceEquals(bar.TemplatedParent, _scroll))
+            {
+                _barPressed = null;
+                return;
+            }
+
+            if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is not null)
+            {
+                KeepFocus.During((PointerPressedEventArgs)e);
+            }
+
             _barPressed = (e.Source as Visual)?.FindAncestorOfType<RepeatButton>(includeSelf: true);
             _barClicks = 0;
         }
+        else if (e.RoutedEvent == PointerReleasedEvent)
+        {
+            _barPressed = null;
+            return;
+        }
 
-        _barPointer = e.GetPosition(this);
+        if (_barPressed is not null)
+        {
+            _barPointer = e.GetPosition(this);
+        }
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -445,7 +446,7 @@ public sealed class Gesture : IDisposable
 
     private void OnPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (!_listening || IsStoppedOnTheWay(e))
+        if (!_listening || IsStoppedOnTheWay(e) || IsOnScrollBar(e))
         {
             return;
         }
@@ -540,6 +541,25 @@ public sealed class Gesture : IDisposable
         for (var visual = e.Source as Visual; visual is not null && !ReferenceEquals(visual, _el); visual = visual.GetVisualParent())
         {
             if (visual is InputElement element && GetStopsTouchStart(element))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// A press on a <see cref="ScrollBar"/> between the press's source and this gesture's element, such as
+    /// <see cref="Controls.AvonicContent.ScrollBars"/>'. Chromium sends a <c>mousedown</c> for a press on a scroller's bar, but no
+    /// moves while its thumb is dragged, so no Ionic gesture starts from it: measured, a drag of the thumb at the top of an
+    /// <c>ion-content</c> scrolled it and started no <c>ion-refresher</c> pull, where the same drag on the content pulled.
+    /// </summary>
+    private bool IsOnScrollBar(PointerPressedEventArgs e)
+    {
+        for (var visual = e.Source as Visual; visual is not null && !ReferenceEquals(visual, _el); visual = visual.GetVisualParent())
+        {
+            if (visual is ScrollBar)
             {
                 return true;
             }

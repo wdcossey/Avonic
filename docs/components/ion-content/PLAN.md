@@ -421,12 +421,18 @@ It's Chromium's Fluent scroll bar, Windows 11's, not the classic grey one.
   is when an app sets it, at start-up. A key read later, at each attach, would make a content moved between pages change its bar. Neither
   name is Ionic's; `ScrollBars` is plural, as there's one for each axis that scrolls.
 - **What "on" draws:** Avalonia's `ScrollBar`, two of them, `PART_VerticalScrollBar` and `PART_HorizontalScrollBar`, in the content's
-  `ScrollViewer` template, in a `*,Auto` grid, as a base theme's are, **so they take the width,** as Chromium's do, and **instead of the
+  `ScrollViewer` template, docked at the end edge and the bottom, **so they take the width,** as Chromium's do (docked, not in a base
+  theme's `*,Auto` grid: measured with no height, as in a page's `ScrollViewer`, the grid kept the content's 2000 as the viewport when
+  arranged at 300, which `B29` caught), and **instead of the
   indicator**, not beside it: a desktop browser draws one or the other, never both, and the bar shows the place all the time, which is
   what the thumb is for. The control makes the axes `Auto` where they were `Hidden` (`overflow: auto`, the bar only when there's
   somewhere to scroll); `ScrollY` off stays `Hidden`, with no bar, as `overflow: hidden` has none. Each indicator shows only where its
   axis is `Hidden` or `Disabled`, from the scroller's own visibility, so the two can't both draw. The corner is a part of its own that
-  takes the vertical bar's `Background`.
+  takes the vertical bar's `Background` and the horizontal one's height. The scroller's theme sets its vertical axis `Hidden`, so a
+  `ScrollViewer` an app gives it keeps no bar, as before.
+- **Other gestures:** a press on a `ScrollBar` starts no `Gesture` (`Gestures/Gesture.cs`), as Chromium sends a `mousedown` for a press
+  on a bar and no moves while its thumb is dragged: measured, a drag of the thumb at the top of an `ion-content` scrolled it to 818
+  and started no `ion-refresher` pull, where the same drag on the content pulled (`ionStart`, 18 `ionPull`s).
 - **The bar's look** is a `ControlTheme`, `AvonicContentScrollBar`, structure in the stub's file and the look in the theme's
   `ContentScrollBar.axaml`, as Chromium's Fluent bar measured above. Its own theme, so that a base theme's `ScrollBar` style (Fluent's thin
   bar that widens under the pointer) doesn't reach it, and a plain `ScrollBar` elsewhere in the app keeps the base theme's. Colours are
@@ -440,8 +446,10 @@ It's Chromium's Fluent scroll bar, Windows 11's, not the classic grey one.
   adding to its target), as Chromium eases a click as it eases a key. They click on the press (`ClickMode="Press"`), as Chromium scrolls on
   `mousedown`, and repeat after 250 ms every 50 ms, which gives Chromium's 800 px/s and 20 pages a second. A repeat of the track stops once
   the thumb covers the pointer, as Chromium's does; the first click always pages.
-- **Focus:** the bar and its buttons aren't focusable. A press on it focuses the scroller, as a press on the content does since #67 (a
-  deliberate difference there, for the keys), with no ring.
+- **Focus:** the bar and its buttons aren't focusable. Measured: a press on the bar moves no focus (a focused field keeps it, and Page
+  Down in it still scrolls the content, 262), and with nothing focused the keys scroll the content after it (Down, 40). So a press on
+  the bar keeps the focus where it is (`KeepFocus`), and with nothing focused the scroller takes it, as from a press on the content
+  since #67, with no ring, so the keys scroll it.
 
 ### Behaviours
 
@@ -466,7 +474,7 @@ Tests in `AvonicContentScrollBarTests` (S1 to S9), named after these numbers.
 | A thumb dragged far to the side doesn't snap back | Windows' own behaviour, which Chromium copies on Windows only: Avalonia's `Thumb` has none, and an app on another OS wouldn't expect it |
 | Held, an arrow or the track steps every 50 ms, each eased, where Chromium scrolls at a steady speed | The same speeds, from Avalonia's `RepeatButton`; the steps on the track are a page each, so the last can carry the thumb past the pointer by up to a page's worth |
 | The thumb's length and place aren't rounded down to a pixel | Avalonia's `Track` places it. Under a pixel |
-| A press on the bar focuses the scroller | As a press on the content does, for the keys (#67's difference). No ring shows |
+| With nothing focused, a press on the bar focuses the scroller | As a press on the content does, for the keys (#67's difference). No ring shows. With something focused, it keeps it, as measured |
 | It's on for desktop and phone alike, by the app's choice | Chromium draws this bar on desktop and the thumb on a phone; Avonic can't tell which an app is for, so the app says |
 
 ## Not in this PR
