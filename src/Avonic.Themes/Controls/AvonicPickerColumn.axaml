@@ -61,8 +61,12 @@
             </ControlTemplate>
         </Setter>
 
-        <!-- @media (any-hover: hover) { :host(:focus) .picker-opts { background: rgba(var(ion-color-base-rgb), 0.2) } } -->
+        <!-- @media (any-hover: hover) { :host(:focus) .picker-opts { background: rgba(var(ion-color-primary-rgb, 0, 84, 233), 0.2) }
+             :host(.ion-color:focus) .picker-opts { background: rgba(var(ion-color-base-rgb), 0.2) } } -->
         <Style Selector="^:any-hover:focus /template/ ScrollViewer#PART_Scroll">
+            <Setter Property="Background" Value="{DynamicResource Avonic.PickerColumn.FocusBackground}" />
+        </Style>
+        <Style Selector="^:any-hover:ion-color:focus /template/ ScrollViewer#PART_Scroll">
             <Setter Property="Background"
                     Value="{Binding (b:ColorPalette.BaseColor), RelativeSource={RelativeSource Self},
                                     Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.2}" />

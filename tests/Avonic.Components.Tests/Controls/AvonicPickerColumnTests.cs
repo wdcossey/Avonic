@@ -219,10 +219,11 @@ public class AvonicPickerColumnTests
         Show(clock);
         Assert.Equal("Orange", page.Active);
 
-        // A scroll that stops with Yellow, disabled, in the middle.
+        // A scroll that stops with Yellow, disabled, in the middle. Ionic 9 keeps the active option until an enabled one is at the
+        // centre (read from 9.0.11's scrollCallback; 8.8.19 cleared it).
         page.Scroll.Offset = new Vector(0, 87);
         Later(clock, 600);
-        Assert.Equal("", page.Active);
+        Assert.Equal("Orange", page.Active);
         Assert.Empty(page.Changes);
         Assert.Equal("Orange", page.Column.Value);
     });
@@ -326,7 +327,7 @@ public class AvonicPickerColumnTests
     });
 
     [AvaloniaFact]
-    public void C6_A_Disabled_Column_Scrolls_To_A_Value_From_Code_And_Then_Shows_No_Option_Active() => InstalledTheme.Run(_ =>
+    public void C6_A_Disabled_Column_Scrolls_To_A_Value_From_Code_And_Keeps_The_Old_Option_Active() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         var page = Build("b", ["a", "b", "c"], disabled: "b");
@@ -335,12 +336,12 @@ public class AvonicPickerColumnTests
         Show(clock);
         Assert.Equal("b", page.Active);
 
-        // Measured: value c scrolls to 87 and no option is active after, as elementsFromPoint skips the disabled column's
-        // options (pointer-events: none), and the scroll took the old one's class away.
+        // Value c scrolls to 87 (measured). elementsFromPoint skips the disabled column's options (pointer-events: none), so no
+        // option is at the centre, and Ionic 9 leaves the old one active (read from 9.0.11; 8.8.19 took its class away).
         page.Column.Value = "c";
         Later(clock, 800);
         Assert.Equal(87, page.Scroll.Offset.Y, 0.5);
-        Assert.Equal("", page.Active);
+        Assert.Equal("b", page.Active);
         Assert.Empty(page.Changes);
     });
 
@@ -558,16 +559,22 @@ public class AvonicPickerColumnTests
     // ── Color, options' color ────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void Color_Is_Primary_By_Default_And_The_Active_Options_Text_Is_Its_Own_Colour() => InstalledTheme.Run(_ =>
+    public void Color_Is_Unset_By_Default_The_Active_Text_Is_Primary_And_An_Options_Color_Is_Its_Own() => InstalledTheme.Run(_ =>
     {
         using var clock = new TestClock();
         var page = Build("Green");
-        Assert.Equal("primary", page.Column.Color);
-        Assert.Equal("primary", page.Option("Green").Color);
-        page.Option("Blue").Color = "danger";
+        page.Column.Color = "success";
         using var scene = new Scene(page.Picker);
         Show(clock);
 
+        // Ionic 9 has no default color: unset, with no .ion-color, and the active option is still --ion-color-primary, whatever
+        // the column's colour, which its options inherit as a base.
+        Assert.Null(page.Option("Green").Color);
+        Assert.Null(new AvonicPickerColumn().Color);
+        Assert.DoesNotContain(":ion-color", page.Option("Green").Classes);
+        Assert.Equal(Primary, ColorOf(Foreground(page.Option("Green"))));
+
+        page.Option("Blue").Color = "danger";
         page.Column.Value = "Blue";
         Later(clock, 400);
         var danger = (Color)page.Column.FindResource("Avonic.Color.Danger")!;
@@ -586,6 +593,137 @@ public class AvonicPickerColumnTests
         using var scene = new Scene(page.Picker);
         Dispatcher.UIThread.RunJobs();
         Assert.Equal("danger", page.Option("Green").Color);
+    });
+
+    // ── C14, C15: Ionic 9's outside press and discarded scroll ───────────────────────────────
+
+    /// <summary>The picker, with something below it to press.</summary>
+    private static (StackPanel Root, Border Outside) WithOutside(Page page)
+    {
+        var outside = new Border { Height = 100, Background = Brushes.Transparent };
+        return (new StackPanel { Children = { page.Picker, outside } }, outside);
+    }
+
+    [AvaloniaFact]
+    public void C14_A_Press_Outside_During_The_Users_Scroll_Commits_At_Once() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Green");
+        var (root, outside) = WithOutside(page);
+        var pressed = new List<object?>();
+        outside.PointerPressed += (_, _) => pressed.Add(page.Column.Value);
+        using var scene = new Scene(root);
+        Show(clock);
+
+        scene.Window.MouseWheel(Centre(page.Scroll, scene), new Vector(0, -1), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Later(clock, 16);
+        Assert.Equal("Violet", page.Active);
+        Assert.Empty(page.Changes);
+
+        // onPointerDownOutside: settle() at once, before the press reaches what it's on, which reads the new value.
+        Click(scene, Centre(outside, scene));
+        Assert.Equal(["Violet"], page.Changes);
+        Assert.Equal(["Violet"], pressed);
+        Assert.False(page.Column.IsScrolling);
+        Later(clock, 600);
+        Assert.Single(page.Changes);
+    });
+
+    [AvaloniaFact]
+    public void C14_A_Press_In_The_Same_Picker_Leaves_The_Column_Coasting() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Green");
+        var other = new AvonicPickerColumn { Value = "1" };
+        foreach (var v in Numbers)
+        {
+            other.Items.Add(new AvonicPickerColumnOption { Value = v, Content = v });
+        }
+
+        page.Picker.Items.Add(other);
+        using var scene = new Scene(page.Picker);
+        Show(clock);
+
+        scene.Window.MouseWheel(Centre(page.Scroll, scene), new Vector(0, -1), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        var scrolled = clock.Now.TotalMilliseconds;
+        Later(clock, 16);
+        // A press on the picker's other column, away from its options' centre, is inside: the 250 ms still decides.
+        GestureTests.Render();
+        var at = Centre(other.Scroller!, scene);
+        scene.Window.MouseDown(at, MouseButton.Left, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Empty(page.Changes);
+        Assert.True(page.Column.IsScrolling);
+        scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
+        Frames(clock, scrolled + 16 + 260);
+        Assert.Equal(["Violet"], page.Changes);
+    });
+
+    [AvaloniaFact]
+    public void C14_A_Press_Outside_Halts_A_Touchpad_Scroll_On_The_Centred_Option() => InstalledTheme.Run(_ =>
+    {
+        using var clock = new TestClock();
+        var page = Build("Green");
+        var (root, outside) = WithOutside(page);
+        using var scene = new Scene(root);
+        Show(clock);
+
+        // As C4: 0.3 of a notch from 121 to 151, with Blue at the centre, which would snap to 155 100 ms after it stops.
+        scene.Window.MouseWheel(Centre(page.Scroll, scene), new Vector(0, -0.3), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Later(clock, 16);
+        Assert.Equal(151, page.Scroll.Offset.Y, 0.5);
+
+        // centerPickerItemInView(centeredOption, false): on Blue at once, committed.
+        Click(scene, Centre(outside, scene));
+        Assert.Equal(155, page.Scroll.Offset.Y, 0.5);
+        Assert.Equal(["Blue"], page.Changes);
+
+        // HALT_TOLERANCE: the landing, and a frame within 2 px of it, start no scroll.
+        Later(clock, 32);
+        Assert.False(page.Column.IsScrolling);
+        page.Scroll.Offset = new Vector(0, 156.5);
+        Later(clock, 32);
+        Assert.False(page.Column.IsScrolling);
+        page.Scroll.Offset = new Vector(0, 189);
+        Later(clock, 32);
+        Assert.True(page.Column.IsScrolling);
+        Later(clock, 300);
+        Assert.Equal(["Blue", "Indigo"], page.Changes);
+    });
+
+    [AvaloniaFact]
+    public void C15_A_Column_Detached_Or_Hidden_During_A_Scroll_Commits_Nothing() => InstalledTheme.Run(_ =>
+    {
+        foreach (var detach in new[] { true, false })
+        {
+            using var clock = new TestClock();
+            var page = Build("Green");
+            var (root, _) = WithOutside(page);
+            using var scene = new Scene(root);
+            Show(clock);
+
+            scene.Window.MouseWheel(Centre(page.Scroll, scene), new Vector(0, -1), RawInputModifiers.None);
+            Dispatcher.UIThread.RunJobs();
+            Later(clock, 16);
+            Assert.Equal("Violet", page.Active);
+
+            // disconnectedCallback → discardScroll(); hidden, the observer drops the centred option.
+            if (detach)
+            {
+                root.Children.Remove(page.Picker);
+            }
+            else
+            {
+                page.Picker.IsVisible = false;
+            }
+
+            Later(clock, 600);
+            Assert.Empty(page.Changes);
+            Assert.Equal("Green", page.Column.Value);
+        }
     });
 
     // ── Found in review ──────────────────────────────────────────────────────────────────────

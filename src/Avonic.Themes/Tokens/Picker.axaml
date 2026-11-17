@@ -11,4 +11,7 @@
     <b:CssUnset x:Key="Avonic.Picker.HighlightBackground" />
     <!-- var(highlight-border-radius, 8px) -->
     <CornerRadius x:Key="Avonic.Picker.HighlightBorderRadius">8</CornerRadius>
+    <!-- ion-picker-column focused with no color: rgba(var(ion-color-primary-rgb, 0, 84, 233), 0.2), which isn't a variable of its
+         own. -->
+    <SolidColorBrush x:Key="Avonic.PickerColumn.FocusBackground" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.2" />
 </ResourceDictionary>
