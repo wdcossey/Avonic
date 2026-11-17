@@ -62,3 +62,66 @@ Ionic's on the left of each.
 | The page lifecycle events on the content (`ionViewWillEnter` and the rest) | `ion-nav`'s ([#130](https://github.com/wdcossey/Avonic/issues/130)) | |
 | `parent-removed` for every inline overlay | Ionic does it only for the modal; the placement here is shared by every overlay | |
 | The page's own `Styles` and `Resources` don't reach an inline modal while it's presented | It's moved out of the page's logical tree, as Ionic moves it out of its parent; a document's global CSS still applies in Ionic, as the app's and window's do here. `DataContext` is kept | |
+
+---
+
+# The sheet
+
+Ionic's frames are from a script in Chromium, as `render.js` can't set an array prop (`breakpoints`): the page above, its button
+taken out, and a modal with a header `Sheet` and a paragraph, presented with `breakpoints [0, 0.25, 0.5, 0.75, 1]` and
+`initialBreakpoint 0.5`; the same at 1024 x 768; and `breakpoints [0.25, 0.5, 0.75]`, `initialBreakpoint 0.25`,
+`backdropBreakpoint 0.5`. They're in [`ref/sheet/`](ref/sheet/), and the numbers behind the plan in
+[`ref/sheet-measurements.txt`](ref/sheet-measurements.txt). Avonic's are `AvonicModalCaptureTests` (`Reference_Sheet`,
+`Reference_Sheet_Tablet`, `Reference_Sheet_Backdrop_Breakpoint`), in [`compare/`](compare/). Headless; not tried in a real window:
+`tools/real-window/drive.ps1` has a section for it.
+
+| At 0.5, 390 x 844 | Tablet, 1024 x 768 | `backdropBreakpoint 0.5`, at 0.25 |
+|---|---|---|
+| ![](compare/side-by-side-sheet.png) | ![](compare/side-by-side-sheet-tablet.png) | ![](compare/side-by-side-sheet-backdrop-breakpoint.png) |
+
+Ionic's on the left of each. The sample page's sheet: [`compare/avonic-sample-sheet.png`](compare/avonic-sample-sheet.png).
+
+## Visual
+
+| | Ionic | Avonic | |
+|---|---|---|---|
+| The wrapper at 0.5 | 0, 427, 390 x 834 | the same | Match (asserted) |
+| The handle | 177, 432, 36 x 5, radius 8, `rgb(192, 192, 190)` | the same | Match (asserted) |
+| The backdrop at rest at 0.5 | 0.165 | 0.165 | Match (asserted) |
+| Tablet | 212, 389, 600 x 758, radius 2, md's shadow | the same | Match (asserted); the shadow as the dialog's |
+| `backdropBreakpoint 0.5` at 0.25 | 0, 635.5; no backdrop | the same | Match (asserted) |
+
+## Behaviour
+
+Frames: the tests assert the same keyframes on the same curves, frame by frame on the test clock. Fitting those formulas to
+Chromium's sampled frames (their start time fitted), the wrapper is within 3 px (enter), 1.2 px (`setCurrentBreakpoint(1)`) and
+2.2 px (leave) of Chromium's, and the backdrop within 0.001: under 0.7% of the move in each, the jitter of reading a frame by
+`requestAnimationFrame`. The spring of a drag blocked by `canDismiss` is Chromium's to 0.001 px at every move.
+
+| # | Behaviour | Ionic | Avonic | |
+|---|---|---|---|---|
+| S1 | Box | 834 high, 10 down, at the bottom, centred; `--ion-modal-offset-top` from the root's top safe area; an app's `--height` wins | The same, from `Avonic.ModalOffsetTop`, which follows the root's `Avonic.SafeAreaTop`; `Avonic.Modal.Height` wins | Match |
+| S2 | Enter | 280 ms md curve, 100% to 50%; the backdrop 0 to 0.16, not hit until the end; then 0.165 | The same | Match |
+| S3 | Leave | 200 ms md leave curve, 50% to 100%, the backdrop 0.16 to 0 | The same | Match |
+| S4 | Drag | 1:1 on the wrapper's height; the backdrop on the full run; `ionDragMove` with `progress` and `snapBreakpoint` | The same, on the ported gesture (10 px, priority 40) | Match |
+| S5 | Snap | The nearest breakpoint 350 ms ahead; 500 ms `cubic-bezier(0.32,0.72,0,1)`; `ionBreakpointDidChange` a frame after; no drag meanwhile | The same | Match |
+| S6 | Swipe to close | `gesture`, no leave, `ionBreakpointDidChange` 0 first; other dismisses refused meanwhile | The same | Match |
+| S7 | `canDismiss` | false: the spring, back; a function asked with `gesture`, `handler` after the snap back | The same | Match |
+| S8 | `setCurrentBreakpoint` | The 500 ms move, the event, then the promise; nothing for the current, a warning for one not listed or no sheet; 0 dismisses | The same, a `Task`; warnings in Avalonia's log | Match |
+| S9 | Handle | Cycle skips 0 and wraps; not during a move; `none`: nothing, `tabindex` -1; 4 px tap area | The same; a `ModalHandle` with `NativeButton` (click, Enter, Space), a `Button` to automation with Ionic's label | Match |
+| S10 | `backdropBreakpoint` | At or below: 0, `pointer-events: none` on host and backdrop, `ion-disable-focus-trap`; above: the backdrop by `getBackdropValueForSheet` | The backdrop not hit-testable (the host draws nothing and takes no input of its own), the focus trap off; above, the same values | Match |
+| S11 | `expandToScroll` | The first content's `scrollY` false below the top, back at the top, after a drag and at the dismiss; false: scrolls at every breakpoint, `.ion-page` `max-height` follows | The same, on `AvonicContent.ScrollY` and the content presenter's `MaxHeight` in `ModalPagePanel` | Match |
+| S11 | A drag up on content that scrolls (fully open, at 1, or `expandToScroll` false) | The passive gesture captures it and does nothing to the sheet (or, with `expandToScroll` false and the content at its top, snaps from a stale offset), and the browser scrolls the content | The gesture lets go, and the content's `ScrollViewer` scrolls; no drag events | **Deliberate difference:** Avalonia gives a pointer to one owner, as the refresher found |
+| S12 | Backdrop tap during a move | Ignored | Ignored | Match |
+| S13 | Focus | The host `tabindex` 0 with a cycling handle; a focus on it from outside goes to the handle; a drag focuses the host | The same (`IsTabStop`) | Match |
+| S14 | Safe area | top, left, right `0px`, bottom `inherit` | The same | Match |
+| S15 | Again | Starts at `initialBreakpoint`; a missing one warns at load | The same | Match |
+| S16 | `initialBreakpoint` alone | The sheet's enter, no handle or gesture, held at 50% | The same | Match |
+| S17 | Keyboard | `ionKeyboardDidShow` turns the gesture off for a frame | The same, from `KeyboardAssist` | Match |
+
+## Gaps
+
+| Gap | Why | Measured |
+|---|---|---|
+| `swapFooterPosition` | Ionic pins an `ion-footer` to the body while a sheet with `expandToScroll` false is dragged, so that it doesn't shake as layout lags the transform; Avalonia lays out and draws in the same frame | |
+| An upward drag on scrolling content raises no drag events | As S11 above | |

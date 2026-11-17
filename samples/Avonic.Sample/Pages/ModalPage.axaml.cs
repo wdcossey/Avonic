@@ -11,10 +11,23 @@ public partial class ModalPage : UserControl
     public ModalPage()
     {
         InitializeComponent();
-        foreach (var modal in new[] { TriggerModal, NestedModal, GuardedModal })
+        foreach (var modal in new[] { TriggerModal, GuardedModal, SheetModal, PageSheetModal })
         {
             modal.DidDismiss += (_, e) => Status.Text = $"{modal.Name} dismissed, role {e.Role ?? "none"}";
         }
+
+        // The nested modal has its own line, as it goes with its parent, at the same time.
+        NestedModal.DidDismiss += (_, e) => NestedStatus.Text = $"NestedModal dismissed, role {e.Role ?? "none"}";
+
+        // The sheet says where it is.
+        for (var i = 1; i <= 30; i++)
+        {
+            SheetRows.Children.Add(new AvonicItem { Content = new AvonicLabel { Content = $"Row {i}" } });
+        }
+
+        SheetModal.DidPresent += (_, _) => SheetStatus.Text = $"The sheet is at {SheetModal.GetCurrentBreakpoint()}";
+        SheetModal.IonBreakpointDidChange += (_, e) => SheetStatus.Text = $"The sheet is at {e.Breakpoint}";
+        SheetModal.DidDismiss += (_, _) => SheetStatus.Text = "The sheet is closed";
 
         // isOpen isn't set back by a dismiss, so the page does it, as Ionic's docs say an app has to.
         IsOpenToggle.IonChange += (_, _) => GuardedModal.IsOpen = IsOpenToggle.Checked;
@@ -30,6 +43,8 @@ public partial class ModalPage : UserControl
     private void OnCloseTrigger(object? sender, RoutedEventArgs e) => TriggerModal.Dismiss(null, "cancel");
 
     private void OnOpenNested(object? sender, RoutedEventArgs e) => NestedModal.Present();
+
+    private void OnClosePageSheet(object? sender, RoutedEventArgs e) => PageSheetModal.Dismiss(null, "cancel");
 
     private void OnCloseGuarded(object? sender, RoutedEventArgs e) => GuardedModal.Dismiss(null, OverlayRoles.Handler);
 

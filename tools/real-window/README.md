@@ -69,6 +69,14 @@ once if the window doesn't fit on the screen.
   - `focus indicators` (#188): a checkbox in a multi-input item, focused by Shift+Tab then Tab, shows its circle 5 past the default
     slot's end (the item's room), and a letter clears it; a toggle in a multi-input item shows its circle beside the handle, told
     from the item's own focus overlay. Run in the full sweep on `28c4288`.
+  - `ion-modal: trigger, focus trap, Escape, back, backdrop, canDismiss` (#42): the trigger, Tab staying inside, Escape and
+    Alt+Left; with a nested modal open, the nested one's `Close the modal under this one` (the full-screen nested modal covers the
+    parent's own Close, which a real click can't reach: 6 of 10 on `a1cd601`), read from the two status lines as `cancel` and
+    `parent-dismissed`; `CanDismiss` against a touch tap on the backdrop; a modal made in code.
+  - `ion-modal: the sheet` (#42): the trigger opens it at 0.5; four clicks on the handle cycle 0.75, 1, 0.25, 0.5; a slow finger drag
+    down from the header, held still before the lift, settles at 0.25; a mouse drag up takes it to 1; a fast finger drag down
+    closes it with `gesture`. Each breakpoint read from the page's `The sheet is at` line, and the sheet's top from its title, within
+    12 dips of where the breakpoint puts it. Not run yet.
 - **239 checks** run on v2 `28c4288` (2026-11-17), all 239 passing; no section added since.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.

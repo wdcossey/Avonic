@@ -66,7 +66,7 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `IsOpen` | `isOpen` | public; false to true presents, true to false dismisses, once it's attached; true at its first attach presents at the next frame. A dismiss doesn't clear it (#42) |
 | `Trigger` | `trigger` (`createTriggerController`) | public; the name of a control in its name scope, whose own `Click` routed event or a tap presents it, as a DOM `click` comes from a key on a button and a tap on anything (#42) |
 | `ControlWillPresentEvent` and the other three | `ion<Name>WillPresent` and the rest | protected; raised just before the generic one, as Ionic does |
-| `OnPresenting()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnPresenting` once it's in the host (an inline one's place is `Placeholder`); `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
+| `OnPresenting()`, `OnPresented()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnPresenting` once it's in the host (an inline one's place is `Placeholder`); `OnPresented` after the enter, the events and the focus (the modal's sheet gesture, #42); `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
 | `PresentFocusTarget` | `[role="dialog"][tabindex]` | protected; what present focuses, the overlay if null (the modal's wrapper) |
 
 **Inline overlays** (`CoreDelegate`, #42): an overlay with a parent when it's presented is moved to the overlay host, with an
@@ -113,6 +113,13 @@ are controllers: see [PLAN.md](PLAN.md#deferred).
 The timing is Web Animations', on `AvonicConfig.Now` and `AvonicConfig.RequestFrame`, so tests run it on `TestClock`: an animation
 played at 0 shows its first values at once, starts at the frame at 16, and shows local time t at 16 + t. Its values beat every
 style, and with the default `fill: both` the last stays until `Destroy()` or `Stop()`.
+
+For a gesture to drive one (#42, the sheet modal): `ProgressStart(forceLinearEasing, step)` holds it at a step, linear if asked;
+`ProgressStep(step)` moves the hold (clamped to 0..0.9999 of the duration, after the delay, as `setAnimationStep`);
+`ProgressEnd(playTo, step, duration)` plays from the step to the end (1) or back to the start (0, which finishes at step 0), with
+its easing back, over the duration given, and the coercions are gone before the `OnFinish` callbacks. `Keyframes` on an animation
+that has started replace them where it is (`setKeyframes`). `maxHeight` is a keyframe property too: px, or a percentage of the
+visual parent's height.
 
 ## Extensions
 

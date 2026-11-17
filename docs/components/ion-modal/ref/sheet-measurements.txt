@@ -1,0 +1,3907 @@
+# Raw output of the sheet measurement script behind docs/components/ion-modal/PLAN.md (Ionic 9.0.11, md, headless Chromium, 390 x 844 unless said, in ion-app)
+# A frame: ms since the action, the wrapper's translateY (px), its opacity, the backdrop's opacity, the backdrop's and the host's pointer-events.
+# breakpoints [0, 0.25, 0.5, 0.75, 1], initialBreakpoint 0.5 unless said. Drags are a mouse, 8 px steps (24 for the closing ones).
+
+## present
+enter frames:
+13.4 834 1 0 none auto
+29.1 784.425 1 0.019 none auto
+47.1 723.756 1 0.0423 none auto
+62.6 644.928 1 0.0725 none auto
+79.6 559.521 1 0.1053 none auto
+96.1 505.701 1 0.126 none auto
+112.4 476.235 1 0.1373 none auto
+129 457.919 1 0.1443 none auto
+145.5 445.614 1 0.149 none auto
+162.2 436.975 1 0.1523 none auto
+180.6 430.675 1 0.1548 none auto
+195.4 426.091 1 0.1565 none auto
+212.8 422.729 1 0.1578 none auto
+229.8 420.327 1 0.1587 none auto
+245.9 418.683 1 0.1594 none auto
+262.2 417.655 1 0.1597 none auto
+279.1 417.122 1 0.16 none auto
+298.2 417 1 0.165 auto auto
+312.8 417 1 0.165 auto auto
+329.3 417 1 0.165 auto auto
+345.9 417 1 0.165 auto auto
+362.2 417 1 0.165 auto auto
+379.2 417 1 0.165 auto auto
+395.3 417 1 0.165 auto auto
+412.5 417 1 0.165 auto auto
+428.8 417 1 0.165 auto auto
+445.3 417 1 0.165 auto auto
+462.5 417 1 0.165 auto auto
+478.9 417 1 0.165 auto auto
+495.2 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.3,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 296.1,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ]
+}
+
+## present-tablet
+enter frames:
+14.7 758 1 0 none auto
+31.2 712.942 1 0.019 none auto
+47.7 657.428 1 0.0425 none auto
+63.9 586.157 1 0.0725 none auto
+80.4 508.533 1 0.1053 none auto
+97.9 459.829 1 0.1259 none auto
+115.2 432.837 1 0.1373 none auto
+130.9 416.19 1 0.1443 none auto
+147.7 405.007 1 0.149 none auto
+163.8 397.155 1 0.1523 none auto
+181.7 391.429 1 0.1548 none auto
+198.4 387.241 1 0.1565 none auto
+213.6 384.207 1 0.1578 none auto
+231.1 382.024 1 0.1587 none auto
+247.6 380.53 1 0.1594 none auto
+265.8 379.596 1 0.1597 none auto
+280.7 379.111 1 0.16 none auto
+299.7 379 1 0.165 auto auto
+314.5 379 1 0.165 auto auto
+331.4 379 1 0.165 auto auto
+348.3 379 1 0.165 auto auto
+364.7 379 1 0.165 auto auto
+381.5 379 1 0.165 auto auto
+397.9 379 1 0.165 auto auto
+413.9 379 1 0.165 auto auto
+431.4 379 1 0.165 auto auto
+447.5 379 1 0.165 auto auto
+464.5 379 1 0.165 auto auto
+481.1 379 1 0.165 auto auto
+498 379 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 212,
+   "y": 389,
+   "w": 600,
+   "h": 758
+  },
+  "clientHeight": 758,
+  "transform": "matrix(1, 0, 0, 1, 0, 379)",
+  "radius": "2px",
+  "shadow": "rgba(0, 0, 0, 0.4) 0px 28px 48px 0px"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 494,
+   "y": 394,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.9,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 298,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ]
+}
+
+## present-bb
+enter frames:
+13.2 834 1 0 auto auto
+29.7 784.356 1 0 auto auto
+46.3 723.67 1 0 auto auto
+62.3 644.816 1 0 auto auto
+78.8 559.43 1 0 auto auto
+96.2 505.884 1 0 auto auto
+112.7 476.207 1 0 auto auto
+129.8 457.901 1 0 auto auto
+146.8 445.663 1 0 auto auto
+162.4 436.966 1 0 auto auto
+179.4 430.669 1 0 auto auto
+197.4 426.086 1 0 auto auto
+213 422.708 1 0 auto auto
+229.6 420.325 1 0 auto auto
+245.5 418.69 1 0 auto auto
+262.6 417.654 1 0 auto auto
+279.2 417.123 1 0 auto auto
+297.1 417 1 0 none none
+312.3 417 1 0 none none
+330 417 1 0 none none
+346.6 417 1 0 none none
+363.1 417 1 0 none none
+379.5 417 1 0 none none
+395.8 417 1 0 none none
+413.2 417 1 0 none none
+429.6 417 1 0 none none
+445.5 417 1 0 none none
+462.8 417 1 0 none none
+478.9 417 1 0 none none
+496.4 417 1 0 none none
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal ion-disable-focus-trap",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: none;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0",
+  "pe": "none"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 295.6,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "underClickedAt05": false,
+ "hostPE": "none",
+ "hasDisableClass": true,
+ "to075": {
+  "frames": [
+   "15.4 417 1 0 none none",
+   "31.9 400.544 1 0.0126 none none",
+   "50.4 382.127 1 0.0268 none none",
+   "66.3 360.665 1 0.0432 none none",
+   "82.3 335.536 1 0.0625 none none",
+   "99.8 306.991 1 0.0844 none none",
+   "116 280.21 1 0.105 none none",
+   "132.5 261.393 1 0.1194 none none",
+   "149 248.942 1 0.129 none none",
+   "166.5 240.388 1 0.1355 none none",
+   "182.4 234.09 1 0.1404 none none",
+   "198.4 229.284 1 0.1441 none none",
+   "216.4 225.5 1 0.147 none none",
+   "233.5 222.472 1 0.1493 none none",
+   "249 219.992 1 0.1512 none none",
+   "265.4 217.916 1 0.1528 none none",
+   "282.5 216.205 1 0.1541 none none",
+   "298.9 214.761 1 0.1552 none none",
+   "315.9 213.553 1 0.1561 none none",
+   "333.1 212.536 1 0.1569 none none",
+   "349.3 211.675 1 0.1576 none none",
+   "365.4 210.954 1 0.1581 none none",
+   "382.1 210.354 1 0.1586 none none",
+   "399.1 209.861 1 0.159 none none",
+   "415.4 209.462 1 0.1593 none none",
+   "432.4 209.142 1 0.1595 none none",
+   "449.4 208.897 1 0.1597 none none",
+   "466.4 208.715 1 0.1598 none none",
+   "483.7 208.592 1 0.1599 none none",
+   "498.7 208.522 1 0.16 none none",
+   "516.1 208.5 1 0.16 none none",
+   "533 208.5 1 0.16 none none",
+   "549.7 208.5 1 0.16 auto auto",
+   "565.7 208.5 1 0.16 auto auto",
+   "581.7 208.5 1 0.16 auto auto",
+   "599.7 208.5 1 0.16 auto auto",
+   "616.3 208.5 1 0.16 auto auto",
+   "632.5 208.5 1 0.16 auto auto",
+   "649.2 208.5 1 0.16 auto auto"
+  ],
+  "log": [
+   {
+    "t": 533.2,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0.75
+    }
+   }
+  ],
+  "hostPE": "auto",
+  "dis": false
+ },
+ "to025": {
+  "last": {
+   "t": 629.3,
+   "tag": "f",
+   "ty": 625.5,
+   "wo": 1,
+   "bd": 0,
+   "bdPE": "none",
+   "hostPE": "none"
+  },
+  "log": [
+   {
+    "t": 529.3,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0.25
+    }
+   }
+  ]
+ }
+}
+
+## set
+enter frames:
+14.6 834 1 0 none auto
+31 784.337 1 0.0191 none auto
+47.5 723.645 1 0.0423 none auto
+64.5 644.785 1 0.0726 none auto
+81.2 559.404 1 0.1054 none auto
+97.1 505.638 1 0.126 none auto
+114.2 476.199 1 0.1373 none auto
+130.7 457.896 1 0.1443 none auto
+147.7 445.659 1 0.149 none auto
+163.8 436.964 1 0.1523 none auto
+180.5 430.667 1 0.1548 none auto
+197.5 426.061 1 0.1565 none auto
+214.6 422.724 1 0.1578 none auto
+230.6 420.324 1 0.1587 none auto
+247.2 418.689 1 0.1594 none auto
+264.3 417.654 1 0.1597 none auto
+281.6 417.121 1 0.16 none auto
+299.6 417 1 0.165 auto auto
+314.2 417 1 0.165 auto auto
+331.3 417 1 0.165 auto auto
+347.4 417 1 0.165 auto auto
+363.8 417 1 0.165 auto auto
+381.4 417 1 0.165 auto auto
+397.7 417 1 0.165 auto auto
+414.2 417 1 0.165 auto auto
+431.1 417 1 0.165 auto auto
+447.3 417 1 0.165 auto auto
+464.4 417 1 0.165 auto auto
+480.5 417 1 0.165 auto auto
+497.5 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.8,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "to1": {
+  "frames": [
+   "3.8 417 1 0.16 auto auto",
+   "21.4 383.939 1 0.1727 auto auto",
+   "38.1 347.083 1 0.1868 auto auto",
+   "54.1 304.407 1 0.2032 auto auto",
+   "71 254.489 1 0.2224 auto auto",
+   "87.9 197.081 1 0.2444 auto auto",
+   "103.9 143.498 1 0.2649 auto auto",
+   "120.9 105.837 1 0.2794 auto auto",
+   "137 80.918 1 0.289 auto auto",
+   "154.3 63.8 1 0.2955 auto auto",
+   "170.7 51.198 1 0.3004 auto auto",
+   "186.9 41.581 1 0.304 auto auto",
+   "205.4 34.052 1 0.3069 auto auto",
+   "220.6 27.953 1 0.3093 auto auto",
+   "237.6 22.965 1 0.3112 auto auto",
+   "254.8 18.838 1 0.3128 auto auto",
+   "270.4 15.415 1 0.3141 auto auto",
+   "287.8 12.526 1 0.3152 auto auto",
+   "304.3 10.11 1 0.3161 auto auto",
+   "320.2 8.052 1 0.3169 auto auto",
+   "337.8 6.343 1 0.3176 auto auto",
+   "354.2 4.91 1 0.3181 auto auto",
+   "370.3 3.711 1 0.3186 auto auto",
+   "387.7 2.723 1 0.319 auto auto",
+   "404.2 1.924 1 0.3193 auto auto",
+   "421 1.285 1 0.3195 auto auto",
+   "437.7 0.792 1 0.3197 auto auto",
+   "453.8 0.429 1 0.3198 auto auto",
+   "470.9 0.184 1 0.3199 auto auto",
+   "487.1 0.045 1 0.32 auto auto",
+   "504 0 1 0.32 auto auto",
+   "520.5 0 1 0.32 auto auto",
+   "537.1 0 1 0.32 auto auto",
+   "553.8 0 1 0.32 auto auto",
+   "570.2 0 1 0.32 auto auto",
+   "587.8 0 1 0.32 auto auto",
+   "604.3 0 1 0.32 auto auto",
+   "620.5 0 1 0.32 auto auto"
+  ],
+  "log": [
+   {
+    "t": 520.6,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 1
+    }
+   },
+   {
+    "t": 520.7,
+    "e": "resolved"
+   }
+  ]
+ },
+ "bad": {
+  "current": 1,
+  "log": []
+ },
+ "to0": {
+  "frames": [
+   "1.2 0 1 0.32 auto auto",
+   "16.8 66.089 1 0.2946 auto auto",
+   "34.3 139.795 1 0.2664 auto auto",
+   "50.5 225.141 1 0.2336 auto auto",
+   "67 324.97 1 0.1953 auto auto",
+   "84 439.782 1 0.1513 auto auto",
+   "100.9 546.406 1 0.1103 auto auto",
+   "116.7 622.661 1 0.0811 auto auto",
+   "133.7 672.143 1 0.0621 auto auto",
+   "150.4 706.561 1 0.0489 auto auto",
+   "168.4 731.593 1 0.0393 auto auto",
+   "183.6 750.931 1 0.0319 auto auto",
+   "200.4 765.97 1 0.0261 auto auto",
+   "217.2 778.155 1 0.0214 auto auto",
+   "234.1 788.066 1 0.0176 auto auto",
+   "250 796.275 1 0.0145 auto auto",
+   "267.1 803.166 1 0.0118 auto auto",
+   "283.8 808.945 1 0.0096 auto auto",
+   "300 813.804 1 0.0077 auto auto",
+   "317.9 817.872 1 0.0062 auto auto",
+   "334.1 821.313 1 0.0049 auto auto",
+   "351 824.194 1 0.0038 auto auto",
+   "367.4 826.591 1 0.0028 auto auto",
+   "384.2 828.554 1 0.0021 auto auto",
+   "400.4 830.159 1 0.0015 auto auto",
+   "417.6 831.436 1 0.001 auto auto",
+   "434.3 832.416 1 0.0006 auto auto",
+   "450.4 833.141 1 0.0003 auto auto",
+   "468.1 833.632 1 0.0001 auto auto",
+   "483.6 833.911 1 0 auto auto",
+   "502.4 0 1 0.01 auto auto",
+   "517.6 0 1 0.01 auto auto",
+   "534.1 0 1 0.01 auto auto",
+   "550.2 0 1 0.01 auto auto",
+   "566.7 0 1 0.01 auto auto",
+   "584.5 0 1 0.01 auto auto",
+   "601.2 0 1 0.01 auto auto",
+   "618.1 0 1 0.01 auto auto",
+   "633.8 0 1 0.01 auto auto",
+   "649.7 0 1 0.01 auto auto"
+  ],
+  "log": [
+   {
+    "t": 501.2,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0
+    }
+   },
+   {
+    "t": 501.5,
+    "e": "ionModalWillDismiss",
+    "d": {
+     "role": "gesture"
+    }
+   },
+   {
+    "t": 501.5,
+    "e": "ionModalDidDismiss",
+    "d": {
+     "role": "gesture"
+    }
+   }
+  ],
+  "inDom": true,
+  "hidden": true
+ }
+}
+
+## handle
+enter frames:
+13.9 834 1 0 none auto
+30.1 784.552 1 0.019 none auto
+47.2 723.505 1 0.0424 none auto
+63.7 645.134 1 0.0725 none auto
+80.5 559.69 1 0.1053 none auto
+97 505.56 1 0.126 none auto
+114.1 476.288 1 0.1373 none auto
+130.2 457.954 1 0.1443 none auto
+148.2 445.638 1 0.149 none auto
+163.7 436.949 1 0.1523 none auto
+180.7 430.688 1 0.1547 none auto
+197.1 426.077 1 0.1565 none auto
+213.8 422.735 1 0.1578 none auto
+230.5 420.332 1 0.1587 none auto
+246.4 418.686 1 0.1594 none auto
+263.6 417.657 1 0.1597 none auto
+281.5 417.122 1 0.16 none auto
+299.6 417 1 0.165 auto auto
+313.4 417 1 0.165 auto auto
+330.6 417 1 0.165 auto auto
+346.7 417 1 0.165 auto auto
+363.7 417 1 0.165 auto auto
+379.8 417 1 0.165 auto auto
+396.9 417 1 0.165 auto auto
+413.5 417 1 0.165 auto auto
+430.2 417 1 0.165 auto auto
+446.3 417 1 0.165 auto auto
+463.5 417 1 0.165 auto auto
+479.7 417 1 0.165 auto auto
+497.1 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.9,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.6,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "cycle": [
+  [
+   0.75,
+   218.5
+  ],
+  [
+   1,
+   10
+  ],
+  [
+   0.25,
+   635.5
+  ],
+  [
+   0.5,
+   427
+  ],
+  [
+   0.75,
+   218.5
+  ]
+ ],
+ "log2": [
+  {
+   "t": 5.9,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.6,
+   "e": "ionModalDidPresent",
+   "d": null
+  },
+  {
+   "t": 1530.6,
+   "e": "ionBreakpointDidChange",
+   "d": {
+    "breakpoint": 0.75
+   }
+  },
+  {
+   "t": 2231.2,
+   "e": "ionBreakpointDidChange",
+   "d": {
+    "breakpoint": 1
+   }
+  },
+  {
+   "t": 2930.2,
+   "e": "ionBreakpointDidChange",
+   "d": {
+    "breakpoint": 0.25
+   }
+  },
+  {
+   "t": 3646.7,
+   "e": "ionBreakpointDidChange",
+   "d": {
+    "breakpoint": 0.5
+   }
+  },
+  {
+   "t": 4330.1,
+   "e": "ionBreakpointDidChange",
+   "d": {
+    "breakpoint": 0.75
+   }
+  }
+ ]
+}
+
+## handle-none
+enter frames:
+15.4 834 1 0 none auto
+30.2 784.301 1 0.0191 none auto
+47.3 723.6 1 0.0424 none auto
+64.6 644.726 1 0.0726 none auto
+80.8 559.356 1 0.1054 none auto
+97.3 505.844 1 0.1259 none auto
+114.3 476.184 1 0.1373 none auto
+130.6 457.974 1 0.1443 none auto
+147.4 445.591 1 0.149 none auto
+164.8 436.959 1 0.1523 none auto
+181.2 430.663 1 0.1548 none auto
+197.5 426.059 1 0.1565 none auto
+213.8 422.739 1 0.1578 none auto
+230.6 420.323 1 0.1587 none auto
+247.6 418.688 1 0.1594 none auto
+264.6 417.654 1 0.1597 none auto
+281.1 417.123 1 0.16 none auto
+299.4 417 1 0.165 auto auto
+313.5 417 1 0.165 auto auto
+330.7 417 1 0.165 auto auto
+346.9 417 1 0.165 auto auto
+364.1 417 1 0.165 auto auto
+380.3 417 1 0.165 auto auto
+397.8 417 1 0.165 auto auto
+413.9 417 1 0.165 auto auto
+430.3 417 1 0.165 auto auto
+447.4 417 1 0.165 auto auto
+463.8 417 1 0.165 auto auto
+481.1 417 1 0.165 auto auto
+497.9 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "-1",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "-1",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.9,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.7,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "after": 0.5,
+ "handleNull": null
+}
+
+## drag-up
+enter frames:
+15.7 834 1 0 none auto
+30.8 784.552 1 0.019 none auto
+48.1 723.505 1 0.0424 none auto
+63.7 644.605 1 0.0727 none auto
+80.8 559.257 1 0.1054 none auto
+97.6 505.791 1 0.1259 none auto
+113.6 476.288 1 0.1373 none auto
+130.1 457.954 1 0.1443 none auto
+146.6 445.638 1 0.149 none auto
+164.4 436.949 1 0.1523 none auto
+180.7 430.656 1 0.1548 none auto
+198 426.077 1 0.1565 none auto
+213.5 422.735 1 0.1578 none auto
+230.3 420.32 1 0.1587 none auto
+246.8 418.686 1 0.1594 none auto
+264.8 417.657 1 0.1597 none auto
+282.3 417.121 1 0.16 none auto
+299.1 417 1 0.165 auto auto
+314.2 417 1 0.165 auto auto
+330.6 417 1 0.165 auto auto
+346.7 417 1 0.165 auto auto
+363.7 417 1 0.165 auto auto
+381.6 417 1 0.165 auto auto
+398 417 1 0.165 auto auto
+413.3 417 1 0.165 auto auto
+430.7 417 1 0.165 auto auto
+447.3 417 1 0.165 auto auto
+463.9 417 1 0.165 auto auto
+479.9 417 1 0.165 auto auto
+497 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.3,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "drag": {
+  "frames": [
+   "15.6 417 1 0.165 auto auto",
+   "32.5 417 1 0.165 auto auto",
+   "48.4 417 1 0.165 auto auto",
+   "66.3 417 1 0.165 auto auto",
+   "81.6 417 1 0.165 auto auto",
+   "98.7 417 1 0.165 auto auto",
+   "114.7 409 1 0.168 auto auto",
+   "131.8 409 1 0.168 auto auto",
+   "148.7 401 1 0.1709 auto auto",
+   "165.3 401 1 0.1709 auto auto",
+   "182.1 393 1 0.1739 auto auto",
+   "198.8 393 1 0.1739 auto auto",
+   "215 385 1 0.1769 auto auto",
+   "231.9 385 1 0.1769 auto auto",
+   "249.6 377 1 0.1799 auto auto",
+   "264.6 377 1 0.1799 auto auto",
+   "282.3 377 1 0.1799 auto auto",
+   "298.7 369 1 0.1828 auto auto",
+   "315.3 369 1 0.1828 auto auto",
+   "333.2 361 1 0.1858 auto auto",
+   "348.9 361 1 0.1858 auto auto",
+   "364.8 353 1 0.1888 auto auto",
+   "382.7 353 1 0.1888 auto auto",
+   "398.9 345 1 0.1918 auto auto",
+   "415.9 345 1 0.1918 auto auto",
+   "431.6 337 1 0.1947 auto auto",
+   "449.8 337 1 0.1947 auto auto",
+   "464.8 329 1 0.1977 auto auto",
+   "482 329 1 0.1977 auto auto",
+   "499.2 321 1 0.2007 auto auto",
+   "515.3 321 1 0.2007 auto auto",
+   "532 313 1 0.2037 auto auto",
+   "548.1 313 1 0.2037 auto auto",
+   "565.1 313 1 0.1999 auto auto",
+   "581.4 304.72 1 0.2031 auto auto",
+   "599.3 295.485 1 0.2066 auto auto",
+   "615.5 284.791 1 0.2107 auto auto",
+   "632.3 272.283 1 0.2155 auto auto",
+   "649.4 257.897 1 0.221 auto auto",
+   "665 244.537 1 0.2262 auto auto",
+   "681.6 234.982 1 0.2298 auto auto",
+   "698 228.781 1 0.2322 auto auto",
+   "715.8 224.49 1 0.2339 auto auto",
+   "731.8 221.332 1 0.2351 auto auto",
+   "748.5 218.922 1 0.236 auto auto",
+   "765.5 217.024 1 0.2367 auto auto",
+   "781.8 215.506 1 0.2373 auto auto",
+   "798.5 214.256 1 0.2378 auto auto",
+   "815.5 213.227 1 0.2382 auto auto",
+   "832.9 212.364 1 0.2385 auto auto",
+   "848.4 211.639 1 0.2388 auto auto",
+   "865.5 211.031 1 0.239 auto auto",
+   "881.9 210.521 1 0.2392 auto auto",
+   "898 210.09 1 0.2394 auto auto",
+   "915.4 209.729 1 0.2395 auto auto",
+   "932.2 209.43 1 0.2396 auto auto",
+   "948.7 209.182 1 0.2397 auto auto",
+   "964.6 208.981 1 0.2398 auto auto",
+   "981.7 208.822 1 0.2399 auto auto",
+   "998.3 208.699 1 0.2399 auto auto",
+   "1015.1 208.608 1 0.24 auto auto",
+   "1032.1 208.546 1 0.24 auto auto",
+   "1048.9 208.511 1 0.24 auto auto",
+   "1065.1 208.5 1 0.24 auto auto",
+   "1081.8 208.5 1 0.24 auto auto",
+   "1098.6 208.5 1 0.2425 auto auto",
+   "1114.6 208.5 1 0.2425 auto auto",
+   "1132.2 208.5 1 0.2425 auto auto",
+   "1148.9 208.5 1 0.2425 auto auto",
+   "1165.8 208.5 1 0.2425 auto auto",
+   "1182.8 208.5 1 0.2425 auto auto",
+   "1199.8 208.5 1 0.2425 auto auto",
+   "1215.7 208.5 1 0.2425 auto auto",
+   "1232.2 208.5 1 0.2425 auto auto",
+   "1248.7 208.5 1 0.2425 auto auto",
+   "1264.6 208.5 1 0.2425 auto auto",
+   "1282.4 208.5 1 0.2425 auto auto",
+   "1298.4 208.5 1 0.2425 auto auto",
+   "1314.9 208.5 1 0.2425 auto auto",
+   "1332.2 208.5 1 0.2425 auto auto",
+   "1348.2 208.5 1 0.2425 auto auto"
+  ],
+  "log": [
+   {
+    "t": 66.3,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 99,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 423,
+     "deltaY": -8,
+     "velocityY": -0.43728480903984557,
+     "progress": 0.51,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 131.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 415,
+     "deltaY": -16,
+     "velocityY": -0.3130036248116214,
+     "progress": 0.519,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 165.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 407,
+     "deltaY": -24,
+     "velocityY": -0.2711162771831972,
+     "progress": 0.529,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 198.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 399,
+     "deltaY": -32,
+     "velocityY": -0.2608220627107173,
+     "progress": 0.538,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 232,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 391,
+     "deltaY": -40,
+     "velocityY": -0.25434724767801764,
+     "progress": 0.548,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 282.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 383,
+     "deltaY": -48,
+     "velocityY": -0.19419891114551052,
+     "progress": 0.558,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 315.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 375,
+     "deltaY": -56,
+     "velocityY": -0.1786897808705349,
+     "progress": 0.567,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 349,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 367,
+     "deltaY": -64,
+     "velocityY": -0.22381970034195647,
+     "progress": 0.577,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 382.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 359,
+     "deltaY": -72,
+     "velocityY": -0.2477910713929095,
+     "progress": 0.586,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 416,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 351,
+     "deltaY": -80,
+     "velocityY": -0.2597677847012499,
+     "progress": 0.596,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 449.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 343,
+     "deltaY": -88,
+     "velocityY": -0.2540309646052533,
+     "progress": 0.606,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 482.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 335,
+     "deltaY": -96,
+     "velocityY": -0.25685445067189855,
+     "progress": 0.615,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 515.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 327,
+     "deltaY": -104,
+     "velocityY": -0.25205633520156956,
+     "progress": 0.625,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 547.7,
+    "e": "release"
+   },
+   {
+    "t": 548.8,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 327,
+     "deltaY": -104,
+     "velocityY": -0.07561690056047086,
+     "progress": 0.625,
+     "snapBreakpoint": 0.75,
+     "isDismissing": false
+    }
+   },
+   {
+    "t": 1081.8,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0.75
+    }
+   }
+  ],
+  "current": 0.75,
+  "connected": true,
+  "hidden": false
+ }
+}
+
+## drag-down-small
+enter frames:
+14.4 834 1 0 none auto
+30.7 784.291 1 0.0191 none auto
+48.1 723.587 1 0.0424 none auto
+64.3 644.711 1 0.0726 none auto
+81.2 559.343 1 0.1054 none auto
+97.6 505.838 1 0.1259 none auto
+114.4 476.18 1 0.1373 none auto
+131.3 457.883 1 0.1443 none auto
+147.3 445.589 1 0.149 none auto
+164.2 436.957 1 0.1523 none auto
+180.8 430.662 1 0.1548 none auto
+197.1 426.082 1 0.1565 none auto
+214 422.722 1 0.1578 none auto
+231.9 420.322 1 0.1587 none auto
+247.4 418.68 1 0.1594 none auto
+263.9 417.653 1 0.1597 none auto
+280.9 417.121 1 0.16 none auto
+298.7 417 1 0.165 auto auto
+313.9 417 1 0.165 auto auto
+332 417 1 0.165 auto auto
+347.2 417 1 0.165 auto auto
+363.8 417 1 0.165 auto auto
+380.3 417 1 0.165 auto auto
+397.5 417 1 0.165 auto auto
+414.4 417 1 0.165 auto auto
+430.4 417 1 0.165 auto auto
+447.6 417 1 0.165 auto auto
+463.5 417 1 0.165 auto auto
+480.9 417 1 0.165 auto auto
+497.1 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "drag": {
+  "frames": [
+   "1.1 417 1 0.165 auto auto",
+   "17 417 1 0.165 auto auto",
+   "33.2 417 1 0.165 auto auto",
+   "50.5 417 1 0.165 auto auto",
+   "67.4 417 1 0.165 auto auto",
+   "83 417 1 0.165 auto auto",
+   "100.6 417 1 0.165 auto auto",
+   "117.2 417 1 0.165 auto auto",
+   "133.3 417 1 0.165 auto auto",
+   "149.8 425 1 0.162 auto auto",
+   "167.6 425 1 0.162 auto auto",
+   "184.2 425 1 0.162 auto auto",
+   "200.6 425 1 0.162 auto auto",
+   "216.5 433 1 0.1591 auto auto",
+   "233.5 433 1 0.1591 auto auto",
+   "250.1 433 1 0.1591 auto auto",
+   "268.1 441 1 0.1561 auto auto",
+   "283.2 441 1 0.1561 auto auto",
+   "300.4 441 1 0.1561 auto auto",
+   "316.4 449 1 0.1531 auto auto",
+   "333.8 449 1 0.1531 auto auto",
+   "351 449 1 0.1531 auto auto",
+   "368.2 449 1 0.1531 auto auto",
+   "382.9 457 1 0.1501 auto auto",
+   "400.3 457 1 0.1501 auto auto",
+   "416.5 457 1 0.1501 auto auto",
+   "433.7 457 1 0.1501 auto auto",
+   "449.7 465 1 0.1472 auto auto",
+   "467.1 465 1 0.1472 auto auto",
+   "483.4 465 1 0.1416 auto auto",
+   "499.8 461.218 1 0.143 auto auto",
+   "517.3 456.952 1 0.1447 auto auto",
+   "533.3 452.04 1 0.1466 auto auto",
+   "550.3 446.294 1 0.1488 auto auto",
+   "566.4 439.686 1 0.1513 auto auto",
+   "583.9 433.55 1 0.1537 auto auto",
+   "599.9 429.183 1 0.1553 auto auto",
+   "616.8 426.314 1 0.1564 auto auto",
+   "634.9 424.334 1 0.1572 auto auto",
+   "650.3 422.893 1 0.1577 auto auto",
+   "667.7 421.786 1 0.1582 auto auto",
+   "684.2 420.92 1 0.1585 auto auto",
+   "699.7 420.218 1 0.1588 auto auto",
+   "716.8 419.643 1 0.159 auto auto",
+   "733.8 419.168 1 0.1592 auto auto",
+   "751.2 418.774 1 0.1593 auto auto",
+   "767.2 418.442 1 0.1594 auto auto",
+   "784.2 418.164 1 0.1596 auto auto",
+   "800.3 417.928 1 0.1596 auto auto",
+   "818.4 417.73 1 0.1597 auto auto",
+   "834.2 417.565 1 0.1598 auto auto",
+   "850 417.427 1 0.1598 auto auto",
+   "866.7 417.313 1 0.1599 auto auto",
+   "883.6 417.221 1 0.1599 auto auto",
+   "900.5 417.148 1 0.1599 auto auto",
+   "917.1 417.091 1 0.16 auto auto",
+   "933.4 417.049 1 0.16 auto auto",
+   "950.2 417.021 1 0.16 auto auto",
+   "966.6 417.005 1 0.16 auto auto",
+   "983.2 417 1 0.16 auto auto",
+   "999.7 417 1 0.165 auto auto",
+   "1017.4 417 1 0.165 auto auto",
+   "1033.9 417 1 0.165 auto auto",
+   "1050 417 1 0.165 auto auto",
+   "1066.4 417 1 0.165 auto auto",
+   "1084.1 417 1 0.165 auto auto",
+   "1100.9 417 1 0.165 auto auto",
+   "1118 417 1 0.165 auto auto",
+   "1133.7 417 1 0.165 auto auto",
+   "1150.2 417 1 0.165 auto auto",
+   "1166.2 417 1 0.165 auto auto",
+   "1183.9 417 1 0.165 auto auto",
+   "1200.2 417 1 0.165 auto auto",
+   "1216.7 417 1 0.165 auto auto",
+   "1233.7 417 1 0.165 auto auto",
+   "1249.8 417 1 0.165 auto auto",
+   "1267.3 417 1 0.165 auto auto",
+   "1283.9 417 1 0.165 auto auto"
+  ],
+  "log": [
+   {
+    "t": 67.3,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 133.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 471,
+     "deltaY": 8,
+     "velocityY": 0.2347988762730091,
+     "progress": 0.49,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 200.6,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 479,
+     "deltaY": 16,
+     "velocityY": 0.16076224352706403,
+     "progress": 0.481,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 250.2,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 487,
+     "deltaY": 24,
+     "velocityY": 0.13899042348084148,
+     "progress": 0.471,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 300.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 495,
+     "deltaY": 32,
+     "velocityY": 0.15885193873051617,
+     "progress": 0.462,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 368.2,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 503,
+     "deltaY": 40,
+     "velocityY": 0.13783271523992796,
+     "progress": 0.452,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 433.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 511,
+     "deltaY": 48,
+     "velocityY": 0.13300284244886493,
+     "progress": 0.442,
+     "snapBreakpoint": 0.5
+    }
+   },
+   {
+    "t": 479.7,
+    "e": "release"
+   },
+   {
+    "t": 480.8,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 511,
+     "deltaY": 48,
+     "velocityY": 0.03990085273465948,
+     "progress": 0.442,
+     "snapBreakpoint": 0.5,
+     "isDismissing": false
+    }
+   }
+  ],
+  "current": 0.5,
+  "connected": true,
+  "hidden": false
+ }
+}
+
+## drag-close
+enter frames:
+13.1 834 1 0 none auto
+29.2 784.144 1 0.0191 none auto
+46.2 723.402 1 0.0424 none auto
+62.6 645.002 1 0.0725 none auto
+79.2 559.581 1 0.1053 none auto
+96.4 505.733 1 0.126 none auto
+112.9 476.254 1 0.1373 none auto
+129.3 457.932 1 0.1443 none auto
+146 445.623 1 0.149 none auto
+163.3 436.938 1 0.1524 none auto
+179.7 430.68 1 0.1548 none auto
+196.8 426.071 1 0.1565 none auto
+212.7 422.731 1 0.1578 none auto
+229.4 420.329 1 0.1587 none auto
+246.3 418.685 1 0.1594 none auto
+262.4 417.651 1 0.1598 none auto
+280.2 417.122 1 0.16 none auto
+299.1 417 1 0.165 auto auto
+312.3 417 1 0.165 auto auto
+329.5 417 1 0.165 auto auto
+346.1 417 1 0.165 auto auto
+362.2 417 1 0.165 auto auto
+379.8 417 1 0.165 auto auto
+396.5 417 1 0.165 auto auto
+412.5 417 1 0.165 auto auto
+429 417 1 0.165 auto auto
+446.1 417 1 0.165 auto auto
+462.7 417 1 0.165 auto auto
+479.7 417 1 0.165 auto auto
+495.7 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.4,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.3,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "drag": {
+  "frames": [
+   "12.1 417 1 0.165 auto auto",
+   "29.1 417 1 0.165 auto auto",
+   "45.2 417 1 0.165 auto auto",
+   "62.1 417 1 0.165 auto auto",
+   "78.5 441 1 0.1561 auto auto",
+   "95.3 441 1 0.1561 auto auto",
+   "111.3 465 1 0.1472 auto auto",
+   "129.1 465 1 0.1472 auto auto",
+   "144.9 489 1 0.1382 auto auto",
+   "162.7 489 1 0.1382 auto auto",
+   "179 513 1 0.1293 auto auto",
+   "195.8 513 1 0.1293 auto auto",
+   "211.9 537 1 0.1204 auto auto",
+   "228.5 537 1 0.1204 auto auto",
+   "245.3 561 1 0.1115 auto auto",
+   "261.8 561 1 0.1115 auto auto",
+   "278.1 585 1 0.1026 auto auto",
+   "296.8 585 1 0.1026 auto auto",
+   "311.6 609 1 0.0936 auto auto",
+   "329.3 609 1 0.0936 auto auto",
+   "345.4 633 1 0.0847 auto auto",
+   "361.9 633 1 0.0847 auto auto",
+   "378.3 657 1 0.0758 auto auto",
+   "395.9 657 1 0.0758 auto auto",
+   "411.9 681 1 0.0669 auto auto",
+   "428.5 681 1 0.0669 auto auto",
+   "445.3 705 1 0.0579 auto auto",
+   "462.5 705 1 0.0579 auto auto",
+   "478.6 729 1 0.049 auto auto",
+   "494.9 729 1 0.049 auto auto",
+   "512.9 753 1 0.0401 auto auto",
+   "529.9 753 1 0.0311 auto auto",
+   "545.6 759.401 1 0.0286 auto auto",
+   "561.8 766.557 1 0.0259 auto auto",
+   "579.8 774.842 1 0.0227 auto auto",
+   "595.3 784.597 1 0.019 auto auto",
+   "611.3 795.75 1 0.0147 auto auto",
+   "628.7 806.152 1 0.0107 auto auto",
+   "644.8 813.423 1 0.0079 auto auto",
+   "662.3 818.269 1 0.006 auto auto",
+   "679 821.615 1 0.0048 auto auto",
+   "694.9 824.061 1 0.0038 auto auto",
+   "711.9 825.918 1 0.0031 auto auto",
+   "728.9 827.389 1 0.0025 auto auto",
+   "745.4 828.567 1 0.0021 auto auto",
+   "761.5 829.542 1 0.0017 auto auto",
+   "778.6 830.343 1 0.0014 auto auto",
+   "795.6 831.007 1 0.0011 auto auto",
+   "812.1 831.568 1 0.0009 auto auto",
+   "828.1 832.037 1 0.0008 auto auto",
+   "845.5 832.435 1 0.0006 auto auto",
+   "862.2 832.767 1 0.0005 auto auto",
+   "878.6 833.047 1 0.0004 auto auto",
+   "895.1 833.28 1 0.0003 auto auto",
+   "911.6 833.471 1 0.0002 auto auto",
+   "928.3 833.627 1 0.0001 auto auto",
+   "945.7 833.751 1 0.0001 auto auto",
+   "961.9 833.846 1 0.0001 auto auto",
+   "979.9 833.916 1 0 auto auto",
+   "995.2 833.964 1 0 auto auto",
+   "1012.6 833.991 1 0 auto auto",
+   "1028.7 834 1 0 auto auto",
+   "1047 0 1 0.01 auto auto",
+   "1062.6 0 1 0.01 auto auto",
+   "1078.6 0 1 0.01 auto auto",
+   "1094.9 0 1 0.01 auto auto",
+   "1112.4 0 1 0.01 auto auto",
+   "1129 0 1 0.01 auto auto",
+   "1145.4 0 1 0.01 auto auto",
+   "1161.6 0 1 0.01 auto auto",
+   "1178.5 0 1 0.01 auto auto",
+   "1195.3 0 1 0.01 auto auto",
+   "1212.1 0 1 0.01 auto auto",
+   "1228.2 0 1 0.01 auto auto",
+   "1246.4 0 1 0.01 auto auto",
+   "1262.3 0 1 0.01 auto auto",
+   "1278.8 0 1 0.01 auto auto",
+   "1295.3 0 1 0.01 auto auto",
+   "1312.3 0 1 0.01 auto auto",
+   "1328.3 0 1 0.01 auto auto"
+  ],
+  "log": [
+   {
+    "t": 29,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 62.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 495,
+     "deltaY": 24,
+     "velocityY": 2.8067797017712923,
+     "progress": 0.471,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 95.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 519,
+     "deltaY": 48,
+     "velocityY": 1.3770657580713923,
+     "progress": 0.442,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 129.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 543,
+     "deltaY": 72,
+     "velocityY": 0.9533126530523114,
+     "progress": 0.414,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 162.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 567,
+     "deltaY": 96,
+     "velocityY": 0.8045123148157689,
+     "progress": 0.385,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 195.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 591,
+     "deltaY": 120,
+     "velocityY": 0.7815466200756244,
+     "progress": 0.356,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 228.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 615,
+     "deltaY": 144,
+     "velocityY": 0.6103029122974155,
+     "progress": 0.327,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 261.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 639,
+     "deltaY": 168,
+     "velocityY": 0.7048300043171629,
+     "progress": 0.299,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 296.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 663,
+     "deltaY": 192,
+     "velocityY": 0.7640805795923974,
+     "progress": 0.27,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 329.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 687,
+     "deltaY": 216,
+     "velocityY": 0.7398624721201073,
+     "progress": 0.241,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 362,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 711,
+     "deltaY": 240,
+     "velocityY": 0.7674132868794631,
+     "progress": 0.212,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 395.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 735,
+     "deltaY": 264,
+     "velocityY": 0.7865153770119022,
+     "progress": 0.183,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 428.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 759,
+     "deltaY": 288,
+     "velocityY": 0.7904100584299857,
+     "progress": 0.155,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 462.6,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 783,
+     "deltaY": 312,
+     "velocityY": 0.5885874525877869,
+     "progress": 0.126,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 494.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 807,
+     "deltaY": 336,
+     "velocityY": 0.722030781019767,
+     "progress": 0.097,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 522.5,
+    "e": "release"
+   },
+   {
+    "t": 523.7,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 807,
+     "deltaY": 336,
+     "velocityY": 0.2166092343059301,
+     "progress": 0.097,
+     "snapBreakpoint": 0,
+     "isDismissing": true
+    }
+   },
+   {
+    "t": 1045.8,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0
+    }
+   },
+   {
+    "t": 1046.1,
+    "e": "ionModalWillDismiss",
+    "d": {
+     "role": "gesture"
+    }
+   },
+   {
+    "t": 1046.2,
+    "e": "ionModalDidDismiss",
+    "d": {
+     "role": "gesture"
+    }
+   }
+  ],
+  "connected": true,
+  "hidden": true
+ }
+}
+
+## drag-candismiss-false
+enter frames:
+14.4 834 1 0 none auto
+30 784.421 1 0.019 none auto
+47 723.34 1 0.0425 none auto
+64.6 644.922 1 0.0725 none auto
+81.6 559.516 1 0.1053 none auto
+97.2 505.699 1 0.126 none auto
+114.2 476.234 1 0.1373 none auto
+130.6 457.918 1 0.1443 none auto
+147.7 445.675 1 0.149 none auto
+163.7 436.975 1 0.1523 none auto
+180.2 430.675 1 0.1548 none auto
+197.8 426.068 1 0.1565 none auto
+213.8 422.729 1 0.1578 none auto
+231.3 420.327 1 0.1587 none auto
+247.3 418.683 1 0.1594 none auto
+264.1 417.655 1 0.1597 none auto
+280.8 417.122 1 0.16 none auto
+299.4 417 1 0.165 auto auto
+313.8 417 1 0.165 auto auto
+332.4 417 1 0.165 auto auto
+348 417 1 0.165 auto auto
+364.4 417 1 0.165 auto auto
+381.1 417 1 0.165 auto auto
+397.4 417 1 0.165 auto auto
+413.5 417 1 0.165 auto auto
+430.5 417 1 0.165 auto auto
+447.5 417 1 0.165 auto auto
+463.7 417 1 0.165 auto auto
+481.6 417 1 0.165 auto auto
+498.3 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.3,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.4,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "drag": {
+  "frames": [
+   "6.3 417 1 0.165 auto auto",
+   "23.7 417 1 0.165 auto auto",
+   "40.3 417 1 0.165 auto auto",
+   "56.3 417 1 0.165 auto auto",
+   "74.3 441 1 0.1561 auto auto",
+   "89.6 441 1 0.1561 auto auto",
+   "107.1 465 1 0.1472 auto auto",
+   "123.1 465 1 0.1472 auto auto",
+   "139.7 489 1 0.1382 auto auto",
+   "156.8 489 1 0.1382 auto auto",
+   "172.7 513 1 0.1293 auto auto",
+   "190 513 1 0.1293 auto auto",
+   "206.3 537 1 0.1204 auto auto",
+   "224 537 1 0.1204 auto auto",
+   "239.9 561 1 0.1115 auto auto",
+   "256.2 561 1 0.1115 auto auto",
+   "273.1 585 1 0.1026 auto auto",
+   "290.5 585 1 0.1026 auto auto",
+   "306.5 609 1 0.0936 auto auto",
+   "322.9 609 1 0.0936 auto auto",
+   "340.4 625.891 1 0.0874 auto auto",
+   "356.3 625.891 1 0.0874 auto auto",
+   "374 625.891 1 0.0874 auto auto",
+   "390.4 629.493 1 0.086 auto auto",
+   "406.4 629.493 1 0.086 auto auto",
+   "423.8 633.92 1 0.0844 auto auto",
+   "440 633.92 1 0.0844 auto auto",
+   "456.3 638.42 1 0.0827 auto auto",
+   "474 638.42 1 0.0827 auto auto",
+   "490.4 642.907 1 0.081 auto auto",
+   "507.4 642.907 1 0.081 auto auto",
+   "523.3 647.371 1 0.0794 auto auto",
+   "540.4 647.371 1 0.0716 auto auto",
+   "556.9 629.15 1 0.0786 auto auto",
+   "573.5 608.664 1 0.0865 auto auto",
+   "589.8 585.227 1 0.0955 auto auto",
+   "606.7 557.48 1 0.1061 auto auto",
+   "623.3 525.757 1 0.1183 auto auto",
+   "640.3 496.333 1 0.1296 auto auto",
+   "656.3 475.407 1 0.1376 auto auto",
+   "673.9 461.662 1 0.1429 auto auto",
+   "690 452.216 1 0.1465 auto auto",
+   "706.3 445.298 1 0.1491 auto auto",
+   "724.3 439.982 1 0.1512 auto auto",
+   "741.4 435.798 1 0.1528 auto auto",
+   "756.9 432.431 1 0.1541 auto auto",
+   "773.5 429.677 1 0.1551 auto auto",
+   "790.5 427.412 1 0.156 auto auto",
+   "806.5 425.51 1 0.1567 auto auto",
+   "824 423.923 1 0.1573 auto auto",
+   "840 422.581 1 0.1579 auto auto",
+   "856.8 421.451 1 0.1583 auto auto",
+   "873.3 420.506 1 0.1587 auto auto",
+   "889.5 419.71 1 0.159 auto auto",
+   "908.2 419.051 1 0.1592 auto auto",
+   "922.8 418.505 1 0.1594 auto auto",
+   "940.9 418.062 1 0.1596 auto auto",
+   "956.9 417.709 1 0.1597 auto auto",
+   "973.4 417.438 1 0.1598 auto auto",
+   "989.9 417.238 1 0.1599 auto auto",
+   "1006.4 417.102 1 0.16 auto auto",
+   "1024 417.025 1 0.16 auto auto",
+   "1041 417 1 0.16 auto auto",
+   "1057.7 417 1 0.16 auto auto",
+   "1073.1 417 1 0.165 auto auto",
+   "1090.7 417 1 0.165 auto auto",
+   "1107.3 417 1 0.165 auto auto",
+   "1123.3 417 1 0.165 auto auto",
+   "1139.4 417 1 0.165 auto auto",
+   "1156.5 417 1 0.165 auto auto",
+   "1173.4 417 1 0.165 auto auto",
+   "1189.9 417 1 0.165 auto auto",
+   "1206 417 1 0.165 auto auto",
+   "1223.7 417 1 0.165 auto auto",
+   "1239.7 417 1 0.165 auto auto",
+   "1257.2 417 1 0.165 auto auto",
+   "1273.3 417 1 0.165 auto auto",
+   "1290.2 417 1 0.165 auto auto",
+   "1306.4 417 1 0.165 auto auto",
+   "1324.1 417 1 0.165 auto auto",
+   "1339.7 417 1 0.165 auto auto"
+  ],
+  "log": [
+   {
+    "t": 23.7,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 56.6,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 495,
+     "deltaY": 24,
+     "velocityY": 2.9740540540540534,
+     "progress": 0.471,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 89.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 519,
+     "deltaY": 48,
+     "velocityY": 1.4221846706741883,
+     "progress": 0.442,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 123.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 543,
+     "deltaY": 72,
+     "velocityY": 0.9721099464456875,
+     "progress": 0.414,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 156.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 567,
+     "deltaY": 96,
+     "velocityY": 0.6513760247107613,
+     "progress": 0.385,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 190.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 591,
+     "deltaY": 120,
+     "velocityY": 0.7444324148285993,
+     "progress": 0.356,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 224.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 615,
+     "deltaY": 144,
+     "velocityY": 0.7635226511147792,
+     "progress": 0.327,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 256.2,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 639,
+     "deltaY": 168,
+     "velocityY": 0.7745113405778647,
+     "progress": 0.299,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 290.6,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 663,
+     "deltaY": 192,
+     "velocityY": 0.7760427229812094,
+     "progress": 0.27,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 323,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 687,
+     "deltaY": 216,
+     "velocityY": 0.764458386113495,
+     "progress": 0.241,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 374,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 711,
+     "deltaY": 240,
+     "velocityY": 0.5898525371088263,
+     "progress": 0.212,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 406.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 735,
+     "deltaY": 264,
+     "velocityY": 0.5336436594926511,
+     "progress": 0.183,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 440,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 759,
+     "deltaY": 288,
+     "velocityY": 0.6934264311811286,
+     "progress": 0.155,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 474.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 783,
+     "deltaY": 312,
+     "velocityY": 0.744769143207423,
+     "progress": 0.126,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 507.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 807,
+     "deltaY": 336,
+     "velocityY": 0.7636236685931206,
+     "progress": 0.097,
+     "snapBreakpoint": 0
+    }
+   },
+   {
+    "t": 528.2,
+    "e": "release"
+   },
+   {
+    "t": 529.3,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 807,
+     "deltaY": 336,
+     "velocityY": 0.22908710057793616,
+     "progress": 0.097,
+     "snapBreakpoint": 0,
+     "isDismissing": false
+    }
+   }
+  ],
+  "current": 0.5,
+  "connected": true,
+  "hidden": false
+ }
+}
+
+## drag-content
+enter frames:
+15 834 1 0 none auto
+30.2 784.509 1 0.019 none auto
+47.7 723.451 1 0.0424 none auto
+63.8 645.065 1 0.0725 none auto
+80.3 559.201 1 0.1054 none auto
+97.3 505.761 1 0.1259 none auto
+113.9 476.271 1 0.1373 none auto
+130.5 457.942 1 0.1443 none auto
+147.5 445.63 1 0.149 none auto
+164.6 436.987 1 0.1523 none auto
+181 430.684 1 0.1547 none auto
+197 426.074 1 0.1565 none auto
+215 422.733 1 0.1578 none auto
+230.6 420.33 1 0.1587 none auto
+247.2 418.685 1 0.1594 none auto
+263.6 417.652 1 0.1598 none auto
+280.8 417.12 1 0.16 none auto
+299.5 417 1 0.165 auto auto
+314.5 417 1 0.165 auto auto
+331 417 1 0.165 auto auto
+347.5 417 1 0.165 auto auto
+363.7 417 1 0.165 auto auto
+380.8 417 1 0.165 auto auto
+397.8 417 1 0.165 auto auto
+414.3 417 1 0.165 auto auto
+430.8 417 1 0.165 auto auto
+446.9 417 1 0.165 auto auto
+464.3 417 1 0.165 auto auto
+480.4 417 1 0.165 auto auto
+497.9 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.8,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "scrollY05": false,
+ "drag": {
+  "frames": [
+   "10.5 417 1 0.165 auto auto",
+   "26.3 417 1 0.165 auto auto",
+   "43.5 417 1 0.165 auto auto",
+   "59.5 417 1 0.165 auto auto",
+   "76.3 417 1 0.165 auto auto",
+   "92.9 417 1 0.165 auto auto",
+   "109.3 417 1 0.165 auto auto",
+   "126.2 409 1 0.168 auto auto",
+   "142.6 409 1 0.168 auto auto",
+   "159.6 401 1 0.1709 auto auto",
+   "176.2 401 1 0.1709 auto auto",
+   "192.8 393 1 0.1739 auto auto",
+   "209.1 393 1 0.1739 auto auto",
+   "226.5 385 1 0.1769 auto auto",
+   "243 385 1 0.1769 auto auto",
+   "259.9 377 1 0.1799 auto auto",
+   "276.3 377 1 0.1799 auto auto",
+   "293.6 369 1 0.1828 auto auto",
+   "309.6 369 1 0.1828 auto auto",
+   "326.1 361 1 0.1858 auto auto",
+   "344.3 361 1 0.1858 auto auto",
+   "359.5 353 1 0.1888 auto auto",
+   "376.3 353 1 0.1888 auto auto",
+   "392.9 345 1 0.1918 auto auto",
+   "410 345 1 0.1918 auto auto",
+   "426 337 1 0.1947 auto auto",
+   "443.2 337 1 0.1947 auto auto",
+   "459.9 329 1 0.1977 auto auto",
+   "476.3 329 1 0.1977 auto auto",
+   "492.4 329 1 0.1977 auto auto",
+   "509.6 321 1 0.2007 auto auto",
+   "525.9 321 1 0.2007 auto auto",
+   "542.3 313 1 0.2037 auto auto",
+   "559.8 313 1 0.2037 auto auto",
+   "576 305 1 0.2066 auto auto",
+   "593.1 305 1 0.2066 auto auto",
+   "609 297 1 0.2096 auto auto",
+   "626.2 297 1 0.2096 auto auto",
+   "643.2 289 1 0.2126 auto auto",
+   "660.4 289 1 0.2126 auto auto",
+   "676.2 281 1 0.2156 auto auto",
+   "692.8 281 1 0.2156 auto auto",
+   "709.1 273 1 0.2185 auto auto",
+   "726.5 273 1 0.2185 auto auto",
+   "742.2 265 1 0.2215 auto auto",
+   "759.8 265 1 0.2215 auto auto",
+   "777.2 257 1 0.2245 auto auto",
+   "792.4 257 1 0.2245 auto auto",
+   "809.2 249 1 0.2274 auto auto",
+   "826.7 249 1 0.2274 auto auto",
+   "843.2 241 1 0.2304 auto auto",
+   "859.4 241 1 0.2304 auto auto",
+   "877.4 233 1 0.2334 auto auto",
+   "892.5 233 1 0.2306 auto auto",
+   "909.2 231.064 1 0.2313 auto auto",
+   "926.9 228.899 1 0.2322 auto auto",
+   "943 226.393 1 0.2331 auto auto",
+   "960.8 223.443 1 0.2343 auto auto",
+   "976 220.069 1 0.2356 auto auto",
+   "993.6 216.923 1 0.2368 auto auto",
+   "1009.5 214.713 1 0.2376 auto auto",
+   "1026 213.258 1 0.2382 auto auto",
+   "1044.1 212.241 1 0.2386 auto auto",
+   "1059.4 211.51 1 0.2388 auto auto",
+   "1075.8 210.945 1 0.2391 auto auto",
+   "1092.3 210.499 1 0.2392 auto auto",
+   "1109.5 210.141 1 0.2394 auto auto",
+   "1126.1 209.848 1 0.2395 auto auto",
+   "1143.1 209.607 1 0.2396 auto auto",
+   "1159.1 209.406 1 0.2397 auto auto",
+   "1175.8 209.236 1 0.2397 auto auto",
+   "1192.5 209.094 1 0.2398 auto auto",
+   "1211 208.973 1 0.2398 auto auto",
+   "1225.9 208.872 1 0.2399 auto auto",
+   "1242.9 208.788 1 0.2399 auto auto",
+   "1259.1 208.718 1 0.2399 auto auto",
+   "1277.4 208.66 1 0.2399 auto auto",
+   "1293.1 208.613 1 0.24 auto auto",
+   "1309.1 208.575 1 0.24 auto auto",
+   "1327.3 208.546 1 0.24 auto auto",
+   "1342.8 208.525 1 0.24 auto auto",
+   "1359.1 208.511 1 0.24 auto auto",
+   "1375.9 208.503 1 0.24 auto auto",
+   "1393 208.5 1 0.24 auto auto",
+   "1409.2 208.5 1 0.24 auto auto",
+   "1426.4 208.5 1 0.2425 auto auto",
+   "1442.9 208.5 1 0.2425 auto auto",
+   "1460 208.5 1 0.2425 auto auto",
+   "1476.5 208.5 1 0.2425 auto auto",
+   "1493 208.5 1 0.2425 auto auto",
+   "1509 208.5 1 0.2425 auto auto",
+   "1526.7 208.5 1 0.2425 auto auto",
+   "1544.5 208.5 1 0.2425 auto auto",
+   "1560.3 208.5 1 0.2425 auto auto",
+   "1576 208.5 1 0.2425 auto auto",
+   "1594.1 208.5 1 0.2425 auto auto",
+   "1609 208.5 1 0.2425 auto auto",
+   "1626.5 208.5 1 0.2425 auto auto",
+   "1642.8 208.5 1 0.2425 auto auto",
+   "1659.1 208.5 1 0.2425 auto auto",
+   "1676.6 208.5 1 0.2425 auto auto",
+   "1693.1 208.5 1 0.2425 auto auto"
+  ],
+  "log": [
+   {
+    "t": 76.2,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 109.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 676,
+     "deltaY": -8,
+     "velocityY": -0.36028557990129184,
+     "progress": 0.51,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 142.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 668,
+     "deltaY": -16,
+     "velocityY": -0.28873083526071014,
+     "progress": 0.519,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 176.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 660,
+     "deltaY": -24,
+     "velocityY": -0.2708297770384736,
+     "progress": 0.529,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 209.2,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 652,
+     "deltaY": -32,
+     "velocityY": -0.2595928822915437,
+     "progress": 0.538,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 243.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 644,
+     "deltaY": -40,
+     "velocityY": -0.2567916026384913,
+     "progress": 0.548,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 276.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 636,
+     "deltaY": -48,
+     "velocityY": -0.1982496020349448,
+     "progress": 0.558,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 309.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 628,
+     "deltaY": -56,
+     "velocityY": -0.24490534389386048,
+     "progress": 0.567,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 344.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 620,
+     "deltaY": -64,
+     "velocityY": -0.2547013767707748,
+     "progress": 0.577,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 376.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 612,
+     "deltaY": -72,
+     "velocityY": -0.2582285947790428,
+     "progress": 0.586,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 410,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 604,
+     "deltaY": -80,
+     "velocityY": -0.25301716790660955,
+     "progress": 0.596,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 443.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 596,
+     "deltaY": -88,
+     "velocityY": -0.2520057792367853,
+     "progress": 0.606,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 492.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 588,
+     "deltaY": -96,
+     "velocityY": -0.19840875125068586,
+     "progress": 0.615,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 525.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 580,
+     "deltaY": -104,
+     "velocityY": -0.18047294947385284,
+     "progress": 0.625,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 559.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 572,
+     "deltaY": -112,
+     "velocityY": -0.23537165809518878,
+     "progress": 0.634,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 593.1,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 564,
+     "deltaY": -120,
+     "velocityY": -0.25009867698431476,
+     "progress": 0.644,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 626.3,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 556,
+     "deltaY": -128,
+     "velocityY": -0.255674764385617,
+     "progress": 0.653,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 660.4,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 548,
+     "deltaY": -136,
+     "velocityY": -0.2511572578465472,
+     "progress": 0.663,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 692.9,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 540,
+     "deltaY": -144,
+     "velocityY": -0.2542609156456981,
+     "progress": 0.673,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 726.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 532,
+     "deltaY": -152,
+     "velocityY": -0.24911778067577045,
+     "progress": 0.682,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 759.8,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 524,
+     "deltaY": -160,
+     "velocityY": -0.1938842703729439,
+     "progress": 0.692,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 792.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 516,
+     "deltaY": -168,
+     "velocityY": -0.23482143259787386,
+     "progress": 0.701,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 826.7,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 508,
+     "deltaY": -176,
+     "velocityY": -0.25405298715641134,
+     "progress": 0.711,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 859.5,
+    "e": "ionDragMove",
+    "d": {
+     "currentY": 500,
+     "deltaY": -184,
+     "velocityY": -0.24694760340194533,
+     "progress": 0.721,
+     "snapBreakpoint": 0.75
+    }
+   },
+   {
+    "t": 885.3,
+    "e": "release"
+   },
+   {
+    "t": 886.6,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 500,
+     "deltaY": -184,
+     "velocityY": -0.07408428102058359,
+     "progress": 0.721,
+     "snapBreakpoint": 0.75,
+     "isDismissing": false
+    }
+   },
+   {
+    "t": 1409.5,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0.75
+    }
+   }
+  ],
+  "current": 0.75,
+  "connected": true,
+  "hidden": false
+ },
+ "scrollY1": false
+}
+
+## no-expand
+enter frames:
+13.8 834 1 0 none auto
+29.5 784.685 1 0.0189 none auto
+47.1 723.261 1 0.0425 none auto
+62.8 644.822 1 0.0726 none auto
+79 559.434 1 0.1053 none auto
+96.1 505.655 1 0.126 none auto
+113.8 476.208 1 0.1373 none auto
+129.7 457.902 1 0.1443 none auto
+146.6 445.663 1 0.149 none auto
+162.9 436.967 1 0.1523 none auto
+179.8 430.669 1 0.1548 none auto
+195.9 426.087 1 0.1565 none auto
+212.4 422.725 1 0.1578 none auto
+229.1 420.337 1 0.1587 none auto
+247.6 418.69 1 0.1594 none auto
+262.9 417.654 1 0.1597 none auto
+280 417.121 1 0.16 none auto
+297.8 417 1 0.165 auto auto
+313.7 417 1 0.165 auto auto
+330.1 417 1 0.165 auto auto
+346.1 417 1 0.165 auto auto
+362.7 417 1 0.165 auto auto
+380.2 417 1 0.165 auto auto
+397.1 417 1 0.165 auto auto
+413.2 417 1 0.165 auto auto
+429.9 417 1 0.165 auto auto
+446 417 1 0.165 auto auto
+464 417 1 0.165 auto auto
+479.2 417 1 0.165 auto auto
+496.7 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet modal-no-expand-scroll hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.2,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 296.1,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "page": {
+  "cls": "ion-delegate-host ion-page",
+  "maxH": "50%",
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 417
+  },
+  "content": {
+   "x": 0,
+   "y": 483,
+   "w": 390,
+   "h": 361
+  },
+  "scrollY": true
+ },
+ "drag": {
+  "frames": [
+   "6.3 417 1 0.165 auto auto",
+   "22.9 417 1 0.165 auto auto",
+   "39.2 417 1 0.165 auto auto",
+   "56.5 417 1 0.165 auto auto",
+   "72.1 417 1 0.165 auto auto",
+   "89.4 417 1 0.165 auto auto",
+   "106 417 1 0.165 auto auto",
+   "122 417 1 0.165 auto auto",
+   "139.2 417 1 0.165 auto auto",
+   "156.1 417 1 0.165 auto auto",
+   "172.5 417 1 0.165 auto auto",
+   "189 417 1 0.165 auto auto",
+   "206.1 417 1 0.165 auto auto",
+   "222.1 417 1 0.165 auto auto",
+   "239.9 417 1 0.165 auto auto",
+   "256.5 417 1 0.165 auto auto",
+   "273.5 417 1 0.165 auto auto",
+   "289.2 417 1 0.165 auto auto",
+   "305.9 417 1 0.165 auto auto",
+   "323.2 417 1 0.165 auto auto",
+   "338.9 417 1 0.165 auto auto",
+   "355.6 417 1 0.165 auto auto",
+   "373.4 417 1 0.165 auto auto",
+   "390.2 417 1 0.165 auto auto",
+   "405.3 417 1 0.165 auto auto",
+   "422.7 417 1 0.165 auto auto",
+   "439.4 417 1 0.165 auto auto",
+   "455.2 417 1 0.165 auto auto",
+   "472.9 417 1 0.165 auto auto",
+   "489 417 1 0.165 auto auto",
+   "506.8 417 1 0.165 auto auto",
+   "522.3 417 1 0.165 auto auto",
+   "539.9 417 1 0.165 auto auto",
+   "555.8 417 1 0.165 auto auto",
+   "572.2 417 1 0.165 auto auto",
+   "588.9 417 1 0.165 auto auto",
+   "606 417 1 0.165 auto auto",
+   "622.1 417 1 0.165 auto auto",
+   "639.3 417 1 0.165 auto auto",
+   "656.1 417 1 0.165 auto auto",
+   "672.8 417 1 0.165 auto auto",
+   "688.8 417 1 0.165 auto auto",
+   "706 417 1 0.165 auto auto",
+   "722.2 417 1 0.165 auto auto",
+   "739.1 417 1 0.165 auto auto",
+   "755.4 417 1 0.165 auto auto",
+   "772.5 417 1 0.165 auto auto",
+   "789 417 1 0.165 auto auto",
+   "805.4 417 1 0.165 auto auto",
+   "823.1 417 1 0.165 auto auto",
+   "839 417 1 0.165 auto auto",
+   "856.7 417 1 0.165 auto auto",
+   "872.6 417 1 0.165 auto auto",
+   "889.1 0 1 0.32 auto auto",
+   "905.9 16.526 1 0.3137 auto auto",
+   "922.2 34.952 1 0.3066 auto auto",
+   "941.1 56.289 1 0.2984 auto auto",
+   "956.2 81.247 1 0.2888 auto auto",
+   "972.3 109.951 1 0.2778 auto auto",
+   "988.9 136.744 1 0.2675 auto auto",
+   "1006.2 155.577 1 0.2603 auto auto",
+   "1022.5 168.038 1 0.2555 auto auto",
+   "1039.3 176.642 1 0.2522 auto auto",
+   "1056.1 182.932 1 0.2498 auto auto",
+   "1072.6 187.708 1 0.248 auto auto",
+   "1089.3 191.493 1 0.2465 auto auto",
+   "1106.2 194.539 1 0.2454 auto auto",
+   "1122.8 197.017 1 0.2444 auto auto",
+   "1139.3 199.08 1 0.2436 auto auto",
+   "1155.7 200.801 1 0.243 auto auto",
+   "1172.7 202.236 1 0.2424 auto auto",
+   "1189.6 203.445 1 0.2419 auto auto",
+   "1205.5 204.474 1 0.2415 auto auto",
+   "1222.1 205.328 1 0.2412 auto auto",
+   "1239.3 206.049 1 0.2409 auto auto",
+   "1256.1 206.644 1 0.2407 auto auto",
+   "1272.1 207.136 1 0.2405 auto auto",
+   "1290.2 207.54 1 0.2404 auto auto",
+   "1306.1 207.857 1 0.2402 auto auto",
+   "1322.8 208.104 1 0.2402 auto auto",
+   "1339.9 208.284 1 0.2401 auto auto",
+   "1356 208.407 1 0.24 auto auto",
+   "1374.1 208.478 1 0.24 auto auto",
+   "1389.3 208.5 1 0.24 auto auto",
+   "1405.9 208.5 1 0.24 auto auto",
+   "1422.1 208.5 1 0.2425 auto auto",
+   "1439.8 208.5 1 0.2425 auto auto",
+   "1455.8 208.5 1 0.2425 auto auto",
+   "1472.5 208.5 1 0.2425 auto auto",
+   "1489.1 208.5 1 0.2425 auto auto",
+   "1505.5 208.5 1 0.2425 auto auto",
+   "1523.4 208.5 1 0.2425 auto auto",
+   "1539 208.5 1 0.2425 auto auto",
+   "1556.6 208.5 1 0.2425 auto auto",
+   "1572.1 208.5 1 0.2425 auto auto",
+   "1589.6 208.5 1 0.2425 auto auto",
+   "1606.5 208.5 1 0.2425 auto auto",
+   "1622.6 208.5 1 0.2425 auto auto",
+   "1639.2 208.5 1 0.2425 auto auto",
+   "1655.4 208.5 1 0.2425 auto auto",
+   "1672.8 208.5 1 0.2425 auto auto"
+  ],
+  "log": [
+   {
+    "t": 56.4,
+    "e": "ionDragStart",
+    "d": null
+   },
+   {
+    "t": 874.1,
+    "e": "release"
+   },
+   {
+    "t": 875.1,
+    "e": "ionDragEnd",
+    "d": {
+     "currentY": 500,
+     "deltaY": -184,
+     "velocityY": -0.07779009305726942,
+     "progress": 0.721,
+     "snapBreakpoint": 0.75,
+     "isDismissing": false
+    }
+   },
+   {
+    "t": 1406,
+    "e": "ionBreakpointDidChange",
+    "d": {
+     "breakpoint": 0.75
+    }
+   }
+  ],
+  "current": 0.75,
+  "connected": true,
+  "hidden": false
+ },
+ "after": {
+  "scrollTop": 0
+ }
+}
+
+## dismiss
+enter frames:
+15 834 1 0 none auto
+31.4 784.271 1 0.0191 none auto
+48.5 723.562 1 0.0424 none auto
+64 644.679 1 0.0726 none auto
+80.1 559.75 1 0.1052 none auto
+97 505.824 1 0.1259 none auto
+114.4 476.172 1 0.1373 none auto
+131 457.878 1 0.1443 none auto
+147 445.647 1 0.149 none auto
+164.6 436.955 1 0.1523 none auto
+180.4 430.692 1 0.1547 none auto
+197 426.08 1 0.1565 none auto
+214.8 422.738 1 0.1578 none auto
+230.2 420.334 1 0.1587 none auto
+247.1 418.688 1 0.1594 none auto
+264.1 417.653 1 0.1597 none auto
+280.6 417.121 1 0.16 none auto
+299.6 417 1 0.165 auto auto
+314.8 417 1 0.165 auto auto
+330.2 417 1 0.165 auto auto
+347.2 417 1 0.165 auto auto
+363.8 417 1 0.165 auto auto
+380.7 417 1 0.165 auto auto
+397.2 417 1 0.165 auto auto
+414.4 417 1 0.165 auto auto
+430.8 417 1 0.165 auto auto
+447.7 417 1 0.165 auto auto
+464.7 417 1 0.165 auto auto
+479.9 417 1 0.165 auto auto
+496.9 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.2,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.7,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "leave": {
+  "frames": [
+   "2.2 417 1 0.16 auto none",
+   "19.5 420.171 1 0.1588 auto none",
+   "35.9 429.931 1 0.155 auto none",
+   "52.8 446.557 1 0.1487 auto none",
+   "70.7 470.083 1 0.1396 auto none",
+   "86.3 500.847 1 0.1278 auto none",
+   "103 538.557 1 0.1134 auto none",
+   "119.2 582.403 1 0.0965 auto none",
+   "135.5 631.869 1 0.0776 auto none",
+   "152.4 684.947 1 0.0572 auto none",
+   "168.7 738.649 1 0.0366 auto none",
+   "186.7 789.984 1 0.0169 auto none",
+   "203.2 833.879 1 0 auto none",
+   "220.9 0 1 0.01 auto auto"
+  ],
+  "log": [
+   {
+    "t": 0.3,
+    "e": "ionModalWillDismiss",
+    "d": {}
+   },
+   {
+    "t": 219.7,
+    "e": "ionModalDidDismiss",
+    "d": {}
+   }
+  ]
+ }
+}
+
+## hit
+enter frames:
+14.2 834 1 0 none auto
+30.9 784.46 1 0.019 none auto
+47 723.389 1 0.0424 none auto
+63.2 644.986 1 0.0725 none auto
+80.4 559.568 1 0.1053 none auto
+96.3 505.726 1 0.126 none auto
+113.5 476.25 1 0.1373 none auto
+131.6 457.929 1 0.1443 none auto
+146.7 445.621 1 0.149 none auto
+164.7 436.936 1 0.1524 none auto
+180.7 430.679 1 0.1548 none auto
+197 426.07 1 0.1565 none auto
+213.1 422.731 1 0.1578 none auto
+230 420.329 1 0.1587 none auto
+246.9 418.684 1 0.1594 none auto
+264.4 417.656 1 0.1597 none auto
+280.1 417.122 1 0.16 none auto
+298.6 417 1 0.165 auto auto
+313.5 417 1 0.165 auto auto
+330.5 417 1 0.165 auto auto
+347 417 1 0.165 auto auto
+363.8 417 1 0.165 auto auto
+380.4 417 1 0.165 auto auto
+397.2 417 1 0.165 auto auto
+413.7 417 1 0.165 auto auto
+429.8 417 1 0.165 auto auto
+448.2 417 1 0.165 auto auto
+464.1 417 1 0.165 auto auto
+480.9 417 1 0.165 auto auto
+496.8 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.3,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.2,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "hits": [
+  [
+   -23,
+   0,
+   "toolbar-title-default md in-toolbar hydrated"
+  ],
+  [
+   -21,
+   0,
+   "toolbar-title-default md in-toolbar hydrated"
+  ],
+  [
+   -21,
+   -6,
+   "md hydrated"
+  ],
+  [
+   -21,
+   -7,
+   "md hydrated"
+  ],
+  [
+   0,
+   -6,
+   "md hydrated"
+  ],
+  [
+   0,
+   -7,
+   "md hydrated"
+  ],
+  [
+   18,
+   -6,
+   "md hydrated"
+  ],
+  [
+   21,
+   -6,
+   "md hydrated"
+  ],
+  [
+   23,
+   -6,
+   "md hydrated"
+  ],
+  [
+   18,
+   2,
+   "modal-handle"
+  ],
+  [
+   35,
+   2,
+   "modal-handle"
+  ],
+  [
+   37,
+   2,
+   "modal-handle"
+  ],
+  [
+   18,
+   6,
+   "modal-handle"
+  ],
+  [
+   18,
+   7,
+   "modal-handle"
+  ],
+  [
+   30,
+   6,
+   "modal-handle"
+  ],
+  [
+   10,
+   6,
+   "modal-handle"
+  ]
+ ],
+ "focusDuring": [
+  "ion-modal",
+  null
+ ],
+ "focusAfter": [
+  "ion-modal",
+  null
+ ]
+}
+
+## hit-none
+enter frames:
+13.3 834 1 0 none auto
+28.7 784.441 1 0.019 none auto
+45.1 723.365 1 0.0425 none auto
+62.6 644.954 1 0.0725 none auto
+79.2 559.542 1 0.1053 none auto
+95.3 505.944 1 0.1259 none auto
+112.1 476.106 1 0.1373 none auto
+130.2 457.924 1 0.1443 none auto
+145.4 445.679 1 0.149 none auto
+161.8 436.978 1 0.1523 none auto
+179.1 430.677 1 0.1548 none auto
+195.3 426.069 1 0.1565 none auto
+212 422.73 1 0.1578 none auto
+228.8 420.328 1 0.1587 none auto
+245.2 418.692 1 0.1594 none auto
+261.9 417.656 1 0.1597 none auto
+278.3 417.122 1 0.16 none auto
+296.8 417 1 0.165 auto auto
+311.9 417 1 0.165 auto auto
+329.4 417 1 0.165 auto auto
+345.5 417 1 0.165 auto auto
+362 417 1 0.165 auto auto
+378.7 417 1 0.165 auto auto
+395.2 417 1 0.165 auto auto
+411.6 417 1 0.165 auto auto
+428.6 417 1 0.165 auto auto
+445.7 417 1 0.165 auto auto
+462.1 417 1 0.165 auto auto
+478.8 417 1 0.165 auto auto
+495.3 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "-1",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "-1",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 295.4,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "focusAfter": [
+  "ion-modal",
+  null
+ ],
+ "hostFocus": [
+  "ion-modal",
+  null
+ ]
+}
+
+## host-focus
+enter frames:
+16.4 834 1 0 none auto
+31.8 784.402 1 0.019 none auto
+48.3 723.315 1 0.0425 none auto
+64.4 644.361 1 0.0728 none auto
+81.9 559.49 1 0.1053 none auto
+97.9 505.685 1 0.126 none auto
+114.9 476.226 1 0.1373 none auto
+131.4 457.913 1 0.1443 none auto
+148.9 445.61 1 0.149 none auto
+164.4 436.928 1 0.1524 none auto
+181.7 430.673 1 0.1548 none auto
+197.8 426.09 1 0.1565 none auto
+214.9 422.728 1 0.1578 none auto
+230.8 420.326 1 0.1587 none auto
+247.9 418.683 1 0.1594 none auto
+264.7 417.655 1 0.1597 none auto
+280.9 417.122 1 0.16 none auto
+299.4 417 1 0.165 auto auto
+314.8 417 1 0.165 auto auto
+331.5 417 1 0.165 auto auto
+347.6 417 1 0.165 auto auto
+365 417 1 0.165 auto auto
+381.1 417 1 0.165 auto auto
+398.5 417 1 0.165 auto auto
+415.4 417 1 0.165 auto auto
+432 417 1 0.165 auto auto
+448.4 417 1 0.165 auto auto
+465 417 1 0.165 auto auto
+481.5 417 1 0.165 auto auto
+497.5 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.4,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 298,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "hostFocus": [
+  "ion-modal",
+  null
+ ]
+}
+
+## safe-top
+enter frames:
+13.1 810 1 0 none auto
+28.9 761.725 1 0.0191 none auto
+45.9 702.368 1 0.0425 none auto
+62.8 626.163 1 0.0726 none auto
+78.8 543.251 1 0.1054 none auto
+96.4 491.283 1 0.1259 none auto
+112.4 462.61 1 0.1372 none auto
+128.8 444.707 1 0.1443 none auto
+145.8 432.827 1 0.149 none auto
+162.5 424.384 1 0.1523 none auto
+179.3 418.301 1 0.1547 none auto
+195.4 413.798 1 0.1565 none auto
+212.9 410.574 1 0.1578 none auto
+229 408.238 1 0.1587 none auto
+246.2 406.64 1 0.1594 none auto
+262.2 405.635 1 0.1597 none auto
+279.2 405.119 1 0.16 none auto
+296.8 405 1 0.165 auto auto
+312.2 405 1 0.165 auto auto
+329.8 405 1 0.165 auto auto
+345.8 405 1 0.165 auto auto
+362.4 405 1 0.165 auto auto
+378.4 405 1 0.165 auto auto
+396 405 1 0.165 auto auto
+413.5 405 1 0.165 auto auto
+428.7 405 1 0.165 auto auto
+446.3 405 1 0.165 auto auto
+462.9 405 1 0.165 auto auto
+478.9 405 1 0.165 auto auto
+495.6 405 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 24px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 439,
+   "w": 390,
+   "h": 810
+  },
+  "clientHeight": 810,
+  "transform": "matrix(1, 0, 0, 1, 0, 405)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 444,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 5.5,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 295.4,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "inner": "0px"
+}
+
+## no-handle
+enter frames:
+15.6 834 1 0 none auto
+32.5 784.356 1 0.019 none auto
+47.5 723.67 1 0.0423 none auto
+65 644.287 1 0.0728 none auto
+81.5 559.43 1 0.1054 none auto
+97.4 505.652 1 0.126 none auto
+114.2 476.207 1 0.1373 none auto
+131.4 457.901 1 0.1443 none auto
+147.8 445.663 1 0.149 none auto
+164.7 436.966 1 0.1523 none auto
+182.3 430.669 1 0.1548 none auto
+198 426.086 1 0.1565 none auto
+214.3 422.725 1 0.1578 none auto
+230.7 420.325 1 0.1587 none auto
+248.4 418.69 1 0.1594 none auto
+264.3 417.65 1 0.1598 none auto
+281.4 417.121 1 0.16 none auto
+299.7 417 1 0.165 auto auto
+315 417 1 0.165 auto auto
+331.1 417 1 0.165 auto auto
+347.2 417 1 0.165 auto auto
+364.7 417 1 0.165 auto auto
+381.2 417 1 0.165 auto auto
+397.8 417 1 0.165 auto auto
+413.8 417 1 0.165 auto auto
+431.5 417 1 0.165 auto auto
+448.6 417 1 0.165 auto auto
+464.8 417 1 0.165 auto auto
+480.9 417 1 0.165 auto auto
+498 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "-1",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": null,
+ "current": 0.5,
+ "log": [
+  {
+   "t": 3.3,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 298.2,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ]
+}
+
+## initial-only
+enter frames:
+15.6 844 1 0 none auto
+30.6 793.916 1 0.019 none auto
+47.6 732.126 1 0.0424 none auto
+64 652.264 1 0.0727 none auto
+80.5 566.344 1 0.1053 none auto
+97.6 511.825 1 0.1259 none auto
+114.7 481.981 1 0.1373 none auto
+130.7 463.433 1 0.1443 none auto
+147.5 450.973 1 0.149 none auto
+163.6 442.227 1 0.1523 none auto
+180.2 435.848 1 0.1547 none auto
+197.2 431.183 1 0.1565 none auto
+213.8 427.802 1 0.1578 none auto
+231.3 425.37 1 0.1587 none auto
+247.6 423.706 1 0.1594 none auto
+264.2 422.66 1 0.1598 none auto
+280.7 422.124 1 0.16 none auto
+297.7 422 1 0.16 auto auto
+314 422 1 0.16 auto auto
+330.6 422 1 0.16 auto auto
+346.8 422 1 0.16 auto auto
+364.5 422 1 0.16 auto auto
+380.7 422 1 0.16 auto auto
+397.5 422 1 0.16 auto auto
+413.6 422 1 0.16 auto auto
+430.9 422 1 0.16 auto auto
+447.3 422 1 0.16 auto auto
+463.7 422 1 0.16 auto auto
+480.9 422 1 0.16 auto auto
+496.9 422 1 0.16 auto auto
+{
+ "host": {
+  "tabindex": "-1",
+  "cls": "md modal-default hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: inherit; --ion-safe-area-right: inherit;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 422,
+   "w": 390,
+   "h": 844
+  },
+  "clientHeight": 844,
+  "transform": "matrix(1, 0, 0, 1, 0, 422)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.16",
+  "pe": "auto"
+ },
+ "handle": null,
+ "current": 0.5,
+ "log": [
+  {
+   "t": 2.8,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 296.9,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ]
+}
+
+## no-expand-scroll
+enter frames:
+14.9 834 1 0 none auto
+31.3 784.516 1 0.019 none auto
+47.5 723.459 1 0.0424 none auto
+64.1 645.076 1 0.0725 none auto
+81.1 559.209 1 0.1054 none auto
+97.1 505.766 1 0.1259 none auto
+115.2 476.273 1 0.1373 none auto
+130.6 457.856 1 0.1443 none auto
+148 445.631 1 0.149 none auto
+164.6 436.944 1 0.1523 none auto
+180.6 430.652 1 0.1548 none auto
+197.1 426.074 1 0.1565 none auto
+214.2 422.733 1 0.1578 none auto
+232.2 420.331 1 0.1587 none auto
+247.5 418.686 1 0.1594 none auto
+263.8 417.657 1 0.1597 none auto
+281 417.122 1 0.16 none auto
+299.1 417 1 0.165 auto auto
+314.4 417 1 0.165 auto auto
+331.3 417 1 0.165 auto auto
+347.6 417 1 0.165 auto auto
+364 417 1 0.165 auto auto
+381.1 417 1 0.165 auto auto
+397.5 417 1 0.165 auto auto
+414.5 417 1 0.165 auto auto
+430.6 417 1 0.165 auto auto
+447.7 417 1 0.165 auto auto
+464.4 417 1 0.165 auto auto
+482.2 417 1 0.165 auto auto
+498.4 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet modal-no-expand-scroll hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.4,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 297.4,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "scrollY": true,
+ "cls": "md modal-sheet modal-no-expand-scroll hydrated show-modal",
+ "footer": null
+}
+
+## hit2
+enter frames:
+13.3 834 1 0 none auto
+29 784.278 1 0.0191 none auto
+46.4 723.571 1 0.0424 none auto
+62.3 644.689 1 0.0726 none auto
+78.8 559.759 1 0.1052 none auto
+96.3 505.828 1 0.1259 none auto
+112.2 476.174 1 0.1373 none auto
+128.6 457.968 1 0.1443 none auto
+146.2 445.648 1 0.149 none auto
+162.2 436.956 1 0.1523 none auto
+179.7 430.661 1 0.1548 none auto
+196.1 426.081 1 0.1565 none auto
+212.4 422.721 1 0.1578 none auto
+230 420.322 1 0.1587 none auto
+246.6 418.688 1 0.1594 none auto
+262.4 417.653 1 0.1597 none auto
+278.7 417.121 1 0.16 none auto
+297.7 417 1 0.165 auto auto
+312.1 417 1 0.165 auto auto
+329.7 417 1 0.165 auto auto
+345.6 417 1 0.165 auto auto
+362.7 417 1 0.165 auto auto
+379.1 417 1 0.165 auto auto
+395.2 417 1 0.165 auto auto
+412.8 417 1 0.165 auto auto
+429.2 417 1 0.165 auto auto
+446.2 417 1 0.165 auto auto
+462.4 417 1 0.165 auto auto
+479.2 417 1 0.165 auto auto
+496.2 417 1 0.165 auto auto
+{
+ "host": {
+  "tabindex": "0",
+  "cls": "md modal-sheet hydrated show-modal",
+  "style": "z-index: 20002; --ion-safe-area-top: 0px; --ion-safe-area-bottom: inherit; --ion-safe-area-left: 0px; --ion-safe-area-right: 0px; --ion-modal-offset-top: 0px; pointer-events: auto;",
+  "active": "ion-modal",
+  "shadowActive": "modal-wrapper ion-overlay-wrapper"
+ },
+ "wrapper": {
+  "rect": {
+   "x": 0,
+   "y": 427,
+   "w": 390,
+   "h": 834
+  },
+  "clientHeight": 834,
+  "transform": "matrix(1, 0, 0, 1, 0, 417)",
+  "radius": "0px",
+  "shadow": "none"
+ },
+ "backdrop": {
+  "opacity": "0.165",
+  "pe": "auto"
+ },
+ "handle": {
+  "rect": {
+   "x": 177,
+   "y": 432,
+   "w": 36,
+   "h": 5
+  },
+  "bg": "rgb(192, 192, 190)",
+  "radius": "8px",
+  "tabindex": "0",
+  "aria": "Activate to adjust the size of the dialog overlaying the screen",
+  "cursor": "pointer",
+  "z": "11",
+  "before": {
+   "w": "36px",
+   "h": "5px",
+   "pad": "4px",
+   "tr": "matrix(1, 0, 0, 1, -22, -6.5)",
+   "pos": "absolute"
+  }
+ },
+ "current": 0.5,
+ "log": [
+  {
+   "t": 4.9,
+   "e": "ionModalWillPresent",
+   "d": null
+  },
+  {
+   "t": 296.2,
+   "e": "ionModalDidPresent",
+   "d": null
+  }
+ ],
+ "hits": [
+  [
+   -3,
+   0,
+   "modal-handle"
+  ],
+  [
+   -5,
+   0,
+   "modal-handle"
+  ],
+  [
+   39,
+   2,
+   "modal-handle"
+  ],
+  [
+   41,
+   2,
+   "toolbar-title-default md in-toolbar hydrated"
+  ],
+  [
+   18,
+   -3,
+   "modal-handle"
+  ],
+  [
+   18,
+   -5,
+   "modal-handle"
+  ],
+  [
+   18,
+   8,
+   "modal-handle"
+  ],
+  [
+   18,
+   10,
+   "md title-default hydrated"
+  ],
+  [
+   -4,
+   -4,
+   "modal-handle"
+  ],
+  [
+   40,
+   9,
+   "toolbar-title-default md in-toolbar hydrated"
+  ]
+ ],
+ "focus": {
+  "ev": [],
+  "sync": [
+   "ion-modal",
+   null
+  ],
+  "later": [
+   "ion-modal",
+   null
+  ]
+ }
+}
+

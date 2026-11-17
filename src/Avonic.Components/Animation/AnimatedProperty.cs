@@ -2,7 +2,10 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Reactive;
+using Avalonia.VisualTree;
 
 namespace Avonic.Components.Animation;
 
@@ -15,8 +18,9 @@ internal abstract class AnimatedProperty
     private static readonly AnimatedProperty OpacityProperty = new OpacityAnimated();
     private static readonly AnimatedProperty TransformProperty = new TransformAnimated();
     private static readonly AnimatedProperty PointerEventsProperty = new PointerEvents();
+    private static readonly AnimatedProperty MaxHeightProperty = new MaxHeightAnimated();
 
-    /// <summary>The CSS name.</summary>
+    /// <summary>The CSS name, as a keyframe has it.</summary>
     internal abstract string Name { get; }
 
     /// <exception cref="ArgumentException">A property no Ionic md animation animates.</exception>
@@ -24,7 +28,9 @@ internal abstract class AnimatedProperty
     {
         "opacity" => OpacityProperty,
         "transform" => TransformProperty,
-        _ => throw new ArgumentException($"'{name}' isn't a property an animation can animate here: opacity or transform.", nameof(name)),
+        "maxHeight" => MaxHeightProperty,
+        _ => throw new ArgumentException(
+            $"'{name}' isn't a property an animation can animate here: opacity, transform or maxHeight.", nameof(name)),
     };
 
     /// <exception cref="ArgumentException">A property no Ionic md animation styles.</exception>
@@ -106,6 +112,84 @@ internal abstract class AnimatedProperty
             throw new ArgumentException("A transform can't be an animation's style here.");
     }
 
+    /// <summary>
+    /// <c>max-height</c>, as the sheet modal's <c>contentAnimation</c> animates it (Ionic writes it <c>maxHeight</c>): px, a number,
+    /// a percentage of the visual parent's height (CSS's containing block, for the content presenter in the wrapper), or
+    /// <c>none</c>. Two percentages, or two lengths, interpolate; anything else switches at the midpoint, as CSS does for
+    /// <c>none</c>.
+    /// </summary>
+    private sealed class MaxHeightAnimated : AnimatedProperty
+    {
+        internal override string Name => "maxHeight";
+
+        internal override object Parse(object value)
+        {
+            if (value is string s)
+            {
+                s = s.Trim();
+                if (s == "none")
+                {
+                    return new Length(double.PositiveInfinity, false);
+                }
+
+                if (s.EndsWith('%'))
+                {
+                    return new Length(Number(s[..^1]), true);
+                }
+
+                if (s.EndsWith("px", StringComparison.Ordinal))
+                {
+                    return new Length(Number(s[..^2]), false);
+                }
+            }
+
+            return new Length(Number(value), false);
+        }
+
+        internal override object Interpolate(object from, object to, double progress)
+        {
+            var (a, b) = ((Length)from, (Length)to);
+            return a.Percent == b.Percent && !double.IsInfinity(a.Value) && !double.IsInfinity(b.Value)
+                ? new Length(a.Value + (b.Value - a.Value) * progress, a.Percent)
+                : progress < 0.5 ? a : b;
+        }
+
+        internal override object Underlying(Visual element) => new Length(element.GetValue(Layoutable.MaxHeightProperty), false);
+
+        /// <summary>A percentage is of the parent's height, so it's worked out again whenever that changes.</summary>
+        internal override IDisposable Bind(Visual element, IObservable<object?> values) =>
+            element.Bind(Layoutable.MaxHeightProperty, new ParentSized(element, values), BindingPriority.Animation);
+
+        internal override void SetStyle(Visual element, object value) =>
+            throw new ArgumentException("max-height can't be an animation's style here.");
+
+        internal readonly record struct Length(double Value, bool Percent);
+
+        private sealed class ParentSized(Visual element, IObservable<object?> values) : IObservable<object?>
+        {
+            public IDisposable Subscribe(IObserver<object?> observer)
+            {
+                object? current = AvaloniaProperty.UnsetValue;
+                var parent = element.GetVisualParent();
+
+                void Push() => observer.OnNext(current switch
+                {
+                    Length { Percent: true } l => Math.Max(0, (parent?.Bounds.Height ?? 0) * l.Value / 100),
+                    Length l => Math.Max(0, l.Value),
+                    _ => AvaloniaProperty.UnsetValue,
+                });
+
+                var bounds = parent?.GetObservable(Visual.BoundsProperty).Subscribe(new AnonymousObserver<Rect>(_ => Push()));
+                var source = values.Subscribe(new AnonymousObserver<object?>(value =>
+                {
+                    current = value;
+                    Push();
+                }));
+                return new Both(bounds, source);
+            }
+        }
+    }
+
     private sealed class PointerEvents : AnimatedProperty
     {
         internal override string Name => "pointer-events";
@@ -172,14 +256,17 @@ internal abstract class AnimatedProperty
             public void OnNext(Rect value) => next(value);
         }
 
-        private sealed class Both(IDisposable a, IDisposable b) : IDisposable
-        {
-            public void Dispose()
-            {
-                a.Dispose();
-                b.Dispose();
-            }
-        }
+
+    }
+}
+
+/// <summary>Two subscriptions as one: a bounds watch, if there is one, and the values'.</summary>
+internal sealed class Both(IDisposable? a, IDisposable b) : IDisposable
+{
+    public void Dispose()
+    {
+        a?.Dispose();
+        b.Dispose();
     }
 }
 

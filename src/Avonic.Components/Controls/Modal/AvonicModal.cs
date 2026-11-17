@@ -24,8 +24,9 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Backdrop", typeof(AvonicBackdrop))]
 [TemplatePart("PART_Content", typeof(ModalWrapper))]
 [TemplatePart("PART_ContentPresenter", typeof(ContentPresenter))]
-[PseudoClasses(InsetSmall, InsetLarge)]
-public class AvonicModal : AvonicOverlay
+[TemplatePart("PART_Handle", typeof(ModalHandle))]
+[PseudoClasses(InsetSmall, InsetLarge, Sheet)]
+public partial class AvonicModal : AvonicOverlay
 {
     /// <summary>
     /// <c>@media (min-width: 768px) and (min-height: 600px)</c>, on the top level's client size, named after Ionic's
@@ -122,6 +123,7 @@ public class AvonicModal : AvonicOverlay
     public AvonicModal()
     {
         Resources.MergedDictionaries.Add(_safeArea);
+        InitSheet();
     }
 
     public bool BackdropDismiss
@@ -203,7 +205,8 @@ public class AvonicModal : AvonicOverlay
 
     protected internal override bool BackdropDismissEnabled => BackdropDismiss;
 
-    protected internal override bool FocusTrapEnabled => FocusTrap;
+    /// <summary><c>focusTrap</c>, and not a sheet's <c>ion-disable-focus-trap</c> at or below its <c>backdropBreakpoint</c>.</summary>
+    protected internal override bool FocusTrapEnabled => FocusTrap && !SheetBackdropOff;
 
     protected override RoutedEvent<RoutedEventArgs> ControlWillPresentEvent => IonModalWillPresentEvent;
 
@@ -216,10 +219,18 @@ public class AvonicModal : AvonicOverlay
     /// <summary>The wrapper, which has <c>role="dialog"</c> and <c>tabindex="-1"</c>, as Ionic's present focuses it.</summary>
     protected override IInputElement? PresentFocusTarget => _wrapper;
 
-    /// <summary><c>md.enter.js</c>: 280 ms, the backdrop to <c>--backdrop-opacity</c>, the wrapper up 40 px as it appears.</summary>
-    protected override AnimationBuilder MdEnterAnimation => (baseElement, _) =>
+    /// <summary>
+    /// <c>md.enter.js</c>: 280 ms, the backdrop to <c>--backdrop-opacity</c>, the wrapper up 40 px as it appears; or a sheet's,
+    /// when there's a breakpoint (<see cref="ModalAnimationOptions.CurrentBreakpoint"/>).
+    /// </summary>
+    protected override AnimationBuilder MdEnterAnimation => (baseElement, options) =>
     {
         var modal = (AvonicModal)baseElement;
+        if (options is ModalAnimationOptions { CurrentBreakpoint: not null } sheet)
+        {
+            return modal.SheetEnterAnimation(sheet, "cubic-bezier(0.36,0.66,0.04,1)", 280);
+        }
+
         var backdrop = AvonicAnimation.Create()
             .AddElement(modal._backdrop)
             .FromTo("opacity", 0.01, modal.BackdropOpacity())
@@ -238,10 +249,15 @@ public class AvonicModal : AvonicOverlay
             .AddAnimation(backdrop, wrapper);
     };
 
-    /// <summary><c>md.leave.js</c>: 200 ms, the backdrop to 0, the wrapper down 40 px as it fades.</summary>
-    protected override AnimationBuilder MdLeaveAnimation => (baseElement, _) =>
+    /// <summary><c>md.leave.js</c>: 200 ms, the backdrop to 0, the wrapper down 40 px as it fades; or a sheet's.</summary>
+    protected override AnimationBuilder MdLeaveAnimation => (baseElement, options) =>
     {
         var modal = (AvonicModal)baseElement;
+        if (options is ModalAnimationOptions { CurrentBreakpoint: { } breakpoint } sheet)
+        {
+            return modal.SheetLeaveAnimation(breakpoint, sheet.BackdropBreakpoint);
+        }
+
         var backdrop = AvonicAnimation.Create()
             .AddElement(modal._backdrop)
             .FromTo("opacity", modal.BackdropOpacity(), 0);
@@ -280,6 +296,11 @@ public class AvonicModal : AvonicOverlay
     /// </summary>
     protected override void OnPresenting()
     {
+        // An inline modal presented again starts at its initial breakpoint, and is a sheet if it has both props by now.
+        _currentBreakpoint = InitialBreakpoint;
+        UpdateIsSheetModal();
+        UpdateSheetSafeArea();
+
         // Its place in its page, if it's inline, or where it is.
         _parentModal = ((Visual?)Placeholder ?? this).GetLogicalAncestors().OfType<AvonicModal>().FirstOrDefault();
         _parentModal?._nested.Add(this);
@@ -292,6 +313,12 @@ public class AvonicModal : AvonicOverlay
     /// </summary>
     protected override async Task<bool> OnDismissing(object? data, string? role)
     {
+        // Not while the sheet's gesture is dismissing it, but for that dismiss.
+        if (_gestureAnimationDismissing && role != OverlayRoles.Gesture)
+        {
+            return false;
+        }
+
         foreach (var nested in _nested.ToList())
         {
             nested.DismissFromInput(OverlayRoles.ParentDismissed);
@@ -303,6 +330,12 @@ public class AvonicModal : AvonicOverlay
     /// <summary>Ionic's own <c>dismiss()</c> after the shared one: the content is unmounted (<c>detachComponent</c>).</summary>
     protected override void OnDismissed(bool dismissed)
     {
+        if (dismissed)
+        {
+            TearDownSheet();
+        }
+
+        _currentBreakpoint = null;
         if (!dismissed)
         {
             return;
@@ -338,6 +371,7 @@ public class AvonicModal : AvonicOverlay
 
         _presenter = e.NameScope.Find<ContentPresenter>("PART_ContentPresenter");
         UpdatePresenter();
+        SetHandle(e.NameScope.Find<ModalHandle>("PART_Handle"));
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -377,11 +411,16 @@ public class AvonicModal : AvonicOverlay
         {
             UpdateSafeArea();
         }
+        else
+        {
+            OnSheetPropertyChanged(change);
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        WatchBreakpoints(true);
 
         // The media queries matter only while it's shown, which is while it's in the overlay host.
         if (Parent is OverlayHost)
@@ -389,6 +428,14 @@ public class AvonicModal : AvonicOverlay
             _topLevel = TopLevel.GetTopLevel(this);
             _topLevel?.PropertyChanged += OnTopLevelPropertyChanged;
             UpdateInset();
+        }
+
+        // componentWillLoad, at the first attach: whether it's a sheet.
+        if (!_sheetLoaded)
+        {
+            _sheetLoaded = true;
+            UpdateIsSheetModal();
+            WarnIfInitialBreakpointMissing();
         }
 
         // keepContentsMounted: mounted from creation, which here is the first attach to a page.
@@ -402,8 +449,11 @@ public class AvonicModal : AvonicOverlay
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        WatchBreakpoints(false);
         _topLevel?.PropertyChanged -= OnTopLevelPropertyChanged;
         _topLevel = null;
+        _offsetTopWatch?.Dispose();
+        _offsetTopWatch = null;
     }
 
     /// <summary>The wrapper's box changed, or the host's: which edges it reaches may have too.</summary>
@@ -422,18 +472,24 @@ public class AvonicModal : AvonicOverlay
     /// </summary>
     private void UpdateSafeArea()
     {
-        if (_wrapper is not { Parent: Visual panel })
+        // A sheet's is fixed at present: UpdateSheetSafeArea.
+        if (_wrapper is not { Parent: Visual panel } || _isSheetModal)
         {
             return;
         }
 
         var wrapper = _wrapper.Bounds;
         var viewport = panel.Bounds.Size;
-        var zero = (
+        SetZeroEdges((
             Top: wrapper.Top > EdgeThreshold,
             Bottom: wrapper.Bottom < viewport.Height - EdgeThreshold,
             Left: wrapper.Left > EdgeThreshold,
-            Right: wrapper.Right < viewport.Width - EdgeThreshold);
+            Right: wrapper.Right < viewport.Width - EdgeThreshold));
+    }
+
+    /// <summary>The safe area of each edge: 0 for one it doesn't reach, the app's for one it does.</summary>
+    private void SetZeroEdges((bool Top, bool Bottom, bool Left, bool Right) zero)
+    {
         if (zero == _zeroEdges)
         {
             return;

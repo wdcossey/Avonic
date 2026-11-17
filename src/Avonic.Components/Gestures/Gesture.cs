@@ -495,7 +495,7 @@ public sealed class Gesture : IDisposable
             return;
         }
 
-        if (_config.ReleaseAgainstDirection && MovesAgainstDirection(e))
+        if ((_config.ReleaseAgainstDirection || _config.ReleaseAgainstDirectionWhen?.Invoke() == true) && MovesAgainstDirection(e))
         {
             // Let go before this move is held from the recognisers, so a scroller that followed the press scrolls from here. The
             // detail is this move's, as at an abort in PointerMove.
