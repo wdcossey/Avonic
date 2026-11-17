@@ -398,7 +398,7 @@ public class AvonicActionSheetTests
             Buttons =
             [
                 new ActionSheetButton { Text = "Enabled" },
-                new ActionSheetButton { Text = "Disabled", Disabled = true, Handler = Log(calls, "Disabled", []) },
+                new ActionSheetButton { Text = "Disabled", Disabled = true, Icon = "heart", Handler = Log(calls, "Disabled", []) },
                 new ActionSheetButton { Text = "Cancel", Role = "cancel", Disabled = true },
             ],
         });
@@ -413,6 +413,11 @@ public class AvonicActionSheetTests
         // Opacity 0.4 over the whole button.
         Assert.Equal(0.4, (disabled.OpacityMask as ISolidColorBrush)!.Opacity, 3);
         Assert.Null(sheet.ButtonControls[0].OpacityMask);
+
+        // Its icon is in currentColor, the button's colour, not --color.
+        var icon = disabled.GetVisualDescendants().OfType<AvonicIcon>().Single();
+        Assert.Equal(Color.Parse("#262626"), ((ISolidColorBrush)icon.Foreground!).Color);
+        Assert.Equal(1, ((ISolidColorBrush)icon.Foreground!).Opacity);
 
         Assert.True(sheet.CancelControl!.IsEffectivelyEnabled);
         var did = sheet.OnDidDismiss();
@@ -814,12 +819,18 @@ public class AvonicActionSheetTests
         var sheet = Shown(stage, new AvonicActionSheet { Header = "Albums", Buttons = [new ActionSheetButton { Text = "Delete", Icon = "trash" }, "Share"] });
         var button = sheet.ButtonControls[0];
         Assert.Equal(Color.Parse("#262626"), ((ISolidColorBrush)button.Foreground!).Color);
+        Assert.Equal(16, button.FontSize);
+
+        // M5: the icons, the title and the sub title in rgba(0, 0, 0, 0.54).
         var icon = button.GetVisualDescendants().OfType<AvonicIcon>().Single();
-        var expected = Color.FromArgb(138, 0, 0, 0);
-        var iconBrush = (ISolidColorBrush)icon.Foreground!;
-        Assert.Equal(0.54, iconBrush.Opacity, 2);
-        Assert.Equal(Colors.Black, iconBrush.Color);
-        _ = expected;
+        foreach (var brush in new[] { icon.Foreground, Part<TextBlock>(sheet, "PART_TitleText").Foreground, Part<TextBlock>(sheet, "PART_SubTitle").Foreground })
+        {
+            var solid = Assert.IsAssignableFrom<ISolidColorBrush>(brush);
+            Assert.Equal(0.54, solid.Opacity, 2);
+            Assert.Equal(Colors.Black, solid.Color);
+        }
+
+        Assert.Equal(24, icon.FontSize);
         var highlight = button.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Highlight");
         Assert.Equal(0, highlight.Opacity);
 
@@ -828,6 +839,32 @@ public class AvonicActionSheetTests
         Assert.Same(button, stage.Focused);
         Assert.Equal(0.12, highlight.Opacity, 3);
         Assert.Equal(Color.Parse("#262626"), ((ISolidColorBrush)highlight.Background!).Color);
+    }
+
+    [AvaloniaFact]
+    public void B14_A_Mouse_Over_A_Button_Shows_The_Hover_Highlight_And_A_Press_Only_The_Ripple()
+    {
+        using var stage = new Stage();
+        var sheet = Shown(stage, new AvonicActionSheet { Buttons = [new ActionSheetButton { Text = "A", Handler = () => false }, "B"] });
+        var button = sheet.ButtonControls[0];
+        var highlight = button.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Highlight");
+        stage.Window.MouseMove(Centre(button, stage), RawInputModifiers.None);
+        Stage.Settle();
+        Assert.Equal(0.04, highlight.Opacity, 3);
+        Assert.Equal(Color.Parse("#262626"), ((ISolidColorBrush)highlight.Background!).Color);
+
+        // The press: md's activated ::after is transparent at 0, but the hover's comes after it in CSS and wins while the mouse is
+        // over it, as in Chromium; a touch press has no hover, so the activated rule shows: nothing.
+        stage.Window.MouseMove(new Point(195, 100), RawInputModifiers.None);
+        Stage.Settle();
+        Assert.Equal(0, highlight.Opacity);
+        var finger = stage.Window.TouchBegin(Centre(button, stage), RawInputModifiers.None);
+        Stage.Settle();
+        stage.After(100);
+        Assert.Contains(":activated", button.Classes);
+        Assert.Equal(0, highlight.Opacity);
+        stage.Window.TouchEnd(finger, Centre(button, stage), RawInputModifiers.None);
+        Stage.Settle();
     }
 
     [AvaloniaFact]
