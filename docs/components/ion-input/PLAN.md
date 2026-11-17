@@ -16,7 +16,7 @@ in a desktop context; the frame in a mobile one). The commands are at the top of
 |---|---|---|---|
 | [x] | `autocapitalize` | `Autocapitalize` (`string`, `"off"`) | Ionic's type is `string`, so it stays one. `on`, `sentences`, `words` → `TextInputOptions.AutoCapitalization`; `characters` → `TextInputOptions.Uppercase`; `off`, `none` and anything else → neither. Avalonia has no words-only mode |
 | [ ] | `autocomplete` | — | Not applicable: the browser's autofill. Avalonia has none |
-| [x] | `autocorrect` | `Autocorrect` (`InputAutocorrect`, `Off`) | `On` → `TextInputOptions.ShowSuggestions`, which is what Android's autocorrect is |
+| [x] | `autocorrect` | `Autocorrect` (`bool`, `false`) | → `TextInputOptions.ShowSuggestions`, which is what Android's autocorrect is. A `boolean` since Ionic 9.0 (`autoCorrect: this.autocorrect ? 'on' : 'off'`); it was `'on' \| 'off'`, the enum `InputAutocorrect` here until #203 |
 | [x] | `autofocus` | `Autofocus` (`bool`) | The native input takes focus when it's first loaded, as Chromium focuses an inserted `autofocus` element |
 | [x] | `clearInput` | `ClearInput` (`bool`) | |
 | [x] | `clearInputIcon` | `ClearInputIcon` (`string?`) | An `AvonicIcon.Icon`: a name or a source. Null is md's `close-sharp` |

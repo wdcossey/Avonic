@@ -136,9 +136,12 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     public static readonly StyledProperty<string> AutocapitalizeProperty =
         AvaloniaProperty.Register<AvonicInput, string>(nameof(Autocapitalize), "off");
 
-    /// <summary>Ionic <c>autocorrect</c>: the soft keyboard's suggestions.</summary>
-    public static readonly StyledProperty<InputAutocorrect> AutocorrectProperty =
-        AvaloniaProperty.Register<AvonicInput, InputAutocorrect>(nameof(Autocorrect));
+    /// <summary>
+    /// Ionic <c>autocorrect</c>: the soft keyboard's suggestions, off by default. A <c>boolean</c> since Ionic 9.0, which renders
+    /// <c>autoCorrect: this.autocorrect ? 'on' : 'off'</c>.
+    /// </summary>
+    public static readonly StyledProperty<bool> AutocorrectProperty =
+        AvaloniaProperty.Register<AvonicInput, bool>(nameof(Autocorrect));
 
     /// <summary>Ionic <c>enterkeyhint</c>: the soft keyboard's Enter key.</summary>
     public static readonly StyledProperty<InputEnterkeyhint?> EnterkeyhintProperty =
@@ -365,7 +368,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
         set => SetValue(AutocapitalizeProperty, value);
     }
 
-    public InputAutocorrect Autocorrect
+    public bool Autocorrect
     {
         get => GetValue(AutocorrectProperty);
         set => SetValue(AutocorrectProperty, value);
@@ -629,7 +632,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
         native.IsReadOnly = Readonly;
         NativeTextField.Apply(native, Maxlength, Placeholder, NativeTextField.ContentType(Inputmode, Type), Enterkeyhint, Autocapitalize);
         TextInputOptions.SetIsSensitive(native, password);
-        TextInputOptions.SetShowSuggestions(native, Autocorrect == InputAutocorrect.On);
+        TextInputOptions.SetShowSuggestions(native, Autocorrect);
     }
 
     /// <summary><c>renderCounter</c> and <c>getCounterText</c>.</summary>

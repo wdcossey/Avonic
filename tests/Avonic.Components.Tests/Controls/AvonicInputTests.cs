@@ -1231,11 +1231,28 @@ public class AvonicInputTests
         Assert.True(TextInputOptions.GetUppercase(native));
 
         Assert.False(TextInputOptions.GetShowSuggestions(native));
-        input.Autocorrect = InputAutocorrect.On;
+        input.Autocorrect = true;
         Assert.True(TextInputOptions.GetShowSuggestions(native));
 
         input.Placeholder = "P";
         Assert.Equal("P", native.PlaceholderText);
+    }
+
+    [AvaloniaFact]
+    public void B24_Autocorrect_Is_A_Boolean_Off_By_Default()
+    {
+        // Ionic 9.0: autocorrect is a boolean, false by default; input.js renders autoCorrect: this.autocorrect ? 'on' : 'off'.
+        Assert.False(AvonicInput.AutocorrectProperty.GetDefaultValue(typeof(AvonicInput)));
+        var (input, _, scene) = Stub(new AvonicInput());
+        using var _ = scene;
+        var native = Native(input);
+        Assert.False(input.Autocorrect);
+        Assert.False(TextInputOptions.GetShowSuggestions(native));
+
+        input.Autocorrect = true;
+        Assert.True(TextInputOptions.GetShowSuggestions(native));
+        input.Autocorrect = false;
+        Assert.False(TextInputOptions.GetShowSuggestions(native));
     }
 
     [AvaloniaFact]

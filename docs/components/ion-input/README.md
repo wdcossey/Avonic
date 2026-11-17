@@ -22,6 +22,11 @@ Ionic is in [COMPARISON.md](COMPARISON.md).
 </c:AvonicInput>
 ```
 
+**Changed in the Ionic 9 migration** ([#203](https://github.com/wdcossey/Avonic/issues/203)): `Autocorrect` is a `bool`, `false`
+by default, as Ionic 9.0's `autocorrect` is a `boolean`. It was the enum `InputAutocorrect` (`Off`, `On`), which is gone:
+`Autocorrect="On"` becomes `Autocorrect="True"`. The rest of 9.0's `ion-input` changes are
+[#201](https://github.com/wdcossey/Avonic/issues/201); until it closes, this page and [PLAN.md](PLAN.md) describe Ionic 8.8.19.
+
 Validation is the app's, as in Ionic: add the style classes `ion-touched` and `ion-invalid` (`AvonicInput.TouchedClass`,
 `InvalidClass`) to show the error text in the invalid colour, or `ion-valid` (`ValidClass`) for the valid colour.
 
@@ -33,7 +38,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 |---|---|---|---|
 | [x] | `autocapitalize` | `Autocapitalize` (`string`) | `TextInputOptions.AutoCapitalization`, or `Uppercase` for `characters` |
 | [ ] | `autocomplete` | — | Not applicable: the browser's autofill |
-| [x] | `autocorrect` | `Autocorrect` | `TextInputOptions.ShowSuggestions` |
+| [x] | `autocorrect` | `Autocorrect` (`bool`) | `TextInputOptions.ShowSuggestions` |
 | [x] | `autofocus` | `Autofocus` | Focuses the field when it's loaded |
 | [x] | `clearInput` | `ClearInput` | |
 | [x] | `clearInputIcon` | `ClearInputIcon` | An icon name or source; null is `close-sharp` |
