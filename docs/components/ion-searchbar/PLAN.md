@@ -4,7 +4,8 @@ A search field: a native `<input type="search">` with a search icon at its start
 cancel button (a back arrow) that takes the search icon's place. md draws the input as a white card: 2 px corners, md's
 three-part shadow, 55 px of padding at each side for the icons. Measurements are from real Ionic 8.8.19 in Chromium, md, at
 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the events;
-a mobile one for the boxes). The commands are at the top of [COMPARISON.md](COMPARISON.md).
+a mobile one for the boxes). The commands are at the top of [COMPARISON.md](COMPARISON.md). They hold for Ionic 9.0.11, the
+reference, whose `searchbar.js` differs from 8.8.19's only in `autocorrect` (#203), and whose `searchbar.md.css` is the same.
 
 ## Fidelity checklist
 
@@ -17,7 +18,7 @@ a mobile one for the boxes). The commands are at the top of [COMPARISON.md](COMP
 | [x] | `animated` | `Animated` (`bool`) | md has no rule on what it changes: the host classes `searchbar-animated` (with `AvonicConfig.Animated`), `searchbar-no-animate` (the first 300 ms) and `searchbar-left-aligned` (`!animated`, a value or focus, worked out at load, focus, blur and a change of `showCancelButton`). Kept as `:animated`, `:no-animate` and `:left-aligned`, with no md rule, for an app's style, as `TitleSize.Large` is. iOS's centred placeholder and sliding cancel button are iOS only (ADR 0001) |
 | [x] | `autocapitalize` | `Autocapitalize` (`string`, `"off"`) | As `ion-input`: `on`, `sentences`, `words` → `TextInputOptions.AutoCapitalization`; `characters` → `Uppercase` |
 | [ ] | `autocomplete` | — | Not applicable: the browser's autofill. Avalonia has none (as `ion-input`) |
-| [x] | `autocorrect` | `Autocorrect` (`SearchbarAutocorrect`, `Off`) | `On` → `TextInputOptions.ShowSuggestions` |
+| [x] | `autocorrect` | `Autocorrect` (`bool`, `false`) | → `TextInputOptions.ShowSuggestions`. A `boolean` since Ionic 9.0 (`autoCorrect: this.autocorrect ? 'on' : 'off'`); it was `'on' \| 'off'`, the enum `SearchbarAutocorrect` here until #203 |
 | [x] | `cancelButtonIcon` | `CancelButtonIcon` (`string`, `"arrow-back-sharp"`) | An `AvonicIcon.Icon`. Ionic's default is `config.get('backButtonIcon', arrowBackSharp)`; Avonic has no `backButtonIcon` config yet (proposed) |
 | [x] | `cancelButtonText` | `CancelButtonText` (`string`, `"Cancel"`) | In md, the cancel button's `aria-label` only: its automation name |
 | [x] | `clearIcon` | `ClearIcon` (`string?`) | Null is md's `close-sharp` |

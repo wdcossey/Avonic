@@ -42,13 +42,6 @@ public enum SearchbarType
     Url,
 }
 
-/// <summary>Ionic <c>ion-searchbar</c> <c>autocorrect</c>.</summary>
-public enum SearchbarAutocorrect
-{
-    Off,
-    On,
-}
-
 /// <summary>Ionic <c>ion-searchbar</c> <c>enterkeyhint</c>: the soft keyboard's enter key. Null is the platform's own.</summary>
 public enum SearchbarEnterkeyhint
 {

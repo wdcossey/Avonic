@@ -848,7 +848,7 @@ public class AvonicSearchbarTests
         searchbar.Autocapitalize = "characters";
         Assert.True(TextInputOptions.GetUppercase(native));
         Assert.False(TextInputOptions.GetShowSuggestions(native));
-        searchbar.Autocorrect = SearchbarAutocorrect.On;
+        searchbar.Autocorrect = true;
         Assert.True(TextInputOptions.GetShowSuggestions(native));
 
         searchbar.Placeholder = "Find";
@@ -870,6 +870,23 @@ public class AvonicSearchbarTests
         searchbar.Maxlength = 0;
         Type(scene, PhysicalKey.E, "e");
         Assert.Equal("", searchbar.Value);
+    }
+
+    [AvaloniaFact]
+    public void B17_Autocorrect_Is_A_Boolean_Off_By_Default()
+    {
+        // Ionic 9.0: autocorrect is a boolean, false by default; searchbar.js renders autoCorrect: this.autocorrect ? 'on' : 'off'.
+        Assert.False(AvonicSearchbar.AutocorrectProperty.GetDefaultValue(typeof(AvonicSearchbar)));
+        var (searchbar, _, scene) = Stub();
+        using var _ = scene;
+        var native = Native(searchbar);
+        Assert.False(searchbar.Autocorrect);
+        Assert.False(TextInputOptions.GetShowSuggestions(native));
+
+        searchbar.Autocorrect = true;
+        Assert.True(TextInputOptions.GetShowSuggestions(native));
+        searchbar.Autocorrect = false;
+        Assert.False(TextInputOptions.GetShowSuggestions(native));
     }
 
     [AvaloniaFact]

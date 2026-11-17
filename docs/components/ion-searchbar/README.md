@@ -16,6 +16,11 @@ with real Ionic is in [COMPARISON.md](COMPARISON.md).
 <c:AvonicSearchbar Color="primary" ShowClearButton="Focus" />
 ```
 
+The reference is Ionic 9.0.11. **Changed in the Ionic 9 migration** ([#203](https://github.com/wdcossey/Avonic/issues/203)):
+`Autocorrect` is a `bool`, `false` by default, as Ionic 9.0's `autocorrect` is a `boolean`. It was the enum
+`SearchbarAutocorrect` (`Off`, `On`), which is gone: `Autocorrect="On"` becomes `Autocorrect="True"`. It's the only change
+9.0.11 makes to `ion-searchbar`.
+
 ## API
 
 ### Properties
@@ -25,7 +30,7 @@ with real Ionic is in [COMPARISON.md](COMPARISON.md).
 | [x] | `animated` | `Animated` (`bool`): the classes `:animated`, `:no-animate`, `:left-aligned`, which md has no rule on |
 | [x] | `autocapitalize` | `Autocapitalize` (`string`, `"off"`) |
 | [ ] | `autocomplete` | — (no autofill in Avalonia) |
-| [x] | `autocorrect` | `Autocorrect` (`SearchbarAutocorrect`) |
+| [x] | `autocorrect` | `Autocorrect` (`bool`, `false`) |
 | [x] | `cancelButtonIcon` | `CancelButtonIcon` (`string?`; unset, `AvonicConfig.BackButtonIcon` when made, as Ionic's `config.get('backButtonIcon')`; null is `arrow-back-sharp`, not mirrored in RTL) |
 | [x] | `cancelButtonText` | `CancelButtonText` (`string?`, `"Cancel"`): the cancel button's automation name |
 | [x] | `clearIcon` | `ClearIcon` (`string?`; null is `close-sharp`) |

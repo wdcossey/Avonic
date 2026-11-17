@@ -113,13 +113,3 @@ public enum InputEnterkeyhint
     /// <summary>Send.</summary>
     Send,
 }
-
-/// <summary>Ionic <c>ion-input</c> <c>autocorrect</c>.</summary>
-public enum InputAutocorrect
-{
-    /// <summary>No suggestions. The default.</summary>
-    Off,
-
-    /// <summary>The keyboard suggests and corrects.</summary>
-    On,
-}

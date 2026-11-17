@@ -49,9 +49,12 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
     public static readonly StyledProperty<string> AutocapitalizeProperty =
         AvaloniaProperty.Register<AvonicSearchbar, string>(nameof(Autocapitalize), "off");
 
-    /// <summary>Ionic <c>autocorrect</c>.</summary>
-    public static readonly StyledProperty<SearchbarAutocorrect> AutocorrectProperty =
-        AvaloniaProperty.Register<AvonicSearchbar, SearchbarAutocorrect>(nameof(Autocorrect));
+    /// <summary>
+    /// Ionic <c>autocorrect</c>: the soft keyboard's suggestions, off by default. A <c>boolean</c> since Ionic 9.0, which renders
+    /// <c>autoCorrect: this.autocorrect ? 'on' : 'off'</c>.
+    /// </summary>
+    public static readonly StyledProperty<bool> AutocorrectProperty =
+        AvaloniaProperty.Register<AvonicSearchbar, bool>(nameof(Autocorrect));
 
     /// <summary>
     /// Ionic <c>cancelButtonIcon</c>: an <see cref="AvonicIcon.Icon"/>, a name or a source. Unset, it's
@@ -204,7 +207,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         set => SetValue(AutocapitalizeProperty, value);
     }
 
-    public SearchbarAutocorrect Autocorrect
+    public bool Autocorrect
     {
         get => GetValue(AutocorrectProperty);
         set => SetValue(AutocorrectProperty, value);
@@ -492,7 +495,7 @@ public class AvonicSearchbar : TemplatedControl, IItemControl
         // autocapitalize === 'default' is no attribute, which is off.
         NativeTextField.Apply(native, Maxlength, Placeholder, NativeTextField.ContentType(Inputmode, Type), Enterkeyhint, Autocapitalize);
         TextInputOptions.SetIsSensitive(native, password);
-        TextInputOptions.SetShowSuggestions(native, Autocorrect == SearchbarAutocorrect.On);
+        TextInputOptions.SetShowSuggestions(native, Autocorrect);
     }
 
     // ── The native input ─────────────────────────────────────────────────────────────────────
