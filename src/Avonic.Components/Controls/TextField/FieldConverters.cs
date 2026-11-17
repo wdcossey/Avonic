@@ -43,6 +43,34 @@ public static class FieldConverters
             return builder.Build();
         });
 
+    /// <summary>
+    /// One side of a padding: the first value that's set, a number, on the side the <c>ConverterParameter</c> names, <c>Top</c> or
+    /// <c>Bottom</c>. The textarea's <c>.textarea-start</c> and <c>.textarea-end</c> (their child's <c>margin-top: var(--padding-top)</c>)
+    /// and a column's <c>.textarea-control</c> (<c>padding-top: 0</c>).
+    /// </summary>
+    public static readonly IMultiValueConverter OneSide = new OneSideConverter();
+
+    /// <summary>
+    /// The textarea's <c>::slotted(ion-button[slot=start|end]) { margin-top: 7px }</c> (Ionic 9), its own 4 px below, and the 16 px
+    /// beside the field: the value is the slot wrapper's padding, whose top is <c>var(--padding-top)</c> for any other child, so the
+    /// button's top margin is 7 less that. The <c>ConverterParameter</c> is <c>Start</c> or <c>End</c>.
+    /// </summary>
+    public static readonly IValueConverter SlottedButtonMargin =
+        new FuncValueConverter<Thickness, object?, Thickness>((padding, side) =>
+        {
+            var top = 7 - padding.Top;
+            return side as string == "End" ? new Thickness(16, top, 0, 4) : new Thickness(0, top, 16, 4);
+        });
+
+    private sealed class OneSideConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            var value = values.Select(v => v is double d && double.IsFinite(d) ? d : (double?)null).FirstOrDefault(d => d is not null) ?? 0;
+            return parameter as string == "Bottom" ? new Thickness(0, 0, 0, value) : new Thickness(0, value, 0, 0);
+        }
+    }
+
     /// <summary>The textarea's placement as <see cref="InputWrapperPanel"/> takes it, which lays out the label the same five ways.</summary>
     public static readonly IValueConverter TextareaPlacement =
         new FuncValueConverter<TextareaLabelPlacement, InputLabelPlacement>(LabelledTextField.Placement);

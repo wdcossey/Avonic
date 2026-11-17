@@ -6,6 +6,10 @@ and md's three looks (no fill, `solid`, `outline` with a notch), around a native
 `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the events; a mobile context for
 the boxes). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 
+**Ionic 9.0.11 (#201).** What `node tools/ionic-diff.js 8.8.19 9.0.11 --show textarea` changes was read and measured in Chromium
+on 9.0.11 (cases `a` to `x`, and the slots page in COMPARISON): behaviours 10, 11, 14, 15, 16, 20 and 22 changed, and 29 to 31
+are new. The rest holds on 9.0.11.
+
 It shares `ion-input`'s machinery (#24), and reuses what `Controls/Input/` makes public without editing it: `InputWrapperPanel`
 for the label's five layouts, and `AvonicInput`'s converters for the padding, radius, borders and notch in the theme. What
 would better move to a shared place is in the PR, under "Proposed for shared files".
@@ -82,8 +86,8 @@ box, an `InputWrapperPanel`), `PART_Label` (`.label-text-wrapper`), `PART_LabelT
 | [x] | `--highlight-color-invalid` | `Avonic.Textarea.HighlightColorInvalid` | brush | danger |
 | [x] | `--highlight-color-valid` | `Avonic.Textarea.HighlightColorValid` | brush | success |
 | [x] | `--highlight-height` | `Avonic.Textarea.HighlightHeight` | `double` | 2 |
-| [x] | `--padding-top` | `Avonic.Textarea.PaddingTop` | `double` | `CssUnset`: 18; 0 for floating and stacked. On the field, the slots and a row's label, not the wrapper |
-| [x] | `--padding-bottom` | `Avonic.Textarea.PaddingBottom` | `double` | `CssUnset`: 8. The same parts |
+| [x] | `--padding-top` | `Avonic.Textarea.PaddingTop` | `double` | `CssUnset`: 18; 20 for floating and stacked (`Avonic.Textarea.Md.PaddingTopStacked`, Ionic 9). On `.textarea-control` in a row (0 in a column), and above a slotted child |
+| [x] | `--padding-bottom` | `Avonic.Textarea.PaddingBottom` | `double` | `CssUnset`: 8; 6 for floating and stacked (`Avonic.Textarea.Md.PaddingBottomStacked`, Ionic 9). On `.textarea-control` |
 | [x] | `--padding-start`, `--padding-end` | `Avonic.Textarea.PaddingStart`, `PaddingEnd` | `double` | `CssUnset`: 0; solid and outline 16, outline round 32. On the wrapper and the bottom |
 | [x] | `--placeholder-color` | `Avonic.Textarea.PlaceholderColor` | brush | `CssUnset`: the field's colour |
 | [x] | `--placeholder-font-style` | `Avonic.Textarea.PlaceholderFontStyle` | `FontStyle` | `CssUnset`: inherited |
@@ -111,25 +115,28 @@ From `textarea.js` and `textarea.md.css`, each checked in Chromium. Each becomes
 | 7 | A click in the wrapper (label, padding) focuses the field; not on the bottom text or a button in a slot | `<label for>` |
 | 8 | `SetFocus()` focuses the native textarea; `GetInputElement()` returns it | |
 | 9 | In an item, a tap on the item's padding focuses the textarea | `ion-item`'s `getFirstInteractive` |
-| 10 | Rows: the field is `Rows` lines high (default 2), 19 px a line for 16 px Roboto, plus `--padding-top` and `--padding-bottom` (18 + 8 in a row): 64 for 2, 102 for 4, 45 for 1. A longer value scrolls inside it | measured `a`, `h`, `r1`, `e` (scrollHeight 102 in 64) |
-| 11 | `AutoGrow`: as many lines as the value, never fewer than `Rows`; grows and shrinks as it's typed or set: 45, 64, 83, 64 with `rows="1"` | `runAutoGrow`, `.native-wrapper::after`; measured `grow*` |
+| 10 | Rows: the field is `Rows` lines high (default 2), 19 px a line for 16 px Roboto, plus `.textarea-control`'s `--padding-top` and `--padding-bottom` (18 + 8 in a row). **Ionic 9:** md's host is at least 72, so 1 and 2 rows are 72 and 4 rows 102; the field fills the control, 46 high in 72. A longer value scrolls inside it | measured 9.0.11 `a`, `g`, `h`, `v` |
+| 11 | `AutoGrow`: as many lines as the value, never fewer than `Rows`; grows and shrinks as it's typed or set. With `rows="1"`: 72, 72, 83, 72 (Ionic 9's 72 minimum; 8.8.19 measured 45, 64, 83, 64) | `runAutoGrow`, `.native-wrapper::after` |
 | 12 | `Cols` without `AutoGrow`: the host is as wide as its content, the field `Cols` × 8 + 4 for 16 px Roboto; with `AutoGrow`, full width | `:host([cols]:not([auto-grow]))`; measured `c10`, `c20`, `c40`, `c20g` |
 | 13 | `Wrap`: `Off` keeps a line on one line; otherwise it wraps. A line break is a line feed, typed or pasted (CR LF and CR become LF), and an unfocused field shows its first lines | `wrap`; the HTML value's line breaks |
-| 14 | Row placements: the label at the top, 18 px above and 8 below its text (45 high), 16 px from the field; end mirrored; fixed 100 px; at most 200 | md.css; measured `a`, `e`, `f` |
-| 15 | Column placements: the label above (19), the field 8 px under it (outline: 12, with the label out of flow), the field's box at least 56 so the host is 75; floating sits on the field (`translateY(100%)`) until it has a value or focus (**Ionic 9**, #201: no longer for slotted content, as `hasStartEndSlots` is gone; the rest of 9.0's textarea changes are still to come), then `translateY(50%) scale(0.75)`; the field is transparent until focus or a value | md.css; measured `b`, `c`, `d`, `j`, `k` |
-| 16 | Heights: 44 at least; 56 for floating, stacked, solid and outline, on both the wrapper and `.textarea-wrapper-inner` | md.css |
+| 14 | Row placements: the label and the field 18 px down, `.textarea-control`'s padding (Ionic 9; it was the label's and the field's own), the label 16 px from the field; end mirrored; fixed 100 px; at most 200 | md.css; measured 9.0.11 `a`, `v`, `p` |
+| 15 | Column placements: the label above (19), the field 8 px under it and 6 above the bottom (`--padding-top: 20px; --padding-bottom: 6px` since 9.0), 72 in all; the outline's label out of flow and its field 19 down (it was 12). Floating sits on the field (`translateY(100%)`) until it has a value or focus (**Ionic 9:** no longer for slotted content), then `translateY(50%) scale(0.75)`; the field is transparent until focus or a value | md.css; measured 9.0.11 `b`, `c`, `d`, `f`, `g` |
+| 16 | Heights: **Ionic 9:** md's `:host { min-height: 72px }`, for every fill and placement; 8.8.19's 44, and 56 for floating, stacked, solid and outline, are gone | md.css; measured 9.0.11 `q` to `t` |
 | 17 | The highlight: 2 px under the wrapper, from the centre over 200 ms when focused; not in an item or with the outline | `shouldRenderHighlight`, `.textarea-highlight` |
 | 18 | Highlight colours: primary, a `Color`'s base, `ion-valid` success, `ion-touched` + `ion-invalid` danger; the focused floating or stacked label, the caret, and the borders take it | md.css |
 | 19 | Solid: step 50 with a 1 px step 500 bottom border and top corners 4; hover (mouse) step 100 and 750; focused step 150 and 750 | md.css |
 | 20 | Outline: a 1 px step 300 border in three parts, the notch opening for a floating label; focused 2 px in the highlight; round 28 with 32 padding | md.css, `createNotchController`; measured `j`, `k` |
 | 21 | Bottom: only with helper or error text or a counter; 5 px above 12 px text; error replaces helper when touched and invalid; the counter at the end | `renderBottomContent`; measured `i`, `l` |
-| 22 | Slots: at the top, with the field's padding above and below them, 16 px from the field; in a column 8 px lower (outline 12). A slotted button keeps only its 4 px below (measured `0 0 4 16` at the end) | md.css `.start-slot-wrapper`, `::slotted`; measured `q` |
+| 22 | **Ionic 9:** `.textarea-start` and `.textarea-end` beside `.textarea-control`, at the top: start slot, label, field, end slot. A slotted child's `margin-top` is `--padding-top` (18 in a row, 20 in a column, the outline's too), 16 px from what's beside it; an `ion-button`'s is 7, with its own 4 below | md.css `.textarea-start`, `::slotted`; measured 9.0.11 `i`, `j`, `w`, `x` |
 | 23 | Disabled: 0.38, as one (an `OpacityMask`, as the parts overlap), no focus. Read-only: focusable, not editable | `textarea-disabled` |
 | 24 | Placeholder: the field's colour at 0.6 | `::placeholder` |
 | 25 | The hints reach the platform: `Inputmode`, `Enterkeyhint`, `Autocapitalize` set `TextInputOptions`; the field takes Return | `<textarea>` attributes |
 | 26 | `Autofocus` focuses the field when it's first loaded | `autoFocus` |
 | 27 | Automation: named by the label (or the host's name), described by the error text when invalid, else the helper; `Required` says it's required | `inheritAriaAttributes`, `getHintTextID` |
 | 28 | RTL mirrors the row, the label's origin and the outline | md.css |
+| 29 | **Ionic 9:** the start, control and end containers side by side, measured with a chip and a button | 9.0.11 `w` |
+| 30 | **Ionic 9:** `textarea { min-width: 2ch }`, the label giving way first | `.native-wrapper`, `textarea` |
+| 31 | **Ionic 9:** the outline's floating label moves back over the start slot by its width, at once on a change of the slot; its room adds the slots back | `createStartEndContainerController`; measured 9.0.11 `j`, `m` |
 
 ### Not reproduced
 

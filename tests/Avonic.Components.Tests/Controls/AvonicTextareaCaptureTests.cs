@@ -75,6 +75,36 @@ public class AvonicTextareaCaptureTests
         Assert.True(page.Bounds.Height > 0);
     });
 
+    // Ionic 9's start, control and end containers: the page in docs/components/ion-textarea/COMPARISON.md's slots section.
+    [AvaloniaFact]
+    public void Slots_Page() => InstalledTheme.Run(_ =>
+    {
+        static AvonicIcon Heart() => new() { IconName = "heart" };
+        var page = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 10,
+            [TextElement.FontSizeProperty] = 16.0,
+            Children =
+            {
+                new AvonicTextarea { Label = "Floating start", LabelPlacement = TextareaLabelPlacement.Floating, StartContent = Heart() },
+                new AvonicTextarea { Label = "Start", Value = "Value", StartContent = new AvonicChip { Items = { "Chip" } }, EndContent = new AvonicButton { Content = "Go" } },
+                new AvonicTextarea { Label = "Stacked", LabelPlacement = TextareaLabelPlacement.Stacked, Value = "Value", StartContent = Heart(), EndContent = new AvonicButton { Fill = ButtonFill.Clear, Content = "Go" } },
+                new AvonicTextarea { Fill = TextareaFill.Outline, Label = "Outline start", LabelPlacement = TextareaLabelPlacement.Floating, Value = "Value", StartContent = Heart() },
+                new AvonicTextarea { Fill = TextareaFill.Solid, Label = "Solid start", LabelPlacement = TextareaLabelPlacement.Floating, Value = "Value", StartContent = Heart() },
+                new AvonicTextarea { Label = "Rows 1", Rows = 1, Value = "v" },
+            },
+        };
+        page.Bind(TextElement.FontFamilyProperty, page.GetResourceObservable("Avonic.FontFamily"));
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        Save(scene, "avonic-textarea-slots.png");
+
+        Assert.True(page.Bounds.Height > 0);
+    });
+
     private static void Save(Scene scene, string name)
     {
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();

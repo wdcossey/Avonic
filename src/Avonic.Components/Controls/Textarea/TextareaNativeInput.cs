@@ -71,6 +71,7 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
     {
         Bind(LineHeightProperty, _normalLineHeight, BindingPriority.Style);
         _automation = new NativeFieldAutomation(this);
+        _ = new TwoCh(this);
         UpdateFontMetrics();
     }
 

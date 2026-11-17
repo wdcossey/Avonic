@@ -27,6 +27,9 @@
     <SolidColorBrush x:Key="Avonic.Textarea.Md.Background" Color="Transparent" />
     <x:Double x:Key="Avonic.Textarea.Md.PaddingTop">18</x:Double>
     <x:Double x:Key="Avonic.Textarea.Md.PaddingBottom">8</x:Double>
+    <!-- :host(.textarea-label-placement-stacked), floating: padding-top 20px, padding-bottom 6px (Ionic 9) -->
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingTopStacked">20</x:Double>
+    <x:Double x:Key="Avonic.Textarea.Md.PaddingBottomStacked">6</x:Double>
     <x:Double x:Key="Avonic.Textarea.Md.PaddingFill">16</x:Double>
     <x:Double x:Key="Avonic.Textarea.Md.PaddingOutlineRound">32</x:Double>
     <x:Double x:Key="Avonic.Textarea.Md.BorderRadiusFill">4</x:Double>

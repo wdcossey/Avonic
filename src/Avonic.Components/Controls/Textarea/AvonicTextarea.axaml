@@ -79,38 +79,43 @@
                     </Grid>
                     <!-- .textarea-wrapper, the <label for>: a transparent background, so a click anywhere in it is the label's -->
                     <Border Name="PART_Wrapper" Background="Transparent">
-                        <c:InputWrapperPanel Name="PART_Layout"
-                                             LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.TextareaPlacement}}">
-                            <!-- align-items: flex-start -->
-                            <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
-                                <Panel>
-                                    <TextBlock Name="PART_LabelText"
-                                               Text="{TemplateBinding Label}"
-                                               TextTrimming="CharacterEllipsis"
-                                               TextWrapping="NoWrap"
-                                               IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                                    <ContentPresenter Name="PART_LabelContent"
-                                                      Content="{TemplateBinding LabelContent}"
-                                                      ContentTemplate="{TemplateBinding LabelContentTemplate}"
-                                                      IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
-                                </Panel>
+                        <!-- Ionic 9: .textarea-start, .textarea-control (the label and the textarea) and .textarea-end, in DOM
+                             order, which is the tab order. The start and end don't shrink and sit at the top (align-self: start). -->
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border Name="PART_StartWrapper" VerticalAlignment="Top">
+                                <ContentPresenter Name="PART_Start"
+                                                  Content="{TemplateBinding StartContent}"
+                                                  ContentTemplate="{TemplateBinding StartContentTemplate}" />
                             </Border>
-                            <!-- .textarea-wrapper-inner, in DOM order, which is the tab order: start, textarea, end -->
-                            <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto">
-                                <Border Name="PART_StartWrapper" VerticalAlignment="Top">
-                                    <ContentPresenter Name="PART_Start"
-                                                      Content="{TemplateBinding StartContent}"
-                                                      ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                                </Border>
-                                <c:TextareaNativeInput Name="PART_NativeInput" Grid.Column="1"
-                                                       Theme="{StaticResource Avonic.Textarea.NativeInput}" />
-                                <Border Name="PART_EndWrapper" Grid.Column="2" VerticalAlignment="Top">
-                                    <ContentPresenter Name="PART_End"
-                                                      Content="{TemplateBinding EndContent}"
-                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
-                                </Border>
-                            </Grid>
-                        </c:InputWrapperPanel>
+                            <Border Name="PART_Control" Grid.Column="1">
+                                <c:InputWrapperPanel Name="PART_Layout"
+                                                     LabelPlacement="{Binding LabelPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.TextareaPlacement}}"
+                                                     StartWidth="{Binding #PART_StartWrapper.Bounds.Width}"
+                                                     EndWidth="{Binding #PART_EndWrapper.Bounds.Width}">
+                                    <!-- align-items: flex-start -->
+                                    <Border Name="PART_Label" IsHitTestVisible="False" VerticalAlignment="Top">
+                                        <Panel>
+                                            <TextBlock Name="PART_LabelText"
+                                                       Text="{TemplateBinding Label}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="NoWrap"
+                                                       IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                            <ContentPresenter Name="PART_LabelContent"
+                                                              Content="{TemplateBinding LabelContent}"
+                                                              ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                              IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                        </Panel>
+                                    </Border>
+                                    <c:TextareaNativeInput Name="PART_NativeInput"
+                                                           Theme="{StaticResource Avonic.Textarea.NativeInput}" />
+                                </c:InputWrapperPanel>
+                            </Border>
+                            <Border Name="PART_EndWrapper" Grid.Column="2" VerticalAlignment="Top">
+                                <ContentPresenter Name="PART_End"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </Border>
+                        </Grid>
                     </Border>
                     <!-- .textarea-highlight: across the wrapper's padding box, at its bottom -->
                     <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />

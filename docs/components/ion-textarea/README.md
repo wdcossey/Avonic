@@ -6,10 +6,11 @@ Status: done · [#25](https://github.com/wdcossey/Avonic/issues/25)
 md's three looks: no fill, `Solid` and `Outline`. Its field is `Rows` lines high, or grows with its lines with `AutoGrow`. The
 design and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
-**Changed in the Ionic 9 migration** ([#201](https://github.com/wdcossey/Avonic/issues/201), in part): a floating label floats for
-focus or a value, no longer for content in a slot, as the input's, whose code it shares. The rest of 9.0's textarea changes (the
-start, control and end containers, `min-height: 72px`, 2ch) are still to come; until then this page describes Ionic 8.8.19
-otherwise.
+**Changed in the Ionic 9 migration** ([#201](https://github.com/wdcossey/Avonic/issues/201)): a floating label floats for focus or a
+value, no longer for content in a slot. The start slot sits before the label and the field, and the end slot after them, at the
+top. md's textarea is at least **72 high** in every fill and placement (it was 44, and 56 for floating, stacked, solid and outline),
+so 1 and 2 rows look the same. Floating and stacked take 20 above and 6 below. The field keeps at least 2ch, and an outline's
+floating label moves back over the start slot. This page describes Ionic 9.0.11.
 
 ```xml
 <c:AvonicItem>
@@ -137,4 +138,4 @@ The textarea shares its native field with the input and the searchbar (`Controls
 See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): `cols` follows Chromium on Windows in a phone viewport, which
 Chromium on Android would make wider; a click on the label while focused keeps focus; an icon-only button in a slot keeps its own
 look; an app's background, border and top padding keys win where Ionic's host classes would; no `align-self: baseline` in an item;
-the notch has no `max-width`; bottom text is 1 px taller. Tried in a real window by `tools/real-window`; not with a soft keyboard, or on a device.
+the notch has no `max-width`; the label's `max-width` changes at once, where Ionic 9 eases it; bottom text is 1 px taller. Tried in a real window by `tools/real-window` before Ionic 9 (#201's layout not yet); not with a soft keyboard, or on a device.

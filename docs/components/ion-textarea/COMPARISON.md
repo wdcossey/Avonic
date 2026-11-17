@@ -52,6 +52,26 @@ The rows line up to a pixel down to the solid field's bottom text: every box is 
 Chromium's `line-height: normal` (19 px for 16 px Roboto, where Avalonia's own is 18.75; see `TextareaNativeInput`). From
 there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia and 14 in Chromium, as for `ion-input`.
 
+### Ionic 9's start, control and end (#201)
+
+`node <temp>/measure.js tslots.html ionic-slots.png`, a throwaway script with `tools/ionic-ref/boxes.js`'s page and server, on
+Ionic 9.0.11, a 390 px desktop page at 2×; Avonic: `AvonicTextareaCaptureTests.Slots_Page`.
+
+```html
+<ion-app style="position:static;display:block;contain:none;overflow:visible"><div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<ion-textarea label="Floating start" label-placement="floating"><ion-icon slot="start" name="heart"></ion-icon></ion-textarea>
+<ion-textarea label="Start" value="Value"><ion-chip slot="start">Chip</ion-chip><ion-button slot="end">Go</ion-button></ion-textarea>
+<ion-textarea label="Stacked" label-placement="stacked" value="Value"><ion-icon slot="start" name="heart"></ion-icon><ion-button slot="end" fill="clear">Go</ion-button></ion-textarea>
+<ion-textarea fill="outline" label="Outline start" label-placement="floating" value="Value"><ion-icon slot="start" name="heart"></ion-icon></ion-textarea>
+<ion-textarea fill="solid" label="Solid start" label-placement="floating" value="Value"><ion-icon slot="start" name="heart"></ion-icon></ion-textarea>
+<ion-textarea label="Rows 1" rows="1" value="v"></ion-textarea>
+</div></ion-app>
+```
+
+![](compare/side-slots.png)
+
+Each row lines up, to the tests' tolerances.
+
 ## Behaviours
 
 | # | Behaviour | Result |
@@ -65,26 +85,29 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 | 7 | A click in the label focuses the field; not on the bottom or a slotted button | Match. **Difference** as the input's: while focused, Chromium blurs and refocuses |
 | 8 | `SetFocus()`, `GetInputElement()` | Match |
 | 9 | An item's padding tap focuses the textarea | Match |
-| 10 | Rows: 45, 64, 102 for 1, 2, 4; a longer value scrolls inside | Match to 0.5 px |
-| 11 | `AutoGrow`: 45, 64, 83, back to 64, 102 when set in code; never under `Rows` | Match |
+| 10 | Rows: 72, 72, 102 for 1, 2, 4 (Ionic 9's 72 minimum); the field 46 in 72; a longer value scrolls inside | Match to 0.5 px |
+| 11 | `AutoGrow`: 72, 72, 83, back to 72, 102 when set in code; never under `Rows` | Match |
 | 12 | `Cols`: 84, 164, 324; full width with `AutoGrow`; 133 for 20 columns of 13 px, and 10 more sizes and counts (#155) | Match in a phone viewport. See the gaps for other platforms |
 | 12a | In an item's start or end slot, `width: auto` (#155): 164 (20 columns) whatever the value or placeholder, the label's 58.52 more, `cols` 10 84; with `AutoGrow` 160 (no scroll bar's room), 80 for 10 columns, and a long line 342, what's left; an end one gives way to a start one, 162 | Match |
 | 13 | `Wrap="Off"`; line breaks as line feeds; an unfocused field at its first lines | Match: one line, scrolling sideways. A pasted CR LF or CR becomes LF, with the caret after it. A value set in code leaves an unfocused field at its first lines, though the caret is at the end |
-| 14 | Row placements: the label 45 high at the top, its text 18 down, 16 from the field; end; fixed 100; at most 200 | Match to 0.8 px |
-| 15 | Column placements: 75 high, the label on the field and raised, the field 8 under it (12 with the outline, 58 high); hidden until focus or a value | Match to 0.8 px |
-| 16 | 44 and 56 minimums, on the wrapper and `.textarea-wrapper-inner` | Match |
+| 14 | Row placements: the label and the field 18 down (the control's padding), 16 apart; end; fixed 100; at most 200; an app's padding keys | Match to 0.8 px |
+| 15 | Column placements: 72 high, the label on the field and raised, the field 8 under it and 39 high (19 down and 47 with the outline); hidden until focus or a value; a slot doesn't float it | Match to 0.8 px |
+| 16 | Ionic 9's 72 minimum, in every fill and placement | Match |
 | 17 | The highlight | Match |
 | 18 | Highlight colours on the highlight, caret, label and bottom border | Match |
 | 19 | Solid: rest, hover (mouse and pen only), focus | Match |
 | 20 | Outline and round shapes | Match |
 | 21 | The bottom, error text, the counter and its formatter | Match; the bottom's text 1 px taller |
-| 22 | Slots at the top, with the field's padding, 16 from it; 8 (12) lower in a column; a button `0 0 4 16` | Match |
+| 22 | Ionic 9's slots: before the label and after the field, `--padding-top` down (18, 20 in a column); a button 7 down | Match |
 | 23 | Disabled (0.38 as one, through an `OpacityMask`) and read-only | Match |
 | 24 | Placeholder at 0.6 | Match |
 | 25 | `Inputmode`, `Enterkeyhint`, `Autocapitalize`, multi-line, `Maxlength` | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
 | 26 | Autofocus | Match |
 | 27 | Automation name, help text and required | Set on the native textarea and tested; no screen reader tried |
 | 28 | RTL | Match, by the input's numbers (the same rules) |
+| 29 | Start, control and end side by side | Match to 0.6 px (B29) |
+| 30 | 2ch | Match: 17.98 (B30) |
+| 31 | The outline label over the start slot | Match: 16 from the host, the field at 48, 19 down (B31) |
 
 ## Deliberate differences and gaps
 
@@ -102,6 +125,10 @@ there Avonic is 1 px lower: a 12 px line under a field is 15 high in Avalonia an
 - **`:host-context(ion-item) { align-self: baseline }`** isn't applied: the textarea sits in an item as any child does. Alone in
   an item, as measured, the box is the same.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
+- **Ionic 9 eases the label's `max-width` with the float**; here the room changes at once and only the transform eases, as for
+  the input.
+- **`--padding-top` and `--padding-bottom` floating or stacked**: Ionic 9's `:host(.textarea-label-placement-stacked)` sets 20 and
+  6, which beat an app's plain `ion-textarea { --padding-top }` by specificity; here the app's key wins, as for the other keys.
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto); a row's label text is 18.75 high, not 19, as the label
   isn't the field and keeps Avalonia's own line height. Neither changes a box above.
 - **Touch scrolling** inside a textarea that's inside a page that scrolls is untried: there's no device here.
