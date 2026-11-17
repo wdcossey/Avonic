@@ -158,4 +158,8 @@
     <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBorderBrush" Color="{DynamicResource Avonic.BackgroundColorStep200}" />
     <SolidColorBrush x:Key="Avonic.Refresher.Md.NativeIconBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColorStep250}" />
 
+    <!-- ion-modal: a sheet's handle reads ion-background-color-step-350, which dark sets (656565), before its literal, which
+         Tokens/Modal.axaml keeps for light. -->
+    <SolidColorBrush x:Key="Avonic.Modal.Md.HandleBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColorStep350}" />
+
 </ResourceDictionary>

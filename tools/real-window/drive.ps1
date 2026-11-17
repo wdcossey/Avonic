@@ -880,9 +880,10 @@ try {
         Away
     }
 
-    # ion-modal (#42): an inline modal opened by its trigger with a real click, the focus trap, Escape, Back (Alt+Left), its
-    # Close button with a nested modal open; one that CanDismiss holds until its box is ticked, tapped on the backdrop with a
-    # finger; and one made in code. The status line says what each was dismissed with.
+    # ion-modal (#42): an inline modal opened by its trigger with a real click, the focus trap, Escape, Back (Alt+Left), and
+    # with a nested modal open, the nested one's button that closes the modal under it (whose own Close the full-screen nested
+    # modal covers); one that CanDismiss holds until its box is ticked, tapped on the backdrop with a finger; and one made in code.
+    # The status lines say what each was dismissed with: the nested modal has its own, as it goes at the same time.
     Section 'ion-modal: trigger, focus trap, Escape, back, backdrop, canDismiss' {
         Open 'ion-modal'
         function OpenWith($name) {
@@ -910,11 +911,12 @@ try {
         Key '{ESC}' 700
         Check 'Escape dismisses the nested one first' ([bool](WaitForText 'NestedModal dismissed, role backdrop')) (FirstText '*dismissed*')
         OpenWith 'Open a nested modal'
-        $x, $y = Centre (Named $CT::Button 'Close')
+        $x, $y = Centre (Named $CT::Button 'Close the modal under this one')
         Click $x $y
         Start-Sleep -Milliseconds 700
-        Check 'Close dismisses the modal' ([bool](WaitForText 'TriggerModal dismissed, role cancel')) ((Texts | Where-Object { $_ -like '*dismissed*' }) -join ' | ')
-        Check 'and the nested one with it' (-not (FirstText 'Closing the modal under this one*')) ''
+        Check 'the nested modal closes the one under it' ([bool](WaitForText 'TriggerModal dismissed, role cancel')) ((Texts | Where-Object { $_ -like '*dismissed*' }) -join ' | ')
+        Check 'and goes with it, parent-dismissed' ([bool](WaitForText 'NestedModal dismissed, role parent-dismissed')) (FirstText 'NestedModal*')
+        Check 'leaving neither open' (-not (FirstText 'Closing the modal under this one*') -and -not (FirstText 'Full screen on a phone*')) ''
 
         # IsOpen opens the guarded dialog, 320 wide in the middle: a touch tap near the top left of the window is on the backdrop.
         $x, $y = Centre (Named $CT::Button 'IsOpen')
@@ -938,6 +940,66 @@ try {
         Click $x $y
         Start-Sleep -Milliseconds 600
         Check 'a modal made in code dismisses with its data' ([bool](WaitForText 'The modal from code was dismissed with closed, role cancel')) (FirstText 'The modal from code*')
+        Away
+    }
+
+    # ion-modal's sheet (#42): breakpoints 0, 0.25, 0.5, 0.75 and 1, opening at 0.5. The page's line says where it is
+    # (IonBreakpointDidChange). Real clicks on the handle cycle it; a real finger drags its header down and it settles at a
+    # breakpoint, with its header where that breakpoint puts it; a mouse drag up takes it higher; a fast finger drag down closes it
+    # with the gesture role. The sheet is 834 high, 10 below the window's top, so at a breakpoint b its top is 10 + (1 - b) * 834.
+    Section 'ion-modal: the sheet' {
+        Open 'ion-modal'
+        $w = $win.Current.BoundingRectangle
+        function SheetAt {
+            $t = FirstText 'The sheet is*'
+            if ($t -match 'at ([0-9.]+)$') { [double]$Matches[1] } else { -1 }
+        }
+        # The sheet's top in dips from the window's, from its title, centred in md's 56-high toolbar at the sheet's top.
+        function SheetTop { $b = (Named $CT::Text 'Sheet').Current.BoundingRectangle; [math]::Round(($b.Y + $b.Height / 2 - $w.Y) / $scale - 28) }
+        function Expected($b) { 10 + (1 - $b) * 834 }
+        ClickOn (Named $CT::Button 'Open the sheet')
+        Start-Sleep -Milliseconds 900
+        Shot 'modal-sheet'
+        Check 'the trigger opens the sheet at 0.5' ((SheetAt) -eq 0.5) (FirstText 'The sheet is*')
+        Check 'with its top half way' ([math]::Abs((SheetTop) - (Expected 0.5)) -le 12) "top $(SheetTop), expected $(Expected 0.5)"
+
+        $handle = Named $CT::Button 'Activate to adjust the size*'
+        Check 'the handle is a button to automation' ([bool]$handle) ''
+        $seen = @()
+        foreach ($i in 1..4) {
+            ClickOn (Named $CT::Button 'Activate to adjust the size*')
+            Start-Sleep -Milliseconds 800
+            $seen += SheetAt
+        }
+        Check 'clicks on the handle cycle 0.75, 1, 0.25, 0.5, never 0' (($seen -join ',') -eq '0.75,1,0.25,0.5') ($seen -join ',')
+
+        # A slow finger drag down from 0.5 by 170, held still 200 ms before the lift, so that the speed the snap projects has
+        # gone: 0.5 - 170 / 834 is 0.296, nearest 0.25.
+        $tx, $ty = Centre (Named $CT::Text 'Sheet')
+        TouchDown $tx $ty
+        for ($i = 1; $i -le 20; $i++) { Start-Sleep -Milliseconds 16; [RealInput]::TouchMove($tx, [int]($ty + (Px 170) * $i / 20)) }
+        TouchHold $tx ([int]($ty + (Px 170))) 200
+        TouchUp $tx ([int]($ty + (Px 170)))
+        Start-Sleep -Milliseconds 900
+        Shot 'modal-sheet-dragged'
+        $at = SheetAt
+        Check 'a finger drag down settles it at a lower breakpoint' ($at -in @(0.25)) "at $at"
+        Check 'where that breakpoint puts it' ([math]::Abs((SheetTop) - (Expected $at)) -le 12) "top $(SheetTop), expected $(Expected $at)"
+
+        # A mouse drag up by most of the window takes it to the top.
+        $tx, $ty = Centre (Named $CT::Text 'Sheet')
+        MouseDrag $tx $ty 0 (Px (-560)) 20 16
+        Start-Sleep -Milliseconds 900
+        Check 'a mouse drag up takes it to 1' ((SheetAt) -eq 1) "at $(SheetAt)"
+        Check 'at the top' ([math]::Abs((SheetTop) - (Expected 1)) -le 12) "top $(SheetTop), expected $(Expected 1)"
+
+        # A fast finger drag down from the top, past the lowest breakpoint, closes it.
+        $tx, $ty = Centre (Named $CT::Text 'Sheet')
+        TouchDrag $tx $ty 0 (Px 700) 10 16
+        Start-Sleep -Milliseconds 900
+        Shot 'modal-sheet-closed'
+        Check 'a fast drag down closes it with the gesture role' ([bool](WaitForText 'SheetModal dismissed, role gesture')) (FirstText 'SheetModal*')
+        Check 'and the page says so' ((FirstText 'The sheet is*') -eq 'The sheet is closed') (FirstText 'The sheet is*')
         Away
     }
 

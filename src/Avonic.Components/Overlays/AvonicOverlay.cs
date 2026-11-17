@@ -228,8 +228,9 @@ public abstract class AvonicOverlay : TemplatedControl
     }
 
     /// <summary>
-    /// What an overlay's own <c>present()</c> does after the shared one, under the lock: after <see cref="DidPresent"/> and the
-    /// shared focus, as the alert then focuses its wrapper or its one button.
+    /// What an overlay's own <c>present()</c> does after the shared one, still under the lock: after its enter animation, its
+    /// <c>didPresent</c> events and the focus, as the modal starts its sheet's gesture and the alert focuses its wrapper or its one
+    /// button.
     /// </summary>
     protected virtual void OnPresented()
     {
@@ -431,7 +432,7 @@ public abstract class AvonicOverlay : TemplatedControl
     /// </summary>
     internal void DismissFromInput(string? role) => LogFault(Dismiss(null, role), "dismiss");
 
-    private void LogFault(Task task, string what) =>
+    private protected void LogFault(Task task, string what) =>
         task.ContinueWith(
             t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's {What} failed: {Exception}", what, t.Exception!.InnerException),
             CancellationToken.None,

@@ -37,7 +37,23 @@
                                         Opacity="0.01"
                                         RenderTransform="translateY(40px)">
                             <Border Name="PART_Clip" ClipToBounds="True">
-                                <ContentPresenter Name="PART_ContentPresenter" />
+                                <Panel>
+                                    <!-- .ion-page, at the top, as tall as the wrapper up to the content's max-height -->
+                                    <c:ModalPagePanel>
+                                        <ContentPresenter Name="PART_ContentPresenter" />
+                                    </c:ModalPagePanel>
+                                    <!-- .modal-handle: 36 by 5, 5 from the top, centred, radius 8, over the content (z-index 11).
+                                         The control shows it on a sheet. -->
+                                    <c:ModalHandle Name="PART_Handle"
+                                                   Width="36"
+                                                   Height="5"
+                                                   Margin="0,5,0,0"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Top"
+                                                   CornerRadius="8"
+                                                   Cursor="Hand"
+                                                   Background="{DynamicResource Avonic.Modal.Md.HandleBackgroundBrush}" />
+                                </Panel>
                             </Border>
                         </c:ModalWrapper>
                     </c:ModalPanel>
@@ -137,6 +153,18 @@
                 <MultiBinding Converter="{x:Static b:Css.Var}">
                     <DynamicResource ResourceKey="Avonic.Modal.Height" />
                     <DynamicResource ResourceKey="Avonic.Modal.Md.HeightInsetLarge" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.modal-sheet): height calc(100% - (ion-modal-offset-top + 10px)), the offset Avonic.ModalOffsetTop, the wrapper at the bottom (position: absolute;
+             bottom: 0). After the media queries, whose height it beats. An app's Avonic.Modal.Height still wins. -->
+        <Style Selector="^:sheet /template/ c|ModalPanel#PART_Panel">
+            <Setter Property="VerticalContentAlignment" Value="Bottom" />
+            <Setter Property="ContentHeight">
+                <MultiBinding Converter="{x:Static c:ModalPanel.SheetHeight}" ConverterParameter="10">
+                    <DynamicResource ResourceKey="Avonic.Modal.Height" />
+                    <DynamicResource ResourceKey="Avonic.ModalOffsetTop" />
                 </MultiBinding>
             </Setter>
         </Style>

@@ -5,9 +5,10 @@ two PRs, as the issue allows:
 
 1. **This one, the modal:** full screen on a phone and a centred dialog on a tablet, presented in code or inline (`IsOpen`,
    `Trigger`), `CanDismiss`, the focus trap, `KeepContentsMounted`, md's enter and leave animations, the events and methods.
-2. **The sheet**, on this branch: `breakpoints`, `initialBreakpoint`, `backdropBreakpoint`, `handle`, `handleBehavior`,
-   `expandToScroll`, the drag and its snapping, `setCurrentBreakpoint()`, `getCurrentBreakpoint()`, `ionBreakpointDidChange` and
-   the drag events. None of these is declared here (rule 3: no dead props).
+2. **The sheet** ([#42](https://github.com/wdcossey/Avonic/issues/42), second PR): `breakpoints`, `initialBreakpoint`,
+   `backdropBreakpoint`, `handle`, `handleBehavior`, `expandToScroll`, the drag and its snapping, `setCurrentBreakpoint()`,
+   `getCurrentBreakpoint()`, `ionBreakpointDidChange` and the drag events, with `progressStart`, `progressStep` and `progressEnd`
+   on `AvonicAnimation`. See [The sheet](#the-sheet) below; the first PR's sections are as they were.
 
 Measured in real Ionic 9.0.11 in headless Chromium, md, in `ion-app`; the raw output is [`ref/measurements.txt`](ref/measurements.txt).
 
@@ -20,17 +21,17 @@ Measured in real Ionic 9.0.11 in headless Chromium, md, in `ion-app`; the raw ou
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
 | [x] | `animated` | `Animated` | `bool` | `true` | The overlay's |
-| [ ] | `backdropBreakpoint` | | | `0` | Sheet |
+| [x] | `backdropBreakpoint` | `BackdropBreakpoint` | `double` | `0` | Sheet |
 | [x] | `backdropDismiss` | `BackdropDismiss` | `bool` | `true` | The backdrop's `Tappable`; Escape and back (`BackdropDismissEnabled`) |
-| [ ] | `breakpoints` | | | | Sheet |
+| [x] | `breakpoints` | `Breakpoints` | `AvaloniaList<double>?` | | Sheet: sorted into a copy, as Ionic sorts its array; `"0, 0.5, 1"` in XAML, as `StrokeDashArray` |
 | [x] | `canDismiss` | `CanDismiss` | `ModalCanDismiss` | `true` | A `bool` or a `Func<object?, string?, Task<bool>>`, converting from either, and from `true`/`false` in XAML |
 | [x] | `enterAnimation` | `EnterAnimation` | `AnimationBuilder?` | | The overlay's |
-| [ ] | `expandToScroll` | | | `true` | Sheet |
+| [x] | `expandToScroll` | `ExpandToScroll` | `bool` | `true` | Sheet |
 | [x] | `focusTrap` | `FocusTrap` | `bool` | `true` | `FocusTrapEnabled` |
-| [ ] | `handle` | | | | Sheet |
-| [ ] | `handleBehavior` | | | `'cycle'` | Sheet |
+| [x] | `handle` | `Handle` | `bool?` | | Sheet: null is Ionic's `undefined`, shown on a sheet |
+| [x] | `handleBehavior` | `HandleBehavior` | `ModalHandleBehavior` | `Cycle` | Sheet: `None`, `Cycle` |
 | [ ] | `htmlAttributes` | none | | | Not applicable: HTML attributes. An Avalonia app sets the control's properties, `Classes` and `AutomationProperties` directly |
-| [ ] | `initialBreakpoint` | | | | Sheet |
+| [x] | `initialBreakpoint` | `InitialBreakpoint` | `double?` | | Sheet |
 | [x] | `isOpen` | `IsOpen` | `bool` | `false` | On `AvonicOverlay`, as every overlay has it |
 | [x] | `keepContentsMounted` | `KeepContentsMounted` | `bool` | `false` | Mounted is in the visual tree: see the design |
 | [x] | `keyboardClose` | `KeyboardClose` | `bool` | `true` | The overlay's |
@@ -48,10 +49,10 @@ Measured in real Ionic 9.0.11 in headless Chromium, md, in `ion-app`; the raw ou
 |---|---|---|---|
 | [x] | `didDismiss` | `DidDismiss` | The overlay's generic event, raised after `IonModalDidDismiss` |
 | [x] | `didPresent` | `DidPresent` | The same, after `IonModalDidPresent` |
-| [ ] | `ionBreakpointDidChange` | | Sheet |
-| [ ] | `ionDragEnd` | | Sheet (and ios's card, not applicable) |
-| [ ] | `ionDragMove` | | Sheet |
-| [ ] | `ionDragStart` | | Sheet |
+| [x] | `ionBreakpointDidChange` | `IonBreakpointDidChange` | Sheet: `ModalBreakpointChangeEventArgs.Breakpoint` |
+| [x] | `ionDragEnd` | `IonDragEnd` | Sheet: `ModalDragEventArgs` with `SnapBreakpoint` and `IsDismissing` (ios's card: not applicable) |
+| [x] | `ionDragMove` | `IonDragMove` | Sheet: `ModalDragEventArgs` (`CurrentY`, `DeltaY`, `VelocityY`, `Progress`, `SnapBreakpoint`) |
+| [x] | `ionDragStart` | `IonDragStart` | Sheet: no detail |
 | [x] | `ionModalDidDismiss` | `IonModalDidDismiss` | `OverlayEventArgs` |
 | [x] | `ionModalDidPresent` | `IonModalDidPresent` | |
 | [x] | `ionModalWillDismiss` | `IonModalWillDismiss` | `OverlayEventArgs` |
@@ -66,11 +67,11 @@ All bubble, as Stencil's events do.
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `dismiss(data?, role?)` | `Dismiss(data, role)` | `Task<bool>`; `CanDismiss` first |
-| [ ] | `getCurrentBreakpoint()` | | Sheet |
+| [x] | `getCurrentBreakpoint()` | `GetCurrentBreakpoint()` | Sheet: `double?`, synchronous, as it only reads a field |
 | [x] | `onDidDismiss()` | `OnDidDismiss()` | The overlay's |
 | [x] | `onWillDismiss()` | `OnWillDismiss()` | The overlay's |
 | [x] | `present()` | `Present()` | And `Present(TopLevel)`, the overlay's extension |
-| [ ] | `setCurrentBreakpoint(breakpoint)` | | Sheet |
+| [x] | `setCurrentBreakpoint(breakpoint)` | `SetCurrentBreakpoint(breakpoint)` | Sheet: `Task`, completing when the move has |
 
 ### Slots, parts
 
@@ -79,7 +80,7 @@ All bubble, as Stencil's events do.
 | [x] | default slot | `Content` (+ `ContentTemplate`) | One slot: the modal is its content's logical parent |
 | [x] | `backdrop` | `PART_Backdrop` | An `AvonicBackdrop` |
 | [x] | `content` | `PART_Content` | A `ModalWrapper`, the `.modal-wrapper` |
-| [ ] | `handle` | | Sheet |
+| [x] | `handle` | `PART_Handle` | Sheet: a `ModalHandle`, the `.modal-handle` button |
 
 ### CSS custom properties (12, and 2 more)
 
@@ -223,11 +224,11 @@ popover (#45) will use the same way. Listed in the PR under "shared files":
 
 | Not here | Why |
 |---|---|
-| The sheet | The second PR |
+| The sheet | The second PR, [below](#the-sheet) |
 | `--internal-content-safe-area-padding-bottom` on an `AvonicContent` in a full-screen modal with no footer | `AvonicContent` has no such padding; it's another control's file. Proposed in the PR. `Avonic.SafeAreaBottom` is 0 unless the app fills it |
 | The page lifecycle (`ionViewWillEnter` and the rest on the user's element) | They're `ion-nav`'s events ([#130](https://github.com/wdcossey/Avonic/issues/130)), which defines them for its pages; nothing in Avonic raises or listens to them yet |
 | `ionMount` | `@internal`: for a framework's delegate |
-| The keyboard's `KEYBOARD_DID_OPEN` | Only the sheet's gesture listens to it |
+| The keyboard's `KEYBOARD_DID_OPEN` | Only the sheet's gesture listens to it: [the sheet](#the-sheet) does |
 | Root `aria-hidden`, `backdrop-no-scroll` | The overlay system's deferral: there's no app root to hide (#65) |
 | The router passthrough (`ion-page-overlay-passthrough`) | The router is out of scope |
 | A `controller` (`modalController.create`) | The overlay system's deferral; `new AvonicModal { … }.Present()` is the same |
@@ -259,3 +260,160 @@ popover (#45) will use the same way. Listed in the PR under "shared files":
 
 `AvonicOverlay`, `AvonicAnimation`, `AvonicBackdrop` (#5), all merged. The sheet will need `Gestures` (#4) and
 `progressStart`/`progressStep`/`progressEnd` on `AvonicAnimation`, which the overlay system deferred to it.
+
+---
+
+# The sheet
+
+The second PR of #42. A modal with `breakpoints` and `initialBreakpoint` is a sheet: it sits at the bottom, at a fraction of its
+height, and the user drags it between those fractions, or down and away when 0 is one of them. From `modal.js`,
+`gestures/sheet.js`, `gestures/utils.js`, `animations/sheet.js`, `md.enter.js`, `md.leave.js`, `ios.enter.js` (md's sheet gesture
+uses it), `utils.js`, `safe-area-utils.js`, `utils/animation/animation.js` and `modal.md.css`. Measured in Ionic 9.0.11 in headless
+Chromium, md, 390 x 844 and 1024 x 768, in `ion-app`; the raw output is [`ref/sheet-measurements.txt`](ref/sheet-measurements.txt).
+`breakpoints [0, 0.25, 0.5, 0.75, 1]` and `initialBreakpoint 0.5` unless said.
+
+## What Ionic does
+
+- **A sheet** (`isSheetModal`): `breakpoints` and `initialBreakpoint` both set, read at load and again at each present. Its host
+  has `modal-sheet`. `breakpoints` is sorted in place when it's set (`breakpointsChanged`). An `initialBreakpoint` that isn't in
+  `breakpoints` logs a warning at load.
+- **Layout** (`modal.md.css`): `:host(.modal-sheet) { --height: calc(100% - (var(--ion-modal-offset-top, 0px) + 10px)) }`, and
+  the wrapper `position: absolute; bottom: 0`, centred across as the host's flex box would place it. `--ion-modal-offset-top` is the
+  root's `--ion-safe-area-top`, which the modal sets on its host at present, on a resize and when the root's changes. An app's
+  `--height` wins, as a `:host` rule loses to the page's. The tablet media query's 600 x 500 height loses to the sheet's.
+- **Safe area**: a sheet's is fixed at present: top, left and right `0px`, bottom `inherit`.
+- **The handle** (`render`, `.modal-handle`): a `<button part="handle">` first in the wrapper when `handle !== false` on a sheet,
+  `aria-label="Activate to adjust the size of the dialog overlaying the screen"`, `tabindex` 0 when `handleBehavior` is `cycle`
+  and -1 for `none`. 36 x 5, 5 px from the wrapper's top, centred, radius 8, `var(--ion-color-step-350,
+  var(--ion-background-color-step-350, #c0c0be))`, `z-index: 11`, `cursor: pointer`; its `::before` adds a 4 px tap area around
+  it. The host is `tabindex` 0 with a cycling handle, -1 otherwise.
+- **Handle click** (`onHandleClick`, `moveToNextBreakpoint`): with `cycle`, and no sheet transition running, the next breakpoint
+  that isn't 0, wrapping from the last to the first.
+- **Present**: `currentBreakpoint` is reset to `initialBreakpoint`. md's enter is the sheet's (`createSheetEnterAnimation`), used
+  whenever `initialBreakpoint` is set: 280 ms, `cubic-bezier(0.36,0.66,0.04,1)`, the wrapper from `translateY(100%)` to
+  `translateY(100 - bp * 100 %)` at opacity 1; the backdrop from 0 to `--backdrop-opacity * bp` with `pointer-events: none` until
+  it ends, when `backdropBreakpoint < bp`; otherwise to 0 with nothing on its `pointer-events`.
+- **The gesture's animation** (`initSheetGesture`): after the present, `enterAnimation || iosEnterAnimation`, with the sheet's
+  keyframes, the wrapper's inline `opacity: 1`, 500 ms and `cubic-bezier(0.32,0.72,0,1)`. Its keyframes become the full run
+  (`translateY(0%)` to `100%`; the backdrop from `--backdrop-opacity` to 0.01, or to 0 at `1 - backdropBreakpoint` and on when
+  that's set) and it's held at `progressStart(true, 1 - bp)`, linear. So at rest the backdrop is the linear point between those
+  frames: 0.165 at 0.5, not 0.16 (S2).
+- **Backdrop by breakpoint** (`enableBackdrop`, `disableBackdrop`): above `backdropBreakpoint`, with `focusTrap` and
+  `showBackdrop` true, the host and backdrop take pointer events and the focus trap is on; otherwise the host and backdrop are
+  `pointer-events: none` (the wrapper keeps `auto`, so only it takes input and the page behind the backdrop does too) and
+  `ion-disable-focus-trap` is added. Checked at the gesture's creation and after each snap.
+- **`expandToScroll`** (true): below the top breakpoint the content (`ion-content` in the modal) has `scrollY` false, so a drag on it
+  moves the sheet; at the top breakpoint it's given back, at the release that snaps there. A press on content can start the
+  gesture (`canStart`) only when it's scrolled to the top and has no refresher, if the sheet is at 1 or `expandToScroll` is false.
+  False: `modal-no-expand-scroll`, the content keeps scrolling at every breakpoint, and the `.ion-page`'s `max-height` follows the
+  visible part (`contentAnimation`, `(1 - offset) * 100%`); an upward drag inside the content doesn't move the sheet.
+- **The drag** (`createGesture`): on the wrapper, `modalSheet`, priority 40, `y`, threshold 10. `onStart`: `canDismiss` blocks the
+  gesture when it isn't `true` and 0 is a breakpoint; the content stops scrolling if the drag goes down; at the next frame the host
+  is focused (it keeps focus, measured); `progressStart(true, 1 - bp)`; `ionDragStart`. `onMove`: `step = 1 - bp + deltaY /
+  height` (the wrapper's height); past the second breakpoint with `canDismiss` blocking, `calculateSpringStep` slows it to at most
+  0.95; clamped 0.0001 to 0.9999; `progressStep`; `ionDragMove` with `{ currentY, deltaY, velocityY, progress, snapBreakpoint }`,
+  `progress` 0 at the lowest breakpoint and 1 at the highest. `onEnd`: the snap is the breakpoint nearest `bp - (deltaY + velocityY
+  * 350) / height`, rounded to thousandths and clamped 0..1 (`FLICK_PROJECTION_MS`); `moveSheetToBreakpoint`; `ionDragEnd`, with
+  `isDismissing`.
+- **The snap** (`moveSheetToBreakpoint`): to the current breakpoint instead of 0 when `canDismiss` blocks; keyframes from the
+  offset to the target (the backdrop by `getBackdropValueForSheet`), `progressStep(0)`, the gesture off,
+  `progressEnd(1, 0, animated ? 500 : 0)`. At its end, if it stays open: at the next frame the full-run keyframes again,
+  `progressStart(true, 1 - target)`, `currentBreakpoint`, `ionBreakpointDidChange` if it changed, the backdrop by breakpoint, the
+  gesture on. At 0: `sheetOnDismiss`, which at the animation's end sets 0, raises `ionBreakpointDidChange` and dismisses with the
+  role `gesture`, which plays no leave animation. Blocked by a `canDismiss` function: it's called with `(undefined, 'gesture')`, and
+  `true` dismisses with `handler` once the snap back has finished.
+- **`setCurrentBreakpoint(bp)`**: a warning and nothing if it isn't a sheet or `bp` isn't a breakpoint; nothing if it's the current
+  one; otherwise the snap, with `animated`, from `1 - current`, kept as `sheetTransition` until it resolves.
+  `getCurrentBreakpoint()` returns `currentBreakpoint`, undefined when not presented.
+- **During a transition**: a backdrop tap does nothing; a `dismiss()` while the gesture is dismissing it returns false unless its
+  role is `gesture`.
+- **md leave** (`createSheetLeaveAnimation`): 200 ms, `cubic-bezier(0.47,0,0.745,0.715)`, the wrapper from `100 - bp * 100 %` to
+  `100%`, the backdrop from `--backdrop-opacity * getBackdropValueForSheet(bp)` to 0 (at `backdropBreakpoint` and on, when set).
+- **Dismissed**: the gesture's animation destroyed, the gesture destroyed, the content's `scrollY` given back (`resetContentScroll`).
+- **Keyboard** (`KEYBOARD_DID_OPEN`): the gesture is turned off for a frame.
+- **Focus** (`onModalFocus`): a focus on the host itself, from outside it, goes to a focusable handle.
+
+## Measured
+
+| | Case | Result |
+|---|---|---|
+| S1 | Box at 390 x 844 | The wrapper 390 x 834 at 0, 10 (`translateY(417px)` at 0.5); host `tabindex` 0; safe area top, left, right `0px`, bottom `inherit` |
+| S1 | 1024 x 768 | 600 x 758 at x 212, radius 2, `0 28px 48px` shadow |
+| S1 | `--ion-safe-area-top: 24px` on the root | `--ion-modal-offset-top: 24px`; the wrapper 810 high; the toolbar inside has no top padding |
+| S2 | Enter at 0.5 | The wrapper 834 → 784.4, 723.8, 644.9 … 417 at 279; the backdrop 0 → 0.019, 0.042 … 0.160, `pointer-events: none`, then 0.165 and `auto` once the gesture holds it |
+| S3 | Leave at 0.5 | 417 → 420.2, 429.9 … 833.9 at 203; the backdrop 0.16 → 0.1588 … 0 |
+| S4 | Drag up 104 px from the header | The wrapper follows 1:1 (409, 401 … 313); the backdrop 0.168, 0.1709 …; `ionDragMove` `progress` 0.51, 0.519 … |
+| S5 | Release there | The snap 0.75: from 313 to 208.5 over 500 ms with `cubic-bezier(0.32,0.72,0,1)`, the backdrop 0.1999 → 0.24 by `getBackdropValueForSheet`, then 0.2425 (the full run at 0.25); `ionBreakpointDidChange` 0.75 a frame after the end |
+| S5 | Drag down 48 px slowly | Snaps back to 0.5 |
+| S6 | Drag down 336 px | `snapBreakpoint` 0 from the first move; `ionDragEnd` `isDismissing: true`; to 834 over 500 ms; then `ionBreakpointDidChange` 0, `ionModalWillDismiss` and `ionModalDidDismiss` with `gesture`, no leave |
+| S7 | The same with `canDismiss: false` | 1:1 to 609 (step 0.73), then the spring: 625.9, 629.5, 633.9 … 647.4; back to 417 over 500 ms; still presented |
+| S8 | `setCurrentBreakpoint(1)` | 417 → 383.9, 347.1 … 0 at 504, the backdrop 0.16 → 0.32; the event at 520, then the promise. `0.6`: a warning, nothing. `0`: to 834, then the event and the dismiss with `gesture` |
+| S9 | The handle | 36 x 5 at 177, 432 (5 below the wrapper), `rgb(192, 192, 190)`, radius 8, `tabindex` 0; hit from 4 px left of it to 4 px right, 4 above to 4 below; clicks: 0.75, 1, 0.25, 0.5, 0.75. `none`: `tabindex` -1, a click does nothing. `handle: false`: none, host `tabindex` -1 |
+| S10 | `backdropBreakpoint 0.5` at 0.5 | The backdrop 0 through the enter, `pointer-events: none` on it and the host, `ion-disable-focus-trap`. To 0.75: 0.16 (0.32 x 0.5), `auto`, the class gone. To 0.25: 0, `none` |
+| S11 | `expandToScroll` | True at 0.5: the content's `scrollY` false. False: `scrollY` true, `.ion-page` `max-height: 50%` (417 high) |
+| S13 | Focus | After a drag from the header: the host itself, its shadow root's `activeElement` null, with a cycling handle or not |
+| S16 | `initialBreakpoint` without `breakpoints` | Not a sheet (`modal-default`), no handle, but md's enter is the sheet's: the wrapper 844 high, held at `translateY(422px)`, the backdrop 0.16 |
+
+## Design
+
+On `AvonicModal`, with what the gesture needs in `Controls/Modal/`:
+
+- **Properties**: `Breakpoints` (`AvaloniaList<double>?`, which XAML reads from `"0, 0.5, 1"`; a sorted copy is kept, as Ionic
+  sorts its array in place), `InitialBreakpoint` (`double?`), `BackdropBreakpoint`, `Handle` (`bool?`), `HandleBehavior`
+  (`ModalHandleBehavior`), `ExpandToScroll`. `:sheet` is `modal-sheet`.
+- **Events and methods**: `IonBreakpointDidChange` (`ModalBreakpointChangeEventArgs`), `IonDragStart`, `IonDragMove`, `IonDragEnd`
+  (`ModalDragEventArgs`), `SetCurrentBreakpoint(double)` (`Task`), `GetCurrentBreakpoint()` (`double?`).
+- **`ModalSheet`** (internal): `createSheetGesture`'s closure as a class: the gesture, the animation, `moveSheetToBreakpoint`, the
+  snap and progress functions, and the backdrop by breakpoint, line for line.
+- **`ModalHandle`**: the `handle` part, a focusable control with `Behaviors/NativeButton` (a native `<button>`: a click on release,
+  Enter and Space), its hit area 4 px wider each way (`::before`), not a tab stop with `None`, a `Button` to automation named as
+  Ionic's `aria-label`.
+- **Layout**: `ModalPanel.VerticalContentAlignment` (`Bottom` for `position: absolute; bottom: 0`), and `calc(a ± b)` in its sizes.
+  `:sheet` sets the height from `Avonic.Modal.Height`, else `calc(100% - (offset + 10px))`, the offset being
+  `Avonic.ModalOffsetTop`, which the modal keeps at the root's `Avonic.SafeAreaTop` (`--ion-modal-offset-top`), read from its
+  overlay host, as the modal's own key is 0.
+- **Backdrop by breakpoint**: `pointer-events: none` on the host and backdrop is the backdrop's `IsHitTestVisible` false (local, as
+  an inline style): the host draws nothing and takes no input of its own, and the wrapper keeps taking it. The focus trap reads
+  `FocusTrapEnabled`, false while the backdrop is off.
+- **`AvonicAnimation`**: `ProgressStart(forceLinearEasing, step)`, `ProgressStep(step)`, `ProgressEnd(playTo, step, dur)`, and
+  `Keyframes` on a running animation (`setKeyframes`), from `animation.js`; `max-height` as a keyframe property (a percentage of the
+  parent's height), for `contentAnimation`, on the content presenter, Avonic's `.ion-page`.
+- **The content**: `ContentUtils.FindClosestIonContent` from the press's source, its `ScrollY` and scroll offset, and its refresher.
+  A drag up inside content that scrolls (the sheet fully open, or `ExpandToScroll` false) can't move the sheet, and
+  Ionic's passive gesture lets the browser scroll it; here the gesture lets go of it (`ReleaseAgainstDirection`, given as a
+  condition read at the move, fully open as `canStart` checks 1), so the `ScrollViewer` scrolls, as the refresher does.
+
+### Not done, with why
+
+| Not here | Why |
+|---|---|
+| `swapFooterPosition` (`expandToScroll` false moves an `ion-footer` to the body while dragging) | It keeps the footer from shaking in a browser, whose layout lags the transform; Avalonia lays out and draws in the same frame, and the footer at the bottom of the content's max height is already where Ionic pins it |
+| `setupChildRoutePassthrough` | The router is out of scope |
+| ios's card (`presentingElement`, swipe to close) | ios only, as the first PR |
+
+## Behaviours to test
+
+| # | Behaviour | Source |
+|---|---|---|
+| S1 | A sheet: `:sheet`, the wrapper at the bottom, `100% - 10` high, centred across; 600 x 758 on a tablet; the root's `Avonic.SafeAreaTop` taken off its height; an app's `Avonic.Modal.Height` wins; not a sheet without both props | `modal.md.css`, S1 |
+| S2 | md's sheet enter frame by frame; the backdrop not hit-testable until it ends; then the gesture's hold (0.165) | `animations/sheet.js`, S2 |
+| S3 | md's sheet leave frame by frame, from the current breakpoint | S3 |
+| S4 | A drag follows the finger 1:1 on the wrapper's height, the backdrop linear; `IonDragStart`, `IonDragMove` with its detail | `onMove`, S4 |
+| S5 | The release snaps to the projected breakpoint over 500 ms, `cubic-bezier(0.32,0.72,0,1)`; `IonDragEnd`; `IonBreakpointDidChange` a frame after; no drag during the snap | `onEnd`, `moveSheetToBreakpoint`, S5 |
+| S6 | Down to 0: dismissed with `gesture`, no leave, `IonBreakpointDidChange` 0 first; a dismiss during it returns false | `sheetOnDismiss`, S6 |
+| S7 | `CanDismiss` false: the spring, back to the breakpoint, still presented; a function is asked with `gesture`, and true dismisses with `handler` after the snap back | `handleCanDismiss`, S7 |
+| S8 | `SetCurrentBreakpoint`: the move, the event, the task; nothing for the current one, one not in the list (a warning) or a modal that isn't a sheet; 0 dismisses; `Animated` false moves at once; `GetCurrentBreakpoint` | S8 |
+| S9 | The handle: shown on a sheet unless `Handle` false; its box and colour; `Cycle` clicks and Enter go to the next non-zero breakpoint, wrapping, not during a move; `None` does nothing and isn't a tab stop; its name; its 4 px hit area | `render`, `onHandleClick`, S9 |
+| S10 | `BackdropBreakpoint`: at or below it, the backdrop is 0 and lets clicks through to the page, and focus can leave; above it, it fades by `getBackdropValueForSheet` and blocks; `ShowBackdrop` or `FocusTrap` false never block | `enableBackdrop`, S10 |
+| S11 | `ExpandToScroll`: the content doesn't scroll below the top breakpoint and does at it, and after a dismiss; false: it scrolls at every breakpoint, its height follows the sheet; a scrolled content doesn't start the drag | S11 |
+| S12 | A backdrop tap during a move does nothing | `onBackdropTap` |
+| S13 | Focus: the host is a tab stop with a cycling handle, and a focus on it from outside goes to the handle; a drag focuses the host | `onModalFocus`, S13 |
+| S14 | Safe area: 0 at the top, left and right of a sheet, the app's at the bottom | `getInitialSafeAreaConfig` |
+| S15 | Presented again, it starts at `InitialBreakpoint`; an `InitialBreakpoint` not in `Breakpoints` logs a warning | `present`, `componentWillLoad` |
+| S16 | `InitialBreakpoint` alone: md's sheet enter, no handle, no gesture | S16 |
+| A1–A6 | `AvonicAnimation`: `ProgressStart` holds the step, linear; `ProgressStep` moves it, clamped to 0..0.9999; `ProgressEnd(1)` plays from the step over the duration given with the easing back, `ProgressEnd(0)` plays back and finishes at step 0; `Keyframes` on a running animation keeps its time; the forced values are gone before `OnFinish` callbacks; children follow; `max-height` | `animation.js` |
+
+## Real window
+
+`tools/real-window/drive.ps1` gets a section for the sheet on the sample page: a drag between breakpoints with real input, the
+handle clicked to cycle, and a drag down that closes it.

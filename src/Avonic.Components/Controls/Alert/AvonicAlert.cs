@@ -962,11 +962,4 @@ public class AvonicAlert : AvonicOverlay
             next.BringIntoView();
         }
     }
-
-    private void LogFault(Task task, string what) =>
-        task.ContinueWith(
-            t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The alert's {What} failed: {Exception}", what, t.Exception!.InnerException),
-            CancellationToken.None,
-            TaskContinuationOptions.OnlyOnFaulted,
-            TaskScheduler.Default);
 }
