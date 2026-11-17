@@ -3,7 +3,7 @@
                     xmlns:b="using:Avonic.Components.Behaviors">
 
     <!--
-        Ionic's global typography, from css/typography.css (@ionic/core 8.8.19). Opt-in, as Ionic's file is: AvonicTheme doesn't
+        Ionic's global typography, from css/typography.css (@ionic/core 9.0.11). Opt-in, as Ionic's file is: AvonicTheme doesn't
         merge it, so it costs nothing unless an app asks for it. Merge it into the app's resources, not its styles, at startup:
 
             <Application.Resources>

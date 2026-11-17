@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Ionic's palette, from css/core.css (@ionic/core 8.8.19). A Color key per variable, plus a brush
+        Ionic's palette, from css/core.css (@ionic/core 9.0.11). A Color key per variable, plus a brush
         that follows it. The -rgb variants have no key: a Color already gives alpha.
         How a control uses these: docs/infra/color-system/README.md
     -->
