@@ -1352,6 +1352,59 @@ try {
         Check 'leaving it raises IonChange' ((Status) -like 'ionChange: *') (Status)
     }
 
+    # ion-alert (#39): one in the page opened by its trigger with a real click, Tab staying inside, Escape; a radio alert made in
+    # code, a pick and OK; a text alert whose Save handler returns false while the name is empty, Enter in a field doing nothing
+    # (as in Ionic, which has no form), and Enter on Save submitting; IsOpen with BackdropDismiss off. The status line says what
+    # each was dismissed with. Only what's on top is aimed at: a click lands on the overlay that covers the page.
+    Section 'ion-alert' {
+        Open 'ion-alert'
+        function OpenWith($name) {
+            ClickOn (Named $CT::Button $name)
+            Start-Sleep -Milliseconds 500
+        }
+        function Status { FirstText '*dismissed with*' }
+
+        OpenWith 'Open the alert'
+        Shot 'alert-presented'
+        Check 'a click on the trigger presents the alert' ([bool](FirstText 'This is an alert!')) ((Texts | Select-Object -First 6) -join ' | ')
+        1..6 | ForEach-Object { Key '{TAB}' 200 }
+        $focused = $AE::FocusedElement.Current
+        Check 'Tab stays inside the alert' ($focused.Name -in @('Cancel', 'OK', 'Alert Important message')) "$($focused.Name) $($focused.ControlType.ProgrammaticName)"
+        Key '{ESC}' 600
+        Check 'Escape dismisses it with the backdrop role' ([bool](WaitForText 'BasicAlert dismissed with nothing, role backdrop')) (Status)
+
+        OpenWith 'Pick a color'
+        Shot 'alert-radios'
+        ClickOn (Named $CT::RadioButton 'Red')
+        ClickOn (Named $CT::Button 'OK')
+        Start-Sleep -Milliseconds 400
+        Check 'a radio picked and OK return its value' ([bool](WaitForText 'Color dismissed with {values: "red"}, role none')) (Status)
+
+        OpenWith 'Enter your name'
+        ClickOn (Named $CT::Button 'Save')
+        Check 'a handler returning false keeps it open' (([bool](FirstText "Save kept it open*")) -and [bool](Named $CT::Button 'Save')) (FirstText 'Save kept*')
+        ClickOn (Named $CT::Edit 'Name')
+        Key 'Ann' 300
+        Key '{ENTER}' 500
+        Check 'Enter in a text field does nothing' ([bool](Named $CT::Button 'Save')) (Status)
+        # Nickname, Age, the textarea, Cancel, then Save.
+        1..5 | ForEach-Object { Key '{TAB}' 200 }
+        Check 'Tab reaches Save' ($AE::FocusedElement.Current.Name -eq 'Save') $AE::FocusedElement.Current.Name
+        Shot 'alert-inputs'
+        Key '{ENTER}' 600
+        Check 'Enter on Save submits the text' ([bool](WaitForText 'Name dismissed with {values: {name: "Ann"*saved: True}, role none')) (Status)
+
+        ClickOn (Named $CT::Button 'IsOpen')
+        Start-Sleep -Milliseconds 500
+        Shot 'alert-three'
+        Key '{ESC}' 500
+        Check 'BackdropDismiss off: Escape leaves it open' ([bool](Named $CT::Button 'Update')) (Status)
+        ClickOn (Named $CT::Button 'Update')
+        Start-Sleep -Milliseconds 400
+        Check 'a button of the IsOpen alert dismisses it' ([bool](WaitForText 'ThreeAlert dismissed with {values: null}, role none')) (Status)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

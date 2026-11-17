@@ -67,6 +67,7 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `Trigger` | `trigger` (`createTriggerController`) | public; the name of a control in its name scope, whose own `Click` routed event or a tap presents it, as a DOM `click` comes from a key on a button and a tap on anything (#42) |
 | `ControlWillPresentEvent` and the other three | `ion<Name>WillPresent` and the rest | protected; raised just before the generic one, as Ionic does |
 | `OnPresenting()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnPresenting` once it's in the host (an inline one's place is `Placeholder`); `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
+| `OnPresented()` | what an overlay's own `present()` does after the shared one | protected, under the lock, after `DidPresent` and the shared focus: the alert focuses its wrapper or its one button (#39) |
 | `PresentFocusTarget` | `[role="dialog"][tabindex]` | protected; what present focuses, the overlay if null (the modal's wrapper) |
 
 **Inline overlays** (`CoreDelegate`, #42): an overlay with a parent when it's presented is moved to the overlay host, with an

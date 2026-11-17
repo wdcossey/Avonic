@@ -96,10 +96,10 @@ public interface) are for #45; md's defaults (`end`, `start`) are what's drawn h
 | [x] | `--background` | `Avonic.Alert.Background` | unset, falling back to `Avonic.OverlayBackgroundColorBrush` |
 | [x] | `--width` | `Avonic.Alert.Width` | `auto` |
 | [x] | `--min-width` | `Avonic.Alert.MinWidth` | 250 |
-| [x] | `--max-width` | `Avonic.Alert.MaxWidth` | unset: `Avonic.Alert.Md.MaxWidth` 280; `Avonic.Alert.Md.MaxWidthTablet` 560 at `:breakpoint-md` (`min(100vw - 96px, 560px)`, which is 560 from 768 up) |
+| [x] | `--max-width` | `Avonic.Alert.MaxWidth` | unset: `Avonic.Alert.Md.MaxWidth` 280; `Avonic.Alert.Md.MaxWidthTablet` `min(100vw - 96px, 560px)` at `:breakpoint-md` (560 from 768 up) |
 | [x] | `--height` | `Avonic.Alert.Height` | `auto` |
 | [x] | `--min-height` | `Avonic.Alert.MinHeight` | `auto` |
-| [x] | `--max-height` | `Avonic.Alert.MaxHeight` | unset: `Avonic.Alert.Md.MaxHeight` `90%`; at `:breakpoint-md`, `min(100vh - 96px, 560px)`: the window's height less `Avonic.Alert.Md.TabletMargin` 96, at most `Avonic.Alert.Md.MaxHeightTablet` 560 |
+| [x] | `--max-height` | `Avonic.Alert.MaxHeight` | unset: `Avonic.Alert.Md.MaxHeight` `90%`; `Avonic.Alert.Md.MaxHeightTablet` `min(100vh - 96px, 560px)` at `:breakpoint-md`, which `AlertPanel` reads as CSS does |
 
 ## What Ionic does
 
