@@ -229,7 +229,8 @@ public abstract class AvonicOverlay : TemplatedControl
 
     /// <summary>
     /// What an overlay's own <c>present()</c> does after the shared one, still under the lock: after its enter animation, its
-    /// <c>didPresent</c> events and the focus, as the modal starts its sheet's gesture.
+    /// <c>didPresent</c> events and the focus, as the modal starts its sheet's gesture and the alert focuses its wrapper or its one
+    /// button.
     /// </summary>
     protected virtual void OnPresented()
     {

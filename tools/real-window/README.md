@@ -45,6 +45,10 @@ once if the window doesn't fit on the screen.
   - `ion-textarea`: Enter, auto grow, the counter (read from a line on the page, and by pixel) and clear on edit.
   - `ion-input-otp`: typing box to box, Backspace, `IonComplete`, a paste and `IonChange` on leaving. The paste puts the
     clipboard's text back afterwards, and is skipped if the clipboard holds anything else.
+  - `ion-alert` (#39): a real click on the trigger presents the page's alert, Tab stays inside, Escape dismisses it with
+    `backdrop`; a radio alert made in code returns `red` after a pick and OK; a text alert's Save handler returning false keeps it
+    open, Enter in its field does nothing (Ionic's has no form), and Enter on Save submits `{name: "Ann"}`; the `IsOpen` alert with
+    `BackdropDismiss` off stays on Escape and closes from a button. Not run yet.
   - `typography`: frames only.
   - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
     to the list at 0; a frame of `SetFocus`'s ring on row 1.
