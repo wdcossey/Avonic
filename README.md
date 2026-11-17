@@ -17,8 +17,8 @@ every screen in both, and a page for each control.
 
 > **Status: in development, with no release yet.** 49 of Ionic's components and families are done, 72 of its elements in all:
 > items and lists, buttons, cards, toolbars, the grid, form controls from checkbox to input and searchbar, segment, tabs, fab,
-> sliding items, accordion, reorder, refresher, infinite scroll and picker. Each went through every step of
-> [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
+> sliding items, accordion, reorder, refresher, infinite scroll, picker, and the app's root, `ion-app`. Each went through every
+> step of [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
 > rolled up at the end of each tier, so the newest may be missing; the `Status:` line of each `docs/components/<tag>/README.md`
 > is current. The overlays (toast, alert, modal, popover, menu and the rest), select and datetime are next, in
 > [`docs/ROADMAP.md`](docs/ROADMAP.md). v1 was reviewed and discarded; see [`docs/LESSONS_LEARNED.md`](docs/LESSONS_LEARNED.md).

@@ -5,18 +5,20 @@
 
     <ScrollViewer>
         <StackPanel>
-            <TextBlock TextWrapping="Wrap">Some words and <c:AvonicTextSpan Color="primary">some coloured ones which wrap around with the words either side of them</c:AvonicTextSpan> and then some more words after.</TextBlock>
-            <TextBlock TextWrapping="Wrap">Nested: <c:AvonicTextSpan Color="danger">red, <c:AvonicTextSpan Color="success">green</c:AvonicTextSpan>, <c:AvonicTextSpan>still red</c:AvonicTextSpan></c:AvonicTextSpan>.</TextBlock>
+            <StackPanel Margin="16,8">
+                <TextBlock TextWrapping="Wrap">Some words and <c:AvonicTextSpan Color="primary">some coloured ones which wrap around with the words either side of them</c:AvonicTextSpan> and then some more words after.</TextBlock>
+                <TextBlock TextWrapping="Wrap">Nested: <c:AvonicTextSpan Color="danger">red, <c:AvonicTextSpan Color="success">green</c:AvonicTextSpan>, <c:AvonicTextSpan>still red</c:AvonicTextSpan></c:AvonicTextSpan>.</TextBlock>
 
-            <c:AvonicText Color="secondary">
-                <StackPanel>
-                    <TextBlock Text="A block" />
-                    <TextBlock Text="Another block" />
-                </StackPanel>
-            </c:AvonicText>
-            <c:AvonicText Color="danger">
-                <c:AvonicIcon IconName="heart" />
-            </c:AvonicText>
+                <c:AvonicText Color="secondary">
+                    <StackPanel>
+                        <TextBlock Text="A block" />
+                        <TextBlock Text="Another block" />
+                    </StackPanel>
+                </c:AvonicText>
+                <c:AvonicText Color="danger">
+                    <c:AvonicIcon IconName="heart" />
+                </c:AvonicText>
+            </StackPanel>
 
             <c:AvonicItem>
                 <c:AvonicText Color="danger" Content="In an item" />

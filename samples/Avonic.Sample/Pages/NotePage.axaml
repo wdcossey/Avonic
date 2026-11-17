@@ -5,8 +5,10 @@
 
     <ScrollViewer>
         <StackPanel>
-            <c:AvonicNote Content="A note on its own" />
-            <c:AvonicNote Color="danger" Content="A danger note" />
+            <StackPanel Margin="16,8">
+                <c:AvonicNote Content="A note on its own" />
+                <c:AvonicNote Color="danger" Content="A danger note" />
+            </StackPanel>
 
             <c:AvonicItem>
                 <c:AvonicLabel Content="In the end slot" />

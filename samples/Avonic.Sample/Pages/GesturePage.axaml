@@ -14,7 +14,7 @@
             </c:AvonicItem>
             <c:AvonicItem>
                 <c:AvonicLabel>
-                    <TextBlock Name="Detail" Text=" " />
+                    <TextBlock Name="Detail" Text="No gesture yet" />
                 </c:AvonicLabel>
             </c:AvonicItem>
             <Border Name="Track" Height="72" Margin="16,8" Background="Transparent">

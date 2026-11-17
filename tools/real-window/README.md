@@ -64,12 +64,12 @@ once if the window doesn't fit on the screen.
     doesn't. Since #182, the same strip at the top differs at load from after the wheel's fade, as the thumb is there from load:
     run on `192cf20`, 13 of 13, and it fails (0 pixels) on `2f8eb1e`, before #182.
   - `ion-content: the scroll bar` (#175): the page's `Scroll bar` toggle on, then a mouse drag of the thumb, which has to scroll the
-    content, and a click on the down arrow, 40 more, read from the `Ended at` line; then the toggle off. Added without being run.
+    content, and a click on the down arrow, 40 more, read from the `Ended at` line; then the toggle off. Run in the full sweep
+    on `28c4288`.
   - `focus indicators` (#188): a checkbox in a multi-input item, focused by Shift+Tab then Tab, shows its circle 5 past the default
     slot's end (the item's room), and a letter clears it; a toggle in a multi-input item shows its circle beside the handle, told
-    from the item's own focus overlay. Added without being run.
-- **229 checks** run on v2 `b1ef0e9` (2026-11-16), in about five minutes, 228 passing (the miss was lost input, rerun 10 of 10);
-  since then 1 from #197 (the showcase page) and 1 from #182 (the thumb at load), each run.
+    from the item's own focus overlay. Run in the full sweep on `28c4288`.
+- **239 checks** run on v2 `28c4288` (2026-11-17), all 239 passing; no section added since.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 

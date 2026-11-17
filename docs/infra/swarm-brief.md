@@ -48,6 +48,11 @@ The point is that the PRs can merge in any order without a conflict.
 - **Don't pipe a script to `python -` or `node -` through a heredoc** with quotes nested inside: the shell's quoting breaks it, or it
   waits on input. Write the script to a file in your temp folder and run the file. Make edits with the Edit tool.
 - **Don't ask the human anything.** Choose the conservative option, and put it under **"For you to decide"** in the PR.
+- **Never post to a repository we don't own:** no issues, pull requests, comments, discussions or reactions in
+  AvaloniaUI/Avalonia, ionic-team/ionic-framework, ionic-team/ionicons or any other. Some projects don't want issues raised by
+  an AI. Write what you find upstream in our own docs (`docs/infra/avalonia-issues.md`; for Ionic, the file
+  [#221](https://github.com/wdcossey/Avonic/issues/221) adds), with the evidence, and the human files it by hand if they choose.
+  Issues in wdcossey/Avonic are fine.
 
 ## How to get this right
 
@@ -125,7 +130,8 @@ These are mistakes this project has already made, so don't repeat them.
 - **An `ItemsControl`'s child that is its own container inherits from the control,** its logical parent, not from the template part
   it sits in, so a part's `color` rule (`.button-native { color }`) goes on the host's `Foreground`.
 - **`AvonicConfig.Animated` isn't a master switch.** Ionic's `animated` reaches tap-click and the transitions of the accordion,
-  menu, nav, router outlet, overlays, searchbar and skeleton text only. A control Ionic doesn't make read it ignores it here too.
+  menu, nav, router outlet, overlays, searchbar and skeleton text and, since 8.8.19, the datetime's month scroll only. A control
+  Ionic doesn't make read it ignores it here too.
 - **A `VirtualizingStackPanel` makes a row's content while it measures the row, before `IndexFromContainer` knows the row,** and
   `ContainerFromIndex` reads the last pass's rows until the pass ends. Read a row's index and its neighbours from `LayoutUpdated`.
   The panel's children are only what's realised, so a rule about the row before (`.foo + .bar`) can't read `Children`: see `AvonicList`.
