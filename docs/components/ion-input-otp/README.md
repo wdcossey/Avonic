@@ -7,6 +7,10 @@ paste or a soft keyboard's suggested code spreads over the boxes, and `Value` is
 under the boxes. The design and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.7** ([#205](https://github.com/wdcossey/Avonic/issues/205)), a change of `Length`
+reads the boxes from `Value` again, so a shorter one cuts `Value`, with no event, and a longer one doesn't bring back what was cut
+(behaviour 22). Before, the boxes kept their values and `Value` stayed as it was.
+
 ```xml
 <c:AvonicInputOtp Length="6" Separators="3" IonComplete="OnCodeComplete">
     Didn't get a code? Resend
@@ -29,7 +33,7 @@ Validation is the app's, as in Ionic: add the style classes `ion-touched` and `i
 | [x] | `disabled` | `IsEnabled` | |
 | [x] | `fill` | `Fill` (`InputOtpFill`) | `Outline` (default), `Solid` |
 | [x] | `inputmode` | `Inputmode` (`InputOtpInputmode?`) | `TextInputOptions.ContentType`; null is numeric for `Number`, text for `Text`. No `none` |
-| [x] | `length` | `Length` (`int`, 4) | |
+| [x] | `length` | `Length` (`int`, 4) | A change reads the boxes from `Value` again, and cuts it (9.0.7) |
 | [x] | `pattern` | `Pattern` (`string?`) | One character's regular expression, .NET's syntax; null is `[\p{N}]` or `[\p{L}\p{N}]` by type |
 | [x] | `readonly` | `Readonly` | Typing, Backspace and paste do nothing, as in Ionic since 8.8.3; the arrows still move |
 | [x] | `separators` | `Separators` (`string?`) | `"all"` or positions such as `"1,3"`; Ionic's array is the same numbers with commas |
@@ -85,6 +89,8 @@ Each has a test in `AvonicInputOtpTests`, named by its number:
 19. The description shows only with content.
 20. The layout by size, the gap, shrinking and overflow, and the separators, measured.
 21. The colours of each state, measured.
+22. A change of `Length` reads the boxes from `Value` again, as 1 does: a shorter one cuts `Value`, raising nothing, and a
+    longer one adds empty boxes; the tab stop and the hidden boxes follow (Ionic 9.0.7).
 
 ## Resource keys
 
