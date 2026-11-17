@@ -21,7 +21,7 @@
         "x": 16,
         "y": 8,
         "w": 358,
-        "h": 64
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -48,8 +48,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "64px",
-        "min-height": "44px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -91,9 +91,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 73,
+        "y": 81,
         "w": 358,
-        "h": 75
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -106,10 +106,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "0px",
         "--padding-start": "0px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -120,8 +120,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "75px",
-        "min-height": "56px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -166,9 +166,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 149,
+        "y": 154,
         "w": 358,
-        "h": 75
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -181,10 +181,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "0px",
         "--padding-start": "0px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -195,8 +195,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "75px",
-        "min-height": "56px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -241,7 +241,7 @@
       ],
       "rect": {
         "x": 16,
-        "y": 225,
+        "y": 227,
         "w": 358,
         "h": 83
       },
@@ -271,7 +271,7 @@
         "box-sizing": "border-box",
         "width": "358px",
         "height": "83px",
-        "min-height": "44px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -317,9 +317,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 309,
+        "y": 311,
         "w": 358,
-        "h": 92
+        "h": 90
       },
       "cssVars": {
         "--background": "",
@@ -332,10 +332,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "0px",
         "--padding-start": "0px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -346,8 +346,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "92px",
-        "min-height": "56px",
+        "height": "90px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -396,7 +396,7 @@
         "x": 16,
         "y": 410,
         "w": 358,
-        "h": 95
+        "h": 91
       },
       "cssVars": {
         "--background": "#f2f2f2",
@@ -409,10 +409,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "16px",
         "--padding-start": "16px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -423,8 +423,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "95px",
-        "min-height": "56px",
+        "height": "91px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -457,7 +457,8 @@
         "label": "Outline",
         "label-placement": "floating",
         "value": "Value",
-        "class": "sc-ion-textarea-md-h md has-value label-floating textarea-fill-outline textarea-label-placement-floating sc-ion-textarea-md hydrated"
+        "class": "sc-ion-textarea-md-h md has-value label-floating textarea-fill-outline textarea-label-placement-floating sc-ion-textarea-md hydrated",
+        "style": "--internal-start-end-container-width: 0px; --internal-start-container-adjustment: 0px;"
       },
       "classes": [
         "sc-ion-textarea-md-h",
@@ -471,9 +472,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 515,
+        "y": 511,
         "w": 358,
-        "h": 58
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -486,10 +487,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "16px",
         "--padding-start": "16px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -500,8 +501,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "58px",
-        "min-height": "56px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -535,7 +536,8 @@
         "label": "Round",
         "label-placement": "stacked",
         "placeholder": "Placeholder",
-        "class": "sc-ion-textarea-md-h md label-floating textarea-fill-outline textarea-shape-round textarea-label-placement-stacked sc-ion-textarea-md hydrated"
+        "class": "sc-ion-textarea-md-h md label-floating textarea-fill-outline textarea-shape-round textarea-label-placement-stacked sc-ion-textarea-md hydrated",
+        "style": "--internal-start-end-container-width: 0px; --internal-start-container-adjustment: 0px;"
       },
       "classes": [
         "sc-ion-textarea-md-h",
@@ -549,9 +551,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 583,
+        "y": 593,
         "w": 358,
-        "h": 58
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -564,10 +566,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "32px",
         "--padding-start": "32px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -578,8 +580,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "58px",
-        "min-height": "56px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -630,9 +632,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 651,
+        "y": 675,
         "w": 358,
-        "h": 95
+        "h": 91
       },
       "cssVars": {
         "--background": "#f2f2f2",
@@ -645,10 +647,10 @@
         "--highlight-color-invalid": "#c5000f",
         "--highlight-color-valid": "#2dd55b",
         "--highlight-height": "2px",
-        "--padding-bottom": "8px",
+        "--padding-bottom": "6px",
         "--padding-end": "16px",
         "--padding-start": "16px",
-        "--padding-top": "0px",
+        "--padding-top": "20px",
         "--placeholder-color": "",
         "--placeholder-font-style": "",
         "--placeholder-font-weight": "",
@@ -659,8 +661,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "95px",
-        "min-height": "56px",
+        "height": "91px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -705,9 +707,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 756,
+        "y": 776,
         "w": 358,
-        "h": 64
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -734,8 +736,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "358px",
-        "height": "64px",
-        "min-height": "44px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",
@@ -777,9 +779,9 @@
       ],
       "rect": {
         "x": 16,
-        "y": 830,
+        "y": 858,
         "w": 164,
-        "h": 64
+        "h": 72
       },
       "cssVars": {
         "--background": "",
@@ -806,8 +808,8 @@
         "position": "relative",
         "box-sizing": "border-box",
         "width": "164px",
-        "height": "64px",
-        "min-height": "44px",
+        "height": "72px",
+        "min-height": "72px",
         "min-width": "auto",
         "padding": "0px",
         "margin": "0px",

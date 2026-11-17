@@ -53,6 +53,7 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
         AvaloniaProperty.Register<TextareaNativeInput, bool>(nameof(AutoGrow));
 
     private readonly StyleValue<double> _normalLineHeight = new();
+    private readonly TwoCh _twoCh;
     private readonly NativeFieldAutomation _automation;
     private double _normal = double.NaN;
     private double _xAdvance;
@@ -71,6 +72,7 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
     {
         Bind(LineHeightProperty, _normalLineHeight, BindingPriority.Style);
         _automation = new NativeFieldAutomation(this);
+        _twoCh = new TwoCh(this);
         UpdateFontMetrics();
     }
 
@@ -183,6 +185,8 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
     /// </summary>
     private void UpdateFontMetrics()
     {
+        // Null while the base constructors run.
+        _twoCh?.Update();
         using var layout = new TextLayout("x", Typeface, FontSize, null);
         if (layout.TextLines.Count > 0)
         {

@@ -49,6 +49,39 @@ public static class FieldConverters
         }
     }
 
+    /// <summary>
+    /// One side of a padding: the first value that's set, a number, on the side the <c>ConverterParameter</c> names, <c>Top</c> or
+    /// <c>Bottom</c>. The textarea's <c>.textarea-start</c> and <c>.textarea-end</c> (their child's <c>margin-top: var(--padding-top)</c>)
+    /// and a column's <c>.textarea-control</c> (<c>padding-top: 0</c>).
+    /// </summary>
+    public static readonly IMultiValueConverter OneSide = new OneSideConverter();
+
+    /// <summary>
+    /// A slotted child's margin, as the theme gives it in the <c>ConverterParameter</c> (a <see cref="Thickness"/> or its text), less
+    /// the slot wrapper's top padding, which the value is: the textarea's wrapper carries <c>var(--padding-top)</c> for every other
+    /// child, and Ionic 9's <c>::slotted(ion-button[slot=start|end]) { margin-top: 7px }</c> replaces it for a button.
+    /// </summary>
+    public static readonly IValueConverter LessWrapperTop =
+        new FuncValueConverter<Thickness, object?, Thickness>((padding, margin) =>
+        {
+            var css = margin switch
+            {
+                Thickness thickness => thickness,
+                string text => Thickness.Parse(text),
+                _ => default,
+            };
+            return new Thickness(css.Left, css.Top - padding.Top, css.Right, css.Bottom);
+        });
+
+    private sealed class OneSideConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            var value = values.Select(v => v is double d && double.IsFinite(d) ? d : (double?)null).FirstOrDefault(d => d is not null) ?? 0;
+            return parameter as string == "Bottom" ? new Thickness(0, 0, 0, value) : new Thickness(0, value, 0, 0);
+        }
+    }
+
     /// <summary>The textarea's placement as <see cref="InputWrapperPanel"/> takes it, which lays out the label the same five ways.</summary>
     public static readonly IValueConverter TextareaPlacement =
         new FuncValueConverter<TextareaLabelPlacement, InputLabelPlacement>(LabelledTextField.Placement);
@@ -70,10 +103,9 @@ public static class FieldConverters
         });
 
     /// <summary>
-    /// The textarea's <c>padding-top: var(--padding-top)</c> and <c>padding-bottom: var(--padding-bottom)</c>, on the field, a
-    /// row's label and the slots. The values are the two variables, then the default for an unset bottom, then for an unset top
-    /// (0 if there's none, as in a column). The <c>ConverterParameter</c> is what's added above: a slotted child's
-    /// <c>margin-top</c> in a column.
+    /// The textarea's <c>padding-top: var(--padding-top)</c> and <c>padding-bottom: var(--padding-bottom)</c>, on
+    /// <c>.textarea-control</c> since Ionic 9. The values are the two variables, then the default for an unset bottom, then for an
+    /// unset top (0 if there's none). The <c>ConverterParameter</c>, if any, is added above.
     /// </summary>
     public static readonly IMultiValueConverter VerticalPadding = new VerticalPaddingConverter();
 

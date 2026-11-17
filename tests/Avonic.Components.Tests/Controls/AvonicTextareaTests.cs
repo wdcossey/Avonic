@@ -380,17 +380,19 @@ public class AvonicTextareaTests
         using var scene = new Scene(new StackPanel { Children = { Item(two), Item(four), Item(one), Item(zero), Item(full) } });
         Render();
 
-        // Measured a, h, r1: 18 + 2 × 19 + 8; 18 + 4 × 19 + 8; 18 + 19 + 8. rows="0" isn't valid, so 2.
+        // Ionic 9.0.11, measured: md's min-height 72, so 18 + 2 × 19 + 8 and 18 + 19 + 8 are 72, and rows below 3 change
+        // nothing; 18 + 4 × 19 + 8 is 102. rows="0" isn't valid, so 2. The field fills the control: 46 high in 72.
         Assert.Equal(19, Native(two).LineHeight);
-        Assert.Equal(64, two.Bounds.Height, 0.5);
+        Assert.Equal(72, two.Bounds.Height, 0.5);
+        Assert.Equal(46, Native(two).Bounds.Height, 0.5);
         Assert.Equal(102, four.Bounds.Height, 0.5);
-        Assert.Equal(45, one.Bounds.Height, 0.5);
-        Assert.Equal(64, zero.Bounds.Height, 0.5);
+        Assert.Equal(72, one.Bounds.Height, 0.5);
+        Assert.Equal(72, zero.Bounds.Height, 0.5);
 
-        // Measured e: four lines in a 64 px field, which scrolls: scrollHeight 102.
-        Assert.Equal(64, full.Bounds.Height, 0.5);
+        // Measured v: four lines in a 72 px host, whose 46 px field scrolls.
+        Assert.Equal(72, full.Bounds.Height, 0.5);
         var viewer = Part<ScrollViewer>(Native(full), "PART_ScrollViewer");
-        Assert.Equal(38, viewer.Viewport.Height, 0.5);
+        Assert.Equal(46, viewer.Viewport.Height, 0.5);
         Assert.Equal(76, viewer.Extent.Height, 0.5);
 
         // Not focused, it shows its first lines, as Chromium does, though the caret is at the end of the value.
@@ -421,18 +423,19 @@ public class AvonicTextareaTests
         using var scene = new Scene(Page(grow, fixedRows, new TextBox()));
         Render();
 
-        // Measured grow0 to shrink: 45, 64, 83, 64; the same value without autoGrow stays 45.
-        Assert.Equal(45, grow.Bounds.Height, 0.5);
+        // 8.8.19 measured grow0 to shrink: 45, 64, 83, 64; Ionic 9's min-height 72 holds the first two at 72. The same value
+        // without autoGrow stays 72.
+        Assert.Equal(72, grow.Bounds.Height, 0.5);
         grow.SetFocus();
         Settle();
         Type(scene, PhysicalKey.A, "a");
         Render();
-        Assert.Equal(45, grow.Bounds.Height, 0.5);
+        Assert.Equal(72, grow.Bounds.Height, 0.5);
 
         Key(scene, PhysicalKey.Enter);
         Type(scene, PhysicalKey.B, "b");
         Render();
-        Assert.Equal(64, grow.Bounds.Height, 0.5);
+        Assert.Equal(72, grow.Bounds.Height, 0.5);
 
         Key(scene, PhysicalKey.Enter);
         Type(scene, PhysicalKey.C, "c");
@@ -442,20 +445,20 @@ public class AvonicTextareaTests
         Key(scene, PhysicalKey.Backspace);
         Key(scene, PhysicalKey.Backspace);
         Render();
-        Assert.Equal(64, grow.Bounds.Height, 0.5);
+        Assert.Equal(72, grow.Bounds.Height, 0.5);
 
         // Set in code: grow-code, 4 lines.
         grow.Value = "x\ny\nz\nw";
         fixedRows.Value = "x\ny\nz\nw";
         Render();
         Assert.Equal(102, grow.Bounds.Height, 0.5);
-        Assert.Equal(45, fixedRows.Bounds.Height, 0.5);
+        Assert.Equal(72, fixedRows.Bounds.Height, 0.5);
 
-        // Default rows: never fewer than 2.
+        // Default rows: never fewer than 2, and the host never under 72.
         grow.Rows = null;
         grow.Value = "";
         Render();
-        Assert.Equal(64, grow.Bounds.Height, 0.5);
+        Assert.Equal(72, grow.Bounds.Height, 0.5);
     });
 
     [AvaloniaFact]
@@ -629,9 +632,12 @@ public class AvonicTextareaTests
         using var scene = new Scene(Page(textarea));
         Render();
 
-        // 30 + 2 × 19 + 2, and the label's text 30 down, as its padding is the field's.
-        Assert.Equal(70, textarea.Bounds.Height, 0.5);
+        // Measured p: 30 + 2 × 19 + 2 is under md's 72; the label's text and the field 30 down, as .textarea-control's padding
+        // is theirs; the field 40 high.
+        Assert.Equal(72, textarea.Bounds.Height, 0.5);
         Assert.Equal(30, Bounds(Part<Control>(textarea, "PART_LabelText"), textarea).Y, 0.5);
+        Assert.Equal(30, Bounds(Native(textarea), textarea).Y, 0.5);
+        Assert.Equal(40, Native(textarea).Bounds.Height, 0.5);
     });
 
     [AvaloniaFact]
@@ -670,12 +676,14 @@ public class AvonicTextareaTests
         using var scene = new Scene(new StackPanel { Children = { Item(start), Item(end), Item(fixedLabel), Item(longLabel) } });
         Render();
 
-        // Measured a: the label at the top, 18 above and 8 below its 19 px line, 16 from the field.
+        // Ionic 9.0.11, measured a: the label 18 down, .textarea-control's padding, 16 from the field, which is 18 down and
+        // 46 high (72 less 18 and 8).
         var label = Part<Control>(start, "PART_Label");
-        AssertBox(0, 0, 34.48, 45, Bounds(label, start), 0.8);
+        AssertBox(0, 18, 34.48, 19, Bounds(label, start), 0.8);
         Assert.Equal(18, Bounds(Part<Control>(start, "PART_LabelText"), start).Y, 0.5);
         Assert.Equal(label.Bounds.Width + 16, Bounds(Native(start), start).X, 0.5);
-        Assert.Equal(64, Native(start).Bounds.Height, 0.5);
+        Assert.Equal(18, Bounds(Native(start), start).Y, 0.5);
+        Assert.Equal(46, Native(start).Bounds.Height, 0.5);
 
         // f: mirrored, the label's right edge at the host's.
         var endLabel = Bounds(Part<Control>(end, "PART_Label"), end);
@@ -705,23 +713,26 @@ public class AvonicTextareaTests
 
         Render();
 
-        // Measured b: the label 19 high, on the field (translateY(100%)); the field 8 under the label and 48 high, as
-        // .textarea-wrapper-inner is at least 56 too: 75 in all.
-        Assert.Equal(75, floating.Bounds.Height, 0.5);
+        // Ionic 9.0.11, measured b: 72 in all; the label 19 high, on the field (translateY(100%)); the field 8 under the
+        // label and 39 high, with 6 below (padding-bottom 6px).
+        Assert.Equal(72, floating.Bounds.Height, 0.5);
         AssertBox(0, 19, 57.52, 19, Bounds(Part<Control>(floating, "PART_Label"), floating), 0.8);
-        AssertBox(0, 27, 358, 48, Bounds(Native(floating), floating));
+        AssertBox(0, 27, 358, 39, Bounds(Native(floating), floating));
 
         // c: raised, translateY(50%) scale(0.75).
         AssertBox(0, 9.5, 43.14, 14.25, Bounds(Part<Control>(raised, "PART_Label"), raised), 0.8);
         Assert.Equal(27, Bounds(Native(raised), raised).Y, 0.5);
 
-        // g: auto-grow with four lines: 19 + 8 + 4 × 19 + 8.
-        Assert.Equal(111, stacked.Bounds.Height, 0.5);
+        // g: auto-grow with four lines: 19 + 8 + 4 × 19 + 6.
+        Assert.Equal(109, stacked.Bounds.Height, 0.5);
 
-        // j: the outline's label sits on the border, out of the flow; the field 12 down, 46 high, 58 in all.
-        Assert.Equal(58, outline.Bounds.Height, 0.5);
+        // f: the outline's label sits on the border, out of the flow; the field 19 down, 47 high, 72 in all.
+        Assert.Equal(72, outline.Bounds.Height, 0.5);
         Assert.Equal(-6.08, Bounds(Part<Control>(outline, "PART_Label"), outline).Y, 0.6);
-        AssertBox(16, 12, 358, 46, Bounds(Native(outline), outline));
+        var field = Bounds(Native(outline), outline);
+        Assert.Equal(16, field.X, 0.6);
+        Assert.Equal(19, field.Y, 0.6);
+        Assert.Equal(47, field.Height, 0.6);
     });
 
     [AvaloniaFact]
@@ -757,7 +768,7 @@ public class AvonicTextareaTests
     });
 
     [AvaloniaFact]
-    public void B16_The_Wrapper_Is_At_Least_44_And_56_When_Floating_Stacked_Or_Filled() => InstalledTheme.Run(_ =>
+    public void B16_The_Host_Is_At_Least_72_In_Every_Fill_And_Placement() => InstalledTheme.Run(_ =>
     {
         static AvonicTextarea Short(AvonicTextarea textarea)
         {
@@ -774,13 +785,16 @@ public class AvonicTextareaTests
         using var scene = new Scene(Page(plain, solid, outline, stacked));
         Render();
 
-        // A one-line field with no padding is 19: the minimums show.
-        Assert.Equal(44, plain.Bounds.Height, 0.5);
-        Assert.Equal(57, solid.Bounds.Height, 0.5);
-        Assert.Equal(56, outline.Bounds.Height, 0.5);
-
-        // In a column, .textarea-wrapper-inner is at least 56 under the label.
-        Assert.Equal(56, Part<Control>(stacked, "PART_NativeWrapper").Bounds.Height, 0.5);
+        // A one-line field with no padding is 19: the minimum shows. Ionic 9.0.11, measured q to t: md's min-height 72 for
+        // every fill and placement, where it was 44, and 56 for floating, stacked, solid and outline. The field fills the rest:
+        // 72, 71 over solid's border, and 45 under a stacked label and its 8 px.
+        Assert.Equal(72, plain.Bounds.Height, 0.5);
+        Assert.Equal(72, solid.Bounds.Height, 0.5);
+        Assert.Equal(72, outline.Bounds.Height, 0.5);
+        Assert.Equal(72, stacked.Bounds.Height, 0.5);
+        Assert.Equal(72, Native(plain).Bounds.Height, 0.5);
+        Assert.Equal(71, Native(solid).Bounds.Height, 0.5);
+        Assert.Equal(45, Native(stacked).Bounds.Height, 0.5);
     });
 
     // ── 17, 18: the highlight ────────────────────────────────────────────────────────────────
@@ -804,12 +818,12 @@ public class AvonicTextareaTests
         Assert.Equal(Css.ScaleProperty, transition.Property);
         Assert.Equal(TimeSpan.FromMilliseconds(200), transition.Duration);
 
-        // Focused: 2 px, 1 px below the 64 px wrapper.
+        // Focused: 2 px, 1 px below the 72 px wrapper.
         highlight.Transitions = [];
         plain.SetFocus();
         Settle();
         Render();
-        AssertBox(0, 63, plain.Bounds.Width, 2, Bounds(highlight, plain));
+        AssertBox(0, 71, plain.Bounds.Width, 2, Bounds(highlight, plain));
     });
 
     [AvaloniaFact]
@@ -861,8 +875,8 @@ public class AvonicTextareaTests
         wrapper.Transitions = [];
         Render();
 
-        // Measured i: 19 + 56 + the 1 px border.
-        Assert.Equal(76, wrapper.Bounds.Height, 0.5);
+        // Ionic 9.0.11, measured u: 72 with the border, and the bottom under it (91 with the helper).
+        Assert.Equal(72, wrapper.Bounds.Height, 0.5);
         Assert.Equal(Color.Parse("#F2F2F2"), BrushColor(wrapper.Background));
         Assert.Equal(Color.Parse("#808080"), BrushColor(wrapper.BorderBrush));
         Assert.Equal(new Thickness(0, 0, 0, 1), wrapper.BorderThickness);
@@ -925,7 +939,7 @@ public class AvonicTextareaTests
         var end = Part<Border>(textarea, "PART_OutlineEnd");
 
         // Measured j: start 12 wide, the notch the label at 12 px plus 8.
-        AssertBox(0, 0, 12, 58, Bounds(start, textarea));
+        AssertBox(0, 0, 12, 72, Bounds(start, textarea));
         Assert.Equal(45.63, notch.Bounds.Width, 1.0);
         Assert.Equal(new Thickness(1, 1, 0, 1), start.BorderThickness);
         Assert.Equal(new CornerRadius(4, 0, 0, 4), start.CornerRadius);
@@ -999,10 +1013,11 @@ public class AvonicTextareaTests
         using var scene = new Scene(Page(textarea));
         Render();
 
-        // Measured l: the bottom under the 64 px wrapper, 5 px above 12 px text, a 1 px top border, the helper step 700.
+        // Measured l: the bottom under the wrapper, 72 since Ionic 9, 5 px above 12 px text, a 1 px top border, the helper
+        // step 700.
         var bottom = Part<Border>(textarea, "PART_Bottom");
         Assert.True(bottom.IsVisible);
-        Assert.Equal(64, bottom.Bounds.Y, 0.5);
+        Assert.Equal(72, bottom.Bounds.Y, 0.5);
         Assert.Equal(new Thickness(0, 1, 0, 0), bottom.BorderThickness);
         Assert.Equal(new Thickness(0, 5, 0, 0), bottom.Padding);
         Assert.Equal(12, Part<TextBlock>(textarea, "PART_HelperText").FontSize);
@@ -1026,18 +1041,17 @@ public class AvonicTextareaTests
         using var scene = new Scene(Page(row, stacked, outlined));
         Render();
 
-        // Measured q: the end slot at the top, 18 down; the button 0 0 4 16 around it.
+        // Ionic 9.0.11, measured w, x, i, j: a slotted child's margin-top is var(--padding-top), 18 in a row; an ion-button's
+        // is 7, with its own 4 below. The start slot is before the label (.textarea-start), the end after the field.
         Assert.Equal(18, Bounds(icon, row).Y, 0.5);
-        Assert.Equal(18, Bounds(button, row).Y, 0.5);
-        Assert.Equal(new Thickness(16, 0, 0, 4), button.Margin);
+        Assert.Equal(7, Bounds(button, row).Y, 0.5);
         Assert.Equal(new Thickness(0, 0, 16, 0), icon.Margin);
-        Assert.Equal(Bounds(icon, row).Right + 16, Bounds(Native(row), row).X, 0.5);
+        Assert.Equal(Bounds(icon, row).Right + 16, Bounds(Part<Control>(row, "PART_Label"), row).X, 0.5);
         Assert.Equal(Bounds(Native(row), row).Right + 16, Bounds(button, row).X, 0.5);
 
-        // In a column, 8 px lower than the field's padding of 0, as the field is: 19 + 8; with the outline, 12.
-        Assert.Equal(27, Bounds(startIcon, stacked).Y, 0.5);
-        Assert.Equal(Bounds(Native(stacked), stacked).Y, Bounds(startIcon, stacked).Y, 0.5);
-        Assert.Equal(12, Bounds(outlineIcon, outlined).Y, 0.5);
+        // In a column, padding-top is 20, so 20 down, whatever the label; with the outline too.
+        Assert.Equal(20, Bounds(startIcon, stacked).Y, 0.5);
+        Assert.Equal(20, Bounds(outlineIcon, outlined).Y, 0.5);
         Assert.Equal(new Thickness(16, 0, 0, 0), endIcon.Margin);
         Assert.Equal(Bounds(Native(stacked), stacked).Right + 16, Bounds(endIcon, stacked).X, 0.5);
     });
@@ -1295,8 +1309,72 @@ public class AvonicTextareaTests
         Assert.True(Bounds(Native(row), window).Right < Bounds(Part<Control>(row, "PART_Label"), window).X);
 
         var top = Bounds(outline, window).Y;
-        AssertBox(378, top, 12, 58, Bounds(Part<Control>(outline, "PART_OutlineStart"), window));
+        AssertBox(378, top, 12, 72, Bounds(Part<Control>(outline, "PART_OutlineStart"), window));
         Assert.Equal(374, Bounds(Part<Control>(outline, "PART_Label"), window).Right, 0.6);
+    });
+
+    // ── 29 to 31: Ionic 9's start, control and end (#201) ────────────────────────────────────
+
+    // Measured w (9.0.11, a 358 px host): a chip in the start slot, 18 down and 52.09 wide with its 16, then the label at 68.09
+    // 18 down, the field from 116.20 to 290.34, and a button in the end slot at 306.34, 7 down.
+    [AvaloniaFact]
+    public void B29_Start_Control_And_End_Are_Side_By_Side() => InstalledTheme.Run(_ =>
+    {
+        var chip = new AvonicChip { Items = { "Chip" } };
+        var button = new AvonicButton { Content = "Go" };
+        var textarea = new AvonicTextarea { Label = "Chip", Value = "v", StartContent = chip, EndContent = button, Width = 358 };
+        using var scene = new Scene(Page(textarea));
+        Render();
+
+        Assert.Equal(18, Bounds(chip, textarea).Y, 0.6);
+        var label = Bounds(Part<Control>(textarea, "PART_Label"), textarea);
+        Assert.Equal(Bounds(chip, textarea).Right + 16, label.X, 0.6);
+        Assert.Equal(18, label.Y, 0.6);
+        Assert.Equal(label.Right + 16, Bounds(Native(textarea), textarea).X, 0.6);
+        Assert.Equal(Bounds(Native(textarea), textarea).Right + 16, Bounds(button, textarea).X, 0.6);
+        Assert.Equal(7, Bounds(button, textarea).Y, 0.6);
+        Assert.Equal(358, Bounds(button, textarea).Right, 0.6);
+    });
+
+    // Ionic 9: textarea { min-width: 2ch }: 17.98 at 16 px Roboto. In 150 px with a long label, the label gives way.
+    [AvaloniaFact]
+    public void B30_The_Field_Keeps_2ch_And_The_Label_Gives_Way() => InstalledTheme.Run(_ =>
+    {
+        var textarea = new AvonicTextarea { Label = "A long label that does not fit", Value = "Value", Width = 150 };
+        using var scene = new Scene(Page(textarea));
+        Render();
+
+        Assert.Equal(17.98, Native(textarea).MinWidth, 0.1);
+        Assert.Equal(17.98, Native(textarea).Bounds.Width, 0.6);
+        Assert.Equal(150, Bounds(Native(textarea), textarea).Right, 0.6);
+    });
+
+    // Measured j and m: the outline's floating or stacked label moves back over the start slot by its width, -32, so it sits 16
+    // from the host; the field 19 down at 48; the notch where it was. A change of the slot moves it at once.
+    [AvaloniaFact]
+    public void B31_An_Outline_Label_Floats_Back_Over_The_Start_Slot() => InstalledTheme.Run(_ =>
+    {
+        var textarea = new AvonicTextarea
+        {
+            Label = "Outline", Fill = TextareaFill.Outline, LabelPlacement = TextareaLabelPlacement.Floating, Value = "v",
+            StartContent = new AvonicIcon { IconName = "heart" }, Width = 358,
+        };
+        using var scene = new Scene(Page(textarea));
+        Part<Control>(textarea, "PART_Label").Transitions = [];
+        Render();
+
+        var label = Bounds(Part<Control>(textarea, "PART_Label"), textarea);
+        Assert.Equal(16, label.X, 0.6);
+        Assert.Equal(-6.08, label.Y, 0.6);
+        AssertBox(48, 19, 294, 47, Bounds(Native(textarea), textarea), 0.8);
+        Assert.Equal(12, Bounds(Part<Control>(textarea, "PART_OutlineNotch"), textarea).X, 0.6);
+        Assert.Equal(45.63, Part<Control>(textarea, "PART_OutlineNotch").Bounds.Width, 1.0);
+
+        Part<Control>(textarea, "PART_Label").ClearValue(Avalonia.Animation.Animatable.TransitionsProperty);
+        Assert.NotEmpty(Part<Control>(textarea, "PART_Label").Transitions!);
+        textarea.StartContent = new Border { Width = 40, Height = 10 };
+        Render();
+        Assert.Equal(16, Bounds(Part<Control>(textarea, "PART_Label"), textarea).X, 0.6);
     });
 
     // ── Regressions ──────────────────────────────────────────────────────────────────────────
