@@ -81,15 +81,34 @@ Two things the coordinator asked to look at while the phone was out, which aren'
 
 ## On Windows (#189)
 
-Headless only so far. The sample's `ion-app` page has a line with what the window's input pane reports (its state, its rect in the
-window and its top on the screen, the content's padding, whether the shims are on, and the client size), here with no pane, as a
-headless window has none ([frame](compare/avonic-app-pane-probe.png)). `tools/real-window/drive.ps1 -Only 'ion-app: the touch keyboard'`
-opens the touch keyboard on the last row's field, by a touch tap and failing that `ITipInvocation`, and checks the field ends above
-it, 50 above with the content padded by what it covers when it had to move. Not run yet.
+The sample's `ion-app` page has a line with what the window's input pane reports: its state, its rect as Avalonia gives it, the
+same rect on the screen through the window's client origin, that origin, the scale, the content's padding, whether the shims are
+on, and the client size. Headless, a window has no pane ([frame](compare/avonic-app-pane-probe.png)).
+`tools/real-window/drive.ps1 -Only 'ion-app: the touch keyboard'` opens the touch keyboard on the last row's field, by a touch tap
+and failing that `ITipInvocation`.
+
+**Measured** (the lead's run of `1f5064e`, 2026-11-17): Windows 11, Avalonia 12.1.4, a 3840 × 2160 screen at 125%, the sample's
+window 487 × 1055, its client's top at screen y 518, with no touch hardware.
+
+| | Result |
+|---|---|
+| At load | `Closed`, an empty rect, and the shims on by default |
+| A touch tap on the field | No keyboard: not in tablet posture |
+| `ITipInvocation.Toggle` | `Open`, at 547.2, 797.6, 1194.4 × 488 |
+| Through the client's origin | The keyboard's top at screen y 1515, 18 below the field's bottom (1497): a floating keyboard, placed under the caret. Its left is 684 right of the window's, past the window's 487 |
+| What it covers of the window | None: it's beside it. The frame shows no keyboard over the window, and the status line says `IonKeyboardDidHide`, as `KeyboardAssist` reports a keyboard over none of the window. Padding 0, the field left where it was |
+
+That reads Avalonia's rect as the window's client DIPs, as its source says, and puts the keyboard just under the caret, where Windows
+puts a floating keyboard. Read as the screen's DIPs instead, it would be at y 997 to 1607, across the field's height, and the frame
+would show it over the window unless the window was left of x 684. The window's x wasn't logged, so the probe's line now gives the
+client's origin and the keyboard's place on the screen, and the run saves a frame of both together. The two checks that failed in
+that run were the probe's own: it took
+what the keyboard covers from the heights alone, 46, and ignored that it was beside the window. They now take the overlap both ways,
+as `KeyboardAssist` does; check that a keyboard beside the window pads nothing; and then move the window over the keyboard and open
+it again, to check the scroll. That part isn't run yet.
 
 ## Not tried
 
-- In a real window: the `ion-app` and `ion-app: the touch keyboard` sections in `tools/real-window/drive.ps1` are for the
-  coordinator to run.
-- On a Windows tablet, or with the touch keyboard: what the pane reports there is read from Avalonia's source.
+- The shims scrolling a field above a real touch keyboard over the window: the probe's second part, after the window is moved.
+- On a Windows tablet, in tablet posture, or with a docked keyboard.
 - On iOS: no device.

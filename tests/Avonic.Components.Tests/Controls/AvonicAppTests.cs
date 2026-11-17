@@ -1326,6 +1326,30 @@ public class AvonicAppTests
         Assert.Equal(138, stage.Offset);
     }
 
+    // Measured on Windows 11 at 125% (#189): ITipInvocation's floating keyboard at 547.2, 797.6, 1194.4 x 488 in the client's DIPs, just
+    // under the caret and right of a 389.6 wide window. Its height reaches 46 into the window, but it's beside it, so it covers none:
+    // a hide, and nothing padded or scrolled. Taking the heights alone, the item at 776 to 824 would scroll 76 and pad 46.
+    [AvaloniaFact]
+    public void W13_On_Windows_A_Keyboard_Beside_The_Window_Covers_None_Of_It()
+    {
+        var measured = new Rect(547.2, 797.6, 1194.4, 488);
+        using (var keyboard = new KeyboardStage())
+        {
+            keyboard.Pane.Set(InputPaneState.Open, measured);
+            keyboard.Clock.At(0);
+            Assert.Equal(["hide@0"], keyboard.Log);
+        }
+
+        var pane = new FakePane();
+        using var stage = new ShimStage(pane: pane, platform: "windows", before: 15);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        pane.Set(InputPaneState.Open, measured);
+        stage.At(1500);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+        Assert.Equal(0, stage.Offset);
+    }
+
     // ── T: the text a page gets from html and body ──────────────────────────────────────────
 
     // Measured H: font-size 16px in ion-app, the browser's default; html's font-family and body's colours are Ionic's core.css.

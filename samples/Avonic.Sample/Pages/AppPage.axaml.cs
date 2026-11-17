@@ -102,8 +102,9 @@ public partial class AppPage : UserControl
     }
 
     /// <summary>
-    /// The probe for #189: the input pane's state and occluded rect, in the window's device-independent pixels, where its top is on
-    /// the screen in physical pixels, the content's keyboard padding, and the window's client size.
+    /// The probe for #189: the input pane's state and occluded rect, in the window's client device-independent pixels, as Avalonia
+    /// gives it; the same rect on the screen, in physical pixels, through the window's client origin; that origin; the scale; the
+    /// content's keyboard padding; and the window's client size.
     /// </summary>
     private void ShowPane()
     {
@@ -122,9 +123,11 @@ public partial class AppPage : UserControl
 
         // Invariant, so that tools/real-window reads the numbers whatever the PC's culture.
         var r = pane.OccludedRect;
-        var screenTop = top.PointToScreen(new Point(0, r.Y)).Y;
+        var origin = top.PointToScreen(default);
+        var screenTopLeft = top.PointToScreen(r.TopLeft);
+        var screenBottomRight = top.PointToScreen(r.BottomRight);
         Pane.Text = FormattableString.Invariant(
-            $"Input pane: {pane.State}, at {r.X:0.#},{r.Y:0.#} {r.Width:0.#}x{r.Height:0.#}, screen top {screenTop}; padding {Main.KeyboardOffset:0.#}; shims {shims}; window {size.Width:0.#}x{size.Height:0.#}");
+            $"Input pane: {pane.State}, at {r.X:0.#},{r.Y:0.#} {r.Width:0.#}x{r.Height:0.#}, screen {screenTopLeft.X},{screenTopLeft.Y} {screenBottomRight.X - screenTopLeft.X}x{screenBottomRight.Y - screenTopLeft.Y}; client on screen {origin.X},{origin.Y}; scale {top.RenderScaling:0.##}; padding {Main.KeyboardOffset:0.#}; shims {shims}; window {size.Width:0.#}x{size.Height:0.#}");
     }
 
     private void OnIonBackButton(object? sender, BackButtonEventArgs e)

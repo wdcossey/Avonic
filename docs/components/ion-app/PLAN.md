@@ -223,6 +223,8 @@ Behaviours, in `AvonicAppTests`:
 - W10 A field focused with the pane open and too little room scrolls as far as it can at once, without the second's wait.
 - W11 The window's height is read when the keyboard opens, not at the focus.
 - W12 A field focused with the pane open reckons with what it covers of the window now, after a resize.
+- W13 A keyboard beside the window covers none of it, though its height reaches into it: measured on Windows 11 at 125%, the
+  floating keyboard at 547.2, 797.6, 1194.4 × 488 in a 389.6 wide window's client DIPs (see COMPARISON).
 
 W3 found a bug the change brought into reach: with the keyboard open before any field had focus, the page's height was never
 taken, and the field scrolled to the top of the content (528 where 138 was right). On Windows the touch keyboard can be opened from

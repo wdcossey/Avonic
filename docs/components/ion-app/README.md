@@ -96,9 +96,12 @@ even while the field keeps focus, and comes back when it opens again: Ionic's st
 keyboard closes with it, where Windows' can be closed alone and typing go on.
 
 Avalonia 12.1.4's pane on Windows is `WindowsInputPane`, over Windows' `IFrameworkInputPane`, made for every window when Windows has
-the WinRT `InputPane` (Windows 10 and later): `Open`, with the keyboard's place on the screen in the window's coordinates, when the
-touch keyboard docks, and `Closed`, with an empty rect, when it goes, with no animation. Avalonia doesn't open the keyboard itself:
-Windows does, for a field focused by touch in tablet posture, or as its touch keyboard setting says.
+the WinRT `InputPane` (Windows 10 and later): `Open`, with the keyboard's place on the screen in the window's client DIPs, when the
+touch keyboard shows, and `Closed`, with an empty rect, when it goes, with no animation. Avalonia doesn't open the keyboard itself:
+Windows does, for a field focused by touch in tablet posture, or as its touch keyboard setting says. **Measured** on Windows 11 at
+125% ([COMPARISON](COMPARISON.md#on-windows-189)): the pane reported the floating keyboard `ITipInvocation` opened, at 547.2, 797.6,
+1194.4 × 488 in the client's DIPs, just under the caret and beside the window, so it covered none of it, and the shims left the
+page alone.
 
 | Platform | Pane | Default | On focus |
 |---|---|---|---|
@@ -168,6 +171,6 @@ fills `Avonic.SafeArea*`.
   screen's bottom, under the keyboard, would have its fields placed too low by that much.
 - **A footer** already hears Windows' touch keyboard through the same pane, and drops its bottom safe area while it's open, as on
   a phone: that's the toolbar's, unchanged, and it counts a keyboard over none of the window as open (proposed in #189's PR).
-- Tried on a Pixel 8 (Android 17) and headless; not on iOS, and not in a real window (`tools/real-window` has an `ion-app`
-  section and an `ion-app: the touch keyboard` section to run). What Windows' pane reports is read from Avalonia's source, not yet
-  measured on a tablet.
+- Tried on a Pixel 8 (Android 17), headless, and on Windows 11 with a floating touch keyboard beside the window; not on iOS, not
+  with a touch keyboard over the window, and not on a tablet (`tools/real-window`'s `ion-app: the touch keyboard` section moves the
+  window over the keyboard to check the scroll).

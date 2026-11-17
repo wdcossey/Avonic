@@ -69,6 +69,9 @@ public static class RealInput {
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
   [DllImport("user32.dll")] static extern void mouse_event(uint f, uint x, uint y, uint d, IntPtr e);
   [DllImport("user32.dll")] public static extern int GetSystemMetrics(int i);
+  [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+  // Moves a window without sizing it, changing its z-order or activating it.
+  public static bool MoveTo(IntPtr h, int x, int y) { return SetWindowPos(h, IntPtr.Zero, x, y, 0, 0, 0x1 | 0x4 | 0x10); }
   public static void Down() { mouse_event(2, 0, 0, 0, IntPtr.Zero); }
   public static void Up() { mouse_event(4, 0, 0, 0, IntPtr.Zero); }
   public static void Wheel(int d) { mouse_event(0x800, 0, 0, unchecked((uint)d), IntPtr.Zero); }
@@ -1322,11 +1325,55 @@ try {
     # #189: Windows' touch keyboard, through the window's input pane, with the input shims following it. The page's 'Input pane:'
     # line says what Avalonia's pane reports. A touch tap on the last row's field asks Windows for the keyboard, which comes on a
     # touch focus in tablet posture, or with Settings > Time & language > Typing > Touch keyboard set to show it; if it doesn't
-    # come, ITipInvocation opens it, as the taskbar's keyboard button does. The field then has to end above the keyboard. Skipped,
-    # not failed, where no keyboard comes or it doesn't reach the window. The keyboard is closed again at the end.
+    # come, ITipInvocation opens it, as the taskbar's keyboard button does. A keyboard beside the window has to pad nothing; then the
+    # window is moved over the keyboard and the keyboard opened again, and the field has to end above it. Skipped, not failed, where
+    # no keyboard comes or it won't cover the window. The keyboard is closed again, and the window put back, at the end.
     Section 'ion-app: the touch keyboard' {
         Open 'ion-app'
         function Probe { FirstText 'Input pane:*' }
+        # The page's line, read: Avalonia's rect is in the window's client DIPs (the line gives it on the screen too, through the
+        # client's origin), so what it covers of the window is the overlap in both directions, as KeyboardAssist takes it.
+        function KeyboardNow {
+            $line = Probe
+            if ($line -notmatch 'at (-?[\d.]+),(-?[\d.]+) ([\d.]+)x([\d.]+), screen (-?\d+),(-?\d+) (-?\d+)x(-?\d+); client on screen (-?\d+),(-?\d+); scale ([\d.]+); padding ([\d.]+);.*window ([\d.]+)x([\d.]+)') { return $null }
+            $m = $Matches
+            $x = [double]$m[1]; $y = [double]$m[2]; $wd = [double]$m[3]; $ht = [double]$m[4]; $cw = [double]$m[13]; $ch = [double]$m[14]
+            $across = [math]::Max(0, [math]::Min($x + $wd, $cw) - [math]::Max($x, 0))
+            $down = [math]::Max(0, [math]::Min($y + $ht, $ch) - [math]::Max($y, 0))
+            [pscustomobject]@{
+                Line = $line; Open = ($line -like 'Input pane: Open*'); Covered = $(if ($across -gt 0) { $down } else { 0 })
+                ScreenX = [int]$m[5]; ScreenY = [int]$m[6]; ScreenW = [int]$m[7]; ScreenH = [int]$m[8]
+                ClientX = [int]$m[9]; ClientY = [int]$m[10]; Scale = [double]$m[11]; Padding = [double]$m[12]; WindowW = $cw; WindowH = $ch
+            }
+        }
+        # A frame of the window and the keyboard together, to see where each was.
+        function Around($k, $name) {
+            $w = $win.Current.BoundingRectangle
+            $screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+            $l = [math]::Max($screen.Left, [math]::Min($w.Left, $k.ScreenX)); $t = [math]::Max($screen.Top, [math]::Min($w.Top, $k.ScreenY))
+            $r = [math]::Min($screen.Right, [math]::Max($w.Right, $k.ScreenX + $k.ScreenW)); $b = [math]::Min($screen.Bottom, [math]::Max($w.Bottom, $k.ScreenY + $k.ScreenH))
+            if ($r -le $l -or $b -le $t) { return }
+            $bmp = Region $l $t ($r - $l) ($b - $t)
+            try { $bmp.Save((Join-Path $Out "$name.png")) } finally { $bmp.Dispose() }
+        }
+        # Moves the window so that its client's bottom is 300 below the keyboard's top, and its left 20 inside the keyboard's.
+        function MoveOver($k) {
+            $outer = $win.Current.BoundingRectangle
+            $dx = $k.ClientX - $outer.X; $dy = $k.ClientY - $outer.Y
+            $clientW = [int]($k.WindowW * $k.Scale); $clientH = [int]($k.WindowH * $k.Scale)
+            $screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+            $left = [math]::Min($k.ScreenX + (Px 20), $k.ScreenX + $k.ScreenW - $clientW)
+            $bottom = $k.ScreenY + [math]::Min((Px 300), $k.ScreenH)
+            $x = [int]($left - $dx); $y = [int]($bottom - $clientH - $dy)
+            if ($x -lt $screen.Left) { $x = $screen.Left }
+            if ($x + $outer.Width -gt $screen.Right) { $x = [int]($screen.Right - $outer.Width) }
+            if ($y -lt $screen.Top) { $y = $screen.Top }
+            if ($y + $outer.Height -gt $screen.Bottom) { return $false }
+            $ok = [RealInput]::MoveTo($p.MainWindowHandle, $x, $y)
+            Start-Sleep -Milliseconds 500
+            $ok
+        }
+        $movedFrom = $null
         $loaded = WaitForText 'Input pane:*'
         "  at load: $loaded"
         if (-not $loaded -or $loaded -like 'Input pane: none*') { "  skip  the window has no input pane"; return }
@@ -1369,24 +1416,46 @@ try {
 
             # The shims run once the pane has opened, and scroll for at most 400 ms.
             Start-Sleep -Milliseconds 1200
-            $now = Probe
+            $k = KeyboardNow
             Shot 'app-touch-keyboard'
-            if ($now -notmatch 'at (-?[\d.]+),(-?[\d.]+) ([\d.]+)x([\d.]+), screen top (-?\d+); padding ([\d.]+);.*window ([\d.]+)x([\d.]+)') {
-                Check 'the probe line reads' $false $now; return
+            if (-not $k) { Check 'the probe line reads' $false (Probe); return }
+            "  the keyboard is at screen $($k.ScreenX),$($k.ScreenY) $($k.ScreenW)x$($k.ScreenH); the window's client at $($k.ClientX),$($k.ClientY); it covers $($k.Covered) of the window"
+            Around $k 'app-touch-keyboard-around'
+            if ($k.Covered -le 0) {
+                # Measured on Windows 11 at 125% (#189): the keyboard ITipInvocation opens floats just under the caret, beside a narrow
+                # window, so it covers none of it, and the shims rightly leave it alone. Then the window goes over the keyboard and the
+                # keyboard opens again, as Avalonia doesn't report it again when the window moves.
+                Check 'a keyboard over none of the window pads nothing' ($k.Padding -eq 0) $k.Line
+                $origin = $win.Current.BoundingRectangle
+                $movedFrom = $origin
+                if (-not (MoveOver $k)) { "  skip  the window can't be put over the keyboard on this screen"; return }
+                Fore
+                try { [TouchKeyboard]::Toggle() } catch { }
+                $until = (Get-Date).AddSeconds(3)
+                while ((Probe) -like 'Input pane: Open*' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
+                $before = (@(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]).Current.BoundingRectangle
+                Fore
+                try { [TouchKeyboard]::Toggle(); $toggled = $true } catch { "  ITipInvocation failed: $($_.Exception.Message)" }
+                $until = (Get-Date).AddSeconds(3)
+                while ((Probe) -notlike 'Input pane: Open*' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
+                Start-Sleep -Milliseconds 1200
+                $k = KeyboardNow
+                Shot 'app-touch-keyboard-moved'
+                if (-not $k -or -not $k.Open) { "  skip  the keyboard didn't open again after the window moved: $(Probe)"; return }
+                "  moved: the keyboard is at screen $($k.ScreenX),$($k.ScreenY) $($k.ScreenW)x$($k.ScreenH); the window's client at $($k.ClientX),$($k.ClientY); it covers $($k.Covered) of the window"
+                Around $k 'app-touch-keyboard-moved-around'
+                if ($k.Covered -le 0) { "  skip  the keyboard went beside the window again; the frames show where"; return }
             }
-            $top = [double]$Matches[2]; $height = [double]$Matches[4]; $screenTop = [int]$Matches[5]
-            $padding = [double]$Matches[6]; $clientHeight = [double]$Matches[8]
-            $covered = [math]::Max(0, [math]::Min($top + $height, $clientHeight) - [math]::Max($top, 0))
-            "  the keyboard covers $covered of the window's $clientHeight; its top is at screen $screenTop; the field was at $($before.Top) to $($before.Bottom)"
-            if ($covered -le 0) { "  skip  the keyboard doesn't reach the window: move the window down to the bottom of the screen and run again"; return }
+            $screenTop = $k.ScreenY
+            "  the field was at $($before.Top) to $($before.Bottom)"
             $after = (@(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]).Current.BoundingRectangle
             Check 'the focused field ends above the touch keyboard' ($after.Bottom -le $screenTop) "field bottom $($after.Bottom), keyboard top $screenTop"
             if ($before.Bottom -gt $screenTop - (Px 50)) {
                 # Ionic's place: the item's bottom 50 above the keyboard, so the field's is at least that.
                 Check 'and 50 above it, as the item is in Ionic' ($after.Bottom -le $screenTop - (Px 48)) "field bottom $($after.Bottom), keyboard top $screenTop"
-                Check 'with the content padded by what the keyboard covers' ([math]::Abs($padding - $covered) -le 1) "padding $padding, covered $covered"
+                Check 'with the content padded by what the keyboard covers' ([math]::Abs($k.Padding - $k.Covered) -le 1) "padding $($k.Padding), covered $($k.Covered)"
             } else {
-                "  the field was already 50 above the keyboard, so only 'above' is checked: move the window down to test the scroll"
+                "  the field was already 50 above the keyboard, so only 'above' is checked"
             }
         }
         finally {
@@ -1399,6 +1468,7 @@ try {
             } elseif ($toggled -and -not $shown) {
                 "  note  ITipInvocation was called and the pane never said Open: if a touch keyboard is on the screen, close it"
             }
+            if ($movedFrom) { [void][RealInput]::MoveTo($p.MainWindowHandle, [int]$movedFrom.X, [int]$movedFrom.Y); Start-Sleep -Milliseconds 300 }
         }
         # A deviation on Windows: the padding goes with the keyboard, though the field keeps focus.
         $closed = Probe
