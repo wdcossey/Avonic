@@ -30,7 +30,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Content", typeof(Border))]
 [TemplatePart("PART_ContentPresenter", typeof(ContentPresenter))]
 [TemplatePart("PART_Scroll", typeof(ScrollViewer))]
-[PseudoClasses(Nested)]
+[PseudoClasses(Nested, ":side-top", ":side-right", ":side-bottom", ":side-left", ":side-start", ":side-end")]
 public partial class AvonicPopover : AvonicOverlay
 {
     /// <summary>Ionic's <c>popover-nested</c>: it's in another popover's content.</summary>
@@ -150,6 +150,7 @@ public partial class AvonicPopover : AvonicOverlay
         }
 
         Resources.MergedDictionaries.Add(_safeArea);
+        UpdateSide();
     }
 
     public bool BackdropDismiss
@@ -431,8 +432,10 @@ public partial class AvonicPopover : AvonicOverlay
     /// <summary>Ionic's own <c>dismiss()</c> before the shared one: the parent popover first, not awaited, unless it's to stay.</summary>
     protected override Task<bool> OnDismissing(object? data, string? role)
     {
+        // Only while it's shown: one click here can come as a tap and a button's click, each a dismiss, where Ionic's is one, and
+        // a second, late dismiss of the parent could close a menu opened again meanwhile.
         var keepParent = ReferenceEquals(s_keepParent.Value, this);
-        if (!keepParent && _parentPopover is { } parent)
+        if (!keepParent && IsShown && _parentPopover is { } parent)
         {
             // Not awaited, and its own lock first, a microtask: its events come after this one's willDismiss (M7).
             Dispatcher.UIThread.Post(() => LogFault(parent.Dismiss(data, role), "dismiss"));
@@ -501,6 +504,10 @@ public partial class AvonicPopover : AvonicOverlay
         {
             UpdatePresenter();
         }
+        else if (change.Property == SideProperty)
+        {
+            UpdateSide();
+        }
         else if (change.Property == TriggerActionProperty)
         {
             ConfigureTrigger();
@@ -555,6 +562,15 @@ public partial class AvonicPopover : AvonicOverlay
         if (ReferenceEquals(e.Source, _parentPopover))
         {
             Dispatcher.UIThread.Post(DismissAlone);
+        }
+    }
+
+    /// <summary>Ionic's <c>popover-side-${side}</c>: <c>:side-bottom</c> and the rest, which no md rule reads but the nested offsets.</summary>
+    private void UpdateSide()
+    {
+        foreach (var side in Enum.GetValues<PopoverSide>())
+        {
+            PseudoClasses.Set(":side-" + side.ToString().ToLowerInvariant(), side == Side);
         }
     }
 

@@ -50,12 +50,12 @@ public class PopoverPanel : Panel
     public static readonly IMultiValueConverter NestedOffsetX = new FuncMultiValueConverter<object?, double>(values =>
     {
         var list = values.ToList();
-        if (list.Count > 0 && Css.IsSet(list[0]) && list[0] is double set)
+        if (list.Count > 0 && Css.IsSet(list[0]) && list[0] is double or float or int)
         {
-            return set;
+            return Convert.ToDouble(list[0], System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        var offset = list.Count > 1 && list[1] is double d ? d : 0;
+        var offset = list.Count > 1 && list[1] is double or float or int ? Convert.ToDouble(list[1], System.Globalization.CultureInfo.InvariantCulture) : 0;
         var rtl = list.Count > 3 && list[3] is FlowDirection.RightToLeft;
         return (list.Count > 2 ? list[2] : null) switch
         {

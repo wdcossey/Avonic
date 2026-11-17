@@ -246,6 +246,12 @@ public partial class AvonicPopover
         {
             _removeDismissInteraction = PopoverClick.Listen(parentContent, (_, e) =>
             {
+                // Stopped inside, at a hover or context-menu trigger: it never got to the parent's content.
+                if (PopoverClick.IsStoppedBelow(e, parentContent))
+                {
+                    return;
+                }
+
                 if (ReferenceEquals(ClosestTrigger(e.Source as Visual), trigger))
                 {
                     PopoverClick.StopAt(e, parentContent);

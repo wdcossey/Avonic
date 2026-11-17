@@ -144,6 +144,8 @@ None. `PopoverEvent` is Ionic's `event` given a type; `Present(TopLevel)` is the
   element of the trigger (an `ion-label`); here, anywhere in the trigger. See [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - **A reference in a popup window**: a trigger or event in a popup that's a top level of its own (not the window's overlay layer)
   is placed through screen coordinates. Headless popups are in the overlay layer, so that path isn't tested.
+- **A submenu's dismiss while it isn't shown** leaves its parent, where Ionic's dismisses it: one tap here can be two dismisses.
+  See [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - **A trigger with its own `ContextMenu` or `ContextFlyout`**: Avalonia opens it before the popover handles the request. Not tried.
 - `arrow`, `translucent`: ios only. The page lifecycle events on the content (`ionViewWillEnter` and the rest) are `ion-nav`'s.
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-popover` section for the batch's runner.

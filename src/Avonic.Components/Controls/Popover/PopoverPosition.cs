@@ -6,7 +6,8 @@ namespace Avonic.Components.Controls;
 /// The popover's positioning maths, from Ionic's <c>popover/utils.js</c> line for line, with md's arrow of 0 by 0: where the
 /// content goes beside its reference (<c>getPopoverPosition</c>), and how it's kept on screen (<c>calculateWindowAdjustment</c>).
 /// Everything is in the viewport's coordinates, as <c>getBoundingClientRect</c>'s are. The origins are fractions of the
-/// content's box: 0 is <c>left</c> or <c>top</c>, 0.5 <c>center</c>, 1 <c>right</c> or <c>bottom</c>.
+/// content's box: 0 is <c>left</c> or <c>top</c>, 0.5 <c>center</c>, 1 <c>right</c> or <c>bottom</c>. The host class
+/// <c>popover-bottom</c> it gives a flipped popover isn't kept: no md rule reads it.
 /// </summary>
 internal static class PopoverPosition
 {
@@ -26,8 +27,7 @@ internal static class PopoverPosition
         bool CheckSafeAreaLeft,
         bool CheckSafeAreaRight,
         bool CheckSafeAreaTop,
-        bool CheckSafeAreaBottom,
-        bool AddPopoverBottomClass);
+        bool CheckSafeAreaBottom);
 
     /// <summary>
     /// <c>getPopoverPosition</c>. <paramref name="reference"/> is the trigger's box, or the event's target's (for
@@ -153,7 +153,6 @@ internal static class PopoverPosition
         bool checkSafeAreaLeft = false, checkSafeAreaRight = false, checkSafeAreaTop = false, checkSafeAreaBottom = false;
         var triggerTop = triggerCoordinates is { } t ? t.Top + t.Height : bodyHeight / 2 - contentHeight / 2;
         var triggerHeight = triggerCoordinates?.Height ?? 0;
-        var addPopoverBottomClass = false;
 
         // Off the left of the screen, else off the right.
         if (left < bodyPadding + safeArea.Left)
@@ -178,7 +177,6 @@ internal static class PopoverPosition
             {
                 top = idealFlipTop;
                 originY = 1;
-                addPopoverBottomClass = true;
             }
             else
             {
@@ -195,6 +193,6 @@ internal static class PopoverPosition
         }
 
         return new Adjusted(top, left, bottom, originX, originY, checkSafeAreaLeft, checkSafeAreaRight, checkSafeAreaTop,
-            checkSafeAreaBottom, addPopoverBottomClass);
+            checkSafeAreaBottom);
     }
 }

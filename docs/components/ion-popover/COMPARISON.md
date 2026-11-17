@@ -54,6 +54,7 @@ Ionic's on the left of each.
 | B10 | `dismissOnSelect` | M7: a click in it dismisses it, no role | A tap, or a key's click, the same | Match |
 | B11 | Backdrop | `backdropDismiss`, `showBackdrop` | The same | Match |
 | B12 | Keys | M6: ArrowDown from the host to the first, End to the last enabled, the ends stay | The same, at the next frame | Match |
+| B12 | Enter, Space on a trigger item | M6b: as ArrowRight, the parent stays | The same | Match |
 | B12 | Submenu by key | M6: ArrowRight on More opens it with focus on Share; ArrowLeft closes it alone, focus back on More | The same | Match |
 | B13 | Nested | M7: no backdrop; Escape: child then parent, both `backdrop`; the parent's backdrop: parent `backdrop`, then the child with none; a click in the child: child then parent; a click trigger in a `dismiss-on-select` parent leaves the parent | The same, in the same order | Match |
 | B13 | Hover child, the pointer back in the parent | dismissed unless `elementFromPoint` is the trigger itself | dismissed unless the point is in the trigger | **Deliberate difference:** below |
@@ -71,6 +72,10 @@ Ionic's on the left of each.
 - **A finger on a hover trigger.** Chromium gives a tap compatibility mouse events, a `mouseenter` and no `mouseleave` until the next
   tap elsewhere, so a tap on a hover trigger opens it after 100 ms. Avalonia's pointer leaves at a touch's release; the popover
   takes a touch's enter as Chromium does, and ignores its leave.
+- **A submenu's dismiss while it isn't shown.** Ionic's `dismiss()` dismisses the parent first, presented or not. Here one tap can come
+  as a tap and an item's click, two dismisses where Ionic has one click; the second, coming once the first is done, would dismiss
+  the parent again, and could close a menu opened again meanwhile. So the parent is dismissed only by a dismiss of a submenu that's
+  shown. An app's `Dismiss()` on a closed submenu leaves its parent open.
 - **Layout to whole pixels.** Avalonia rounds layout to device pixels (whole ones at a scale of 1): 90% of 844 is 760 here, 759.59
   in Chromium at 2x.
 

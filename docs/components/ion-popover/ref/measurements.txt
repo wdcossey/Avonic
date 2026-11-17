@@ -245,3 +245,14 @@ left click on ctx trigger while open (backdrop): open= active=ctx-trigger ev=p-c
 115.8 bd=0.3200 bdPE=auto wr=0.9924 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
 132.3 bd=0.3200 bdPE=auto wr=0.9983 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
 150.4 bd=0.3200 bdPE=auto wr=1.0000 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+
+## Enter, Space and ArrowRight on the nested popover's click trigger (the menu above, the third item focused by ArrowDown three times)
+before "Enter": open=p-click active=nested-trigger ev=p-click:ionPopoverWillPresent@83 p-click:ionPopoverDidPresent@399
+after "Enter": open=p-click,p-nested active=n1 ev=p-nested:ionPopoverWillPresent@812 p-nested:ionPopoverDidPresent@1115
+closed: open= active=click-trigger ev=p-nested:ionPopoverWillDismiss(backdrop)@1528 p-click:ionPopoverWillDismiss(backdrop)@1528 p-nested:ionPopoverDidDismiss(backdrop)@1665 p-click:ionPopoverDidDismiss(backdrop)@1666
+before " ": open=p-click active=nested-trigger ev=p-click:ionPopoverWillPresent@2551 p-click:ionPopoverDidPresent@2850
+after " ": open=p-click,p-nested active=n1 ev=p-nested:ionPopoverWillPresent@3267 p-nested:ionPopoverDidPresent@3598
+closed: open= active=click-trigger ev=p-nested:ionPopoverWillDismiss(backdrop)@3982 p-click:ionPopoverWillDismiss(backdrop)@3983 p-nested:ionPopoverDidDismiss(backdrop)@4132 p-click:ionPopoverDidDismiss(backdrop)@4133
+before "ArrowRight": open=p-click active=nested-trigger ev=p-click:ionPopoverWillPresent@5007 p-click:ionPopoverDidPresent@5299
+after "ArrowRight": open=p-click,p-nested active=n1 ev=p-nested:ionPopoverWillPresent@5741 p-nested:ionPopoverDidPresent@6049
+closed: open= active=click-trigger ev=p-nested:ionPopoverWillDismiss(backdrop)@6460 p-click:ionPopoverWillDismiss(backdrop)@6460 p-nested:ionPopoverDidDismiss(backdrop)@6615 p-click:ionPopoverDidDismiss(backdrop)@6616

@@ -605,6 +605,66 @@ public class AvonicPopoverInteractionTests
         Assert.True(parent.IsShown);
     }
 
+    [AvaloniaTheory]
+    [InlineData(PhysicalKey.Enter)]
+    [InlineData(PhysicalKey.Space)]
+    public void B12_Enter_And_Space_On_A_Trigger_Item_Open_Its_Popover_And_Focus_Inside(PhysicalKey key)
+    {
+        // M6b: as ArrowRight; the item's own click from the key presents it again, which does nothing, and the parent stays.
+        using var stage = new Stage();
+        var (parent, items, child, childItems) = Nested(stage);
+        for (var i = 0; i < 3; i++)
+        {
+            stage.Key(PhysicalKey.ArrowDown);
+            stage.After(16);
+        }
+
+        stage.Key(key);
+        stage.After(Entered);
+        Assert.True(child.IsShown);
+        Assert.True(parent.IsShown);
+        Assert.Same(childItems[0], stage.Focused);
+    }
+
+    [AvaloniaFact]
+    public void B13_A_Click_A_Hover_Trigger_Stops_Leaves_An_Open_Click_Submenu()
+    {
+        using var stage = new Stage();
+        var (parent, items, child, _) = Nested(stage);
+        var hover = Popover();
+        hover.Trigger = "First";
+        hover.TriggerAction = PopoverTriggerAction.Hover;
+        stage.Names.Register("First", items[0]);
+        ((StackPanel)parent.Content!).Children.Add(hover);
+        stage.Click(Centre(items[2], stage.Window));
+        stage.After(Entered);
+        Assert.True(child.IsShown);
+
+        // In Ionic the hover trigger's stopPropagation keeps the click from the parent's content, where the submenu listens.
+        stage.Click(Centre(items[0], stage.Window));
+        stage.After(Left);
+        Assert.True(child.IsShown);
+        Assert.True(parent.IsShown);
+    }
+
+    [AvaloniaFact]
+    public void B13_A_Menu_Opened_Again_Right_After_A_Pick_In_Its_Submenu_Stays_Open()
+    {
+        // One tap is a tap and the item's click here, two dismisses of the submenu; the second, once the first is done, mustn't
+        // dismiss the parent again.
+        using var stage = new Stage();
+        var (parent, items, child, childItems) = Nested(stage);
+        stage.Click(Centre(items[2], stage.Window));
+        stage.After(Entered);
+        stage.Click(Centre(childItems[0], stage.Window));
+        stage.After(Left);
+        Assert.False(parent.IsShown);
+
+        parent.Present();
+        stage.After(Entered);
+        Assert.True(parent.IsShown);
+    }
+
     // ── B14 to B17 ──────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -713,6 +773,19 @@ public class AvonicPopoverInteractionTests
         var indicator = stage.Trigger(10, 100, name: "Indicator");
         var args = new BreadcrumbCollapsedClickEventArgs(AvonicBreadcrumbs.IonCollapsedClickEvent, [], indicator);
         Assert.Same(indicator, PopoverEvent.From(args).Target);
+    }
+
+    [AvaloniaFact]
+    public void B8_A_Side_Is_A_Pseudoclass_And_A_Nested_Offset_Takes_An_Apps_Whole_Number()
+    {
+        using var stage = new Stage();
+        var (_, items, child, _) = Nested(stage);
+        Assert.Contains(":side-end", child.Classes);
+        Assert.DoesNotContain(":side-bottom", child.Classes);
+        child.Resources["Avonic.Popover.OffsetX"] = 3;
+        stage.Click(Centre(items[2], stage.Window));
+        stage.After(Entered);
+        Assert.Equal(131, Box(child, stage.Window).X, 0.5);
     }
 
     // ── B18: the look ───────────────────────────────────────────────────────────────────────
