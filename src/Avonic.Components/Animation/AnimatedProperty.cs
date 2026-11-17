@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Reactive;
 using Avalonia.VisualTree;
 
 namespace Avonic.Components.Animation;
@@ -178,39 +179,13 @@ internal abstract class AnimatedProperty
                     _ => AvaloniaProperty.UnsetValue,
                 });
 
-                var bounds = parent?.GetObservable(Visual.BoundsProperty).Subscribe(new BoundsObserver(Push));
-                var source = values.Subscribe(new ValueObserver(value =>
+                var bounds = parent?.GetObservable(Visual.BoundsProperty).Subscribe(new AnonymousObserver<Rect>(_ => Push()));
+                var source = values.Subscribe(new AnonymousObserver<object?>(value =>
                 {
                     current = value;
                     Push();
                 }));
                 return new Both(bounds, source);
-            }
-
-            private sealed class BoundsObserver(Action push) : IObserver<Rect>
-            {
-                public void OnCompleted()
-                {
-                }
-
-                public void OnError(Exception error)
-                {
-                }
-
-                public void OnNext(Rect value) => push();
-            }
-
-            private sealed class ValueObserver(Action<object?> next) : IObserver<object?>
-            {
-                public void OnCompleted()
-                {
-                }
-
-                public void OnError(Exception error)
-                {
-                }
-
-                public void OnNext(object? value) => next(value);
             }
 
             private sealed class Both(IDisposable? a, IDisposable b) : IDisposable

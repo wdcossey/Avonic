@@ -431,7 +431,7 @@ public abstract class AvonicOverlay : TemplatedControl
     /// </summary>
     internal void DismissFromInput(string? role) => LogFault(Dismiss(null, role), "dismiss");
 
-    private void LogFault(Task task, string what) =>
+    private protected void LogFault(Task task, string what) =>
         task.ContinueWith(
             t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's {What} failed: {Exception}", what, t.Exception!.InnerException),
             CancellationToken.None,

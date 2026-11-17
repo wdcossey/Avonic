@@ -6,6 +6,8 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
+using Avalonia.Reactive;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Animation;
 using Avonic.Components.Overlays;
 
@@ -23,7 +25,8 @@ public partial class AvonicModal
 
     /// <summary>
     /// Ionic <c>breakpoints</c>: the fractions of its height, from 0 (closed) to 1 (fully open), a sheet stops at. XAML reads
-    /// <c>"0, 0.25, 0.5, 1"</c>. They're kept sorted, as Ionic sorts its array when it's set.
+    /// <c>"0, 0.25, 0.5, 1"</c>. The sheet reads them sorted, as Ionic sorts its array when it's set, and follows a change made
+    /// to the list in place, as Ionic's code reads the array it was given.
     /// </summary>
     public static readonly StyledProperty<AvaloniaList<double>?> BreakpointsProperty =
         AvaloniaProperty.Register<AvonicModal, AvaloniaList<double>?>(nameof(Breakpoints));
@@ -74,7 +77,7 @@ public partial class AvonicModal
     /// Ionic's <c>--ion-modal-offset-top</c>: the root's <c>Avonic.SafeAreaTop</c>, which a sheet's height leaves out, as the modal's
     /// own is 0. Set by the modal in its resources.
     /// </summary>
-    internal const string OffsetTopKey = "Avonic.Modal.OffsetTop";
+    internal const string OffsetTopKey = "Avonic.ModalOffsetTop";
 
     /// <summary>Ionic's sorted <c>breakpoints</c> (<c>breakpointsChanged</c>).</summary>
     private double[] _sortedBreakpoints = [];
@@ -86,7 +89,8 @@ public partial class AvonicModal
     private Task? _sheetTransition;
     private bool _gestureAnimationDismissing;
     private ModalHandle? _handle;
-    private IDisposable? _tabStop;
+    private readonly StyleValue<bool> _hostTabStop = new();
+    private AvaloniaList<double>? _watchedBreakpoints;
     private IDisposable? _offsetTopWatch;
     private TopLevel? _keyboardTopLevel;
     private bool _focusEnteredFromOutside;
@@ -210,6 +214,11 @@ public partial class AvonicModal
         }
 
         var allowed = _sortedBreakpoints.Where(b => b != 0).ToArray();
+        if (allowed.Length == 0)
+        {
+            return;
+        }
+
         var next = allowed[(Array.IndexOf(allowed, current) + 1) % allowed.Length];
         await SetCurrentBreakpoint(next);
     }
@@ -222,7 +231,7 @@ public partial class AvonicModal
             return;
         }
 
-        LogTaskFault(MoveToNextBreakpoint());
+        LogFault(MoveToNextBreakpoint(), "sheet's move");
     }
 
     /// <summary>Ionic's <c>onBackdropTap</c>: not while the sheet moves between breakpoints, as a double click on the handle would.</summary>
@@ -316,19 +325,21 @@ public partial class AvonicModal
     private void SheetOnDismiss()
     {
         _gestureAnimationDismissing = true;
-        _sheetAnimation?.OnFinish(async (_, _) =>
+        _sheetAnimation?.OnFinish((_, _) => LogFault(DismissByGesture(), "dismiss"));
+    }
+
+    private async Task DismissByGesture()
+    {
+        _currentBreakpoint = 0;
+        RaiseEvent(new ModalBreakpointChangeEventArgs(IonBreakpointDidChangeEvent, 0));
+        try
         {
-            _currentBreakpoint = 0;
-            RaiseEvent(new ModalBreakpointChangeEventArgs(IonBreakpointDidChangeEvent, 0));
-            try
-            {
-                await Dismiss(null, OverlayRoles.Gesture);
-            }
-            finally
-            {
-                _gestureAnimationDismissing = false;
-            }
-        });
+            await Dismiss(null, OverlayRoles.Gesture);
+        }
+        finally
+        {
+            _gestureAnimationDismissing = false;
+        }
     }
 
     /// <summary>After a dismiss: the gesture's animation and the gesture go, and the content scrolls as it did.</summary>
@@ -338,6 +349,9 @@ public partial class AvonicModal
         _sheetAnimation = null;
         _sheet?.Gesture.Destroy();
         _sheet?.ResetContentScroll();
+
+        // A move that was on its way when it was dismissed is over: setCurrentBreakpoint's task completes.
+        _sheet?.EndMove();
         _sheet = null;
         _sheetTransition = null;
         SheetBackdropOff = false;
@@ -480,22 +494,13 @@ public partial class AvonicModal
     {
         var showHandle = Handle != false && _isSheetModal;
         var cycle = HandleBehavior == ModalHandleBehavior.Cycle;
-        if (_handle is not null)
-        {
-            _handle.SetValue(IsVisibleProperty, showHandle, BindingPriority.Style);
-            _handle.SetValue(KeyboardNavigation.IsTabStopProperty, cycle, BindingPriority.Style);
-        }
-
-        if (cycle && showHandle)
-        {
-            _tabStop ??= SetValue(KeyboardNavigation.IsTabStopProperty, true, BindingPriority.Style);
-        }
-        else
-        {
-            _tabStop?.Dispose();
-            _tabStop = null;
-        }
+        _handle?.Shown.Set(showHandle);
+        _handle?.TabStop.Set(cycle);
+        _hostTabStop.SetWhen(cycle && showHandle, true);
     }
+
+    /// <summary>The sheet's values at style priority, bound once, so that an app's style wins: see <see cref="StyleValue{T}"/>.</summary>
+    private void InitSheet() => Bind(KeyboardNavigation.IsTabStopProperty, _hostTabStop, BindingPriority.Style);
 
     private void SetHandle(ModalHandle? handle)
     {
@@ -517,8 +522,19 @@ public partial class AvonicModal
     {
         if (change.Property == BreakpointsProperty)
         {
-            // breakpointsChanged: sorted when set.
-            _sortedBreakpoints = Breakpoints is { } breakpoints ? [.. breakpoints.Order()] : [];
+            // breakpointsChanged: sorted when set, and read again when the list changes.
+            if (_watchedBreakpoints is not null)
+            {
+                _watchedBreakpoints.CollectionChanged -= OnBreakpointsChanged;
+            }
+
+            _watchedBreakpoints = Breakpoints;
+            if (_watchedBreakpoints is not null)
+            {
+                _watchedBreakpoints.CollectionChanged += OnBreakpointsChanged;
+            }
+
+            SortBreakpoints();
         }
         else if (change.Property == HandleProperty || change.Property == HandleBehaviorProperty)
         {
@@ -529,6 +545,10 @@ public partial class AvonicModal
             _focusEnteredFromOutside = true;
         }
     }
+
+    private void OnBreakpointsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SortBreakpoints();
+
+    private void SortBreakpoints() => _sortedBreakpoints = Breakpoints is { } breakpoints ? [.. breakpoints.Order()] : [];
 
     /// <summary>
     /// Ionic's <c>onModalFocus</c>: a focus on the host itself, from outside it, goes on to the handle when it's a tab stop. Focus
@@ -564,21 +584,9 @@ public partial class AvonicModal
         SetZeroEdges((Top: true, Bottom: false, Left: true, Right: true));
         if (Parent is IResourceHost root)
         {
-            _offsetTopWatch = root.GetResourceObservable("Avonic.SafeAreaTop").Subscribe(new OffsetTopObserver(this));
+            _offsetTopWatch = root.GetResourceObservable("Avonic.SafeAreaTop")
+                .Subscribe(new AnonymousObserver<object?>(value => _safeArea[OffsetTopKey] = value is double top ? top : 0d));
         }
-    }
-
-    private sealed class OffsetTopObserver(AvonicModal modal) : IObserver<object?>
-    {
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(object? value) => modal._safeArea[OffsetTopKey] = value is double top ? top : 0d;
     }
 
     internal void RaiseDragStart() => RaiseEvent(new RoutedEventArgs(IonDragStartEvent, this));
@@ -590,10 +598,6 @@ public partial class AvonicModal
     private void Warn(string message) =>
         Logger.TryGet(LogEventLevel.Warning, LogArea.Control)?.Log(this, "[ion-modal] - {Message}", message);
 
-    private void LogTaskFault(Task task) =>
-        task.ContinueWith(
-            t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The sheet's move failed: {Exception}", t.Exception!.InnerException),
-            CancellationToken.None,
-            TaskContinuationOptions.OnlyOnFaulted,
-            TaskScheduler.Default);
+    /// <summary>A task nothing awaits, its fault logged, as the overlay's dismisses from input are.</summary>
+    internal void LogTaskFault(Task task, string what) => LogFault(task, what);
 }

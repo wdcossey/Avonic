@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Rendering;
 using Avonic.Components.Behaviors;
@@ -25,13 +26,28 @@ public class ModalHandle : Border, ICustomHitTest
     static ModalHandle()
     {
         FocusableProperty.OverrideDefaultValue<ModalHandle>(true);
+
+        // position: absolute; top; margin-inline: auto: at the top, centred, so that a theme that sizes it nothing still leaves the
+        // content its presses.
+        HorizontalAlignmentProperty.OverrideDefaultValue<ModalHandle>(Avalonia.Layout.HorizontalAlignment.Center);
+        VerticalAlignmentProperty.OverrideDefaultValue<ModalHandle>(Avalonia.Layout.VerticalAlignment.Top);
         AutomationProperties.NameProperty.OverrideDefaultValue<ModalHandle>(DefaultName);
     }
 
     public ModalHandle()
     {
         _ = new NativeButton(this, _ => Click?.Invoke(this, EventArgs.Empty), static () => true, static () => { });
+
+        // Bound before its styles, so that an app's style for it wins.
+        Bind(IsVisibleProperty, Shown, BindingPriority.Style);
+        Bind(KeyboardNavigation.IsTabStopProperty, TabStop, BindingPriority.Style);
     }
+
+    /// <summary>Whether the modal shows it: on a sheet, unless <c>handle</c> is false.</summary>
+    internal StyleValue<bool> Shown { get; } = new();
+
+    /// <summary><c>tabindex</c> 0 with <c>handleBehavior</c> <c>cycle</c>, -1 otherwise.</summary>
+    internal StyleValue<bool> TabStop { get; } = new();
 
     /// <summary>The native button's <c>onClick</c>.</summary>
     internal event EventHandler? Click;

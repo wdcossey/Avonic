@@ -370,7 +370,7 @@ On `AvonicModal`, with what the gesture needs in `Controls/Modal/`:
   Ionic's `aria-label`.
 - **Layout**: `ModalPanel.VerticalContentAlignment` (`Bottom` for `position: absolute; bottom: 0`), and `calc(a ± b)` in its sizes.
   `:sheet` sets the height from `Avonic.Modal.Height`, else `calc(100% - (offset + 10px))`, the offset being
-  `Avonic.Modal.OffsetTop`, which the modal keeps at the root's `Avonic.SafeAreaTop` (`--ion-modal-offset-top`), read from its
+  `Avonic.ModalOffsetTop`, which the modal keeps at the root's `Avonic.SafeAreaTop` (`--ion-modal-offset-top`), read from its
   overlay host, as the modal's own key is 0.
 - **Backdrop by breakpoint**: `pointer-events: none` on the host and backdrop is the backdrop's `IsHitTestVisible` false (local, as
   an inline style): the host draws nothing and takes no input of its own, and the wrapper keeps taking it. The focus trap reads

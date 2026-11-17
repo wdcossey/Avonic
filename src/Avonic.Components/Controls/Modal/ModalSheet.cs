@@ -49,6 +49,9 @@ internal sealed class ModalSheet
     /// <summary>The content the press is on, from <c>canStart</c>, for letting go of an upward drag that scrolls it.</summary>
     private Control? _pressContent;
 
+    /// <summary>The move on its way, which completes when it's there, or when the modal is dismissed first.</summary>
+    private TaskCompletionSource? _moved;
+
     internal ModalSheet(
         AvonicModal baseEl,
         AvonicBackdrop backdropEl,
@@ -141,6 +144,12 @@ internal sealed class ModalSheet
     /// <summary>A percentage as Ionic's template strings write it.</summary>
     internal static string Percent(double value) => value.ToString(CultureInfo.InvariantCulture) + "%";
 
+    /// <summary>
+    /// Not in Ionic, whose promise is left pending when the modal is dismissed during a move, as <c>destroy()</c> drops the
+    /// animation's callbacks: the move's task completes.
+    /// </summary>
+    internal void EndMove() => _moved?.TrySetResult();
+
     /// <summary><c>resetContentScroll</c>: the content's scrolling as the app declared it.</summary>
     internal void ResetContentScroll() => _contentEl?.SetCurrentValue(AvonicContent.ScrollYProperty, _initialContentScrollY);
 
@@ -186,7 +195,7 @@ internal sealed class ModalSheet
         Gesture.Enable(false);
         if (shouldPreventDismiss)
         {
-            _ = HandleCanDismiss();
+            _baseEl.LogTaskFault(HandleCanDismiss(), "canDismiss");
         }
         else if (!shouldRemainOpen)
         {
@@ -199,7 +208,8 @@ internal sealed class ModalSheet
             _contentEl.SetCurrentValue(AvonicContent.ScrollYProperty, _initialContentScrollY);
         }
 
-        var moved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _moved?.TrySetResult();
+        var moved = _moved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _animation
             .OnFinish((_, _) =>
             {
@@ -440,7 +450,11 @@ internal sealed class ModalSheet
             return;
         }
 
-        if (!await handler(null, Overlays.OverlayRoles.Gesture))
+        // The handler is called now, and its answer read after a turn, as an async function's await always yields: after the
+        // snap back has started, so that an answer that's ready at once still waits for it.
+        var answer = handler(null, Overlays.OverlayRoles.Gesture);
+        await Task.Yield();
+        if (!await answer)
         {
             return;
         }

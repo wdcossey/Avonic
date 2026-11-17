@@ -532,10 +532,13 @@ public sealed class AvonicAnimation
     /// <summary>Ionic's <c>update</c> without <c>deep</c>: the playback takes the timing as it is now, and the step if given.</summary>
     private void Update(double? step = null)
     {
-        _player?.Refresh();
         if (step is { } s)
         {
             SetAnimationStep(s);
+        }
+        else
+        {
+            _player?.Refresh();
         }
     }
 
@@ -818,13 +821,14 @@ public sealed class AvonicAnimation
             Apply(0);
         }
 
+        private string[] Properties() => _owner._keyframes.SelectMany(k => k.Keys).Distinct(StringComparer.Ordinal).ToArray();
+
         private void BuildTracks()
         {
             var offsets = ComputedOffsets(_owner._keyframes);
-            var properties = _owner._keyframes.SelectMany(k => k.Keys).Distinct(StringComparer.Ordinal).ToArray();
             foreach (var element in _owner._elements)
             {
-                foreach (var name in properties)
+                foreach (var name in Properties())
                 {
                     _tracks.Add(new Track(element, AnimatedProperty.ForKeyframes(name), _owner._keyframes, offsets));
                 }
@@ -900,13 +904,34 @@ public sealed class AvonicAnimation
         /// <summary>Web Animations' <c>setKeyframes</c>: the tracks made again from the owner's keyframes, at the current time.</summary>
         internal void SetKeyframes()
         {
-            foreach (var track in _tracks)
+            // A track of a property that's still there keeps its binding, and takes the new frames; the rest go or come.
+            var old = _tracks.ToList();
+            _tracks.Clear();
+            var offsets = ComputedOffsets(_owner._keyframes);
+            foreach (var element in _owner._elements)
+            {
+                foreach (var name in Properties())
+                {
+                    var property = AnimatedProperty.ForKeyframes(name);
+                    var kept = old.FirstOrDefault(t => t.Is(element, property));
+                    if (kept is not null)
+                    {
+                        old.Remove(kept);
+                        kept.SetFrames(_owner._keyframes, offsets);
+                        _tracks.Add(kept);
+                    }
+                    else
+                    {
+                        _tracks.Add(new Track(element, property, _owner._keyframes, offsets));
+                    }
+                }
+            }
+
+            foreach (var track in old)
             {
                 track.Dispose();
             }
 
-            _tracks.Clear();
-            BuildTracks();
             Apply(CurrentTime);
         }
 
@@ -1028,6 +1053,17 @@ public sealed class AvonicAnimation
         {
             _element = element;
             _property = property;
+            SetFrames(keyframes, offsets);
+        }
+
+        internal bool Is(Visual element, AnimatedProperty property) => ReferenceEquals(element, _element) && ReferenceEquals(property, _property);
+
+        /// <summary>The frames of its property in <paramref name="keyframes"/>, with the underlying value at an end they leave open.</summary>
+        internal void SetFrames(IReadOnlyList<AnimationKeyframe> keyframes, double[] offsets)
+        {
+            _frames.Clear();
+            var property = _property;
+            var element = _element;
             for (var i = 0; i < keyframes.Count; i++)
             {
                 if (keyframes[i].TryGetValue(property.Name, out var value))

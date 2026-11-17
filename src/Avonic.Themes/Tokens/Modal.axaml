@@ -40,10 +40,10 @@
 
     <!-- A sheet's height leaves out the root's top safe area (ion-modal-offset-top), which the modal sets here while it's
          presented, as its own Avonic.SafeAreaTop is 0. -->
-    <x:Double x:Key="Avonic.Modal.OffsetTop">0</x:Double>
+    <x:Double x:Key="Avonic.ModalOffsetTop">0</x:Double>
     <!-- .modal-handle: var(ion-color-step-350, var(ion-background-color-step-350, #c0c0be)). Neither is set in Ionic's light
-         palette, so its own fallback; an app with a dark palette sets this. -->
-    <Color x:Key="Avonic.Modal.HandleBackground">#C0C0BE</Color>
-    <SolidColorBrush x:Key="Avonic.Modal.HandleBackgroundBrush" Color="{DynamicResource Avonic.Modal.HandleBackground}" />
+         palette, so its own fallback; Palettes/Dark.axaml follows the step it sets. -->
+    <Color x:Key="Avonic.Modal.Md.HandleBackground">#C0C0BE</Color>
+    <SolidColorBrush x:Key="Avonic.Modal.Md.HandleBackgroundBrush" Color="{DynamicResource Avonic.Modal.Md.HandleBackground}" />
 
 </ResourceDictionary>

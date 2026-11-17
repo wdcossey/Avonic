@@ -41,7 +41,7 @@ public class ModalPanel : Panel
 
     /// <summary>
     /// A sheet's <c>--height</c>: <c>Avonic.Modal.Height</c> if the app set it, else <c>calc(100% - (offset + gap))</c>, the offset
-    /// being <c>Avonic.Modal.OffsetTop</c> (Ionic's <c>--ion-modal-offset-top</c>) and the gap the parameter, md's 10 px.
+    /// being <c>Avonic.ModalOffsetTop</c> (Ionic's <c>--ion-modal-offset-top</c>) and the gap the parameter, md's 10 px.
     /// </summary>
     public static readonly IMultiValueConverter SheetHeight = new SheetHeightConverter();
 

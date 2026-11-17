@@ -100,7 +100,7 @@ Chromium's sampled frames (their start time fitted), the wrapper is within 3 px 
 
 | # | Behaviour | Ionic | Avonic | |
 |---|---|---|---|---|
-| S1 | Box | 834 high, 10 down, at the bottom, centred; `--ion-modal-offset-top` from the root's top safe area; an app's `--height` wins | The same, from `Avonic.Modal.OffsetTop`, which follows the root's `Avonic.SafeAreaTop`; `Avonic.Modal.Height` wins | Match |
+| S1 | Box | 834 high, 10 down, at the bottom, centred; `--ion-modal-offset-top` from the root's top safe area; an app's `--height` wins | The same, from `Avonic.ModalOffsetTop`, which follows the root's `Avonic.SafeAreaTop`; `Avonic.Modal.Height` wins | Match |
 | S2 | Enter | 280 ms md curve, 100% to 50%; the backdrop 0 to 0.16, not hit until the end; then 0.165 | The same | Match |
 | S3 | Leave | 200 ms md leave curve, 50% to 100%, the backdrop 0.16 to 0 | The same | Match |
 | S4 | Drag | 1:1 on the wrapper's height; the backdrop on the full run; `ionDragMove` with `progress` and `snapBreakpoint` | The same, on the ported gesture (10 px, priority 40) | Match |
@@ -123,6 +123,5 @@ Chromium's sampled frames (their start time fitted), the wrapper is within 3 px 
 
 | Gap | Why | Measured |
 |---|---|---|
-| The handle in a dark palette | Ionic's follows `--ion-background-color-step-350` when a palette sets it; Avonic's step colours are always set, so the handle has its own key, `Avonic.Modal.HandleBackground` (#C0C0BE) | Light: the same colour |
 | `swapFooterPosition` | Ionic pins an `ion-footer` to the body while a sheet with `expandToScroll` false is dragged, so that it doesn't shake as layout lags the transform; Avalonia lays out and draws in the same frame | |
 | An upward drag on scrolling content raises no drag events | As S11 above | |

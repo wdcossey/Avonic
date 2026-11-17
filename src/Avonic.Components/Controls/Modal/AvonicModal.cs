@@ -123,6 +123,7 @@ public partial class AvonicModal : AvonicOverlay
     public AvonicModal()
     {
         Resources.MergedDictionaries.Add(_safeArea);
+        InitSheet();
     }
 
     public bool BackdropDismiss

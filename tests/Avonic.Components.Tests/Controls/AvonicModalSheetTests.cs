@@ -902,6 +902,76 @@ public class AvonicModalSheetTests
         Assert.Null(modal.SheetGesture);
     }
 
+    // ── R: from the review ───────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void R1_A_CanDismiss_That_Answers_At_Once_Still_Waits_For_The_Snap_Back()
+    {
+        using var stage = new Stage();
+        var modal = stage.Watch(Presented(stage, Sheet(set: m => m.CanDismiss = new ModalCanDismiss((_, _) => Task.FromResult(true)))));
+        stage.Log.Clear();
+
+        var released = new Drag(stage, 447).By(400, step: 24).Lift();
+        stage.At(released + 400);
+        Assert.Empty(stage.Log);
+        stage.At(released + 16 + 512 + 240);
+        Assert.Contains($"ionModalWillDismiss(,handler)@{released + 16 + 512}", stage.Log);
+    }
+
+    [AvaloniaFact]
+    public void R2_SetCurrentBreakpoints_Task_Completes_When_It_Is_Dismissed_On_The_Way()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage);
+        var start = stage.Clock.Now.TotalMilliseconds;
+        var moved = modal.SetCurrentBreakpoint(1);
+        stage.At(start + 100);
+        stage.Key(PhysicalKey.Escape);
+        stage.After(300);
+        Assert.Null(modal.GetVisualParent());
+        Assert.True(moved.IsCompleted);
+    }
+
+    [AvaloniaFact]
+    public void R3_A_Breakpoint_Added_To_The_List_Counts()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage);
+        modal.Breakpoints!.Add(0.6);
+        var start = stage.Clock.Now.TotalMilliseconds;
+        modal.SetCurrentBreakpoint(0.6);
+        stage.At(start + 560);
+        Assert.Equal(0.6, modal.GetCurrentBreakpoint());
+    }
+
+    [AvaloniaFact]
+    public void R4_An_Apps_Style_On_The_Handle_Wins_And_A_Bare_Theme_Leaves_It_At_The_Top()
+    {
+        using var stage = new Stage();
+        stage.Window.Styles.Add(new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.OfType<ModalHandle>(x))
+        {
+            Setters = { new Avalonia.Styling.Setter(KeyboardNavigation.IsTabStopProperty, false) },
+        });
+        var modal = Presented(stage);
+        Assert.False(KeyboardNavigation.GetIsTabStop(modal.HandlePart!));
+        modal.Dismiss();
+        stage.After(240);
+        Presented(stage, modal);
+        Assert.False(KeyboardNavigation.GetIsTabStop(modal.HandlePart!));
+
+        var handle = new ModalHandle();
+        Assert.Equal(HorizontalAlignment.Center, handle.HorizontalAlignment);
+        Assert.Equal(VerticalAlignment.Top, handle.VerticalAlignment);
+    }
+
+    [AvaloniaFact]
+    public void R5_In_The_Dark_Palette_The_Handle_Follows_Its_Step_350() => ToolbarTest.InDark(() =>
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage);
+        Assert.Equal(Color.Parse("#656565"), ((ISolidColorBrush)modal.HandlePart!.Background!).Color);
+    });
+
     [AvaloniaFact]
     public void S17_A_Keyboard_Opening_Turns_The_Gesture_Off_For_A_Frame()
     {

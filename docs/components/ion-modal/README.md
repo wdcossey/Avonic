@@ -164,8 +164,8 @@ In `Tokens/Modal.axaml`. A size takes a number (px) or a CSS string: `100%`, `60
 | `Avonic.Modal.MinWidth`, `MaxWidth`, `MinHeight`, `MaxHeight` | `--min-width` and the rest | `auto`, `auto`, `auto`, `100%` |
 | `Avonic.Modal.BoxShadow` | `--box-shadow` (not in `core.json`) | unset: `…Md.BoxShadow` none, `…Md.BoxShadowInset` `0 28px 48px rgba(0, 0, 0, 0.4)` |
 
-| `Avonic.Modal.HandleBackground` (+ `Brush`) | `.modal-handle`'s `var(--ion-color-step-350, var(--ion-background-color-step-350, #c0c0be))` | `#C0C0BE` |
-| `Avonic.Modal.OffsetTop` | `--ion-modal-offset-top` (internal) | 0; the modal sets it to the root's `Avonic.SafeAreaTop` while a sheet is presented |
+| `Avonic.Modal.Md.HandleBackground` (+ `Brush`) | `.modal-handle`'s `var(--ion-color-step-350, var(--ion-background-color-step-350, #c0c0be))` | `#C0C0BE`; `Palettes/Dark.axaml` points the brush at `Avonic.BackgroundColorStep350`, as dark sets the step (#656565) |
+| `Avonic.ModalOffsetTop` | `--ion-modal-offset-top` (internal, global, hence no `Modal.` part) | 0; the modal sets it to the root's `Avonic.SafeAreaTop` while a sheet is presented |
 
 The host's text is `Avonic.TextColorBrush`. A sheet's height reads `Avonic.Modal.Height` first, then the 10 px gap, a literal in
 the theme.
@@ -184,8 +184,6 @@ None of the modal's own. On `AvonicOverlay`, which every overlay gets: inline ov
 - `Avonic.Modal.BorderStyle`: Avalonia's `Border` draws only solid lines.
 - md's tablet shadow, `0 28px 48px`, is up to 15 levels lighter just under the wrapper than Chromium's (box-shadow is best effort).
 - The page lifecycle (`ionViewWillEnter` and the rest on the content) waits for `ion-nav` (#130).
-- The sheet's handle doesn't follow a dark palette's step-350 colour, as Ionic's does through `--ion-background-color-step-350`:
-  Avonic's step colours are always set, so the handle has its own key, `Avonic.Modal.HandleBackground`, which a dark app sets.
 - A drag up on the sheet's content where the content scrolls (at the top breakpoint, or with `ExpandToScroll` false) scrolls it
   and raises no drag events: Ionic's passive gesture follows that drag as well as the browser scrolling, and Avalonia gives a
   pointer to one owner.
