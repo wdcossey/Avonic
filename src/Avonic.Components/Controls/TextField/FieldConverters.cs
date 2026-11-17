@@ -27,21 +27,27 @@ public static class FieldConverters
     /// The label's <c>translate(var(--internal-start-container-adjustment), Y%) scale(S)</c>: the values are its height, the Y
     /// fraction (<c>Css.TranslateY</c>), the scale (<c>Css.Scale</c>), <see cref="InputWrapperPanel.StartShiftProperty"/> and the
     /// start container's width. The label moves back over the start slot by that width times the shift, toward the start edge,
-    /// which is left in a mirrored panel too.
+    /// which is left in a mirrored panel too. Without the last two (an app's template with no panel), there's no X, as
+    /// <c>Css.TranslateScale</c>.
     /// </summary>
-    public static readonly IMultiValueConverter LabelTransform =
-        new FuncMultiValueConverter<object?, object?>(values =>
+    public static readonly IMultiValueConverter LabelTransform = new LabelTransformConverter();
+
+    private sealed class LabelTransformConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (values.ToList() is not [double height, double fraction, double scale, double shift, double start])
+            if (values.Count < 3 || values[0] is not double height || values[1] is not double fraction || values[2] is not double scale)
             {
                 return AvaloniaProperty.UnsetValue;
             }
 
+            var x = values.Count > 4 && values[3] is double shift && values[4] is double start ? -shift * start : 0;
             var builder = TransformOperations.CreateBuilder(2);
             builder.AppendScale(scale, scale);
-            builder.AppendTranslate(-shift * start, height * fraction);
+            builder.AppendTranslate(x, height * fraction);
             return builder.Build();
-        });
+        }
+    }
 
     /// <summary>The textarea's placement as <see cref="InputWrapperPanel"/> takes it, which lays out the label the same five ways.</summary>
     public static readonly IValueConverter TextareaPlacement =

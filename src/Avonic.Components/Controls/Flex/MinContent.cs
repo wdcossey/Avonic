@@ -72,10 +72,11 @@ internal static class MinContent
 
         // The input's, the textarea's and the searchbar's native field are width: 100%, which makes them compressible: a
         // min-content of nothing but their box. Even a growing textarea's, whose copy of the text doesn't hold it open: measured
-        // with a 34-letter word. A searchbar's is its padding and the input's, 126 at md, whatever its value: measured.
+        // with a 34-letter word. A searchbar's is its padding and the input's, 126 at md, whatever its value: measured. Since
+        // Ionic 9 the input's and the textarea's have min-width: 2ch, which their MinWidth is.
         if (control is TextBox { TemplatedParent: IInputHost or AvonicSearchbar })
         {
-            return OwnBox(control);
+            return Math.Max(OwnBox(control), Horizontal(control.Margin) + control.MinWidth);
         }
 
         var children = control.GetVisualChildren().OfType<Control>().Where(child => child.IsVisible).ToList();

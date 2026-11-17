@@ -532,6 +532,23 @@ public class AvonicInputTests
         }
     });
 
+    // Ionic 9's min-width: 2ch is in the native input's min-content, so a slot gives way down to it and no further: two inputs
+    // in a 60 px item, which leaves 28 for both, keep 17.98 each. From CSS's min-content contribution; not measured in Chromium.
+    [AvaloniaFact]
+    public void B11_In_A_Slot_With_Too_Little_Room_The_Input_Keeps_2ch() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicInput { Value = "a long value", [AutomationProperties.NameProperty] = "x" };
+        var end = new AvonicInput { Value = "a long value", [AutomationProperties.NameProperty] = "x" };
+        using var scene = new Scene(new StackPanel
+        {
+            Children = { new AvonicItem { StartContent = start, EndContent = end, Width = 60, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left } },
+        });
+        Render();
+
+        Assert.Equal(17.98, start.Bounds.Width, 0.6);
+        Assert.Equal(17.98, end.Bounds.Width, 0.6);
+    });
+
     // The native input is width: 100%, which makes it compressible: an input in the end slot gives way to the start slot's, where
     // a label beside it, which is flex: 1, wraps instead. Measured in Chromium.
     [AvaloniaFact]

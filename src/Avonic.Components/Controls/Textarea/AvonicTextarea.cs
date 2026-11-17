@@ -576,8 +576,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
             UpdateAutomation();
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
-                 || change.Property == IsEnabledProperty || change.Property == StartContentProperty
-                 || change.Property == EndContentProperty)
+                 || change.Property == IsEnabledProperty)
         {
             UpdateClasses();
         }
