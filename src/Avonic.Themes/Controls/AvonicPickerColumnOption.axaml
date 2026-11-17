@@ -38,7 +38,10 @@
             <Setter Property="Cursor" Value="Arrow" />
         </Style>
 
-        <!-- :host(.option-active) { color: var(ion-color-base) } -->
+        <!-- :host(.option-active) { color: var(ion-color-primary, #0054e9) }, :host(.ion-color.option-active) { color: var(ion-color-base) } -->
+        <Style Selector="^:option-active">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
         <Style Selector="^:option-active:ion-color">
             <Setter Property="Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
         </Style>

@@ -21,7 +21,9 @@
 The behaviours were measured with throwaway Playwright scripts on pages like it, at 390 wide, wrapped in `ion-app`, with a mouse
 and the keyboard: `scrollTop` at load and every frame of a programmatic change, a wheel notch, a click two rows down, the keys,
 a value with no option (at load and later), a click on a disabled option, a disabled column given a value from code, and numeric
-input with two numeric columns (a tap in the highlight, typing, two wheels, a tap outside, Enter).
+input with two numeric columns (a tap in the highlight, typing, two wheels, a tap outside, Enter). On 9.0.11 (#202): a press
+outside after a wheel notch, a picker removed during a scroll, a disabled column given a value, and a scroll to a disabled option.
+`ref/` is rendered on 9.0.11; its screenshots are byte-identical to 8.8.19's.
 
 ## Visual
 
@@ -47,21 +49,25 @@ disabled option and column at 0.4, the fades, and the prefix and suffix. Avonic'
 | C1 | At load, centred on its value, active in primary, no `ionChange` | `scrollTop` 121 | 121 | match |
 | C2 | A value from code scrolls smoothly, no `ionChange` | 155 → 291 in about 200 ms, eased | √136 / 60 = 194 ms, the same easing as the segment's measured smooth scroll | match |
 | C3 | The active option follows the centre; the value is set 250 ms after the last scroll, with one `ionChange` | `ionChange` 251 ms after the last scroll event | at 250 ms | match |
-| C3 | A disabled option at the centre is never active, nor the value | — (from the code) | tested | match |
+| C3 | A disabled option at the centre is never active, nor the value, and the active option stays | 9.0.11: `scrollTop` 87 snaps back to 53, Orange stays active and the value | tested: Orange stays active and the value | match |
 | C4 | A wheel notch scrolls 100 px and snaps to the nearest | 121 → 221 → 223 | 121 → 223 | match (Avonic jumps; Chromium headless jumped too, then eased the last 2 px) |
 | C4 | A drag rests centred on an enabled option | `scroll-snap-type: y mandatory` | Avalonia's `Mandatory` snap points from `PickerColumnPanel` | deliberate difference: Avalonia's snap after a fling and on release, which jumps where Chromium eases |
 | C5 | A click sets the value at once, then scrolls | `ionChange` at 7 ms, scroll after | at once, then smooth | match |
 | C6 | Disabled column: no wheel, click, key or focus; options at 0.4; its disabled option with the value is active | measured | tested | match |
-| C6 | A disabled column given a value from code scrolls there, and then no option is active | 87, none active | 87, none active | match |
+| C6 | A disabled column given a value from code scrolls there, and the old option stays active | 9.0.11: 87, `b` active (8.8.1: none) | 87, `b` active | match |
 | C7 | A disabled option is at 0.4 and skipped by the keys | 0.4 | 0.4 | match |
 | C7 | A click on a disabled option | `ionChange` b, then `ionChange` a: the value goes to the first option | nothing | deliberate difference: see the README's "Decided" |
 | C8 | Keys: 11 → ↓ 12 → ↑ 11 → PgUp 6 → Home 1 → End 12 → PgUp 7 | measured on a desktop | the same; reversed on Android and iOS | match |
 | C9 | A value with no option: kept at load (first option at the centre, none active); set while visible, it becomes the first option's with `ionChange` | `scrollTop` 19; `a` | 19; `a` at the next frame | match |
-| C10 | Focused: the scroller has the colour's base at 0.2 | `rgba(0, 84, 233, 0.2)` | a primary brush at opacity 0.2; none on Android and iOS | match |
+| C10 | Focused: the scroller has the colour's base at 0.2, primary's with no colour (9.0.11) | `rgba(0, 84, 233, 0.2)` | a primary brush at opacity 0.2; none on Android and iOS | match |
 | C3 | `aria-valuetext` while the user scrolls | Ionic 8.8.19 writes it to `assistiveFocusable`, which nothing sets, so nothing changes until the render after the value | the peer's value changes at the render after the value | match |
 | C11 | `setFocus()` | does nothing in 8.8.19: `assistiveFocusable` is never set | focuses the column | deliberate difference: see "Decided" |
 | C12 | An option added later centres the column | from the code | tested | match |
 | C13 | A hidden column doesn't scroll for a value, and centres when shown | from the code | tested | match |
+| — | `color` by default (9.0.11) | none: the hosts have no `ion-color` class (`ref/README.md`), the active option is still primary | `Color` null, no `:ion-color`, the active option primary | match |
+| C14 | A press outside during the user's scroll commits at once, halted on the centred option | after a wheel notch: `ionChange` 2 ms after the press, `scrollTop` 223 | at the press, on the snap point; a touchpad's pending snap is cancelled; frames within 2 px ignored | match, except a touch fling, which Avalonia carries on: see the README's "Known gaps" |
+| C14 | A press in the same picker | from the code: the column coasts | tested: commits 250 ms after the last scroll | match |
+| C15 | A column detached during a scroll | removed 60 ms after a notch: no `ionChange` | none; hidden, none too | match |
 | P1 | Highlight, fades, columns centred, left to right in RTL | measured | tested | match |
 | P2 | First column's text at the start, last at the end, a lone one centred | measured `text-align` | tested | match |
 | P3 | A tap in the highlight with two numeric columns: both active, the hidden input focused; "1230" → 12 and 30 | measured | tested | match |

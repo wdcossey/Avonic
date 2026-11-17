@@ -9,6 +9,15 @@ Measurements are from real Ionic 8.8.1 in Chromium, and a column shown again on 
 boxes and colours, `scrollTop` at load and sampled every frame during a programmatic change, a wheel notch, a click on an option, the
 keys, a value with no option, a click on a disabled option and a disabled column. The page is in [COMPARISON.md](COMPARISON.md).
 
+**Ionic 9.0.11** (#202, from #190): `color` has no default on the column or the option; the active option and the focused column
+fall back to primary without `.ion-color`. A press outside the column and its picker during the user's scroll halts it on the
+centred option and commits it at once (`settle()`, `HALT_TOLERANCE` 2, `SCROLL_END_DELAY` 250); a detached or hidden column drops
+what it would have committed; a scroll that centres no enabled option leaves the active one. Measured on 9.0.11 with a throwaway
+Playwright script (C3, C6, C14, C15): the press outside after a wheel notch raised `ionChange` 2 ms after the press, at
+`scrollTop` 223 (224 later, within the tolerance); a picker removed 60 ms after a notch raised nothing; a disabled column given
+`c` kept `b` active; a scroll to a disabled option snapped back and kept Orange active. Re-rendered `ref/` on 9.0.11: the
+screenshots are byte-identical, and the hosts lose `ion-color ion-color-primary`.
+
 ## Fidelity checklist
 
 `node tools/ionic-api.js ion-picker`, `ion-picker-column`, `ion-picker-column-option`.
@@ -38,7 +47,7 @@ event, `InputModeChanged`, as the mapping does for `@internal` events between ou
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`, `primary` at style priority, as Ionic's default is `'primary'`. Drives the focused background |
+| [x] | `color` | `Color` | `ColorPalette.ColorProperty.AddOwner`, unset by default, as Ionic 9's (8.8.19's was `'primary'`). Drives the focused background: `Avonic.PickerColumn.FocusBackground`, primary at 0.2, without one, as `rgba(var(--ion-color-primary-rgb), 0.2)` |
 | [x] | `disabled` | `IsEnabled` | Mapping rule. It stops the column's own scrolling, keys and focus, and its options' input (`pointer-events: none` on them). See "Decided" for the prefix and suffix |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
 | [x] | `value` | `Value` (`object?`) | `string \| number`; null is `undefined`. Compared with `Equals`, as `===`. Two-way, as the user changes it |
@@ -60,7 +69,7 @@ The options are the default slot, which `core.json` doesn't list: **`Items`**, a
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `color` | `Color` | As the column's, `primary` by default. The active option's text is its base colour |
+| [x] | `color` | `Color` | As the column's, unset by default. The active option's text is its base colour, or `Avonic.Color.PrimaryBrush` without one (`var(--ion-color-primary)`), not a base it inherits |
 | [x] | `disabled` | `IsEnabled` | Mapping rule. Opacity 0.4, not snapped to, skipped by the keys, never active |
 | [x] | `value` | `Value` (`object?`) | `any` |
 
@@ -76,17 +85,19 @@ From `picker-column.js`, `picker-column-option.js` and `picker.js`; every number
 |---|---|---|
 | C1 | Once it's visible, the column jumps to centre the option whose value is `value`, and that option is active (`option-active`): its text is its colour's base. No `ionChange`. Measured: `scrollTop` 121 for the 4th option, 34 × 3 + 19. Shown again, an old active option is cleared (8.8.19's `el.querySelector`; measured on 8.8.19, hidden at Red, value Blue, shown: only Blue active). 8.8.19's `picker-column-option.md.css` also colours `[part~=active]`, which only `ion-datetime` sets: for #46 | IO callback → `scrollActiveItemIntoView()`; `scroll-snap-align: center` |
 | C2 | A programmatic `value` while visible scrolls smoothly to its option, √distance / 60 s, Chromium's ease in-out (measured 136 px in 200 ms), and no `ionChange` | `valueChange` → `scrollActiveItemIntoView(true)` |
-| C3 | A scroll by the user moves the active option with the centre at every frame, and 250 ms after the last scroll sets `value` to the centred option and raises `ionChange` once. A disabled option at the centre is never active | `initializeScrollListener` |
+| C3 | A scroll by the user moves the active option with the centre at every frame, and 250 ms after the last scroll sets `value` to the centred option and raises `ionChange` once. A disabled option at the centre is never active, and the active option stays until an enabled one is at the centre (9.0.11, measured: Orange stays) | `initializeScrollListener` |
 | C4 | A scroll comes to rest centred on an enabled option. Measured: a 100 px wheel notch from 121 rests at 223, the nearest | `scroll-snap-type: y mandatory`; `scroll-snap-align: none` on disabled options unless the column is disabled |
 | C5 | A click on an option sets `value` and raises `ionChange` at once, then scrolls it to the centre (measured: `ionChange` at 7 ms, scroll after) | option `onClick` → `setValue` |
 | C6 | Disabled column: no scroll, click or key changes it; it can't be focused; its options are at opacity 0.4; the option with its value is active even if that option is disabled (measured) | `setValue`'s `disabled` check, `overflow-y: hidden`, `tabindex` |
 | C7 | Disabled option: opacity 0.4; the keys skip it; not active | `activeItem`, `findNextOption` |
 | C8 | Keys on the focused column: ArrowDown and ArrowUp move one enabled option, PageDown and PageUp five, Home and End the first and last option, each with `ionChange` at once. On a mobile platform the arrows and pages are reversed. Measured on desktop: 11 → ↓ 12 → ↑ 11 → PgUp 6 → Home 1 → End 12 → PgUp 7 | `onKeyDown` |
 | C9 | A `value` with no option, set while the column is visible, becomes the first option's value at the next render, with `ionChange` (measured: at 71 ms). At load it stays (measured) | `componentDidRender` |
-| C10 | The focused column's scroller has its colour's base at 0.2 behind it, where there's a hovering pointer (measured `rgba(0, 84, 233, 0.2)`) | `@media (any-hover: hover) :host(:focus)` |
+| C10 | The focused column's scroller has its colour's base, or primary with no colour (9.0.11), at 0.2 behind it, where there's a hovering pointer (measured `rgba(0, 84, 233, 0.2)`) | `@media (any-hover: hover) :host(:focus)` |
 | C11 | `SetFocus()` focuses the column | `setFocus` (see "Decided") |
 | C12 | An option added later centres the column again on its value | option `componentDidLoad` |
 | C13 | A column that isn't visible doesn't scroll for a new value, and centres when it's shown; its scroll listener starts a frame after it's shown, so that first jump isn't a user's scroll | `IntersectionObserver`, `raf` |
+| C14 | During a scroll the user started (a press, the wheel or a touch moving on the scroller), a press outside the column and its picker centres the centred option at once, with no smooth scroll, and commits it with `ionChange` before the press reaches its target; scroll frames within 2 px of that place after it start nothing. A press in the same picker leaves the column coasting. A value from code ends the user's scroll. Measured: `ionChange` 2 ms after the press | 9.0.11: `watchForOutsidePress`, `onPointerDownOutside`, `settle`, `HALT_TOLERANCE`; a tunnel `PointerPressed` on the `TopLevel`, with handled presses too, as a capture listener on the document |
+| C15 | A column detached during a scroll commits nothing; hidden, it drops the option it would have committed. Measured: removed 60 ms after a notch, no `ionChange` | 9.0.11: `disconnectedCallback` → `discardScroll`; the observer's hidden branch |
 
 **Picker**
 

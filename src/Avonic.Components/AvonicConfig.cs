@@ -148,9 +148,28 @@ public static class AvonicConfig
     /// <summary>
     /// Ionic's <c>inputShims</c> config: whether an <see cref="AvonicApp"/> starts the scroll assist and scroll padding for its
     /// fields. Default on Android and iOS, where the on-screen keyboard covers the app instead of resizing it, as Ionic's
-    /// <c>needInputShims()</c> is for iOS and for Chrome on Android; off elsewhere. Read when the app is attached.
+    /// <c>needInputShims()</c> is for iOS and for Chrome on Android; and on Windows, where the touch keyboard covers the window
+    /// the same way; off elsewhere. Read when the app is attached.
     /// </summary>
-    public static bool InputShims { get; set; } = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+    /// <remarks>
+    /// On Windows, a deviation: Ionic's is off in a desktop browser. There they follow the touch keyboard: a field's focus waits
+    /// for the window's input pane (<see cref="TopLevel.InputPane"/>) to open over the window, and reckons with the height it
+    /// covers, as most Windows PCs type on a keyboard of their own and the touch keyboard comes only in tablet use. With no
+    /// keyboard ever shown, nothing happens, and the padding goes when the keyboard does. On Android and iOS, and on macOS and
+    /// Linux where an app turns them on, they're Ionic's: a field's focus reckons with <see cref="KeyboardHeight"/> at once. See
+    /// <c>docs/components/ion-app/README.md</c>.
+    /// </remarks>
+    public static bool InputShims { get; set; } = InputShimsByDefault(Controls.InputShims.IsPlatform);
+
+    /// <summary><see cref="InputShims"/>'s default for the platform <paramref name="isPlatform"/> says it is.</summary>
+    internal static bool InputShimsByDefault(Func<string, bool> isPlatform) =>
+        KeyboardIsTheOnlyOne(isPlatform) || isPlatform("windows");
+
+    /// <summary>
+    /// Whether the on-screen keyboard is the only keyboard on the platform <paramref name="isPlatform"/> says it is, so that a
+    /// field's focus brings it, as Ionic reckons: Android and iOS.
+    /// </summary>
+    internal static bool KeyboardIsTheOnlyOne(Func<string, bool> isPlatform) => isPlatform("android") || isPlatform("ios");
 
     /// <summary>
     /// Ionic's <c>scrollAssist</c> config: whether a field that takes focus where the keyboard would cover it scrolls its content

@@ -1077,8 +1077,9 @@ public sealed class AvonicIconTests : IDisposable
     [AvaloniaFact]
     public void Clipping_Can_Be_Styled()
     {
+        // contain: layout style (ionicons 8.1.0; strict before) doesn't clip the host: only the SVG clips, in Render.
         var icon = new AvonicIcon();
-        Assert.True(icon.ClipToBounds);
+        Assert.False(icon.ClipToBounds);
         Assert.False(icon.IsSet(Visual.ClipToBoundsProperty), "A local value would beat a style");
     }
 
