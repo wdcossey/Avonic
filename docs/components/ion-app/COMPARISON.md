@@ -41,6 +41,9 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicApp
 | I1–I7 | Scroll assist and scroll padding | S1–S3 in [PLAN.md](PLAN.md#input-shims), with a Pixel's user agent | the same numbers: 290 at once, 128 by about 400 ms, 0 120 ms after blur, a second's wait without room | match |
 | I8 | The keyboard's own height | Ionic keeps its 290; Chrome scrolls the focused field into the visual viewport itself | the assist runs again with it when its scroll ends | deliberate difference: Avalonia doesn't scroll a focused field above the keyboard (measured below) |
 | I9 | The page's height | `innerHeight`, above the navigation bar | the client height less the bottom inset, as the keyboard's height is above the bar | match |
+| W1 | `inputShims` on Windows | off: `needInputShims()` is false in a desktop browser | on by default | deliberate difference (#189): the touch keyboard covers a Windows tablet's window as a phone's covers the view |
+| W2–W7 | When they act on Windows | n/a | they follow the window's input pane: nothing on focus, then the height the touch keyboard covers of the window once it opens; nothing if it covers none | deliberate: most Windows PCs have a keyboard of their own, so focus can't mean the touch keyboard is coming. Read from Avalonia's `WindowsInputPane`, see [PLAN.md](PLAN.md#input-shims-on-windows-189) |
+| K1 | `keyboardHeight` | the plugin's, the keyboard's own | what the keyboard covers of the `TopLevel`: on a phone, the same; on Windows, the part over the window | deliberate, for windows that don't fill the screen |
 
 ## On the Pixel
 
@@ -75,7 +78,17 @@ Two things the coordinator asked to look at while the phone was out, which aren'
   Chrome's shadow sits far more below the button than Avonic's. The cards ([Chrome](compare/pixel8-chrome-card.png),
   [Avonic](compare/pixel8-avonic-card.png)) look alike by eye; their shadow is 1 to 5 px, too small to measure apart.
 
+## On Windows (#189)
+
+Headless only so far. The sample's `ion-app` page has a line with what the window's input pane reports (its state, its rect in the
+window and its top on the screen, the content's padding, whether the shims are on, and the client size), here with no pane, as a
+headless window has none ([frame](compare/avonic-app-pane-probe.png)). `tools/real-window/drive.ps1 -Only 'ion-app: the touch keyboard'`
+opens the touch keyboard on the last row's field, by a touch tap and failing that `ITipInvocation`, and checks the field ends above
+it, 50 above with the content padded by what it covers when it had to move. Not run yet.
+
 ## Not tried
 
-- In a real window: the `ion-app` section added to `tools/real-window/drive.ps1` is for the coordinator to run.
+- In a real window: the `ion-app` and `ion-app: the touch keyboard` sections in `tools/real-window/drive.ps1` are for the
+  coordinator to run.
+- On a Windows tablet, or with the touch keyboard: what the pane reports there is read from Avalonia's source.
 - On iOS: no device.

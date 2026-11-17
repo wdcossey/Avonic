@@ -1,6 +1,6 @@
 # ion-app
 
-Status: done · [#65](https://github.com/wdcossey/Avonic/issues/65)
+Status: done · [#65](https://github.com/wdcossey/Avonic/issues/65) · the input shims on Windows: [#189](https://github.com/wdcossey/Avonic/issues/189)
 
 `AvonicApp`, Ionic's `ion-app`: the root of an app. It starts what a native app needs from Ionic for the `TopLevel` it's in: the
 hardware back button, the keyboard's events, the input shims and the safe area, and its theme gives what's in it a page's text. Plan:
@@ -62,7 +62,9 @@ topLevel.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) =>
 
 Ionic's `ionKeyboardDidShow` and `ionKeyboardDidHide`: `KeyboardAssist.IonKeyboardDidShowEvent`, with `KeyboardHeight`, and
 `IonKeyboardDidHideEvent`, on the `TopLevel`, each time the on-screen keyboard has opened or closed. They come from
-`TopLevel.InputPane`, once its animation has finished. A desktop has no pane, and nothing comes.
+`TopLevel.InputPane`, once its animation has finished. `KeyboardHeight` is how much of the `TopLevel` the keyboard covers: on a
+phone, all of it; on Windows, the part of the touch keyboard over the window, which may be none. Windows 10 and later give every
+window a pane, which reports the touch keyboard (see [Windows](#windows)); macOS and Linux have none, and nothing comes.
 
 ## The input shims
 
@@ -73,12 +75,35 @@ keyboard. The padding goes 120 ms after the field loses focus.
 
 | Config | Ionic | Default | |
 |---|---|---|---|
-| `AvonicConfig.InputShims` | `inputShims` | on for Android and iOS | Read when the app is attached |
+| `AvonicConfig.InputShims` | `inputShims` | on for Android, iOS and Windows | Read when the app is attached. Windows is a deviation: see below |
 | `AvonicConfig.ScrollAssist` | `scrollAssist` | true | Read when the app is attached |
 | `AvonicConfig.ScrollPadding` | `scrollPadding` | true | Read when the app is attached |
 | `AvonicConfig.KeyboardHeight` | `keyboardHeight` | 290 | The height reckoned with until the keyboard says its own. Read when the app is attached |
 
 Once the keyboard says its own height, the assist runs again with it, where Ionic leaves that to the browser.
+
+### Windows
+
+**A deviation:** Ionic's `inputShims` is off in a desktop browser. Here they're on by default on Windows too, for tablets, where
+the touch keyboard covers the window as a phone's does (#189). Most Windows PCs type on a keyboard of their own, so a field's focus
+doesn't reckon with a keyboard as it does on a phone: the shims **follow the window's input pane**. Nothing happens on focus; when
+the touch keyboard opens over the window, the content is padded by what it covers and the field's item scrolled 50 above it, and a
+field focused while it's open is placed at once. A touch keyboard that doesn't reach the window, as under a window high on the
+screen, changes nothing. With no touch keyboard, they never act.
+
+Avalonia 12.1.4's pane on Windows is `WindowsInputPane`, over Windows' `IFrameworkInputPane`, made for every window when Windows has
+the WinRT `InputPane` (Windows 10 and later): `Open`, with the keyboard's place on the screen in the window's coordinates, when the
+touch keyboard docks, and `Closed`, with an empty rect, when it goes, with no animation. Avalonia doesn't open the keyboard itself:
+Windows does, for a field focused by touch in tablet posture, or as its touch keyboard setting says.
+
+| Platform | Pane | Default | On focus |
+|---|---|---|---|
+| Android, iOS | yes | on | Ionic's: reckons with `KeyboardHeight` at once, then the keyboard's own |
+| Windows 10 and later | yes, every window | on | Waits for the touch keyboard; nothing without one |
+| macOS, Linux | no | off | If an app turns it on: Ionic's, as in a desktop browser with `inputShims: true` |
+
+The sample's `ion-app` page has a line with what the pane reports, for a real Windows tablet or a touch keyboard forced on, and
+`tools/real-window` opens the touch keyboard on it (`-Only 'ion-app: the touch keyboard'`).
 
 ## The safe area
 
@@ -131,5 +156,10 @@ fills `Avonic.SafeArea*`.
 - `AvonicConfig.HardwareBackButton` off leaves back alone, where Ionic's `blockHardwareBackButton` swallows it.
 - Ionic starts its utilities after an idle callback; here they start when the app is attached. Ionic never stops them; here they
   stop when the app is taken out.
+- **On Windows, the padding stays while the field keeps focus,** as in Ionic, also after the touch keyboard has been closed by
+  hand, until the field loses focus. A phone's keyboard closes with the focus; Windows' can be closed alone.
+- **A footer** already hears Windows' touch keyboard through the same pane, and drops its bottom safe area while it's open, as on
+  a phone: that's the toolbar's, unchanged.
 - Tried on a Pixel 8 (Android 17) and headless; not on iOS, and not in a real window (`tools/real-window` has an `ion-app`
-  section to run).
+  section and an `ion-app: the touch keyboard` section to run). What Windows' pane reports is read from Avalonia's source, not yet
+  measured on a tablet.
