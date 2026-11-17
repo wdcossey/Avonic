@@ -728,6 +728,59 @@ public class AvonicModalSheetTests
     }
 
     [AvaloniaFact]
+    public void S11_A_Drag_Up_On_The_Content_At_The_Top_Breakpoint_Scrolls_It()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage, Sheet(1));
+        var scroller = ContentOf(modal).GetScrollElement()!;
+        scroller.IsScrollInertiaEnabled = false;
+        var starts = 0;
+        modal.IonDragStart += (_, _) => starts++;
+
+        // Ionic's passive gesture would capture it and do nothing, and the browser scrolls; here the gesture lets go of it.
+        var released = new Drag(stage, 500).By(-120).Lift();
+        stage.At(released + 600);
+        Assert.Equal(0, starts);
+        Assert.True(scroller.Offset.Y > 50, $"offset {scroller.Offset.Y}");
+        Assert.Equal(1, modal.GetCurrentBreakpoint());
+
+        // Below the top, the same drag expands the sheet instead.
+        scroller.Offset = default;
+        var start = stage.Clock.Now.TotalMilliseconds;
+        modal.SetCurrentBreakpoint(0.75);
+        stage.At(start + 600);
+        new Drag(stage, 500).By(-40).Lift();
+        Assert.Equal(1, starts);
+    }
+
+    [AvaloniaFact]
+    public void S4_Progress_Is_0_At_The_Lowest_Breakpoint_And_1_At_The_Highest()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage, Sheet(0.5, [0.25, 0.5, 0.75]));
+        var moves = new List<ModalDragEventArgs>();
+        modal.IonDragMove += (_, e) => moves.Add(e);
+        var drag = new Drag(stage, 447).By(-40).Hold();
+
+        // (0.5 - deltaY / 834, rounded, - 0.25) / (0.75 - 0.25)
+        var delta = moves[^1].DeltaY;
+        Near((Math.Round(0.5 - delta / Height, 3) - 0.25) / 0.5, moves[^1].Progress);
+        drag.Lift();
+    }
+
+    [AvaloniaFact]
+    public void S9_Breakpoints_Given_Out_Of_Order_Are_Sorted()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage, Sheet(0.5, [1, 0, 0.5]));
+        var centre = modal.HandlePart!.TranslatePoint(new Point(18, 2.5), stage.Window)!.Value;
+        stage.Click(centre);
+        stage.After(560);
+        Assert.Equal(1, modal.GetCurrentBreakpoint());
+        Near(0, TranslateY(modal.Wrapper!));
+    }
+
+    [AvaloniaFact]
     public void S11_ExpandToScroll_False_The_Content_Scrolls_At_Every_Breakpoint_And_Is_As_Tall_As_What_Shows()
     {
         using var stage = new Stage();

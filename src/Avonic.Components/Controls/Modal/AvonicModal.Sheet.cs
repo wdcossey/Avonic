@@ -366,13 +366,13 @@ public partial class AvonicModal
 
     /// <summary>
     /// <c>iosEnterAnimation</c> with no presenting element, which md's sheet gesture drives: the same parts, 500 ms,
-    /// <c>cubic-bezier(0.32,0.72,0,1)</c>, and the wrapper's inline <c>opacity: 1</c>.
+    /// <c>cubic-bezier(0.32,0.72,0,1)</c>. Its wrapper's inline <c>opacity: 1</c> is left out: md's own enter animation, which holds
+    /// the wrapper at 1 until the dismiss, is there the whole time.
     /// </summary>
     private AnimationBuilder SheetGestureAnimation => (baseElement, options) =>
     {
         var modal = (AvonicModal)baseElement;
         var (wrapper, backdrop, content) = modal.SheetEnterParts((ModalAnimationOptions)options!);
-        wrapper.BeforeStyles(new() { ["opacity"] = 1 });
         var baseAnimation = AvonicAnimation.Create("entering-base")
             .AddElement(modal)
             .Easing("cubic-bezier(0.32,0.72,0,1)")
