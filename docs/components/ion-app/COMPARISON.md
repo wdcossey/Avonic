@@ -41,6 +41,10 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicApp
 | I1–I7 | Scroll assist and scroll padding | S1–S3 in [PLAN.md](PLAN.md#input-shims), with a Pixel's user agent | the same numbers: 290 at once, 128 by about 400 ms, 0 120 ms after blur, a second's wait without room | match |
 | I8 | The keyboard's own height | Ionic keeps its 290; Chrome scrolls the focused field into the visual viewport itself | the assist runs again with it when its scroll ends | deliberate difference: Avalonia doesn't scroll a focused field above the keyboard (measured below) |
 | I9 | The page's height | `innerHeight`, above the navigation bar | the client height less the bottom inset, as the keyboard's height is above the bar | match |
+| W1 | `inputShims` on Windows | off: `needInputShims()` is false in a desktop browser | on by default | deliberate difference (#189): the touch keyboard covers a Windows tablet's window as a phone's covers the view |
+| W2–W8, W10–W12 | When they act on Windows | n/a | they follow the window's input pane: nothing on focus, then the height the touch keyboard covers of the window once it opens; nothing if it covers none, or the window has no pane | deliberate: most Windows PCs have a keyboard of their own, so focus can't mean the touch keyboard is coming. Read from Avalonia's `WindowsInputPane`, see [PLAN.md](PLAN.md#input-shims-on-windows-189) |
+| W9 | The padding when the keyboard closes with the field still focused | stays until blur | on Windows, goes 120 ms later, and comes back with the keyboard | deliberate: a phone's keyboard closes with the focus; Windows' can be closed alone, and typing go on |
+| K1 | `keyboardHeight` | the plugin's, the keyboard's own | what the keyboard covers of the `TopLevel`: on a phone, the same; on Windows, the part over the window, and over none of it is a hide | deliberate, for windows that don't fill the screen |
 
 ## On the Pixel
 
@@ -75,7 +79,36 @@ Two things the coordinator asked to look at while the phone was out, which aren'
   Chrome's shadow sits far more below the button than Avonic's. The cards ([Chrome](compare/pixel8-chrome-card.png),
   [Avonic](compare/pixel8-avonic-card.png)) look alike by eye; their shadow is 1 to 5 px, too small to measure apart.
 
+## On Windows (#189)
+
+The sample's `ion-app` page has a line with what the window's input pane reports: its state, its rect as Avalonia gives it, the
+same rect on the screen through the window's client origin, that origin, the scale, the content's padding, whether the shims are
+on, and the client size. Headless, a window has no pane ([frame](compare/avonic-app-pane-probe.png)).
+`tools/real-window/drive.ps1 -Only 'ion-app: the touch keyboard'` opens the touch keyboard on the last row's field, by a touch tap
+and failing that `ITipInvocation`.
+
+**Measured** (the lead's run of `1f5064e`, 2026-11-17): Windows 11, Avalonia 12.1.4, a 3840 × 2160 screen at 125%, the sample's
+window 487 × 1055, its client's top at screen y 518, with no touch hardware.
+
+| | Result |
+|---|---|
+| At load | `Closed`, an empty rect, and the shims on by default |
+| A touch tap on the field | No keyboard: not in tablet posture |
+| `ITipInvocation.Toggle` | `Open`, at 547.2, 797.6, 1194.4 × 488 |
+| Through the client's origin | The keyboard's top at screen y 1515, 18 below the field's bottom (1497): a floating keyboard, placed under the caret. Its left is 684 right of the window's, past the window's 487 |
+| What it covers of the window | None: it's beside it. The frame shows no keyboard over the window, and the status line says `IonKeyboardDidHide`, as `KeyboardAssist` reports a keyboard over none of the window. Padding 0, the field left where it was |
+
+That reads Avalonia's rect as the window's client DIPs, as its source says, and puts the keyboard just under the caret, where Windows
+puts a floating keyboard. Read as the screen's DIPs instead, it would be at y 997 to 1607, across the field's height, and the frame
+would show it over the window unless the window was left of x 684. The window's x wasn't logged, so the probe's line now gives the
+client's origin and the keyboard's place on the screen, and the run saves a frame of both together. The two checks that failed in
+that run were the probe's own: it took
+what the keyboard covers from the heights alone, 46, and ignored that it was beside the window. They now take the overlap both ways,
+as `KeyboardAssist` does; check that a keyboard beside the window pads nothing; and then move the window over the keyboard and open
+it again, to check the scroll. That part isn't run yet.
+
 ## Not tried
 
-- In a real window: the `ion-app` section added to `tools/real-window/drive.ps1` is for the coordinator to run.
+- The shims scrolling a field above a real touch keyboard over the window: the probe's second part, after the window is moved.
+- On a Windows tablet, in tablet posture, or with a docked keyboard.
 - On iOS: no device.

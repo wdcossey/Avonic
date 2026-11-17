@@ -19,15 +19,13 @@ public class AvonicPickerColumnOption : ContentControl
     /// <summary>Ionic's <c>option-active</c> class, which the column sets on the option at its centre.</summary>
     internal const string OptionActive = ":option-active";
 
-    /// <summary>Ionic <c>color</c>: the active option's text colour. <c>primary</c> unless set, as Ionic's default is.</summary>
+    /// <summary>Ionic <c>color</c>: the active option's text colour. Unset by default, as Ionic 9's is; the text is then primary.</summary>
     public static readonly StyledProperty<string?> ColorProperty =
         ColorPalette.ColorProperty.AddOwner<AvonicPickerColumnOption>();
 
     /// <summary>Ionic <c>value</c>: what the column's value becomes when this option is chosen.</summary>
     public static readonly StyledProperty<object?> ValueProperty =
         AvaloniaProperty.Register<AvonicPickerColumnOption, object?>(nameof(Value));
-
-    private readonly StyleValue<string?> _defaultColor = new();
 
     static AvonicPickerColumnOption()
     {
@@ -37,10 +35,6 @@ public class AvonicPickerColumnOption : ContentControl
 
     public AvonicPickerColumnOption()
     {
-        // color = 'primary', at style priority so that an app's style still wins.
-        Bind(ColorProperty, _defaultColor, BindingPriority.Style);
-        _defaultColor.Set("primary");
-
         // onClick, on the div with role="button" inside: a DOM click on release, with no keys.
         _ = new NativeButton(this, _ => OnClick(), () => false, () => { });
     }

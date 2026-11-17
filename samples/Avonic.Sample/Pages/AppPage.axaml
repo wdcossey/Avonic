@@ -8,10 +8,15 @@
     <c:AvonicApp Name="App">
         <Grid RowDefinitions="Auto,*,Auto">
             <Border Background="#F4F5F8" Padding="8">
-                <WrapPanel>
-                    <ToggleButton Name="TakeBack" Content="Take back at 10" Margin="2" />
-                    <Button Name="Ring" Content="SetFocus on row 1" Margin="2" />
-                </WrapPanel>
+                <StackPanel>
+                    <WrapPanel>
+                        <ToggleButton Name="TakeBack" Content="Take back at 10" Margin="2" />
+                        <Button Name="Ring" Content="SetFocus on row 1" Margin="2" />
+                    </WrapPanel>
+                    <!-- What the window's input pane reports (Windows' touch keyboard, a phone's keyboard), above where the keyboard goes.
+                         tools/real-window reads it. -->
+                    <TextBlock Name="Pane" Margin="2" FontSize="12" TextWrapping="Wrap" />
+                </StackPanel>
             </Border>
 
             <c:AvonicContent Name="Main" Grid.Row="1">

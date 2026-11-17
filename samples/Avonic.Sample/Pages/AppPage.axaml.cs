@@ -1,5 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Platform;
 using Avalonia.Interactivity;
+using Avonic.Components;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Controls;
 
@@ -10,6 +13,7 @@ public partial class AppPage : UserControl
 {
     private readonly AvonicItem _first;
     private TopLevel? _topLevel;
+    private IInputPane? _pane;
     private int _backs;
 
     public AppPage()
@@ -38,6 +42,19 @@ public partial class AppPage : UserControl
         _topLevel?.AddHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         _topLevel?.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardDidShow);
         _topLevel?.AddHandler(KeyboardAssist.IonKeyboardDidHideEvent, OnKeyboardDidHide);
+        _pane = _topLevel?.InputPane;
+        if (_pane is not null)
+        {
+            _pane.StateChanged += OnPaneChanged;
+        }
+
+        if (_topLevel is not null)
+        {
+            _topLevel.PropertyChanged += OnTopLevelChanged;
+        }
+
+        Main.PropertyChanged += OnMainChanged;
+        ShowPane();
     }
 
     protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
@@ -46,7 +63,71 @@ public partial class AppPage : UserControl
         _topLevel?.RemoveHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         _topLevel?.RemoveHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardDidShow);
         _topLevel?.RemoveHandler(KeyboardAssist.IonKeyboardDidHideEvent, OnKeyboardDidHide);
+        if (_pane is not null)
+        {
+            _pane.StateChanged -= OnPaneChanged;
+            _pane = null;
+        }
+
+        if (_topLevel is not null)
+        {
+            _topLevel.PropertyChanged -= OnTopLevelChanged;
+        }
+
+        Main.PropertyChanged -= OnMainChanged;
         _topLevel = null;
+    }
+
+    // Also to the log, only for the pane's own changes, not each step of a window's resize.
+    private void OnPaneChanged(object? sender, InputPaneStateEventArgs e)
+    {
+        ShowPane();
+        Console.WriteLine($"AvonicApp: {Pane.Text}");
+    }
+
+    private void OnTopLevelChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == TopLevel.ClientSizeProperty)
+        {
+            ShowPane();
+        }
+    }
+
+    private void OnMainChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == AvonicContent.KeyboardOffsetProperty)
+        {
+            ShowPane();
+        }
+    }
+
+    /// <summary>
+    /// The probe for #189: the input pane's state and occluded rect, in the window's client device-independent pixels, as Avalonia
+    /// gives it; the same rect on the screen, in physical pixels, through the window's client origin; that origin; the scale; the
+    /// content's keyboard padding; and the window's client size.
+    /// </summary>
+    private void ShowPane()
+    {
+        if (_topLevel is not { } top)
+        {
+            return;
+        }
+
+        var size = top.ClientSize;
+        var shims = AvonicConfig.InputShims ? "on" : "off";
+        if (_pane is not { } pane)
+        {
+            Pane.Text = FormattableString.Invariant($"Input pane: none; shims {shims}; window {size.Width:0.#}x{size.Height:0.#}");
+            return;
+        }
+
+        // Invariant, so that tools/real-window reads the numbers whatever the PC's culture.
+        var r = pane.OccludedRect;
+        var origin = top.PointToScreen(default);
+        var screenTopLeft = top.PointToScreen(r.TopLeft);
+        var screenBottomRight = top.PointToScreen(r.BottomRight);
+        Pane.Text = FormattableString.Invariant(
+            $"Input pane: {pane.State}, at {r.X:0.#},{r.Y:0.#} {r.Width:0.#}x{r.Height:0.#}, screen {screenTopLeft.X},{screenTopLeft.Y} {screenBottomRight.X - screenTopLeft.X}x{screenBottomRight.Y - screenTopLeft.Y}; client on screen {origin.X},{origin.Y}; scale {top.RenderScaling:0.##}; padding {Main.KeyboardOffset:0.#}; shims {shims}; window {size.Width:0.#}x{size.Height:0.#}");
     }
 
     private void OnIonBackButton(object? sender, BackButtonEventArgs e)

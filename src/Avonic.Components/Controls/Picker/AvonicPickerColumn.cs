@@ -51,8 +51,14 @@ public class AvonicPickerColumn : ItemsControl
     /// </summary>
     internal static readonly TimeSpan WheelSnapDelay = TimeSpan.FromMilliseconds(100);
 
-    /// <summary>The time after the last scroll that the centred option becomes the value, as Ionic's timeout.</summary>
+    /// <summary>The time after the last scroll that the centred option becomes the value, as Ionic's <c>SCROLL_END_DELAY</c>.</summary>
     internal static readonly TimeSpan ScrollEndDelay = TimeSpan.FromMilliseconds(250);
+
+    /// <summary>
+    /// Ionic's <c>HALT_TOLERANCE</c>: after a press outside halts the column, a scroll frame this close to where it stopped is the
+    /// halt landing, not the wheel moving.
+    /// </summary>
+    internal const double HaltTolerance = 2;
 
     /// <summary>
     /// Ionic's <c>isPlatform('mobile')</c>, <c>any-pointer: coarse</c>: Android and iOS here, as Avalonia has no such query. It
@@ -60,7 +66,9 @@ public class AvonicPickerColumn : ItemsControl
     /// </summary>
     internal static Func<bool> IsMobile = () => OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
 
-    /// <summary>Ionic <c>color</c>: the focused column's background. <c>primary</c> unless set, as Ionic's default is.</summary>
+    /// <summary>
+    /// Ionic <c>color</c>: the focused column's background. Unset by default, as Ionic 9's is; the background is then primary's.
+    /// </summary>
     public static readonly StyledProperty<string?> ColorProperty =
         ColorPalette.ColorProperty.AddOwner<AvonicPickerColumn>();
 
@@ -93,7 +101,6 @@ public class AvonicPickerColumn : ItemsControl
     public static readonly RoutedEvent<PickerColumnChangeEventArgs> IonChangeEvent =
         RoutedEvent.Register<AvonicPickerColumn, PickerColumnChangeEventArgs>(nameof(IonChange), RoutingStrategies.Bubble);
 
-    private readonly StyleValue<string?> _defaultColor = new();
     private readonly HiddenChainWatcher _hiddenChain;
     private ScrollViewer? _scroll;
     private SmoothScroll? _smooth;
@@ -114,6 +121,10 @@ public class AvonicPickerColumn : ItemsControl
     private bool _centrePosted;
     private IDisposable? _wheelSnap;
     private string? _peerValue;
+    private bool _isUserScroll;
+    private AvonicPickerColumnOption? _centeredOption;
+    private double? _haltedAtScrollTop;
+    private TopLevel? _outsidePressWatch;
 
     static AvonicPickerColumn()
     {
@@ -127,9 +138,6 @@ public class AvonicPickerColumn : ItemsControl
     {
         // display: none on the column or an ancestor ends its intersection, and showing it starts one.
         _hiddenChain = new HiddenChainWatcher(CheckVisible);
-        // color = 'primary', at style priority so that an app's style still wins.
-        Bind(ColorProperty, _defaultColor, BindingPriority.Style);
-        _defaultColor.Set("primary");
         PseudoClasses.Set(AnyHover, !IsMobile());
         // Ahead of the scroller's own wheel, which would step to the next snap point whatever the distance.
         AddHandler(PointerWheelChangedEvent, OnWheel, RoutingStrategies.Tunnel);
@@ -255,6 +263,8 @@ public class AvonicPickerColumn : ItemsControl
         if (_scroll is not null)
         {
             _scroll.PropertyChanged -= OnScrollPropertyChanged;
+            _scroll.RemoveHandler(PointerPressedEvent, OnUserScroll);
+            _scroll.RemoveHandler(PointerMovedEvent, OnUserTouchMove);
         }
 
         _scroll = e.NameScope.Find<ScrollViewer>("PART_Scroll");
@@ -262,6 +272,9 @@ public class AvonicPickerColumn : ItemsControl
         if (_scroll is not null)
         {
             _scroll.PropertyChanged += OnScrollPropertyChanged;
+            // pointerdown and touchmove on the scroller: the user has hold of the wheel. The wheel is OnWheel's.
+            _scroll.AddHandler(PointerPressedEvent, OnUserScroll, RoutingStrategies.Tunnel, handledEventsToo: true);
+            _scroll.AddHandler(PointerMovedEvent, OnUserTouchMove, RoutingStrategies.Tunnel, handledEventsToo: true);
         }
     }
 
@@ -301,7 +314,9 @@ public class AvonicPickerColumn : ItemsControl
         SetColumnVisible(false);
         _hiddenChain.Dispose();
         _smooth?.Stop();
-        // Avonic's own snap for a touchpad goes with the column. Ionic's scroll-end timeout outlives the element, so it stays.
+        // Ionic 9's disconnectedCallback: discardScroll(), so a detached column commits nothing. Avonic's own snap for a touchpad
+        // goes with it.
+        DiscardScroll();
         _wheelSnap?.Dispose();
         _wheelSnap = null;
         _renderFrame?.Dispose();
@@ -401,6 +416,10 @@ public class AvonicPickerColumn : ItemsControl
         }
         else
         {
+            // The pending timer still runs, to reset the scroll state, but the option it would have committed is dropped.
+            StopWatchingForOutsidePress();
+            _centeredOption = null;
+            _haltedAtScrollTop = null;
             DestroyScrollListener();
         }
     }
@@ -433,21 +452,45 @@ public class AvonicPickerColumn : ItemsControl
         }
     }
 
-    /// <summary>Ionic's <c>scrollCallback</c>: the option at the centre is active, and becomes the value 250 ms after the last scroll.</summary>
+    /// <summary>
+    /// Ionic's <c>scrollCallback</c>: the option at the centre is active, and becomes the value 250 ms after the last scroll
+    /// (<see cref="Settle"/>). With no enabled option at the centre, the active one stays, as Ionic 9's does.
+    /// </summary>
     private void OnScrollFrame()
     {
         _scrollFrame = null;
-        _scrollTimeout?.Dispose();
-        _scrollTimeout = null;
+        // The frame can't be cancelled, so it checks the live state.
+        if (!_attached || !_isColumnVisible || _scroll is null)
+        {
+            return;
+        }
+
+        if (_haltedAtScrollTop is { } halted)
+        {
+            // Still where a press outside halted it: the halt landing, not the wheel moving.
+            if (Math.Abs(_scroll.Offset.Y - halted) <= HaltTolerance)
+            {
+                return;
+            }
+
+            _haltedAtScrollTop = null;
+        }
+
+        // Armed before the early return below, so a scroll never ends uncommitted.
+        ResetScrollEndTimeout();
         _isScrolling = true;
+        if (_isUserScroll)
+        {
+            WatchForOutsidePress();
+        }
 
         var newActive = OptionAtCentre();
-        _listenerActive?.SetActive(false);
         if (newActive is null || !newActive.IsEnabled)
         {
             return;
         }
 
+        _listenerActive?.SetActive(false);
         if (newActive != _listenerActive && _canExitInputMode)
         {
             // Only a change of the selected option by the user's scroll leaves input mode.
@@ -456,16 +499,128 @@ public class AvonicPickerColumn : ItemsControl
 
         _listenerActive = newActive;
         newActive.SetActive(true);
-        _scrollTimeout = AvonicConfig.Schedule(() =>
+        _centeredOption = newActive;
+    }
+
+    private void ClearScrollEndTimeout()
+    {
+        _scrollTimeout?.Dispose();
+        _scrollTimeout = null;
+    }
+
+    private void ResetScrollEndTimeout()
+    {
+        ClearScrollEndTimeout();
+        _scrollTimeout = AvonicConfig.Schedule(Settle, ScrollEndDelay);
+    }
+
+    /// <summary>
+    /// Ionic 9's <c>settle</c>: ends the scroll and commits the centred option, if it's still in the column. From the scroll-end
+    /// timeout, or at once from a press outside.
+    /// </summary>
+    private void Settle()
+    {
+        // The observer drops the option when an ancestor hides the column, which Avalonia doesn't report: look first.
+        IsVisibleNow();
+        var centered = _centeredOption;
+        ClearScrollEndTimeout();
+        StopWatchingForOutsidePress();
+        _isUserScroll = false;
+        _isScrolling = false;
+        var callback = _scrollEndCallback;
+        _scrollEndCallback = null;
+        callback?.Invoke();
+        _canExitInputMode = true;
+        if (centered is not null)
         {
-            _scrollTimeout = null;
-            _isScrolling = false;
-            var callback = _scrollEndCallback;
-            _scrollEndCallback = null;
-            callback?.Invoke();
-            _canExitInputMode = true;
-            SetValue(newActive.Value);
-        }, ScrollEndDelay);
+            _centeredOption = null;
+            // isConnected.
+            if (centered.Column is not null)
+            {
+                SetValue(centered.Value);
+            }
+        }
+    }
+
+    /// <summary>Ionic 9's <c>discardScroll</c>: drops everything the scroll holds, so nothing pending commits later.</summary>
+    private void DiscardScroll()
+    {
+        StopWatchingForOutsidePress();
+        ClearScrollEndTimeout();
+        _scrollEndCallback = null;
+        _centeredOption = null;
+        _haltedAtScrollTop = null;
+        _isScrolling = false;
+        _isUserScroll = false;
+        _canExitInputMode = true;
+    }
+
+    /// <summary>Ionic 9's <c>userScrollCallback</c>, for a press, the wheel or a touch moving on the scroller.</summary>
+    private void OnUserScroll(object? sender, RoutedEventArgs e)
+    {
+        _isUserScroll = true;
+        // Taking hold of the wheel ends the halt, even before it moves.
+        _haltedAtScrollTop = null;
+    }
+
+    /// <summary><c>touchmove</c>: a finger moving, not a mouse.</summary>
+    private void OnUserTouchMove(object? sender, PointerEventArgs e)
+    {
+        if (e.Pointer.Type == PointerType.Touch)
+        {
+            OnUserScroll(sender, e);
+        }
+    }
+
+    /// <summary>
+    /// Ionic 9's <c>watchForOutsidePress</c>: a capture <c>pointerdown</c> on the document, here a tunnel handler on the
+    /// <see cref="TopLevel"/> that hears handled presses too, so an app's own handler can't stop it.
+    /// </summary>
+    private void WatchForOutsidePress()
+    {
+        if (_outsidePressWatch is not null || TopLevel.GetTopLevel(this) is not { } top)
+        {
+            return;
+        }
+
+        _outsidePressWatch = top;
+        top.AddHandler(PointerPressedEvent, OnPointerDownOutside, RoutingStrategies.Tunnel, handledEventsToo: true);
+    }
+
+    private void StopWatchingForOutsidePress()
+    {
+        _outsidePressWatch?.RemoveHandler(PointerPressedEvent, OnPointerDownOutside);
+        _outsidePressWatch = null;
+    }
+
+    /// <summary>
+    /// Ionic 9's <c>onPointerDownOutside</c>: a press outside the column and its picker, during a scroll the user started, halts the
+    /// column on the centred option and commits it at once, before the press reaches what it's on (a Save button reads the new
+    /// value). A press anywhere in the picker leaves the column coasting.
+    /// </summary>
+    private void OnPointerDownOutside(object? sender, PointerPressedEventArgs e)
+    {
+        if (!_isScrolling)
+        {
+            return;
+        }
+
+        if (e.Source is Visual source
+            && (source == this || this.IsVisualAncestorOf(source) || (_parent is not null && (source == _parent || _parent.IsVisualAncestorOf(source)))))
+        {
+            return;
+        }
+
+        if (_centeredOption is { Column: not null } centered && _scroll is not null)
+        {
+            // Landing on the centred option halts the scroll: Avonic's touchpad snap, and a smooth scroll, stop with it.
+            _wheelSnap?.Dispose();
+            _wheelSnap = null;
+            CenterPickerItemInView(centered, smooth: false, canExitInputMode: false);
+            _haltedAtScrollTop = _scroll.Offset.Y;
+        }
+
+        Settle();
     }
 
     /// <summary>
@@ -505,6 +660,7 @@ public class AvonicPickerColumn : ItemsControl
             return;
         }
 
+        OnUserScroll(sender, e);
         var max = Math.Max(0, _scroll.Extent.Height - _scroll.Viewport.Height);
         var target = Math.Clamp(_scroll.Offset.Y - e.Delta.Y * WheelStep, 0, max);
         if (Math.Abs(target - _scroll.Offset.Y) < 0.5)
@@ -560,6 +716,9 @@ public class AvonicPickerColumn : ItemsControl
         if (_scroll.Offset.Y != top)
         {
             _canExitInputMode = canExitInputMode;
+            // This scroll takes over from the user's, so a press outside mustn't commit an option it only passes.
+            _isUserScroll = false;
+            StopWatchingForOutsidePress();
             _smooth.To(Snap(top), smooth);
         }
     }
