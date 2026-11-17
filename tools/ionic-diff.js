@@ -11,7 +11,10 @@
 // Normalising:
 //   - Stencil's vdom `key: '<hash>'` props, which change on every build, are removed;
 //   - `test/` folders, `*.ios.css`, `*.ionic.css` and source maps are left out, as Avonic recreates md only;
-//   - trailing white space is dropped.
+//   - trailing white space is dropped;
+//   - in `.js`, TypeScript's ES2017 down-levelling of `?.` and `??` (Ionic 8's build) is written back as the operators,
+//     as Ionic 9's ES2020 build emits them, and the `var _a;` temporaries it needed are removed. Object spread
+//     (`Object.assign` in 8) and other syntax still show, so read a small diff before calling it a change.
 //
 // The packages come from the registry with `npm pack` and are kept in the system's temp folder, so that a
 // second run is offline. Needs `npm`, `tar` and `git` on the PATH (`git diff --no-index` does the diffing).
@@ -50,10 +53,66 @@ function fetchPackage(name, version) {
     return path.join(dir, 'package');
 }
 
-const normalise = text => text
-    .replace(/\r\n/g, '\n')
-    .replace(/\bkey: '[0-9a-f]{40}',? ?/g, '')
-    .replace(/[ \t]+$/gm, '');
+/** Bumped when the normalising changes, as the trees are cached. */
+const TREE_FORMAT = 2;
+
+const normalise = (text, file = '') => {
+    const out = text
+        .replace(/\r\n/g, '\n')
+        .replace(/\bkey: '[0-9a-f]{40}',? ?/g, '')
+        .replace(/[ \t]+$/gm, '');
+    return file.endsWith('.js') ? modernise(out) : out;
+};
+
+/**
+ * Writes TypeScript's ES2017 down-levelling of `?.` and `??` back as the operators, as Ionic 9's build (Stencil 4.44,
+ * ES2020) emits them, so that a diff across that change shows what changed and not how it was compiled. Only the forms
+ * TypeScript emits are matched; what's left (`Object.assign` for a spread) still shows.
+ */
+function modernise(js) {
+    // `(_a = EXPR) === null || _a === void 0 ? void 0 : _a.x` and `(_a = EXPR) !== null && _a !== void 0 ? _a : y`.
+    let out = '';
+    for (let i = 0; i < js.length;) {
+        const m = /^\((_[a-z]\d*) = /.exec(js.slice(i, i + 12));
+        if (m) {
+            let depth = 0, j = i;
+            for (; j < js.length; j++) {
+                if (js[j] === '(') depth++;
+                else if (js[j] === ')' && --depth === 0) break;
+            }
+            const expr = js.slice(i + m[0].length, j);
+            const rest = js.slice(j + 1, j + 1 + 80);
+            const v = m[1];
+            const chain = `) === null || ${v} === void 0 ? void 0 : ${v}`;
+            const coalesce = `) !== null && ${v} !== void 0 ? ${v} : `;
+            if ((')' + rest).startsWith(chain)) {
+                const after = j + chain.length;
+                // `?.x`, `?.(` or `?.[`: the dot is TypeScript's own for a member, and added for a call or an index.
+                out += expr + '?.';
+                i = js[after] === '.' ? after + 1 : after;
+                continue;
+            }
+            if ((')' + rest).startsWith(coalesce)) {
+                out += expr + ' ?? ';
+                i = j + coalesce.length;
+                continue;
+            }
+        }
+        out += js[i++];
+    }
+    const ref = String.raw`(?:this|[\w$]+)(?:\.[\w$]+)*`;
+    return out
+        // `a.b === null || a.b === void 0 ? void 0 : a.b.c` → `a.b?.c`
+        .replace(new RegExp(String.raw`(?<![\w$.])(${ref}) === null \|\| \1 === void 0 \? void 0 : \1(\.|(?=[\[(]))`, 'g'),
+            (_, r) => `${r}?.`)
+        // `a !== null && a !== void 0 ? a : b` → `a ?? b`
+        .replace(new RegExp(String.raw`(?<![\w$.])(${ref}) !== null && \1 !== void 0 \? \1 : `, 'g'), '$1 ?? ')
+        // `(a?.b) !== c`: the parentheses the conditional needed
+        .replace(/(?<![\w$)\]])\(([\w$]+(?:\??\.[\w$]+)*\?\.[\w$]+(?:\??\.[\w$]+)*)\)/g, '$1')
+        // `var _a, _b;`, the temporaries, and the lint comment that asked for `?.`
+        .replace(/^[ \t]*var _[a-z]\d*(?:, _[a-z]\d*)*;\n/gm, '')
+        .replace(/^[ \t]*\/\/ eslint-disable-next-line @typescript-eslint\/prefer-optional-chain\n/gm, '');
+}
 
 const wanted = file =>
     !/(^|[\\/])test[\\/]/.test(file) &&
@@ -70,13 +129,14 @@ function copyNormalised(from, to) {
         if (!wanted(relative)) continue;
         const target = path.join(to, relative);
         fs.mkdirSync(path.dirname(target), { recursive: true });
-        fs.writeFileSync(target, normalise(fs.readFileSync(source, 'utf8')));
+        fs.writeFileSync(target, normalise(fs.readFileSync(source, 'utf8'), relative));
     }
 }
 
 /** The normalised tree of one version: components/, utils/, css/, and core.json. */
 function prepare(version) {
-    const out = path.join(cache, `tree-${version}`);
+    // Named for the normalising too, so that a change to it doesn't read a tree normalised the old way.
+    const out = path.join(cache, `tree-${TREE_FORMAT}-${version}`);
     if (fs.existsSync(path.join(out, '.done'))) return out;
     fs.rmSync(out, { recursive: true, force: true });
     const core = fetchPackage('@ionic/core', version);

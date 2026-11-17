@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/wdcossey/Avonic#readme",
   "dependencies": {
-    "@ionic/core": "^8.8.19",
-    "@ionic/docs": "^8.8.19"
+    "@ionic/core": "^9.0.11",
+    "@ionic/docs": "^9.0.11"
   },
   "devDependencies": {
     "playwright-core": "1.56.1"
