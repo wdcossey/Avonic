@@ -165,7 +165,7 @@ md file), `utils/overlays.js`, and `normalize.css`'s `button { line-height: 1 }`
 
 **An Ionic bug, not copied:** an action sheet in the page (not made by the controller) with radios loses its checked one at
 present: `buttonsChanged` makes the checked button's id from the overlay index, and the present moves the element to `ion-app`,
-which gives it a new index, so no rendered id matches and no radio is checked or a tab stop (measured: the sheet in `ref/radios.png`
+which gives it a new index, so no rendered id matches and no radio is checked or a tab stop (measured: the sheet in `ref/radios-inline.png`
 shows none). The select's sheet, made by the controller, isn't moved, and works. Avonic keys the checked radio by the button's
 `Id` or its place, so both work. Ionic's ids also count the cancel button when it's set (`indexOf` in all the buttons) but not when
 they're rendered, so a cancel button before the radios would shift them; Avonic counts the rendered ones. Both are recorded in

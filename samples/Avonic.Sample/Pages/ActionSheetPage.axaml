@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ActionSheetPage">
+
+    <!-- ion-action-sheet: one declared in the page and opened by its trigger, one by IsOpen, and sheets made in code, one with
+         radios as ion-select builds its own. The status line says what each was dismissed with. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Open one, then pick a button, tap the backdrop, or press Escape or Back" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="In the page, with a trigger" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenSheet" Content="Open the action sheet" Margin="16,8,16,0" />
+            <c:AvonicActionSheet Name="BasicSheet" Trigger="OpenSheet" Header="Albums">
+                <c:AvonicActionSheet.Buttons>
+                    <c:ActionSheetButton Text="Delete" Role="destructive" Icon="trash" Data="delete" />
+                    <c:ActionSheetButton Text="Share" Icon="share" Data="share" />
+                    <c:ActionSheetButton Text="Play (open modal)" Icon="caret-forward-circle" Data="play" />
+                    <c:ActionSheetButton Text="Favorite" Icon="heart" Data="favorite" />
+                    <c:ActionSheetButton Text="Cancel" Role="cancel" Icon="close" />
+                </c:AvonicActionSheet.Buttons>
+            </c:AvonicActionSheet>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Made in code" />
+            </c:AvonicListHeader>
+            <StackPanel Margin="16,8" Spacing="8">
+                <c:AvonicButton Name="PickFruit" Content="Pick a fruit" />
+                <c:AvonicButton Name="KeepOpen" Content="A handler that says no" />
+                <c:AvonicButton Name="PickMany" Content="Pick from a long list" />
+            </StackPanel>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="IsOpen, BackdropDismiss off" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="IsOpen" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicToggle Name="IsOpenToggle" AutomationProperties.Name="IsOpen" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicActionSheet Name="IsOpenSheet" Header="Only a button closes it" SubHeader="The backdrop and Escape don't"
+                                 BackdropDismiss="False">
+                <c:AvonicActionSheet.Buttons>
+                    <c:ActionSheetButton Text="Archive" Icon="archive" Data="archive" />
+                    <c:ActionSheetButton Text="Close" Role="cancel" />
+                </c:AvonicActionSheet.Buttons>
+            </c:AvonicActionSheet>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
