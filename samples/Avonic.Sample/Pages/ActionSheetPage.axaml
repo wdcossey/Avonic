@@ -21,7 +21,7 @@
                 <c:AvonicActionSheet.Buttons>
                     <c:ActionSheetButton Text="Delete" Role="destructive" Icon="trash" Data="delete" />
                     <c:ActionSheetButton Text="Share" Icon="share" Data="share" />
-                    <c:ActionSheetButton Text="Play (open modal)" Icon="caret-forward-circle" Data="play" />
+                    <c:ActionSheetButton Text="Play" Icon="caret-forward-circle" Data="play" />
                     <c:ActionSheetButton Text="Favorite" Icon="heart" Data="favorite" />
                     <c:ActionSheetButton Text="Cancel" Role="cancel" Icon="close" />
                 </c:AvonicActionSheet.Buttons>

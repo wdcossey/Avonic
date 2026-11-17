@@ -227,7 +227,7 @@ public class AvonicActionSheetCaptureTests
         Save(scene, "avonic-action-sheet-sample.png");
 
         var sheet = page.FindControl<AvonicActionSheet>("BasicSheet")!;
-        Assert.Equal(["Delete", "Share", "Play (open modal)", "Favorite"], sheet.ButtonControls.Select(b => b.Text));
+        Assert.Equal(["Delete", "Share", "Play", "Favorite"], sheet.ButtonControls.Select(b => b.Text));
         Assert.Equal("Cancel", sheet.CancelControl!.Text);
         var share = sheet.ButtonControls[1];
         var centre = share.TranslatePoint(new Point(share.Bounds.Width / 2, share.Bounds.Height / 2), scene.Window)!.Value;

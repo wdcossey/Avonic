@@ -1017,6 +1017,100 @@ public class AvonicActionSheetTests
     }
 
     [AvaloniaFact]
+    public void B16_A_Render_Patches_The_Buttons_So_Focus_And_A_Press_Survive_It()
+    {
+        using var stage = new Stage();
+        var sheet = new AvonicActionSheet();
+        sheet.Buttons!.Add("A");
+        sheet.Buttons.Add("B");
+        sheet.Buttons.Add(new ActionSheetButton { Text = "Cancel", Role = "cancel" });
+        Shown(stage, sheet);
+        var cancel = sheet.CancelControl!;
+        var first = sheet.ButtonControls[0];
+        cancel.Focus();
+
+        // A button put in front: the cancel button keeps its focus, as its own element in its own group.
+        sheet.Buttons.Insert(0, new ActionSheetButton { Text = "X", CssClass = "new" });
+        Stage.Settle();
+        Assert.Same(cancel, sheet.CancelControl);
+        Assert.Same(cancel, stage.Focused);
+        Assert.Same(first, sheet.ButtonControls[0]);
+        Assert.Equal(["X", "A", "B"], sheet.ButtonControls.Select(b => b.Text));
+        Assert.Contains("new", first.Classes);
+
+        // The classes follow the button in each place.
+        sheet.Buttons[0] = "Y";
+        Stage.Settle();
+        Assert.DoesNotContain("new", first.Classes);
+
+        // A press on a button, a render, and the release: it clicks, as Ionic's patched element does.
+        var did = sheet.OnDidDismiss();
+        var at = Centre(sheet.ButtonControls[1], stage);
+        stage.Render();
+        stage.Window.MouseDown(at, MouseButton.Left);
+        Stage.Settle();
+        sheet.Buttons[1] = new ActionSheetButton { Text = "A2", Data = "a2" };
+        Stage.Settle();
+        stage.Window.MouseUp(at, MouseButton.Left);
+        Stage.Settle();
+        stage.After(Left);
+        Assert.Equal("a2", Done(did).Data);
+
+        // A button that goes, with focus on it: the sheet takes focus.
+        Shown(stage, sheet);
+        sheet.ButtonControls[^1].Focus();
+        sheet.Buttons.RemoveAt(2);
+        Stage.Settle();
+        Assert.Same(sheet, stage.Focused);
+    }
+
+    [AvaloniaFact]
+    public void B16_The_List_Is_Followed_Only_While_The_Sheet_Is_In_A_Tree()
+    {
+        using var stage = new Stage();
+        var shared = new Avalonia.Collections.AvaloniaList<ActionSheetButton> { "A" };
+        var sheet = new AvonicActionSheet { Buttons = shared };
+        Shown(stage, sheet);
+        sheet.Dismiss();
+        stage.After(Left);
+
+        // Gone from the tree, the sheet doesn't listen, so the list doesn't keep it.
+        var handlers = typeof(Avalonia.Collections.AvaloniaList<ActionSheetButton>)
+            .GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .Single(field => field.FieldType == typeof(System.Collections.Specialized.NotifyCollectionChangedEventHandler))
+            .GetValue(shared);
+        Assert.Null(handlers);
+
+        // A change made meanwhile is read at the next present.
+        shared.Add("B");
+        Shown(stage, sheet);
+        Assert.Equal(["A", "B"], sheet.ButtonControls.Select(b => b.Text));
+        shared.Add("C");
+        Stage.Settle();
+        Assert.Equal(3, sheet.ButtonControls.Count);
+    }
+
+    [AvaloniaFact]
+    public void B15_A_New_Header_Raises_The_Dialogs_Name_Change()
+    {
+        using var stage = new Stage();
+        var sheet = Shown(stage, new AvonicActionSheet { Header = "One", Buttons = ["A"] });
+        var peer = ControlAutomationPeer.CreatePeerForElement(sheet);
+        Assert.Equal("One", peer.GetName());
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.NameProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+        sheet.Header = "Two";
+        sheet.SubHeader = "Sub";
+        Assert.Equal(["Two", "Two Sub"], changes);
+    }
+
+    [AvaloniaFact]
     public void B17_The_Group_Scrolls_With_The_Wheel_And_A_Touch_Drag()
     {
         using var stage = new Stage();

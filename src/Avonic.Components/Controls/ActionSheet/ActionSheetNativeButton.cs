@@ -31,7 +31,9 @@ public class ActionSheetNativeButton : TemplatedControl
     public static readonly StyledProperty<string?> IconProperty =
         AvaloniaProperty.Register<ActionSheetNativeButton, string?>(nameof(Icon));
 
-    private string? _rolePseudoClass;
+    private string? _role;
+    private string? _cssClass;
+    private string[] _cssClasses = [];
     private bool _checked;
     private ButtonPeer? _peer;
 
@@ -59,31 +61,47 @@ public class ActionSheetNativeButton : TemplatedControl
         set => SetValue(IconProperty, value);
     }
 
-    /// <summary>The <see cref="ActionSheetButton"/> it was made for.</summary>
-    internal ActionSheetButton? Button { get; init; }
+    /// <summary>The <see cref="ActionSheetButton"/> it shows, which a render of the sheet can change.</summary>
+    internal ActionSheetButton? Button { get; set; }
 
     /// <summary>Its index among the buttons the sheet renders in its first group; -1 for the cancel button.</summary>
-    internal int Index { get; init; } = -1;
+    internal int Index { get; set; } = -1;
 
     /// <summary><c>role="radio"</c>.</summary>
-    internal bool IsRadio { get; init; }
+    internal bool IsRadio { get; set; }
 
     /// <summary>The button's role, whose pseudoclass is <c>:role-&lt;role&gt;</c>.</summary>
     internal string? Role
     {
-        get => _rolePseudoClass?[6..];
+        get => _role;
         set
         {
-            if (_rolePseudoClass is not null)
+            if (_role is not null)
             {
-                PseudoClasses.Remove(_rolePseudoClass);
+                PseudoClasses.Remove(":role-" + _role);
             }
 
-            _rolePseudoClass = value is null ? null : ":role-" + value;
-            if (_rolePseudoClass is not null)
+            _role = value;
+            if (_role is not null)
             {
-                PseudoClasses.Add(_rolePseudoClass);
+                PseudoClasses.Add(":role-" + _role);
             }
+        }
+    }
+
+    /// <summary>The button's <c>cssClass</c>: style classes, space-separated, taking off the ones the last value added.</summary>
+    internal string? CssClass
+    {
+        get => _cssClass;
+        set
+        {
+            foreach (var name in _cssClasses)
+            {
+                Classes.Remove(name);
+            }
+
+            _cssClass = value;
+            _cssClasses = AlertClasses.Apply(this, value);
         }
     }
 

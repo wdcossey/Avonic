@@ -87,6 +87,11 @@ public class AvonicActionSheet : AvonicOverlay
     private string[] _cssClasses = [];
     private INotifyCollectionChanged? _watchedButtons;
     private bool _buttonsPending;
+    private ActionSheetAutomationPeer? _peer;
+    private bool _inTree;
+
+    /// <summary>The buttons the last <c>buttonsChanged</c> saw, to tell a change made while the list wasn't followed.</summary>
+    private ActionSheetButton[] _seen = [];
 
     /// <summary>Ionic's <c>activeRadioId</c>: the checked radio's <see cref="ButtonKey"/>.</summary>
     private string? _activeRadio;
@@ -266,18 +271,53 @@ public class AvonicActionSheet : AvonicOverlay
     /// <summary>The render, once there's an overlay index for the buttons' ids.</summary>
     protected override void OnPresenting() => RenderButtons();
 
-    protected override AutomationPeer OnCreateAutomationPeer() => new ActionSheetAutomationPeer(this);
+    protected override AutomationPeer OnCreateAutomationPeer() => _peer = new ActionSheetAutomationPeer(this);
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
         _backdrop = e.NameScope.Find<AvonicBackdrop>("PART_Backdrop");
         _wrapper = e.NameScope.Find<Control>("PART_Wrapper");
-        _buttonsPanel?.Children.Clear();
+        DropAll();
         _buttonsPanel = e.NameScope.Find<Panel>("PART_Buttons");
-        _cancelGroup?.Child = null;
         _cancelGroup = e.NameScope.Find<Decorator>("PART_CancelGroup");
         RenderButtons();
+    }
+
+    /// <summary>
+    /// The list is followed only while the sheet is in a tree, so that a list an app keeps doesn't keep every sheet it was given to;
+    /// a change while it was out is read when it's back.
+    /// </summary>
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _inTree = true;
+        WatchButtons(Buttons as INotifyCollectionChanged);
+        if (!(Buttons ?? []).SequenceEqual(_seen))
+        {
+            ButtonsChanged();
+        }
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _inTree = false;
+        WatchButtons(null);
+    }
+
+    private void WatchButtons(INotifyCollectionChanged? next)
+    {
+        if (_watchedButtons is not null)
+        {
+            _watchedButtons.CollectionChanged -= OnButtonsCollectionChanged;
+        }
+
+        _watchedButtons = next;
+        if (_watchedButtons is not null)
+        {
+            _watchedButtons.CollectionChanged += OnButtonsCollectionChanged;
+        }
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -285,18 +325,17 @@ public class AvonicActionSheet : AvonicOverlay
         base.OnPropertyChanged(change);
         if (change.Property == ButtonsProperty)
         {
-            if (_watchedButtons is not null)
+            if (_inTree)
             {
-                _watchedButtons.CollectionChanged -= OnButtonsCollectionChanged;
-            }
-
-            _watchedButtons = change.NewValue as INotifyCollectionChanged;
-            if (_watchedButtons is not null)
-            {
-                _watchedButtons.CollectionChanged += OnButtonsCollectionChanged;
+                WatchButtons(change.NewValue as INotifyCollectionChanged);
             }
 
             ButtonsChanged();
+        }
+        else if (change.Property == HeaderProperty || change.Property == SubHeaderProperty || change.Property == HtmlAttributesProperty)
+        {
+            // aria-labelledby follows the title's text.
+            _peer?.NameChanged();
         }
         else if (change.Property == CssClassProperty)
         {
@@ -346,6 +385,7 @@ public class AvonicActionSheet : AvonicOverlay
     private void ButtonsChanged()
     {
         _buttonsPending = false;
+        _seen = Buttons?.ToArray() ?? [];
         var buttons = GroupButtons;
         for (var i = 0; i < buttons.Count; i++)
         {
@@ -359,7 +399,11 @@ public class AvonicActionSheet : AvonicOverlay
         RenderButtons();
     }
 
-    /// <summary><c>render</c>'s buttons: the first group's, then the cancel group's.</summary>
+    /// <summary>
+    /// <c>render</c>'s buttons: the first group's, then the cancel group's. As Stencil's render patches the elements that are there,
+    /// the controls are kept and updated in place, by their place in each group, so that a button keeps its focus, its press and its
+    /// ripple through a render; only the ones past the end of the new buttons go, and focus on one of those goes to the sheet.
+    /// </summary>
     private void RenderButtons()
     {
         if (_buttonsPanel is null)
@@ -367,30 +411,32 @@ public class AvonicActionSheet : AvonicOverlay
             return;
         }
 
-        // Ionic's render patches the buttons that are there, so one with focus keeps it: the one in its place takes it here.
-        var all = AllButtonControls.ToList();
-        var focused = all.FindIndex(c => c.IsKeyboardFocusWithin);
-        foreach (var control in all)
-        {
-            control.Clicked -= OnButtonClicked;
-        }
-
-        _buttonControls.Clear();
-        _buttonsPanel.Children.Clear();
-        _cancelControl = null;
-        if (_cancelGroup is not null)
-        {
-            _cancelGroup.Child = null;
-        }
-
+        var focusedGoes = false;
         var buttons = GroupButtons;
+        while (_buttonControls.Count > buttons.Count)
+        {
+            var gone = _buttonControls[^1];
+            focusedGoes |= gone.IsKeyboardFocusWithin;
+            Drop(gone);
+            _buttonControls.RemoveAt(_buttonControls.Count - 1);
+            _buttonsPanel.Children.Remove(gone);
+        }
+
         var radios = buttons.Where(IsRadio).ToList();
         var activeExists = _activeRadio is not null;
         for (var i = 0; i < buttons.Count; i++)
         {
             var button = buttons[i];
             var isRadio = IsRadio(button);
-            var control = new ActionSheetNativeButton { Button = button, Index = i, IsRadio = isRadio };
+            if (i == _buttonControls.Count)
+            {
+                _buttonControls.Add(Add(_buttonsPanel));
+            }
+
+            var control = _buttonControls[i];
+            control.Button = button;
+            control.Index = i;
+            control.IsRadio = isRadio;
             Fill(control, button);
             AutomationProperties.SetAutomationId(control, button.Id ?? $"action-sheet-button-{OverlayIndex}-{i}");
             control.IsEnabled = !button.Disabled;
@@ -405,37 +451,76 @@ public class AvonicActionSheet : AvonicOverlay
                 // The one tab stop: the checked radio, or the first when none is.
                 KeyboardNavigation.SetIsTabStop(control, active || !activeExists && ReferenceEquals(button, radios[0]));
             }
-
-            control.Clicked += OnButtonClicked;
-            _buttonControls.Add(control);
-            _buttonsPanel.Children.Add(control);
+            else
+            {
+                control.IsChecked = false;
+                control.ClearValue(KeyboardNavigation.IsTabStopProperty);
+            }
         }
 
         if (CancelButton is { } cancel)
         {
-            var control = new ActionSheetNativeButton { Button = cancel };
+            var control = _cancelControl ??= Add(null);
+            control.Button = cancel;
+            control.Index = -1;
+            control.IsRadio = false;
+            control.IsChecked = false;
             Fill(control, cancel);
-            if (cancel.HtmlAttributes is { } attributes)
-            {
-                // Spread, with nothing of Ionic's after it: disabled and id reach the cancel button.
-                if (attributes.TryGetValue("disabled", out var disabled) && AlertClasses.IsTrue(disabled))
-                {
-                    control.IsEnabled = false;
-                }
 
-                if (attributes.TryGetValue("id", out var id) && id?.ToString() is { Length: > 0 } automationId)
-                {
-                    AutomationProperties.SetAutomationId(control, automationId);
-                }
+            // Spread, with nothing of Ionic's after it: disabled and id reach the cancel button.
+            var attributes = cancel.HtmlAttributes;
+            control.IsEnabled = !(attributes is not null && attributes.TryGetValue("disabled", out var disabled) && AlertClasses.IsTrue(disabled));
+            if (attributes is not null && attributes.TryGetValue("id", out var id) && id?.ToString() is { Length: > 0 } automationId)
+            {
+                AutomationProperties.SetAutomationId(control, automationId);
+            }
+            else
+            {
+                control.ClearValue(AutomationProperties.AutomationIdProperty);
             }
 
-            control.Clicked += OnButtonClicked;
-            _cancelControl = control;
-            _cancelGroup?.Child = control;
+            if (_cancelGroup is not null && !ReferenceEquals(_cancelGroup.Child, control))
+            {
+                _cancelGroup.Child = control;
+            }
+        }
+        else if (_cancelControl is { } gone)
+        {
+            focusedGoes |= gone.IsKeyboardFocusWithin;
+            Drop(gone);
+            _cancelControl = null;
+            _cancelGroup?.Child = null;
         }
 
         PseudoClasses.Set(HasCancel, _cancelControl is not null);
-        RefocusAt(focused);
+        if (focusedGoes)
+        {
+            Focus();
+        }
+    }
+
+    private ActionSheetNativeButton Add(Panel? panel)
+    {
+        var control = new ActionSheetNativeButton();
+        control.Clicked += OnButtonClicked;
+        panel?.Children.Add(control);
+        return control;
+    }
+
+    private void Drop(ActionSheetNativeButton control) => control.Clicked -= OnButtonClicked;
+
+    /// <summary>A new template: the controls go, to be made again in its parts.</summary>
+    private void DropAll()
+    {
+        foreach (var control in AllButtonControls)
+        {
+            Drop(control);
+        }
+
+        _buttonControls.Clear();
+        _buttonsPanel?.Children.Clear();
+        _cancelControl = null;
+        _cancelGroup?.Child = null;
     }
 
     private static void Fill(ActionSheetNativeButton control, ActionSheetButton button)
@@ -444,29 +529,14 @@ public class AvonicActionSheet : AvonicOverlay
         control.Icon = button.Icon;
         control.Role = button.Role;
         control.IsSelected = button.Role == "selected";
-        AlertClasses.Apply(control, button.CssClass);
+        control.CssClass = button.CssClass;
         if (button.HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label is not null)
         {
             AutomationProperties.SetName(control, label.ToString());
         }
-    }
-
-    /// <summary>
-    /// Focus that was on a button a render replaced goes to the one in its place, or the sheet if there's none, rather than out of
-    /// the sheet, as Ionic's patched element keeps it.
-    /// </summary>
-    private void RefocusAt(int index)
-    {
-        if (index < 0)
+        else
         {
-            return;
-        }
-
-        var controls = AllButtonControls.ToList();
-        var target = index < controls.Count ? controls[index] : null;
-        if (target is null || !target.Focus())
-        {
-            Focus();
+            control.ClearValue(AutomationProperties.NameProperty);
         }
     }
 
@@ -582,9 +652,22 @@ public class AvonicActionSheet : AvonicOverlay
     /// </summary>
     private sealed class ActionSheetAutomationPeer(AvonicActionSheet owner) : ControlAutomationPeer(owner)
     {
+        private string? _name;
+
+        /// <summary>The name, read again, and raised if it changed.</summary>
+        public void NameChanged()
+        {
+            var name = owner.AccessibleName;
+            if (name != _name)
+            {
+                RaisePropertyChangedEvent(AutomationElementIdentifiers.NameProperty, _name, name);
+                _name = name;
+            }
+        }
+
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Window;
 
-        protected override string? GetNameCore() => owner.AccessibleName;
+        protected override string? GetNameCore() => _name = owner.AccessibleName;
 
         protected override string? GetAutomationIdCore() =>
             owner.HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id

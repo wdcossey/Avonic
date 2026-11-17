@@ -41,7 +41,7 @@ public class ActionSheetPanel : Panel
     public static readonly IMultiValueConverter MaxHeightConverter = new FuncMultiValueConverter<object?, object?>(values =>
     {
         var list = values.ToList();
-        if (list is [var own, ..] && Css.IsSet(own) && own is not null)
+        if (list is [var own, ..] && Css.IsSet(own))
         {
             return own;
         }
