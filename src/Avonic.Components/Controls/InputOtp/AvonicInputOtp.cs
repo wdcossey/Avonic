@@ -357,7 +357,10 @@ public class AvonicInputOtp : ContentControl
         }
         else if (change.Property == LengthProperty)
         {
-            // The watcher on length processes the separators, and the render makes the boxes. The values stay as they are.
+            // The watchers on length, in Ionic's order: lengthChanged (9.0.7) reads the values from the value again, which cuts
+            // the value to the new length without an event; then processSeparators. The render makes the boxes, and
+            // componentDidRender updates the tab indexes among them.
+            InitializeValues();
             ProcessSeparators();
             Render();
             UpdateTabIndexes();

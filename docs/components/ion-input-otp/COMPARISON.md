@@ -72,6 +72,7 @@ in the frame are asserted in `B21`.
 | 19 | The description: 12 px on 20, centred, `#4d4d4d`; none without content | Match (`desc` rows: 20 high with text, 0 without) |
 | 20 | Sizes 40, 48, 56; gaps 8 and 12; 16 above and below; shrinking to 40 and overflowing centred; 8 px round separators | Match to 0.6 px (`REST`) |
 | 21 | Every state's colours, the focused box's 2 px and caret, valid, invalid, a colour at 0.6 and 0.3 | Match (`REST` and `FOCUS` rows, each asserted) |
+| 22 | A change of `Length` reads the boxes from the value again (9.0.7) | Match (`length.js` on 9.0.11, a throwaway script setting `el.length` after load: `"1234"` at 4 → 6 shows `1,2,3,4,,`, tab `-1,-1,-1,-1,0,-1`, box 6 `aria-hidden`; → 3 `"123"`, tab `-1,-1,0`; → 4 `"123"` and `1,2,3,`, tab `-1,-1,-1,0`; empty at 4 → 6, tab `0,-1,-1,-1,-1,-1`, five hidden; no `ionInput`, `ionChange` or `ionComplete`; a focused box 3 keeps focus at 4 → 6). 8.8.19 has no `lengthChanged` (read, not measured), so the boxes kept their values and the value stayed, as Avonic did until #205 |
 
 ## Deliberate differences
 

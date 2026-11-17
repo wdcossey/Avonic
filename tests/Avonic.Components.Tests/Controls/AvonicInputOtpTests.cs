@@ -1250,4 +1250,69 @@ public class AvonicInputOtpTests
         // The box sits under the 4 px padding, not centred in the whole group.
         Assert.Equal(4, Bounds(box, otp).Y, 0.6);
     });
+
+    // ── 22: a change of length (Ionic 9.0.7) ─────────────────────────────────────────────────
+
+    private static AccessibilityView[] Views(AvonicInputOtp otp) => Boxes(otp).Select(AutomationProperties.GetAccessibilityView).ToArray();
+
+    [AvaloniaFact]
+    public void B22_A_Change_Of_Length_Reads_The_Value_Again_So_A_Shorter_One_Cuts_It()
+    {
+        // lengthChanged: initializeValues, then updateTabIndexes after the render. Measured on 9.0.11 (length.js).
+        var (otp, _, scene) = Stub(new AvonicInputOtp { Value = "1234" });
+        using var _ = scene;
+        var log = Log.Of(otp);
+
+        otp.Length = 6;
+        Assert.Equal("1|2|3|4||", Shown(otp));
+        Assert.Equal("1234", otp.Value);
+        Assert.Equal("-1,-1,-1,-1,0,-1", TabStops(otp));
+        Assert.Equal(AccessibilityView.Raw, Views(otp)[5]);
+
+        otp.Length = 3;
+        Assert.Equal("1|2|3", Shown(otp));
+        Assert.Equal("123", otp.Value);
+        Assert.Equal("-1,-1,0", TabStops(otp));
+
+        // What a shorter length cut doesn't come back.
+        otp.Length = 4;
+        Assert.Equal("1|2|3|", Shown(otp));
+        Assert.Equal("123", otp.Value);
+        Assert.Equal("-1,-1,-1,0", TabStops(otp));
+        Assert.All(Views(otp), view => Assert.Equal(AccessibilityView.Content, view));
+
+        // initializeValues emits nothing.
+        Assert.Empty(log.Take());
+    }
+
+    [AvaloniaFact]
+    public void B22_A_Bound_Value_Gets_The_Cut_Value_Back()
+    {
+        var model = new Model { Code = "1234" };
+        var otp = new AvonicInputOtp { DataContext = model };
+        otp.Bind(AvonicInputOtp.ValueProperty, new Avalonia.Data.Binding(nameof(Model.Code)));
+        var (_, _, scene) = Stub(otp);
+        using var _ = scene;
+        Settle();
+
+        otp.Length = 2;
+        Settle();
+        Assert.Equal("12", model.Code);
+        Assert.Equal("1|2", Shown(otp));
+    }
+
+    [AvaloniaFact]
+    public void B22_With_No_Value_The_First_Box_Stays_The_Tab_Stop_And_The_Rest_Are_Hidden()
+    {
+        var (otp, _, scene) = Stub();
+        using var _ = scene;
+
+        otp.Length = 6;
+        Assert.Equal("0,-1,-1,-1,-1,-1", TabStops(otp));
+        Assert.Equal([AccessibilityView.Content, .. Enumerable.Repeat(AccessibilityView.Raw, 5)], Views(otp));
+
+        otp.Length = 2;
+        Assert.Equal("0,-1", TabStops(otp));
+        Assert.Equal("|", Shown(otp));
+    }
 }

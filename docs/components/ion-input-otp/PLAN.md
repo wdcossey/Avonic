@@ -2,9 +2,11 @@
 
 A row of one-character boxes for a one-time code: `length` native inputs in a flex row with a gap, optional separator dots
 between them, and a description slot underneath. Typing fills a box and moves on, Backspace walks back, a paste or an autofill
-spreads over the boxes, and the value is the boxes joined. Measurements are from real Ionic 8.8.1 in Chromium, and read-only and disabled again on 8.8.19 (behaviour 16), md, at 390 px
-wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the behaviours; the
-frame in a mobile one). The commands are at the top of [COMPARISON.md](COMPARISON.md).
+spreads over the boxes, and the value is the boxes joined. Measurements are from real Ionic 8.8.1 in Chromium, read-only and
+disabled again on 8.8.19 (behaviour 16), and a change of `length` on 9.0.11 (behaviour 22), md, at 390 px wide, wrapped in
+`ion-app`, with throwaway Playwright scripts (a mouse and keyboard in a desktop context for the behaviours; the frame in a mobile
+one). The commands are at the top of [COMPARISON.md](COMPARISON.md). The reference is Ionic 9.0.11: its `input-otp.js` differs
+from 8.8.19's only by behaviour 22, and `input-otp.md.css` is the same.
 
 ## Fidelity checklist
 
@@ -19,7 +21,7 @@ frame in a mobile one). The commands are at the top of [COMPARISON.md](COMPARISO
 | [x] | `disabled` | `IsEnabled` | Mapping rule. The boxes can't be focused; `:disabled` styles them |
 | [x] | `fill` | `Fill` (`InputOtpFill`, `Outline`) | `Outline`, `Solid`. Ionic's type also allows `undefined`, which leaves neither class and draws an unstyled box; not declared |
 | [x] | `inputmode` | `Inputmode` (`InputOtpInputmode?`) | → `TextInputOptions.ContentType` on each box: `Decimal` (`Number`), `Email`, `Numeric` and `Tel` (`Digits`), `Search`, `Text` (`Normal`), `Url`. Null is `numeric` for `Type == Number`, else `text`, as `getInputmode`. `none` isn't declared, as for `AvonicInput`: Avalonia can't keep the soft keyboard away from a focused `TextBox` |
-| [x] | `length` | `Length` (`int`, 4) | The number of boxes. Ionic throws for a negative length (`Array(-1)`); here it's no boxes |
+| [x] | `length` | `Length` (`int`, 4) | The number of boxes. Ionic throws for a negative length (`Array(-1)`); here it's no boxes. Since 9.0.7 a change reads the boxes from `value` again, which cuts it (behaviour 22) |
 | [x] | `pattern` | `Pattern` (`string?`) | A regular expression for one character, tested as `^pattern$`, as Ionic's `validKeyPattern`. Null is `[\p{N}]` for `Number` and `[\p{L}\p{N}]` for `Text`. .NET's syntax, which shares `\p{…}` and classes with JavaScript's; a pattern .NET can't read logs a warning and accepts nothing, where Ionic's handlers throw |
 | [x] | `readonly` | `Readonly` (`bool`) | Each box's `IsReadOnly`: typing does nothing. Since Ionic 8.8.3, its Backspace and paste handlers check it too, and do nothing (measured on 8.8.19). 8.8.1's didn't, so they edited, which this reproduced until #188 |
 | [x] | `separators` | `Separators` (`string?`) | `"all"`, or positions such as `"3"` or `"1,3"`: a dot after those boxes. Ionic's array form is the same numbers joined with commas. A string that isn't a list of numbers logs a warning and shows none; duplicates warn; positions past `length` warn and are ignored, as `processSeparators` |
@@ -99,6 +101,7 @@ are in COMPARISON.md). Each becomes a test.
 | 19 | The description: under the group, 12 px with a 20 px line, centred, text step 300; nothing when there's no content | `.input-otp-description`; measured |
 | 20 | Layout: boxes `width` × `height` by size (40, 48, 56), gap 12 (8 small), 16 px above and below, centred; too narrow, boxes shrink to `min-width` 40, and past that the row overflows both sides, centred. Separators 8 × 8, round, step 150, with the gap on both sides | md.css; measured `REST` |
 | 21 | Look by state: radius by shape; outline step 300 border; solid step 50; disabled and read-only colours; the focused box 2 px in the highlight colour, which is the caret's too; `ion-valid` while focused and `ion-touched ion-invalid` border every box in it; with a `Color`, outline boxes are bordered in its base at 0.6, at 0.3 disabled, danger when `ion-invalid` and success when `ion-valid` | md.css; measured `REST`, `FOCUS` |
+| 22 | Since Ionic 9.0.7, a change of `Length` after load takes the boxes' values from `Value` again, as 1 does: `Value` is cut to the new length, raising nothing, and the tab stop and hidden boxes follow, among the new boxes. A longer `Length` adds empty boxes, and doesn't bring back what a shorter one cut. Before 9.0.7 the boxes kept their values and `Value` stayed as it was | `lengthChanged` (`initializeValues`, then `updateTabIndexes` in `componentDidRender`), and the ref callback's `splice`; measured `length.js` on 9.0.11: `"1234"` at 4 → 6 boxes `1,2,3,4,,`, tab stop box 5, box 6 hidden; → 3 `"123"`, tab stop box 3; → 4 `"123"` and an empty box 4, the tab stop; empty at 4 → 6, tab stop box 1, the rest hidden; no event in any |
 
 ### Not reproduced
 
