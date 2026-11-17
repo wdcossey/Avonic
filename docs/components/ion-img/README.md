@@ -1,10 +1,22 @@
 # ion-img
 
-Status: done · [#17](https://github.com/wdcossey/Avonic/issues/17)
+Status: done · [#17](https://github.com/wdcossey/Avonic/issues/17) · kept: Ionic deprecates `ion-img` in 9 for the browser's `<img loading="lazy">` ([ADR 0004](../../decisions/0004-keep-what-the-browser-does.md))
 
 `AvonicImg` is a picture that loads only once it's in the viewport, and raises an event when it starts, finishes or fails. It has
 no look of its own: it's as wide as its parent and as tall as the picture's aspect ratio makes it. The design and evidence are in
 [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
+
+## Reference
+
+Ionic 9.0 deprecates `ion-img`, and plans to remove it in 10: it logs that an app should use a native `<img>` with
+`loading="lazy"`. Avonic keeps `AvonicImg` on purpose, as [ADR 0004](../../decisions/0004-keep-what-the-browser-does.md)
+decides: Avalonia has no image that does what that `<img>` does, so an Avonic app has nothing to move to. It isn't marked
+`[Obsolete]`.
+
+The reference stays Ionic 8's `ion-img`: [PLAN.md](PLAN.md) reads 8.8.19, and [`ref/`](ref/) was rendered with 8.8.1. Ionic
+9.0.11's `img.js` differs from 8.8.19's only by the warning and its `@deprecated` tag, and `img.css` is the same, so nothing in
+Avonic changes for 9. It isn't moved to the browser's `<img loading="lazy">`, which behaves differently: it raises no
+`ionImgWillLoad`, and Chromium starts loading at a distance from the viewport of its own choosing.
 
 ```xml
 <c:AvonicImg Src="https://example.com/photo.jpg" Alt="The view from the top" IonImgDidLoad="OnLoaded" />
