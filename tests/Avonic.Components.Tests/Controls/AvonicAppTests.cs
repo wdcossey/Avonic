@@ -1056,6 +1056,19 @@ public class AvonicAppTests
         }
     }
 
+    // #189's review: the keyboard already open when the first field takes focus, as after a plain TextBox opened it. The page's height
+    // is taken then, so the item's bottom, 632, goes to 844 - 300 - 50: 138, where with none taken it went to the content's top, 528.
+    [AvaloniaFact]
+    public void I15_A_First_Field_Focused_With_The_Keyboard_Open_Takes_The_Page_s_Height()
+    {
+        using var stage = new ShimStage();
+        KeyboardShows(stage.Scene.Window, 300);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(500);
+        Assert.Equal(138, stage.Offset);
+    }
+
     // ── W: the input shims on Windows, following the touch keyboard (#189) ───────────────────
 
     // A deviation: Ionic's needInputShims() is iOS and Chrome on Android, and off in a desktop browser; Windows' touch keyboard covers

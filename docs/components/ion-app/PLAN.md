@@ -222,8 +222,9 @@ Behaviours, in `AvonicAppTests`:
 - W11 The window's height is read when the keyboard opens, not at the focus.
 
 W3 found a bug the change brought into reach: with the keyboard open before any field had focus, the page's height was never
-taken, and the field scrolled to the top of the content (528 where 138 was right). On a phone the keyboard comes with focus, so
-it couldn't happen there; on Windows the touch keyboard can be opened from the taskbar first.
+taken, and the field scrolled to the top of the content (528 where 138 was right). On Windows the touch keyboard can be opened from
+the taskbar first; on a phone, a plain `TextBox` can open it before focus moves to a field. Windows now reads the height when it
+runs, and the phone's case is I15: the height is taken at a first focus with the keyboard open.
 
 ## Not in this PR
 
