@@ -22,7 +22,8 @@ Ionic beside Avonic, through URLs pinned to the commit. Say if it's headless or 
 
 ## Review
 
-- `/code-review` findings: _n_ raised, _n_ fixed, _n_ waived (reasons below)
+- `/code-review` pass 1 (`high`, _n_ tokens): _n_ raised, _n_ fixed, _n_ waived (reasons below)
+- `/code-review` pass 2 (`medium`, _n_ tokens): _n_ raised, _n_ fixed, _n_ waived (levels: `docs/PROCESS.md` §4; tokens "not measured" if unseen)
 -
 
 ## Checks
