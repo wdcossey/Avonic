@@ -584,11 +584,12 @@ public partial class AvonicPopover : AvonicOverlay
 
     /// <summary>
     /// What <c>md.enter.js</c> works out before it plays: the content's box read from the layout, as <c>getBoundingClientRect</c>
-    /// forces one, then <see cref="PopoverPosition"/>, in the overlay host's coordinates, which are the viewport's.
+    /// forces one, then <see cref="PopoverPosition"/>, in the top level's coordinates, which are the viewport's, left to right
+    /// whatever the direction, as the client's are. The overlay host covers it; in a right-to-left window it's mirrored.
     /// </summary>
     private PopoverPanel.Placement? WorkOutPlace(PopoverAnimationOptions options)
     {
-        if (_content is null || _wrapper is null || Parent is not Visual host)
+        if (_content is null || _wrapper is null || Parent is not Visual host || TopLevel.GetTopLevel(this) is not { } root)
         {
             return null;
         }
@@ -601,15 +602,15 @@ public partial class AvonicPopover : AvonicOverlay
         var referenceElement = options.Trigger ?? options.Event?.Target;
         var contentWidth = _content.Bounds.Width;
         var contentHeight = _content.Bounds.Height;
-        if (cover && referenceElement is not null && BoxIn(referenceElement, host) is { } referenceBox)
+        if (cover && referenceElement is not null && BoxIn(referenceElement, root) is { } referenceBox)
         {
             contentWidth = referenceBox.Width;
         }
 
         var defaultPosition = new PopoverPosition.Result(
             bodyHeight / 2 - contentHeight / 2, bodyWidth / 2 - contentWidth / 2, null, rtl ? 1 : 0, 0);
-        var reference = referenceElement is null ? null : BoxIn(referenceElement, host);
-        Point? point = options.Event is { } ev ? PointIn(ev, host) ?? default(Point) : null;
+        var reference = referenceElement is null ? null : BoxIn(referenceElement, root);
+        Point? point = options.Event is { } ev ? PointIn(ev, root) ?? default(Point) : null;
         var results = PopoverPosition.GetPopoverPosition(rtl, contentWidth, contentHeight, options.Reference, options.Side,
             options.Alignment, defaultPosition, reference, point);
 
@@ -621,7 +622,7 @@ public partial class AvonicPopover : AvonicOverlay
         var left = adjusted.Left + (adjusted.CheckSafeAreaLeft ? safe.Left : 0) - (adjusted.CheckSafeAreaRight ? safe.Right : 0);
         var top = adjusted.Top + (adjusted.CheckSafeAreaTop ? safe.Top : 0);
         double? bottom = adjusted.Bottom is { } b ? b + (adjusted.CheckSafeAreaBottom ? safe.Bottom : 0) : null;
-        var mirrored = _wrapper.TransformToVisual(host) is { } m && m.M11 < 0;
+        var mirrored = _wrapper.TransformToVisual(root) is { } m && m.M11 < 0;
         _pendingOrigin = new RelativePoint(mirrored ? 1 - adjusted.OriginX : adjusted.OriginX, adjusted.OriginY, RelativeUnit.Relative);
         return new PopoverPanel.Placement(top, left, bottom, cover ? contentWidth : null, mirrored);
     }
@@ -647,12 +648,12 @@ public partial class AvonicPopover : AvonicOverlay
         _origin = null;
     }
 
-    /// <summary>An element's box in the host's coordinates, as <c>getBoundingClientRect</c>; null if it isn't in the same window.</summary>
-    private static Rect? BoxIn(Visual element, Visual host) =>
-        element.TransformToVisual(host) is { } matrix ? new Rect(element.Bounds.Size).TransformToAABB(matrix) : null;
+    /// <summary>An element's box in the top level's coordinates, as <c>getBoundingClientRect</c>; null if it isn't in that window.</summary>
+    private static Rect? BoxIn(Visual element, Visual root) =>
+        element.TransformToVisual(root) is { } matrix ? new Rect(element.Bounds.Size).TransformToAABB(matrix) : null;
 
-    /// <summary>The event's point in the host's coordinates; null with none, or out of the host's window.</summary>
-    private Point? PointIn(PopoverEvent ev, Visual host)
+    /// <summary>The event's point in the popover's top level; null with none, or out of its window.</summary>
+    private Point? PointIn(PopoverEvent ev, Visual root)
     {
         if (ev.ClientPosition is not { } point)
         {
@@ -660,7 +661,7 @@ public partial class AvonicPopover : AvonicOverlay
         }
 
         var top = ev.Target is { } target ? TopLevel.GetTopLevel(target) : TopLevel.GetTopLevel(this);
-        return top is null ? null : top.TranslatePoint(point, host);
+        return top is null ? null : top.TranslatePoint(point, root);
     }
 
     /// <summary><c>getSafeAreaInsets</c>: the <c>Avonic.SafeArea*</c> keys as the host reads them, outside the popover's own zeros.</summary>
@@ -675,6 +676,13 @@ public partial class AvonicPopover : AvonicOverlay
     private void Mount(bool mounted)
     {
         _mounted = mounted;
+
+        // The presenter is inside the scroller, whose own template waits for a measure that a hidden popover doesn't have.
+        if (mounted)
+        {
+            _scroll?.ApplyTemplate();
+        }
+
         UpdatePresenter();
     }
 

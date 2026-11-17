@@ -205,6 +205,23 @@ public class AvonicPopoverTests
     }
 
     [AvaloniaFact]
+    public void B1_Not_Animated_The_Wrapper_Still_Fades_Over_Its_Own_150ms()
+    {
+        // M1b: duration(0) is the parent's; the wrapper keeps its own 150 ms, the backdrop and the scale are at their ends at once.
+        using var stage = new Stage();
+        var popover = Popover();
+        popover.Animated = false;
+        popover.Present(stage.Window);
+        stage.At(16);
+        Assert.Equal(0.32, popover.Backdrop!.Opacity, 6);
+        Assert.Equal(1, Scale(popover.ContentPart!), 6);
+        stage.At(16 + 64);
+        Assert.Equal(0.01 + 0.99 * EnterEasing.Ease(64 / 150.0), popover.Wrapper!.Opacity, 4);
+        stage.At(176);
+        Assert.Equal(1, popover.Wrapper.Opacity, 6);
+    }
+
+    [AvaloniaFact]
     public void B1_The_Scale_Grows_From_The_Origin_The_Side_And_Alignment_Give()
     {
         using var stage = new Stage();

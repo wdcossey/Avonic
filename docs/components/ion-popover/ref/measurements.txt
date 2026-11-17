@@ -232,3 +232,16 @@ hover 40ms then leave: open= active=BODY ev=
 right click ctx: open=p-ctx active=p-ctx ev=p-ctx:ionPopoverWillPresent@11696 p-ctx:ionPopoverDidPresent@11985
 ctx at 247.25,41 content {"x":128,"y":42,"width":250,"height":51,"top":42,"right":378,"bottom":93,"left":128}
 left click on ctx trigger while open (backdrop): open= active=ctx-trigger ev=p-ctx:ionPopoverWillDismiss(backdrop)@12211 p-ctx:ionPopoverDidDismiss(backdrop)@12352
+
+## Enter with animated=false (the same trigger and content): the backdrop and the scale at their ends at once, the wrapper still over its own 150 ms
+0.0 bd=0.0100 bdPE=auto wr=0.0000 c=none vp=-
+2.9 bd=0.3200 bdPE=auto wr=0.0100 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+17.6 bd=0.3200 bdPE=auto wr=0.2520 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+33.2 bd=0.3200 bdPE=auto wr=0.6126 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+49.3 bd=0.3200 bdPE=auto wr=0.8359 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+65.9 bd=0.3200 bdPE=auto wr=0.9177 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+82.9 bd=0.3200 bdPE=auto wr=0.9581 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+99.6 bd=0.3200 bdPE=auto wr=0.9803 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+115.8 bd=0.3200 bdPE=auto wr=0.9924 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+132.3 bd=0.3200 bdPE=auto wr=0.9983 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000
+150.4 bd=0.3200 bdPE=auto wr=1.0000 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000

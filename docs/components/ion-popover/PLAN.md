@@ -16,7 +16,7 @@ reference render [`ref/`](ref/README.md).
 
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
-| [x] | `alignment` | `Alignment` | `PopoverAlignment?` | null | `Start`, `Center`, `End`; null is Ionic's `undefined`, which `componentWillLoad` makes `start` in md |
+| [x] | `alignment` | `Alignment` | `PopoverAlignment` | `Start` | `Start`, `Center`, `End`. Ionic's is `undefined` until `componentWillLoad` makes it `start` in md, before anything reads it; Avonic is md only, so it's `Start` from the start |
 | [x] | `animated` | `Animated` | `bool` | `true` | The overlay's |
 | [ ] | `arrow` | none | | | Not applicable: "Does not apply in md mode". md's `.popover-arrow` has no style, so it's an empty box, and `md.enter.js` passes an arrow of 0 by 0. Declared, it would do nothing (rule 3) |
 | [x] | `backdropDismiss` | `BackdropDismiss` | `bool` | `true` | The backdrop's `Tappable`; Escape and back (`BackdropDismissEnabled`) |
@@ -70,7 +70,7 @@ reference render [`ref/`](ref/README.md).
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | default slot | `Content` (+ `ContentTemplate`) | Ionic wraps an inline popover's children in `div.popover-viewport`; here a `PopoverViewport` in the template |
+| [x] | default slot | `Content` (+ `ContentTemplate`) | Ionic wraps an inline popover's children in `div.popover-viewport`; here the content presenter in the box's `ScrollViewer` (`PART_Scroll`), with the safe areas 0 inside |
 | [ ] | `arrow` | none | ios only: see `arrow` |
 | [x] | `backdrop` | `PART_Backdrop` | An `AvonicBackdrop`, not in a nested popover |
 | [x] | `content` | `PART_Content` | A `Border`, the `.popover-content`, placed by `PART_Wrapper`, a `PopoverPanel` (`.popover-wrapper`) |
@@ -176,6 +176,7 @@ From `popover.js`, `utils.js`, `animations/md.enter.js`, `md.leave.js`, `popover
 | | Case | Result |
 |---|---|---|
 | M1 | Enter, a 100 by 40 trigger at 145, 400 | At the call the wrapper 0.01, the content `scale(0.8)`; at 22 ms the backdrop 0.0443, the wrapper 0.2518, scale 0.82212; the wrapper 1 by 156 ms; the backdrop 0.32 and scale 1 at 305 ms, the backdrop's `pointer-events` back after. The viewport 1 throughout |
+| M1b | Enter, `animated` false | The backdrop at 0.32 and the scale 1 at the first frame; the wrapper 0.2506 at 29 ms and 1 by 163, as animated |
 | M2 | Leave | 150 ms, `ease`: the backdrop 0.2840 and the wrapper 0.8786 at 14 ms; 0 at 147; the content's `top` stays until the end |
 | M3 | Events | `ionPopoverWillDismiss`, `willDismiss` at the call; `ionPopoverDidDismiss`, `didDismiss` at the end (164 ms) |
 | M4 | Box | 250 wide, the content's height (120), radius 4, the shadow above, white, `overflow: auto`, `max-height: 90%`; a list of five button items 256 high; host z-index 20000 + index, text black |
@@ -191,16 +192,16 @@ From `popover.js`, `utils.js`, `animations/md.enter.js`, `md.leave.js`, `popover
 
 - **Template**: a `Panel` with `PART_Backdrop` (`Visible` from `ShowBackdrop`, `Tappable` from `BackdropDismiss`, hidden in a
   nested popover) and `PART_Wrapper`, a `PopoverPanel` (`.popover-wrapper`, opacity 0 in the theme) that places `PART_Content`,
-  a `Border` with the background, shadow and radius; inside it a clip part to the radius, a `ScrollViewer` (`overflow: auto`)
-  and a `PopoverViewport` holding the content presenter.
+  a `Border` with the background, shadow and radius; inside it a clip part to the radius and a `ScrollViewer` (`PART_Scroll`,
+  `overflow: auto`) holding the content presenter.
 - **`PopoverPanel`**: the content's width, height and their limits in CSS's terms, as `ModalPanel` reads them; placed at the
   `left`, `top` and maybe `bottom` the popover gives it, in the top level's coordinates, plus `OffsetX` and `OffsetY`; with no
   position, centred, as an absolute box with no inset sits where the host's flex box centres it. A mirrored (RTL) popover gets
   the same physical place.
-- **`PopoverViewport`**: measures its child at the box's maximum height first; one that fits (an `AvonicContent`, which
-  scrolls itself) keeps that, as `ion-content` shrinks with `min-height: 0`; one that doesn't is measured at its full height, and
-  the `ScrollViewer` around scrolls it. The safe areas are 0 inside (`Avonic.SafeArea*` in a dictionary the popover merges), and
-  read from the overlay host for the position.
+- **The viewport**: `ion-content` alone has `min-height: 0` in the viewport's flex column, so it shrinks to the box and scrolls
+  itself; anything else is as tall as it is, and the box (`overflow: auto`) scrolls it. So the scroller doesn't scroll vertically
+  when the content is an `AvonicContent`, and does otherwise. The safe areas are 0 inside (`Avonic.SafeArea*` in a dictionary the
+  popover merges), and read from the overlay host for the position.
 - **Positioning**: `PopoverPosition`, internal and pure: `getPopoverPosition` and `calculateWindowAdjustment` line for line, so
   tests check it against the 108 measured cases. The md enter builder reads the boxes after a layout pass (the forced reflow of
   `getBoundingClientRect`) in the top level's coordinates, and gives the panel the result in a `BeforeAddWrite`, as Ionic's
@@ -220,8 +221,14 @@ From `popover.js`, `utils.js`, `animations/md.enter.js`, `md.leave.js`, `popover
   `IsOpen` call, keeps Ionic's default.
 - **Nested**: the parent is the nearest `AvonicPopover` among the logical ancestors at the first attach to the logical tree
   (`componentWillLoad`), which for one in another's `Content` is before either is shown. The child listens to its parent's
-  `IonPopoverWillDismiss` while it's attached. A click on a nested popover's trigger stops at the parent's content, whether
-  the child was open or not, as M7's microtasks make it.
+  `IonPopoverWillDismiss`. A click on a nested popover's trigger stops at the parent's content, whether the child was open or
+  not, as M7's microtasks make it. Ionic's `dismiss()` awaits its lock before its events, so the parent's dismiss from the
+  child's, and the child's from the parent's will-dismiss, are posted, to come after the events already on their way (M7's
+  order). The trigger is looked up through a presented overlay's placeholder (a change to `OverlayTrigger`), as the parent's
+  teleport moves the child's place out of the page's name scope, where `getElementById` sees the whole document.
+- **Not animated**: `animation.duration(0)` sets the parent's duration; the wrapper's own 150 ms stays, as a child with its own
+  duration keeps it (`getDuration`), so a popover with `animated` false still fades in over 150 ms (M1b). `AvonicAnimation`
+  does the same.
 - **Keyboard**: a tunnel `KeyDown` handler on the popover while it's presented, for a key whose source is the popover or an
   `AvonicItem`, so the item's own handlers and a `ScrollViewer`'s arrows come after it, as a `preventDefault` beats the
   browser's scrolling. The items are the enabled `AvonicItem`s in the popover's visual tree, not in another popover's; focusing

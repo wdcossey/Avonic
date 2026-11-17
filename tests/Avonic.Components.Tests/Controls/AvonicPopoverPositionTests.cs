@@ -225,6 +225,17 @@ public class AvonicPopoverPositionTests
         Assert.Equal((originX, originY), (ox, oy));
     }
 
+    [AvaloniaFact]
+    public void B5_A_Box_That_Would_Start_Past_The_Bottom_Padding_Is_Pulled_Up_To_The_Top()
+    {
+        // From calculateWindowAdjustment, not measured: a trigger 835 high leaves no room above to flip to, and its bottom is past
+        // 844 - 12, so the box goes from 12 down to 12 from the bottom, within its maximum.
+        using var stage = new Stage();
+        var trigger = stage.Trigger(0, 0, 100, 835);
+        var (box, _, _) = Place(stage, Popover(), new PopoverEvent(trigger));
+        AssertBox(12, 12, 250, 759.6, box);
+    }
+
     [AvaloniaTheory]
     [InlineData(50, 60, 50, 61, 0, 0)]
     [InlineData(380, 60, 128, 61, 1, 0)]
@@ -296,6 +307,20 @@ public class AvonicPopoverPositionTests
         AssertBox(x, y, 250, 120, box);
         Assert.Equal((originX, 0d), (ox, oy));
         Assert.Equal(FlowDirection.RightToLeft, popover.FlowDirection);
+    }
+
+    [AvaloniaFact]
+    public void B16_In_A_Right_To_Left_Window_It_Is_Placed_Left_To_Right_As_The_Viewport_Is()
+    {
+        // Canvas.Left 50 in a mirrored window is 240 to 340 on the screen: left 240 runs past the right, so 390 - 250 - 12, as
+        // the measured rtl c bottom start; in the window's own mirrored coordinates it would fit at 50, and land at 90.
+        using var stage = new Stage();
+        stage.Window.FlowDirection = FlowDirection.RightToLeft;
+        var trigger = stage.Trigger(50, 400);
+        var (box, ox, oy) = Place(stage, Popover(), new PopoverEvent(trigger));
+        Assert.Equal(240, new Rect(trigger.Bounds.Size).TransformToAABB(trigger.TransformToVisual(stage.Window)!.Value).X, 0.5);
+        AssertBox(128, 440, 250, 120, box);
+        Assert.Equal((1d, 0d), (ox, oy));
     }
 
     [AvaloniaFact]

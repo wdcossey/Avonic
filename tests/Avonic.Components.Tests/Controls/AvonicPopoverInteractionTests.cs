@@ -286,6 +286,25 @@ public class AvonicPopoverInteractionTests
     }
 
     [AvaloniaFact]
+    public void B12_The_Items_Of_A_Popover_Inside_Dont_Count()
+    {
+        using var stage = new Stage();
+        var (popover, items) = Menu(2, -1);
+        var (inner, innerItems) = Menu(2, -1);
+        inner.KeepContentsMounted = true;
+        ((StackPanel)popover.Content!).Children.Add(inner);
+        stage.Page.Children.Add(popover);
+        popover.Present();
+        stage.After(Entered);
+
+        // The inner one's items are in the tree, kept mounted, but not this popover's: End is the second of its own.
+        Assert.True(innerItems[0].IsAttachedToVisualTree());
+        stage.Key(PhysicalKey.End);
+        stage.After(16);
+        Assert.Same(items[1], stage.Focused);
+    }
+
+    [AvaloniaFact]
     public void B12_The_Arrows_Are_Handled_Only_From_The_Popover_Or_An_Item()
     {
         using var stage = new Stage();
@@ -551,10 +570,16 @@ public class AvonicPopoverInteractionTests
         stage.After(Left);
         Assert.False(content.IsAttachedToVisualTree());
 
-        var kept = new AvonicPopover { Content = new Border(), KeepContentsMounted = true };
+        var keptContent = new Border();
+        var kept = new AvonicPopover { Content = keptContent, KeepContentsMounted = true };
         stage.Page.Children.Add(kept);
         Stage.Settle();
-        Assert.True(kept.IsContentMounted);
+        Assert.True(keptContent.IsAttachedToVisualTree());
+        kept.Present();
+        stage.After(Entered);
+        kept.Dismiss();
+        stage.After(Left);
+        Assert.True(keptContent.IsAttachedToVisualTree());
     }
 
     [AvaloniaFact]
