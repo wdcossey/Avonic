@@ -134,6 +134,13 @@ public class AvonicModalTests
 
     private static double TranslateY(Visual element) => element.RenderTransform?.Value.M32 ?? 0;
 
+    /// <summary>A finished task's result. Never <c>.Result</c> on one still running: it would block the UI thread it waits for.</summary>
+    private static T Done<T>(Task<T> task)
+    {
+        Assert.True(task.IsCompleted, "The task hasn't finished.");
+        return task.Result;
+    }
+
     // ── B1, B2: md's animations ─────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -269,7 +276,7 @@ public class AvonicModalTests
 
         var result = modal.Dismiss(1, "x");
         stage.After(Left);
-        Assert.False(result.Result);
+        Assert.False(Done(result));
         Assert.Empty(stage.Log);
         Assert.NotNull(modal.GetVisualParent());
 
@@ -281,7 +288,7 @@ public class AvonicModalTests
         // The handler role dismisses without asking.
         var handler = modal.Dismiss(2, OverlayRoles.Handler);
         stage.After(Left);
-        Assert.True(handler.Result);
+        Assert.True(Done(handler));
     }
 
     [AvaloniaFact]
@@ -300,10 +307,10 @@ public class AvonicModalTests
 
         var no = modal.Dismiss(1, "nope");
         stage.After(16);
-        Assert.False(no.Result);
+        Assert.False(Done(no));
         var yes = modal.Dismiss(2, "ok");
         stage.After(Left);
-        Assert.True(yes.Result);
+        Assert.True(Done(yes));
         Assert.Equal(["1,nope", "2,ok"], asked);
     }
 
@@ -423,7 +430,15 @@ public class AvonicModalTests
         try
         {
             using var stage = new Stage();
-            NameScope.SetNameScope(stage.Page, new NameScope());
+            NameScope.SetNameScope(stage.Page, NameScopeOf(stage));
+
+            // As XAML sets it: Trigger first, then the modal goes in the page. No warning for a trigger that's there.
+            var found = Modal();
+            found.Trigger = "Opener";
+            stage.Page.Children.Add(found);
+            Stage.Settle();
+            Assert.DoesNotContain(sink.Messages, m => m.Contains("trigger element", StringComparison.Ordinal));
+
             var modal = Modal();
             modal.Trigger = "Nowhere";
             stage.Page.Children.Add(modal);

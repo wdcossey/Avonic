@@ -271,16 +271,21 @@ public abstract class AvonicOverlay : TemplatedControl
             return;
         }
 
-        OnPresenting();
-
         // A dismiss always detaches it, so this is always a new attach, and a new index, as connectedCallback gives.
         var host = OverlayHost.For(topLevel);
+        OnPresenting();
         if (Parent is not (null or OverlayHost) || this.GetVisualParent() is not (null or OverlayHost))
         {
             _moving = true;
             try
             {
                 _placement = InlinePlacement.Teleport(this, () => DismissFromInput(OverlayRoles.ParentRemoved));
+            }
+            catch
+            {
+                // Not presented after all: undo what the overlay did for it.
+                OnDismissed(true);
+                throw;
             }
             finally
             {
@@ -339,7 +344,7 @@ public abstract class AvonicOverlay : TemplatedControl
                 DismissFromInput(null);
             }
         }
-        else if (change.Property == TriggerProperty && !IsInHost)
+        else if (change.Property == TriggerProperty && !IsInHost && ((ILogical)this).IsAttachedToLogicalTree)
         {
             _trigger.Attach(Trigger);
         }
