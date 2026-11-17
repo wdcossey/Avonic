@@ -88,20 +88,12 @@ public partial class AvonicPopover
         trigger.AddHandler(PointerReleasedEvent, OnReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
         var removeClick = OverlayTrigger.AddClickListener(trigger, OnClick);
 
-        // A nested popover's dismiss interaction stops the click at the parent's content, as Ionic sets it up in the microtasks
-        // after this listener, before the click gets there: even the click that presents it (M7). Every form of it.
-        var removeStop = PopoverClick.Listen(trigger, (_, e) =>
-        {
-            if (_parentPopover?._content is { } parentContent)
-            {
-                PopoverClick.StopAt(e, parentContent);
-            }
-        });
+        // A nested popover's click needs no stop here: its present installs the dismiss interaction on the parent's content at
+        // once, before any form of this click gets there, as Ionic's runs in the microtasks after this listener (M7).
         return () =>
         {
             trigger.RemoveHandler(PointerReleasedEvent, OnReleased);
             removeClick();
-            removeStop();
         };
     }
 

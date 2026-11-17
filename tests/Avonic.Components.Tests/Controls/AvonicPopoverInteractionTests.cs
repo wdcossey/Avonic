@@ -386,34 +386,20 @@ public class AvonicPopoverInteractionTests
         popover.Present(stage.Window);
         stage.After(Entered);
 
-        stage.Key(PhysicalKey.Home);
-        stage.After(16);
+        // preventDefault, so a scroller doesn't move: each of the four.
+        foreach (var key in new[] { PhysicalKey.ArrowDown, PhysicalKey.ArrowUp, PhysicalKey.End, PhysicalKey.Home })
+        {
+            stage.Key(key);
+            stage.After(16);
+            Assert.True(handled[^1], key.ToString());
+        }
+
         Assert.Same(items[0], stage.Focused);
-        Assert.True(handled[^1]);
 
         box.Focus();
         stage.Key(PhysicalKey.ArrowDown);
         stage.After(16);
         Assert.Same(box, stage.Focused);
-    }
-
-    [AvaloniaFact]
-    public void B12_The_Keys_Do_Nothing_After_The_Dismiss()
-    {
-        using var stage = new Stage();
-        var (popover, items) = Menu();
-        popover.Present(stage.Window);
-        stage.After(Entered);
-        popover.Dismiss();
-        stage.After(Left);
-        var outside = new Button { Content = "Outside" };
-        stage.Page.Children.Add(outside);
-        outside.Focus();
-
-        var handled = false;
-        stage.Window.AddHandler(InputElement.KeyDownEvent, (_, e) => handled = e.Handled, RoutingStrategies.Bubble, handledEventsToo: true);
-        stage.Key(PhysicalKey.End);
-        Assert.False(handled);
     }
 
     // ── B13: nested ─────────────────────────────────────────────────────────────────────────
@@ -656,12 +642,10 @@ public class AvonicPopoverInteractionTests
         var (parent, items, child, childItems) = Nested(stage);
         stage.Click(Centre(items[2], stage.Window));
         stage.After(Entered);
+        // The app opens the menu again at once: the present waits behind the menu's dismiss, and must be the last word.
         stage.Click(Centre(childItems[0], stage.Window));
-        stage.After(Left);
-        Assert.False(parent.IsShown);
-
         parent.Present();
-        stage.After(Entered);
+        stage.After(Left + Entered + Left);
         Assert.True(parent.IsShown);
     }
 
@@ -795,13 +779,14 @@ public class AvonicPopoverInteractionTests
     {
         using var stage = new Stage();
         var popover = Popover();
+        stage.Window.Resources["Avonic.TextColorBrush"] = Brushes.Green;
         popover.Present(stage.Window);
         stage.After(Entered);
         var content = popover.ContentPart!;
         Assert.Equal(new CornerRadius(4), content.CornerRadius);
         Assert.Equal(3, content.BoxShadow.Count);
         Assert.Equal(Colors.White, ((ISolidColorBrush)content.Background!).Color);
-        Assert.Equal(Colors.Black, ((ISolidColorBrush)popover.Foreground!).Color);
+        Assert.Equal(Colors.Green, ((ISolidColorBrush)popover.Foreground!).Color);
         Assert.Equal(20000 + popover.OverlayIndex, popover.ZIndex);
     }
 

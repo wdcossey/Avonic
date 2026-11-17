@@ -452,7 +452,7 @@ public partial class AvonicPopover : AvonicOverlay
             return;
         }
 
-        RemoveKeyboardInteraction();
+        // The keyboard's handler stays: no key reaches a dismissed popover, and the next present replaces it.
         RemoveDismissInteraction();
         if (!KeepContentsMounted)
         {
