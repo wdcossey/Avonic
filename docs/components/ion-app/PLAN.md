@@ -30,7 +30,7 @@ There are no props, events, slots, shadow parts or CSS custom properties.
 |---|---|---|
 | `startTapClick` | unless `_testing` | Already each control's, through `Behaviors.Activatable`. Unchanged |
 | `startStatusTap` | `statusTap`, `isHybrid` | Not in this PR: an issue of its own. Avalonia doesn't report a tap on the status bar, and only iOS has one |
-| `startInputShims` | `inputShims`, `needInputShims()`: iOS, or Android in a browser | `InputShims`. `AvonicConfig.InputShims`, default on Android and iOS: see [input shims](#input-shims) |
+| `startInputShims` | `inputShims`, `needInputShims()`: iOS, or Android in a browser | `InputShims`. `AvonicConfig.InputShims`, default on Android, iOS and, since #189, Windows: see [input shims](#input-shims) and [on Windows](#input-shims-on-windows-189) |
 | `startHardwareBackButton`, or `blockHardwareBackButton` | `hardwareBackButton`, `isHybrid \|\| closeWatcher` | `HardwareBackButton`, started for the app's `TopLevel`. `AvonicConfig.HardwareBackButton`, default true |
 | `startKeyboardAssist` | always | `KeyboardAssist`, started for the app's `TopLevel` |
 | `startFocusVisible` | always | Already each control's, through `Behaviors.FocusVisible`. `SetFocus` reaches it |
@@ -169,6 +169,68 @@ Not done: moving the native input away and focusing it again (`relocateInput`), 
 as Avalonia doesn't, and so neither the click 8.8.1 fired on the component a frame after it, which 8.8.19 no longer fires; hide caret on scroll (WebKit draws the caret over a scrolling page); input blurring (off since Ionic 8, and
 going); a footer's field, for which Ionic only relocates.
 
+### Input shims on Windows (#189)
+
+The user asked for the shims on Windows tablets too, where the touch keyboard covers the window as a phone's covers the view
+(decided 2026-11-16). Ionic has nothing to copy here: `needInputShims()` is false in every desktop browser. What Avalonia gives:
+
+**Avalonia 12.1.4 on Windows, read from its source** (`Avalonia.Win32.dll`, decompiled with ilspycmd 11.2):
+
+- `WindowImpl`'s constructor calls `WindowsInputPane.TryCreate(this)`, which makes a pane when
+  `WinRTApiInformation.IsTypePresent("Windows.UI.ViewManagement.InputPane")`, so on Windows 10 and later, for **every** window,
+  touch or not. `TryGetFeature(typeof(IInputPane))` returns it, so `TopLevel.InputPane` is never null there.
+- It creates Windows' `FrameworkInputPane` (`IFrameworkInputPane`) and calls `AdviseWithHWND` with the window's handle. Its handler's
+  `Showing(RECT*)` sets `State` to `Open` and `OccludedRect` to the keyboard's place on the screen, converted to the window's
+  client coordinates (`PointToClient` for the corner, the size divided by `DesktopScaling`); `Hiding` sets `Closed` and an empty
+  rect. `StateChanged` is raised, through `Dispatcher.UIThread.Send`, only when the state or the rect changed, with no start
+  rect and no animation (`AnimationDuration` zero), so `IonKeyboardDidShow` comes at once.
+- Nothing in `Avalonia.Win32` opens the touch keyboard (no `TabTip`, `ITipInvocation` or `TryShow`): Windows does, from UI
+  Automation focus on an edit control, for a touch focus in tablet posture or as its touch keyboard setting says.
+- The rect is the keyboard's, wherever the window is: a window that ends above the bottom of the screen is covered by part of it,
+  or none. Android's, by contrast, is always `(0, client height − bottom inset − ime, client width, ime)`, inside the view.
+
+So "a Windows tablet" can't be told from the pane's being there: every window has one. It can be told from the pane opening over
+the window, which happens only when the touch keyboard docks. The design follows that:
+
+- `AvonicConfig.InputShims` defaults to on for Android, iOS and Windows (`InputShimsByDefault`); off for macOS and Linux, which
+  have no pane.
+- Where the keyboard isn't the only one (not Android or iOS: `AvonicConfig.KeyboardIsTheOnlyOne`), and the top level has a pane
+  or it's Windows (a hosted Windows top level has none), the shims **follow the pane**: a field's focus records the field and does
+  nothing more; the pane opening runs Ionic's `jsSetFocus` with the height it covers and the window's height then, without
+  waiting; a field focused while it's open runs at once with that height, without waiting for a show that won't come; the pane
+  closing takes the padding away 120 ms later, and the next opening runs again. Android and iOS keep Ionic's estimate at focus,
+  and macOS and Linux, with no pane, get Ionic's too where an app turns the shims on, as a desktop browser with
+  `inputShims: true` would.
+- `KeyboardAssist`'s height is what the pane covers of the top level (`CoveredHeight`, the rect's overlap with the client area),
+  as its doc already said, where the keyboard isn't the only one. A pane with a rect that covers none of the top level is reported
+  as hidden; an empty rect is left as it was. On Android and iOS it's the pane's own height, as before: Android's rect is always
+  inside the view, and iOS's, in Avalonia.iOS 11.3.9 (the only one in the NuGet cache; 12.1.4's not read), is UIKit's
+  `FrameEndFromNotification`, in the screen's coordinates, which an iPad's window in Split View or Stage Manager doesn't share.
+
+Behaviours, in `AvonicAppTests`:
+
+- W1 The default is on for Android, iOS and Windows, and off for Linux, macOS and others.
+- W2 On Windows, a field's focus neither pads nor scrolls; the pane opening pads by its height and scrolls the item 50 above it.
+- W3 A field focused with the pane already open runs at once with its height, also when nothing had focus before it opened.
+- W4 The keyboard's height is what it covers of the top level: 244 of a 400 high keyboard from 600 in an 844 high window; one
+  over none of it is reported as hidden.
+- W5 A touch keyboard below the window changes nothing.
+- W6 On a phone with a pane, focus still reckons with the estimate at once.
+- W7 Each focus runs when the pane opens, even at the height the last one used.
+- W8 On Windows with no pane, focus does nothing.
+- W9 **A deviation:** the padding goes 120 ms after the keyboard closes or ends off the window, with the field still focused,
+  and the next opening runs again. Ionic's stays until blur, as a phone's keyboard closes with the focus.
+- W10 A field focused with the pane open and too little room scrolls as far as it can at once, without the second's wait.
+- W11 The window's height is read when the keyboard opens, not at the focus.
+- W12 A field focused with the pane open reckons with what it covers of the window now, after a resize.
+- W13 A keyboard beside the window covers none of it, though its height reaches into it: measured on Windows 11 at 125%, the
+  floating keyboard at 547.2, 797.6, 1194.4 × 488 in a 389.6 wide window's client DIPs (see COMPARISON).
+
+W3 found a bug the change brought into reach: with the keyboard open before any field had focus, the page's height was never
+taken, and the field scrolled to the top of the content (528 where 138 was right). On Windows the touch keyboard can be opened from
+the taskbar first; on a phone, a plain `TextBox` can open it before focus moves to a field. Windows now reads the height when it
+runs, and the phone's case is I15: the height is taken at a first focus with the keyboard open.
+
 ## Not in this PR
 
 | What | Why |
@@ -204,7 +266,7 @@ And the other choices that change what every app sees:
 | D5 Back without `AvonicApp` | Overlays still dismiss on it. Registering handlers needs an `AvonicApp`, as `ionBackButton` needs `ion-app` |
 | D6 `HardwareBackButton` off | Back is left alone. A deviation: Ionic's `blockHardwareBackButton` takes it and does nothing, which here would also hide it from the app's own `BackRequested` handlers |
 | D7 A back request nothing takes | Handled, so the app stays, as in Ionic on Capacitor. An extension, `AvonicConfig.HandleUnclaimedBack`, turns that off |
-| D8 Input shims | On for Android and iOS, off on desktop: the Pixel showed the keyboard covering the view |
+| D8 Input shims | On for Android and iOS, off on desktop: the Pixel showed the keyboard covering the view. Since #189, on for Windows too, following the touch keyboard |
 | D9 Status tap | An issue of its own |
 
 ## Avonic extensions
