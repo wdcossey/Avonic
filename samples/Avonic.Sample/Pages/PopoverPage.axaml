@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.PopoverPage">
+
+    <!-- ion-popover: a menu with a submenu opened by a click, one opened by hovering, one at a right click or a long press, the
+         sides and the cover size, and one made in code. Each is moved to the overlay layer while it's presented, and back after. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Open one, then pick an item, tap the backdrop, or press Escape" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="A menu, with a submenu" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenMenu" Content="Open the menu" HorizontalAlignment="Left" Margin="16,8,16,0" />
+            <!-- The arrow keys move through its items; ArrowRight on More opens the submenu, ArrowLeft closes it. -->
+            <c:AvonicPopover Name="MenuPopover" Trigger="OpenMenu" DismissOnSelect="True">
+                <StackPanel>
+                    <c:AvonicList>
+                        <c:AvonicItem Name="MenuCopy" Button="True" Detail="False" Content="Copy" />
+                        <c:AvonicItem Name="MenuPaste" Button="True" Detail="False" Content="Paste" />
+                        <c:AvonicItem Name="MenuMore" Button="True" Detail="True" Content="More" />
+                        <c:AvonicItem Button="True" Detail="False" Content="Delete" IsEnabled="False" />
+                    </c:AvonicList>
+                    <c:AvonicPopover Name="SubmenuPopover" Trigger="MenuMore" Side="End" DismissOnSelect="True">
+                        <c:AvonicList>
+                            <c:AvonicItem Name="SubmenuShare" Button="True" Detail="False" Content="Share" />
+                            <c:AvonicItem Name="SubmenuPrint" Button="True" Detail="False" Content="Print" />
+                        </c:AvonicList>
+                    </c:AvonicPopover>
+                </StackPanel>
+            </c:AvonicPopover>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Hover" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="HoverTrigger" Content="Hover over me" HorizontalAlignment="Left" Margin="16,8,16,0" />
+            <c:AvonicPopover Name="HoverPopover" Trigger="HoverTrigger" TriggerAction="Hover">
+                <c:AvonicContent Padding="16">
+                    <TextBlock Text="Opened by hovering for 100 ms" TextWrapping="Wrap" />
+                </c:AvonicContent>
+            </c:AvonicPopover>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Context menu, at the pointer" />
+            </c:AvonicListHeader>
+            <Border Name="ContextArea" Height="96" Margin="16,8" CornerRadius="4" Background="#E0E0E0">
+                <TextBlock Text="Right-click or long-press here" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <c:AvonicPopover Name="ContextPopover" Trigger="ContextArea" TriggerAction="ContextMenu" Reference="Event" DismissOnSelect="True">
+                <c:AvonicList>
+                    <c:AvonicItem Button="True" Detail="False" Content="Cut" />
+                    <c:AvonicItem Button="True" Detail="False" Content="Copy" />
+                </c:AvonicList>
+            </c:AvonicPopover>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Sides and size" />
+            </c:AvonicListHeader>
+            <WrapPanel Margin="12,4">
+                <c:AvonicButton Name="AboveTrigger" Content="Above, centred" />
+                <c:AvonicButton Name="CoverTrigger" Content="As wide as this button" />
+            </WrapPanel>
+            <c:AvonicPopover Trigger="AboveTrigger" Side="Top" Alignment="Center">
+                <c:AvonicContent Padding="16">
+                    <TextBlock Text="Above its trigger, centred on it" TextWrapping="Wrap" />
+                </c:AvonicContent>
+            </c:AvonicPopover>
+            <c:AvonicPopover Trigger="CoverTrigger" Size="Cover">
+                <c:AvonicContent Padding="16">
+                    <TextBlock Text="As wide as the button" TextWrapping="Wrap" />
+                </c:AvonicContent>
+            </c:AvonicPopover>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="In code" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenInCode" Content="Present one in code" HorizontalAlignment="Left" Margin="16,8,16,16" />
+        </StackPanel>
+    </c:AvonicContent>
+
+</UserControl>

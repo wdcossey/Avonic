@@ -49,6 +49,12 @@ once if the window doesn't fit on the screen.
     `backdrop`; a radio alert made in code returns `red` after a pick and OK; a text alert's Save handler returning false keeps it
     open, Enter in its field does nothing (Ionic's has no form), and Enter on Save submits `{name: "Ann"}`; the `IsOpen` alert with
     `BackdropDismiss` off stays on Escape and closes from a button. Not run yet.
+  - `ion-popover` (#43): a real click opens the menu below its button, at its left; ArrowDown twice from the popover focuses the
+    second item, End the last enabled one; ArrowRight on More opens the submenu with focus on its first item, ArrowLeft closes it
+    alone with focus back on More; Escape dismisses the menu with `backdrop`; a click on an item dismisses it with no role
+    (`dismissOnSelect`), and one on the backdrop with `backdrop`; resting the pointer on the hover trigger presents its popover; a
+    real right click opens the context menu at the pointer (its first item at the click's x, 8 to 11 below it). Frames:
+    `popover-menu`, `popover-submenu`, `popover-hover`, `popover-context`. Not run yet.
   - `typography`: frames only.
   - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
     to the list at 0; a frame of `SetFocus`'s ring on row 1.
