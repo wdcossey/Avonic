@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ModalPage">
+
+    <!-- ion-modal: inline modals, opened by a trigger and by IsOpen, and one made in code. Each is moved to the overlay layer
+         while it's presented, and back after. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Open one, then close it, tap the backdrop, or press Escape or Back" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Inline, with a trigger" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenModal" Content="Open the modal" Margin="16,8,16,0" />
+            <c:AvonicModal Name="TriggerModal" Trigger="OpenModal">
+                <Grid RowDefinitions="Auto,*">
+                    <c:AvonicHeader>
+                        <c:AvonicToolbar>
+                            <c:AvonicTitle Content="Modal" />
+                            <c:AvonicToolbar.EndContent>
+                                <c:AvonicButtons>
+                                    <c:AvonicButton Content="Close" Click="OnCloseTrigger" />
+                                </c:AvonicButtons>
+                            </c:AvonicToolbar.EndContent>
+                        </c:AvonicToolbar>
+                    </c:AvonicHeader>
+                    <c:AvonicContent Grid.Row="1" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Full screen on a phone, 600 by 600 on a tablet. Tab stays inside." TextWrapping="Wrap" />
+                            <TextBox PlaceholderText="Type here" />
+                            <c:AvonicButton Content="Open a nested modal" Click="OnOpenNested" />
+                            <c:AvonicModal Name="NestedModal">
+                                <Grid RowDefinitions="Auto,*">
+                                    <c:AvonicHeader>
+                                        <c:AvonicToolbar>
+                                            <c:AvonicTitle Content="Nested" />
+                                        </c:AvonicToolbar>
+                                    </c:AvonicHeader>
+                                    <c:AvonicContent Grid.Row="1" Padding="16">
+                                        <TextBlock Text="Closing the modal under this one closes this one too, with the role parent-dismissed."
+                                                   TextWrapping="Wrap" />
+                                    </c:AvonicContent>
+                                </Grid>
+                            </c:AvonicModal>
+                        </StackPanel>
+                    </c:AvonicContent>
+                </Grid>
+            </c:AvonicModal>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="IsOpen, and CanDismiss" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="IsOpen" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicToggle Name="IsOpenToggle" AutomationProperties.Name="IsOpen" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <!-- A dialog of its own size: 320 wide, as tall as its content. -->
+            <c:AvonicModal Name="GuardedModal">
+                <c:AvonicModal.Resources>
+                    <x:String x:Key="Avonic.Modal.Width">320</x:String>
+                    <x:String x:Key="Avonic.Modal.Height">auto</x:String>
+                    <x:Double x:Key="Avonic.Modal.BorderRadius">8</x:Double>
+                </c:AvonicModal.Resources>
+                <StackPanel Margin="16" Spacing="12">
+                    <TextBlock Text="CanDismiss asks first" FontSize="20" FontWeight="Medium" />
+                    <TextBlock Text="With the box unticked, nothing closes it but the button, through the handler role." TextWrapping="Wrap" />
+                    <CheckBox Name="AllowClose" Content="Can be dismissed" />
+                    <c:AvonicButton Content="Close anyway" Click="OnCloseGuarded" />
+                </StackPanel>
+            </c:AvonicModal>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Made in code" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenInCode" Content="Present a modal from code" Margin="16,8,16,16" />
+        </StackPanel>
+    </c:AvonicContent>
+
+</UserControl>

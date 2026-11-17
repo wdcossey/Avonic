@@ -1,0 +1,145 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="420">
+            <TextBlock Text="The page under the modal" Margin="16" />
+            <!-- A modal's template, as it is after its enter animation: the backdrop at 0.32 and the wrapper in place. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+            <c:ModalWrapper Width="300" Height="240" ZIndex="10" Background="{DynamicResource Avonic.BackgroundColorBrush}">
+                <TextBlock Text="A modal's content" Margin="16" />
+            </c:ModalWrapper>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of modal.md.css, with modal.css's base. The host covers the window (inset: 0), a flex box centring the
+         wrapper; contain: strict and translate3d are rendering hints. -->
+    <ControlTheme x:Key="{x:Type c:AvonicModal}" TargetType="c:AvonicModal">
+        <!-- color: var(ion-text-color, #000) -->
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <!-- outline: none, on the host and the wrapper -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop"
+                                      Visible="{TemplateBinding ShowBackdrop}"
+                                      Tappable="{TemplateBinding BackdropDismiss}" />
+                    <!-- .modal-wrapper's z-index 10, over the backdrop's 2, on the panel, as ZIndex sorts siblings. -->
+                    <c:ModalPanel Name="PART_Panel" ZIndex="10">
+                        <!-- .modal-wrapper rests 40 px down at 0.01, which the enter animation takes away. ClipToBounds is off so
+                             that it draws its shadow; PART_Clip is overflow: hidden. -->
+                        <c:ModalWrapper Name="PART_Content"
+                                        ClipToBounds="False"
+                                        FocusAdorner="{x:Null}"
+                                        Opacity="0.01"
+                                        RenderTransform="translateY(40px)">
+                            <Border Name="PART_Clip" ClipToBounds="True">
+                                <ContentPresenter Name="PART_ContentPresenter" />
+                            </Border>
+                        </c:ModalWrapper>
+                    </c:ModalPanel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- width, min-width, max-width, height, min-height, max-height: var(...) -->
+        <Style Selector="^ /template/ c|ModalPanel#PART_Panel">
+            <Setter Property="ContentWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Width" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.Width" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="ContentHeight">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Height" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.Height" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Modal.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.Modal.MaxWidth}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Modal.MinHeight}" />
+            <Setter Property="ContentMaxHeight" Value="{DynamicResource Avonic.Modal.MaxHeight}" />
+        </Style>
+
+        <!-- border-radius, border, background, box-shadow: var(...) -->
+        <Style Selector="^ /template/ c|ModalWrapper#PART_Content">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Modal.BorderColor}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:ModalWrapper.BorderThicknessConverter}">
+                    <DynamicResource ResourceKey="Avonic.Modal.BorderWidth" />
+                    <DynamicResource ResourceKey="Avonic.Modal.BorderStyle" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.Modal.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.BorderRadius" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.BoxShadow" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- overflow: hidden, inside the border, to the wrapper's radius -->
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="{Binding $parent[c:ModalWrapper].CornerRadius}" />
+        </Style>
+
+        <!-- @media (min-width: 768px) and (min-height: 600px): 600 by 500, radius 2, the shadow -->
+        <Style Selector="^:inset-small /template/ c|ModalPanel#PART_Panel">
+            <Setter Property="ContentWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Width" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.WidthInset" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="ContentHeight">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Height" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.HeightInsetSmall" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:inset-small /template/ c|ModalWrapper#PART_Content">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.Modal.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.BorderRadiusInset" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.BoxShadow" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.BoxShadowInset" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (min-width: 768px) and (min-height: 768px): 600 by 600 -->
+        <Style Selector="^:inset-large /template/ c|ModalPanel#PART_Panel">
+            <Setter Property="ContentHeight">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Modal.Height" />
+                    <DynamicResource ResourceKey="Avonic.Modal.Md.HeightInsetLarge" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

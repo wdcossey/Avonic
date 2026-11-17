@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
@@ -40,6 +41,17 @@ public abstract class AvonicOverlay : TemplatedControl
     public static readonly StyledProperty<AnimationBuilder?> LeaveAnimationProperty =
         AvaloniaProperty.Register<AvonicOverlay, AnimationBuilder?>(nameof(LeaveAnimation));
 
+    /// <summary>
+    /// Ionic <c>isOpen</c>: false to true presents it, true to false dismisses it; true when it's first attached presents it at
+    /// the next frame. A dismiss doesn't set it back.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsOpenProperty =
+        AvaloniaProperty.Register<AvonicOverlay, bool>(nameof(IsOpen));
+
+    /// <summary>Ionic <c>trigger</c>: the name of a control in the overlay's name scope whose click presents it.</summary>
+    public static readonly StyledProperty<string?> TriggerProperty =
+        AvaloniaProperty.Register<AvonicOverlay, string?>(nameof(Trigger));
+
     /// <summary>Ionic <c>willPresent</c>, the generic event of every overlay. Each control adds its own <c>Ion&lt;Name&gt;WillPresent</c>.</summary>
     public static readonly RoutedEvent<RoutedEventArgs> WillPresentEvent =
         RoutedEvent.Register<AvonicOverlay, RoutedEventArgs>(nameof(WillPresent), RoutingStrategies.Bubble);
@@ -66,6 +78,11 @@ public abstract class AvonicOverlay : TemplatedControl
     private OverlayHost? _host;
     private (TopLevel TopLevel, IInputElement Element)? _focusToRestore;
     private bool _presented;
+    private readonly OverlayTrigger _trigger;
+    private InlinePlacement? _placement;
+    private bool _loaded;
+    private bool _moving;
+    private int _dismissesPending;
 
     static AvonicOverlay()
     {
@@ -77,8 +94,27 @@ public abstract class AvonicOverlay : TemplatedControl
     {
         // overlay-hidden is display: none !important, so it beats any value.
         _hidden = SetValue(IsVisibleProperty, false, BindingPriority.Animation);
+        _trigger = new OverlayTrigger(this);
         AddHandler(AvonicBackdrop.IonBackdropTapEvent, (_, _) => OnBackdropTap());
     }
+
+    public bool IsOpen
+    {
+        get => GetValue(IsOpenProperty);
+        set => SetValue(IsOpenProperty, value);
+    }
+
+    public string? Trigger
+    {
+        get => GetValue(TriggerProperty);
+        set => SetValue(TriggerProperty, value);
+    }
+
+    /// <summary>
+    /// The placeholder an inline overlay left in its place while it's presented: it had a parent of the app's when it was
+    /// presented, and has been moved to the overlay host until its dismiss puts it back (Ionic's <c>CoreDelegate</c>).
+    /// </summary>
+    internal Control? Placeholder => _placement?.Placeholder;
 
     public bool Animated
     {
@@ -165,16 +201,69 @@ public abstract class AvonicOverlay : TemplatedControl
     /// <summary>What the overlay gives its enter and leave animations, as a toast gives its position.</summary>
     protected virtual object? AnimationOptions => null;
 
+    /// <summary>The control's own <c>ion&lt;Name&gt;WillPresent</c>, raised just before <see cref="WillPresentEvent"/>, as Ionic does.</summary>
+    protected virtual RoutedEvent<RoutedEventArgs>? ControlWillPresentEvent => null;
+
+    /// <summary>The control's own <c>ion&lt;Name&gt;DidPresent</c>, raised just before <see cref="DidPresentEvent"/>.</summary>
+    protected virtual RoutedEvent<RoutedEventArgs>? ControlDidPresentEvent => null;
+
+    /// <summary>The control's own <c>ion&lt;Name&gt;WillDismiss</c>, raised just before <see cref="WillDismissEvent"/>.</summary>
+    protected virtual RoutedEvent<OverlayEventArgs>? ControlWillDismissEvent => null;
+
+    /// <summary>The control's own <c>ion&lt;Name&gt;DidDismiss</c>, raised just before <see cref="DidDismissEvent"/>.</summary>
+    protected virtual RoutedEvent<OverlayEventArgs>? ControlDidDismissEvent => null;
+
     /// <summary>
-    /// Ionic <c>present()</c>, in the application's top level: a desktop's active window, else its main one; a single view's; under
-    /// Android's <c>MainViewFactory</c>, the current activity's.
+    /// What present focuses with <see cref="KeyboardClose"/>: Ionic's <c>[role="dialog"][tabindex]</c> in the overlay's root (the
+    /// modal's wrapper), or the overlay itself when null.
+    /// </summary>
+    protected virtual IInputElement? PresentFocusTarget => null;
+
+    /// <summary>
+    /// What an overlay's own <c>present()</c> does before the shared one: under the lock, when it isn't presented yet, once it's in
+    /// the overlay host (an inline one's place in its page is <see cref="Placeholder"/>).
+    /// </summary>
+    protected virtual void OnPresenting()
+    {
+    }
+
+    /// <summary>
+    /// What an overlay's own <c>dismiss()</c> does before the shared one, under the lock: false stops the dismiss, which then
+    /// returns false, as the modal's <c>canDismiss</c> does.
+    /// </summary>
+    protected virtual Task<bool> OnDismissing(object? data, string? role) => Task.FromResult(true);
+
+    /// <summary>What an overlay's own <c>dismiss()</c> does after the shared one, under the lock; <paramref name="dismissed"/> is its result.</summary>
+    protected virtual void OnDismissed(bool dismissed)
+    {
+    }
+
+    /// <summary>
+    /// Ionic <c>present()</c>. An inline overlay, one with a parent of the app's, presents in its own top level, as Ionic's
+    /// teleports to its document's <c>ion-app</c>. Otherwise the application's top level: a desktop's active window, else its main
+    /// one; a single view's; under Android's <c>MainViewFactory</c>, the current activity's.
     /// </summary>
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
-    public Task Present() => OverlayHost.TopLevelOf(Application.Current?.ApplicationLifetime) is { } topLevel
-        ? Present(topLevel)
-        : Task.FromException(new InvalidOperationException(
-            "There's no TopLevel to present the overlay in: the application has no desktop, single-view or activity lifetime, or none of its " +
-            "top levels is open. Use Present(TopLevel)."));
+    public Task Present()
+    {
+        // Inline, or still in a host during its leave animation: its own top level, where an inline one goes back to. In a
+        // popup, the top level the popup belongs to, as a browser has one document.
+        if (Parent is not null && TopLevel.GetTopLevel(this) is { } own)
+        {
+            while (own is PopupRoot { ParentTopLevel: { } parent })
+            {
+                own = parent;
+            }
+
+            return Present(own);
+        }
+
+        return OverlayHost.TopLevelOf(Application.Current?.ApplicationLifetime) is { } topLevel
+            ? Present(topLevel)
+            : Task.FromException(new InvalidOperationException(
+                "There's no TopLevel to present the overlay in: the application has no desktop, single-view or activity lifetime, or none of its " +
+                "top levels is open. Use Present(TopLevel)."));
+    }
 
     /// <summary>Ionic <c>present()</c>, in <paramref name="topLevel"/>. An Avonic extension, for an app with several windows.</summary>
     public async Task Present(TopLevel topLevel)
@@ -187,22 +276,136 @@ public abstract class AvonicOverlay : TemplatedControl
 
         // A dismiss always detaches it, so this is always a new attach, and a new index, as connectedCallback gives.
         var host = OverlayHost.For(topLevel);
+        if (Parent is not (null or OverlayHost) || this.GetVisualParent() is not (null or OverlayHost))
+        {
+            _moving = true;
+            try
+            {
+                _placement = InlinePlacement.Teleport(this, OnPlaceRemoved);
+            }
+            finally
+            {
+                _moving = false;
+            }
+        }
+
         _host = host;
         OverlayIndex = ++s_lastOverlayIndex;
         ZIndex = ZIndexBase + OverlayIndex;
         host.Attach(this);
+        OnPresenting();
         await PresentCore(host.TopLevel);
     }
 
     /// <summary>
-    /// Ionic <c>dismiss(data, role)</c>: true when it dismissed, false when it wasn't presented. It waits for a present that's
-    /// still running.
+    /// An inline overlay's place left the tree while it was presented: <c>parent-removed</c>, unless a dismiss is already on its
+    /// way, as when the modal it's inside unmounts its content after dismissing it with <c>parent-dismissed</c>.
+    /// </summary>
+    private void OnPlaceRemoved()
+    {
+        if (_dismissesPending == 0)
+        {
+            DismissFromInput(OverlayRoles.ParentRemoved);
+        }
+    }
+
+    /// <summary>
+    /// Ionic <c>dismiss(data, role)</c>: true when it dismissed, false when it wasn't presented, or the overlay stopped it. It
+    /// waits for a present that's still running.
     /// </summary>
     public async Task<bool> Dismiss(object? data = null, string? role = null)
     {
-        using var unlock = await _lock.Lock();
-        return await DismissCore(data, role);
+        _dismissesPending++;
+        try
+        {
+            using var unlock = await _lock.Lock();
+            if (!await OnDismissing(data, role))
+            {
+                return false;
+            }
+
+            bool dismissed;
+            try
+            {
+                dismissed = await DismissCore(data, role);
+            }
+            catch
+            {
+                OnDismissed(true);
+                throw;
+            }
+
+            OnDismissed(dismissed);
+            return dismissed;
+        }
+        finally
+        {
+            _dismissesPending--;
+        }
     }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        // Stencil calls a watcher only once the component has loaded; before that, the first attach reads isOpen.
+        if (change.Property == IsOpenProperty && (_loaded || _presented))
+        {
+            var (oldValue, newValue) = change.GetOldAndNewValue<bool>();
+            if (newValue && !oldValue)
+            {
+                PresentFromInput();
+            }
+            else if (!newValue && oldValue)
+            {
+                DismissFromInput(null);
+            }
+        }
+        else if (change.Property == TriggerProperty && !IsInHost && ((ILogical)this).IsAttachedToLogicalTree)
+        {
+            _trigger.Attach(Trigger);
+        }
+    }
+
+    /// <summary>Ionic's <c>connectedCallback</c> and <c>componentDidLoad</c>: the trigger is looked up; <c>isOpen</c> at load presents.</summary>
+    protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToLogicalTree(e);
+        if (!IsInHost)
+        {
+            _trigger.Attach(Trigger);
+        }
+    }
+
+    /// <summary>Ionic's <c>disconnectedCallback</c>: the trigger's listener goes. Not when it's moved for its presentation.</summary>
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromLogicalTree(e);
+        if (!_moving && !_presented && _placement is null)
+        {
+            _trigger.Remove();
+        }
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        if (_loaded)
+        {
+            return;
+        }
+
+        // Loaded at its first attach, which for one made in code is its present, as Ionic's controller attaches it at create.
+        _loaded = true;
+        if (IsOpen && !IsInHost)
+        {
+            AvonicConfig.RequestFrame(this, PresentFromInput);
+        }
+    }
+
+    private bool IsInHost => Parent is OverlayHost;
+
+    /// <summary>A present that nothing awaits (<c>isOpen</c>, a trigger), its exception logged as a dismiss's from input is.</summary>
+    internal void PresentFromInput() => LogFault(Present(), "present");
 
     /// <summary>Ionic <c>onWillDismiss()</c>: the detail of the next <see cref="WillDismiss"/>.</summary>
     public Task<OverlayEventDetail> OnWillDismiss() => NextEvent(WillDismissEvent);
@@ -217,9 +420,11 @@ public abstract class AvonicOverlay : TemplatedControl
     /// A dismiss that input started, which nothing awaits: a backdrop tap, Escape, the back button. An exception in it is logged,
     /// as Ionic's <c>dismiss</c> logs one with <c>printIonError</c>, rather than lost in a task no one reads.
     /// </summary>
-    internal void DismissFromInput(string role) =>
-        Dismiss(null, role).ContinueWith(
-            task => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's dismiss failed: {Exception}", task.Exception!.InnerException),
+    internal void DismissFromInput(string? role) => LogFault(Dismiss(null, role), "dismiss");
+
+    private void LogFault(Task task, string what) =>
+        task.ContinueWith(
+            t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's {What} failed: {Exception}", what, t.Exception!.InnerException),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted,
             TaskScheduler.Default);
@@ -232,14 +437,27 @@ public abstract class AvonicOverlay : TemplatedControl
         }
 
         _presented = true;
+        if (ControlWillPresentEvent is { } controlWillPresent)
+        {
+            RaiseEvent(new RoutedEventArgs(controlWillPresent, this));
+        }
+
         RaiseEvent(new RoutedEventArgs(WillPresentEvent, this));
         await OverlayAnimation(EnterAnimation ?? MdEnterAnimation);
+        if (ControlDidPresentEvent is { } controlDidPresent)
+        {
+            RaiseEvent(new RoutedEventArgs(controlDidPresent, this));
+        }
+
         RaiseEvent(new RoutedEventArgs(DidPresentEvent, this));
 
         // Focus is left where it is if it's already inside.
         if (KeyboardClose && (Focused(topLevel) is not { } focused || !OverlayHost.Contains(this, focused)))
         {
-            Focus();
+            if (PresentFocusTarget is not { } target || !target.Focus())
+            {
+                Focus();
+            }
         }
     }
 
@@ -256,10 +474,20 @@ public abstract class AvonicOverlay : TemplatedControl
         {
             // Not clickable during the dismiss: pointer-events: none.
             _noPointer = SetValue(IsHitTestVisibleProperty, false, BindingPriority.Animation);
+            if (ControlWillDismissEvent is { } controlWillDismiss)
+            {
+                RaiseEvent(new OverlayEventArgs(controlWillDismiss, data, role));
+            }
+
             RaiseEvent(new OverlayEventArgs(WillDismissEvent, data, role));
             if (role != OverlayRoles.Gesture)
             {
                 await OverlayAnimation(LeaveAnimation ?? MdLeaveAnimation);
+            }
+
+            if (ControlDidDismissEvent is { } controlDidDismiss)
+            {
+                RaiseEvent(new OverlayEventArgs(controlDidDismiss, data, role));
             }
 
             RaiseEvent(new OverlayEventArgs(DidDismissEvent, data, role));
@@ -280,6 +508,15 @@ public abstract class AvonicOverlay : TemplatedControl
             LastFocus = null;
             _host?.Detach(this);
             _host = null;
+
+            // An inline overlay goes back where it was: detachComponent's removeViewFromDom. If its page has left the tree, it
+            // goes back there, detached, and nothing will detach it again: its trigger's listener goes now.
+            _placement?.Restore();
+            _placement = null;
+            if (!((ILogical)this).IsAttachedToLogicalTree)
+            {
+                _trigger.Remove();
+            }
             RestoreElementFocus(didDismiss);
         }
 

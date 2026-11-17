@@ -880,6 +880,67 @@ try {
         Away
     }
 
+    # ion-modal (#42): an inline modal opened by its trigger with a real click, the focus trap, Escape, Back (Alt+Left), its
+    # Close button with a nested modal open; one that CanDismiss holds until its box is ticked, tapped on the backdrop with a
+    # finger; and one made in code. The status line says what each was dismissed with.
+    Section 'ion-modal: trigger, focus trap, Escape, back, backdrop, canDismiss' {
+        Open 'ion-modal'
+        function OpenWith($name) {
+            $x, $y = Centre (Named $CT::Button $name)
+            Click $x $y
+            Start-Sleep -Milliseconds 600
+        }
+
+        OpenWith 'Open the modal'
+        Shot 'modal-presented'
+        Check 'a click on the trigger presents the modal' ([bool](FirstText 'Full screen on a phone*')) ((Texts | Select-Object -First 4) -join ' | ')
+        1..5 | ForEach-Object { Key '{TAB}' 200 }
+        $focused = $AE::FocusedElement.Current
+        Check 'Tab stays inside the modal' (($focused.Name -in @('Close', 'Open a nested modal')) -or ($focused.ControlType -eq $CT::Edit)) "$($focused.Name) $($focused.ControlType.ProgrammaticName)"
+        Key '{ESC}' 700
+        Check 'Escape dismisses it with the backdrop role' ([bool](WaitForText 'TriggerModal dismissed, role backdrop')) (FirstText 'TriggerModal*')
+
+        OpenWith 'Open the modal'
+        Key '%{LEFT}' 700
+        Check 'Back dismisses it, and it is back in the page' ([bool](WaitForText 'TriggerModal dismissed, role backdrop')) (FirstText 'TriggerModal*')
+
+        OpenWith 'Open the modal'
+        OpenWith 'Open a nested modal'
+        Shot 'modal-nested'
+        Key '{ESC}' 700
+        Check 'Escape dismisses the nested one first' ([bool](WaitForText 'NestedModal dismissed, role backdrop')) (FirstText '*dismissed*')
+        OpenWith 'Open a nested modal'
+        $x, $y = Centre (Named $CT::Button 'Close')
+        Click $x $y
+        Start-Sleep -Milliseconds 700
+        Check 'Close dismisses the modal' ([bool](WaitForText 'TriggerModal dismissed, role cancel')) ((Texts | Where-Object { $_ -like '*dismissed*' }) -join ' | ')
+        Check 'and the nested one with it' (-not (FirstText 'Closing the modal under this one*')) ''
+
+        # IsOpen opens the guarded dialog, 320 wide in the middle: a touch tap near the top left of the window is on the backdrop.
+        $x, $y = Centre (Named $CT::Button 'IsOpen')
+        Click $x $y
+        Start-Sleep -Milliseconds 600
+        Shot 'modal-guarded'
+        $w = $win.Current.BoundingRectangle
+        $bx = [int]($w.X + 20 * $scale)
+        $by = [int]($w.Y + $w.Height * 0.12)
+        Tap $bx $by
+        Start-Sleep -Milliseconds 600
+        Check 'CanDismiss holds it while the box is unticked' ([bool](FirstText 'CanDismiss asks first')) ''
+        $x, $y = Centre (Named $CT::CheckBox 'Can be dismissed')
+        Click $x $y
+        Tap $bx $by
+        Start-Sleep -Milliseconds 600
+        Check 'a touch tap on the backdrop dismisses it once it can' ([bool](WaitForText 'GuardedModal dismissed, role backdrop')) (FirstText 'GuardedModal*')
+
+        OpenWith 'Present a modal from code'
+        $x, $y = Centre (Named $CT::Button 'Close')
+        Click $x $y
+        Start-Sleep -Milliseconds 600
+        Check 'a modal made in code dismisses with its data' ([bool](WaitForText 'The modal from code was dismissed with closed, role cancel')) (FirstText 'The modal from code*')
+        Away
+    }
+
     # Ionic's item-swipe gesture (x, 5 px): released past half the options it rests open, 30 px past them it's a full swipe,
     # and pressing another sliding item closes the open one (canStart). The item's offset is read from its label's bounds,
     # which follow its transform; an option is in the tree only while its side is open.
