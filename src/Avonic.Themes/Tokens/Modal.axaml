@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-modal. A size takes a number (px) or a CSS string: a percentage of the window, "600px", a content
+         size ("auto", "fit-content", "max-content", "min-content"), or "none" for a maximum. -->
+
+    <!-- backdrop-opacity: var(ion-backdrop-opacity, 0.32). Unset, it follows Avonic.BackdropOpacity. Read by the animations. -->
+    <b:CssUnset x:Key="Avonic.Modal.BackdropOpacity" />
+    <!-- background: var(ion-background-color, #fff). Unset, it follows Avonic.BackgroundColorBrush. -->
+    <b:CssUnset x:Key="Avonic.Modal.Background" />
+    <SolidColorBrush x:Key="Avonic.Modal.BorderColor" Color="Transparent" />
+    <x:Double x:Key="Avonic.Modal.BorderWidth">0</x:Double>
+    <!-- none or hidden draw no border; any other style a solid one, as Avalonia's Border draws. -->
+    <x:String x:Key="Avonic.Modal.BorderStyle">none</x:String>
+    <x:String x:Key="Avonic.Modal.MinWidth">auto</x:String>
+    <x:String x:Key="Avonic.Modal.MaxWidth">auto</x:String>
+    <x:String x:Key="Avonic.Modal.MinHeight">auto</x:String>
+    <x:String x:Key="Avonic.Modal.MaxHeight">100%</x:String>
+
+    <!-- These change with the window's size in md (the media queries, :inset-small and :inset-large), so they're unset, and the
+         defaults are the Md keys below. Set one, and it wins at every size, as an app's variable on ion-modal does. -->
+    <b:CssUnset x:Key="Avonic.Modal.Width" />
+    <b:CssUnset x:Key="Avonic.Modal.Height" />
+    <b:CssUnset x:Key="Avonic.Modal.BorderRadius" />
+    <!-- box-shadow, which core.json doesn't list. -->
+    <b:CssUnset x:Key="Avonic.Modal.BoxShadow" />
+
+    <x:String x:Key="Avonic.Modal.Md.Width">100%</x:String>
+    <x:String x:Key="Avonic.Modal.Md.Height">100%</x:String>
+    <x:Double x:Key="Avonic.Modal.Md.BorderRadius">0</x:Double>
+    <b:CssShadow x:Key="Avonic.Modal.Md.BoxShadow">none</b:CssShadow>
+    <!-- At least 768 by 600. -->
+    <x:Double x:Key="Avonic.Modal.Md.WidthInset">600</x:Double>
+    <x:Double x:Key="Avonic.Modal.Md.HeightInsetSmall">500</x:Double>
+    <x:Double x:Key="Avonic.Modal.Md.BorderRadiusInset">2</x:Double>
+    <b:CssShadow x:Key="Avonic.Modal.Md.BoxShadowInset">0 28px 48px rgba(0, 0, 0, 0.4)</b:CssShadow>
+    <!-- At least 768 by 768. -->
+    <x:Double x:Key="Avonic.Modal.Md.HeightInsetLarge">600</x:Double>
+
+</ResourceDictionary>

@@ -36,6 +36,18 @@ public static class OverlayRoles
     /// <summary>Ionic <c>GESTURE</c>: a swipe has already moved it off, so the leave animation doesn't play.</summary>
     public const string Gesture = "gesture";
 
+    /// <summary>
+    /// Ionic's <c>'parent-removed'</c>: an inline overlay's place in the app left the tree while it was presented. Ionic's modal
+    /// does it; here every inline overlay does, as the placement is shared.
+    /// </summary>
+    public const string ParentRemoved = "parent-removed";
+
+    /// <summary>Ionic's <c>'parent-dismissed'</c>: the modal an inline modal was in was dismissed.</summary>
+    public const string ParentDismissed = "parent-dismissed";
+
+    /// <summary>Ionic's <c>'handler'</c>: a modal's <c>canDismiss</c> handler dismisses it, so it isn't asked again.</summary>
+    public const string Handler = "handler";
+
     /// <summary>Ionic <c>isCancel</c>: <c>cancel</c> or <see cref="Backdrop"/>.</summary>
     public static bool IsCancel(string? role) => role is "cancel" or Backdrop;
 }
