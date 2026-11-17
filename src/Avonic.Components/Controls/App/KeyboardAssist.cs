@@ -38,7 +38,8 @@ public static class KeyboardAssist
     /// How much of a top level of <paramref name="clientSize"/> the pane at <paramref name="occluded"/> covers: the height of their
     /// overlap. On Android and iOS the pane is always inside the top level, which fills the screen, so it's the pane's own height.
     /// On Windows it's the touch keyboard's place on the screen, in the window's coordinates, and a window that doesn't reach the
-    /// bottom of the screen is covered by part of it, or none.
+    /// bottom of the screen is covered by part of it, or none: then the keyboard is reported as hidden. The rect is the one
+    /// Windows gave when the keyboard showed: Avalonia doesn't report it again when the window moves.
     /// </summary>
     internal static double CoveredHeight(Rect occluded, Size clientSize) => occluded.Intersect(new Rect(clientSize)).Height;
 
@@ -71,8 +72,10 @@ public static class KeyboardAssist
         private void OnStateChanged(object? sender, InputPaneStateEventArgs e)
         {
             _pending?.Dispose(); // A newer change replaces one not raised yet.
-            var open = e.NewState == InputPaneState.Open;
+            // A pane that's somewhere, but over none of the top level, is no keyboard to it: Windows' touch keyboard under a window
+            // that ends higher on the screen. An empty rect is left as it was, as Android's can be at the start of an opening.
             var height = CoveredHeight(e.EndRect, topLevel.ClientSize);
+            var open = e.NewState == InputPaneState.Open && !(e.EndRect.Height > 0 && height <= 0);
             _pending = AvonicConfig.Schedule(() =>
             {
                 _pending = null;

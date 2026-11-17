@@ -22,8 +22,9 @@ namespace Avonic.Components.Controls;
 /// <para>
 /// On Windows, where the touch keyboard covers the window in the same way but most PCs have a keyboard of their own, they follow
 /// the window's input pane instead, a deviation: a field's focus does nothing until the pane opens over the window, and then
-/// it runs with the height the pane covers; a field focused while it's open runs at once with that height. Where there's no
-/// pane, or the keyboard is the only one (Android, iOS), it's Ionic's: focus reckons with the config's height at once.
+/// it runs with the height the pane covers; a field focused while it's open runs at once with that height; the padding goes when
+/// the keyboard does. Where the keyboard is the only one (Android, iOS), or on macOS and Linux, which have no pane, it's Ionic's:
+/// focus reckons with the config's height at once.
 /// </para>
 /// </remarks>
 internal static class InputShims
@@ -40,11 +41,8 @@ internal static class InputShims
     /// <summary>Ionic's 1000 ms wait for the keyboard before scrolling anyway.</summary>
     internal static readonly TimeSpan KeyboardWait = TimeSpan.FromSeconds(1);
 
-    /// <summary>
-    /// Whether a field's focus means the on-screen keyboard is coming, as Ionic reckons on a phone: Android and iOS, where it's the
-    /// only keyboard. Tests replace it.
-    /// </summary>
-    internal static Func<bool> KeyboardComesWithFocus { get; set; } = () => OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+    /// <summary>Which platform this is, as <see cref="OperatingSystem.IsOSPlatform"/> says. Tests replace it.</summary>
+    internal static Func<string, bool> IsPlatform { get; set; } = OperatingSystem.IsOSPlatform;
 
     private static readonly TopLevelStarts<Assist> s_started = new(top => new Assist(top), a => a.Attach(), a => a.Detach());
 
@@ -79,8 +77,9 @@ internal static class InputShims
         private double _configKeyboardHeight;
 
         /// <summary>
-        /// Whether it follows the input pane, rather than reckon a keyboard comes with focus: where the top level has a pane and the
-        /// keyboard isn't the only one (Windows). Decided when it starts.
+        /// Whether it follows the input pane, rather than reckon a keyboard comes with focus: where the keyboard isn't the only one,
+        /// and the top level has a pane, or it's Windows, whose top levels have one unless they're hosted or Windows is older than
+        /// 10, when nothing comes and nothing happens. Decided when it starts.
         /// </summary>
         private bool _followsPane;
 
@@ -122,7 +121,8 @@ internal static class InputShims
             _scrollAssist = AvonicConfig.ScrollAssist;
             _scrollPadding = AvonicConfig.ScrollPadding;
             _configKeyboardHeight = AvonicConfig.KeyboardHeight;
-            _followsPane = !KeyboardComesWithFocus() && KeyboardController.InputPaneOf(topLevel) is not null;
+            _followsPane = !AvonicConfig.KeyboardIsTheOnlyOne(IsPlatform)
+                && (KeyboardController.InputPaneOf(topLevel) is not null || IsPlatform("windows"));
             topLevel.AddHandler(InputElement.GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(InputElement.LostFocusEvent, OnLostFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
@@ -177,12 +177,12 @@ internal static class InputShims
             if (_keyboardHeight is null && _followsPane)
             {
                 // No keyboard yet, and none may come: the pane opening runs it, with its own height (OnKeyboardShow).
-                _usedHeight = double.NaN;
                 return;
             }
 
-            // With the keyboard already open, its own height: a deviation, as I8 is.
-            SetFocus(component, _keyboardHeight ?? _configKeyboardHeight, waitForResize: true);
+            // With the keyboard already open, its own height: a deviation, as I8 is. Following the pane, with it open, no show is
+            // coming to wait for.
+            SetFocus(component, _keyboardHeight ?? _configKeyboardHeight, waitForResize: !_followsPane);
         }
 
         /// <summary>Ionic's <c>focusOut</c>, and the padding's <c>setClearScrollPaddingListener</c>.</summary>
@@ -207,7 +207,28 @@ internal static class InputShims
             }
         }
 
-        private void OnKeyboardHide(object? sender, RoutedEventArgs e) => _keyboardHeight = null;
+        /// <summary>
+        /// The keyboard has gone. Following the pane, the padding goes too, 120 ms later, and the field runs again when it next
+        /// opens: a deviation, as Ionic's padding stays until the field loses focus, where a phone's keyboard closes with the focus
+        /// and Windows' touch keyboard can be closed alone, or undocked, and typing go on.
+        /// </summary>
+        private void OnKeyboardHide(object? sender, RoutedEventArgs e)
+        {
+            _keyboardHeight = null;
+            if (!_followsPane)
+            {
+                return;
+            }
+
+            _cancelWait?.Invoke();
+            _cancelWait = null;
+            _keyboardPresented = false;
+            _usedHeight = double.NaN;
+            if (_scrollPadding && _padded is { } content)
+            {
+                SetScrollPadding(content, 0, () => _currentPadding = 0);
+            }
+        }
 
         /// <summary>
         /// Ionic's <c>keyboardShow</c>: the first one after focus is the keyboard opening for it, which focus has already dealt with;
@@ -221,13 +242,6 @@ internal static class InputShims
         /// </remarks>
         private void OnKeyboardShow(object? sender, KeyboardDidShowEventArgs e)
         {
-            if (_followsPane && e.KeyboardHeight <= 0)
-            {
-                // A touch keyboard that doesn't reach the window: nothing to keep clear of, as when it's closed.
-                _keyboardHeight = null;
-                return;
-            }
-
             _keyboardHeight = e.KeyboardHeight;
             if (_component is not { } component)
             {
@@ -275,7 +289,11 @@ internal static class InputShims
             }
 
             _usedHeight = keyboardHeight;
-            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, _platformHeight);
+
+            // Following the pane, the window as it is now: Windows doesn't shrink it for the keyboard, and it may have been resized
+            // since the focus.
+            var platformHeight = _followsPane ? PlatformHeight() : _platformHeight;
+            var (scrollAmount, scrollDuration, scrollPadding) = ScrollData(input, box, keyboardHeight, platformHeight);
             if (Math.Abs(scrollAmount) < 4)
             {
                 // Safe where it is: the padding stays as it was, so that moving from a field that needed it doesn't jump.

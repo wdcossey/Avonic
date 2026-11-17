@@ -569,16 +569,16 @@ public class AvonicAppTests
     {
         private readonly bool _shims = AvonicConfig.InputShims;
         private readonly Func<TopLevel, IInputPane?> _paneOf = KeyboardController.InputPaneOf;
-        private readonly Func<bool> _comesWithFocus = InputShims.KeyboardComesWithFocus;
+        private readonly Func<string, bool> _isPlatform = InputShims.IsPlatform;
 
-        /// <param name="pane">The top level's input pane, as on Windows, Android and iOS; none by default, as on Linux and macOS.</param>
-        /// <param name="phone">Whether the keyboard comes with focus, as on Android and iOS; with a pane and not, Windows.</param>
+        /// <param name="pane">The top level's input pane, as on Windows, Android and iOS; none by default.</param>
+        /// <param name="platform">The platform, as <see cref="OperatingSystem.IsOSPlatform"/> names it: Android by default.</param>
         /// <param name="before">How many rows of 48 are before the field's item: 11 by default, 1 with <paramref name="safe"/>.</param>
         public ShimStage(int after = 11, bool inApp = true, bool safe = false, bool shims = true, FakePane? pane = null,
-            bool phone = false, int? before = null)
+            string platform = "android", int? before = null)
         {
             AvonicConfig.InputShims = shims;
-            InputShims.KeyboardComesWithFocus = () => phone;
+            InputShims.IsPlatform = os => os == platform;
             Clock = new TestClock();
             var rows = new StackPanel();
             for (var i = 0; i < (before ?? (safe ? 1 : 11)); i++)
@@ -641,7 +641,7 @@ public class AvonicAppTests
             Clock.Dispose();
             AvonicConfig.InputShims = _shims;
             KeyboardController.InputPaneOf = _paneOf;
-            InputShims.KeyboardComesWithFocus = _comesWithFocus;
+            InputShims.IsPlatform = _isPlatform;
         }
     }
 
@@ -887,10 +887,13 @@ public class AvonicAppTests
     private sealed class FieldsStage : IDisposable
     {
         private readonly bool _shims = AvonicConfig.InputShims;
+        private readonly Func<string, bool> _isPlatform = InputShims.IsPlatform;
 
+        /// <summary>On Android, as Ionic's flow is a phone's.</summary>
         public FieldsStage(params int[] rowsBefore)
         {
             AvonicConfig.InputShims = true;
+            InputShims.IsPlatform = os => os == "android";
             Clock = new TestClock();
             var rows = new StackPanel();
             foreach (var count in rowsBefore)
@@ -953,6 +956,7 @@ public class AvonicAppTests
             Scene.Dispose();
             Clock.Dispose();
             AvonicConfig.InputShims = _shims;
+            InputShims.IsPlatform = _isPlatform;
         }
     }
 
@@ -1077,7 +1081,7 @@ public class AvonicAppTests
     public void W2_On_Windows_A_Field_s_Focus_Waits_For_The_Pane_And_Reckons_With_Its_Height()
     {
         var pane = new FakePane();
-        using var stage = new ShimStage(pane: pane);
+        using var stage = new ShimStage(pane: pane, platform: "windows");
         stage.Native.Focus();
         Dispatcher.UIThread.RunJobs();
         stage.At(1500);
@@ -1096,7 +1100,7 @@ public class AvonicAppTests
     public void W3_On_Windows_A_Field_Focused_With_The_Pane_Open_Runs_At_Once()
     {
         var pane = new FakePane();
-        using var stage = new ShimStage(pane: pane);
+        using var stage = new ShimStage(pane: pane, platform: "windows");
         pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
         stage.At(1);
         stage.Native.Focus();
@@ -1117,12 +1121,12 @@ public class AvonicAppTests
             keyboard.Clock.At(0);
             keyboard.Pane.Set(InputPaneState.Open, new Rect(0, 900, 390, 300));
             keyboard.Clock.At(0);
-            Assert.Equal(["show 244@0", "show 0@0"], keyboard.Log);
+            Assert.Equal(["show 244@0", "hide@0"], keyboard.Log);
         }
 
         // The item's bottom, 632, to 844 - 244 - 50: 82.
         var pane = new FakePane();
-        using var stage = new ShimStage(pane: pane);
+        using var stage = new ShimStage(pane: pane, platform: "windows");
         stage.Native.Focus();
         Dispatcher.UIThread.RunJobs();
         pane.Set(InputPaneState.Open, new Rect(0, 600, 390, 400));
@@ -1138,7 +1142,7 @@ public class AvonicAppTests
     public void W5_On_Windows_A_Keyboard_Below_The_Window_Changes_Nothing()
     {
         var pane = new FakePane();
-        using var stage = new ShimStage(pane: pane, before: 15);
+        using var stage = new ShimStage(pane: pane, platform: "windows", before: 15);
         stage.Native.Focus();
         Dispatcher.UIThread.RunJobs();
         pane.Set(InputPaneState.Open, new Rect(0, 900, 390, 300));
@@ -1153,7 +1157,7 @@ public class AvonicAppTests
     public void W7_On_Windows_Each_Focus_Runs_When_The_Pane_Opens_Even_At_The_Same_Height()
     {
         var pane = new FakePane();
-        using var stage = new ShimStage(pane: pane);
+        using var stage = new ShimStage(pane: pane, platform: "windows");
         stage.Native.Focus();
         Dispatcher.UIThread.RunJobs();
         pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
@@ -1181,12 +1185,96 @@ public class AvonicAppTests
     [AvaloniaFact]
     public void W6_On_A_Phone_Focus_Reckons_With_The_Estimate_Before_The_Pane_Opens()
     {
-        using var stage = new ShimStage(pane: new FakePane(), phone: true);
+        using var stage = new ShimStage(pane: new FakePane());
         stage.Native.Focus();
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(290, stage.Content.KeyboardOffset);
         stage.At(500);
         Assert.Equal(128, stage.Offset);
+    }
+
+    // A Windows top level with no pane (a hosted one, or Windows before 10) hears no keyboard, and so does nothing, where a phone's
+    // estimate would pad and scroll on every focus of a PC with a keyboard of its own.
+    [AvaloniaFact]
+    public void W8_On_Windows_With_No_Pane_Focus_Does_Nothing()
+    {
+        using var stage = new ShimStage(platform: "windows");
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(1500);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+        Assert.Equal(0, stage.Offset);
+    }
+
+    // A deviation: Ionic's padding stays until the field loses focus, as a phone's keyboard closes with it. Windows' touch keyboard
+    // can be closed with the field still focused, or undocked, or end off the window: each takes the padding away 120 ms later, and
+    // the next opening runs it again.
+    [AvaloniaFact]
+    public void W9_On_Windows_The_Padding_Goes_With_The_Keyboard_And_Comes_Back_With_It()
+    {
+        var pane = new FakePane();
+        using var stage = new ShimStage(pane: pane, platform: "windows");
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
+        stage.At(500);
+        Assert.Equal(300, stage.Content.KeyboardOffset);
+
+        pane.Set(InputPaneState.Closed, default);
+        stage.At(619);
+        Assert.Equal(300, stage.Content.KeyboardOffset);
+        stage.At(620);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+        Assert.True(stage.Native.IsFocused);
+
+        stage.Content.GetScrollElement()!.Offset = default;
+        Dispatcher.UIThread.RunJobs();
+        pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
+        stage.At(621);
+        Assert.Equal(300, stage.Content.KeyboardOffset);
+        stage.At(1100);
+        Assert.Equal(138, stage.Offset);
+
+        pane.Set(InputPaneState.Open, new Rect(0, 900, 390, 300));
+        stage.At(1219);
+        Assert.Equal(300, stage.Content.KeyboardOffset);
+        stage.At(1220);
+        Assert.Equal(0, stage.Content.KeyboardOffset);
+    }
+
+    // With the keyboard already open no show is coming, so a field without room yet doesn't wait a second for one: on the short
+    // page the padding gives 88 (576 + 300 - 788), and it scrolls that far at once.
+    [AvaloniaFact]
+    public void W10_On_Windows_A_Field_Focused_With_The_Pane_Open_Does_Not_Wait()
+    {
+        var pane = new FakePane();
+        using var stage = new ShimStage(after: 0, pane: pane, platform: "windows");
+        pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
+        stage.At(1);
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.At(500);
+        Assert.Equal(88, stage.Offset);
+    }
+
+    // The window as it is when the keyboard opens, not at the focus: resized from 844 to 600, with a 200 keyboard from 400, the
+    // item's bottom, 632, goes to 600 - 200 - 50: 282. With 844, it would be 82, under the keyboard.
+    [AvaloniaFact]
+    public void W11_On_Windows_The_Window_s_Height_Is_Read_When_The_Keyboard_Opens()
+    {
+        var pane = new FakePane();
+        using var stage = new ShimStage(pane: pane, platform: "windows");
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        stage.Scene.Window.Height = 600;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(600, stage.Scene.Window.ClientSize.Height);
+
+        pane.Set(InputPaneState.Open, new Rect(0, 400, 390, 200));
+        stage.At(1);
+        Assert.Equal(200, stage.Content.KeyboardOffset);
+        stage.At(500);
+        Assert.Equal(282, stage.Offset);
     }
 
     // ── T: the text a page gets from html and body ──────────────────────────────────────────

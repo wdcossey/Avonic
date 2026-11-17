@@ -63,8 +63,9 @@ topLevel.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) =>
 Ionic's `ionKeyboardDidShow` and `ionKeyboardDidHide`: `KeyboardAssist.IonKeyboardDidShowEvent`, with `KeyboardHeight`, and
 `IonKeyboardDidHideEvent`, on the `TopLevel`, each time the on-screen keyboard has opened or closed. They come from
 `TopLevel.InputPane`, once its animation has finished. `KeyboardHeight` is how much of the `TopLevel` the keyboard covers: on a
-phone, all of it; on Windows, the part of the touch keyboard over the window, which may be none. Windows 10 and later give every
-window a pane, which reports the touch keyboard (see [Windows](#windows)); macOS and Linux have none, and nothing comes.
+phone, all of it; on Windows, the part of the touch keyboard over the window. A touch keyboard over none of the window is
+reported as hidden. Windows 10 and later give every window a pane, which reports the touch keyboard (see [Windows](#windows));
+macOS and Linux have none, and nothing comes.
 
 ## The input shims
 
@@ -87,9 +88,12 @@ Once the keyboard says its own height, the assist runs again with it, where Ioni
 **A deviation:** Ionic's `inputShims` is off in a desktop browser. Here they're on by default on Windows too, for tablets, where
 the touch keyboard covers the window as a phone's does (#189). Most Windows PCs type on a keyboard of their own, so a field's focus
 doesn't reckon with a keyboard as it does on a phone: the shims **follow the window's input pane**. Nothing happens on focus; when
-the touch keyboard opens over the window, the content is padded by what it covers and the field's item scrolled 50 above it, and a
-field focused while it's open is placed at once. A touch keyboard that doesn't reach the window, as under a window high on the
-screen, changes nothing. With no touch keyboard, they never act.
+the touch keyboard opens over the window, the content is padded by what it covers and the field's item scrolled 50 above it, with
+the window's height as it is then, and a field focused while it's open is placed at once, without waiting. A touch keyboard that
+doesn't reach the window, as under a window high on the screen, changes nothing. With no touch keyboard, or a window with no pane
+(a hosted one), they never act. **The padding goes with the keyboard,** 120 ms after it closes, undocks or ends off the window,
+even while the field keeps focus, and comes back when it opens again: Ionic's stays until the field loses focus, as a phone's
+keyboard closes with it, where Windows' can be closed alone and typing go on.
 
 Avalonia 12.1.4's pane on Windows is `WindowsInputPane`, over Windows' `IFrameworkInputPane`, made for every window when Windows has
 the WinRT `InputPane` (Windows 10 and later): `Open`, with the keyboard's place on the screen in the window's coordinates, when the
@@ -99,7 +103,7 @@ Windows does, for a field focused by touch in tablet posture, or as its touch ke
 | Platform | Pane | Default | On focus |
 |---|---|---|---|
 | Android, iOS | yes | on | Ionic's: reckons with `KeyboardHeight` at once, then the keyboard's own |
-| Windows 10 and later | yes, every window | on | Waits for the touch keyboard; nothing without one |
+| Windows 10 and later | yes, every window but a hosted one | on | Waits for the touch keyboard; nothing without one |
 | macOS, Linux | no | off | If an app turns it on: Ionic's, as in a desktop browser with `inputShims: true` |
 
 The sample's `ion-app` page has a line with what the pane reports, for a real Windows tablet or a touch keyboard forced on, and
@@ -156,10 +160,10 @@ fills `Avonic.SafeArea*`.
 - `AvonicConfig.HardwareBackButton` off leaves back alone, where Ionic's `blockHardwareBackButton` swallows it.
 - Ionic starts its utilities after an idle callback; here they start when the app is attached. Ionic never stops them; here they
   stop when the app is taken out.
-- **On Windows, the padding stays while the field keeps focus,** as in Ionic, also after the touch keyboard has been closed by
-  hand, until the field loses focus. A phone's keyboard closes with the focus; Windows' can be closed alone.
+- **Windows' rect is the one it gave when the keyboard showed.** Avalonia converts it to the window's coordinates then, and
+  doesn't report it again when the window moves, so a window moved while the keyboard is open reckons with where it was.
 - **A footer** already hears Windows' touch keyboard through the same pane, and drops its bottom safe area while it's open, as on
-  a phone: that's the toolbar's, unchanged.
+  a phone: that's the toolbar's, unchanged, and it counts a keyboard over none of the window as open (proposed in #189's PR).
 - Tried on a Pixel 8 (Android 17) and headless; not on iOS, and not in a real window (`tools/real-window` has an `ion-app`
   section and an `ion-app: the touch keyboard` section to run). What Windows' pane reports is read from Avalonia's source, not yet
   measured on a tablet.

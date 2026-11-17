@@ -194,23 +194,32 @@ the window, which happens only when the touch keyboard docks. The design follows
 
 - `AvonicConfig.InputShims` defaults to on for Android, iOS and Windows (`InputShimsByDefault`); off for macOS and Linux, which
   have no pane.
-- Where the top level has a pane and the keyboard isn't the only one (not Android or iOS: `InputShims.KeyboardComesWithFocus`),
-  the shims **follow the pane**: a field's focus records the field and the page's height and does nothing more; the pane opening
-  runs Ionic's `jsSetFocus` with the height it covers, without waiting; a field focused while it's open runs at once with that
-  height. Android and iOS keep Ionic's estimate at focus, and a platform with no pane where the app turns the shims on gets Ionic's
-  too, as a desktop browser with `inputShims: true` would.
+- Where the keyboard isn't the only one (not Android or iOS: `AvonicConfig.KeyboardIsTheOnlyOne`), and the top level has a pane
+  or it's Windows (a hosted Windows top level has none), the shims **follow the pane**: a field's focus records the field and does
+  nothing more; the pane opening runs Ionic's `jsSetFocus` with the height it covers and the window's height then, without
+  waiting; a field focused while it's open runs at once with that height, without waiting for a show that won't come; the pane
+  closing takes the padding away 120 ms later, and the next opening runs again. Android and iOS keep Ionic's estimate at focus,
+  and macOS and Linux, with no pane, get Ionic's too where an app turns the shims on, as a desktop browser with
+  `inputShims: true` would.
 - `KeyboardAssist`'s height is what the pane covers of the top level (`CoveredHeight`, the rect's overlap with the client area),
-  as its doc already said; the same as before on a phone. A keyboard that covers none of the window counts as closed for the shims.
+  as its doc already said; the same as before on a phone. A pane with a rect that covers none of the top level is reported as
+  hidden; an empty rect is left as it was.
 
 Behaviours, in `AvonicAppTests`:
 
 - W1 The default is on for Android, iOS and Windows, and off for Linux, macOS and others.
 - W2 On Windows, a field's focus neither pads nor scrolls; the pane opening pads by its height and scrolls the item 50 above it.
 - W3 A field focused with the pane already open runs at once with its height, also when nothing had focus before it opened.
-- W4 The keyboard's height is what it covers of the top level: 244 of a 400 high keyboard from 600 in an 844 high window.
+- W4 The keyboard's height is what it covers of the top level: 244 of a 400 high keyboard from 600 in an 844 high window; one
+  over none of it is reported as hidden.
 - W5 A touch keyboard below the window changes nothing.
 - W6 On a phone with a pane, focus still reckons with the estimate at once.
 - W7 Each focus runs when the pane opens, even at the height the last one used.
+- W8 On Windows with no pane, focus does nothing.
+- W9 **A deviation:** the padding goes 120 ms after the keyboard closes or ends off the window, with the field still focused,
+  and the next opening runs again. Ionic's stays until blur, as a phone's keyboard closes with the focus.
+- W10 A field focused with the pane open and too little room scrolls as far as it can at once, without the second's wait.
+- W11 The window's height is read when the keyboard opens, not at the focus.
 
 W3 found a bug the change brought into reach: with the keyboard open before any field had focus, the page's height was never
 taken, and the field scrolled to the top of the content (528 where 138 was right). On a phone the keyboard comes with focus, so

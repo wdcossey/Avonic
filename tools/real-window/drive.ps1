@@ -1338,7 +1338,10 @@ try {
         Away
         $field = @(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]
         $before = $field.Current.BoundingRectangle
-        $opened = $false
+        # Whether this opened the keyboard with ITipInvocation, and whether the pane said it was open: a keyboard this opened is
+        # closed again at the end, also one the pane never reported, such as a floating one.
+        $toggled = $false
+        $shown = $false
         try {
             if ($touch) {
                 $fx, $fy = Centre $field
@@ -1354,12 +1357,16 @@ try {
                     if (Test-Path $tabTip) { Start-Process $tabTip; Start-Sleep -Milliseconds 800 }
                 }
                 Fore
-                try { [TouchKeyboard]::Toggle(); $opened = $true } catch { "  ITipInvocation failed: $($_.Exception.Message)" }
+                # Starting TabTip can show the keyboard by itself, and a toggle would then close it.
+                if ((Probe) -notlike 'Input pane: Open*') {
+                    try { [TouchKeyboard]::Toggle(); $toggled = $true } catch { "  ITipInvocation failed: $($_.Exception.Message)" }
+                }
                 $until = (Get-Date).AddSeconds(3)
                 while ((Probe) -notlike 'Input pane: Open*' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
                 "  after ITipInvocation: $(Probe)"
-            } else { $opened = $true }
-            if ((Probe) -notlike 'Input pane: Open*') { "  skip  no touch keyboard came, or the pane didn't report it: $(Probe)"; return }
+            }
+            if ((Probe) -notlike 'Input pane: Open*') { "  skip  no touch keyboard came, or the pane didn't report it (a floating keyboard?): $(Probe)"; return }
+            $shown = $true
 
             # The shims run once the pane has opened, and scroll for at most 400 ms.
             Start-Sleep -Milliseconds 1200
@@ -1384,15 +1391,16 @@ try {
             }
         }
         finally {
-            if ($opened -and (Probe) -like 'Input pane: Open*') {
+            if (((Probe) -like 'Input pane: Open*') -or ($toggled -and -not $shown)) {
                 Fore
                 try { [TouchKeyboard]::Toggle() } catch { }
                 Start-Sleep -Milliseconds 800
             }
         }
-        Invoke-Element (Named $CT::Button 'SetFocus on row 1'); Start-Sleep -Milliseconds 500
+        # A deviation on Windows: the padding goes with the keyboard, though the field keeps focus.
         $closed = Probe
-        Check 'closed, and with focus gone, the padding goes' (($closed -like 'Input pane: Closed*') -and ($closed -like '*padding 0;*')) $closed
+        Check 'closing the keyboard takes the padding away' (($closed -like 'Input pane: Closed*') -and ($closed -like '*padding 0;*')) $closed
+        Invoke-Element (Named $CT::Button 'SetFocus on row 1'); Start-Sleep -Milliseconds 300
     }
 
     # A mistyped -Only would otherwise pass with nothing run.
