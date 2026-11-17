@@ -69,7 +69,8 @@ public sealed class InputNativeInput : TextBox, INativeFieldAutomation
         if (TwoCh.IsFont(change.Property))
         {
             _sizedWidth = double.NaN;
-            _twoCh.Update();
+            // Null while the base constructors run.
+            _twoCh?.Update();
         }
     }
 
