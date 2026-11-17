@@ -1,0 +1,256 @@
+{
+ "focusAtPresent": "host",
+ "handlerFalse": {
+  "open": true,
+  "calls": [
+   "Share"
+  ]
+ },
+ "destructive": {
+  "detail": {
+   "data": {
+    "action": "delete"
+   },
+   "role": "destructive"
+  },
+  "calls": [
+   "Share",
+   "Delete"
+  ]
+ },
+ "focusAfter": "opener",
+ "cancel": {
+  "detail": {
+   "data": {
+    "action": "cancel"
+   },
+   "role": "cancel"
+  },
+  "calls": [
+   "Cancel"
+  ],
+  "log": [
+   "ionActionSheetWillDismiss{\"data\":{\"action\":\"cancel\"},\"role\":\"cancel\"}",
+   "ionActionSheetDidDismiss{\"data\":{\"action\":\"cancel\"},\"role\":\"cancel\"}"
+  ]
+ },
+ "escape": {
+  "detail": {
+   "role": "backdrop"
+  },
+  "calls": [
+   "Cancel"
+  ]
+ },
+ "backdrop": {
+  "detail": {
+   "role": "backdrop"
+  },
+  "calls": [
+   "Cancel"
+  ]
+ },
+ "backdropDismissFalse": {
+  "open": true,
+  "calls": []
+ },
+ "tab": [
+  "host",
+  "Delete",
+  "Share",
+  "Play (open modal)",
+  "Favorite",
+  "Cancel",
+  "Delete",
+  "Share",
+  "Play (open modal)"
+ ],
+ "focusedButton": {
+  "classes": [
+   "action-sheet-button",
+   "ion-activatable",
+   "ion-focusable",
+   "sc-ion-action-sheet-md",
+   "ion-focused"
+  ],
+  "color": "rgb(38, 38, 38)",
+  "after": [
+   "rgb(38, 38, 38)",
+   "0.12"
+  ]
+ },
+ "shiftTab": [
+  "Play (open modal)",
+  "Share",
+  "Delete",
+  "Cancel"
+ ],
+ "arrowOnPlainButton": "Cancel",
+ "enterOnButton": {
+  "detail": {
+   "role": "cancel"
+  },
+  "calls": [
+   "Cancel"
+  ]
+ },
+ "radios": {
+  "initial": [
+   "Apple:false:-1:false",
+   "Banana:true:0:true",
+   "Cherry:false:-1:false",
+   "Durian:false:-1:false",
+   "Cancel:null:0:false"
+  ],
+  "groupRole": "radiogroup",
+  "tab": [
+   "host",
+   "Banana",
+   "Cancel",
+   "Banana"
+  ],
+  "afterDown": {
+   "active": "Cherry",
+   "radios": [
+    "Apple:false:-1:false",
+    "Banana:false:-1:false",
+    "Cherry:true:0:true",
+    "Durian:false:-1:false",
+    "Cancel:null:0:false"
+   ],
+   "open": true,
+   "calls": []
+  },
+  "afterDown2": {
+   "active": "Apple",
+   "radios": [
+    "Apple:true:0:true",
+    "Banana:false:-1:false",
+    "Cherry:false:-1:false",
+    "Durian:false:-1:false",
+    "Cancel:null:0:false"
+   ]
+  },
+  "afterUp": {
+   "active": "Cherry",
+   "radios": [
+    "Apple:false:-1:false",
+    "Banana:false:-1:false",
+    "Cherry:true:0:true",
+    "Durian:false:-1:false",
+    "Cancel:null:0:false"
+   ]
+  },
+  "afterLeft": {
+   "active": "Banana",
+   "radios": [
+    "Apple:false:-1:false",
+    "Banana:true:0:true",
+    "Cherry:false:-1:false",
+    "Durian:false:-1:false",
+    "Cancel:null:0:false"
+   ]
+  },
+  "space": {
+   "detail": {},
+   "calls": [
+    "Banana"
+   ],
+   "radios": []
+  },
+  "tap": {
+   "detail": {},
+   "calls": [
+    "Cherry"
+   ],
+   "radios": []
+  }
+ },
+ "disabled": {
+  "open": true,
+  "calls": [],
+  "buttons": [
+   "Enabled:false",
+   "Disabled:true",
+   "Cancel:false"
+  ],
+  "cancel": {
+   "role": "cancel"
+  }
+ },
+ "stringCancel": {
+  "detail": {},
+  "groups": 1
+ },
+ "asyncFalse": {
+  "open": true,
+  "calls": [
+   "Later"
+  ]
+ },
+ "confirm": {
+  "data": 7,
+  "role": "confirm"
+ },
+ "attributes": {
+  "host": {
+   "trigger": "open",
+   "id": "ion-overlay-13",
+   "class": "sc-ion-action-sheet-md-h md mine other sc-ion-action-sheet-md hydrated",
+   "role": "dialog",
+   "aria-modal": "true",
+   "aria-labelledby": "action-sheet-32-header",
+   "tabindex": "-1",
+   "aria-label": "Label",
+   "style": "z-index: 20032;"
+  },
+  "hostClasses": [
+   "sc-ion-action-sheet-md-h",
+   "md",
+   "mine",
+   "other",
+   "sc-ion-action-sheet-md",
+   "hydrated"
+  ],
+  "title": "<div id=\"action-sheet-32-header\" class=\"action-sheet-title action-sheet-has-sub-title sc-ion-action-sheet-md\">H<div class=\"action-sheet-sub-title sc-ion-action-sheet-md\">S</div></div>",
+  "buttons": [
+   {
+    "id": "my-a",
+    "classes": [
+     "action-sheet-button",
+     "ion-activatable",
+     "ion-focusable",
+     "x",
+     "y",
+     "sc-ion-action-sheet-md"
+    ],
+    "aria": "Alpha",
+    "type": "button"
+   },
+   {
+    "id": "action-sheet-button-32-1",
+    "classes": [
+     "action-sheet-button",
+     "ion-activatable",
+     "ion-focusable",
+     "sc-ion-action-sheet-md"
+    ],
+    "aria": null,
+    "type": "button"
+   },
+   {
+    "id": "",
+    "classes": [
+     "action-sheet-button",
+     "ion-activatable",
+     "ion-focusable",
+     "action-sheet-cancel",
+     "z",
+     "sc-ion-action-sheet-md"
+    ],
+    "aria": null,
+    "type": "button"
+   }
+  ]
+ }
+}
