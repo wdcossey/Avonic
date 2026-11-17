@@ -133,6 +133,9 @@ public sealed class InputWrapperPanel : Panel
         }
     }
 
+    /// <summary>The label's own margin, which doesn't shrink, as CSS's doesn't.</summary>
+    private static double LabelMargin(Control? label) => label is null ? 0 : label.Margin.Left + label.Margin.Right;
+
     /// <summary>The field's <c>min-width</c>, with its margin: what the label leaves it in a row.</summary>
     private static double FieldMinimum(Control? field) =>
         field is null || !field.IsVisible ? 0 : field.MinWidth + field.Margin.Left + field.Margin.Right;
@@ -161,7 +164,7 @@ public sealed class InputWrapperPanel : Panel
         // The label's own width first, as its flex basis: a trimmed label would want only its trimmed text.
         label?.Measure(availableSize);
         _labelBasis = label?.DesiredSize.Width ?? 0;
-        var labelRoom = Math.Max(0, availableSize.Width - FieldMinimum(field));
+        var labelRoom = Math.Max(LabelMargin(label), availableSize.Width - FieldMinimum(field));
         if (_labelBasis > labelRoom)
         {
             label!.Measure(availableSize.WithWidth(labelRoom));
@@ -188,7 +191,7 @@ public sealed class InputWrapperPanel : Panel
         }
 
         // min-width: 0 on the label and 2ch on the field: the label gives way first.
-        var width = Math.Min(_labelBasis, Math.Max(0, finalSize.Width - FieldMinimum(field)));
+        var width = Math.Min(_labelBasis, Math.Max(LabelMargin(label), finalSize.Width - FieldMinimum(field)));
         var reversed = LabelPlacement == InputLabelPlacement.End;
         label?.Arrange(new Rect(reversed ? finalSize.Width - width : 0, 0, width, finalSize.Height));
         field?.Arrange(new Rect(reversed ? 0 : width, 0, Math.Max(0, finalSize.Width - width), finalSize.Height));
