@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Platform;
 using Avalonia.Interactivity;
@@ -14,7 +15,9 @@ namespace Avonic.Components.Controls;
 /// Cordova), and passes each on as it comes, with the plugin's height: that's the path here, as an Avalonia app is native. The
 /// events are <see cref="TopLevel.InputPane"/> changing state, which Avalonia reports when the pane's animation starts, with its
 /// duration, so each is raised once that has passed, as a plugin's <c>Did</c> events come at its end. A newer change before then
-/// replaces it. A desktop has no pane, and nothing is raised, as a desktop browser's viewport doesn't change for a keyboard.
+/// replaces it. On Windows 10 and later every window has a pane, which reports the touch keyboard docking and undocking (Avalonia's
+/// <c>WindowsInputPane</c>, through <c>IFrameworkInputPane</c>), with no animation; macOS and Linux have none, and nothing is
+/// raised, as a desktop browser's viewport doesn't change for a keyboard.
 /// </remarks>
 public static class KeyboardAssist
 {
@@ -30,6 +33,14 @@ public static class KeyboardAssist
 
     /// <summary>Starts it for one top level, until the result is disposed. Starts count, as the back button's do.</summary>
     internal static IDisposable Start(TopLevel topLevel) => s_started.Start(topLevel);
+
+    /// <summary>
+    /// How much of a top level of <paramref name="clientSize"/> the pane at <paramref name="occluded"/> covers: the height of their
+    /// overlap. On Android and iOS the pane is always inside the top level, which fills the screen, so it's the pane's own height.
+    /// On Windows it's the touch keyboard's place on the screen, in the window's coordinates, and a window that doesn't reach the
+    /// bottom of the screen is covered by part of it, or none.
+    /// </summary>
+    internal static double CoveredHeight(Rect occluded, Size clientSize) => occluded.Intersect(new Rect(clientSize)).Height;
 
     private sealed class Watch(TopLevel topLevel)
     {
@@ -61,7 +72,7 @@ public static class KeyboardAssist
         {
             _pending?.Dispose(); // A newer change replaces one not raised yet.
             var open = e.NewState == InputPaneState.Open;
-            var height = e.EndRect.Height;
+            var height = CoveredHeight(e.EndRect, topLevel.ClientSize);
             _pending = AvonicConfig.Schedule(() =>
             {
                 _pending = null;

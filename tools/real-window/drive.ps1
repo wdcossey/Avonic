@@ -139,6 +139,20 @@ public static class Pixels {
   }
 }
 '@
+# Windows' touch keyboard, as the taskbar's keyboard button opens and closes it: ITipInvocation on TabTip's COM server, which needs
+# TabTip.exe running. For the ion-app section (#189).
+Add-Type @'
+using System; using System.Runtime.InteropServices;
+[ComImport, Guid("37c994e7-432b-4834-a2f7-dce1f13b834b"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface ITipInvocation { void Toggle(IntPtr hwnd); }
+public static class TouchKeyboard {
+  [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
+  public static void Toggle() {
+    var tip = (ITipInvocation)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("4ce576fa-83dc-4f88-951c-9d0782b4e376")));
+    try { tip.Toggle(GetDesktopWindow()); } finally { Marshal.ReleaseComObject(tip); }
+  }
+}
+'@
 [void][RealInput]::SetProcessDPIAware()
 $AE = [System.Windows.Automation.AutomationElement]
 $TS = [System.Windows.Automation.TreeScope]
@@ -1303,6 +1317,82 @@ try {
         Invoke-Element (Named $CT::Button 'SetFocus on row 1'); Start-Sleep -Milliseconds 300
         Shot 'app-setfocus'
         'frames: app-setfocus should show the ring on row 1, in text of 16'
+    }
+
+    # #189: Windows' touch keyboard, through the window's input pane, with the input shims following it. The page's 'Input pane:'
+    # line says what Avalonia's pane reports. A touch tap on the last row's field asks Windows for the keyboard, which comes on a
+    # touch focus in tablet posture, or with Settings > Time & language > Typing > Touch keyboard set to show it; if it doesn't
+    # come, ITipInvocation opens it, as the taskbar's keyboard button does. The field then has to end above the keyboard. Skipped,
+    # not failed, where no keyboard comes or it doesn't reach the window. The keyboard is closed again at the end.
+    Section 'ion-app: the touch keyboard' {
+        Open 'ion-app'
+        function Probe { FirstText 'Input pane:*' }
+        $loaded = WaitForText 'Input pane:*'
+        "  at load: $loaded"
+        if (-not $loaded -or $loaded -like 'Input pane: none*') { "  skip  the window has no input pane"; return }
+        Check 'the window has an input pane, closed, and the shims are on by default' (($loaded -like 'Input pane: Closed*') -and ($loaded -like '*shims on*')) $loaded
+
+        $w = $win.Current.BoundingRectangle
+        [void][RealInput]::SetCursorPos(([int]($w.X + $w.Width / 2)), ([int]($w.Y + $w.Height / 2))); Start-Sleep -Milliseconds 150
+        Wheel 25
+        Away
+        $field = @(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]
+        $before = $field.Current.BoundingRectangle
+        $opened = $false
+        try {
+            if ($touch) {
+                $fx, $fy = Centre $field
+                Tap $fx $fy
+                $until = (Get-Date).AddSeconds(3)
+                while ((Probe) -notlike 'Input pane: Open*' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
+                "  after a touch tap: $(Probe)"
+            }
+            if ((Probe) -notlike 'Input pane: Open*') {
+                ClickOn $field
+                if (-not (Get-Process -Name TabTip -ErrorAction SilentlyContinue)) {
+                    $tabTip = Join-Path $env:CommonProgramFiles 'microsoft shared\ink\TabTip.exe'
+                    if (Test-Path $tabTip) { Start-Process $tabTip; Start-Sleep -Milliseconds 800 }
+                }
+                Fore
+                try { [TouchKeyboard]::Toggle(); $opened = $true } catch { "  ITipInvocation failed: $($_.Exception.Message)" }
+                $until = (Get-Date).AddSeconds(3)
+                while ((Probe) -notlike 'Input pane: Open*' -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 100 }
+                "  after ITipInvocation: $(Probe)"
+            } else { $opened = $true }
+            if ((Probe) -notlike 'Input pane: Open*') { "  skip  no touch keyboard came, or the pane didn't report it: $(Probe)"; return }
+
+            # The shims run once the pane has opened, and scroll for at most 400 ms.
+            Start-Sleep -Milliseconds 1200
+            $now = Probe
+            Shot 'app-touch-keyboard'
+            if ($now -notmatch 'at (-?[\d.]+),(-?[\d.]+) ([\d.]+)x([\d.]+), screen top (-?\d+); padding ([\d.]+);.*window ([\d.]+)x([\d.]+)') {
+                Check 'the probe line reads' $false $now; return
+            }
+            $top = [double]$Matches[2]; $height = [double]$Matches[4]; $screenTop = [int]$Matches[5]
+            $padding = [double]$Matches[6]; $clientHeight = [double]$Matches[8]
+            $covered = [math]::Max(0, [math]::Min($top + $height, $clientHeight) - [math]::Max($top, 0))
+            "  the keyboard covers $covered of the window's $clientHeight; its top is at screen $screenTop; the field was at $($before.Top) to $($before.Bottom)"
+            if ($covered -le 0) { "  skip  the keyboard doesn't reach the window: move the window down to the bottom of the screen and run again"; return }
+            $after = (@(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]).Current.BoundingRectangle
+            Check 'the focused field ends above the touch keyboard' ($after.Bottom -le $screenTop) "field bottom $($after.Bottom), keyboard top $screenTop"
+            if ($before.Bottom -gt $screenTop - (Px 50)) {
+                # Ionic's place: the item's bottom 50 above the keyboard, so the field's is at least that.
+                Check 'and 50 above it, as the item is in Ionic' ($after.Bottom -le $screenTop - (Px 48)) "field bottom $($after.Bottom), keyboard top $screenTop"
+                Check 'with the content padded by what the keyboard covers' ([math]::Abs($padding - $covered) -le 1) "padding $padding, covered $covered"
+            } else {
+                "  the field was already 50 above the keyboard, so only 'above' is checked: move the window down to test the scroll"
+            }
+        }
+        finally {
+            if ($opened -and (Probe) -like 'Input pane: Open*') {
+                Fore
+                try { [TouchKeyboard]::Toggle() } catch { }
+                Start-Sleep -Milliseconds 800
+            }
+        }
+        Invoke-Element (Named $CT::Button 'SetFocus on row 1'); Start-Sleep -Milliseconds 500
+        $closed = Probe
+        Check 'closed, and with focus gone, the padding goes' (($closed -like 'Input pane: Closed*') -and ($closed -like '*padding 0;*')) $closed
     }
 
     # A mistyped -Only would otherwise pass with nothing run.
