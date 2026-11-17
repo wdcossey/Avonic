@@ -250,12 +250,7 @@ public abstract class AvonicOverlay : TemplatedControl
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
     public Task Present()
     {
-        // Still in a host, as during its leave animation: that one's top level, where an inline overlay will go back to.
-        if (Parent is OverlayHost host)
-        {
-            return Present(host.TopLevel);
-        }
-
+        // Inline, or still in a host during its leave animation: its own top level, where an inline one goes back to.
         if (Parent is not null && TopLevel.GetTopLevel(this) is { } own)
         {
             return Present(own);
