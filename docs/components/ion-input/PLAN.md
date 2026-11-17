@@ -6,6 +6,10 @@ toggle is a round clear `ion-button` in the end slot that flips the input betwee
 real Ionic 8.8.19 in Chromium, md, at 390 px wide, wrapped in `ion-app`, with throwaway Playwright scripts (a mouse and keyboard
 in a desktop context; the frame in a mobile one). The commands are at the top of [COMPARISON.md](COMPARISON.md).
 
+**Ionic 9.0.11 (#201).** What `node tools/ionic-diff.js 8.8.19 9.0.11 --show input` changes was read and measured in Chromium on
+9.0.11 (`a` to `o` and `s1` to `s8` below are those pages' inputs; the slots page is in COMPARISON): behaviours 11, 13, 20 and 21
+changed, and 29 to 32 are new. The rest holds on 9.0.11. `autocorrect` was #203.
+
 ## Fidelity checklist: ion-input
 
 `node tools/ionic-api.js ion-input`.
@@ -122,17 +126,17 @@ From `input.js`, `input.md.css`, `input-password-toggle.js` and `utils/forms`, e
 | 8 | A click on the label or anywhere in the wrapper focuses the input. Not on the bottom text, and not on a button in a slot | `<label for>`, `onLabelClick`; measured `labelFocus` |
 | 9 | `SetFocus()` focuses the native input; `GetInputElement()` returns it | `setFocus`, `getInputElement` |
 | 10 | In an item, a tap on the item's padding focuses the input. The item counts it as an input | `ion-item`'s `getFirstInteractive`; measured `itemPadTap` |
-| 11 | Label placements: start (label, 16 px, field), end (mirrored), fixed (label 100 px), each label at most 200 px and trimmed with an ellipsis; stacked and floating are a column, the label above at 0.75 scale and `translateY(50%)`; floating sits on the field (`translateY(100%)`, scale 1) until it has a value, focus, or anything in a slot. No label hides the label part and its gap | md.css; measured `scene1`, `scene3` |
+| 11 | Label placements: start (label, 16 px, field), end (mirrored), fixed (label 100 px), each label at most 200 px and trimmed with an ellipsis; stacked and floating are a column, the label above at 0.75 scale and `translateY(50%)`; floating sits on the field (`translateY(100%)`, scale 1) until it has a value or focus. **Ionic 9:** no longer for anything in a slot (`hasStartEndSlots` is gone). In a column the field fills what the label leaves, its text in the middle. No label hides the label part and its gap | md.css; measured `scene1`, `scene3`; 9.0.11: `a`, `b`, `j` (below) |
 | 12 | Floating: the field is transparent until the label floats (opacity, 150 ms) | `.input-label-placement-floating input { opacity: 0 }` |
-| 13 | Heights: 44 at least; 56 for floating, stacked, solid and outline | md.css; measured |
+| 13 | Heights: 44 at least; 56 for floating, stacked, solid and outline. **Ionic 9:** no 1 px above a stacked or floating input, and no 6 px around an outline's: at 40 px, 94 stacked (47 + 47) and 56 outline, where 8.8.19 gave 95 and 59 | md.css; measured; 9.0.11: `g`, `h` |
 | 14 | Focus outside an item, and not outline: a 2 px highlight at the bottom grows from the centre over 200 ms in the highlight colour. Not in an item, and not with `outline` | `shouldRenderHighlight`, `.input-highlight`; measured `focus_s`, `focus_n`, `focus_sep`, `focus_f` |
 | 15 | The highlight colour is primary, or a known `Color`'s base; `ion-valid` makes it success, and `ion-touched` + `ion-invalid` danger, which wins. Focused floating or stacked labels take it, as do the caret, the bottom border (focused and valid, or invalid), and the outline when focused | md.css; measured `focus_*`, `l` |
 | 16 | Solid: background step 50, a 1 px bottom border step 500, top corners 4. Hover (mouse): step 100 and step 750. Focused: step 150 and step 750 | md.css; measured `f`, `focus_s`, `hoverSolid` |
 | 17 | Outline: a 1 px border step 300 with radius 4 (round 28, padding 32), drawn as start, notch and end; when the label floats, the notch's top border goes, and the notch is as wide as the label at 0.75 plus 8. The floating label sits on the border (`translateY(-32%)`) and takes no room. Focused: 2 px in the highlight colour. Hover: step 750 | md.css, `createNotchController`; measured `g`, `h`, `j`, `k`, `l`, `focus_o`, `hoverOutline` |
 | 18 | Round shape: radius 16 (solid: top corners only), 28 with outline | md.css; measured `n`, `h` |
 | 19 | Bottom: shown only with helper text, error text or a counter. 5 px above 12 px text; a top border with no fill; helper step 700; while touched and invalid the error text in the invalid colour replaces the helper. The counter `len / max` at the end, 16 px from the text | `renderBottomContent`, `getCounterText`; measured `f`, `i`, `k`, `l` |
-| 20 | The clear button sits at the end of the field, 30 × 30, a 22 px `close-sharp` in step 600, or the item's colour in a coloured item | md.css; measured `j` |
-| 21 | Start and end slots sit beside the field, 16 px from it | md.css `::slotted`; measured `g` |
+| 20 | The clear button is first in `.input-end`, 30 × 30, a 22 px `close-sharp` (`font-size: 22px` since 9.0, the same box) in step 600, or the item's colour in a coloured item | md.css; measured `j`; 9.0.11: `l` |
+| 21 | **Ionic 9:** the start slot is in `.input-start`, before `.input-control` (the label and the field), and the end slot in `.input-end`, after the clear button; both centred in the wrapper's height and never shrinking, 16 px from what's beside them. With the start placement: start, label, field, end | md.css `::slotted`, `.input-start`, `.input-end`; 9.0.11: `c`, `l` |
 | 22 | Disabled: 0.38 opacity, as one (an `OpacityMask`, as the parts overlap), no focus, no clear button, the password toggle hidden. Read-only: focusable, not editable, no clear button, the toggle hidden | `input-disabled`, md.css; measured `m` |
 | 23 | Placeholder: the input's colour at 0.6 | `::placeholder`; measured `ph` |
 | 24 | Type and the hints reach the platform: `Password` masks and is sensitive; `Type`, `Inputmode`, `Enterkeyhint`, `Autocapitalize`, `Autocorrect` set `TextInputOptions` | `type`, `inputmode`, `enterKeyHint`, ... on `<input>` |
@@ -140,6 +144,10 @@ From `input.js`, `input.md.css`, `input-password-toggle.js` and `utils/forms`, e
 | 26 | Automation: the native input is named by the label (or the host's `AutomationProperties.Name`, which beats it, as `aria-label` does), and described by the error text when invalid and set, else the helper text; `Required` says it's required | `getLabelledById`, `getHintTextID`, `inheritAriaAttributes`, `required` |
 | 27 | Password toggle: a click flips the input between `Password` and `Text` (setting `Type`), and the icon between `eye` and `eye-off`, named "Show password" / "Hide password". A press on it doesn't take focus from the field. A change of the input's `Type` in code updates it | `togglePasswordVisibility`, `onTypeChange`; measured `toggle0`, `toggle1` |
 | 28 | RTL mirrors the row, the label's origin and the notch | measured `q` |
+| 29 | **Ionic 9:** `min-width: 2ch` on the native input, and `min-width: 0` on the label: in too little room the label gives way and the field keeps 2ch, 17.98 at 16 px Roboto, 44.96 at 40 px | `.native-input`, `.label-text-wrapper`; 9.0.11: `i` |
+| 30 | **Ionic 9:** the outline's floating label moves back over the start slot by its width (`--internal-start-container-adjustment`, -32 for an icon and its margin), so it sits 16 from the host as without one; at rest it's on the field. A change of the slot moves it at once (`skip-label-transition`) | `createStartEndContainerController`; 9.0.11: `d`, `e` |
+| 31 | **Ionic 9:** the outline's floating label's room is `(control + start + end − 8) / 0.75`, as the notch spans the whole outline | md.css; 9.0.11: `f` |
+| 32 | **Ionic 9.0.4:** one click for slotted content (`createClickController`). Avonic raises no click from the host, and a slotted control's own click is raised once (B08), so nothing changes | `click-controller.js` |
 
 ### Not reproduced
 
@@ -163,14 +171,24 @@ Panel (root)
 ├─ Border PART_Wrapper                 .input-wrapper: padding, background, bottom border, radius
 │  └─ Panel
 │     ├─ Grid (outline only)            .input-outline-container: PART_OutlineStart, PART_OutlineNotch (PART_NotchSpacer), PART_OutlineEnd
-│     ├─ InputWrapperPanel PART_Layout  row, row-reverse, column, or column with the label taking no room (outline)
-│     │  ├─ Border PART_Label           .label-text-wrapper: TextBlock PART_LabelText or ContentPresenter PART_LabelContent
-│     │  └─ DockPanel PART_NativeWrapper   PART_Start | PART_End | PART_ClearButton | PART_NativeInput
+│     └─ Grid (Auto, *, Auto)            Ionic 9's three containers
+│        ├─ ContentPresenter PART_Start   .input-start
+│        ├─ InputWrapperPanel PART_Layout .input-control: row, row-reverse, column, or column with the label taking no room (outline)
+│        │  ├─ Border PART_Label          .label-text-wrapper: TextBlock PART_LabelText or ContentPresenter PART_LabelContent
+│        │  └─ InputNativeInput PART_NativeInput
+│        └─ Grid PART_InputEnd            .input-end: PART_ClearButton, PART_End
 │     └─ Border PART_Highlight          .input-highlight, 1 px below the wrapper
 └─ DockPanel PART_Bottom                .input-bottom: PART_Counter, PART_HelperText, PART_ErrorText
 ```
 
-`InputWrapperPanel` is the flex box of `.input-wrapper` for the five placements, each measured: in a row the label takes its
+**Ionic 9 (#201).** `.input-start` and `.input-end` don't shrink and `.input-control` has `min-width: 0`, which `Auto`, `*`, `Auto`
+columns give. `createStartEndContainerController` measures the containers with a `ResizeObserver` for the outline: here
+`InputWrapperPanel.StartWidth` and `EndWidth` are bound to the parts' arranged widths. The label's X is
+`InputWrapperPanel.StartShift` (0 to 1, eased with the float) times the start width, so a change of the slot moves it at once, as
+`skip-label-transition` does, and the float eases it. `min-width: 2ch` is the native field's `MinWidth` at style priority, from the
+`0` glyph's advance (`TextField/TwoCh`).
+
+`InputWrapperPanel` is the flex box of `.input-control` for the five placements, each measured: in a row the label takes its
 width up to its `MaxWidth` and the field the rest; in a column the label's available width is `(width − inset) / scale`, as the
 `max-width: calc(100% / 0.75)` and the outline's `calc((100% − padding − 8px) / 0.75)` say. `FlexRow` has neither a column nor
 `max-width`.

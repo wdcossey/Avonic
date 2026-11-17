@@ -32,7 +32,11 @@ public sealed class InputNativeInput : TextBox, INativeFieldAutomation
     private bool _sizesToCharacters;
     private double _sizedWidth = double.NaN;
 
-    public InputNativeInput() => _automation = new NativeFieldAutomation(this);
+    public InputNativeInput()
+    {
+        _automation = new NativeFieldAutomation(this);
+        _ = new TwoCh(this);
+    }
 
     NativeFieldAutomation INativeFieldAutomation.Automation => _automation;
 

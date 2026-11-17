@@ -24,8 +24,12 @@ Ionic is in [COMPARISON.md](COMPARISON.md).
 
 **Changed in the Ionic 9 migration** ([#203](https://github.com/wdcossey/Avonic/issues/203)): `Autocorrect` is a `bool`, `false`
 by default, as Ionic 9.0's `autocorrect` is a `boolean`. It was the enum `InputAutocorrect` (`Off`, `On`), which is gone:
-`Autocorrect="On"` becomes `Autocorrect="True"`. The rest of 9.0's `ion-input` changes are
-[#201](https://github.com/wdcossey/Avonic/issues/201); until it closes, this page and [PLAN.md](PLAN.md) describe Ionic 8.8.19.
+`Autocorrect="On"` becomes `Autocorrect="True"`.
+
+**Changed in the Ionic 9 migration** ([#201](https://github.com/wdcossey/Avonic/issues/201)): a floating label floats for focus or a
+value, **no longer for content in a slot**. The start slot sits before the label and the field (`.input-start`), and the end slot
+after the clear button (`.input-end`). The field keeps at least 2ch, and the label gives way first. An outline's floating label
+moves back over the start slot. The 1 px above a stacked field and the outline's 6 px are gone. This page describes Ionic 9.0.11.
 
 Validation is the app's, as in Ionic: add the style classes `ion-touched` and `ion-invalid` (`AvonicInput.TouchedClass`,
 `InvalidClass`) to show the error text in the invalid colour, or `ion-valid` (`ValidClass`) for the valid colour.
@@ -120,6 +124,8 @@ Each has a test in `AvonicInputTests`, named after its number in [PLAN.md](PLAN.
 - `ClearOnEdit` (on for passwords) clears on the first key that edits, once per focus.
 - The clear button shows with a value, clears, raises `IonInput` with `""`, and leaves the field focused.
 - A click on the label focuses the field; in an item, so does a tap on the item's padding.
+- Ionic 9's start, control and end: a slot doesn't float the label; the field keeps 2ch; an outline's floating label sits over
+  the start slot.
 - The five label placements, the floating label, the highlight, the solid and outline looks, the notch, round shapes, helper
   and error text, the counter, disabled and read-only, all measured against Chromium.
 - The native input is named by the label and described by the helper or error text, and is marked required to automation when `Required`.
@@ -133,7 +139,10 @@ Not in Ionic's API, but needed by the theme:
 - `CounterText`: the counter's text, or null when there's none.
 - The converters in `FieldConverters`, which the textarea's and the searchbar's themes share: `Padding`, `BottomPadding`, `Radius`,
   `Sides`, `OutlineStartWidth`, `NotchWidth` and `Or`.
-- `InputWrapperPanel`: the wrapper's flex box, in a row, a column, or with the outline's label out of the flow.
+- `InputWrapperPanel`: `.input-control`'s flex box, in a row, a column, or with the outline's label out of the flow; its
+  `StartWidth`, `EndWidth`, `LabelSpansSlots` and `StartShift` are Ionic 9's `--internal-start-container-adjustment` and
+  `--internal-start-end-container-width`.
+- `FieldConverters.LabelTransform`: the label's `translate(X, Y%) scale(S)`.
 - `InputNativeInput`: the native `<input>`, a `TextBox` that wants the width Chromium gives 20 characters while the input is
   `width: auto`, in an item's start or end slot: 199 at 16 px Roboto, as measured.
 - `IInputHost`, which the input and the textarea implement, for the slotted margins both have.
@@ -147,4 +156,4 @@ See [COMPARISON.md](COMPARISON.md#deliberate-differences-and-gaps): a click on t
 Chromium blurs and refocuses; no date or time types and no number filtering; an icon-only button in a slot keeps its own look;
 an app's background and border keys win at rest with a fill, where Ionic's fill wins; outside an item's start or end slot, a
 container that sizes to its content gives the input its text's width, where Chromium gives it 20 characters; the notch has no
-`max-width`; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader; `Required` is set for automation, but nothing in Avalonia 12.1.4 reads it. Not tried in a real window, with a soft keyboard, or on a device.
+`max-width`; the label's `max-width` changes at once, where Ionic 9 eases it; a 2ch field shows its value's end; bottom text is 1 px taller; a slotted label's text isn't followed live for the screen reader; `Required` is set for automation, but nothing in Avalonia 12.1.4 reads it. Not tried in a real window, with a soft keyboard, or on a device.

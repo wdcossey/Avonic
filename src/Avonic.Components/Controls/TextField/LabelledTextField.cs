@@ -209,16 +209,17 @@ internal sealed class LabelledTextField
 
     /// <summary>
     /// <c>render</c>'s host classes that the input and the textarea share, in the order both set them, up to <c>:in-item</c>.
-    /// The label floats when stacked, or floating with a value, focus, or anything in a slot.
+    /// The label floats when stacked, or floating with a value or focus. Since Ionic 9, no longer for anything in a slot
+    /// (<c>hasStartEndSlots</c> is gone).
     /// </summary>
     public static void SetClasses(IPseudoClasses classes, InputLabelPlacement placement, bool hasValue, bool hasFocus,
-        bool hasStartEnd, bool outline, bool solid, bool round, bool inItem)
+        bool outline, bool solid, bool round, bool inItem)
     {
         classes.Set(":has-value", hasValue);
         classes.Set(":has-focus", hasFocus);
         classes.Set(":label-floating",
             placement == InputLabelPlacement.Stacked
-            || (placement == InputLabelPlacement.Floating && (hasValue || hasFocus || hasStartEnd)));
+            || (placement == InputLabelPlacement.Floating && (hasValue || hasFocus)));
 
         classes.Set(":fill-outline", outline);
         classes.Set(":fill-solid", solid);

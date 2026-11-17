@@ -6,6 +6,11 @@ Status: done · [#25](https://github.com/wdcossey/Avonic/issues/25)
 md's three looks: no fill, `Solid` and `Outline`. Its field is `Rows` lines high, or grows with its lines with `AutoGrow`. The
 design and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+**Changed in the Ionic 9 migration** ([#201](https://github.com/wdcossey/Avonic/issues/201), in part): a floating label floats for
+focus or a value, no longer for content in a slot, as the input's, whose code it shares. The rest of 9.0's textarea changes (the
+start, control and end containers, `min-height: 72px`, 2ch) are still to come; until then this page describes Ionic 8.8.19
+otherwise.
+
 ```xml
 <c:AvonicItem>
     <c:AvonicTextarea Label="Notes" Placeholder="Anything else?" />

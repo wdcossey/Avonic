@@ -617,18 +617,22 @@ public class AvonicInputTests
         Assert.Equal(56, floating.Bounds.Height, 0.5);
         AssertBox(0, 19, 57.52, 18.75, Bounds(Part<Control>(floating, "PART_Label"), floating), 0.8);
 
-        // scene1 c: raised, translateY(50%) scale(0.75): 9.5 down, 0.75 the size; the field 1 px below the label's box,
-        // in the middle of what's left.
+        // scene1 c: raised, translateY(50%) scale(0.75): 9.5 down, 0.75 the size. Ionic 9: the field fills what the label's
+        // box leaves, 19 down and 37 tall (9.0.11, measured), its text in the middle; no longer 1 px below and its line tall.
         AssertBox(0, 9.5, 43.14, 14.25, Bounds(Part<Control>(raised, "PART_Label"), raised), 0.8);
-        Assert.Equal(28.5, Bounds(Native(raised), raised).Y, 0.8);
+        AssertBox(0, 19, 358, 37, Bounds(Native(raised), raised), 0.8);
 
         // scene3 e: the label's room is 358 / 0.75, so 377 wide before the scale.
         var label = Part<Control>(stacked, "PART_Label");
         Assert.InRange(label.Bounds.Width, 358.5, 477.4);
         Assert.Equal(282.9, Bounds(label, stacked).Width, 1.5);
 
-        // scene3 g: anything in a slot floats the label.
-        Assert.Equal(0.75, Bounds(Part<Control>(slots, "PART_Label"), slots).Height / Part<Control>(slots, "PART_Label").Bounds.Height, 0.01);
+        // Ionic 9: a slot no longer floats the label (hasStartEndSlots is gone). It rests on the field, after the start slot's
+        // 16 and its 16 px margin: measured at x 32, y 19, full size.
+        var slotsLabel = Part<Control>(slots, "PART_Label");
+        Assert.Equal(1, Bounds(slotsLabel, slots).Height / slotsLabel.Bounds.Height, 0.01);
+        Assert.Equal(32, Bounds(slotsLabel, slots).X, 0.8);
+        Assert.Equal(19, Bounds(slotsLabel, slots).Y, 0.8);
     });
 
     [AvaloniaFact]
@@ -655,11 +659,14 @@ public class AvonicInputTests
         Settle();
         Assert.Equal(1, Native(input).Opacity);
 
-        // Start content floats the label, but the field stays hidden: the rule reads focus and value only.
+        // Ionic 9: start or end content doesn't float the label, and the field stays hidden.
         input.Value = "";
         input.StartContent = new Border { Width = 4, Height = 4 };
+        input.EndContent = new Border { Width = 4, Height = 4 };
         Settle();
         Assert.Equal(0, Native(input).Opacity);
+        Assert.Equal(1, Part<Control>(input, "PART_Label").GetValue(Css.ScaleProperty));
+        Assert.DoesNotContain(":label-floating", input.Classes);
     });
 
     [AvaloniaFact]
@@ -683,17 +690,21 @@ public class AvonicInputTests
     });
 
     [AvaloniaFact]
-    public void B13_A_Large_Field_Has_1px_Above_It_Stacked_And_6px_Around_It_In_An_Outline() => InstalledTheme.Run(_ =>
+    public void B13_A_Large_Field_Has_No_Margin_Stacked_Or_In_An_Outline() => InstalledTheme.Run(_ =>
     {
-        // At 40 px the text, not the 56 px minimum, sets the height, so the margins show.
+        // At 40 px the text, not the 56 px minimum, sets the height, so margins would show. Ionic 9 drops the 1 px above a
+        // stacked input and the outline's 6 px around it: measured 94 (47 + 47) and 56, where 9.0's predecessor gave 95 and 59.
         var stacked = new AvonicInput { Label = "L", LabelPlacement = InputLabelPlacement.Stacked, FontSize = 40 };
         var outline = new AvonicInput { Label = "L", LabelPlacement = InputLabelPlacement.Stacked, Fill = InputFill.Outline, FontSize = 40 };
         using var scene = new Scene(Page(stacked, outline));
         Render();
 
         var label = Part<Control>(stacked, "PART_Label").Bounds.Height;
-        Assert.Equal(label + 1 + Native(stacked).Bounds.Height, stacked.Bounds.Height, 0.5);
-        Assert.Equal(6 + Native(outline).Bounds.Height + 6, outline.Bounds.Height, 0.5);
+        Assert.Equal(label + Native(stacked).Bounds.Height, stacked.Bounds.Height, 0.5);
+        Assert.Equal(label, Bounds(Native(stacked), stacked).Y, 0.5);
+        // The outline's label is out of the flow, and the field fills the host.
+        Assert.Equal(Native(outline).Bounds.Height, outline.Bounds.Height, 0.5);
+        Assert.Equal(56, outline.Bounds.Height, 0.5);
     });
 
     // ── 14, 15: the highlight ────────────────────────────────────────────────────────────────
@@ -882,7 +893,11 @@ public class AvonicInputTests
         // The floating label opens the notch, and sits on the border: translateY(-32%), out of the flow.
         Assert.Equal(new Thickness(0, 0, 0, 1), notch.BorderThickness);
         Assert.Equal(-6.08, Bounds(Part<Control>(input, "PART_Label"), input).Y, 0.6);
-        Assert.Equal(18.5, Bounds(Native(input), input).Y, 0.8);
+        // Ionic 9: the field fills the outline, 0 to 56, its text in the middle, where it had 6 px around it.
+        var field = Bounds(Native(input), input);
+        Assert.Equal(16, field.X, 0.8);
+        Assert.Equal(0, field.Y, 0.8);
+        Assert.Equal(56, field.Height, 0.8);
 
         // A label that isn't floating closes it: scene3 l.
         Assert.Equal(new Thickness(0, 1, 0, 1), Part<Border>(resting, "PART_OutlineNotch").BorderThickness);
@@ -1102,8 +1117,116 @@ public class AvonicInputTests
         using var scene = new Scene(Page(input));
         Render();
 
-        Assert.Equal(16, Bounds(Native(input), input).X - Bounds(start, input).Right, 0.5);
+        // Ionic 9: the start slot is outside .input-control, before the label, and the end slot after the field. Measured: the
+        // start's 16 px margin, then the label; the field, then the end's 16.
+        Assert.Equal(16, Bounds(Part<Control>(input, "PART_Label"), input).X - Bounds(start, input).Right, 0.5);
         Assert.Equal(16, Bounds(end, input).X - Bounds(Native(input), input).Right, 0.5);
+        Assert.True(Bounds(start, input).Right < Bounds(Part<Control>(input, "PART_Label"), input).X);
+    });
+
+    // Ionic 9's .input-start, .input-control and .input-end, measured in Chromium (9.0.11, 16 px Roboto, a 358 px host): the
+    // start icon at 0, the label at 32 and 34.48 wide, its 16 px gap, the field from 82.48 to the end container at 326, and the
+    // end icon at 342. With a clear button: it's first in the end container, 30 square at 7 down, before the end slot.
+    [AvaloniaFact]
+    public void B23_Start_Control_And_End_Are_Side_By_Side() => InstalledTheme.Run(_ =>
+    {
+        var start = new AvonicIcon { IconName = "heart" };
+        var end = new AvonicIcon { IconName = "star" };
+        var input = new AvonicInput { Label = "Start", Value = "Value", StartContent = start, EndContent = end, Width = 358 };
+        var clearEnd = new AvonicIcon { IconName = "star" };
+        var clear = new AvonicInput { Label = "Clear", ClearInput = true, Value = "Value", EndContent = clearEnd, Width = 358 };
+        using var scene = new Scene(Page(input, clear));
+        Render();
+
+        AssertBox(0, 14, 16, 16, Bounds(start, input));
+        var label = Bounds(Part<Control>(input, "PART_Label"), input);
+        Assert.Equal(32, label.X, 0.6);
+        Assert.Equal(34.48, label.Width, 1.0);
+        AssertBox(82.48, 0, 243.52, 44, Bounds(Native(input), input), 1.0);
+        AssertBox(342, 14, 16, 16, Bounds(end, input));
+
+        AssertBox(296, 7, 30, 30, Bounds(Part<Control>(clear, "PART_ClearButton"), clear));
+        AssertBox(342, 14, 16, 16, Bounds(clearEnd, clear));
+        Assert.Equal(296, Bounds(Native(clear), clear).Right, 1.0);
+    });
+
+    // Ionic 9: .native-input { min-width: 2ch }, and the label's min-width: 0. In 150 px with a label too long for it, the label
+    // gives way and the field keeps 2ch: measured 17.98 at 16 px Roboto, from 132.02.
+    [AvaloniaFact]
+    public void B24_The_Field_Keeps_2ch_And_The_Label_Gives_Way() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput { Label = "A long label that does not fit", Value = "Value", Width = 150 };
+        using var scene = new Scene(Page(input));
+        Render();
+
+        Assert.Equal(17.98, Native(input).MinWidth, 0.1);
+        AssertBox(132.02, 0, 17.98, 44, Bounds(Native(input), input), 0.6);
+        // The label's box and its 16 px margin.
+        Assert.Equal(132.02 - 16, Part<Control>(input, "PART_Label").Bounds.Width, 1.0);
+
+        // 2ch follows the font: 44.96 at 40 px.
+        input.FontSize = 40;
+        Render();
+        Assert.Equal(44.96, Native(input).MinWidth, 0.1);
+    });
+
+    // Ionic 9's outline label floats back over the start slot: translate(var(--internal-start-container-adjustment), -32%), the
+    // start container's width, measured -32 for a 16 px icon and its 16 px margin. Floating, the label's left is 16 from the host,
+    // over the slot, as without one; resting, it's on the field at 48. The notch is where it was: 12, 45.63 wide.
+    [AvaloniaFact]
+    public void B25_An_Outline_Label_Floats_Back_Over_The_Start_Slot() => InstalledTheme.Run(_ =>
+    {
+        var floating = new AvonicInput
+        {
+            Label = "Outline", Fill = InputFill.Outline, LabelPlacement = InputLabelPlacement.Floating, Value = "Value",
+            StartContent = new AvonicIcon { IconName = "heart" }, Width = 358,
+        };
+        var resting = new AvonicInput
+        {
+            Label = "Outline", Fill = InputFill.Outline, LabelPlacement = InputLabelPlacement.Floating,
+            StartContent = new AvonicIcon { IconName = "heart" }, Width = 358,
+        };
+        using var scene = new Scene(Page(floating, resting));
+        Part<Control>(floating, "PART_Label").Transitions = [];
+        Part<Control>(resting, "PART_Label").Transitions = [];
+        Render();
+
+        var label = Bounds(Part<Control>(floating, "PART_Label"), floating);
+        Assert.Equal(16, label.X, 0.6);
+        Assert.Equal(-6.08, label.Y, 0.6);
+        Assert.Equal(12, Bounds(Part<Control>(floating, "PART_OutlineNotch"), floating).X, 0.6);
+        Assert.Equal(45.63, Part<Control>(floating, "PART_OutlineNotch").Bounds.Width, 1.0);
+        AssertBox(48, 0, 294, 56, Bounds(Native(floating), floating), 0.8);
+
+        var rest = Bounds(Part<Control>(resting, "PART_Label"), resting);
+        Assert.Equal(48, rest.X, 0.6);
+        Assert.Equal(19, rest.Y, 0.8);
+
+        // A change of the start slot moves a floating label at once, as skip-label-transition does: the shift is the width
+        // times a factor that only the float eases.
+        Part<Control>(floating, "PART_Label").Transitions = null;
+        floating.StartContent = new Border { Width = 40, Height = 10 };
+        Render();
+        Assert.Equal(16, Bounds(Part<Control>(floating, "PART_Label"), floating).X, 0.6);
+    });
+
+    // Ionic 9: the outline's floating label has max-width: calc((100% + start and end − 8px) / 0.75), as the notch spans the
+    // whole outline, where it was the control's width less 8.
+    [AvaloniaFact]
+    public void B26_An_Outline_Floating_Labels_Room_Adds_The_Slots_Back() => InstalledTheme.Run(_ =>
+    {
+        var input = new AvonicInput
+        {
+            LabelContent = new Border { Width = 1000, Height = 10 },
+            Fill = InputFill.Outline, LabelPlacement = InputLabelPlacement.Floating, Value = "v",
+            StartContent = new Border { Width = 20, Height = 10 }, EndContent = new Border { Width = 30, Height = 10 }, Width = 358,
+        };
+        using var scene = new Scene(Page(input));
+        Render();
+
+        var control = Part<Control>(input, "PART_Layout").Bounds.Width;
+        Assert.Equal(358 - 32 - 36 - 46, control, 0.6);
+        Assert.Equal((control + 36 + 46 - 8) / 0.75, Part<Control>(input, "PART_Label").Bounds.Width, 1.0);
     });
 
     [AvaloniaFact]

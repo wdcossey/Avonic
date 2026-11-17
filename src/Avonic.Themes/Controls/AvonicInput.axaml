@@ -129,7 +129,17 @@
                         <Border Name="PART_OutlineEnd" Grid.Column="2" />
                     </Grid>
                     <Border Name="PART_Wrapper">
-                        <c:InputWrapperPanel Name="PART_Layout" LabelPlacement="{TemplateBinding LabelPlacement}">
+                        <!-- Ionic 9: .input-start, .input-control and .input-end. The start and end don't shrink (flex-shrink: 0,
+                             align-items: center), and the control takes the rest, down to nothing (min-width: 0). -->
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                        <ContentPresenter Name="PART_Start"
+                                          VerticalAlignment="Center"
+                                          Content="{TemplateBinding StartContent}"
+                                          ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                        <c:InputWrapperPanel Name="PART_Layout" Grid.Column="1"
+                                             LabelPlacement="{TemplateBinding LabelPlacement}"
+                                             StartWidth="{Binding #PART_Start.Bounds.Width}"
+                                             EndWidth="{Binding #PART_InputEnd.Bounds.Width}">
                             <Border Name="PART_Label" IsHitTestVisible="False">
                                 <Panel VerticalAlignment="Center">
                                     <TextBlock Name="PART_LabelText"
@@ -146,33 +156,30 @@
                                                       IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
                                 </Panel>
                             </Border>
-                            <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto,Auto">
-                                <ContentPresenter Name="PART_Start"
-                                                  VerticalAlignment="Center"
-                                                  Content="{TemplateBinding StartContent}"
-                                                  ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                                <c:InputNativeInput Name="PART_NativeInput" Grid.Column="1"
-                                                    Theme="{StaticResource Avonic.Input.Md.NativeInput}" />
-                                <!-- .input-clear-icon: 30 px, in the middle of what's left -->
-                                <Border Name="PART_ClearButton" Grid.Column="2"
-                                        Width="30" Height="30"
-                                        VerticalAlignment="Center"
-                                        Background="Transparent"
-                                        AutomationProperties.Name="reset"
-                                        AutomationProperties.ControlTypeOverride="Button">
-                                    <c:AvonicIcon Name="PART_ClearIcon"
-                                                  Width="22" Height="22"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  AutomationProperties.AccessibilityView="Raw"
-                                                  Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
-                                </Border>
-                                <ContentPresenter Name="PART_End" Grid.Column="3"
-                                                  VerticalAlignment="Center"
-                                                  Content="{TemplateBinding EndContent}"
-                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
-                            </Grid>
+                            <c:InputNativeInput Name="PART_NativeInput"
+                                                Theme="{StaticResource Avonic.Input.Md.NativeInput}" />
                         </c:InputWrapperPanel>
+                        <Grid Name="PART_InputEnd" Grid.Column="2" ColumnDefinitions="Auto,Auto">
+                            <!-- .input-clear-icon: 30 px, in the middle of .input-end; its icon font-size 22px -->
+                            <Border Name="PART_ClearButton"
+                                    Width="30" Height="30"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    AutomationProperties.Name="reset"
+                                    AutomationProperties.ControlTypeOverride="Button">
+                                <c:AvonicIcon Name="PART_ClearIcon"
+                                              Width="22" Height="22"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.AccessibilityView="Raw"
+                                              Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
+                            </Border>
+                            <ContentPresenter Name="PART_End" Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding EndContent}"
+                                              ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                        </Grid>
+                        </Grid>
                     </Border>
                     <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
                     <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
@@ -479,11 +486,14 @@
         <Style Selector="^ /template/ Border#PART_Label">
             <Setter Property="MaxWidth" Value="200" />
             <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+            <!-- translate(var(internal-start-container-adjustment), Y%) scale(S): the X is the outline's, below -->
             <Setter Property="RenderTransform">
-                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                <MultiBinding Converter="{x:Static c:FieldConverters.LabelTransform}">
                     <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
                     <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
                     <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(c:InputWrapperPanel.StartShift)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:InputWrapperPanel].StartWidth" />
                 </MultiBinding>
             </Setter>
             <Setter Property="Transitions">
@@ -491,6 +501,7 @@
                     <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
                     <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
                     <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static c:InputWrapperPanel.StartShiftProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
                 </Transitions>
             </Setter>
         </Style>
@@ -525,11 +536,15 @@
         <Style Selector="^:fill-outline:label-placement-stacked /template/ c|InputWrapperPanel#PART_Layout, ^:fill-outline:label-placement-floating /template/ c|InputWrapperPanel#PART_Layout">
             <Setter Property="IsLabelOutOfFlow" Value="True" />
         </Style>
+        <!-- max-width: calc((100% + var(internal-start-end-container-width) - 8px) / 0.75): the notch spans the whole outline -->
         <Style Selector="^:fill-outline:label-floating /template/ c|InputWrapperPanel#PART_Layout">
             <Setter Property="LabelInset" Value="8" />
+            <Setter Property="LabelSpansSlots" Value="True" />
         </Style>
+        <!-- translate(var(internal-start-container-adjustment), -32%): back over the start slot, onto the border -->
         <Style Selector="^:fill-outline:label-floating /template/ Border#PART_Label">
             <Setter Property="b:Css.TranslateY" Value="-0.32" />
+            <Setter Property="c:InputWrapperPanel.StartShift" Value="1" />
         </Style>
         <!-- Focused, floating or stacked: the highlight colour; so too when focused and valid, or touched and invalid -->
         <Style Selector="^:label-placement-floating:has-focus /template/ Border#PART_Label, ^:label-placement-stacked:has-focus /template/ Border#PART_Label, ^:label-placement-floating.ion-touched.ion-invalid /template/ Border#PART_Label, ^:label-placement-stacked.ion-touched.ion-invalid /template/ Border#PART_Label">
@@ -546,14 +561,8 @@
                 </Transitions>
             </Setter>
         </Style>
-        <!-- Stacked and floating: margin-top 1px, and only as tall as its line; with the outline, 6 px above and below -->
-        <Style Selector="^:label-placement-stacked /template/ TextBox#PART_NativeInput, ^:label-placement-floating /template/ TextBox#PART_NativeInput">
-            <Setter Property="Margin" Value="0,1,0,0" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style Selector="^:fill-outline:label-placement-stacked /template/ TextBox#PART_NativeInput, ^:fill-outline:label-placement-floating /template/ TextBox#PART_NativeInput">
-            <Setter Property="Margin" Value="0,6" />
-        </Style>
+        <!-- Stacked and floating: Ionic 9 drops the 1 px above the input, and the outline's 6 px around it, and .native-wrapper's
+             align-items: center. The input fills what the label leaves (height: 100%), its text in the middle. -->
         <!-- :host(.input-label-placement-floating) input: opacity 0, until it has focus or a value -->
         <Style Selector="^:label-placement-floating /template/ TextBox#PART_NativeInput">
             <Setter Property="Opacity" Value="0" />

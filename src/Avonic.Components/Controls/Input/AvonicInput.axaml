@@ -23,9 +23,18 @@
                         <Border Name="PART_OutlineEnd" Grid.Column="2" />
                     </Grid>
                     <!-- .input-wrapper, the <label for>: a transparent background, so a click anywhere in it is the label's -->
+                    <!-- Ionic 9: .input-start, .input-control (the label and the input) and .input-end, in DOM order, which is
+                         the tab order. The start and end don't shrink, and the control takes the rest, down to nothing. -->
                     <Border Name="PART_Wrapper" Background="Transparent">
-                        <Panel>
-                            <c:InputWrapperPanel Name="PART_Layout" LabelPlacement="{TemplateBinding LabelPlacement}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <ContentPresenter Name="PART_Start"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <c:InputWrapperPanel Name="PART_Layout" Grid.Column="1"
+                                                 LabelPlacement="{TemplateBinding LabelPlacement}"
+                                                 StartWidth="{Binding #PART_Start.Bounds.Width}"
+                                                 EndWidth="{Binding #PART_InputEnd.Bounds.Width}">
                                 <Border Name="PART_Label" IsHitTestVisible="False">
                                     <Panel VerticalAlignment="Center">
                                         <TextBlock Name="PART_LabelText"
@@ -39,31 +48,27 @@
                                                           IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
                                     </Panel>
                                 </Border>
-                                <!-- .native-wrapper, in DOM order, which is the tab order: start, input, clear, end -->
-                                <Grid Name="PART_NativeWrapper" ColumnDefinitions="Auto,*,Auto,Auto">
-                                    <ContentPresenter Name="PART_Start"
-                                                      VerticalAlignment="Center"
-                                                      Content="{TemplateBinding StartContent}"
-                                                      ContentTemplate="{TemplateBinding StartContentTemplate}" />
-                                    <c:InputNativeInput Name="PART_NativeInput" Grid.Column="1"
-                                                        Theme="{StaticResource Avonic.TextField.NativeInput}" />
-                                    <Border Name="PART_ClearButton" Grid.Column="2"
-                                            Background="Transparent"
-                                            AutomationProperties.Name="reset"
-                                            AutomationProperties.ControlTypeOverride="Button">
-                                        <c:AvonicIcon Name="PART_ClearIcon"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"
-                                                      AutomationProperties.AccessibilityView="Raw"
-                                                      Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
-                                    </Border>
-                                    <ContentPresenter Name="PART_End" Grid.Column="3"
-                                                      VerticalAlignment="Center"
-                                                      Content="{TemplateBinding EndContent}"
-                                                      ContentTemplate="{TemplateBinding EndContentTemplate}" />
-                                </Grid>
+                                <c:InputNativeInput Name="PART_NativeInput"
+                                                    Theme="{StaticResource Avonic.TextField.NativeInput}" />
                             </c:InputWrapperPanel>
-                        </Panel>
+                            <Grid Name="PART_InputEnd" Grid.Column="2" ColumnDefinitions="Auto,Auto">
+                                <Border Name="PART_ClearButton"
+                                        VerticalAlignment="Center"
+                                        Background="Transparent"
+                                        AutomationProperties.Name="reset"
+                                        AutomationProperties.ControlTypeOverride="Button">
+                                    <c:AvonicIcon Name="PART_ClearIcon"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  AutomationProperties.AccessibilityView="Raw"
+                                                  Icon="{Binding ClearInputIcon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:FieldConverters.Or}, ConverterParameter=close-sharp}" />
+                                </Border>
+                                <ContentPresenter Name="PART_End" Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </Grid>
+                        </Grid>
                     </Border>
                     <!-- .input-highlight: across the wrapper's padding box, at its bottom -->
                     <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />

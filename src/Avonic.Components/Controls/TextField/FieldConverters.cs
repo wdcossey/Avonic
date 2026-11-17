@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using Avalonia.Media.Transformation;
 
 namespace Avonic.Components.Controls;
 
@@ -21,6 +22,26 @@ public static class FieldConverters
     /// </summary>
     public static readonly IValueConverter FlipUnlessDefault =
         new FuncValueConverter<object?, bool?>(value => value is null or "" ? false : null);
+
+    /// <summary>
+    /// The label's <c>translate(var(--internal-start-container-adjustment), Y%) scale(S)</c>: the values are its height, the Y
+    /// fraction (<c>Css.TranslateY</c>), the scale (<c>Css.Scale</c>), <see cref="InputWrapperPanel.StartShiftProperty"/> and the
+    /// start container's width. The label moves back over the start slot by that width times the shift, toward the start edge,
+    /// which is left in a mirrored panel too.
+    /// </summary>
+    public static readonly IMultiValueConverter LabelTransform =
+        new FuncMultiValueConverter<object?, object?>(values =>
+        {
+            if (values.ToList() is not [double height, double fraction, double scale, double shift, double start])
+            {
+                return AvaloniaProperty.UnsetValue;
+            }
+
+            var builder = TransformOperations.CreateBuilder(2);
+            builder.AppendScale(scale, scale);
+            builder.AppendTranslate(-shift * start, height * fraction);
+            return builder.Build();
+        });
 
     /// <summary>The textarea's placement as <see cref="InputWrapperPanel"/> takes it, which lays out the label the same five ways.</summary>
     public static readonly IValueConverter TextareaPlacement =
