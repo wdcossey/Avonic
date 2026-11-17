@@ -34,10 +34,21 @@ internal sealed class OverlayTrigger(AvonicOverlay overlay)
             return;
         }
 
+        // A DOM click comes from a tap on any element and from a key on a button. A type's own Click may come only in some of its
+        // modes (an item's or a card's, as a button), so a tap presents too; a present while presented does nothing.
         var click = ClickEventOf(target.GetType());
         EventHandler<RoutedEventArgs> handler = (_, _) => overlay.PresentFromInput();
         target.AddHandler(click, handler, RoutingStrategies.Bubble, handledEventsToo: true);
-        _remove = () => target.RemoveHandler(click, handler);
+        if (click != InputElement.TappedEvent)
+        {
+            target.AddHandler(InputElement.TappedEvent, handler, RoutingStrategies.Bubble, handledEventsToo: true);
+        }
+
+        _remove = () =>
+        {
+            target.RemoveHandler(click, handler);
+            target.RemoveHandler(InputElement.TappedEvent, handler);
+        };
     }
 
     /// <summary>Ionic's <c>removeClickListener</c>.</summary>

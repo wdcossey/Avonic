@@ -25,13 +25,13 @@ internal sealed class InlinePlacement
     private readonly Action _onParentRemoved;
     private readonly IDisposable _dataContext;
 
-    private InlinePlacement(Control overlay, Control placeholder, Action restore, Action onParentRemoved)
+    private InlinePlacement(Control overlay, Control placeholder, Action restore, Action onParentRemoved, IDisposable dataContext)
     {
         _overlay = overlay;
         Placeholder = placeholder;
         _restore = restore;
         _onParentRemoved = onParentRemoved;
-        _dataContext = overlay.Bind(StyledElement.DataContextProperty, placeholder.GetObservable(StyledElement.DataContextProperty), BindingPriority.Style);
+        _dataContext = dataContext;
         placeholder.DetachedFromVisualTree += OnPlaceholderDetached;
     }
 
@@ -48,6 +48,9 @@ internal sealed class InlinePlacement
     {
         var placeholder = new Control { IsVisible = false };
         var parent = overlay.Parent ?? overlay.GetVisualParent() as StyledElement;
+
+        // The page's DataContext held while it moves, so that it never reads null on the way, which a two-way binding would write back.
+        using var holding = overlay.SetValue(StyledElement.DataContextProperty, overlay.DataContext, BindingPriority.Style);
         Action restore;
         switch (parent)
         {
@@ -109,13 +112,17 @@ internal sealed class InlinePlacement
                     $"Panel's Children, a Decorator's Child, or a ContentControl's or ContentPresenter's Content. This one is in a {parent?.GetType().Name}.");
         }
 
-        return new InlinePlacement(overlay, placeholder, restore, onParentRemoved);
+        var dataContext = overlay.Bind(StyledElement.DataContextProperty, placeholder.GetObservable(StyledElement.DataContextProperty), BindingPriority.Style);
+        return new InlinePlacement(overlay, placeholder, restore, onParentRemoved, dataContext);
     }
 
     /// <summary>Puts the overlay back in its place, if the placeholder is still there. The overlay has to have no parent by then.</summary>
     public void Restore()
     {
         Placeholder.DetachedFromVisualTree -= OnPlaceholderDetached;
+
+        // The page's DataContext held while it moves back: the placeholder's goes null as it leaves.
+        using var holding = _overlay.SetValue(StyledElement.DataContextProperty, _overlay.DataContext, BindingPriority.Style);
         _dataContext.Dispose();
         if (_overlay.Parent is null && _overlay.GetVisualParent() is null)
         {

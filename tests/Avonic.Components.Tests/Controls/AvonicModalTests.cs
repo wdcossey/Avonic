@@ -381,6 +381,37 @@ public class AvonicModalTests
         }
     }
 
+    [AvaloniaFact]
+    public void B5_IsOpen_On_One_Made_In_Code_After_Its_First_Present()
+    {
+        // Ionic's controller attaches it at create, so it's loaded: its isOpen watcher runs from then on. With nothing to place
+        // it in, Present() looks to the app's lifetime, which a headless test has none of: the watcher's present fails, logged.
+        var sink = new WarningSink(Avalonia.Logging.LogEventLevel.Error);
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            using var stage = new Stage();
+            var modal = Modal();
+            modal.Present(stage.Window);
+            stage.At(Entered);
+            modal.Dismiss();
+            stage.After(Left);
+            Assert.Empty(sink.Messages);
+
+            modal.IsOpen = true;
+            stage.After(16);
+
+            // The fault is logged from the thread pool, as a dismiss's from input is.
+            SpinWait.SpinUntil(() => sink.Messages.Count > 0, TimeSpan.FromSeconds(5));
+            Assert.Contains(sink.Messages, m => m.Contains("failed", StringComparison.Ordinal));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
+
     // ── B6: trigger ─────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -435,6 +466,24 @@ public class AvonicModalTests
     }
 
     [AvaloniaFact]
+    public void B6_A_Tap_On_A_Plain_Item_Trigger_Presents_It()
+    {
+        // An item's own Click comes only when it's a button; a DOM click comes from a tap on any item.
+        var item = new AvonicItem { Name = "Item", Content = "Item" };
+        using var stage = new Stage(390, 844, item);
+        NameScope.SetNameScope(stage.Page, NameScopeOf(stage));
+        var modal = stage.Watch(Modal());
+        modal.Trigger = "Item";
+        stage.Page.Children.Add(modal);
+        Stage.Settle();
+
+        stage.Click(item.TranslatePoint(new Point(20, 10), stage.Window)!.Value);
+        stage.After(Entered);
+        Assert.Contains(stage.Log, l => l.StartsWith("didPresent", StringComparison.Ordinal));
+        Assert.Single(stage.Log, l => l.StartsWith("willPresent", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
     public void B6_A_Missing_Trigger_Is_Warned_About()
     {
         var sink = new WarningSink();
@@ -478,6 +527,16 @@ public class AvonicModalTests
         Stage.Settle();
         var index = stage.Page.Children.IndexOf(modal);
 
+        // A two-way binding in it would write back a null it saw on the way.
+        var seen = new List<object?>();
+        modal.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == StyledElement.DataContextProperty)
+            {
+                seen.Add(e.NewValue);
+            }
+        };
+
         modal.Present();
         stage.At(Entered);
         Assert.NotSame(stage.Page, modal.Parent);
@@ -492,6 +551,7 @@ public class AvonicModalTests
         stage.After(Left);
         Assert.Same(modal, stage.Page.Children[index]);
         Assert.DoesNotContain(placeholder, stage.Page.Children);
+        Assert.DoesNotContain(null, seen);
     }
 
     [AvaloniaFact]
@@ -579,11 +639,41 @@ public class AvonicModalTests
     }
 
     [AvaloniaFact]
+    public void B8_A_Nested_Modals_CanDismiss_Is_Asked_Once()
+    {
+        using var stage = new Stage();
+        var asked = new List<string?>();
+        var inner = stage.Watch(Modal(), "inner.");
+        inner.CanDismiss = new ModalCanDismiss(async (_, role) =>
+        {
+            asked.Add(role);
+            await Task.Yield();
+            return true;
+        });
+        var outer = Modal(inner);
+        stage.Page.Children.Add(outer);
+        Stage.Settle();
+        outer.Present();
+        stage.At(Entered);
+        inner.Present();
+        stage.After(Entered);
+
+        // The outer modal unmounts its content after it's dismissed, which takes the inner one's place out of the tree: no
+        // second dismiss for that, with parent-removed.
+        outer.Dismiss();
+        stage.After(Left * 2);
+        Assert.Equal([OverlayRoles.ParentDismissed], asked);
+        Assert.DoesNotContain(stage.Log, l => l.Contains("parent-removed", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
     public void B9_Its_Place_Leaving_The_Tree_Dismisses_It_With_Parent_Removed()
     {
         var holder = new StackPanel();
         using var stage = new Stage(390, 844, holder);
+        NameScope.SetNameScope(stage.Page, NameScopeOf(stage));
         var modal = stage.Watch(Modal());
+        modal.Trigger = "Opener";
         holder.Children.Add(modal);
         Stage.Settle();
         modal.Present();
@@ -593,6 +683,12 @@ public class AvonicModalTests
         stage.Page.Children.Remove(holder);
         stage.After(Left);
         Assert.Contains("didDismiss(,parent-removed)@528", stage.Log);
+
+        // Back in its page, which has gone: its trigger no longer presents it.
+        stage.Log.Clear();
+        stage.Opener.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        stage.After(Entered);
+        Assert.Empty(stage.Log);
     }
 
     // ── B10: the backdrop ───────────────────────────────────────────────────────────────────
@@ -726,6 +822,22 @@ public class AvonicModalTests
         Assert.Null(TopLevel.GetTopLevel(content));
     }
 
+    [AvaloniaFact]
+    public void B13_ContentTemplate_Builds_Content_That_Isnt_A_Control()
+    {
+        using var stage = new Stage();
+        var modal = new AvonicModal
+        {
+            Content = "data",
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new TextBlock { Name = "Built", Text = text + "!" }),
+        };
+        modal.Present(stage.Window);
+        stage.At(Entered);
+        stage.Render();
+        var built = modal.GetVisualDescendants().OfType<TextBlock>().Single(t => t.Name == "Built");
+        Assert.Equal("data!", built.Text);
+    }
+
     // ── B14, B15: layout and safe area ──────────────────────────────────────────────────────
 
     [AvaloniaTheory]
@@ -766,6 +878,13 @@ public class AvonicModalTests
         modal.Resources["Avonic.Modal.MaxWidth"] = 400d;
         stage.Render();
         Assert.Equal(new Size(400, 300), modal.Wrapper.Bounds.Size);
+
+        // A content height under the minimum.
+        modal.Resources["Avonic.Modal.Height"] = "auto";
+        modal.Resources["Avonic.Modal.MinHeight"] = "200px";
+        stage.Render();
+        Assert.Equal(200, modal.Wrapper.Bounds.Height);
+        modal.Resources["Avonic.Modal.Height"] = "300px";
 
         // The minimum wins over the maximum, as in CSS.
         modal.Resources["Avonic.Modal.MinWidth"] = "450px";
@@ -844,16 +963,20 @@ public class AvonicModalTests
         modal.Resources["Avonic.Modal.BorderStyle"] = "solid";
         Stage.Settle();
         Assert.Equal(new Thickness(3), wrapper.BorderThickness);
+        Assert.Equal(Avalonia.Media.Colors.Transparent, ((Avalonia.Media.ISolidColorBrush)wrapper.BorderBrush!).Color);
+        modal.Resources["Avonic.Modal.BorderColor"] = Avalonia.Media.Brushes.Blue;
+        Stage.Settle();
+        Assert.Equal(Avalonia.Media.Colors.Blue, ((Avalonia.Media.ISolidColorBrush)wrapper.BorderBrush!).Color);
         modal.Resources["Avonic.Modal.Background"] = Avalonia.Media.Brushes.Red;
         Stage.Settle();
         Assert.Equal(Avalonia.Media.Colors.Red, ((Avalonia.Media.ISolidColorBrush)wrapper.Background!).Color);
     }
 
-    private sealed class WarningSink : Avalonia.Logging.ILogSink
+    private sealed class WarningSink(Avalonia.Logging.LogEventLevel least = Avalonia.Logging.LogEventLevel.Warning) : Avalonia.Logging.ILogSink
     {
         public List<string> Messages { get; } = [];
 
-        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Warning;
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= least;
 
         public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) => Messages.Add(messageTemplate);
 

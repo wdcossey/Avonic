@@ -82,6 +82,7 @@ public abstract class AvonicOverlay : TemplatedControl
     private InlinePlacement? _placement;
     private bool _loaded;
     private bool _moving;
+    private int _dismissesPending;
 
     static AvonicOverlay()
     {
@@ -110,12 +111,9 @@ public abstract class AvonicOverlay : TemplatedControl
     }
 
     /// <summary>
-    /// Whether it's presented inline: it had a parent of the app's when it was presented, and has been moved to the overlay host,
-    /// with a placeholder in its place until its dismiss puts it back (Ionic's <c>CoreDelegate</c>).
+    /// The placeholder an inline overlay left in its place while it's presented: it had a parent of the app's when it was
+    /// presented, and has been moved to the overlay host until its dismiss puts it back (Ionic's <c>CoreDelegate</c>).
     /// </summary>
-    internal bool IsTeleported => _placement is not null;
-
-    /// <summary>The placeholder an inline overlay left in its place, while it's presented.</summary>
     internal Control? Placeholder => _placement?.Placeholder;
 
     public bool Animated
@@ -221,13 +219,11 @@ public abstract class AvonicOverlay : TemplatedControl
     /// </summary>
     protected virtual IInputElement? PresentFocusTarget => null;
 
-    /// <summary>What an overlay's own <c>present()</c> does before the shared one: under the lock, when it isn't presented yet.</summary>
+    /// <summary>
+    /// What an overlay's own <c>present()</c> does before the shared one: under the lock, when it isn't presented yet, once it's in
+    /// the overlay host (an inline one's place in its page is <see cref="Placeholder"/>).
+    /// </summary>
     protected virtual void OnPresenting()
-    {
-    }
-
-    /// <summary>What an overlay's own <c>present()</c> does after the shared one, under the lock.</summary>
-    protected virtual void OnPresented()
     {
     }
 
@@ -250,9 +246,15 @@ public abstract class AvonicOverlay : TemplatedControl
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
     public Task Present()
     {
-        // Inline, or still in a host during its leave animation: its own top level, where an inline one goes back to.
+        // Inline, or still in a host during its leave animation: its own top level, where an inline one goes back to. In a
+        // popup, the top level the popup belongs to, as a browser has one document.
         if (Parent is not null && TopLevel.GetTopLevel(this) is { } own)
         {
+            while (own is PopupRoot { ParentTopLevel: { } parent })
+            {
+                own = parent;
+            }
+
             return Present(own);
         }
 
@@ -274,19 +276,12 @@ public abstract class AvonicOverlay : TemplatedControl
 
         // A dismiss always detaches it, so this is always a new attach, and a new index, as connectedCallback gives.
         var host = OverlayHost.For(topLevel);
-        OnPresenting();
         if (Parent is not (null or OverlayHost) || this.GetVisualParent() is not (null or OverlayHost))
         {
             _moving = true;
             try
             {
-                _placement = InlinePlacement.Teleport(this, () => DismissFromInput(OverlayRoles.ParentRemoved));
-            }
-            catch
-            {
-                // Not presented after all: undo what the overlay did for it.
-                OnDismissed(true);
-                throw;
+                _placement = InlinePlacement.Teleport(this, OnPlaceRemoved);
             }
             finally
             {
@@ -298,8 +293,20 @@ public abstract class AvonicOverlay : TemplatedControl
         OverlayIndex = ++s_lastOverlayIndex;
         ZIndex = ZIndexBase + OverlayIndex;
         host.Attach(this);
+        OnPresenting();
         await PresentCore(host.TopLevel);
-        OnPresented();
+    }
+
+    /// <summary>
+    /// An inline overlay's place left the tree while it was presented: <c>parent-removed</c>, unless a dismiss is already on its
+    /// way, as when the modal it's inside unmounts its content after dismissing it with <c>parent-dismissed</c>.
+    /// </summary>
+    private void OnPlaceRemoved()
+    {
+        if (_dismissesPending == 0)
+        {
+            DismissFromInput(OverlayRoles.ParentRemoved);
+        }
     }
 
     /// <summary>
@@ -308,25 +315,33 @@ public abstract class AvonicOverlay : TemplatedControl
     /// </summary>
     public async Task<bool> Dismiss(object? data = null, string? role = null)
     {
-        using var unlock = await _lock.Lock();
-        if (!await OnDismissing(data, role))
-        {
-            return false;
-        }
-
-        bool dismissed;
+        _dismissesPending++;
         try
         {
-            dismissed = await DismissCore(data, role);
-        }
-        catch
-        {
-            OnDismissed(true);
-            throw;
-        }
+            using var unlock = await _lock.Lock();
+            if (!await OnDismissing(data, role))
+            {
+                return false;
+            }
 
-        OnDismissed(dismissed);
-        return dismissed;
+            bool dismissed;
+            try
+            {
+                dismissed = await DismissCore(data, role);
+            }
+            catch
+            {
+                OnDismissed(true);
+                throw;
+            }
+
+            OnDismissed(dismissed);
+            return dismissed;
+        }
+        finally
+        {
+            _dismissesPending--;
+        }
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -374,13 +389,14 @@ public abstract class AvonicOverlay : TemplatedControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        if (_loaded || IsInHost)
+        if (_loaded)
         {
             return;
         }
 
+        // Loaded at its first attach, which for one made in code is its present, as Ionic's controller attaches it at create.
         _loaded = true;
-        if (IsOpen)
+        if (IsOpen && !IsInHost)
         {
             AvonicConfig.RequestFrame(this, PresentFromInput);
         }
@@ -493,9 +509,14 @@ public abstract class AvonicOverlay : TemplatedControl
             _host?.Detach(this);
             _host = null;
 
-            // An inline overlay goes back where it was: detachComponent's removeViewFromDom.
+            // An inline overlay goes back where it was: detachComponent's removeViewFromDom. If its page has left the tree, it
+            // goes back there, detached, and nothing will detach it again: its trigger's listener goes now.
             _placement?.Restore();
             _placement = null;
+            if (!((ILogical)this).IsAttachedToLogicalTree)
+            {
+                _trigger.Remove();
+            }
             RestoreElementFocus(didDismiss);
         }
 
