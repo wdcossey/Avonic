@@ -8,16 +8,17 @@ internal static class AlertClasses
     /// <summary>Space-separated classes, as style classes. Returns what it added, so it can be taken off again.</summary>
     public static string[] Apply(Control control, string? cssClass)
     {
-        var classes = Split(cssClass);
-        foreach (var name in classes)
+        var added = new List<string>();
+        foreach (var name in Split(cssClass))
         {
             if (!control.Classes.Contains(name))
             {
                 control.Classes.Add(name);
+                added.Add(name);
             }
         }
 
-        return classes;
+        return [.. added];
     }
 
     public static string[] Split(string? cssClass) =>

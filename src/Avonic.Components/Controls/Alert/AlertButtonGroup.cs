@@ -37,6 +37,9 @@ public class AlertButtonGroup : Panel
     /// </summary>
     internal event EventHandler? Wrapped;
 
+    /// <summary>Whether the last measure of the row put its buttons on more than one line. A column doesn't change it.</summary>
+    internal bool RowWraps { get; private set; }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -103,7 +106,8 @@ public class AlertButtonGroup : Panel
             widest = Math.Max(widest, lineWidth);
         }
 
-        if (_lines.Count > 1)
+        RowWraps = _lines.Count > 1;
+        if (RowWraps)
         {
             Wrapped?.Invoke(this, EventArgs.Empty);
         }

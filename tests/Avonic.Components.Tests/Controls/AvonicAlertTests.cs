@@ -648,6 +648,72 @@ public class AvonicAlertTests
         Assert.Equal(new Rect(92, 8, 100, 40), group.Children[1].Bounds);
     }
 
+    [AvaloniaFact]
+    public void B14_A_Narrow_Pass_On_The_Way_Does_Not_Make_A_Column()
+    {
+        using var stage = new Stage();
+        var alert = Shown(stage, new AvonicAlert { Buttons = ["Cancel", "OK"] });
+
+        // A pass too narrow for the row, then the real layout: the frame's check reads the row again, which fits.
+        alert.ButtonGroup!.Measure(new Size(60, double.PositiveInfinity));
+        alert.ButtonGroup.InvalidateMeasure();
+        stage.Render();
+        stage.After(32);
+        stage.Render();
+        Assert.False(alert.ButtonGroup.Vertical);
+    }
+
+    [AvaloniaFact]
+    public void B21_Focus_On_A_Button_Stays_In_The_Alert_When_The_Buttons_Change()
+    {
+        using var stage = new Stage();
+        var alert = Shown(stage, new AvonicAlert { Buttons = ["Cancel", "OK"] });
+        alert.ButtonControls[1].Focus();
+        alert.Buttons = ["Cancel", "OK", "More"];
+        Stage.Settle();
+        Assert.Same(alert.ButtonControls[1], stage.Focused);
+    }
+
+    [AvaloniaFact]
+    public void B5_A_Handlers_ValueTask_False_Keeps_It_Open()
+    {
+        using var stage = new Stage();
+        var alert = new AvonicAlert { Buttons = [new AlertButton { Text = "OK", Handler = _ => new ValueTask<bool>(false) }] };
+        Shown(stage, alert);
+        Tap(stage, alert.ButtonControls[0]);
+        stage.After(Left);
+        Assert.True(alert.IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void B18_CssClass_Leaves_The_Apps_Own_Classes()
+    {
+        var alert = new AvonicAlert();
+        alert.Classes.Add("wide");
+        alert.CssClass = "wide custom";
+        alert.CssClass = "custom";
+        Assert.Contains("wide", alert.Classes);
+        alert.CssClass = null;
+        Assert.DoesNotContain("custom", alert.Classes);
+    }
+
+    [AvaloniaFact]
+    public void B10_A_Number_Value_Is_Written_As_JavaScript_Does_Whatever_The_Culture()
+    {
+        var culture = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+        try
+        {
+            using var stage = new Stage();
+            var alert = Shown(stage, new AvonicAlert { Inputs = [new AlertInput { Type = AlertInputType.Number, Value = 1.5 }] });
+            Assert.Equal("1.5", ((AlertTextField)alert.InputControls[0]).Native!.Text);
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = culture;
+        }
+    }
+
     // ── B15: layout ─────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -690,6 +756,7 @@ public class AvonicAlertTests
     [InlineData("90%", 800d, 720d)]
     [InlineData("12px", 800d, 12d)]
     [InlineData("100% + 4px", 100d, 104d)]
+    [InlineData("100% - 10px + 4px", 100d, 94d)]
     [InlineData("auto", 100d, null)]
     [InlineData("none", 100d, null)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>

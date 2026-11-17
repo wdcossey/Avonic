@@ -61,7 +61,7 @@ public abstract class AlertTextField : TemplatedControl
         var attributes = input.Attributes ?? new Dictionary<string, object?>();
         string? Attribute(string name) => attributes.TryGetValue(name, out var value) ? value?.ToString() : null;
 
-        native.Text = input.Value?.ToString() ?? "";
+        native.Text = Convert.ToString(input.Value, System.Globalization.CultureInfo.InvariantCulture) ?? "";
         int? maxlength = int.TryParse(Attribute("maxlength"), out var max) ? max : null;
         var type = input.Type ?? AlertInputType.Text;
         NativeTextField.Apply(native, maxlength, input.Placeholder ?? "", ContentType(Attribute("inputmode"), type), null,

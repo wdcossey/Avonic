@@ -44,8 +44,8 @@ public class AvonicAlert : AvonicOverlay
     /// <summary>Checkboxes: <c>.alert-checkbox-group</c>.</summary>
     public const string CheckboxGroup = ":checkbox-group";
 
-    /// <summary>md's <c>min-width: 768px</c>.</summary>
-    internal const double BreakpointMdWidth = 768;
+    /// <summary>md's <c>min-width: 768px</c>: <see cref="GridViewport"/>'s <c>md</c>.</summary>
+    internal const int BreakpointMdIndex = 2;
 
     /// <summary><c>--backdrop-opacity</c>'s md fallback, <c>var(--ion-backdrop-opacity, 0.32)</c>.</summary>
     internal const double DefaultBackdropOpacity = 0.32;
@@ -122,7 +122,7 @@ public class AvonicAlert : AvonicOverlay
     private string[] _cssClasses = [];
     private INotifyCollectionChanged? _watchedButtons;
     private INotifyCollectionChanged? _watchedInputs;
-    private TopLevel? _topLevel;
+    private GridViewport? _viewport;
 
     private AvonicBackdrop? _backdrop;
     private AlertWrapper? _wrapper;
@@ -406,10 +406,12 @@ public class AvonicAlert : AvonicOverlay
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        // The media queries matter only while it's shown, which is while it's in the overlay host: the grid's breakpoints, which
+        // say when one is crossed.
         if (Parent is OverlayHost)
         {
-            _topLevel = TopLevel.GetTopLevel(this);
-            _topLevel?.PropertyChanged += OnTopLevelPropertyChanged;
+            _viewport = GridViewport.Of(this);
+            _viewport?.Changed += UpdateBreakpoint;
             UpdateBreakpoint();
         }
     }
@@ -417,22 +419,15 @@ public class AvonicAlert : AvonicOverlay
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _topLevel?.PropertyChanged -= OnTopLevelPropertyChanged;
-        _topLevel = null;
+        _viewport?.Changed -= UpdateBreakpoint;
+        _viewport = null;
         _wrapCheck?.Dispose();
         _wrapCheck = null;
     }
 
-    private void OnTopLevelPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == TopLevel.ClientSizeProperty)
-        {
-            UpdateBreakpoint();
-        }
-    }
-
+    /// <summary><c>@media (min-width: 768px)</c>: the grid's <c>md</c> breakpoint and up.</summary>
     private void UpdateBreakpoint() =>
-        PseudoClasses.Set(BreakpointMd, (_topLevel?.ClientSize.Width ?? 0) >= BreakpointMdWidth);
+        PseudoClasses.Set(BreakpointMd, (_viewport?.Breakpoint ?? 0) >= BreakpointMdIndex);
 
     private static void Watch(ref INotifyCollectionChanged? watched, INotifyCollectionChanged? next, NotifyCollectionChangedEventHandler handler)
     {
@@ -543,6 +538,8 @@ public class AvonicAlert : AvonicOverlay
             return;
         }
 
+        // Ionic's render patches the buttons that are there, so one with focus keeps it: the one in its place takes it here.
+        var focused = _buttonControls.FindIndex(c => c.IsKeyboardFocusWithin);
         foreach (var control in _buttonControls)
         {
             control.Clicked -= OnButtonClicked;
@@ -559,6 +556,7 @@ public class AvonicAlert : AvonicOverlay
         }
 
         UpdateVertical();
+        RefocusAt(focused, _buttonControls);
     }
 
     /// <summary><c>alert-button-group-vertical</c>: more than two buttons, or two that wrapped.</summary>
@@ -584,7 +582,9 @@ public class AvonicAlert : AvonicOverlay
         _wrapCheck = AvonicConfig.RequestFrame(this, () =>
         {
             _wrapCheck = null;
-            _wrapped = true;
+
+            // Read again after the frame, as Ionic reads the buttons' tops in its raf: a narrow pass on the way doesn't count.
+            _wrapped = _buttonGroup?.RowWraps == true;
             UpdateVertical();
         });
     }
@@ -597,6 +597,7 @@ public class AvonicAlert : AvonicOverlay
             return;
         }
 
+        var focused = _inputsPanel.Children.ToList().FindIndex(c => c.IsKeyboardFocusWithin);
         foreach (var option in _options)
         {
             option.Clicked -= OnOptionClicked;
@@ -604,6 +605,38 @@ public class AvonicAlert : AvonicOverlay
 
         _options.Clear();
         _inputsPanel.Children.Clear();
+        try
+        {
+            RenderInputControls(_inputsPanel);
+        }
+        finally
+        {
+            RefocusAt(focused, _inputsPanel.Children);
+        }
+    }
+
+    /// <summary>
+    /// Focus that was on a control a render replaced goes to the one in its place, or the wrapper if there's none, rather than out
+    /// of the alert, as Ionic's patched element keeps it.
+    /// </summary>
+    private void RefocusAt(int index, IReadOnlyList<Control> controls)
+    {
+        if (index < 0)
+        {
+            return;
+        }
+
+        var target = index < controls.Count ? controls[index] : null;
+        (target as TemplatedControl)?.ApplyTemplate();
+        var focusable = target is AlertTextField { Native: { } native } ? native : target;
+        if (focusable is null || !focusable.Focus())
+        {
+            _wrapper?.Focus();
+        }
+    }
+
+    private void RenderInputControls(Panel panel)
+    {
         PseudoClasses.Set(InputGroup, false);
         PseudoClasses.Set(RadioGroup, false);
         PseudoClasses.Set(CheckboxGroup, false);
@@ -652,7 +685,7 @@ public class AvonicAlert : AvonicOverlay
                     field.IsEnabled = !(attributes is not null && attributes.TryGetValue("disabled", out var disabled) && disabled is not null
                         ? AlertClasses.IsTrue(disabled)
                         : input.Disabled);
-                    _inputsPanel.Children.Add(field);
+                    panel.Children.Add(field);
                 }
 
                 break;
@@ -668,7 +701,7 @@ public class AvonicAlert : AvonicOverlay
         AutomationProperties.SetAutomationId(option, input.Id);
         option.Clicked += OnOptionClicked;
         _options.Add(option);
-        _inputsPanel!.Children.Add(option);
+        _inputsPanel?.Children.Add(option);
         UpdateOption(option);
     }
 
@@ -772,6 +805,13 @@ public class AvonicAlert : AvonicOverlay
         }
 
         var returned = handler(data);
+        // A ValueTask is a Task once asked for one.
+        if (returned is not null && returned.GetType() is { IsValueType: true } type
+            && (type == typeof(ValueTask) || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>)))
+        {
+            returned = type.GetMethod(nameof(ValueTask.AsTask))!.Invoke(returned, null);
+        }
+
         if (returned is Task task)
         {
             await task;
@@ -797,8 +837,8 @@ public class AvonicAlert : AvonicOverlay
             type = type.BaseType;
         }
 
-        // An async method's plain Task is a Task<VoidTaskResult>, which isn't public: nothing to read.
-        return type is not null && type.GetGenericArguments()[0].IsVisible
+        // An async method's plain Task is a Task<VoidTaskResult>: nothing to read.
+        return type is not null && type.GetGenericArguments()[0].FullName != "System.Threading.Tasks.VoidTaskResult"
             ? type.GetProperty(nameof(Task<object>.Result), BindingFlags.Public | BindingFlags.Instance)?.GetValue(task)
             : null;
     }
@@ -863,6 +903,11 @@ public class AvonicAlert : AvonicOverlay
         }
 
         var radios = _options.Where(o => o.IsEnabled).ToList();
+        if (radios.Count == 0)
+        {
+            return;
+        }
+
         var index = radios.IndexOf(current);
         AlertOptionButton? next = e.Key switch
         {

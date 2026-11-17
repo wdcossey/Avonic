@@ -149,16 +149,15 @@ public class AlertPanel : Panel
             return min;
         }
 
-        // A sum or difference of two terms, as in calc().
-        foreach (var op in new[] { " - ", " + " })
+        // Sums and differences, as in calc(), left to right: split at the last operator of either kind.
+        var minus = s.LastIndexOf(" - ", StringComparison.Ordinal);
+        var plus = s.LastIndexOf(" + ", StringComparison.Ordinal);
+        var at = Math.Max(minus, plus);
+        if (at > 0)
         {
-            var at = s.LastIndexOf(op, StringComparison.Ordinal);
-            if (at > 0)
-            {
-                return Parse(s[..at].Trim(), basis) is { } a && Parse(s[(at + op.Length)..].Trim(), basis) is { } b
-                    ? op == " - " ? a - b : a + b
-                    : null;
-            }
+            return Parse(s[..at].Trim(), basis) is { } a && Parse(s[(at + 3)..].Trim(), basis) is { } b
+                ? at == minus ? a - b : a + b
+                : null;
         }
 
         foreach (var unit in new[] { "%", "vw", "vh" })

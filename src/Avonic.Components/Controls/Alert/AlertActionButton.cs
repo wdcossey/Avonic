@@ -24,7 +24,6 @@ public class AlertActionButton : TemplatedControl
     public static readonly StyledProperty<ButtonTextTransform> TextTransformProperty =
         AvaloniaProperty.Register<AlertActionButton, ButtonTextTransform>(nameof(TextTransform));
 
-    private readonly NativeButton _native;
     private string? _rolePseudoClass;
 
     static AlertActionButton()
@@ -34,7 +33,7 @@ public class AlertActionButton : TemplatedControl
 
     public AlertActionButton()
     {
-        _native = new NativeButton(this, _ => Clicked?.Invoke(this, EventArgs.Empty), () => true, UpdateIsEffectivelyEnabled);
+        _ = new NativeButton(this, _ => Clicked?.Invoke(this, EventArgs.Empty), () => true, static () => { });
         SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
         SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
     }
