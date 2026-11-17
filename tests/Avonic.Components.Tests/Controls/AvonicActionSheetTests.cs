@@ -1116,6 +1116,11 @@ public class AvonicActionSheetTests
         sheet.Header = "Two";
         sheet.SubHeader = "Sub";
         Assert.Equal(["Two", "Two Sub"], changes);
+
+        // With no header, its own name names it, and a new one is raised too.
+        sheet.Header = null;
+        AutomationProperties.SetName(sheet, "Actions");
+        Assert.Equal(["Two", "Two Sub", null, "Actions"], changes);
     }
 
     [AvaloniaFact]

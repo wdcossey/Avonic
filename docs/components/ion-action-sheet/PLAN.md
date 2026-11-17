@@ -116,12 +116,14 @@ md file), `utils/overlays.js`, and `normalize.css`'s `button { line-height: 1 }`
 - **Buttons** (`render`): the first `cancel` button goes last, in `.action-sheet-group-cancel`; any other cancel button isn't
   rendered; the rest, in order, in the first group after the title. `ion-icon` before the text; md's ripple in each; classes
   `action-sheet-button`, `ion-activatable` and `ion-focusable` (not when disabled), `action-sheet-<role>`, the `cssClass`. The
-  cancel button gets neither `disabled` nor an `id`.
+  cancel button gets neither `disabled` nor an `id`, but its `disabled` still takes `ion-activatable` and `ion-focusable` away: no
+  ripple and no focus highlight.
 - **Radios** (`htmlAttributes.role === 'radio'`): the group is `role="radiogroup"`; the checked one is the first with
   `aria-checked === 'true'` when the buttons are set (`buttonsChanged`), and stays when new buttons have none; it's
   `.action-sheet-selected` and the one tab stop (`tabindex` 0), or the first radio when none is checked, the others -1. A click
   checks it, then `buttonClick`. Keys on a radio, while presented: ArrowDown and ArrowRight focus and check the next enabled radio,
-  ArrowUp and ArrowLeft the previous, wrapping, without a dismiss or a handler; Space and Enter check it and `buttonClick`.
+  ArrowUp and ArrowLeft the previous, wrapping, without a dismiss or a handler; Space and Enter check it and `buttonClick` on the press, with the default prevented, so the
+  native button doesn't click it again. Not once a dismiss has started (`presented` is false from its start).
 - **Keys**: Tab from the host goes to the first button, through each enabled one (or the radios' one stop) and the cancel button,
   and wraps at the sentinels; Shift+Tab wraps back to the cancel button; Enter and Space click (native buttons); Escape dismisses
   with `backdrop` when `backdropDismiss`. An arrow on a plain button does nothing.
@@ -201,7 +203,6 @@ focusable sentinels around it, as Ionic's `tabindex="0"` divs.
 | `translucent` | ios only |
 | The ios button gesture (`createButtonActiveGesture`) | ios only |
 | Rich options (`startContent`, `endContent`, `description`) | `ion-select`'s, internal to Ionic; with #45 |
-| `.action-sheet-container`'s `max-height: calc(100dvh - safe areas)` | The wrapper's own `max-height` is the same here, as the host is the window |
 | `margin-top: var(--ion-safe-area-top)` on the wrapper | It's placed by `bottom: 0` with `top: auto`, so the margin moves nothing in CSS either |
 | Root `aria-hidden` while it's open | The overlay system's deferral (#65) |
 | A controller (`actionSheetController.create`) | The overlay system's deferral; `new AvonicActionSheet { … }.Present()` is the same |

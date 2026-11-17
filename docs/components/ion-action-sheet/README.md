@@ -46,7 +46,7 @@ a plain button: unlike the alert's, `"Cancel"` has no role.
 
 **Radios**, as `ion-select` (`interface="action-sheet"`) builds them: a button with `HtmlAttributes` `role` `"radio"` is a radio,
 and the first with `aria-checked` `"true"` is checked, bold and the one tab stop; the arrow keys move between the enabled radios and
-check them, and a click or Space checks one and runs its handler.
+check them, and a click, Space or Enter checks one and runs its handler.
 
 ```csharp
 Buttons =
