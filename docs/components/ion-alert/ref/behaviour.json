@@ -1,0 +1,821 @@
+[
+ {
+  "name": "radio click, arrows, OK",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:true:0",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab1",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-1.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:true:0",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab2",
+    {
+     "presented": true,
+     "active": "button.alert-button.ion-focusable.ion-activatable.alert-button-role-cancel.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:true:0",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "shifttab",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-1.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:true:0",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "down",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-3.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:true:0"
+     ],
+     "active_desc": "alert-input-1-3",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "down2",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": "alert-input-1-0",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": [
+      "in:red:true"
+     ]
+    }
+   ],
+   [
+    "up",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-3.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:true:0"
+     ],
+     "active_desc": "alert-input-1-3",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": [
+      "in:red:true"
+     ]
+    }
+   ],
+   [
+    "space",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-3.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:true:0"
+     ],
+     "active_desc": "alert-input-1-3",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": [
+      "in:red:true"
+     ]
+    }
+   ],
+   [
+    "tapRed",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-activated",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": "alert-input-1-0",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": [
+      "in:red:true",
+      "in:red:true"
+     ]
+    }
+   ],
+   [
+    "ok",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:false:-1",
+      "alert-input-1-2:false:-1",
+      "alert-input-1-3:false:-1"
+     ],
+     "active_desc": "alert-input-1-0",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"data\":{\"values\":\"red\"}}",
+      "willDismiss{\"data\":{\"values\":\"red\"}}",
+      "ionAlertDidDismiss{\"data\":{\"values\":\"red\"}}",
+      "didDismiss{\"data\":{\"values\":\"red\"}}"
+     ],
+     "calls": [
+      "in:red:true",
+      "in:red:true",
+      "ok:\"red\""
+     ]
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "checkbox: Enter does not toggle, Space does, values",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [
+      "alert-input-1-0:false:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-tappable.alert-checkbox.alert-checkbox-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "enter",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-tappable.alert-checkbox.alert-checkbox-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "space",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-tappable.alert-checkbox.alert-checkbox-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab3",
+    {
+     "presented": true,
+     "active": "button.alert-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "enterOnOk",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:true:0"
+     ],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"data\":{\"values\":[\"a\",\"b\"]}}",
+      "willDismiss{\"data\":{\"values\":[\"a\",\"b\"]}}",
+      "ionAlertDidDismiss{\"data\":{\"values\":[\"a\",\"b\"]}}",
+      "didDismiss{\"data\":{\"values\":[\"a\",\"b\"]}}"
+     ],
+     "calls": []
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "text: Enter in input, handler false keeps open, values",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab",
+    {
+     "presented": true,
+     "active": "input#alert-input-1-0.alert-input",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "typed",
+    {
+     "presented": true,
+     "active": "input#alert-input-1-0.alert-input",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "enter",
+    {
+     "presented": true,
+     "active": "input#alert-input-1-0.alert-input",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "saveKept",
+    {
+     "presented": true,
+     "active": "button.alert-button.ion-focusable.ion-activatable",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": [
+      "save:{\"1\":\"pre\",\"first\":\"Ann\"}"
+     ]
+    }
+   ],
+   [
+    "saved",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"data\":{\"values\":{\"1\":\"pre\",\"first\":\"Ann\"},\"extra\":1}}",
+      "willDismiss{\"data\":{\"values\":{\"1\":\"pre\",\"first\":\"Ann\"},\"extra\":1}}",
+      "ionAlertDidDismiss{\"data\":{\"values\":{\"1\":\"pre\",\"first\":\"Ann\"},\"extra\":1}}",
+      "didDismiss{\"data\":{\"values\":{\"1\":\"pre\",\"first\":\"Ann\"},\"extra\":1}}"
+     ],
+     "calls": [
+      "save:{\"1\":\"pre\",\"first\":\"Ann\"}",
+      "save:{\"1\":\"pre\",\"first\":\"Ann\"}"
+     ]
+    }
+   ]
+  ],
+  "extra": {
+   "didDismiss": {
+    "data": {
+     "values": {
+      "1": "pre",
+      "first": "Ann"
+     },
+     "extra": 1
+    }
+   }
+  },
+  "errors": []
+ },
+ {
+  "name": "cancel handler on Escape and backdrop",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "escape",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"role\":\"backdrop\"}",
+      "willDismiss{\"role\":\"backdrop\"}",
+      "ionAlertDidDismiss{\"role\":\"backdrop\"}",
+      "didDismiss{\"role\":\"backdrop\"}"
+     ],
+     "calls": [
+      "cancel:undefined:undefined"
+     ]
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "cancel button click",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "cancel",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"data\":{\"values\":{\"x\":\"v\"}},\"role\":\"cancel\"}",
+      "willDismiss{\"data\":{\"values\":{\"x\":\"v\"}},\"role\":\"cancel\"}",
+      "ionAlertDidDismiss{\"data\":{\"values\":{\"x\":\"v\"}},\"role\":\"cancel\"}",
+      "didDismiss{\"data\":{\"values\":{\"x\":\"v\"}},\"role\":\"cancel\"}"
+     ],
+     "calls": [
+      "cancel:undefined"
+     ]
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "backdrop tap; backdropDismiss false",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "button.alert-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tapNoDismiss",
+    {
+     "presented": true,
+     "active": "ion-alert#ion-overlay-1.md.hydrated",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "escapeNoDismiss",
+    {
+     "presented": true,
+     "active": "ion-alert#ion-overlay-1.md.hydrated",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tap",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"role\":\"backdrop\"}",
+      "willDismiss{\"role\":\"backdrop\"}",
+      "ionAlertDidDismiss{\"role\":\"backdrop\"}",
+      "didDismiss{\"role\":\"backdrop\"}"
+     ],
+     "calls": []
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "string buttons roles; button with role destructive",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "delete",
+    {
+     "presented": false,
+     "active": "button#opener.",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent",
+      "ionAlertWillDismiss{\"data\":{},\"role\":\"destructive\"}",
+      "willDismiss{\"data\":{},\"role\":\"destructive\"}",
+      "ionAlertDidDismiss{\"data\":{},\"role\":\"destructive\"}",
+      "didDismiss{\"data\":{},\"role\":\"destructive\"}"
+     ],
+     "calls": []
+    }
+   ]
+  ],
+  "extra": {
+   "classes": [
+    "alert-button ion-focusable ion-activatable alert-button-role-cancel sc-ion-alert-md",
+    "alert-button ion-focusable ion-activatable alert-button-role-destructive x y sc-ion-alert-md"
+   ]
+  },
+  "errors": []
+ },
+ {
+  "name": "radio wrap-around arrows and focus on present with one button",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [
+      "alert-input-1-0:false:0",
+      "alert-input-1-1:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tab",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:0",
+      "alert-input-1-1:false:-1"
+     ],
+     "active_desc": null,
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "upWraps",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-1.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:false:-1",
+      "alert-input-1-1:true:0"
+     ],
+     "active_desc": "alert-input-1-1",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "right",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:false:-1"
+     ],
+     "active_desc": "alert-input-1-0",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "enterOnRadio",
+    {
+     "presented": true,
+     "active": "button#alert-input-1-0.alert-radio-button.alert-tappable.alert-radio.ion-focusable.ion-activatable.ion-focused",
+     "options": [
+      "alert-input-1-0:true:0",
+      "alert-input-1-1:false:-1"
+     ],
+     "active_desc": "alert-input-1-0",
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "name": "shift-tab from wrapper",
+  "steps": [
+   [
+    "present",
+    {
+     "presented": true,
+     "active": "div.alert-wrapper.ion-overlay-wrapper",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "shiftTab",
+    {
+     "presented": true,
+     "active": "button.alert-button.ion-focusable.ion-activatable.ion-focused",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ],
+   [
+    "tabWraps",
+    {
+     "presented": true,
+     "active": "input#alert-input-1-0.alert-input",
+     "options": [],
+     "log": [
+      "ionAlertWillPresent",
+      "willPresent",
+      "ionAlertDidPresent",
+      "didPresent"
+     ],
+     "calls": []
+    }
+   ]
+  ],
+  "errors": []
+ }
+]

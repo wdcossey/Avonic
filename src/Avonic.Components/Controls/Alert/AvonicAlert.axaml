@@ -1,0 +1,125 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The alert's scrollers, the message and the input group: only a presenter, as a phone's scroll bars are hidden
+         (any-pointer: coarse), and a finger still scrolls them. -->
+    <ControlTheme x:Key="Avonic.Alert.Scroller" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- ion-alert: structure only. The look is in Avonic.Themes/Controls/AvonicAlert.axaml. The host covers the overlay layer:
+         the backdrop, then a focusable sentinel, the wrapper laid out by the panel, and another sentinel, as Ionic's tabindex="0"
+         divs, so that Tab wraps inside. The alert fills the inputs and the buttons in code. -->
+    <ControlTheme x:Key="{x:Type c:AvonicAlert}" TargetType="c:AvonicAlert">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <Border Name="PART_SentinelStart" Focusable="True" />
+                    <c:AlertPanel Name="PART_Panel" ZIndex="10">
+                        <c:AlertWrapper Name="PART_Wrapper">
+                            <c:AlertColumn ClipToBounds="True">
+                                <StackPanel Name="PART_Head">
+                                    <TextBlock Name="PART_Title" Text="{TemplateBinding Header}" TextWrapping="Wrap"
+                                               IsVisible="{TemplateBinding Header, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Name="PART_SubTitle" Text="{TemplateBinding SubHeader}" TextWrapping="Wrap"
+                                               IsVisible="{TemplateBinding SubHeader, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                </StackPanel>
+                                <ScrollViewer Name="PART_Message" c:AlertColumn.Shrinks="True"
+                                              Theme="{StaticResource Avonic.Alert.Scroller}"
+                                              IsVisible="{TemplateBinding Message, Converter={x:Static c:AvonicAlert.HasMessage}}">
+                                    <ContentPresenter Name="PART_MessagePresenter" Content="{TemplateBinding Message}"
+                                                      TextWrapping="Wrap" />
+                                </ScrollViewer>
+                                <Border Name="PART_InputGroup" c:AlertColumn.Shrinks="True" IsVisible="False">
+                                    <ScrollViewer Name="PART_InputScroller" Theme="{StaticResource Avonic.Alert.Scroller}">
+                                        <StackPanel Name="PART_Inputs" />
+                                    </ScrollViewer>
+                                </Border>
+                                <c:AlertButtonGroup Name="PART_ButtonGroup" />
+                            </c:AlertColumn>
+                        </c:AlertWrapper>
+                    </c:AlertPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- .alert-button: the native button, its ripple under its text. -->
+    <ControlTheme x:Key="{x:Type c:AlertActionButton}" TargetType="c:AlertActionButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <Panel>
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <TextBlock Name="PART_Inner" Text="{TemplateBinding Text}" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- .alert-radio-button: the icon, its dot, and the label. -->
+    <ControlTheme x:Key="{x:Type c:AlertRadioButton}" TargetType="c:AlertRadioButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="PART_Native" Background="Transparent">
+                    <Panel Name="PART_Inner">
+                        <Border Name="PART_Icon" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Border Name="PART_Dot" />
+                        </Border>
+                        <TextBlock Name="PART_Label" Text="{TemplateBinding Label}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    </Panel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- .alert-checkbox-button: the icon, its tick, the label, and md's ripple. -->
+    <ControlTheme x:Key="{x:Type c:AlertCheckboxButton}" TargetType="c:AlertCheckboxButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="PART_Native" Background="Transparent">
+                    <c:AvonicRippleEffect Name="PART_Ripple" />
+                    <Panel Name="PART_Inner">
+                        <Border Name="PART_Icon" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Border Name="PART_Tick" />
+                        </Border>
+                        <TextBlock Name="PART_Label" Text="{TemplateBinding Label}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    </Panel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- .alert-input-wrapper and its <input class="alert-input">. -->
+    <ControlTheme x:Key="{x:Type c:AlertTextInput}" TargetType="c:AlertTextInput">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Field">
+                    <TextBox Name="PART_Native" Theme="{StaticResource Avonic.TextField.NativeInput}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- .alert-input-wrapper and its <textarea class="alert-input">. -->
+    <ControlTheme x:Key="{x:Type c:AlertTextareaInput}" TargetType="c:AlertTextareaInput">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Field">
+                    <c:TextareaNativeInput Name="PART_Native" Theme="{StaticResource Avonic.Textarea.NativeInput}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

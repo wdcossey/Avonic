@@ -1,0 +1,407 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="420">
+            <TextBlock Text="The page under the alert" Margin="16" />
+            <!-- An alert's look, as it is after its enter animation: the backdrop at 0.32 and the wrapper shown. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+            <c:AlertWrapper Width="250" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="4"
+                            Background="{DynamicResource Avonic.OverlayBackgroundColorBrush}">
+                <StackPanel>
+                    <TextBlock Text="Alert" FontSize="20" FontWeight="Medium" LineHeight="24" Margin="24,20,24,15" />
+                    <TextBlock Text="This is an alert!" FontSize="16" LineHeight="19" Margin="24,0,24,20"
+                               Foreground="{DynamicResource Avonic.TextColorStep450Brush}" />
+                    <c:AlertButtonGroup Padding="8">
+                        <c:AlertActionButton Text="Cancel" />
+                        <c:AlertActionButton Text="OK" />
+                    </c:AlertButtonGroup>
+                </StackPanel>
+            </c:AlertWrapper>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of alert.md.css, with alert.css's base. The host covers the window (inset: 0), a flex box centring the
+         wrapper; contain, touch-action and font smoothing are hints to the browser. -->
+    <ControlTheme x:Key="{x:Type c:AvonicAlert}" TargetType="c:AvonicAlert">
+        <!-- font-family: var(ion-font-family, inherit); font-size: 0.875rem -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <!-- The tabindex="0" divs around the wrapper, which the focus trap wraps at. -->
+                    <Border Name="PART_SentinelStart" Focusable="True" FocusAdorner="{x:Null}" />
+                    <!-- .alert-wrapper's z-index 10, over the backdrop's 2, on the panel, as ZIndex sorts siblings. -->
+                    <c:AlertPanel Name="PART_Panel" ZIndex="10">
+                        <!-- .alert-wrapper rests at opacity 0, which the enter animation takes away. ClipToBounds is off so that it
+                             draws its shadow; PART_Clip is contain: content. -->
+                        <c:AlertWrapper Name="PART_Wrapper" ClipToBounds="False" FocusAdorner="{x:Null}" Opacity="0">
+                            <Border Name="PART_Clip" ClipToBounds="True">
+                                <c:AlertColumn>
+                                    <!-- .alert-head: there, padded, with or without a header -->
+                                    <Border Name="PART_Head">
+                                        <StackPanel>
+                                            <TextBlock Name="PART_Title" Text="{TemplateBinding Header}" TextWrapping="Wrap"
+                                                       IsVisible="{TemplateBinding Header, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                            <TextBlock Name="PART_SubTitle" Text="{TemplateBinding SubHeader}" TextWrapping="Wrap"
+                                                       IsVisible="{TemplateBinding SubHeader, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- .alert-message: overflow-y: auto, so it shrinks and scrolls -->
+                                    <ScrollViewer Name="PART_Message" c:AlertColumn.Shrinks="True"
+                                                  Theme="{StaticResource Avonic.Alert.Scroller}"
+                                                  IsVisible="{TemplateBinding Message, Converter={x:Static c:AvonicAlert.HasMessage}}">
+                                        <ContentPresenter Name="PART_MessagePresenter" Content="{TemplateBinding Message}" />
+                                    </ScrollViewer>
+                                    <!-- .alert-input-group, .alert-radio-group, .alert-checkbox-group: the alert fills it -->
+                                    <Border Name="PART_InputGroup" c:AlertColumn.Shrinks="True" IsVisible="False">
+                                        <ScrollViewer Name="PART_InputScroller" Theme="{StaticResource Avonic.Alert.Scroller}">
+                                            <StackPanel Name="PART_Inputs" />
+                                        </ScrollViewer>
+                                    </Border>
+                                    <c:AlertButtonGroup Name="PART_ButtonGroup" />
+                                </c:AlertColumn>
+                            </Border>
+                        </c:AlertWrapper>
+                    </c:AlertPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" FocusAdorner="{x:Null}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- width, min-width, max-width, height, min-height, max-height: var(...) -->
+        <Style Selector="^ /template/ c|AlertPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Alert.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Alert.MinWidth}" />
+            <Setter Property="ContentMaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Alert.MaxWidth" />
+                    <DynamicResource ResourceKey="Avonic.Alert.Md.MaxWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.Alert.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Alert.MinHeight}" />
+            <Setter Property="ContentMaxHeight">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Alert.MaxHeight" />
+                    <DynamicResource ResourceKey="Avonic.Alert.Md.MaxHeight" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media screen and (min-width: 768px): max-width and max-height min(100vw or 100vh - 96px, 560px) -->
+        <Style Selector="^:breakpoint-md /template/ c|AlertPanel#PART_Panel">
+            <Setter Property="ContentMaxWidth">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Alert.MaxWidth" />
+                    <DynamicResource ResourceKey="Avonic.Alert.Md.MaxWidthTablet" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="ContentMaxHeight">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Alert.MaxHeight" />
+                    <DynamicResource ResourceKey="Avonic.Alert.Md.MaxHeightTablet" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .alert-wrapper: background: var(background); border-radius: 4px; the shadow -->
+        <Style Selector="^ /template/ c|AlertWrapper#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Alert.Background" />
+                    <DynamicResource ResourceKey="Avonic.OverlayBackgroundColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Alert.Md.BoxShadow}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+
+        <!-- .alert-head: padding 20px 24px 15px; text-align: start -->
+        <Style Selector="^ /template/ Border#PART_Head">
+            <Setter Property="Padding" Value="24,20,24,15" />
+        </Style>
+        <!-- .alert-title: color: var(ion-text-color, #000); font-size: 1.25rem; font-weight: 500; line-height: normal, 24 at 20 px -->
+        <Style Selector="^ /template/ TextBlock#PART_Title">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="LineHeight" Value="24" />
+        </Style>
+        <!-- .alert-sub-title: margin-top: 5px; font-weight: normal; font-size: 1rem; line-height: normal, 19 at 16 px -->
+        <Style Selector="^ /template/ TextBlock#PART_SubTitle">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="LineHeight" Value="19" />
+            <Setter Property="Margin" Value="0,5,0,0" />
+        </Style>
+
+        <!-- .alert-message: padding 20px 24px, 0 at the top after the head; font-size: 1rem; color: step 550 (text 450);
+             at most 266 high on a phone -->
+        <Style Selector="^ /template/ ScrollViewer#PART_Message">
+            <Setter Property="MaxHeight" Value="266" />
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#PART_MessagePresenter">
+            <Setter Property="Padding" Value="24,0,24,20" />
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep450Brush}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="19" />
+        </Style>
+
+        <!-- .alert-input-group: padding 20px 24px, inside the scroller; color: step 550 -->
+        <Style Selector="^:input-group /template/ StackPanel#PART_Inputs">
+            <Setter Property="Margin" Value="24,20" />
+        </Style>
+        <Style Selector="^:input-group /template/ Border#PART_InputGroup">
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource Avonic.TextColorStep450Brush}" />
+        </Style>
+        <!-- .alert-radio-group, .alert-checkbox-group: border-top and border-bottom 1px step 150; at most 266 high on a phone -->
+        <Style Selector="^:radio-group /template/ Border#PART_InputGroup, ^:checkbox-group /template/ Border#PART_InputGroup">
+            <Setter Property="BorderThickness" Value="0,1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
+            <Setter Property="MaxHeight" Value="266" />
+        </Style>
+        <!-- @media screen and (max-width: 767px) only: no cap from 768 up -->
+        <Style Selector="^:breakpoint-md /template/ ScrollViewer#PART_Message">
+            <Setter Property="MaxHeight" Value="Infinity" />
+        </Style>
+        <Style Selector="^:breakpoint-md:radio-group /template/ Border#PART_InputGroup, ^:breakpoint-md:checkbox-group /template/ Border#PART_InputGroup">
+            <Setter Property="MaxHeight" Value="Infinity" />
+        </Style>
+
+        <!-- .alert-button-group: padding 8px; flex-wrap: wrap-reverse; justify-content: flex-end -->
+        <Style Selector="^ /template/ c|AlertButtonGroup#PART_ButtonGroup">
+            <Setter Property="Padding" Value="8" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .alert-button: margin-inline-end 8px; padding 10px; border-radius 2px; color: primary; font-size 0.875rem;
+         line-height 1.25rem; font-weight 500; text-align: end; text-transform: uppercase; overflow: hidden -->
+    <ControlTheme x:Key="{x:Type c:AlertActionButton}" TargetType="c:AlertActionButton">
+        <Setter Property="Margin" Value="0,0,8,0" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <!-- .alert-button-inner: justify-content: flex-end -->
+                        <TextBlock Name="PART_Inner" Margin="{TemplateBinding Padding}" LineHeight="20" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{x:Static c:AvonicButton.TextTransformConverter}">
+                                    <Binding Path="Text" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    <Binding Path="TextTransform" RelativeSource="{RelativeSource TemplatedParent}" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AlertActionButton].Foreground}" />
+        </Style>
+        <!-- .alert-button.ion-focused: background: step 100 -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep100Brush}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .alert-tappable.alert-radio-button: min-height 48px; text-align: start; transparent -->
+    <ControlTheme x:Key="{x:Type c:AlertRadioButton}" TargetType="c:AlertRadioButton">
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="PART_Native" Background="{TemplateBinding Background}">
+                    <Panel Name="PART_Inner">
+                        <!-- .alert-radio-icon: 20 by 20, round, a 2px border step 550, 24 from the start (inset-inline-start) -->
+                        <Border Name="PART_Icon" Width="20" Height="20" CornerRadius="10" BorderThickness="2" Margin="24,0,0,0"
+                                HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <!-- .alert-radio-inner: 10 by 10, round, primary, scaled to 0 until checked -->
+                            <Border Name="PART_Dot" Width="10" Height="10" CornerRadius="5" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" RenderTransform="scale(0)" />
+                        </Border>
+                        <!-- .alert-radio-label: padding 13px; 56px after the 20 px icon, 24px at the end; 1rem, step 850 (text 150);
+                             line-height: normal, 19 at 16 px -->
+                        <TextBlock Name="PART_Label" Text="{TemplateBinding Label}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Margin="76,13,24,13" LineHeight="19" />
+                    </Panel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^ /template/ Border#PART_Icon">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep550Brush}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Dot">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_Label">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep150Brush}" />
+        </Style>
+        <!-- [aria-checked=true]: the icon's border primary, the dot scaled to 1 -->
+        <Style Selector="^:checked /template/ Border#PART_Icon">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <Style Selector="^:checked /template/ Border#PART_Dot">
+            <Setter Property="RenderTransform" Value="scale(1)" />
+        </Style>
+        <!-- transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1). A dot checked from the start is drawn at once: a template's first
+             style doesn't start a transition here, as CSS's doesn't. -->
+        <Style Selector="^ /template/ Border#PART_Dot">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <!-- .alert-radio-button-disabled .alert-button-inner: opacity: 0.5 -->
+        <Style Selector="^:disabled /template/ Panel#PART_Inner">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <!-- .alert-tappable.ion-focused: background: step 100 -->
+        <Style Selector="^:ion-focused">
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep100Brush}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .alert-tappable.alert-checkbox-button: as the radio, with md's ripple -->
+    <ControlTheme x:Key="{x:Type c:AlertCheckboxButton}" TargetType="c:AlertCheckboxButton">
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="16" />
+        <!-- The ripple's colour is the current colour, the text colour the button inherits. -->
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="PART_Native" Background="{TemplateBinding Background}">
+                    <c:AvonicRippleEffect Name="PART_Ripple" />
+                    <Panel Name="PART_Inner">
+                        <!-- .alert-checkbox-icon: 16 by 16, radius 2, a 2px border step 550, 24 from the start -->
+                        <Border Name="PART_Icon" Width="16" Height="16" CornerRadius="2" BorderThickness="2" Margin="24,0,0,0"
+                                HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <!-- [aria-checked=true] .alert-checkbox-inner: 6 by 10 at 3, 0, its right and bottom borders 2px,
+                                 rotated 45deg about its centre -->
+                            <Border Name="PART_Tick" Width="6" Height="10" Margin="3,0,0,0" BorderThickness="0,0,2,2"
+                                    HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransform="rotate(45deg)"
+                                    IsVisible="False" />
+                        </Border>
+                        <!-- .alert-checkbox-label: 56px after the 16 px icon -->
+                        <TextBlock Name="PART_Label" Text="{TemplateBinding Label}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Margin="72,13,24,13" LineHeight="19" />
+                    </Panel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^ /template/ Border#PART_Icon">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep550Brush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_Label">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep150Brush}" />
+        </Style>
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AlertCheckboxButton].Foreground}" />
+        </Style>
+        <!-- [aria-checked=true]: the icon primary, filled; the tick in the primary's contrast -->
+        <Style Selector="^:checked /template/ Border#PART_Icon">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+            <Setter Property="Background" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <Style Selector="^:checked /template/ Border#PART_Tick">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.PrimaryContrastBrush}" />
+        </Style>
+        <Style Selector="^:disabled /template/ Panel#PART_Inner">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <Style Selector="^:ion-focused">
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep100Brush}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .alert-input: margin 5px 0; padding 10px 0; width: 100%; border-bottom: 1px solid step 150; font: inherit;
+         color: var(ion-text-color); the placeholder var(ion-placeholder-color); :focus: margin-bottom 4px and a 2px primary
+         border. line-height: normal, 16 at 14 px. -->
+    <ControlTheme x:Key="{x:Type c:AlertTextInput}" TargetType="c:AlertTextInput">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Field" Margin="0,5" BorderThickness="0,0,0,1">
+                    <TextBox Name="PART_Native" Theme="{StaticResource Avonic.TextField.NativeInput}" Padding="0,10"
+                             LineHeight="16" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^ /template/ Border#PART_Field">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBox#PART_Native">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+            <Setter Property="PlaceholderForeground" Value="{DynamicResource Avonic.PlaceholderColorBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource Avonic.TextColorBrush}" />
+        </Style>
+        <Style Selector="^:focus-within /template/ Border#PART_Field">
+            <Setter Property="Margin" Value="0,5,0,4" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <!-- .alert-input-disabled: opacity: 0.5 -->
+        <Style Selector="^:disabled /template/ Border#PART_Field">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+    </ControlTheme>
+
+    <!-- textarea.alert-input: as the input, two rows, min-height 37px, resize: none. Its wrapper has the 3 px under it that an
+         inline-block's baseline leaves for the line's descent, measured. -->
+    <ControlTheme x:Key="{x:Type c:AlertTextareaInput}" TargetType="c:AlertTextareaInput">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Field" Margin="0,5,0,8" BorderThickness="0,0,0,1" MinHeight="37">
+                    <c:TextareaNativeInput Name="PART_Native" Theme="{StaticResource Avonic.Textarea.NativeInput}" Padding="0,10" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^ /template/ Border#PART_Field">
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBox#PART_Native">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+            <Setter Property="PlaceholderForeground" Value="{DynamicResource Avonic.PlaceholderColorBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource Avonic.TextColorBrush}" />
+        </Style>
+        <Style Selector="^:focus-within /template/ Border#PART_Field">
+            <Setter Property="Margin" Value="0,5,0,7" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <Style Selector="^:disabled /template/ Border#PART_Field">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

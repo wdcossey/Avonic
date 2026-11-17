@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.AlertPage">
+
+    <!-- ion-alert: one declared in the page and opened by its trigger, one by IsOpen, and alerts made in code with radios,
+         checkboxes and text fields, as ion-select builds its own. The status line says what each was dismissed with. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Open one, then pick a button, tap the backdrop, or press Escape or Back" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="In the page, with a trigger" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="OpenAlert" Content="Open the alert" Margin="16,8,16,0" />
+            <c:AvonicAlert Name="BasicAlert" Trigger="OpenAlert" Header="Alert" SubHeader="Important message"
+                           Message="This is an alert!">
+                <c:AvonicAlert.Buttons>
+                    <c:AlertButton Text="Cancel" Role="cancel" />
+                    <c:AlertButton Text="OK" Role="confirm" />
+                </c:AvonicAlert.Buttons>
+            </c:AvonicAlert>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Made in code" />
+            </c:AvonicListHeader>
+            <StackPanel Margin="16,8" Spacing="8">
+                <c:AvonicButton Name="PickColor" Content="Pick a color" />
+                <c:AvonicButton Name="PickToppings" Content="Pick toppings" />
+                <c:AvonicButton Name="EnterName" Content="Enter your name" />
+                <c:AvonicButton Name="PickMany" Content="Pick from a long list" />
+            </StackPanel>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="IsOpen, three buttons" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="IsOpen" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicToggle Name="IsOpenToggle" AutomationProperties.Name="IsOpen" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicAlert Name="ThreeAlert" Header="Three buttons" Message="More than two make a column." BackdropDismiss="False">
+                <c:AvonicAlert.Buttons>
+                    <c:AlertButton Text="Later" Role="cancel" />
+                    <c:AlertButton Text="Not now" />
+                    <c:AlertButton Text="Update" />
+                </c:AvonicAlert.Buttons>
+            </c:AvonicAlert>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
