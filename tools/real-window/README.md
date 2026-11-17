@@ -50,14 +50,15 @@ once if the window doesn't fit on the screen.
     to the list at 0; a frame of `SetFocus`'s ring on row 1.
   - `ion-content: keys and the scroll indicator` (#67): a press on a row, then Down, Home, Page Down, Space, Shift+Space and End,
     read from the page's `Ended at` line; and a strip at the end edge that a wheel changes until the indicator fades, and a key
-    doesn't. Added without being run: the first run is the one that proves it.
+    doesn't. Since #182, the same strip at the top differs at load from after the wheel's fade, as the thumb is there from load:
+    run on `192cf20`, 13 of 13, and it fails (0 pixels) on `2f8eb1e`, before #182.
   - `ion-content: the scroll bar` (#175): the page's `Scroll bar` toggle on, then a mouse drag of the thumb, which has to scroll the
     content, and a click on the down arrow, 40 more, read from the `Ended at` line; then the toggle off. Added without being run.
   - `focus indicators` (#188): a checkbox in a multi-input item, focused by Shift+Tab then Tab, shows its circle 5 past the default
     slot's end (the item's room), and a letter clears it; a toggle in a multi-input item shows its circle beside the handle, told
     from the item's own focus overlay. Added without being run.
-- **226 checks** run on v2 `0877c72` (2026-11-16), in about five minutes, and since then 3 from #188 (`focus indicators`) added
-  without being run.
+- **229 checks** run on v2 `b1ef0e9` (2026-11-16), in about five minutes, 228 passing (the miss was lost input, rerun 10 of 10);
+  since then 1 from #197 (the showcase page) and 1 from #182 (the thumb at load), each run.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 
