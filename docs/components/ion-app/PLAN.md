@@ -202,8 +202,10 @@ the window, which happens only when the touch keyboard docks. The design follows
   and macOS and Linux, with no pane, get Ionic's too where an app turns the shims on, as a desktop browser with
   `inputShims: true` would.
 - `KeyboardAssist`'s height is what the pane covers of the top level (`CoveredHeight`, the rect's overlap with the client area),
-  as its doc already said; the same as before on a phone. A pane with a rect that covers none of the top level is reported as
-  hidden; an empty rect is left as it was.
+  as its doc already said, where the keyboard isn't the only one. A pane with a rect that covers none of the top level is reported
+  as hidden; an empty rect is left as it was. On Android and iOS it's the pane's own height, as before: Android's rect is always
+  inside the view, and iOS's, in Avalonia.iOS 11.3.9 (the only one in the NuGet cache; 12.1.4's not read), is UIKit's
+  `FrameEndFromNotification`, in the screen's coordinates, which an iPad's window in Split View or Stage Manager doesn't share.
 
 Behaviours, in `AvonicAppTests`:
 
@@ -220,6 +222,7 @@ Behaviours, in `AvonicAppTests`:
   and the next opening runs again. Ionic's stays until blur, as a phone's keyboard closes with the focus.
 - W10 A field focused with the pane open and too little room scrolls as far as it can at once, without the second's wait.
 - W11 The window's height is read when the keyboard opens, not at the focus.
+- W12 A field focused with the pane open reckons with what it covers of the window now, after a resize.
 
 W3 found a bug the change brought into reach: with the keyboard open before any field had focus, the page's height was never
 taken, and the field scrolled to the top of the content (528 where 138 was right). On Windows the touch keyboard can be opened from

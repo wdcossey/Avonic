@@ -1338,8 +1338,7 @@ try {
         Away
         $field = @(All $CT::Edit | Where-Object { $_.Current.Name -like 'The last row*' })[-1]
         $before = $field.Current.BoundingRectangle
-        # Whether this opened the keyboard with ITipInvocation, and whether the pane said it was open: a keyboard this opened is
-        # closed again at the end, also one the pane never reported, such as a floating one.
+        # Whether this called ITipInvocation, and whether the pane said the keyboard was open: an open one is closed again at the end.
         $toggled = $false
         $shown = $false
         try {
@@ -1391,10 +1390,14 @@ try {
             }
         }
         finally {
-            if (((Probe) -like 'Input pane: Open*') -or ($toggled -and -not $shown)) {
+            # A toggle closes a keyboard that's open and opens one that isn't, and only the pane says which: one it never reported
+            # (a floating keyboard) is left, with a note, rather than risk opening one.
+            if ((Probe) -like 'Input pane: Open*') {
                 Fore
                 try { [TouchKeyboard]::Toggle() } catch { }
                 Start-Sleep -Milliseconds 800
+            } elseif ($toggled -and -not $shown) {
+                "  note  ITipInvocation was called and the pane never said Open: if a touch keyboard is on the screen, close it"
             }
         }
         # A deviation on Windows: the padding goes with the keyboard, though the field keeps focus.

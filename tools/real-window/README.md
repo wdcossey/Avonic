@@ -51,9 +51,10 @@ once if the window doesn't fit on the screen.
   - `ion-app: the touch keyboard` (#189): the page's `Input pane:` line shows a closed pane and the shims on; a touch tap on the
     last row's field, or failing that `ITipInvocation` (the taskbar's keyboard button), opens Windows' touch keyboard; the line
     then says `Open`, and the field has to end above the keyboard's top, 50 above it with the content padded by what the keyboard
-    covers when it had to move. It closes the keyboard again, also one it opened that the pane never reported, and checks the
-    padding goes with it, with the field still focused. Skipped, not failed,
-    when no keyboard comes or it doesn't reach the window (a window high on the screen: move it down). Added without being run.
+    covers when it had to move. It closes the keyboard again, and checks the padding goes with it, with the field still focused.
+    A keyboard the pane never reports (a floating one) it can't tell open from closed, so it leaves it with a note. Skipped, not
+    failed, when no keyboard comes or it doesn't reach the window (a window high on the screen: move it down). Added without being
+    run.
   - `ion-content: keys and the scroll indicator` (#67): a press on a row, then Down, Home, Page Down, Space, Shift+Space and End,
     read from the page's `Ended at` line; and a strip at the end edge that a wheel changes until the indicator fades, and a key
     doesn't. Since #182, the same strip at the top differs at load from after the wheel's fade, as the thumb is there from load:

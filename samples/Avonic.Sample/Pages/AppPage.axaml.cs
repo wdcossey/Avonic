@@ -78,7 +78,12 @@ public partial class AppPage : UserControl
         _topLevel = null;
     }
 
-    private void OnPaneChanged(object? sender, InputPaneStateEventArgs e) => ShowPane();
+    // Also to the log, only for the pane's own changes, not each step of a window's resize.
+    private void OnPaneChanged(object? sender, InputPaneStateEventArgs e)
+    {
+        ShowPane();
+        Console.WriteLine($"AvonicApp: {Pane.Text}");
+    }
 
     private void OnTopLevelChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
@@ -120,7 +125,6 @@ public partial class AppPage : UserControl
         var screenTop = top.PointToScreen(new Point(0, r.Y)).Y;
         Pane.Text = FormattableString.Invariant(
             $"Input pane: {pane.State}, at {r.X:0.#},{r.Y:0.#} {r.Width:0.#}x{r.Height:0.#}, screen top {screenTop}; padding {Main.KeyboardOffset:0.#}; shims {shims}; window {size.Width:0.#}x{size.Height:0.#}");
-        Console.WriteLine($"AvonicApp: {Pane.Text}");
     }
 
     private void OnIonBackButton(object? sender, BackButtonEventArgs e)

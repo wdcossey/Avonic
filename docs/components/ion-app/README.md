@@ -63,8 +63,8 @@ topLevel.AddHandler(HardwareBackButton.IonBackButtonEvent, (_, e) =>
 Ionic's `ionKeyboardDidShow` and `ionKeyboardDidHide`: `KeyboardAssist.IonKeyboardDidShowEvent`, with `KeyboardHeight`, and
 `IonKeyboardDidHideEvent`, on the `TopLevel`, each time the on-screen keyboard has opened or closed. They come from
 `TopLevel.InputPane`, once its animation has finished. `KeyboardHeight` is how much of the `TopLevel` the keyboard covers: on a
-phone, all of it; on Windows, the part of the touch keyboard over the window. A touch keyboard over none of the window is
-reported as hidden. Windows 10 and later give every window a pane, which reports the touch keyboard (see [Windows](#windows));
+phone, the pane's own height, as before (iOS gives UIKit's frame in the screen's coordinates, not the view's); on Windows, the
+part of the touch keyboard over the window. A touch keyboard over none of the window is reported as hidden. Windows 10 and later give every window a pane, which reports the touch keyboard (see [Windows](#windows));
 macOS and Linux have none, and nothing comes.
 
 ## The input shims
@@ -161,7 +161,11 @@ fills `Avonic.SafeArea*`.
 - Ionic starts its utilities after an idle callback; here they start when the app is attached. Ionic never stops them; here they
   stop when the app is taken out.
 - **Windows' rect is the one it gave when the keyboard showed.** Avalonia converts it to the window's coordinates then, and
-  doesn't report it again when the window moves, so a window moved while the keyboard is open reckons with where it was.
+  doesn't report it again when the window moves, so a window moved while the keyboard is open reckons with where it was. A window
+  resized while it's open is followed: a field focused then reckons with what the rect covers of it now.
+- **On Windows the keyboard's top is taken as the window's height less what it covers,** as Ionic's model has it, which holds
+  while the keyboard reaches the window's bottom, as a docked one at the bottom of the screen does. A window reaching below the
+  screen's bottom, under the keyboard, would have its fields placed too low by that much.
 - **A footer** already hears Windows' touch keyboard through the same pane, and drops its bottom safe area while it's open, as on
   a phone: that's the toolbar's, unchanged, and it counts a keyboard over none of the window as open (proposed in #189's PR).
 - Tried on a Pixel 8 (Android 17) and headless; not on iOS, and not in a real window (`tools/real-window` has an `ion-app`

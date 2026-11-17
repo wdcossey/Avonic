@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Platform;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -83,6 +84,9 @@ internal static class InputShims
         /// </summary>
         private bool _followsPane;
 
+        /// <summary>The top level's input pane, if it has one.</summary>
+        private IInputPane? _pane;
+
         /// <summary>Ionic's module-level <c>currentPadding</c>.</summary>
         private double _currentPadding;
 
@@ -121,8 +125,8 @@ internal static class InputShims
             _scrollAssist = AvonicConfig.ScrollAssist;
             _scrollPadding = AvonicConfig.ScrollPadding;
             _configKeyboardHeight = AvonicConfig.KeyboardHeight;
-            _followsPane = !AvonicConfig.KeyboardIsTheOnlyOne(IsPlatform)
-                && (KeyboardController.InputPaneOf(topLevel) is not null || IsPlatform("windows"));
+            _pane = KeyboardController.InputPaneOf(topLevel);
+            _followsPane = !AvonicConfig.KeyboardIsTheOnlyOne(IsPlatform) && (_pane is not null || IsPlatform("windows"));
             topLevel.AddHandler(InputElement.GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(InputElement.LostFocusEvent, OnLostFocus, RoutingStrategies.Bubble, handledEventsToo: true);
             topLevel.AddHandler(KeyboardAssist.IonKeyboardDidShowEvent, OnKeyboardShow);
@@ -146,6 +150,7 @@ internal static class InputShims
             _component = null;
             _keyboardHeight = null;
             _scrollPending = false;
+            _pane = null;
         }
 
         /// <summary>The input or textarea around what has focus: Ionic registers <c>ion-input</c> and <c>ion-textarea</c>.</summary>
@@ -168,21 +173,28 @@ internal static class InputShims
             _keyboardPresented = false;
             _scrollPending = false;
 
-            // Also with the keyboard open before any field had focus, as Windows' touch keyboard can be, opened from the taskbar.
+            if (_followsPane)
+            {
+                // No keyboard yet, and none may come: the pane opening runs it, with its own height (OnKeyboardShow). Open, what it
+                // covers of the window now, as the window may have been resized since it opened, and no show is coming to wait for.
+                if (_keyboardHeight is not null && _pane is { State: InputPaneState.Open } pane
+                    && KeyboardAssist.CoveredHeight(pane.OccludedRect, topLevel.ClientSize) is var covered and > 0)
+                {
+                    _keyboardHeight = covered;
+                    SetFocus(component, covered, waitForResize: false);
+                }
+
+                return;
+            }
+
+            // Also with the keyboard open before any field had focus, as a plain TextBox can have opened it.
             if (_keyboardHeight is null || _platformHeight <= 0)
             {
                 _platformHeight = PlatformHeight();
             }
 
-            if (_keyboardHeight is null && _followsPane)
-            {
-                // No keyboard yet, and none may come: the pane opening runs it, with its own height (OnKeyboardShow).
-                return;
-            }
-
-            // With the keyboard already open, its own height: a deviation, as I8 is. Following the pane, with it open, no show is
-            // coming to wait for.
-            SetFocus(component, _keyboardHeight ?? _configKeyboardHeight, waitForResize: !_followsPane);
+            // With the keyboard already open, its own height: a deviation, as I8 is.
+            SetFocus(component, _keyboardHeight ?? _configKeyboardHeight, waitForResize: true);
         }
 
         /// <summary>Ionic's <c>focusOut</c>, and the padding's <c>setClearScrollPaddingListener</c>.</summary>
@@ -220,8 +232,7 @@ internal static class InputShims
                 return;
             }
 
-            _cancelWait?.Invoke();
-            _cancelWait = null;
+            // No wait to take away: following the pane, a run never waits.
             _keyboardPresented = false;
             _usedHeight = double.NaN;
             if (_scrollPadding && _padded is { } content)

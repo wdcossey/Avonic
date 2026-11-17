@@ -35,13 +35,16 @@ public static class KeyboardAssist
     internal static IDisposable Start(TopLevel topLevel) => s_started.Start(topLevel);
 
     /// <summary>
-    /// How much of a top level of <paramref name="clientSize"/> the pane at <paramref name="occluded"/> covers: the height of their
-    /// overlap. On Android and iOS the pane is always inside the top level, which fills the screen, so it's the pane's own height.
-    /// On Windows it's the touch keyboard's place on the screen, in the window's coordinates, and a window that doesn't reach the
-    /// bottom of the screen is covered by part of it, or none: then the keyboard is reported as hidden. The rect is the one
-    /// Windows gave when the keyboard showed: Avalonia doesn't report it again when the window moves.
+    /// How much of a top level of <paramref name="clientSize"/> the pane at <paramref name="occluded"/> covers. Where the keyboard
+    /// is the only one (Android, iOS), the pane's own height, as before: Android's rect is always inside the view, and iOS's is
+    /// UIKit's keyboard frame in the screen's coordinates, not the view's, which an iPad's window in Split View or Stage Manager
+    /// doesn't share. Elsewhere (Windows), the height of their overlap: Windows' rect is the touch keyboard's place on the screen, in
+    /// the window's coordinates, and a window that doesn't reach the bottom of the screen is covered by part of it, or none, when
+    /// the keyboard is reported as hidden. The rect is the one Windows gave when the keyboard showed: Avalonia doesn't report it
+    /// again when the window moves.
     /// </summary>
-    internal static double CoveredHeight(Rect occluded, Size clientSize) => occluded.Intersect(new Rect(clientSize)).Height;
+    internal static double CoveredHeight(Rect occluded, Size clientSize) =>
+        AvonicConfig.KeyboardIsTheOnlyOne(InputShims.IsPlatform) ? occluded.Height : occluded.Intersect(new Rect(clientSize)).Height;
 
     private sealed class Watch(TopLevel topLevel)
     {

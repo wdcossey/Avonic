@@ -159,7 +159,7 @@ public static class AvonicConfig
     /// Linux where an app turns them on, they're Ionic's: a field's focus reckons with <see cref="KeyboardHeight"/> at once. See
     /// <c>docs/components/ion-app/README.md</c>.
     /// </remarks>
-    public static bool InputShims { get; set; } = InputShimsByDefault(OperatingSystem.IsOSPlatform);
+    public static bool InputShims { get; set; } = InputShimsByDefault(Controls.InputShims.IsPlatform);
 
     /// <summary><see cref="InputShims"/>'s default for the platform <paramref name="isPlatform"/> says it is.</summary>
     internal static bool InputShimsByDefault(Func<string, bool> isPlatform) =>

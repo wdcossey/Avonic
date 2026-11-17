@@ -1137,6 +1137,22 @@ public class AvonicAppTests
             Assert.Equal(["show 244@0", "hide@0"], keyboard.Log);
         }
 
+        // Where the keyboard is the only one, the pane's own height, as before: iOS's rect is UIKit's frame in the screen's
+        // coordinates, which an iPad's window in Split View doesn't share.
+        var platform = InputShims.IsPlatform;
+        InputShims.IsPlatform = os => os == "ios";
+        try
+        {
+            using var phone = new KeyboardStage();
+            phone.Pane.Set(InputPaneState.Open, new Rect(0, 900, 390, 300));
+            phone.Clock.At(0);
+            Assert.Equal(["show 300@0"], phone.Log);
+        }
+        finally
+        {
+            InputShims.IsPlatform = platform;
+        }
+
         // The item's bottom, 632, to 844 - 244 - 50: 82.
         var pane = new FakePane();
         using var stage = new ShimStage(pane: pane, platform: "windows");
@@ -1288,6 +1304,26 @@ public class AvonicAppTests
         Assert.Equal(200, stage.Content.KeyboardOffset);
         stage.At(500);
         Assert.Equal(282, stage.Offset);
+    }
+
+    // Second review: the keyboard open over 300 of 844, then the window resized to 600, where it covers 56, and a field focused:
+    // it reckons with 56, what the pane covers now, and the item's bottom, 632, goes to 600 - 56 - 50: 138. With the 300 from the
+    // show, it would go to 250: 382.
+    [AvaloniaFact]
+    public void W12_On_Windows_A_Field_Focused_With_The_Pane_Open_Reckons_With_What_It_Covers_Now()
+    {
+        var pane = new FakePane();
+        using var stage = new ShimStage(pane: pane, platform: "windows");
+        pane.Set(InputPaneState.Open, new Rect(0, 544, 390, 300));
+        stage.At(1);
+        stage.Scene.Window.Height = 600;
+        Dispatcher.UIThread.RunJobs();
+
+        stage.Native.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(56, stage.Content.KeyboardOffset);
+        stage.At(500);
+        Assert.Equal(138, stage.Offset);
     }
 
     // ── T: the text a page gets from html and body ──────────────────────────────────────────
