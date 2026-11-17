@@ -1,0 +1,234 @@
+# Raw output of the measurement scripts behind docs/components/ion-popover/PLAN.md (Ionic 9.0.11, md, headless Chromium)
+
+## Enter and leave, frame by frame (390x844 phone, a 100x40 trigger at 145,400, 120 px of content); the box; the dismiss events
+{
+ "enter": [
+  "0.0 bd=0.0100 bdPE=auto wr=0.0000 c=none vp=-",
+  "5.9 bd=0.0100 bdPE=none wr=0.0100 c=matrix(0.8, 0, 0, 0.8, 0, 0) vp=1.0000",
+  "22.0 bd=0.0443 bdPE=none wr=0.2518 c=matrix(0.82212, 0, 0, 0.82212, 0, 0) vp=1.0000",
+  "39.3 bd=0.0854 bdPE=none wr=0.6122 c=matrix(0.848652, 0, 0, 0.848652, 0, 0) vp=1.0000",
+  "55.9 bd=0.1379 bdPE=none wr=0.8358 c=matrix(0.882484, 0, 0, 0.882484, 0, 0) vp=1.0000",
+  "72.0 bd=0.1989 bdPE=none wr=0.9179 c=matrix(0.921869, 0, 0, 0.921869, 0, 0) vp=1.0000",
+  "89.7 bd=0.2433 bdPE=none wr=0.9581 c=matrix(0.950546, 0, 0, 0.950546, 0, 0) vp=1.0000",
+  "105.2 bd=0.2686 bdPE=none wr=0.9803 c=matrix(0.966828, 0, 0, 0.966828, 0, 0) vp=1.0000",
+  "122.4 bd=0.2840 bdPE=none wr=0.9924 c=matrix(0.976771, 0, 0, 0.976771, 0, 0) vp=1.0000",
+  "138.9 bd=0.2943 bdPE=none wr=0.9983 c=matrix(0.98342, 0, 0, 0.98342, 0, 0) vp=1.0000",
+  "156.5 bd=0.3015 bdPE=none wr=1.0000 c=matrix(0.988077, 0, 0, 0.988077, 0, 0) vp=1.0000",
+  "173.7 bd=0.3069 bdPE=none wr=1.0000 c=matrix(0.991547, 0, 0, 0.991547, 0, 0) vp=1.0000",
+  "189.6 bd=0.3109 bdPE=none wr=1.0000 c=matrix(0.994109, 0, 0, 0.994109, 0, 0) vp=1.0000",
+  "205.9 bd=0.3138 bdPE=none wr=1.0000 c=matrix(0.996013, 0, 0, 0.996013, 0, 0) vp=1.0000",
+  "222.0 bd=0.3160 bdPE=none wr=1.0000 c=matrix(0.997429, 0, 0, 0.997429, 0, 0) vp=1.0000",
+  "238.9 bd=0.3176 bdPE=none wr=1.0000 c=matrix(0.998466, 0, 0, 0.998466, 0, 0) vp=1.0000",
+  "255.4 bd=0.3187 bdPE=none wr=1.0000 c=matrix(0.999188, 0, 0, 0.999188, 0, 0) vp=1.0000",
+  "273.4 bd=0.3195 bdPE=none wr=1.0000 c=matrix(0.99966, 0, 0, 0.99966, 0, 0) vp=1.0000",
+  "288.7 bd=0.3199 bdPE=none wr=1.0000 c=matrix(0.99992, 0, 0, 0.99992, 0, 0) vp=1.0000",
+  "305.4 bd=0.3200 bdPE=none wr=1.0000 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000",
+  "323.2 bd=0.3200 bdPE=auto wr=1.0000 c=matrix(1, 0, 0, 1, 0, 0) vp=1.0000"
+ ],
+ "box": {
+  "rect": {
+   "x": 128,
+   "y": 440,
+   "width": 250,
+   "height": 120,
+   "top": 440,
+   "right": 378,
+   "bottom": 560,
+   "left": 128
+  },
+  "radius": "4px",
+  "shadow": "rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px",
+  "bg": "rgb(255, 255, 255)",
+  "overflow": "auto",
+  "maxHeight": "90%",
+  "width": "250px",
+  "display": "flex",
+  "hostZ": "20003",
+  "hostCls": "md popover-side-bottom hydrated",
+  "color": "rgb(0, 0, 0)"
+ },
+ "leave": [
+  "0.1 bd=0.3200 wr=1.0000 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=auto",
+  "14.3 bd=0.2840 wr=0.8786 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "31.4 bd=0.2092 wr=0.6471 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "48.3 bd=0.1359 wr=0.4204 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "63.8 bd=0.0829 wr=0.2564 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "80.8 bd=0.0474 wr=0.1467 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "96.8 bd=0.0240 wr=0.0742 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "113.3 bd=0.0098 wr=0.0303 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "130.4 bd=0.0023 wr=0.0070 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none",
+  "147.2 bd=0.0000 wr=0.0000 c=matrix(1, 0, 0, 1, 0, 0) top=calc(440px + var(--offset-y, 0px)) hostPE=none"
+ ],
+ "dismissEvents": [
+  "ionPopoverWillDismiss@0",
+  "willDismiss@0",
+  "ionPopoverDidDismiss@164",
+  "didDismiss@164"
+ ]
+}
+
+## Positions: the content's box, and the inline top/left/bottom/transform-origin the md enter animation sets, for a 100x40 trigger at tl (10,10), tr (280,10), c (145,400), bl (10,794), br (280,794), mid (145,200), each side and alignment; cover with a 180x40 trigger; no event; tall content; reference=event at a point; rtl; --offset-x 7px and --offset-y -3px
+tl bottom start        box 12 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+tl bottom center       box 12 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+tl bottom end          box 12 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+tl top start           box 12 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl top center          box 12 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl top end             box 12 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl left start          box 12 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+tl left center         box 12 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+tl left end            box 12 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl right start         box 110 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left top  
+tl right center        box 110 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left center  
+tl right end           box 110 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl start start         box 12 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+tl start center        box 12 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+tl start end           box 12 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tl end start           box 110 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left top  
+tl end center          box 110 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left center  
+tl end end             box 110 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left bottom  
+tr bottom start        box 128 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+tr bottom center       box 128 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+tr bottom end          box 128 50 250 120 | top calc(50px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+tr top start           box 128 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr top center          box 128 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr top end             box 128 -110 250 120 | top calc(-110px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr left start          box 30 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right top  
+tr left center         box 30 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right center  
+tr left end            box 30 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr right start         box 128 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+tr right center        box 128 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+tr right end           box 128 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr start start         box 30 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right top  
+tr start center        box 30 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right center  
+tr start end           box 30 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tr end start           box 128 10 250 120 | top calc(10px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+tr end center          box 128 -30 250 120 | top calc(-30px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+tr end end             box 128 -70 250 120 | top calc(-70px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+c bottom start         box 128 440 250 120 | top calc(440px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+c bottom center        box 70 440 250 120 | top calc(440px + var(--offset-y, 0px)) | left calc(70px + var(--offset-x, 0px)) | bottom - | origin center top  
+c bottom end           box 12 440 250 120 | top calc(440px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+c top start            box 128 280 250 120 | top calc(280px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+c top center           box 70 280 250 120 | top calc(280px + var(--offset-y, 0px)) | left calc(70px + var(--offset-x, 0px)) | bottom - | origin center bottom  
+c top end              box 12 280 250 120 | top calc(280px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+c left start           box 12 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+c left center          box 12 360 250 120 | top calc(360px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+c left end             box 12 320 250 120 | top calc(320px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+c right start          box 128 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+c right center         box 128 360 250 120 | top calc(360px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+c right end            box 128 320 250 120 | top calc(320px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+c start start          box 12 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+c start center         box 12 360 250 120 | top calc(360px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+c start end            box 12 320 250 120 | top calc(320px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+c end start            box 128 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+c end center           box 128 360 250 120 | top calc(360px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+c end end              box 128 320 250 120 | top calc(320px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+bl bottom start        box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl bottom center       box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl bottom end          box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl top start           box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl top center          box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl top end             box 12 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+bl left start          box 12 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+bl left center         box 12 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+bl left end            box 12 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+bl right start         box 110 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left top  
+bl right center        box 110 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left center  
+bl right end           box 110 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left bottom  
+bl start start         box 12 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+bl start center        box 12 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+bl start end           box 12 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+bl end start           box 110 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left top  
+bl end center          box 110 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left center  
+bl end end             box 110 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(110px + var(--offset-x, 0px)) | bottom - | origin left bottom  
+br bottom start        box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br bottom center       box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br bottom end          box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br top start           box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br top center          box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br top end             box 128 675 250 120 | top calc(675px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+br left start          box 30 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right top  
+br left center         box 30 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right center  
+br left end            box 30 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right bottom  
+br right start         box 128 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+br right center        box 128 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+br right end           box 128 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+br start start         box 30 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right top  
+br start center        box 30 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right center  
+br start end           box 30 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(30px + var(--offset-x, 0px)) | bottom - | origin right bottom  
+br end start           box 128 794 250 120 | top calc(794px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+br end center          box 128 754 250 120 | top calc(754px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+br end end             box 128 714 250 120 | top calc(714px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+mid bottom start       box 128 240 250 120 | top calc(240px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+mid bottom center      box 70 240 250 120 | top calc(240px + var(--offset-y, 0px)) | left calc(70px + var(--offset-x, 0px)) | bottom - | origin center top  
+mid bottom end         box 12 240 250 120 | top calc(240px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+mid top start          box 128 80 250 120 | top calc(80px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+mid top center         box 70 80 250 120 | top calc(80px + var(--offset-y, 0px)) | left calc(70px + var(--offset-x, 0px)) | bottom - | origin center bottom  
+mid top end            box 12 80 250 120 | top calc(80px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+mid left start         box 12 200 250 120 | top calc(200px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+mid left center        box 12 160 250 120 | top calc(160px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+mid left end           box 12 120 250 120 | top calc(120px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+mid right start        box 128 200 250 120 | top calc(200px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+mid right center       box 128 160 250 120 | top calc(160px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+mid right end          box 128 120 250 120 | top calc(120px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+mid start start        box 12 200 250 120 | top calc(200px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+mid start center       box 12 160 250 120 | top calc(160px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left center  
+mid start end          box 12 120 250 120 | top calc(120px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom  
+mid end start          box 128 200 250 120 | top calc(200px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+mid end center         box 128 160 250 120 | top calc(160px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right center  
+mid end end            box 128 120 250 120 | top calc(120px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom  
+tl cover               box 10 50 180 120 | top calc(50px + var(--offset-y, 0px)) | left calc(10px + var(--offset-x, 0px)) | bottom - | origin left top  | --width 180px
+tr cover               box 210 50 180 120 | top calc(50px + var(--offset-y, 0px)) | left calc(210px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  | --width 180px
+c cover                box 145 440 180 120 | top calc(440px + var(--offset-y, 0px)) | left calc(145px + var(--offset-x, 0px)) | bottom - | origin left top  | --width 180px
+bl cover               box 10 675 180 120 | top calc(675px + var(--offset-y, 0px)) | left calc(10px + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom | --width 180px
+br cover               box 210 675 180 120 | top calc(675px + var(--offset-y, 0px)) | left calc(210px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom | --width 180px
+mid cover              box 145 240 180 120 | top calc(240px + var(--offset-y, 0px)) | left calc(145px + var(--offset-x, 0px)) | bottom - | origin left top  | --width 180px
+no event               box 70 362 250 120 | top calc(362px + var(--offset-y, 0px)) | left calc(70px + var(--offset-x, 0px)) | bottom - | origin left top  
+c tall600              box 128 440 250 392 | top calc(440px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom calc(12px + var(--ion-safe-area-bottom, 0px)) | origin right top  
+bl tall600             box 12 195 250 600 | top calc(195px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+tl tall600             box 12 50 250 600 | top calc(50px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+c tall900              box 128 440 250 392 | top calc(440px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom calc(12px + var(--ion-safe-area-bottom, 0px)) | origin right top  
+bl tall900             box 12 35.41 250 759.59 | top calc(35.40625px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left bottom | popover-bottom 
+tl tall900             box 12 50 250 759.59 | top calc(50px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom calc(12px + var(--ion-safe-area-bottom, 0px)) | origin left top  
+event 50,60            box 50 61 250 120 | top calc(61px + var(--offset-y, 0px)) | left calc(50px + var(--offset-x, 0px)) | bottom - | origin left top  
+event 380,60           box 128 61 250 120 | top calc(61px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+event 200,800          box 128 681 250 120 | top calc(681px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right bottom | popover-bottom 
+event 5,500            box 12 501 250 120 | top calc(501px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+rtl c start start      box 128 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+rtl c end start        box 12 400 250 120 | top calc(400px + var(--offset-y, 0px)) | left calc(12px + var(--ion-safe-area-left, 0px) + var(--offset-x, 0px)) | bottom - | origin left top  
+rtl c bottom start     box 128 440 250 120 | top calc(440px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+offsets                box 135 437 250 120 | top calc(440px + var(--offset-y, 0px)) | left calc(128px - var(--ion-safe-area-right, 0px) + var(--offset-x, 0px)) | bottom - | origin right top  
+
+## Behaviour with real input (desktop context 390x844): a click trigger with dismiss-on-select holding five button items (the fourth disabled) and a nested popover (side end, dismiss-on-select) on the third; a hover trigger; a context-menu trigger with reference=event
+click trigger: open=p-click active=p-click ev=p-click:ionPopoverWillPresent@93 p-click:ionPopoverDidPresent@402
+p-click content {"x":18,"y":56,"width":250,"height":256,"top":56,"right":268,"bottom":312,"left":18}
+key ArrowDown: open=p-click active=i1 ev=
+key ArrowDown: open=p-click active=i2 ev=
+key ArrowUp: open=p-click active=i1 ev=
+key End: open=p-click active=i5 ev=
+key ArrowDown: open=p-click active=i5 ev=
+key Home: open=p-click active=i1 ev=
+key ArrowUp: open=p-click active=i1 ev=
+to More: open=p-click active=nested-trigger ev=
+ArrowRight on More: open=p-click,p-nested active=n1 ev=p-nested:ionPopoverWillPresent@1249 p-nested:ionPopoverDidPresent@1536
+p-nested {"r":{"x":123,"y":160,"width":250,"height":112,"top":160,"right":373,"bottom":272,"left":123},"cls":"md popover-desktop popover-side-end popover-nested hydrated","bd":false}
+ArrowLeft in nested: open=p-click active=nested-trigger ev=p-nested:ionPopoverWillDismiss@1857 p-nested:ionPopoverDidDismiss@2003
+Escape: open= active=click-trigger ev=p-click:ionPopoverWillDismiss(backdrop)@2274 p-click:ionPopoverDidDismiss(backdrop)@2419
+reopen: open=p-click active=p-click ev=p-click:ionPopoverWillPresent@2685 p-click:ionPopoverDidPresent@3003
+click nested trigger (parent dismissOnSelect): open=p-click,p-nested active=p-nested ev=p-nested:ionPopoverWillPresent@3200 p-nested:ionPopoverDidPresent@3518
+click nested item (both dismissOnSelect): open= active=click-trigger ev=p-nested:ionPopoverWillDismiss@3812 p-click:ionPopoverWillDismiss@3812 p-nested:ionPopoverDidDismiss@3968 p-click:ionPopoverDidDismiss@3969
+nested again: open=p-click,p-nested active=p-nested ev=p-click:ionPopoverWillPresent@4432 p-click:ionPopoverDidPresent@4736 p-nested:ionPopoverWillPresent@4946 p-nested:ionPopoverDidPresent@5268
+Escape with nested: open= active=click-trigger ev=p-nested:ionPopoverWillDismiss(backdrop)@5551 p-click:ionPopoverWillDismiss(backdrop)@5552 p-nested:ionPopoverDidDismiss(backdrop)@5703 p-click:ionPopoverDidDismiss(backdrop)@5704
+backdrop with nested: open= active=BODY ev=p-click:ionPopoverWillPresent@6067 p-click:ionPopoverDidPresent@6386 p-nested:ionPopoverWillPresent@6585 p-nested:ionPopoverDidPresent@6903 p-click:ionPopoverWillDismiss(backdrop)@7196 p-nested:ionPopoverWillDismiss@7196 p-click:ionPopoverDidDismiss(backdrop)@7336 p-nested:ionPopoverDidDismiss@7336
+second click on nested trigger: open= active=click-trigger ev=p-click:ionPopoverWillPresent@7716 p-click:ionPopoverDidPresent@8018 p-nested:ionPopoverWillPresent@8234 p-nested:ionPopoverDidPresent@8552 p-nested:ionPopoverWillDismiss@8839 p-click:ionPopoverWillDismiss@8839 p-nested:ionPopoverDidDismiss@8985 p-click:ionPopoverDidDismiss@8986
+click parent item One with nested open: open= active=BODY ev=
+hover +50: open= active=BODY ev=
+hover +90: open=p-hover active=BODY ev=p-hover:ionPopoverWillPresent@10384
+hover +130: open=p-hover active=BODY ev=
+hover +400: open=p-hover active=p-hover ev=p-hover:ionPopoverDidPresent@10686
+hover t0 10278
+hover leave to backdrop: open=p-hover active=p-hover ev=
+dismissed hover: open= active=BODY ev=p-hover:ionPopoverWillDismiss(backdrop)@11024 p-hover:ionPopoverDidDismiss(backdrop)@11169
+hover 40ms then leave: open= active=BODY ev=
+right click ctx: open=p-ctx active=p-ctx ev=p-ctx:ionPopoverWillPresent@11696 p-ctx:ionPopoverDidPresent@11985
+ctx at 247.25,41 content {"x":128,"y":42,"width":250,"height":51,"top":42,"right":378,"bottom":93,"left":128}
+left click on ctx trigger while open (backdrop): open= active=ctx-trigger ev=p-ctx:ionPopoverWillDismiss(backdrop)@12211 p-ctx:ionPopoverDidDismiss(backdrop)@12352
