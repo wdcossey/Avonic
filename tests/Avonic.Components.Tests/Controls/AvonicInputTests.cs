@@ -533,7 +533,7 @@ public class AvonicInputTests
     });
 
     // Ionic 9's min-width: 2ch is in the native input's min-content, so a slot gives way down to it and no further: two inputs
-    // in a 60 px item, which leaves 28 for both, keep 17.98 each. From CSS's min-content contribution; not measured in Chromium.
+    // in a 60 px item, which leaves 28 for both, keep 17.98 each, as measured in Chromium (9.0.11, `ion-item style="width:60px"`).
     [AvaloniaFact]
     public void B11_In_A_Slot_With_Too_Little_Room_The_Input_Keeps_2ch() => InstalledTheme.Run(_ =>
     {
@@ -1220,8 +1220,9 @@ public class AvonicInputTests
         Assert.Equal(19, rest.Y, 0.8);
 
         // A change of the start slot moves a floating label at once, as skip-label-transition does: the shift is the width
-        // times a factor that only the float eases.
-        Part<Control>(floating, "PART_Label").Transitions = null;
+        // times a factor that only the float eases. With the theme's transitions back on.
+        Part<Control>(floating, "PART_Label").ClearValue(Avalonia.Animation.Animatable.TransitionsProperty);
+        Assert.NotEmpty(Part<Control>(floating, "PART_Label").Transitions!);
         floating.StartContent = new Border { Width = 40, Height = 10 };
         Render();
         Assert.Equal(16, Bounds(Part<Control>(floating, "PART_Label"), floating).X, 0.6);
