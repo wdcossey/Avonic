@@ -47,8 +47,8 @@ Not covered here:
 
 Every component Ionic has deprecated or removed in favour of something else, from `BREAKING.md` and its archive (v4 to v9),
 `CHANGELOG.md`, the deprecation warnings in `@ionic/core` 5.6.0 to 5.9.0 and 6.0.0, and every `deprecation` in `core.json`
-8.8.19 and 9.0.11 (read 2026-11-17; 9.0.11 is the latest). Props are
-listed where the browser took their job. Other props Ionic removed for its own reasons aren't, as they're the case above.
+8.8.19 and 9.0.11 (read 2026-11-17; 9.0.11 is the latest). Props are listed where the browser took their job. Other props
+Ionic removed for its own reasons aren't, as they're the case above.
 
 **Kept or built:** `AvonicImg`, kept. Nothing else needs building.
 
