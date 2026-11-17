@@ -52,6 +52,76 @@ public class AvonicPopoverInteractionTests
     }
 
     [AvaloniaFact]
+    public void B9_A_Buttons_Click_Trigger_With_Reference_Event_Opens_At_The_Click()
+    {
+        // A button's Click comes during the release, with no point of its own: the release's is the DOM click's clientX, clientY.
+        using var stage = new Stage();
+        var button = new AvonicButton { Name = "Button", Content = "Open", Width = 200, Height = 40 };
+        Canvas.SetLeft(button, 20);
+        Canvas.SetTop(button, 300);
+        stage.Page.Children.Add(button);
+        stage.Names.Register("Button", button);
+        var popover = Popover();
+        popover.Trigger = "Button";
+        popover.Reference = PopoverReference.Event;
+        stage.Page.Children.Add(popover);
+        Stage.Settle();
+
+        stage.Click(new Point(60, 310));
+        stage.After(Entered);
+        Assert.Equal(new Rect(60, 311, 250, 120), Box(popover, stage.Window));
+    }
+
+    [AvaloniaFact]
+    public void B6_From_A_Tap_On_A_Buttons_Text_Places_It_By_The_Button()
+    {
+        // Avalonia's tap comes from the text inside the button's template; a DOM click's target is the button, its shadow's host.
+        using var stage = new Stage();
+        var button = new AvonicButton { Content = "Open", Width = 180, Height = 40 };
+        Canvas.SetLeft(button, 30);
+        Canvas.SetTop(button, 300);
+        stage.Page.Children.Add(button);
+        var popover = Popover();
+        popover.Size = PopoverSize.Cover;
+        button.AddHandler(InputElement.TappedEvent, (_, e) =>
+        {
+            Assert.NotSame(button, e.Source);
+            popover.Present(PopoverEvent.From(e));
+        });
+        Stage.Settle();
+
+        stage.Click(Centre(button, stage.Window));
+        stage.After(Entered);
+        var box = new Rect(button.Bounds.Size).TransformToAABB(button.TransformToVisual(stage.Window)!.Value);
+        Assert.Equal(new Rect(box.X, box.Bottom, 180, 120), Box(popover, stage.Window));
+    }
+
+    [AvaloniaFact]
+    public void B6_A_Target_In_A_Popup_Places_It_Beside_It()
+    {
+        // Headless popups are in the window's overlay layer; a popup that's a top level of its own goes through the screen,
+        // which a headless test can't make.
+        using var stage = new Stage();
+        var inside = new Border { Width = 100, Height = 40, Background = Brushes.Gray };
+        var anchor = stage.Trigger(60, 200, name: "Anchor");
+        var popup = new Avalonia.Controls.Primitives.Popup
+        {
+            PlacementTarget = anchor, Placement = PlacementMode.Bottom, Child = inside, IsLightDismissEnabled = false,
+        };
+        stage.Page.Children.Add(popup);
+        popup.IsOpen = true;
+        Stage.Settle();
+        var expected = stage.Window.PointToClient(inside.PointToScreen(default));
+
+        var popover = Popover();
+        popover.Present(new PopoverEvent(inside));
+        stage.After(Entered);
+        Assert.Equal(expected.X, Box(popover, stage.Window).X, 0.5);
+        Assert.Equal(expected.Y + 40, Box(popover, stage.Window).Y, 0.5);
+        popup.IsOpen = false;
+    }
+
+    [AvaloniaFact]
     public void B9_Hover_Presents_After_100ms_And_A_Frame()
     {
         using var stage = new Stage();
@@ -580,6 +650,20 @@ public class AvonicPopoverInteractionTests
         kept.Dismiss();
         stage.After(Left);
         Assert.True(keptContent.IsAttachedToVisualTree());
+    }
+
+    [AvaloniaFact]
+    public void B15_ContentTemplate_Builds_Content_That_Isnt_A_Control()
+    {
+        using var stage = new Stage();
+        var popover = new AvonicPopover
+        {
+            Content = "data",
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((text, _) => new TextBlock { Text = $"Built from {text}" }),
+        };
+        popover.Present(stage.Window);
+        stage.After(Entered);
+        Assert.Contains(popover.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == "Built from data");
     }
 
     [AvaloniaFact]

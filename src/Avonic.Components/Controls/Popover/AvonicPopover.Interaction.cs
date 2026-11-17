@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
@@ -37,17 +38,7 @@ public partial class AvonicPopover
         {
             PopoverTriggerAction.Hover => AddHoverListeners(trigger),
             PopoverTriggerAction.ContextMenu => AddContextMenuListeners(trigger),
-            _ => OverlayTrigger.AddClickListener(trigger, (_, e) =>
-            {
-                // A nested popover's dismiss interaction stops the click at the parent's content, as Ionic sets it up in the
-                // microtasks after this listener, before the click gets there: even the click that presents it (M7).
-                if (_parentPopover?._content is { } parentContent)
-                {
-                    PopoverClick.StopAt(e, parentContent);
-                }
-
-                PresentFromTrigger(PopoverEvent.From(e));
-            }),
+            _ => AddClickListeners(trigger),
         };
 
         return () =>
@@ -60,6 +51,57 @@ public partial class AvonicPopover
             {
                 s_triggers.Remove(trigger);
             }
+        };
+    }
+
+    /// <summary>
+    /// <c>click</c>: a click presents it, with the click as the event. A click Avalonia raises during a release (a button's, an
+    /// item's) carries no point, so the release's is taken, as a DOM <c>click</c> has the pointer's <c>clientX</c>; one from a key
+    /// has none, as Chromium gives 0, 0.
+    /// </summary>
+    private Action AddClickListeners(Interactive trigger)
+    {
+        Point? releasePoint = null;
+
+        void OnReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            if (TopLevel.GetTopLevel(trigger) is { } top)
+            {
+                releasePoint = e.GetPosition(top);
+
+                // The click comes while the release is routing; anything after is another input's.
+                Dispatcher.UIThread.Post(() => releasePoint = null);
+            }
+        }
+
+        void OnClick(object? sender, RoutedEventArgs e)
+        {
+            var ev = PopoverEvent.From(e);
+            if (ev.ClientPosition is null && releasePoint is { } point)
+            {
+                ev = new PopoverEvent(ev.Target, point);
+            }
+
+            PresentFromTrigger(ev);
+        }
+
+        trigger.AddHandler(PointerReleasedEvent, OnReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+        var removeClick = OverlayTrigger.AddClickListener(trigger, OnClick);
+
+        // A nested popover's dismiss interaction stops the click at the parent's content, as Ionic sets it up in the microtasks
+        // after this listener, before the click gets there: even the click that presents it (M7). Every form of it.
+        var removeStop = PopoverClick.Listen(trigger, (_, e) =>
+        {
+            if (_parentPopover?._content is { } parentContent)
+            {
+                PopoverClick.StopAt(e, parentContent);
+            }
+        });
+        return () =>
+        {
+            trigger.RemoveHandler(PointerReleasedEvent, OnReleased);
+            removeClick();
+            removeStop();
         };
     }
 
@@ -355,17 +397,14 @@ internal static class PopoverClick
         element.AddHandler(InputElement.TappedEvent, handler, RoutingStrategies.Bubble, handledEventsToo: true);
         element.AddHandler(Button.ClickEvent, handler, RoutingStrategies.Bubble, handledEventsToo: true);
         element.AddHandler(NativeButton.ClickInsideEvent, handler, RoutingStrategies.Bubble, handledEventsToo: true);
-        return () => RemoveHandlers(element, handler);
+        return () =>
+        {
+            element.RemoveHandler(InputElement.TappedEvent, handler);
+            element.RemoveHandler(Button.ClickEvent, handler);
+            element.RemoveHandler(NativeButton.ClickInsideEvent, handler);
+        };
     }
 
-    public static void AddClickHandlers(this Interactive element, EventHandler<RoutedEventArgs> handler) => Listen(element, handler);
-
-    public static void RemoveHandlers(this Interactive element, EventHandler<RoutedEventArgs> handler)
-    {
-        element.RemoveHandler(InputElement.TappedEvent, handler);
-        element.RemoveHandler(Button.ClickEvent, handler);
-        element.RemoveHandler(NativeButton.ClickInsideEvent, handler);
-    }
 
     /// <summary><c>stopPropagation()</c> at <paramref name="element"/>: listeners on elements around it don't act on the click.</summary>
     public static void StopAt(RoutedEventArgs e, Visual element) => s_stoppedAt.AddOrUpdate(e, element);

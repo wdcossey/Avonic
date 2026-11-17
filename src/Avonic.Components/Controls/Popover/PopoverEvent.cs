@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Avonic.Components.Controls;
 
@@ -25,12 +27,13 @@ public sealed class PopoverEvent(Visual? target, Point? clientPosition = null)
     public Point? ClientPosition { get; } = clientPosition;
 
     /// <summary>
-    /// The event an Avalonia input event is: its source as the target (a breadcrumb's collapsed click gives its indicator, as
-    /// Ionic's <c>ionShadowTarget</c>), and the point of a pointer, a tap, or a context request that has one.
+    /// The event an Avalonia input event is: its source as the target, out of any template it's a part of (a breadcrumb's
+    /// collapsed click gives its indicator, as Ionic's <c>ionShadowTarget</c>), and the point of a pointer, a tap, or a context
+    /// request that has one.
     /// </summary>
     public static PopoverEvent From(RoutedEventArgs e)
     {
-        var target = e is BreadcrumbCollapsedClickEventArgs { IonShadowTarget: { } shadow } ? shadow : e.Source as Visual;
+        var target = e is BreadcrumbCollapsedClickEventArgs { IonShadowTarget: { } shadow } ? shadow : Retarget(e.Source as Visual);
         var top = target is null ? null : TopLevel.GetTopLevel(target);
         Point? position = null;
         if (top is not null)
@@ -50,5 +53,31 @@ public sealed class PopoverEvent(Visual? target, Point? clientPosition = null)
         }
 
         return new PopoverEvent(target, position);
+    }
+
+    /// <summary>
+    /// What a DOM event's <c>target</c> is: a part of a control's template is retargeted to the control, as a shadow root's element
+    /// is to its host, and what a presenter made for content that isn't a control (a string's text) to the presenter's control, as
+    /// a text node is never a target.
+    /// </summary>
+    internal static Visual? Retarget(Visual? element)
+    {
+        while (element is not null)
+        {
+            if (element is StyledElement { TemplatedParent: Visual host })
+            {
+                element = host;
+            }
+            else if (element.GetVisualParent() is ContentPresenter { Content: not Visual } presenter && ReferenceEquals(presenter.Child, element))
+            {
+                element = presenter;
+            }
+            else
+            {
+                return element;
+            }
+        }
+
+        return null;
     }
 }

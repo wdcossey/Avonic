@@ -110,7 +110,7 @@ public partial class AvonicPopover : AvonicOverlay
     public static readonly RoutedEvent<OverlayEventArgs> IonPopoverDidDismissEvent =
         RoutedEvent.Register<AvonicPopover, OverlayEventArgs>(nameof(IonPopoverDidDismiss), RoutingStrategies.Bubble);
 
-    private static readonly string[] SafeAreaKeys = ["Avonic.SafeAreaTop", "Avonic.SafeAreaBottom", "Avonic.SafeAreaLeft", "Avonic.SafeAreaRight"];
+    private static readonly string[] SafeAreaKeys = [AppSafeArea.TopKey, AppSafeArea.BottomKey, AppSafeArea.LeftKey, AppSafeArea.RightKey];
 
     /// <summary>
     /// What a call to <see cref="Present(PopoverEvent?)"/> or <c>presentFromTrigger</c> gave, for <see cref="OnPresenting"/>, which
@@ -127,6 +127,7 @@ public partial class AvonicPopover : AvonicOverlay
 
     private AvonicBackdrop? _backdrop;
     private PopoverPanel? _wrapper;
+    private Action? _removeWrapperClick;
     private Border? _content;
     private ContentPresenter? _presenter;
     private ScrollViewer? _scroll;
@@ -302,6 +303,8 @@ public partial class AvonicPopover : AvonicOverlay
             .AddElement(popover._wrapper)
             .Duration(150)
             .FromTo("opacity", 0.01, 1);
+        // Ionic's fifth, .popover-viewport 0.01 to 1, looks for it in the shadow root, where the slotted viewport isn't: it
+        // animates nothing (measured, M1), so it isn't here.
         var content = AvonicAnimation.Create()
             .AddElement(popover._content)
             .BeforeAddWrite(() => popover.ApplyPlace(place))
@@ -462,9 +465,9 @@ public partial class AvonicPopover : AvonicOverlay
     {
         base.OnApplyTemplate(e);
         _backdrop = e.NameScope.Find<AvonicBackdrop>("PART_Backdrop");
-        _wrapper?.RemoveHandlers(OnWrapperClick);
+        _removeWrapperClick?.Invoke();
         _wrapper = e.NameScope.Find<PopoverPanel>("PART_Wrapper");
-        _wrapper?.AddClickHandlers(OnWrapperClick);
+        _removeWrapperClick = _wrapper is null ? null : PopoverClick.Listen(_wrapper, OnWrapperClick);
         _content = e.NameScope.Find<Border>("PART_Content");
         if (_presenter is not null)
         {
@@ -648,9 +651,27 @@ public partial class AvonicPopover : AvonicOverlay
         _origin = null;
     }
 
-    /// <summary>An element's box in the top level's coordinates, as <c>getBoundingClientRect</c>; null if it isn't in that window.</summary>
-    private static Rect? BoxIn(Visual element, Visual root) =>
-        element.TransformToVisual(root) is { } matrix ? new Rect(element.Bounds.Size).TransformToAABB(matrix) : null;
+    /// <summary>
+    /// An element's box in the top level's coordinates, as <c>getBoundingClientRect</c>; through the screen for one in a popup
+    /// of the window, which is a top level of its own; null for one in no window.
+    /// </summary>
+    private static Rect? BoxIn(Visual element, Visual root)
+    {
+        if (element.TransformToVisual(root) is { } matrix)
+        {
+            return new Rect(element.Bounds.Size).TransformToAABB(matrix);
+        }
+
+        return ThroughScreen(element, default, root) is { } topLeft && ThroughScreen(element, new Point(element.Bounds.Width, element.Bounds.Height), root) is { } bottomRight
+            ? new Rect(topLeft, bottomRight)
+            : null;
+    }
+
+    /// <summary>A point of one top level's in another's coordinates, through the screen; null if either isn't in a window.</summary>
+    private static Point? ThroughScreen(Visual from, Point point, Visual root) =>
+        TopLevel.GetTopLevel(from) is not null && TopLevel.GetTopLevel(root) is not null
+            ? root.PointToClient(from.PointToScreen(point))
+            : null;
 
     /// <summary>The event's point in the popover's top level; null with none, or out of its window.</summary>
     private Point? PointIn(PopoverEvent ev, Visual root)
@@ -661,14 +682,14 @@ public partial class AvonicPopover : AvonicOverlay
         }
 
         var top = ev.Target is { } target ? TopLevel.GetTopLevel(target) : TopLevel.GetTopLevel(this);
-        return top is null ? null : top.TranslatePoint(point, root);
+        return top is null ? null : top.TranslatePoint(point, root) ?? ThroughScreen(top, point, root);
     }
 
     /// <summary><c>getSafeAreaInsets</c>: the <c>Avonic.SafeArea*</c> keys as the host reads them, outside the popover's own zeros.</summary>
     private static Thickness SafeArea(Visual host)
     {
         double Read(string key) => host is IResourceHost resources && resources.TryFindResource(key, out var value) && value is double d ? d : 0;
-        return new Thickness(Read("Avonic.SafeAreaLeft"), Read("Avonic.SafeAreaTop"), Read("Avonic.SafeAreaRight"), Read("Avonic.SafeAreaBottom"));
+        return new Thickness(Read(AppSafeArea.LeftKey), Read(AppSafeArea.TopKey), Read(AppSafeArea.RightKey), Read(AppSafeArea.BottomKey));
     }
 
     // ── Content ───────────────────────────────────────────────────────────────────────────
