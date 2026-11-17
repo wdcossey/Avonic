@@ -389,7 +389,7 @@
         <Style Selector="^ /template/ Border#PART_Field">
             <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
         </Style>
-        <Style Selector="^ /template/ c|TextareaNativeInput#PART_Native">
+        <Style Selector="^ /template/ TextBox#PART_Native">
             <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
             <Setter Property="PlaceholderForeground" Value="{DynamicResource Avonic.PlaceholderColorBrush}" />
             <Setter Property="CaretBrush" Value="{DynamicResource Avonic.TextColorBrush}" />

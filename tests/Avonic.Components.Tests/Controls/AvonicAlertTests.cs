@@ -535,6 +535,11 @@ public class AvonicAlertTests
         Assert.Equal("Code", AutomationProperties.GetName(fields[2].Native!));
         Assert.False(fields[3].IsEnabled);
         Assert.True(fields[4].IsEnabled);
+
+        // ::placeholder: var(ion-placeholder-color), on the input and the textarea alike.
+        var placeholder = ((ISolidColorBrush)alert.FindResource("Avonic.PlaceholderColorBrush")!).Color;
+        Assert.Equal(placeholder, ((ISolidColorBrush)fields[0].Native!.PlaceholderForeground!).Color);
+        Assert.Equal(placeholder, ((ISolidColorBrush)fields[5].Native!.PlaceholderForeground!).Color);
     }
 
     [AvaloniaFact]
@@ -896,6 +901,23 @@ public class AvonicAlertTests
     }
 
     // ── The look ────────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void Look_A_Radios_Dot_Grows_Through_Its_Transition_But_Not_At_First()
+    {
+        using var stage = new Stage();
+        var inputs = Radios("a", "b");
+        inputs[1].Checked = true;
+        var alert = Shown(stage, new AvonicAlert { Inputs = inputs });
+        var dots = alert.GetVisualDescendants().OfType<Border>().Where(b => b.Name == "PART_Dot").ToList();
+
+        // Checked from the start: drawn at full size, as CSS doesn't transition a first style.
+        Assert.Equal(1, Scale(dots[1]), 3);
+
+        // transition: transform 280ms: a tap starts it from 0. Transitions run on real time here, so only its start is read.
+        Tap(stage, alert.InputControls[0]);
+        Assert.True(Scale(dots[0]) < 0.5, $"The dot is at {Scale(dots[0])} at once.");
+    }
 
     [AvaloniaFact]
     public void Look_Checked_Radio_Shows_Its_Dot_In_The_Primary_And_A_Focused_Button_Is_Grey()

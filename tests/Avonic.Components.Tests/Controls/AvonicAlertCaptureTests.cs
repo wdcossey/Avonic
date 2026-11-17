@@ -21,6 +21,13 @@ public class AvonicAlertCaptureTests
     private static Control Page()
     {
         var page = AvonicModalCaptureTests.PageOf("Page", "Under the alert");
+        var content = page.Children.OfType<AvonicContent>().Single();
+        var text = (TextBlock)content.Content!;
+        content.Content = null;
+        content.Content = new StackPanel
+        {
+            Children = { text, new AvonicButton { Content = "Open", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left } },
+        };
         TextElement.SetFontSize(page, 16);
         return page;
     }
@@ -248,6 +255,28 @@ public class AvonicAlertCaptureTests
         // M6: the message capped at 266, the wrapper 280.
         Near([55, 231.5, 280, 381], Box(alert.Wrapper!, scene));
         Near([55, 290.5, 280, 266], Box(Part<ScrollViewer>(alert, "PART_Message"), scene));
+    });
+
+    [AvaloniaFact]
+    public void Sample_Page_Its_Xaml_Buttons_And_Trigger() => Run((_, clock) =>
+    {
+        var page = new Avonic.Sample.Pages.AlertPage();
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        Dispatcher.UIThread.RunJobs();
+        var opener = page.FindControl<AvonicButton>("OpenAlert")!;
+        opener.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(AvonicButton.ClickEvent));
+        Advance(clock, clock.Now.TotalMilliseconds + 250);
+        Save(scene, "avonic-alert-sample.png");
+
+        var alert = page.FindControl<AvonicAlert>("BasicAlert")!;
+        Assert.Equal(["CANCEL", "OK"], alert.ButtonControls.Select(b => b.GetVisualDescendants().OfType<TextBlock>().First().Text));
+        var ok = alert.ButtonControls[1];
+        var centre = ok.TranslatePoint(new Point(ok.Bounds.Width / 2, ok.Bounds.Height / 2), scene.Window)!.Value;
+        scene.Window.MouseDown(centre, Avalonia.Input.MouseButton.Left);
+        scene.Window.MouseUp(centre, Avalonia.Input.MouseButton.Left);
+        Advance(clock, clock.Now.TotalMilliseconds + 250);
+        Assert.Equal("BasicAlert dismissed with {values: null}, role confirm", page.FindControl<TextBlock>("Status")!.Text);
     });
 
     [AvaloniaFact]
