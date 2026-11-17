@@ -98,8 +98,6 @@ public class AvonicModal : AvonicOverlay
     public static readonly RoutedEvent<OverlayEventArgs> IonModalDidDismissEvent =
         RoutedEvent.Register<AvonicModal, OverlayEventArgs>(nameof(IonModalDidDismiss), RoutingStrategies.Bubble);
 
-    /// <summary>The modals presented, for <c>dismissNestedModals</c>.</summary>
-    private static readonly List<AvonicModal> s_presented = [];
 
     private static readonly string[] SafeAreaKeys = ["Avonic.SafeAreaTop", "Avonic.SafeAreaBottom", "Avonic.SafeAreaLeft", "Avonic.SafeAreaRight"];
 
@@ -280,7 +278,6 @@ public class AvonicModal : AvonicOverlay
     protected override void OnPresenting()
     {
         _parentModal = this.GetLogicalAncestors().OfType<AvonicModal>().FirstOrDefault();
-        s_presented.Add(this);
         Mount(true);
     }
 
@@ -290,7 +287,9 @@ public class AvonicModal : AvonicOverlay
     /// </summary>
     protected override async Task<bool> OnDismissing(object? data, string? role)
     {
-        foreach (var nested in s_presented.Where(m => m._parentModal == this).ToList())
+        // Ionic queries the document; a nested inline modal is presented in the same top level, so in the same host.
+        var presented = Parent is Panel host ? host.Children.OfType<AvonicModal>() : [];
+        foreach (var nested in presented.Where(m => m._parentModal == this).ToList())
         {
             nested.DismissFromInput(OverlayRoles.ParentDismissed);
         }
@@ -306,7 +305,6 @@ public class AvonicModal : AvonicOverlay
             return;
         }
 
-        s_presented.Remove(this);
         _parentModal = null;
         if (!KeepContentsMounted)
         {

@@ -275,7 +275,7 @@ public abstract class AvonicOverlay : TemplatedControl
 
         // A dismiss always detaches it, so this is always a new attach, and a new index, as connectedCallback gives.
         var host = OverlayHost.For(topLevel);
-        if (Parent is not null || this.GetVisualParent() is not null)
+        if (Parent is not (null or OverlayHost) || this.GetVisualParent() is not (null or OverlayHost))
         {
             _moving = true;
             try

@@ -62,10 +62,21 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `MdEnterAnimation`, `MdLeaveAnimation`, `AnimationOptions` | `md.enter.js`, `md.leave.js`, `opts` | protected |
 | `OnBackdropTap()` | `onIonBackdropTap` | protected; dismisses with `OverlayRoles.Backdrop` |
 | `OverlayRoles.Backdrop`, `.Gesture`, `.IsCancel()` | `BACKDROP`, `GESTURE`, `isCancel` | `Gesture` skips the leave animation |
+| `OverlayRoles.ParentRemoved`, `.ParentDismissed`, `.Handler` | the modal's `'parent-removed'`, `'parent-dismissed'`, `'handler'` | |
+| `IsOpen` | `isOpen` | public; false to true presents, true to false dismisses, once it's attached; true at its first attach presents at the next frame. A dismiss doesn't clear it (#42) |
+| `Trigger` | `trigger` (`createTriggerController`) | public; the name of a control in its name scope, whose own `Click` routed event, or `Tapped` if it has none, presents it (#42) |
+| `ControlWillPresentEvent` and the other three | `ion<Name>WillPresent` and the rest | protected; raised just before the generic one, as Ionic does |
+| `OnPresenting()`, `OnPresented()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
+| `PresentFocusTarget` | `[role="dialog"][tabindex]` | protected; what present focuses, the overlay if null (the modal's wrapper) |
 
-Per-control events (each overlay adds its own `Ion<Name>WillPresent`, `Ion<Name>DidPresent`, `Ion<Name>WillDismiss` and
-`Ion<Name>DidDismiss`, as `ionAlertWillPresent` → `IonAlertWillPresent`, raised with the base's generic ones), controllers, `isOpen`, `trigger` and inline overlays are each overlay's
-issue: see [PLAN.md](PLAN.md#deferred).
+**Inline overlays** (`CoreDelegate`, #42): an overlay with a parent when it's presented is moved to the overlay host, with an
+invisible placeholder in its place (in a `Panel`, a `Decorator`, a `ContentControl` or a `ContentPresenter`; anything else throws),
+and moved back after its dismiss. `Present()` uses its own top level. It keeps the page's `DataContext` through a style-priority
+binding to the placeholder's; a placeholder that leaves the visual tree while it's out dismisses it with `parent-removed`. See
+[ion-modal](../../components/ion-modal/README.md).
+
+Per-control events are each overlay's own (`ionAlertWillPresent` → `IonAlertWillPresent`, through `ControlWillPresentEvent`), as
+are controllers: see [PLAN.md](PLAN.md#deferred).
 
 ## What it does, in short
 
@@ -127,11 +138,9 @@ Avonic additions, which shadow no Ionic name:
   or shows two of its activities in split screen, would need `Present(TopLevel)`. So would `Present()` from a view's constructor
   under the factory, which runs before its activity's top level exists, and an app that adds `AvonicTheme` or
   `AvonicComponentsStyles` only after its first activity, rather than in its `App.axaml`.
-- **Focus at present, for the modal ([#42](https://github.com/wdcossey/Avonic/issues/42)).** Since Ionic 8.8.19, `present()` with
-  `keyboardClose` focuses the first element in the overlay's root with `role="dialog"` and a `tabindex`, with `preventScroll`, and
-  the host only when there's none. Of Ionic's overlays, only `ion-modal`'s `.modal-wrapper` is one: the action sheet and loading
-  put the role on the host, which `querySelector` doesn't search, and the alert's is `alertdialog`. `AvonicOverlay` focuses itself,
-  which is right for every overlay but the modal, which will need a protected member for its wrapper, and to check that focusing it
-  doesn't scroll a sheet that's partly off screen. 8.8.19's modal also pads its content's end by the bottom safe area, in a modal
-  that isn't a sheet or a card and has no footer (`--internal-content-safe-area-padding-bottom`, which `content.css` reads).
+- **Focus at present.** Since Ionic 8.8.19, `present()` with `keyboardClose` focuses the first element in the overlay's root with
+  `role="dialog"` and a `tabindex`, and the host only when there's none. Of Ionic's overlays, only `ion-modal`'s `.modal-wrapper`
+  is one, which `AvonicModal` gives as `PresentFocusTarget` (#42). Whether focusing it scrolls a sheet that's partly off screen is
+  for the sheet. The modal's padding of its content's end by the bottom safe area is a gap of `AvonicContent`'s, in
+  [ion-modal](../../components/ion-modal/README.md#known-gaps).
 - Not tried in a real window: `tools/real-window/drive.ps1` has a section for the sample page, which the batch's runner runs.
