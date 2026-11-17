@@ -163,10 +163,10 @@
                         <!-- .action-sheet-button-inner: a flex row, align-items: center, justify-content: flex-start; z-index 1 -->
                         <c:FlexRow Name="PART_Inner" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
                                    IsHitTestVisible="False">
-                            <!-- .action-sheet-icon: 1.5rem, margin-inline-end 32px, color: var(color). Its basis is its 24 px,
-                                 and it shrinks to nothing beside a long label, as ion-icon's contain: strict lets it. -->
+                            <!-- .action-sheet-icon: 1.5rem, margin-inline-end 32px, color: var(color). FlexRow shrinks it below its
+                                 24 px beside a long label, as ion-icon's contain: strict lets Chromium (14.78 wide at 390). -->
                             <c:AvonicIcon Name="PART_Icon" Icon="{TemplateBinding Icon}" FontSize="24" Margin="0,0,32,0"
-                                          c:FlexRow.FlexBasis="24" MinWidth="0" VerticalAlignment="Center"
+                                          VerticalAlignment="Center"
                                           IsVisible="{TemplateBinding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             <TextBlock Name="PART_Label" Text="{TemplateBinding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
                         </c:FlexRow>
