@@ -94,6 +94,18 @@
             </Setter>
         </Style>
 
+        <!-- .action-sheet-container: max-height: calc(100dvh - (ion-safe-area-top + ion-safe-area-bottom)), so the group still
+             shrinks and scrolls when the wrapper's own max-height is larger, or none -->
+        <Style Selector="^ /template/ c|ActionSheetContainer#PART_Container">
+            <Setter Property="MaxHeight">
+                <MultiBinding Converter="{x:Static c:ActionSheetPanel.ContainerMaxHeightConverter}">
+                    <Binding Path="$parent[c:AvonicActionSheet].Bounds.Height" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
         <!-- .action-sheet-group: background: var(background); the last one's padding-bottom: var(ion-safe-area-bottom) -->
         <Style Selector="^ /template/ Border#PART_Group, ^ /template/ Border#PART_CancelGroup">
             <Setter Property="Background">

@@ -1119,6 +1119,97 @@ public class AvonicActionSheetTests
     }
 
     [AvaloniaFact]
+    public void B9_Space_And_Enter_On_A_Radio_Click_It_On_The_Press_Once()
+    {
+        using var stage = new Stage();
+        foreach (var key in new[] { PhysicalKey.Space, PhysicalKey.Enter })
+        {
+            var calls = new List<string>();
+            var sheet = Shown(stage, new AvonicActionSheet { Buttons = [Radio("Apple", calls: calls), Radio("Banana", true, calls: calls)] });
+            sheet.ButtonControls[0].Focus();
+            stage.Window.KeyPressQwerty(key, RawInputModifiers.None);
+            Stage.Settle();
+            Assert.Equal(["Apple"], calls);
+            Assert.True(sheet.ButtonControls[0].IsChecked);
+            stage.Window.KeyReleaseQwerty(key, RawInputModifiers.None);
+            Stage.Settle();
+            stage.After(Left);
+            Assert.Equal(["Apple"], calls);
+        }
+    }
+
+    [AvaloniaFact]
+    public void B9_Arrows_Do_Nothing_Once_A_Dismiss_Has_Started()
+    {
+        using var stage = new Stage();
+        var sheet = Shown(stage, new AvonicActionSheet { Buttons = [Radio("Apple"), Radio("Banana", true), Radio("Cherry")] });
+        sheet.ButtonControls[1].Focus();
+        sheet.Dismiss();
+        Stage.Settle();
+        stage.After(100);
+        Key(stage, PhysicalKey.ArrowDown);
+        Assert.Equal([false, true, false], sheet.ButtonControls.Select(b => b.IsChecked));
+    }
+
+    [AvaloniaFact]
+    public void B8_A_Disabled_Cancel_Button_Clicks_With_No_Ripple_Or_Focus_Highlight()
+    {
+        using var stage = new Stage();
+        var sheet = Shown(stage, new AvonicActionSheet { Buttons = ["A", new ActionSheetButton { Text = "Cancel", Role = "cancel", Disabled = true }] });
+        var cancel = sheet.CancelControl!;
+        Assert.True(cancel.IsEffectivelyEnabled);
+        Assert.False(Avonic.Components.Behaviors.Activatable.GetIsEnabled(cancel));
+        Assert.False(Avonic.Components.Behaviors.FocusVisible.GetIsEnabled(cancel));
+        Assert.True(Avonic.Components.Behaviors.Activatable.GetIsEnabled(sheet.ButtonControls[0]));
+
+        Key(stage, PhysicalKey.Tab);
+        Key(stage, PhysicalKey.Tab);
+        Assert.Same(cancel, stage.Focused);
+        Assert.Equal(0, cancel.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Highlight").Opacity);
+    }
+
+    [AvaloniaFact]
+    public void B12_With_No_Max_Height_The_Container_Still_Caps_At_The_Window_And_The_Group_Scrolls()
+    {
+        using var stage = new Stage();
+        stage.Window.Resources["Avonic.SafeAreaTop"] = 30.0;
+        var sheet = new AvonicActionSheet
+        {
+            Buttons = [.. Enumerable.Range(1, 30).Select(i => new ActionSheetButton { Text = $"Option {i}" }), new ActionSheetButton { Text = "Cancel", Role = "cancel" }],
+        };
+        sheet.Resources["Avonic.ActionSheet.MaxHeight"] = "none";
+        Shown(stage, sheet);
+        stage.Render();
+
+        // calc(100dvh - 30px): 814, the group 762 of it, scrolling.
+        Assert.Equal(814, Part<ActionSheetContainer>(sheet, "PART_Container").Bounds.Height, 1);
+        Assert.Equal(762, Part<ScrollViewer>(sheet, "PART_GroupScroller").Viewport.Height, 1);
+        Assert.Equal(844, Box(sheet.CancelControl!, stage).Bottom, 1);
+    }
+
+    [AvaloniaFact]
+    public void B15_A_Reused_Buttons_New_Text_Raises_Its_Name_Change()
+    {
+        using var stage = new Stage();
+        var sheet = new AvonicActionSheet();
+        sheet.Buttons!.Add("Share");
+        Shown(stage, sheet);
+        var peer = ControlAutomationPeer.CreatePeerForElement(sheet.ButtonControls[0]);
+        Assert.Equal("Share", peer.GetName());
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.NameProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+        sheet.Buttons[0] = "Delete";
+        Stage.Settle();
+        Assert.Equal(["Delete"], changes);
+    }
+
+    [AvaloniaFact]
     public void B17_The_Group_Scrolls_With_The_Wheel_And_A_Touch_Drag()
     {
         using var stage = new Stage();

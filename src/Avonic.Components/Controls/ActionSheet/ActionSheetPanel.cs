@@ -51,6 +51,20 @@ public class ActionSheetPanel : Panel
         return string.Create(CultureInfo.InvariantCulture, $"calc(100% - {top + bottom}px)");
     });
 
+    /// <summary>
+    /// <c>.action-sheet-container</c>'s <c>max-height: calc(100dvh - (var(--ion-safe-area-top) + var(--ion-safe-area-bottom)))</c>:
+    /// the values are the sheet's height, which is the window's, then the top and bottom safe areas. Before the sheet has a height,
+    /// none.
+    /// </summary>
+    public static readonly IMultiValueConverter ContainerMaxHeightConverter = new FuncMultiValueConverter<object?, double>(values =>
+    {
+        var list = values.ToList();
+        var height = list.ElementAtOrDefault(0) is double h ? h : 0;
+        var top = list.ElementAtOrDefault(1) is double t ? t : 0;
+        var bottom = list.ElementAtOrDefault(2) is double b ? b : 0;
+        return height > 0 ? Math.Max(0, height - top - bottom) : double.PositiveInfinity;
+    });
+
     private Size _content;
 
     static ActionSheetPanel()
@@ -93,13 +107,14 @@ public class ActionSheetPanel : Panel
             w = 0;
         }
 
+        var fixedHeight = AlertPanel.Length(ContentHeight, height, availableSize);
         var desired = default(Size);
         foreach (var child in Children)
         {
             double h;
-            if (AlertPanel.Length(ContentHeight, height, availableSize) is { } fixedHeight)
+            if (fixedHeight is { } fh)
             {
-                h = Clamp(fixedHeight, minHeight, maxHeight);
+                h = Clamp(fh, minHeight, maxHeight);
             }
             else
             {

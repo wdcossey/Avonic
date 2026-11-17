@@ -90,6 +90,9 @@ public class AvonicActionSheet : AvonicOverlay
     private ActionSheetAutomationPeer? _peer;
     private bool _inTree;
 
+    /// <summary>Ionic's <c>presented</c>: from present until a dismiss starts.</summary>
+    private bool _presented;
+
     /// <summary>The buttons the last <c>buttonsChanged</c> saw, to tell a change made while the list wasn't followed.</summary>
     private ActionSheetButton[] _seen = [];
 
@@ -269,7 +272,11 @@ public class AvonicActionSheet : AvonicOverlay
     internal double BackdropOpacity() => OverlayHandler.BackdropOpacity(this, "Avonic.ActionSheet.BackdropOpacity");
 
     /// <summary>The render, once there's an overlay index for the buttons' ids.</summary>
-    protected override void OnPresenting() => RenderButtons();
+    protected override void OnPresenting()
+    {
+        _presented = true;
+        RenderButtons();
+    }
 
     protected override AutomationPeer OnCreateAutomationPeer() => _peer = new ActionSheetAutomationPeer(this);
 
@@ -332,7 +339,8 @@ public class AvonicActionSheet : AvonicOverlay
 
             ButtonsChanged();
         }
-        else if (change.Property == HeaderProperty || change.Property == SubHeaderProperty || change.Property == HtmlAttributesProperty)
+        else if (change.Property == HeaderProperty || change.Property == SubHeaderProperty || change.Property == HtmlAttributesProperty
+                 || change.Property == AutomationProperties.NameProperty)
         {
             // aria-labelledby follows the title's text.
             _peer?.NameChanged();
@@ -440,6 +448,7 @@ public class AvonicActionSheet : AvonicOverlay
             Fill(control, button);
             AutomationProperties.SetAutomationId(control, button.Id ?? $"action-sheet-button-{OverlayIndex}-{i}");
             control.IsEnabled = !button.Disabled;
+            control.IsActivatable = !button.Disabled;
             if (isRadio)
             {
                 var active = ButtonKey(button, i) == _activeRadio;
@@ -470,6 +479,9 @@ public class AvonicActionSheet : AvonicOverlay
             // Spread, with nothing of Ionic's after it: disabled and id reach the cancel button.
             var attributes = cancel.HtmlAttributes;
             control.IsEnabled = !(attributes is not null && attributes.TryGetValue("disabled", out var disabled) && AlertClasses.IsTrue(disabled));
+
+            // Its own disabled is ignored but for buttonClass: no ion-activatable or ion-focusable.
+            control.IsActivatable = !cancel.Disabled;
             if (attributes is not null && attributes.TryGetValue("id", out var id) && id?.ToString() is { Length: > 0 } automationId)
             {
                 AutomationProperties.SetAutomationId(control, automationId);
@@ -605,20 +617,27 @@ public class AvonicActionSheet : AvonicOverlay
     /// </summary>
     private void OnWillDismissCancel(object? sender, OverlayEventArgs e)
     {
-        if (ReferenceEquals(e.Source, this) && OverlayRoles.IsCancel(e.Role) && CancelButton is { } cancel)
+        if (!ReferenceEquals(e.Source, this))
+        {
+            return;
+        }
+
+        // dismiss() sets presented to false before its events and its animation.
+        _presented = false;
+        if (OverlayRoles.IsCancel(e.Role) && CancelButton is { } cancel)
         {
             LogFault(CallButtonHandler(cancel), "cancel button's handler");
         }
     }
 
     /// <summary>
-    /// Ionic's <c>onKeydown</c>, with radios, while presented, on a radio: ArrowDown and ArrowRight focus and check the next enabled
-    /// radio, ArrowUp and ArrowLeft the previous, wrapping. Space and Enter, which check it and click it, are its native button's
-    /// click here, which does the same.
+    /// Ionic's <c>onKeydown</c>, with radios, while presented (not during the dismiss), on a radio: ArrowDown and ArrowRight focus and
+    /// check the next enabled radio, ArrowUp and ArrowLeft the previous, wrapping; Space and Enter check it and click it on the key's
+    /// press, with its default prevented, so the native button doesn't click it again on the release.
     /// </summary>
     private void OnSheetKeyDown(object? sender, KeyEventArgs e)
     {
-        if (!IsShown || e.Source is not ActionSheetNativeButton { IsRadio: true } current || !_buttonControls.Contains(current))
+        if (!_presented || e.Source is not ActionSheetNativeButton { IsRadio: true } current || !_buttonControls.Contains(current))
         {
             return;
         }
@@ -627,6 +646,18 @@ public class AvonicActionSheet : AvonicOverlay
         var index = radios.IndexOf(current);
         if (index < 0)
         {
+            return;
+        }
+
+        if (e.Key is Key.Space or Key.Enter)
+        {
+            e.Handled = true;
+            if (current.Button is { } button)
+            {
+                SelectRadio(current);
+                LogFault(ButtonClick(button), "button's handler");
+            }
+
             return;
         }
 

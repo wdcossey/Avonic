@@ -36,6 +36,8 @@ public class ActionSheetNativeButton : TemplatedControl
     private string[] _cssClasses = [];
     private bool _checked;
     private ButtonPeer? _peer;
+    private IDisposable? _activatable;
+    private IDisposable? _focusable;
 
     static ActionSheetNativeButton()
     {
@@ -45,8 +47,39 @@ public class ActionSheetNativeButton : TemplatedControl
     public ActionSheetNativeButton()
     {
         _ = new NativeButton(this, _ => Clicked?.Invoke(this, EventArgs.Empty), () => true, static () => { });
-        SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
-        SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style);
+        IsActivatable = true;
+    }
+
+    /// <summary>
+    /// <c>ion-activatable</c> and <c>ion-focusable</c>, which Ionic gives a button that isn't <c>disabled</c>: its ripple and its focus
+    /// highlight. A cancel button stays clickable with <c>disabled</c>, but loses both.
+    /// </summary>
+    internal bool IsActivatable
+    {
+        get => _activatable is not null;
+        set
+        {
+            if (value == IsActivatable)
+            {
+                return;
+            }
+
+            _activatable?.Dispose();
+            _focusable?.Dispose();
+            _activatable = value ? SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style) : null;
+            _focusable = value ? SetValue(FocusVisible.IsEnabledProperty, true, BindingPriority.Style) : null;
+        }
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        // A render that reuses the control can change what names it.
+        if (change.Property == TextProperty || change.Property == AutomationProperties.NameProperty)
+        {
+            _peer?.NameChanged();
+        }
     }
 
     public string? Text
@@ -149,6 +182,19 @@ public class ActionSheetNativeButton : TemplatedControl
             RaisePropertyChangedEvent(TogglePatternIdentifiers.ToggleStateProperty,
                 old ? ToggleState.On : ToggleState.Off, now ? ToggleState.On : ToggleState.Off);
 
+        private string? _name;
+
+        /// <summary>The name, read again, and raised if it changed.</summary>
+        public void NameChanged()
+        {
+            var name = CurrentName();
+            if (name != _name)
+            {
+                RaisePropertyChangedEvent(AutomationElementIdentifiers.NameProperty, _name, name);
+                _name = name;
+            }
+        }
+
         protected override object? GetProviderCore(Type providerType) =>
             providerType == typeof(IToggleProvider) && !owner.IsRadio || providerType == typeof(IInvokeProvider) && owner.IsRadio
                 ? null
@@ -157,7 +203,9 @@ public class ActionSheetNativeButton : TemplatedControl
         protected override AutomationControlType GetAutomationControlTypeCore() =>
             owner.IsRadio ? AutomationControlType.RadioButton : AutomationControlType.Button;
 
-        protected override string? GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.Text;
+        protected override string? GetNameCore() => _name = CurrentName();
+
+        private string? CurrentName() => base.GetNameCore() is { Length: > 0 } name ? name : owner.Text;
 
         protected override bool IsContentElementCore() => true;
 
