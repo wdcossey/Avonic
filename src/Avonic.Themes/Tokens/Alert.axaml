@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-alert, md. A size takes a number (px) or a CSS string: px, a percentage of the window, vw and vh,
+         a sum or difference of two ("100vh - 96px"), min(a, b), or "auto" ("none" for a maximum). -->
+
+    <!-- backdrop-opacity: var(ion-backdrop-opacity, 0.32). Unset, it follows Avonic.BackdropOpacity. Read by the animations. -->
+    <b:CssUnset x:Key="Avonic.Alert.BackdropOpacity" />
+    <!-- background: var(ion-overlay-background-color, var(ion-background-color, #fff)). Unset, it follows
+         Avonic.OverlayBackgroundColorBrush. -->
+    <b:CssUnset x:Key="Avonic.Alert.Background" />
+    <x:String x:Key="Avonic.Alert.Width">auto</x:String>
+    <x:Double x:Key="Avonic.Alert.MinWidth">250</x:Double>
+    <x:String x:Key="Avonic.Alert.Height">auto</x:String>
+    <x:String x:Key="Avonic.Alert.MinHeight">auto</x:String>
+
+    <!-- These change on a tablet in md (@media (min-width: 768px), :breakpoint-md), so they're unset, and the defaults are the
+         Md keys below. Set one, and it wins at every size, as an app's variable on ion-alert does. -->
+    <b:CssUnset x:Key="Avonic.Alert.MaxWidth" />
+    <b:CssUnset x:Key="Avonic.Alert.MaxHeight" />
+
+    <x:Double x:Key="Avonic.Alert.Md.MaxWidth">280</x:Double>
+    <x:String x:Key="Avonic.Alert.Md.MaxHeight">90%</x:String>
+    <!-- At least 768 wide: 48 from each edge, up to 560 by 560. -->
+    <x:String x:Key="Avonic.Alert.Md.MaxWidthTablet">min(100vw - 96px, 560px)</x:String>
+    <x:String x:Key="Avonic.Alert.Md.MaxHeightTablet">min(100vh - 96px, 560px)</x:String>
+
+</ResourceDictionary>

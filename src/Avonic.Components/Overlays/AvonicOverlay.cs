@@ -228,6 +228,14 @@ public abstract class AvonicOverlay : TemplatedControl
     }
 
     /// <summary>
+    /// What an overlay's own <c>present()</c> does after the shared one, under the lock: after <see cref="DidPresent"/> and the
+    /// shared focus, as the alert then focuses its wrapper or its one button.
+    /// </summary>
+    protected virtual void OnPresented()
+    {
+    }
+
+    /// <summary>
     /// What an overlay's own <c>dismiss()</c> does before the shared one, under the lock: false stops the dismiss, which then
     /// returns false, as the modal's <c>canDismiss</c> does.
     /// </summary>
@@ -295,6 +303,7 @@ public abstract class AvonicOverlay : TemplatedControl
         host.Attach(this);
         OnPresenting();
         await PresentCore(host.TopLevel);
+        OnPresented();
     }
 
     /// <summary>
