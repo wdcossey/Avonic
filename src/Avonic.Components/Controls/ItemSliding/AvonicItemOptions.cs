@@ -69,8 +69,8 @@ public class AvonicItemOptions : ItemsControl
     }
 
     /// <summary>
-    /// Ionic <c>isEndSide(side)</c>: whether the options are on the physical right, which <c>item-options-end</c> means. Ionic reads
-    /// the document's <c>dir</c>; this is the options' own <see cref="Visual.FlowDirection"/>, as the mapping rule for <c>isRTL</c> says.
+    /// Ionic <c>isEndSide(side, el)</c>: whether the options are on the physical right, which <c>item-options-end</c> means. Ionic
+    /// reads the nearest ancestor's <c>dir</c> since 9.0.10; this is the options' own <see cref="Visual.FlowDirection"/>, which inherits.
     /// </summary>
     internal bool IsRight => (Side == ItemOptionsSide.End) != (FlowDirection == Avalonia.Media.FlowDirection.RightToLeft);
 

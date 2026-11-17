@@ -795,6 +795,20 @@ public class AvonicGridTests
         Near(290, X(pulled, scene));
     });
 
+    [AvaloniaFact]
+    public void B21_RTL_From_An_Element_Around_The_Grid_Mirrors_Offset_And_Push() => InstalledTheme.Run(_ =>
+    {
+        // Since Ionic 9.0.10, col.js reads isRTL(this.el). Measured on 9.0.11 with dir="rtl" on a div around the grid only, in an
+        // LTR page: size 3 offset 3 and size 3 push 3 both at x = 195. Ionic 8 read document.dir, and left them at 290 and 385.
+        var offset = new AvonicCol { Size = "3", Offset = "3" };
+        var push = new AvonicCol { Size = "3", Push = "3" };
+        using var scene = Show(new Border { FlowDirection = FlowDirection.RightToLeft, Child = Grid(Row(offset), Row(push)) });
+        Run();
+
+        Near(195, X(offset, scene));
+        Near(195, X(push, scene));
+    });
+
     // ── 22. Rows in a grid ───────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]

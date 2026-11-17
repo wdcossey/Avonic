@@ -206,3 +206,11 @@ back handled, and the caret doesn't move, so a `ScrollViewer` around it never se
 which scrolls by a page (measured in Chromium for #67). Arrows, Home and End move the caret, and Space isn't handled as a key, as
 expected. `AvonicContent` takes the two keys on their way down from a one-line field to get around it (`OnContainerKeyDownTunnel`). A
 multi-line `TextBox` handling them is right, as a `<textarea>` moves its caret with them. Not checked with `FluentTheme`.
+
+## A change of `AutomationProperties.Name` raises no name change on the peer
+
+**Measured in a headless test, and the cause not read.** With a peer made for a stock `Button` (and for each control in
+`AttributeForwardingTests`), `AutomationProperties.SetName` after load changes what `GetName()` returns, but the peer's `PropertyChanged`
+raises nothing for `AutomationElementIdentifiers.NameProperty`. A browser fires a name change when an element's `aria-label` changes,
+which Ionic 9's `utils/attribute-controller.js` relies on (#207), so a screen reader may not notice a renamed control until it reads it
+again. `AvonicToggle` raises it itself, for a name made from its content. Not tried with a real screen reader.

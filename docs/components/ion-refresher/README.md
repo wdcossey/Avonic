@@ -6,6 +6,9 @@ Status: done · [#35](https://github.com/wdcossey/Avonic/issues/35) · two of Io
 down from the top of an `AvonicContent`; let go past 0.4 of the pull and it refreshes, with a spinning icon, until the app calls
 `Complete()`. The plan is in [PLAN.md](PLAN.md), the comparison with Ionic in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.1**, the refresher checks its `slot` in `componentWillLoad`, once frameworks have
+assigned it: nothing here, as Avalonia sets properties before attach (#207).
+
 ## Usage
 
 The refresher goes in the content's fixed slot, as Ionic's needs `slot="fixed"`.

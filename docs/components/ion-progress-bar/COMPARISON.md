@@ -68,7 +68,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicPro
 | 8 | Indeterminate | the spans at 125 ms steps in [PLAN.md](PLAN.md#measured) | match, within 0.5 px, at all eight times and at 3000 ms |
 | 9 | A change of type | the kept element eases, the bars and the stream start at 0; 67 ms in, the track at 208.8 and the secondary bar at −17.6..6.7 | match, within 1 px |
 | 10 | Reversed | progress 250.6..358, track 143.2..358, dots 0..143.2 | match, and the stream runs right |
-| 11 | RTL | `document.dir="rtl"` reverses; `reversed` puts it back | match, through the inherited `FlowDirection`. See the plan |
+| 11 | RTL | `document.dir="rtl"` reverses; `reversed` puts it back. On 9.0.11 `dir="rtl"` on an ancestor `div` does too (`isRTL(el)`, 9.0.10) | match, through the inherited `FlowDirection` (`B11`, from a `Border` around the bar). See the plan |
 | 12 | Colour | danger: progress `rgb(197, 0, 15)`, track and dots at 0.3 | match. An unknown colour draws nothing, from the CSS |
 | 13 | Host classes | `progress-bar-determinate`, `-indeterminate`, `-reversed`, `-solid` | match, as pseudoclasses |
 | 14 | `AvonicConfig.Animated` off | `animated: false` doesn't reach this control's CSS: it eases and moves | match (#87): it eases and moves |

@@ -246,7 +246,7 @@ public class AvonicItemSliding : ItemsControl
         _ => _rightOptions,
     };
 
-    /// <summary>Ionic <c>isEndSide(side)</c>, with this control's <see cref="Visual.FlowDirection"/> for the document's <c>dir</c>.</summary>
+    /// <summary>Ionic <c>isEndSide(side, el)</c>, with this control's inherited <see cref="Visual.FlowDirection"/> for the nearest <c>dir</c>.</summary>
     private bool IsEndSide(ItemOptionsSide side) => (side == ItemOptionsSide.End) != IsRtl;
 
     private bool IsRtl => FlowDirection == FlowDirection.RightToLeft;

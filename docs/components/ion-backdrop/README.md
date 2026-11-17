@@ -22,7 +22,7 @@ the `backdrop` role.
 |---|---|---|---|---|
 | [x] | `stopPropagation` | `StopPropagation` | `true` | The tap goes no further: an `AvonicButton`, item or chip around it doesn't click, and a parent's `Tapped` isn't raised |
 | [x] | `tappable` | `Tappable` | `true` | Raises `IonBackdropTap`; a hand cursor. False: nothing, and it still covers what's under it |
-| [x] | `visible` | `Visible` | `true` | False: a transparent background, still taking the tap |
+| [x] | `visible` | `Visible` | `true` | False: a transparent background, still taking the tap. Ionic 9's docs say the same: it hides only the default background, and doesn't stop the blocking. An app's own background is a known gap, below |
 | [x] | `ionBackdropTap` | `IonBackdropTap` | | Routed, bubbling |
 | [ ] | `mode` | none | | Not exposed (ADR 0001) |
 
@@ -49,6 +49,11 @@ pseudoclasses `:backdrop-hide` (transparent) and `:backdrop-no-tappable` (the de
 
 ## Known gaps
 
+- **`Visible="False"` hides an app's plain style's background too.** Ionic 9's docs for `visible` say it "does not override a custom
+  background set on `ion-backdrop`", and it doesn't: measured on 9.0.11, a page's `ion-backdrop { background: red }` beats
+  `:host(.backdrop-hide)`, `rgb(255, 0, 0)` with `visible="false"`. Here the theme's `:backdrop-hide` setter has an activator, so it
+  beats an app's plain `c|AvonicBackdrop` style (measured: transparent). A local `Background` still wins. Ionic 8 behaved the same;
+  only its docs are new (#207).
 - Opacity is blended one level of 255 differently from Chromium (253 against 252 at 0.01, 174 against 173 at 0.32). Measured in
   [COMPARISON.md](COMPARISON.md).
 - With `StopPropagation`, a `Tapped` handler on the backdrop itself needs `handledEventsToo`, as the backdrop's class handler runs

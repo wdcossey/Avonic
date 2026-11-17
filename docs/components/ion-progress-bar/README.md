@@ -61,8 +61,9 @@ Everything is listed and measured in [PLAN.md](PLAN.md#behaviours). In short:
   carries on from where it is. Not before the bar's first frame, as Stencil renders a new element at the next frame.
 - **The dots stream left** by 10 px every 450 ms, and the indeterminate bars loop every 2 s, both from the moment the bar
   appeared or changed type, as CSS animations start when the element does.
-- **Right-to-left reverses the bar,** and `Reversed` puts it back, as `document.dir` does in Ionic. The bar's own parts are always
-  laid out left to right.
+- **Right-to-left reverses the bar,** and `Reversed` puts it back, as `dir` does in Ionic. An ancestor's `FlowDirection` does it
+  too, as an ancestor's `dir` does since Ionic 9.0.10 (measured on 9.0.11, #207). The bar's own parts are always laid out left to
+  right.
 - **`AvonicConfig.Animated` doesn't stop it.** Ionic's `animated` config reaches the ripple (`tap-click`) and the transitions of
   the accordion, the menu, `ion-nav`, `ion-router-outlet`, overlays and the searchbar, and the skeleton text's shimmer, not
   this control's CSS. A progress bar is the user's only sign that something is happening, so with it off the changes still
@@ -80,8 +81,7 @@ None.
 
 Each is in the [plan](PLAN.md#deliberate-differences), with its measurement.
 
-- **Right-to-left is the inherited `FlowDirection`,** so an ancestor set right to left reverses the bar. Ionic reads only
-  `document.dir`, and a `dir="rtl"` ancestor does nothing there, measured.
+- **A change of direction reverses the bar at once,** where Ionic reads the direction only when it renders.
 - **A change of type raises no automation event,** as WPF's progress bar raises none, by the decision in #87. A value set while
   indeterminate is announced by nothing, and read when a client next looks. What Chromium announces wasn't measured.
 - **The dots' edges are anti-aliased,** where Chromium draws the gradient's hard stop. Each dot is in the same place and of the

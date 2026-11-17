@@ -1,6 +1,8 @@
 # ion-progress-bar → `AvonicProgressBar` — Plan
 
-Ionic 8.8.19, from `dist/collection/components/progress-bar/progress-bar.js` and `progress-bar.md.css`, and `core.json`.
+Ionic 8.8.19, from `dist/collection/components/progress-bar/progress-bar.js` and `progress-bar.md.css`, and `core.json`. The
+reference is Ionic 9.0.11, whose `progress-bar.js` differs only in reading the direction from `isRTL(el)` (9.0.10), measured
+again for RTL (#207), and whose `progress-bar.md.css` is the same.
 Every number here was measured in Chromium, md, at 390 wide, with the bars 358 wide, by a throwaway `playwright-core` script
 that paused the CSS animations with the Web Animations API (`animation.pause(); animation.currentTime = ms`) to read them at
 a known time. The reference render is [`ref/`](ref/), and the comparison is [COMPARISON.md](COMPARISON.md). During the build,
@@ -56,7 +58,7 @@ There's no `--buffer-background` in 8.8.19: `core.json`, the CSS and the JS don'
 | Transition | `transform 150ms linear` on the progress, the track and both containers. 0.2 → 0.8 measured 0.2, 0.267, 0.333, 0.4 … 0.8 one frame at a time, done 150 ms after it began. The buffer the same: 268.5 → 89.5 while the circles' x stayed at −10 |
 | Clamping | `value="1.5"` draws 358 and reports `aria-valuenow="1.5"`; `value = −1` draws 0 and reports −1. `buffer = 1.5` is clamped to 1 and the host loses `progress-bar-solid` |
 | Reversed | `transform: scaleX(−1)` on the host, about its centre: `value="0.3" buffer="0.6"` puts the progress at 250.6..358, the track at 143.2..358, and the dots from 0 to 143.2 |
-| RTL | `document.dir = 'rtl'` reverses every bar, and a reversed one goes back: `progress-bar-reversed: document.dir === 'rtl' ? !reversed : reversed`. A `dir="rtl"` ancestor does nothing, measured. Only the document counts |
+| RTL | `document.dir = 'rtl'` reverses every bar, and a reversed one goes back: `progress-bar-reversed: isRTL(el) ? !reversed : reversed`. Since 9.0.10 `isRTL(el)` is the nearest ancestor's `dir`: on 9.0.11, with `dir="rtl"` on an ancestor `div` only, the bar has `progress-bar-reversed` and a `reversed` one hasn't. 8.8.19 read `document.dir` only, and an ancestor did nothing, measured |
 | Colour | `color="danger"`: progress `rgb(197, 0, 15)`, track and dots `rgba(197, 0, 15, 0.3)`. `--background` and `--progress-background` are still primary, unused |
 | Accessibility | `role="progressbar"`, `aria-valuemin="0"`, `aria-valuemax="1"`, `aria-valuenow` = the raw value when determinate, absent when indeterminate |
 | Type change | Re-renders, and Stencil keeps the first `div` and patches its class: the `.progress` becomes the indeterminate `.progress-buffer-bar`, and back. So that element eases over 150 ms from its old scale. Determinate 0.25 → indeterminate: the track goes 89.5, 149.2, 208.8, 268.5, 328.2, 358 at 33 ms steps. Indeterminate → determinate 0.25: the progress goes 358 → 89.5 the same way. The other elements are new: the indeterminate bars and `buffering` start at 0, and the determinate track is at the buffer at once |
@@ -103,7 +105,7 @@ Each becomes a test in `AvonicProgressBarTests`.
 | 8 | Indeterminate: two bars on a 2 s loop, at the measured positions, from the moment the bar became indeterminate, over the full track | keyframes; measured at 125 ms steps |
 | 9 | A change of type restarts the animations, eases the kept element (the progress or the indeterminate track) from its old scale, and doesn't ease the determinate track. The indeterminate bars are inside the track, so its ease scales them too: 67 ms after 0.25 → indeterminate, the track at 208.8 and the secondary bar at −17.6..6.7 | Stencil's patch; measured |
 | 10 | `Reversed` mirrors the whole bar about its centre, including the stream's direction. An app's `RenderTransform` replaces it | `:host(.progress-bar-reversed) { transform: scaleX(-1) }` |
-| 11 | Right-to-left reverses it, and `Reversed` in RTL puts it back. Nothing else is mirrored: the bar's internals are always LTR | `document.dir === 'rtl' ? !reversed : reversed`, `direction: ltr` |
+| 11 | Right-to-left reverses it, and `Reversed` in RTL puts it back. Nothing else is mirrored: the bar's internals are always LTR | `isRTL(el) ? !reversed : reversed` (`document.dir` before 9.0.10), `direction: ltr` |
 | 12 | `Color`: the progress is the base colour, and the track and the dots are the base colour at 0.3. An unknown colour draws nothing. No colour inside a coloured ancestor keeps the defaults | `:host(.ion-color)` rules; `var()` invalid at computed-value time |
 | 13 | Host classes: `:type-determinate` / `:type-indeterminate`, `:reversed` for the effective direction, `:solid` when `Buffer` is exactly 1 | `createColorClasses(...)` |
 | 14 | `AvonicConfig.Animated` off changes nothing: changes ease, and the stream and the indeterminate bars move (#87, which replaced "changes snap and the animations stand at time 0") | `animated` isn't read by `progress-bar.js` or its CSS. `progress-paused` is for `_testing`, Ionic's private screenshot config, which isn't mapped |
@@ -156,8 +158,9 @@ control does the same: `RenderTransform` on the host at style priority, so an ap
 `FlowDirection.LeftToRight`, set by the control, because the internals are `direction: ltr`. In a right-to-left window that
 root mirrors itself back, and the effective direction is computed: `FlowDirection == RightToLeft ? !Reversed : Reversed`.
 `BypassFlowDirectionPolicies`, as `AvonicIcon` uses, isn't enough here: it stops the host's own mirroring, and then each child
-mirrors again, as its direction differs from the host's. Ionic reads `document.dir`, the document's direction only; the nearest
-thing in Avalonia is the inherited `FlowDirection`, which an ancestor can also set. That's the one deviation, recorded.
+mirrors again, as its direction differs from the host's. Since 9.0.10 Ionic reads `isRTL(el)`, the nearest ancestor's `dir`, which
+is what the inherited `FlowDirection` is: a match (8.8.19 read only `document.dir`, and this was a deviation). What's left is when:
+Ionic reads it when it renders, and this follows a change at once.
 
 ### Accessibility
 
@@ -187,7 +190,7 @@ None. Every member maps to an Ionic prop, part, class or variable.
 
 | Difference | Why |
 |---|---|
-| Right-to-left is the inherited `FlowDirection`, where Ionic reads only `document.dir`. A `dir="rtl"` ancestor does nothing in Ionic, measured, and an ancestor's `FlowDirection` does here | Avalonia has no document; an app sets `FlowDirection` on its window, which is the same thing, or on a subtree, which Ionic can't. Ionic also reads `document.dir` only when it renders; this follows a change at once |
+| A change of direction reverses the bar at once, where Ionic reads `isRTL(el)` only when it renders | `FlowDirection` raises a change, and `dir` raises nothing Ionic listens to. An ancestor's direction counts in both since Ionic 9.0.10 (8.8.19 read only `document.dir`) |
 | The dot geometry is a constant in Components, not a theme literal | A brush with a bound colour can't be tiled in a template, and the pitch is the animation's period |
 | The dots' edges are anti-aliased, where Chromium draws the gradient's hard stop at 30 % with a harder edge | Rendering, best effort (ADR 0002). Each dot is in the same place and of the same size |
 | A change of type raises no automation event. Chromium may announce `aria-valuenow` appearing or going: not measured, as its platform accessibility events can't be seen from `playwright-core` | The human's decision in #87, to follow WPF's progress bar, which raises none when it becomes indeterminate, rather than a range-value change with a null old or new value, which UIA clients don't expect. The range pattern appears or goes, and a client reads it when it next looks. A value set while indeterminate is read then too |

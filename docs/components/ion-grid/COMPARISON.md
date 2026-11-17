@@ -52,7 +52,7 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicGri
 | 18 | Stretch, and `align-self` | 67 and 67; a `div` inside 19 at the top; start and center | match. `align-self` is the column's `VerticalAlignment` |
 | 19 | The longest word; a clipping part; a grid inside | 244.11 and three of 45.3; a button's column 215.67; 126.67 with the inner columns stacked at 106.67 | match |
 | 20 | Not a column | 58.94, the column the rest | match |
-| 21 | RTL | 195, 163.33, 242.5, 290 | match, with `FlowDirection` on the window |
+| 21 | RTL | 195, 163.33, 242.5, 290; on 9.0.11 `dir="rtl"` on a `div` around the grid only gives offset 3 and push 3 at 195 too (`isRTL(el)`, 9.0.10) | match, with `FlowDirection` on the window, and on a `Border` around the grid (#207) |
 | 22 | Rows stack; an empty grid; an empty column | 380 at x = 5; 10; 1 | match |
 | 23 | Text wraps; nothing clips | 67 high; 411.66 past the row, visible | match |
 | 24 | `flex: 1` | 358 in an item; the rest after a `span` in a row: 345.22 | match |
@@ -64,7 +64,6 @@ The numbers are from [PLAN.md](PLAN.md#behaviours). Each has tests in `AvonicGri
 | Difference | Measured | Why |
 |---|---|---|
 | A column follows a resize in the same layout pass. Ionic's grid padding changes in the `resize` event, and its columns one frame later | 45 ms padding, 60 ms the column, from a 390 to 800 resize | Stencil schedules the re-render. Nothing reads that frame |
-| RTL is each column's `FlowDirection`. Ionic reads `document.dir`, so under a `dir="rtl"` element in an LTR page its offset lands at the end, and push and pull go the wrong way | offset 3: the column stayed at the start, x = 290, with the gap after it; push 3: x = 385, outside the row | A whole RTL app matches. The local case is a bug in Ionic |
 | A size, offset, push or pull has to be a CSS number. Ionic pastes the string into `calc()` | `"3 + 1"` isn't tried | No one means an expression |
 | Width variables are lengths | — | `Infinity` is the default `100%` |
 | `Avonic.GridColumns` that isn't a positive number is 12 | — | CSS would divide by it |

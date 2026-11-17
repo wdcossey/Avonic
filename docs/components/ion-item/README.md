@@ -6,6 +6,16 @@ Status: done · [#6](https://github.com/wdcossey/Avonic/issues/6)
 tappable, and it's what form controls inside it report to. The design and evidence are in [PLAN.md](PLAN.md), and the
 comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.11** (`utils/attribute-controller.js`), a clickable item's `tabindex` moves to
+its native `<button>` or `<a>`, and an `aria-label` written after load reaches it; an item that isn't clickable keeps its
+`tabindex`, which makes the host a tab stop: here, `Focusable="True"` on the item, which then takes `TabIndex` as a clickable one
+does. Here the host is the focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the control are what Tab
+uses (`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host, taking it out of the tab order), and its peer
+reads `AutomationProperties.Name` and `HelpText` when it's asked, so a value set after load reaches it. Already so before Ionic 9;
+pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer raises no change of the name ([Avalonia
+issues](../../infra/avalonia-issues.md)). `item-rtl`, from `isRTL(el)` since 9.0.10, has no md rule; the item follows an
+ancestor's direction, as `AvonicItemRtlTests` does from a panel.
+
 ```xml
 <c:AvonicItem Content="A row" />
 

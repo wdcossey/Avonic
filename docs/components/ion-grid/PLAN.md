@@ -2,7 +2,8 @@
 
 Three controls in one PR: `AvonicGrid`, `AvonicRow` and `AvonicCol`. They only make sense together, so they share this folder,
 as the card family does. Measurements are from real Ionic 8.8.19 in Chromium, md, wrapped in `ion-app`, with scripts kept outside
-the repo. Every number below was measured unless it says otherwise. Widths are CSS px, and Avalonia's are device-independent
+the repo. The reference is Ionic 9.0.11: `grid.js` and `row.js` are the same, and `col.js` differs only in reading the direction
+from `isRTL(this.el)` (9.0.10), measured again for 21 (#207). Every number below was measured unless it says otherwise. Widths are CSS px, and Avalonia's are device-independent
 pixels, which are the same unit.
 
 ## Fidelity checklist
@@ -80,7 +81,7 @@ Each becomes a test, named after its number. Widths are at a 390 viewport unless
 | 18 | Columns on a line are as tall as the tallest, and what's in them stays at the top, its own height. One with its own `VerticalAlignment` keeps its height and aligns, as `align-self` | `align-items: normal` (stretch); measured 67, 67, a `div` in one 19 high at the top; `ion-align-self-start` 29 at the top, `-center` y + 19 |
 | 19 | A column with no size is never narrower than its longest word, and the others share the rest. What's in a clipping part still counts, and a grid inside a column wraps rather than widen it | `min-width: auto`; measured `Supercalifragilisticexpialidocious` 244.11 and three of 45.3; a button 215.67 with the others 82.17; a nested grid's column 126.67, its three columns stacked at 106.67 |
 | 20 | Something in a row that isn't a column is as wide as its content, and the columns share the rest | `flex: 0 1 auto`; measured a `div` at 58.94 |
-| 21 | RTL: columns start at the right, and offset, push and pull mirror | measured with `dir="rtl"` on the document |
+| 21 | RTL: columns start at the right, and offset, push and pull mirror | measured with `dir="rtl"` on the document; on 9.0.11 with `dir="rtl"` on a `div` around the grid only too: size 3 with offset 3, and with push 3, both at x = 195 |
 | 22 | Rows stack in the grid, each as wide as the grid inside its padding. A grid with nothing in it is its padding, and an empty column with no padding is 1 high | `display: block`, `min-height: 1px`; measured 380 at x = 5; empty 10 high; empty column 1 |
 | 23 | Text in a column wraps, and nothing is clipped: a column wider than the row shows | `white-space: normal`, `overflow: visible`; measured |
 | 24 | In a flex row, as in an item, the grid fills what's left | `:host { flex: 1 }`; measured 358 in an item, and 355.22 after a `span` |
@@ -160,7 +161,6 @@ None.
 | Difference | Why |
 |---|---|
 | A column follows a resize in the same layout pass, where Ionic's lags a frame: the grid's padding changes in the `resize` event, and the column's size one frame later (measured 45 ms and 60 ms) | Stencil schedules the re-render. A frame with the two out of step is a flicker, not a behaviour |
-| RTL is the column's `FlowDirection`. Ionic reads `document.dir`, so under a `dir="rtl"` element in an LTR page its offset lands at the end and push and pull go the wrong way (measured: offset 3 left the column at the start, x = 290; push moved it to 385) | Avalonia has one direction per control, and the page-wide case, which is what an RTL app is, matches |
 | A size, offset, push or pull must be a CSS number. Ionic pastes the string into `calc()`, so `"3 + 1"` would compute something | An expression in a column count isn't something anyone means |
 | `Avonic.GridWidth*` are lengths. CSS takes a percentage too | `Infinity` stands for the default `100%`. Set `MaxWidth` for anything else |
 | `Avonic.GridColumns` that isn't a positive number counts as unset, so 12 | CSS would divide by it. 0 is a division by zero there |
