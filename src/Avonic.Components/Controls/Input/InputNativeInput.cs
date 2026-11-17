@@ -29,10 +29,16 @@ public sealed class InputNativeInput : TextBox, INativeFieldAutomation
     private static readonly ConditionalWeakTable<GlyphTypeface, StrongBox<double?>> s_widest = new();
 
     private readonly NativeFieldAutomation _automation;
+    private readonly TwoCh _twoCh;
     private bool _sizesToCharacters;
     private double _sizedWidth = double.NaN;
 
-    public InputNativeInput() => _automation = new NativeFieldAutomation(this);
+    public InputNativeInput()
+    {
+        _automation = new NativeFieldAutomation(this);
+        _twoCh = new TwoCh(this);
+        _twoCh.Update();
+    }
 
     NativeFieldAutomation INativeFieldAutomation.Automation => _automation;
 
@@ -60,10 +66,11 @@ public sealed class InputNativeInput : TextBox, INativeFieldAutomation
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == FontFamilyProperty || change.Property == FontSizeProperty || change.Property == FontStyleProperty
-            || change.Property == FontWeightProperty || change.Property == FontStretchProperty)
+        if (TwoCh.IsFont(change.Property))
         {
             _sizedWidth = double.NaN;
+            // Null while the base constructors run.
+            _twoCh?.Update();
         }
     }
 

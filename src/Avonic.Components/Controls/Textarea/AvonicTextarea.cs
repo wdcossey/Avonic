@@ -576,8 +576,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
             UpdateAutomation();
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
-                 || change.Property == IsEnabledProperty || change.Property == StartContentProperty
-                 || change.Property == EndContentProperty)
+                 || change.Property == IsEnabledProperty)
         {
             UpdateClasses();
         }
@@ -587,7 +586,7 @@ public class AvonicTextarea : TemplatedControl, IItemControl, IInputHost
     private void UpdateClasses()
     {
         LabelledTextField.SetClasses(PseudoClasses, LabelledTextField.Placement(LabelPlacement), hasValue: HasValue,
-            hasFocus: _hasFocus, hasStartEnd: StartContent is not null || EndContent is not null,
+            hasFocus: _hasFocus,
             outline: Fill == TextareaFill.Outline, solid: Fill == TextareaFill.Solid, round: Shape == TextareaShape.Round,
             inItem: _item is not null);
         PseudoClasses.Set(":textarea-disabled", !IsEnabled);

@@ -609,7 +609,8 @@
         "label": "Outline",
         "label-placement": "floating",
         "value": "Value",
-        "class": "sc-ion-input-md-h md has-value label-floating input-fill-outline input-label-placement-floating sc-ion-input-md hydrated"
+        "class": "sc-ion-input-md-h md has-value label-floating input-fill-outline input-label-placement-floating sc-ion-input-md hydrated",
+        "style": "--internal-start-end-container-width: 0px; --internal-start-container-adjustment: 0px;"
       },
       "classes": [
         "sc-ion-input-md-h",
@@ -687,7 +688,8 @@
         "label": "Round",
         "label-placement": "stacked",
         "placeholder": "Placeholder",
-        "class": "sc-ion-input-md-h md label-floating input-fill-outline input-shape-round input-label-placement-stacked sc-ion-input-md hydrated"
+        "class": "sc-ion-input-md-h md label-floating input-fill-outline input-shape-round input-label-placement-stacked sc-ion-input-md hydrated",
+        "style": "--internal-start-end-container-width: 0px; --internal-start-container-adjustment: 0px;"
       },
       "classes": [
         "sc-ion-input-md-h",

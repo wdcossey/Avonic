@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avonic.Components.Controls;
@@ -73,6 +74,38 @@ public class AvonicInputCaptureTests
         scene.Window.SetRenderScaling(2);
         Dispatcher.UIThread.RunJobs();
         Save(scene, "avonic-input-page.png");
+
+        Assert.True(page.Bounds.Height > 0);
+    });
+
+    // Ionic 9's start, control and end containers: the page in docs/components/ion-input/COMPARISON.md's slots section.
+    [AvaloniaFact]
+    public void Slots_Page() => InstalledTheme.Run(_ =>
+    {
+        static AvonicIcon Heart() => new() { IconName = "heart" };
+        var page = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Spacing = 10,
+            [TextElement.FontSizeProperty] = 16.0,
+            Children =
+            {
+                new AvonicInput { Label = "Floating start", LabelPlacement = InputLabelPlacement.Floating, StartContent = Heart() },
+                new AvonicInput { Label = "Floating start", LabelPlacement = InputLabelPlacement.Floating, Value = "Value", StartContent = Heart() },
+                new AvonicInput { Label = "Start", Value = "Value", StartContent = Heart(), EndContent = new AvonicIcon { IconName = "star" } },
+                new AvonicInput { Fill = InputFill.Outline, Label = "Outline start", LabelPlacement = InputLabelPlacement.Floating, StartContent = Heart() },
+                new AvonicInput { Fill = InputFill.Outline, Label = "Outline start", LabelPlacement = InputLabelPlacement.Floating, Value = "Value", StartContent = Heart() },
+                new AvonicInput { Fill = InputFill.Solid, Label = "Solid start", LabelPlacement = InputLabelPlacement.Floating, Value = "Value", StartContent = Heart() },
+                new AvonicInput { Label = "Clear", ClearInput = true, Value = "Value", EndContent = new AvonicIcon { IconName = "star" } },
+                new AvonicInput { Label = "A long label that does not fit", Value = "Value", Width = 150, HorizontalAlignment = HorizontalAlignment.Left },
+            },
+        };
+        page.Bind(TextElement.FontFamilyProperty, page.GetResourceObservable("Avonic.FontFamily"));
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        Save(scene, "avonic-input-slots.png");
 
         Assert.True(page.Bounds.Height > 0);
     });

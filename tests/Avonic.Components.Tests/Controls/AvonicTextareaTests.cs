@@ -747,12 +747,13 @@ public class AvonicTextareaTests
         Settle();
         Assert.Equal(1, Native(textarea).Opacity);
 
-        // Start content floats the label, but the field stays hidden: the rule reads focus and value only.
+        // Ionic 9: start or end content doesn't float the label (hasStartEndSlots is gone), and the field stays hidden.
         textarea.Value = "";
         textarea.StartContent = new Border { Width = 4, Height = 4 };
+        textarea.EndContent = new Border { Width = 4, Height = 4 };
         Settle();
         Assert.Equal(0, Native(textarea).Opacity);
-        Assert.Equal(0.75, Part<Control>(textarea, "PART_Label").GetValue(Css.ScaleProperty));
+        Assert.Equal(1, Part<Control>(textarea, "PART_Label").GetValue(Css.ScaleProperty));
     });
 
     [AvaloniaFact]

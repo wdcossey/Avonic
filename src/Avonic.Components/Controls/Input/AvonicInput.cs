@@ -596,8 +596,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
             UpdateAutomation();
         }
         else if (change.Property == LabelPlacementProperty || change.Property == FillProperty || change.Property == ShapeProperty
-                 || change.Property == IsEnabledProperty || change.Property == StartContentProperty
-                 || change.Property == EndContentProperty)
+                 || change.Property == IsEnabledProperty)
         {
             UpdateClasses();
         }
@@ -608,7 +607,7 @@ public class AvonicInput : TemplatedControl, IItemControl, IInputHost
     {
         var item = _item;
         LabelledTextField.SetClasses(PseudoClasses, LabelPlacement, hasValue: HasValue, hasFocus: _hasFocus,
-            hasStartEnd: StartContent is not null || EndContent is not null, outline: Fill == InputFill.Outline,
+            outline: Fill == InputFill.Outline,
             solid: Fill == InputFill.Solid, round: Shape == InputShape.Round, inItem: item is not null);
         PseudoClasses.Set(":in-item-color", item?.Classes.Contains(":ion-color") == true);
         PseudoClasses.Set(":input-disabled", !IsEnabled);

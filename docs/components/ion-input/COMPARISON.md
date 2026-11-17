@@ -44,6 +44,29 @@ Ionic on the left, Avonic on the right:
 |---|---|
 | ![](ref/page.png) | ![](compare/avonic-page.png) |
 
+### Ionic 9's start, control and end (#201)
+
+`node <temp>/measure.js slots.html ionic-slots.png`, a throwaway script with `tools/ionic-ref/boxes.js`'s page and server, on
+Ionic 9.0.11, a 390 px desktop page at 2×, with this body; Avonic: `AvonicInputCaptureTests.Slots_Page`.
+
+```html
+<ion-app style="position:static;display:block;contain:none;overflow:visible"><div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<ion-input label="Floating start" label-placement="floating"><ion-icon slot="start" name="heart"></ion-icon></ion-input>
+<ion-input label="Floating start" label-placement="floating" value="Value"><ion-icon slot="start" name="heart"></ion-icon></ion-input>
+<ion-input label="Start" value="Value"><ion-icon slot="start" name="heart"></ion-icon><ion-icon slot="end" name="star"></ion-icon></ion-input>
+<ion-input fill="outline" label="Outline start" label-placement="floating"><ion-icon slot="start" name="heart"></ion-icon></ion-input>
+<ion-input fill="outline" label="Outline start" label-placement="floating" value="Value"><ion-icon slot="start" name="heart"></ion-icon></ion-input>
+<ion-input fill="solid" label="Solid start" label-placement="floating" value="Value"><ion-icon slot="start" name="heart"></ion-icon></ion-input>
+<ion-input label="Clear" clear-input value="Value"><ion-icon slot="end" name="star"></ion-icon></ion-input>
+<div style="width:150px"><ion-input label="A long label that does not fit" value="Value"></ion-input></div>
+</div></ion-app>
+```
+
+![](compare/side-slots.png)
+
+Each row lines up, to the tests' tolerances (B11, B23 to B26). One difference: the last row's 2ch field shows the end of its
+value (`ue`), where Chromium shows the start (`Va`): Avalonia's `TextBox` keeps the caret, at the end, in view.
+
 The rows line up to a pixel down to the password row. From there Avonic drifts by 1 to 2 px: the password row is 49 in both,
 but each 12 px line under a field is 15 px high in Avalonia and 14 in Chromium (Roboto's line height is 14.06 px, which
 Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
@@ -62,9 +85,9 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 | 8 | A click in the label focuses the field; not on the bottom or on a button in a slot | Match. **Difference:** while focused, Chromium blurs and refocuses (`ionBlur`, `ionFocus`, and an `ionChange` if edited); Avalonia keeps focus, so none of those |
 | 9 | `SetFocus()`, `GetInputElement()` | Match. `GetInputElement()` is null before the input is in a tree, where Ionic's promise waits |
 | 10 | An item's padding tap focuses the input | Match |
-| 11 | Placements, measured | Match to 0.6 px: start, end, fixed, a long start label at 200, stacked's 377 px room, floating at rest and raised, slots floating the label |
+| 11 | Placements, measured | Match to 0.6 px: start, end, fixed, a long start label at 200, stacked's 377 px room, floating at rest and raised. Ionic 9: a slot no longer floats the label; the field fills what the label leaves (19 down, 37 tall) |
 | 12 | A floating field is transparent until focus or a value | Match |
-| 13 | 44 and 56 high | Match; a field with bottom text is 1 px taller (above) |
+| 13 | 44 and 56 high | Match; a field with bottom text is 1 px taller (above). Ionic 9's dropped 1 px and 6 px margins: 94 and 56 at 40 px, as measured |
 | 14 | The highlight: 2 px, grows from the centre over 200 ms, not in an item or with the outline | Match |
 | 15 | Highlight colours: primary, a colour's base, valid, invalid; the label, caret and borders take it | Match |
 | 16 | Solid: rest, hover (mouse and pen only), focus | Match |
@@ -72,7 +95,7 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 | 18 | Round shapes | Match |
 | 19 | The bottom, the error replacing the helper, the counter and its formatter | Match |
 | 20 | The clear button's box, icon and colour | Match |
-| 21 | Slots 16 px from the field | Match |
+| 21 | Ionic 9's start, control and end: the start slot before the label, the end after the clear button, 16 px from each | Match, to 1 px (B21, B23) |
 | 22 | Disabled (0.38 as one, through an `OpacityMask`) and read-only | Match |
 | 23 | Placeholder at 0.6 | Match |
 | 24 | Type, inputmode, enterkeyhint, autocapitalize, autocorrect reach `TextInputOptions`; password masks | Set and tested on the `TextBox`. **Not tried with a soft keyboard**: there's no device |
@@ -80,6 +103,10 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
 | 26 | Automation name, help text and required | Match; `Required` is set on the native input and tested, but nothing in Avalonia 12.1.4 reads `IsRequiredForForm`, and no screen reader was tried |
 | 27 | The password toggle | Match; it doesn't take focus. 44 × 48 at the end of an item, as measured |
 | 28 | RTL | Match: the row, the outline's start on the right, the label scaled from its top right |
+| 29 | `min-width: 2ch`, the label giving way | Match: 17.98 from 132.02 in 150 px; the label 1 px wider from layout rounding (B24) |
+| 30 | The outline label floated back over the start slot, at once on a change of the slot | Match: 16 from the host floating, 48 at rest (B25) |
+| 31 | The outline floating label's room adds the slots back | Match (B26) |
+| 32 | One click for slotted content | Nothing to do: no click from the host (B08) |
 
 ## Deliberate differences and gaps
 
@@ -102,6 +129,9 @@ Chromium lays out at 14 and Avalonia rounds up), so each bottom is 1 px taller.
   still gives the input its text's width. The native input is `width: 100%`, which makes it compressible: with too little room
   an end slot's input gives way to a start slot's, 127 beside a 199, as in Chromium (#155), where it used to keep its 199.
 - **The notch's `max-width`** for a label wider than the field isn't applied.
+- **Ionic 9 eases the label's `max-width` with the float** (150 ms), so a long label doesn't show its floating width at full size.
+  Here the room changes at once and only the transform eases: visible only for a floating label wider than the field, for 150 ms.
+- **A 2ch field too narrow for its value** shows the value's end, where Chromium shows its start (above).
 - **Bottom text** is 1 px taller (Avalonia's line height for 12 px Roboto).
 - **A slotted label's text is read when it's set**, and when the slot's element is made, not each time its text changes, where
   Ionic's `aria-labelledby` follows the element. The field's own `Label` is always current.
