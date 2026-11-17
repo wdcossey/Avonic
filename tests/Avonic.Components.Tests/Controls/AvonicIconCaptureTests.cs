@@ -111,4 +111,68 @@ public class AvonicIconCaptureTests
 
         Assert.True(HasInk(frame, 0, 0, 200));
     });
+
+    /// <summary>
+    /// Glyphs in the default slot, as the Chromium page in docs/components/ion-icon/ref-font/ has them: Roboto letters stand
+    /// in for an icon font. Bottom-aligned, as <c>contain: layout</c> takes an inline-block's baseline away.
+    /// </summary>
+    [AvaloniaFact]
+    public void Font_Icons_Page() => InstalledTheme.Run(_ =>
+    {
+        static TextBlock Glyph(string text, double? size = null)
+        {
+            var glyph = new TextBlock { Text = text };
+            if (size is { } fontSize)
+            {
+                glyph.FontSize = fontSize;
+            }
+
+            return glyph;
+        }
+
+        // The div's font-size, which each icon inherits.
+        static StackPanel Row(double fontSize, params AvonicIcon[] icons)
+        {
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, Margin = new Thickness(0, 0, 0, 6) };
+            row.SetValue(Avalonia.Controls.Documents.TextElement.FontSizeProperty, fontSize);
+            foreach (var icon in icons)
+            {
+                icon.VerticalAlignment = VerticalAlignment.Bottom;
+            }
+
+            row.Children.AddRange(icons);
+            return row;
+        }
+
+        var rtl = Row(48,
+            new AvonicIcon { FlipRtl = true, Content = Glyph("R") },
+            new AvonicIcon { Content = Glyph("R") });
+        rtl.FlowDirection = FlowDirection.RightToLeft;
+
+        var page = new StackPanel
+        {
+            Margin = new Thickness(16),
+            Children =
+            {
+                Row(24,
+                    new AvonicIcon { Content = Glyph("M") },
+                    new AvonicIcon { Size = IconSize.Small, Content = Glyph("M", 40) },
+                    new AvonicIcon { Size = IconSize.Large, Content = Glyph("M") },
+                    new AvonicIcon { FontSize = 48, Content = Glyph("M") },
+                    new AvonicIcon { IconName = "star", Content = Glyph("M") },
+                    new AvonicIcon { Color = "danger", Content = Glyph("M") },
+                    new AvonicIcon { FontSize = 48, Content = Glyph("WWW") }),
+                rtl,
+            },
+        };
+
+        using var scene = new Scene(page, 390, 844);
+        scene.Window.Background = Brushes.White;
+        scene.Window.SetRenderScaling(2);
+        Dispatcher.UIThread.RunJobs();
+        var frame = scene.Window.CaptureRenderedFrame()!;
+        Frames.Save(frame, "avonic-font-page.png");
+
+        Assert.True(HasInk(frame, 0, 0, 200));
+    });
 }
