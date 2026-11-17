@@ -3,13 +3,18 @@
              xmlns:c="using:Avonic.Components.Controls"
              x:Class="Avonic.Sample.Pages.ModalPage">
 
-    <!-- ion-modal: inline modals, opened by a trigger and by IsOpen, and one made in code. Each is moved to the overlay layer
-         while it's presented, and back after. -->
+    <!-- ion-modal: inline modals, opened by a trigger and by IsOpen, a sheet, and one made in code. Each is moved to the overlay
+         layer while it's presented, and back after. -->
     <c:AvonicContent>
         <StackPanel>
             <c:AvonicItem>
                 <c:AvonicLabel>
                     <TextBlock Name="Status" Text="Open one, then close it, tap the backdrop, or press Escape or Back" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="NestedStatus" Text="The nested modal hasn't been dismissed" TextWrapping="Wrap" />
                 </c:AvonicLabel>
             </c:AvonicItem>
 
@@ -42,8 +47,12 @@
                                         </c:AvonicToolbar>
                                     </c:AvonicHeader>
                                     <c:AvonicContent Grid.Row="1" Padding="16">
-                                        <TextBlock Text="Closing the modal under this one closes this one too, with the role parent-dismissed."
-                                                   TextWrapping="Wrap" />
+                                        <StackPanel Spacing="12">
+                                            <TextBlock Text="Closing the modal under this one closes this one too, with the role parent-dismissed."
+                                                       TextWrapping="Wrap" />
+                                            <!-- The modal under this one is covered, so its own Close can't be reached from here. -->
+                                            <c:AvonicButton Content="Close the modal under this one" Click="OnCloseTrigger" />
+                                        </StackPanel>
                                     </c:AvonicContent>
                                 </Grid>
                             </c:AvonicModal>
@@ -76,6 +85,44 @@
                     <CheckBox Name="AllowClose" Content="Can be dismissed" />
                     <c:AvonicButton Content="Close anyway" Click="OnCloseGuarded" />
                 </StackPanel>
+            </c:AvonicModal>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="A sheet" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="SheetStatus" Text="The sheet is closed" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+            <c:AvonicButton Name="OpenSheet" Content="Open the sheet" Margin="16,8,16,0" />
+            <!-- Drag it by its handle or header, or its content below the top breakpoint; press the handle to cycle; drag it down
+                 and away. -->
+            <c:AvonicModal Name="SheetModal" Trigger="OpenSheet" Breakpoints="0, 0.25, 0.5, 0.75, 1" InitialBreakpoint="0.5">
+                <DockPanel>
+                    <c:AvonicHeader DockPanel.Dock="Top">
+                        <c:AvonicToolbar>
+                            <c:AvonicTitle Content="Sheet" />
+                        </c:AvonicToolbar>
+                    </c:AvonicHeader>
+                    <c:AvonicContent>
+                        <StackPanel Name="SheetRows" />
+                    </c:AvonicContent>
+                </DockPanel>
+            </c:AvonicModal>
+            <c:AvonicButton Name="OpenSheetOverPage" Content="Open a sheet over the page" Margin="16,8,16,0" />
+            <!-- The page behind takes input at 0.25 and 0.5, as the backdrop shows only above BackdropBreakpoint; its content
+                 scrolls at every breakpoint. -->
+            <c:AvonicModal Name="PageSheetModal" Trigger="OpenSheetOverPage" Breakpoints="0.25, 0.5, 0.75" InitialBreakpoint="0.25"
+                           BackdropBreakpoint="0.5" ExpandToScroll="False" HandleBehavior="None">
+                <c:AvonicContent Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Over the page" FontSize="20" FontWeight="Medium" />
+                        <TextBlock Text="Below 0.75 the page behind still takes taps and focus. Drag it up to darken it."
+                                   TextWrapping="Wrap" />
+                        <c:AvonicButton Content="Close the sheet" Click="OnClosePageSheet" />
+                    </StackPanel>
+                </c:AvonicContent>
             </c:AvonicModal>
 
             <c:AvonicListHeader>

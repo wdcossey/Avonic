@@ -1,12 +1,14 @@
 # ion-modal
 
-Status: done · [#42](https://github.com/wdcossey/Avonic/issues/42) (the modal; the sheet comes in a second PR)
+Status: done · [#42](https://github.com/wdcossey/Avonic/issues/42)
 
 `AvonicModal`, Ionic's `ion-modal`, md: full screen on a phone and a centred 600 by 500 or 600 dialog on a tablet, over a
-backdrop, on the [overlay system](../../infra/overlays/README.md). Plan: [PLAN.md](PLAN.md); comparison:
-[COMPARISON.md](COMPARISON.md). The sheet modal (`Breakpoints` and the rest) isn't here yet: none of its members is declared.
+backdrop, on the [overlay system](../../infra/overlays/README.md); or a sheet, dragged between breakpoints. Plan:
+[PLAN.md](PLAN.md); comparison: [COMPARISON.md](COMPARISON.md).
 
-![Ionic's dialog beside Avonic's, headless](compare/side-by-side-dialog.png)
+| A dialog | A sheet |
+|---|---|
+| ![Ionic's dialog beside Avonic's, headless](compare/side-by-side-dialog.png) | ![Ionic's sheet beside Avonic's, headless](compare/side-by-side-sheet.png) |
 
 ## Usage
 
@@ -52,6 +54,30 @@ var detail = await modal.OnDidDismiss();   // detail.Data, detail.Role
 
 `IsOpen` isn't set back to false by a dismiss: an app that binds it sets it back from `DidDismiss`, as Ionic's docs say.
 
+### A sheet
+
+With `Breakpoints` and `InitialBreakpoint` it's a sheet: at the bottom, at a fraction of its height (1 is open, 0 closed), with a
+handle. The user drags it between breakpoints, by its handle, its header, or its content below the top breakpoint; presses the
+handle to go to the next; and drags it down and away if 0 is a breakpoint.
+
+```xml
+<c:AvonicModal Trigger="Open" Breakpoints="0, 0.25, 0.5, 0.75, 1" InitialBreakpoint="0.5"
+               IonBreakpointDidChange="OnBreakpoint">
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">…</c:AvonicHeader>
+        <c:AvonicContent>…</c:AvonicContent>
+    </DockPanel>
+</c:AvonicModal>
+```
+
+```csharp
+await modal.SetCurrentBreakpoint(1);      // completes when it's there
+double? at = modal.GetCurrentBreakpoint(); // null when it isn't presented
+```
+
+`BackdropBreakpoint="0.5"` leaves the page behind usable at 0.5 and below; `ExpandToScroll="False"` lets the content scroll at every
+breakpoint, and the sheet move only by its header and handle; `HandleBehavior="None"` makes the handle decoration.
+
 ## Checklist
 
 | ✓ | Ionic | Avonic | Default | |
@@ -69,15 +95,21 @@ var detail = await modal.OnDidDismiss();   // detail.Data, detail.Role
 | [ ] | `presentingElement` | none | | Not applicable: ios only, the card modal |
 | [x] | `showBackdrop` | `ShowBackdrop` | `true` | False: transparent, and it still takes the tap |
 | [x] | `trigger` | `Trigger` | | On `AvonicOverlay`: the name of a control in its name scope, whose `Click`, or a tap, presents it |
-| [ ] | `breakpoints`, `initialBreakpoint`, `backdropBreakpoint`, `handle`, `handleBehavior`, `expandToScroll` | | | The sheet, the second PR |
+| [x] | `breakpoints` | `Breakpoints` | | `AvaloniaList<double>?`, `"0, 0.5, 1"` in XAML; kept sorted |
+| [x] | `initialBreakpoint` | `InitialBreakpoint` | | `double?`; with `Breakpoints`, a sheet |
+| [x] | `backdropBreakpoint` | `BackdropBreakpoint` | `0` | |
+| [x] | `handle` | `Handle` | | `bool?`: null (Ionic's `undefined`) shows it on a sheet |
+| [x] | `handleBehavior` | `HandleBehavior` | `Cycle` | `ModalHandleBehavior`: `None`, `Cycle` |
+| [x] | `expandToScroll` | `ExpandToScroll` | `true` | |
 | [x] | `ionModalWillPresent`, `ionModalDidPresent`, `ionModalWillDismiss`, `ionModalDidDismiss` | `IonModalWillPresent`, … | | Routed, bubbling, each just before the generic one |
 | [x] | `willPresent`, `didPresent`, `willDismiss`, `didDismiss` | `WillPresent`, … | | The overlay's |
-| [ ] | `ionBreakpointDidChange`, `ionDragStart`, `ionDragMove`, `ionDragEnd` | | | The sheet |
+| [x] | `ionBreakpointDidChange` | `IonBreakpointDidChange` | | `ModalBreakpointChangeEventArgs.Breakpoint` |
+| [x] | `ionDragStart`, `ionDragMove`, `ionDragEnd` | `IonDragStart`, `IonDragMove`, `IonDragEnd` | | `ModalDragEventArgs`: `CurrentY`, `DeltaY`, `VelocityY`, `Progress`, `SnapBreakpoint`, and `IsDismissing` at the end |
 | [x] | `present()`, `dismiss()`, `onDidDismiss()`, `onWillDismiss()` | `Present()`, `Dismiss(data, role)`, `OnDidDismiss()`, `OnWillDismiss()` | | `Present(TopLevel)` too, the overlay's extension |
-| [ ] | `setCurrentBreakpoint()`, `getCurrentBreakpoint()` | | | The sheet |
+| [x] | `setCurrentBreakpoint()`, `getCurrentBreakpoint()` | `SetCurrentBreakpoint(b)`, `GetCurrentBreakpoint()` | | A `Task`; a `double?`, synchronous |
 | [x] | default slot | `Content`, `ContentTemplate` | | |
 | [x] | `backdrop`, `content` parts | `PART_Backdrop`, `PART_Content` | | An `AvonicBackdrop`; a `ModalWrapper` |
-| [ ] | `handle` part | | | The sheet |
+| [x] | `handle` part | `PART_Handle` | | A `ModalHandle`, a native button |
 
 ## Behaviour
 
@@ -92,6 +124,27 @@ var detail = await modal.OnDidDismiss();   // detail.Data, detail.Role
 - **Safe area**: inside the modal, `Avonic.SafeArea<Edge>` is 0 for an edge the wrapper doesn't reach, as Ionic's host style
   does, so a centred dialog's header isn't padded for a notch.
 - Escape and back dismiss it with `backdrop`, as every overlay's do, through `CanDismiss`.
+
+The sheet (`:sheet`):
+
+- **Box**: `100% - (Avonic.SafeAreaTop + 10)` high, at the bottom, centred across (600 wide on a tablet), held down by
+  `(1 - breakpoint)` of its height. Its safe area is 0 at the top, left and right, the app's at the bottom.
+- **Present**: md's sheet enter, 280 ms, `cubic-bezier(0.36,0.66,0.04,1)`, up from below to the breakpoint, the backdrop to
+  `--backdrop-opacity × breakpoint` if that's above `BackdropBreakpoint`. Then a 500 ms `cubic-bezier(0.32,0.72,0,1)` animation
+  that the gesture drives holds it: the backdrop rests on its line from `--backdrop-opacity` to 0.01, 0.165 at 0.5.
+- **Drag**: on the wrapper, vertical, 10 px to start: it follows the finger, and on release snaps over 500 ms to the breakpoint
+  nearest where it would be 350 ms later at its speed. `IonBreakpointDidChange` a frame after it's there. At 0 it dismisses with
+  `gesture`, with no leave animation. `CanDismiss` other than true keeps it from 0 with a spring, and a function is asked with
+  `gesture`, and true dismisses it with `handler` once it's snapped back.
+- **Handle**: 36 by 5, 5 from the top; `Cycle` goes to the next breakpoint other than 0, wrapping, on a click, Enter or Space,
+  not while it's moving; its tap area is 4 px around it. With a cycling handle the modal is a tab stop, and a focus on it from
+  outside goes to the handle.
+- **Backdrop**: at or below `BackdropBreakpoint` it's clear and takes no input, so the page behind does, and the focus trap is
+  off; `ShowBackdrop` or `FocusTrap` false keep it that way.
+- **Content**: the first `AvonicContent` inside doesn't scroll below the top breakpoint, so that a drag on it moves the sheet, and
+  is given its scrolling back at the top and after the dismiss. With `ExpandToScroll` false it scrolls at every breakpoint and
+  is only as tall as what shows. A drag up on content that can scroll, at the top breakpoint or with `ExpandToScroll` false,
+  scrolls it.
 
 ## Resource keys
 
@@ -111,12 +164,17 @@ In `Tokens/Modal.axaml`. A size takes a number (px) or a CSS string: `100%`, `60
 | `Avonic.Modal.MinWidth`, `MaxWidth`, `MinHeight`, `MaxHeight` | `--min-width` and the rest | `auto`, `auto`, `auto`, `100%` |
 | `Avonic.Modal.BoxShadow` | `--box-shadow` (not in `core.json`) | unset: `…Md.BoxShadow` none, `…Md.BoxShadowInset` `0 28px 48px rgba(0, 0, 0, 0.4)` |
 
-The host's text is `Avonic.TextColorBrush`.
+| `Avonic.Modal.HandleBackground` (+ `Brush`) | `.modal-handle`'s `var(--ion-color-step-350, var(--ion-background-color-step-350, #c0c0be))` | `#C0C0BE` |
+| `Avonic.Modal.OffsetTop` | `--ion-modal-offset-top` (internal) | 0; the modal sets it to the root's `Avonic.SafeAreaTop` while a sheet is presented |
+
+The host's text is `Avonic.TextColorBrush`. A sheet's height reads `Avonic.Modal.Height` first, then the 10 px gap, a literal in
+the theme.
 
 ## Extensions
 
 None of the modal's own. On `AvonicOverlay`, which every overlay gets: inline overlays keep the page's `DataContext`, and
-`parent-removed` applies to every inline overlay, where Ionic has it only on the modal.
+`parent-removed` applies to every inline overlay, where Ionic has it only on the modal. `ModalAnimationOptions`, what an
+`EnterAnimation` or `LeaveAnimation` is given, is Ionic's `ModalAnimationOptions` without `presentingEl`.
 
 ## Known gaps
 
@@ -126,4 +184,11 @@ None of the modal's own. On `AvonicOverlay`, which every overlay gets: inline ov
 - `Avonic.Modal.BorderStyle`: Avalonia's `Border` draws only solid lines.
 - md's tablet shadow, `0 28px 48px`, is up to 15 levels lighter just under the wrapper than Chromium's (box-shadow is best effort).
 - The page lifecycle (`ionViewWillEnter` and the rest on the content) waits for `ion-nav` (#130).
-- Not tried in a real window: `tools/real-window/drive.ps1`'s `ion-modal` section is for the batch's runner.
+- The sheet's handle doesn't follow a dark palette's step-350 colour, as Ionic's does through `--ion-background-color-step-350`:
+  Avonic's step colours are always set, so the handle has its own key, `Avonic.Modal.HandleBackground`, which a dark app sets.
+- A drag up on the sheet's content where the content scrolls (at the top breakpoint, or with `ExpandToScroll` false) scrolls it
+  and raises no drag events: Ionic's passive gesture follows that drag as well as the browser scrolling, and Avalonia gives a
+  pointer to one owner.
+- `ExpandToScroll` false: Ionic moves an `ion-footer` to the body while the sheet is dragged, so that it doesn't shake as the
+  browser's layout lags the transform; Avalonia lays out and draws in the same frame, so the footer stays in the content.
+- Not tried in a real window: `tools/real-window/drive.ps1`'s `ion-modal` sections are for the batch's runner.
