@@ -826,9 +826,10 @@ public sealed class AvonicAnimation
         private void BuildTracks()
         {
             var offsets = ComputedOffsets(_owner._keyframes);
+            var properties = Properties();
             foreach (var element in _owner._elements)
             {
-                foreach (var name in Properties())
+                foreach (var name in properties)
                 {
                     _tracks.Add(new Track(element, AnimatedProperty.ForKeyframes(name), _owner._keyframes, offsets));
                 }
@@ -908,9 +909,10 @@ public sealed class AvonicAnimation
             var old = _tracks.ToList();
             _tracks.Clear();
             var offsets = ComputedOffsets(_owner._keyframes);
+            var properties = Properties();
             foreach (var element in _owner._elements)
             {
-                foreach (var name in Properties())
+                foreach (var name in properties)
                 {
                     var property = AnimatedProperty.ForKeyframes(name);
                     var kept = old.FirstOrDefault(t => t.Is(element, property));
@@ -1070,6 +1072,12 @@ public sealed class AvonicAnimation
                 {
                     _frames.Add((offsets[i], property.Parse(value)));
                 }
+            }
+
+            // The underlying value is the element's own, so a track that's showing a value lets go of it first.
+            if (_frames[0].Offset != 0 || _frames[^1].Offset != 1)
+            {
+                Dispose();
             }
 
             if (_frames[0].Offset != 0)

@@ -187,15 +187,6 @@ internal abstract class AnimatedProperty
                 }));
                 return new Both(bounds, source);
             }
-
-            private sealed class Both(IDisposable? a, IDisposable b) : IDisposable
-            {
-                public void Dispose()
-                {
-                    a?.Dispose();
-                    b.Dispose();
-                }
-            }
         }
     }
 
@@ -265,14 +256,17 @@ internal abstract class AnimatedProperty
             public void OnNext(Rect value) => next(value);
         }
 
-        private sealed class Both(IDisposable a, IDisposable b) : IDisposable
-        {
-            public void Dispose()
-            {
-                a.Dispose();
-                b.Dispose();
-            }
-        }
+
+    }
+}
+
+/// <summary>Two subscriptions as one: a bounds watch, if there is one, and the values'.</summary>
+internal sealed class Both(IDisposable? a, IDisposable b) : IDisposable
+{
+    public void Dispose()
+    {
+        a?.Dispose();
+        b.Dispose();
     }
 }
 

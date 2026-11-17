@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 using Avonic.Components.Gestures;
 
@@ -27,7 +28,7 @@ internal sealed class ModalSheet
     private readonly AvonicBackdrop _backdropEl;
     private readonly double _backdropBreakpoint;
     private readonly AvonicAnimation _animation;
-    private readonly IReadOnlyList<double> _breakpoints;
+    private readonly Func<IReadOnlyList<double>> _getBreakpoints;
     private readonly bool _expandToScroll;
     private readonly Func<double> _getCurrentBreakpoint;
     private readonly Action _onDismiss;
@@ -59,7 +60,7 @@ internal sealed class ModalSheet
         double initialBreakpoint,
         double backdropBreakpoint,
         AvonicAnimation animation,
-        IReadOnlyList<double> breakpoints,
+        Func<IReadOnlyList<double>> getBreakpoints,
         bool expandToScroll,
         Func<double> getCurrentBreakpoint,
         Action onDismiss,
@@ -69,14 +70,16 @@ internal sealed class ModalSheet
         _backdropEl = backdropEl;
         _backdropBreakpoint = backdropBreakpoint;
         _animation = animation;
-        _breakpoints = breakpoints;
+        // Ionic's gesture holds the modal's sorted array, so it sees a change made to it in place, but takes its ends once.
+        _getBreakpoints = getBreakpoints;
+        var breakpoints = getBreakpoints();
         _expandToScroll = expandToScroll;
         _getCurrentBreakpoint = getCurrentBreakpoint;
         _onDismiss = onDismiss;
         _onBreakpointChange = onBreakpointChange;
 
-        // baseEl.querySelector('ion-content'): the first in the modal's content, in document order.
-        _contentEl = FirstContent(baseEl.Content);
+        // baseEl.querySelector('ion-content'): the first in the modal's content, in document order, however it was made.
+        _contentEl = FirstContent(baseEl.Content) ?? baseEl.ContentPresenter?.GetVisualDescendants().OfType<AvonicContent>().FirstOrDefault();
 
         // Cache the initial value so the gesture restores it instead of forcing scrolling on.
         _initialContentScrollY = _contentEl?.ScrollY ?? true;
@@ -229,6 +232,13 @@ internal sealed class ModalSheet
                 // Then the animation from 0 to 1 again, at the snapped position.
                 AvonicConfig.RequestFrame(_baseEl, () =>
                 {
+                    // Dismissed in the meantime: the sheet is gone.
+                    if (!ReferenceEquals(_baseEl.SheetGesture, this))
+                    {
+                        moved.TrySetResult();
+                        return;
+                    }
+
                     SetDefaultKeyframes();
                     _animation.ProgressStart(true, 1 - snapToBreakpoint);
                     _currentBreakpoint = snapToBreakpoint;
@@ -251,7 +261,13 @@ internal sealed class ModalSheet
     internal double CalculateSnapBreakpoint(double deltaY, double velocityY)
     {
         var currentProgress = CalculateProgress(deltaY + velocityY * FlickProjectionMs);
-        return _breakpoints.Aggregate((a, b) => Math.Abs(b - currentProgress) < Math.Abs(a - currentProgress) ? b : a);
+        var breakpoints = _getBreakpoints();
+        if (breakpoints.Count == 0)
+        {
+            return _currentBreakpoint;
+        }
+
+        return breakpoints.Aggregate((a, b) => Math.Abs(b - currentProgress) < Math.Abs(a - currentProgress) ? b : a);
     }
 
     /// <summary><c>calculateProgress</c>: how open the sheet is part way through a drag, 1 fully open, rounded to thousandths.</summary>
@@ -328,12 +344,12 @@ internal sealed class ModalSheet
     }
 
     /// <summary>
-    /// Not in Ionic: an upward drag on content that scrolls can't move the sheet (at its top breakpoint, or with
+    /// Not in Ionic: an upward drag on content that scrolls can't move the sheet (fully open, as <c>canStart</c> checks, or with
     /// <c>expandToScroll</c> off), and Ionic's passive gesture lets the browser scroll the content all the same. Avalonia gives a
     /// pointer to one owner, so the gesture lets go of it for the content's <see cref="ScrollViewer"/>.
     /// </summary>
     private bool ReleasesUpwardDrag() =>
-        _pressContent is not null && (!_expandToScroll || _getCurrentBreakpoint() == _maxBreakpoint);
+        _pressContent is not null && (!_expandToScroll || _getCurrentBreakpoint() == 1);
 
     /// <summary>
     /// <c>canSwipeOnContent</c>: only when the content is scrolled to the top, so as not to fight its scrolling, and never on content
@@ -396,7 +412,8 @@ internal sealed class ModalSheet
 
         // Where the animation is, from where the user dragged.
         var initialStep = 1 - _currentBreakpoint;
-        double? secondToLastBreakpoint = _breakpoints.Count > 1 ? 1 - _breakpoints[1] : null;
+        var breakpoints = _getBreakpoints();
+        double? secondToLastBreakpoint = breakpoints.Count > 1 ? 1 - breakpoints[1] : null;
         var step = initialStep + detail.DeltaY / _height;
         var isAttemptingDismissWithCanDismiss = secondToLastBreakpoint is { } second && step >= second && _canDismissBlocksGesture;
 

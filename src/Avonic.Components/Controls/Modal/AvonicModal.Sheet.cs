@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Logging;
 using Avalonia.Reactive;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Animation;
 using Avonic.Components.Overlays;
@@ -161,6 +162,9 @@ public partial class AvonicModal
     /// </summary>
     internal bool SheetBackdropOff { get; set; }
 
+    /// <summary>The content presenter, in which the sheet finds its content when it's made from a template.</summary>
+    internal Avalonia.Controls.Presenters.ContentPresenter? ContentPresenter => _presenter;
+
     /// <summary>The handle part.</summary>
     internal ModalHandle? HandlePart => _handle;
 
@@ -199,10 +203,15 @@ public partial class AvonicModal
             return;
         }
 
-        _sheetTransition = sheet.MoveSheetToBreakpoint(
+        var transition = _sheetTransition = sheet.MoveSheetToBreakpoint(
             breakpoint, 1 - current, !CanDismiss.IsTrue && _sortedBreakpoints[0] == 0, Animated);
-        await _sheetTransition;
-        _sheetTransition = null;
+        await transition;
+
+        // A later move's own transition stays until it's done.
+        if (ReferenceEquals(_sheetTransition, transition))
+        {
+            _sheetTransition = null;
+        }
     }
 
     /// <summary>Ionic <c>moveToNextBreakpoint</c>: the next breakpoint that isn't 0, from the last back to the first.</summary>
@@ -303,7 +312,7 @@ public partial class AvonicModal
             initialBreakpoint,
             BackdropBreakpoint,
             animation,
-            _sortedBreakpoints,
+            () => _sortedBreakpoints,
             ExpandToScroll,
             () => _currentBreakpoint ?? 0,
             SheetOnDismiss,
@@ -522,18 +531,8 @@ public partial class AvonicModal
     {
         if (change.Property == BreakpointsProperty)
         {
-            // breakpointsChanged: sorted when set, and read again when the list changes.
-            if (_watchedBreakpoints is not null)
-            {
-                _watchedBreakpoints.CollectionChanged -= OnBreakpointsChanged;
-            }
-
-            _watchedBreakpoints = Breakpoints;
-            if (_watchedBreakpoints is not null)
-            {
-                _watchedBreakpoints.CollectionChanged += OnBreakpointsChanged;
-            }
-
+            // breakpointsChanged: sorted when set, and read again when the list changes, while it's attached.
+            WatchBreakpoints(_watchedBreakpoints is not null || this.IsAttachedToVisualTree());
             SortBreakpoints();
         }
         else if (change.Property == HandleProperty || change.Property == HandleBehaviorProperty)
@@ -547,6 +546,25 @@ public partial class AvonicModal
     }
 
     private void OnBreakpointsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SortBreakpoints();
+
+    /// <summary>
+    /// Follows changes to <see cref="Breakpoints"/> made in place, while the modal is attached, so that a list an app keeps doesn't
+    /// keep the modal alive after it's gone.
+    /// </summary>
+    private void WatchBreakpoints(bool watch)
+    {
+        if (_watchedBreakpoints is not null)
+        {
+            _watchedBreakpoints.CollectionChanged -= OnBreakpointsChanged;
+        }
+
+        _watchedBreakpoints = watch ? Breakpoints : null;
+        if (_watchedBreakpoints is not null)
+        {
+            _watchedBreakpoints.CollectionChanged += OnBreakpointsChanged;
+            SortBreakpoints();
+        }
+    }
 
     private void SortBreakpoints() => _sortedBreakpoints = Breakpoints is { } breakpoints ? [.. breakpoints.Order()] : [];
 

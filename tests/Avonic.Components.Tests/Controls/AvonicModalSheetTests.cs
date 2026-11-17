@@ -772,12 +772,12 @@ public class AvonicModalSheetTests
     public void S9_Breakpoints_Given_Out_Of_Order_Are_Sorted()
     {
         using var stage = new Stage();
-        var modal = Presented(stage, Sheet(0.5, [1, 0, 0.5]));
+        var modal = Presented(stage, Sheet(0.5, [0.75, 0.25, 0, 0.5, 1]));
         var centre = modal.HandlePart!.TranslatePoint(new Point(18, 2.5), stage.Window)!.Value;
         stage.Click(centre);
         stage.After(560);
-        Assert.Equal(1, modal.GetCurrentBreakpoint());
-        Near(0, TranslateY(modal.Wrapper!));
+        Assert.Equal(0.75, modal.GetCurrentBreakpoint());
+        Near(Height * 0.25, TranslateY(modal.Wrapper!));
     }
 
     [AvaloniaFact]
@@ -971,6 +971,68 @@ public class AvonicModalSheetTests
         var modal = Presented(stage);
         Assert.Equal(Color.Parse("#656565"), ((ISolidColorBrush)modal.HandlePart!.Background!).Color);
     });
+
+    [AvaloniaFact]
+    public void R6_Content_Made_From_A_Template_Is_Found()
+    {
+        using var stage = new Stage();
+        var modal = new AvonicModal
+        {
+            Breakpoints = [0, 0.5, 1],
+            InitialBreakpoint = 0.5,
+            Content = "a view model",
+            ContentTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<string>((_, _) => new AvonicContent { Content = new TextBlock { Text = "Made" } }),
+        };
+        Presented(stage, modal);
+        var content = modal.ContentPresenter!.GetVisualDescendants().OfType<AvonicContent>().Single();
+        Assert.False(content.ScrollY);
+    }
+
+    [AvaloniaFact]
+    public void R7_A_Second_Move_Keeps_The_Sheet_Moving_Until_It_Is_Done()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage);
+        var start = stage.Clock.Now.TotalMilliseconds;
+        _ = modal.SetCurrentBreakpoint(1);
+        stage.At(start + 100);
+        _ = modal.SetCurrentBreakpoint(0.25);
+        stage.At(start + 300);
+
+        // The first move's task is done, and the second still moving: a backdrop tap does nothing.
+        stage.Click(new Point(30, 20));
+        stage.At(start + 900);
+        Assert.NotNull(modal.GetVisualParent());
+        Assert.Equal(0.25, modal.GetCurrentBreakpoint());
+    }
+
+    [AvaloniaFact]
+    public void R8_Dismissed_Between_The_Snap_And_Its_Next_Frame_The_Sheet_Leaves_Nothing_Behind()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage, Sheet(set: m => m.BackdropBreakpoint = 0.5));
+        var start = stage.Clock.Now.TotalMilliseconds;
+        _ = modal.SetCurrentBreakpoint(0.25);
+
+        // The move ends at the frame at 16 + 512; its frame after is 16 later.
+        stage.At(start + 16 + 512);
+        modal.Dismiss(null, "gesture");
+        stage.After(100);
+        Assert.Null(modal.GetVisualParent());
+        Assert.Null(modal.GetCurrentBreakpoint());
+        Assert.False(modal.Backdrop!.IsSet(InputElement.IsHitTestVisibleProperty));
+    }
+
+    [AvaloniaFact]
+    public void R9_An_Empty_Breakpoint_List_Drags_Without_Throwing()
+    {
+        using var stage = new Stage();
+        var modal = Presented(stage, Sheet(0.5, []));
+        var drag = new Drag(stage, 447).By(-40).Hold();
+        var released = drag.Lift();
+        stage.At(released + 600);
+        Assert.NotNull(modal.GetVisualParent());
+    }
 
     [AvaloniaFact]
     public void S17_A_Keyboard_Opening_Turns_The_Gesture_Off_For_A_Frame()

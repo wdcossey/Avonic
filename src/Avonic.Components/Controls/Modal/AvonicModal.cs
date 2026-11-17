@@ -420,6 +420,7 @@ public partial class AvonicModal : AvonicOverlay
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        WatchBreakpoints(true);
 
         // The media queries matter only while it's shown, which is while it's in the overlay host.
         if (Parent is OverlayHost)
@@ -448,6 +449,7 @@ public partial class AvonicModal : AvonicOverlay
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        WatchBreakpoints(false);
         _topLevel?.PropertyChanged -= OnTopLevelPropertyChanged;
         _topLevel = null;
         _offsetTopWatch?.Dispose();
