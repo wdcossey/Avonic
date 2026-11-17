@@ -47,6 +47,13 @@ public sealed class GestureConfig
     /// </summary>
     public bool ReleaseAgainstDirection { get; init; }
 
+    /// <summary>
+    /// <see cref="ReleaseAgainstDirection"/> when this returns true, asked at the move that would let go: for a gesture whose drag
+    /// the other way does something only some of the time, as the sheet modal's drag up on its content does nothing at its top
+    /// breakpoint and expands it below.
+    /// </summary>
+    internal Func<bool>? ReleaseAgainstDirectionWhen { get; init; }
+
     /// <summary>Ionic <c>blurOnStart</c>: clear the focus before <see cref="OnStart"/>.</summary>
     public bool BlurOnStart { get; init; }
 

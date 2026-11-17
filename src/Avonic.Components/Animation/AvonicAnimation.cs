@@ -49,6 +49,12 @@ public sealed class AvonicAnimation
     private bool _paused;
     private Player? _player;
 
+    // progressStart and progressEnd's coercions: shouldForceLinearEasing, forceDurationValue, forceDirectionValue. Ionic's
+    // forceDelayValue is for browsers without Web Animations only.
+    private bool _shouldForceLinearEasing;
+    private double? _forceDuration;
+    private AnimationDirection? _forceDirection;
+
     private AvonicAnimation(string? id) => Id = id;
 
     /// <summary>Ionic <c>createAnimation(animationId?)</c>.</summary>
@@ -113,8 +119,10 @@ public sealed class AvonicAnimation
     }
 
     /// <summary>
-    /// Ionic <c>keyframes</c>. The properties are <c>opacity</c>, a number or a numeric string, and <c>transform</c>, a CSS
-    /// transform list (see <c>docs/infra/overlays/PLAN.md</c>).
+    /// Ionic <c>keyframes</c>. The properties are <c>opacity</c>, a number or a numeric string, <c>transform</c>, a CSS
+    /// transform list (see <c>docs/infra/overlays/PLAN.md</c>), and <c>maxHeight</c>, a length in px or a percentage of the
+    /// parent's height. On an animation that has started, they replace its keyframes where it is, as Ionic's
+    /// <c>setKeyframes</c> does: the sheet modal's gesture changes them between drags.
     /// </summary>
     /// <exception cref="ArgumentException">A property or value this doesn't take.</exception>
     public AvonicAnimation Keyframes(IEnumerable<AnimationKeyframe> keyframes)
@@ -126,6 +134,7 @@ public sealed class AvonicAnimation
         }
 
         _keyframes = list;
+        _player?.SetKeyframes();
         return this;
     }
 
@@ -218,14 +227,25 @@ public sealed class AvonicAnimation
     /// <summary>Ionic <c>getFill</c>: this one's, else the parent's, else <see cref="AnimationFill.Both"/>.</summary>
     public AnimationFill GetFill() => _fill ?? ParentAnimation?.GetFill() ?? AnimationFill.Both;
 
-    /// <summary>Ionic <c>getDirection</c>: this one's, else the parent's, else <see cref="AnimationDirection.Normal"/>.</summary>
-    public AnimationDirection GetDirection() => _direction ?? ParentAnimation?.GetDirection() ?? AnimationDirection.Normal;
+    /// <summary>
+    /// Ionic <c>getDirection</c>: the one <see cref="ProgressEnd"/> forces, else this one's, else the parent's, else
+    /// <see cref="AnimationDirection.Normal"/>.
+    /// </summary>
+    public AnimationDirection GetDirection() =>
+        _forceDirection ?? _direction ?? ParentAnimation?.GetDirection() ?? AnimationDirection.Normal;
 
-    /// <summary>Ionic <c>getEasing</c>: this one's, else the parent's, else <c>linear</c>.</summary>
-    public string GetEasing() => _easing ?? ParentAnimation?.GetEasing() ?? "linear";
+    /// <summary>
+    /// Ionic <c>getEasing</c>: <c>linear</c> from a <see cref="ProgressStart"/> that forces it until <see cref="ProgressEnd"/>,
+    /// else this one's, else the parent's, else <c>linear</c>.
+    /// </summary>
+    public string GetEasing() => _shouldForceLinearEasing ? "linear" : _easing ?? ParentAnimation?.GetEasing() ?? "linear";
 
-    /// <summary>Ionic <c>getDuration</c>: 0 during a <c>sync</c> play, else this one's, else the parent's, else 0.</summary>
-    public double GetDuration() => _shouldForceSyncPlayback ? 0 : _duration ?? ParentAnimation?.GetDuration() ?? 0;
+    /// <summary>
+    /// Ionic <c>getDuration</c>: 0 during a <c>sync</c> play, else the one <see cref="ProgressEnd"/> forces, else this one's, else
+    /// the parent's, else 0.
+    /// </summary>
+    public double GetDuration() =>
+        _shouldForceSyncPlayback ? 0 : _forceDuration ?? _duration ?? ParentAnimation?.GetDuration() ?? 0;
 
     /// <summary>Ionic <c>getIterations</c>: this one's, else the parent's, else 1.</summary>
     public double GetIterations() => _iterations ?? ParentAnimation?.GetIterations() ?? 1;
@@ -416,13 +436,114 @@ public sealed class AvonicAnimation
             child.Pause();
         }
 
+        PauseAnimation();
+        return this;
+    }
+
+    /// <summary>
+    /// Ionic <c>progressStart(forceLinearEasing, step)</c>: pauses this and its children for a gesture to drive, linear if
+    /// <paramref name="forceLinearEasing"/>, at <paramref name="step"/> (0 to 1 of the duration) if it's given.
+    /// </summary>
+    public AvonicAnimation ProgressStart(bool forceLinearEasing = false, double? step = null)
+    {
+        foreach (var child in _childAnimations)
+        {
+            child.ProgressStart(forceLinearEasing, step);
+        }
+
+        PauseAnimation();
+        _shouldForceLinearEasing = forceLinearEasing;
+        if (!_initialized)
+        {
+            InitializeAnimation();
+        }
+
+        Update(step);
+        return this;
+    }
+
+    /// <summary>Ionic <c>progressStep(step)</c>: this and its children held at <paramref name="step"/>, clamped to 0..0.9999.</summary>
+    public AvonicAnimation ProgressStep(double step)
+    {
+        foreach (var child in _childAnimations)
+        {
+            child.ProgressStep(step);
+        }
+
+        SetAnimationStep(step);
+        return this;
+    }
+
+    /// <summary>
+    /// Ionic <c>progressEnd(playTo, step, dur)</c>: the easing back, and played from <paramref name="step"/> to the end
+    /// (<paramref name="playTo"/> 1) or back to the start (0, which finishes at step 0) over <paramref name="duration"/> ms, or its
+    /// own duration. Null for <paramref name="playTo"/> only sets them up. A child plays with its parent.
+    /// </summary>
+    public AvonicAnimation ProgressEnd(int? playTo, double step, double? duration = null)
+    {
+        _shouldForceLinearEasing = false;
+        foreach (var child in _childAnimations)
+        {
+            child.ProgressEnd(playTo, step, duration);
+        }
+
+        if (duration is { } forced)
+        {
+            _forceDuration = forced;
+        }
+
+        _finished = false;
+        _willComplete = true;
+        if (playTo == 0)
+        {
+            _forceDirection = GetDirection() == AnimationDirection.Reverse ? AnimationDirection.Normal : AnimationDirection.Reverse;
+            if (_forceDirection == AnimationDirection.Reverse)
+            {
+                _willComplete = false;
+            }
+
+            Update();
+            SetAnimationStep(1 - step);
+        }
+        else if (playTo == 1)
+        {
+            Update();
+            SetAnimationStep(step);
+        }
+
+        if (playTo is not null && ParentAnimation is null)
+        {
+            _ = Play();
+        }
+
+        return this;
+    }
+
+    /// <summary>Ionic's <c>pauseAnimation</c>: this one's own playback, once it's been initialized.</summary>
+    private void PauseAnimation()
+    {
         if (_initialized)
         {
             _player?.Pause();
             _paused = true;
         }
+    }
 
-        return this;
+    /// <summary>Ionic's <c>update</c> without <c>deep</c>: the playback takes the timing as it is now, and the step if given.</summary>
+    private void Update(double? step = null)
+    {
+        _player?.Refresh();
+        if (step is { } s)
+        {
+            SetAnimationStep(s);
+        }
+    }
+
+    /// <summary>Ionic's <c>setAnimationStep</c>: paused at the delay plus <paramref name="step"/>, clamped to 0..0.9999, of the duration.</summary>
+    private void SetAnimationStep(double step)
+    {
+        step = Math.Min(Math.Max(step, 0), 0.9999);
+        _player?.SeekPaused(GetDelay() + GetDuration() * step);
     }
 
     /// <summary>
@@ -487,6 +608,9 @@ public sealed class AvonicAnimation
 
     private void ResetFlags()
     {
+        _shouldForceLinearEasing = false;
+        _forceDuration = null;
+        _forceDirection = null;
         _shouldForceSyncPlayback = false;
         _shouldCalculateNumAnimations = true;
         _numAnimationsRunning = 0;
@@ -541,6 +665,10 @@ public sealed class AvonicAnimation
 
         var currentStep = _willComplete ? 1 : 0;
         ApplyClassesAndStyles(_afterAddClasses, _afterRemoveClasses, _afterStyles);
+
+        // The coercions go before the callbacks, so that one that starts a progress again doesn't get them.
+        _forceDuration = null;
+        _forceDirection = null;
 
         foreach (var (callback, _) in _onFinish.Where(c => !c.OneTime).ToArray())
         {
@@ -684,18 +812,23 @@ public sealed class AvonicAnimation
         internal Player(AvonicAnimation owner)
         {
             _owner = owner;
-            var offsets = ComputedOffsets(owner._keyframes);
-            var properties = owner._keyframes.SelectMany(k => k.Keys).Distinct(StringComparer.Ordinal).ToArray();
-            foreach (var element in owner._elements)
-            {
-                foreach (var name in properties)
-                {
-                    _tracks.Add(new Track(element, AnimatedProperty.ForKeyframes(name), owner._keyframes, offsets));
-                }
-            }
+            BuildTracks();
 
             // Ionic creates each Web Animation paused at 0, which shows its value there at once.
             Apply(0);
+        }
+
+        private void BuildTracks()
+        {
+            var offsets = ComputedOffsets(_owner._keyframes);
+            var properties = _owner._keyframes.SelectMany(k => k.Keys).Distinct(StringComparer.Ordinal).ToArray();
+            foreach (var element in _owner._elements)
+            {
+                foreach (var name in properties)
+                {
+                    _tracks.Add(new Track(element, AnimatedProperty.ForKeyframes(name), _owner._keyframes, offsets));
+                }
+            }
         }
 
         private double Now => AvonicConfig.Now().TotalMilliseconds;
@@ -750,6 +883,34 @@ public sealed class AvonicAnimation
             _startTime = null;
             Apply(time);
         }
+
+        /// <summary>Web Animations' <c>currentTime = time</c> and <c>pause()</c>: held there, showing its value.</summary>
+        internal void SeekPaused(double time)
+        {
+            _playing = false;
+            _startTime = null;
+            CancelFrame();
+            _holdTime = time;
+            Apply(time);
+        }
+
+        /// <summary>Web Animations' <c>updateTiming</c>: the value at the current time, with the timing as it is now.</summary>
+        internal void Refresh() => Apply(CurrentTime);
+
+        /// <summary>Web Animations' <c>setKeyframes</c>: the tracks made again from the owner's keyframes, at the current time.</summary>
+        internal void SetKeyframes()
+        {
+            foreach (var track in _tracks)
+            {
+                track.Dispose();
+            }
+
+            _tracks.Clear();
+            BuildTracks();
+            Apply(CurrentTime);
+        }
+
+        private double CurrentTime => _playing && _startTime is { } start ? Now - start : _holdTime;
 
         internal void Cancel()
         {

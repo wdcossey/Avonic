@@ -1,6 +1,9 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data.Converters;
+using Avalonia.Layout;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -8,8 +11,9 @@ namespace Avonic.Components.Controls;
 /// The modal's host as <c>modal.md.css</c> lays it out: <c>display: flex; align-items: center; justify-content: center</c> around
 /// the wrapper, which is <c>--width</c> by <c>--height</c>, within <c>--min-*</c> and <c>--max-*</c>. Each size is a number (px) or a
 /// CSS string: a percentage of the host, <c>px</c>, a content size (<c>auto</c>, <c>fit-content</c>, <c>max-content</c>,
-/// <c>min-content</c>), or <c>none</c> for a maximum. As in CSS, the maximum applies and then the minimum, which wins, and a wrapper
-/// larger than the host overflows both sides equally.
+/// <c>min-content</c>), <c>none</c> for a maximum, or <c>calc()</c> of two of those lengths added or taken away. As in CSS, the
+/// maximum applies and then the minimum, which wins, and a wrapper larger than the host overflows both sides equally. A sheet's
+/// wrapper is <c>position: absolute; bottom: 0</c>: <see cref="VerticalContentAlignment"/> <see cref="VerticalAlignment.Bottom"/>.
 /// </summary>
 public class ModalPanel : Panel
 {
@@ -31,12 +35,23 @@ public class ModalPanel : Panel
     public static readonly StyledProperty<object?> ContentMaxHeightProperty =
         AvaloniaProperty.Register<ModalPanel, object?>(nameof(ContentMaxHeight));
 
+    /// <summary>Where the wrapper sits up and down: centred, as the host's flex box puts it, or at the bottom, as a sheet's.</summary>
+    public static readonly StyledProperty<VerticalAlignment> VerticalContentAlignmentProperty =
+        ContentControl.VerticalContentAlignmentProperty.AddOwner<ModalPanel>(new(VerticalAlignment.Center));
+
+    /// <summary>
+    /// A sheet's <c>--height</c>: <c>Avonic.Modal.Height</c> if the app set it, else <c>calc(100% - (offset + gap))</c>, the offset
+    /// being <c>Avonic.Modal.OffsetTop</c> (Ionic's <c>--ion-modal-offset-top</c>) and the gap the parameter, md's 10 px.
+    /// </summary>
+    public static readonly IMultiValueConverter SheetHeight = new SheetHeightConverter();
+
     private Size _content;
 
     static ModalPanel()
     {
         AffectsMeasure<ModalPanel>(ContentWidthProperty, ContentMinWidthProperty, ContentMaxWidthProperty, ContentHeightProperty,
             ContentMinHeightProperty, ContentMaxHeightProperty);
+        AffectsArrange<ModalPanel>(VerticalContentAlignmentProperty);
     }
 
     /// <summary><c>--width</c>.</summary>
@@ -47,6 +62,13 @@ public class ModalPanel : Panel
 
     /// <summary><c>--max-width</c>.</summary>
     public object? ContentMaxWidth { get => GetValue(ContentMaxWidthProperty); set => SetValue(ContentMaxWidthProperty, value); }
+
+    /// <inheritdoc cref="VerticalContentAlignmentProperty"/>
+    public VerticalAlignment VerticalContentAlignment
+    {
+        get => GetValue(VerticalContentAlignmentProperty);
+        set => SetValue(VerticalContentAlignmentProperty, value);
+    }
 
     /// <summary><c>--height</c>.</summary>
     public object? ContentHeight { get => GetValue(ContentHeightProperty); set => SetValue(ContentHeightProperty, value); }
@@ -86,11 +108,13 @@ public class ModalPanel : Panel
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var rect = new Rect(
-            (finalSize.Width - _content.Width) / 2,
-            (finalSize.Height - _content.Height) / 2,
-            _content.Width,
-            _content.Height);
+        var top = VerticalContentAlignment switch
+        {
+            VerticalAlignment.Top => 0,
+            VerticalAlignment.Bottom => finalSize.Height - _content.Height,
+            _ => (finalSize.Height - _content.Height) / 2,
+        };
+        var rect = new Rect((finalSize.Width - _content.Width) / 2, top, _content.Width, _content.Height);
         foreach (var child in Children)
         {
             child.Arrange(rect);
@@ -101,7 +125,7 @@ public class ModalPanel : Panel
 
     /// <summary>
     /// A CSS size in px, or null for one that isn't a length: a content size, <c>auto</c>, <c>none</c>, or nothing. A percentage of
-    /// an infinite basis is null too.
+    /// an infinite basis is null too, and so is a <c>calc()</c> with either side null.
     /// </summary>
     internal static double? Length(object? value, double basis)
     {
@@ -113,6 +137,11 @@ public class ModalPanel : Panel
                 return i;
             case string s:
                 s = s.Trim().ToLowerInvariant();
+                if (s.StartsWith("calc(", StringComparison.Ordinal) && s.EndsWith(')'))
+                {
+                    return Calc(s[5..^1], basis);
+                }
+
                 if (s.EndsWith('%') && double.TryParse(s[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var percent))
                 {
                     return double.IsInfinity(basis) ? null : basis * percent / 100;
@@ -129,5 +158,41 @@ public class ModalPanel : Panel
         }
     }
 
+    /// <summary><c>calc(a - b)</c> or <c>calc(a + b)</c>, each side a length; CSS needs the spaces around the operator.</summary>
+    private static double? Calc(string expression, double basis)
+    {
+        foreach (var (op, sign) in new[] { (" - ", -1), (" + ", 1) })
+        {
+            var at = expression.LastIndexOf(op, StringComparison.Ordinal);
+            if (at > 0)
+            {
+                return Length(expression[..at], basis) is { } a && Length(expression[(at + op.Length)..], basis) is { } b ? a + sign * b : null;
+            }
+        }
+
+        return Length(expression, basis);
+    }
+
     private static double Clamp(double value, double min, double max) => Math.Max(min, Math.Min(value, max));
+
+    /// <summary><see cref="SheetHeight"/>.</summary>
+    private sealed class SheetHeightConverter : IMultiValueConverter
+    {
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values.Count > 0 && Css.IsSet(values[0]))
+            {
+                return values[0];
+            }
+
+            var offset = values.Count > 1 && values[1] is double d ? d : 0;
+            var gap = parameter switch
+            {
+                double g => g,
+                string g when double.TryParse(g, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) => parsed,
+                _ => 0,
+            };
+            return FormattableString.Invariant($"calc(100% - {offset + gap}px)");
+        }
+    }
 }

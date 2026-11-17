@@ -4,7 +4,7 @@
 
     <!-- ion-modal: structure only. The look is in Avonic.Themes/Controls/AvonicModal.axaml. The host covers the overlay layer,
          the backdrop under the wrapper, which the panel centres at its size (the full host here). The wrapper's content is set
-         by the control, while it's mounted. -->
+         by the control, while it's mounted; over it, a sheet's handle. -->
     <ControlTheme x:Key="{x:Type c:AvonicModal}" TargetType="c:AvonicModal">
         <Setter Property="Template">
             <ControlTemplate>
@@ -14,7 +14,13 @@
                                       Tappable="{TemplateBinding BackdropDismiss}" />
                     <c:ModalPanel ContentWidth="100%" ContentHeight="100%" ZIndex="10">
                         <c:ModalWrapper Name="PART_Content" ClipToBounds="True">
-                            <ContentPresenter Name="PART_ContentPresenter" />
+                            <Panel>
+                                <c:ModalPagePanel>
+                                    <ContentPresenter Name="PART_ContentPresenter" />
+                                </c:ModalPagePanel>
+                                <!-- A sheet's handle, which the control shows. -->
+                                <c:ModalHandle Name="PART_Handle" />
+                            </Panel>
                         </c:ModalWrapper>
                     </c:ModalPanel>
                 </Panel>
