@@ -82,7 +82,7 @@
                 <StackPanel Margin="16" Spacing="12">
                     <TextBlock Text="CanDismiss asks first" FontSize="20" FontWeight="Medium" />
                     <TextBlock Text="With the box unticked, nothing closes it but the button, through the handler role." TextWrapping="Wrap" />
-                    <CheckBox Name="AllowClose" Content="Can be dismissed" />
+                    <CheckBox Name="AllowClose" Content="Can be dismissed" HorizontalAlignment="Left" />
                     <c:AvonicButton Content="Close anyway" Click="OnCloseGuarded" />
                 </StackPanel>
             </c:AvonicModal>
