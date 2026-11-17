@@ -180,7 +180,7 @@
     </Style>
 
     <!-- :host(.label-stacked), :host(.label-floating). FlowDirection mirrors the origin, which is .label-rtl. Ionic
-         only sets that from document.dir, so a right-to-left subtree differs: see the plan. -->
+         sets that from the nearest ancestor's dir since 9.0.10, as FlowDirection inherits. -->
     <Style Selector=":is(c|IItemHost) c|AvonicLabel:position-stacked, :is(c|IItemHost) c|AvonicLabel:position-floating, c|AvonicListHeader c|AvonicLabel:position-stacked, c|AvonicListHeader c|AvonicLabel:position-floating">
         <Setter Property="Margin" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />

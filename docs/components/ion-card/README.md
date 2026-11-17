@@ -6,6 +6,15 @@ The card family: `AvonicCard`, `AvonicCardHeader`, `AvonicCardTitle`, `AvonicCar
 card is a raised box for content, and it can be tappable. The design and evidence are in [PLAN.md](PLAN.md), and the
 comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.11** (`utils/attribute-controller.js`), a clickable card's `tabindex` moves to
+its native `<button>` or `<a>`, and an `aria-label` written after load reaches it; a card that isn't clickable keeps its
+`tabindex`, which makes the host a tab stop: here, `Focusable="True"` on the card, which then takes `TabIndex` as a clickable one
+does. Here the host is the focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the control are what Tab
+uses (`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host, taking it out of the tab order), and its peer
+reads `AutomationProperties.Name` and `HelpText` when it's asked, so a value set after load reaches it. Already so before Ionic 9;
+pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer raises no change of the name ([Avalonia
+issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicCard>
     <StackPanel>

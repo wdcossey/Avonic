@@ -6,6 +6,18 @@ Status: done · [#31](https://github.com/wdcossey/Avonic/issues/31)
 `AvonicItemOption` buttons. The design and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in
 [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.10**, `item-sliding.js` reads `isRTL(this.el)` and `isEndSide(side, this.el)`,
+and `item-options.js` `isEndSide(this.side, this.el)`: the nearest ancestor's `dir`, which is what the inherited `FlowDirection`
+already was here. Measured on 9.0.11 with `dir="rtl"` on a `div` around the list only: `side="end"` options are
+`item-options-start`, and `open('end')` moves the item right; `S17_RTL_From_An_Ancestor_Swaps_The_Sides_Too` pins it. 9.0.1 reads
+each option's `side` after frameworks have set it: nothing here, as Avalonia sets properties before attach. **Since Ionic 9.0.11**
+(`utils/attribute-controller.js`), an `ion-item-option`'s `tabindex` moves to its native `<button>` or `<a>`. Here the host is the
+focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the control are what Tab uses (`IsTabStop="False"`
+for a negative `tabindex`, which Ionic leaves on the host, taking it out of the tab order), and its peer reads
+`AutomationProperties.Name` and `HelpText` when it's asked, so a value set after load reaches it. Already so before Ionic 9;
+pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer raises no change of the name ([Avalonia
+issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicList>
     <c:AvonicItemSliding>

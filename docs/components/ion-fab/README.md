@@ -6,6 +6,14 @@ Status: done · [#30](https://github.com/wdcossey/Avonic/issues/30)
 the `AvonicFabList`s beside it, whose smaller buttons appear one by one. The design and evidence are in [PLAN.md](PLAN.md), and the
 comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.11** (`utils/attribute-controller.js`), an `ion-fab-button`'s `tabindex` moves to
+its native `<button>` or `<a>`. Its aria attributes are still copied once, at load, where here they're read live. Here the host is
+the focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the control are what Tab uses
+(`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host, taking it out of the tab order), and its peer
+reads `AutomationProperties.Name` and `HelpText` when it's asked, so a value set after load reaches it. Already so before Ionic 9;
+pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer raises no change of the name ([Avalonia
+issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicContent>
     <c:AvonicContent.FixedContent>

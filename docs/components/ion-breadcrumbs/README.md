@@ -6,6 +6,14 @@ Status: done · [#33](https://github.com/wdcossey/Avonic/issues/33)
 the last one active, and a collapsed indicator standing for the middle of a long trail. The design and evidence are in
 [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.11** (`utils/attribute-controller.js`), a breadcrumb's `tabindex` moves to its
+native `<a>` while it has an `Href`, and stays on the host without one. Its aria attributes are still copied once, at load, where
+here they're read live. Here the host is the focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the
+control are what Tab uses (`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host, taking it out of the tab
+order), and its peer reads `AutomationProperties.Name` and `HelpText` when it's asked, so a value set after load reaches it.
+Already so before Ionic 9; pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer raises no change of the
+name ([Avalonia issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicBreadcrumbs MaxItems="4" IonCollapsedClick="OnCollapsedClick">
     <c:AvonicBreadcrumb Href="#home" Content="Home" Click="OnHome" />

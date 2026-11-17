@@ -2,7 +2,8 @@
 
 A small API over a lot of CSS: nearly everything `ion-label` does depends on the `ion-item` around it. So this PR is
 mostly how a child control's look follows its host, which `ion-note`, `ion-text` and the form controls will reuse.
-Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide.
+Measurements are from real Ionic 8.8.19 in Chromium, md, at 390 px wide. The reference is Ionic 9.0.11: `label.js` differs from
+8.8.19's only in reading `label-rtl` from `isRTL(this.el)` (9.0.10), the nearest ancestor's `dir`, measured again for 27 (#207).
 
 ## Fidelity checklist
 
@@ -65,7 +66,7 @@ Each becomes a test.
 | 24 | `item-textarea`: at the top, at its own height, but stacked and floating still fill. `item-skeleton-text`: clipped | measured `l-ta`, `l-sk`, and a stacked one: `matrix(0.75, 0, 0, 0.75, 0, 27)` |
 | 25 | A tap on a label doesn't forward to the item's first control, even on its blank part, but a tap on the padding does | measured: `toggle: on label blank` leaves it off |
 | 26 | A tap on a label in a button item clicks the item | measured |
-| 27 | RTL: stacked and floating shrink towards the right, and fixed sits at the right | `.label-rtl`; measured with `dir` on the document: 105.5 to 374, and x = 274 |
+| 27 | RTL: stacked and floating shrink towards the right, and fixed sits at the right | `.label-rtl`; measured with `dir` on the document: 105.5 to 374, and x = 274. On 9.0.11 `dir` on an ancestor `div` alone does it too (`label-rtl`, `transform-origin: 358px 0px`, the text ending at 374), as an ancestor's `FlowDirection` does here: `B14`, `B27` |
 | 28 | Automation: a button item's name includes its label's text | native `<button>` |
 
 ## Design
@@ -132,7 +133,6 @@ what `flex: 1` beside a fixed-height sibling is.
 | Margins between two headings add up to 4, where CSS collapses them to 2 | Avalonia has no margin collapsing. `h1` or `h2` followed by `p`, the usual pairs, are 2 in both |
 | `item-input`'s label is as wide as its text up to 200, where Ionic's is `min-content` (measured 58, one word per line) | Avalonia has no `min-content`. Nothing in Ionic 8 raises `input`, so only a custom child reaches this |
 | A label moved to another item tells the new item | Ionic only emits on first load, so measured `b` gets nothing. Recycled containers are normal in Avalonia. As in Ionic, the old item keeps its classes |
-| A right-to-left subtree acts like a right-to-left document, so a stacked label shrinks to the right | Ionic's `label-rtl` only reads `document.dir`, so with `dir` on a `div`, measured, its text ends at 284 and leaves a gap. `FlowDirection` has no separate document level |
 | `h1`–`h6` and `p` get their rules directly in the label or in a panel directly in it, where Ionic's reach any depth (measured `n-h2`) | See the design: a descendant selector adds about 13% to attaching every `TextBlock` in the app. Set the values yourself deeper down |
 | With `ion-text-wrap`, a `TextBlock` nested deeper than a panel with its own `FontSize` gets 1.5 of the label's size, not its own, and can clip | `TextBlock.LineHeight` inherits as a size. Same reason |
 | A label detached in its first second doesn't stay stuck without transitions | Ionic cancels the timer and never clears the state, which is an accident |

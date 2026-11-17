@@ -579,6 +579,26 @@ public class AvonicItemSlidingTests
         Assert.Equal(0, Left(options[1], f.Scene.Window), 3);
     }
 
+    [AvaloniaFact]
+    public void S17_RTL_From_An_Ancestor_Swaps_The_Sides_Too()
+    {
+        // Since Ionic 9.0.10, isRTL(this.el) and isEndSide(side, this.el) read the nearest ancestor's dir. Measured on 9.0.11 with
+        // dir="rtl" on a div around the list only: side="end" options are item-options-start, and open('end') moves the item right.
+        using var f = Make(start: false, wrap: sliding =>
+        {
+            sliding.ClearValue(Visual.FlowDirectionProperty);
+            return new StackPanel { FlowDirection = FlowDirection.RightToLeft, Children = { sliding } };
+        });
+        f.Finger().Down(100, Y, 0).Move(110, Y, 16).Move(150, Y, 32);
+        f.At(48);
+
+        Assert.Equal(-40, f.Sliding.GetOpenAmount(), 3);
+        var item = new Rect(f.Item.Bounds.Size).TransformToAABB(f.Item.TransformToVisual(f.Scene.Window)!.Value);
+        Assert.Equal(40, item.X, 3);
+        GestureTests.Render();
+        Assert.Equal(0, Left(f.End!.Items.OfType<AvonicItemOption>().Last(), f.Scene.Window), 3);
+    }
+
     private static double Left(Visual visual, Visual root) =>
         new Rect(visual.Bounds.Size).TransformToAABB(visual.TransformToVisual(root)!.Value).X;
 

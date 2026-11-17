@@ -21,9 +21,11 @@ fixed, stacked, stacked and focused, floating (pushed out of its row, in both), 
 - **Text** is drawn from the same Roboto files on both sides since #100 ([`tools/fonts/roboto/`](../../../tools/fonts/roboto/README.md)), so every row is the height Ionic's is, the
   primary row 62, except the headings row, 118 against 113, which is the difference below.
 - **Margins between headings** add up to 4 where CSS collapses them to 2. See the plan.
-- **RTL,** the last row. The reference sets `dir` on a `div`, and Ionic's `label-rtl` only reads `document.dir`, so its
-  text shrinks to the left, ending at x = 284. With `dir` on the document, Ionic measures 105.5 to 374, which is what
-  Avonic draws. `FlowDirection` has no separate document level.
+- **RTL,** the last row. The reference sets `dir` on a `div`, and was rendered on Ionic 8, whose `label-rtl` read only
+  `document.dir`, so its text shrinks to the left there, ending at x = 284. Since 9.0.10 `label-rtl` is `isRTL(this.el)`, the
+  nearest ancestor's `dir`: measured on 9.0.11 with `dir` on a `div` only, the label's origin is its top right and its text ends
+  at 374, which is what Avonic draws (105.5 to 374 for the box, as with `dir` on the document). A match; the frame in `ref/`
+  hasn't been rendered again (#207).
 
 ## Found here, not by the tests
 

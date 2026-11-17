@@ -9,7 +9,11 @@ and the evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic i
 
 The reference is Ionic 9.0.11. **Since Ionic 9.0.1** ([#206](https://github.com/wdcossey/Avonic/issues/206)), the guard that enables
 a disabled button with a `ContentId` runs once, on the button's first attach, and leaves it disabled when its segment is disabled.
-The tab index that 9.0.5 and 9.0.11 move to the native button is [#207](https://github.com/wdcossey/Avonic/issues/207)'s.
+**Since Ionic 9.0.11** (`utils/attribute-controller.js`), an `ion-segment-button`'s `tabindex` moves to its native `<button>`. Here
+the host is the focusable element, so there's nothing to move: `TabIndex` and `IsTabStop` on the button are what Tab uses
+(`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host), and its peer reads `AutomationProperties.Name` and
+`HelpText` when it's asked. Already so before Ionic 9; pinned by `AttributeForwardingTests`
+([#207](https://github.com/wdcossey/Avonic/issues/207)).
 
 ```xml
 <c:AvonicSegment Value="photos" IonChange="OnSegmentChange">

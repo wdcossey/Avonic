@@ -1898,7 +1898,8 @@ public class AvonicLabelTests
         var frame = scene.Window.CaptureRenderedFrame()!;
         var (left, right) = InkRange(frame, 0, 55);
 
-        // Measured with the document right-to-left: 105.5 to 374. Shrunk from the left, it would end at 284.5.
+        // Measured with the document right-to-left: 105.5 to 374, and on 9.0.11 with dir on an ancestor only, as the item is here
+        // (isRTL(el) since 9.0.10). Shrunk from the left, it would end at 284.5.
         Assert.InRange(right, 360, 374);
         Assert.True(left > 284);
     });

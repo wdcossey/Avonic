@@ -6,6 +6,13 @@ Status: done · [#10](https://github.com/wdcossey/Avonic/issues/10)
 in slots. Inside an [`AvonicItem`](../ion-item/README.md) it's small by default, and the item treats it as a clickable. The
 design and evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.5 and 9.0.11** (`utils/attribute-controller.js`), the host's `tabindex` moves to
+the native `<button>`, and every aria attribute and `role` written after load reaches it. Here the host is the focusable element,
+so there's nothing to move: `TabIndex` and `IsTabStop` on the control are what Tab uses (`IsTabStop="False"` for a negative
+`tabindex`, which Ionic leaves on the host, taking it out of the tab order), and its peer reads `AutomationProperties.Name` and
+`HelpText` when it's asked, so a value set after load reaches it. Already so before Ionic 9; pinned by `AttributeForwardingTests`
+(#207). Like a stock `Button`'s, the peer raises no change of the name ([Avalonia issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicButton Content="Save" Click="OnSave" />
 <c:AvonicButton Content="Save" Command="{Binding Save}" CommandParameter="{Binding Draft}" />

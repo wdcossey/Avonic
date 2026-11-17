@@ -111,4 +111,5 @@ None.
 - The utility classes of `flex-utils.css` (`ion-justify-content-*`, `ion-align-items-*`, `ion-nowrap` …) aren't provided,
   as `.ion-padding` isn't. A column's `VerticalAlignment` does `align-self`.
 - The deliberate differences, each measured, are in [COMPARISON.md](COMPARISON.md#known-differences-in-behaviour): a resize
-  needs no frame to reach the columns, and RTL is each control's `FlowDirection` rather than the document's.
+  needs no frame to reach the columns. RTL is each control's `FlowDirection`, which an ancestor sets, as an ancestor's `dir` does
+  in Ionic since 9.0.10 (`isRTL(el)` in `col.js`): a match, measured on 9.0.11 (#207).

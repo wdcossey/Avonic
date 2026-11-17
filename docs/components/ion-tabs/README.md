@@ -6,6 +6,14 @@ Status: done · [#29](https://github.com/wdcossey/Avonic/issues/29)
 built together, and share a [PLAN.md](PLAN.md) and a [COMPARISON.md](COMPARISON.md). This is Ionic's standalone mode: there's no
 router (it's out of scope), so the tabs select their first tab at load, and a tab button's click selects its tab.
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.11** (`utils/attribute-controller.js`), an `ion-tab-button`'s `tabindex` moves to
+its native `<a>`, which an `<a>` with no `href` needs to take focus at all: here that's `Focusable="True"` on the button, as it
+isn't by default, and then `TabIndex`. Here the host is the focusable element, so there's nothing to move: `TabIndex` and
+`IsTabStop` on the control are what Tab uses (`IsTabStop="False"` for a negative `tabindex`, which Ionic leaves on the host,
+taking it out of the tab order), and its peer reads `AutomationProperties.Name` and `HelpText` when it's asked, so a value set
+after load reaches it. Already so before Ionic 9; pinned by `AttributeForwardingTests` (#207). Like a stock `Button`'s, the peer
+raises no change of the name ([Avalonia issues](../../infra/avalonia-issues.md)).
+
 ```xml
 <c:AvonicTabs IonTabsDidChange="OnTabChanged">
     <Panel>

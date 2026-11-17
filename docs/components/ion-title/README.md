@@ -8,3 +8,7 @@ design and evidence, and [COMPARISON.md](../ion-toolbar/COMPARISON.md) for the c
 
 `Size="Large"` changes nothing in md, as in Ionic, and is kept so that Ionic's values map across: the title gets Ionic's host
 class as `:size-large`, with no md rule on it, and its toolbar `:toolbar-title-large`, which an app can style.
+
+The reference is Ionic 9.0.11. **Since Ionic 9.0.10**, `title-rtl` is `isRTL(this.el)`, the nearest ancestor's `dir`, where it was
+`document.dir`. Only `title.ios.css` reads it (a large title's origin), so md has nothing to change, and the title follows an
+ancestor's `FlowDirection` as any control does ([#207](https://github.com/wdcossey/Avonic/issues/207)).

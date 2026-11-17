@@ -6,6 +6,9 @@ Status: done · [#22](https://github.com/wdcossey/Avonic/issues/22)
 sets its `Value` and raises `IonChange`, and each radio is checked when its `Value` is the group's. The design and evidence are in
 [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.0**, `ion-radio`'s `value` reflects to its attribute: nothing here, as a control
+has no attributes, and `Value` is a property an app reads (#207).
+
 ```xml
 <c:AvonicList>
     <c:AvonicRadioGroup Value="banana" HelperText="Pick one" IonChange="OnFruitChange">
