@@ -1370,7 +1370,8 @@ public class AvonicTextareaTests
         Assert.Equal(12, Bounds(Part<Control>(textarea, "PART_OutlineNotch"), textarea).X, 0.6);
         Assert.Equal(45.63, Part<Control>(textarea, "PART_OutlineNotch").Bounds.Width, 1.0);
 
-        Part<Control>(textarea, "PART_Label").Transitions = null;
+        Part<Control>(textarea, "PART_Label").ClearValue(Avalonia.Animation.Animatable.TransitionsProperty);
+        Assert.NotEmpty(Part<Control>(textarea, "PART_Label").Transitions!);
         textarea.StartContent = new Border { Width = 40, Height = 10 };
         Render();
         Assert.Equal(16, Bounds(Part<Control>(textarea, "PART_Label"), textarea).X, 0.6);

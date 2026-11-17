@@ -185,7 +185,8 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
     /// </summary>
     private void UpdateFontMetrics()
     {
-        _twoCh.Update();
+        // Null while the base constructors run.
+        _twoCh?.Update();
         using var layout = new TextLayout("x", Typeface, FontSize, null);
         if (layout.TextLines.Count > 0)
         {
