@@ -40,7 +40,7 @@ Ionic's on the left of each.
 | B3 | Events | M3: `ionModalWillPresent`, `willPresent`, … each pair in the same task | The same order, each bubbling | Match |
 | B4 | `canDismiss` | M6: false keeps it; a function decides; `handler` skips it | The same; Escape and the backdrop go through it | Match |
 | B5 | `isOpen` | M6: false to true presents, the reverse dismisses, a dismiss leaves it true, true at load presents at the next frame | The same | Match |
-| B6 | `trigger` | M7: a click on the element with that id | A click on the control with that name in the modal's name scope: its own `Click` (a stock `Button`'s, an `AvonicButton`'s, …), else `Tapped` | Match, by name for id |
+| B6 | `trigger` | M7: a click on the element with that id | A click on the control with that name in the modal's name scope: its own `Click` (a stock `Button`'s, an `AvonicButton`'s, …), or a tap on it, as a plain item or card raises no `Click` | Match, by name for id |
 | B7 | Inline | M7: teleported to `ion-app`, a comment in its place, back after | Moved to the overlay layer, an invisible placeholder in its place, back after; the page's `DataContext` kept | Match; the `DataContext` is Avalonia's binding scope, kept as a framework's bindings are |
 | B8 | Nested modals | M7: `parent-dismissed` | The same | Match |
 | B9 | Parent removed | M7: `parent-removed` | The same, when the placeholder leaves the visual tree | Match |

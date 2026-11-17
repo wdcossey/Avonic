@@ -68,7 +68,7 @@ var detail = await modal.OnDidDismiss();   // detail.Data, detail.Role
 | [ ] | `mode` | none | | Not exposed (ADR 0001) |
 | [ ] | `presentingElement` | none | | Not applicable: ios only, the card modal |
 | [x] | `showBackdrop` | `ShowBackdrop` | `true` | False: transparent, and it still takes the tap |
-| [x] | `trigger` | `Trigger` | | On `AvonicOverlay`: the name of a control in its name scope, whose `Click` (or `Tapped`) presents it |
+| [x] | `trigger` | `Trigger` | | On `AvonicOverlay`: the name of a control in its name scope, whose `Click`, or a tap, presents it |
 | [ ] | `breakpoints`, `initialBreakpoint`, `backdropBreakpoint`, `handle`, `handleBehavior`, `expandToScroll` | | | The sheet, the second PR |
 | [x] | `ionModalWillPresent`, `ionModalDidPresent`, `ionModalWillDismiss`, `ionModalDidDismiss` | `IonModalWillPresent`, … | | Routed, bubbling, each just before the generic one |
 | [x] | `willPresent`, `didPresent`, `willDismiss`, `didDismiss` | `WillPresent`, … | | The overlay's |

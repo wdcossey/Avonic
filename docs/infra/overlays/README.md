@@ -64,14 +64,14 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 | `OverlayRoles.Backdrop`, `.Gesture`, `.IsCancel()` | `BACKDROP`, `GESTURE`, `isCancel` | `Gesture` skips the leave animation |
 | `OverlayRoles.ParentRemoved`, `.ParentDismissed`, `.Handler` | the modal's `'parent-removed'`, `'parent-dismissed'`, `'handler'` | |
 | `IsOpen` | `isOpen` | public; false to true presents, true to false dismisses, once it's attached; true at its first attach presents at the next frame. A dismiss doesn't clear it (#42) |
-| `Trigger` | `trigger` (`createTriggerController`) | public; the name of a control in its name scope, whose own `Click` routed event, or `Tapped` if it has none, presents it (#42) |
+| `Trigger` | `trigger` (`createTriggerController`) | public; the name of a control in its name scope, whose own `Click` routed event or a tap presents it, as a DOM `click` comes from a key on a button and a tap on anything (#42) |
 | `ControlWillPresentEvent` and the other three | `ion<Name>WillPresent` and the rest | protected; raised just before the generic one, as Ionic does |
-| `OnPresenting()`, `OnPresented()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
+| `OnPresenting()`, `OnDismissing(data, role)`, `OnDismissed(bool)` | what an overlay's own `present()` and `dismiss()` do around the shared ones | protected, under the lock; `OnPresenting` once it's in the host (an inline one's place is `Placeholder`); `OnDismissing` returning false stops the dismiss (the modal's `canDismiss`) |
 | `PresentFocusTarget` | `[role="dialog"][tabindex]` | protected; what present focuses, the overlay if null (the modal's wrapper) |
 
 **Inline overlays** (`CoreDelegate`, #42): an overlay with a parent when it's presented is moved to the overlay host, with an
 invisible placeholder in its place (in a `Panel`, a `Decorator`, a `ContentControl` or a `ContentPresenter`; anything else throws),
-and moved back after its dismiss. `Present()` uses its own top level. It keeps the page's `DataContext` through a style-priority
+and moved back after its dismiss. `Present()` uses its own top level, or, in a popup, the one the popup belongs to. It keeps the page's `DataContext` through a style-priority
 binding to the placeholder's, but not the page's own `Styles` and `Resources`, which it's out of the reach of; a placeholder that leaves the visual tree while it's out dismisses it with `parent-removed`. See
 [ion-modal](../../components/ion-modal/README.md).
 

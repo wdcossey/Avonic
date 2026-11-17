@@ -684,11 +684,24 @@ public class AvonicModalTests
         stage.After(Left);
         Assert.Contains("didDismiss(,parent-removed)@528", stage.Log);
 
-        // Back in its page, which has gone: its trigger no longer presents it.
+        // Back in its page, which has gone: its trigger no longer tries to present it, which with no top level to present in
+        // would fail, logged.
         stage.Log.Clear();
-        stage.Opener.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        stage.After(Entered);
-        Assert.Empty(stage.Log);
+        var sink = new WarningSink(Avalonia.Logging.LogEventLevel.Error);
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            stage.Opener.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            stage.After(Entered);
+            SpinWait.SpinUntil(() => sink.Messages.Count > 0, TimeSpan.FromSeconds(2));
+            Assert.Empty(stage.Log);
+            Assert.Empty(sink.Messages);
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
     }
 
     // ── B10: the backdrop ───────────────────────────────────────────────────────────────────

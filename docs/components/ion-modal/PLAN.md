@@ -190,7 +190,7 @@ popover (#45) will use the same way. Listed in the PR under "shared files":
   with `parent-removed`, as the modal's `MutationObserver` does. (Ionic only does that for the modal; it's done here for all, as
   the placement is shared, and recorded.)
 - Hooks: the per-control events (`ControlWillPresentEvent` and the rest, raised before the generic ones); `OnPresenting()`
-  (under the lock, before anything), `OnPresented()` (after, under the lock), `OnDismissing(data, role)` (under the lock; false
+  (under the lock, once it's in the host), `OnDismissing(data, role)` (under the lock; false
   stops the dismiss), `OnDismissed(bool)` (after removal, under the lock); `PresentFocusTarget`, Ionic's `[role="dialog"][tabindex]`.
 
 ### The modal
