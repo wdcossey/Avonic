@@ -316,7 +316,17 @@ public class AvonicModal : AvonicOverlay
     {
         base.OnApplyTemplate(e);
         _backdrop = e.NameScope.Find<AvonicBackdrop>("PART_Backdrop");
+        if (_wrapper is not null)
+        {
+            _wrapper.PropertyChanged -= OnWrapperPropertyChanged;
+        }
+
         _wrapper = e.NameScope.Find<ModalWrapper>("PART_Content");
+        if (_wrapper is not null)
+        {
+            _wrapper.PropertyChanged += OnWrapperPropertyChanged;
+        }
+
         if (_presenter is not null)
         {
             _presenter.Content = null;
@@ -347,23 +357,35 @@ public class AvonicModal : AvonicOverlay
         {
             UpdatePresenter();
         }
-        else if (change.Property == KeepContentsMountedProperty && change.GetNewValue<bool>() && TopLevel.GetTopLevel(this) is not null)
+        else if (change.Property == KeepContentsMountedProperty && !IsShown)
         {
-            ApplyTemplate();
-            Mount(true);
+            if (change.GetNewValue<bool>() && TopLevel.GetTopLevel(this) is not null)
+            {
+                ApplyTemplate();
+                Mount(true);
+            }
+            else if (!change.GetNewValue<bool>())
+            {
+                Mount(false);
+            }
+        }
+        else if (change.Property == BoundsProperty)
+        {
+            UpdateSafeArea();
         }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        _topLevel = TopLevel.GetTopLevel(this);
-        if (_topLevel is not null)
-        {
-            _topLevel.PropertyChanged += OnTopLevelPropertyChanged;
-        }
 
-        UpdateInset();
+        // The media queries matter only while it's shown, which is while it's in the overlay host.
+        if (Parent is OverlayHost)
+        {
+            _topLevel = TopLevel.GetTopLevel(this);
+            _topLevel?.PropertyChanged += OnTopLevelPropertyChanged;
+            UpdateInset();
+        }
 
         // keepContentsMounted: mounted from creation, which here is the first attach to a page.
         if (KeepContentsMounted)
@@ -376,31 +398,33 @@ public class AvonicModal : AvonicOverlay
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        if (_topLevel is not null)
-        {
-            _topLevel.PropertyChanged -= OnTopLevelPropertyChanged;
-            _topLevel = null;
-        }
+        _topLevel?.PropertyChanged -= OnTopLevelPropertyChanged;
+        _topLevel = null;
     }
 
-    /// <summary>After the wrapper is placed, the safe area of each edge it doesn't reach is 0 inside it.</summary>
-    protected override Size ArrangeOverride(Size finalSize)
+    /// <summary>The wrapper's box changed, or the host's: which edges it reaches may have too.</summary>
+    private void OnWrapperPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        var size = base.ArrangeOverride(finalSize);
-        if (_wrapper is { Parent: Visual panel })
+        if (e.Property == BoundsProperty)
         {
-            UpdateSafeArea(_wrapper.Bounds, panel.Bounds.Size);
+            UpdateSafeArea();
         }
-
-        return size;
     }
 
     /// <summary>
     /// <c>getPositionBasedSafeAreaConfig</c>: an edge the wrapper's box (untransformed, as Ionic's prediction and its read after
-    /// the animation agree on) doesn't reach within 5 px gets <c>0px</c>; one it reaches inherits.
+    /// the animation agree on) doesn't reach within 5 px gets <c>0px</c>; one it reaches inherits. Measured in its panel,
+    /// which covers the window, as Ionic measures against the viewport.
     /// </summary>
-    private void UpdateSafeArea(Rect wrapper, Size viewport)
+    private void UpdateSafeArea()
     {
+        if (_wrapper is not { Parent: Visual panel })
+        {
+            return;
+        }
+
+        var wrapper = _wrapper.Bounds;
+        var viewport = panel.Bounds.Size;
         var zero = (
             Top: wrapper.Top > EdgeThreshold,
             Bottom: wrapper.Bottom < viewport.Height - EdgeThreshold,

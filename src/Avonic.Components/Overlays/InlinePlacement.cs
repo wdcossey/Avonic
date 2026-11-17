@@ -91,6 +91,18 @@ internal sealed class InlinePlacement
                     }
                 };
                 break;
+            // A templated control that takes ContentControl's Content as its own and adopts it, as AvonicModal does.
+            case AvaloniaObject owner when AvaloniaPropertyRegistry.Instance.IsRegistered(owner, ContentControl.ContentProperty)
+                                           && owner.GetValue(ContentControl.ContentProperty) == overlay:
+                owner.SetCurrentValue(ContentControl.ContentProperty, placeholder);
+                restore = () =>
+                {
+                    if (owner.GetValue(ContentControl.ContentProperty) == placeholder)
+                    {
+                        owner.SetCurrentValue(ContentControl.ContentProperty, overlay);
+                    }
+                };
+                break;
             default:
                 throw new InvalidOperationException(
                     $"An inline {overlay.GetType().Name} is moved to the overlay layer while it's presented, and back after, so it has to be in a " +

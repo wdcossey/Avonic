@@ -250,7 +250,13 @@ public abstract class AvonicOverlay : TemplatedControl
     /// <exception cref="InvalidOperationException">There's no top level to present in.</exception>
     public Task Present()
     {
-        if (Parent is not null and not OverlayHost && TopLevel.GetTopLevel(this) is { } own)
+        // Still in a host, as during its leave animation: that one's top level, where an inline overlay will go back to.
+        if (Parent is OverlayHost host)
+        {
+            return Present(host.TopLevel);
+        }
+
+        if (Parent is not null && TopLevel.GetTopLevel(this) is { } own)
         {
             return Present(own);
         }
@@ -388,12 +394,7 @@ public abstract class AvonicOverlay : TemplatedControl
     private bool IsInHost => Parent is OverlayHost;
 
     /// <summary>A present that nothing awaits (<c>isOpen</c>, a trigger), its exception logged as a dismiss's from input is.</summary>
-    internal void PresentFromInput() =>
-        Present().ContinueWith(
-            task => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's present failed: {Exception}", task.Exception!.InnerException),
-            CancellationToken.None,
-            TaskContinuationOptions.OnlyOnFaulted,
-            TaskScheduler.Default);
+    internal void PresentFromInput() => LogFault(Present(), "present");
 
     /// <summary>Ionic <c>onWillDismiss()</c>: the detail of the next <see cref="WillDismiss"/>.</summary>
     public Task<OverlayEventDetail> OnWillDismiss() => NextEvent(WillDismissEvent);
@@ -408,9 +409,11 @@ public abstract class AvonicOverlay : TemplatedControl
     /// A dismiss that input started, which nothing awaits: a backdrop tap, Escape, the back button. An exception in it is logged,
     /// as Ionic's <c>dismiss</c> logs one with <c>printIonError</c>, rather than lost in a task no one reads.
     /// </summary>
-    internal void DismissFromInput(string? role) =>
-        Dismiss(null, role).ContinueWith(
-            task => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's dismiss failed: {Exception}", task.Exception!.InnerException),
+    internal void DismissFromInput(string? role) => LogFault(Dismiss(null, role), "dismiss");
+
+    private void LogFault(Task task, string what) =>
+        task.ContinueWith(
+            t => Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The overlay's {What} failed: {Exception}", what, t.Exception!.InnerException),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted,
             TaskScheduler.Default);

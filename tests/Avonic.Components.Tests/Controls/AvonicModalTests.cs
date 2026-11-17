@@ -356,16 +356,29 @@ public class AvonicModalTests
     [AvaloniaFact]
     public void B5_IsOpen_At_Load_Presents_At_The_Next_Frame()
     {
-        using var stage = new Stage();
-        var modal = stage.Watch(Modal());
-        modal.IsOpen = true;
-        Stage.Settle();
-        Assert.Empty(stage.Log);
-        stage.Page.Children.Add(modal);
-        Stage.Settle();
-        Assert.Empty(stage.Log);
-        stage.At(16);
-        Assert.Equal(["ionModalWillPresent@16", "willPresent@16"], stage.Log);
+        var sink = new WarningSink();
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            using var stage = new Stage();
+            var modal = stage.Watch(Modal());
+
+            // Before it's loaded, as XAML sets it: Stencil calls no watcher yet, so nothing tries to present it with no top level.
+            modal.IsOpen = true;
+            Stage.Settle();
+            Assert.Empty(stage.Log);
+            stage.Page.Children.Add(modal);
+            Stage.Settle();
+            Assert.Empty(stage.Log);
+            stage.At(16);
+            Assert.Equal(["ionModalWillPresent@16", "willPresent@16"], stage.Log);
+            Assert.DoesNotContain(sink.Messages, m => m.Contains("failed", StringComparison.Ordinal));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
     }
 
     // ── B6: trigger ─────────────────────────────────────────────────────────────────────────
@@ -503,6 +516,46 @@ public class AvonicModalTests
         stage.After(Left);
         Assert.Same(inDecorator, decorator.Child);
         Assert.Same(inContent, contentControl.Content);
+    }
+
+    [AvaloniaFact]
+    public void B7_Inline_As_Another_Modals_Own_Content()
+    {
+        using var stage = new Stage();
+        var inner = stage.Watch(Modal(), "inner.");
+        var outer = new AvonicModal { Content = inner };
+        stage.Page.Children.Add(outer);
+        Stage.Settle();
+        outer.Present();
+        stage.At(Entered);
+        var presented = inner.Present();
+        stage.After(Entered);
+        Assert.True(presented.IsCompletedSuccessfully);
+        Assert.NotSame(inner, outer.Content);
+        inner.Dismiss();
+        stage.After(Left);
+        Assert.Same(inner, outer.Content);
+    }
+
+    [AvaloniaFact]
+    public void B7_Presented_Again_During_Its_Leave_It_Stays_In_Its_Own_Window()
+    {
+        using var stage = new Stage();
+        var modal = stage.Watch(Modal());
+        stage.Page.Children.Add(modal);
+        Stage.Settle();
+        modal.Present();
+        stage.At(Entered);
+        modal.Dismiss();
+        stage.After(100);
+
+        // Still in the overlay host, leaving. Ionic's present waits for the dismiss, then presents it again.
+        var again = modal.Present();
+        stage.After(Left + Entered);
+        Assert.True(again.IsCompletedSuccessfully);
+        Assert.Same(stage.Window, TopLevel.GetTopLevel(modal));
+        // The dismiss ends at 528 and the present starts then.
+        Assert.Equal("didPresent@832", stage.Log[^1]);
     }
 
     [AvaloniaFact]
@@ -666,6 +719,11 @@ public class AvonicModalTests
         modal.Dismiss();
         stage.After(Left);
         Assert.Same(stage.Window, TopLevel.GetTopLevel(content));
+
+        // Turned off while it's closed: unmounted.
+        modal.KeepContentsMounted = false;
+        Stage.Settle();
+        Assert.Null(TopLevel.GetTopLevel(content));
     }
 
     // ── B14, B15: layout and safe area ──────────────────────────────────────────────────────
@@ -730,6 +788,27 @@ public class AvonicModalTests
         stage.Render();
         Assert.Equal(expected, content.FindResource("Avonic.SafeAreaTop"));
         Assert.Equal(expected, content.FindResource("Avonic.SafeAreaBottom"));
+    }
+
+    [AvaloniaFact]
+    public void B15_The_Safe_Area_Follows_A_Wrapper_That_Changes_Size()
+    {
+        using var stage = new Stage();
+        stage.Window.Resources["Avonic.SafeAreaTop"] = 24d;
+        var content = new TextBlock();
+        var modal = new AvonicModal { Content = content };
+        modal.Present(stage.Window);
+        stage.At(Entered);
+        stage.Render();
+        Assert.Equal(24d, content.FindResource("Avonic.SafeAreaTop"));
+
+        // Smaller, in the middle: it reaches no edge. The host's own size doesn't change, so only the wrapper's layout does.
+        modal.Resources["Avonic.Modal.Height"] = "50%";
+        stage.Render();
+        Assert.Equal(0d, content.FindResource("Avonic.SafeAreaTop"));
+        modal.Resources["Avonic.Modal.Height"] = "100%";
+        stage.Render();
+        Assert.Equal(24d, content.FindResource("Avonic.SafeAreaTop"));
     }
 
     // ── B16, B17: automation and look ───────────────────────────────────────────────────────

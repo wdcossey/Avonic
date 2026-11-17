@@ -122,6 +122,7 @@ None of the modal's own. On `AvonicOverlay`, which every overlay gets: inline ov
 
 - A full-screen modal with an `AvonicContent` and no footer doesn't pad the content's end by the bottom safe area, as Ionic 9's
   does: `AvonicContent` has no such padding yet.
+- While an inline modal is presented, it's out of its page's logical tree, so the page's own `Styles` and `Resources` don't reach it (the app's and the window's do), as an ancestor's scoped style wouldn't in a browser. Its `DataContext` is kept. Put what it needs in the modal's own `Styles` and `Resources`, or the app's.
 - `Avonic.Modal.BorderStyle`: Avalonia's `Border` draws only solid lines.
 - md's tablet shadow, `0 28px 48px`, is up to 15 levels lighter just under the wrapper than Chromium's (box-shadow is best effort).
 - The page lifecycle (`ionViewWillEnter` and the rest on the content) waits for `ion-nav` (#130).

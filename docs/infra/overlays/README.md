@@ -72,7 +72,7 @@ picker) puts two focusable sentinels around its wrapper, as Ionic's `tabindex="0
 **Inline overlays** (`CoreDelegate`, #42): an overlay with a parent when it's presented is moved to the overlay host, with an
 invisible placeholder in its place (in a `Panel`, a `Decorator`, a `ContentControl` or a `ContentPresenter`; anything else throws),
 and moved back after its dismiss. `Present()` uses its own top level. It keeps the page's `DataContext` through a style-priority
-binding to the placeholder's; a placeholder that leaves the visual tree while it's out dismisses it with `parent-removed`. See
+binding to the placeholder's, but not the page's own `Styles` and `Resources`, which it's out of the reach of; a placeholder that leaves the visual tree while it's out dismisses it with `parent-removed`. See
 [ion-modal](../../components/ion-modal/README.md).
 
 Per-control events are each overlay's own (`ionAlertWillPresent` → `IonAlertWillPresent`, through `ControlWillPresentEvent`), as

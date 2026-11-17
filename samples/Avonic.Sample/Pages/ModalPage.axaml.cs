@@ -18,7 +18,11 @@ public partial class ModalPage : UserControl
 
         // isOpen isn't set back by a dismiss, so the page does it, as Ionic's docs say an app has to.
         IsOpenToggle.IonChange += (_, _) => GuardedModal.IsOpen = IsOpenToggle.Checked;
-        GuardedModal.DidDismiss += (_, _) => IsOpenToggle.Checked = false;
+        GuardedModal.DidDismiss += (_, _) =>
+        {
+            GuardedModal.IsOpen = false;
+            IsOpenToggle.Checked = false;
+        };
         GuardedModal.CanDismiss = new ModalCanDismiss((_, _) => Task.FromResult(AllowClose.IsChecked == true));
         OpenInCode.Click += (_, _) => PresentInCode();
     }

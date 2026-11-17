@@ -61,3 +61,4 @@ Ionic's on the left of each.
 | `--border-style` other than none or solid | Avalonia's `Border` draws only solid lines | |
 | The page lifecycle events on the content (`ionViewWillEnter` and the rest) | `ion-nav`'s ([#130](https://github.com/wdcossey/Avonic/issues/130)) | |
 | `parent-removed` for every inline overlay | Ionic does it only for the modal; the placement here is shared by every overlay | |
+| The page's own `Styles` and `Resources` don't reach an inline modal while it's presented | It's moved out of the page's logical tree, as Ionic moves it out of its parent; a document's global CSS still applies in Ionic, as the app's and window's do here. `DataContext` is kept | |
