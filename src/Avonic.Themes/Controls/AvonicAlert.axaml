@@ -120,8 +120,7 @@
                 </MultiBinding>
             </Setter>
             <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="BoxShadow"
-                    Value="{b:CssShadow '0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12)'}" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Alert.Md.BoxShadow}" />
         </Style>
         <Style Selector="^ /template/ Border#PART_Clip">
             <Setter Property="CornerRadius" Value="4" />

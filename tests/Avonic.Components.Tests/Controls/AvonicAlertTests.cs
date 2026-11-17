@@ -380,6 +380,15 @@ public class AvonicAlertTests
             Inputs = [new AlertInput { Name = "first", Value = "Ann" }, new AlertInput(), new AlertInput { Type = AlertInputType.Textarea, Value = "t" }],
         });
         Assert.Equal(new Dictionary<string, object?> { ["first"] = "Ann", ["1"] = "", ["2"] = "t" }, text.GetValues());
+        text.Dismiss();
+        stage.After(Left);
+
+        // i.value || '': every falsy value is ''.
+        var falsy = Shown(stage, new AvonicAlert
+        {
+            Inputs = [new AlertInput { Name = "zero", Value = 0 }, new AlertInput { Name = "no", Value = false }, new AlertInput { Name = "one", Value = 1 }],
+        });
+        Assert.Equal(new Dictionary<string, object?> { ["zero"] = "", ["no"] = "", ["one"] = 1 }, falsy.GetValues());
     }
 
     // ── B8: radios ──────────────────────────────────────────────────────────────────────────
@@ -470,6 +479,28 @@ public class AvonicAlertTests
     }
 
     // ── B9: checkboxes ──────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B8_An_Input_Handlers_Exception_Is_Logged_And_The_Options_Still_Show_The_Pick()
+    {
+        var sink = new Sink();
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            using var stage = new Stage();
+            var inputs = Radios("a", "b");
+            inputs[1].Handler = _ => throw new InvalidOperationException("app");
+            var alert = Shown(stage, new AvonicAlert { Inputs = inputs });
+            Tap(stage, alert.InputControls[1]);
+            Assert.True(((AlertRadioButton)alert.InputControls[1]).IsChecked);
+            Assert.Contains(sink.Messages, m => m.Contains("input handler failed", StringComparison.Ordinal));
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
 
     [AvaloniaFact]
     public void B9_A_Tap_Or_Space_Toggles_A_Checkbox_And_Enter_Does_Not()
@@ -717,6 +748,24 @@ public class AvonicAlertTests
     // ── B15: layout ─────────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
+    public void B15_Vw_And_Vh_Are_The_Windows_Width_And_Height_Whatever_The_Axis()
+    {
+        var viewport = new Size(400, 800);
+        Assert.Equal(400, AlertPanel.Length("50vh", 400, viewport));
+        Assert.Equal(320, AlertPanel.Length("80vw", 800, viewport));
+    }
+
+    [AvaloniaFact]
+    public void B15_In_A_Narrow_Window_A_Long_Message_Makes_The_Wrapper_As_Wide_As_The_Room()
+    {
+        // fit-content: min(max-content, room). Measured only at the room, wrapped text would be its widest line, narrower.
+        using var stage = new Stage(266, 844);
+        var text = string.Join(" ", Enumerable.Range(1, 12).Select(i => $"Line {i} of a long message."));
+        var alert = Shown(stage, new AvonicAlert { Message = text, Buttons = ["OK"] });
+        Assert.Equal(266, alert.Wrapper!.Bounds.Width, 3);
+    }
+
+    [AvaloniaFact]
     public void B15_The_Wrappers_Max_Height_Shrinks_The_Scrollers_In_Proportion()
     {
         var column = new AlertColumn();
@@ -757,6 +806,7 @@ public class AvonicAlertTests
     [InlineData("12px", 800d, 12d)]
     [InlineData("100% + 4px", 100d, 104d)]
     [InlineData("100% - 10px + 4px", 100d, 94d)]
+    [InlineData("calc(100% - 32px)", 400d, 368d)]
     [InlineData("auto", 100d, null)]
     [InlineData("none", 100d, null)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>
@@ -925,11 +975,15 @@ public class AvonicAlertTests
         Shown(stage, alert);
         Assert.Single(alert.ButtonControls);
         alert.Buttons.Add("Cancel");
+        Stage.Settle();
         Assert.Equal(2, alert.ButtonControls.Count);
         alert.Inputs = new Avalonia.Collections.AvaloniaList<AlertInput>(Radios("x", "y", "z"));
         Assert.Equal(3, alert.InputControls.Count);
         alert.Inputs.Add(new AlertInput { Type = AlertInputType.Radio, Label = "w" });
-        Assert.Equal(4, alert.InputControls.Count);
+        alert.Inputs.Add(new AlertInput { Type = AlertInputType.Radio, Label = "v" });
+        Assert.Equal(3, alert.InputControls.Count);
+        Stage.Settle();
+        Assert.Equal(5, alert.InputControls.Count);
         Assert.Equal("w", ((AlertRadioButton)alert.InputControls[3]).Label);
     }
 

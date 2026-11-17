@@ -20,6 +20,9 @@
     <b:CssUnset x:Key="Avonic.Alert.MaxWidth" />
     <b:CssUnset x:Key="Avonic.Alert.MaxHeight" />
 
+    <!-- .alert-wrapper's box-shadow, which core.json doesn't list. -->
+    <b:CssShadow x:Key="Avonic.Alert.Md.BoxShadow">0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12)</b:CssShadow>
+
     <x:Double x:Key="Avonic.Alert.Md.MaxWidth">280</x:Double>
     <x:String x:Key="Avonic.Alert.Md.MaxHeight">90%</x:String>
     <!-- At least 768 wide: 48 from each edge, up to 560 by 560. -->

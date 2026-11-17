@@ -93,16 +93,8 @@ public abstract class AlertTextField : TemplatedControl
     }
 
     /// <summary>The keyboard: <c>inputmode</c> if it's set, as it beats the type's, else the type's.</summary>
-    private static TextInputContentType ContentType(string? inputmode, AlertInputType type) => inputmode?.Trim().ToLowerInvariant() switch
-    {
-        "decimal" => TextInputContentType.Number,
-        "email" => TextInputContentType.Email,
-        "numeric" or "tel" => TextInputContentType.Digits,
-        "search" => TextInputContentType.Search,
-        "text" => TextInputContentType.Normal,
-        "url" => TextInputContentType.Url,
-        _ => NativeTextField.ContentType(null, type),
-    };
+    private static TextInputContentType ContentType(string? inputmode, AlertInputType type) =>
+        NativeTextField.ContentType(Enum.TryParse<InputInputmode>(inputmode?.Trim(), ignoreCase: true, out var mode) ? mode : null, type);
 }
 
 /// <summary>An <see cref="AvonicAlert"/>'s <c>&lt;input class="alert-input"&gt;</c>, in its wrapper.</summary>

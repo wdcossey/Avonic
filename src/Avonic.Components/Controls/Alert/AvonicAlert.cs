@@ -123,6 +123,8 @@ public class AvonicAlert : AvonicOverlay
     private INotifyCollectionChanged? _watchedButtons;
     private INotifyCollectionChanged? _watchedInputs;
     private GridViewport? _viewport;
+    private bool _buttonsPending;
+    private bool _inputsPending;
 
     private AvonicBackdrop? _backdrop;
     private AlertWrapper? _wrapper;
@@ -443,15 +445,28 @@ public class AvonicAlert : AvonicOverlay
         }
     }
 
-    private void OnButtonsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => ButtonsChanged();
+    // Changes to a list in place come in a batch, as one render after them, as Stencil renders once for many changes.
+    private void OnButtonsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => Coalesce(ref _buttonsPending, ButtonsChanged);
 
-    private void OnInputsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => InputsChanged();
+    private void OnInputsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => Coalesce(ref _inputsPending, InputsChanged);
+
+    private static void Coalesce(ref bool pending, Action render)
+    {
+        if (pending)
+        {
+            return;
+        }
+
+        pending = true;
+        Avalonia.Threading.Dispatcher.UIThread.Post(render);
+    }
 
     // ── Ionic's watchers ────────────────────────────────────────────────────────────────────
 
     /// <summary><c>buttonsChanged</c>: the buttons again, and the wrap state reset, to be checked again.</summary>
     private void ButtonsChanged()
     {
+        _buttonsPending = false;
         _processedButtons.Clear();
         _processedButtons.AddRange(Buttons ?? []);
         _wrapped = false;
@@ -463,6 +478,7 @@ public class AvonicAlert : AvonicOverlay
     /// <summary><c>inputsChanged</c>, once the alert has loaded; before that, its present does it.</summary>
     private void InputsChanged()
     {
+        _inputsPending = false;
         if (_inputsProcessed)
         {
             ProcessInputs();
@@ -744,21 +760,34 @@ public class AvonicAlert : AvonicOverlay
             _tabStops[input] = ReferenceEquals(input, selected);
         }
 
-        selected.Handler?.Invoke(selected);
-        foreach (var option in _options)
-        {
-            UpdateOption(option);
-        }
+        CallInputHandler(selected);
     }
 
     /// <summary><c>cbClick</c>: toggled; its handler.</summary>
     private void CbClick(AlertInput selected)
     {
         selected.Checked = !selected.Checked;
-        selected.Handler?.Invoke(selected);
+        CallInputHandler(selected);
+    }
+
+    /// <summary>
+    /// <c>safeCall(selectedInput.handler, selectedInput)</c>, then the render. A handler's exception is logged, as a browser logs
+    /// one from a click listener and carries on, rather than reaching Avalonia's input; the options show their new state either way.
+    /// </summary>
+    private void CallInputHandler(AlertInput selected)
+    {
         foreach (var option in _options)
         {
             UpdateOption(option);
+        }
+
+        try
+        {
+            selected.Handler?.Invoke(selected);
+        }
+        catch (Exception e)
+        {
+            Logger.TryGet(LogEventLevel.Error, LogArea.Control)?.Log(this, "The alert's input handler failed: {Exception}", e);
         }
     }
 
@@ -872,13 +901,23 @@ public class AvonicAlert : AvonicOverlay
         };
     }
 
+    /// <summary>JavaScript's falsy values, which <c>i.value || ''</c> replaces.</summary>
+    private static bool IsFalsy(object? value) => value switch
+    {
+        null or "" or false => true,
+        double d => d == 0 || double.IsNaN(d),
+        float f => f == 0 || float.IsNaN(f),
+        int or long or short or byte or decimal => Convert.ToDecimal(value, System.Globalization.CultureInfo.InvariantCulture) == 0,
+        _ => false,
+    };
+
     /// <summary>A text alert's values: each input's value, <c>''</c> when it has none, under its name; a later name wins.</summary>
     private Dictionary<string, object?> TextValues()
     {
         var values = new Dictionary<string, object?>();
         foreach (var input in _processedInputs)
         {
-            values[input.Name!] = input.Value is null or "" ? "" : input.Value;
+            values[input.Name!] = IsFalsy(input.Value) ? "" : input.Value;
         }
 
         return values;

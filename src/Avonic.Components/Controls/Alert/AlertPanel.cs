@@ -62,12 +62,12 @@ public class AlertPanel : Panel
     {
         var width = availableSize.Width;
         var height = availableSize.Height;
-        var minWidth = Length(ContentMinWidth, width) ?? 0;
-        var maxWidth = Length(ContentMaxWidth, width) ?? double.PositiveInfinity;
-        var minHeight = Length(ContentMinHeight, height) ?? 0;
-        var maxHeight = Length(ContentMaxHeight, height) ?? double.PositiveInfinity;
-        var fixedWidth = Length(ContentWidth, width);
-        var fixedHeight = Length(ContentHeight, height);
+        var minWidth = Length(ContentMinWidth, width, availableSize) ?? 0;
+        var maxWidth = Length(ContentMaxWidth, width, availableSize) ?? double.PositiveInfinity;
+        var minHeight = Length(ContentMinHeight, height, availableSize) ?? 0;
+        var maxHeight = Length(ContentMaxHeight, height, availableSize) ?? double.PositiveInfinity;
+        var fixedWidth = Length(ContentWidth, width, availableSize);
+        var fixedHeight = Length(ContentHeight, height, availableSize);
 
         var desired = default(Size);
         foreach (var child in Children)
@@ -120,33 +120,44 @@ public class AlertPanel : Panel
 
     /// <summary>
     /// A CSS size in px, or null for one that isn't a length (<c>auto</c>, <c>none</c>, nothing, or a percentage of an infinite
-    /// basis).
+    /// basis). A percentage is of <paramref name="basis"/>; <c>vw</c> and <c>vh</c> are of the viewport's width and height.
     /// </summary>
-    internal static double? Length(object? value, double basis) => value switch
+    internal static double? Length(object? value, double basis, Size viewport) => value switch
     {
         double d => double.IsNaN(d) ? null : d,
         int i => i,
-        string s => Parse(s.Trim().ToLowerInvariant(), basis),
+        string s => Parse(s.Trim().ToLowerInvariant(), basis, viewport),
         _ => null,
     };
 
-    private static double? Parse(string s, double basis)
+    /// <summary><see cref="Length(object?, double, Size)"/> where the viewport is the basis both ways.</summary>
+    internal static double? Length(object? value, double basis) => Length(value, basis, new Size(basis, basis));
+
+    private static double? Parse(string s, double basis, Size viewport)
     {
-        if (s.StartsWith("min(", StringComparison.Ordinal) && s.EndsWith(')'))
+        foreach (var function in new[] { "calc(", "min(" })
         {
-            var parts = s[4..^1].Split(',');
-            double? min = null;
-            foreach (var part in parts)
+            if (s.StartsWith(function, StringComparison.Ordinal) && s.EndsWith(')'))
             {
-                if (Parse(part.Trim(), basis) is not { } value)
+                var inner = s[function.Length..^1];
+                if (function == "calc(")
                 {
-                    return null;
+                    return Parse(inner.Trim(), basis, viewport);
                 }
 
-                min = min is { } m ? Math.Min(m, value) : value;
-            }
+                double? min = null;
+                foreach (var part in inner.Split(','))
+                {
+                    if (Parse(part.Trim(), basis, viewport) is not { } value)
+                    {
+                        return null;
+                    }
 
-            return min;
+                    min = min is { } m ? Math.Min(m, value) : value;
+                }
+
+                return min;
+            }
         }
 
         // Sums and differences, as in calc(), left to right: split at the last operator of either kind.
@@ -155,18 +166,18 @@ public class AlertPanel : Panel
         var at = Math.Max(minus, plus);
         if (at > 0)
         {
-            return Parse(s[..at].Trim(), basis) is { } a && Parse(s[(at + 3)..].Trim(), basis) is { } b
+            return Parse(s[..at].Trim(), basis, viewport) is { } a && Parse(s[(at + 3)..].Trim(), basis, viewport) is { } b
                 ? at == minus ? a - b : a + b
                 : null;
         }
 
-        foreach (var unit in new[] { "%", "vw", "vh" })
+        foreach (var (unit, of) in new[] { ("%", basis), ("vw", viewport.Width), ("vh", viewport.Height) })
         {
             if (s.EndsWith(unit, StringComparison.Ordinal))
             {
                 return double.TryParse(s[..^unit.Length], NumberStyles.Float, CultureInfo.InvariantCulture, out var percent)
-                       && !double.IsInfinity(basis)
-                    ? basis * percent / 100
+                       && !double.IsInfinity(of)
+                    ? of * percent / 100
                     : null;
             }
         }
