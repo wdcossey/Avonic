@@ -54,7 +54,7 @@ function fetchPackage(name, version) {
 }
 
 /** Bumped when the normalising changes, as the trees are cached. */
-const TREE_FORMAT = 2;
+const TREE_FORMAT = 3;
 
 const normalise = (text, file = '') => {
     const out = text
@@ -107,8 +107,8 @@ function modernise(js) {
             (_, r) => `${r}?.`)
         // `a !== null && a !== void 0 ? a : b` → `a ?? b`
         .replace(new RegExp(String.raw`(?<![\w$.])(${ref}) !== null && \1 !== void 0 \? \1 : `, 'g'), '$1 ?? ')
-        // `(a?.b) !== c`: the parentheses the conditional needed
-        .replace(/(?<![\w$)\]])\(([\w$]+(?:\??\.[\w$]+)*\?\.[\w$]+(?:\??\.[\w$]+)*)\)/g, '$1')
+        // `(a?.b) !== c`: the parentheses the conditional needed before a comparison (not an `if (a?.b)`'s)
+        .replace(/(?<![\w$)\]])\(([\w$]+(?:\??\.[\w$]+)*\?\.[\w$]+(?:\??\.[\w$]+)*)\)(?= [!=]==)/g, '$1')
         // `var _a, _b;`, the temporaries, and the lint comment that asked for `?.`
         .replace(/^[ \t]*var _[a-z]\d*(?:, _[a-z]\d*)*;\n/gm, '')
         .replace(/^[ \t]*\/\/ eslint-disable-next-line @typescript-eslint\/prefer-optional-chain\n/gm, '');
