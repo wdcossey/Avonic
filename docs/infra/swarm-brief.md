@@ -143,8 +143,8 @@ These are mistakes this project has already made, so don't repeat them.
 
 ## Review and PR
 
-- **`/code-review` twice, at the levels in `docs/PROCESS.md` §4:** pass 1 `high origin/v2...<branch> --max-findings all`, pass 2 on the fixed code `medium origin/v2...<branch> --max-findings all` (a docs or chore PR: one pass at `medium`). Always write the level and name the branch, never `HEAD`. Findings are fixed or waived with a reason; the PR records each pass's level and tokens ("not measured" if you can't see them). Don't run extra passes: the level trial (#232) is the coordinator's.
-- **No conflict markers:** after merging `origin/v2` into your branch, `git grep -n -E '^(<<<<<<<|>>>>>>>)' -- ':!*.png'` prints nothing. CI doesn't catch them in a doc.
+- **`/code-review` twice, at the levels in `docs/PROCESS.md` §4:** pass 1 `high origin/v2...<branch> --max-findings all` (`medium` for a small bug fix; always `high` on code many controls share, as listed there), pass 2 on the fixed code `medium origin/v2...<branch> --max-findings all` (a docs or chore PR: one pass at `medium`). Always write the level and name the branch, never `HEAD`. Findings are fixed or waived with a reason; the PR records each pass's level and tokens ("not measured" if you can't see them). Don't run extra passes: the level trial (#232) is the coordinator's.
+- **No conflict markers:** after merging or rebasing on `origin/v2`, and before your last push, `git grep -n -I -E '^(<<<<<<<|>>>>>>>)'` prints nothing. CI doesn't catch them in a doc.
 - **The gate before every commit:** `dotnet build Avonic.sln && dotnet test Avonic.sln`.
 - **A clean clone:** before the PR, clone your branch to your temp folder, `npm ci`, and run a Release build and test. Nothing may be skipped.
 - **Commits** end with exactly this line: `Co-Authored-By: <the model's name> <noreply@anthropic.com>`, as the session's instructions give it.

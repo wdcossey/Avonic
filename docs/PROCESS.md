@@ -91,19 +91,19 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
 
 ## 4. Review
 
-- **`/code-review`, twice**, the second pass on the fixed branch, at the levels of the shared ways of working
-  (`~/.claude/ways-of-working/PROCESS.md` §4, on trial from 17 Nov 2026, #232). They're the costliest step, so the level follows
-  what the pass checks:
+- **`/code-review`, twice** for a change in behaviour, the second pass on the fixed branch; **once** for docs, samples and
+  chores. The levels are the developer's shared ways of working (copied here; on trial from 17 Nov 2026, #232). The passes
+  are the costliest step, so the level follows what the pass checks:
 
   | Pass | Level |
   |---|---|
-  | Pass 1 on shared infrastructure (`Overlays/`, `Gestures/`, `Animation/`, `Behaviors/`, `Controls/TextField/`, `Controls/Flex/`) | `high`, always |
+  | Pass 1 on code many controls share (`Overlays/`, `Gestures/`, `Animation/`, `Behaviors/`, `Controls/TextField/`, `Controls/Flex/`, `Controls/App/`, `Controls/Item/`, `Controls/List/`, `AvonicConfig.cs`, `src/Avonic.Themes/Tokens/` and `Styles/`, `Directory.Build.targets`) | `high`, always |
   | Pass 1 on a control, or other behaviour | `high`; `medium` for a small bug fix (one area, a few lines) |
   | Pass 2, which checks pass 1's fixes | `medium` |
   | The one pass for docs, samples and chores | `medium` |
 
   Invoke the `code-review` skill with the level, the branch and no cap: `high origin/v2...<branch> --max-findings all`. Always
-  write the level (left out, it reuses the last one typed) and name the branch, never `HEAD` (the review runs in the main clone).
+  write the level (left out, it reuses the last one typed) and name the branch, never `HEAD` (the review runs in the main clone), on committed work.
   Never `max` or `ultra` unless the human asks. Findings are fixed or waived with a reason in the PR, which records each pass's
   level and its tokens, from the review's usage line ("not measured" if it can't be seen).
 - **Prove the tests can fail,** with [`tools/breakage`](../tools/breakage/run.js). A new test for a bug has to fail on that bug.
