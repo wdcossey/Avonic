@@ -67,8 +67,9 @@ would better move to a shared place is in the PR, under "Proposed for shared fil
 | [x] | `end` | `EndContent`, `EndContentTemplate` |
 
 No shadow parts (it's scoped). Template parts, by Ionic's class: `PART_Wrapper` (`.textarea-wrapper`), `PART_Layout` (its flex
-box, an `InputWrapperPanel`), `PART_Label` (`.label-text-wrapper`), `PART_LabelText`, `PART_LabelContent`, `PART_NativeWrapper`
-(`.textarea-wrapper-inner`), `PART_StartWrapper`, `PART_Start`, `PART_EndWrapper`, `PART_End`, `PART_NativeInput` (the
+box, an `InputWrapperPanel`), `PART_Control` (`.textarea-control`), `PART_Label` (`.label-text-wrapper`), `PART_LabelText`,
+`PART_LabelContent`, `PART_StartWrapper` (`.textarea-start`), `PART_Start`, `PART_EndWrapper` (`.textarea-end`), `PART_End`,
+`PART_NativeInput` (the
 `<textarea>`), `PART_Highlight`, `PART_OutlineContainer`, `PART_OutlineStart`, `PART_OutlineNotch`, `PART_NotchSpacer`,
 `PART_OutlineEnd`, `PART_Bottom`, `PART_HelperText`, `PART_ErrorText`, `PART_Counter`.
 
@@ -94,9 +95,8 @@ box, an `InputWrapperPanel`), `PART_Label` (`.label-text-wrapper`), `PART_LabelT
 | [x] | `--placeholder-font-weight` | `Avonic.Textarea.PlaceholderFontWeight` | `FontWeight` | `CssUnset`: inherited |
 | [x] | `--placeholder-opacity` | `Avonic.Textarea.PlaceholderOpacity` | `double` | `CssUnset`: `--ion-placeholder-opacity`, 0.6 |
 
-md's literals with no variable are in the theme: min heights 44 and 56, which the wrapper and `.textarea-wrapper-inner` both
-inherit; the label's 16 px gap, 200 px max and 100 px fixed width; the field's and slots' 8 px (outline 12 px) above in a
-column; the transforms and their 150 ms `cubic-bezier(0.4, 0, 0.2, 1)`; the highlight's 200 ms; the wrapper's 15 ms background;
+md's literals with no variable are in the theme: the min height 72 (Ionic 9; it was 44 and 56); the label's 16 px gap, 200 px
+max and 100 px fixed width; the field's 8 px (outline 19 px) above in a column; a slotted button's 7 px; the transforms and their 150 ms `cubic-bezier(0.4, 0, 0.2, 1)`; the highlight's 200 ms; the wrapper's 15 ms background;
 the bottom's 5 px, 12 px text and step 700 colour; the counter's 16 px and letter spacing; the notch's 4 px and 8 px; 0.38
 opacity when disabled.
 
@@ -167,13 +167,14 @@ Avalonia's own is 18.75), set at style priority, so the rows add up as in Chromi
 ```
 Grid (root)
 ├─ Grid PART_OutlineContainer          .textarea-outline-container (outline only)
-├─ Border PART_Wrapper                 .textarea-wrapper: padding start and end, background, bottom border, radius, min height
-│  └─ InputWrapperPanel PART_Layout    row, row-reverse or column; the label out of flow with the outline
-│     ├─ Border PART_Label             at the top: padding-top and -bottom in a row
-│     └─ Grid PART_NativeWrapper       .textarea-wrapper-inner: min height again
-│        ├─ Border PART_StartWrapper > ContentPresenter PART_Start
-│        ├─ TextareaNativeInput PART_NativeInput   padding-top and -bottom; 8 px above in a column, 12 with the outline
-│        └─ Border PART_EndWrapper > ContentPresenter PART_End
+├─ Border PART_Wrapper                 .textarea-wrapper: padding start and end, background, bottom border, radius, min height 72
+│  └─ Grid (Auto, *, Auto)              Ionic 9's three containers
+│     ├─ Border PART_StartWrapper > ContentPresenter PART_Start   .textarea-start: at the top, padding-top above the child
+│     ├─ Border PART_Control            .textarea-control: padding-top (0 in a column) and padding-bottom
+│     │  └─ InputWrapperPanel PART_Layout   row, row-reverse or column; the label out of flow with the outline
+│     │     ├─ Border PART_Label        at the top
+│     │     └─ TextareaNativeInput PART_NativeInput   8 px above in a column, 19 with the outline
+│     └─ Border PART_EndWrapper > ContentPresenter PART_End       .textarea-end
 ├─ Border PART_Highlight
 └─ Border PART_Bottom                  helper or error text, counter
 ```

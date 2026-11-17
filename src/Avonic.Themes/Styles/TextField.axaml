@@ -29,8 +29,8 @@
     </Style>
 
     <!-- ion-textarea: an ion-chip keeps its own 4px below, and its margin-top is var(padding-top), which is the slot wrapper's
-         padding, in the theme. Ionic 9: an ion-button's margin-top is 7px, whatever the padding: here 7 less the wrapper's
-         padding above, so that the button sits 7 down, and its own 4px below. -->
+         padding, in the theme. Ionic 9: an ion-button's margin-top is 7px, whatever the padding: the margin here, less the
+         wrapper's padding above, so that the button sits 7 down, with its own 4px below and 16px beside the field. -->
     <Style Selector="c|AvonicTextarea /template/ ContentPresenter#PART_Start > c|AvonicChip">
         <Setter Property="Margin" Value="0,0,16,4" />
     </Style>
@@ -38,10 +38,10 @@
         <Setter Property="Margin" Value="16,0,0,4" />
     </Style>
     <Style Selector="c|AvonicTextarea /template/ ContentPresenter#PART_Start > c|AvonicButton">
-        <Setter Property="Margin" Value="{Binding $parent[Border].Padding, Converter={x:Static c:FieldConverters.SlottedButtonMargin}, ConverterParameter=Start}" />
+        <Setter Property="Margin" Value="{Binding $parent[Border].Padding, Converter={x:Static c:FieldConverters.LessWrapperTop}, ConverterParameter='0,7,16,4'}" />
     </Style>
     <Style Selector="c|AvonicTextarea /template/ ContentPresenter#PART_End > c|AvonicButton">
-        <Setter Property="Margin" Value="{Binding $parent[Border].Padding, Converter={x:Static c:FieldConverters.SlottedButtonMargin}, ConverterParameter=End}" />
+        <Setter Property="Margin" Value="{Binding $parent[Border].Padding, Converter={x:Static c:FieldConverters.LessWrapperTop}, ConverterParameter='16,7,0,4'}" />
     </Style>
 
 </Styles>
