@@ -143,7 +143,7 @@ The sheet (`:sheet`):
   off; `ShowBackdrop` or `FocusTrap` false keep it that way.
 - **Content**: the first `AvonicContent` inside doesn't scroll below the top breakpoint, so that a drag on it moves the sheet, and
   is given its scrolling back at the top and after the dismiss. With `ExpandToScroll` false it scrolls at every breakpoint and
-  is only as tall as what shows. A drag up on content that can scroll, at the top breakpoint or with `ExpandToScroll` false,
+  is only as tall as what shows. A drag up on content that can scroll, fully open (at 1) or with `ExpandToScroll` false,
   scrolls it.
 
 ## Resource keys
@@ -184,7 +184,7 @@ None of the modal's own. On `AvonicOverlay`, which every overlay gets: inline ov
 - `Avonic.Modal.BorderStyle`: Avalonia's `Border` draws only solid lines.
 - md's tablet shadow, `0 28px 48px`, is up to 15 levels lighter just under the wrapper than Chromium's (box-shadow is best effort).
 - The page lifecycle (`ionViewWillEnter` and the rest on the content) waits for `ion-nav` (#130).
-- A drag up on the sheet's content where the content scrolls (at the top breakpoint, or with `ExpandToScroll` false) scrolls it
+- A drag up on the sheet's content where the content scrolls (fully open, at 1, or with `ExpandToScroll` false) scrolls it
   and raises no drag events: Ionic's passive gesture follows that drag as well as the browser scrolling, and Avalonia gives a
   pointer to one owner.
 - `ExpandToScroll` false: Ionic moves an `ion-footer` to the body while the sheet is dragged, so that it doesn't shake as the

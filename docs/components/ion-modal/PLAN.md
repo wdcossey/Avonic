@@ -381,7 +381,7 @@ On `AvonicModal`, with what the gesture needs in `Controls/Modal/`:
 - **The content**: `ContentUtils.FindClosestIonContent` from the press's source, its `ScrollY` and scroll offset, and its refresher.
   A drag up inside content that scrolls (the sheet at its top breakpoint, or `ExpandToScroll` false) can't move the sheet, and
   Ionic's passive gesture lets the browser scroll it; here the gesture lets go of it (`ReleaseAgainstDirection`, given as a
-  condition read at the press), so the `ScrollViewer` scrolls, as the refresher does.
+  condition read at the move, fully open as `canStart` checks 1), so the `ScrollViewer` scrolls, as the refresher does.
 
 ### Not done, with why
 
