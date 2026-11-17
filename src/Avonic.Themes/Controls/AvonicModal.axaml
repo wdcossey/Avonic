@@ -27,11 +27,11 @@
                     <c:AvonicBackdrop Name="PART_Backdrop"
                                       Visible="{TemplateBinding ShowBackdrop}"
                                       Tappable="{TemplateBinding BackdropDismiss}" />
-                    <c:ModalPanel Name="PART_Panel">
-                        <!-- .modal-wrapper: z-index 10, over the backdrop's 2. It rests 40 px down at 0.01, which the enter
-                             animation takes away. ClipToBounds is off so that it draws its shadow; PART_Clip is overflow. -->
+                    <!-- .modal-wrapper's z-index 10, over the backdrop's 2, on the panel, as ZIndex sorts siblings. -->
+                    <c:ModalPanel Name="PART_Panel" ZIndex="10">
+                        <!-- .modal-wrapper rests 40 px down at 0.01, which the enter animation takes away. ClipToBounds is off so
+                             that it draws its shadow; PART_Clip is overflow: hidden. -->
                         <c:ModalWrapper Name="PART_Content"
-                                        ZIndex="10"
                                         ClipToBounds="False"
                                         FocusAdorner="{x:Null}"
                                         Opacity="0.01"

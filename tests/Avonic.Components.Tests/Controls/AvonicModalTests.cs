@@ -537,9 +537,20 @@ public class AvonicModalTests
         modal.Present(stage.Window);
         stage.At(Entered);
         stage.Log.Clear();
+
+        // The wrapper is over the backdrop: a click in it isn't a tap on the backdrop.
+        var inside = new Button { Content = "Inside", Height = 40 };
+        ((StackPanel)modal.Content!).Children.Add(inside);
+        stage.Render();
+        var centre = inside.TranslatePoint(new Point(10, 10), stage.Window)!.Value;
+        stage.Click(centre);
+        stage.After(Left);
+        Assert.Empty(stage.Log);
+        Assert.Same(inside, ((Visual?)stage.Window.InputHitTest(centre))?.FindAncestorOfType<Button>(includeSelf: true));
+
         stage.Click(new Point(50, 50));
         stage.After(Left);
-        Assert.Contains("didDismiss(,backdrop)@528", stage.Log);
+        Assert.Contains("didDismiss(,backdrop)@752", stage.Log);
 
         modal.BackdropDismiss = false;
         modal.Present(stage.Window);
@@ -682,6 +693,11 @@ public class AvonicModalTests
         modal.Resources["Avonic.Modal.MaxWidth"] = 400d;
         stage.Render();
         Assert.Equal(new Size(400, 300), modal.Wrapper.Bounds.Size);
+
+        // The minimum wins over the maximum, as in CSS.
+        modal.Resources["Avonic.Modal.MinWidth"] = "450px";
+        stage.Render();
+        Assert.Equal(new Size(450, 300), modal.Wrapper.Bounds.Size);
     }
 
     [AvaloniaTheory]

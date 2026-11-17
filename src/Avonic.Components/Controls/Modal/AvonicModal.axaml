@@ -12,8 +12,8 @@
                     <c:AvonicBackdrop Name="PART_Backdrop"
                                       Visible="{TemplateBinding ShowBackdrop}"
                                       Tappable="{TemplateBinding BackdropDismiss}" />
-                    <c:ModalPanel ContentWidth="100%" ContentHeight="100%">
-                        <c:ModalWrapper Name="PART_Content" ZIndex="10" ClipToBounds="True">
+                    <c:ModalPanel ContentWidth="100%" ContentHeight="100%" ZIndex="10">
+                        <c:ModalWrapper Name="PART_Content" ClipToBounds="True">
                             <ContentPresenter Name="PART_ContentPresenter" />
                         </c:ModalWrapper>
                     </c:ModalPanel>
