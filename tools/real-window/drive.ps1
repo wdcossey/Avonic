@@ -1467,6 +1467,64 @@ try {
         Away
     }
 
+    # ion-action-sheet (#40): the page's sheet opened by its trigger with a real click, a button dismissing it with its data and role,
+    # a handler returning false keeping one open, Cancel, Escape and a tap on the backdrop dismissing with cancel and backdrop, a radio
+    # sheet as ion-select builds one, and IsOpen with BackdropDismiss off. The status line says what each was dismissed with, and each
+    # check waits for a line that differs from the one before, so that it sees the input arrive. Only what's on top is aimed at.
+    Section 'ion-action-sheet' {
+        Open 'ion-action-sheet'
+        function OpenWith($name) {
+            ClickOn (Named $CT::Button $name)
+            Start-Sleep -Milliseconds 700
+        }
+        function Status { FirstText '*dismissed with*' }
+
+        OpenWith 'Open the action sheet'
+        Shot 'action-sheet-presented'
+        Check 'a click on the trigger presents the sheet' (([bool](FirstText 'Albums')) -and [bool](Named $CT::Button 'Favorite')) ((Texts | Select-Object -First 6) -join ' | ')
+        ClickOn (Named $CT::Button 'Share')
+        Check 'a button dismisses it with its data and no role' ([bool](WaitForText 'BasicSheet dismissed with share, role none')) (Status)
+
+        OpenWith 'Open the action sheet'
+        ClickOn (Named $CT::Button 'Delete')
+        Check 'a destructive button dismisses it with its data and role' ([bool](WaitForText 'BasicSheet dismissed with delete, role destructive')) (Status)
+
+        OpenWith 'A handler that says no'
+        Shot 'action-sheet-keep-open'
+        ClickOn (Named $CT::Button 'Not yet')
+        Start-Sleep -Milliseconds 600
+        Check 'a handler returning false keeps it open' (([bool](FirstText 'Not yet kept it open')) -and [bool](Named $CT::Button 'Done')) (FirstText 'Not yet*')
+        ClickOn (Named $CT::Button 'Cancel')
+        Check 'Cancel dismisses it with the cancel role' ([bool](WaitForText 'KeepOpen dismissed with nothing, role cancel')) (Status)
+
+        OpenWith 'Open the action sheet'
+        Key '{ESC}' 700
+        Check 'Escape dismisses it with the backdrop role' ([bool](WaitForText 'BasicSheet dismissed with nothing, role backdrop')) (Status)
+
+        OpenWith 'Pick a fruit'
+        Shot 'action-sheet-radios'
+        $banana = Named $CT::RadioButton 'Banana'
+        $checked = $banana -and ($banana.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Current.ToggleState -eq 'On')
+        Check 'the checked radio is Banana' $checked
+        ClickOn (Named $CT::RadioButton 'Cherry')
+        Check 'a radio picked dismisses it with its data' ([bool](WaitForText 'Fruit dismissed with cherry, role none')) (Status)
+
+        # The backdrop: near the top of the window, above the sheet, which is at the bottom.
+        OpenWith 'Open the action sheet'
+        $w = $win.Current.BoundingRectangle
+        Click ([int]($w.X + $w.Width / 2)) ([int]($w.Y + $w.Height * 0.15))
+        Check 'a tap on the backdrop dismisses it with the backdrop role' ([bool](WaitForText 'BasicSheet dismissed with nothing, role backdrop')) (Status)
+
+        ClickOn (Named $CT::Button 'IsOpen')
+        Start-Sleep -Milliseconds 700
+        Shot 'action-sheet-isopen'
+        Key '{ESC}' 600
+        Check 'BackdropDismiss off: Escape leaves it open' ([bool](Named $CT::Button 'Archive')) (Status)
+        ClickOn (Named $CT::Button 'Close')
+        Check 'its cancel button dismisses the IsOpen sheet' ([bool](WaitForText 'IsOpenSheet dismissed with nothing, role cancel')) (Status)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

@@ -960,6 +960,12 @@ public class AvonicActionSheetTests
         b.GetProvider<IInvokeProvider>()!.Invoke();
         stage.After(Left);
         Assert.True(did.IsCompleted);
+
+        // Presented again, it has a new overlay index, and its render at present gives the buttons ids with it.
+        var first = sheet.OverlayIndex;
+        Shown(stage, sheet);
+        Assert.NotEqual(first, sheet.OverlayIndex);
+        Assert.Equal($"action-sheet-button-{sheet.OverlayIndex}-1", AutomationProperties.GetAutomationId(sheet.ButtonControls[1]));
     }
 
     // ── B16, B17: isOpen, trigger, changes while open, scrolling ────────────────────────────
