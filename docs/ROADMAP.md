@@ -1,7 +1,7 @@
 # Roadmap
 
-Ionic has **95** components (`node tools/ionic-api.js --list`). Avonic v2 targets **89** of them,
-all but the six under "Out of scope", in the issues listed by tier (families that can only be built and compared together
+Ionic 9.0.11 has **94** components (`node tools/ionic-api.js --list`). Avonic v2 targets **89** of them,
+all but the five under "Out of scope" that Ionic 9 still has, in the issues listed by tier (families that can only be built and compared together
 share one issue), plus the shared infrastructure they stand on. This file is the map; the issues are the work.
 `CLAUDE.md` lists only what *exists*.
 
@@ -74,6 +74,15 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#71](https://github.com/wdcossey/Avonic/issues/71) | `ion-item`: a flex-like layout for long content | **done** — [docs](components/ion-item/README.md) |
 | [#72](https://github.com/wdcossey/Avonic/issues/72) | `ion-item`: shared press handling, `Command`, ripple and automation | **done** — [docs](components/ion-item/README.md) |
 | [#100](https://github.com/wdcossey/Avonic/issues/100) | infra: Roboto on both sides, for the tests, the tools and the sample | **done** — [docs](infra/roboto/README.md) |
+| [#65](https://github.com/wdcossey/Avonic/issues/65) | `ion-app` | **done** — [docs](components/ion-app/README.md) |
+| [#67](https://github.com/wdcossey/Avonic/issues/67) | `ion-content`: keyboard scrolling and a scroll indicator | **done** — [docs](components/ion-content/README.md) |
+| [#175](https://github.com/wdcossey/Avonic/issues/175) | `ion-content`: a draggable scroll bar, by config | **done** — [docs](components/ion-content/README.md) |
+| [#189](https://github.com/wdcossey/Avonic/issues/189) | `ion-app`: input shims on Windows, following the touch keyboard | **done** — [docs](components/ion-app/README.md) |
+| [#139](https://github.com/wdcossey/Avonic/issues/139) | infra: CSS's `box-shadow` on Avalonia's `BoxShadow`, its blur converted | **done** — [docs](infra/box-shadow/README.md) |
+| [#188](https://github.com/wdcossey/Avonic/issues/188), [#190](https://github.com/wdcossey/Avonic/issues/190) | infra: Ionic's base moved from 8.8.1 to 8.8.19, then to 9.0.11, with what 9.0 changes in each component (#201 to #207) | **done** — [docs](infra/ionic-base/README.md) |
+| [#204](https://github.com/wdcossey/Avonic/issues/204) | `ion-icon`: font icons in the default slot (ionicons 8.1.0) | **done** — [docs](components/ion-icon/README.md) |
+| [#191](https://github.com/wdcossey/Avonic/issues/191) | a component Ionic drops for a browser feature is kept | **done** — [ADR 0004](decisions/0004-keep-what-the-browser-does.md) |
+| [#196](https://github.com/wdcossey/Avonic/issues/196) | screenshots for the README and `PREVIEW.md` | **done** — [preview](../PREVIEW.md) |
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 
@@ -89,7 +98,7 @@ the controls with no Material 3 counterpart are in [ADR 0003](decisions/0003-mat
 Reason: the router family is bound to the browser's history (`window.history`, `window.location`), and Ionic uses it only in
 plain web-component apps, leaving routing to Angular's, React's and Vue's own routers; an Avalonia app routes with its own
 (ReactiveUI, Prism, or none). Without the router, `ion-router-outlet` is one page swapped in, which `ion-nav` covers. Picker
-legacy is a legacy component. `Href`, which only a router follows, is declared only where it makes a link a link: the
+legacy is a legacy component, and Ionic 9 removed it. `Href`, which only a router follows, is declared only where it makes a link a link: the
 breadcrumb.
 (`ion-nav` and `ion-nav-link` were here too, as web routing. They aren't: `nav.js` never reads the browser's location or
 history, and is a stack of pages with a transition. They're in scope since 2026-11-11, as

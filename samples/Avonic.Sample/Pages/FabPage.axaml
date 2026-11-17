@@ -13,7 +13,8 @@
         </c:AvonicHeader>
 
         <c:AvonicContent Grid.Row="1" ZIndex="11">
-            <StackPanel Margin="16" Spacing="8">
+            <!-- 64 at the end, so that the text wraps before the fab on the header's edge. -->
+            <StackPanel Margin="16,16,64,16" Spacing="8">
                 <TextBlock TextWrapping="Wrap" Text="Tap a fab with a list to open it, and a button in a list to close it. The one at the top sits on the header's edge." />
                 <TextBlock Name="Status" Text="Nothing tapped yet" />
             </StackPanel>
