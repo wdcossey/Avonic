@@ -5,7 +5,8 @@ Status: done · [#3](https://github.com/wdcossey/Avonic/issues/3)
 Ionic reference: [`ion-icon`](https://ionicframework.com/docs/api/icon) · [Plan](PLAN.md) · [Comparison](COMPARISON.md) ·
 reference render in [`ref/`](ref/)
 
-A box `1em` square showing one SVG, in the current text colour. All 1357 ionicons are bundled.
+A box `1em` square showing one SVG, in the current text colour, or, with no SVG, a glyph from an icon font in its
+`Content`. All 1357 ionicons (8.1.0) are bundled.
 
 ## Usage
 
@@ -60,7 +61,13 @@ showing, as Ionic does. An unknown name is blank, because it counts as an icon t
 |---|---|---|
 | [x] | `addIcons({ name: url })` | `AvonicIcon.AddIcons(IReadOnlyDictionary<string, string>)` |
 
-### Events, methods, slots, parts
+### Slots
+
+| ✓ | Ionic | Avonic | Notes |
+|---|---|---|---|
+| [x] | default (ionicons 8.1.0) | `Content` | Shown only with no SVG. See "Font icons" |
+
+### Events, methods, parts
 
 None in Ionic.
 
@@ -90,6 +97,23 @@ way as other controls. An unknown `Color` falls back to the inherited `Foregroun
 
 Avalonia would mirror the drawing under a right-to-left ancestor, and Ionic doesn't, so `AvonicIcon` opts out and flips
 itself. Arrows and chevrons flip by themselves, by name. Set `FlipRtl="True"` for others, and `FlipRtl="False"` to stop it.
+
+## Font icons
+
+With no SVG, the icon shows its `Content`, Ionic's default slot (ionicons 8.1.0): a glyph from an icon font, such as
+Material Symbols, which the app supplies.
+
+```xml
+<c:AvonicIcon FontSize="24">
+    <TextBlock FontFamily="avares://MyApp/Assets#Material Symbols Outlined" Text="home" />
+</c:AvonicIcon>
+```
+
+The content is centred in the `1em` box, and a wider one overflows both sides, unclipped. It's at the icon's size,
+`Size` included, over a `FontSize` of its own, as `font-size: inherit !important` is; it's in the icon's colour, `Color`
+included, unless it sets its own `Foreground`; and it mirrors with `FlipRtl` in RTL. An `IconName`, `Icon` or `Src` that
+draws hides it, and an unknown name, which draws nothing, shows it. The glyph's text isn't read out: the icon is an image,
+named by `AutomationProperties.Name`.
 
 ## Custom icons
 

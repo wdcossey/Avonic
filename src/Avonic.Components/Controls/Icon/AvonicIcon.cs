@@ -3,20 +3,24 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Automation.Peers;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Metadata;
 using Avalonia.Threading;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
 /// <summary>
-/// Ionicons' <c>ion-icon</c>. A box <c>1em</c> square showing one SVG, in the current text colour.
+/// Ionicons' <c>ion-icon</c>. A box <c>1em</c> square showing one SVG, in the current text colour, or, with no SVG, its
+/// <see cref="Content"/>: a glyph from an icon font, as ionicons 8.1.0's default slot.
 /// </summary>
 /// <remarks>
-/// It draws itself, so it has no template. Ionic's only inner element, <c>.icon-inner</c>, is there
-/// to carry the RTL flip. See <c>docs/components/ion-icon/README.md</c>.
+/// It draws the SVG itself, so it has no template. Ionic's only inner element, <c>.icon-inner</c>, carries the RTL flip and
+/// centres the slot; here a <see cref="ContentPresenter"/> made when there's content does both. See
+/// <c>docs/components/ion-icon/README.md</c>.
 /// </remarks>
 public class AvonicIcon : Control
 {
@@ -82,7 +86,18 @@ public class AvonicIcon : Control
     public static readonly AttachedProperty<double> SlotFontSizeProperty =
         AvaloniaProperty.RegisterAttached<AvonicIcon, Control, double>("SlotFontSize", double.NaN);
 
+    /// <summary>
+    /// Ionic's default slot (ionicons 8.1.0): shown only while there's no SVG, centred both ways in the box and overflowing it
+    /// evenly, in the icon's colour and at the icon's size, which beats a font size the content sets, as
+    /// <c>::slotted(*) { font-size: inherit !important }</c> does. Usually a <see cref="TextBlock"/> in an icon font.
+    /// </summary>
+    public static readonly StyledProperty<object?> ContentProperty =
+        ContentControl.ContentProperty.AddOwner<AvonicIcon>();
+
     private SvgArtwork _artwork = SvgArtwork.Empty;
+    private ContentPresenter? _slot;
+    private readonly StyleValue<double> _slottedFontSize = new();
+    private IDisposable? _slottedFontSizeBinding;
     private string? _iconName;
     private double _strokeWidth = DefaultStrokeWidth;
     private IDisposable? _strokeWidthSubscription;
@@ -99,8 +114,11 @@ public class AvonicIcon : Control
         HorizontalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(HorizontalAlignment.Left);
         VerticalAlignmentProperty.OverrideDefaultValue<AvonicIcon>(VerticalAlignment.Top);
 
-        // contain: strict, and the SVG's overflow: hidden.
-        ClipToBoundsProperty.OverrideDefaultValue<AvonicIcon>(true);
+        // contain: layout style (8.1.0; strict before) doesn't clip, so a slotted glyph wider than the box shows. The SVG's
+        // overflow: hidden still clips the SVG: Render clips it.
+        ClipToBoundsProperty.OverrideDefaultValue<AvonicIcon>(false);
+
+        ContentProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.UpdateSlot());
 
         IconNameProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
         MdProperty.Changed.AddClassHandler<AvonicIcon>((icon, _) => icon.LoadIcon());
@@ -184,6 +202,14 @@ public class AvonicIcon : Control
         set => SetValue(FontSizeProperty, value);
     }
 
+    /// <inheritdoc cref="ContentProperty"/>
+    [Content]
+    public object? Content
+    {
+        get => GetValue(ContentProperty);
+        set => SetValue(ContentProperty, value);
+    }
+
     /// <summary>
     /// Ionicons' <c>addIcons</c>: makes each source available by name. It beats a bundled icon of the
     /// same name, and the first registration of a name wins. A camelCase key also registers in kebab-case.
@@ -205,6 +231,70 @@ public class AvonicIcon : Control
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Image;
         protected override string GetClassNameCore() => nameof(AvonicIcon);
+
+        /// <summary><c>role="img"</c>'s children are presentational, so a slotted glyph's text isn't read.</summary>
+        protected override IReadOnlyList<AutomationPeer>? GetChildrenCore() => null;
+    }
+
+    /// <summary>
+    /// <c>svgContent ? .icon-inner with the SVG : .icon-inner with a &lt;slot&gt;</c>. A failed or unknown icon gives
+    /// <see cref="SvgArtwork.Empty"/>, Ionic's empty <c>svgContent</c>, so the slot shows.
+    /// </summary>
+    private bool HasSvg => !ReferenceEquals(_artwork, SvgArtwork.Empty);
+
+    /// <summary>The presenter for <see cref="Content"/>, made the first time there's content, so an icon with none costs nothing.</summary>
+    private void UpdateSlot()
+    {
+        if (_slot is null)
+        {
+            if (Content is null)
+            {
+                return;
+            }
+
+            _slot = new ContentPresenter();
+            LogicalChildren.Add(_slot);
+            VisualChildren.Add(_slot);
+        }
+
+        _slot.Content = Content;
+
+        // ::slotted(*) { font-size: inherit !important }: an element in the slot takes the icon's size over its own. Through a
+        // binding at animation priority, the one above a local value. A string's TextBlock inherits it from the presenter.
+        _slottedFontSizeBinding?.Dispose();
+        _slottedFontSizeBinding = Content is Control child
+            ? child.Bind(TextElement.FontSizeProperty, _slottedFontSize, BindingPriority.Animation)
+            : null;
+
+        UpdateSlotState();
+        InvalidateMeasure();
+    }
+
+    /// <summary>What the slot takes from the icon: visible without an SVG, its size, its colour and the RTL flip.</summary>
+    private void UpdateSlotState()
+    {
+        if (_slot is null)
+        {
+            return;
+        }
+
+        _slot.IsVisible = !HasSvg;
+        _slot.SetValue(TextElement.FontSizeProperty, EffectiveSize);
+        _slottedFontSize.Set(EffectiveSize);
+
+        // :host(.ion-color) { color: var(--ion-color-base) !important }, inherited by the slot.
+        if (!string.IsNullOrEmpty(Color) && ColorPalette.GetBase(this) is { } baseBrush)
+        {
+            _slot.SetValue(TextElement.ForegroundProperty, baseBrush);
+        }
+        else
+        {
+            _slot.ClearValue(TextElement.ForegroundProperty);
+        }
+
+        // :host(.flip-rtl):host-context([dir='rtl']) .icon-inner { transform: scaleX(-1) }. The slot is centred in the box, so
+        // its own centre is the box's.
+        _slot.RenderTransform = FlowDirection == FlowDirection.RightToLeft && ShouldBeFlippable ? new ScaleTransform(-1, 1) : null;
     }
 
     private double EffectiveSize => Size switch
@@ -268,6 +358,13 @@ public class AvonicIcon : Control
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (_slot is not null &&
+            (change.Property == FontSizeProperty || change.Property == ColorProperty ||
+             change.Property == ColorPalette.BaseProperty || change.Property == FlowDirectionProperty))
+        {
+            UpdateSlotState();
+        }
+
         if (change.Property == ParentProperty)
         {
             _slotFontSizeSubscription?.Dispose();
@@ -302,9 +399,27 @@ public class AvonicIcon : Control
         PseudoClasses.Set(":size-small", Size == IconSize.Small);
         PseudoClasses.Set(":size-large", Size == IconSize.Large);
         PseudoClasses.Set(":flip-rtl", ShouldBeFlippable);
+        UpdateSlotState();
     }
 
-    protected override Size MeasureOverride(Size availableSize) => new(EffectiveSize, EffectiveSize);
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        // .icon-inner is a flex box with the slot's content as its item: as wide and tall as its content, overflowing the box.
+        _slot?.Measure(Avalonia.Size.Infinity);
+        return new(EffectiveSize, EffectiveSize);
+    }
+
+    /// <summary><c>align-items: center; justify-content: center</c>, which overflows both sides evenly.</summary>
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        if (_slot is not null)
+        {
+            var content = _slot.DesiredSize;
+            _slot.Arrange(new Rect((finalSize.Width - content.Width) / 2, (finalSize.Height - content.Height) / 2, content.Width, content.Height));
+        }
+
+        return finalSize;
+    }
 
     public override void Render(DrawingContext context)
     {
@@ -330,6 +445,8 @@ public class AvonicIcon : Control
             ? new Matrix(-1, 0, 0, 1, bounds.Width, 0)
             : Matrix.Identity;
 
+        // The SVG's overflow: hidden.
+        using (context.PushClip(new Rect(bounds)))
         using (context.PushTransform(ViewBoxTransform(bounds) * flip))
         {
             foreach (var layer in _artwork.Layers)

@@ -1,7 +1,9 @@
 # ion-icon → `AvonicIcon` — Plan
 
 > Sources read: `ionicons` 8.0.13 `dist/collection/components/icon/icon.js`, `utils.js`, `request.js`,
-> `validate.js` and `icon.css`, plus all 1357 files in `dist/svg/`. `ion-icon` isn't in `@ionic/core`, so
+> `validate.js` and `icon.css`, plus all 1357 files in `dist/svg/`; then 8.1.0's `icon.js` and `icon.css` against them, for
+> the default slot ([#204](https://github.com/wdcossey/Avonic/issues/204), "Font icons" below). The SVGs, `utils.js` and
+> `request.js` are byte-identical in 8.1.0. `ion-icon` isn't in `@ionic/core`, so
 > `tools/ionic-api.js` can't print it, and this checklist comes from `icon.js`.
 > Reference render: [`ref/README.md`](ref/README.md) (`node tools/ionic-ref/render.js ion-icon`).
 
@@ -47,9 +49,15 @@ Measured in real Ionic 8.8.19 (md, Chromium, computed styles):
 |---|---|---|
 | [x] | `addIcons({ name: url })` | `AvonicIcon.AddIcons(IReadOnlyDictionary<string, string>)`: camelCase keys also register in kebab-case, and the first registration of a name wins |
 
-### Events (0), methods (0), slots (0), parts (0)
+### Events (0), methods (0), parts (0)
 
 None.
+
+### Slots (1, ionicons 8.1.0)
+
+| ✓ | Ionic | Avonic | Notes |
+|---|---|---|---|
+| [x] | default | `Content` (`object?`, the XAML content property) | Shown only with no SVG. See "Font icons" |
 
 ### Host classes → pseudoclasses
 
@@ -93,8 +101,9 @@ Each becomes a test.
     start of its parent, rather than stretching to fill it.
 11. `Size` gives 18 or 32, and beats a local `FontSize`.
 12. An explicit `Width` and `Height` win, and the artwork is centred and scaled to fit (`xMidYMid meet`).
-13. Painting is clipped to the box (`contain: strict`, `overflow: hidden`), and all of the box takes input, even
-    where nothing is painted, because the host is a box.
+13. The SVG is clipped to the box (its `overflow: hidden`), and all of the box takes input, even where nothing is
+    painted, because the host is a box. Since 8.1.0 the host is `contain: layout style`, not `strict`, so the host itself
+    no longer clips: `ClipToBounds` is false, and `Render` clips the SVG.
 
 **Colour**
 
@@ -121,6 +130,63 @@ Each becomes a test.
 **Accessibility**
 
 27. The host has `role="img"`, so the automation peer is `Image`. `AutomationProperties.Name` gives the label.
+
+## Font icons (ionicons 8.1.0, #204)
+
+**What changed from 8.0.13.** `render()` gives `.icon-inner` the SVG when there's `svgContent`, and a default `<slot>`
+otherwise (`h("div", { class: "icon-inner" }, h("slot", null))`), so `<ion-icon><span class="material-symbols">home</span></ion-icon>`
+shows a glyph from an icon font. `icon.css`: `:host` gains `font-size: 1em` and goes from `contain: strict` to
+`contain: layout style`; `.icon-inner { display: flex; align-items: center; justify-content: center; width: 100%; height: 100% }`;
+`::slotted(*) { font-size: inherit !important }`.
+
+**Mapping.** The default slot is `Content` (`object?`), as the mapping rules say. `AvonicIcon` keeps drawing its SVG with no
+template; a `ContentPresenter` made the first time there's content (so an icon with none costs nothing, and the style budget
+doesn't move) stands for `.icon-inner`'s slot. An icon font is an app's choice, so the slot takes anything: a `TextBlock` in the
+font, usually, or a string, which the presenter shows as text.
+
+**Measured in Chromium** (Ionic 9.0.11, ionicons 8.1.0, md, 390×844, Roboto letters standing in for an icon font; the
+page is [`ref-font/`](ref-font/)):
+
+| Scene | Icon box | Slotted `<span>` | Font size |
+|---|---|---|---|
+| 24 px | 24 × 24 at (16, 40) | 20.95 × 28 at (17.52, 38): centred both ways | 24 |
+| `size="small"`, span `font-size: 40px` | 18 × 18 | 15.72 × 21, centred | **18**: the `!important` beats the span's own |
+| `size="large"` | 32 × 32 | 27.94 × 38, centred | 32 |
+| `font-size: 48px` on the host | 48 × 48 | 41.91 × 57, centred | 48 |
+| 48 px, `WWW` | 48 × 48 at x 161.81 | 127.77 wide at x 121.94: over both sides by 39.9, **not clipped** | 48 |
+| `name="star"` and a span | the star | not rendered | — |
+| `color="danger"` | — | painted `#c5000f` | — |
+| RTL, 48 px, `flip-rtl="true"` / not set | — | mirrored / as it is | 48 |
+
+**Behaviours.** Each is a test in `AvonicIconSlotTests`.
+
+28. With no SVG content (no icon, or one that failed: an unknown name gives an empty `svgContent`), the content shows; with
+    one, it doesn't, and it goes when an icon is set later.
+29. It's centred both ways in the box (`align-items`, `justify-content: center`), and wider content overflows both sides evenly,
+    unclipped (`contain: layout style`).
+30. It takes the icon's size, `Size` included, over a font size of its own (`::slotted(*) { font-size: inherit !important }`),
+    and follows it. Given back when the content leaves the slot.
+31. It's in the icon's colour: the inherited `Foreground`, or `Color`'s base (`:host(.ion-color) { color: … !important }`).
+32. With `FlipRtl` in RTL it's mirrored, as `.icon-inner` is; without, it isn't.
+33. The automation peer is still an `Image`, with no children: `role="img"` makes them presentational.
+34. The SVG is still clipped to the box (`svg { overflow: hidden }`).
+
+**How.** The presenter's `TextElement.FontSize` is the icon's effective size, which text in it inherits; a control in the
+slot is also bound to it at `Animation` priority, the one above a local value, for the `!important`. The presenter's
+`Foreground` is `Color`'s base while there is one, and inherited otherwise. Measured at infinity and arranged centred, as a
+flex item of a `1em` box that can't shrink below its content. The flip is a `ScaleTransform(-1, 1)` on the presenter, whose
+centre is the box's.
+
+**Deviations.**
+
+- *Animation priority.* An app's own animation of the slotted control's `FontSize` runs at the same priority as the binding,
+  so the later of the two wins, where CSS's `!important` beats an animation. Avalonia has nothing above `Animation`.
+- *Layout rounding.* Avalonia rounds the content's position to a pixel: the 24 px `M` sits at x 2, not 1.52 (test tolerance 0.5).
+- *Line height.* Avalonia's `TextBlock` is 28.125 tall at 24 px Roboto, Chromium's `line-height: normal` 28.
+- *Text wrap.* Content is measured at infinity, so a slotted `TextBlock` with spaces and wrapping doesn't wrap at the
+  box's min-content width as a flex item would. An icon font's glyph is one word.
+- *RTL.* Avalonia mirrors the content under an RTL ancestor, as it does everywhere (the icon bypasses that only for its own
+  SVG); text inside reads the same either way, so an `R` shows as it is, as in Chromium.
 
 ## Artwork
 
@@ -207,7 +273,8 @@ blank. A `<!DOCTYPE>` is skipped, and its entities are never expanded.
 ## Design
 
 `AvonicIcon : Control` overrides `Render`. It has **no template**: Ionic's only inner element is `.icon-inner`,
-which exists to carry the flip transform. So there's no stub `ControlTheme` and no Themes template.
+which exists to carry the flip transform, and since 8.1.0 the slot, which a `ContentPresenter` made on demand stands for
+("Font icons"). So there's no stub `ControlTheme` and no Themes template.
 
 | Piece | Job |
 |---|---|

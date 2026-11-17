@@ -45,7 +45,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -67,7 +67,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 46.67,
+        "x": 45.95,
         "y": 16,
         "w": 24,
         "h": 24
@@ -97,7 +97,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -119,7 +119,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 77.34,
+        "x": 75.91,
         "y": 16,
         "w": 24,
         "h": 24
@@ -149,7 +149,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -171,7 +171,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 108.02,
+        "x": 105.86,
         "y": 16,
         "w": 24,
         "h": 24
@@ -201,7 +201,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -223,7 +223,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 138.69,
+        "x": 135.81,
         "y": 16,
         "w": 24,
         "h": 24
@@ -253,7 +253,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -275,7 +275,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 169.36,
+        "x": 165.77,
         "y": 16,
         "w": 24,
         "h": 24
@@ -305,7 +305,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -327,7 +327,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 200.03,
+        "x": 195.72,
         "y": 16,
         "w": 24,
         "h": 24
@@ -357,7 +357,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -411,7 +411,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -434,7 +434,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 38.45,
+        "x": 37.97,
         "y": 70,
         "w": 24,
         "h": 24
@@ -464,7 +464,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -488,7 +488,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 66.91,
+        "x": 65.94,
         "y": 62,
         "w": 32,
         "h": 32
@@ -518,7 +518,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -541,7 +541,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 103.36,
+        "x": 101.91,
         "y": 46,
         "w": 48,
         "h": 48
@@ -571,7 +571,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -626,7 +626,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -651,7 +651,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 46.67,
+        "x": 45.95,
         "y": 98,
         "w": 24,
         "h": 24
@@ -681,7 +681,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -706,7 +706,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 77.34,
+        "x": 75.91,
         "y": 98,
         "w": 24,
         "h": 24
@@ -736,7 +736,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -761,7 +761,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 108.02,
+        "x": 105.86,
         "y": 98,
         "w": 24,
         "h": 24
@@ -791,7 +791,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -816,7 +816,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 138.69,
+        "x": 135.81,
         "y": 98,
         "w": 24,
         "h": 24
@@ -846,7 +846,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -871,7 +871,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 169.36,
+        "x": 165.77,
         "y": 98,
         "w": 24,
         "h": 24
@@ -901,7 +901,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -926,7 +926,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 200.03,
+        "x": 195.72,
         "y": 98,
         "w": 24,
         "h": 24
@@ -956,7 +956,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -981,7 +981,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 230.7,
+        "x": 225.67,
         "y": 98,
         "w": 24,
         "h": 24
@@ -1011,7 +1011,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1036,7 +1036,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 261.38,
+        "x": 255.63,
         "y": 98,
         "w": 24,
         "h": 24
@@ -1066,7 +1066,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1119,7 +1119,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1142,7 +1142,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 319.33,
+        "x": 320.05,
         "y": 128,
         "w": 24,
         "h": 24
@@ -1172,7 +1172,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1195,7 +1195,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 288.66,
+        "x": 290.09,
         "y": 128,
         "w": 24,
         "h": 24
@@ -1225,7 +1225,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1247,7 +1247,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 257.98,
+        "x": 260.14,
         "y": 128,
         "w": 24,
         "h": 24
@@ -1277,7 +1277,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
@@ -1301,7 +1301,7 @@
         "hydrated"
       ],
       "rect": {
-        "x": 227.31,
+        "x": 230.19,
         "y": 128,
         "w": 24,
         "h": 24
@@ -1331,7 +1331,7 @@
         "text-transform": "none",
         "opacity": "1",
         "overflow": "visible",
-        "contain": "strict",
+        "contain": "layout style",
         "pointer-events": "auto",
         "transition": "all",
         "transform": "none",
