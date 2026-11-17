@@ -479,6 +479,9 @@ try {
         $right = [int]($f.Right + (Px 16))
         $rx, $ry = Centre (Named $CT::Text 'Row 2')
         $stripX = $right - (Px 6); $stripY = [int]($ry - (Px 30)); $stripW = Px 6; $stripH = [int]($f.Top - (Px 8) - $stripY)
+        # The thumb is there from the load, before any input but the Top button's script, at the top of the track (#182). Compared
+        # below with the same strip at the top again, once a wheel has ended the load's thumb and it has faded.
+        $atLoad = Region $stripX $stripY $stripW $stripH
         # A press on a row, which can't take focus, focuses the content, so the keys scroll it.
         Click $rx $ry
         Key '{DOWN}' 600
@@ -515,6 +518,9 @@ try {
         Check 'a key shows no indicator' ($keyShown -eq 0) "$keyShown pixels"
         $during.Dispose(); $afterKey.Dispose()
         Key '{HOME}' 600
+        $loadShown = Changed $atLoad (Region $stripX $stripY $stripW $stripH)
+        Check 'the indicator shows from the load until a wheel' ($loadShown -gt 0) "$loadShown pixels"
+        $atLoad.Dispose()
     }
 
     # A scroll bar to drag on ion-content, by its ScrollBars extension (#175), from the page's toggle. The bar is at the content's end
