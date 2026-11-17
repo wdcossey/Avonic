@@ -1088,6 +1088,14 @@ public class AvonicActionSheetTests
         shared.Add("C");
         Stage.Settle();
         Assert.Equal(3, sheet.ButtonControls.Count);
+
+        // And buttonsChanged's reading of aria-checked too, which only a change to the buttons does.
+        sheet.Dismiss();
+        stage.After(Left);
+        shared[0] = Radio("A");
+        shared[1] = Radio("B", true);
+        Shown(stage, sheet);
+        Assert.Equal([false, true], sheet.ButtonControls.Take(2).Select(b => b.IsChecked));
     }
 
     [AvaloniaFact]
