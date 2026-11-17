@@ -65,9 +65,9 @@ changed, and 29 to 32 are new. The rest holds on 9.0.11. `autocorrect` was #203.
 | [x] | `end` | `EndContent`, `EndContentTemplate` |
 
 No shadow parts (it's scoped). Template parts, by Ionic's class: `PART_Wrapper` (`.input-wrapper`, a `Border`), `PART_Layout`
-(the wrapper's flex box, an `InputWrapperPanel`), `PART_Label` (`.label-text-wrapper`), `PART_LabelText` (`.label-text`),
-`PART_LabelContent` (the `label` slot), `PART_NativeWrapper` (`.native-wrapper`), `PART_Start`, `PART_End`, `PART_NativeInput`
-(the `<input>`, a `TextBox`), `PART_ClearButton` (`.input-clear-icon`), `PART_Highlight` (`.input-highlight`),
+(`.input-control`, an `InputWrapperPanel`), `PART_Label` (`.label-text-wrapper`), `PART_LabelText` (`.label-text`),
+`PART_LabelContent` (the `label` slot), `PART_Start` (`.input-start` and the slot), `PART_InputEnd` (`.input-end`), `PART_End`,
+`PART_NativeInput` (the `<input>`, a `TextBox`; since Ionic 9 `.native-wrapper` holds only it, so it has no part of its own), `PART_ClearButton` (`.input-clear-icon`), `PART_Highlight` (`.input-highlight`),
 `PART_OutlineStart`, `PART_OutlineNotch`, `PART_NotchSpacer`, `PART_OutlineEnd` (`.input-outline-*`), `PART_Bottom`
 (`.input-bottom`), `PART_HelperText`, `PART_ErrorText` and `PART_Counter`.
 
