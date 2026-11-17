@@ -269,8 +269,9 @@
         <Style Selector="^:checked /template/ Border#PART_Dot">
             <Setter Property="RenderTransform" Value="scale(1)" />
         </Style>
-        <!-- transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), from the first frame, as CSS doesn't transition a first style -->
-        <Style Selector="^:drawn /template/ Border#PART_Dot">
+        <!-- transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1). A dot checked from the start is drawn at once: a template's first
+             style doesn't start a transition here, as CSS's doesn't. -->
+        <Style Selector="^ /template/ Border#PART_Dot">
             <Setter Property="Transitions">
                 <Transitions>
                     <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />

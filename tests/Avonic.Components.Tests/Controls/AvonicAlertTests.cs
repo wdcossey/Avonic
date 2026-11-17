@@ -756,12 +756,11 @@ public class AvonicAlertTests
     }
 
     [AvaloniaFact]
-    public void B15_In_A_Narrow_Window_A_Long_Message_Makes_The_Wrapper_As_Wide_As_The_Room()
+    public void B15_In_A_Narrow_Window_A_Long_Header_Makes_The_Wrapper_As_Wide_As_The_Room()
     {
         // fit-content: min(max-content, room). Measured only at the room, wrapped text would be its widest line, narrower.
         using var stage = new Stage(266, 844);
-        var text = string.Join(" ", Enumerable.Range(1, 12).Select(i => $"Line {i} of a long message."));
-        var alert = Shown(stage, new AvonicAlert { Message = text, Buttons = ["OK"] });
+        var alert = Shown(stage, new AvonicAlert { Header = "A header long enough to wrap onto lines of its own", Buttons = ["OK"] });
         Assert.Equal(266, alert.Wrapper!.Bounds.Width, 3);
     }
 

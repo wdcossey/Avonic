@@ -18,7 +18,7 @@ namespace Avonic.Components.Controls;
 /// <c>ion-activatable</c>, its <c>aria-checked</c> the pseudoclass <c>:checked</c>. Ionic draws its own icon here, not an
 /// <c>ion-radio</c> or <c>ion-checkbox</c>, and so does the theme. The alert makes it, and sets its state.
 /// </summary>
-[PseudoClasses(":checked", ":drawn")]
+[PseudoClasses(":checked")]
 public abstract class AlertOptionButton : TemplatedControl
 {
     /// <summary>The input's <c>label</c>.</summary>
@@ -27,7 +27,6 @@ public abstract class AlertOptionButton : TemplatedControl
 
     private bool _checked;
     private OptionPeer? _peer;
-    private IDisposable? _firstFrame;
 
     static AlertOptionButton()
     {
@@ -69,28 +68,6 @@ public abstract class AlertOptionButton : TemplatedControl
 
     /// <summary>A click, Enter or Space.</summary>
     internal event EventHandler? Clicked;
-
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-
-        // :drawn, from the first frame: CSS doesn't transition a first style, so a radio checked from the start shows its dot
-        // at once, and the theme's transition waits for this.
-        _firstFrame?.Dispose();
-        _firstFrame = AvonicConfig.RequestFrame(this, () =>
-        {
-            _firstFrame = null;
-            PseudoClasses.Set(":drawn", true);
-        });
-    }
-
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnDetachedFromVisualTree(e);
-        _firstFrame?.Dispose();
-        _firstFrame = null;
-        PseudoClasses.Set(":drawn", false);
-    }
 
     private protected abstract AutomationControlType ControlType { get; }
 

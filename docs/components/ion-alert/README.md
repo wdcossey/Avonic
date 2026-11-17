@@ -109,7 +109,7 @@ From `node tools/ionic-api.js ion-alert`; the reasons for each row are in [PLAN.
 | [x] | `--min-height` | `Avonic.Alert.MinHeight` | `auto` |
 | [x] | `--max-height` | `Avonic.Alert.MaxHeight` | unset: `Avonic.Alert.Md.MaxHeight` `90%`; `Avonic.Alert.Md.MaxHeightTablet` `min(100vh - 96px, 560px)` from 768 wide |
 
-A size takes a number (px) or a CSS string: px, `%`, `vw`, `vh`, a sum or difference (`100vh - 96px`), `min(a, b)`, `auto`, `none`.
+A size takes a number (px) or a CSS string: px, `%`, `vw` and `vh` (of the window), a sum or difference (`100vh - 96px`), `calc()`, `min(a, b)`, `auto`, `none`.
 Set an unset key, and it wins at every size, as an app's variable on `ion-alert` does.
 
 ## Behaviours
