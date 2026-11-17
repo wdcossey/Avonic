@@ -66,6 +66,7 @@ public class AvonicSegmentButton : ItemsControl
     private static int s_ids;
     private readonly NativeButton _native;
     private AvonicSegment? _segment;
+    private bool _willLoad;
 
     static AvonicSegmentButton()
     {
@@ -151,12 +152,17 @@ public class AvonicSegmentButton : ItemsControl
             _segment.StyleChanged += UpdateClasses;
         }
 
-        // Prevent buttons from being disabled when associated with segment content.
-        if (ContentId is not null && !IsEnabled)
+        // componentWillLoad, once for the element (Ionic 9.0.1): buttons associated with segment content can't be disabled,
+        // unless their segment is: it reads the segment's own disabled, not what its ancestors make it.
+        if (!_willLoad)
         {
-            Logger.TryGet(LogEventLevel.Warning, LogArea.Control)?.Log(
-                this, "[ion-segment-button] - Segment buttons cannot be disabled when associated with an <ion-segment-content>.");
-            SetCurrentValue(IsEnabledProperty, true);
+            _willLoad = true;
+            if (ContentId is not null && !IsEnabled && _segment?.IsEnabled != false)
+            {
+                Logger.TryGet(LogEventLevel.Warning, LogArea.Control)?.Log(
+                    this, "[ion-segment-button] - Segment buttons cannot be disabled when associated with an <ion-segment-content>.");
+                SetCurrentValue(IsEnabledProperty, true);
+            }
         }
 
         UpdateState();

@@ -4,10 +4,11 @@ A row of tabs and the pages they switch: `ion-segment` holds `ion-segment-button
 under it that slides from the last one; `ion-segment-view` holds `ion-segment-content`s side by side in a horizontal scroller,
 and a button with a `contentId` pages it. One family, one PR (#28).
 
-Measurements are from real Ionic 8.8.1 in Chromium, and V3's disabled button on 8.8.19, md, 390 px wide, wrapped in `ion-app`. The page is in
-[COMPARISON.md](COMPARISON.md). The behaviours were measured with throwaway Playwright scripts on the same page: mouse taps and
-drags, held presses, the keys, the indicator's transform sampled during its transition, and `scrollLeft` sampled every frame
-during each smooth scroll.
+Measurements are from real Ionic 8.8.1 in Chromium, V3's disabled button on 8.8.19, and B8 on 9.0.11, md, 390 px wide,
+wrapped in `ion-app`. The page is in [COMPARISON.md](COMPARISON.md). The behaviours were measured with throwaway Playwright
+scripts on the same page: mouse taps and drags, held presses, the keys, the indicator's transform sampled during its transition,
+and `scrollLeft` sampled every frame during each smooth scroll. The reference is Ionic 9.0.11: `segment.js` differs from 8.8.19's
+only in syntax, and `segment-button.js` by B8 and the tab index controller, which is #207's.
 
 ## Fidelity checklist
 
@@ -43,7 +44,7 @@ The segment's children: `core.json` lists no slot, so they're **`Items`**, and t
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `contentId` | `ContentId` (`string?`) | The `Name` of an `AvonicSegmentContent`, as Ionic's is its `id`. A button with one can't be disabled: it's enabled on attach, with a warning |
+| [x] | `contentId` | `ContentId` (`string?`) | The `Name` of an `AvonicSegmentContent`, as Ionic's is its `id`. A button with one can't be disabled: it's enabled on its first attach, with a warning, unless its segment is disabled (9.0.1, B8) |
 | [x] | `disabled` | `IsEnabled` | Mapping rule. Opacity 0.3; skipped by the keys and the drag |
 | [x] | `layout` | `Layout` (`SegmentButtonLayout`: `IconBottom`, `IconEnd`, `IconHide`, `IconStart`, `IconTop`, `LabelHide`; default `IconTop`) | `:layout-icon-top` and so on |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
@@ -148,6 +149,7 @@ Each becomes a test. "Measured" is from the scripts above.
 | B5 | Disabled, or in a disabled segment: opacity 0.3, no input | `.segment-button-disabled` |
 | B6 | Automation: a tab item, selected when checked, named by its text | `role="tab"`, `aria-selected` |
 | B7 | Labels are one line with an ellipsis, 22 high, upper case; the icon 24 | `::slotted(ion-label)`, `::slotted(ion-icon)` |
+| B8 | A button with a `ContentId` can't be disabled: on its first attach, a disabled one logs a warning and is enabled. Since 9.0.1, not when its segment is disabled (the segment's own `IsEnabled`, as Ionic reads `segmentEl.disabled`): it stays disabled, with no warning, and stays so when the segment is enabled again. Only once, as `componentWillLoad` runs once for an element: disabled after load, or moved out and back, it stays disabled | `componentWillLoad`; measured `guard.js` on 9.0.11: in a disabled segment with a view, `content-id` buttons, disabled or not, are disabled after load with no warning, and still disabled once the segment is enabled; in an enabled one a disabled `content-id` button warns and is enabled; one disabled after load, then removed and appended again, stays disabled; a new disabled one appended to an enabled segment warns and is enabled, to a disabled segment stays disabled |
 
 ### The view
 

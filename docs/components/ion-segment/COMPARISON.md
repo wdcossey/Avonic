@@ -68,7 +68,7 @@ everywhere in Avonic.
 | B5 | Disabled at 0.3 | 0.3 | 0.3 | match |
 | B6 | `role="tab"`, `aria-selected`, in a `tablist` | yes | `TabItem`, selection, in a `Tab` | match |
 | B7 | Labels upper case, one line, an ellipsis | yes | yes | match |
-| B8 | A button with a content id can't be disabled | warning, enabled | warning in the log, enabled | match |
+| B8 | A button with a content id can't be disabled, unless its segment is (9.0.1); only at load | `guard.js` on 9.0.11: in an enabled segment, warning, enabled; in a disabled segment with a view, disabled, no warning, and still disabled once the segment is enabled; disabled after load, then removed and appended again, still disabled, no warning | the same, through the log | match |
 | V1 | `setContent` scrolls smoothly; no pointer events until 100 ms after | `segment-view-scroll-disabled` on, then off | no hit testing, then back | match |
 | V2 | `ionSegmentViewScroll` with `isManualScroll` false meanwhile | yes | yes | match |
 | V3 | A person's scroll moves the checked button, and not to a disabled one (8.8.6) | `manual 600` → `v3`; on 8.8.19 a disabled second button is passed over | the same; the first one always raises `ionChange` | match |
@@ -93,6 +93,11 @@ everywhere in Avonic.
 - **A label's or icon's `hasLabel` and `hasIcon`** follow the button's children as they change. Ionic reads them only when it renders.
 - **Adding buttons doesn't scroll the checked one into view or move the view,** which Ionic's `slotchange` does through
   `valueChanged`. Each new button checks itself as it attaches, as Ionic's `connectedCallback` does too.
+- **A disabled segment doesn't write its buttons' `IsEnabled` when they attach.** Ionic's `updateState` sets a button's `disabled`
+  whenever its segment is disabled, and with a view nothing clears it: measured on 9.0.11 (`guard.js`), every button of a segment
+  disabled at load, `content-id` or not, is still disabled once the segment is enabled. Here a disabled segment disables its
+  buttons as any ancestor does, so they work again when it's enabled; only a button whose own `IsEnabled` is false (B8) stays
+  disabled. Without a view, both write every button's, as `disabledChanged` does (S14).
 - **The view keeps its content in view when it's resized,** a step after the layout, as Chromium's snap does in the same frame.
 
 ## Known gaps

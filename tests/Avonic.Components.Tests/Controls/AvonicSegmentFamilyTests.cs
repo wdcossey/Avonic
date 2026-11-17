@@ -554,6 +554,90 @@ public class AvonicSegmentFamilyTests
         Assert.True(button.IsEnabled);
     }
 
+    private sealed class WarningSink : Avalonia.Logging.ILogSink
+    {
+        public List<string> Messages { get; } = [];
+
+        public bool IsEnabled(Avalonia.Logging.LogEventLevel level, string area) => level >= Avalonia.Logging.LogEventLevel.Warning;
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate) => Messages.Add(messageTemplate);
+
+        public void Log(Avalonia.Logging.LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues) =>
+            Messages.Add(messageTemplate);
+
+        public bool Warned => Messages.Any(m => m.Contains("cannot be disabled", StringComparison.Ordinal));
+    }
+
+    private static void WithWarnings(Action<WarningSink> test)
+    {
+        var sink = new WarningSink();
+        var previous = Avalonia.Logging.Logger.Sink;
+        Avalonia.Logging.Logger.Sink = sink;
+        try
+        {
+            test(sink);
+        }
+        finally
+        {
+            Avalonia.Logging.Logger.Sink = previous;
+        }
+    }
+
+    private static StackPanel WithView(AvonicSegment segment, params string[] names)
+    {
+        var view = new AvonicSegmentView { Height = 64 };
+        foreach (var name in names)
+        {
+            view.Items.Add(new AvonicSegmentContent { Name = name, Content = new TextBlock { Text = name } });
+        }
+
+        return new StackPanel { VerticalAlignment = VerticalAlignment.Top, Children = { segment, view } };
+    }
+
+    [AvaloniaFact]
+    public void B8_In_A_Disabled_Segment_A_Disabled_Button_With_A_Content_Id_Stays_Disabled() => WithWarnings(sink =>
+    {
+        // 9.0.1: this.disabled && this.segmentEl?.disabled !== true. Measured on 9.0.11 (guard.js).
+        var button = Button("a", "A");
+        button.ContentId = "a";
+        button.IsEnabled = false;
+        var segment = Segment("a", button);
+        segment.IsEnabled = false;
+        using var scene = new Scene(WithView(segment, "a"));
+        Settle();
+
+        Assert.False(button.IsEnabled);
+        Assert.False(sink.Warned);
+
+        // With a view, enabling the segment writes only the view's disabled, so the button stays disabled.
+        segment.IsEnabled = true;
+        Settle();
+        Assert.False(button.IsEnabled);
+        Assert.False(sink.Warned);
+    });
+
+    [AvaloniaFact]
+    public void B8_The_Guard_Runs_Once_So_A_Button_Disabled_After_Load_And_Moved_Stays_Disabled() => WithWarnings(sink =>
+    {
+        // componentWillLoad runs once for an element; connectedCallback, on each attach, has no guard.
+        var a = Button("a", "A");
+        var b = Button("b", "B");
+        a.ContentId = "a";
+        b.ContentId = "b";
+        var segment = Segment("a", a, b);
+        using var scene = new Scene(WithView(segment, "a", "b"));
+        Settle();
+
+        b.IsEnabled = false;
+        segment.Items.Remove(b);
+        Settle();
+        segment.Items.Add(b);
+        Settle();
+
+        Assert.False(b.IsEnabled);
+        Assert.False(sink.Warned);
+    });
+
     // ── The look ─────────────────────────────────────────────────────────────────────────────
 
     private static Color ColorOf(IBrush? brush) => brush is ISolidColorBrush s ? Color.FromArgb((byte)Math.Round(s.Color.A * s.Opacity), s.Color.R, s.Color.G, s.Color.B) : default;
