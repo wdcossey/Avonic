@@ -7,6 +7,10 @@ the indicator, or the keys change it and raise `IonChange`, and the indicator sl
 `ContentId` page an `AvonicSegmentView` of `AvonicSegmentContent`s, which a finger can page too, and the segment follows. The design
 and the evidence are in [PLAN.md](PLAN.md), and the comparison with real Ionic is in [COMPARISON.md](COMPARISON.md).
 
+The reference is Ionic 9.0.11. **Since Ionic 9.0.1** ([#206](https://github.com/wdcossey/Avonic/issues/206)), the guard that enables
+a disabled button with a `ContentId` runs once, on the button's first attach, and leaves it disabled when its segment is disabled.
+The tab index that 9.0.5 and 9.0.11 move to the native button is [#207](https://github.com/wdcossey/Avonic/issues/207)'s.
+
 ```xml
 <c:AvonicSegment Value="photos" IonChange="OnSegmentChange">
     <c:AvonicSegmentButton Value="photos" ContentId="photos">
@@ -46,7 +50,7 @@ Its buttons are its `Items`, as `core.json` lists no slot. Pseudoclasses: `:in-t
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [x] | `contentId` | `ContentId` | The `Name` of an `AvonicSegmentContent`. Such a button can't be disabled |
+| [x] | `contentId` | `ContentId` | The `Name` of an `AvonicSegmentContent`. Such a button is enabled, with a warning, on its first attach, unless its segment is disabled |
 | [x] | `disabled` | `IsEnabled` | 0.3, no input, skipped by the keys and the drag |
 | [x] | `layout` | `Layout` (`SegmentButtonLayout`, `IconTop`) | `IconTop`, `IconBottom`, `IconStart`, `IconEnd`, `IconHide`, `LabelHide` |
 | [ ] | `mode` | — | Not exposed (ADR 0001) |
