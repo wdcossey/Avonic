@@ -1596,6 +1596,77 @@ try {
         Away
     }
 
+    # ion-select (#45): each interface from a real click on its select, named by its label and its text as a screen reader reads
+    # it: the alert's radio and OK, Escape as a cancel, the action sheet's radio, the popover's radio by a click and then by the
+    # keys (ArrowDown moves focus and chooses nothing, Enter chooses), the modal's radio, and the multiple popover's checkboxes,
+    # which leave it open. The status line says what each chose. Only what's on top is aimed at: each interface covers the page,
+    # or sits over the rows below its select, and every click is on one of its own options.
+    Section 'ion-select' {
+        Open 'ion-select'
+        function SelStatus { FirstText '*Select: *' }
+        function OpenSelect($name) {
+            ClickOn (Named $CT::Button $name)
+            Start-Sleep -Milliseconds 800
+        }
+
+        OpenSelect 'Alert, Pick one'
+        Shot 'select-alert'
+        Check 'a click on the select presents its alert of radios' ([bool](Named $CT::RadioButton 'Banana')) ((Texts | Select-Object -First 6) -join ' | ')
+        ClickOn (Named $CT::RadioButton 'Banana')
+        Start-Sleep -Milliseconds 200
+        ClickOn (Named $CT::Button 'OK')
+        Check 'a radio and OK set the value' ([bool](WaitForText 'AlertSelect: banana')) (SelStatus)
+        Start-Sleep -Milliseconds 500
+        Check 'the select is named by its label and its text now' ([bool](Named $CT::Button 'Alert, Banana'))
+
+        OpenSelect 'Alert, Banana'
+        Key '{ESC}' 700
+        Check 'Escape on the alert is a cancel' ([bool](WaitForText 'AlertSelect: cancelled')) (SelStatus)
+
+        OpenSelect 'Action sheet, Pick one'
+        Shot 'select-action-sheet'
+        ClickOn (Named $CT::RadioButton 'Grape')
+        Check 'a radio of the action sheet sets the value' ([bool](WaitForText 'SheetSelect: grape')) (SelStatus)
+        Start-Sleep -Milliseconds 500
+
+        OpenSelect 'Popover, Pick one'
+        Shot 'select-popover'
+        $popover = Named $CT::Button 'Popover, Pick one'
+        $expanded = $popover -and ($popover.GetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern).Current.ExpandCollapseState -eq 'Expanded')
+        Check 'the select says it is expanded while its popover is open' $expanded
+        ClickOn (Named $CT::RadioButton 'Apple')
+        Check 'a radio of the popover sets the value and dismisses it' ([bool](WaitForText 'PopoverSelect: apple')) (SelStatus)
+        Start-Sleep -Milliseconds 500
+
+        OpenSelect 'Popover, Apple'
+        Check 'the chosen option has focus when the popover opens' (IsFocused (Named $CT::RadioButton 'Apple')) $AE::FocusedElement.Current.Name
+        Key '{DOWN}' 300
+        Check 'ArrowDown moves focus to Banana' (IsFocused (Named $CT::RadioButton 'Banana')) $AE::FocusedElement.Current.Name
+        Check 'and chooses nothing' ([bool](FirstText 'PopoverSelect: apple')) (SelStatus)
+        Key '{ENTER}' 700
+        Check 'Enter chooses Banana and dismisses' ([bool](WaitForText 'PopoverSelect: banana')) (SelStatus)
+        Start-Sleep -Milliseconds 300
+
+        OpenSelect 'Modal, Pick one'
+        Shot 'select-modal'
+        Check 'the modal has the header from its interface options' ([bool](FirstText 'Fruits')) ((Texts | Select-Object -First 6) -join ' | ')
+        ClickOn (Named $CT::RadioButton 'Grape')
+        Check 'a radio of the modal sets the value' ([bool](WaitForText 'ModalSelect: grape')) (SelStatus)
+        Start-Sleep -Milliseconds 600
+
+        OpenSelect 'Several, popover, Pick some'
+        Shot 'select-popover-multiple'
+        ClickOn (Named $CT::CheckBox 'Apple')
+        Check 'a checkbox sets the values' ([bool](WaitForText 'MultiplePopoverSelect: apple')) (SelStatus)
+        ClickOn (Named $CT::CheckBox 'Grape')
+        Check 'and a second adds to them, the popover still open' ([bool](WaitForText 'MultiplePopoverSelect: apple, grape')) (SelStatus)
+        Key '{ESC}' 700
+
+        $disabled = Named $CT::Button 'Disabled, Apple'
+        Check 'the disabled select is disabled to automation' ($disabled -and -not $disabled.Current.IsEnabled)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

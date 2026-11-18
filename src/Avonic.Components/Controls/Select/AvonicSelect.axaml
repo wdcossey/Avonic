@@ -1,0 +1,169 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for ion-select: structure only. The look is in Avonic.Themes. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelect}" TargetType="c:AvonicSelect">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="*,Auto">
+                    <!-- .select-outline-container: across the wrapper, behind it -->
+                    <Grid Name="PART_OutlineContainer" ColumnDefinitions="Auto,Auto,*" IsVisible="False" IsHitTestVisible="False">
+                        <Border Name="PART_OutlineStart" />
+                        <Border Name="PART_OutlineNotch" Grid.Column="1">
+                            <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0">
+                                <TextBlock.Width>
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
+                                        <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="#PART_LabelContent.Bounds.Width" />
+                                    </MultiBinding>
+                                </TextBlock.Width>
+                            </TextBlock>
+                        </Border>
+                        <Border Name="PART_OutlineEnd" Grid.Column="2" />
+                    </Grid>
+                    <!-- .select-wrapper, the <label>: .select-start, .select-control and .select-end. The start and end don't shrink,
+                         and the control takes the rest. -->
+                    <Border Name="PART_Wrapper" Background="Transparent">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <ContentPresenter Name="PART_Start"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <c:SelectControlPanel Name="PART_Control" Grid.Column="1"
+                                                  LabelPlacement="{TemplateBinding LabelPlacement}"
+                                                  Justify="{TemplateBinding Justify}"
+                                                  StartWidth="{Binding #PART_Start.Bounds.Width}"
+                                                  EndWidth="{Binding #PART_SelectEnd.Bounds.Width}">
+                                <Border Name="PART_Label" IsHitTestVisible="False">
+                                    <Panel VerticalAlignment="Center">
+                                        <TextBlock Name="PART_LabelText"
+                                                   Text="{TemplateBinding Label}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="NoWrap"
+                                                   IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <ContentPresenter Name="PART_LabelContent"
+                                                          Content="{TemplateBinding LabelContent}"
+                                                          ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                          IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                    </Panel>
+                                </Border>
+                                <!-- .native-wrapper: the text, and the icon unless the label is floating or stacked. aria-hidden. -->
+                                <Grid Name="PART_Container" ColumnDefinitions="*,Auto" ClipToBounds="True">
+                                    <c:SelectTextBlock Name="PART_Text"
+                                                       Text="{TemplateBinding DisplayText}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="NoWrap"
+                                                       AutomationProperties.AccessibilityView="Raw" />
+                                    <c:AvonicIcon Name="PART_Icon" Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Icon="{TemplateBinding SelectIcon}"
+                                                  AutomationProperties.AccessibilityView="Raw" />
+                                </Grid>
+                            </c:SelectControlPanel>
+                            <!-- .select-end: the icon of a floating or stacked label, then the end slot -->
+                            <StackPanel Name="PART_SelectEnd" Grid.Column="2" Orientation="Horizontal">
+                                <c:AvonicIcon Name="PART_EndIcon"
+                                              VerticalAlignment="Center"
+                                              IsVisible="False"
+                                              Icon="{TemplateBinding SelectIcon}"
+                                              AutomationProperties.AccessibilityView="Raw" />
+                                <ContentPresenter Name="PART_End"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <!-- .select-highlight: across the wrapper, at its bottom -->
+                    <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
+                    <!-- .select-bottom: the helper text (aria-live polite) or the error text (role alert) -->
+                    <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
+                        <Panel>
+                            <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Assertive" />
+                        </Panel>
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .label-text-wrapper-hidden, .select-outline-notch-hidden: display: none -->
+        <Style Selector="^:label-text-wrapper-hidden /template/ Border#PART_Label, ^:label-text-wrapper-hidden /template/ Border#PART_OutlineNotch">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <!-- renderOutlineContainer: with fill="outline" -->
+        <Style Selector="^:fill-outline /template/ Grid#PART_OutlineContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- shouldRenderHighlight: not with the outline, and not in an item -->
+        <Style Selector="^:not(:fill-outline):not(:in-item) /template/ Border#PART_Highlight">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- renderSelectIcon: in .native-wrapper, or in .select-end with a floating or stacked label -->
+        <Style Selector="^:label-placement-floating /template/ c|AvonicIcon#PART_Icon, ^:label-placement-stacked /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:label-placement-floating /template/ c|AvonicIcon#PART_EndIcon, ^:label-placement-stacked /template/ c|AvonicIcon#PART_EndIcon">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-bottom /template/ Border#PART_Bottom">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <!-- :host(.ion-touched.ion-invalid): the error text replaces the helper text -->
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-select-popover: a list, which the control fills. The radio's mark isn't shown
+         (ion-radio::part(container) display: none). -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelectPopover}" TargetType="c:AvonicSelectPopover">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:AvonicList Name="PART_List">
+                    <c:AvonicList.Styles>
+                        <Style Selector="c|AvonicRadio /template/ Border#PART_Container">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
+                    </c:AvonicList.Styles>
+                </c:AvonicList>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-select-modal: a header with a toolbar of the title and the close button, and the content's list. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelectModal}" TargetType="c:AvonicSelectModal">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,*">
+                    <c:AvonicHeader>
+                        <c:AvonicToolbar>
+                            <c:AvonicTitle Content="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}}"
+                                           IsVisible="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            <c:AvonicToolbar.EndContent>
+                                <c:AvonicButtons>
+                                    <c:AvonicButton Name="PART_Cancel" Content="{Binding CancelText, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}}" />
+                                </c:AvonicButtons>
+                            </c:AvonicToolbar.EndContent>
+                        </c:AvonicToolbar>
+                    </c:AvonicHeader>
+                    <c:AvonicContent Grid.Row="1">
+                        <c:AvonicList Name="PART_List">
+                            <c:AvonicList.Styles>
+                                <Style Selector="c|AvonicRadio /template/ Border#PART_Container">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </Style>
+                            </c:AvonicList.Styles>
+                        </c:AvonicList>
+                    </c:AvonicContent>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

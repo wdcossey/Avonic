@@ -1,0 +1,2270 @@
+{
+ "errors": [],
+ "focus": "body# .",
+ "dump": [
+  {
+   "d": 0,
+   "tag": "div",
+   "id": "stage",
+   "box": [
+    0,
+    0,
+    390,
+    531
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 1,
+   "tag": "ion-list",
+   "id": "list",
+   "cls": "list-md",
+   "box": [
+    0,
+    0,
+    390,
+    208
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "aria": "role=list"
+  },
+  {
+   "d": 2,
+   "tag": "ion-item",
+   "id": "i1",
+   "cls": "item item-lines-default item-control-needs-pointer-cursor in-list ion-activatable ion-focusable",
+   "box": [
+    0,
+    8,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=listitem"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    8,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    8,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgba(0, 0, 0, 0.13)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    8,
+    358,
+    47
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    8,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "ion-select",
+   "id": "s1",
+   "cls": "in-item has-value has-placeholder ion-focusable select-ltr select-label-placement-start",
+   "box": [
+    16,
+    9.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    9.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    9.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    9.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    22,
+    32.02,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    22,
+    32.02,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Fruit"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    316.22,
+    22,
+    57.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    316.22,
+    22,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 7,
+   "tag": "button",
+   "id": "ion-sel-0",
+   "box": [
+    16,
+    9.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Fruit, Apple aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 7,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    23.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    23.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 9,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    23.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 10,
+   "tag": "path",
+   "box": [
+    362.63,
+    28.66,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    374,
+    9.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-item",
+   "id": "i2",
+   "cls": "item item-lines-default item-control-needs-pointer-cursor in-list ion-activatable ion-focusable",
+   "box": [
+    0,
+    56,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=listitem"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    56,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    56,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgba(0, 0, 0, 0.13)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    56,
+    358,
+    47
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    56,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "ion-select",
+   "id": "s2",
+   "cls": "in-item has-placeholder ion-focusable select-ltr select-label-placement-start",
+   "box": [
+    16,
+    57.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    57.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    57.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    57.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    70,
+    84.31,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    70,
+    84.31,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Placeholder"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    296.11,
+    70,
+    77.89,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-text select-placeholder",
+   "part": "placeholder",
+   "box": [
+    296.11,
+    70,
+    60.89,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.6",
+   "text": "Pick one"
+  },
+  {
+   "d": 7,
+   "tag": "button",
+   "id": "ion-sel-1",
+   "box": [
+    16,
+    57.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Placeholder, Pick one aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 7,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    71.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    71.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 9,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    71.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 10,
+   "tag": "path",
+   "box": [
+    362.63,
+    76.66,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    374,
+    57.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-item",
+   "id": "i3",
+   "cls": "item item-lines-default item-control-needs-pointer-cursor in-list ion-activatable ion-focusable",
+   "box": [
+    0,
+    104,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=listitem"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    104,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    104,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgba(0, 0, 0, 0.13)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    104,
+    358,
+    47
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    104,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "ion-select",
+   "id": "s3",
+   "cls": "in-item ion-focusable select-ltr select-label-placement-start",
+   "box": [
+    16,
+    105.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    105.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    105.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    105.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    118,
+    57.17,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    118,
+    57.17,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Multiple"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    339.02,
+    119.5,
+    34.98,
+    16
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    339.02,
+    127.5,
+    17.98,
+    0
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "button",
+   "id": "ion-sel-2",
+   "box": [
+    16,
+    105.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Multiple aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 7,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    119.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    119.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 9,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    119.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 10,
+   "tag": "path",
+   "box": [
+    362.63,
+    124.66,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    374,
+    105.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-item",
+   "id": "i4",
+   "cls": "item item-lines-default in-list ion-activatable ion-focusable item-interactive-disabled",
+   "box": [
+    0,
+    152,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=listitem"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    152,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    152,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgba(0, 0, 0, 0.13)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    152,
+    358,
+    47
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    152,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "ion-select",
+   "id": "s4",
+   "cls": "in-item select-disabled has-value ion-focusable select-ltr select-label-placement-start",
+   "box": [
+    16,
+    153.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.38"
+  },
+  {
+   "d": 4,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    153.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    153.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    153.5,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    166,
+    61.73,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    166,
+    61.73,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Disabled"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    316.22,
+    166,
+    57.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    316.22,
+    166,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 7,
+   "tag": "button",
+   "id": "ion-sel-3",
+   "box": [
+    16,
+    153.5,
+    358,
+    44
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "bg": "rgba(239, 239, 239, 0.3)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Disabled, Apple aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 7,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    167.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    167.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 9,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    167.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 10,
+   "tag": "path",
+   "box": [
+    362.63,
+    172.66,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    374,
+    153.5,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 1,
+   "tag": "div",
+   "box": [
+    0,
+    208,
+    390,
+    323
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-select",
+   "id": "s5",
+   "cls": "ion-focusable select-ltr select-label-placement-floating",
+   "box": [
+    16,
+    208,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    208,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    208,
+    0,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    208,
+    341,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    227,
+    57.52,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "tr": "matrix(1, 0, 0, 1, 0, 19)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    227,
+    57.52,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Floating"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    227,
+    341,
+    37
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    16,
+    245.5,
+    341,
+    0
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "id": "ion-sel-4",
+   "box": [
+    16,
+    208,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Floating aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    357,
+    208,
+    17,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    228,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    228,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    228,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "path",
+   "box": [
+    362.63,
+    233.16,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-select",
+   "id": "s6",
+   "cls": "label-floating has-placeholder ion-focusable select-ltr select-label-placement-stacked",
+   "box": [
+    16,
+    264,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    264,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    264,
+    0,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    264,
+    341,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    273.5,
+    42.96,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "tr": "matrix(0.75, 0, 0, 0.75, 0, 9.5)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    273.5,
+    42.96,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Stacked"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    283,
+    341,
+    37
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-text select-placeholder",
+   "part": "placeholder",
+   "box": [
+    16,
+    292,
+    341,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.6",
+   "text": "Pick one"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "id": "ion-sel-5",
+   "box": [
+    16,
+    264,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Stacked, Pick one aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    357,
+    264,
+    17,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    284,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    284,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    284,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "path",
+   "box": [
+    362.63,
+    289.16,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-select",
+   "id": "s7",
+   "cls": "has-value label-floating ion-focusable select-ltr select-fill-solid select-label-placement-floating",
+   "box": [
+    16,
+    320,
+    358,
+    75
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    320,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(242, 242, 242)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgb(128, 128, 128)"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    32,
+    320,
+    0,
+    55
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    32,
+    320,
+    309,
+    55
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    32,
+    329.5,
+    26.58,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "tr": "matrix(0.75, 0, 0, 0.75, 0, 9.5)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    32,
+    329.5,
+    26.58,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Solid"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    32,
+    339,
+    309,
+    36
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    32,
+    347.5,
+    309,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "id": "ion-sel-6",
+   "box": [
+    16,
+    320,
+    358,
+    55
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Solid, Apple aria-haspopup=dialog aria-expanded=false aria-describedby=ion-sel-6-helper-text"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    341,
+    320,
+    17,
+    55
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    345,
+    339.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    345,
+    339.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    345,
+    339.5,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "path",
+   "box": [
+    346.63,
+    344.66,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "select-bottom",
+   "part": "bottom",
+   "box": [
+    16,
+    376,
+    358,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "12px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "id": "ion-sel-6-helper-text",
+   "cls": "helper-text",
+   "part": "supporting-text helper-text",
+   "box": [
+    32,
+    381,
+    58.16,
+    14
+   ],
+   "color": "rgb(77, 77, 77)",
+   "fs": "12px",
+   "text": "Helper text"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "box": [
+    16,
+    395,
+    358,
+    8
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-select",
+   "id": "s8",
+   "cls": "has-value label-floating ion-focusable select-ltr select-fill-outline select-label-placement-floating",
+   "box": [
+    16,
+    403,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    403,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-outline-container",
+   "box": [
+    16,
+    403,
+    358,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-outline-start",
+   "box": [
+    16,
+    403,
+    12,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "1px 1px 1px 0px rgb(179, 179, 179)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-outline-notch",
+   "box": [
+    28,
+    403,
+    45.63,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "0px 1px 0px 0px rgb(179, 179, 179)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "notch-spacer",
+   "box": [
+    28,
+    403,
+    45.63,
+    14
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "12px",
+   "op": "0",
+   "text": "Outline"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "select-outline-end",
+   "box": [
+    73.63,
+    403,
+    300.38,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "border": "1px 1px 0px 1px rgb(179, 179, 179)"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    32,
+    403,
+    0,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    32,
+    403,
+    309,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    32,
+    396.92,
+    37.63,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "tr": "matrix(0.75, 0, 0, 0.75, 0, -6.08)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    32,
+    396.92,
+    37.63,
+    14.25
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Outline"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    32,
+    403,
+    309,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    32,
+    421.5,
+    309,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Banana"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "id": "ion-sel-7",
+   "box": [
+    32,
+    403,
+    309,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Outline, Banana aria-haspopup=dialog aria-expanded=false"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    341,
+    403,
+    17,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    345,
+    423,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    345,
+    423,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    345,
+    423,
+    13,
+    16
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "path",
+   "box": [
+    346.63,
+    428.16,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(128, 128, 128)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "box": [
+    16,
+    459,
+    358,
+    8
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-select",
+   "id": "s9",
+   "cls": "ion-touched ion-invalid ion-focusable select-ltr select-label-placement-start",
+   "box": [
+    16,
+    467,
+    358,
+    64
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "label",
+   "id": "select-label",
+   "cls": "select-wrapper",
+   "part": "wrapper",
+   "box": [
+    16,
+    467,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-start",
+   "part": "start",
+   "box": [
+    16,
+    467,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-control",
+   "part": "control",
+   "box": [
+    16,
+    467,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    479.5,
+    34.33,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "label-text",
+   "box": [
+    16,
+    479.5,
+    34.33,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Error"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "native-wrapper",
+   "part": "container",
+   "box": [
+    339.02,
+    481,
+    34.98,
+    16
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-text",
+   "part": "text",
+   "box": [
+    339.02,
+    489,
+    17.98,
+    0
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "id": "ion-sel-8",
+   "box": [
+    16,
+    467,
+    358,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(240, 240, 240)",
+   "fs": "13.3333px",
+   "op": "0",
+   "aria": "aria-label=Error aria-haspopup=dialog aria-expanded=false aria-describedby=ion-sel-8-error-text"
+  },
+  {
+   "d": 6,
+   "tag": "ion-icon",
+   "cls": "select-icon",
+   "part": "icon",
+   "box": [
+    361,
+    481,
+    13,
+    16
+   ],
+   "color": "rgb(197, 0, 15)",
+   "fs": "16px",
+   "aria": "role=img"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "icon-inner",
+   "box": [
+    361,
+    481,
+    13,
+    16
+   ],
+   "color": "rgb(197, 0, 15)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "svg",
+   "cls": "ionicon",
+   "box": [
+    361,
+    481,
+    13,
+    16
+   ],
+   "color": "rgb(197, 0, 15)",
+   "fs": "16px"
+  },
+  {
+   "d": 9,
+   "tag": "path",
+   "box": [
+    362.63,
+    486.16,
+    9.75,
+    5.69
+   ],
+   "color": "rgb(197, 0, 15)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "select-end",
+   "part": "end",
+   "box": [
+    374,
+    467,
+    0,
+    44
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "select-bottom",
+   "part": "bottom",
+   "box": [
+    16,
+    511,
+    358,
+    20
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "12px",
+   "border": "1px 0px 0px 0px rgb(0, 0, 0)"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "id": "ion-sel-8-error-text",
+   "cls": "error-text",
+   "part": "supporting-text error-text",
+   "box": [
+    16,
+    517,
+    47.2,
+    14
+   ],
+   "color": "rgb(197, 0, 15)",
+   "fs": "12px",
+   "text": "Required",
+   "aria": "role=alert"
+  }
+ ]
+}

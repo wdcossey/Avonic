@@ -1,0 +1,735 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="12" Margin="16">
+            <c:AvonicSelect Label="Fruit" Placeholder="Pick one">
+                <c:AvonicSelectOption Value="apple">Apple</c:AvonicSelectOption>
+                <c:AvonicSelectOption Value="banana">Banana</c:AvonicSelectOption>
+            </c:AvonicSelect>
+            <c:AvonicSelect Label="Floating" LabelPlacement="Floating" Value="apple">
+                <c:AvonicSelectOption Value="apple">Apple</c:AvonicSelectOption>
+            </c:AvonicSelect>
+            <c:AvonicSelect Label="Solid" LabelPlacement="Floating" Fill="Solid" HelperText="Helper text" />
+            <c:AvonicSelect Label="Outline" LabelPlacement="Floating" Fill="Outline" Value="apple">
+                <c:AvonicSelectOption Value="apple">Apple</c:AvonicSelectOption>
+            </c:AvonicSelect>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of select.md.css, as the input's is of input.md.css. Slotted content's margins are Styles/TextField.axaml's
+         IInputHost rules, word for word the same in select.md.css. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelect}" TargetType="c:AvonicSelect">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- width: 100%; cursor: pointer; the hidden button's outline is never seen -->
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Foreground" Value="{Binding $parent[Control].(TextElement.Foreground)}" />
+        <!-- highlight-color: highlight-color-focused, which a known colour's base replaces -->
+        <Setter Property="HighlightBrush">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Select.HighlightColorFocused" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="*,Auto">
+                    <Grid Name="PART_OutlineContainer" ColumnDefinitions="Auto,Auto,*" IsVisible="False" IsHitTestVisible="False">
+                        <Border Name="PART_OutlineStart" />
+                        <Border Name="PART_OutlineNotch" Grid.Column="1">
+                            <!-- .notch-spacer: the label at 0.75em, and 8 px after it -->
+                            <TextBlock Name="PART_NotchSpacer" Text="{TemplateBinding Label}" Opacity="0" Margin="0,0,8,0" TextWrapping="NoWrap">
+                                <TextBlock.FontSize>
+                                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="0.75">
+                                        <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </TextBlock.FontSize>
+                                <TextBlock.Width>
+                                    <MultiBinding Converter="{x:Static c:FieldConverters.NotchWidth}">
+                                        <Binding Path="Label" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="#PART_LabelContent.Bounds.Width" />
+                                    </MultiBinding>
+                                </TextBlock.Width>
+                            </TextBlock>
+                        </Border>
+                        <Border Name="PART_OutlineEnd" Grid.Column="2" />
+                    </Grid>
+                    <Border Name="PART_Wrapper">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <ContentPresenter Name="PART_Start"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding StartContent}"
+                                              ContentTemplate="{TemplateBinding StartContentTemplate}" />
+                            <c:SelectControlPanel Name="PART_Control" Grid.Column="1"
+                                                  LabelPlacement="{TemplateBinding LabelPlacement}"
+                                                  Justify="{TemplateBinding Justify}"
+                                                  StartWidth="{Binding #PART_Start.Bounds.Width}"
+                                                  EndWidth="{Binding #PART_SelectEnd.Bounds.Width}">
+                                <Border Name="PART_Label" IsHitTestVisible="False">
+                                    <Panel VerticalAlignment="Center">
+                                        <TextBlock Name="PART_LabelText"
+                                                   Text="{TemplateBinding Label}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="NoWrap"
+                                                   IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <ContentPresenter Name="PART_LabelContent"
+                                                          Content="{TemplateBinding LabelContent}"
+                                                          ContentTemplate="{TemplateBinding LabelContentTemplate}"
+                                                          TextTrimming="CharacterEllipsis"
+                                                          TextWrapping="NoWrap"
+                                                          ClipToBounds="True"
+                                                          IsVisible="{Binding Label, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNull}}" />
+                                    </Panel>
+                                </Border>
+                                <Grid Name="PART_Container" ColumnDefinitions="*,Auto" ClipToBounds="True">
+                                    <c:SelectTextBlock Name="PART_Text"
+                                                       Text="{TemplateBinding DisplayText}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="NoWrap"
+                                                       AutomationProperties.AccessibilityView="Raw" />
+                                    <c:AvonicIcon Name="PART_Icon" Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Icon="{TemplateBinding SelectIcon}"
+                                                  AutomationProperties.AccessibilityView="Raw" />
+                                </Grid>
+                            </c:SelectControlPanel>
+                            <StackPanel Name="PART_SelectEnd" Grid.Column="2" Orientation="Horizontal">
+                                <c:AvonicIcon Name="PART_EndIcon"
+                                              VerticalAlignment="Center"
+                                              IsVisible="False"
+                                              Icon="{TemplateBinding SelectIcon}"
+                                              AutomationProperties.AccessibilityView="Raw" />
+                                <ContentPresenter Name="PART_End"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding EndContent}"
+                                                  ContentTemplate="{TemplateBinding EndContentTemplate}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Name="PART_Highlight" VerticalAlignment="Bottom" IsHitTestVisible="False" IsVisible="False" />
+                    <Border Name="PART_Bottom" Grid.Row="1" IsVisible="False">
+                        <Panel>
+                            <TextBlock Name="PART_HelperText" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            <TextBlock Name="PART_ErrorText" Text="{TemplateBinding ErrorText}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Assertive" />
+                        </Panel>
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- ── Structure, as the stub ─────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^:label-text-wrapper-hidden /template/ Border#PART_Label, ^:label-text-wrapper-hidden /template/ Border#PART_OutlineNotch">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:fill-outline /template/ Grid#PART_OutlineContainer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:not(:fill-outline):not(:in-item) /template/ Border#PART_Highlight">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:label-placement-floating /template/ c|AvonicIcon#PART_Icon, ^:label-placement-stacked /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:label-placement-floating /template/ c|AvonicIcon#PART_EndIcon, ^:label-placement-stacked /template/ c|AvonicIcon#PART_EndIcon">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-bottom /template/ Border#PART_Bottom">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_HelperText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid /template/ TextBlock#PART_ErrorText">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- ── The host ───────────────────────────────────────────────────────────────────────── -->
+
+        <!-- :host(.ion-color): highlight-color-focused is the colour's base -->
+        <!-- An app's own highlight-color-focused still wins, as its variable on the host beats the :host rule -->
+        <Style Selector="^:ion-color">
+            <Setter Property="HighlightBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.HighlightColorFocused" />
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.ion-valid), then :host(.ion-touched.ion-invalid), which beats it -->
+        <Style Selector="^.ion-valid">
+            <Setter Property="HighlightBrush" Value="{DynamicResource Avonic.Select.HighlightColorValid}" />
+        </Style>
+        <Style Selector="^.ion-touched.ion-invalid">
+            <Setter Property="HighlightBrush" Value="{DynamicResource Avonic.Select.HighlightColorInvalid}" />
+        </Style>
+        <!-- min-height 44px, and 56px for floating, stacked, solid and outline: the wrapper's, as the bottom text is under it -->
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="MinHeight" Value="44" />
+        </Style>
+        <Style Selector="^:label-placement-floating /template/ Border#PART_Wrapper, ^:label-placement-stacked /template/ Border#PART_Wrapper, ^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper">
+            <Setter Property="MinHeight" Value="56" />
+        </Style>
+        <!-- :host(.select-disabled): opacity 0.38, as one -->
+        <Style Selector="^:select-disabled">
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Select.Md.DisabledMask}" />
+        </Style>
+
+        <!-- ── .select-wrapper ────────────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.015" />
+                </Transitions>
+            </Setter>
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.Background" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.select-fill-solid): background step 50, a bottom border step 500, the top corners 4 -->
+        <Style Selector="^:fill-solid /template/ Border#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep500Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid:shape-round /template/ Border#PART_Wrapper">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Top">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid /template/ Border#PART_Wrapper, ^:fill-outline /template/ Border#PART_Wrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Wrapper">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Padding}">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingBottom" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- No fill, round: border-radius 16 -->
+        <Style Selector="^:shape-round:not(:fill-solid):not(:fill-outline) /template/ Border#PART_Wrapper">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- @media (any-hover: hover) :host(.select-fill-solid:hover): step 100, border step 750 -->
+        <Style Selector="^:fill-solid:ion-hover /template/ Border#PART_Wrapper">
+            <!-- An app's own background and border colour still win, as its variable on the host beats the :host rule -->
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep100Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep750Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.select-fill-solid.select-expanded), :host(.select-fill-solid.has-focus): step 150, the highlight's border -->
+        <Style Selector="^:fill-solid:select-expanded /template/ Border#PART_Wrapper, ^:fill-solid:has-focus /template/ Border#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <Binding Path="$parent[c:AvonicSelect].HighlightBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.select-fill-solid.ion-touched.ion-invalid) -->
+        <Style Selector="^:fill-solid.ion-touched.ion-invalid /template/ Border#PART_Wrapper">
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <Binding Path="$parent[c:AvonicSelect].HighlightBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ── The outline ────────────────────────────────────────────────────────────────────── -->
+
+        <Style Selector="^ /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep300Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Tag" Value="{DynamicResource Avonic.Select.BorderWidth}" />
+        </Style>
+        <Style Selector="^:fill-outline:ion-hover /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep750Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.select-fill-outline.select-expanded), .has-focus: border-width highlight-height, border-color highlight-color -->
+        <Style Selector="^:fill-outline:has-focus /template/ Grid#PART_OutlineContainer, ^:fill-outline:select-expanded /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+            <Setter Property="Tag" Value="{DynamicResource Avonic.Select.HighlightHeight}" />
+        </Style>
+        <Style Selector="^:fill-outline.ion-touched.ion-invalid /template/ Grid#PART_OutlineContainer">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineStart">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="stb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Width">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-round /template/ Border#PART_OutlineStart">
+            <Setter Property="Width">
+                <MultiBinding Converter="{x:Static c:FieldConverters.OutlineStartWidth}">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="Start">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineNotch">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="tb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.label-floating.select-fill-outline) .select-outline-notch: border-top: none -->
+        <Style Selector="^:label-floating /template/ Border#PART_OutlineNotch">
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="b">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Border#PART_OutlineEnd">
+            <Setter Property="BorderBrush" Value="{Binding $parent[Grid].(TextElement.Foreground)}" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="teb">
+                    <Binding Path="$parent[Grid].Tag" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusFill" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:shape-round /template/ Border#PART_OutlineEnd">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Radius}" ConverterParameter="End">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.BorderRadiusOutlineRound" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ── The label ──────────────────────────────────────────────────────────────────────── -->
+
+        <!-- .label-text-wrapper: at most 200 px; the colour, transform and max-width ease over 150 ms -->
+        <Style Selector="^ /template/ Border#PART_Label">
+            <Setter Property="MaxWidth" Value="200" />
+            <Setter Property="RenderTransformOrigin" Value="0%,0%" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static c:FieldConverters.LabelTransform}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(c:SelectControlPanel.StartShift)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[c:SelectControlPanel].StartWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="{x:Static TextElement.ForegroundProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static b:Css.TranslateYProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                    <DoubleTransition Property="{x:Static c:SelectControlPanel.StartShiftProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <!-- :host(.select-label-placement-start), fixed: 16 px after it; end: before it -->
+        <Style Selector="^:label-placement-start /template/ Border#PART_Label, ^:label-placement-fixed /template/ Border#PART_Label">
+            <Setter Property="Margin" Value="0,0,16,0" />
+        </Style>
+        <Style Selector="^:label-placement-end /template/ Border#PART_Label">
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        <!-- :host(.select-label-placement-fixed) .label-text-wrapper: flex: 0 0 100px -->
+        <Style Selector="^:label-placement-fixed /template/ Border#PART_Label">
+            <Setter Property="Width" Value="100" />
+        </Style>
+        <!-- Stacked and floating: a column, the label's max-width calc(100% / scale), which the panel works out -->
+        <Style Selector="^:label-placement-stacked /template/ Border#PART_Label, ^:label-placement-floating /template/ Border#PART_Label">
+            <Setter Property="MaxWidth" Value="Infinity" />
+        </Style>
+        <!-- :host(.select-label-placement-floating) .label-text-wrapper: translateY(100%) scale(1), on the field -->
+        <Style Selector="^:label-placement-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="1" />
+        </Style>
+        <!-- :host(.label-floating) .label-text-wrapper: translateY(50%) scale(0.75) -->
+        <Style Selector="^:label-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="0.5" />
+            <Setter Property="b:Css.Scale" Value="0.75" />
+        </Style>
+        <Style Selector="^:label-floating /template/ c|SelectControlPanel#PART_Control">
+            <Setter Property="LabelScale" Value="0.75" />
+        </Style>
+        <!-- The outline: position: absolute, and translateY(-32%) onto the border, with 8 px less room -->
+        <Style Selector="^:fill-outline:label-placement-stacked /template/ c|SelectControlPanel#PART_Control, ^:fill-outline:label-placement-floating /template/ c|SelectControlPanel#PART_Control">
+            <Setter Property="IsLabelOutOfFlow" Value="True" />
+        </Style>
+        <Style Selector="^:fill-outline:label-floating /template/ c|SelectControlPanel#PART_Control">
+            <Setter Property="LabelInset" Value="8" />
+            <Setter Property="LabelSpansSlots" Value="True" />
+        </Style>
+        <Style Selector="^:fill-outline:label-floating /template/ Border#PART_Label">
+            <Setter Property="b:Css.TranslateY" Value="-0.32" />
+            <Setter Property="c:SelectControlPanel.StartShift" Value="1" />
+        </Style>
+        <!-- Floating or stacked, and open or focused: the highlight colour; so too when focused and valid, or touched and invalid -->
+        <Style Selector="^:label-placement-floating:select-expanded /template/ Border#PART_Label, ^:label-placement-floating:has-focus /template/ Border#PART_Label, ^:label-placement-stacked:select-expanded /template/ Border#PART_Label, ^:label-placement-stacked:has-focus /template/ Border#PART_Label, ^:label-placement-floating.ion-touched.ion-invalid /template/ Border#PART_Label, ^:label-placement-stacked.ion-touched.ion-invalid /template/ Border#PART_Label">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+        </Style>
+
+        <!-- ── The text ───────────────────────────────────────────────────────────────────────── -->
+
+        <!-- .native-wrapper: its opacity eases over 150 ms -->
+        <Style Selector="^ /template/ c|SelectTextBlock#PART_Text">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <!-- .select-placeholder: placeholder-color, at placeholder-opacity -->
+        <Style Selector="^:has-placeholder-shown /template/ c|SelectTextBlock#PART_Text">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.PlaceholderColor" />
+                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.PlaceholderOpacity" />
+                    <DynamicResource ResourceKey="Avonic.PlaceholderOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.select-label-placement-floating) .native-wrapper .select-placeholder: hidden until the label floats -->
+        <Style Selector="^:label-placement-floating:has-placeholder-shown /template/ c|SelectTextBlock#PART_Text">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="^:label-placement-floating:label-floating:has-placeholder-shown /template/ c|SelectTextBlock#PART_Text">
+            <Setter Property="Opacity">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.PlaceholderOpacity" />
+                    <DynamicResource ResourceKey="Avonic.PlaceholderOpacity" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ── .select-icon ───────────────────────────────────────────────────────────────────── -->
+
+        <!-- 0.8125rem wide, 4 px before it, step 500; turns 180 degrees over 150 ms when open without an expanded icon -->
+        <Style Selector="^ /template/ c|AvonicIcon#PART_Icon, ^ /template/ c|AvonicIcon#PART_EndIcon">
+            <Setter Property="Width" Value="13" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep500Brush}" />
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform" Value="rotate(0deg)" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="{a:CubicBezier 0.4, 0, 0.2, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^:select-expanded:not(:has-expanded-icon) /template/ c|AvonicIcon#PART_Icon, ^:select-expanded:not(:has-expanded-icon) /template/ c|AvonicIcon#PART_EndIcon">
+            <Setter Property="RenderTransform" Value="rotate(180deg)" />
+        </Style>
+        <!-- :host(.in-item-color) .select-icon: color inherit, at rest. Before the rules for the states, which are more specific in CSS -->
+        <Style Selector="^:in-item-color /template/ c|AvonicIcon">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSelect].Foreground}" />
+        </Style>
+        <!-- Open, focused, focused and valid, touched and invalid: the highlight colour -->
+        <Style Selector="^:select-expanded /template/ c|AvonicIcon, ^:has-focus /template/ c|AvonicIcon, ^.ion-touched.ion-invalid /template/ c|AvonicIcon">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+        </Style>
+        <!-- In an item, with no fill: step 500 all the same (the in-item rule is more specific) -->
+        <Style Selector="^:in-item:not(:fill-solid):not(:fill-outline):select-expanded /template/ c|AvonicIcon, ^:in-item:not(:fill-solid):not(:fill-outline):has-focus /template/ c|AvonicIcon, ^:in-item:not(:fill-solid):not(:fill-outline).ion-touched.ion-invalid /template/ c|AvonicIcon">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep500Brush}" />
+        </Style>
+
+        <!-- ── .select-highlight ──────────────────────────────────────────────────────────────── -->
+
+        <!-- bottom: -1px, height highlight-height, scale(0) to scale(1) over 200 ms (ease) when open or focused; in an item, bottom 0 -->
+        <Style Selector="^ /template/ Border#PART_Highlight">
+            <Setter Property="Margin" Value="0,0,0,-1" />
+            <Setter Property="Height" Value="{DynamicResource Avonic.Select.HighlightHeight}" />
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+            <Setter Property="b:Css.Scale" Value="0" />
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="{x:Static b:Css.ScaleProperty}" Duration="0:0:0.2" Easing="{a:CubicBezier 0.25, 0.1, 0.25, 1}" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^:has-focus /template/ Border#PART_Highlight, ^:select-expanded /template/ Border#PART_Highlight">
+            <Setter Property="b:Css.Scale" Value="1" />
+        </Style>
+
+        <!-- ── .select-bottom ─────────────────────────────────────────────────────────────────── -->
+
+        <!-- padding 5 above, the wrapper's start and end; a top border with no fill; 12 px text -->
+        <Style Selector="^ /template/ Border#PART_Bottom">
+            <Setter Property="TextElement.FontSize" Value="12" />
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:FieldConverters.Sides}" ConverterParameter="t">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderWidth" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-solid /template/ Border#PART_Bottom, ^:fill-outline /template/ Border#PART_Bottom">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingFill" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:fill-outline:shape-round /template/ Border#PART_Bottom">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:FieldConverters.BottomPadding}" ConverterParameter="5">
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.Select.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.Select.Md.PaddingOutlineRound" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.has-focus.ion-valid), :host(.select-expanded.ion-valid), :host(.ion-touched.ion-invalid): highlight-color -->
+        <Style Selector="^:has-focus.ion-valid /template/ Border#PART_Bottom, ^:select-expanded.ion-valid /template/ Border#PART_Bottom, ^.ion-touched.ion-invalid /template/ Border#PART_Bottom">
+            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_HelperText">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep300Brush}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_ErrorText">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Select.HighlightColorInvalid}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- ion-select-popover: an ion-list with no margins, its items with no inner border (Tokens/Select.axaml), the radio's mark
+         hidden and its label's margins 0. ion-list-header and ion-label: margin 0. The options' label and description. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelectPopover}" TargetType="c:AvonicSelectPopover">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:AvonicList Name="PART_List" Margin="0">
+                    <c:AvonicList.Styles>
+                        <Style Selector="c|AvonicRadio /template/ Border#PART_Container">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
+                        <!-- ion-list ion-radio::part(label): margin 0, over the radio's own in-item margins -->
+                        <Style Selector="c|AvonicRadio:in-item /template/ ContentPresenter#PART_Label">
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                        <Style Selector="c|AvonicListHeader, c|AvonicLabel">
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                        <Style Selector="TextBlock.select-option-label">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            <Setter Property="TextWrapping" Value="NoWrap" />
+                        </Style>
+                        <Style Selector="StackPanel.select-option-content > TextBlock">
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                        <!-- .select-option-description: 5 above, 0.75rem, ion-color-step-700, which is ion-text-color-step-300 -->
+                        <Style Selector="TextBlock.select-option-description">
+                            <Setter Property="Margin" Value="0,5,0,0" />
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep300Brush}" />
+                        </Style>
+                    </c:AvonicList.Styles>
+                </c:AvonicList>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- ion-select-modal: height 100%; a header with a toolbar of the title and the close button, and the content's list, whose
+         items are the popover's. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSelectModal}" TargetType="c:AvonicSelectModal">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,*">
+                    <c:AvonicHeader>
+                        <c:AvonicToolbar>
+                            <c:AvonicTitle Content="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}}"
+                                           IsVisible="{Binding Header, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            <c:AvonicToolbar.EndContent>
+                                <c:AvonicButtons>
+                                    <c:AvonicButton Name="PART_Cancel" Content="{Binding CancelText, RelativeSource={RelativeSource FindAncestor, AncestorType=c:AvonicSelectModal}}" />
+                                </c:AvonicButtons>
+                            </c:AvonicToolbar.EndContent>
+                        </c:AvonicToolbar>
+                    </c:AvonicHeader>
+                    <c:AvonicContent Grid.Row="1">
+                        <c:AvonicList Name="PART_List">
+                            <c:AvonicList.Styles>
+                                <Style Selector="c|AvonicRadio /template/ Border#PART_Container">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </Style>
+                                <Style Selector="c|AvonicRadio:in-item /template/ ContentPresenter#PART_Label">
+                                    <Setter Property="Margin" Value="0" />
+                                </Style>
+                                <Style Selector="TextBlock.select-option-label">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                    <Setter Property="TextWrapping" Value="NoWrap" />
+                                </Style>
+                                <Style Selector="StackPanel.select-option-content > TextBlock">
+                                    <Setter Property="TextWrapping" Value="Wrap" />
+                                </Style>
+                                <Style Selector="TextBlock.select-option-description">
+                                    <Setter Property="Margin" Value="0,5,0,0" />
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep300Brush}" />
+                                </Style>
+                            </c:AvonicList.Styles>
+                        </c:AvonicList>
+                    </c:AvonicContent>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
