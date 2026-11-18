@@ -1,0 +1,66 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-select's variables, with md defaults from select.md.css. A CssUnset key falls back to something else in Ionic, often a
+         value that depends on the fill or the state: the theme's bindings say what. Any value overrides it. -->
+    <b:CssUnset x:Key="Avonic.Select.Background" />
+    <b:CssUnset x:Key="Avonic.Select.BorderColor" />
+    <b:CssUnset x:Key="Avonic.Select.BorderRadius" />
+    <x:Double x:Key="Avonic.Select.BorderWidth">1</x:Double>
+    <b:CssUnset x:Key="Avonic.Select.HighlightColorFocused" />
+    <SolidColorBrush x:Key="Avonic.Select.HighlightColorInvalid" Color="{DynamicResource Avonic.Color.Danger}" />
+    <SolidColorBrush x:Key="Avonic.Select.HighlightColorValid" Color="{DynamicResource Avonic.Color.Success}" />
+    <x:Double x:Key="Avonic.Select.HighlightHeight">2</x:Double>
+    <b:CssUnset x:Key="Avonic.Select.PaddingTop" />
+    <b:CssUnset x:Key="Avonic.Select.PaddingEnd" />
+    <b:CssUnset x:Key="Avonic.Select.PaddingBottom" />
+    <b:CssUnset x:Key="Avonic.Select.PaddingStart" />
+    <b:CssUnset x:Key="Avonic.Select.PlaceholderColor" />
+    <b:CssUnset x:Key="Avonic.Select.PlaceholderOpacity" />
+
+    <!-- md's defaults for the variables above that depend on the fill or the shape -->
+    <SolidColorBrush x:Key="Avonic.Select.Md.Background" Color="Transparent" />
+    <x:Double x:Key="Avonic.Select.Md.PaddingFill">16</x:Double>
+    <x:Double x:Key="Avonic.Select.Md.PaddingOutlineRound">32</x:Double>
+    <x:Double x:Key="Avonic.Select.Md.BorderRadiusFill">4</x:Double>
+    <x:Double x:Key="Avonic.Select.Md.BorderRadiusRound">16</x:Double>
+    <x:Double x:Key="Avonic.Select.Md.BorderRadiusOutlineRound">28</x:Double>
+
+    <!-- :host(.select-disabled) { opacity: 0.38 }, as a mask so that the select fades as one -->
+    <SolidColorBrush x:Key="Avonic.Select.Md.DisabledMask" Color="#000000" Opacity="0.38" />
+
+    <!-- popover.md.css: :host(.select-popover-rich-content) { width: clamp(250px, calc(100vw - 40px), 400px) }, the three numbers -->
+    <x:Double x:Key="Avonic.SelectPopover.Md.RichContentMinWidth">250</x:Double>
+    <x:Double x:Key="Avonic.SelectPopover.Md.RichContentInset">40</x:Double>
+    <x:Double x:Key="Avonic.SelectPopover.Md.RichContentMaxWidth">400</x:Double>
+
+    <!-- select-popover.md.css and select-modal.md.css, word for word the same: the CSS variables each option's ion-item gets. The
+         content merges a copy of each dictionary into the item's own resources while the rule holds; its entries are the brushes
+         and numbers above them, so that a palette's colour reaches them. No variables of their own in Ionic. -->
+    <!-- .item-radio-checked: background rgba(primary, 0.08); focused primary at 0.2; hovered primary at 0.12 -->
+    <SolidColorBrush x:Key="Avonic.SelectOption.Md.RadioCheckedBackground" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.08" />
+    <SolidColorBrush x:Key="Avonic.SelectOption.Md.RadioCheckedHighlight" Color="{DynamicResource Avonic.Color.Primary}" />
+    <!-- .item-checkbox-checked: the activated, focused and hovered backgrounds the item's colour; the text primary -->
+    <SolidColorBrush x:Key="Avonic.SelectOption.Md.CheckboxCheckedHighlight" Color="{DynamicResource Avonic.TextColor}" />
+    <SolidColorBrush x:Key="Avonic.SelectOption.Md.CheckboxCheckedColor" Color="{DynamicResource Avonic.Color.Primary}" />
+
+    <!-- ion-item: inner-border-width 0 -->
+    <ResourceDictionary x:Key="Avonic.SelectOption.Md.Item">
+        <Thickness x:Key="Avonic.Item.InnerBorderWidth">0</Thickness>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Avonic.SelectOption.Md.ItemRadioChecked">
+        <StaticResource x:Key="Avonic.Item.Background" ResourceKey="Avonic.SelectOption.Md.RadioCheckedBackground" />
+        <StaticResource x:Key="Avonic.Item.BackgroundFocused" ResourceKey="Avonic.SelectOption.Md.RadioCheckedHighlight" />
+        <x:Double x:Key="Avonic.Item.BackgroundFocusedOpacity">0.2</x:Double>
+        <StaticResource x:Key="Avonic.Item.BackgroundHover" ResourceKey="Avonic.SelectOption.Md.RadioCheckedHighlight" />
+        <x:Double x:Key="Avonic.Item.BackgroundHoverOpacity">0.12</x:Double>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Avonic.SelectOption.Md.ItemCheckboxChecked">
+        <StaticResource x:Key="Avonic.Item.BackgroundActivated" ResourceKey="Avonic.SelectOption.Md.CheckboxCheckedHighlight" />
+        <StaticResource x:Key="Avonic.Item.BackgroundFocused" ResourceKey="Avonic.SelectOption.Md.CheckboxCheckedHighlight" />
+        <StaticResource x:Key="Avonic.Item.BackgroundHover" ResourceKey="Avonic.SelectOption.Md.CheckboxCheckedHighlight" />
+        <StaticResource x:Key="Avonic.Item.Color" ResourceKey="Avonic.SelectOption.Md.CheckboxCheckedColor" />
+    </ResourceDictionary>
+
+</ResourceDictionary>

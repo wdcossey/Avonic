@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SelectPage">
+
+    <!-- ion-select: each interface (alert, action sheet, popover, modal), several values, the label placements and fills,
+         helper and error text, and disabled. The options are made in code for every select but the first. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="Status" Text="Open one and choose, or cancel" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Interfaces" />
+            </c:AvonicListHeader>
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="AlertSelect" Label="Alert" Placeholder="Pick one">
+                        <c:AvonicSelectOption Value="apple">Apple</c:AvonicSelectOption>
+                        <c:AvonicSelectOption Value="banana">Banana</c:AvonicSelectOption>
+                        <c:AvonicSelectOption Value="cherry" IsEnabled="False">Cherry</c:AvonicSelectOption>
+                        <c:AvonicSelectOption Value="grape">Grape</c:AvonicSelectOption>
+                    </c:AvonicSelect>
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="SheetSelect" Label="Action sheet" Interface="ActionSheet" Placeholder="Pick one" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="PopoverSelect" Label="Popover" Interface="Popover" Placeholder="Pick one" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="ModalSelect" Label="Modal" Interface="Modal" Placeholder="Pick one" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="MultipleSelect" Label="Several" Multiple="True" Placeholder="Pick some" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="MultiplePopoverSelect" Label="Several, popover" Interface="Popover" Multiple="True" Placeholder="Pick some" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="DescriptionSelect" Label="Descriptions" Interface="Popover" Placeholder="Pick one" />
+                </c:AvonicItem>
+                <c:AvonicItem>
+                    <c:AvonicSelect Name="DisabledSelect" Label="Disabled" IsEnabled="False" Value="apple" />
+                </c:AvonicItem>
+            </c:AvonicList>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Labels and fills" />
+            </c:AvonicListHeader>
+            <StackPanel Margin="16,0" Spacing="8">
+                <c:AvonicSelect Name="FloatingSelect" Label="Floating" LabelPlacement="Floating" Interface="Popover" />
+                <c:AvonicSelect Name="StackedSelect" Label="Stacked" LabelPlacement="Stacked" Placeholder="Pick one" />
+                <c:AvonicSelect Name="SolidSelect" Label="Solid" LabelPlacement="Floating" Fill="Solid" HelperText="Helper text" Interface="Popover" />
+                <c:AvonicSelect Name="OutlineSelect" Label="Outline" LabelPlacement="Floating" Fill="Outline" Interface="Popover" Value="banana" />
+                <c:AvonicSelect Name="RoundSelect" Label="Round" LabelPlacement="Stacked" Fill="Outline" Shape="Round" Placeholder="Pick one" Interface="Modal" />
+                <c:AvonicSelect Name="ErrorSelect" Label="Required" HelperText="Choose a fruit" ErrorText="A fruit is required" Required="True"
+                                Classes="ion-touched ion-invalid" />
+            </StackPanel>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
