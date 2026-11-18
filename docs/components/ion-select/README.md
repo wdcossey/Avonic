@@ -157,6 +157,5 @@ From [COMPARISON.md](COMPARISON.md#known-gaps):
   whose `AlertInput` and `ActionSheetButton` have no such fields yet.
 - `aria-haspopup` and `aria-invalid` have no Avalonia counterpart.
 - No `ItemsSource` for options: make one `AvonicSelectOption` per model.
-- A held Enter is told from a new press without a repeat flag; the click's point isn't kept for a popover; the rich popover's
-  width doesn't follow the window while it's open.
+- A held Enter is told from a new press without a repeat flag; the rich popover's width doesn't follow the window while it's open.
 - Not tried in a real window yet: `tools/real-window/drive.ps1` has an `ion-select` section.

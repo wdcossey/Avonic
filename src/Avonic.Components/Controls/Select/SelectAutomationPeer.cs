@@ -12,14 +12,15 @@ namespace Avonic.Components.Controls;
 /// </summary>
 internal sealed class SelectAutomationPeer(AvonicSelect owner) : ControlAutomationPeer(owner), IInvokeProvider, IExpandCollapseProvider
 {
-    private string? _name;
-    private string? _helpText;
+    // What a screen reader was last told: as it is when the peer is made, then each change raised.
+    private string? _name = owner.AccessibleName(AutomationProperties.GetName(owner));
+    private string? _helpText = owner.HintText;
 
     protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Button;
 
-    protected override string? GetNameCore() => _name = owner.AccessibleName(AutomationProperties.GetName(owner));
+    protected override string? GetNameCore() => owner.AccessibleName(AutomationProperties.GetName(owner));
 
-    protected override string? GetHelpTextCore() => _helpText = owner.HintText;
+    protected override string? GetHelpTextCore() => owner.HintText;
 
     protected override bool IsControlElementCore() => true;
 
@@ -42,13 +43,13 @@ internal sealed class SelectAutomationPeer(AvonicSelect owner) : ControlAutomati
 
     public void Collapse() => _ = owner.Close();
 
-    /// <summary>The name and help text again, raising a change for each that changed.</summary>
+    /// <summary>The name and help text again, raising a change for each that changed since the last it raised.</summary>
     public void Update()
     {
         var oldName = _name;
         var oldHelp = _helpText;
-        var name = GetNameCore();
-        var help = GetHelpTextCore();
+        var name = _name = GetNameCore();
+        var help = _helpText = GetHelpTextCore();
         if (oldName != name)
         {
             RaisePropertyChangedEvent(AutomationElementIdentifiers.NameProperty, oldName, name);

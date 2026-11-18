@@ -789,6 +789,9 @@ public class AvonicSelectInterfaceTests
         var select = Mount(stage);
         var alert = Opened<AvonicAlert>(stage, select);
         select.Items.RemoveAt(0);
-        Assert.Equal(3, alert.Inputs!.Count);
+        select.Items.RemoveAt(0);
+        // Once for the batch, as the MutationObserver's callback.
+        Stage.Settle();
+        Assert.Equal(2, alert.Inputs!.Count);
     }
 }

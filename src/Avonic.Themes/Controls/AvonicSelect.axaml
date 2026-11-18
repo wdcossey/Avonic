@@ -153,8 +153,14 @@
         <!-- ── The host ───────────────────────────────────────────────────────────────────────── -->
 
         <!-- :host(.ion-color): highlight-color-focused is the colour's base -->
+        <!-- An app's own highlight-color-focused still wins, as its variable on the host beats the :host rule -->
         <Style Selector="^:ion-color">
-            <Setter Property="HighlightBrush" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+            <Setter Property="HighlightBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.HighlightColorFocused" />
+                    <Binding Path="(b:ColorPalette.Base)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <!-- :host(.ion-valid), then :host(.ion-touched.ion-invalid), which beats it -->
         <Style Selector="^.ion-valid">
@@ -551,6 +557,10 @@
         <Style Selector="^:select-expanded:not(:has-expanded-icon) /template/ c|AvonicIcon#PART_Icon, ^:select-expanded:not(:has-expanded-icon) /template/ c|AvonicIcon#PART_EndIcon">
             <Setter Property="RenderTransform" Value="rotate(180deg)" />
         </Style>
+        <!-- :host(.in-item-color) .select-icon: color inherit, at rest. Before the rules for the states, which are more specific in CSS -->
+        <Style Selector="^:in-item-color /template/ c|AvonicIcon">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSelect].Foreground}" />
+        </Style>
         <!-- Open, focused, focused and valid, touched and invalid: the highlight colour -->
         <Style Selector="^:select-expanded /template/ c|AvonicIcon, ^:has-focus /template/ c|AvonicIcon, ^.ion-touched.ion-invalid /template/ c|AvonicIcon">
             <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
@@ -558,10 +568,6 @@
         <!-- In an item, with no fill: step 500 all the same (the in-item rule is more specific) -->
         <Style Selector="^:in-item:not(:fill-solid):not(:fill-outline):select-expanded /template/ c|AvonicIcon, ^:in-item:not(:fill-solid):not(:fill-outline):has-focus /template/ c|AvonicIcon, ^:in-item:not(:fill-solid):not(:fill-outline).ion-touched.ion-invalid /template/ c|AvonicIcon">
             <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep500Brush}" />
-        </Style>
-        <!-- :host(.in-item-color) .select-icon: color inherit -->
-        <Style Selector="^:in-item-color /template/ c|AvonicIcon">
-            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicSelect].Foreground}" />
         </Style>
 
         <!-- ── .select-highlight ──────────────────────────────────────────────────────────────── -->
@@ -668,7 +674,7 @@
                         <Style Selector="StackPanel.select-option-content > TextBlock">
                             <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
-                        <!-- .select-option-description: 5 above, 0.75rem, step 700 -->
+                        <!-- .select-option-description: 5 above, 0.75rem, ion-color-step-700, which is ion-text-color-step-300 -->
                         <Style Selector="TextBlock.select-option-description">
                             <Setter Property="Margin" Value="0,5,0,0" />
                             <Setter Property="FontSize" Value="12" />

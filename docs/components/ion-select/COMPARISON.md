@@ -82,7 +82,7 @@ Boxes are x, y, width, height in the window, asserted within 0.6 px unless said.
 | B22 | Choosing | radio click dismisses; arrows move only; Enter commits then dismisses on its key up; Space; checkboxes stay open | the same | Match; see repeats below |
 | B23 | Focus at present | the chosen option's radio, or the first enabled; the alert's and sheet's button a frame later | the same | Match; see below |
 | B24 | Interface options | spread | a dictionary by name | **Deliberate** (PLAN) |
-| B25 | Changes while open | `updateOverlayOptions` | the same | Match |
+| B25 | Changes while open | `updateOverlayOptions`, once for a batch of mutations | the same, posted once for the changes before it runs; focus stays on its option | Match |
 
 ## Deliberate differences
 
@@ -112,8 +112,6 @@ Boxes are x, y, width, height in the window, asserted within 0.6 px unless said.
   the group's; proposed in the PR so that the group does it itself.
 - **A held Enter.** Avalonia's key events have no repeat flag. A second key down with no key up between is taken as a repeat, and an
   Enter that opened the select is ignored until it comes up, which covers `!ev.repeat`'s two cases.
-- **The click's point.** A popover opened by a click is placed by the select's container, as Ionic's; the click's own point
-  (`clientX`, `clientY`) isn't kept, which only an `interfaceOptions` `reference: "event"` would read.
 - **The rich popover's width** is worked out when it opens, from the window's width; it doesn't follow the window while open, as
   `100vw` would.
 - **`aria-haspopup`, `aria-invalid`**: no Avalonia counterpart. The helper and error text's live regions are in the template, at a

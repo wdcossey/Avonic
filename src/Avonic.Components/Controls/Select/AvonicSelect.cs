@@ -16,6 +16,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Metadata;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
@@ -217,6 +218,7 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     private bool _hasFocus;
     private bool _invalid;
     private string _displayText = "";
+    private string _text = "";
     private string _selectIcon = MdToggleIcon;
 
     static AvonicSelect()
@@ -391,7 +393,7 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     internal string GetText() => SelectedText is { Length: > 0 } selected ? selected : GenerateText();
 
     /// <summary><c>hasValue</c>.</summary>
-    private bool HasValue => GetText().Length > 0;
+    private bool HasValue => _text.Length > 0;
 
     // ── Lifecycle ────────────────────────────────────────────────────────────────────────────
 
@@ -515,10 +517,22 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     /// <summary><c>watchForOptions</c>' callback: the open interface's options again, and the text.</summary>
     private void OnOptionsChanged()
     {
-        UpdateOverlayOptions();
         UpdateText();
         UpdateClasses();
+
+        // The MutationObserver's callback comes once for a batch of changes: the open interface is made again once, after them.
+        if (!_overlayUpdatePosted && _overlay is not null)
+        {
+            _overlayUpdatePosted = true;
+            Dispatcher.UIThread.Post(() =>
+            {
+                _overlayUpdatePosted = false;
+                UpdateOverlayOptions();
+            });
+        }
     }
+
+    private bool _overlayUpdatePosted;
 
     /// <summary><c>generateText</c>.</summary>
     private string GenerateText()
@@ -634,7 +648,8 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     /// <summary><c>renderSelectText</c>: the text, or the placeholder when it's <c>""</c>.</summary>
     private void UpdateText()
     {
-        var text = GetText();
+        // Worked out once per change: hasValue and the accessible name read it.
+        var text = _text = GetText();
         var placeholder = text.Length == 0 && Placeholder is not null;
         DisplayText = placeholder ? Placeholder! : text;
         PseudoClasses.Set(":has-placeholder-shown", placeholder);
@@ -703,6 +718,8 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     {
         if (source is Visual visual && SlottedInteractive(visual))
         {
+            _enterDown = false;
+            _pointerPoint = null;
             return;
         }
 
@@ -843,13 +860,14 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
     /// </summary>
     internal string AccessibleName(string? appName)
     {
-        var rendered = GetText();
+        var rendered = _text;
         if (rendered.Length == 0 && Placeholder is { } placeholder)
         {
             rendered = placeholder;
         }
 
-        var defined = string.IsNullOrEmpty(appName) ? LabelText : appName;
+        // inheritedAttributes['aria-label'] ?? labelText: an empty name is still the app's.
+        var defined = appName ?? LabelText;
         return defined is null ? rendered : rendered.Length == 0 ? defined : $"{defined}, {rendered}";
     }
 

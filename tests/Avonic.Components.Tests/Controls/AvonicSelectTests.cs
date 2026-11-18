@@ -110,6 +110,14 @@ public class AvonicSelectTests
         option.Content = new StackPanel { Children = { new TextBlock { Text = "Big " }, new TextBlock { Text = "pear" } } };
         Assert.Equal("Big pear", select.DisplayText);
 
+        // A text set inside the option renders again too, as a new text node does.
+        var block = new TextBlock { Text = "Pear" };
+        option.Content = block;
+        option.Value = null;
+        select.Value = "Ripe pear";
+        block.Text = "Ripe pear";
+        Assert.Equal("Ripe pear", select.DisplayText);
+
         select.Items.Remove(option);
         Assert.Equal("", select.DisplayText);
     }
@@ -349,6 +357,9 @@ public class AvonicSelectTests
 
         AutomationProperties.SetName(select, "Choose");
         Assert.Equal("Choose, Apple", peer.GetName());
+        // An empty aria-label is still the app's: ariaLabel joins it all the same.
+        AutomationProperties.SetName(select, "");
+        Assert.Equal(", Apple", peer.GetName());
 
         Assert.False(AutomationProperties.GetIsRequiredForForm(select));
         select.Required = true;
@@ -442,5 +453,36 @@ public class AvonicSelectTests
         ((Avalonia.Controls.IPseudoClasses)select.Classes).Set(":has-expanded-icon", true);
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(1, icon.RenderTransform!.Value.M11, 3);
+    });
+
+    [AvaloniaFact]
+    public void B11_A_Colour_Is_The_Highlight_Unless_The_App_Sets_The_Focused_Highlight() => InstalledTheme.Run(_ =>
+    {
+        var select = Select("s", s => { s.Label = "Fruit"; s.Color = "danger"; });
+        using var scene = Show(select).Scene;
+        Assert.Equal(Color.FromRgb(197, 0, 15), ((ISolidColorBrush)select.HighlightBrush!).Color);
+        var orange = new SolidColorBrush(Colors.Orange);
+        select.Resources["Avonic.Select.HighlightColorFocused"] = orange;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(orange, select.HighlightBrush);
+    });
+
+    [AvaloniaFact]
+    public void B16_In_A_Coloured_Item_The_Icon_Inherits_At_Rest_And_Is_Step_500_When_Focused() => InstalledTheme.Run(_ =>
+    {
+        var select = Select("s", s => s.Label = "Fruit");
+        using var scene = Show(select, inItem: true).Scene;
+        select.FindAncestorOfType<AvonicItem>()!.Color = "primary";
+        // in-item-color is read at render, which is the attach here.
+        var item = select.FindAncestorOfType<AvonicItem>()!;
+        item.Content = null;
+        item.Content = select;
+        Dispatcher.UIThread.RunJobs();
+        var icon = Part<AvonicIcon>(select, "PART_Icon");
+        icon.Transitions = [];
+        Assert.Same(select.Foreground, icon.Foreground);
+        select.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(Color.FromRgb(128, 128, 128), ((ISolidColorBrush)icon.Foreground!).Color);
     });
 }

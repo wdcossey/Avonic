@@ -119,10 +119,29 @@ public partial class AvonicSelectOption : Control
             {
                 LogicalChildren.Add(now);
             }
+
+            // watchForOptions' subtree: a text set on what's in the default slot replaces its text node, which Ionic hears.
+            if (change.OldValue is AvaloniaObject oldContent)
+            {
+                oldContent.PropertyChanged -= OnContentPropertyChanged;
+            }
+
+            if (change.NewValue is AvaloniaObject newContent)
+            {
+                newContent.PropertyChanged += OnContentPropertyChanged;
+            }
         }
 
         if (change.Property == ValueProperty || change.Property == ContentProperty || change.Property == DescriptionProperty
             || change.Property == IsEnabledProperty || change.Property == LabelPlacementProperty || change.Property == JustifyProperty)
+        {
+            Changed?.Invoke(this);
+        }
+    }
+
+    private void OnContentPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == TextBlock.TextProperty || e.Property == ContentControl.ContentProperty)
         {
             Changed?.Invoke(this);
         }
