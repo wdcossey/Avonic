@@ -49,6 +49,11 @@ once if the window doesn't fit on the screen.
     `backdrop`; a radio alert made in code returns `red` after a pick and OK; a text alert's Save handler returning false keeps it
     open, Enter in its field does nothing (Ionic's has no form), and Enter on Save submits `{name: "Ann"}`; the `IsOpen` alert with
     `BackdropDismiss` off stays on Escape and closes from a button. Not run yet.
+  - `ion-action-sheet` (#40): a real click on the trigger presents the page's sheet; Share dismisses it with `share` and no role,
+    Delete with `delete` and `destructive`; a handler returning false keeps a sheet open, and its Cancel dismisses it with `cancel`;
+    Escape and a click on the backdrop dismiss with `backdrop`; a radio sheet made in code, as `ion-select` builds one, has Banana
+    checked and returns `cherry` after a click on Cherry; the `IsOpen` sheet with `BackdropDismiss` off stays on Escape and closes
+    from its Close button. Not run yet.
   - `ion-popover` (#43): a real click opens the menu below its button, at its left; ArrowDown twice from the popover focuses the
     second item, End the last enabled one; ArrowRight on More opens the submenu with focus on its first item, ArrowLeft closes it
     alone with focus back on More; Escape dismisses the menu with `backdrop`; a click on an item dismisses it with no role
