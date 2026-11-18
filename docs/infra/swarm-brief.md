@@ -77,6 +77,7 @@ These are mistakes this project has already made, so don't repeat them.
 - **Test in the layouts an app really uses,** not only a fixed-size box. A scroller measures with no height and arranges at the viewport's, which hid an invisible
   button from 1,486 tests.
 - **Review findings can be wrong.** Check each against what Ionic really does before acting, and say so in the PR when one is wrong.
+- **`role`, `aria-*` and `tabindex` in the `.js` are behaviours:** map each by `docs/infra/accessibility/README.md` (landmarks, live regions, names, help text, headings), at a priority an app's own value beats, or record the gap.
 
 ### Avalonia facts already learned
 

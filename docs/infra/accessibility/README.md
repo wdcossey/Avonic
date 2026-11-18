@@ -11,8 +11,8 @@ for the OS. A peer gives the control type, name, help text, bounds and state, an
 the control does (`IInvokeProvider`, `IToggleProvider`, `IValueProvider`, `IRangeValueProvider`, `IExpandCollapseProvider`,
 `ISelectionProvider`, `IScrollProvider`). An app or a theme sets `AutomationProperties`: `Name`, `HelpText`, `LabeledBy`,
 `AutomationId`, `AcceleratorKey`, `AccessKey`, `ControlTypeOverride`, `LandmarkType`, `HeadingLevel`, `LiveSetting`,
-`ItemStatus`, `ItemType`, `AccessibilityView`, `IsRequiredForForm`. Validation errors from Avalonia's data validation reach
-the peer as help text by themselves.
+`ItemStatus`, `ItemType`, `AccessibilityView`, `IsRequiredForForm`. Avalonia's docs say errors from its data validation reach
+the peer as help text by themselves; not tried here, so a control with its own error text still gives it to its peer.
 
 | Platform | API | Avalonia's docs say |
 |---|---|---|
@@ -33,20 +33,20 @@ Linux desktop driver.
 | Ionic | Avalonia | In Avonic |
 |---|---|---|
 | `role` | the peer's control type, or `ControlTypeOverride` | per control (CLAUDE.md's mapping rules) |
-| `aria-label`, `aria-labelledby` | `Name`, `LabeledBy`, the peer's `GetNameCore` | overlays name themselves from their header (`AvonicActionSheet`, `AvonicAlert`) |
-| `aria-describedby` | `HelpText`, the peer's `GetHelpTextCore` | `AvonicCheckbox`; `AvonicInput`, `AvonicTextarea` on the native field |
-| `aria-required` | `IsRequiredForForm` | checkbox, input, textarea |
+| `aria-label`, `aria-labelledby` | `Name`, `LabeledBy`, the peer's `GetNameCore` | an overlay names itself from its header (`AvonicAlert`) |
+| `aria-describedby` | `HelpText`, the peer's `GetHelpTextCore` | `AvonicCheckbox`, `AvonicToggle`, `AvonicRadioGroup`; `AvonicInput`, `AvonicTextarea` on the native field |
+| `aria-required` | `IsRequiredForForm` | checkbox, input, textarea. **Not** the toggle, which has no `Required` (#238) |
 | `aria-checked="mixed"` | `IToggleProvider`, indeterminate | `AvonicCheckbox` |
-| `role="heading"`, `aria-level` | `HeadingLevel` | `AvonicCardTitle` |
-| `role="banner"`, `contentinfo`, `main`, `search`, `navigation` | `LandmarkType` | `AvonicHeader` (banner), `AvonicFooter` (contentinfo), `AvonicContent` (main), `AvonicSearchbar` (search); `ion-menu`'s `navigation` waits for #44 |
-| `aria-live="polite"`, `role="alert"` | `LiveSetting` `Polite`, `Assertive` | the helper and error text of `AvonicCheckbox`, `AvonicRadio`, `AvonicRadioGroup`. **Not yet** on `AvonicInput`, `AvonicTextarea`, `AvonicToggle`, which Ionic gives the same (#236) |
+| `role="heading"`, `aria-level` | `HeadingLevel` | `AvonicCardTitle` (2), `AvonicCardSubtitle` (3) |
+| `role="banner"`, `contentinfo`, `main`, `search`, `navigation` | `LandmarkType` | `AvonicHeader` (banner), `AvonicFooter` (contentinfo), `AvonicContent` (main), `AvonicSearchbar` (search); `ion-menu`'s `navigation` waits for #44. **Gap:** Ionic gives content `main` only outside a menu, popover or modal, and a header `banner` only outside a menu; Avonic's content is `main` in a modal or popover too (#237) |
+| `aria-live="polite"`, `role="alert"` | `LiveSetting` `Polite`, `Assertive` | the helper and error text of `AvonicCheckbox` and `AvonicRadioGroup` (`ion-radio` has none), though at a priority an app's style can't beat. **Not yet** on `AvonicInput`, `AvonicTextarea`, `AvonicToggle`, which Ionic gives the same (#236, both) |
 | `role="status"` with `aria-live="polite"` | `LiveSetting` `Polite` | `ion-toast` (#38), when it's built |
-| `role="radiogroup"` | no control type | recorded as a gap in the alert and the action sheet |
+| `role="radiogroup"` | no control type | recorded as a gap in the alert |
 | `aria-activedescendant` | no counterpart | recorded as a gap in the alert |
 
 ## For a new control
 
 - Read the `.js` for `role`, `aria-*` and `tabindex`, and map each by the table above; a gap goes in COMPARISON with why.
 - A landmark or live region set by the control is a default (`OverrideDefaultValue`, or style priority), so an app's own
-  value wins.
+  value wins. The checkbox's and radio group's live regions don't yet (#236).
 - A real-window check that finds an element by its name also proves the name a screen reader reads.
