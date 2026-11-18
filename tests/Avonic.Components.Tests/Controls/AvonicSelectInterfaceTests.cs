@@ -334,6 +334,24 @@ public class AvonicSelectInterfaceTests
     }
 
     [AvaloniaFact]
+    public void B22_Space_And_Enter_On_The_Checked_Radio_Dismiss_With_No_Change()
+    {
+        // The radio's key up dismisses; the group's change, which would close it too, doesn't come for the value it has.
+        using var stage = new Stage();
+        var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.Value = "apple"; });
+        Opened<AvonicPopover>(stage, select);
+        Key(stage, PhysicalKey.Space);
+        stage.After(Settled);
+        Assert.Equal(["ionDismiss"], stage.Log);
+
+        Opened<AvonicPopover>(stage, select);
+        Key(stage, PhysicalKey.Enter);
+        stage.After(Settled);
+        Assert.Equal(["ionDismiss", "ionDismiss"], stage.Log);
+        Assert.Null(select.Overlay);
+    }
+
+    [AvaloniaFact]
     public void B21_The_Checked_Radios_Item_Has_Primary_At_8_Percent_And_No_Mark_Or_Inner_Border()
     {
         using var stage = new Stage();
