@@ -4,7 +4,8 @@
              x:Class="Avonic.Sample.Pages.Showcase.SettingsScreen">
 
     <!-- Settings: the account at the top, then lists under headers, with icons at the start of each item, toggles, a range
-         between two icons, notes for the current value, a progress bar, and the chevron of an item that opens a page. -->
+         between two icons, a select for the language, notes for the current value, a progress bar, and the chevron of an item
+         that opens a page. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
@@ -68,14 +69,16 @@
                             </c:AvonicRange.EndContent>
                         </c:AvonicRange>
                     </c:AvonicItem>
-                    <c:AvonicItem Button="True" Detail="True">
+                    <c:AvonicItem>
                         <c:AvonicItem.StartContent>
                             <c:AvonicIcon IconName="language" />
                         </c:AvonicItem.StartContent>
-                        <c:AvonicLabel Content="Language" />
-                        <c:AvonicItem.EndContent>
-                            <c:AvonicNote Content="English" />
-                        </c:AvonicItem.EndContent>
+                        <c:AvonicSelect Label="Language" Interface="Popover" Value="en">
+                            <c:AvonicSelectOption Value="en">English</c:AvonicSelectOption>
+                            <c:AvonicSelectOption Value="fr">Français</c:AvonicSelectOption>
+                            <c:AvonicSelectOption Value="de">Deutsch</c:AvonicSelectOption>
+                            <c:AvonicSelectOption Value="es">Español</c:AvonicSelectOption>
+                        </c:AvonicSelect>
                     </c:AvonicItem>
                     <c:AvonicItem Button="True" Detail="True">
                         <c:AvonicItem.StartContent>

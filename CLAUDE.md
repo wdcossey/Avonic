@@ -38,6 +38,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Controls/App/          AvonicApp, and what it starts for its TopLevel: HardwareBackButton (ionBackButton's registry),
                          KeyboardAssist (ionKeyboardDidShow, ionKeyboardDidHide), InputShims (scroll assist and padding),
                          AppSafeArea
+  Controls/Alert/        AvonicAlert, and AlertPanel.Length (a CSS length: %, px, vw, vh, calc(), min()) and AlertClasses
+                         (cssClass, and the attribute values Ionic reads), which the action sheet uses too
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
                          AccessibleText = what a browser names a button from; TextContent = textContent, for a label to hide;
                          Activatable = tap-click; FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
@@ -52,11 +54,16 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer
                          waiting; Gesture.StopsTouchStart (a touchstart stopped on its way) and
-                         GestureConfig.ReleaseAgainstDirection (docs/infra/gesture/README.md)
-  Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back),
-                         hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present() with no TopLevel
-                         finds the current activity's under Android's MainViewFactory (OpenTopLevels, the last one still open)
-  Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock; CubicBezierEasing, CSS's cubic-bezier
+                         GestureConfig.ReleaseAgainstDirection, and ReleaseAgainstDirectionWhen, a condition read at the move
+                         (docs/infra/gesture/README.md)
+  Overlays/              Ionic's utils/overlays: AvonicOverlay (present, dismiss, events, stacking, focus trap, Escape and back;
+                         IsOpen, and Trigger through OverlayTrigger; an inline overlay moved to the host and back by
+                         InlinePlacement), hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present()
+                         with no TopLevel finds the current activity's under Android's MainViewFactory (OpenTopLevels, the
+                         last one still open); OverlayHandler, what the overlays share: a button's handler run and awaited
+                         (safeCall), and var(--backdrop-opacity)
+  Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock, with progressStart, progressStep and
+                         progressEnd for a gesture to drive; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js;
                          SmoothScroll, Chromium's scrollTo({ behavior: 'smooth' }) on either axis; CssTransition, a CSS
                          transition of one number with a timing function
@@ -99,7 +106,9 @@ tools/breakage/          breaks each behaviour in a copy of the repo, and checks
 tools/real-window/       drives the real sample window with real input and checks it; takes over the PC, so ask first
 docs/                    PROCESS, ROADMAP, decisions, per-component plan/comparison/docs; infra/swarm-brief.md
                          for a batch of agents; infra/ionic-base/ for the Ionic version and how it's moved;
-                         infra/avalonia-issues.md for what to report to Avalonia, which only the human files
+                         infra/accessibility/ for what Avalonia offers assistive technology, and Ionic's role and aria-* in it;
+                         infra/avalonia-issues.md and infra/ionic-issues.md for what to report to Avalonia and to Ionic, which
+                         only the human files
 PREVIEW.md, docs/preview/   the showcase in light and dark and a frame of every sample page, from PreviewCaptureTests with
                          AVONIC_PREVIEW_DIR set; a roll-up regenerates them
 .mcp.json                Claude Code MCP servers: avalonia-docs (Avalonia's hosted Build MCP — docs and API lookup)
@@ -167,6 +176,11 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-refresher`, `ion-refresher-content` | `AvonicRefresher`, `AvonicRefresherContent` (md's native refresher; Ionic's legacy one isn't here; + `RefresherColumn`, the content's column, centred both ways as a flex column is) | done — [docs](docs/components/ion-refresher/README.md) |
 | `ion-picker`, `ion-picker-column`, `ion-picker-column-option` | `AvonicPicker`, `AvonicPickerColumn`, `AvonicPickerColumnOption` (+ `PickerColumnPanel`, the column's snapping panel; `HorizontalContentAlignment` on the column, as an extension) | done — [docs](docs/components/ion-picker/README.md) |
 | `ion-app` | `AvonicApp` (+ `HardwareBackButton`, `KeyboardAssist`; `AvonicConfig.HandleUnclaimedBack` as an extension) | done — [docs](docs/components/ion-app/README.md) |
+| `ion-alert` | `AvonicAlert` (+ `AlertButton`, `AlertInput`, `AlertDismissData`, the data `ion-select` builds; `AlertActionButton`, `AlertRadioButton`, `AlertCheckboxButton`, `AlertTextInput`, `AlertTextareaInput`, what it renders) | done — [docs](docs/components/ion-alert/README.md) |
+| `ion-action-sheet` | `AvonicActionSheet` (+ `ActionSheetButton`, plain data a select can build; `ActionSheetNativeButton`, its buttons) | done — [docs](docs/components/ion-action-sheet/README.md) |
+| `ion-modal` | `AvonicModal` (+ `ModalWrapper`, `ModalPanel`, `ModalCanDismiss`; the sheet: `ModalHandle`, `ModalPagePanel`, `ModalSheet`; `AvonicAnimation`'s `ProgressStart`/`Step`/`End`) | done — [docs](docs/components/ion-modal/README.md) |
+| `ion-popover` | `AvonicPopover` (+ `PopoverEvent`, Ionic's `event`: a target and a point; `PopoverPanel`, its wrapper) | done — [docs](docs/components/ion-popover/README.md) |
+| `ion-select`, `ion-select-option`, `ion-select-modal` | `AvonicSelect`, `AvonicSelectOption`, `AvonicSelectModal` (+ `AvonicSelectPopover`, Ionic's internal `ion-select-popover`; `SelectOverlayOption`, an option the popover and the modal show; each interface built in code, as `select.js` does) | done — [docs](docs/components/ion-select/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
 each priority tier, not by the control's own PR, so a recently finished control may be missing. For
@@ -260,9 +274,13 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `align-self` on a slotted child | Its `VerticalAlignment`, which `FlexSlot` honours once it's set | `ion-note` → `Top`. A control aligned some way by default uses `OverrideDefaultValue`, not its theme, whose value counts as set: `AvonicButton`, `AvonicIcon` |
 | `overflow: hidden` on a flex item | `ClipToBounds` set on it, as `FlexRow` reads it to take the minimum away | `.ion-text-nowrap`. A `TemplatedControl` clips by default, and that doesn't count |
 | `@media (min-width: …)`, `matchMedia` | Cumulative pseudoclasses `:breakpoint-sm`, `:breakpoint-md`, `:breakpoint-lg`, `:breakpoint-xl`, each set from that width of the `TopLevel`'s client width up (a popup's: the `TopLevel` it belongs to), so a theme's later rule wins as the later query does | `ion-grid`'s padding; `ion-col`'s sizes per breakpoint |
+| `@media (min-width)` and `(min-height)` on a component | Pseudoclasses the control sets from its `TopLevel`'s client size, named after Ionic's SCSS variables | `AvonicModal`'s `:inset-small`, `:inset-large` |
 | `display: flex; flex-wrap: wrap` around columns | `RowPanel`, which reads what each `AvonicCol` works out from its props | `ion-row` |
 | A `:host(.foo)` rule that sets CSS variables for what's inside | A `ResourceDictionary` the control merges into its own `Resources` while the class is on, so an app's own key there still wins | `ion-grid.ion-no-padding` → the six `Avonic.GridColumnPadding*` keys at 0 |
+| A class on an element the component makes, that sets CSS variables on it (`.item-radio-checked { --background }`) | A `ResourceDictionary` keyed in the theme, copied into the element's own `Resources` while the class is on; its entries `StaticResource`s of top-level brushes, as a brush with a `DynamicResource` inside a nested dictionary has no host to resolve it | `Avonic.SelectOption.Md.ItemRadioChecked` |
 | `width: Npx; max-width: 100%; margin: auto` | `MaxWidth` on a stretched control | `ion-grid[fixed]` |
+| A size variable taking `%`, `px` or a content size (`--width: 100%`, `auto`) | A panel of the host's with `object` properties read as CSS lengths, the key a number or a string | `ModalPanel` |
+| `width: auto` in a flex box: fit-content | Measure the child with no limit for its max-content, then min(that, the room), within min and max | `AlertPanel` |
 | A slotted child with no height of its own, in a panel | It collapses, as `align-items: center` does in CSS. `VerticalAlignment="Stretch"` on it fills the panel | A background behind text: put the `Grid` in a `Border`, which isn't a panel |
 | `::slotted(ion-foo:not(:first-child))` | `c\|Host > :is(Panel) > c\|Foo:not(:nth-child(1))` | a panel stands for the slot |
 | `ion-foo.ion-color .ion-inherit-color` | `c\|Foo:ion-color c\|Bar`, with `Foreground` bound to `$parent[Control].(TextElement.Foreground)` | after `:ion-color`, which it beats |
@@ -283,7 +301,16 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | An overlay (`present`, `dismiss`, `onDidDismiss`) | A control deriving from `AvonicOverlay`; what only some overlays have is a protected override | `backdropDismiss` → the property, and `BackdropDismissEnabled` returning it |
 | `createAnimation()` | `AvonicAnimation.Create()`, members in PascalCase; CSS values as strings, `var()` read from the resource by the builder | `.fromTo('opacity', 0.01, 'var(--backdrop-opacity)')` → `.FromTo("opacity", 0.01, backdropOpacity)` |
 | `Promise<T>` of an overlay | `Task<T>`, completing on the dispatcher with continuations run asynchronously, as a promise's | `onDidDismiss()` → `OnDidDismiss()` |
-| An overlay's generic `willPresent`, `didPresent`, `willDismiss`, `didDismiss` | `WillPresent`, `DidPresent`, `WillDismiss`, `DidDismiss` on `AvonicOverlay`; each control adds its per-control `Ion<Name>WillPresent` set | `ion<Name>WillPresent` → `Ion<Name>WillPresent`, from the first overlay control (P3) |
+| An overlay's generic `willPresent`, `didPresent`, `willDismiss`, `didDismiss` | `WillPresent`, `DidPresent`, `WillDismiss`, `DidDismiss` on `AvonicOverlay`; each control adds its per-control `Ion<Name>WillPresent` set, through the protected `ControlWillPresentEvent` and the other three, raised before the generic ones | `ionModalWillPresent` → `AvonicModal.IonModalWillPresent` |
+| An inline overlay (`isOpen`, `trigger`, a framework's inline modal) | Moved to the overlay host at present, an invisible placeholder in its place, and back after (`Overlays/InlinePlacement`); its `DataContext` kept, its page's `Styles` and `Resources` not | `AvonicModal` |
+| A prop typed `bool` or a function (`canDismiss`) | A struct with implicit conversions from both and a `TypeConverter` from `True`/`False` | `ModalCanDismiss` |
+| A button's `handler` on an overlay (`safeCall`, awaited; `false` keeps it open) | `Func<…>` on the button's data class, run by `OverlayHandler.Run`, a `Task` or `ValueTask` awaited and its result read | `AlertButton.Handler`, `ActionSheetButton.Handler` |
+| An interface's `htmlAttributes` / `attributes` (spread on an element) | A dictionary, with only the keys that map to automation or a property read; others ignored and documented | `AvonicAlert.HtmlAttributes`, `AlertButton.HtmlAttributes`, `AlertInput.Attributes` |
+| `interfaceOptions` (`any`, spread into an overlay's create options) | `IReadOnlyDictionary<string, object?>`, each key the overlay's property by name in camelCase or PascalCase, a string converted as XAML would; a key with no property ignored | `AvonicSelect.InterfaceOptions` |
+| Work at an overlay's `willPresent` that needs it shown (focus) | Post it to the dispatcher from `WillPresent`: Avonic shows the overlay just after the event, for its enter animation | `AvonicSelect`'s focus at present |
+| An `async` method's `await` of a lock before its events (`dismiss()`), called from inside another's event | `Dispatcher.UIThread.Post` the call, so its events come after the ones on their way | `AvonicPopover`: the parent's dismiss from the child's, the child's from the parent's will-dismiss |
+| A per-call argument of Ionic's (`present(event)`, `dismiss(…, dismissParentPopover)`) to a base method that has none | An `AsyncLocal` of the control's, set around the base call and read in its protected hook, keyed by the control | `AvonicPopover.Present(PopoverEvent)`, `Dismiss(data, role, dismissParentPopover)` |
+| `getBoundingClientRect`, `clientX` for positioning in the viewport | The top level's coordinates (`TransformToVisual(topLevel)`), which are left to right in a right-to-left window too; a panel whose layout is mirrored places by them | `AvonicPopover`, `PopoverPanel` |
 | `ionBackButton`, `register(priority, handler)` | `HardwareBackButton.IonBackButtonEvent` on the `TopLevel`, `BackButtonEventArgs.Register`, raised while an `AvonicApp` is in it | an overlay's 100 |
 | A window event a native plugin raises (`keyboardDidShow`) | A routed event on the `TopLevel`, from Avalonia's platform API (`InputPane`) | `KeyboardAssist` |
 | A text node beside slotted elements | Not counted for `:nth-child`: the host's `IChildIndexProvider` skips an item shown as its text | `AvonicChip` |
@@ -345,8 +372,11 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | An inline `style.transform` a component sets on a child | The child's `RenderTransform`, eased by a `CssTransition` as the CSS transition: at `Animation` priority, so the app's own value comes back when it's cleared, or local and cleared at rest | `AvonicReorderGroup` (animation priority), `AvonicItemSliding`'s item (local) |
 | A module-level singleton (`let openSlidingItem`) | A static, one per process, as `GestureController` is | `AvonicItemSliding`'s open item |
 | `padding-left: 100%` on a flex item, transitioned | A `Decorator` in the item's template that adds the width before (or after) its child, set by the container on each frame | `ItemOptionExpander`, from `AvonicItemOptions` |
+| `progressStart`, `progressStep`, `progressEnd` on an animation a gesture drives | `AvonicAnimation.ProgressStart`/`ProgressStep`/`ProgressEnd`, from `animation.js`: a step held at delay + duration × step (clamped to 0.9999), linear if forced; `ProgressEnd` plays from it with the easing back | `AvonicModal`'s sheet |
 | `progressStart`, `progressStep` on an animation of what `AvonicAnimation` can't drive (`stroke-dasharray`) | A pure function from the step to a frame, which tests pin to Chromium's values, applied to the parts on `AvonicConfig`'s clock and cleared at `destroy()`: properties at `Animation` priority, so the theme's values come back; the circle's dash, a value of its own drawing, set directly and reset to its base | `RefresherPullFrame`, applied by `AvonicRefresherContent` |
 | A vertical gesture inside a vertical scroller, where a drag the other way scrolls | `GestureConfig.ReleaseAgainstDirection`: the gesture lets go of a press moving the other way at its threshold, before it captures and before the move is held from the scroller, which has followed the press, and scrolls | `AvonicRefresher`: an upward drag from the top |
+| A gesture whose drag the other way does something only some of the time | `GestureConfig.ReleaseAgainstDirectionWhen`, read at the move | the sheet: an upward drag on content fully open |
+| `.ion-page` with an animated `max-height` | `ModalPagePanel`, which arranges its child at the top up to the child's `MaxHeight`, as a `Layoutable` held below its slot would be centred | `AvonicModal`'s `contentAnimation` |
 | A `touchstart` listener that calls `stopPropagation()`, so an outer gesture never starts | `Gesture.StopsTouchStart` on the element, internal: a touch or pen press from it or inside it starts no `Gesture` whose element is around it; a mouse press still does, as only `touchstart` is stopped | `AvonicPicker`, over an `AvonicItemSliding` |
 | `findClosestIonContent`, `getScrollElement` (`utils/content`) | `ContentUtils`, internal, in `Controls/Content/`: the closest `AvonicContent` or control with `AvonicContent.ScrollHostClass`, from the control itself; its `ScrollViewer`: the content's, the host if it is one, or the nearest one on the way up to it | `AvonicInfiniteScroll`, `AvonicReorderGroup`; `AvonicRefresher` finds its content by its fixed slot, then `FindScrollHost` (`querySelector('.ion-content-scroll-host')`: the content's `Content`, then `FixedContent`, and their logical descendants) and `GetScrollElementWithin` (the host if it's a `ScrollViewer`, else the first one in it), looking again after each layout of the content until it's there |
 | `scroll-snap-type: y mandatory` on a scroller of options | A panel that is `IScrollSnapPointsInfo`, with a point at each option's centre, and `VerticalSnapPointsType="Mandatory"`; a wheel the control handles, 100 px a notch and then the nearest point, as Chromium does | `PickerColumnPanel`, `AvonicPickerColumn` |

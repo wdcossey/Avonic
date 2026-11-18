@@ -28,7 +28,7 @@
             <c:AvonicListHeader>
                 <TextBlock Text="Made in code" />
             </c:AvonicListHeader>
-            <StackPanel Margin="16,8" Spacing="8">
+            <StackPanel Margin="14,8" Spacing="8">
                 <c:AvonicButton Name="PickColor" Content="Pick a color" />
                 <c:AvonicButton Name="PickToppings" Content="Pick toppings" />
                 <c:AvonicButton Name="EnterName" Content="Enter your name" />

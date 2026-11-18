@@ -4,7 +4,7 @@
              x:Class="Avonic.Sample.Pages.Showcase.ProfileScreen">
 
     <!-- A form: a segment under the toolbar, inputs with floating and stacked labels, a textarea that grows with its text,
-         a radio group, a checkbox, and a block button. -->
+         a radio group, a checkbox, and a block button, which opens an alert. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
@@ -65,7 +65,7 @@
                     </c:AvonicItem>
                 </c:AvonicList>
 
-                <c:AvonicButton Expand="Block" Content="Save changes" Margin="16,8,16,16" />
+                <c:AvonicButton Expand="Block" Content="Save changes" Margin="16,8,16,16" Click="OnSave" />
             </StackPanel>
         </c:AvonicContent>
     </Grid>

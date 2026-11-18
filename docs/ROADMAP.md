@@ -83,6 +83,12 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#204](https://github.com/wdcossey/Avonic/issues/204) | `ion-icon`: font icons in the default slot (ionicons 8.1.0) | **done** — [docs](components/ion-icon/README.md) |
 | [#191](https://github.com/wdcossey/Avonic/issues/191) | a component Ionic drops for a browser feature is kept | **done** — [ADR 0004](decisions/0004-keep-what-the-browser-does.md) |
 | [#196](https://github.com/wdcossey/Avonic/issues/196) | screenshots for the README and `PREVIEW.md` | **done** — [preview](../PREVIEW.md) |
+| [#39](https://github.com/wdcossey/Avonic/issues/39) | `ion-alert` | **done** — [docs](components/ion-alert/README.md) |
+| [#40](https://github.com/wdcossey/Avonic/issues/40) | `ion-action-sheet` | **done** — [docs](components/ion-action-sheet/README.md) |
+| [#42](https://github.com/wdcossey/Avonic/issues/42) | `ion-modal` (+ sheet), with `isOpen`, `trigger` and inline overlays in the overlay system | **done** — [docs](components/ion-modal/README.md) |
+| [#43](https://github.com/wdcossey/Avonic/issues/43) | `ion-popover` | **done** — [docs](components/ion-popover/README.md) |
+| [#45](https://github.com/wdcossey/Avonic/issues/45) | `ion-select`, `ion-select-option`, `ion-select-modal` (all four interfaces) | **done** — [docs](components/ion-select/README.md) |
+| — | infra: accessibility in Avalonia, and Ionic's ARIA in Avonic | **done** — [docs](infra/accessibility/README.md) |
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 

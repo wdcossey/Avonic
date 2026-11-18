@@ -4,7 +4,7 @@
              x:Class="Avonic.Sample.Pages.Showcase.InboxScreen">
 
     <!-- An inbox: a header with a searchbar under its toolbar, and a list of messages. Swipe a message right to archive it,
-         or left for more. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
+         or left for more, where More opens an action sheet. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
@@ -64,7 +64,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -92,7 +92,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -117,7 +117,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -142,7 +142,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -167,7 +167,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -192,7 +192,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -217,7 +217,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>
@@ -242,7 +242,7 @@
                         </c:AvonicItem.EndContent>
                     </c:AvonicItem>
                     <c:AvonicItemOptions>
-                        <c:AvonicItemOption Color="medium" Content="More" />
+                        <c:AvonicItemOption Color="medium" Content="More" Click="OnMore" />
                         <c:AvonicItemOption Color="danger" Expandable="True" Content="Delete" />
                     </c:AvonicItemOptions>
                 </c:AvonicItemSliding>

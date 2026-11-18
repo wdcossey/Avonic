@@ -43,6 +43,8 @@ Linux desktop driver.
 | `role="status"` with `aria-live="polite"` | `LiveSetting` `Polite` | `ion-toast` (#38), when it's built |
 | `role="radiogroup"` | no control type | recorded as a gap in the alert and the action sheet |
 | `aria-activedescendant` | no counterpart | recorded as a gap in the alert |
+| `aria-expanded` | `IExpandCollapseProvider` on the peer | `AvonicSelect`, expanded while its interface is open; an `AvonicItem` that is an accordion's header |
+| `aria-haspopup`, `aria-invalid` | no counterpart | recorded as a gap in `AvonicSelect` |
 
 ## For a new control
 
