@@ -1,0 +1,56 @@
+{
+  "tag": "ion-menu-toggle",
+  "snippet": "<ion-app style=\"position:static;display:block;contain:none;overflow:visible\"><ion-menu content-id=\"main\"><ion-content>Menu</ion-content></ion-menu><div class=\"ion-page\" id=\"main\"><ion-header><ion-toolbar><ion-buttons slot=\"start\"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Page</ion-title></ion-toolbar></ion-header><ion-content class=\"ion-padding\"><ion-menu-toggle><ion-button>Toggle</ion-button></ion-menu-toggle></ion-content></div></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "class": "md hydrated"
+      },
+      "classes": [
+        "md",
+        "hydrated"
+      ],
+      "rect": {
+        "x": 16,
+        "y": 79,
+        "w": 92.36,
+        "h": 19
+      },
+      "cssVars": {},
+      "host": {
+        "display": "inline",
+        "position": "static",
+        "box-sizing": "border-box",
+        "width": "auto",
+        "height": "auto",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "none",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <ion-button.md.button.button-solid.ion-activatable.ion-focusable.hydrated>\n    #shadow-root\n      <button.button-native part=\"native\">\n        <span.button-inner>\n          <slot name=\"icon-only\">\n          <slot name=\"start\">\n          <slot name=\"\">\n          <slot name=\"end\">\n        <ion-ripple-effect.md.hydrated>\n          #shadow-root\n"
+    }
+  ]
+}
