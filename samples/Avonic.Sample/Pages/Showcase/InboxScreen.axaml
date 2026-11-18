@@ -4,7 +4,8 @@
              x:Class="Avonic.Sample.Pages.Showcase.InboxScreen">
 
     <!-- An inbox: a header with a searchbar under its toolbar, and a list of messages. Swipe a message right to archive it,
-         or left for more, where More opens an action sheet. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
+         or left for more, where More opens an action sheet. An avatar is a picture, or initials on one of the palette's
+         colours, which follow a dark palette. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>

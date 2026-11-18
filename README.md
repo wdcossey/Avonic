@@ -21,7 +21,7 @@ every screen in both, and a page for each control.
 > sheet, modal (with its sheet) and popover, and select. Each went through every step of
 > [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
 > rolled up at the end of each tier, so the newest may be missing; the `Status:` line of each `docs/components/<tag>/README.md`
-> is current. Toast, loading, menu, nav, split pane, datetime and back button are next, in
+> is current. Toast, loading, menu, nav, split pane, datetime, datetime button and back button are next, in
 > [`docs/ROADMAP.md`](docs/ROADMAP.md). v1 was reviewed and discarded; see [`docs/LESSONS_LEARNED.md`](docs/LESSONS_LEARNED.md).
 
 ## What "faithful" means here

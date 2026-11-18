@@ -11,11 +11,14 @@ namespace Avonic.Sample.Pages.Showcase;
 /// </summary>
 public partial class InboxScreen : UserControl
 {
+    private bool _sheetOpen;
+
     public InboxScreen() => InitializeComponent();
 
     private async void OnMore(object? sender, RoutedEventArgs e)
     {
-        if (sender is not AvonicItemOption option || TopLevel.GetTopLevel(this) is not { } top)
+        // One sheet at a time: a second tap while one is on its way in or open does nothing.
+        if (_sheetOpen || sender is not AvonicItemOption option || TopLevel.GetTopLevel(this) is not { } top)
         {
             return;
         }
@@ -32,6 +35,20 @@ public partial class InboxScreen : UserControl
                 new ActionSheetButton { Text = "Cancel", Role = "cancel", Icon = "close" },
             ],
         };
-        await sheet.Present(top);
+
+        _sheetOpen = true;
+        try
+        {
+            await sheet.Present(top);
+            await sheet.OnDidDismiss();
+        }
+        catch (InvalidOperationException)
+        {
+            // Nowhere to present it: nothing to show.
+        }
+        finally
+        {
+            _sheetOpen = false;
+        }
     }
 }

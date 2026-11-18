@@ -10,11 +10,14 @@ namespace Avonic.Sample.Pages.Showcase;
 /// </summary>
 public partial class ProfileScreen : UserControl
 {
+    private bool _alertOpen;
+
     public ProfileScreen() => InitializeComponent();
 
     private async void OnSave(object? sender, RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not { } top)
+        // One alert at a time: a second tap while one is on its way in or open does nothing.
+        if (_alertOpen || TopLevel.GetTopLevel(this) is not { } top)
         {
             return;
         }
@@ -25,6 +28,20 @@ public partial class ProfileScreen : UserControl
             Message = "Your changes have been saved.",
             Buttons = ["OK"],
         };
-        await alert.Present(top);
+
+        _alertOpen = true;
+        try
+        {
+            await alert.Present(top);
+            await alert.OnDidDismiss();
+        }
+        catch (InvalidOperationException)
+        {
+            // Nowhere to present it: nothing to show.
+        }
+        finally
+        {
+            _alertOpen = false;
+        }
     }
 }
