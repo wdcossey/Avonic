@@ -30,7 +30,7 @@
             <c:AvonicListHeader>
                 <TextBlock Text="Made in code" />
             </c:AvonicListHeader>
-            <StackPanel Margin="16,8" Spacing="8">
+            <StackPanel Margin="14,8" Spacing="8">
                 <c:AvonicButton Name="PickFruit" Content="Pick a fruit" />
                 <c:AvonicButton Name="KeepOpen" Content="A handler that says no" />
                 <c:AvonicButton Name="PickMany" Content="Pick from a long list" />

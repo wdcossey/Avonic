@@ -8,19 +8,20 @@ A faithful recreation of [Ionic Framework](https://ionicframework.com/)'s compon
     <td><img src="docs/preview/showcase-inbox-light.png" width="190" alt="An inbox: a searchbar, messages with avatars, notes and badges, one swiped open" /></td>
     <td><img src="docs/preview/showcase-discover-dark.png" width="190" alt="A feed of cards with pictures, chips and a fab, in dark" /></td>
     <td><img src="docs/preview/showcase-profile-light.png" width="190" alt="A form: a segment, inputs, a textarea, radios, a checkbox and a button" /></td>
-    <td><img src="docs/preview/showcase-settings-dark.png" width="190" alt="Settings: toggles, a range, notes and a progress bar, in dark" /></td>
+    <td><img src="docs/preview/showcase-settings-dark.png" width="190" alt="Settings: toggles, a range, a select, notes and a progress bar, in dark" /></td>
   </tr>
 </table>
 
 Built only from Avonic controls, rendered by Avalonia, in light and Ionic's dark palette. More in **[PREVIEW.md](PREVIEW.md)**:
 every screen in both, and a page for each control.
 
-> **Status: in development, with no release yet.** 49 of Ionic's components and families are done, 72 of its elements in all:
+> **Status: in development, with no release yet.** 54 of Ionic's components and families are done, 79 of its elements in all:
 > items and lists, buttons, cards, toolbars, the grid, form controls from checkbox to input and searchbar, segment, tabs, fab,
-> sliding items, accordion, reorder, refresher, infinite scroll, picker, and the app's root, `ion-app`. Each went through every
-> step of [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
+> sliding items, accordion, reorder, refresher, infinite scroll, picker, the app's root, `ion-app`, the overlays alert, action
+> sheet, modal (with its sheet) and popover, and select. Each went through every step of
+> [`docs/PROCESS.md`](docs/PROCESS.md). The list, with a link to each one's docs, is in [`CLAUDE.md`](CLAUDE.md#components),
 > rolled up at the end of each tier, so the newest may be missing; the `Status:` line of each `docs/components/<tag>/README.md`
-> is current. The overlays (toast, alert, modal, popover, menu and the rest), select and datetime are next, in
+> is current. Toast, loading, menu, nav, split pane, datetime, datetime button and back button are next, in
 > [`docs/ROADMAP.md`](docs/ROADMAP.md). v1 was reviewed and discarded; see [`docs/LESSONS_LEARNED.md`](docs/LESSONS_LEARNED.md).
 
 ## What "faithful" means here

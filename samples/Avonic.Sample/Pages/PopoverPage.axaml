@@ -61,7 +61,7 @@
             <c:AvonicListHeader>
                 <TextBlock Text="Sides and size" />
             </c:AvonicListHeader>
-            <WrapPanel Margin="12,4">
+            <WrapPanel Margin="14,4">
                 <c:AvonicButton Name="AboveTrigger" Content="Above, centred" />
                 <c:AvonicButton Name="CoverTrigger" Content="As wide as this button" />
             </WrapPanel>

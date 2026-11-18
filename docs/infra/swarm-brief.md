@@ -50,8 +50,8 @@ The point is that the PRs can merge in any order without a conflict.
 - **Don't ask the human anything.** Choose the conservative option, and put it under **"For you to decide"** in the PR.
 - **Never post to a repository we don't own:** no issues, pull requests, comments, discussions or reactions in
   AvaloniaUI/Avalonia, ionic-team/ionic-framework, ionic-team/ionicons or any other. Some projects don't want issues raised by
-  an AI. Write what you find upstream in our own docs (`docs/infra/avalonia-issues.md`; for Ionic, the file
-  [#221](https://github.com/wdcossey/Avonic/issues/221) adds), with the evidence, and the human files it by hand if they choose.
+  an AI. Write what you find upstream in our own docs (`docs/infra/avalonia-issues.md`; for Ionic, `docs/infra/ionic-issues.md`,
+  [#221](https://github.com/wdcossey/Avonic/issues/221)), with the evidence, and the human files it by hand if they choose.
   Issues in wdcossey/Avonic are fine.
 
 ## How to get this right
@@ -77,6 +77,14 @@ These are mistakes this project has already made, so don't repeat them.
 - **Test in the layouts an app really uses,** not only a fixed-size box. A scroller measures with no height and arranges at the viewport's, which hid an invisible
   button from 1,486 tests.
 - **Review findings can be wrong.** Check each against what Ionic really does before acting, and say so in the PR when one is wrong.
+- **Don't `.Result` or `.Wait()` a task in a test that may not finish:** a deliberate break then hangs the breakage run instead of
+  failing (#227, #241). Await it, or assert `IsCompleted` first.
+- **Headless popups are in the window's overlay layer,** so code for a control in a real popup window (another `TopLevel`) can't be
+  tested headless. Say so in the PR (#227, #231).
+- **An overlay reuses what the overlays share** before writing its own: `Overlays/OverlayHandler` (a button's handler, the backdrop's
+  opacity), `ModalPanel`'s and `AlertPanel.Length`'s CSS sizes, `AlertClasses`. Three overlays each copied `BackdropOpacity()`.
+- **A `drive.ps1` section's real click lands on whatever is on top.** Click only what the top overlay shows: a button under a
+  full-screen modal is covered, and the click reached the modal (#228).
 - **`role`, `aria-*` and `tabindex` in the `.js` are behaviours:** map each by `docs/infra/accessibility/README.md` (landmarks, live regions, names, help text, headings), at a priority an app's own value beats, or record the gap.
 
 ### Avalonia facts already learned
@@ -141,6 +149,10 @@ These are mistakes this project has already made, so don't repeat them.
   never Avalonia's own `BoxShadows` numbers (`docs/infra/box-shadow/README.md`). Its offset isn't scaled at 2× (`avalonia-issues.md`).
 - **An implicit `ControlTheme` merged into resources at runtime doesn't restyle a control already shown,** though `DynamicResource`s
   follow. Merge it before the control is attached.
+- **A finger's `PointerExited` comes at its release,** where Chromium's compatibility mouse events don't leave, so a hover behaviour
+  ignores a touch's leave (`AvonicPopover`'s hover trigger, #43).
+- **Avalonia's hit test finds the deepest visual,** so Ionic's `elementFromPoint() === el` ("the element itself, not a child") has no
+  equivalent: test the element's subtree (#43).
 
 ## Review and PR
 

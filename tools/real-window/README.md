@@ -48,18 +48,23 @@ once if the window doesn't fit on the screen.
   - `ion-alert` (#39): a real click on the trigger presents the page's alert, Tab stays inside, Escape dismisses it with
     `backdrop`; a radio alert made in code returns `red` after a pick and OK; a text alert's Save handler returning false keeps it
     open, Enter in its field does nothing (Ionic's has no form), and Enter on Save submits `{name: "Ann"}`; the `IsOpen` alert with
-    `BackdropDismiss` off stays on Escape and closes from a button. Not run yet.
+    `BackdropDismiss` off stays on Escape and closes from a button. Run in the full sweep on `4383769`.
   - `ion-action-sheet` (#40): a real click on the trigger presents the page's sheet; Share dismisses it with `share` and no role,
     Delete with `delete` and `destructive`; a handler returning false keeps a sheet open, and its Cancel dismisses it with `cancel`;
     Escape and a click on the backdrop dismiss with `backdrop`; a radio sheet made in code, as `ion-select` builds one, has Banana
     checked and returns `cherry` after a click on Cherry; the `IsOpen` sheet with `BackdropDismiss` off stays on Escape and closes
-    from its Close button. Not run yet.
+    from its Close button. Run in the full sweep on `4383769`.
   - `ion-popover` (#43): a real click opens the menu below its button, at its left; ArrowDown twice from the popover focuses the
     second item, End the last enabled one; ArrowRight on More opens the submenu with focus on its first item, ArrowLeft closes it
     alone with focus back on More; Escape dismisses the menu with `backdrop`; a click on an item dismisses it with no role
     (`dismissOnSelect`), and one on the backdrop with `backdrop`; resting the pointer on the hover trigger presents its popover; a
     real right click opens the context menu at the pointer (its first item at the click's x, 8 to 11 below it). Frames:
-    `popover-menu`, `popover-submenu`, `popover-hover`, `popover-context`. Not run yet.
+    `popover-menu`, `popover-submenu`, `popover-hover`, `popover-context`. Run in the full sweep on `4383769`.
+  - `ion-select` (#45): each interface opened by a real click on its select, found by the name a screen reader reads (`Alert, Pick
+    one`): the alert's radio and OK, and Escape as a cancel; the action sheet's radio; the popover's radio by a click, then by the
+    keys (ArrowDown moves focus and chooses nothing, Enter chooses), and the select expanded while it's open; the modal's radio
+    and its header from `InterfaceOptions`; the multiple popover's checkboxes, which leave it open; and the disabled select
+    disabled to automation. Every click is on an option of the interface on top. Run in the full sweep on `4383769`.
   - `typography`: frames only.
   - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
     to the list at 0; a frame of `SetFocus`'s ring on row 1.
@@ -73,7 +78,7 @@ once if the window doesn't fit on the screen.
     the keyboard together. A keyboard the pane never reports it can't tell open from closed, so it leaves it with a note. Skipped,
     not failed, when no keyboard comes or it won't cover the window. First run on `1f5064e` (2026-11-17, Windows 11 at 125%): the
     floating keyboard opened beside the window, which the shims rightly left alone, and the old checks, taking the heights alone,
-    failed 2 of 7; the move over the keyboard came after, not run yet.
+    failed 2 of 7; the move over the keyboard came after, and passed in the full sweep on `4383769`.
   - `ion-content: keys and the scroll indicator` (#67): a press on a row, then Down, Home, Page Down, Space, Shift+Space and End,
     read from the page's `Ended at` line; and a strip at the end edge that a wheel changes until the indicator fades, and a key
     doesn't. Since #182, the same strip at the top differs at load from after the wheel's fade, as the thumb is there from load:
@@ -87,12 +92,12 @@ once if the window doesn't fit on the screen.
   - `ion-modal: trigger, focus trap, Escape, back, backdrop, canDismiss` (#42): the trigger, Tab staying inside, Escape and
     Alt+Left; with a nested modal open, the nested one's `Close the modal under this one` (the full-screen nested modal covers the
     parent's own Close, which a real click can't reach: 6 of 10 on `a1cd601`), read from the two status lines as `cancel` and
-    `parent-dismissed`; `CanDismiss` against a touch tap on the backdrop; a modal made in code.
+    `parent-dismissed`; `CanDismiss` against a touch tap on the backdrop; a modal made in code. Run in the full sweep on `4383769`.
   - `ion-modal: the sheet` (#42): the trigger opens it at 0.5; four clicks on the handle cycle 0.75, 1, 0.25, 0.5; a slow finger drag
     down from the header, held still before the lift, settles at 0.25; a mouse drag up takes it to 1; a fast finger drag down
     closes it with `gesture`. Each breakpoint read from the page's `The sheet is at` line, and the sheet's top from its title, within
-    12 dips of where the breakpoint puts it. Not run yet.
-- **239 checks** run on v2 `28c4288` (2026-11-17), all 239 passing; no section added since.
+    12 dips of where the breakpoint puts it. Run in the full sweep on `4383769`.
+- **318 checks** in 31 sections run on v2 `4383769` (2026-11-18), all 318 passing; no section added since.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 
