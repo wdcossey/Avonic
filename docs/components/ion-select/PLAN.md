@@ -99,7 +99,7 @@ lists no default slot for them.
 | [x] | `--background` | `Avonic.Select.Background` | unset: transparent; `step-50` solid, `step-100` hovered, `step-150` focused or open |
 | [x] | `--border-color` | `Avonic.Select.BorderColor` | unset: `Avonic.ItemBorderColorBrush`; step 500 solid, 300 outline, 750 hovered, the highlight focused or open |
 | [x] | `--border-radius` | `Avonic.Select.BorderRadius` | unset: 4 with a fill, 16 round, 28 outline round |
-| [x] | `--border-style` | none | Not applicable: Avalonia draws solid borders only. Ionic's default is `solid` |
+| [ ] | `--border-style` | none | Not applicable: Avalonia draws solid borders only. Ionic's default is `solid` |
 | [x] | `--border-width` | `Avonic.Select.BorderWidth` | 1 |
 | [x] | `--highlight-color-focused` | `Avonic.Select.HighlightColorFocused` | unset: primary, or the colour's base |
 | [x] | `--highlight-color-invalid` | `Avonic.Select.HighlightColorInvalid` | danger |
@@ -108,7 +108,7 @@ lists no default slot for them.
 | [x] | `--padding-bottom`, `--padding-end`, `--padding-start`, `--padding-top` | `Avonic.Select.PaddingBottom` and the rest | unset: 0, or 16 at the sides with a fill, 32 for a round outline |
 | [x] | `--placeholder-color` | `Avonic.Select.PlaceholderColor` | unset: the text's colour |
 | [x] | `--placeholder-opacity` | `Avonic.Select.PlaceholderOpacity` | unset: `Avonic.PlaceholderOpacity`, 0.6 |
-| [x] | `--ripple-color` | none | Not applicable: md's select has no ripple (`select.js` renders none; the variable is only documented) |
+| [ ] | `--ripple-color` | none | Not applicable: md's select has no ripple (`select.js` renders none; the variable is only documented) |
 | [ ] | `--select-text-gap`, `--select-text-media-*` (7) | none | Not applicable: they style the rich content the select text shows only with `innerHTMLTemplatesEnabled`, off by default; Avonic has no HTML to show (as `ion-infinite-scroll`'s `loadingText`) |
 
 ## Fidelity checklist — `ion-select-option`
