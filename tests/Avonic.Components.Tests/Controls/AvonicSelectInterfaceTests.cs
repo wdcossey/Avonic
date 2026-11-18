@@ -534,6 +534,25 @@ public class AvonicSelectInterfaceTests
     }
 
     [AvaloniaFact]
+    public void B6_After_A_Dismiss_The_Select_Has_Focus_Even_Opened_From_Code()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage);
+        var other = new Button { Content = "Other" };
+        Canvas.SetTop(other, 400);
+        stage.Page.Children.Add(other);
+        Stage.Settle();
+        other.Focus();
+
+        // The overlay gives focus back to what had it; then onDidDismiss's setFocus moves it to the select.
+        _ = select.Open(new PopoverEvent(select));
+        stage.After(Settled);
+        Key(stage, PhysicalKey.Escape);
+        stage.After(Settled);
+        Assert.Same(select, stage.Focused);
+    }
+
+    [AvaloniaFact]
     public void B6_An_Expanded_Icon_Replaces_The_Toggle_Icon_While_Open()
     {
         using var stage = new Stage();
