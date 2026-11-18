@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
@@ -55,6 +57,12 @@ internal sealed class SelectOptionList
 
     /// <summary>An Enter that opened the select is still down: its repeats aren't presses here, as <c>ev.repeat</c> says.</summary>
     public bool IgnoreEnterUntilKeyUp { get; set; }
+    /// <summary>The value of the option that had focus when the host took the rows out to render again.</summary>
+    private StrongBox<object?>? _refocus;
+
+    /// <summary>Called by the host before it clears its list: which option has focus, to give it back after <see cref="Render"/>.</summary>
+    public void RememberFocus() =>
+        _refocus = _rows.FirstOrDefault(row => row.Control.IsFocused) is { Control: not null } row ? new StrongBox<object?>(row.Option.Value) : null;
 
     /// <summary>The rows, in order: each option, its item, and its radio or checkbox.</summary>
     public IReadOnlyList<(SelectOverlayOption Option, AvonicItem Item, Control Control)> Rows => _rows;
@@ -66,6 +74,19 @@ internal sealed class SelectOptionList
     public List<Control> Render(IList<SelectOverlayOption>? options, bool multiple)
     {
         var rendered = new List<Control>();
+
+        // Stencil keeps the elements it renders again, and focus with them: here they're made again, so focus goes back to the
+        // option it was on (RememberFocus, before the host takes the old ones out), once the new ones are in.
+        if (_refocus is { } refocus)
+        {
+            _refocus = null;
+            Dispatcher.UIThread.Post(() =>
+            {
+                _host.UpdateLayout();
+                _rows.FirstOrDefault(row => Equals(row.Option.Value, refocus.Value)).Control?.Focus(NavigationMethod.Directional);
+            }, DispatcherPriority.Background);
+        }
+
         _rows.Clear();
         _multiple = multiple;
         _pendingEnter = null;
@@ -106,7 +127,12 @@ internal sealed class SelectOptionList
         {
             Value = option.Value,
             IsEnabled = !option.Disabled,
-            Justify = (RadioJustify)(option.Justify ?? SelectOptionJustify.Start),
+            Justify = option.Justify switch
+            {
+                SelectOptionJustify.End => RadioJustify.End,
+                SelectOptionJustify.SpaceBetween => RadioJustify.SpaceBetween,
+                _ => RadioJustify.Start,
+            },
             LabelPlacement = option.LabelPlacement == SelectOptionLabelPlacement.Start ? RadioLabelPlacement.Start : RadioLabelPlacement.End,
             Content = Label(option),
         };
@@ -138,7 +164,12 @@ internal sealed class SelectOptionList
             Value = option.Value,
             IsEnabled = !option.Disabled,
             Checked = option.Checked,
-            Justify = (CheckboxJustify)(option.Justify ?? SelectOptionJustify.Start),
+            Justify = option.Justify switch
+            {
+                SelectOptionJustify.End => CheckboxJustify.End,
+                SelectOptionJustify.SpaceBetween => CheckboxJustify.SpaceBetween,
+                _ => CheckboxJustify.Start,
+            },
             LabelPlacement = option.LabelPlacement == SelectOptionLabelPlacement.Start ? CheckboxLabelPlacement.Start : CheckboxLabelPlacement.End,
             Content = Label(option),
         };
@@ -293,6 +324,8 @@ internal sealed class SelectOptionList
         {
             // !ev.repeat: a held key isn't a new press. Avalonia gives no repeat flag, so a down after a down with no up between is
             // one, and so is an Enter still held from opening the select (IgnoreEnterUntilKeyUp).
+            // preventDefault: Enter on a radio in the interface is its own, not a default button's.
+            e.Handled = true;
             if (_pendingEnter is null && !IgnoreEnterUntilKeyUp)
             {
                 _pendingEnter = current;

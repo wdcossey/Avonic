@@ -514,11 +514,16 @@ public class AvonicSelectInterfaceTests
     {
         using var stage = new Stage();
         var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.LabelPlacement = SelectLabelPlacement.Floating; }, inItem: false);
-        Assert.DoesNotContain(":label-floating", select.Classes);
+        var label = AvonicSelectCaptureTests.Part<Border>(select, "PART_Label");
+        var icon = AvonicSelectCaptureTests.Part<AvonicIcon>(select, "PART_EndIcon");
+        label.Transitions = [];
+        icon.Transitions = [];
+        Assert.Equal(1, label.GetValue(Css.ScaleProperty));
 
         Opened<AvonicPopover>(stage, select);
-        Assert.Contains(":select-expanded", select.Classes);
-        Assert.Contains(":label-floating", select.Classes);
+        // The label floats, at 0.75, and the icon has turned half round.
+        Assert.Equal(0.75, label.GetValue(Css.ScaleProperty));
+        Assert.Equal(-1, icon.RenderTransform!.Value.M11, 3);
         // Done at once, with nothing: never .Result on a task that isn't, which would hang the UI thread.
         var again = select.Open(new PopoverEvent(select));
         Assert.True(again.IsCompleted);
@@ -529,8 +534,126 @@ public class AvonicSelectInterfaceTests
 
         Key(stage, PhysicalKey.Escape);
         stage.After(Settled);
-        Assert.DoesNotContain(":select-expanded", select.Classes);
+        Assert.Equal(1, icon.RenderTransform!.Value.M11, 3);
         Assert.Equal(ExpandCollapseState.Collapsed, peer.ExpandCollapseState);
+    }
+
+    // ── Review fixes ────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void B22_After_An_Enter_Opened_It_A_Tap_Opens_It_With_Enter_Working_Inside()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.Value = "apple"; });
+        select.Focus(NavigationMethod.Tab);
+        Key(stage, PhysicalKey.Enter);
+        stage.After(Settled);
+        Key(stage, PhysicalKey.Escape);
+        stage.After(Settled);
+
+        // Opened by a tap on the item's padding this time: Enter inside isn't taken for the old one held.
+        var item = select.FindAncestorOfType<AvonicItem>()!;
+        var box = AvonicSelectCaptureTests.Box(item, stage.Window);
+        stage.Click(new Point(box.X + 4, box.Y + box.Height / 2));
+        stage.After(Settled);
+        Key(stage, PhysicalKey.ArrowDown);
+        Key(stage, PhysicalKey.Enter);
+        stage.After(Settled);
+        Assert.Equal(["ionDismiss", "ionChange(banana)", "ionDismiss"], stage.Log);
+    }
+
+    [AvaloniaFact]
+    public void B22_An_Enter_Up_Before_Focus_Goes_In_Leaves_Enter_Working_Inside()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.Value = "apple"; });
+        select.Focus(NavigationMethod.Tab);
+        // Down and up at once, before the popover is in and its option focused.
+        stage.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        stage.Window.KeyReleaseQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        stage.After(Settled);
+        Key(stage, PhysicalKey.ArrowDown);
+        Key(stage, PhysicalKey.Enter);
+        stage.After(Settled);
+        Assert.Equal(["ionChange(banana)", "ionDismiss"], stage.Log);
+    }
+
+    [AvaloniaFact]
+    public void B22_Enter_On_An_Option_Doesnt_Reach_A_Default_Button()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.Value = "apple"; });
+        var clicks = 0;
+        var submit = new Button { Content = "Submit", IsDefault = true };
+        submit.Click += (_, _) => clicks++;
+        Canvas.SetTop(submit, 400);
+        stage.Page.Children.Add(submit);
+        Opened<AvonicPopover>(stage, select);
+        Key(stage, PhysicalKey.ArrowDown);
+        Key(stage, PhysicalKey.Enter);
+        stage.After(Settled);
+        Assert.Equal("banana", select.Value);
+        Assert.Equal(0, clicks);
+    }
+
+    [AvaloniaFact]
+    public void B25_Focus_Stays_On_Its_Option_When_The_Options_Change_While_Open()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s => { s.Interface = SelectInterface.Popover; s.Value = "apple"; });
+        var popover = Opened<AvonicPopover>(stage, select);
+        Key(stage, PhysicalKey.ArrowDown);
+        select.Items.Add(new AvonicSelectOption { Value = "kiwi", Content = "Kiwi" });
+        stage.After(50);
+        var banana = Rows(popover)[1].Content;
+        Assert.Same(banana, stage.Focused);
+    }
+
+    [AvaloniaFact]
+    public void B23_The_Selected_Option_Is_Found_By_Its_Own_Value_Not_Its_Text()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s =>
+        {
+            s.Interface = SelectInterface.Popover;
+            s.Items.Clear();
+            s.Items.Add(new AvonicSelectOption { Content = "Apple" });
+            s.Items.Add(new AvonicSelectOption { Content = "Banana" });
+            s.Value = "Banana";
+        });
+        var popover = Opened<AvonicPopover>(stage, select);
+        // o.value === this.value: neither has a value, so the first enabled is focused.
+        Assert.Same(Rows(popover)[0].Content, stage.Focused);
+    }
+
+    [AvaloniaFact]
+    public void B19_The_Clicks_Point_Goes_To_A_Popover_Placed_By_The_Event()
+    {
+        using var stage = new Stage();
+        var select = Mount(stage, s =>
+        {
+            s.Interface = SelectInterface.Popover;
+            s.InterfaceOptions = new Dictionary<string, object?> { ["reference"] = "event", ["alignment"] = "start" };
+        });
+        stage.Render();
+        var box = AvonicSelectCaptureTests.Box(select, stage.Window);
+        var point = new Point(box.X + 60, box.Y + box.Height / 2);
+        stage.Click(point);
+        stage.After(Settled);
+        var popover = Assert.IsType<AvonicPopover>(select.Overlay);
+        Assert.Equal(point.X, AvonicPopoverTests.Box(popover, stage.Window).X, 1.01);
+    }
+
+    [AvaloniaFact]
+    public void B4_A_Present_That_Fails_Leaves_The_Select_Closed()
+    {
+        // A target in no window: the popover has nowhere to present.
+        var select = AvonicSelectCaptureTests.Select("s", s => s.Interface = SelectInterface.Popover);
+        var task = select.Open(new PopoverEvent(new Border()));
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.True(task.IsFaulted);
+        Assert.False(select.IsExpanded);
+        Assert.Null(select.Overlay);
     }
 
     [AvaloniaFact]

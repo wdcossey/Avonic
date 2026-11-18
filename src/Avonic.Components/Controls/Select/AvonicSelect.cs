@@ -234,6 +234,8 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
         // The host's onClick, and the <button>'s Enter and Space, which click it.
         _ = new NativeButton(this, OnClick, () => true, UpdateIsEffectivelyEnabled);
 
+        // On the way down, before NativeButton's click on release.
+        AddHandler(PointerReleasedEvent, OnPointerReleasedTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(GotFocusEvent, OnGotFocus);
         AddHandler(LostFocusEvent, OnLostFocus);
 
@@ -704,9 +706,13 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
             return;
         }
 
+        // The click's own point, for a popover placed by the event; a key's click has none, as Chromium gives it 0, 0.
+        var openedByEnter = source == this && _enterDown;
+        var ev = new PopoverEvent(this, _pointerPoint);
+        _enterDown = false;
+        _pointerPoint = null;
         SetFocus();
-        var ev = new PopoverEvent(this);
-        _ = Open(ev, openedByEnter: source == this && _enterDown);
+        LogFault(Open(ev, openedByEnter));
     }
 
     /// <summary>A DOM <c>click()</c> on the select, from automation: its <c>onClick</c>.</summary>
@@ -738,11 +744,17 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
         return false;
     }
 
+    /// <summary>An Enter key down is being handled: its click opened the select, and its key up may land in the interface.</summary>
     private bool _enterDown;
+
+    /// <summary>The release of the press being handled, in the top level's coordinates: the click's <c>clientX</c>, <c>clientY</c>.</summary>
+    private Point? _pointerPoint;
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
+        // A class handler, so it runs before NativeButton's, whose Enter clicks; OnClick takes it back.
         _enterDown = e.Key == Key.Enter;
+        _pointerPoint = null;
         base.OnKeyDown(e);
     }
 
@@ -751,10 +763,19 @@ public partial class AvonicSelect : TemplatedControl, IItemControl, IInputHost
         if (e.Key == Key.Enter)
         {
             _enterDown = false;
+
+            // The Enter that opened it came up before focus went into the interface: its repeats are over.
+            if (_overlay is { } overlay && ContentList(overlay) is { } list)
+            {
+                list.IgnoreEnterUntilKeyUp = false;
+            }
         }
 
         base.OnKeyUp(e);
     }
+
+    private void OnPointerReleasedTunnel(object? sender, PointerReleasedEventArgs e) =>
+        _pointerPoint = TopLevel.GetTopLevel(this) is { } top ? e.GetPosition(top) : null;
 
     /// <summary><c>setFocus</c>: the <c>&lt;button&gt;</c>.</summary>
     private void SetFocus() => Focus();

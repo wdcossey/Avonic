@@ -36,7 +36,20 @@ public partial class AvonicSelect
         }
 
         SetExpanded(true);
-        var overlay = _overlay = CreateOverlay(ev, out var popoverEvent);
+        AvonicOverlay overlay;
+        PopoverEvent? popoverEvent;
+        try
+        {
+            overlay = _overlay = CreateOverlay(ev, out popoverEvent);
+        }
+        catch
+        {
+            // Not left expanded with nothing to dismiss.
+            _overlay = null;
+            SetExpanded(false);
+            throw;
+        }
+
         if (overlay is AvonicPopover or AvonicModal)
         {
             // For modals and popovers, scroll and focus before they're visible: at will-present, as soon as the overlay is
@@ -67,21 +80,41 @@ public partial class AvonicSelect
 
         _ = WaitForDismiss(overlay);
 
-        if (overlay is AvonicPopover popover)
+        try
         {
-            await popover.Present(popoverEvent);
+            if (overlay is AvonicPopover popover)
+            {
+                await popover.Present(popoverEvent);
+            }
+            else if (OwnTopLevel() is { } top)
+            {
+                await overlay.Present(top);
+            }
+            else
+            {
+                await overlay.Present();
+            }
         }
-        else if (OwnTopLevel() is { } top)
+        catch
         {
-            await overlay.Present(top);
-        }
-        else
-        {
-            await overlay.Present();
+            if (_overlay == overlay)
+            {
+                _overlay = null;
+                SetExpanded(false);
+            }
+
+            throw;
         }
 
         return overlay;
     }
+
+    /// <summary>An open from input, which nothing awaits: a fault is logged, as an unhandled rejection is.</summary>
+    private static void LogFault(Task task) => task.ContinueWith(
+        static t => Avalonia.Logging.Logger.TryGet(Avalonia.Logging.LogEventLevel.Error, "Avonic")?.Log(null, "[ion-select] open: {0}", t.Exception),
+        CancellationToken.None,
+        TaskContinuationOptions.OnlyOnFaulted,
+        TaskScheduler.Default);
 
     /// <summary><c>overlay.onDidDismiss().then</c>: not expanded, <c>ionDismiss</c>, and the select focused again.</summary>
     private async Task WaitForDismiss(AvonicOverlay overlay)
@@ -408,7 +441,8 @@ public partial class AvonicSelect
     private void ScrollSelectedIntoView(AvonicOverlay overlay)
     {
 
-        var index = _items.ToList().FindIndex(option => Equals(option.OptionValue, Value));
+        // childOpts.findIndex((o) => o.value === this.value): the option's own value, not its text.
+        var index = _items.ToList().FindIndex(option => Equals(option.Value, Value));
         if (ContentList(overlay) is { } list)
         {
             // The content is made with the overlay's template, laid out for the first time as it's presented.
@@ -514,7 +548,16 @@ internal static class SelectInterfaceOptions
                 continue;
             }
 
-            overlay.SetValue(property, converted);
+            try
+            {
+                overlay.SetValue(property, converted);
+            }
+            catch (Exception exception)
+            {
+                // A value the property won't take is dropped, as an element ignores what it can't use.
+                Avalonia.Logging.Logger.TryGet(Avalonia.Logging.LogEventLevel.Warning, "Avonic")?
+                    .Log(overlay, "[ion-select] interfaceOptions {0}: {1}", key, exception.Message);
+            }
         }
     }
 
@@ -552,8 +595,9 @@ internal static class SelectInterfaceOptions
                 return true;
             }
         }
-        catch (Exception exception) when (exception is FormatException or ArgumentException or InvalidCastException or NotSupportedException or OverflowException)
+        catch (Exception)
         {
+            // A converter's failure is a value that can't be used: dropped.
         }
 
         return false;

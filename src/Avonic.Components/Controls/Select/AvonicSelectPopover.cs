@@ -119,6 +119,7 @@ public class AvonicSelectPopover : TemplatedControl
             return;
         }
 
+        _options.RememberFocus();
         _list.Items.Clear();
         if (Header is { } header)
         {

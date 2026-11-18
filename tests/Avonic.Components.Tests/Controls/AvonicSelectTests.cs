@@ -49,13 +49,9 @@ public class AvonicSelectTests
     {
         var select = Select("s", s => s.Placeholder = "Pick one");
         Assert.Equal("Pick one", select.DisplayText);
-        Assert.Contains(":has-placeholder-shown", select.Classes);
-        Assert.DoesNotContain(":has-value", select.Classes);
 
         select.Value = "banana";
         Assert.Equal("Banana", select.DisplayText);
-        Assert.Contains(":has-value", select.Classes);
-        Assert.DoesNotContain(":has-placeholder-shown", select.Classes);
 
         // A value no option has: no text.
         select.Value = "kiwi";
@@ -177,9 +173,7 @@ public class AvonicSelectTests
         using var scene = new Scene(page);
 
         select.Focus();
-        Assert.Contains(":has-focus", select.Classes);
         other.Focus();
-        Assert.DoesNotContain(":has-focus", select.Classes);
         Assert.Equal(["focus", "blur"], log);
         Assert.True(FocusVisible.GetIsEnabled(select));
     }
@@ -187,22 +181,26 @@ public class AvonicSelectTests
     // ── B9: the label ───────────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void B9_A_Floating_Label_Floats_With_A_Value_Or_Focus_A_Stacked_One_Always()
+    public void B9_A_Floating_Label_Floats_With_A_Value_Or_Focus_A_Stacked_One_Always() => InstalledTheme.Run(_ =>
     {
         var select = Select("s", s => { s.Label = "Fruit"; s.LabelPlacement = SelectLabelPlacement.Floating; });
         var other = new Button();
         using var scene = new Scene(new StackPanel { Children = { select, other } });
-        Assert.DoesNotContain(":label-floating", select.Classes);
+        var label = Part<Border>(select, "PART_Label");
+        label.Transitions = [];
+        double Scale() { Dispatcher.UIThread.RunJobs(); return label.GetValue(Css.ScaleProperty); }
+
+        Assert.Equal(1, Scale());
         select.Focus();
-        Assert.Contains(":label-floating", select.Classes);
+        Assert.Equal(0.75, Scale());
         other.Focus();
-        Assert.DoesNotContain(":label-floating", select.Classes);
+        Assert.Equal(1, Scale());
         select.Value = "apple";
-        Assert.Contains(":label-floating", select.Classes);
+        Assert.Equal(0.75, Scale());
         select.Value = null;
         select.LabelPlacement = SelectLabelPlacement.Stacked;
-        Assert.Contains(":label-floating", select.Classes);
-    }
+        Assert.Equal(0.75, Scale());
+    });
 
     [AvaloniaFact]
     public void B9_The_Floating_Label_Rests_On_The_Field_And_Floats_Above_It() => InstalledTheme.Run(_ =>
@@ -234,7 +232,6 @@ public class AvonicSelectTests
         var (scene, page) = Show(select, inItem: true);
         using (scene)
         {
-            Assert.Contains(":select-disabled", select.Classes);
             Assert.Equal(0.38, Assert.IsAssignableFrom<ISolidColorBrush>(select.OpacityMask).Opacity, 3);
             var item = select.FindAncestorOfType<AvonicItem>()!;
             Assert.Contains(":item-interactive-disabled", item.Classes);
@@ -370,10 +367,32 @@ public class AvonicSelectTests
         var (scene, page) = Show(select, inItem: true);
         using (scene)
         {
-            Assert.Contains(":in-item", select.Classes);
             Assert.False(Part<Border>(select, "PART_Highlight").IsVisible);
             AssertBox(16, 9.5, 358, 44, Box(select, page));
         }
+    });
+
+    [AvaloniaFact]
+    public void B13_An_Apps_Background_And_Border_Colour_Win_In_Every_State() => InstalledTheme.Run(_ =>
+    {
+        // --background and --border-color on the host beat the shadow :host(.select-fill-solid:hover) and .has-focus rules.
+        var red = new SolidColorBrush(Colors.Red);
+        var blue = new SolidColorBrush(Colors.Blue);
+        var select = Select("s", s => { s.Label = "Solid"; s.Fill = SelectFill.Solid; });
+        select.Resources["Avonic.Select.Background"] = red;
+        select.Resources["Avonic.Select.BorderColor"] = blue;
+        using var scene = Show(select).Scene;
+        var wrapper = Part<Border>(select, "PART_Wrapper");
+        wrapper.Transitions = [];
+        ((Avalonia.Controls.IPseudoClasses)select.Classes).Set(":ion-hover", true);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(red, wrapper.Background);
+        Assert.Same(blue, wrapper.BorderBrush);
+        ((Avalonia.Controls.IPseudoClasses)select.Classes).Set(":ion-hover", false);
+        select.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(red, wrapper.Background);
+        Assert.Same(blue, wrapper.BorderBrush);
     });
 
     [AvaloniaFact]

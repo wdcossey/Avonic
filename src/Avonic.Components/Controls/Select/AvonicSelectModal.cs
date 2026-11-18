@@ -114,6 +114,7 @@ public class AvonicSelectModal : TemplatedControl
             return;
         }
 
+        _options.RememberFocus();
         _list.Items.Clear();
         foreach (var control in _options.Render(Options, Multiple == true))
         {

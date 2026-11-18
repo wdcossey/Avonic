@@ -279,17 +279,43 @@
         </Style>
         <!-- @media (any-hover: hover) :host(.select-fill-solid:hover): step 100, border step 750 -->
         <Style Selector="^:fill-solid:ion-hover /template/ Border#PART_Wrapper">
-            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep100Brush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Avonic.BackgroundColorStep750Brush}" />
+            <!-- An app's own background and border colour still win, as its variable on the host beats the :host rule -->
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep100Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep750Brush" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <!-- :host(.select-fill-solid.select-expanded), :host(.select-fill-solid.has-focus): step 150, the highlight's border -->
         <Style Selector="^:fill-solid:select-expanded /template/ Border#PART_Wrapper, ^:fill-solid:has-focus /template/ Border#PART_Wrapper">
-            <Setter Property="Background" Value="{DynamicResource Avonic.BackgroundColorStep150Brush}" />
-            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <Binding Path="$parent[c:AvonicSelect].HighlightBrush" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <!-- :host(.select-fill-solid.ion-touched.ion-invalid) -->
         <Style Selector="^:fill-solid.ion-touched.ion-invalid /template/ Border#PART_Wrapper">
-            <Setter Property="BorderBrush" Value="{Binding $parent[c:AvonicSelect].HighlightBrush}" />
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <Binding Path="$parent[c:AvonicSelect].HighlightBrush" />
+                </MultiBinding>
+            </Setter>
         </Style>
 
         <!-- ── The outline ────────────────────────────────────────────────────────────────────── -->
@@ -304,7 +330,12 @@
             <Setter Property="Tag" Value="{DynamicResource Avonic.Select.BorderWidth}" />
         </Style>
         <Style Selector="^:fill-outline:ion-hover /template/ Grid#PART_OutlineContainer">
-            <Setter Property="TextElement.Foreground" Value="{DynamicResource Avonic.BackgroundColorStep750Brush}" />
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Select.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep750Brush" />
+                </MultiBinding>
+            </Setter>
         </Style>
         <!-- :host(.select-fill-outline.select-expanded), .has-focus: border-width highlight-height, border-color highlight-color -->
         <Style Selector="^:fill-outline:has-focus /template/ Grid#PART_OutlineContainer, ^:fill-outline:select-expanded /template/ Grid#PART_OutlineContainer">
