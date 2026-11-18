@@ -1,0 +1,535 @@
+{
+ "errors": [],
+ "focus": "div# .alert-wrapper ion-overlay-wrapper sc-ion-alert-md",
+ "dump": [
+  {
+   "d": 0,
+   "tag": "ion-alert",
+   "id": "ion-overlay-1",
+   "cls": "select-alert multiple-select-alert",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 1,
+   "tag": "ion-backdrop",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "op": "0.32",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 1,
+   "tag": "div",
+   "cls": "alert-wrapper ion-overlay-wrapper",
+   "box": [
+    70,
+    267.5,
+    250,
+    309
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "14px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)",
+   "aria": "role=alertdialog"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "cls": "alert-head",
+   "box": [
+    70,
+    267.5,
+    250,
+    59
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 3,
+   "tag": "h2",
+   "id": "alert-1-hdr",
+   "cls": "alert-title",
+   "box": [
+    94,
+    287.5,
+    202,
+    24
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "20px",
+   "text": "Multiple"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "id": "alert-1-msg",
+   "cls": "alert-message",
+   "box": [
+    70,
+    326.5,
+    250,
+    0
+   ],
+   "color": "rgb(115, 115, 115)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "cls": "alert-checkbox-group",
+   "box": [
+    70,
+    326.5,
+    250,
+    194
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "border": "1px 1px 0px 0px rgb(217, 217, 217)"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "id": "alert-input-1-0",
+   "cls": "select-interface-option alert-tappable alert-checkbox alert-checkbox-button ion-focusable ion-activatable",
+   "box": [
+    70,
+    327.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=checkbox aria-checked=true"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "alert-button-inner checkbox-label-placement-end checkbox-justify-start",
+   "box": [
+    70,
+    327.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-icon",
+   "box": [
+    94,
+    343.5,
+    16,
+    16
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "border": "2px 2px 2px 2px rgb(0, 84, 233)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "alert-checkbox-inner",
+   "box": [
+    96.34,
+    344.84,
+    11.31,
+    11.31
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "tr": "matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)",
+   "border": "0px 2px 0px 2px rgb(255, 255, 255)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-label",
+   "box": [
+    86,
+    329,
+    120.78,
+    45
+   ],
+   "color": "rgb(38, 38, 38)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    70,
+    327.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "id": "alert-input-1-1",
+   "cls": "select-interface-option alert-tappable alert-checkbox alert-checkbox-button ion-focusable ion-activatable",
+   "box": [
+    70,
+    375.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=checkbox aria-checked=false"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "alert-button-inner checkbox-label-placement-end checkbox-justify-start",
+   "box": [
+    70,
+    375.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-icon",
+   "box": [
+    94,
+    391.5,
+    16,
+    16
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "border": "2px 2px 2px 2px rgb(115, 115, 115)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "alert-checkbox-inner",
+   "box": [
+    96,
+    393.5,
+    12,
+    0
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-label",
+   "box": [
+    86,
+    377,
+    133.75,
+    45
+   ],
+   "color": "rgb(38, 38, 38)",
+   "fs": "16px",
+   "text": "Banana"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    70,
+    375.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "id": "alert-input-1-2",
+   "cls": "select-interface-option alert-tappable alert-checkbox alert-checkbox-button alert-checkbox-button-disabled",
+   "box": [
+    70,
+    423.5,
+    250,
+    48
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "fs": "14px",
+   "aria": "role=checkbox aria-checked=false"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "alert-button-inner checkbox-label-placement-end checkbox-justify-start",
+   "box": [
+    70,
+    423.5,
+    250,
+    48
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "fs": "14px",
+   "op": "0.5"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-icon",
+   "box": [
+    94,
+    439.5,
+    16,
+    16
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "fs": "14px",
+   "border": "2px 2px 2px 2px rgb(115, 115, 115)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "alert-checkbox-inner",
+   "box": [
+    96,
+    441.5,
+    12,
+    0
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "fs": "14px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-label",
+   "box": [
+    86,
+    425,
+    126.27,
+    45
+   ],
+   "color": "rgb(38, 38, 38)",
+   "fs": "16px",
+   "text": "Cherry"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    70,
+    423.5,
+    250,
+    48
+   ],
+   "color": "rgba(16, 16, 16, 0.3)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "id": "alert-input-1-3",
+   "cls": "select-interface-option alert-tappable alert-checkbox alert-checkbox-button ion-focusable ion-activatable",
+   "box": [
+    70,
+    471.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=checkbox aria-checked=true"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "alert-button-inner checkbox-label-placement-end checkbox-justify-start",
+   "box": [
+    70,
+    471.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-icon",
+   "box": [
+    94,
+    487.5,
+    16,
+    16
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "border": "2px 2px 2px 2px rgb(0, 84, 233)"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "alert-checkbox-inner",
+   "box": [
+    96.34,
+    488.84,
+    11.31,
+    11.31
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "tr": "matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)",
+   "border": "0px 2px 0px 2px rgb(255, 255, 255)"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "alert-checkbox-label",
+   "box": [
+    86,
+    473,
+    122.19,
+    45
+   ],
+   "color": "rgb(38, 38, 38)",
+   "fs": "16px",
+   "text": "Grape"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    70,
+    471.5,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "cls": "alert-button-group",
+   "box": [
+    70,
+    520.5,
+    250,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "14px"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "cls": "alert-button ion-focusable ion-activatable alert-button-role-cancel",
+   "box": [
+    184.53,
+    528.5,
+    72.97,
+    40
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px"
+  },
+  {
+   "d": 4,
+   "tag": "span",
+   "cls": "alert-button-inner",
+   "box": [
+    194.53,
+    538.5,
+    52.97,
+    20
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "text": "Cancel"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    184.53,
+    528.5,
+    72.97,
+    40
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 3,
+   "tag": "button",
+   "cls": "alert-button ion-focusable ion-activatable",
+   "box": [
+    265.5,
+    528.5,
+    38.5,
+    40
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px"
+  },
+  {
+   "d": 4,
+   "tag": "span",
+   "cls": "alert-button-inner",
+   "box": [
+    275.5,
+    538.5,
+    18.5,
+    20
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "text": "OK"
+  },
+  {
+   "d": 4,
+   "tag": "ion-ripple-effect",
+   "box": [
+    265.5,
+    528.5,
+    38.5,
+    40
+   ],
+   "color": "rgb(0, 84, 233)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  }
+ ]
+}

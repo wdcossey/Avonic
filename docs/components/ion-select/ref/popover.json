@@ -1,0 +1,591 @@
+{
+ "errors": [],
+ "focus": "ion-radio# .sc-ion-select-popover-md md in-item radio-checked radio-justify-start radio-label-placement-end hydrated",
+ "dump": [
+  {
+   "d": 0,
+   "tag": "ion-popover",
+   "id": "ion-overlay-1",
+   "cls": "select-popover popover-side-bottom",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 1,
+   "tag": "ion-backdrop",
+   "cls": "backdrop-hide",
+   "part": "backdrop",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.32",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 2,
+   "tag": "div",
+   "cls": "popover-content",
+   "part": "content",
+   "box": [
+    128,
+    41,
+    250,
+    208
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 1,
+   "tag": "ion-select-popover",
+   "cls": "popover-viewport",
+   "box": [
+    128,
+    41,
+    250,
+    208
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-list",
+   "cls": "list-md",
+   "box": [
+    128,
+    41,
+    250,
+    208
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "aria": "role=list"
+  },
+  {
+   "d": 3,
+   "tag": "ion-radio-group",
+   "box": [
+    128,
+    49,
+    250,
+    192
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radiogroup"
+  },
+  {
+   "d": 4,
+   "tag": "ion-item",
+   "cls": "item-radio-checked select-interface-option item item-lines-default item-control-needs-pointer-cursor ion-activatable ion-focusable ion-focused",
+   "box": [
+    128,
+    49,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    128,
+    49,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgba(0, 84, 233, 0.08)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    144,
+    49,
+    234,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    144,
+    49,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "ion-ripple-effect",
+   "box": [
+    128,
+    49,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 5,
+   "tag": "ion-radio",
+   "cls": "in-item radio-checked radio-justify-start radio-label-placement-end",
+   "box": [
+    144,
+    49,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=true"
+  },
+  {
+   "d": 6,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    144,
+    49,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    144,
+    63.5,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    144,
+    63.5,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 4,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-default item-control-needs-pointer-cursor ion-activatable ion-focusable",
+   "box": [
+    128,
+    97,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    128,
+    97,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    144,
+    97,
+    234,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    144,
+    97,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "ion-ripple-effect",
+   "box": [
+    128,
+    97,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 5,
+   "tag": "ion-radio",
+   "cls": "in-item radio-justify-start radio-label-placement-end",
+   "box": [
+    144,
+    97,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 6,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    144,
+    97,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    144,
+    111.5,
+    53.75,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    144,
+    111.5,
+    53.75,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Banana"
+  },
+  {
+   "d": 4,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-default item-control-needs-pointer-cursor item-disabled ion-activatable ion-focusable",
+   "box": [
+    128,
+    145,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.3"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    128,
+    145,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    144,
+    145,
+    234,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    144,
+    145,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "ion-ripple-effect",
+   "box": [
+    128,
+    145,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 5,
+   "tag": "ion-radio",
+   "cls": "in-item radio-disabled radio-justify-start radio-label-placement-end",
+   "box": [
+    144,
+    145,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 6,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    144,
+    145,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    144,
+    159.5,
+    46.27,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.38"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    144,
+    159.5,
+    46.27,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Cherry"
+  },
+  {
+   "d": 4,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-default item-control-needs-pointer-cursor ion-activatable ion-focusable",
+   "box": [
+    128,
+    193,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    128,
+    193,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    144,
+    193,
+    234,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    144,
+    193,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "ion-ripple-effect",
+   "box": [
+    128,
+    193,
+    250,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 5,
+   "tag": "ion-radio",
+   "cls": "in-item radio-justify-start radio-label-placement-end",
+   "box": [
+    144,
+    193,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 6,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    144,
+    193,
+    218,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    144,
+    207.5,
+    42.19,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    144,
+    207.5,
+    42.19,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Grape"
+  }
+ ]
+}

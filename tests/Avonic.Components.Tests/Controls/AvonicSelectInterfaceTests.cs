@@ -210,6 +210,7 @@ public class AvonicSelectInterfaceTests
         select.Interface = SelectInterface.Popover;
         var task = select.Open();
         stage.After(Settled);
+        Assert.True(task.IsCompleted);
         Assert.IsType<AvonicAlert>(task.Result);
     }
 
@@ -518,7 +519,10 @@ public class AvonicSelectInterfaceTests
         Opened<AvonicPopover>(stage, select);
         Assert.Contains(":select-expanded", select.Classes);
         Assert.Contains(":label-floating", select.Classes);
-        Assert.Null(select.Open(new PopoverEvent(select)).Result);
+        // Done at once, with nothing: never .Result on a task that isn't, which would hang the UI thread.
+        var again = select.Open(new PopoverEvent(select));
+        Assert.True(again.IsCompleted);
+        Assert.Null(again.Result);
 
         var peer = (IExpandCollapseProvider)ControlAutomationPeer.CreatePeerForElement(select);
         Assert.Equal(ExpandCollapseState.Expanded, peer.ExpandCollapseState);
@@ -547,7 +551,10 @@ public class AvonicSelectInterfaceTests
     {
         using var stage = new Stage();
         var select = Mount(stage, s => s.IsEnabled = false);
-        Assert.Null(select.Open(new PopoverEvent(select)).Result);
+        // Done at once, with nothing: never .Result on a task that isn't, which would hang the UI thread.
+        var again = select.Open(new PopoverEvent(select));
+        Assert.True(again.IsCompleted);
+        Assert.Null(again.Result);
         Assert.Null(select.Overlay);
     }
 

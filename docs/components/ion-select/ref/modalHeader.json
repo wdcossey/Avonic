@@ -1,0 +1,813 @@
+{
+ "errors": [],
+ "focus": "ion-radio# .sc-ion-select-modal-md md in-item radio-checked radio-justify-start radio-label-placement-end hydrated",
+ "dump": [
+  {
+   "d": 0,
+   "tag": "ion-modal",
+   "id": "ion-overlay-1",
+   "cls": "modal-default select-modal show-modal",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 1,
+   "tag": "ion-backdrop",
+   "part": "backdrop",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.32",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 1,
+   "tag": "div",
+   "cls": "modal-wrapper ion-overlay-wrapper",
+   "part": "content",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)",
+   "aria": "role=dialog"
+  },
+  {
+   "d": 1,
+   "tag": "ion-select-modal",
+   "cls": "ion-page",
+   "box": [
+    0,
+    0,
+    390,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 2,
+   "tag": "ion-header",
+   "cls": "header-md header-collapse-none",
+   "box": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=banner"
+  },
+  {
+   "d": 3,
+   "tag": "ion-toolbar",
+   "cls": "toolbar-title-default in-toolbar",
+   "box": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "toolbar-background",
+   "part": "background",
+   "box": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "color": "rgb(66, 66, 66)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 4,
+   "tag": "div",
+   "cls": "toolbar-container",
+   "part": "container",
+   "box": [
+    0,
+    0,
+    390,
+    56
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "16px"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "toolbar-content",
+   "part": "content",
+   "box": [
+    0,
+    16,
+    307.98,
+    24
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "16px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-title",
+   "cls": "title-default",
+   "box": [
+    0,
+    16,
+    307.98,
+    24
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "20px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)",
+   "text": "Fruits"
+  },
+  {
+   "d": 5,
+   "tag": "div",
+   "cls": "toolbar-title",
+   "box": [
+    20,
+    16,
+    267.98,
+    24
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "20px"
+  },
+  {
+   "d": 4,
+   "tag": "ion-buttons",
+   "cls": "buttons-last-slot",
+   "box": [
+    307.98,
+    12,
+    78.02,
+    32
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "16px",
+   "tr": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  {
+   "d": 5,
+   "tag": "ion-button",
+   "cls": "button button-clear in-toolbar in-buttons ion-activatable ion-focusable",
+   "box": [
+    309.98,
+    12,
+    74.02,
+    32
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "14px",
+   "text": "Cancel"
+  },
+  {
+   "d": 6,
+   "tag": "button",
+   "cls": "button-native",
+   "part": "native",
+   "box": [
+    309.98,
+    12,
+    74.02,
+    32
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "14px"
+  },
+  {
+   "d": 7,
+   "tag": "span",
+   "cls": "button-inner",
+   "box": [
+    317.98,
+    21,
+    58.02,
+    14
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "14px"
+  },
+  {
+   "d": 7,
+   "tag": "ion-ripple-effect",
+   "box": [
+    309.98,
+    12,
+    74.02,
+    32
+   ],
+   "color": "rgb(66, 66, 66)",
+   "fs": "14px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 2,
+   "tag": "ion-content",
+   "cls": "content-ltr",
+   "box": [
+    0,
+    56,
+    390,
+    788
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "id": "background-content",
+   "part": "background",
+   "box": [
+    0,
+    56,
+    390,
+    788
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "div",
+   "cls": "inner-scroll scroll-y",
+   "part": "scroll",
+   "box": [
+    0,
+    56,
+    390,
+    788
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 3,
+   "tag": "ion-list",
+   "cls": "list-md",
+   "box": [
+    0,
+    56,
+    390,
+    208
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px",
+   "aria": "role=list"
+  },
+  {
+   "d": 4,
+   "tag": "ion-radio-group",
+   "box": [
+    0,
+    64,
+    390,
+    192
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radiogroup"
+  },
+  {
+   "d": 5,
+   "tag": "ion-item",
+   "cls": "item-radio-checked select-interface-option item item-lines-none item-control-needs-pointer-cursor ion-activatable ion-focusable ion-focused",
+   "box": [
+    0,
+    64,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    64,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgba(0, 84, 233, 0.08)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    64,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    64,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    64,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 6,
+   "tag": "ion-radio",
+   "cls": "in-item radio-checked radio-justify-start radio-label-placement-end",
+   "box": [
+    16,
+    64,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=true"
+  },
+  {
+   "d": 7,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    16,
+    64,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    78.5,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    16,
+    78.5,
+    40.78,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Apple"
+  },
+  {
+   "d": 5,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-none item-control-needs-pointer-cursor ion-activatable ion-focusable",
+   "box": [
+    0,
+    112,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    112,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    112,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    112,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    112,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 6,
+   "tag": "ion-radio",
+   "cls": "in-item radio-justify-start radio-label-placement-end",
+   "box": [
+    16,
+    112,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 7,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    16,
+    112,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    126.5,
+    53.75,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    16,
+    126.5,
+    53.75,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Banana"
+  },
+  {
+   "d": 5,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-none item-control-needs-pointer-cursor item-disabled ion-activatable ion-focusable",
+   "box": [
+    0,
+    160,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.3"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    160,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    160,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    160,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    160,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 6,
+   "tag": "ion-radio",
+   "cls": "in-item radio-disabled radio-justify-start radio-label-placement-end",
+   "box": [
+    16,
+    160,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 7,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    16,
+    160,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    174.5,
+    46.27,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "op": "0.38"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    16,
+    174.5,
+    46.27,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Cherry"
+  },
+  {
+   "d": 5,
+   "tag": "ion-item",
+   "cls": "select-interface-option item item-lines-none item-control-needs-pointer-cursor ion-activatable ion-focusable",
+   "box": [
+    0,
+    208,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 6,
+   "tag": "div",
+   "cls": "item-native",
+   "part": "native",
+   "box": [
+    0,
+    208,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "bg": "rgb(255, 255, 255)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "item-inner",
+   "part": "inner",
+   "box": [
+    16,
+    208,
+    374,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "input-wrapper",
+   "part": "container",
+   "box": [
+    16,
+    208,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "ion-ripple-effect",
+   "box": [
+    0,
+    208,
+    390,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=presentation"
+  },
+  {
+   "d": 6,
+   "tag": "ion-radio",
+   "cls": "in-item radio-justify-start radio-label-placement-end",
+   "box": [
+    16,
+    208,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "aria": "role=radio aria-checked=false"
+  },
+  {
+   "d": 7,
+   "tag": "label",
+   "cls": "radio-wrapper",
+   "box": [
+    16,
+    208,
+    358,
+    48
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 8,
+   "tag": "div",
+   "cls": "label-text-wrapper",
+   "part": "label",
+   "box": [
+    16,
+    222.5,
+    42.19,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  },
+  {
+   "d": 7,
+   "tag": "div",
+   "cls": "select-option-label",
+   "box": [
+    16,
+    222.5,
+    42.19,
+    19
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px",
+   "text": "Grape"
+  },
+  {
+   "d": 1,
+   "tag": "div",
+   "box": [
+    0,
+    0,
+    0,
+    844
+   ],
+   "color": "rgb(0, 0, 0)",
+   "fs": "16px"
+  }
+ ]
+}
