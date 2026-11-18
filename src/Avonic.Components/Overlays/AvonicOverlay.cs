@@ -247,6 +247,28 @@ public abstract class AvonicOverlay : TemplatedControl
     {
     }
 
+    /// <summary>Ionic's <c>triggerEl</c>: the control <see cref="Trigger"/> names, while its listeners are on it.</summary>
+    protected Interactive? TriggerElement => _trigger.Target;
+
+    /// <summary>
+    /// The listeners that make <paramref name="trigger"/>, the control <see cref="Trigger"/> names, present the overlay; returns
+    /// what removes them. A click by default (<c>createTriggerController</c>); the popover's depend on its <c>triggerAction</c>.
+    /// </summary>
+    protected internal virtual Action AddTriggerListeners(Interactive trigger) =>
+        OverlayTrigger.AddClickListener(trigger, (_, _) => PresentFromInput());
+
+    /// <summary>
+    /// Looks <see cref="Trigger"/> up again and gives it its listeners, as a watcher on a prop they depend on does (the popover's
+    /// <c>triggerAction</c>). Nothing while the overlay is presented in the overlay host, out of its name scope.
+    /// </summary>
+    protected void ConfigureTrigger()
+    {
+        if (!IsInHost && ((ILogical)this).IsAttachedToLogicalTree)
+        {
+            _trigger.Attach(Trigger);
+        }
+    }
+
     /// <summary>
     /// Ionic <c>present()</c>. An inline overlay, one with a parent of the app's, presents in its own top level, as Ionic's
     /// teleports to its document's <c>ion-app</c>. Otherwise the application's top level: a desktop's active window, else its main
@@ -370,9 +392,9 @@ public abstract class AvonicOverlay : TemplatedControl
                 DismissFromInput(null);
             }
         }
-        else if (change.Property == TriggerProperty && !IsInHost && ((ILogical)this).IsAttachedToLogicalTree)
+        else if (change.Property == TriggerProperty)
         {
-            _trigger.Attach(Trigger);
+            ConfigureTrigger();
         }
     }
 

@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-popover. A size takes a number (px) or a CSS string: a percentage of the window, "250px", "auto", or
+         "none" for a maximum. -->
+
+    <!-- backdrop-opacity: var(ion-backdrop-opacity, 0.32). Unset, it follows Avonic.BackdropOpacity. Read by the animations. -->
+    <b:CssUnset x:Key="Avonic.Popover.BackdropOpacity" />
+    <!-- background: var(ion-background-color, #fff). Unset, it follows Avonic.BackgroundColorBrush. -->
+    <b:CssUnset x:Key="Avonic.Popover.Background" />
+    <b:CssShadow x:Key="Avonic.Popover.BoxShadow">0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12)</b:CssShadow>
+    <x:Double x:Key="Avonic.Popover.Width">250</x:Double>
+    <x:String x:Key="Avonic.Popover.MinWidth">0</x:String>
+    <x:String x:Key="Avonic.Popover.MaxWidth">auto</x:String>
+    <x:String x:Key="Avonic.Popover.Height">auto</x:String>
+    <x:String x:Key="Avonic.Popover.MinHeight">0</x:String>
+    <x:String x:Key="Avonic.Popover.MaxHeight">90%</x:String>
+    <x:Double x:Key="Avonic.Popover.OffsetY">0</x:Double>
+
+    <!-- offset-x is 0, and 5 on a nested popover on the left (start in LTR, end in RTL), -5 on the right, so it's unset and the
+         defaults are the Md keys. Set it, and it wins on a nested one too, as an app's variable on ion-popover does. -->
+    <b:CssUnset x:Key="Avonic.Popover.OffsetX" />
+    <x:Double x:Key="Avonic.Popover.Md.OffsetX">0</x:Double>
+    <x:Double x:Key="Avonic.Popover.Md.NestedOffsetX">5</x:Double>
+
+</ResourceDictionary>
