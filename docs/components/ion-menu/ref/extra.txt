@@ -1,0 +1,14 @@
+## disabled at load, log: ["ionDidClose {\"role\":\"gesture\"}","ionMenuChange {\"disabled\":true,\"open\":false}","ionDidClose {\"role\":\"gesture\"}"]
+enable then disable a closed menu [["ionMenuChange {\"disabled\":false,\"open\":false}"],["ionDidClose {\"role\":\"gesture\"}","ionMenuChange {\"disabled\":true,\"open\":false}"]]
+console.error [Ionic Error]: [ion-menu] - Must have a "content" element to listen for drag events on.
+## no content-id {"cls":"md button menu-button-hidden in-toolbar ion-activatable ion-focusable hydrated","openResult":true,"isOpen":true,"log":["ionMenuChange {\"disabled\":false,\"open\":false}","ionWillOpen","ionDidOpen"]}
+## enabled at load log ["ionMenuChange {\"disabled\":false,\"open\":false}"]
+hover {"bg":"rgba(0, 0, 0, 0)","op":"0","color":"rgb(66, 66, 66)"}
+after click via mouse: active ion-menu ["ionWillOpen","ionDidOpen"]
+click inside menu []
+click outside ["ionWillClose {\"role\":\"backdrop\"}","ionDidClose {\"role\":\"backdrop\"}"]
+enter on button ["ion-menu",["ionWillOpen","ionDidOpen"]]
+escape ["body",["ionWillClose {\"role\":\"backdrop\"}","ionDidClose {\"role\":\"backdrop\"}"]]
+space on button []
+two clicks fast [["ionWillOpen","ionDidOpen"],true]
+remove while open [[],"ion-page menu-content menu-content-overlay","md button in-toolbar ion-activatable ion-focusable hydrated"]

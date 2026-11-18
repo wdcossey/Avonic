@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-menu: structure only. The look is in Avonic.Themes/Controls/AvonicMenu.axaml. The transparent root takes a click
+         anywhere in the host, as the host behind push and reveal content does; it's laid out left to right, so that the
+         container's side, transform and shadow are physical, as Ionic's are, and the presenter takes the menu's direction back.
+         The backdrop shows for the overlay type while the menu is shown, and the content shadow part for push and reveal. -->
+    <ControlTheme x:Key="{x:Type c:AvonicMenu}" TargetType="c:AvonicMenu">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:MenuRootPanel Background="Transparent" FlowDirection="LeftToRight">
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="False" StopPropagation="False" IsVisible="False" ZIndex="-1" />
+                    <Border Name="PART_ContentShadow" IsHitTestVisible="False" />
+                    <c:MenuPanel Name="PART_Panel">
+                        <Border Name="PART_Container" Background="{TemplateBinding Background}">
+                            <Panel ClipToBounds="True">
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                  FlowDirection="{TemplateBinding FlowDirection}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Panel>
+                        </Border>
+                    </c:MenuPanel>
+                </c:MenuRootPanel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:type-overlay:show-menu /template/ c|AvonicBackdrop#PART_Backdrop">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

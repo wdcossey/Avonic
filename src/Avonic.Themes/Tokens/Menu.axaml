@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-menu. A size takes a number (px) or a CSS string: "304px", a percentage of the menu's host, "vw" and
+         "vh" of the window, calc(), min(), or "auto". -->
+
+    <!-- background: var(ion-background-color, #fff). Unset, it follows Avonic.BackgroundColorBrush. -->
+    <b:CssUnset x:Key="Avonic.Menu.Background" />
+    <!-- width: 304px. Below 341 wide, .menu-inner's own width, Avonic.Menu.Md.WidthSmall, beats it, as in Ionic. -->
+    <x:Double x:Key="Avonic.Menu.Width">304</x:Double>
+    <x:String x:Key="Avonic.Menu.MinWidth">auto</x:String>
+    <x:String x:Key="Avonic.Menu.MaxWidth">auto</x:String>
+    <x:String x:Key="Avonic.Menu.Height">100%</x:String>
+    <x:String x:Key="Avonic.Menu.MinHeight">auto</x:String>
+    <x:String x:Key="Avonic.Menu.MaxHeight">auto</x:String>
+
+    <!-- @media (max-width: 340px) { .menu-inner { width: 264px } } -->
+    <x:Double x:Key="Avonic.Menu.Md.WidthSmall">264</x:Double>
+    <!-- :host(.menu-type-overlay) .menu-inner, which has no variable. -->
+    <b:CssShadow x:Key="Avonic.Menu.Md.BoxShadow">4px 0px 16px rgba(0, 0, 0, 0.18)</b:CssShadow>
+    <!-- core.css's .md .menu-content-push and .md .menu-content-reveal, on the main content, which has no variable. -->
+    <b:CssShadow x:Key="Avonic.Menu.Md.ContentBoxShadow">4px 0px 16px rgba(0, 0, 0, 0.18)</b:CssShadow>
+
+</ResourceDictionary>

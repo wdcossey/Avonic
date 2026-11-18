@@ -78,6 +78,20 @@ internal sealed class OverlayHost : Panel
 
     internal TopLevel TopLevel => _topLevel;
 
+    /// <summary>
+    /// Ionic <c>getPresentedOverlay(document)</c> for <paramref name="topLevel"/>, without making it a host: the top overlay there, or
+    /// null. For what isn't an overlay and defers to one, as <c>ion-menu</c>'s focus trap and back button do.
+    /// </summary>
+    internal static AvonicOverlay? PresentedOverlayIn(TopLevel topLevel) =>
+        s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
+            ? host.GetPresentedOverlay()
+            : null;
+
+    /// <summary>Ionic's <c>document.querySelector('ion-modal.show-modal')</c>, for <paramref name="topLevel"/>: a modal is presented there.</summary>
+    internal static bool IsModalPresentedIn(TopLevel topLevel) =>
+        s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
+        && host.Children.OfType<AvonicModal>().Any(m => m.IsShown);
+
     internal void Attach(AvonicOverlay overlay)
     {
         if (!Children.Contains(overlay))
@@ -247,19 +261,19 @@ internal sealed class OverlayHost : Panel
     /// <see cref="AvonicContent"/>'s scroller, which Tab stops at as Chromium's does, but which the query, of elements and
     /// <c>tabindex</c>, never finds in its shadow root.
     /// </summary>
-    private static IEnumerable<InputElement> Focusables(Visual container) =>
+    internal static IEnumerable<InputElement> Focusables(Visual container) =>
         container.GetVisualDescendants().OfType<InputElement>()
             .Where(e => e.Focusable && e.IsEffectivelyEnabled && e.IsEffectivelyVisible && KeyboardNavigation.GetIsTabStop(e)
                 && e is not ScrollViewer { TemplatedParent: AvonicContent });
 
-    private static void FocusFirstDescendant(Visual container, AvonicOverlay fallback, NavigationMethod method) =>
+    internal static void FocusFirstDescendant(Visual container, InputElement fallback, NavigationMethod method) =>
         FocusElementInContext(Focusables(container).FirstOrDefault(), fallback, method);
 
-    private static void FocusLastDescendant(Visual container, AvonicOverlay fallback, NavigationMethod method) =>
+    internal static void FocusLastDescendant(Visual container, InputElement fallback, NavigationMethod method) =>
         FocusElementInContext(Focusables(container).LastOrDefault(), fallback, method);
 
     /// <summary>Ionic <c>focusElementInContext</c>, and <c>focusElementInOverlay</c>, which is the same: the element, with its navigation method so a Tab wrap shows the ring, else the fallback.</summary>
-    private static void FocusElementInContext(IInputElement? element, AvonicOverlay fallback, NavigationMethod method)
+    private static void FocusElementInContext(IInputElement? element, InputElement fallback, NavigationMethod method)
     {
         if (element is not null)
         {

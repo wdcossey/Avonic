@@ -109,6 +109,26 @@ public static class AvonicConfig
     /// </remarks>
     public static TabButtonLayout? TabButtonLayout { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>menuIcon</c> config: the icon of an <see cref="AvonicMenuButton"/>, an <see cref="AvonicIcon.Icon"/>. Null is md's
+    /// <c>menu-sharp</c>.
+    /// </summary>
+    /// <remarks>
+    /// Read when the button renders, as Ionic reads it in <c>render()</c>: when it's first attached, and at each change of one of
+    /// its properties. A change of this alone redraws nothing.
+    /// </remarks>
+    public static string? MenuIcon { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>menuType</c> config: the <see cref="AvonicMenu.Type"/> of a menu that has none. Null is Ionic's fallback,
+    /// <see cref="Controls.MenuType.Overlay"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read when the menu is first attached, as Ionic reads it in <c>connectedCallback</c> while <c>type</c> is undefined: a change of
+    /// this reaches only menus attached for the first time after it, and only if their type isn't set then.
+    /// </remarks>
+    public static MenuType? MenuType { get; set; }
+
     // ── Avonic's own: no Ionic config has these ─────────────────────────────────────────────────
 
     /// <summary>

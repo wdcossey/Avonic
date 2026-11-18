@@ -1,0 +1,6 @@
+mobile Tab: ["ion-menu","button#a","button#b","button#c","button#c","button#c","button#c"]
+Shift+Tab: ["button#b","button#a","ion-menu","body","button#c","button#b"]
+m1.focus() while open -> button#c
+desktop Tab: ["ion-menu","button#a","button#b","button#c","button#c","button#c","button#c"]
+Shift+Tab: ["button#b","button#a","ion-menu","body","button#c","button#b"]
+m1.focus() while open -> button#c

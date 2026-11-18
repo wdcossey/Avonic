@@ -1,0 +1,134 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.MenuPage">
+
+    <!-- ion-menu, ion-menu-button and ion-menu-toggle: a start menu and an end menu over the page, named in ContentId. Open one
+         with the menu button, the buttons below, or a swipe from the window's edge; close it with a tap outside it, a swipe,
+         Escape, Back, or a toggle in it. -->
+    <Grid>
+        <c:AvonicMenu Name="StartMenu" MenuId="start-menu" ContentId="MainContent">
+            <DockPanel>
+                <c:AvonicHeader DockPanel.Dock="Top">
+                    <c:AvonicToolbar>
+                        <c:AvonicTitle Content="Start menu" />
+                    </c:AvonicToolbar>
+                </c:AvonicHeader>
+                <c:AvonicContent>
+                    <c:AvonicList>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Name="StartInbox" Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="mail-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Inbox" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Name="StartOutbox" Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="paper-plane-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Outbox" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Name="StartFavourites" Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="heart-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Favourites" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Name="StartArchived" Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="archive-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Archived" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                    </c:AvonicList>
+                </c:AvonicContent>
+            </DockPanel>
+        </c:AvonicMenu>
+
+        <c:AvonicMenu Name="EndMenu" MenuId="end-menu" Side="End" ContentId="MainContent">
+            <DockPanel>
+                <c:AvonicHeader DockPanel.Dock="Top">
+                    <c:AvonicToolbar Color="tertiary">
+                        <c:AvonicTitle Content="End menu" />
+                    </c:AvonicToolbar>
+                </c:AvonicHeader>
+                <c:AvonicContent Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="On the end side. Swipe it back to close it, or use the button." TextWrapping="Wrap" />
+                        <c:AvonicMenuToggle Menu="end-menu">
+                            <c:AvonicButton Name="EndClose" Content="Close" AutomationProperties.Name="Close the end menu" />
+                        </c:AvonicMenuToggle>
+                    </StackPanel>
+                </c:AvonicContent>
+            </DockPanel>
+        </c:AvonicMenu>
+
+        <DockPanel Name="MainContent" Background="{DynamicResource Avonic.BackgroundColorBrush}">
+            <c:AvonicHeader DockPanel.Dock="Top">
+                <c:AvonicToolbar>
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicMenuButton Name="StartMenuButton" Menu="start-menu" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                    <c:AvonicTitle Content="Menu" />
+                    <c:AvonicToolbar.EndContent>
+                        <c:AvonicButtons>
+                            <c:AvonicMenuButton Name="EndMenuButton" Menu="end-menu" AutomationProperties.Name="End menu">
+                                <c:AvonicIcon IconName="ellipsis-vertical" />
+                            </c:AvonicMenuButton>
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.EndContent>
+                </c:AvonicToolbar>
+            </c:AvonicHeader>
+            <c:AvonicContent>
+                <StackPanel>
+                    <c:AvonicItem>
+                        <c:AvonicLabel>
+                            <TextBlock Name="Status" Text="Open a menu: the button, a swipe from the edge, or below" TextWrapping="Wrap" />
+                        </c:AvonicLabel>
+                    </c:AvonicItem>
+
+                    <c:AvonicListHeader>
+                        <TextBlock Text="The start menu's type" />
+                    </c:AvonicListHeader>
+                    <c:AvonicRadioGroup Name="TypeGroup" Value="overlay">
+                        <c:AvonicItem>
+                            <c:AvonicRadio Name="TypeOverlay" Value="overlay" Content="Overlay" />
+                        </c:AvonicItem>
+                        <c:AvonicItem>
+                            <c:AvonicRadio Name="TypeReveal" Value="reveal" Content="Reveal" />
+                        </c:AvonicItem>
+                        <c:AvonicItem>
+                            <c:AvonicRadio Name="TypePush" Value="push" Content="Push" />
+                        </c:AvonicItem>
+                    </c:AvonicRadioGroup>
+
+                    <c:AvonicListHeader>
+                        <TextBlock Text="The start menu" />
+                    </c:AvonicListHeader>
+                    <c:AvonicItem>
+                        <c:AvonicToggle Name="SwipeToggle" Checked="True" Content="Swipe to open" />
+                    </c:AvonicItem>
+                    <c:AvonicItem>
+                        <c:AvonicToggle Name="EnabledToggle" Checked="True" Content="Enabled (the menu button hides without it)" />
+                    </c:AvonicItem>
+                    <c:AvonicButton Name="OpenStart" Content="Open the start menu" Margin="16,8,16,0" />
+                    <c:AvonicButton Name="OpenEnd" Content="Open the end menu" Fill="Outline" Margin="16,8,16,0" />
+                    <c:AvonicMenuToggle Menu="end-menu">
+                        <c:AvonicButton Name="ToggleEnd" Content="A menu toggle for the end menu" Fill="Clear" Margin="16,8,16,16" />
+                    </c:AvonicMenuToggle>
+                </StackPanel>
+            </c:AvonicContent>
+        </DockPanel>
+    </Grid>
+
+</UserControl>

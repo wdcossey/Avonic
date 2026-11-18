@@ -624,7 +624,7 @@ public abstract class AvonicOverlay : TemplatedControl
 
     internal static IInputElement? Focused(TopLevel topLevel) => topLevel.FocusManager?.GetFocusedElement();
 
-    private static void Blur(TopLevel topLevel) => (topLevel.FocusManager as FocusManager)?.Focus(null);
+    internal static void Blur(TopLevel topLevel) => (topLevel.FocusManager as FocusManager)?.Focus(null);
 
     private Task<OverlayEventDetail> NextEvent(RoutedEvent<OverlayEventArgs> routedEvent)
     {
