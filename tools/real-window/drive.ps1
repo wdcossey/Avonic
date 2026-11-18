@@ -1507,6 +1507,10 @@ try {
         ClickOn (Named $CT::Button 'Paste')
         Start-Sleep -Milliseconds 500
         Check 'a click on an item dismisses it (dismissOnSelect), with no role' ([bool](WaitForText 'MenuPopover dismissed, role none')) (PopStatus)
+        # The pointer rests where Paste was, over the hover trigger once the menu has gone, which opens the hover popover (as
+        # Chromium's mouse events after a layout change would): move away, and close it if it opened.
+        Away
+        if (FirstText 'Opened by hovering*') { Key '{ESC}' 600 }
         OpenMenu
         Backdrop
         Check 'a click on the backdrop dismisses it' ([bool](WaitForText 'MenuPopover dismissed, role backdrop')) (PopStatus)
