@@ -131,6 +131,10 @@ public class AvonicSelectCaptureTests
         // The floating label at rest: 19 down, on the field; stacked: scaled to 14.25 at 9.5 down.
         AssertBox(16, 227, 57.52, 19, Box(Part<Control>(Find(page, "s5"), "PART_Label"), page), 1);
         AssertBox(16, 273.5, 42.96, 14.25, Box(Part<Control>(Find(page, "s6"), "PART_Label"), page), 1);
+        // The outline's floating label is out of the flow, on the border (translateY(-32%)): 32, 396.92; the text's container
+        // fills the outline from its top, 403.
+        AssertBox(32, 396.92, 37.63, 14.25, Box(Part<Control>(Find(page, "s8"), "PART_Label"), page), 1);
+        Assert.Equal(403, Box(Part<Control>(Find(page, "s8"), "PART_Container"), page).Y, 0.6);
         // The end icon of a floating label: 361, 228.
         AssertBox(361, 228, 13, 16, Box(Part<AvonicIcon>(Find(page, "s5"), "PART_EndIcon"), page));
     });

@@ -485,4 +485,17 @@ public class AvonicSelectTests
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(Color.FromRgb(128, 128, 128), ((ISolidColorBrush)icon.Foreground!).Color);
     });
+
+    [AvaloniaFact]
+    public void B13_The_Outline_Takes_The_Highlight_At_Its_Height_When_Focused() => InstalledTheme.Run(_ =>
+    {
+        var select = Select("s", s => { s.Label = "Outline"; s.Fill = SelectFill.Outline; s.LabelPlacement = SelectLabelPlacement.Floating; });
+        using var scene = Show(select).Scene;
+        var start = Part<Border>(select, "PART_OutlineStart");
+        Assert.Equal(new Thickness(1, 1, 0, 1), start.BorderThickness);
+        select.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(select.HighlightBrush, start.BorderBrush);
+        Assert.Equal(new Thickness(2, 2, 0, 2), start.BorderThickness);
+    });
 }
