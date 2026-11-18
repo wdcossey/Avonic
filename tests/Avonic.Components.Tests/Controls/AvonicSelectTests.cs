@@ -386,9 +386,42 @@ public class AvonicSelectTests
         Assert.Equal(Color.FromRgb(242, 242, 242), ((ISolidColorBrush)wrapper.Background!).Color);
         Assert.Equal(new Thickness(0, 0, 0, 1), wrapper.BorderThickness);
         Assert.Equal(new Thickness(16, 0, 16, 0), wrapper.Padding);
+        var label = Part<Border>(select, "PART_Label");
+        label.Transitions = [];
         select.Focus();
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(Color.FromRgb(217, 217, 217), ((ISolidColorBrush)wrapper.Background!).Color);
         Assert.Same(select.HighlightBrush, wrapper.BorderBrush);
+        // A floating label takes the highlight colour while focused.
+        Assert.Same(select.HighlightBrush, label.GetValue(Avalonia.Controls.Documents.TextElement.ForegroundProperty));
+    });
+
+    [AvaloniaFact]
+    public void B9_A_Floating_Labels_Placeholder_Is_Hidden_Until_It_Floats() => InstalledTheme.Run(_ =>
+    {
+        var select = Select("s", s => { s.Label = "Fruit"; s.LabelPlacement = SelectLabelPlacement.Floating; s.Placeholder = "Pick one"; });
+        using var scene = Show(select).Scene;
+        var text = Part<SelectTextBlock>(select, "PART_Text");
+        text.Transitions = [];
+        Assert.Equal(0, text.Opacity);
+        select.Focus();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0.6, text.Opacity, 3);
+    });
+
+    [AvaloniaFact]
+    public void B6_The_Icon_Turns_Half_Round_While_Open_Unless_There_Is_An_Expanded_Icon() => InstalledTheme.Run(_ =>
+    {
+        var select = Select("s", s => s.Label = "Fruit");
+        using var scene = Show(select).Scene;
+        var icon = Part<AvonicIcon>(select, "PART_Icon");
+        icon.Transitions = [];
+        Assert.Equal(1, icon.RenderTransform!.Value.M11, 3);
+        ((Avalonia.Controls.IPseudoClasses)select.Classes).Set(":select-expanded", true);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(-1, icon.RenderTransform!.Value.M11, 3);
+        ((Avalonia.Controls.IPseudoClasses)select.Classes).Set(":has-expanded-icon", true);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(1, icon.RenderTransform!.Value.M11, 3);
     });
 }
