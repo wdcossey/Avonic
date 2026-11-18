@@ -42,7 +42,8 @@ together with the comparison, so write it to be read — decisions and omissions
 2. Read the implementation: `node_modules/@ionic/core/dist/collection/components/<name>/<name>.js`.
    List the **behaviours** (not props) that the control must reproduce — e.g. *"ion-item forwards
    a tap on its padding to the first interactive child"*, *"ion-toggle flips on drag past 10px
-   and fires ionChange on each flip"*. These become the test list.
+   and fires ionChange on each flip"*. These become the test list. Its `role`, `aria-*` and `tabindex` are behaviours
+   too, mapped by [accessibility](infra/accessibility/README.md).
 3. Read `<name>.md.css`. List the visual states and which resource keys drive them.
 4. Note Avonic extensions (touch-target enforcement, etc.) in a separate section. They never
    mix with the Ionic-mapped API.
