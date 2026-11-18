@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-menu-button, md. -->
+
+    <SolidColorBrush x:Key="Avonic.MenuButton.Background" Color="Transparent" />
+    <!-- background-focused: currentColor. Unset, it follows the native part's colour. -->
+    <b:CssUnset x:Key="Avonic.MenuButton.BackgroundFocused" />
+    <x:Double x:Key="Avonic.MenuButton.BackgroundFocusedOpacity">0.12</x:Double>
+    <!-- background-hover: currentColor -->
+    <b:CssUnset x:Key="Avonic.MenuButton.BackgroundHover" />
+    <x:Double x:Key="Avonic.MenuButton.BackgroundHoverOpacity">0.04</x:Double>
+    <x:String x:Key="Avonic.MenuButton.BorderRadius">50%</x:String>
+    <!-- color: initial, so the host's colour is inherited. -->
+    <b:CssUnset x:Key="Avonic.MenuButton.Color" />
+    <!-- color-focused: currentColor -->
+    <b:CssUnset x:Key="Avonic.MenuButton.ColorFocused" />
+    <!-- color-hover: md leaves it undefined, so the colour is inherited. -->
+    <b:CssUnset x:Key="Avonic.MenuButton.ColorHover" />
+    <x:Double x:Key="Avonic.MenuButton.PaddingStart">8</x:Double>
+    <x:Double x:Key="Avonic.MenuButton.PaddingEnd">8</x:Double>
+    <x:Double x:Key="Avonic.MenuButton.PaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.MenuButton.PaddingBottom">0</x:Double>
+
+</ResourceDictionary>

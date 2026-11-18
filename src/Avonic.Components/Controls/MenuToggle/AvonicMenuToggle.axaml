@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-menu-toggle: its content, nothing more. menu-toggle.css has only .menu-toggle-hidden { display: none }, which the
+         control does, so the theme has no file of its own for it. A click on anything inside reaches the toggle, as a DOM
+         click on its host comes from anything inside. -->
+    <ControlTheme x:Key="{x:Type c:AvonicMenuToggle}" TargetType="c:AvonicMenuToggle">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

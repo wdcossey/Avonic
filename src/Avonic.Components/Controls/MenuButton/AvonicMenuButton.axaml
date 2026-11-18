@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-menu-button: structure only. The look is in Avonic.Themes/Controls/AvonicMenuButton.axaml. The icon is the slot's
+         fallback: it shows while there's no content. -->
+    <ControlTheme x:Key="{x:Type c:AvonicMenuButton}" TargetType="c:AvonicMenuButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="Transparent">
+                    <Panel>
+                        <c:AvonicRippleEffect Name="PART_Ripple" Type="Unbounded" />
+                        <c:AvonicIcon Name="PART_Icon"
+                                      IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

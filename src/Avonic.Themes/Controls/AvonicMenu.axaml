@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <!-- A menu is hidden until it opens: an open one is in the sample's menu page. -->
+        <Panel Width="390" Height="400">
+            <Border Name="Main" Background="White">
+                <TextBlock Text="Main content" Margin="16" />
+            </Border>
+            <c:AvonicMenu ContentId="Main">
+                <TextBlock Text="Menu" Margin="16" />
+            </c:AvonicMenu>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of menu.md.css. The host is position: absolute; inset: 0; display: none until show-menu: it fills its parent,
+         and the menu shows itself while it's open, at style priority. contain: strict on the host and on .menu-inner has nothing to
+         do here but clip the content, which the container's inner panel does. Its z-index per type is the control's. -->
+    <ControlTheme x:Key="{x:Type c:AvonicMenu}" TargetType="c:AvonicMenu">
+        <Setter Property="Background">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Menu.Background" />
+                <DynamicResource ResourceKey="Avonic.BackgroundColorBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:MenuRootPanel Background="Transparent" FlowDirection="LeftToRight">
+                    <!-- ion-backdrop: display: none; z-index: -1, under the container. -->
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="False" StopPropagation="False" IsVisible="False" ZIndex="-1" />
+                    <!-- The main content's box-shadow for push and reveal, placed over the content's box by the menu. -->
+                    <Border Name="PART_ContentShadow" IsHitTestVisible="False" />
+                    <c:MenuPanel Name="PART_Panel">
+                        <Border Name="PART_Container" Background="{TemplateBinding Background}">
+                            <Panel ClipToBounds="True">
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                  FlowDirection="{TemplateBinding FlowDirection}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  VerticalContentAlignment="Stretch" />
+                            </Panel>
+                        </Border>
+                    </c:MenuPanel>
+                </c:MenuRootPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .menu-inner: width: var(width) and the rest. -->
+        <Style Selector="^ /template/ c|MenuPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Menu.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Menu.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.Menu.MaxWidth}" />
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.Menu.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Menu.MinHeight}" />
+            <Setter Property="ContentMaxHeight" Value="{DynamicResource Avonic.Menu.MaxHeight}" />
+        </Style>
+
+        <!-- @media (max-width: 340px) { .menu-inner { width: 264px } }: the inner's own variable, which beats the host's. -->
+        <Style Selector="^:small-width /template/ c|MenuPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Menu.Md.WidthSmall}" />
+        </Style>
+
+        <!-- .menu-inner { transform: translateX(-9999px) }: off screen when it's shown but not yet animated. -->
+        <Style Selector="^ /template/ Border#PART_Container">
+            <Setter Property="RenderTransform" Value="translateX(-9999px)" />
+        </Style>
+
+        <!-- :host(.menu-type-reveal.show-menu) .menu-inner { transform: translate3d(0, 0, 0) } -->
+        <Style Selector="^:type-reveal:show-menu /template/ Border#PART_Container">
+            <Setter Property="RenderTransform" Value="none" />
+        </Style>
+
+        <!-- :host(.menu-type-overlay) .menu-inner { box-shadow } -->
+        <Style Selector="^:type-overlay /template/ Border#PART_Container">
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Menu.Md.BoxShadow}" />
+        </Style>
+
+        <!-- :host(.menu-type-overlay) .show-backdrop { display: block; cursor: pointer } -->
+        <Style Selector="^:type-overlay:show-menu /template/ c|AvonicBackdrop#PART_Backdrop">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- .md .menu-content-push, .md .menu-content-reveal { box-shadow } on the main content. -->
+        <Style Selector="^:type-push /template/ Border#PART_ContentShadow, ^:type-reveal /template/ Border#PART_ContentShadow">
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Menu.Md.ContentBoxShadow}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

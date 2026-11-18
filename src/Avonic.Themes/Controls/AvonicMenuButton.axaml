@@ -1,0 +1,170 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8" Margin="16" Orientation="Horizontal">
+            <c:AvonicMenuButton AutoHide="False" />
+            <c:AvonicMenuButton AutoHide="False" Color="danger" />
+            <c:AvonicMenuButton AutoHide="False" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of menu-button.md.css, in its order: its state rules have equal specificity, so later beats earlier, and
+         so does everything here with a pseudoclass. -->
+    <ControlTheme x:Key="{x:Type c:AvonicMenuButton}" TargetType="c:AvonicMenuButton">
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- width: 3rem; height: 3rem; font-size: 1.5rem -->
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="FontSize" Value="24" />
+        <!-- color: var(color), which is initial in md: the host's colour is inherited. -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.MenuButton.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <!-- text-align: center; white-space: nowrap; text-overflow: ellipsis; font-kerning: none -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextBlock.FontFeatures">
+            <FontFeatureCollection>
+                <FontFeature Tag="kern" Value="0" />
+            </FontFeatureCollection>
+        </Setter>
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none. The overlay is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <!-- .button-native::after -->
+                            <Border Name="PART_Overlay" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" Type="Unbounded" />
+                            <!-- .button-inner -->
+                            <Panel Name="PART_Inner">
+                                <c:AvonicIcon Name="PART_Icon"
+                                              IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}"
+                                              IsHitTestVisible="False"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                <ContentPresenter Name="PART_ContentPresenter"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  HorizontalContentAlignment="Center"
+                                                  VerticalContentAlignment="Center" />
+                            </Panel>
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .button-native: border-radius, background, padding; color: inherit. -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background" Value="{DynamicResource Avonic.MenuButton.Background}" />
+        </Style>
+
+        <!-- overflow: hidden, to the radius, which takes the ripple and the overlay. -->
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="{Binding $parent[Border].CornerRadius}" />
+        </Style>
+
+        <!-- padding-inline-start: var(padding-start) and the rest, inside the overlay. -->
+        <Style Selector="^ /template/ Panel#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.MenuButton.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.MenuButton.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.MenuButton.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .button-native::after { opacity: 0 } -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- :host(.menu-button-disabled) { cursor: default; opacity: 0.5; pointer-events: none }. A disabled control takes no input. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+
+        <!-- :host(.ion-focused) .button-native { color: var(color-focused) }, currentColor: the colour it has. -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.ColorFocused" />
+                    <Binding Path="$parent[c:AvonicMenuButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.BackgroundFocused" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.MenuButton.BackgroundFocusedOpacity}" />
+        </Style>
+
+        <!-- @media (any-hover: hover) :host(:hover): mouse and pen. -->
+        <Style Selector="^:ion-hover /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.ColorHover" />
+                    <Binding Path="$parent[c:AvonicMenuButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.MenuButton.BackgroundHover" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.MenuButton.BackgroundHoverOpacity}" />
+        </Style>
+
+        <!-- :host(.ion-color) .button-native { color: var(ion-color-base) }, after the states, which it beats. -->
+        <Style Selector="^:ion-color /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+
+        <!-- :host(.in-toolbar:not(.in-toolbar-color)) { color: var(ion-toolbar-color, var(color)) } -->
+        <Style Selector="^:in-toolbar:not(:in-toolbar-color)">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
+                    <DynamicResource ResourceKey="Avonic.MenuButton.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color:hover) .button-native::after { background: var(ion-color-base) }. Its focused twin is on the host's
+             own ::after, which has no content, so it draws nothing. -->
+        <Style Selector="^:ion-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
