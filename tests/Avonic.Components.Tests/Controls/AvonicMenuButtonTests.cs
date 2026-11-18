@@ -195,6 +195,21 @@ public class AvonicMenuButtonTests
     }
 
     [AvaloniaFact]
+    public void B21_In_A_Toolbar_With_No_Colour_It_Takes_The_Toolbar_Colour_Variable_Over_What_It_Inherits()
+    {
+        // :host(.in-toolbar:not(.in-toolbar-color)) { color: var(--ion-toolbar-color, var(--color)) }: a toolbar whose own colour is
+        // red, with --ion-toolbar-color blue, gives the button blue, where it would inherit red.
+        using var stage = new Stage();
+        stage.Window.Resources["Avonic.ToolbarColorBrush"] = new SolidColorBrush(Colors.Blue);
+        var button = InToolbar(stage);
+        var toolbar = button.GetVisualAncestors().OfType<AvonicToolbar>().First();
+        toolbar.Foreground = new SolidColorBrush(Colors.Red);
+        AvonicMenuTests.Stage.Settle();
+        Assert.True(((IPseudoClasses)button.Classes).Contains(":in-toolbar"));
+        Assert.Equal(Colors.Blue, ((ISolidColorBrush)button.Foreground!).Color);
+    }
+
+    [AvaloniaFact]
     public void B21_Focused_By_Key_Its_Overlay_Is_Its_Colour_At_0_12_And_Hovered_At_0_04()
     {
         using var stage = new Stage();

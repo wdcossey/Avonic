@@ -1434,4 +1434,18 @@ public class AvonicMenuTests
         stage.Opened();
         Near(304, PhysicalLeft(stage.Main, stage.Window), 0.5);
     }
+
+    [AvaloniaFact]
+    public void B14_A_Swipe_With_No_Animation_For_Its_Type_Ends_Where_It_Started()
+    {
+        // The will event, then the did event of the state it stays in, and nothing left animating.
+        using var stage = new Stage();
+        stage.Menu.Type = null;
+        Swipe(stage, 10, 210, 8);
+        stage.At(3000);
+        Assert.Equal(["ionWillOpen", "ionDidClose(gesture)"], stage.Log.Select(l => l[..l.IndexOf('@')]));
+        Assert.False(MenuController.IsAnimating());
+        Assert.False(stage.Menu.IsVisible);
+        Assert.True(stage.Main.IsHitTestVisible);
+    }
 }
