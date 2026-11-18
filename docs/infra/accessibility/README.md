@@ -38,7 +38,7 @@ Linux desktop driver.
 | `aria-required` | `IsRequiredForForm` | checkbox, input, textarea. **Not** the toggle, which has no `Required` (#238) |
 | `aria-checked="mixed"` | `IToggleProvider`, indeterminate | `AvonicCheckbox` |
 | `role="heading"`, `aria-level` | `HeadingLevel` | `AvonicCardTitle` (2), `AvonicCardSubtitle` (3) |
-| `role="banner"`, `contentinfo`, `main`, `search`, `navigation` | `LandmarkType` | `AvonicHeader` (banner), `AvonicFooter` (contentinfo), `AvonicContent` (main), `AvonicSearchbar` (search); `ion-menu`'s `navigation` waits for #44. **Gap:** Ionic gives content `main` only outside a menu, popover or modal, and a header `banner` only outside a menu; Avonic's content is `main` in a modal or popover too (#237) |
+| `role="banner"`, `contentinfo`, `main`, `search`, `navigation` | `LandmarkType` | `AvonicHeader` (banner), `AvonicFooter` (contentinfo), `AvonicContent` (main), `AvonicSearchbar` (search), `AvonicMenu` (navigation, named `menu` unless the app names it). **Gap:** Ionic gives content `main` only outside a menu, popover or modal, and a header `banner` only outside a menu; Avonic's content is `main` in a modal or popover too (#237) |
 | `aria-live="polite"`, `role="alert"` | `LiveSetting` `Polite`, `Assertive` | the helper and error text of `AvonicCheckbox` and `AvonicRadioGroup` (`ion-radio` has none), though at a priority an app's style can't beat. **Not yet** on `AvonicInput`, `AvonicTextarea`, `AvonicToggle`, which Ionic gives the same (#236, both) |
 | `role="status"` with `aria-live="polite"` | `LiveSetting` `Polite` | `ion-toast` (#38), when it's built |
 | `role="radiogroup"` | no control type | recorded as a gap in the alert and the action sheet |

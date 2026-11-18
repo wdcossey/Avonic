@@ -65,6 +65,12 @@ once if the window doesn't fit on the screen.
     keys (ArrowDown moves focus and chooses nothing, Enter chooses), and the select expanded while it's open; the modal's radio
     and its header from `InterfaceOptions`; the multiple popover's checkboxes, which leave it open; and the disabled select
     disabled to automation. Every click is on an option of the interface on top. Run in the full sweep on `4383769`.
+  - `ion-menu` (#44): a real click on the start menu's button (`menu`) opens it, its items within the left 304; a click on the
+    backdrop and Escape close it with `backdrop`, a click on an item in a toggle with no role; a touch swipe from the left edge
+    opens it, and one back closes it with `gesture`; Alt+Left closes the open menu (its back at 99) and the page stays; the end
+    menu opens from its own button (`End menu`) at the right, and its toggle (`Close the end menu`) closes it; the start menu
+    disabled hides its button, and enabled shows it. While a menu is open, every click is on the menu or the backdrop. Frames:
+    `menu-start`, `menu-swiped`, `menu-end`. **Not yet run.**
   - `typography`: frames only.
   - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
     to the list at 0; a frame of `SetFocus`'s ring on row 1.

@@ -1667,6 +1667,80 @@ try {
         Away
     }
 
+    # ion-menu (#44): the start menu from a real click on its menu button (named `menu`), closed by a click on the backdrop, by
+    # Escape, by a toggle in it (Outbox), by Alt+Left (the menu's back at 99, over the shell's 0, so the page stays), and opened and
+    # closed by touch swipes from the window's left edge; the end menu from its own menu button (named `End menu`) and closed by the
+    # toggle in it; and the start menu's button hidden while the menu is disabled. The status line says how each opened and closed.
+    # Only what's on top is aimed at: while a menu is open the backdrop covers the page, so every click then is on the menu or the
+    # backdrop. Not yet run.
+    Section 'ion-menu' {
+        Open 'ion-menu'
+        $w = $win.Current.BoundingRectangle
+        function MenuStatus { Texts | Where-Object { $_ -cmatch '^(Start|End)Menu ' } | Select-Object -First 1 }
+        $midY = [int]($w.Y + $w.Height / 2)
+        # The backdrop: the window's right, beyond the 304-wide start menu, half way down.
+        function Backdrop { Click ([int]($w.Right - 30 * $scale)) $midY; Start-Sleep -Milliseconds 500 }
+        function OpenStart {
+            ClickOn (Named $CT::Button 'menu')
+            Check 'and the start menu opens' ([bool](WaitForText 'StartMenu open')) (MenuStatus)
+            Start-Sleep -Milliseconds 200
+        }
+
+        OpenStart
+        Shot 'menu-start'
+        $inbox = Named $CT::Button 'Inbox'
+        $ib = if ($inbox) { $inbox.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'its items are at the left, within 304' ($inbox -and $ib.X -ge $w.X -and $ib.Right -le ($w.X + (Px 306))) "window $w, Inbox $ib"
+        Backdrop
+        Check 'a click on the backdrop closes it with the backdrop role' ([bool](WaitForText 'StartMenu closed, role backdrop')) (MenuStatus)
+
+        OpenStart
+        Key '{ESC}' 600
+        Check 'Escape closes it with the backdrop role' ([bool](WaitForText 'StartMenu closed, role backdrop')) (MenuStatus)
+
+        OpenStart
+        ClickOn (Named $CT::Button 'Outbox')
+        Start-Sleep -Milliseconds 500
+        Check 'a click on an item in a toggle closes it, with no role' ([bool](WaitForText 'StartMenu closed, role none')) (MenuStatus)
+
+        # A swipe from 6 dips in from the left edge, well within maxEdgeStart's 50, then one back from the open menu.
+        TouchDrag ([int]($w.X + 6 * $scale)) $midY (Px 220) 0 15 16
+        Check 'a touch swipe from the left edge opens it' ([bool](WaitForText 'StartMenu open')) (MenuStatus)
+        Start-Sleep -Milliseconds 300
+        Shot 'menu-swiped'
+        TouchDrag ([int]($w.X + 280 * $scale)) $midY (- (Px 220)) 0 15 16
+        Check 'and a swipe back closes it with the gesture role' ([bool](WaitForText 'StartMenu closed, role gesture')) (MenuStatus)
+        Start-Sleep -Milliseconds 300
+
+        OpenStart
+        Fore
+        Key '%{LEFT}' 600
+        Check 'Alt+Left (back) closes the open menu, with no role' ([bool](WaitForText 'StartMenu closed, role none')) (MenuStatus)
+        Check 'and the page stays' ([bool](Named $CT::Button 'Back'))
+
+        ClickOn (Named $CT::Button 'End menu')
+        Check 'the end menu opens from its own button' ([bool](WaitForText 'EndMenu open')) (MenuStatus)
+        Start-Sleep -Milliseconds 200
+        Shot 'menu-end'
+        $close = Named $CT::Button 'Close the end menu'
+        $cb = if ($close) { $close.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'its content is at the right' ($close -and $cb.X -ge ($w.Right - (Px 306))) "window $w, Close $cb"
+        ClickOn $close
+        Start-Sleep -Milliseconds 500
+        Check 'the toggle in it closes it' ([bool](WaitForText 'EndMenu closed, role none')) (MenuStatus)
+
+        # Disabling the start menu hides its button (autoHide); enabling it shows it again.
+        ClickOn (Named $CT::Button 'Enabled*')
+        Start-Sleep -Milliseconds 400
+        $button = Named $CT::Button 'menu'
+        Check 'the start menu disabled hides its button' (-not $button -or $button.Current.IsOffscreen -or $button.Current.BoundingRectangle.IsEmpty)
+        ClickOn (Named $CT::Button 'Enabled*')
+        Start-Sleep -Milliseconds 400
+        $button = Named $CT::Button 'menu'
+        Check 'and enabled shows it again' ($button -and -not $button.Current.BoundingRectangle.IsEmpty)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'
