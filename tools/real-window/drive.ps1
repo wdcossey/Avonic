@@ -74,6 +74,8 @@ public static class RealInput {
   public static bool MoveTo(IntPtr h, int x, int y) { return SetWindowPos(h, IntPtr.Zero, x, y, 0, 0, 0x1 | 0x4 | 0x10); }
   public static void Down() { mouse_event(2, 0, 0, 0, IntPtr.Zero); }
   public static void Up() { mouse_event(4, 0, 0, 0, IntPtr.Zero); }
+  public static void RightDown() { mouse_event(8, 0, 0, 0, IntPtr.Zero); }
+  public static void RightUp() { mouse_event(0x10, 0, 0, 0, IntPtr.Zero); }
   public static void Wheel(int d) { mouse_event(0x800, 0, 0, unchecked((uint)d), IntPtr.Zero); }
 
   [StructLayout(LayoutKind.Sequential)] struct PT { public int x, y; }
@@ -1464,6 +1466,75 @@ try {
         ClickOn (Named $CT::Button 'Update')
         Start-Sleep -Milliseconds 400
         Check 'a button of the IsOpen alert dismisses it' ([bool](WaitForText 'ThreeAlert dismissed with {values: null}, role none')) (Status)
+        Away
+    }
+
+    # ion-popover (#43): the menu below its button from a real click, the arrow keys through its items (the disabled Delete
+    # skipped), ArrowRight on More opening the submenu with focus in it, ArrowLeft closing it alone, Escape, a click on an item
+    # (dismissOnSelect) and on the backdrop; a hover trigger after 100 ms; a right click opening the context menu at the pointer.
+    # The status line says what each was dismissed with. Only what's on top is aimed at: a click lands on the overlay over the page.
+    Section 'ion-popover' {
+        Open 'ion-popover'
+        $w = $win.Current.BoundingRectangle
+        function PopStatus { FirstText '*dismissed*' }
+        function OpenMenu {
+            ClickOn (Named $CT::Button 'Open the menu')
+            Start-Sleep -Milliseconds 600
+        }
+        # The backdrop: the window's bottom right, below everything the page's popovers put there.
+        function Backdrop { Click ([int]($w.Right - 10 * $scale)) ([int]($w.Bottom - 10 * $scale)); Start-Sleep -Milliseconds 400 }
+
+        OpenMenu
+        Shot 'popover-menu'
+        $trigger = (Named $CT::Button 'Open the menu').Current.BoundingRectangle
+        $copy = (Named $CT::Button 'Copy').Current.BoundingRectangle
+        Check 'a click on the trigger presents the menu below it, at its left' (($copy.X - $trigger.X) -ge -2 -and ($copy.X - $trigger.X) -le 2 -and ($copy.Y - $trigger.Bottom) -ge 0 -and ($copy.Y - $trigger.Bottom) -le (Px 12)) "trigger $trigger, Copy $copy"
+        Key '{DOWN}' 200
+        Key '{DOWN}' 200
+        Check 'ArrowDown twice from the popover focuses the second item' (IsFocused (Named $CT::Button 'Paste')) $AE::FocusedElement.Current.Name
+        Key '{END}' 200
+        Check 'End skips the disabled last item' (IsFocused (Named $CT::Button 'More')) $AE::FocusedElement.Current.Name
+        Key '{RIGHT}' 700
+        Shot 'popover-submenu'
+        Check 'ArrowRight on More opens the submenu and focuses its first item' (IsFocused (Named $CT::Button 'Share')) $AE::FocusedElement.Current.Name
+        Key '{LEFT}' 600
+        Check 'ArrowLeft closes the submenu alone' ([bool](WaitForText 'SubmenuPopover dismissed, role none')) (PopStatus)
+        Check 'and focus is back on More' (IsFocused (Named $CT::Button 'More')) $AE::FocusedElement.Current.Name
+        Key '{ESC}' 600
+        Check 'Escape dismisses the menu with the backdrop role' ([bool](WaitForText 'MenuPopover dismissed, role backdrop')) (PopStatus)
+
+        OpenMenu
+        ClickOn (Named $CT::Button 'Paste')
+        Start-Sleep -Milliseconds 500
+        Check 'a click on an item dismisses it (dismissOnSelect), with no role' ([bool](WaitForText 'MenuPopover dismissed, role none')) (PopStatus)
+        # The pointer rests where Paste was, over the hover trigger once the menu has gone, which opens the hover popover (as
+        # Chromium's mouse events after a layout change would): move away, and close it if it opened.
+        Away
+        if (FirstText 'Opened by hovering*') { Key '{ESC}' 600 }
+        OpenMenu
+        Backdrop
+        Check 'a click on the backdrop dismisses it' ([bool](WaitForText 'MenuPopover dismissed, role backdrop')) (PopStatus)
+
+        $x, $y = Centre (Named $CT::Button 'Hover over me')
+        Guard; Within $x $y
+        [void][RealInput]::SetCursorPos($x, $y)
+        Start-Sleep -Milliseconds 600
+        Shot 'popover-hover'
+        Check 'resting on the hover trigger presents its popover' ([bool](FirstText 'Opened by hovering*')) ((Texts | Select-Object -First 6) -join ' | ')
+        Backdrop
+        Check 'and its backdrop dismisses it' ([bool](WaitForText 'HoverPopover dismissed, role backdrop')) (PopStatus)
+
+        # A right click 30 dips into the area, where the 250-wide menu fits without being pushed in from the right.
+        $area = (Named $CT::Text 'Right-click or long-press here').Current.BoundingRectangle
+        $cx = [int]($w.X + 46 * $scale); $cy = [int]($area.Y + $area.Height / 2)
+        Guard; Within $cx $cy
+        [void][RealInput]::SetCursorPos($cx, $cy); Start-Sleep -Milliseconds 120
+        [RealInput]::RightDown(); Start-Sleep -Milliseconds 50; [RealInput]::RightUp(); Start-Sleep -Milliseconds 600
+        Shot 'popover-context'
+        $cut = Named $CT::Button 'Cut'
+        $cb = if ($cut) { $cut.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'a right click opens the context menu at the pointer' ($cut -and [math]::Abs($cb.X - $cx) -le (Px 2) -and ($cb.Y - $cy) -ge (Px 8) -and ($cb.Y - $cy) -le (Px 11)) "click $cx, $cy; Cut $cb"
+        Key '{ESC}' 500
         Away
     }
 

@@ -1,0 +1,89 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="420">
+            <Button Content="Trigger" Margin="16" VerticalAlignment="Top" />
+            <!-- A popover's template, as it is after its enter animation: the backdrop at 0.32 and the content below the trigger. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+            <Border Width="250" Margin="16,52,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="4"
+                    Background="{DynamicResource Avonic.BackgroundColorBrush}" BoxShadow="{DynamicResource Avonic.Popover.BoxShadow}">
+                <StackPanel Margin="16">
+                    <TextBlock Text="A popover's content" />
+                </StackPanel>
+            </Border>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of popover.md.css, with popover.css's base. The host covers the window; .popover-wrapper rests at opacity 0,
+         which the enter animation takes to 1; .popover-content is placed by the wrapper, a flex column with overflow: auto. -->
+    <ControlTheme x:Key="{x:Type c:AvonicPopover}" TargetType="c:AvonicPopover">
+        <!-- color: var(ion-text-color, #000) -->
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop"
+                                      Visible="{TemplateBinding ShowBackdrop}"
+                                      Tappable="{TemplateBinding BackdropDismiss}" />
+                    <!-- .popover-wrapper: z-index 10, over the backdrop's 2, opacity 0 -->
+                    <c:PopoverPanel Name="PART_Wrapper" ZIndex="10" Opacity="0">
+                        <!-- .popover-content: radius 4, transform-origin left top (right top in RTL, which the mirrored layout gives).
+                             ClipToBounds is off so that it draws its shadow; PART_Clip is overflow: auto's clip. -->
+                        <Border Name="PART_Content" CornerRadius="4" ClipToBounds="False" RenderTransformOrigin="0%,0%">
+                            <Border Name="PART_Clip" ClipToBounds="True" CornerRadius="{Binding $parent[Border].CornerRadius}">
+                                <ScrollViewer Name="PART_Scroll" HorizontalScrollBarVisibility="Disabled">
+                                    <ContentPresenter Name="PART_ContentPresenter" />
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                    </c:PopoverPanel>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- width, min-width, max-width, height, min-height, max-height, and the offsets: var(...) -->
+        <Style Selector="^ /template/ c|PopoverPanel#PART_Wrapper">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Popover.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Popover.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.Popover.MaxWidth}" />
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.Popover.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Popover.MinHeight}" />
+            <Setter Property="ContentMaxHeight" Value="{DynamicResource Avonic.Popover.MaxHeight}" />
+            <Setter Property="OffsetY" Value="{DynamicResource Avonic.Popover.OffsetY}" />
+            <Setter Property="OffsetX">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Popover.OffsetX" />
+                    <DynamicResource ResourceKey="Avonic.Popover.Md.OffsetX" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- :host(.popover-nested.popover-side-left) and the rest: 5 px, or -5, by the side and the direction -->
+        <Style Selector="^:nested /template/ c|PopoverPanel#PART_Wrapper">
+            <Setter Property="OffsetX">
+                <MultiBinding Converter="{x:Static c:PopoverPanel.NestedOffsetX}">
+                    <DynamicResource ResourceKey="Avonic.Popover.OffsetX" />
+                    <DynamicResource ResourceKey="Avonic.Popover.Md.NestedOffsetX" />
+                    <Binding Path="Side" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- background, box-shadow: var(...) -->
+        <Style Selector="^ /template/ Border#PART_Content">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Popover.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Popover.BoxShadow}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
