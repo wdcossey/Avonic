@@ -1,0 +1,306 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="420">
+            <TextBlock Text="The page under the action sheet" Margin="16" />
+            <!-- An action sheet's look, as it is after its enter animation: the backdrop at 0.32 and the wrapper up. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+            <StackPanel VerticalAlignment="Bottom" Background="{DynamicResource Avonic.OverlayBackgroundColorBrush}">
+                <TextBlock Text="Albums" FontSize="16" LineHeight="19" Margin="16,20,16,17"
+                           Foreground="{DynamicResource Avonic.ActionSheet.Color}" />
+                <c:ActionSheetNativeButton Text="Delete" Icon="trash" />
+                <c:ActionSheetNativeButton Text="Share" Icon="share" />
+                <c:ActionSheetNativeButton Text="Cancel" Icon="close" />
+            </StackPanel>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of action-sheet.md.css, with action-sheet.css's base. The host covers the window (inset: 0); touch-action,
+         user-select and font smoothing are hints to the browser. -->
+    <ControlTheme x:Key="{x:Type c:AvonicActionSheet}" TargetType="c:AvonicActionSheet">
+        <!-- font-family: var(ion-font-family, inherit) -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <!-- The tabindex="0" divs around the wrapper, which the focus trap wraps at. -->
+                    <Border Name="PART_SentinelStart" Focusable="True" FocusAdorner="{x:Null}" />
+                    <!-- .action-sheet-wrapper's z-index 10, over the backdrop's 2, on the panel, as ZIndex sorts siblings. -->
+                    <c:ActionSheetPanel Name="PART_Panel" ZIndex="10">
+                        <!-- .action-sheet-wrapper: pointer-events: none, which a Border with no background is; it rests at
+                             translate3d(0, 100%, 0), off the bottom, until the enter animation brings it up. -->
+                        <Border Name="PART_Wrapper">
+                            <!-- .action-sheet-container: a column at the end -->
+                            <c:ActionSheetContainer Name="PART_Container">
+                                <!-- .action-sheet-group: flex-shrink: 2; overflow-y: auto, so it shrinks and scrolls -->
+                                <Border Name="PART_Group" c:ActionSheetContainer.Shrinks="True">
+                                    <ScrollViewer Name="PART_GroupScroller" Theme="{StaticResource Avonic.ActionSheet.Scroller}">
+                                        <StackPanel>
+                                            <!-- .action-sheet-title, when there's a header; the sub title inside it -->
+                                            <Border Name="PART_Title"
+                                                    IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                <StackPanel>
+                                                    <TextBlock Name="PART_TitleText" Text="{TemplateBinding Header}" TextWrapping="Wrap"
+                                                               IsVisible="{TemplateBinding Header, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                    <TextBlock Name="PART_SubTitle" Text="{TemplateBinding SubHeader}" TextWrapping="Wrap"
+                                                               IsVisible="{TemplateBinding SubHeader, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                </StackPanel>
+                                            </Border>
+                                            <StackPanel Name="PART_Buttons" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Border>
+                                <!-- .action-sheet-group-cancel: flex-shrink: 0; overflow: hidden -->
+                                <Border Name="PART_CancelGroup" IsVisible="False" ClipToBounds="True" />
+                            </c:ActionSheetContainer>
+                        </Border>
+                    </c:ActionSheetPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" FocusAdorner="{x:Null}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- width, min-width, max-width, height, min-height, max-height: var(...) -->
+        <Style Selector="^ /template/ c|ActionSheetPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.ActionSheet.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.ActionSheet.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.ActionSheet.MaxWidth}" />
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.ActionSheet.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.ActionSheet.MinHeight}" />
+            <Setter Property="ContentMaxHeight">
+                <MultiBinding Converter="{x:Static c:ActionSheetPanel.MaxHeightConverter}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.MaxHeight" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .action-sheet-wrapper: transform: translate3d(0, 100%, 0) at rest -->
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="b:Css.TranslateY" Value="1" />
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .action-sheet-container: max-height: calc(100dvh - (ion-safe-area-top + ion-safe-area-bottom)), so the group still
+             shrinks and scrolls when the wrapper's own max-height is larger, or none -->
+        <Style Selector="^ /template/ c|ActionSheetContainer#PART_Container">
+            <Setter Property="MaxHeight">
+                <MultiBinding Converter="{x:Static c:ActionSheetPanel.ContainerMaxHeightConverter}">
+                    <Binding Path="$parent[c:AvonicActionSheet].Bounds.Height" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaTop" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .action-sheet-group: background: var(background); the last one's padding-bottom: var(ion-safe-area-bottom) -->
+        <Style Selector="^ /template/ Border#PART_Group, ^ /template/ Border#PART_CancelGroup">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.Background" />
+                    <DynamicResource ResourceKey="Avonic.OverlayBackgroundColorBrush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.Md.NoPadding" />
+                    <DynamicResource ResourceKey="Avonic.SafeAreaBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <!-- With a cancel group after it, the first group isn't the last -->
+        <Style Selector="^:has-cancel /template/ Border#PART_Group">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="^:has-cancel /template/ Border#PART_CancelGroup">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- .action-sheet-title: padding 20px 16px 17px; min-height: 60px; color: var(color); font-size: 1rem; text-align: start;
+             line-height: normal, 19 at 16 px -->
+        <Style Selector="^ /template/ Border#PART_Title">
+            <Setter Property="Padding" Value="16,20,16,17" />
+            <Setter Property="MinHeight" Value="60" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource Avonic.ActionSheet.Color}" />
+        </Style>
+        <Style Selector="^ /template/ TextBlock#PART_TitleText">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="LineHeight" Value="19" />
+        </Style>
+        <!-- .action-sheet-sub-title: padding-top: 16px; font-size: 0.875rem; line-height: normal, 16 at 14 px -->
+        <Style Selector="^ /template/ TextBlock#PART_SubTitle">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineHeight" Value="16" />
+            <Setter Property="Margin" Value="0,16,0,0" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .action-sheet-button: padding 12px 16px; min-height: 52px; font-size: 1rem; text-align: start; background and color from
+         the variables; overflow: hidden; line-height: 1 (normalize.css's button). Chromium centres a button's content. -->
+    <ControlTheme x:Key="{x:Type c:ActionSheetNativeButton}" TargetType="c:ActionSheetNativeButton">
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="MinHeight" Value="52" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{DynamicResource Avonic.ActionSheet.ButtonBackground}" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" ClipToBounds="True">
+                    <Panel>
+                        <!-- ::after: inset 0, at an opacity by state -->
+                        <Border Name="PART_Highlight" Opacity="0" />
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <!-- .action-sheet-button-inner: a flex row, align-items: center, justify-content: flex-start; z-index 1 -->
+                        <c:FlexRow Name="PART_Inner" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                   IsHitTestVisible="False">
+                            <!-- .action-sheet-icon: 1.5rem, margin-inline-end 32px, color: var(color). FlexRow shrinks it below its
+                                 24 px beside a long label, as ion-icon's contain: strict lets Chromium (14.78 wide at 390). -->
+                            <c:AvonicIcon Name="PART_Icon" Icon="{TemplateBinding Icon}" FontSize="24" Margin="0,0,32,0"
+                                          VerticalAlignment="Center"
+                                          IsVisible="{TemplateBinding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <TextBlock Name="PART_Label" Text="{TemplateBinding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                        </c:FlexRow>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^ /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.ActionSheet.Color}" />
+        </Style>
+        <!-- line-height: 1. A TextBlock clips to its line height and keeps the line at the top; CSS's never clips and splits the
+             leading. -->
+        <Style Selector="^ /template/ TextBlock#PART_Label">
+            <Setter Property="LineHeight" Value="{Binding $parent[c:ActionSheetNativeButton].FontSize}" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.HalfLeading}">
+                    <Binding Path="FontFamily" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FontWeight" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="LineHeight" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding $parent[c:ActionSheetNativeButton].Foreground}" />
+        </Style>
+
+        <!-- .action-sheet-selected: color, the ::after, and md's font-weight: bold -->
+        <Style Selector="^:selected">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColorSelected" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:selected /template/ Border#PART_Highlight">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonBackgroundSelected" />
+                    <Binding Path="$parent[c:ActionSheetNativeButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.ActionSheet.ButtonBackgroundSelectedOpacity}" />
+        </Style>
+
+        <!-- :disabled: color: var(button-color-disabled); opacity: 0.4, over the whole button; the icon in currentColor -->
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColorDisabled" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.ActionSheet.Md.DisabledMask}" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+        <Style Selector="^:disabled /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="Foreground" Value="{Binding $parent[c:ActionSheetNativeButton].Foreground}" />
+        </Style>
+
+        <!-- .ion-activated: color and the ::after. md's are transparent, at 0: the ripple shows the press. -->
+        <Style Selector="^:activated">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColorActivated" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:activated /template/ Border#PART_Highlight">
+            <Setter Property="Background" Value="{DynamicResource Avonic.ActionSheet.ButtonBackgroundActivated}" />
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.ActionSheet.ButtonBackgroundActivatedOpacity}" />
+        </Style>
+
+        <!-- .ion-focused:not(.ion-activated): color and the ::after, currentColor at 0.12. md sets button-background-focused, so
+             a selected button's fallback to button-background-selected never applies. -->
+        <Style Selector="^:ion-focused:not(:activated)">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColorFocused" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused:not(:activated) /template/ Border#PART_Highlight">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonBackgroundFocused" />
+                    <Binding Path="$parent[c:ActionSheetNativeButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.ActionSheet.ButtonBackgroundFocusedOpacity}" />
+        </Style>
+
+        <!-- @media (any-hover: hover) :not(:disabled):hover, for a mouse or a pen: color and the ::after, currentColor at 0.04.
+             Last, as it's last and as specific in CSS. -->
+        <Style Selector="^:ion-hover:not(:disabled)">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColorHover" />
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonColor" />
+                    <DynamicResource ResourceKey="Avonic.TextColorStep150Brush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-hover:not(:disabled) /template/ Border#PART_Highlight">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ActionSheet.ButtonBackgroundHover" />
+                    <Binding Path="$parent[c:ActionSheetNativeButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.ActionSheet.ButtonBackgroundHoverOpacity}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

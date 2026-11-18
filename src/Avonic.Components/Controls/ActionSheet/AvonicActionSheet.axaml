@@ -1,0 +1,85 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The action sheet's group: only a presenter, as a phone's scroll bar is hidden (any-pointer: coarse), with the recognizer
+         that lets a finger scroll it, as overflow-y: auto does. -->
+    <ControlTheme x:Key="Avonic.ActionSheet.Scroller" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="False"
+                                                 CanVerticallyScroll="True"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- ion-action-sheet: structure only. The look is in Avonic.Themes/Controls/AvonicActionSheet.axaml. The host covers the overlay
+         layer: the backdrop, then a focusable sentinel, the wrapper placed by the panel at the bottom, and another sentinel, as
+         Ionic's tabindex="0" divs, so that Tab wraps inside. The sheet fills the buttons in code. -->
+    <ControlTheme x:Key="{x:Type c:AvonicActionSheet}" TargetType="c:AvonicActionSheet">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <Border Name="PART_SentinelStart" Focusable="True" />
+                    <c:ActionSheetPanel Name="PART_Panel" ZIndex="10">
+                        <Border Name="PART_Wrapper">
+                            <c:ActionSheetContainer Name="PART_Container">
+                                <Border Name="PART_Group" c:ActionSheetContainer.Shrinks="True">
+                                    <ScrollViewer Name="PART_GroupScroller" Theme="{StaticResource Avonic.ActionSheet.Scroller}">
+                                        <StackPanel>
+                                            <Border Name="PART_Title"
+                                                    IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                <StackPanel>
+                                                    <TextBlock Name="PART_TitleText" Text="{TemplateBinding Header}" TextWrapping="Wrap"
+                                                               IsVisible="{TemplateBinding Header, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                    <TextBlock Name="PART_SubTitle" Text="{TemplateBinding SubHeader}" TextWrapping="Wrap"
+                                                               IsVisible="{TemplateBinding SubHeader, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                </StackPanel>
+                                            </Border>
+                                            <StackPanel Name="PART_Buttons" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Border>
+                                <Border Name="PART_CancelGroup" IsVisible="False" />
+                            </c:ActionSheetContainer>
+                        </Border>
+                    </c:ActionSheetPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <!-- .action-sheet-group-cancel, rendered only with a cancel button -->
+        <Style Selector="^:has-cancel /template/ Border#PART_CancelGroup">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .action-sheet-button: the native button, the ::after highlight, md's ripple, and the icon and the text in a flex row. -->
+    <ControlTheme x:Key="{x:Type c:ActionSheetNativeButton}" TargetType="c:ActionSheetNativeButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <Panel>
+                        <Border Name="PART_Highlight" />
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <c:FlexRow Name="PART_Inner">
+                            <c:AvonicIcon Name="PART_Icon" Icon="{TemplateBinding Icon}"
+                                          IsVisible="{TemplateBinding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <TextBlock Name="PART_Label" Text="{TemplateBinding Text}" TextWrapping="Wrap" />
+                        </c:FlexRow>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
