@@ -128,7 +128,10 @@ public sealed class DatetimeCalendarDay : Button
     internal static IBrush? ParseBrush(string? text) =>
         !string.IsNullOrWhiteSpace(text) && Behaviors.CssBoxShadow.TryParseColor(text, out var color) ? new ImmutableSolidColorBrush(color) : null;
 
-    /// <summary>CSS's <c>border</c> shorthand: a width in px, a style (none hides it), and a colour, in any order.</summary>
+    /// <summary>
+    /// CSS's <c>border</c> shorthand: a width (a length, or thin, medium, thick), a style, and a colour, in any order. The shorthand
+    /// resets what it leaves out: no style is <c>none</c>, so no border; no width is medium, 3px; no colour is currentColor (null here).
+    /// </summary>
     internal static (double? Thickness, IBrush? Brush) ParseBorder(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -138,20 +141,27 @@ public sealed class DatetimeCalendarDay : Button
 
         double? width = null;
         IBrush? brush = null;
-        var none = false;
-        foreach (var token in SplitCss(text))
+        var visible = false;
+        foreach (var token in Behaviors.CssBoxShadow.Split(text, ' '))
         {
-            if (token.EndsWith("px", StringComparison.OrdinalIgnoreCase)
-                && double.TryParse(token[..^2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w))
+            var lower = token.ToLowerInvariant();
+            if (lower is "thin" or "medium" or "thick")
+            {
+                width = lower switch { "thin" => 1, "medium" => 3, _ => 5 };
+            }
+            else if (double.TryParse(lower.EndsWith("px", StringComparison.Ordinal) ? lower[..^2] : lower,
+                         System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w)
+                     && (w == 0 || lower.EndsWith("px", StringComparison.Ordinal)))
             {
                 width = w;
             }
-            else if (token is "none" or "hidden")
+            else if (lower is "none" or "hidden")
             {
-                none = true;
+                visible = false;
             }
-            else if (token is "solid" or "dashed" or "dotted" or "double" or "groove" or "ridge" or "inset" or "outset")
+            else if (lower is "solid" or "dashed" or "dotted" or "double" or "groove" or "ridge" or "inset" or "outset")
             {
+                visible = true;
             }
             else if (ParseBrush(token) is { } b)
             {
@@ -159,40 +169,7 @@ public sealed class DatetimeCalendarDay : Button
             }
         }
 
-        if (none)
-        {
-            return (0, null);
-        }
-
-        // CSS's default width is medium, 3px, and the default colour currentColor, which the theme's foreground gives.
-        return (width ?? 3, brush);
-    }
-
-    /// <summary>Splits at spaces outside brackets, so that <c>rgb(0, 128, 0)</c> is one token.</summary>
-    private static IEnumerable<string> SplitCss(string text)
-    {
-        var depth = 0;
-        var start = 0;
-        for (var i = 0; i <= text.Length; i++)
-        {
-            if (i == text.Length || (text[i] == ' ' && depth == 0))
-            {
-                if (i > start)
-                {
-                    yield return text[start..i];
-                }
-
-                start = i + 1;
-            }
-            else if (text[i] == '(')
-            {
-                depth++;
-            }
-            else if (text[i] == ')')
-            {
-                depth--;
-            }
-        }
+        return visible ? (width ?? 3, brush) : (0, null);
     }
 }
 
@@ -227,9 +204,6 @@ public sealed class DatetimeCalendarMonth : Panel
     internal int Month { get; set; }
 
     internal int Year { get; set; }
-
-    /// <summary>Ionic's <c>calendar-month-disabled</c>: outside min and max, so it can't be swiped to.</summary>
-    internal bool IsSwipeDisabled { get; set; }
 
     static DatetimeCalendarMonth()
     {

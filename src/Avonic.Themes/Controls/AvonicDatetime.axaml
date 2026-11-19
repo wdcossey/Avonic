@@ -43,7 +43,7 @@
             <Setter Property="Opacity" Value="0.04" />
         </Style>
         <Style Selector="^:disabled">
-            <Setter Property="Opacity" Value="0.3" />
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Datetime.Md.MonthYearDisabledMask}" />
         </Style>
     </ControlTheme>
 

@@ -78,7 +78,8 @@ public readonly struct DatetimeValue : IEquatable<DatetimeValue>
 
     public static implicit operator DatetimeValue(string? value) => new(value);
 
-    public static implicit operator DatetimeValue(string[] values) => new(values);
+    /// <summary>A list; a null one is no value.</summary>
+    public static implicit operator DatetimeValue(string[]? values) => values is null ? new((string?)null) : new(values);
 
     public static implicit operator DatetimeValue(List<string> values) => new(values);
 

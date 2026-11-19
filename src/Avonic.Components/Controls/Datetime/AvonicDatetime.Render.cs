@@ -39,6 +39,7 @@ public partial class AvonicDatetime
     private SmoothScroll? _smooth;
     private IDisposable? _scrollRest;
     private bool _rendering;
+    private bool _renderAgain;
     private IDisposable? _wheelVariables;
 
     internal ScrollViewer? CalendarBody => _calendarBody;
@@ -265,8 +266,15 @@ public partial class AvonicDatetime
     /// <summary>Ionic's <c>render()</c>: every part from the state. Cheap enough to run after each change.</summary>
     internal void Render()
     {
-        if (!_loaded || _rendering)
+        if (!_loaded)
         {
+            return;
+        }
+
+        if (_rendering)
+        {
+            // Asked for during a render: run again once this one ends, so that the parts show the state as it is then.
+            _renderAgain = true;
             return;
         }
 
@@ -294,6 +302,13 @@ public partial class AvonicDatetime
         finally
         {
             _rendering = false;
+        }
+
+        if (_renderAgain)
+        {
+            _renderAgain = false;
+            Render();
+            return;
         }
 
         if (_prevPresentation is { } previous && previous != Presentation)
@@ -499,7 +514,7 @@ public partial class AvonicDatetime
                 isPadding ? null : DatetimeIntl.DayAriaLabel(culture, reference, isToday),
                 isPadding: isPadding,
                 isActive: isActive,
-                isToday: isToday && !isPadding && !cell.IsAdjacentDay,
+                isToday: isToday && !isPadding,
                 isDayDisabled: isCalDayDisabled && !isPadding,
                 isConstrained: isCalDayDisabled && isDatetimeDisabled,
                 isAdjacent: cell.IsAdjacentDay,
@@ -508,7 +523,6 @@ public partial class AvonicDatetime
                 highlight: style);
         }
 
-        monthPanel.IsSwipeDisabled = !isWorkingMonth && swipeDisabled;
         return isWorkingMonth || !swipeDisabled;
     }
 
@@ -852,6 +866,11 @@ public partial class AvonicDatetime
             {
                 SetYearFirstAlignment(column, null);
             }
+        }
+
+        foreach (var gone in picker.Items.OfType<AvonicPickerColumn>().Except(columns).ToList())
+        {
+            SetYearFirstAlignment(gone, null);
         }
 
         if (!picker.Items.OfType<AvonicPickerColumn>().SequenceEqual(columns))

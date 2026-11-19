@@ -86,6 +86,29 @@ public class DatetimeUtilsTests
     }
 
     [Fact]
+    public void ValidateParts_Keeps_A_Date_Clamped_To_Max_Whole()
+    {
+        // ADR 0005: Ionic cuts the 29th to February's 28 days after clamping to max, writing 2021-01-28, past max.
+        var max = new DatetimeParts(1, 15, 2021, 23, 59);
+        Assert.Equal(max, DatetimeUtils.ValidateParts(new DatetimeParts(2, 29, 2021, 10, 0), null, max));
+    }
+
+    [Theory]
+    [InlineData("1px solid green", 1, true)]
+    [InlineData("1px green", 0, false)]
+    [InlineData("red", 0, false)]
+    [InlineData("0 solid red", 0, true)]
+    [InlineData("thin solid blue", 1, true)]
+    [InlineData("solid", 3, false)]
+    [InlineData("2px dashed rgb(0, 128, 0)", 2, true)]
+    public void A_Highlight_Border_Reads_Css_Shorthand(string css, double width, bool hasColour)
+    {
+        var (thickness, brush) = DatetimeCalendarDay.ParseBorder(css);
+        Assert.Equal(width, thickness);
+        Assert.Equal(hasColour, brush is not null);
+    }
+
+    [Fact]
     public void B19_Day_Arithmetic_Crosses_Months_And_Years_And_Keeps_The_Day_In_The_Month()
     {
         Assert.Equal(new DatetimeParts(7, 1, 2023), DatetimeUtils.GetNextDay(new DatetimeParts(6, 30, 2023)));

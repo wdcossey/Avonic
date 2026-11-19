@@ -269,7 +269,7 @@ public static class CssBoxShadow
     }
 
     // Splits at a separator outside parentheses, dropping empty pieces for spaces.
-    private static List<string> Split(string text, char separator)
+    internal static List<string> Split(string text, char separator)
     {
         var pieces = new List<string>();
         var depth = 0;

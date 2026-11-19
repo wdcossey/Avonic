@@ -90,6 +90,7 @@ the time button 83 x 31 at 251).
 | B31 | Hidden in an overlay, the month/year wheel closes | **deliberate**: closed at the parent overlay's next present, as Avalonia doesn't say when an ancestor hides; the same as the picker's known gap |
 | B32 | The locale | see below |
 | B33 | An adjacent day with the default buttons | **deliberate** ([ADR 0005](../../decisions/0005-dont-copy-an-ionic-bug.md)): Ionic confirms at once (`adjacent`), Avonic waits for Done; `docs/infra/ionic-issues.md` |
+| B35 | A date clamped to `max` and then cut to the month asked for | **deliberate** (ADR 0005, read in `manipulation.js`): Ionic can write a date past max (2021-01-28 for max 2021-01-15) and move max itself; Avonic cuts only a date that wasn't clamped; `docs/infra/ionic-issues.md` |
 | B34 | Done with nothing chosen on a `time`, `month` or `year` wheel | **deliberate** (ADR 0005): Ionic writes no value (`confirmNoSelectionTime`), Avonic the time shown, as Ionic's comment means; `docs/infra/ionic-issues.md` |
 
 Two inputs Ionic draws as garbage, which Avonic shows sensibly (read in `datetime.js`, not measured): a time alone (`"13:47"`) in a

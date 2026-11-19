@@ -354,7 +354,9 @@ internal static partial class DatetimeUtils
     {
         var copy = ClampDate(parts, min, max);
         var numDays = GetNumDaysInMonth(parts.Month, parts.Year);
-        if (parts.Day is { } day && numDays < day)
+        // Ionic cuts the day to the month asked for even when min or max replaced the date, which can give a date past them
+        // (ADR 0005, docs/infra/ionic-issues.md): only a date that wasn't clamped is cut.
+        if (parts.Day is { } day && numDays < day && copy == parts)
         {
             copy = copy with { Day = numDays };
         }

@@ -137,6 +137,7 @@ Deliberately not as Ionic ([ADR 0005](../../decisions/0005-dont-copy-an-ionic-bu
 - **Done with nothing chosen on a `Time`, `Month`, `MonthYear` or `Year` wheel writes what the wheel shows**, as Ionic's comment says
   it means; Ionic writes no value there.
 
+- **A date clamped to `Max` stays inside it**: Ionic's `validateParts` can then cut its day to another month's length, past max.
 - **A time alone in a calendar presentation** shows today's month with the time, where Ionic draws "Invalid Date"; a negative
   `FirstDayOfWeek` counts back from Sunday, where Ionic's grid breaks.
 

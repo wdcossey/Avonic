@@ -600,6 +600,11 @@ public class AvonicDatetimeTests
         scene.Window.KeyPressQwerty(PhysicalKey.ArrowLeft, RawInputModifiers.None);
         Settle(clock, 50);
         Assert.Equal(14, ((DatetimeCalendarDay)TopLevel.GetTopLevel(datetime)!.FocusManager!.GetFocusedElement()!).Parts.Day);
+
+        // Page Up to May 14, before min: nothing, not even the month.
+        scene.Window.KeyPressQwerty(PhysicalKey.PageUp, RawInputModifiers.None);
+        Settle(clock, 50);
+        Assert.Equal("June 2023", MonthShown(datetime));
     });
 
     [AvaloniaFact]
@@ -879,5 +884,34 @@ public class AvonicDatetimeTests
         Settle(clock, 100);
         Assert.Equal(1, rendered);
         Assert.False(datetime.ShowMonthAndYear);
+    });
+
+    // ── Review pass 2 ────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void An_Adjacent_Day_That_Is_Today_Has_The_Today_Ring() => Run((scene, clock) =>
+    {
+        AvonicDatetime.Now = () => new DateTime(2023, 7, 1, 10, 0, 0);
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15, ShowAdjacentDays = true });
+        var july1 = datetime.CalendarMonths!.Months[1].Days.First(d => d.IsVisible && d.IsAdjacent && d.Parts.Day == 1);
+        Assert.True(july1.IsToday);
+        Assert.Equal(new Thickness(1), july1.BorderThickness);
+    });
+
+    [AvaloniaFact]
+    public void A_Null_List_Is_No_Value() => Run((scene, clock) =>
+    {
+        string[]? none = null;
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Multiple = true, Value = none });
+        Assert.Empty(ActiveDays(datetime));
+    });
+
+    [AvaloniaFact]
+    public void The_Month_Year_Button_Fades_As_One_When_Disabled() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15, IsEnabled = false });
+        var toggle = Part<Button>(datetime, "PART_MonthYearButton");
+        Assert.Equal(0.3, toggle.OpacityMask!.Opacity, 3);
+        Assert.Equal(1, toggle.Opacity);
     });
 }

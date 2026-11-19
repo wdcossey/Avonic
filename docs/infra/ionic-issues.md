@@ -182,3 +182,15 @@ theirs too. `!this.isGridStyle` in place of `preferWheel` would fix it.
 
 **Avonic** writes the working parts for every wheel presentation (`B34_Done_With_Nothing_Chosen_On_A_Time_Wheel_Writes_What_It_Shows`).
 Fairly sure: the comment says what's meant, but an app could rely on no value.
+
+## `ion-datetime`: a wheel can write a date past `max`
+
+**Read in `utils/manipulation.js` (#46); not measured.** `validateParts` clamps the parts to `min` and `max` (`clampDate` returns
+`maxParts` itself), and then, if the day asked for is past the end of the month asked for, sets the day of that clamped copy, which is
+`maxParts`, to the length of the month asked for. With `max="2021-01-15"` on a date wheel, the 29th of February 2020 moved to 2021
+gives 2021-02-29, past max, so it's clamped to 2021-01-15, and then cut to February's 28 days: the value is `2021-01-28T23:59:00`,
+13 days past max, and `maxParts` itself is now the 28th, so max has moved for the rest of the datetime's life. Cutting the day only
+when the parts weren't clamped would fix both.
+
+**Avonic** cuts the day only when the date wasn't clamped (`ValidateParts_Keeps_A_Date_Clamped_To_Max_Whole`), and its parts are
+values, so max can't move. Fairly sure, from the code.
