@@ -115,4 +115,16 @@ public class DatetimeIntlTests
             .ToList();
         Assert.True(wrong.Count == 0, string.Join("\n", wrong));
     }
+
+    [Fact]
+    public void Short_Day_Names_Are_Cut_To_A_Letter_As_Linux_Gives_Them()
+    {
+        // Linux's .NET gives ShortestDayNames as Su, Mo …; Windows' as S, M ….
+        var culture = (CultureInfo)CultureInfo.GetCultureInfo("en-US").Clone();
+        culture.DateTimeFormat.ShortestDayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+        Assert.Equal(["S", "M", "T", "W", "T", "F", "S"], DatetimeIntl.DaysOfWeek(culture, 0));
+        var chinese = (CultureInfo)CultureInfo.GetCultureInfo("zh-CN").Clone();
+        chinese.DateTimeFormat.ShortestDayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+        Assert.Equal("周日", DatetimeIntl.DaysOfWeek(chinese, 0)[0]);
+    }
 }
