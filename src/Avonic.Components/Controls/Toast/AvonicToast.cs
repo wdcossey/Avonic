@@ -389,8 +389,8 @@ public partial class AvonicToast : AvonicOverlay
     {
         _presented = true;
         Reveal(true);
-        // setTimeout takes any number; a TimeSpan doesn't, so one too long for it (infinity, say) never comes.
-        if (Duration > 0 && Duration < TimeSpan.MaxValue.TotalMilliseconds)
+        // A browser's setTimeout overflows past 2^31 - 1 ms; a timer here throws, so a duration that long (infinity, say) never comes.
+        if (Duration > 0 && Duration <= int.MaxValue)
         {
             _durationTimeout = AvonicConfig.Schedule(() => DismissFromInput("timeout"), TimeSpan.FromMilliseconds(Duration));
         }

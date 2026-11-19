@@ -79,6 +79,7 @@ Boxes are x, y, width, height in the window, with the render transform (`getBoun
 | Escape over an alert with a toast on top | nothing | the alert is dismissed | Deliberate: an Ionic bug, `docs/infra/ionic-issues.md` (B12) |
 | Tab from the page | never reaches the buttons | reaches them after the page's last | Deliberate: an Ionic bug, `docs/infra/ionic-issues.md` (B21) |
 | Stacking | 60000 + the index; a later toast over an earlier, in the same place | the same | Match (B13) |
+| A toast over an open menu | the menu's focus trap is off while it shows (`menu.handleFocus` takes every overlay) | the same: `AvonicMenu` defers to the top overlay, toasts included | Match, Ionic's, left as the menu has it; its back skips a toast, as the overlays' own |
 | Swipe at the bottom and the top | 1:1 after 10 px; under half back, over it out and `gesture` with no leave; the release played over a 200 ms animation from the step, or faster with a flick | the same, on the clock: 20 px back in 36 ms, 50 px out in 57 ms | Match (B14) |
 | Swipe in the middle | either way, a quarter | the same | Match (B15) |
 | `swipeGesture` while presented | made and destroyed | the same | Match (B16) |
@@ -93,7 +94,7 @@ Boxes are x, y, width, height in the window, with the render transform (`getBoun
 | White space | `normal` collapses runs, `pre-line` keeps breaks | the same, by `ToastContent.WhiteSpaceText` | Match (B20); `break-spaces` is kept as `pre-wrap` |
 | Button groups too wide for the line | `flex-shrink` down to their min-content | not shrunk; clipped | Gap: not reached by any measured case; a button's text wraps in Chromium before it's cut here |
 | Message as HTML | with `innerHTMLTemplatesEnabled` only | plain text | Deliberate, as the alert |
-| `duration` too long for a timer (`Infinity`) | a browser's `setTimeout` overflows past 2^31 - 1 ms and fires at once (not measured) | never dismissed by itself | Deliberate: a `TimeSpan` can't hold it, and "forever" is what an app means (B7) |
+| `duration` too long for a timer (over 2^31 - 1 ms, `Infinity`) | a browser's `setTimeout` overflows past 2^31 - 1 ms and fires at once (not measured) | never dismissed by itself | Deliberate: a `TimeSpan` can't hold it, and "forever" is what an app means (B7) |
 
 ## Not tried
 

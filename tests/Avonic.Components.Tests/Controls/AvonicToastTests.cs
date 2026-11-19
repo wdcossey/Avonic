@@ -325,6 +325,24 @@ public class AvonicToastTests
         var present = toast.Present(stage.Window);
         stage.At(Entered);
         Assert.True(present.IsCompletedSuccessfully);
+
+        // Past 2^31 - 1 ms Avalonia's DispatcherTimer, the scheduler outside tests, throws (its Interval must fit an int of ms): such
+        // a duration never comes either. The clock's scheduler, made to throw as that one does.
+        var testSchedule = AvonicConfig.Schedule;
+        try
+        {
+            AvonicConfig.Schedule = (callback, delay) => delay.TotalMilliseconds > int.MaxValue
+                ? throw new ArgumentOutOfRangeException(nameof(delay), "TimeSpan period must be less than or equal to Int32.MaxValue.")
+                : testSchedule(callback, delay);
+            var tooLong = Watch(stage, new AvonicToast { Message = "Too long for a timer", Duration = 3e9 }, "2:");
+            var second = tooLong.Present(stage.Window);
+            stage.At(Entered * 2);
+            Assert.True(second.IsCompletedSuccessfully);
+        }
+        finally
+        {
+            AvonicConfig.Schedule = testSchedule;
+        }
         stage.Log.Clear();
         stage.At(5000);
         Assert.Empty(stage.Log);

@@ -80,7 +80,8 @@ internal sealed class OverlayHost : Panel
 
     /// <summary>
     /// Ionic <c>getPresentedOverlay(document)</c> for <paramref name="topLevel"/>, without making it a host: the top overlay there, or
-    /// null. For what isn't an overlay and defers to one, as <c>ion-menu</c>'s focus trap and back button do.
+    /// null, toasts included. For what isn't an overlay and defers to one, as <c>ion-menu</c>'s focus trap does, as Ionic's; a back
+    /// button defers to <see cref="BackTargetIn"/>, which skips toasts.
     /// </summary>
     internal static AvonicOverlay? PresentedOverlayIn(TopLevel topLevel) =>
         s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
