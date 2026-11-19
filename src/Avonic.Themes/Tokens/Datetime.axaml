@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-datetime's variables, with datetime.md.css's values. A CssUnset key is one md leaves unset, which the theme reads
+         through to the next value. -->
+
+    <!-- background: var(ion-color-step-100, var(ion-background-color-step-100, #ffffff)). Ionic's light theme sets neither step,
+         so the literal; Palettes/Dark.axaml follows Avonic.BackgroundColorStep100, which dark sets. -->
+    <SolidColorBrush x:Key="Avonic.Datetime.Background" Color="#FFFFFF" />
+    <!-- Only datetime.ios.css reads background-rgb (the ios wheel fades); md reads nothing. -->
+    <b:CssUnset x:Key="Avonic.Datetime.BackgroundRgb" />
+    <!-- title-color: var(ion-color-primary-contrast, #fff); with a color, the colour's contrast. -->
+    <SolidColorBrush x:Key="Avonic.Datetime.TitleColor" Color="{DynamicResource Avonic.Color.PrimaryContrast}" />
+    <!-- Passed to the wheels' ion-picker as fade-background-rgb, highlight-background and highlight-border-radius: unset in md,
+         so the picker's own (Tokens/Picker.axaml). -->
+    <b:CssUnset x:Key="Avonic.Datetime.WheelFadeBackgroundRgb" />
+    <b:CssUnset x:Key="Avonic.Datetime.WheelHighlightBackground" />
+    <b:CssUnset x:Key="Avonic.Datetime.WheelHighlightBorderRadius" />
+
+    <!-- md literals with no variable, where a global step falls back to a literal Ionic's light theme doesn't set. The time
+         button's background: var(ion-color-step-300, var(ion-background-color-step-300, #edeef0)). Palettes/Dark.axaml follows
+         Avonic.BackgroundColorStep300, which dark sets. -->
+    <SolidColorBrush x:Key="Avonic.Datetime.Md.TimeButtonBackground" Color="#EDEEF0" />
+
+</ResourceDictionary>

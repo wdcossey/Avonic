@@ -1,0 +1,412 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="16">
+            <c:AvonicDatetime Value="2023-06-15T13:47:00" ShowDefaultTitle="True" ShowDefaultButtons="True" />
+            <c:AvonicDatetime Value="2023-06-15T13:47:00" Presentation="Date" PreferWheel="True" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- The month/year button: .calendar-month-year-toggle. padding 12px 16px 12px 20px, min-height 48px, the text in the step-650
+         grey (ion-text-color-step-350, #595959, which Avonic.TextColorStep350 is), a ripple, and a 0.04 overlay of its colour when
+         focused by the keyboard or hovered by a mouse. Disabled at 0.3. -->
+    <ControlTheme x:Key="Avonic.Datetime.MonthYearButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep350Brush}" />
+        <Setter Property="Padding" Value="20,12,16,12" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="b:Activatable.IsEnabled" Value="True" />
+        <Setter Property="b:FocusVisible.IsEnabled" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <Border Name="PART_Overlay" Background="{TemplateBinding Foreground}" Opacity="0" IsHitTestVisible="False" />
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      Padding="{TemplateBinding Padding}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    <c:AvonicRippleEffect Name="PART_Ripple" Foreground="{TemplateBinding Foreground}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0.04" />
+        </Style>
+        <Style Selector="^:ion-hover:not(:ion-focused) /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0.04" />
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+    </ControlTheme>
+
+    <!-- The time button: .time-body. radius 8, padding 6px 12px, the step-300 background (#edeef0), the text colour. -->
+    <ControlTheme x:Key="Avonic.Datetime.TimeButton" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource Avonic.Datetime.Md.TimeButtonBackground}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A day of the grid: .calendar-day. 42 x 42, a circle, 0.875rem, the text colour (currentColor). Today: a 1px ring and text
+         in the accent (primary, or the colour's base); selected: the accent behind contrast text; adjacent days in step-500 grey
+         (gray); disabled at 0.4 (not when read-only, unless the day is constrained); focused, the accent at 0.2 behind it with a
+         4px ring of the same. -->
+    <ControlTheme x:Key="{x:Type c:DatetimeCalendarDay}" TargetType="c:DatetimeCalendarDay">
+        <Setter Property="Width" Value="42" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="ClickMode" Value="Release" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Focus" CornerRadius="21" Margin="-4" Opacity="0" IsHitTestVisible="False"
+                            Background="{Binding $parent[c:DatetimeCalendarDay].(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.2}" />
+                    <Border Name="PART_Day"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:today">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{Binding $self.(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+            <Setter Property="Foreground" Value="{Binding $self.(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+        </Style>
+        <Style Selector="^:adjacent-day">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep500Brush}" />
+        </Style>
+        <Style Selector="^:focus:not(:adjacent-day)">
+            <Setter Property="Background" Value="{Binding $self.(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=0.2}" />
+        </Style>
+        <Style Selector="^:focus:not(:adjacent-day) /template/ Border#PART_Focus">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="^:active">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{Binding $self.(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+            <Setter Property="Background" Value="{Binding $self.(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+            <Setter Property="Foreground" Value="{Binding $self.(c:DatetimeCalendarDay.AccentContrastColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <!-- :host(.datetime-readonly) .calendar-day[disabled]:not(.calendar-day-constrained) { opacity: 1 } -->
+        <Style Selector="^:readonly:disabled:not(:constrained)">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </ControlTheme>
+
+    <!-- A month: .calendar-month-grid, padding 4px 10px. -->
+    <ControlTheme x:Key="{x:Type c:DatetimeCalendarMonth}" TargetType="c:DatetimeCalendarMonth">
+        <Setter Property="Padding" Value="10,4" />
+    </ControlTheme>
+
+    <!-- The calendar's scroller: .calendar-body. No bar, a horizontal swipe, and a snap at each month that can be reached, one
+         month a swipe (scroll-snap-type: x mandatory, scroll-snap-stop: always). -->
+    <ControlTheme x:Key="Avonic.Datetime.CalendarBody" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        Background="{TemplateBinding Background}"
+                                        HorizontalSnapPointsType="MandatorySingle"
+                                        HorizontalSnapPointsAlignment="Near"
+                                        ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="True"
+                                                 CanVerticallyScroll="False"
+                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- ion-datetime, md. A column (display: flex, flex-flow: column) on the background, clipped (overflow: hidden): the header, the
+         time before the calendar for time-date, the calendar, the month/year wheel, the time after it for date-time, the wheels,
+         and the footer. Fixed size is at most 350 wide, or, with wheels, at least 350 and as wide as they are; cover fills. -->
+    <ControlTheme x:Key="{x:Type c:AvonicDatetime}" TargetType="c:AvonicDatetime">
+        <Setter Property="Background" Value="{DynamicResource Avonic.Datetime.Background}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="MaxWidth" Value="350" />
+        <Setter Property="c:DatetimeCalendarDay.AccentColor" Value="{DynamicResource Avonic.Color.Primary}" />
+        <Setter Property="c:DatetimeCalendarDay.AccentContrastColor" Value="{DynamicResource Avonic.Color.PrimaryContrast}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <!-- .datetime-header: padding 20, the accent behind the title colour. The title 0.75rem uppercase on one
+                             line; the selected date 30 below it at 2.125rem. -->
+                        <Border Name="PART_DatetimeHeader" Grid.Row="0" IsVisible="False" Padding="20"
+                                Background="{Binding $parent[c:AvonicDatetime].(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}"
+                                TextElement.Foreground="{DynamicResource Avonic.Datetime.TitleColor}">
+                            <StackPanel>
+                                <ContentPresenter Name="PART_DatetimeTitle"
+                                                  Content="{TemplateBinding ShownTitle}"
+                                                  ContentTemplate="{TemplateBinding TitleContentTemplate}"
+                                                  FontSize="12"
+                                                  TextBlock.TextTrimming="CharacterEllipsis"
+                                                  TextBlock.TextWrapping="NoWrap" />
+                                <TextBlock Name="PART_DatetimeSelectedDate" Margin="0,30,0,0" FontSize="34" IsVisible="False" />
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Name="PART_Calendar" Grid.Row="2" RowDefinitions="Auto,Auto" IsVisible="False">
+                            <StackPanel Name="PART_CalendarHeader" Grid.Row="0">
+                                <Grid Name="PART_CalendarActionButtons" ColumnDefinitions="*,Auto">
+                                    <Button Name="PART_MonthYearButton" Grid.Column="0" Theme="{StaticResource Avonic.Datetime.MonthYearButton}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Name="PART_MonthYearText" VerticalAlignment="Center" />
+                                            <c:AvonicIcon Name="PART_MonthYearIcon" Icon="caret-down-sharp" FlipRtl="True" Margin="4,0,0,0"
+                                                          VerticalAlignment="Center" FontSize="16" />
+                                        </StackPanel>
+                                    </Button>
+                                    <c:AvonicButtons Name="PART_NavButtons" Grid.Column="1">
+                                        <c:AvonicButtons.Resources>
+                                            <SolidColorBrush x:Key="Avonic.Button.Color" Color="{DynamicResource Avonic.TextColorStep350}" />
+                                            <SolidColorBrush x:Key="Avonic.Button.Background" Color="Transparent" />
+                                        </c:AvonicButtons.Resources>
+                                        <c:AvonicButton Name="PART_PreviousButton" Classes="navigation-button" AutomationProperties.Name="Previous month">
+                                            <c:AvonicButton.IconOnlyContent>
+                                                <c:AvonicIcon Icon="chevron-back" FlipRtl="True" />
+                                            </c:AvonicButton.IconOnlyContent>
+                                        </c:AvonicButton>
+                                        <c:AvonicButton Name="PART_NextButton" Classes="navigation-button" AutomationProperties.Name="Next month">
+                                            <c:AvonicButton.IconOnlyContent>
+                                                <c:AvonicIcon Icon="chevron-forward" FlipRtl="True" />
+                                            </c:AvonicButton.IconOnlyContent>
+                                        </c:AvonicButton>
+                                    </c:AvonicButtons>
+                                </Grid>
+                                <!-- .calendar-days-of-week: seven columns, padding 0 10px, 0.875rem in step-500 grey, 36 high. -->
+                                <UniformGrid Name="PART_CalendarDaysOfWeek" Columns="7" Margin="10,0" Height="36"
+                                             TextElement.FontSize="14"
+                                             TextElement.Foreground="{DynamicResource Avonic.TextColorStep500Brush}"
+                                             TextBlock.LineHeight="36"
+                                             AutomationProperties.AccessibilityView="Raw" />
+                            </StackPanel>
+                            <ScrollViewer Name="PART_CalendarBody" Grid.Row="1" Theme="{StaticResource Avonic.Datetime.CalendarBody}">
+                                <c:DatetimeCalendarBodyPanel Name="PART_CalendarMonths" />
+                            </ScrollViewer>
+                        </Grid>
+
+                        <!-- .datetime-year: the month and year wheels, in place of the calendar while open. -->
+                        <c:AvonicPicker Name="PART_MonthYearWheel" Grid.Row="3" IsVisible="False" />
+
+                        <!-- .datetime-time: padding 8px 16px; the label in step-650 grey, then the time button at the end. -->
+                        <Grid Name="PART_Time" Grid.Row="4" ColumnDefinitions="*,Auto" Margin="16,8" IsVisible="False">
+                            <ContentPresenter Name="PART_TimeLabel" Grid.Column="0" VerticalAlignment="Center"
+                                              Content="{TemplateBinding ShownTimeLabel}"
+                                              ContentTemplate="{TemplateBinding TimeLabelContentTemplate}"
+                                              Foreground="{DynamicResource Avonic.TextColorStep350Brush}" />
+                            <Button Name="PART_TimeButton" Grid.Column="1" Theme="{StaticResource Avonic.Datetime.TimeButton}">
+                                <TextBlock Name="PART_TimeText" />
+                            </Button>
+                            <!-- The time popover: centred under the button, 10 up (offset-y: -10px), 200 high, no arrow in md. -->
+                            <c:AvonicPopover Name="PART_TimePopover" Alignment="Center">
+                                <c:AvonicPopover.Resources>
+                                    <x:Double x:Key="Avonic.Popover.OffsetY">-10</x:Double>
+                                    <x:String x:Key="Avonic.Popover.Height">200px</x:String>
+                                </c:AvonicPopover.Resources>
+                                <c:AvonicPicker Name="PART_TimeWheel" />
+                            </c:AvonicPopover>
+                        </Grid>
+
+                        <!-- The wheels of time, month, month-year, year, and of preferWheel. -->
+                        <c:AvonicPicker Name="PART_Wheel" Grid.Row="5" IsVisible="False" />
+
+                        <!-- .datetime-footer: padding 10, the buttons at the end; with Clear, Cancel at the start. -->
+                        <Panel Name="PART_Footer" Grid.Row="6" Margin="10" IsVisible="False">
+                            <ContentPresenter Name="PART_ButtonsSlot"
+                                              Content="{TemplateBinding ButtonsContent}"
+                                              ContentTemplate="{TemplateBinding ButtonsContentTemplate}"
+                                              IsVisible="False" />
+                            <c:AvonicButtons Name="PART_DefaultButtons" HorizontalAlignment="Right" IsVisible="False">
+                                <c:AvonicButtons.Resources>
+                                    <SolidColorBrush x:Key="Avonic.Button.Color" Color="{DynamicResource Avonic.Color.Primary}" />
+                                </c:AvonicButtons.Resources>
+                                <c:AvonicButtons.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" />
+                                    </ItemsPanelTemplate>
+                                </c:AvonicButtons.ItemsPanel>
+                                <c:AvonicButton Name="PART_CancelButton" Grid.Column="0" IsVisible="False" />
+                                <c:AvonicButton Name="PART_ClearButton" Grid.Column="2" IsVisible="False" />
+                                <c:AvonicButton Name="PART_ConfirmButton" Grid.Column="3" IsVisible="False" />
+                            </c:AvonicButtons>
+                        </Panel>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:size-cover">
+            <Setter Property="MaxWidth" Value="Infinity" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:size-fixed:prefer-wheel">
+            <Setter Property="MinWidth" Value="350" />
+            <Setter Property="MaxWidth" Value="Infinity" />
+        </Style>
+        <Style Selector="^:ion-color">
+            <Setter Property="c:DatetimeCalendarDay.AccentColor" Value="{Binding $self.(b:ColorPalette.BaseColor)}" />
+            <Setter Property="c:DatetimeCalendarDay.AccentContrastColor" Value="{Binding $self.(b:ColorPalette.ContrastColor)}" />
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_DatetimeHeader">
+            <Setter Property="TextElement.Foreground" Value="{Binding $parent[c:AvonicDatetime].(b:ColorPalette.Contrast)}" />
+        </Style>
+
+        <!-- The parts each presentation shows, as renderDatetime picks them. -->
+        <Style Selector="^:has-header /template/ Border#PART_DatetimeHeader">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-selected-date /template/ TextBlock#PART_DatetimeSelectedDate">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:grid /template/ Grid#PART_Calendar">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-time /template/ Grid#PART_Time">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:presentation-time-date /template/ Grid#PART_Time">
+            <Setter Property="Grid.Row" Value="1" />
+        </Style>
+        <Style Selector="^:has-wheel /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-time-label /template/ ContentPresenter#PART_TimeLabel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#PART_TimeLabel">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:has-footer /template/ Panel#PART_Footer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-buttons /template/ ContentPresenter#PART_ButtonsSlot">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButtons#PART_DefaultButtons">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-clear-button /template/ c|AvonicButtons#PART_DefaultButtons">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButton#PART_CancelButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButton#PART_ConfirmButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-clear-button /template/ c|AvonicButton#PART_ClearButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- show-month-and-year: the wheel in place of the arrows, the days of the week, the calendar and the time; the footer
+             hidden while it's open over the calendar. The button's text in the accent. -->
+        <Style Selector="^:show-month-and-year /template/ c|AvonicButtons#PART_NavButtons">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ UniformGrid#PART_CalendarDaysOfWeek">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ ScrollViewer#PART_CalendarBody">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ Grid#PART_Time">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:month-year-picker-open /template/ c|AvonicPicker#PART_MonthYearWheel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:month-year-picker-open /template/ Panel#PART_Footer">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:month-year-picker-open /template/ Button#PART_MonthYearButton">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicDatetime].(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+        </Style>
+
+        <!-- The month, month-year and year presentations: margin 20px 0 around the wheel. -->
+        <Style Selector="^:presentation-month /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="Margin" Value="0,20" />
+        </Style>
+        <Style Selector="^:presentation-month-year /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="Margin" Value="0,20" />
+        </Style>
+        <Style Selector="^:presentation-year /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="Margin" Value="0,20" />
+        </Style>
+
+        <!-- The time button while its popover is open: the accent. -->
+        <Style Selector="^ /template/ Button#PART_TimeButton:active">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicDatetime].(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
+        </Style>
+
+        <!-- disabled: no input (pointer-events: none); the days of the week and the time at 0.4. -->
+        <Style Selector="^:disabled /template/ UniformGrid#PART_CalendarDaysOfWeek">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <Style Selector="^:disabled /template/ Grid#PART_Time">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- readonly: only the calendar's buttons, the calendar and the month/year wheel take the pointer; the days and the footer's
+             disabled buttons at full opacity, unless a day is constrained. -->
+        <Style Selector="^:readonly /template/ Border#PART_DatetimeHeader">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ Grid#PART_Time">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ Panel#PART_Footer">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

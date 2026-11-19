@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.DatetimePage">
+
+    <!-- Every value is pinned, so that the page looks the same any day: only the today ring follows the clock. -->
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="16">
+            <TextBlock Name="DatetimeChanged" Text="Pick a date or a time" />
+
+            <!-- The default: a calendar and a time, picked at once. -->
+            <c:AvonicDatetime Name="DateTimeGrid" Value="2023-06-15T13:47:00" />
+
+            <!-- A header, the default buttons and Clear: a selection waits for Done. -->
+            <c:AvonicDatetime Name="WithButtons" Value="2023-06-15T13:47:00" Presentation="Date"
+                              ShowDefaultTitle="True" ShowDefaultButtons="True" ShowClearButton="True"
+                              CancelText="Cancel date" DoneText="Done date" ClearText="Clear date" />
+
+            <!-- min, max and a colour. -->
+            <c:AvonicDatetime Name="MinMax" Value="2023-06-15" Presentation="Date" Min="2023-06-10" Max="2023-07-20" Color="danger" />
+
+            <!-- Several dates. -->
+            <c:AvonicDatetime Name="Several" Presentation="Date" Multiple="True" ShowDefaultTitle="True" />
+
+            <!-- Wheels. -->
+            <c:AvonicDatetime Name="WheelDate" Value="2023-06-15T13:47:00" Presentation="Date" PreferWheel="True" />
+            <c:AvonicDatetime Name="WheelDateTime" Value="2023-06-15T13:47:00" Presentation="DateTime" PreferWheel="True" />
+            <c:AvonicDatetime Name="TimeOnly" Value="2023-06-15T13:47:00" Presentation="Time" />
+            <c:AvonicDatetime Name="MonthYear" Value="2023-06-15T13:47:00" Presentation="MonthYear" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

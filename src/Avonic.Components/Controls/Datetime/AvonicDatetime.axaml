@@ -1,0 +1,178 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for a calendar day: structure only, a button with its text. -->
+    <ControlTheme x:Key="{x:Type c:DatetimeCalendarDay}" TargetType="c:DatetimeCalendarDay">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The calendar's scroller: no bar, a horizontal swipe, a snap at each month that can be reached, one a swipe. -->
+    <ControlTheme x:Key="Avonic.Datetime.CalendarBodyStub" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ScrollContentPresenter Name="PART_ContentPresenter"
+                                        HorizontalSnapPointsType="MandatorySingle"
+                                        HorizontalSnapPointsAlignment="Near">
+                    <ScrollContentPresenter.GestureRecognizers>
+                        <ScrollGestureRecognizer CanHorizontallyScroll="True" CanVerticallyScroll="False" />
+                    </ScrollContentPresenter.GestureRecognizers>
+                </ScrollContentPresenter>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-datetime: structure only. A column: the header, the time (before the calendar for time-date), the
+         calendar (its header and its scroller of three months), the month/year wheel, the time (after it for date-time), the wheels,
+         and the footer. Which shows follows the presentation, through the host's pseudoclasses. -->
+    <ControlTheme x:Key="{x:Type c:AvonicDatetime}" TargetType="c:AvonicDatetime">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" Background="{TemplateBinding Background}">
+                    <StackPanel Name="PART_DatetimeHeader" Grid.Row="0" IsVisible="False">
+                        <ContentPresenter Name="PART_DatetimeTitle" Content="{TemplateBinding ShownTitle}" ContentTemplate="{TemplateBinding TitleContentTemplate}" />
+                        <TextBlock Name="PART_DatetimeSelectedDate" IsVisible="False" />
+                    </StackPanel>
+                    <Grid Name="PART_Calendar" Grid.Row="2" RowDefinitions="Auto,Auto" IsVisible="False">
+                        <StackPanel Name="PART_CalendarHeader" Grid.Row="0">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Button Name="PART_MonthYearButton" Grid.Column="0" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Name="PART_MonthYearText" />
+                                        <c:AvonicIcon Name="PART_MonthYearIcon" Icon="caret-down-sharp" FlipRtl="True" />
+                                    </StackPanel>
+                                </Button>
+                                <c:AvonicButtons Name="PART_NavButtons" Grid.Column="1">
+                                    <c:AvonicButton Name="PART_PreviousButton" Classes="navigation-button" AutomationProperties.Name="Previous month">
+                                        <c:AvonicButton.IconOnlyContent>
+                                            <c:AvonicIcon Icon="chevron-back" FlipRtl="True" />
+                                        </c:AvonicButton.IconOnlyContent>
+                                    </c:AvonicButton>
+                                    <c:AvonicButton Name="PART_NextButton" Classes="navigation-button" AutomationProperties.Name="Next month">
+                                        <c:AvonicButton.IconOnlyContent>
+                                            <c:AvonicIcon Icon="chevron-forward" FlipRtl="True" />
+                                        </c:AvonicButton.IconOnlyContent>
+                                    </c:AvonicButton>
+                                </c:AvonicButtons>
+                            </Grid>
+                            <UniformGrid Name="PART_CalendarDaysOfWeek" Columns="7" AutomationProperties.AccessibilityView="Raw" />
+                        </StackPanel>
+                        <ScrollViewer Name="PART_CalendarBody" Grid.Row="1" Theme="{StaticResource Avonic.Datetime.CalendarBodyStub}">
+                            <c:DatetimeCalendarBodyPanel Name="PART_CalendarMonths" />
+                        </ScrollViewer>
+                    </Grid>
+                    <c:AvonicPicker Name="PART_MonthYearWheel" Grid.Row="3" IsVisible="False" />
+                    <Grid Name="PART_Time" Grid.Row="4" ColumnDefinitions="*,Auto" IsVisible="False">
+                        <ContentPresenter Name="PART_TimeLabel" Grid.Column="0" Content="{TemplateBinding ShownTimeLabel}" ContentTemplate="{TemplateBinding TimeLabelContentTemplate}" />
+                        <Button Name="PART_TimeButton" Grid.Column="1">
+                            <TextBlock Name="PART_TimeText" />
+                        </Button>
+                        <c:AvonicPopover Name="PART_TimePopover" Alignment="Center">
+                            <c:AvonicPicker Name="PART_TimeWheel" />
+                        </c:AvonicPopover>
+                    </Grid>
+                    <c:AvonicPicker Name="PART_Wheel" Grid.Row="5" IsVisible="False" />
+                    <Panel Name="PART_Footer" Grid.Row="6" IsVisible="False">
+                        <ContentPresenter Name="PART_ButtonsSlot" Content="{TemplateBinding ButtonsContent}" ContentTemplate="{TemplateBinding ButtonsContentTemplate}" IsVisible="False" />
+                        <c:AvonicButtons Name="PART_DefaultButtons" HorizontalAlignment="Right" IsVisible="False">
+                            <c:AvonicButtons.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" />
+                                </ItemsPanelTemplate>
+                            </c:AvonicButtons.ItemsPanel>
+                            <c:AvonicButton Name="PART_CancelButton" Grid.Column="0" IsVisible="False" />
+                            <c:AvonicButton Name="PART_ClearButton" Grid.Column="2" IsVisible="False" />
+                            <c:AvonicButton Name="PART_ConfirmButton" Grid.Column="3" IsVisible="False" />
+                        </c:AvonicButtons>
+                    </Panel>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:has-header /template/ StackPanel#PART_DatetimeHeader">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-selected-date /template/ TextBlock#PART_DatetimeSelectedDate">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:grid /template/ Grid#PART_Calendar">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-time /template/ Grid#PART_Time">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:presentation-time-date /template/ Grid#PART_Time">
+            <Setter Property="Grid.Row" Value="1" />
+        </Style>
+        <Style Selector="^:has-wheel /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#PART_TimeLabel">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:has-time-label /template/ ContentPresenter#PART_TimeLabel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-footer /template/ Panel#PART_Footer">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-buttons /template/ ContentPresenter#PART_ButtonsSlot">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButtons#PART_DefaultButtons">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-clear-button /template/ c|AvonicButtons#PART_DefaultButtons">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButton#PART_CancelButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-default-buttons /template/ c|AvonicButton#PART_ConfirmButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:has-clear-button /template/ c|AvonicButton#PART_ClearButton">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ c|AvonicButtons#PART_NavButtons">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ UniformGrid#PART_CalendarDaysOfWeek">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ ScrollViewer#PART_CalendarBody">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ Grid#PART_Time">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:month-year-picker-open /template/ c|AvonicPicker#PART_MonthYearWheel">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:month-year-picker-open /template/ Panel#PART_Footer">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ Grid#PART_Time">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ c|AvonicPicker#PART_Wheel">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="^:readonly /template/ Panel#PART_Footer">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>
