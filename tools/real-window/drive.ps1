@@ -1759,7 +1759,9 @@ try {
         Shot 'toast-bottom'
         $hide = Named $CT::Button 'Hide toast'
         $hb = if ($hide) { $hide.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
-        Check 'a click on the trigger presents the toast, with its buttons, at the bottom' ($hide -and [bool](Named $CT::Button 'Undo save') -and ($w.Bottom - $hb.Bottom) -le (Px 30)) "window $w, Hide toast $hb"
+        # The bottom quarter, not a fixed gap: in the phone-sized window the message wraps to three lines, and the button sits
+        # centred in the taller toast, 57 px above the window's bottom at 1.25.
+        Check 'a click on the trigger presents the toast, with its buttons, at the bottom' ($hide -and [bool](Named $CT::Button 'Undo save') -and $hb.Top -gt ($w.Top + 0.75 * $w.Height) -and $hb.Bottom -le $w.Bottom) "window $w, Hide toast $hb"
         Key '{ESC}' 600
         Check 'Escape leaves a toast' ([bool](Named $CT::Button 'Hide toast'))
 
