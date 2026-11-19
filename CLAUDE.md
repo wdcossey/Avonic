@@ -408,7 +408,7 @@ Avonic-only additions (touch-target enforcement, extra events) are allowed but l
 5. **No visual opinion in Components.** No hex colours or `Brushes.*` in Themes outside `Tokens/`.
 6. **No emoji or Unicode glyphs as icons.** Icons come from ionicons.
 7. **This file is ground truth.** If it says something exists, it exists and works. Aspirations go in `docs/ROADMAP.md`.
-8. **Faithful, with deviations explained.** Avalonia doesn't offer every technique html, CSS and JS do, so a deviation it forces is allowed, if it's recorded with its measurement and the reason. It isn't a licence to skip measuring, or to deviate where Avalonia could do it ([ADR 0002](docs/decisions/0002-decisions-from-the-first-swarm.md)).
+8. **Faithful, with deviations explained.** Avalonia doesn't offer every technique html, CSS and JS do, so a deviation it forces is allowed, if it's recorded with its measurement and the reason. It isn't a licence to skip measuring, or to deviate where Avalonia could do it ([ADR 0002](docs/decisions/0002-decisions-from-the-first-swarm.md)), except where Ionic's behaviour is a bug: then Avonic does what Ionic means, recorded in `docs/infra/ionic-issues.md` and the control's comparison ([ADR 0005](docs/decisions/0005-dont-copy-an-ionic-bug.md)).
 
 ---
 
