@@ -1,0 +1,2665 @@
+{
+ "basic": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     342,
+     20
+    ],
+    "text": "Hello World",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": [],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "header": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   766,
+   374,
+   70
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "774px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   766,
+   374,
+   70
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   43.59,
+   766,
+   168.53,
+   70
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [
+   {
+    "rect": [
+     59.59,
+     780,
+     136.53,
+     20
+    ],
+    "text": "Toast header",
+    "ariaHidden": null,
+    "font": "14px 500 lh 20px",
+    "mb": "2px",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "message": [
+   {
+    "rect": [
+     59.59,
+     802,
+     136.53,
+     20
+    ],
+    "text": "Toast message",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": {
+   "rect": [
+    24,
+    791.2,
+    19.59,
+    19.59
+   ],
+   "font": "19.6px",
+   "margin": "16px",
+   "color": "rgb(242, 242, 242)",
+   "ariaHidden": "true"
+  },
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     212.13,
+     783,
+     161.88,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "161.875px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Undo",
+    "rect": [
+     212.13,
+     783,
+     71.25,
+     36
+    ],
+    "inner": [
+     227.13,
+     793,
+     41.25,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button toast-button-cancel ion-focusable ion-activatable",
+    "part": "button cancel",
+    "text": "Dismiss",
+    "rect": [
+     283.38,
+     783,
+     90.63,
+     36
+    ],
+    "inner": [
+     298.38,
+     793,
+     60.63,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(230, 230, 230)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "stacked": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-stacked",
+  "wrapper": [
+   8,
+   702,
+   374,
+   134
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "710px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   702,
+   374,
+   134
+  ],
+  "containerFlexWrap": "wrap",
+  "content": [
+   8,
+   702,
+   374,
+   90
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [
+   {
+    "rect": [
+     24,
+     716,
+     342,
+     20
+    ],
+    "text": "Stacked",
+    "ariaHidden": null,
+    "font": "14px 500 lh 20px",
+    "mb": "2px",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "message": [
+   {
+    "rect": [
+     24,
+     738,
+     342,
+     40
+    ],
+    "text": "A longer message that wraps onto a second line in the toast.",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     8,
+     792,
+     366,
+     36
+    ],
+    "margin": "0px 8px 8px 0px",
+    "justify": "end",
+    "width": "366px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Undo",
+    "rect": [
+     212.13,
+     792,
+     71.25,
+     36
+    ],
+    "inner": [
+     227.13,
+     802,
+     41.25,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button toast-button-cancel ion-focusable ion-activatable",
+    "part": "button cancel",
+    "text": "Dismiss",
+    "rect": [
+     283.38,
+     792,
+     90.63,
+     36
+    ],
+    "inner": [
+     298.38,
+     802,
+     60.63,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(230, 230, 230)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "top": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-top toast-layout-baseline",
+  "wrapper": [
+   8,
+   8,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, 8)",
+  "wrapperInline": "transform: translateY(calc(8px + var(--ion-safe-area-top, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "0px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "796px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   8,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   8,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     22,
+     342,
+     20
+    ],
+    "text": "At the top",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": [],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "middle": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-middle toast-layout-baseline",
+  "wrapper": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "wrapperTransform": "none",
+  "wrapperInline": "top: 398px;",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "398px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "398px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     412,
+     342,
+     20
+    ],
+    "text": "In the middle",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": [],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "iconOnly": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   788,
+   330,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     298,
+     20
+    ],
+    "text": "Icon-only button",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     338,
+     794,
+     36,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "36px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button toast-button-icon-only toast-button-cancel ion-focusable ion-activatable",
+    "part": "button cancel",
+    "text": "",
+    "rect": [
+     338,
+     794,
+     36,
+     36
+    ],
+    "inner": [
+     347,
+     803,
+     18,
+     19.59
+    ],
+    "padding": "9px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(230, 230, 230)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "50%",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": "Close the toast",
+    "icon": {
+     "rect": [
+      347,
+      803,
+      18,
+      19.59
+     ],
+     "font": "19.6px",
+     "slot": "icon-only"
+    },
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "primary": {
+  "hostClasses": "ion-color ion-color-primary md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(255, 255, 255)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(0, 84, 233)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   788,
+   204.13,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     172.13,
+     20
+    ],
+    "text": "Primary",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(255, 255, 255)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     212.13,
+     794,
+     161.88,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "161.875px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Undo",
+    "rect": [
+     212.13,
+     794,
+     71.25,
+     36
+    ],
+    "inner": [
+     227.13,
+     804,
+     41.25,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button toast-button-cancel ion-focusable ion-activatable",
+    "part": "button cancel",
+    "text": "Dismiss",
+    "rect": [
+     283.38,
+     794,
+     90.63,
+     36
+    ],
+    "inner": [
+     298.38,
+     804,
+     60.63,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "danger": {
+  "hostClasses": "ion-color ion-color-danger md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(255, 255, 255)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(197, 0, 15)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   43.59,
+   788,
+   253.78,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     59.59,
+     802,
+     221.78,
+     20
+    ],
+    "text": "Danger",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(255, 255, 255)"
+   }
+  ],
+  "icon": {
+   "rect": [
+    24,
+    802.2,
+    19.59,
+    19.59
+   ],
+   "font": "19.6px",
+   "margin": "16px",
+   "color": "rgb(255, 255, 255)",
+   "ariaHidden": "true"
+  },
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     297.38,
+     794,
+     76.63,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "76.625px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Retry",
+    "rect": [
+     297.38,
+     794,
+     76.63,
+     36
+    ],
+    "inner": [
+     312.38,
+     804,
+     46.63,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "start": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   81.22,
+   788,
+   218,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     97.22,
+     802,
+     186,
+     20
+    ],
+    "text": "Start buttons",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-start",
+    "rect": [
+     16,
+     794,
+     65.22,
+     36
+    ],
+    "margin": "0px 0px 0px 8px",
+    "justify": "normal",
+    "width": "65.2188px"
+   },
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     299.22,
+     794,
+     74.78,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "74.7812px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Left",
+    "rect": [
+     16,
+     794,
+     65.22,
+     36
+    ],
+    "inner": [
+     31,
+     804,
+     35.22,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Right",
+    "rect": [
+     299.22,
+     794,
+     74.78,
+     36
+    ],
+    "inner": [
+     314.22,
+     804,
+     44.78,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "stackedStart": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-stacked",
+  "wrapper": [
+   8,
+   744,
+   374,
+   92
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "752px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   744,
+   374,
+   92
+  ],
+  "containerFlexWrap": "wrap",
+  "content": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     342,
+     20
+    ],
+    "text": "Stacked, start buttons",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-start",
+    "rect": [
+     8,
+     752,
+     366,
+     36
+    ],
+    "margin": "8px 8px 0px 0px",
+    "justify": "end",
+    "width": "366px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Left",
+    "rect": [
+     308.78,
+     752,
+     65.22,
+     36
+    ],
+    "inner": [
+     323.78,
+     762,
+     35.22,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "long": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   728,
+   374,
+   108
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "736px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   728,
+   374,
+   108
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   728,
+   315.83,
+   108
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     742,
+     283.83,
+     80
+    ],
+    "text": "A long message that wraps over several lines, so that the toast grows taller, and the buttons stay centred beside it, as the container aligns its items to the centre.",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     323.83,
+     764,
+     50.17,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "50.1719px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "OK",
+    "rect": [
+     323.83,
+     764,
+     50.17,
+     36
+    ],
+    "inner": [
+     338.83,
+     774,
+     20.17,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "nowrap": {
+  "hostClasses": "md nowrap hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     342,
+     20
+    ],
+    "text": "A long message that does not wrap at all because white-space is nowrap in this toast",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "nowrap",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": [],
+  "anims": [
+   {
+    "duration": 400,
+    "easing": "cubic-bezier(0.36, 0.66, 0.04, 1)",
+    "delay": 0,
+    "fill": "both",
+    "currentTime": 400,
+    "keyframes": [
+     {
+      "offset": 0,
+      "opacity": "0.01",
+      "easing": "linear"
+     },
+     {
+      "offset": 1,
+      "opacity": "1",
+      "easing": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "tablet": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   1024,
+   768
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   162,
+   712,
+   700,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "720px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "700px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   162,
+   712,
+   700,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   162,
+   712,
+   700,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     178,
+     726,
+     668,
+     20
+    ],
+    "text": "Hello World",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "tabletHeader": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   1024,
+   768
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   162,
+   690,
+   700,
+   70
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "698px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "700px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   162,
+   690,
+   700,
+   70
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   197.59,
+   690,
+   494.53,
+   70
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [
+   {
+    "rect": [
+     213.59,
+     704,
+     462.53,
+     20
+    ],
+    "text": "Toast header",
+    "ariaHidden": null,
+    "font": "14px 500 lh 20px",
+    "mb": "2px",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "message": [
+   {
+    "rect": [
+     213.59,
+     726,
+     462.53,
+     20
+    ],
+    "text": "Toast message",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": {
+   "rect": [
+    178,
+    715.2,
+    19.59,
+    19.59
+   ],
+   "font": "19.6px",
+   "margin": "16px",
+   "color": "rgb(242, 242, 242)",
+   "ariaHidden": "true"
+  },
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     692.13,
+     707,
+     161.88,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "161.875px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Undo",
+    "rect": [
+     692.13,
+     707,
+     71.25,
+     36
+    ],
+    "inner": [
+     707.13,
+     717,
+     41.25,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button toast-button-cancel ion-focusable ion-activatable",
+    "part": "button cancel",
+    "text": "Dismiss",
+    "rect": [
+     763.38,
+     707,
+     90.63,
+     36
+    ],
+    "inner": [
+     778.38,
+     717,
+     60.63,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(230, 230, 230)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ]
+ },
+ "tabletTop": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   1024,
+   768
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-top toast-layout-baseline",
+  "wrapper": [
+   162,
+   8,
+   700,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, 8)",
+  "wrapperInline": "transform: translateY(calc(8px + var(--ion-safe-area-top, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "0px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "720px",
+  "wrapperWidth": "700px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   162,
+   8,
+   700,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   162,
+   8,
+   700,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     178,
+     22,
+     668,
+     20
+    ],
+    "text": "At the top",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "anchorBottom": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   732,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -64)",
+  "wrapperInline": "transform: translateY(-64px);",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   732,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   732,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     746,
+     342,
+     20
+    ],
+    "text": "Above the footer",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "anchorTop": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-top toast-layout-baseline",
+  "wrapper": [
+   8,
+   64,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, 64)",
+  "wrapperInline": "transform: translateY(64px);",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "0px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "796px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   64,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   64,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     78,
+     342,
+     20
+    ],
+    "text": "Below the header",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "anchorMiddle": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-middle toast-layout-baseline",
+  "wrapper": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "wrapperTransform": "none",
+  "wrapperInline": "top: 398px;",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "398px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "398px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   398,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     412,
+     342,
+     20
+    ],
+    "text": "Middle ignores the anchor",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "anchorMissing": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   788,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     802,
+     342,
+     20
+    ],
+    "text": "Anchor missing",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "safeBottom": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   8,
+   768,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -28)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   768,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   768,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     782,
+     342,
+     20
+    ],
+    "text": "Hello World",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "safeTop": {
+  "hostClasses": "md hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-top toast-layout-baseline",
+  "wrapper": [
+   8,
+   38,
+   374,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, 38)",
+  "wrapperInline": "transform: translateY(calc(8px + var(--ion-safe-area-top, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "0px",
+  "wrapperLeft": "8px",
+  "wrapperRight": "8px",
+  "wrapperBottom": "796px",
+  "wrapperWidth": "374px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   8,
+   38,
+   374,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   8,
+   38,
+   374,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     24,
+     52,
+     342,
+     20
+    ],
+    "text": "At the top",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "custom": {
+  "hostClasses": "md w hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   83,
+   752,
+   204,
+   84
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "760px",
+  "wrapperLeft": "20px",
+  "wrapperRight": "40px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "200px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "2px solid",
+  "container": [
+   85,
+   754,
+   200,
+   80
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   85,
+   770,
+   200,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     101,
+     784,
+     168,
+     20
+    ],
+    "text": "Custom",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": null,
+  "groups": [],
+  "buttons": []
+ },
+ "rtl": {
+  "hostClasses": "md r hydrated",
+  "hostRect": [
+   0,
+   0,
+   390,
+   844
+  ],
+  "hostZ": "60002",
+  "hostColor": "rgb(242, 242, 242)",
+  "hostFont": "14px Roboto, \"Helvetica Neue\", sans-serif",
+  "hostPointer": "none",
+  "hostTabindex": "-1",
+  "hostDisplay": "block",
+  "hostAriaHidden": null,
+  "wrapperClasses": "toast-wrapper toast-bottom toast-layout-baseline",
+  "wrapper": [
+   40,
+   788,
+   330,
+   48
+  ],
+  "wrapperTransform": "matrix(1, 0, 0, 1, 0, -8)",
+  "wrapperInline": "transform: translateY(calc(-8px - var(--ion-safe-area-bottom, 0px)));",
+  "wrapperOpacity": "1",
+  "wrapperBg": "rgb(51, 51, 51)",
+  "wrapperRadius": "4px",
+  "wrapperShadow": "rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px",
+  "wrapperTop": "796px",
+  "wrapperLeft": "40px",
+  "wrapperRight": "20px",
+  "wrapperBottom": "0px",
+  "wrapperWidth": "330px",
+  "wrapperMaxWidth": "700px",
+  "wrapperBorder": "0px none",
+  "container": [
+   40,
+   788,
+   330,
+   48
+  ],
+  "containerFlexWrap": "nowrap",
+  "content": [
+   107.52,
+   788,
+   142.16,
+   48
+  ],
+  "contentPadding": "14px 16px",
+  "contentRole": "status",
+  "contentLive": "polite",
+  "contentAtomic": "true",
+  "header": [],
+  "message": [
+   {
+    "rect": [
+     123.52,
+     802,
+     110.16,
+     20
+    ],
+    "text": "RTL",
+    "ariaHidden": null,
+    "font": "14px 400 lh 20px",
+    "ws": "normal",
+    "color": "rgb(242, 242, 242)"
+   }
+  ],
+  "icon": {
+   "rect": [
+    249.67,
+    802.2,
+    19.59,
+    19.59
+   ],
+   "font": "19.6px",
+   "margin": "16px",
+   "color": "rgb(242, 242, 242)",
+   "ariaHidden": "true"
+  },
+  "groups": [
+   {
+    "cls": "toast-button-group toast-button-group-start",
+    "rect": [
+     285.27,
+     794,
+     76.73,
+     36
+    ],
+    "margin": "0px 8px 0px 0px",
+    "justify": "normal",
+    "width": "76.7344px"
+   },
+   {
+    "cls": "toast-button-group toast-button-group-end",
+    "rect": [
+     48,
+     794,
+     59.52,
+     36
+    ],
+    "margin": "0px 0px 0px 8px",
+    "justify": "normal",
+    "width": "59.5156px"
+   }
+  ],
+  "buttons": [
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "Start",
+    "rect": [
+     285.27,
+     794,
+     76.73,
+     36
+    ],
+    "inner": [
+     300.27,
+     804,
+     46.73,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   },
+   {
+    "cls": "toast-button ion-focusable ion-activatable",
+    "part": "button",
+    "text": "End",
+    "rect": [
+     48,
+     794,
+     59.52,
+     36
+    ],
+    "inner": [
+     63,
+     804,
+     29.52,
+     16
+    ],
+    "padding": "10px 15px",
+    "font": "14px 500 Roboto, \"Helvetica Neue\", sans-serif",
+    "lh": "normal",
+    "letterSpacing": "0.84px",
+    "transform": "uppercase",
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "tabindex": "0",
+    "type": "button",
+    "ariaLabel": null,
+    "icon": null,
+    "ripple": null,
+    "cursor": "default"
+   }
+  ]
+ }
+}

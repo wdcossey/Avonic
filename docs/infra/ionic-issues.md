@@ -89,3 +89,57 @@ deliberate differences). Fairly sure of the cause; the measurement is direct.
 
 **Avonic** clears the cancel at the start of each operation, puts the menu back when no animation can be made, and closes a menu
 detached mid-play at once, ending its play (`docs/components/ion-menu/COMPARISON.md`, deliberate differences, with tests).
+
+## `ion-toast`: Tab never reaches a toast's buttons
+
+**Measured in Ionic 9.0.11, md, headless Chromium, mobile and desktop (#38).** A minimal page:
+
+```html
+<ion-app>
+  <button id="a">A</button>
+</ion-app>
+<script>
+  const t = document.createElement('ion-toast');
+  t.message = 'Saved';
+  t.buttons = ['Undo', { text: 'Dismiss', role: 'cancel' }];
+  document.querySelector('ion-app').appendChild(t);
+  t.present();
+</script>
+```
+
+With the toast shown, Tab from A goes to `body` and back to A, and Shift+Tab the other way: neither reaches Undo or Dismiss
+(`docs/components/ion-toast/ref/extra.json`, `"tab"`). A button focused another way (a tap, `focus()`) does Tab to the next one, then
+out of the toast.
+
+`render()` gives the host `tabindex="-1"`, and Chromium leaves everything in the shadow tree of a host with a negative `tabindex` out
+of sequential navigation, so the buttons' own `tabIndex: 0` and `ion-focusable` never count. A keyboard user can't reach an Undo.
+Moving `tabindex="-1"` off the host (it's there so that `keyboardClose` can focus it) or onto the wrapper would fix it.
+
+**Avonic** doesn't copy it: the buttons are tab stops after the page's last, as their `tabindex="0"` asks
+(`B21_Buttons_Are_Named_And_Invokable_And_Tab_Reaches_Them_After_The_Page`). Sure of the measurement; the cause is the HTML
+spec's rule for a shadow host with a negative `tabindex`.
+
+## Overlays: a toast on top stops Escape and the hardware back button dismissing the overlay under it
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#38), and the cause read in `utils/overlays.js`.** Present an `ion-alert`, then an
+`ion-toast` over it, and press Escape: nothing is dismissed (`docs/components/ion-toast/ref/behaviour.json`, `"overAlert"`). Once the
+toast has gone, Escape dismisses the alert.
+
+`connectListeners` adds the close watcher's condition with `NON_TOAST_OVERLAYS` ("Every overlay except toast, which doesn't trap focus
+or close on back"), but its `keydown` and `ionBackButton` listeners take `getPresentedOverlay(doc)`, of every kind: the toast is on
+top, it has no `backdropDismiss`, and nothing happens. On Android the back press then falls through to the next handler, such as the
+router's, which navigates while the alert or modal stays. Passing `NON_TOAST_OVERLAYS` to those two `getPresentedOverlay` calls
+would fix it.
+
+**Avonic** doesn't copy it: `OverlayHost`'s Escape and back take the top overlay that isn't a toast
+(`B12_A_Toast_On_Top_Doesnt_Stop_Escape_Dismissing_The_Alert_Under_It`). Sure: the measurement and the code agree.
+
+## `ion-toast`: a toast presented again at another position keeps the old one's inline style
+
+**Read in `animations/md.enter.js` (#38); not measured.** The md enter sets the wrapper's inline `transform` at the top and the bottom,
+and its inline `top` in the middle, and neither clears the other. An inline toast (`isOpen`, `trigger`) presented in the middle and
+then, after `position = 'bottom'`, again has `top: 398px` from the first and `bottom: 0` from its class, so CSS ignores `bottom` and
+it shows at 398 with `translateY(-8px)`. Presented at the bottom and then in the middle, it keeps the bottom's `translateY`.
+
+**Avonic** clears the transform for the middle, and its panel reads the middle's offset only in the middle
+(`B1_Top_Is_8_Down_And_The_Middle_Is_Floor_Of_Half_The_Rest_With_No_Transform`). Fairly sure, from the code.

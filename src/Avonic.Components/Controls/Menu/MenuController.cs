@@ -214,7 +214,7 @@ public static class MenuController
         topLevel.AddHandler(TopLevel.BackRequestedEvent, (_, e) =>
         {
             if (HardwareBackButton.IsStarted(topLevel) || !AvonicConfig.HardwareBackButton
-                || OverlayHost.PresentedOverlayIn(topLevel) is { BackdropDismissEnabled: true })
+                || OverlayHost.BackTargetIn(topLevel) is { BackdropDismissEnabled: true })
             {
                 return;
             }

@@ -1741,6 +1741,73 @@ try {
         Away
     }
 
+    # ion-toast (#38): the page's toast from its trigger with a real click, at the bottom, which doesn't block the page (a click on
+    # a page button beside it shows a top toast) or take Escape; its icon-only and cancel buttons by their names; a handler returning
+    # false keeping one open; real touch swipes dismissing a middle and a stacked toast with the gesture role; and a duration's
+    # timeout. The status line says what each was dismissed with; each check waits for a line that differs from the one before.
+    # Only what's on top is aimed at: the toasts never cover the page buttons clicked here. Durations are 0 but the last, 2 s.
+    Section 'ion-toast' {
+        Open 'ion-toast'
+        $w = $win.Current.BoundingRectangle
+        function ToastStatus { FirstText '*dismissed with role*' }
+        function ShowWith($name) {
+            ClickOn (Named $CT::Button $name)
+            Start-Sleep -Milliseconds 700
+        }
+
+        ShowWith 'Show the bottom toast'
+        Shot 'toast-bottom'
+        $hide = Named $CT::Button 'Hide toast'
+        $hb = if ($hide) { $hide.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        # The bottom quarter, not a fixed gap: in the phone-sized window the message wraps to three lines, and the button sits
+        # centred in the taller toast, 57 px above the window's bottom at 1.25.
+        Check 'a click on the trigger presents the toast, with its buttons, at the bottom' ($hide -and [bool](Named $CT::Button 'Undo save') -and $hb.Top -gt ($w.Top + 0.75 * $w.Height) -and $hb.Bottom -le $w.Bottom) "window $w, Hide toast $hb"
+        Key '{ESC}' 600
+        Check 'Escape leaves a toast' ([bool](Named $CT::Button 'Hide toast'))
+
+        ShowWith 'Show a top toast'
+        Shot 'toast-top-and-bottom'
+        $close = Named $CT::Button 'Close the top toast'
+        $cb = if ($close) { $close.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the page under a toast still takes a click: a top toast, its icon-only button named by aria-label' ($close -and ($cb.Y - $w.Y) -le (Px 120)) "window $w, close $cb"
+        ClickOn $close
+        Check 'the icon-only cancel button dismisses it with the cancel role' ([bool](WaitForText 'TopToast dismissed with role cancel')) (ToastStatus)
+        ClickOn (Named $CT::Button 'Hide toast')
+        Check 'the bottom toast is still there, and its cancel button dismisses it' ([bool](WaitForText 'BottomToast dismissed with role cancel')) (ToastStatus)
+
+        ShowWith 'Show the bottom toast'
+        ClickOn (Named $CT::Button 'Undo save')
+        Check 'a button with no role dismisses it with none' ([bool](WaitForText 'BottomToast dismissed with role none')) (ToastStatus)
+
+        ShowWith 'Show a danger toast'
+        Shot 'toast-danger'
+        ClickOn (Named $CT::Button 'Retry upload')
+        Start-Sleep -Milliseconds 500
+        Check 'a handler returning false keeps it open' (([bool](FirstText 'Retry upload pressed 1 time*')) -and [bool](Named $CT::Button 'Retry upload')) (FirstText 'Retry upload*')
+        ClickOn (Named $CT::Button 'Retry upload')
+        Check 'the next press dismisses it with its role' ([bool](WaitForText 'DangerToast dismissed with role retry')) (ToastStatus)
+
+        # A touch swipe up from the middle toast's button, which the wrapper's gesture takes from the button past 10 px.
+        ShowWith 'Show a middle toast'
+        Shot 'toast-middle'
+        $x, $y = Centre (Named $CT::Button 'Middle done')
+        TouchDrag $x $y 0 (- (Px 300)) 20 16
+        Check 'a swipe up dismisses the middle toast with the gesture role' ([bool](WaitForText 'MiddleToast dismissed with role gesture')) (ToastStatus)
+
+        ClickOn (Named $CT::Button 'Swipeable toast open')
+        Start-Sleep -Milliseconds 700
+        Shot 'toast-stacked'
+        $got = Named $CT::Button 'Got it, thanks'
+        Check 'IsOpen presents the stacked toast' ([bool]$got)
+        $x, $y = Centre $got
+        TouchDrag $x ($y - (Px 30)) 0 (Px 120) 15 16
+        Check 'a swipe down dismisses it with the gesture role' ([bool](WaitForText 'SwipeToast dismissed with role gesture')) (ToastStatus)
+
+        ShowWith 'Show a toast for two seconds'
+        Check 'a duration dismisses it by itself with the timeout role' ([bool](WaitForText 'TimedToast dismissed with role timeout' 6)) (ToastStatus)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

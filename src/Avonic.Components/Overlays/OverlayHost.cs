@@ -80,7 +80,8 @@ internal sealed class OverlayHost : Panel
 
     /// <summary>
     /// Ionic <c>getPresentedOverlay(document)</c> for <paramref name="topLevel"/>, without making it a host: the top overlay there, or
-    /// null. For what isn't an overlay and defers to one, as <c>ion-menu</c>'s focus trap and back button do.
+    /// null, toasts included. For what isn't an overlay and defers to one, as <c>ion-menu</c>'s focus trap does, as Ionic's; a back
+    /// button defers to <see cref="BackTargetIn"/>, which skips toasts.
     /// </summary>
     internal static AvonicOverlay? PresentedOverlayIn(TopLevel topLevel) =>
         s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
@@ -118,13 +119,29 @@ internal sealed class OverlayHost : Panel
     }
 
     /// <summary>
+    /// The top overlay that Escape and back are for: the top one that isn't a toast. Ionic's listeners take every kind, so a toast
+    /// on top, which has no <c>backdropDismiss</c>, stops them dismissing the overlay under it; Avonic doesn't copy that
+    /// (<c>docs/infra/ionic-issues.md</c>, #38).
+    /// </summary>
+    private AvonicOverlay? BackTarget => GetPresentedOverlay(o => o is not AvonicToast);
+
+    /// <summary>
+    /// <see cref="BackTarget"/> for <paramref name="topLevel"/>, without making it a host: what defers to an overlay on back, as
+    /// <c>ion-menu</c>'s back does, takes the same one as the overlays' own back.
+    /// </summary>
+    internal static AvonicOverlay? BackTargetIn(TopLevel topLevel) =>
+        s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
+            ? host.BackTarget
+            : null;
+
+    /// <summary>
     /// Ionic's <c>keydown</c> listener on the document: Escape dismisses the top overlay with the backdrop role, if it allows it.
     /// Nothing is prevented. A key a control has handled, as a <c>ComboBox</c> handles Escape to close its drop-down, doesn't
     /// come, as a stopped <c>keydown</c> never reaches the document.
     /// </summary>
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape && GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
+        if (e.Key == Key.Escape && BackTarget is { BackdropDismissEnabled: true } top)
         {
             top.DismissFromInput(OverlayRoles.Backdrop);
         }
@@ -137,7 +154,7 @@ internal sealed class OverlayHost : Panel
     /// </summary>
     private void OnIonBackButton(object? sender, BackButtonEventArgs e)
     {
-        if (GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
+        if (BackTarget is { BackdropDismissEnabled: true } top)
         {
             e.Register(HardwareBackButton.OverlayBackButtonPriority, _ => top.DismissFromInput(OverlayRoles.Backdrop));
         }
@@ -156,7 +173,7 @@ internal sealed class OverlayHost : Panel
             return;
         }
 
-        if (GetPresentedOverlay() is { BackdropDismissEnabled: true } top)
+        if (BackTarget is { BackdropDismissEnabled: true } top)
         {
             e.Handled = true;
             top.DismissFromInput(OverlayRoles.Backdrop);

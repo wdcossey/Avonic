@@ -40,7 +40,7 @@ Linux desktop driver.
 | `role="heading"`, `aria-level` | `HeadingLevel` | `AvonicCardTitle` (2), `AvonicCardSubtitle` (3) |
 | `role="banner"`, `contentinfo`, `main`, `search`, `navigation` | `LandmarkType` | `AvonicHeader` (banner), `AvonicFooter` (contentinfo), `AvonicContent` (main), `AvonicSearchbar` (search), `AvonicMenu` (navigation, named `menu` unless the app names it). **Gap:** Ionic gives content `main` only outside a menu, popover or modal, and a header `banner` only outside a menu; Avonic's content is `main` in a modal or popover too (#237) |
 | `aria-live="polite"`, `role="alert"` | `LiveSetting` `Polite`, `Assertive` | the helper and error text of `AvonicCheckbox` and `AvonicRadioGroup` (`ion-radio` has none), though at a priority an app's style can't beat. **Not yet** on `AvonicInput`, `AvonicTextarea`, `AvonicToggle`, which Ionic gives the same (#236, both) |
-| `role="status"` with `aria-live="polite"` | `LiveSetting` `Polite` | `ion-toast` (#38), when it's built |
+| `role="status"` with `aria-live="polite"` | `LiveSetting` `Polite` | `AvonicToast`'s content (`ToastContent`, #38), a default an app's value beats; its header and message hidden from automation (`AccessibilityView` `Raw`) until the enter has finished, as Ionic's `aria-hidden` copies. `aria-atomic` has no counterpart |
 | `role="radiogroup"` | no control type | recorded as a gap in the alert and the action sheet |
 | `aria-activedescendant` | no counterpart | recorded as a gap in the alert |
 | `aria-expanded` | `IExpandCollapseProvider` on the peer | `AvonicSelect`, expanded while its interface is open; an `AvonicItem` that is an accordion's header |

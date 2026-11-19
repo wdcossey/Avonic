@@ -1,0 +1,278 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="200">
+            <TextBlock Text="The page under the toast" Margin="16" />
+            <!-- A toast's look, as it is after its enter animation: the wrapper at the bottom, 8 up, fully opaque. -->
+            <Border VerticalAlignment="Bottom" Margin="8" CornerRadius="4"
+                    Background="{DynamicResource Avonic.BackgroundColorStep800Brush}"
+                    BoxShadow="{DynamicResource Avonic.Toast.BoxShadow}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <c:ToastNativeButton Text="Undo" />
+                        <c:ToastNativeButton Text="Dismiss" />
+                    </StackPanel>
+                    <TextBlock Text="Toast message" Margin="16,14" LineHeight="20" FontSize="14"
+                               Foreground="{DynamicResource Avonic.TextColorStep950Brush}" />
+                </DockPanel>
+            </Border>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of toast.md.css, with its base part. The host covers the window (position: absolute, 100% by 100%) and takes
+         no input (pointer-events: none): it has no background, so only the wrapper is hit. contain: strict and z-index are the
+         browser's and the overlay's. -->
+    <ControlTheme x:Key="{x:Type c:AvonicToast}" TargetType="c:AvonicToast">
+        <!-- font-family: var(ion-font-family, inherit); md's font-size: 0.875rem -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <!-- color: var(color) -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Toast.Color" />
+                <DynamicResource ResourceKey="Avonic.TextColorStep950Brush" />
+            </MultiBinding>
+        </Setter>
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:ToastPanel Name="PART_Panel" Position="{TemplateBinding Position}">
+                    <!-- .toast-wrapper: opacity 0.01 at rest, which the enter animation takes to 1 -->
+                    <Border Name="PART_Wrapper" Opacity="0.01">
+                        <!-- .toast-container: a flex row, align-items: center; height, min-height and max-height: inherit, which the
+                             wrapper's box gives it; contain: content clips it -->
+                        <c:ToastContainer Name="PART_Container" ClipToBounds="True">
+                            <!-- .toast-button-group-start -->
+                            <StackPanel Name="PART_StartButtons" Orientation="Horizontal" IsVisible="False" />
+                            <!-- .toast-icon: font-size 1.4em, margin-inline-start 16px; aria-hidden -->
+                            <c:AvonicIcon Name="PART_Icon" Icon="{TemplateBinding Icon}" Margin="16,0,0,0"
+                                          AutomationProperties.AccessibilityView="Raw"
+                                          IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            <!-- .toast-content: flex: 1; min-width: 0; padding 14px 16px; a column (centred when baseline) -->
+                            <c:ToastContent Name="PART_Content" c:ToastContainer.Flex="True" Padding="16,14">
+                                <StackPanel VerticalAlignment="Center">
+                                    <!-- .toast-header: margin-bottom 2px; font-weight 500; line-height 1.25rem -->
+                                    <TextBlock Name="PART_Header" TextWrapping="Wrap" Margin="0,0,0,2" FontWeight="Medium" LineHeight="20"
+                                               IsVisible="{Binding Text, RelativeSource={RelativeSource Self}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{x:Static c:ToastContent.WhiteSpaceText}">
+                                                <Binding Path="Header" RelativeSource="{RelativeSource TemplatedParent}" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <!-- .toast-message: line-height 1.25rem; white-space: var(white-space) -->
+                                    <TextBlock Name="PART_Message" LineHeight="20"
+                                               IsVisible="{Binding Text, RelativeSource={RelativeSource Self}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{x:Static c:ToastContent.WhiteSpaceText}">
+                                                <Binding Path="Message" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                <DynamicResource ResourceKey="Avonic.Toast.WhiteSpace" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                        <TextBlock.TextWrapping>
+                                            <MultiBinding Converter="{x:Static c:ToastContent.WhiteSpaceWrapping}">
+                                                <DynamicResource ResourceKey="Avonic.Toast.WhiteSpace" />
+                                            </MultiBinding>
+                                        </TextBlock.TextWrapping>
+                                    </TextBlock>
+                                </StackPanel>
+                            </c:ToastContent>
+                            <!-- .toast-button-group-end -->
+                            <StackPanel Name="PART_EndButtons" Orientation="Horizontal" IsVisible="False" />
+                        </c:ToastContainer>
+                    </Border>
+                </c:ToastPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- inset-inline: var(start) var(end); width, min-width, max-width, height, min-height, max-height: var(...) -->
+        <Style Selector="^ /template/ c|ToastPanel#PART_Panel">
+            <Setter Property="Start" Value="{DynamicResource Avonic.Toast.Start}" />
+            <Setter Property="End" Value="{DynamicResource Avonic.Toast.End}" />
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Toast.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Toast.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.Toast.MaxWidth}" />
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.Toast.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Toast.MinHeight}" />
+            <Setter Property="ContentMaxHeight" Value="{DynamicResource Avonic.Toast.MaxHeight}" />
+        </Style>
+
+        <!-- .toast-wrapper: background, border-radius, the border and box-shadow from the variables -->
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Toast.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep800Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.ToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.Toast.BorderRadius" />
+                    <Binding Path="Bounds.Size" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderThickness">
+                <MultiBinding Converter="{x:Static c:ModalWrapper.BorderThicknessConverter}">
+                    <DynamicResource ResourceKey="Avonic.Toast.BorderWidth" />
+                    <DynamicResource ResourceKey="Avonic.Toast.BorderStyle" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Toast.BorderColor" />
+                    <Binding Path="$parent[c:AvonicToast].Foreground" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Toast.BoxShadow}" />
+        </Style>
+        <!-- .toast-wrapper.toast-top and .toast-bottom: translate3d(0, -100%, 0) and (0, 100%, 0) at rest, off the edge; the present
+             sets its own transform, as Ionic's inline style -->
+        <Style Selector="^:position-top /template/ Border#PART_Wrapper">
+            <Setter Property="b:Css.TranslateY" Value="-1" />
+        </Style>
+        <Style Selector="^:position-bottom /template/ Border#PART_Wrapper">
+            <Setter Property="b:Css.TranslateY" Value="1" />
+        </Style>
+        <Style Selector="^:position-top /template/ Border#PART_Wrapper, ^:position-bottom /template/ Border#PART_Wrapper">
+            <Setter Property="RenderTransform">
+                <MultiBinding Converter="{x:Static b:Css.TranslateScale}">
+                    <Binding Path="Bounds.Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.TranslateY)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="(b:Css.Scale)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .toast-icon: font-size 1.4em -->
+        <Style Selector="^ /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="FontSize">
+                <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.4">
+                    <Binding Path="$parent[c:AvonicToast].FontSize" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- The button groups: display: flex. Baseline: 8 at the start of the start group and the end of the end group. Stacked:
+             width: 100%, a line of their own, justify-content: end, 8 at the end, and 8 above the start group and below the end group. -->
+        <Style Selector="^:layout-baseline /template/ StackPanel#PART_StartButtons">
+            <Setter Property="Margin" Value="8,0,0,0" />
+        </Style>
+        <Style Selector="^:layout-baseline /template/ StackPanel#PART_EndButtons">
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style Selector="^:layout-stacked /template/ c|ToastContainer#PART_Container">
+            <Setter Property="Wrap" Value="True" />
+        </Style>
+        <Style Selector="^:layout-stacked /template/ StackPanel#PART_StartButtons">
+            <Setter Property="c:ToastContainer.FillsLine" Value="True" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,8,8,0" />
+        </Style>
+        <Style Selector="^:layout-stacked /template/ StackPanel#PART_EndButtons">
+            <Setter Property="c:ToastContainer.FillsLine" Value="True" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,8,8" />
+        </Style>
+
+        <!-- :host(.ion-color): color: var(ion-color-contrast); the wrapper's background: var(ion-color-base). The buttons follow it,
+             button-color: inherit, through the toast's :in-color on them. -->
+        <Style Selector="^:ion-color">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <Binding Path="(b:ColorPalette.Contrast)" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-color /template/ Border#PART_Wrapper">
+            <Setter Property="Background" Value="{Binding $parent[c:AvonicToast].(b:ColorPalette.Base)}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- .toast-button: padding 10px 15px; transparent; 14 px, 500, letter-spacing 0.84px, uppercase; color: var(button-color);
+         overflow: hidden, for the ripple; outline: none; line-height: normal, 16 at 14 px (Chromium's rounded ascent and descent),
+         where Avalonia's is 16.41. -->
+    <ControlTheme x:Key="{x:Type c:ToastNativeButton}" TargetType="c:ToastNativeButton">
+        <Setter Property="Padding" Value="15,10" />
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.Toast.ButtonColor" />
+                <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+            </MultiBinding>
+        </Setter>
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <!-- .toast-button-inner: a flex row, align-items: center -->
+                        <c:FlexRow Name="PART_Inner" Margin="{TemplateBinding Padding}" IsHitTestVisible="False">
+                            <!-- .toast-button-icon: font-size 1.4em; aria-hidden -->
+                            <c:AvonicIcon Name="PART_Icon" Icon="{TemplateBinding Icon}" VerticalAlignment="Center"
+                                          AutomationProperties.AccessibilityView="Raw"
+                                          IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <c:AvonicIcon.FontSize>
+                                    <MultiBinding Converter="{x:Static b:Css.Em}" ConverterParameter="1.4">
+                                        <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                                    </MultiBinding>
+                                </c:AvonicIcon.FontSize>
+                            </c:AvonicIcon>
+                            <TextBlock Name="PART_Label" Text="{TemplateBinding Text, Converter={x:Static c:ToastNativeButton.Uppercase}}"
+                                       LetterSpacing="0.84" LineHeight="16" VerticalAlignment="Center"
+                                       IsVisible="{TemplateBinding Text, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </c:FlexRow>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground" Value="{Binding $parent[c:ToastNativeButton].Foreground}" />
+        </Style>
+
+        <!-- .toast-button-cancel: md's step-100 -->
+        <Style Selector="^:role-cancel">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Toast.Md.ButtonCancelColor}" />
+        </Style>
+
+        <!-- :host(.ion-color): button-color: inherit, and the cancel button's color: inherit: the toast's text colour -->
+        <Style Selector="^:in-color">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicToast].Foreground}" />
+        </Style>
+
+        <!-- .toast-button-icon-only: border-radius 50%; padding 9px; 36 by 36; md's unbounded ripple -->
+        <Style Selector="^:icon-only">
+            <Setter Property="Padding" Value="9" />
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="CornerRadius" Value="18" />
+        </Style>
+        <Style Selector="^:icon-only /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Type" Value="Unbounded" />
+        </Style>
+
+        <!-- @media (any-hover: hover) .toast-button:hover, for a mouse or a pen: rgba(ion-color-primary-rgb, 0.08), and a cancel
+             button's rgba(ion-background-color-rgb, 0.08) -->
+        <Style Selector="^:ion-hover">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toast.Md.ButtonBackgroundHover}" />
+        </Style>
+        <Style Selector="^:role-cancel:ion-hover">
+            <Setter Property="Background" Value="{DynamicResource Avonic.Toast.Md.ButtonCancelBackgroundHover}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

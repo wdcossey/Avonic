@@ -129,6 +129,16 @@ public static class AvonicConfig
     /// </remarks>
     public static MenuType? MenuType { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>toastDuration</c> config: the <see cref="AvonicToast.Duration"/> of a toast, in milliseconds. 0, Ionic's fallback,
+    /// keeps a toast until it's dismissed.
+    /// </summary>
+    /// <remarks>
+    /// Read when the toast is made, as Ionic reads it as the prop's default: a change of this reaches only toasts made after it. It's
+    /// the toast's value at style priority, so an app's own, set or in a style, wins.
+    /// </remarks>
+    public static double ToastDuration { get; set; }
+
     // ── Avonic's own: no Ionic config has these ─────────────────────────────────────────────────
 
     /// <summary>

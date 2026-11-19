@@ -390,6 +390,9 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | `createItemMultipleInputsObserver` (a control re-rendering when its item's class flips) | `ItemMultipleInputsObserver`, internal, on attach: the nearest `AvonicItem`'s pseudoclasses, compared as bits on `Classes.CollectionChanged`; disposed on detach. It also tells the item of a control inside a wrapper, the item's `MutationObserver` | `AvonicCheckbox`, `AvonicRadio` (`:item-multiple-inputs`), `AvonicToggle` (and `:ion-activatable`) |
 | `overflow: hidden` that must not clip the element's own `box-shadow`, on a `Border` with padding | A `Clip` geometry on the part inside the `Border`, its padding box: `AvonicItem.PaddingBoxClipConverter` | `.item-inner` with `:item-focus-indicator-room` |
 | `::after` focus indicator on `:host(.ion-focused)` | A `PART_Focus` part, hidden, shown by `:ion-focused` in the theme; negative margins keep it out of the layout, and the host's `ClipToBounds` off | `AvonicCheckbox`, `AvonicToggle` (before the handle: `z-index: -1` in a stacking context), `AvonicRadio` |
+| An overlay's animation builder that sets an inline style before it animates (`wrapperEl.style.transform`, `style.top`) | A local value on the part (its `RenderTransform`) or on its panel, set by the `Md*Animation` builder, as an app's own builder wouldn't set it either; the animation's values, at `Animation` priority, beat it, and it stays after the dismiss, as the inline style does | `AvonicToast`'s `translateY` and the middle's `ToastPanel.MiddleTop` |
+| `white-space: var(--white-space)` on text | A string key read by `ToastContent.WhiteSpaceText` (`normal` and `nowrap` collapse runs of white space, `pre-line` keeps the breaks, `pre` keeps it all) and `.WhiteSpaceWrapping`, as a `TextBlock` keeps every space and line break | `AvonicToast`'s message |
+| A part with `tabindex="0"` in the shadow tree of a host with `tabindex="-1"`, which Chromium leaves out of Tab | A tab stop, as the part's `tabindex` asks, recorded in `docs/infra/ionic-issues.md` | `AvonicToast`'s buttons |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.
@@ -405,7 +408,7 @@ Avonic-only additions (touch-target enforcement, extra events) are allowed but l
 5. **No visual opinion in Components.** No hex colours or `Brushes.*` in Themes outside `Tokens/`.
 6. **No emoji or Unicode glyphs as icons.** Icons come from ionicons.
 7. **This file is ground truth.** If it says something exists, it exists and works. Aspirations go in `docs/ROADMAP.md`.
-8. **Faithful, with deviations explained.** Avalonia doesn't offer every technique html, CSS and JS do, so a deviation it forces is allowed, if it's recorded with its measurement and the reason. It isn't a licence to skip measuring, or to deviate where Avalonia could do it ([ADR 0002](docs/decisions/0002-decisions-from-the-first-swarm.md)).
+8. **Faithful, with deviations explained.** Avalonia doesn't offer every technique html, CSS and JS do, so a deviation it forces is allowed, if it's recorded with its measurement and the reason. It isn't a licence to skip measuring, or to deviate where Avalonia could do it ([ADR 0002](docs/decisions/0002-decisions-from-the-first-swarm.md)), except where Ionic's behaviour is a bug: then Avonic does what Ionic means, recorded in `docs/infra/ionic-issues.md` and the control's comparison ([ADR 0005](docs/decisions/0005-dont-copy-an-ionic-bug.md)).
 
 ---
 
