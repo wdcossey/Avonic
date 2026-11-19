@@ -153,8 +153,8 @@ public partial class AvonicToast
                 {
                     if (shouldDismiss)
                     {
+                        // The dismiss destroys the gesture and this animation (OnDismissed).
                         DismissFromInput(OverlayRoles.Gesture);
-                        swipeAnimation.Destroy();
                     }
                     else
                     {

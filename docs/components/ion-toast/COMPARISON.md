@@ -60,7 +60,7 @@ Boxes are x, y, width, height in the window, with the render transform (`getBoun
 | Safe areas 30 / 20 | top 38, bottom 768 | the same | Match (asserted, B5) |
 | `--white-space: nowrap` | one line, cut at the wrapper's end | the same (`TextWrapping.NoWrap`, the container clips) | Match (B20) |
 | Hover with a mouse | `rgba(0, 84, 233, 0.08)`; a cancel button `rgba(255, 255, 255, 0.08)`; a pointer cursor | the same | Match (asserted, B19) |
-| An empty `header` or `message` (`""`) | an empty `div`: 0 high, the header's 2 px margin | not shown | Deliberate: up to 2 px with an empty header; Avalonia's empty `TextBlock` is a line high |
+| An empty `header` or `message` (`""`, or only spaces) | an empty `div`: 0 high, the header's 2 px margin | not shown | Match for the message (B24); 2 px short with an empty header, as Avalonia's empty `TextBlock` is a line high, so it's hidden |
 
 ## Behaviour
 
@@ -93,6 +93,7 @@ Boxes are x, y, width, height in the window, with the render transform (`getBoun
 | White space | `normal` collapses runs, `pre-line` keeps breaks | the same, by `ToastContent.WhiteSpaceText` | Match (B20); `break-spaces` is kept as `pre-wrap` |
 | Button groups too wide for the line | `flex-shrink` down to their min-content | not shrunk; clipped | Gap: not reached by any measured case; a button's text wraps in Chromium before it's cut here |
 | Message as HTML | with `innerHTMLTemplatesEnabled` only | plain text | Deliberate, as the alert |
+| `duration` too long for a timer (`Infinity`) | a browser's `setTimeout` overflows past 2^31 - 1 ms and fires at once (not measured) | never dismissed by itself | Deliberate: a `TimeSpan` can't hold it, and "forever" is what an app means (B7) |
 
 ## Not tried
 

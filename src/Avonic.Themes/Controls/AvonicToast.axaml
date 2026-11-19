@@ -57,7 +57,7 @@
                                 <StackPanel VerticalAlignment="Center">
                                     <!-- .toast-header: margin-bottom 2px; font-weight 500; line-height 1.25rem -->
                                     <TextBlock Name="PART_Header" TextWrapping="Wrap" Margin="0,0,0,2" FontWeight="Medium" LineHeight="20"
-                                               IsVisible="{TemplateBinding Header, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                               IsVisible="{Binding Text, RelativeSource={RelativeSource Self}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{x:Static c:ToastContent.WhiteSpaceText}">
                                                 <Binding Path="Header" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -66,7 +66,7 @@
                                     </TextBlock>
                                     <!-- .toast-message: line-height 1.25rem; white-space: var(white-space) -->
                                     <TextBlock Name="PART_Message" LineHeight="20"
-                                               IsVisible="{TemplateBinding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                               IsVisible="{Binding Text, RelativeSource={RelativeSource Self}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{x:Static c:ToastContent.WhiteSpaceText}">
                                                 <Binding Path="Message" RelativeSource="{RelativeSource TemplatedParent}" />

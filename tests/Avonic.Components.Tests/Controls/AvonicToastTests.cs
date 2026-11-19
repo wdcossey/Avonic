@@ -131,6 +131,16 @@ public class AvonicToastTests
         Assert.Equal(0, TranslateY(middle.Wrapper!), 6);
         Near([8, 398, 374, 48], Box(middle.Wrapper!, stage));
         Assert.Equal(398, AvonicToast.OffsetForMiddle(844, 48));
+        _ = middle.Dismiss();
+        Gone(stage);
+
+        // clientHeight leaves the border out: a 4 px border is still at 398, 56 high.
+        var bordered = new AvonicToast { Message = "Bordered", Position = ToastPosition.Middle };
+        bordered.Resources["Avonic.Toast.BorderWidth"] = 4.0;
+        bordered.Resources["Avonic.Toast.BorderStyle"] = "solid";
+        Shown(stage, bordered);
+        Assert.Equal(398, bordered.Panel!.MiddleTop);
+        Near([8, 398, 374, 56], Box(bordered.Wrapper!, stage));
         Assert.Equal(397, AvonicToast.OffsetForMiddle(844, 49.4));
     }
 
@@ -308,6 +318,19 @@ public class AvonicToastTests
     }
 
     [AvaloniaFact]
+    public void B7_A_Duration_Too_Long_For_A_Timer_Never_Comes()
+    {
+        using var stage = new Stage();
+        var toast = Watch(stage, new AvonicToast { Message = "Forever", Duration = double.PositiveInfinity });
+        var present = toast.Present(stage.Window);
+        stage.At(Entered);
+        Assert.True(present.IsCompletedSuccessfully);
+        stage.Log.Clear();
+        stage.At(5000);
+        Assert.Empty(stage.Log);
+    }
+
+    [AvaloniaFact]
     public void B7_The_Config_Is_The_Default_And_An_Apps_Value_Wins()
     {
         try
@@ -366,6 +389,18 @@ public class AvonicToastTests
         Assert.True(Box(icon, stage).Right <= Box(label, stage).Left + 0.5);
         Assert.Equal(19.6, icon.FontSize, 6);
         Assert.Equal("DISMISS", label.Text);
+
+        // Uppercase whatever the culture, as AvonicButton's: not Turkish's dotted capital I.
+        var culture = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("tr-TR");
+            Assert.Equal("HIDE", ToastNativeButton.Uppercase.Convert("Hide", typeof(string), null, System.Globalization.CultureInfo.InvariantCulture));
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = culture;
+        }
 
         // The groups: the start group before the content, the end group after it.
         Assert.True(Box(toast.StartButtonControls[0], stage).Right <= Box(toast.Content!, stage).Left + 0.5);
@@ -516,7 +551,8 @@ public class AvonicToastTests
         stage.At(500);
         var toast = Shown(stage, new AvonicToast { Message = "On top" });
 
-        // Not copied from Ionic, where the toast on top stops it (M23).
+        // Not copied from Ionic, where the toast on top stops it (M23). The menu's back defers to the same overlay.
+        Assert.Same(alert, OverlayHost.BackTargetIn(stage.Window));
         stage.Key(PhysicalKey.Escape);
         Assert.Equal(["backdrop"], dismissed);
         Assert.True(toast.IsShown);
@@ -962,6 +998,9 @@ public class AvonicToastTests
         Assert.False(Part<TextBlock>(toast, "PART_Message").IsVisible);
         Assert.False(Part<AvonicIcon>(toast, "PART_Icon").IsVisible);
         Near([8, 808, 374, 28], Box(toast.Wrapper!, stage));
+        toast.Message = "   ";
+        stage.Render();
+        Assert.False(Part<TextBlock>(toast, "PART_Message").IsVisible);
         toast.Message = "Now";
         stage.Render();
         Near([8, 788, 374, 48], Box(toast.Wrapper!, stage));

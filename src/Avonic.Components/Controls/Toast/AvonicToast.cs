@@ -61,7 +61,7 @@ public partial class AvonicToast : AvonicOverlay
     /// <summary>md's offset from the edge, or the anchor: 8 px (<c>getAnimationPosition</c>).</summary>
     internal const double EdgeOffset = 8;
 
-    /// <summary>Ionic <c>innerHTMLTemplatesEnabled</c> is off by default, and the toast's z-index base is 60000.</summary>
+    /// <summary>The toast's z-index base: 60000, over every other overlay.</summary>
     private const int ToastZIndex = 60000;
 
     /// <summary>Ionic <c>color</c>.</summary>
@@ -335,7 +335,9 @@ public partial class AvonicToast : AvonicOverlay
                     toast.UpdateLayout();
                     if (toast._panel is { } panel)
                     {
-                        panel.MiddleTop = OffsetForMiddle(toast.Bounds.Height, wrapper.Bounds.Height);
+                        // clientHeight, which leaves the border out.
+                        var border = wrapper is Border { BorderThickness: var thickness } ? thickness.Top + thickness.Bottom : 0;
+                        panel.MiddleTop = OffsetForMiddle(toast.Bounds.Height, wrapper.Bounds.Height - border);
                     }
 
                     break;
@@ -387,7 +389,8 @@ public partial class AvonicToast : AvonicOverlay
     {
         _presented = true;
         Reveal(true);
-        if (Duration > 0)
+        // setTimeout takes any number; a TimeSpan doesn't, so one too long for it (infinity, say) never comes.
+        if (Duration > 0 && Duration < TimeSpan.MaxValue.TotalMilliseconds)
         {
             _durationTimeout = AvonicConfig.Schedule(() => DismissFromInput("timeout"), TimeSpan.FromMilliseconds(Duration));
         }
@@ -491,27 +494,38 @@ public partial class AvonicToast : AvonicOverlay
     private ToastPresentOptions AnimationPosition(ToastPosition position, Control? anchor)
     {
         var offset = position == ToastPosition.Top ? EdgeOffset : -EdgeOffset;
-        if (anchor is not null && TopLevel.GetTopLevel(this) is { } top && anchor.TransformToVisual(top) is { } transform)
+
+        // The anchor's box and the height in the toast's host, which the toast covers, as Ionic's fixed host covers the window that
+        // getBoundingClientRect and innerHeight measure. A host not laid out yet is its top level's size.
+        if (anchor is not null && this.GetVisualParent() is Visual host)
         {
-            if (!anchor.IsEffectivelyVisible)
+            if (anchor.TransformToVisual(host) is not { } transform)
             {
-                Warn("The PositionAnchor element was found, but appears to be hidden. This may lead to unexpected positioning of the toast.");
+                Warn("The PositionAnchor element isn't in the toast's window, so it's ignored.");
             }
+            else
+            {
+                if (!anchor.IsEffectivelyVisible)
+                {
+                    Warn("The PositionAnchor element was found, but appears to be hidden. This may lead to unexpected positioning of the toast.");
+                }
 
-            var box = new Rect(anchor.Bounds.Size).TransformToAABB(transform);
-            if (position == ToastPosition.Top)
-            {
-                offset += box.Bottom;
-            }
-            else if (position == ToastPosition.Bottom)
-            {
-                offset -= top.ClientSize.Height - box.Top;
-            }
+                var height = host.Bounds.Height > 0 ? host.Bounds.Height : TopLevel.GetTopLevel(this)?.ClientSize.Height ?? 0;
+                var box = new Rect(anchor.Bounds.Size).TransformToAABB(transform);
+                if (position == ToastPosition.Top)
+                {
+                    offset += box.Bottom;
+                }
+                else if (position == ToastPosition.Bottom)
+                {
+                    offset -= height - box.Top;
+                }
 
-            return new ToastPresentOptions(position, offset, offset);
+                return new ToastPresentOptions(position, offset, offset);
+            }
         }
 
-        return new ToastPresentOptions(position, EdgeOffset + SafeArea("Avonic.SafeAreaTop"), -EdgeOffset - SafeArea("Avonic.SafeAreaBottom"));
+        return new ToastPresentOptions(position, EdgeOffset + SafeArea(AppSafeArea.TopKey), -EdgeOffset - SafeArea(AppSafeArea.BottomKey));
     }
 
     private double SafeArea(string key) =>

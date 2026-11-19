@@ -32,7 +32,7 @@ public class ToastNativeButton : TemplatedControl
 
     /// <summary><c>text-transform: uppercase</c>, for the label.</summary>
     public static readonly IValueConverter Uppercase =
-        new FuncValueConverter<string?, string?>(text => text?.ToUpper(System.Globalization.CultureInfo.CurrentCulture));
+        new FuncValueConverter<string?, string?>(text => text?.ToUpperInvariant());
 
     /// <summary>The button's <c>text</c>.</summary>
     public static readonly StyledProperty<string?> TextProperty =

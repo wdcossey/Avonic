@@ -122,7 +122,16 @@ internal sealed class OverlayHost : Panel
     /// on top, which has no <c>backdropDismiss</c>, stops them dismissing the overlay under it; Avonic doesn't copy that
     /// (<c>docs/infra/ionic-issues.md</c>, #38).
     /// </summary>
-    private AvonicOverlay? BackTarget => GetPresentedOverlay(o => o.StealsFocus);
+    private AvonicOverlay? BackTarget => GetPresentedOverlay(o => o is not AvonicToast);
+
+    /// <summary>
+    /// <see cref="BackTarget"/> for <paramref name="topLevel"/>, without making it a host: what defers to an overlay on back, as
+    /// <c>ion-menu</c>'s back does, takes the same one as the overlays' own back.
+    /// </summary>
+    internal static AvonicOverlay? BackTargetIn(TopLevel topLevel) =>
+        s_hosts.TryGetValue(topLevel, out var host) && host._layer == OverlayLayer.GetOverlayLayer(topLevel)
+            ? host.BackTarget
+            : null;
 
     /// <summary>
     /// Ionic's <c>keydown</c> listener on the document: Escape dismisses the top overlay with the backdrop role, if it allows it.
