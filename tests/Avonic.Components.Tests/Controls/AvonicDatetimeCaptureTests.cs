@@ -96,6 +96,9 @@ public class AvonicDatetimeCaptureTests
         Save(scene, "avonic-datetime-page.png");
         Dump(scene, datetime, "dateTime");
         Near([16, 16, 350, 391], Box(datetime, scene.Window));
+        // M4: June 1 at 201.13, 88 (the calendar at 84, its padding 4 and 10, columns 47.14 apart), 42 x 42.
+        var first = datetime.CalendarMonths!.Months[1].Days.First(d => d.IsVisible && !d.IsPadding);
+        Near([201.13, 88, 42, 42], Box(first, datetime));
     });
 
     [AvaloniaFact]
@@ -132,6 +135,8 @@ public class AvonicDatetimeCaptureTests
         Save(scene, "avonic-datetime-timeDate.png");
         Dump(scene, datetime, "timeDate");
         Near([16, 16, 350, 391], Box(datetime, scene.Window));
+        // time-date: the time row first, then the calendar.
+        Assert.True(Box(Part<Control>(datetime, "PART_Time"), datetime).Bottom <= Box(datetime.CalendarBody!, datetime).Top);
     });
 
     [AvaloniaFact]
@@ -240,6 +245,10 @@ public class AvonicDatetimeCaptureTests
         Save(scene, "avonic-datetime-disabled.png");
         Dump(scene, datetime, "disabled");
         Near([16, 16, 350, 443], Box(datetime, scene.Window));
+        // opacity: 0.4 of each day as a whole: a mask, not Opacity, which would fade its text and its circle each on its own.
+        var day = datetime.CalendarMonths!.Months[1].Days.First(d => d.IsVisible && !d.IsPadding);
+        Assert.Equal(0.4, day.OpacityMask!.Opacity, 3);
+        Assert.Equal(1, day.Opacity);
     });
 
     [AvaloniaFact]
