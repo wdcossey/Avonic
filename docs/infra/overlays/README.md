@@ -94,7 +94,8 @@ are controllers: see [PLAN.md](PLAN.md#deferred).
 - **Dismiss**: not hit-testable, `WillDismiss`, the leave animation (not for `gesture`), `DidDismiss`, every animation it
   played destroyed, hidden and removed; focus given back to what had it at present, if nothing has it now.
 - **Top overlay**: the last presented that's showing. Escape and `TopLevel.BackRequested` (Android's back, Alt+Left, the mouse's
-  back button) dismiss it with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. In an
+  back button) dismiss the top one that isn't a toast (#38: Ionic's take a toast on top, which then stops them, recorded in
+  `docs/infra/ionic-issues.md`) with the `backdrop` role when its `BackdropDismissEnabled` is true; back is then handled. In an
   [`AvonicApp`](../../components/ion-app/README.md), back goes through `HardwareBackButton.IonBackButtonEvent`, where the overlay
   registers at 100 (`OverlayBackButtonPriority`), so an app's own handler above that comes first; without one, the overlay takes
   the back request itself. Neither with `AvonicConfig.HardwareBackButton` off. An Escape a control inside has handled, as a

@@ -617,9 +617,10 @@ public partial class AvonicToast : AvonicOverlay
         }
         else if (change.Property == ColorProperty)
         {
+            var colored = !string.IsNullOrEmpty(Color);
             foreach (var native in ButtonControls)
             {
-                native.IsInColor = !string.IsNullOrEmpty(Color);
+                native.IsInColor = colored;
             }
         }
         else if (change.Property == ToastSwipeGestureProperty)

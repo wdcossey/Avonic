@@ -124,7 +124,9 @@ public class AvonicToastTests
         _ = top.Dismiss();
         Gone(stage);
 
-        var middle = Shown(stage, new AvonicToast { Message = "Middle", Position = ToastPosition.Middle });
+        // The same toast again, in the middle: the top's transform goes (not copied: Ionic keeps it).
+        top.Position = ToastPosition.Middle;
+        var middle = Shown(stage, top);
         Assert.Equal(398, middle.Panel!.MiddleTop);
         Assert.Equal(0, TranslateY(middle.Wrapper!), 6);
         Near([8, 398, 374, 48], Box(middle.Wrapper!, stage));
@@ -753,6 +755,12 @@ public class AvonicToastTests
         Assert.Equal(Colors.Teal, ColorOf(wrapper.Background));
         Assert.Equal(Colors.Orange, ColorOf(toast.EndButtonControls[0].Foreground));
         Assert.Equal(Colors.Yellow, ColorOf(toast.Foreground));
+
+        // A colour from the start reaches the buttons it renders.
+        _ = toast.Dismiss();
+        Gone(stage);
+        var danger = Shown(stage, new AvonicToast { Message = "Danger", Color = "danger", Buttons = [new ToastButton { Text = "Retry" }, new ToastButton { Text = "Close", Role = "cancel" }] });
+        Assert.All(danger.ButtonControls, b => Assert.Equal(Colors.White, ColorOf(b.Foreground)));
     }
 
     [AvaloniaFact]
