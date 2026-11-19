@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-toast, md. A size takes a number (px) or a CSS string: px, a percentage of the window, vw and vh, sums
+         and differences ("100% - 40px"), calc(), min(a, b), or "auto". A key set to CssUnset falls back as its comment says, as the
+         variable does in toast.md.css. -->
+
+    <!-- background: var(ion-color-step-800, var(ion-background-color-step-800, #333333)). Unset, it follows
+         Avonic.BackgroundColorStep800Brush. -->
+    <b:CssUnset x:Key="Avonic.Toast.Background" />
+    <!-- color: var(ion-color-step-50, var(ion-text-color-step-950, #f2f2f2)). Unset, it follows Avonic.TextColorStep950Brush. -->
+    <b:CssUnset x:Key="Avonic.Toast.Color" />
+    <!-- button-color: var(ion-color-primary, #0054e9). Unset, it follows Avonic.Color.PrimaryBrush. -->
+    <b:CssUnset x:Key="Avonic.Toast.ButtonColor" />
+
+    <!-- border-color: initial, which is currentColor. Unset, it follows the toast's Foreground. -->
+    <b:CssUnset x:Key="Avonic.Toast.BorderColor" />
+    <x:Double x:Key="Avonic.Toast.BorderRadius">4</x:Double>
+    <!-- border-style: none draws no border, whatever its width, as in CSS; any other value draws a solid one. -->
+    <x:String x:Key="Avonic.Toast.BorderStyle">none</x:String>
+    <x:Double x:Key="Avonic.Toast.BorderWidth">0</x:Double>
+    <b:CssShadow x:Key="Avonic.Toast.BoxShadow">0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12)</b:CssShadow>
+
+    <!-- start and end: inset-inline-start and inset-inline-end of the wrapper -->
+    <x:Double x:Key="Avonic.Toast.Start">8</x:Double>
+    <x:Double x:Key="Avonic.Toast.End">8</x:Double>
+    <x:String x:Key="Avonic.Toast.Width">auto</x:String>
+    <x:String x:Key="Avonic.Toast.MinWidth">auto</x:String>
+    <x:Double x:Key="Avonic.Toast.MaxWidth">700</x:Double>
+    <x:String x:Key="Avonic.Toast.Height">auto</x:String>
+    <x:String x:Key="Avonic.Toast.MinHeight">auto</x:String>
+    <!-- max-height: auto, which isn't a valid max-height, so none -->
+    <x:String x:Key="Avonic.Toast.MaxHeight">auto</x:String>
+
+    <!-- white-space, of the message: normal, nowrap, pre, pre-wrap, pre-line or break-spaces -->
+    <x:String x:Key="Avonic.Toast.WhiteSpace">normal</x:String>
+
+    <!-- md's own, with no variable, as keys so that they can be restyled. -->
+    <!-- .toast-button-cancel: color: var(ion-color-step-100, var(ion-text-color-step-900, #e6e6e6)) -->
+    <SolidColorBrush x:Key="Avonic.Toast.Md.ButtonCancelColor" Color="{DynamicResource Avonic.TextColorStep900}" />
+    <!-- .toast-button:hover: background-color: rgba(ion-color-primary-rgb, 0.08) -->
+    <SolidColorBrush x:Key="Avonic.Toast.Md.ButtonBackgroundHover" Color="{DynamicResource Avonic.Color.Primary}" Opacity="0.08" />
+    <!-- .toast-button-cancel:hover: background-color: rgba(ion-background-color-rgb, 0.08) -->
+    <SolidColorBrush x:Key="Avonic.Toast.Md.ButtonCancelBackgroundHover" Color="{DynamicResource Avonic.BackgroundColor}" Opacity="0.08" />
+
+</ResourceDictionary>

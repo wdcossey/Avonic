@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.ToastPage">
+
+    <!-- ion-toast: one declared in the page and opened by its trigger, one by IsOpen that a swipe dismisses, and toasts made in code:
+         at the top with an icon-only button, in the middle, in a colour, and one that goes by itself. None blocks the page: the
+         status line says what each was dismissed with. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="ToastStatus" Text="Show one, then pick a button, swipe it, or wait" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="In the page, with a trigger" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="ShowBottomToast" Content="Show the bottom toast" Margin="16,8,16,0" />
+            <c:AvonicToast Name="BottomToast" Trigger="ShowBottomToast" Header="Saved" Message="The photo is in your library."
+                           Icon="checkmark-circle">
+                <c:AvonicToast.Buttons>
+                    <c:ToastButton Text="Undo save" />
+                    <c:ToastButton Text="Hide toast" Role="cancel" />
+                </c:AvonicToast.Buttons>
+            </c:AvonicToast>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Made in code" />
+            </c:AvonicListHeader>
+            <StackPanel Margin="14,8" Spacing="8">
+                <c:AvonicButton Name="ShowTopToast" Content="Show a top toast" />
+                <c:AvonicButton Name="ShowMiddleToast" Content="Show a middle toast" />
+                <c:AvonicButton Name="ShowDangerToast" Content="Show a danger toast" />
+                <c:AvonicButton Name="ShowTimedToast" Content="Show a toast for two seconds" />
+            </StackPanel>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="IsOpen, stacked, swipe down to dismiss" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="Swipeable toast" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicToggle Name="SwipeToastToggle" AutomationProperties.Name="Swipeable toast open" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicToast Name="SwipeToast" Layout="Stacked" ToastSwipeGesture="Vertical"
+                           Message="A stacked toast: its button has a line of its own. Swipe it down to dismiss it.">
+                <c:AvonicToast.Buttons>
+                    <c:ToastButton Text="Got it, thanks" Role="cancel" />
+                </c:AvonicToast.Buttons>
+            </c:AvonicToast>
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>
