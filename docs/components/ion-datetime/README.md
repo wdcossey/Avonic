@@ -159,6 +159,9 @@ None.
 
 - **Some locales' short dates and eras differ from Chromium's** (COMPARISON.md's locale table), and "Today" is English outside the 21
   languages measured, as .NET has no `Intl.RelativeTimeFormat`.
+- **The locale's text is the platform's ICU, through .NET**: measured on Windows; Linux's gives some locales' AM and PM in English and
+  `ar-SA` in the Gregorian calendar, and non-Latin narrow day names may be longer there (COMPARISON.md). Android, iOS and macOS
+  weren't measured.
 - **Snapping after a touch swipe is Avalonia's**: it jumps to the month, or aims a fling at it, where Chromium eases (as the picker
   and the segment view).
 - **The month/year wheel closes at the parent overlay's next present**, not as soon as the datetime is hidden, as Avalonia doesn't say

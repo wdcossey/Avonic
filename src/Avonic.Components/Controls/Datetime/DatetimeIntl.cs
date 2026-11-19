@@ -119,8 +119,24 @@ internal static class DatetimeIntl
     /// <summary><c>getDaysOfWeek</c> in md: the narrow names from <paramref name="firstDayOfWeek"/>.</summary>
     public static string[] DaysOfWeek(CultureInfo culture, int firstDayOfWeek)
     {
-        var names = culture.DateTimeFormat.ShortestDayNames;
+        var names = NarrowDayNames(culture);
         return [.. Enumerable.Range(firstDayOfWeek, 7).Select(i => Digits(culture, names[((i % 7) + 7) % 7]))];
+    }
+
+    /// <summary>
+    /// Intl's narrow day names. .NET's <c>ShortestDayNames</c> are them on Windows (measured in 20 locales), but on Linux its ICU
+    /// gives the short names (<c>Su</c>, <c>Mo</c>): a name of more than one letter, in a cased script, is cut to its first letter,
+    /// upper-cased, as the narrow names of the Latin, Cyrillic and Greek locales are.
+    /// </summary>
+    internal static string[] NarrowDayNames(CultureInfo culture)
+    {
+        var names = culture.DateTimeFormat.ShortestDayNames;
+        return [.. names.Select(name =>
+        {
+            var first = StringInfo.GetNextTextElement(name);
+            var cased = first.Length > 0 && char.IsLetter(first[0]) && (char.ToUpperInvariant(first[0]) != char.ToLowerInvariant(first[0]));
+            return cased && first.Length < name.Length ? culture.TextInfo.ToUpper(first) : name;
+        })];
     }
 
     /// <summary><c>getDay</c>: the day number alone, as the day part of <c>{ day: 'numeric' }</c>, for a calendar cell.</summary>
@@ -325,7 +341,8 @@ internal static class DatetimeIntl
         }
 
         var text = datePart is null ? timePart ?? string.Empty : timePart is null ? datePart : $"{datePart}, {timePart}";
-        return Digits(culture, text.Trim());
+        // Chromium's V8 writes a plain space where ICU 72 and later put a narrow no-break space before AM and PM, as Linux's .NET does.
+        return Digits(culture, text.Trim().Replace('\u202F', ' '));
     }
 
     private static DatetimeHourCycle CycleFor(CultureInfo culture, DateTimeFormatOptions options)
@@ -609,7 +626,7 @@ internal static class DatetimeIntl
             switch (token.Field)
             {
                 case 'd' when n >= 5:
-                    text.Append(info.ShortestDayNames[(int)calendar.GetDayOfWeek(date)]);
+                    text.Append(NarrowDayNames(culture)[(int)calendar.GetDayOfWeek(date)]);
                     break;
                 case 'd' when n == 4:
                     text.Append(info.DayNames[(int)calendar.GetDayOfWeek(date)]);

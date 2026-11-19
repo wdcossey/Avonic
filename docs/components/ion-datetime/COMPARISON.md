@@ -120,7 +120,11 @@ ADR 0004's note for #46: .NET's `CultureInfo` does `Intl`'s job, measured agains
 What .NET doesn't do and Avonic does, all matching Chromium: Arabic-Indic and Persian digits (`DigitSubstitution`), the `h11` and
 `h24` cycles, narrow day names, a day alone with its suffix (`15日`), and AM/PM as `AM`/`PM` in a 24-hour locale. "Today"
 (`Intl.RelativeTimeFormat`) is a table of the 20 measured languages and Italian, and English otherwise. Measured on Windows, whose
-.NET uses ICU; Linux's ICU is a later version.
+.NET uses ICU. **Linux's .NET differs** (CI, Ubuntu's ICU 74): its `ShortestDayNames` are the short names (`Su`, `Mo`), which
+Avonic cuts to their first letter in a cased script (so `S M T W T F S` as Chromium); it writes a narrow no-break space before AM
+and PM, which Avonic writes as a space, as V8 does; and some locales' AM and PM come out in English (Korean, Hebrew, Thai), Hindi's
+October is a later CLDR's, and `ar-SA` is Gregorian. `DatetimeIntlTests` compares every call on Windows and en-US and the narrow
+days of the Latin and Cyrillic locales elsewhere. Android, iOS and macOS use their own ICU, and weren't measured.
 
 ## Not in Avonic
 
