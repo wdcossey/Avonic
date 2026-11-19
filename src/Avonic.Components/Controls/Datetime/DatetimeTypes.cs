@@ -50,10 +50,10 @@ public readonly struct DatetimeValue : IEquatable<DatetimeValue>
     private readonly string? _single;
     private readonly string[]? _list;
 
-    /// <summary>One string.</summary>
-    public DatetimeValue(string value)
+    /// <summary>One string. A null one is no value, as Ionic's <c>undefined</c>.</summary>
+    public DatetimeValue(string? value)
     {
-        _single = value ?? throw new ArgumentNullException(nameof(value));
+        _single = value;
     }
 
     /// <summary>A list of strings.</summary>
@@ -76,7 +76,7 @@ public readonly struct DatetimeValue : IEquatable<DatetimeValue>
     /// </summary>
     public bool HasValue => _list is { Length: > 0 } || !string.IsNullOrEmpty(_single);
 
-    public static implicit operator DatetimeValue(string value) => new(value);
+    public static implicit operator DatetimeValue(string? value) => new(value);
 
     public static implicit operator DatetimeValue(string[] values) => new(values);
 

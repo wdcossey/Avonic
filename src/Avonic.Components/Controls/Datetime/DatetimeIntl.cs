@@ -218,7 +218,12 @@ internal static class DatetimeIntl
     private const string FieldLetters = "dMyghHmstfFzK";
 
     /// <summary>Splits a .NET date pattern into fields and literals, the separators <c>/</c> and <c>:</c> as the culture's.</summary>
-    internal static List<Token> Tokenize(string pattern, DateTimeFormatInfo? info = null)
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string, string, string), Token[]> TokenCache = new();
+
+    internal static List<Token> Tokenize(string pattern, DateTimeFormatInfo? info = null) =>
+        [.. TokenCache.GetOrAdd((pattern, info?.DateSeparator ?? "/", info?.TimeSeparator ?? ":"), key => [.. TokenizeUncached(key.Item1, info)])];
+
+    private static List<Token> TokenizeUncached(string pattern, DateTimeFormatInfo? info)
     {
         var tokens = new List<Token>();
         var literal = new StringBuilder();

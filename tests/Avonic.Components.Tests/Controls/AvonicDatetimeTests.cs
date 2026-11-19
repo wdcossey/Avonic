@@ -154,6 +154,22 @@ public class AvonicDatetimeTests
         Assert.DoesNotContain(log.Events, e => e.StartsWith("ionChange", StringComparison.Ordinal));
     });
 
+    [AvaloniaFact]
+    public void B28_Readonly_Browses_The_Month_Year_Wheel_But_Selects_Nothing_There() => Run((scene, clock) =>
+    {
+        // The month/year wheel takes the pointer when read-only (pointer-events: initial); setActiveParts returns before a selection.
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15, Readonly = true });
+        var log = Log.Of(datetime);
+        Click(scene, Part<Button>(datetime, "PART_MonthYearButton"));
+        Settle(clock, 400);
+        var months = datetime.MonthYearWheel!.Items.OfType<AvonicPickerColumn>().First(c => c.Classes.Contains("month-column"));
+        Click(scene, months.Items.OfType<AvonicPickerColumnOption>().First(o => Equals(o.Value, 8)));
+        Settle(clock, 400);
+        Assert.Equal("August 2023", MonthShown(datetime));
+        Assert.Equal(June15, datetime.Value.ToString());
+        Assert.Empty(log.Events);
+    });
+
     // ── B6, B7, B8, B10: confirm, cancel, reset, clear ───────────────────────────────────────
 
     [AvaloniaFact]
@@ -762,5 +778,106 @@ public class AvonicDatetimeTests
         after.Focus(NavigationMethod.Tab);
         Assert.Equal(["ionFocus", "ionBlur"], log.Events);
         Assert.Equal(0, buttonFocus);
+    });
+
+    // ── Review pass 1 ────────────────────────────────────────────────────────────────────────
+
+    [AvaloniaFact]
+    public void A_Time_Alone_In_The_Grid_Shows_The_Default_Month_And_Its_Time() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = "13:47" });
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Equal("1:47 PM", Part<TextBlock>(datetime, "PART_TimeText").Text);
+        datetime.Reset("09:05");
+        Settle(clock, 100);
+        Assert.Equal("9:05 AM", Part<TextBlock>(datetime, "PART_TimeText").Text);
+    });
+
+    [AvaloniaFact]
+    public void A_Value_In_Year_One_Or_9999_Shows_Without_The_Month_Beyond() => Run((scene, clock) =>
+    {
+        var first = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = "0001-01-01T00:00:00" });
+        Assert.Equal("January 1", MonthShown(first));
+        Assert.DoesNotContain(first.CalendarMonths!.Months[0].Days, d => d.IsVisible);
+        var last = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = "9999-12-31" });
+        Assert.Equal("December 9999", MonthShown(last));
+    });
+
+    [AvaloniaFact]
+    public void A_Null_String_Is_No_Value() => Run((scene, clock) =>
+    {
+        string? none = null;
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = none });
+        Assert.Empty(ActiveDays(datetime));
+        Assert.Equal(string.Empty, datetime.Value.ToString());
+    });
+
+    [AvaloniaFact]
+    public void An_Adjacent_Day_Scrolls_Forward_From_The_Month_Shown() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15, ShowAdjacentDays = true });
+        var body = datetime.CalendarBody!;
+        var width = body.Viewport.Width;
+        Click(scene, datetime.CalendarMonths!.Months[1].Days.First(d => d.IsVisible && d.IsAdjacent && d.Parts.Day == 3));
+        // June stays in the middle, July is drawn next, and the scroll is on its way there.
+        Assert.Equal(6, datetime.CalendarMonths.Months[1].Month);
+        Assert.Equal(7, datetime.CalendarMonths.Months[2].Month);
+        Settle(clock, 100);
+        Assert.InRange(body.Offset.X, width + 1, 2 * width - 1);
+        Settle(clock, 600);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Assert.Equal(width, body.Offset.X, 1);
+    });
+
+    [AvaloniaFact]
+    public void Highlights_Read_Css_Colours_And_A_Border_With_No_Colour_Is_The_Text_Colour() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime
+        {
+            Presentation = DatetimePresentation.Date, Value = June15,
+            HighlightedDates = new DatetimeHighlight[]
+            {
+                new() { Date = "2023-06-05", BackgroundColor = "#ff000080" },
+                new() { Date = "2023-06-06", TextColor = "rgb(0, 128, 0)", Border = "2px solid" },
+            },
+        });
+        // CSS's #rrggbbaa: half-transparent red, not Avalonia's #aarrggbb.
+        Assert.Equal(Color.FromArgb(0x80, 0xff, 0, 0), ((ISolidColorBrush)Day(datetime, 5).Background!).Color);
+        Assert.Equal(Color.FromRgb(0, 128, 0), ((ISolidColorBrush)Day(datetime, 6).BorderBrush!).Color);
+        Assert.Equal(new Thickness(2), Day(datetime, 6).BorderThickness);
+    });
+
+    [AvaloniaFact]
+    public void The_Day_Period_Comes_First_Of_The_Whole_Wheel_In_Korean() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ko-KR", Presentation = DatetimePresentation.DateTime, PreferWheel = true, Value = June15 });
+        Assert.Equal(["Select a day period", "Select a date", "Select an hour", "Select a minute"],
+            datetime.Wheel!.Items.OfType<AvonicPickerColumn>().Select(c => AutomationProperties.GetName(c)));
+    });
+
+    [AvaloniaFact]
+    public void The_Year_First_Alignment_Goes_With_The_Locale() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ja-JP", Presentation = DatetimePresentation.Date, PreferWheel = true, Value = June15 });
+        // Japanese: year, month, day; the day at the end. en-US: month, day, year; the day in the middle, centred.
+        var day = datetime.Wheel!.Items.OfType<AvonicPickerColumn>().First(c => c.Classes.Contains("day-column"));
+        Assert.Equal(Avalonia.Layout.HorizontalAlignment.Right, day.HorizontalContentAlignment);
+        datetime.Locale = "en-US";
+        Settle(clock, 100);
+        Assert.Equal(Avalonia.Layout.HorizontalAlignment.Center, day.HorizontalContentAlignment);
+    });
+
+    [AvaloniaFact]
+    public void A_Presentation_Change_Raises_One_Rendered() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15 });
+        var rendered = 0;
+        datetime.Rendered += (_, _) => rendered++;
+        Click(scene, Part<Button>(datetime, "PART_MonthYearButton"));
+        Settle(clock, 100);
+        datetime.Presentation = DatetimePresentation.Time;
+        Settle(clock, 100);
+        Assert.Equal(1, rendered);
+        Assert.False(datetime.ShowMonthAndYear);
     });
 }

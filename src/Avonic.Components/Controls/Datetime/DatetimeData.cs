@@ -27,6 +27,12 @@ internal static partial class DatetimeUtils
     /// </summary>
     public static List<DatetimeCalendarCell> GetDaysOfMonth(int month, int year, int firstDayOfWeek, bool showAdjacentDays)
     {
+        // A month DateTime can't hold (year 0, or 10000, beside a value at either end) has no days to show.
+        if (year < 1 || year > 9999)
+        {
+            return [];
+        }
+
         var numDays = GetNumDaysInMonth(month, year);
         var previousNumDays = month == 1 ? GetNumDaysInMonth(12, year - 1) : GetNumDaysInMonth(month - 1, year);
         var firstOfMonth = (int)new DateTime(year, month, 1).DayOfWeek;
@@ -34,20 +40,20 @@ internal static partial class DatetimeUtils
         var days = new List<DatetimeCalendarCell>();
         for (var i = 1; i <= numDays; i++)
         {
-            days.Add(new DatetimeCalendarCell(i, Mod(offset + i, 7), false));
+            days.Add(new DatetimeCalendarCell(i, (offset + i) % 7, false));
         }
 
         if (showAdjacentDays)
         {
             for (var i = 0; i <= offset; i++)
             {
-                days.Insert(0, new DatetimeCalendarCell(previousNumDays - i, Mod(previousNumDays - i, 7), true));
+                days.Insert(0, new DatetimeCalendarCell(previousNumDays - i, (previousNumDays - i) % 7, true));
             }
 
             var positiveOffset = 41 - (numDays + offset);
             for (var i = 0; i < positiveOffset; i++)
             {
-                days.Add(new DatetimeCalendarCell(i + 1, Mod(numDays + offset + i, 7), true));
+                days.Add(new DatetimeCalendarCell(i + 1, (numDays + offset + i) % 7, true));
             }
         }
         else
@@ -60,9 +66,6 @@ internal static partial class DatetimeUtils
 
         return days;
     }
-
-    /// <summary>JavaScript's <c>%</c> keeps the sign; Ionic's offsets of -1 give a day of week of 0 at most once, as here.</summary>
-    private static int Mod(int a, int b) => a % b;
 
     /// <summary><c>generateTime</c>: the hours and minutes the cycle, the lists and min and max allow, and whether AM and PM are.</summary>
     public static (int[] Hours, int[] Minutes, bool Am, bool Pm) GenerateTime(DatetimeParts reference, DatetimeHourCycle hourCycle,

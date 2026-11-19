@@ -139,6 +139,21 @@ public static class CssBoxShadow
         return double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
     }
 
+    /// <summary>A CSS colour (hex with alpha last, rgb(), rgba(), hsl(), names, transparent), or false.</summary>
+    internal static bool TryParseColor(string token, out Color color)
+    {
+        try
+        {
+            color = ParseColor(token.Trim(), token);
+            return true;
+        }
+        catch (FormatException)
+        {
+            color = default;
+            return false;
+        }
+    }
+
     private static Color ParseColor(string token, string css)
     {
         if (token.StartsWith('#'))

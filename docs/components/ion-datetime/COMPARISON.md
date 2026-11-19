@@ -92,6 +92,11 @@ the time button 83 x 31 at 251).
 | B33 | An adjacent day with the default buttons | **deliberate** ([ADR 0005](../../decisions/0005-dont-copy-an-ionic-bug.md)): Ionic confirms at once (`adjacent`), Avonic waits for Done; `docs/infra/ionic-issues.md` |
 | B34 | Done with nothing chosen on a `time`, `month` or `year` wheel | **deliberate** (ADR 0005): Ionic writes no value (`confirmNoSelectionTime`), Avonic the time shown, as Ionic's comment means; `docs/infra/ionic-issues.md` |
 
+Two inputs Ionic draws as garbage, which Avonic shows sensibly (read in `datetime.js`, not measured): a time alone (`"13:47"`) in a
+grid presentation, which has no month for the calendar (Ionic renders `NaN` months and "Invalid Date"; Avonic shows the default
+parts' month, today's, with the time), and a negative `firstDayOfWeek`, which JavaScript's `%` keeps negative (Avonic reads it in 0 to 6).
+A month before year 1 or after 9999, beside a value at either end, has no days, as `DateTime` can't hold it.
+
 `ionFocus` and `ionBlur` come once as focus enters and leaves the datetime, not as it moves between its parts (`keyboard`: one of
 each); the inner buttons' own stop at the datetime. Match.
 

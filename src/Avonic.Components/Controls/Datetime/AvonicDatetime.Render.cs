@@ -124,7 +124,7 @@ public partial class AvonicDatetime
         if (_calendarBody is not null)
         {
             _smooth = new SmoothScroll(_calendarBody);
-            _calendarBody.ScrollChanged += OnCalendarScroll;
+            _calendarBody.PropertyChanged += OnCalendarScroll;
             _calendarBody.AddHandler(KeyDownEvent, OnCalendarKeyDown, RoutingStrategies.Tunnel);
             _calendarBody.GotFocus += OnCalendarFocus;
             _calendarBody.SizeChanged += OnCalendarBodySize;
@@ -231,7 +231,7 @@ public partial class AvonicDatetime
 
         if (_calendarBody is not null)
         {
-            _calendarBody.ScrollChanged -= OnCalendarScroll;
+            _calendarBody.PropertyChanged -= OnCalendarScroll;
             _calendarBody.RemoveHandler(KeyDownEvent, OnCalendarKeyDown);
             _calendarBody.GotFocus -= OnCalendarFocus;
             _calendarBody.SizeChanged -= OnCalendarBodySize;
@@ -255,6 +255,9 @@ public partial class AvonicDatetime
     }
 
     // ── Render ───────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Ionic's <c>firstDayOfWeek % 7</c>, kept in 0 to 6: a negative one would give a month more than 42 cells.</summary>
+    private int FirstDayOfWeekIndex => ((FirstDayOfWeek % 7) + 7) % 7;
 
     private bool IsMonthAndYearPresentation =>
         Presentation is DatetimePresentation.Year or DatetimePresentation.Month or DatetimePresentation.MonthYear;
@@ -295,6 +298,7 @@ public partial class AvonicDatetime
 
         if (_prevPresentation is { } previous && previous != Presentation)
         {
+            _prevPresentation = Presentation;
             // componentDidRender: the month/year picker isn't in the other presentations, and ionRender a frame later.
             if (_showMonthAndYear)
             {
@@ -397,7 +401,7 @@ public partial class AvonicDatetime
 
         if (_daysOfWeek is not null)
         {
-            var names = DatetimeIntl.DaysOfWeek(culture, FirstDayOfWeek % 7);
+            var names = DatetimeIntl.DaysOfWeek(culture, FirstDayOfWeekIndex);
             while (_daysOfWeek.Children.Count < 7)
             {
                 _daysOfWeek.Children.Add(new TextBlock { Classes = { "day-of-week" }, HorizontalAlignment = HorizontalAlignment.Center });
@@ -439,7 +443,7 @@ public partial class AvonicDatetime
         monthPanel.Month = month;
         monthPanel.Year = year;
 
-        var cells = DatetimeUtils.GetDaysOfMonth(month, year, FirstDayOfWeek % 7, ShowAdjacentDays);
+        var cells = DatetimeUtils.GetDaysOfMonth(month, year, FirstDayOfWeekIndex, ShowAdjacentDays);
         for (var index = 0; index < monthPanel.Days.Count; index++)
         {
             var dayControl = monthPanel.Days[index];
@@ -519,6 +523,7 @@ public partial class AvonicDatetime
         var activePart = ActivePartWithFallback;
         if (day.IsAdjacent)
         {
+            var shown = _working;
             // Ionic blurs, sets the active parts and confirms at once, past the default buttons. Avonic selects the day as any other
             // (ADR 0005, docs/infra/ionic-issues.md), then shows its month.
             if (Multiple)
@@ -530,7 +535,9 @@ public partial class AvonicDatetime
                 SetActiveParts(activePart.With(reference) with { IsAdjacentDay = false });
             }
 
-            AnimateToDate(reference);
+            // The scroll starts from the month that was shown, as Ionic's leaves the working parts to it.
+            _working = shown;
+            AnimateToDate(reference with { IsAdjacentDay = false });
             return;
         }
 
@@ -598,14 +605,15 @@ public partial class AvonicDatetime
         }
     }
 
-    private void OnCalendarScroll(object? sender, ScrollChangedEventArgs e)
+    /// <summary>The scroll listener: a change of the offset; and, as the calendar gets its size, the working month put in view.</summary>
+    private void OnCalendarScroll(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (_calendarBody is null)
         {
             return;
         }
 
-        if (e.ExtentDelta.X != 0 || e.ViewportDelta.X != 0)
+        if (e.Property == ScrollViewer.ExtentProperty || e.Property == ScrollViewer.ViewportProperty)
         {
             // Ionic's scrollLeft = month width, once the calendar has its size: the working month in view.
             if (_smooth?.IsRunning != true)
@@ -616,7 +624,7 @@ public partial class AvonicDatetime
             return;
         }
 
-        if (e.OffsetDelta.X == 0)
+        if (e.Property != ScrollViewer.OffsetProperty || e.GetOldValue<Vector>().X == e.GetNewValue<Vector>().X)
         {
             return;
         }
@@ -821,13 +829,28 @@ public partial class AvonicDatetime
         var time = TimeColumns(culture, presentation, existing);
         columns.AddRange(presentation == DatetimePresentation.TimeDate ? [.. time, .. date] : [.. date, .. time]);
 
+        // order: -1 on the day period column, where the locale's hour starts with it (Korean): first of the whole picker.
+        if (columns.FirstOrDefault(c => AutomationProperties.GetName(c) == "Select a day period") is { } period && DatetimeIntl.IsDayPeriodFirst(culture))
+        {
+            columns.Remove(period);
+            columns.Insert(0, period);
+        }
+
         // Year first where the locale writes the year first (wheel-order-year-first): the year, the month, then the day.
         if (!DatetimeIntl.IsMonthFirst(culture) && presentation is DatetimePresentation.Date or DatetimePresentation.MonthYear or DatetimePresentation.Month or DatetimePresentation.Year)
         {
             columns = [.. columns.OrderBy(c => c.Classes.Contains("year-column") ? 0 : c.Classes.Contains("month-column") ? 1 : c.Classes.Contains("day-column") ? 2 : 3)];
             foreach (var column in columns)
             {
-                column.HorizontalContentAlignment = column.Classes.Contains("year-column") ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+                // .wheel-order-year-first: the year at the start, the month and the day at the end, at style priority so an app's wins.
+                SetYearFirstAlignment(column, column.Classes.Contains("year-column") ? HorizontalAlignment.Left : HorizontalAlignment.Right);
+            }
+        }
+        else
+        {
+            foreach (var column in columns)
+            {
+                SetYearFirstAlignment(column, null);
             }
         }
 
@@ -1004,17 +1027,25 @@ public partial class AvonicDatetime
                 _working = current with { AmPm = ampm, Hour = hour };
                 SetActiveParts(ActivePartWithFallback with { AmPm = ampm, Hour = hour });
             });
-            if (DatetimeIntl.IsDayPeriodFirst(culture))
-            {
-                result.Insert(0, column);
-            }
-            else
-            {
-                result.Add(column);
-            }
+            result.Add(column);
         }
 
         return result;
+    }
+
+    private readonly Dictionary<AvonicPickerColumn, IDisposable> _yearFirstAlignment = [];
+
+    private void SetYearFirstAlignment(AvonicPickerColumn column, HorizontalAlignment? alignment)
+    {
+        if (_yearFirstAlignment.Remove(column, out var previous))
+        {
+            previous.Dispose();
+        }
+
+        if (alignment is { } value && column.SetValue(AvonicPickerColumn.HorizontalContentAlignmentProperty, value, Avalonia.Data.BindingPriority.Style) is { } frame)
+        {
+            _yearFirstAlignment[column] = frame;
+        }
     }
 
     /// <summary>A column kept from the last render, or a new one, with these options and this value.</summary>

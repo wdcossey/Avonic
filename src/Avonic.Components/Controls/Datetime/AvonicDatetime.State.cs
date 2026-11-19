@@ -107,6 +107,8 @@ public partial class AvonicDatetime
         _yearValues = YearValues?.Values.ToArray();
         _dayValues = DayValues?.Values.ToArray();
         _today = DatetimeUtils.PartsOf(Now());
+        // min and max read the default parts for a missing year; at load those are today's, as they become.
+        _default = _today;
         ProcessMinParts();
         ProcessMaxParts();
         _default = DatetimeUtils.GetClosestValidDate(_today, _monthValues, _dayValues, _yearValues, _hourValues, _minuteValues, _minParts, _maxParts);
@@ -119,15 +121,15 @@ public partial class AvonicDatetime
     private void ProcessMaxParts() => _maxParts = Max is null ? null : DatetimeUtils.ParseMaxParts(Max, _default, this);
 
     /// <summary><c>formatOptionsChanged</c>: <c>checkForPresentationFormatMismatch</c> and <c>warnIfTimeZoneProvided</c>.</summary>
-    private void CheckFormatOptions()
+    private void CheckFormatOptions(bool presentationOnly = false)
     {
         if (FormatOptions is not { } options)
         {
             return;
         }
 
-        if (options.Date?.TimeZone is not null || options.Date?.TimeZoneName is not null
-            || options.Time?.TimeZone is not null || options.Time?.TimeZoneName is not null)
+        if (!presentationOnly && (options.Date?.TimeZone is not null || options.Date?.TimeZoneName is not null
+            || options.Time?.TimeZone is not null || options.Time?.TimeZoneName is not null))
         {
             Warn(this, "[ion-datetime] - \"timeZone\" and \"timeZoneName\" are not supported in \"formatOptions\".");
         }
@@ -181,6 +183,8 @@ public partial class AvonicDatetime
     {
         if (Readonly)
         {
+            // The working parts the caller set still show, as Ionic's setWorkingParts renders before this returns.
+            Render();
             return;
         }
 
@@ -280,7 +284,9 @@ public partial class AvonicDatetime
         }
         else
         {
-            _working = new DatetimeParts(target.Month, target.Day, target.Year, target.Hour, target.Minute, ampm);
+            // A time alone has no month for the grid to show (Ionic draws "Invalid Date" there): the default parts' month shows.
+            _working = new DatetimeParts(target.Month ?? _default.Month, target.Year is null ? _default.Day : target.Day, target.Year ?? _default.Year,
+                target.Hour, target.Minute, ampm);
             Render();
         }
     }
@@ -499,7 +505,7 @@ public partial class AvonicDatetime
         }
         else if (change.Property == PresentationProperty)
         {
-            CheckFormatOptions();
+            CheckFormatOptions(presentationOnly: true);
             Render();
         }
         else if (change.Property == YearValuesProperty)

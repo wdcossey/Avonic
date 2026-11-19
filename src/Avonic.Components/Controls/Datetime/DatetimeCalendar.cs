@@ -101,7 +101,8 @@ public sealed class DatetimeCalendarDay : Button
         SetOrClear(ForegroundProperty, ParseBrush(style?.TextColor));
         SetOrClear(BackgroundProperty, ParseBrush(style?.BackgroundColor));
         var (thickness, brush) = ParseBorder(style?.Border);
-        SetOrClear(BorderBrushProperty, brush);
+        // CSS's default border colour is currentColor: the highlight's text colour, or the day's.
+        SetOrClear(BorderBrushProperty, brush ?? (thickness is > 0 ? ParseBrush(style?.TextColor) ?? Foreground : null));
         if (thickness is { } t)
         {
             SetValue(BorderThicknessProperty, new Thickness(t));
@@ -125,7 +126,7 @@ public sealed class DatetimeCalendarDay : Button
     }
 
     internal static IBrush? ParseBrush(string? text) =>
-        !string.IsNullOrWhiteSpace(text) && Color.TryParse(text.Trim(), out var color) ? new ImmutableSolidColorBrush(color) : null;
+        !string.IsNullOrWhiteSpace(text) && Behaviors.CssBoxShadow.TryParseColor(text, out var color) ? new ImmutableSolidColorBrush(color) : null;
 
     /// <summary>CSS's <c>border</c> shorthand: a width in px, a style (none hides it), and a colour, in any order.</summary>
     internal static (double? Thickness, IBrush? Brush) ParseBorder(string? text)
