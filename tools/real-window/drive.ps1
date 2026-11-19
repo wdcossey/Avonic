@@ -1808,6 +1808,77 @@ try {
         Away
     }
 
+    # ion-datetime (#46): the page's first datetime, a calendar and a time with value 2023-06-15T13:47:00, so that every date checked
+    # here is pinned (the today ring follows the real clock, and no check reads it). A real click on a day confirms at once; the next
+    # button scrolls to July; the keyboard moves from the focused day and Enter selects; the time button's popover takes a click on an
+    # hour, and Escape closes it; a touch swipe on the calendar moves to the next month. Then the datetime with default buttons: Done
+    # with no change confirms its value, and a day then Cancel cancels. The status line says each ionChange and ionCancel. Days are
+    # found by their accessible names ("Tuesday, June 20"), the first in the page being the first datetime's; buttons by their
+    # distinctive names. Only what's on top is aimed at: the time popover covers part of the calendar, so nothing under it is clicked
+    # while it's open. Positions are checked by regions, not fixed gaps, as text may wrap in the phone-sized window.
+    Section 'ion-datetime' {
+        Open 'ion-datetime'
+        $w = $win.Current.BoundingRectangle
+        function DtStatus { FirstText '*ionChange*' }
+        function Said($text) { [bool](WaitForText $text 3) }
+
+        $day = Named $CT::Button 'Tuesday, June 20'
+        Check 'the first calendar shows June 2023, its value''s month' ($day -and [bool](FirstText 'June 2023')) (Texts -join ' | ')
+        ClickOn $day
+        Check 'a click on a day confirms it at once, with the time kept' (Said 'DateTimeGrid ionChange: 2023-06-20T13:47:00') (DtStatus)
+        Shot 'datetime-clicked'
+
+        ClickOn (Named $CT::Button 'Next month')
+        Check 'the next button scrolls to July' (Said 'July 2023') (Texts -join ' | ')
+        Shot 'datetime-july'
+
+        ClickOn (Named $CT::Button 'Monday, July 3')
+        Check 'a day in July' (Said 'DateTimeGrid ionChange: 2023-07-03T13:47:00') (DtStatus)
+        Key '{RIGHT}' 400
+        Key '{ENTER}' 400
+        Check 'Right moves the focus a day, and Enter selects it' (Said 'DateTimeGrid ionChange: 2023-07-04T13:47:00') (DtStatus)
+
+        $time = Named $CT::Button '1:47 PM'
+        $tb = if ($time) { $time.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the time button shows the time, at the end of its row' ($time -and $tb.Right -gt ($w.X + $w.Width / 2)) "window $w, time $tb"
+        ClickOn $time
+        Start-Sleep -Milliseconds 700
+        Shot 'datetime-time-popover'
+        $hour = All $CT::Button | Where-Object { $_.Current.Name -eq '3' -and $_.Current.BoundingRectangle.Top -gt $tb.Top } | Select-Object -First 1
+        Check 'its popover opens under the button, with the hours' ($hour -ne $null) "time $tb"
+        if ($hour) { ClickOn $hour }
+        Check 'an hour chosen in the popover confirms it' (Said 'DateTimeGrid ionChange: 2023-07-04T15:47:00') (DtStatus)
+        Key '{ESC}' 600
+        Check 'Escape closes the popover' (-not (All $CT::Button | Where-Object { $_.Current.Name -eq '3' -and $_.Current.BoundingRectangle.Top -gt $tb.Top } | Select-Object -First 1))
+
+        # A swipe left on the calendar's middle row moves to August, 50 ms after the scroll rests.
+        $mid = Named $CT::Button 'Wednesday, July 12'
+        if ($mid) {
+            $x, $y = Centre $mid
+            TouchDrag $x $y (- (Px 250)) 0 15 16
+            Start-Sleep -Milliseconds 800
+        }
+        Shot 'datetime-swiped'
+        Check 'a touch swipe left moves the calendar to August' ([bool](FirstText 'August 2023')) (Texts -join ' | ')
+
+        # The datetime with the default buttons, below: the page scrolled by a wheel over the status line, which isn't a calendar.
+        $status = FirstText '*ionChange*'
+        $sx, $sy = Centre (Named $CT::Text $status)
+        Guard
+        [void][RealInput]::SetCursorPos($sx, $sy); Start-Sleep -Milliseconds 150
+        Wheel 4
+        $done = Named $CT::Button 'Done date'
+        $db = if ($done) { $done.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the default buttons are in view' ($done -and (OnScreen ($db.X + $db.Width / 2) ($db.Y + $db.Height / 2))) "window $w, done $db"
+        Shot 'datetime-buttons'
+        ClickOn $done
+        Check 'Done with no change confirms the value' (Said 'WithButtons ionChange: 2023-06-15T13:47:00') (DtStatus)
+        ClickOn (Named $CT::Button 'Wednesday, June 21')
+        ClickOn (Named $CT::Button 'Cancel date')
+        Check 'a day then Cancel raises ionCancel' (Said 'WithButtons ionCancel') (FirstText 'WithButtons*')
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

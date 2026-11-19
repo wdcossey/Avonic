@@ -22,5 +22,8 @@
          button's background: var(ion-color-step-300, var(ion-background-color-step-300, #edeef0)). Palettes/Dark.axaml follows
          Avonic.BackgroundColorStep300, which dark sets. -->
     <SolidColorBrush x:Key="Avonic.Datetime.Md.TimeButtonBackground" Color="#EDEEF0" />
+    <!-- opacity: 0.4 on a disabled day and on the time row, of each as a whole, which an OpacityMask is, where Opacity would fade
+         the text and its circle each on its own. -->
+    <SolidColorBrush x:Key="Avonic.Datetime.Md.DisabledMask" Color="#000000" Opacity="0.4" />
 
 </ResourceDictionary>

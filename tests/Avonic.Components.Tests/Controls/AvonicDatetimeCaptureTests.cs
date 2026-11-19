@@ -65,10 +65,12 @@ public class AvonicDatetimeCaptureTests
     internal static Rect Box(Visual visual, Visual relativeTo) =>
         new Rect(visual.Bounds.Size).TransformToAABB(visual.TransformToVisual(relativeTo)!.Value);
 
-    internal static void Near(double[] expected, Rect actual, double tolerance = 0.5)
+    internal static void Near(double[] expected, Rect actual, double tolerance = 0.5) =>
+        Near(expected, [actual.X, actual.Y, actual.Width, actual.Height], tolerance);
+
+    internal static void Near(double[] expected, double[] got, double tolerance = 0.5)
     {
-        var got = new[] { actual.X, actual.Y, actual.Width, actual.Height };
-        for (var i = 0; i < 4; i++)
+        for (var i = 0; i < expected.Length; i++)
         {
             Assert.True(Math.Abs(expected[i] - got[i]) <= tolerance,
                 $"Expected [{string.Join(", ", expected)}], got [{string.Join(", ", got.Select(v => Math.Round(v, 2)))}]");
@@ -94,5 +96,281 @@ public class AvonicDatetimeCaptureTests
         Save(scene, "avonic-datetime-page.png");
         Dump(scene, datetime, "dateTime");
         Near([16, 16, 350, 391], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Title() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = "2023-06-15T13:47:00", ShowDefaultTitle = true, ShowDefaultButtons = true, ShowClearButton = true });
+        Save(scene, "avonic-datetime-title.png");
+        Dump(scene, datetime, "title");
+        Near([16, 16, 350, 567], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_TitleSlot() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = "2023-06-15T13:47:00", TitleContent = "Pick a day" });
+        Save(scene, "avonic-datetime-titleSlot.png");
+        Dump(scene, datetime, "titleSlot");
+        Near([16, 16, 350, 515], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Date() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-date.png");
+        Dump(scene, datetime, "date");
+        Near([16, 16, 350, 344], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_TimeDate() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.TimeDate, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-timeDate.png");
+        Dump(scene, datetime, "timeDate");
+        Near([16, 16, 350, 391], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Time() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Time, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-time.png");
+        Dump(scene, datetime, "time");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Month() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Month, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-month.png");
+        Dump(scene, datetime, "month");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Year() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Year, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-year.png");
+        Dump(scene, datetime, "year");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_MonthYear() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.MonthYear, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-monthYear.png");
+        Dump(scene, datetime, "monthYear");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_WheelDate() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, PreferWheel = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-wheelDate.png");
+        Dump(scene, datetime, "wheelDate");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_WheelDateTime() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.DateTime, PreferWheel = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-wheelDateTime.png");
+        Dump(scene, datetime, "wheelDateTime");
+        Near([16, 16, 350, 200], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Buttons() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, ShowDefaultButtons = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-buttons.png");
+        Dump(scene, datetime, "buttons");
+        Near([16, 16, 350, 396], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_MinMax() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Min = "2023-06-10", Max = "2023-07-20", Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-minMax.png");
+        Dump(scene, datetime, "minMax");
+        Near([16, 16, 350, 344], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Adjacent() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, ShowAdjacentDays = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-adjacent.png");
+        Dump(scene, datetime, "adjacent");
+        Near([16, 16, 350, 344], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_FirstDay() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, FirstDayOfWeek = 1, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-firstDay.png");
+        Dump(scene, datetime, "firstDay");
+        Near([16, 16, 350, 344], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Color() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Color = "danger", ShowDefaultTitle = true, ShowDefaultButtons = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-color.png");
+        Dump(scene, datetime, "color");
+        Near([16, 16, 350, 520], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Disabled() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { IsEnabled = false, ShowDefaultButtons = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-disabled.png");
+        Dump(scene, datetime, "disabled");
+        Near([16, 16, 350, 443], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Readonly() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Readonly = true, ShowDefaultButtons = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-readonly.png");
+        Dump(scene, datetime, "readonly");
+        Near([16, 16, 350, 443], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Cover() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Size = DatetimeSize.Cover, Presentation = DatetimePresentation.Date, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-cover.png");
+        Dump(scene, datetime, "cover");
+        Near([16, 16, 358, 344], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_Hour24() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { HourCycle = DatetimeHourCycle.H23, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-hour24.png");
+        Dump(scene, datetime, "hour24");
+        Near([16, 16, 350, 391], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_MultipleNoValue() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Multiple = true, ShowDefaultTitle = true });
+        Save(scene, "avonic-datetime-multipleNoValue.png");
+        Dump(scene, datetime, "multipleNoValue");
+        Near([16, 16, 350, 468], Box(datetime, scene.Window));
+    });
+
+    [AvaloniaFact]
+    public void Reference_MonthYearOpen() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = "2023-06-15T13:47:00" });
+        Part<Button>(datetime, "PART_MonthYearButton").RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        Settle(clock, 600);
+        Save(scene, "avonic-datetime-monthYearOpen.png");
+        Dump(scene, datetime, "monthYearOpen");
+        // M7: the header 48, the wheel 350 x 200 under it, the host 248.
+        Near([16, 16, 350, 248], Box(datetime, scene.Window));
+        Near([0, 48, 350, 200], Box(datetime.MonthYearWheel!, datetime));
+    });
+
+    [AvaloniaFact]
+    public void Reference_TimePopover() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = "2023-06-15T13:47:00" });
+        Part<Button>(datetime, "PART_TimeButton").RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        Settle(clock, 800);
+        Save(scene, "avonic-datetime-timePopover.png");
+        // M9: the button at (267.1, 368, 82.9, 31) in the window; the popover's content 250 x 200 with its top 10 above the button's bottom.
+        var button = Part<Button>(datetime, "PART_TimeButton");
+        Near([267.1, 368, 82.9, 31], Box(button, scene.Window), 1);
+        var content = datetime.TimeWheel!;
+        Near([128, 389, 250, 200], Box(content, scene.Window), 1);
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleArRtl() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ar-EG", ShowDefaultTitle = true, Value = "2023-06-15T13:47:00" }, FlowDirection.RightToLeft);
+        Save(scene, "avonic-datetime-localeArRtl.png");
+        Dump(scene, datetime, "localeArRtl");
+        Assert.Equal("يونيو ٢٠٢٣", Part<TextBlock>(datetime, "PART_MonthYearText").Text);
+        // The host 24 in from the left: the right edge of its line in RTL. Its height isn't Chromium's 515: Roboto has no Arabic,
+        // and the fallback font's lines are taller in Avalonia than in Chromium (COMPARISON.md).
+        var box = Box(datetime, scene.Window);
+        Near([24, 16, 350], [box.X, box.Y, box.Width]);
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleArWheel() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ar-EG", Presentation = DatetimePresentation.DateTime, PreferWheel = true, Value = "2023-06-15T13:47:00" }, FlowDirection.RightToLeft);
+        Save(scene, "avonic-datetime-localeArWheel.png");
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleJa() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ja-JP", ShowDefaultTitle = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeJa.png");
+        Assert.Equal("2023年6月", Part<TextBlock>(datetime, "PART_MonthYearText").Text);
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleJaWheel() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ja-JP", Presentation = DatetimePresentation.Date, PreferWheel = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeJaWheel.png");
+        // Year first in Japanese (wheel-order-year-first).
+        Assert.Equal(["Select a year", "Select a month", "Select a day"], datetime.Wheel!.Items.OfType<AvonicPickerColumn>().Select(c => Avalonia.Automation.AutomationProperties.GetName(c)));
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleEnGb() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "en-GB", Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeEnGb.png");
+        Assert.Equal("13:47", Part<TextBlock>(datetime, "PART_TimeText").Text);
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleEnGbWheel() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "en-GB", Presentation = DatetimePresentation.Date, PreferWheel = true, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeEnGbWheel.png");
+        Assert.Equal(["Select a day", "Select a month", "Select a year"], datetime.Wheel!.Items.OfType<AvonicPickerColumn>().Select(c => Avalonia.Automation.AutomationProperties.GetName(c)));
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleDe() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "de-DE", ShowDefaultTitle = true, FirstDayOfWeek = 1, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeDe.png");
+    });
+
+    [AvaloniaFact]
+    public void Reference_LocaleKoTime() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Locale = "ko-KR", Presentation = DatetimePresentation.Time, Value = "2023-06-15T13:47:00" });
+        Save(scene, "avonic-datetime-localeKoTime.png");
+        // The day period first in Korean.
+        Assert.Equal("Select a day period", Avalonia.Automation.AutomationProperties.GetName(datetime.Wheel!.Items.OfType<AvonicPickerColumn>().First()));
     });
 }

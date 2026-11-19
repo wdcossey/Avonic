@@ -62,6 +62,10 @@ public partial class AvonicDatetime : TemplatedControl, IItemControl
     /// <summary>The style class of the previous and next buttons, Ionic's <c>part="navigation-button"</c>.</summary>
     public const string NavigationButtonClass = "navigation-button";
 
+    /// <summary>The title's <c>text-transform: uppercase</c>, for a string; other content as it is.</summary>
+    public static readonly Avalonia.Data.Converters.IValueConverter UppercaseText =
+        new Avalonia.Data.Converters.FuncValueConverter<object?, object?>(value => value is string text ? text.ToUpperInvariant() : value);
+
     /// <summary>Ionic's <c>getToday()</c>: the clock. Tests pin it.</summary>
     internal static Func<DateTime> Now { get; set; } = () => DateTime.Now;
 

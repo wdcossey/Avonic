@@ -122,11 +122,11 @@
             <Setter Property="Foreground" Value="{Binding $self.(c:DatetimeCalendarDay.AccentContrastColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
         </Style>
         <Style Selector="^:disabled">
-            <Setter Property="Opacity" Value="0.4" />
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Datetime.Md.DisabledMask}" />
         </Style>
         <!-- :host(.datetime-readonly) .calendar-day[disabled]:not(.calendar-day-constrained) { opacity: 1 } -->
         <Style Selector="^:readonly:disabled:not(:constrained)">
-            <Setter Property="Opacity" Value="1" />
+            <Setter Property="OpacityMask" Value="{x:Null}" />
         </Style>
     </ControlTheme>
 
@@ -183,7 +183,7 @@
                                 TextElement.Foreground="{DynamicResource Avonic.Datetime.TitleColor}">
                             <StackPanel>
                                 <ContentPresenter Name="PART_DatetimeTitle"
-                                                  Content="{TemplateBinding ShownTitle}"
+                                                  Content="{Binding ShownTitle, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static c:AvonicDatetime.UppercaseText}}"
                                                   ContentTemplate="{TemplateBinding TitleContentTemplate}"
                                                   FontSize="12"
                                                   TextBlock.TextTrimming="CharacterEllipsis"
@@ -369,16 +369,6 @@
             <Setter Property="Foreground" Value="{Binding $parent[c:AvonicDatetime].(c:DatetimeCalendarDay.AccentColor), Converter={x:Static b:ColorPalette.WithAlpha}, ConverterParameter=1}" />
         </Style>
 
-        <!-- The month, month-year and year presentations: margin 20px 0 around the wheel. -->
-        <Style Selector="^:presentation-month /template/ c|AvonicPicker#PART_Wheel">
-            <Setter Property="Margin" Value="0,20" />
-        </Style>
-        <Style Selector="^:presentation-month-year /template/ c|AvonicPicker#PART_Wheel">
-            <Setter Property="Margin" Value="0,20" />
-        </Style>
-        <Style Selector="^:presentation-year /template/ c|AvonicPicker#PART_Wheel">
-            <Setter Property="Margin" Value="0,20" />
-        </Style>
 
         <!-- The time button while its popover is open: the accent. -->
         <Style Selector="^ /template/ Button#PART_TimeButton:active">
@@ -390,7 +380,7 @@
             <Setter Property="Opacity" Value="0.4" />
         </Style>
         <Style Selector="^:disabled /template/ Grid#PART_Time">
-            <Setter Property="Opacity" Value="0.4" />
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.Datetime.Md.DisabledMask}" />
         </Style>
 
         <!-- readonly: only the calendar's buttons, the calendar and the month/year wheel take the pointer; the days and the footer's
@@ -406,6 +396,16 @@
         </Style>
         <Style Selector="^:readonly /template/ Panel#PART_Footer">
             <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <!-- :host(.datetime-readonly) .datetime-action-buttons ion-button[disabled] { opacity: 1 } -->
+        <Style Selector="^:readonly /template/ c|AvonicButton#PART_CancelButton">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="^:readonly /template/ c|AvonicButton#PART_ClearButton">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="^:readonly /template/ c|AvonicButton#PART_ConfirmButton">
+            <Setter Property="Opacity" Value="1" />
         </Style>
     </ControlTheme>
 

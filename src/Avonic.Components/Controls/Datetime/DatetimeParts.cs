@@ -27,7 +27,4 @@ internal readonly record struct DatetimeParts(
         DayOfWeek = other.DayOfWeek ?? DayOfWeek,
         IsAdjacentDay = other.IsAdjacentDay,
     };
-
-    /// <summary>The date only, <c>{ month, day, year }</c>, as Ionic's calendar day gives.</summary>
-    public DatetimeParts DateOnly => new(Month, Day, Year);
 }

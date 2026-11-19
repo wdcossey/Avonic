@@ -241,6 +241,19 @@ public partial class AvonicDatetime
         _smooth = null;
     }
 
+    /// <summary>
+    /// The host is a block, <c>width: auto</c>: as wide as its line, up to its <c>max-width</c>, unless it's a wheel that's as wide as
+    /// its content (<c>size="fixed"</c> with <c>preferWheel</c>: <c>max-width: max-content</c>).
+    /// </summary>
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var desired = base.MeasureOverride(availableSize);
+        var contentWide = Size == DatetimeSize.Fixed && IsCalendarPicker && PreferWheel;
+        return !contentWide && double.IsFinite(availableSize.Width) && HorizontalAlignment != Avalonia.Layout.HorizontalAlignment.Stretch
+            ? desired.WithWidth(Math.Max(desired.Width, availableSize.Width))
+            : desired;
+    }
+
     // ── Render ───────────────────────────────────────────────────────────────────────────────
 
     private bool IsMonthAndYearPresentation =>
