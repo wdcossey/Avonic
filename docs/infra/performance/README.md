@@ -255,6 +255,16 @@ are, as their queries of Avalonia's accessibility bridge run on the UI thread, a
 `table.js` lists the checks under the tables, the warnings in bold. A run with a warning measured something other than the
 calendar: keep it out of `page-costs/`.
 
+The baseline's round 1 (3201219) had two failures that later rounds didn't: ten nexts that never left June (`heading n/a`, each
+watched the full 5 s), then "the calendar left the tree" at the first previous. The first is the scroll rest, a `Background` timer,
+never running: `PageCostTests.With_No_Idle_Time_The_Calendar_Stays_In_The_Tree` gives the same lines with the timer held, so the
+phone gave no idle time during that round's changes, though the checks before and after found it (6.3 and 0.5 ms). Held so, the
+calendar stays in the tree; and nothing in the calendar or the timing takes a page away (only the shell's `ShowIndex` does, which
+the rounds call after the timing, and a back request). So the second came from outside: a back request, or the activity going. The
+rounds now write a `note:` line when a back request or the back button takes the page away, or the shell leaves its top level, and
+`table.js` lists it, in bold, with the checks. The single grid's change waits on no timer, only on frames, so it changes month with
+no idle time at all (the same test).
+
 ### Keeping a run
 
 Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and

@@ -82,6 +82,7 @@ public partial class SampleShell : UserControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        PageCostsNote("the shell left its top level (its activity was destroyed?)");
         _back?.Dispose();
         _back = null;
         _topLevel?.RemoveHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
@@ -104,6 +105,7 @@ public partial class SampleShell : UserControl
         }
 
         e.Handled = true;
+        PageCostsNote("a back request took the page away");
         ShowIndex();
     }
 
@@ -115,7 +117,11 @@ public partial class SampleShell : UserControl
     {
         if (IsShowingPage)
         {
-            e.Register(0, _ => ShowIndex());
+            e.Register(0, _ =>
+            {
+                PageCostsNote("a back button took the page away");
+                ShowIndex();
+            });
         }
     }
 
@@ -135,4 +141,7 @@ public partial class SampleShell : UserControl
     partial void Reported(string line);
 
     partial void StartPageCosts();
+
+    /// <summary>What took a page away from the page-cost rounds while they run, other than the rounds themselves.</summary>
+    partial void PageCostsNote(string what);
 }

@@ -266,6 +266,51 @@ public partial class PageCostTests
         Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });
 
+    // Round 1 of the baseline run (2026-11-20, 3201219): ten nexts that never left June ("heading n/a", the full 5 s each), then
+    // "the calendar left the tree" at the first previous. Here the scroll rest, the 50 ms Background timer that Android runs only
+    // in idle time, never runs, as there: the month stays, and the calendar stays in the tree, through the previous too. So the
+    // first symptom is the idle time the device didn't give, and the second came from outside the calendar and the timing (the
+    // shell's back, or the activity): ShowIndex is the only thing that takes the page away, and the timing calls it only after.
+    // The single grid's change waits on no timer, only on frames: it lands with no idle time at all.
+    [AvaloniaTheory]
+    [InlineData(DatetimeCalendarRendering.ScrolledMonths)]
+    [InlineData(DatetimeCalendarRendering.SingleGrid)]
+    public void With_No_Idle_Time_The_Calendar_Stays_In_The_Tree(DatetimeCalendarRendering rendering) => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(1, rendering);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().Single();
+        var detached = 0;
+        datetime.DetachedFromVisualTree += (_, _) => detached++;
+
+        var schedule = AvonicConfig.Schedule;
+        AvonicConfig.Schedule = (callback, delay) => delay == AvonicDatetime.ScrollRest ? new CancellationTokenSource() : schedule(callback, delay);
+        try
+        {
+            var run = new MonthChangeTiming(datetime, TimeSpan.FromMilliseconds(20), TimeSpan.FromMilliseconds(400)).Run(10, 1);
+            Drive(clock, run);
+
+            Assert.True(run.IsCompletedSuccessfully, run.Exception?.ToString());
+            Assert.Equal(0, detached);
+            var changes = run.Result;
+            if (rendering == DatetimeCalendarRendering.ScrolledMonths)
+            {
+                Assert.All(changes.Take(10), c => Assert.Equal(("June 2023", "July 2023", (double?)null), (c.From, c.To, c.HeadingMs)));
+                Assert.Equal(("June 2023", "May 2023"), (changes[10].From, changes[10].To));
+            }
+            else
+            {
+                Assert.All(changes, c => Assert.NotNull(c.HeadingMs));
+                Assert.Equal(("April 2024", "March 2024"), (changes[9].To, changes[10].To));
+            }
+        }
+        finally
+        {
+            AvonicConfig.Schedule = schedule;
+        }
+    });
+
     // As the rounds do: a second timing, on a new page, after the first one's page has gone.
     [AvaloniaFact]
     public void A_Second_Timing_On_A_New_Page_Sees_Its_Months_Change() => Run((scene, clock) =>

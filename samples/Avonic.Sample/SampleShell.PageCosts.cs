@@ -28,6 +28,7 @@ public partial class SampleShell
     private const int MonthChanges = 10;
 
     private static bool _pageCostsStarted;
+    private static bool _pageCostsRunning;
     private TaskCompletionSource<string>? _pendingReport;
 
     /// <summary>
@@ -46,6 +47,18 @@ public partial class SampleShell
     {
         Write(line);
         _pendingReport?.TrySetResult(line);
+    }
+
+    /// <summary>
+    /// A line for what took the page away from the rounds, a back request or the activity, while they run: the baseline's round 1
+    /// lost its calendar in the middle of a change ("the calendar left the tree"), and nothing in the rounds says why.
+    /// </summary>
+    partial void PageCostsNote(string what)
+    {
+        if (_pageCostsRunning)
+        {
+            Write($"note: {what}");
+        }
     }
 
     partial void StartPageCosts()
@@ -81,6 +94,7 @@ public partial class SampleShell
 
         // Past the first frames and the start-up work.
         await Task.Delay(TimeSpan.FromSeconds(3));
+        _pageCostsRunning = true;
         for (var round = 1; round <= PageCostRounds && pages.Count > 0; round++)
         {
             foreach (var (title, create) in pages)
@@ -137,6 +151,7 @@ public partial class SampleShell
         }
 
         _pendingReport = null;
+        _pageCostsRunning = false;
         Write("done");
         if (Environment.GetEnvironmentVariable("AVONIC_PERF_EXIT") == "1"
             && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
