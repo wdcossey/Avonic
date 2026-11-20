@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
 using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
@@ -76,12 +75,11 @@ public partial class AvonicNav
 
         public List<AvonicNav> Navs { get; } = [];
 
-        /// <summary>The innermost nav that takes the request: of those, the last attached that has none of the others inside it.</summary>
-        private AvonicNav? Target()
-        {
-            var takers = Navs.Where(nav => nav.TakesBack).ToList();
-            return takers.LastOrDefault(nav => !takers.Any(other => other != nav && nav.IsVisualAncestorOf(other)));
-        }
+        /// <summary>
+        /// The innermost nav that takes the request: the last attached of those, as a nav inside another's page is attached after
+        /// it (a parent attaches before its children), and is removed when it's detached.
+        /// </summary>
+        private AvonicNav? Target() => Navs.LastOrDefault(nav => nav.TakesBack);
 
         private void OnIonBackButton(object? sender, BackButtonEventArgs e)
         {
