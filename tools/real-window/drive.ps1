@@ -1958,6 +1958,97 @@ try {
         Away
     }
 
+    # ion-datetime-button (#79): every datetime on the page has its value and its locale (en-US) pinned, and each button's text
+    # differs, so each is found by its accessible name, its text: "Jun 15, 2023" and "1:47 PM" for the modal's datetime, "Jul 4, 2023"
+    # for the popover's. A click on the date button opens the modal with a calendar only (no time button inside), its days named as
+    # the datetime's ("Wednesday, June 21"); a day then "Done picking" closes it and the button's text follows. The time button opens
+    # the same modal with the time only. The popover opens under the date button, and a day there is the value at once. The disabled
+    # button is disabled to automation, and the slot's and the multiple's texts are the buttons' names. The colour button's
+    # datetime is in the page, at the bottom: its date button is expanded only while that datetime is in view. Only what's on top is
+    # clicked: the modal and the popover cover the page. Positions are compared with the window's bounds and with each other, not
+    # with fixed gaps, as text may wrap in the phone-sized window.
+    Section 'ion-datetime-button' {
+        Open 'ion-datetime-button'
+        $w = $win.Current.BoundingRectangle
+        function DbStatus { FirstText '*ionChange*' }
+        function Said($text) { [bool](WaitForText $text 3) }
+        function InWindow($el) {
+            if (-not $el) { return $false }
+            $r = $el.Current.BoundingRectangle
+            $r.Top -ge $w.Top -and $r.Bottom -le $w.Bottom -and $r.Left -ge $w.Left -and $r.Right -le $w.Right
+        }
+        function ExpandedOf($el) {
+            $el -and $el.GetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern).Current.ExpandCollapseState -eq 'Expanded'
+        }
+
+        $date = Named $CT::Button 'Jun 15, 2023'
+        $time = Named $CT::Button '1:47 PM'
+        $dr = if ($date) { $date.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        $tr = if ($time) { $time.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the modal datetime''s date and time are two buttons, the date first' ($date -and $time -and $dr.Right -le $tr.Left -and [math]::Abs($dr.Top - $tr.Top) -le 2) "date $dr, time $tr"
+        Check 'collapsed while the modal is closed' ($date -and -not (ExpandedOf $date))
+        Shot 'datetime-button-page'
+
+        ClickOn $date
+        Start-Sleep -Milliseconds 800
+        Shot 'datetime-button-modal-date'
+        $day = Named $CT::Button 'Wednesday, June 21'
+        Check 'the date button opens the modal with the calendar' (InWindow $day) "window $w"
+        Check 'and only the date: no time button in it' (@(All $CT::Button | Where-Object { $_.Current.Name -eq '1:47 PM' }).Count -eq 1)
+        Check 'the date button is expanded while it shows' (ExpandedOf (Named $CT::Button 'Jun 15, 2023'))
+        ClickOn $day
+        ClickOn (Named $CT::Button 'Done picking')
+        Start-Sleep -Milliseconds 800
+        Check 'a day then Done confirms it' (Said 'ModalDatetime ionChange: 2023-06-21T13:47:00') (DbStatus)
+        $date = Named $CT::Button 'Jun 21, 2023'
+        Check 'the date button shows the new date, and the modal has closed' ($date -and -not (InWindow (Named $CT::Button 'Done picking'))) (DbStatus)
+        Check 'collapsed again' ($date -and -not (ExpandedOf $date))
+
+        ClickOn (Named $CT::Button '1:47 PM')
+        Start-Sleep -Milliseconds 800
+        Shot 'datetime-button-modal-time'
+        Check 'the time button opens the same modal with the time only' ((InWindow (Named $CT::Button 'Done picking')) -and -not (InWindow (Named $CT::Button 'Wednesday, June 21'))) "window $w"
+        ClickOn (Named $CT::Button 'Cancel picking')
+        Start-Sleep -Milliseconds 800
+        Check 'Cancel closes it with the time as it was' ((Named $CT::Button '1:47 PM') -and -not (InWindow (Named $CT::Button 'Cancel picking')))
+
+        $pop = Named $CT::Button 'Jul 4, 2023'
+        $pr = if ($pop) { $pop.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        ClickOn $pop
+        Start-Sleep -Milliseconds 800
+        Shot 'datetime-button-popover'
+        $july = Named $CT::Button 'Wednesday, July 12'
+        $jr = if ($july) { $july.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the popover opens under its button' ((InWindow $july) -and $jr.Top -gt $pr.Bottom) "button $pr, day $jr"
+        ClickOn $july
+        Check 'a day there is the value at once' (Said 'PopoverDatetime ionChange: 2023-07-12T09:30:00') (DbStatus)
+        Key '{ESC}' 800
+        Check 'Escape closes the popover, and the button shows the day' ((Named $CT::Button 'Jul 12, 2023') -and -not (InWindow (Named $CT::Button 'Wednesday, July 12')))
+
+        $disabled = Named $CT::Button 'Sep 1, 2023'
+        Check 'the disabled button is disabled' ($disabled -and -not $disabled.Current.IsEnabled)
+        Check 'the slot''s content names its button' ([bool](Named $CT::Button 'Pick a day'))
+        Check 'several dates are counted' ([bool](Named $CT::Button '3 days'))
+
+        # The colour button's datetime, at the bottom of the page: its date button is expanded while any of it is in view (as
+        # Ionic's IntersectionObserver), collapsed otherwise. In the phone-sized window its header already shows at the top of the
+        # page, and the page can't scroll it out, so the first check is that the state follows where the datetime is.
+        $colour = Named $CT::Button 'Dec 24, 2023'
+        # The page's own datetime's: the lowest one with a box, as an overlay's datetime may be in the tree while it's closed.
+        $next = All $CT::Button | Where-Object { $_.Current.Name -eq 'Next month' -and -not $_.Current.BoundingRectangle.IsEmpty } |
+            Sort-Object { $_.Current.BoundingRectangle.Top } | Select-Object -Last 1
+        $shown = $next -and $next.Current.BoundingRectangle.Top -lt $w.Bottom
+        Check 'the colour button is expanded exactly while its datetime is in view' ($colour -and ((ExpandedOf $colour) -eq [bool]$shown)) "window $w, next month $(if ($next) { $next.Current.BoundingRectangle })"
+        $status = FirstText '*ionChange*'
+        $sx, $sy = Centre (Named $CT::Text $status)
+        Guard
+        [void][RealInput]::SetCursorPos($sx, $sy); Start-Sleep -Milliseconds 150
+        Wheel 15
+        Shot 'datetime-button-inline'
+        Check 'and expanded once it is in view' ((InWindow (Named $CT::Button 'Sunday, December 24')) -and (ExpandedOf (Named $CT::Button 'Dec 24, 2023'))) "window $w"
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'
