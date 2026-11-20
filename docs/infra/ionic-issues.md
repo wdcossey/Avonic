@@ -194,3 +194,30 @@ when the parts weren't clamped would fix both.
 
 **Avonic** cuts the day only when the date wasn't clamped (`ValidateParts_Keeps_A_Date_Clamped_To_Max_Whole`), and its parts are
 values, so max can't move. Fairly sure, from the code.
+
+## `ion-datetime-button`: the `month` and `year` presentations are formatted by `formatOptions.time`
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#79), and read in `datetime-button.js`.** A minimal page:
+
+```html
+<ion-app>
+  <ion-datetime-button datetime="dt"></ion-datetime-button>
+  <ion-modal keep-contents-mounted="true"><ion-datetime id="dt" presentation="month"></ion-datetime></ion-modal>
+</ion-app>
+<script>
+  const dt = document.getElementById('dt');
+  dt.formatOptions = { date: { month: 'short' }, time: { hour: '2-digit', minute: '2-digit' } };
+  dt.value = '2024-07-15T13:47:00';
+</script>
+```
+
+The button reads `01:47 PM`, a time, for a month picker (`docs/components/ion-datetime-button/ref/behaviour.json`, `x_fo0_month`).
+With only `{ date: { month: 'short' } }` it reads `July`, the date's options ignored (`x_fo1_month`); `presentation="year"` with
+`{ date: { year: '2-digit' } }` reads `2024` (`x_fo2_year`), and with `{ time: { hour: '2-digit' } }`, `01 PM` (`x_fo3_year`).
+`setDateTimeText` formats `month` with `formatOptions?.time ?? { month: 'long' }` and `year` with `formatOptions?.time ?? { year:
+'numeric' }`, where the `month-year` case just above it reads `formatOptions?.date`. The datetime itself formats those presentations by
+`formatOptions.date` and warns when it's missing ("The 'month' presentation requires a date object in formatOptions"), so `time` looks
+like a copy of the wrong line.
+
+**Avonic** formats both by `formatOptions.date` (`Jul`, `24`), `B13_Month_And_Year_Are_Formatted_By_The_Date_Options`. Sure, from the
+code and the measurement.
