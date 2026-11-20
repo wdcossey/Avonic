@@ -2030,9 +2030,15 @@ try {
         Check 'the slot''s content names its button' ([bool](Named $CT::Button 'Pick a day'))
         Check 'several dates are counted' ([bool](Named $CT::Button '3 days'))
 
-        # The colour button's datetime, at the bottom of the page: in view, its date button is expanded; scrolled away, collapsed.
+        # The colour button's datetime, at the bottom of the page: its date button is expanded while any of it is in view (as
+        # Ionic's IntersectionObserver), collapsed otherwise. In the phone-sized window its header already shows at the top of the
+        # page, and the page can't scroll it out, so the first check is that the state follows where the datetime is.
         $colour = Named $CT::Button 'Dec 24, 2023'
-        Check 'the colour button is collapsed while its datetime is out of view' ($colour -and -not (ExpandedOf $colour))
+        # The page's own datetime's: the lowest one with a box, as an overlay's datetime may be in the tree while it's closed.
+        $next = All $CT::Button | Where-Object { $_.Current.Name -eq 'Next month' -and -not $_.Current.BoundingRectangle.IsEmpty } |
+            Sort-Object { $_.Current.BoundingRectangle.Top } | Select-Object -Last 1
+        $shown = $next -and $next.Current.BoundingRectangle.Top -lt $w.Bottom
+        Check 'the colour button is expanded exactly while its datetime is in view' ($colour -and ((ExpandedOf $colour) -eq [bool]$shown)) "window $w, next month $(if ($next) { $next.Current.BoundingRectangle })"
         $status = FirstText '*ionChange*'
         $sx, $sy = Centre (Named $CT::Text $status)
         Guard
