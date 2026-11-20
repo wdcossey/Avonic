@@ -21,6 +21,14 @@
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
   </PropertyGroup>
 
+  <!-- -p:AvonicPerf=true: a Release build with the page-cost line, which also opens every page by itself and logs what each cost
+       (docs/infra/performance/README.md, "Page costs on a device"). -->
+  <PropertyGroup Condition="'$(AvonicPerf)' == 'true'">
+    <DefineConstants>$(DefineConstants);AVONIC_PERF</DefineConstants>
+    <!-- MetricsSupport stays off, as .NET for Android has it: turned on, Avalonia's meter fills the layout column but makes every
+         page 6 to 10 times slower on a Pixel 8 (measured 2026-11-20), so on Android only the total is measured. -->
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />
   </ItemGroup>

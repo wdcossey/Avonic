@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-loading, md. A size takes a number (px) or a CSS string: px, a percentage of the window, vw and vh,
+         sums and differences, calc(), min(a, b), or "auto" ("none" for a maximum), as the alert's. -->
+
+    <!-- backdrop-opacity: var(ion-backdrop-opacity, 0.32). Unset, it follows Avonic.BackdropOpacity. Read by the animations. -->
+    <b:CssUnset x:Key="Avonic.Loading.BackdropOpacity" />
+    <!-- background: var(ion-color-step-50, var(ion-background-color-step-50, #f2f2f2)). Unset, it follows
+         Avonic.BackgroundColorStep50Brush. -->
+    <b:CssUnset x:Key="Avonic.Loading.Background" />
+    <x:String x:Key="Avonic.Loading.Width">auto</x:String>
+    <x:String x:Key="Avonic.Loading.MinWidth">auto</x:String>
+    <x:Double x:Key="Avonic.Loading.MaxWidth">280</x:Double>
+    <x:String x:Key="Avonic.Loading.Height">auto</x:String>
+    <x:String x:Key="Avonic.Loading.MinHeight">auto</x:String>
+    <x:String x:Key="Avonic.Loading.MaxHeight">90%</x:String>
+    <!-- spinner-color: var(ion-color-primary, #0054e9). Unset, it follows Avonic.Color.PrimaryBrush. -->
+    <b:CssUnset x:Key="Avonic.Loading.SpinnerColor" />
+
+    <!-- .loading-wrapper's box-shadow, which core.json doesn't list. -->
+    <b:CssShadow x:Key="Avonic.Loading.Md.BoxShadow">0 16px 20px rgba(0, 0, 0, 0.4)</b:CssShadow>
+
+</ResourceDictionary>

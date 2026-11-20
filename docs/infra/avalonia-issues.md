@@ -214,3 +214,12 @@ multi-line `TextBox` handling them is right, as a `<textarea>` moves its caret w
 raises nothing for `AutomationElementIdentifiers.NameProperty`. A browser fires a name change when an element's `aria-label` changes,
 which Ionic 9's `utils/attribute-controller.js` relies on (#207), so a screen reader may not notice a renamed control until it reads it
 again. `AvonicToggle` raises it itself, for a name made from its content. Not tried with a real screen reader.
+
+## A `TextBlock` in RTL keeps trailing punctuation at the end of the line
+
+**Measured in a headless test, and the cause not read.** `"Loading..."` in a `TextBlock` with `FlowDirection="RightToLeft"` is one
+shaped run at bidi level 2, and draws as `Loading...`, its full stops on the right. Chromium, in a `dir="rtl"` paragraph, resolves the
+trailing full stops to the paragraph's direction and draws `...Loading` (measured in `ion-loading`'s RTL frame, #41). A `TextLayout`
+made directly with the same text, Roboto 14 and `FlowDirection.RightToLeft` does split it, `...` at level 1 before `Loading` at level 2,
+so it's something in how `TextBlock` builds its layout. Avonic accepts it: Latin text in an RTL window ending in punctuation shows
+the punctuation at the other end from Chromium's. Not tried in a real window or with Arabic or Hebrew text, where it may not show.

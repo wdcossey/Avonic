@@ -76,6 +76,7 @@ public partial class SampleShell : UserControl
         _back = TopLevel.BackRequestedEvent.RouteFinished.Subscribe(new AnonymousObserver<RoutedEventArgs>(OnBackRequestFinished));
         _topLevel?.AddHandler(HardwareBackButton.IonBackButtonEvent, OnIonBackButton);
         _safeArea = SafeAreaMode.PadShell(this, Header, _index, PerformanceLine);
+        StartPageCosts();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -118,14 +119,20 @@ public partial class SampleShell : UserControl
         }
     }
 
-    // Only called in a Debug build. A Release build still compiles them, so CI sees them.
-    [Conditional("DEBUG")]
+    // Only called in a Debug build, or one with -p:AvonicPerf=true. A Release build still compiles them, so CI sees them.
+    [Conditional("DEBUG"), Conditional("AVONIC_PERF")]
     private void BeginTiming() => (_performance ??= new Diagnostics.PerformanceMonitor()).Begin();
 
-    [Conditional("DEBUG")]
+    [Conditional("DEBUG"), Conditional("AVONIC_PERF")]
     private void ReportTiming(string title, Control page) => _performance?.Report(title, page, line =>
     {
         PerformanceLine.Text = line;
         PerformanceLine.IsVisible = true;
+        Reported(line);
     });
+
+    // In a build with -p:AvonicPerf=true: SampleShell.PageCosts.cs. Otherwise they compile to nothing.
+    partial void Reported(string line);
+
+    partial void StartPageCosts();
 }

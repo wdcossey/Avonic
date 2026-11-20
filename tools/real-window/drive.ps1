@@ -1808,6 +1808,70 @@ try {
         Away
     }
 
+    # ion-loading (#41): loadings made in code from real clicks, each found by its message, which names it (aria-labelledby), and
+    # centred in the window, checked by region; Escape and a click on the backdrop dismissing those with BackdropDismiss, with the
+    # backdrop role; with no backdrop, a click on a page button under it reaching the transparent backdrop, not the button; IsOpen;
+    # and the page's loading from its trigger, which Escape leaves (BackdropDismiss off) and its two-second duration dismisses with no
+    # role. The status line says what each was dismissed with, a different line each time, which each check waits for. Only what's on
+    # top is aimed at: the backdrop covers the page while a loading is up, and every click is inside the window.
+    Section 'ion-loading' {
+        Open 'ion-loading'
+        $w = $win.Current.BoundingRectangle
+        function LoadStatus { FirstText '*dismissed with role*' }
+        function ShowLoading($name) {
+            ClickOn (Named $CT::Button $name)
+            Start-Sleep -Milliseconds 600
+        }
+        function Loading($message) {
+            $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+                (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, $message)))
+        }
+        # The backdrop: the window's top centre, below the title bar and above the loading, which is in the middle.
+        function Backdrop { Click ([int]($w.X + $w.Width / 2)) ([int]($w.Y + $w.Height * 0.15)); Start-Sleep -Milliseconds 400 }
+
+        ShowLoading 'Show until a tap outside'
+        Shot 'loading-dismissable'
+        $l = Loading 'Tap outside to close'
+        $lb = if ($l) { $l.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        $cy = $lb.Top + $lb.Height / 2
+        Check 'a loading made in code is presented, named by its message, in the middle of the window' ($l -and $cy -gt ($w.Top + 0.3 * $w.Height) -and $cy -lt ($w.Top + 0.7 * $w.Height)) "window $w, loading $lb"
+        Key '{ESC}' 600
+        Check 'Escape dismisses one with BackdropDismiss, with the backdrop role' ([bool](WaitForText 'Dismissable dismissed with role backdrop')) (LoadStatus)
+
+        ShowLoading 'Show with no spinner'
+        Check 'one with no spinner is presented' ([bool](Loading 'Please wait...'))
+        Backdrop
+        Check 'a click on the backdrop dismisses it with the backdrop role' ([bool](WaitForText 'NoSpinner dismissed with role backdrop')) (LoadStatus)
+
+        # The transparent backdrop still covers the page: a click where a page button is reaches the backdrop, not the button. The
+        # button is one above the loading, which covers the buttons beside it in the phone-sized window.
+        $under = Named $CT::Button 'Show until a tap outside'
+        ShowLoading 'Show with no backdrop'
+        Shot 'loading-no-backdrop'
+        ClickOn $under
+        Check 'with no backdrop, a click on a page button under it dismisses the loading, and the button gets nothing' (([bool](WaitForText 'NoBackdrop dismissed with role backdrop')) -and -not (Loading 'Tap outside to close')) (LoadStatus)
+
+        ShowLoading 'Show in custom colours'
+        Shot 'loading-custom'
+        Check 'the custom-coloured one is presented' ([bool](Loading 'Custom colours'))
+        Backdrop
+        Check 'and dismissed by the backdrop' ([bool](WaitForText 'Custom dismissed with role backdrop')) (LoadStatus)
+
+        ClickOn (Named $CT::Button 'Loading IsOpen')
+        Start-Sleep -Milliseconds 600
+        Shot 'loading-isopen'
+        Check 'IsOpen presents the page''s loading' ([bool](Loading 'Opened by IsOpen'))
+        Backdrop
+        Check 'a click on the backdrop dismisses it, and the page sets IsOpen back' ([bool](WaitForText 'IsOpenLoading dismissed with role backdrop')) (LoadStatus)
+
+        ShowLoading 'Show a loading for two seconds'
+        Shot 'loading-timed'
+        Key '{ESC}' 300
+        Check 'the trigger presents the page''s loading, and Escape leaves it (BackdropDismiss off)' ([bool](Loading 'Loading...')) (LoadStatus)
+        Check 'its duration dismisses it by itself with no role' ([bool](WaitForText 'TimedLoading dismissed with role none' 6)) (LoadStatus)
+        Away
+    }
+
     # ion-datetime (#46): the page's first datetime, a calendar and a time with value 2023-06-15T13:47:00, so that every date checked
     # here is pinned (the today ring follows the real clock, and no check reads it). A real click on a day confirms at once; the next
     # button scrolls to July; the keyboard moves from the focused day and Enter selects; the time button's popover takes a click on an
