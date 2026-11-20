@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             xmlns:nav="using:Avonic.Sample.Pages.Nav"
+             x:Class="Avonic.Sample.Pages.NavPage">
+
+    <!-- ion-nav and ion-nav-link: a stack of pages with md's transition. The root is a Type, built when the nav loads; its
+         messages are pushed as a Type with a prop, settings as a view model that the data template below turns into a page, and
+         a draft by a factory. Back pops (an extension), as do the "Back to inbox" links, and with Swipe back on, a drag from the left
+         edge (off by default, as md has it). The status line under the nav says what
+         the stack is once each transition has ended, and how long it took. -->
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Padding="16,8">
+            <StackPanel Spacing="8">
+                <TextBlock Name="NavStatus" Text="Loading the root" TextWrapping="Wrap" />
+                <WrapPanel>
+                    <c:AvonicButton Name="PopToRootButton" Content="Pop to root" Fill="Outline" Size="Small" />
+                    <c:AvonicButton Name="PushDraftButton" Content="Push a draft" Fill="Outline" Size="Small" />
+                    <c:AvonicToggle Name="AnimatedToggle" Checked="True" Content="Animated" VerticalAlignment="Center" />
+                    <c:AvonicToggle Name="SwipeToggle" Content="Swipe back" VerticalAlignment="Center" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+        <c:AvonicNav Name="Nav" Root="{x:Type nav:NavInboxView}">
+            <c:AvonicNav.DataTemplates>
+                <DataTemplate DataType="nav:NavSettingsViewModel">
+                    <nav:NavSettingsView />
+                </DataTemplate>
+            </c:AvonicNav.DataTemplates>
+        </c:AvonicNav>
+    </DockPanel>
+</UserControl>

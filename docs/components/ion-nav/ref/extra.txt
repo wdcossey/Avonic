@@ -1,0 +1,26 @@
+## X1 pop() at the root with a push queued behind it
+console.warning [Ionic Warning]: [ion-nav] - You can't remove all the pages in the navigation stack. nav.pop() is probably called too many times. y JSHandle@node
+   ["pop rejected navigation stack needs at least one root page","push resolved true","length 2"]
+  events: ["ionNavWillChange ion-nav @1","ionNavWillChange ion-nav @1","connected page-two props={} @1","ionViewWillLeave page-one @36","ionViewWillEnter page-two @36","ionViewDidEnter page-two @331","ionViewDidLeave page-one @331","ionNavDidChange ion-nav @331"]
+  a push afterwards: [true,3]
+## X2 Enter and Space on the native button of an ion-button inside a nav-link
+  focused: BODY
+  Enter: ["page-two",2,[]]
+  focused: ION-BUTTON > BUTTON
+  Space: ["page-two",2,["ionNavWillChange ion-nav @8","ionNavDidChange ion-nav @332"]]
+## X2b Tab order: is a nav-link focusable itself?
+   [-1,"function"]
+## X3 focus on a button of the leaving page after a push
+   {"before":"BODY","afterPush":"body","afterPop":"body"}
+## X4 the entering page during the transition: hit-testable? pointer-events
+   {"pages":["page-one pe=none","page-two pe=none"],"hitAt195x300":"ion-app"}
+## X5 push before the nav has loaded its root (nav made in script, push at once)
+   {"v":true,"comps":["page-one","page-two"],"log":["ionNavWillLoad ion-nav (bubbles) @1","ionNavWillChange ion-nav @1","connected page-one props={} @1","ionViewWillEnter page-one @33","ionViewDidEnter page-one @33","ionNavDidChange ion-nav @33","ionNavWillChange ion-nav @33","connected page-two props={} @33","ionViewWillLeave page-one @71","ionViewWillEnter page-two @71","ionViewDidEnter page-two @366","ionViewDidLeave page-one @366","ionNavDidChange ion-nav @366"]}
+## X6 a nav with no root: getActive, canGoBack, length; then pop
+   ["undefined",false,0,"pop rejected no views in the stack to be removed"]
+## X1b push (running), then pop, pop (fails at the root), push queued behind them
+console.warning [Ionic Warning]: [ion-nav] - You can't remove all the pages in the navigation stack. nav.pop() is probably called too many times. y JSHandle@node
+   ["push A resolved true","pop 1 resolved true","pop 2 rejected navigation stack needs at least one root page","length 1 active page-one"]
+## X2c Enter on the native button inside a nav-link
+  focused: ION-BUTTON > BUTTON
+  after Enter: ["page-two",2]

@@ -150,6 +150,24 @@ public static class AvonicConfig
     /// </remarks>
     public static double ToastDuration { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>swipeBackEnabled</c> config: the <see cref="AvonicNav.NavSwipeGesture"/> of a nav that has none, whether a drag from
+    /// the start edge goes back. False, Ionic's fallback in md.
+    /// </summary>
+    /// <remarks>
+    /// Read when the nav is first attached, as Ionic reads it in <c>componentWillLoad</c> while <c>swipeGesture</c> is undefined: a
+    /// change of this reaches only navs attached for the first time after it, and only if theirs isn't set then. On Android, a drag
+    /// from the left edge is also the system's back gesture, which the system takes first where it's on.
+    /// </remarks>
+    public static bool SwipeBackEnabled { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>navAnimation</c> config: the page transition of an <see cref="AvonicNav"/> whose call and own
+    /// <see cref="AvonicNav.Animation"/> give none. Null is md's.
+    /// </summary>
+    /// <remarks>Read at each transition, as Ionic reads it in <c>transition()</c>.</remarks>
+    public static Animation.AnimationBuilder? NavAnimation { get; set; }
+
     // ── Avonic's own: no Ionic config has these ─────────────────────────────────────────────────
 
     /// <summary>

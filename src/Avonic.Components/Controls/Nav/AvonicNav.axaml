@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-nav: structure only, as it has no look (nav.css is position: absolute; inset: 0; z-index: 0, and there's no
+         nav.md.css). The pages overlap at the nav's full size, as .ion-page's position: absolute; inset: 0 places them. -->
+    <ControlTheme x:Key="{x:Type c:AvonicNav}" TargetType="c:AvonicNav">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <c:NavPagesHost Name="PART_Pages" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
