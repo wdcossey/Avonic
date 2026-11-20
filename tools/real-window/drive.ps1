@@ -1883,7 +1883,7 @@ try {
         Wheel 4
         $done = Named $CT::Button 'Done date'
         $db = if ($done) { $done.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
-        Check 'the default buttons are in view' ($done -and (OnScreen ($db.X + $db.Width / 2) ($db.Y + $db.Height / 2))) "window $w, done $db"
+        Check 'the default buttons are in view' ($done -and $db.Top -gt $w.Top -and $db.Bottom -lt $w.Bottom) "window $w, done $db"
         Shot 'datetime-buttons'
         ClickOn $done
         Check 'Done with no change confirms the value' (Said 'WithButtons ionChange: 2023-06-15T13:47:00') (DtStatus)
