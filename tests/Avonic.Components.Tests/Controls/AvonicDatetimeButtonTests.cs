@@ -367,14 +367,16 @@ public class AvonicDatetimeButtonTests
     public void B6_A_Binding_On_The_Presentation_Stays() => Run((scene, clock) =>
     {
         // The button sets it as Ionic sets the prop; SetCurrentValue, so an app's binding still holds.
-        var source = new Avalonia.Data.Binding("Tag") { Source = new Border { Tag = DatetimePresentation.DateTime }, Mode = Avalonia.Data.BindingMode.OneWay };
+        var holder = new Border { Tag = DatetimePresentation.DateTime };
+        var source = new Avalonia.Data.Binding("Tag") { Source = holder, Mode = Avalonia.Data.BindingMode.OneWay };
         var datetime = new AvonicDatetime { Value = June15 };
         datetime.Bind(AvonicDatetime.PresentationProperty, source);
         var (button, _) = Stage(scene, clock, datetime);
         Tap(scene, clock, TimeButton(button));
         Assert.Equal(DatetimePresentation.Time, datetime.Presentation);
-        Assert.True(datetime.IsSet(AvonicDatetime.PresentationProperty));
-        Assert.NotNull(datetime.GetBindingObservable(AvonicDatetime.PresentationProperty));
+        // The app's source still drives it.
+        holder.Tag = DatetimePresentation.Date;
+        Assert.Equal(DatetimePresentation.Date, datetime.Presentation);
     });
 
     [AvaloniaTheory]
