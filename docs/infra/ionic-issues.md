@@ -258,3 +258,51 @@ whole sequence hasn't been run in Chromium.
 overlay and dismisses it as soon as it's presented. **Avonic** never dismisses one that long by itself
 (`AvonicLoadingTests.B7_A_Duration_Too_Long_For_A_Timer_Never_Comes`, and the toast's `B7_A_Duration_Too_Long_For_A_Timer_Never_Comes`).
 Sure: measured.
+
+## `ion-nav`: a string in `insertPages` or `setPages` throws a `TypeError`
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#130; `docs/components/ion-nav/ref/measurements.txt`, M8).** With a nav loaded,
+`nav.insertPages(-1, ['page-three'])` rejects with `TypeError: Cannot use 'in' operator to search for 'component' in page-three`, and so
+does `setPages(['page-one', 'page-two'])`. Their type is `NavComponent[] | NavComponentWithProps[]`, and a tag name is a
+`NavComponent`: `convertToViews` tests `'component' in page`, which throws on a string. `{ component: 'page-three' }` works.
+
+**Avonic** takes any page form in the list (`N22_InsertPages_and_SetPages_take_a_bare_page_form`). Sure: measured.
+
+## `ion-nav`: a failed transition drops the calls queued behind it, which never settle
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#130; `ref/extra.txt`, X1b).** A minimal page:
+
+```html
+<ion-app><ion-nav root="page-one"></ion-nav></ion-app>
+<script>
+  const nav = document.querySelector('ion-nav');
+  nav.push('page-two');      // resolves true
+  nav.pop();                 // resolves true
+  nav.pop();                 // rejects: navigation stack needs at least one root page
+  nav.push('page-three');    // never resolves or rejects, and never runs
+</script>
+```
+
+`failed()` empties `transInstr` (`this.transInstr.length = 0`) and settles only the failed call; the others are dropped without
+calling their `resolve`, `reject` or `done`, so an `await` on one waits for ever. **Avonic** drops them too, and completes each with
+false (and `done(false, false)`) (`N21_A_failure_drops_the_calls_queued_behind_it_and_each_completes_false`). Sure: measured.
+
+## `ion-nav`: moving the nav in the DOM empties it, and a nav in an inline `ion-modal` shows nothing
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#130; `ref/extra.txt`, X7 and X8).**
+
+```html
+<ion-app>
+  <ion-button id="open">Open</ion-button>
+  <ion-modal trigger="open"><ion-nav root="page-one"></ion-nav></ion-modal>
+</ion-app>
+```
+
+After a click on Open the modal is empty: `getLength()` is 0 and the nav has no children. `disconnectedCallback` unloads and removes
+every view, and `componentDidLoad`, which sets `root`, runs once, so when `present()` moves the inline modal to `ion-app` (its delegate's
+`attachViewToDom`) the nav comes back with nothing. The same with any nav moved to another parent (X8). Frameworks that mount the
+modal's content only when it's presented don't meet it; core's inline modal does.
+
+**Avonic** keeps the stack across a detach: Avalonia moves controls routinely (`InlinePlacement` moves an inline overlay at every
+present) and has no "destroyed" (`N20_A_nav_moved_to_another_parent_keeps_its_stack`,
+`N20_A_nav_in_an_inline_modal_keeps_its_stack_through_present_and_dismiss`). Sure: measured.

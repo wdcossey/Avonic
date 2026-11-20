@@ -2049,6 +2049,60 @@ try {
         Away
     }
 
+    # ion-nav (#130): real clicks on nav links push and pop with md's transition; the status line under the nav says the stack
+    # once each transition has ended ("Stack: Inbox > Lunch on Friday (2). Done: ..."), so every step waits for it, and no click
+    # lands mid-transition. Each target is on the top page: the pages under it are hidden. Pages are pushed as a Type with a prop
+    # (a message), a view model through a data template (settings) and a factory (the draft button under the nav). Alt+Left pops
+    # the nav (the extension) before the shell's own back, and leaves the request to the shell at the root. Names are distinctive:
+    # the shell's own button is "Back". Checks are by names and regions, not wrapped text.
+    Section 'ion-nav' {
+        Open 'ion-nav'
+        $w = $win.Current.BoundingRectangle
+        function NavStatus { FirstText 'Stack:*' }
+        function WaitStack($like) { [bool](WaitForText "Stack: $like*" 5) }
+        function InWin($el) { $el -and -not $el.Current.BoundingRectangle.IsEmpty -and $w.Contains($el.Current.BoundingRectangle) }
+
+        Check 'the root page loads' (WaitStack 'Inbox (1)') (NavStatus)
+        Shot 'nav-root'
+        $lunch = Named $CT::Button 'Open message: Lunch*'
+        Check 'its message link is in the window' (InWin $lunch) "window $w"
+        ClickOn $lunch
+        Check 'a click on a message link pushes it with its subject' (WaitStack 'Inbox > Lunch on Friday (2)') (NavStatus)
+        Start-Sleep -Milliseconds 200
+        Shot 'nav-pushed'
+        Check 'the inbox under it is hidden' (-not (InWin (Named $CT::Button 'Open message: Quarterly*')))
+
+        ClickOn (Named $CT::Button 'Write a reply')
+        Check 'a link on the pushed page pushes the draft' (WaitStack 'Inbox > Lunch on Friday > Draft (3)') (NavStatus)
+        ClickOn (Named $CT::Button 'Discard the draft')
+        Check 'a back link pops it' (WaitStack 'Inbox > Lunch on Friday (2)') (NavStatus)
+        ClickOn (Named $CT::Button 'Back to inbox')
+        Check 'and another pops to the inbox' (WaitStack 'Inbox (1)') (NavStatus)
+
+        ClickOn (Named $CT::Button 'Open settings')
+        Check 'a view model is pushed through its data template' (WaitStack 'Inbox > Settings (2)') (NavStatus)
+        Check 'and its page shows the bound text' ([bool](Named $CT::Text 'Built from a view model*'))
+        ClickOn (Named $CT::Button 'Start over at a new inbox')
+        Check 'a root link sets a new root' (WaitStack 'Inbox (1)') (NavStatus)
+
+        ClickOn (Named $CT::Button 'Push a draft')
+        Check 'the factory button pushes a draft' (WaitStack 'Inbox > Draft (2)') (NavStatus)
+        ClickOn (Named $CT::Button 'Push a draft')
+        Check 'and another on top of it' (WaitStack 'Inbox > Draft > Draft (3)') (NavStatus)
+        ClickOn (Named $CT::Button 'Pop to root')
+        Check 'Pop to root goes back to the inbox' (WaitStack 'Inbox (1)') (NavStatus)
+
+        ClickOn (Named $CT::Button 'Open message: Quarterly*')
+        Check 'pushed again' (WaitStack 'Inbox > Quarterly report (2)') (NavStatus)
+        Fore
+        Key '%{LEFT}' 900
+        Check 'Alt+Left (back) pops the nav' (WaitStack 'Inbox (1)') (NavStatus)
+        Check 'and the sample page stays' ([bool](Named $CT::Button 'Back'))
+        Key '%{LEFT}' 900
+        Check 'at the root Alt+Left is left to the shell, which goes back to the index' (-not (Named $CT::Button 'Back'))
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'

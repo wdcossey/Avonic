@@ -1,0 +1,22 @@
+<nav:NavSampleView xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:c="using:Avonic.Components.Controls"
+                   xmlns:nav="using:Avonic.Sample.Pages.Nav"
+                   x:Class="Avonic.Sample.Pages.Nav.NavDraftView">
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">
+            <c:AvonicToolbar Color="secondary">
+                <c:AvonicTitle Content="Draft" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+        <c:AvonicContent>
+            <StackPanel Margin="16" Spacing="12">
+                <TextBlock TextWrapping="Wrap"
+                           Text="A draft: pushed by a factory from the button under the nav, or as a Type by a message's reply link." />
+                <c:AvonicNavLink RouterDirection="Back" HorizontalAlignment="Left">
+                    <c:AvonicButton Content="Discard the draft" Fill="Outline" />
+                </c:AvonicNavLink>
+            </StackPanel>
+        </c:AvonicContent>
+    </DockPanel>
+</nav:NavSampleView>

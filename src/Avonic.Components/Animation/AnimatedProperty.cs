@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Avalonia.Reactive;
 using Avalonia.VisualTree;
 
@@ -77,13 +78,20 @@ internal abstract class AnimatedProperty
         internal override object Underlying(Visual element) => element.GetValue(Visual.OpacityProperty);
 
         internal override IDisposable Bind(Visual element, IObservable<object?> values) =>
-            element.Bind(Visual.OpacityProperty, values, BindingPriority.Animation);
+            AnimationGroupOpacity.GetIsEnabled(element)
+                ? element.Bind(Visual.OpacityMaskProperty, new AnimationGroupOpacity.Masks(values), BindingPriority.Animation)
+                : element.Bind(Visual.OpacityProperty, values, BindingPriority.Animation);
 
         internal override void SetStyle(Visual element, object value)
         {
+            var group = AnimationGroupOpacity.GetIsEnabled(element);
             if (value is "")
             {
-                element.ClearValue(Visual.OpacityProperty);
+                element.ClearValue(group ? Visual.OpacityMaskProperty : Visual.OpacityProperty);
+            }
+            else if (group)
+            {
+                element.SetValue(Visual.OpacityMaskProperty, AnimationGroupOpacity.Mask(Math.Clamp(Number(value), 0, 1)));
             }
             else
             {
@@ -301,5 +309,31 @@ internal sealed class ValueSubject : IObservable<object?>
     private sealed class Unsubscriber(ValueSubject subject, IObserver<object?> observer) : IDisposable
     {
         public void Dispose() => subject._observers.Remove(observer);
+    }
+}
+
+/// <summary>
+/// CSS's <c>opacity</c> fades an element and what's in it as one picture. Avalonia's <see cref="Visual.Opacity"/> fades each part
+/// on its own, so where they overlap the one underneath shows through (docs/infra/avalonia-issues.md). On an element with this
+/// set, an animation's <c>opacity</c> is an <see cref="Visual.OpacityMask"/> of a solid brush at that alpha instead, which is a
+/// group: a nav's pages, whose content overlaps their background.
+/// </summary>
+internal static class AnimationGroupOpacity
+{
+    public static readonly AttachedProperty<bool> IsEnabledProperty =
+        AvaloniaProperty.RegisterAttached<Visual, bool>("IsEnabled", typeof(AnimationGroupOpacity));
+
+    public static bool GetIsEnabled(Visual element) => element.GetValue(IsEnabledProperty);
+
+    public static void SetIsEnabled(Visual element, bool value) => element.SetValue(IsEnabledProperty, value);
+
+    /// <summary>The mask for <paramref name="opacity"/>: none at 1, so that a still page draws as it does with no animation.</summary>
+    internal static IBrush? Mask(double opacity) => opacity >= 1 ? null : new ImmutableSolidColorBrush(Colors.Black, opacity);
+
+    /// <summary>An animation's opacities, as masks.</summary>
+    internal sealed class Masks(IObservable<object?> opacities) : IObservable<object?>
+    {
+        public IDisposable Subscribe(IObserver<object?> observer) =>
+            opacities.Subscribe(new AnonymousObserver<object?>(v => observer.OnNext(v is double d ? Mask(d) : v), observer.OnError, observer.OnCompleted));
     }
 }

@@ -1,0 +1,39 @@
+<nav:NavSampleView xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:c="using:Avonic.Components.Controls"
+                   xmlns:nav="using:Avonic.Sample.Pages.Nav"
+                   x:Class="Avonic.Sample.Pages.Nav.NavInboxView">
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">
+            <c:AvonicToolbar>
+                <c:AvonicTitle Content="Inbox" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+        <c:AvonicContent>
+            <StackPanel>
+                <TextBlock Margin="16" TextWrapping="Wrap"
+                           Text="The root page. Each message is a nav link that pushes a page Type with its subject as a prop." />
+                <c:AvonicList>
+                    <c:AvonicNavLink Name="LunchLink">
+                        <c:AvonicItem Button="True" Detail="True">
+                            <c:AvonicLabel Content="Open message: Lunch on Friday" />
+                        </c:AvonicItem>
+                    </c:AvonicNavLink>
+                    <c:AvonicNavLink Name="ReportLink">
+                        <c:AvonicItem Button="True" Detail="True">
+                            <c:AvonicLabel Content="Open message: Quarterly report" />
+                        </c:AvonicItem>
+                    </c:AvonicNavLink>
+                    <c:AvonicNavLink>
+                        <c:AvonicNavLink.Component>
+                            <nav:NavSettingsViewModel />
+                        </c:AvonicNavLink.Component>
+                        <c:AvonicItem Button="True" Detail="True">
+                            <c:AvonicLabel Content="Open settings" />
+                        </c:AvonicItem>
+                    </c:AvonicNavLink>
+                </c:AvonicList>
+            </StackPanel>
+        </c:AvonicContent>
+    </DockPanel>
+</nav:NavSampleView>

@@ -1,0 +1,24 @@
+<nav:NavSampleView xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:c="using:Avonic.Components.Controls"
+                   xmlns:nav="using:Avonic.Sample.Pages.Nav"
+                   x:Class="Avonic.Sample.Pages.Nav.NavMessageView">
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">
+            <c:AvonicToolbar Color="primary">
+                <c:AvonicTitle Name="TitleText" Content="Message" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+        <c:AvonicContent>
+            <StackPanel Margin="16" Spacing="12">
+                <TextBlock Name="Body" TextWrapping="Wrap" />
+                <c:AvonicNavLink Component="{x:Type nav:NavDraftView}" HorizontalAlignment="Left">
+                    <c:AvonicButton Content="Write a reply" />
+                </c:AvonicNavLink>
+                <c:AvonicNavLink RouterDirection="Back" HorizontalAlignment="Left">
+                    <c:AvonicButton Content="Back to inbox" Fill="Outline" />
+                </c:AvonicNavLink>
+            </StackPanel>
+        </c:AvonicContent>
+    </DockPanel>
+</nav:NavSampleView>

@@ -1,0 +1,25 @@
+<nav:NavSampleView xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:c="using:Avonic.Components.Controls"
+                   xmlns:nav="using:Avonic.Sample.Pages.Nav"
+                   x:Class="Avonic.Sample.Pages.Nav.NavSettingsView"
+                   x:DataType="nav:NavSettingsViewModel">
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">
+            <c:AvonicToolbar Color="tertiary">
+                <c:AvonicTitle Content="{Binding Heading}" />
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+        <c:AvonicContent>
+            <StackPanel Margin="16" Spacing="12">
+                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" />
+                <c:AvonicNavLink RouterDirection="Root" Component="{x:Type nav:NavInboxView}" HorizontalAlignment="Left">
+                    <c:AvonicButton Content="Start over at a new inbox" />
+                </c:AvonicNavLink>
+                <c:AvonicNavLink RouterDirection="Back" HorizontalAlignment="Left">
+                    <c:AvonicButton Content="Back to inbox" Fill="Outline" />
+                </c:AvonicNavLink>
+            </StackPanel>
+        </c:AvonicContent>
+    </DockPanel>
+</nav:NavSampleView>
