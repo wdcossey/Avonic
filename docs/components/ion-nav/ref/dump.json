@@ -1,0 +1,56 @@
+{
+  "tag": "ion-nav",
+  "snippet": "<script>customElements.define(\"nav-page-one\",class extends HTMLElement{connectedCallback(){if(this.innerHTML)return;this.innerHTML='<ion-header><ion-toolbar><ion-title>Page One</ion-title></ion-toolbar></ion-header><ion-content class=\"ion-padding\"><p>The root page of the nav.</p><ion-list><ion-item><ion-label>Inbox</ion-label></ion-item><ion-item><ion-label>Starred</ion-label></ion-item><ion-item><ion-label>Sent</ion-label></ion-item></ion-list><ion-nav-link router-direction=\"forward\" component=\"nav-page-two\"><ion-button id=\"go\">Go to Page Two</ion-button></ion-nav-link></ion-content>'}});customElements.define(\"nav-page-two\",class extends HTMLElement{connectedCallback(){if(this.innerHTML)return;this.innerHTML='<ion-header><ion-toolbar color=\"primary\"><ion-title>Page Two</ion-title></ion-toolbar></ion-header><ion-content class=\"ion-padding\"><p>Pushed on top of Page One.</p><ion-list><ion-item><ion-label>Details</ion-label></ion-item><ion-item><ion-label>Settings</ion-label></ion-item></ion-list><ion-nav-link router-direction=\"back\"><ion-button id=\"back\" fill=\"outline\">Back to Page One</ion-button></ion-nav-link></ion-content>'}});</script><ion-app><ion-nav root=\"nav-page-one\"></ion-nav></ion-app>",
+  "viewport": "390x844@2x md",
+  "errors": [],
+  "elements": [
+    {
+      "attributes": {
+        "root": "nav-page-one",
+        "class": "hydrated"
+      },
+      "classes": [
+        "hydrated"
+      ],
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 844
+      },
+      "cssVars": {},
+      "host": {
+        "display": "block",
+        "position": "absolute",
+        "box-sizing": "border-box",
+        "width": "390px",
+        "height": "844px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "margin": "0px",
+        "border": "0px none rgb(0, 0, 0)",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "16px",
+        "font-weight": "400",
+        "font-family": "Roboto, \"Helvetica Neue\", sans-serif",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "text-transform": "none",
+        "opacity": "1",
+        "overflow": "visible",
+        "contain": "size layout style",
+        "pointer-events": "auto",
+        "transition": "all",
+        "transform": "none",
+        "box-shadow": "none",
+        "outline": "rgb(0, 0, 0) none 0px",
+        "cursor": "auto"
+      },
+      "parts": [],
+      "tree": "  #shadow-root\n    <slot name=\"\">\n  <nav-page-one.ion-page>\n    <ion-header.md.header-md.header-collapse-none.hydrated>\n      <ion-toolbar.toolbar-title-default.md.in-toolbar.hydrated>\n        #shadow-root\n          <div.toolbar-background part=\"background\">\n          <div.toolbar-container part=\"container\">\n            <slot name=\"start\">\n            <slot name=\"secondary\">\n            <div.toolbar-content part=\"content\">\n              <slot name=\"\">\n            <slot name=\"primary\">\n            <slot name=\"end\">\n        <ion-title.md.title-default.hydrated>\n          #shadow-root\n            <div.toolbar-title>\n              <slot name=\"\">\n    <ion-content.ion-padding.md.content-ltr.hydrated>\n      #shadow-root\n        <div#background-content part=\"background\">\n        <div.inner-scroll.scroll-y part=\"scroll\">\n          <slot name=\"\">\n        <slot name=\"fixed\">\n      <p>\n      <ion-list.md.list-md.hydrated>\n        <ion-item.item.md.item-lines-default.in-list.hydrated.item-label>\n          #shadow-root\n            <div.item-native part=\"native\">\n              <slot name=\"start\">\n              <div.item-inner part=\"inner\">\n                <div.input-wrapper part=\"container\">\n                  <slot name=\"\">\n                <slot name=\"end\">\n          <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n        <ion-item.item.md.item-lines-default.in-list.hydrated.item-label>\n          #shadow-root\n            <div.item-native part=\"native\">\n              <slot name=\"start\">\n              <div.item-inner part=\"inner\">\n                <div.input-wrapper part=\"container\">\n                  <slot name=\"\">\n                <slot name=\"end\">\n          <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n        <ion-item.item.md.item-lines-default.in-list.hydrated.item-label>\n          #shadow-root\n            <div.item-native part=\"native\">\n              <slot name=\"start\">\n              <div.item-inner part=\"inner\">\n                <div.input-wrapper part=\"container\">\n                  <slot name=\"\">\n                <slot name=\"end\">\n          <ion-label.sc-ion-label-md-h.md.sc-ion-label-md.sc-ion-label-md-s.hydrated>\n      <ion-nav-link.hydrated>\n        <ion-button#go.md.button.button-solid.ion-activatable.ion-focusable.hydrated>\n          #shadow-root\n            <button.button-native part=\"native\">\n              <span.button-inner>\n                <slot name=\"icon-only\">\n                <slot name=\"start\">\n                <slot name=\"\">\n                <slot name=\"end\">\n              <ion-ripple-effect.md.hydrated>\n                #shadow-root\n"
+    }
+  ]
+}

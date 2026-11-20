@@ -1,0 +1,444 @@
+## M1 load with root="page-one"
+  events (from page load):
+    ionNavWillLoad ion-nav (bubbles) @136
+    ionNavWillChange ion-nav @136
+    connected page-one props={} @136
+    ionViewWillEnter page-one @158
+    ionViewDidEnter page-one @158
+    ionNavDidChange ion-nav @158
+  nav rect/style: 0,0,390x844 position=absolute z=0 contain=size layout style
+  pages:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+  canGoBack/length: [false,1]
+  getActive().component, params, element: ["page-one",null,"PAGE-ONE",2]
+## M2 push("page-two", { label: "from push" })
+  events (push):
+    push() returned @1
+    ionNavWillChange ion-nav @1
+    connected page-two props={"label":"from push"} @1
+    ionViewWillLeave page-one @31
+    ionViewWillEnter page-two @31
+    ionViewDidEnter page-two @329
+    ionViewDidLeave page-one @329
+    ionNavDidChange ion-nav @329
+    push resolved true @329
+  right after push():
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+  next frame:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+    page-two class="ion-page ion-page-invisible" z=- pe=- aria-hidden=null display=flex opacity=0 transform=none rect=0,0,390x844
+  frame after:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+    page-two class="ion-page ion-page-invisible" z=- pe=- aria-hidden=null display=flex opacity=0 transform=none rect=0,0,390x844
+  per frame:
+    frame 10: page-one(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)
+    frame 27: page-one(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)
+    frame 44: page-one(o=1.000 t=none d=flex) page-two(o=0.010 t=ty(40) d=flex)
+    frame 62: page-one(o=1.000 t=none d=flex) page-two(o=0.128 t=ty(35.2471) d=flex)
+    frame 77: page-one(o=1.000 t=none d=flex) page-two(o=0.272 t=ty(29.4282) d=flex)
+    frame 94: page-one(o=1.000 t=none d=flex) page-two(o=0.459 t=ty(21.8676) d=flex)
+    frame 111: page-one(o=1.000 t=none d=flex) page-two(o=0.662 t=ty(13.6744) d=flex)
+    frame 128: page-one(o=1.000 t=none d=flex) page-two(o=0.789 t=ty(8.53249) d=flex)
+    frame 144: page-one(o=1.000 t=none d=flex) page-two(o=0.860 t=ty(5.67007) d=flex)
+    frame 162: page-one(o=1.000 t=none d=flex) page-two(o=0.903 t=ty(3.9258) d=flex)
+    frame 178: page-one(o=1.000 t=none d=flex) page-two(o=0.932 t=ty(2.74524) d=flex)
+    frame 194: page-one(o=1.000 t=none d=flex) page-two(o=0.953 t=ty(1.91223) d=flex)
+    frame 211: page-one(o=1.000 t=none d=flex) page-two(o=0.968 t=ty(1.31204) d=flex)
+    frame 227: page-one(o=1.000 t=none d=flex) page-two(o=0.978 t=ty(0.869986) d=flex)
+    frame 244: page-one(o=1.000 t=none d=flex) page-two(o=0.986 t=ty(0.548015) d=flex)
+    frame 262: page-one(o=1.000 t=none d=flex) page-two(o=0.992 t=ty(0.319247) d=flex)
+    frame 277: page-one(o=1.000 t=none d=flex) page-two(o=0.996 t=ty(0.161539) d=flex)
+    frame 295: page-one(o=1.000 t=none d=flex) page-two(o=0.998 t=ty(0.0628906) d=flex)
+    frame 311: page-one(o=1.000 t=none d=flex) page-two(o=1.000 t=ty(0.0116907) d=flex)
+    frame 329: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+    frame 344: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+    frame 362: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+    frame 377: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+    frame 394: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+  after resolve:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+    anims left: 0
+  canGoBack/length: [true,2]
+  page-two classes (can-go-back?): ion-page can-go-back
+  back button display page-two: block
+## M3 pop()
+  events (pop):
+    ionNavWillChange ion-nav @1
+    ionViewWillLeave page-two @3
+    ionViewWillEnter page-one @3
+    ionViewDidEnter page-one @233
+    ionViewDidLeave page-two @233
+    ionViewWillUnload page-two @233
+    ionNavDidChange ion-nav @234
+    pop resolved true @234
+  right after pop():
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+  next frame:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+    anim (frame 2) page-two kf=[{"o":0,"opacity":"1","transform":"translateY(0px)"},{"o":1,"opacity":"0","transform":"translateY(40px)"}] dur=200 easing=cubic-bezier(0.47, 0, 0.745, 0.715) fill=both delay=0 state=running
+  per frame:
+    frame 1: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)
+    frame 15: page-one(o=1.000 t=none d=flex) page-two(o=1.000 t=ty(0) d=flex)
+    frame 32: page-one(o=1.000 t=none d=flex) page-two(o=0.992 t=ty(0.307694) d=flex)
+    frame 48: page-one(o=1.000 t=none d=flex) page-two(o=0.969 t=ty(1.24003) d=flex)
+    frame 65: page-one(o=1.000 t=none d=flex) page-two(o=0.929 t=ty(2.83464) d=flex)
+    frame 81: page-one(o=1.000 t=none d=flex) page-two(o=0.872 t=ty(5.10671) d=flex)
+    frame 98: page-one(o=1.000 t=none d=flex) page-two(o=0.799 t=ty(8.04187) d=flex)
+    frame 115: page-one(o=1.000 t=none d=flex) page-two(o=0.709 t=ty(11.6354) d=flex)
+    frame 132: page-one(o=1.000 t=none d=flex) page-two(o=0.603 t=ty(15.8646) d=flex)
+    frame 148: page-one(o=1.000 t=none d=flex) page-two(o=0.485 t=ty(20.6095) d=flex)
+    frame 164: page-one(o=1.000 t=none d=flex) page-two(o=0.358 t=ty(25.6697) d=flex)
+    frame 182: page-one(o=1.000 t=none d=flex) page-two(o=0.228 t=ty(30.8828) d=flex)
+    frame 199: page-one(o=1.000 t=none d=flex) page-two(o=0.106 t=ty(35.7765) d=flex)
+    frame 214: page-one(o=1.000 t=none d=flex) page-two(o=0.000 t=ty(39.9873) d=flex)
+    frame 234: page-one(o=1.000 t=none d=flex)
+    frame 248: page-one(o=1.000 t=none d=flex)
+    frame 265: page-one(o=1.000 t=none d=flex)
+    frame 282: page-one(o=1.000 t=none d=flex)
+  after resolve:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M4 pop() at the root
+console.warning [Ionic Warning]: [ion-nav] - You can't remove all the pages in the navigation stack. nav.pop() is probably called too many times. y JSHandle@node
+  result: rejected: Error: navigation stack needs at least one root page
+  events (pop at root):
+    ionNavWillChange ion-nav @1
+  pages:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M5 push twice at once, then push with skipIfBusy while busy
+  results: [true,true,false]
+  events (queue):
+    ionNavWillChange ion-nav @1
+    connected page-two props={"label":"A"} @1
+    ionViewWillLeave page-one @8
+    ionViewWillEnter page-two @8
+    C (skipIfBusy) resolved false @58
+    ionViewDidEnter page-two @307
+    ionViewDidLeave page-one @307
+    ionNavDidChange ion-nav @307
+    ionNavWillChange ion-nav @307
+    connected page-three @307
+    A resolved true @308
+    ionViewWillLeave page-two @326
+    ionViewWillEnter page-three @326
+    ionViewDidEnter page-three @624
+    ionViewDidLeave page-two @624
+    ionNavDidChange ion-nav @624
+    B resolved true @624
+  length: 3
+  pages:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-three class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M6 popToRoot() from depth 3
+  result: true
+  events (popToRoot):
+    ionNavWillChange ion-nav @2
+    ionViewWillLeave page-two @2
+    ionViewDidLeave page-two @2
+    ionViewWillUnload page-two @2
+    ionViewWillLeave page-three @3
+    ionViewWillEnter page-one @3
+    ionViewDidEnter page-one @224
+    ionViewDidLeave page-three @224
+    ionViewWillUnload page-three @224
+    ionNavDidChange ion-nav @224
+  pages:
+    page-one class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M7 push page-two, then insert(1, page-three), then removeIndex(1)
+  insert result: true
+  events (insert(1)):
+    ionNavWillChange ion-nav @1
+    connected page-three @1
+    ionNavDidChange ion-nav @13
+  length/pages: [3,["page-one:el","page-three:el","page-two:el"]]
+  pages:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+    page-three class="ion-page ion-page-invisible" z=- pe=- aria-hidden=null display=flex opacity=0 transform=none rect=0,0,390x844
+  removeIndex(1) result: true
+  events (removeIndex(1)):
+    ionNavWillChange ion-nav @1
+    ionViewWillLeave page-three @1
+    ionViewDidLeave page-three @1
+    ionViewWillUnload page-three @1
+    ionNavDidChange ion-nav @1
+  pages:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M8 insertPages(-1, [page-three, page-two])
+  with a string in the array: threw: TypeError: Cannot use 'in' operator to search for 'component' in page-three
+  then a push still works? resolved true
+  result: true
+  events (insertPages):
+    ionNavWillChange ion-nav @1
+    connected page-two props={"label":"last"} @1
+    ionViewWillLeave page-two @32
+    ionViewWillEnter page-two @32
+    ionViewDidEnter page-two @331
+    ionViewDidLeave page-two @331
+    ionNavDidChange ion-nav @331
+  stack: ["page-one:el","page-two:el","page-three:none","page-two:el"]
+  pages:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back" z=101 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+  pop into the unbuilt page: true
+  events (pop into unbuilt):
+    ionNavWillChange ion-nav @1
+    connected page-three @1
+    ionViewWillLeave page-two @30
+    ionViewWillEnter page-three @30
+    ionViewDidEnter page-three @262
+    ionViewDidLeave page-two @262
+    ionViewWillUnload page-two @262
+    ionNavDidChange ion-nav @263
+  pages:
+    page-one class="ion-page ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-two class="ion-page can-go-back ion-page-hidden" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0
+    page-three class="ion-page can-go-back" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M9 setRoot(page-two) from a stack
+  result: [true,["frame 3: page-one(o=1.000 t=none d=none) page-two(o=1.000 t=none d=none) page-three(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)","frame 18: page-three(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)","frame 34: page-two(o=1.000 t=none d=flex)","frame 50: page-two(o=1.000 t=none d=flex)"]]
+  events (setRoot):
+    ionNavWillChange ion-nav @1
+    connected page-two props={"label":"root"} @1
+    ionViewWillLeave page-one @3
+    ionViewDidLeave page-one @3
+    ionViewWillUnload page-one @3
+    ionViewWillLeave page-two @3
+    ionViewDidLeave page-two @3
+    ionViewWillUnload page-two @3
+    ionViewWillLeave page-three @18
+    ionViewWillEnter page-two @18
+    ionViewDidEnter page-two @18
+    ionViewDidLeave page-three @18
+    ionViewWillUnload page-three @18
+    ionNavDidChange ion-nav @18
+  pages:
+    page-two class="ion-page" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M9b setPages([page-one, page-two], { animated: true })
+  result: true
+  events (setPages animated):
+    ionNavWillChange ion-nav @1
+    connected page-two props={} @1
+    ionViewWillLeave page-two @33
+    ionViewWillEnter page-two @33
+    ionViewDidEnter page-two @248
+    ionViewDidLeave page-two @248
+    ionViewWillUnload page-two @248
+    ionNavDidChange ion-nav @248
+  pages:
+    page-two class="ion-page can-go-back" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844
+## M10 push page-three, popTo(view at 0)
+  result: true
+  events (popTo(view)):
+    ionNavWillChange ion-nav @1
+    connected page-one props={} @1
+    ionViewWillLeave page-two @18
+    ionViewDidLeave page-two @18
+    ionViewWillUnload page-two @18
+    ionViewWillLeave page-three @35
+    ionViewWillEnter page-one @35
+    ionViewDidEnter page-one @267
+    ionViewDidLeave page-three @267
+    ionViewWillUnload page-three @268
+    ionNavDidChange ion-nav @268
+  length: 1
+## M11 scroll page one, push, pop: scrollTop kept?
+  scrollTop before / while hidden / after pop: [600,0,600]
+## M12 push an element instance
+  result: {"v1":true,"same":true,"connectedAfterPop":false,"v2":true,"again":true}
+  events (instance):
+    ionNavWillChange ion-nav @1
+    connected page-two props={"label":"instance"} @1
+    ionViewWillLeave page-big @48
+    ionViewWillEnter page-two @48
+    ionViewDidEnter page-two @343
+    ionViewDidLeave page-big @344
+    ionNavDidChange ion-nav @344
+    ionNavWillChange ion-nav @344
+    ionViewWillLeave page-two @344
+    ionViewWillEnter page-big @344
+    ionViewDidEnter page-big @577
+    ionViewDidLeave page-two @577
+    ionViewWillUnload page-two @577
+    ionNavDidChange ion-nav @577
+    ionNavWillChange ion-nav @577
+    connected page-two props={"label":"instance"} @577
+    ionViewWillLeave page-big @617
+    ionViewWillEnter page-two @617
+    ionViewDidEnter page-two @911
+    ionViewDidLeave page-big @911
+    ionNavDidChange ion-nav @911
+## M13 nav.animated = false: push
+  result: [true,["frame 12: page-big(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)","frame 29: page-big(o=1.000 t=none d=flex) page-two(o=0.000 t=none d=flex)","frame 47: page-big(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)","frame 63: page-big(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)","frame 80: page-big(o=1.000 t=none d=none) page-two(o=1.000 t=none d=flex)"]]
+  events (unanimated push):
+    ionNavWillChange ion-nav @1
+    connected page-two props={} @1
+    ionViewWillLeave page-big @29
+    ionViewWillEnter page-two @29
+    ionViewDidEnter page-two @29
+    ionViewDidLeave page-big @29
+    ionNavDidChange ion-nav @29
+## M14 push with { duration: 1000 }, and with { direction: "back" }
+  duration: ["page-two kf=[{\"o\":0,\"opacity\":\"0.01\",\"transform\":\"translateY(40px)\"},{\"o\":1,\"opacity\":\"1\",\"transform\":\"translateY(0px)\"}] dur=1000 easing=cubic-bezier(0.36, 0.66, 0.04, 1) fill=both delay=0 state=running"]
+  direction back on a push: [["page-big kf=[{\"o\":0,\"opacity\":\"1\",\"transform\":\"translateY(0px)\"},{\"o\":1,\"opacity\":\"0\",\"transform\":\"translateY(40px)\"}] dur=200 easing=cubic-bezier(0.47, 0, 0.745, 0.715) fill=both delay=0 state=running"],["page-big class=\"ion-page\" z=100 pe=none aria-hidden=null display=flex opacity=1 transform=matrix(1, 0, 0, 1, 0, 0) rect=0,0,390x844","page-two class=\"ion-page can-go-back\" z=99 pe=none aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844"],["page-big class=\"ion-page ion-page-hidden\" z=100 pe=- aria-hidden=true display=none opacity=1 transform=none rect=0,0,0x0","page-two class=\"ion-page can-go-back\" z=99 pe=- aria-hidden=null display=flex opacity=1 transform=none rect=0,0,390x844"]]
+## M15 nav.root = "page-three"
+  events (root change):
+    ionNavWillChange ion-nav @1
+    connected page-three @1
+    ionViewWillLeave page-big @13
+    ionViewDidLeave page-big @13
+    ionViewWillUnload page-big @13
+    ionViewWillLeave page-two @28
+    ionViewWillEnter page-three @28
+    ionViewDidEnter page-three @28
+    ionViewDidLeave page-two @28
+    ionViewWillUnload page-two @28
+    ionNavDidChange ion-nav @28
+  stack: page-three length 1
+  rootParams change alone: []
+## M16 do nav events reach an ancestor in the bubble phase?
+   []
+## M17 ion-nav-link
+  events (click nav-link forward):
+    ionNavWillChange ion-nav @38
+    connected page-two props={} @38
+    ionViewWillLeave page-one @67
+    ionViewWillEnter page-two @67
+    ionViewDidEnter page-two @365
+    ionViewDidLeave page-one @365
+    ionNavDidChange ion-nav @365
+  stack: page-two length 2
+  events (click nav-link back):
+    ionNavWillChange ion-nav @16
+    ionViewWillLeave page-two @42
+    ionViewWillEnter page-one @42
+    ionViewDidEnter page-one @263
+    ionViewDidLeave page-two @263
+    ionViewWillUnload page-two @263
+    ionNavDidChange ion-nav @264
+  stack: page-one length 1
+  events (Enter on the button in a nav-link):
+  stack: page-one length 1
+  events (double click nav-link forward):
+    ionNavWillChange ion-nav @15
+    connected page-two props={} @15
+    ionViewWillLeave page-one @46
+    ionViewWillEnter page-two @46
+    ionViewDidEnter page-two @344
+    ionViewDidLeave page-one @344
+    ionNavDidChange ion-nav @344
+  stack: page-two length 2
+  events (nav-link root):
+    ionNavWillChange ion-nav @36
+    connected page-one props={} @36
+    ionViewWillLeave page-one @50
+    ionViewDidLeave page-one @50
+    ionViewWillUnload page-one @50
+    ionViewWillLeave page-two @50
+    ionViewDidLeave page-two @50
+    ionViewWillUnload page-two @50
+    ionViewWillLeave page-three @66
+    ionViewWillEnter page-one @66
+    ionViewDidEnter page-one @66
+    ionViewDidLeave page-three @66
+    ionViewWillUnload page-three @66
+    ionNavDidChange ion-nav @67
+  stack: page-one length 1
+  nav-link host: role, tabindex, display: [null,null,"inline","no shadow"]
+  click on text inside a nav-link: added
+  stack after text click: page-two length 2
+  events (ion-back-button click):
+    ionNavWillChange ion-nav @35
+    ionViewWillLeave page-two @52
+    ionViewWillEnter page-one @52
+    ionViewDidEnter page-one @283
+    ionViewDidLeave page-two @283
+    ionViewWillUnload page-two @283
+    ionNavDidChange ion-nav @284
+  stack: page-one length 1
+## M18 push("page-heavy"): the build and the animation's start
+  events (page-heavy):
+    push @1
+    ionNavWillChange ion-nav @1
+    connected page-heavy start @1
+    connected page-heavy end @152
+    ionViewWillLeave page-one @166
+    ionViewWillEnter page-heavy @166
+    ionViewDidEnter page-heavy @465
+    ionViewDidLeave page-one @465
+    ionNavDidChange ion-nav @465
+    resolved true @465
+    frame 156: opacity=0.000 no anim
+    frame 160: opacity=0.000 no anim
+    frame 165: opacity=0.000 no anim
+    frame 181: opacity=0.010 anim start=pending current=0
+    frame 198: opacity=0.128 anim start=180 current=17
+    frame 214: opacity=0.272 anim start=180 current=33
+    frame 231: opacity=0.459 anim start=180 current=50
+    frame 248: opacity=0.662 anim start=180 current=67
+    frame 264: opacity=0.789 anim start=180 current=83
+    frame 281: opacity=0.859 anim start=180 current=100
+    frame 298: opacity=0.903 anim start=180 current=117
+    frame 314: opacity=0.932 anim start=180 current=133
+    frame 331: opacity=0.953 anim start=180 current=150
+    frame 348: opacity=0.968 anim start=180 current=167
+    frame 364: opacity=0.978 anim start=180 current=183
+    frame 382: opacity=0.986 anim start=180 current=200
+    frame 398: opacity=0.992 anim start=180 current=217
+    frame 416: opacity=0.996 anim start=180 current=233
+    frame 432: opacity=0.998 anim start=180 current=250
+    frame 449: opacity=1.000 anim start=180 current=267
+    frame 465: opacity=1.000 no anim
+    frame 482: opacity=1.000 no anim
+    frame 499: opacity=1.000 no anim
+    frame 514: opacity=1.000 no anim
+    frame 531: opacity=1.000 no anim
+    frame 548: opacity=1.000 no anim
+    frame 564: opacity=1.000 no anim
+## M18 push("page-big"): the build and the animation's start
+  events (page-big):
+    push @1
+    ionNavWillChange ion-nav @1
+    connected page-big @1
+    ionViewWillLeave page-one @120
+    ionViewWillEnter page-big @120
+    ionViewDidEnter page-big @416
+    ionViewDidLeave page-one @416
+    ionNavDidChange ion-nav @416
+    resolved true @416
+    frame 61: opacity=0.000 no anim
+    frame 85: opacity=0.000 no anim
+    frame 119: opacity=0.000 no anim
+    frame 133: opacity=0.010 anim start=pending current=0
+    frame 148: opacity=0.128 anim start=131 current=17
+    frame 165: opacity=0.272 anim start=131 current=33
+    frame 181: opacity=0.460 anim start=131 current=50
+    frame 198: opacity=0.662 anim start=131 current=67
+    frame 215: opacity=0.789 anim start=131 current=83
+    frame 231: opacity=0.860 anim start=131 current=100
+    frame 249: opacity=0.903 anim start=131 current=117
+    frame 264: opacity=0.932 anim start=131 current=133
+    frame 282: opacity=0.953 anim start=131 current=150
+    frame 298: opacity=0.967 anim start=131 current=167
+    frame 315: opacity=0.978 anim start=131 current=183
+    frame 331: opacity=0.986 anim start=131 current=200
+    frame 349: opacity=0.992 anim start=131 current=217
+    frame 365: opacity=0.996 anim start=131 current=233
+    frame 381: opacity=0.998 anim start=131 current=250
+    frame 399: opacity=1.000 anim start=131 current=267
+    frame 432: opacity=1.000 no anim
+    frame 434: opacity=1.000 no anim
+    frame 448: opacity=1.000 no anim
+    frame 465: opacity=1.000 no anim
+    frame 482: opacity=1.000 no anim
+    frame 498: opacity=1.000 no anim
+    frame 515: opacity=1.000 no anim
+## M19 document "backbutton" with hardwareBackButton: true, nav two deep
+  handlers registered: [["ionBackButton seen"],"page-two",2]
+  events (backbutton):
+## M20 swipeGesture in md
+  swipeGesture: false
