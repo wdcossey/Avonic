@@ -13,7 +13,8 @@ public partial class LoadingPage : UserControl
         InitializeComponent();
         TimedLoading.DidDismiss += (_, e) => Report("TimedLoading", e.Detail);
 
-        // isOpen isn't set back by a dismiss, so the page does it, as Ionic's docs say an app has to.
+        // isOpen isn't set back by a dismiss, so the page does it, as Ionic's docs say an app has to, and turns its toggle off to
+        // match (a toggle's ionChange is the user's, so that doesn't come back here).
         LoadingOpenToggle.IonChange += (_, _) => IsOpenLoading.IsOpen = LoadingOpenToggle.Checked;
         IsOpenLoading.DidDismiss += (_, e) =>
         {

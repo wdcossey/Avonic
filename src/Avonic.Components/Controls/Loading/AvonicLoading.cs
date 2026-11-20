@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
@@ -23,6 +24,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Backdrop", typeof(AvonicBackdrop))]
 [TemplatePart("PART_Wrapper", typeof(Control))]
 [TemplatePart("PART_Spinner", typeof(AvonicSpinner))]
+[TemplatePart("PART_MessagePresenter", typeof(ContentPresenter))]
 public class AvonicLoading : AvonicOverlay
 {
     /// <summary>md's enter and leave: 200 ms.</summary>
@@ -107,9 +109,13 @@ public class AvonicLoading : AvonicOverlay
     public static readonly IMultiValueConverter NormalLineHeight = new FuncMultiValueConverter<object?, double>(values =>
     {
         var list = values.ToList();
-        return list.Count == 3 && list[0] is string && list[1] is FontFamily family && list[2] is double size
-            ? LineMetrics(family, size).Ascent + LineMetrics(family, size).Descent
-            : double.NaN;
+        if (list.Count == 3 && list[0] is string && list[1] is FontFamily family && list[2] is double size)
+        {
+            var (ascent, descent) = LineMetrics(family, size);
+            return ascent + descent;
+        }
+
+        return double.NaN;
     });
 
     /// <summary>
@@ -147,6 +153,7 @@ public class AvonicLoading : AvonicOverlay
     private AvonicBackdrop? _backdrop;
     private Control? _wrapper;
     private AvonicSpinner? _spinnerPart;
+    private ContentPresenter? _messagePresenter;
 
     public AvonicLoading()
     {
@@ -239,12 +246,11 @@ public class AvonicLoading : AvonicOverlay
         {
             var message = Message switch
             {
+                null => null,
                 string text => text,
-                Control control => AutomationProperties.GetName(control) is { Length: > 0 } name
-                    ? name
-                    : string.Join(" ", control.GetSelfAndLogicalDescendants().OfType<TextBlock>()
-                        .Select(t => t.Text).Where(t => !string.IsNullOrEmpty(t))),
-                _ => null,
+                Control control => TextContent(control),
+                // Anything else is shown through a data template: what the presenter made of it.
+                _ => _messagePresenter?.Child is { } shown ? TextContent(shown) : null,
             };
             if (message is { Length: > 0 })
             {
@@ -256,6 +262,16 @@ public class AvonicLoading : AvonicOverlay
                 : null;
         }
     }
+
+    /// <summary>
+    /// What <c>aria-labelledby</c> reads from content: its own automation name, else its text, as <c>textContent</c>: each
+    /// <see cref="TextBlock"/>'s, from its <c>Text</c> or its inlines.
+    /// </summary>
+    private static string TextContent(Control control) =>
+        AutomationProperties.GetName(control) is { Length: > 0 } name
+            ? name
+            : string.Join(" ", control.GetSelfAndLogicalDescendants().OfType<TextBlock>()
+                .Select(t => t.Inlines is { Count: > 0 } inlines ? inlines.Text : t.Text).Where(t => !string.IsNullOrEmpty(t)));
 
     /// <summary><c>htmlAttributes.id</c>, the host's <c>AutomationId</c>.</summary>
     internal string? HtmlId =>
@@ -368,6 +384,7 @@ public class AvonicLoading : AvonicOverlay
         _backdrop = e.NameScope.Find<AvonicBackdrop>("PART_Backdrop");
         _wrapper = e.NameScope.Find<Control>("PART_Wrapper");
         _spinnerPart = e.NameScope.Find<AvonicSpinner>("PART_Spinner");
+        _messagePresenter = e.NameScope.Find<ContentPresenter>("PART_MessagePresenter");
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

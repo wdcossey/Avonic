@@ -110,6 +110,10 @@ string message, from the font) and `SpinnerBaselineDrop` (the font's rounded des
   `TextBlock` ([avalonia-issues.md](../../infra/avalonia-issues.md)).
 - **The shadow** is lighter straight below the wrapper at 2x, as Avalonia doesn't scale a `BoxShadow`'s offset
   ([box-shadow](../../infra/box-shadow/README.md)).
+- **A message that's content** names the dialog by its own automation name, or its text when it's set; a later change of that
+  text inside it isn't raised as a name change, as the loading doesn't watch the content (a new `Message` is).
+- **A font with a line gap**: the line height and the spinner's drop are the rounded ascent and descent, as `TextareaNativeInput`
+  works out `line-height: normal`, measured only with Roboto, whose gap is 0. Where a gap goes for another font isn't measured.
 - **Root `aria-hidden`** while it's open, the overlay system's deferral (#65).
 - **Not copied:** Ionic's second `present()` starts a second duration timer, and a `duration` past 2^31 - 1 ms (`Infinity`)
   dismisses at once, where Avonic's never comes ([ionic-issues.md](../../infra/ionic-issues.md)).

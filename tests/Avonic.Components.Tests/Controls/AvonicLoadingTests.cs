@@ -680,6 +680,16 @@ public class AvonicLoadingTests
         loading.Message = named;
         Assert.Equal("Saving", peer.GetName());
 
+        // Inlines, and a value shown through a data template, by what's shown.
+        var inlines = new TextBlock();
+        inlines.Inlines!.Add(new Avalonia.Controls.Documents.Run("Saving"));
+        inlines.Inlines.Add(new Avalonia.Controls.Documents.Run(" file"));
+        loading.Message = inlines;
+        Assert.Equal("Saving file", peer.GetName());
+        loading.Message = 42;
+        stage.Render();
+        Assert.Equal("42", peer.GetName());
+
         // With no message, AutomationProperties.LabeledBy still names it, as the peer's own name does.
         var label = new TextBlock { Text = "From a label" };
         stage.Page.Children.Add(label);
