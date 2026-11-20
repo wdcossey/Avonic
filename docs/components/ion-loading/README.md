@@ -100,7 +100,9 @@ changes while open, and stacking.
 
 ## Extensions
 
-None. `Present(TopLevel)` is the overlay's.
+No Ionic member is shadowed or added. `Present(TopLevel)` is the overlay's. For the theme, three public converters, as
+`AvonicAlert.HasMessage` is: `AvonicLoading.HasText` (a message with text), `NormalLineHeight` (Chromium's `line-height: normal` for a
+string message, from the font) and `SpinnerBaselineDrop` (the font's rounded descent below the spinner).
 
 ## Known gaps
 
@@ -109,5 +111,6 @@ None. `Present(TopLevel)` is the overlay's.
 - **The shadow** is lighter straight below the wrapper at 2x, as Avalonia doesn't scale a `BoxShadow`'s offset
   ([box-shadow](../../infra/box-shadow/README.md)).
 - **Root `aria-hidden`** while it's open, the overlay system's deferral (#65).
-- **Not copied:** Ionic's second `present()` starts a second duration timer ([ionic-issues.md](../../infra/ionic-issues.md)).
+- **Not copied:** Ionic's second `present()` starts a second duration timer, and a `duration` past 2^31 - 1 ms (`Infinity`)
+  dismisses at once, where Avonic's never comes ([ionic-issues.md](../../infra/ionic-issues.md)).
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-loading` section for the batch's runner.

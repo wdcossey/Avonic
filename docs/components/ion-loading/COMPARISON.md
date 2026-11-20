@@ -39,7 +39,7 @@ where Avalonia rounds the layout to whole pixels and a text 61.11 wide is 62.
 |---|---|---|---|
 | Basic: wrapper | 118.44, 382.5, 153.11 x 79 | the same | Match (asserted) |
 | Spinner box, spinner | 142.44, 406.5, 28 x 31; the spinner 28 x 28 at its top | the same (a `Border` with 3 below) | Match (asserted) |
-| Message | 186.44, 414, 61.11 x 16 (`line-height: normal`, 16) | the same (`LineHeight` 16) | Match (asserted) |
+| Message | 186.44, 414, 61.11 x 16 (`line-height: normal`, 16) | the same: `LineHeight` 16, worked out from the font as Chromium does (24 at 20 px) | Match (asserted) |
 | No spinner | 140.44, 390, 109.11 x 64 | the same | Match (asserted) |
 | No message | 157, 382.5, 76 x 79 | the same | Match (asserted) |
 | `message: ''` | 149, 382.5, 92 x 79; an empty content 0 x 0 at 217, 422 | the same | Match (asserted) |
@@ -66,12 +66,13 @@ where Avalonia rounds the layout to whole pixels and a text 61.11 wide is 62.
 | B5 | Backdrop, Escape, back | M15: by default none dismisses; with `backdropDismiss` each does, with `backdrop`; a tap on the wrapper never | The same (back as Alt+Left, Avalonia's back request) | Match |
 | B6 | No backdrop | M9, M15: transparent, still covering: a button under it isn't clicked; with `backdropDismiss` a tap dismisses | The same | Match |
 | B7 | Duration | M16: `willDismiss` 516 ms after `didPresent` for 500 (500 + 10, and a frame), no role; a dismiss first stops it | 510 after, no role; the same | Match |
+| B7 | A `duration` past 2^31 - 1 ms (`Infinity`, `3e9`) | `setTimeout` fires at once (measured: 0 ms for `Infinity + 10` and `3e9 + 10`; `2147483647` doesn't within 3 s), so it dismisses as soon as it's presented | never dismisses by itself | **Deliberate**, as the toast's: "forever" is what an app means, and a `TimeSpan` timer can't hold it ([ionic-issues.md](../../infra/ionic-issues.md)) |
 | B7 | A second `present()` | starts a second timer, which can dismiss a later presentation | starts none | **Deliberate** (ADR 0005, [ionic-issues.md](../../infra/ionic-issues.md)) |
 | B8 | `spinner` | M14: unset is `config.get('loadingSpinner', config.get('spinner', 'crescent'))`; `null` none; `aria-hidden`; `--spinner-color` | `AvonicConfig.LoadingSpinner`, then `AvonicConfig.Spinner`, then `Crescent`, at the first attach, only if unset; null none; `AccessibilityView.Raw`; `Avonic.Loading.SpinnerColor` | Match |
 | B9 | Message | M5, M6: undefined: no content and no gap; `''`: an empty one after the gap; wraps within the wrapper | The same; content other than a string is shown as it is (Ionic's HTML) | Match |
 | B10 | Sizes | M7: the variables, `90%` the window's height at most | The keys, as numbers or CSS strings | Match |
 | B11 | Look | M4, M11 | The keys | Match |
-| B12 | Automation | M17: `role="dialog"`, `aria-modal`, `aria-labelledby` the message, else `aria-label`; `htmlAttributes.id` | A `Window` peer named by the message, else `aria-label`, else its own name, raising a name change; `AutomationId` from `id` | Match, as far as Avalonia has a dialog |
+| B12 | Automation | M17: `role="dialog"`, `aria-modal`, `aria-labelledby` the message (its text, for HTML too), else `aria-label`; `htmlAttributes.id` | A `Window` peer named by a string message, or content's own name or else its text, else `aria-label`, else its own `Name` or `LabeledBy`, raising a name and an id change; `AutomationId` from `id` | Match, as far as Avalonia has a dialog |
 | B13 | `cssClass` | classes on the host | style classes, taken off when it changes | Match |
 | B14 | `isOpen`, `trigger`, changes while open | M18, M19 | The same, through the base | Match |
 | B15 | Stacking | M17: `z-index: 40000 + index` | `ZIndex` 40000 plus the index: over an alert, under a toast | Match |

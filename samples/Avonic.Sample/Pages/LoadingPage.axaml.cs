@@ -75,8 +75,17 @@ public partial class LoadingPage : UserControl
             return;
         }
 
-        await loading.Present(top);
-        Report(name, await loading.OnDidDismiss());
+        // An async void handler: an exception here would reach the dispatcher and end the app, so the status line shows it.
+        try
+        {
+            var dismissed = loading.OnDidDismiss();
+            await loading.Present(top);
+            Report(name, await dismissed);
+        }
+        catch (Exception exception)
+        {
+            LoadingStatus.Text = $"{name} failed: {exception.Message}";
+        }
     }
 
     private void Report(string name, OverlayEventDetail detail) =>

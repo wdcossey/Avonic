@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -553,6 +554,29 @@ public class AvonicLoadingTests
     }
 
     [AvaloniaFact]
+    public void B10_The_Line_Height_And_The_Spinners_Drop_Follow_The_Font_And_Content_Keeps_Its_Own()
+    {
+        using var stage = new Stage();
+        var loading = Shown(stage, new AvonicLoading { Message = "Loading..." });
+        var presenter = Part<ContentPresenter>(loading, "PART_MessagePresenter");
+        var box = Part<Border>(loading, "PART_SpinnerBox");
+        Assert.Equal(16, presenter.LineHeight);
+        Assert.Equal(new Thickness(0, 0, 0, 3), box.Padding);
+
+        // line-height: normal and the baseline grow with the font: 24 at 20 px Roboto (as the alert's title measures), 5 below.
+        loading.FontSize = 20;
+        Stage.Settle();
+        Assert.Equal(24, presenter.LineHeight);
+        Assert.Equal(new Thickness(0, 0, 0, 5), box.Padding);
+
+        // Content keeps its own line height: normal for each of its fonts.
+        var big = new TextBlock { Text = "Big", FontSize = 22, TextWrapping = TextWrapping.Wrap };
+        loading.Message = big;
+        stage.Render();
+        Assert.True(double.IsNaN(big.LineHeight), $"LineHeight {big.LineHeight}");
+    }
+
+    [AvaloniaFact]
     public void B10_The_Sizes_Come_From_The_Keys()
     {
         using var stage = new Stage();
@@ -637,6 +661,44 @@ public class AvonicLoadingTests
         loading.HtmlAttributes = null;
         AutomationProperties.SetName(loading, "Own");
         Assert.Equal("Own", peer.GetName());
+    }
+
+    [AvaloniaFact]
+    public void B12_Content_Names_The_Dialog_By_Its_Name_Or_Its_Text_And_A_New_Id_Is_Raised()
+    {
+        using var stage = new Stage();
+        var loading = Shown(stage, new AvonicLoading
+        {
+            Message = new StackPanel { Children = { new TextBlock { Text = "Uploading" }, new TextBlock { Text = "3 of 7" } } },
+        });
+        var peer = ControlAutomationPeer.CreatePeerForElement(loading);
+
+        // aria-labelledby the .loading-content div: its text.
+        Assert.Equal("Uploading 3 of 7", peer.GetName());
+        var named = new TextBlock { Text = "Ignored" };
+        AutomationProperties.SetName(named, "Saving");
+        loading.Message = named;
+        Assert.Equal("Saving", peer.GetName());
+
+        // With no message, AutomationProperties.LabeledBy still names it, as the peer's own name does.
+        var label = new TextBlock { Text = "From a label" };
+        stage.Page.Children.Add(label);
+        loading.Message = null;
+        AutomationProperties.SetLabeledBy(loading, label);
+        Assert.Equal("From a label", peer.GetName());
+
+        var ids = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.AutomationIdProperty)
+            {
+                ids.Add(e.NewValue);
+            }
+        };
+        Assert.Equal(peer.GetAutomationId(), peer.GetAutomationId());
+        loading.HtmlAttributes = new Dictionary<string, object?> { ["id"] = "busy" };
+        Assert.Equal(["busy"], ids);
+        Assert.Equal("busy", peer.GetAutomationId());
     }
 
     [AvaloniaFact]

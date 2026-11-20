@@ -47,9 +47,9 @@
                                  spinner and the message is the row's gap: .loading-spinner + .loading-content, as the gap is only
                                  between two shown children. -->
                             <c:FlexRow Name="PART_Row" HorizontalContentAlignment="Center" Spacing="16">
-                                <!-- .loading-spinner: the 28 px inline-block spinner on the baseline of a 14 px line, which is 3
-                                     deeper, as Chromium rounds the descent (31 high, measured). -->
-                                <Border Name="PART_SpinnerBox" VerticalAlignment="Center" Padding="0,0,0,3"
+                                <!-- .loading-spinner: the 28 px inline-block spinner on the baseline of a line of the loading's
+                                     font, with the line's descent below it (its padding, below). -->
+                                <Border Name="PART_SpinnerBox" VerticalAlignment="Center"
                                         IsVisible="{TemplateBinding Spinner, Converter={x:Static ObjectConverters.IsNotNull}}">
                                     <c:AvonicSpinner Name="PART_Spinner" SpinnerName="{TemplateBinding Spinner}" VerticalAlignment="Top"
                                                      AutomationProperties.AccessibilityView="Raw" />
@@ -101,11 +101,28 @@
             </Setter>
         </Style>
 
+        <!-- .loading-spinner: the descent of a line of the loading's font, which Chromium rounds: 3 at 14 px Roboto, so 31 high
+             (measured). -->
+        <Style Selector="^ /template/ Border#PART_SpinnerBox">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static c:AvonicLoading.SpinnerBaselineDrop}">
+                    <Binding Path="FontFamily" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
         <!-- The message: line-height: normal, which Chromium makes 16 at 14 px Roboto (its ascent and descent each rounded), where
-             Avalonia's is 16.41; it wraps within the wrapper. -->
+             Avalonia's is 16.41; content other than text keeps its own. It wraps within the wrapper. -->
         <Style Selector="^ /template/ ContentPresenter#PART_MessagePresenter">
             <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="LineHeight" Value="16" />
+            <Setter Property="LineHeight">
+                <MultiBinding Converter="{x:Static c:AvonicLoading.NormalLineHeight}">
+                    <Binding Path="Message" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="FontFamily" RelativeSource="{RelativeSource TemplatedParent}" />
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+            </Setter>
         </Style>
     </ControlTheme>
 

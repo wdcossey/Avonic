@@ -147,11 +147,13 @@ sentinels around it, as Ionic's `tabindex="0"` divs. `ZIndexBase` 40000.
 - **The 16 between them** is the row's `Spacing`, the gap between two shown children: it's there only when both are, which is
   `.loading-spinner + .loading-content` for a row of these two, with no pseudoclass to work out.
 - **`.loading-spinner`**: a `Border` with 3 of padding below the 28 px spinner: the inline-block spinner sits on the baseline of a
-  14 px line, whose descent Chromium rounds to 3 (M4). A literal in the theme, so it can be restyled.
+  14 px line, whose descent Chromium rounds to 3 (M4). Worked out from the loading's font family and size by
+  `AvonicLoading.SpinnerBaselineDrop`, which the theme binds, so it follows a restyled font (5 at 20 px), and an app's style can replace it.
 - **`.loading-content`**: a `Border` shown when `Message` isn't null, holding a `ContentPresenter` shown when it isn't `""`, so an
   empty message is a 0 x 0 box after the gap, as the empty `div` is, where an empty `TextBlock` is a line high. `line-height: normal`
-  is 16 at 14 px Roboto in Chromium (its ascent and descent each rounded), where Avalonia's is 16.41: the theme sets 16, as the
-  alert sets its own measured line heights.
+  is 16 at 14 px Roboto in Chromium (its ascent and descent each rounded), where Avalonia's is 16.41: the theme binds
+  `AvonicLoading.NormalLineHeight`, which works it out from the font as `TextareaNativeInput` does (24 at 20 px), for a string
+  message only, as content keeps its own fonts' `normal`.
 - **`AvonicConfig.LoadingSpinner`**, a new key beside `InfiniteLoadingSpinner` and `RefreshingSpinner`, read at the first attach
   through `ConfigOnLoad.IfUnset`, as `AvonicInfiniteScrollContent` reads its own.
 - **Automation**: the host's peer is a `Window`, Avalonia's nearest type to a dialog, as the action sheet's, named by a string

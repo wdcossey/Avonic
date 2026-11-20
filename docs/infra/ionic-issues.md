@@ -222,3 +222,12 @@ clears only the last handle, so a dismiss by hand doesn't stop the earlier one e
 **Avonic** starts the timer only when a present presents it (`OnPresented`), so a second `Present()` does nothing, and each
 presentation has one timer, which its dismiss clears (`B7_A_Second_Present_Starts_No_Second_Timer`). Fairly sure, from the code; the
 whole sequence hasn't been run in Chromium.
+
+## `ion-loading`, `ion-toast`: a `duration` past 2^31 - 1 ms dismisses at once
+
+**Measured in headless Chromium (#41); the cause is the browser's `setTimeout`.** Both pass `duration` (plus 10 for the loading) to
+`setTimeout`, whose delay is a 32-bit integer: `setTimeout(fn, Infinity + 10)` and `setTimeout(fn, 3e9 + 10)` fire after 0 ms, while
+`setTimeout(fn, 2147483647)` doesn't fire within 3 s. So `duration: Infinity`, which an app means as "until it's dismissed", shows the
+overlay and dismisses it as soon as it's presented. **Avonic** never dismisses one that long by itself
+(`AvonicLoadingTests.B7_A_Duration_Too_Long_For_A_Timer_Never_Comes`, and the toast's `B7_A_Duration_Too_Long_For_A_Timer_Never_Comes`).
+Sure: measured.

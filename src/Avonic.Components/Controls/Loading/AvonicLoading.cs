@@ -6,6 +6,9 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
+using Avalonia.Media;
+using Avalonia.Media.TextFormatting;
 using Avonic.Components.Animation;
 using Avonic.Components.Overlays;
 
@@ -95,6 +98,44 @@ public class AvonicLoading : AvonicOverlay
     /// </summary>
     public static readonly IValueConverter HasText =
         new FuncValueConverter<object?, bool>(message => message is not (null or ""));
+
+    /// <summary>
+    /// For the theme: the message's <c>line-height: normal</c> as Chromium works it out from the message, the font family and the
+    /// font size: the font's ascent and descent each rounded (16 at 14 px Roboto, where Avalonia's own is 16.41). NaN, Avalonia's
+    /// own, for a message that isn't a string: content keeps its own fonts, and CSS's <c>normal</c> is worked out for each of them.
+    /// </summary>
+    public static readonly IMultiValueConverter NormalLineHeight = new FuncMultiValueConverter<object?, double>(values =>
+    {
+        var list = values.ToList();
+        return list.Count == 3 && list[0] is string && list[1] is FontFamily family && list[2] is double size
+            ? LineMetrics(family, size).Ascent + LineMetrics(family, size).Descent
+            : double.NaN;
+    });
+
+    /// <summary>
+    /// For the theme: what <c>.loading-spinner</c> adds below its inline-block spinner, which sits on the baseline of a line of the
+    /// loading's font: the font's descent, as Chromium rounds it (3 at 14 px Roboto), from the font family and the font size.
+    /// </summary>
+    public static readonly IMultiValueConverter SpinnerBaselineDrop = new FuncMultiValueConverter<object?, Thickness>(values =>
+    {
+        var list = values.ToList();
+        return list.Count == 2 && list[0] is FontFamily family && list[1] is double size
+            ? new Thickness(0, 0, 0, LineMetrics(family, size).Descent)
+            : default;
+    });
+
+    /// <summary>Chromium's ascent and descent of a font's line, each rounded on its own, as <c>TextareaNativeInput</c> works them out.</summary>
+    private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size)
+    {
+        using var layout = new TextLayout("x", new Typeface(family), size, null);
+        if (layout.TextLines.Count == 0)
+        {
+            return (0, 0);
+        }
+
+        var line = layout.TextLines[0];
+        return (Math.Round(line.Baseline, MidpointRounding.AwayFromZero), Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero));
+    }
 
     private readonly ConfigOnLoad<SpinnerName?> _spinner;
     private string[] _cssClasses = [];
@@ -188,26 +229,37 @@ public class AvonicLoading : AvonicOverlay
     internal AvonicSpinner? SpinnerPart => _spinnerPart;
 
     /// <summary>
-    /// The name the host's <c>aria-labelledby</c> gives it: the message's text; else <c>htmlAttributes['aria-label']</c>, else its
-    /// own name.
+    /// The name the host's <c>aria-labelledby</c> gives it: the message's text, or for content, its own automation name or else its
+    /// text, as <c>textContent</c>; else <c>htmlAttributes['aria-label']</c>. Null leaves it to the peer's own: <c>AutomationProperties</c>'s
+    /// <c>Name</c> and <c>LabeledBy</c>.
     /// </summary>
     internal string? AccessibleName
     {
         get
         {
-            if (Message is string { Length: > 0 } text)
+            var message = Message switch
             {
-                return text;
+                string text => text,
+                Control control => AutomationProperties.GetName(control) is { Length: > 0 } name
+                    ? name
+                    : string.Join(" ", control.GetSelfAndLogicalDescendants().OfType<TextBlock>()
+                        .Select(t => t.Text).Where(t => !string.IsNullOrEmpty(t))),
+                _ => null,
+            };
+            if (message is { Length: > 0 })
+            {
+                return message;
             }
 
-            if (HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } name)
-            {
-                return name;
-            }
-
-            return AutomationProperties.GetName(this);
+            return HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } ariaLabel
+                ? ariaLabel
+                : null;
         }
     }
+
+    /// <summary><c>htmlAttributes.id</c>, the host's <c>AutomationId</c>.</summary>
+    internal string? HtmlId =>
+        HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id ? id : null;
 
     protected internal override bool BackdropDismissEnabled => BackdropDismiss;
 
@@ -330,7 +382,8 @@ public class AvonicLoading : AvonicOverlay
 
             _cssClasses = AlertClasses.Apply(this, change.GetNewValue<string?>());
         }
-        else if (change.Property == MessageProperty || change.Property == HtmlAttributesProperty || change.Property == AutomationProperties.NameProperty)
+        else if (change.Property == MessageProperty || change.Property == HtmlAttributesProperty || change.Property == AutomationProperties.NameProperty
+                 || change.Property == AutomationProperties.LabeledByProperty || change.Property == AutomationProperties.AutomationIdProperty)
         {
             _peer?.NameChanged();
         }
@@ -338,32 +391,41 @@ public class AvonicLoading : AvonicOverlay
 
     /// <summary>
     /// The host: <c>role="dialog"</c>, <c>aria-modal</c>, to automation a <see cref="AutomationControlType.Window"/>, Avalonia's
-    /// nearest type to a dialog, named by its message (<c>aria-labelledby</c>), else <c>aria-label</c>; its <c>AutomationId</c>
-    /// <c>htmlAttributes.id</c>.
+    /// nearest type to a dialog, named by its message (<c>aria-labelledby</c>), else <c>aria-label</c>, else its own name; its
+    /// <c>AutomationId</c> <c>htmlAttributes.id</c>.
     /// </summary>
     private sealed class LoadingAutomationPeer(AvonicLoading owner) : ControlAutomationPeer(owner)
     {
         private string? _name;
+        private string? _id;
 
-        /// <summary>The name, read again, and raised if it changed.</summary>
+        /// <summary>The name and the automation id, read again, and raised where they changed.</summary>
         public void NameChanged()
         {
-            var name = owner.AccessibleName;
+            var name = Name();
             if (name != _name)
             {
                 RaisePropertyChangedEvent(AutomationElementIdentifiers.NameProperty, _name, name);
                 _name = name;
             }
+
+            var id = Id();
+            if (id != _id)
+            {
+                RaisePropertyChangedEvent(AutomationElementIdentifiers.AutomationIdProperty, _id, id);
+                _id = id;
+            }
         }
+
+        private string? Name() => owner.AccessibleName ?? base.GetNameCore();
+
+        private string? Id() => owner.HtmlId ?? base.GetAutomationIdCore();
 
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Window;
 
-        protected override string? GetNameCore() => _name = owner.AccessibleName;
+        protected override string? GetNameCore() => _name = Name();
 
-        protected override string? GetAutomationIdCore() =>
-            owner.HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id
-                ? id
-                : base.GetAutomationIdCore();
+        protected override string? GetAutomationIdCore() => _id = Id();
 
         protected override bool IsControlElementCore() => true;
 
