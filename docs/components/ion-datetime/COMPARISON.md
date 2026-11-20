@@ -126,6 +126,27 @@ and PM, which Avonic writes as a space, as V8 does; and some locales' AM and PM 
 October is a later CLDR's, and `ar-SA` is Gregorian. `DatetimeIntlTests` compares every call on Windows and en-US and the narrow
 days of the Latin and Cyrillic locales elsewhere. Android, iOS and macOS use their own ICU, and weren't measured.
 
+## Deviation: the single grid (an option)
+
+`CalendarRendering="SingleGrid"` (README, Extensions; #248, spike A) isn't Ionic's, and isn't the default. Ionic's calendar is three
+months in a horizontally snapping scroller; the single grid is one month drawn again in place. What it shows is the same: its frame of
+June 2023 (`AvonicDatetimeSingleGridTests.Capture_Single_Grid`) is pixel for pixel the scrolled calendar's
+(`AvonicDatetimeCaptureTests.Reference_DateTime`), and each day's text, state, automation name and pseudoclasses equal the scrolled
+calendar's working month in six cases (four locales, four first days, adjacent days, `Min`, `Max`, `IsDateEnabled` and
+`HighlightedDates`). What differs, by design:
+
+| | Ionic (and `ScrolledMonths`) | `SingleGrid` |
+|---|---|---|
+| A change of month | a smooth scroll of about 330 ms, then the month 50 ms after it rests (a `Background` timer in Avonic) | a fade: out 90 ms, the month, in 210 ms, on frames only |
+| The heading | when the scroll rests (Pixel 8: 383 ms median) | at the end of the fade out (about 100 ms) |
+| `animated: false` | the scroll jumps | the month changes at once |
+| A swipe | drags the months with the finger, then snaps | changes the month once, at its end, past 50 px or a flick |
+| Days made | 126 (103 shown and templated in June 2023's three months) | 42 (34 shown) |
+
+The swipe that doesn't follow the finger is the deliberate deviation. Elements on the `datetime-x1` perf page (one default datetime),
+headless: 726 scrolled (725 before the grid's part, empty in this rendering, was added) and 292 as a single grid, as the two hidden
+months' days were most of the calendar.
+
 ## Not in Avonic
 
 - `name` (an HTML form's hidden input) and `mode`, as the plan says.

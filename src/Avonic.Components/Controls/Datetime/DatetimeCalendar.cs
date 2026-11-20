@@ -175,18 +175,31 @@ public sealed class DatetimeCalendarDay : Button
 
 /// <summary>
 /// Ionic's <c>.calendar-month-grid</c>: 7 columns and 6 rows (<c>grid-template-rows: repeat(6, 1fr)</c>), each day centred in its
-/// cell (<c>.calendar-day-wrapper</c>, a flex box that centres). Its 42 days are made once and kept; the datetime sets each.
+/// cell (<c>.calendar-day-wrapper</c>, a flex box that centres). Its 42 days are made once, when the datetime first draws the month
+/// (<see cref="EnsureDays"/>), and kept; the datetime sets each. Made then, not with the panel, so that the calendar of the
+/// rendering the datetime doesn't use (<see cref="DatetimeCalendarRendering"/>) costs no days.
 /// </summary>
 public sealed class DatetimeCalendarMonth : Panel
 {
-    public DatetimeCalendarMonth()
+    /// <summary>The number of days a month grid holds: 7 columns, 6 rows.</summary>
+    internal const int DayCount = 42;
+
+    /// <summary>Makes the 42 days if they aren't made yet. True when it made them, so that the datetime hears their clicks.</summary>
+    internal bool EnsureDays()
     {
-        for (var i = 0; i < 42; i++)
+        if (Days.Count > 0)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < DayCount; i++)
         {
             var day = new DatetimeCalendarDay();
             Days.Add(day);
             Children.Add(day);
         }
+
+        return true;
     }
 
     /// <summary>The padding of the grid: <c>padding: 4px 10px</c> in md, set by the theme.</summary>
@@ -255,21 +268,32 @@ public sealed class DatetimeCalendarMonth : Panel
 
 /// <summary>
 /// Ionic's <c>.calendar-body</c> content: the previous, working and next months in a row, each the calendar's width, with a snap point
-/// at each that can be swiped to (<c>scroll-snap-align: start</c>; none for <c>calendar-month-disabled</c>).
+/// at each that can be swiped to (<c>scroll-snap-align: start</c>; none for <c>calendar-month-disabled</c>). Its months are made when
+/// the datetime first draws them (<see cref="EnsureMonths"/>), so that a datetime in <see cref="DatetimeCalendarRendering.SingleGrid"/>
+/// makes none.
 /// </summary>
 public sealed class DatetimeCalendarBodyPanel : Panel, IScrollSnapPointsInfo
 {
     private readonly bool[] _snap = [true, true, true];
     private double _pageWidth;
 
-    public DatetimeCalendarBodyPanel()
+    /// <summary>Makes the three months and their days if they aren't made yet. True when it made them.</summary>
+    internal bool EnsureMonths()
     {
+        if (Months.Count > 0)
+        {
+            return false;
+        }
+
         for (var i = 0; i < 3; i++)
         {
             var month = new DatetimeCalendarMonth();
+            month.EnsureDays();
             Months.Add(month);
             Children.Add(month);
         }
+
+        return true;
     }
 
     internal List<DatetimeCalendarMonth> Months { get; } = [];

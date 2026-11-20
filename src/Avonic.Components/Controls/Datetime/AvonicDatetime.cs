@@ -28,6 +28,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_CalendarDaysOfWeek", typeof(Panel))]
 [TemplatePart("PART_CalendarBody", typeof(ScrollViewer))]
 [TemplatePart("PART_CalendarMonths", typeof(DatetimeCalendarBodyPanel))]
+[TemplatePart("PART_CalendarGrid", typeof(DatetimeCalendarMonth))]
 [TemplatePart("PART_MonthYearWheel", typeof(AvonicPicker))]
 [TemplatePart("PART_TimeButton", typeof(Button))]
 [TemplatePart("PART_TimeText", typeof(TextBlock))]
@@ -41,7 +42,7 @@ namespace Avonic.Components.Controls;
 [PseudoClasses(":presentation-month", ":presentation-month-year", ":presentation-year", ":size-fixed", ":size-cover")]
 [PseudoClasses(":prefer-wheel", ":grid", ":show-month-and-year", ":month-year-picker-open", ":readonly", ":ion-color")]
 [PseudoClasses(":has-header", ":has-selected-date", ":has-time", ":has-wheel", ":has-footer", ":has-default-buttons")]
-[PseudoClasses(":has-clear-button", ":has-buttons", ":has-time-label", ":wheel-in-time")]
+[PseudoClasses(":has-clear-button", ":has-buttons", ":has-time-label", ":wheel-in-time", ":calendar-single-grid")]
 public partial class AvonicDatetime : TemplatedControl, IItemControl
 {
     /// <summary>Ionic's <c>CANCEL_ROLE</c>, the parent overlay's dismiss role for <see cref="Cancel"/>.</summary>
@@ -218,6 +219,13 @@ public partial class AvonicDatetime : TemplatedControl, IItemControl
         // Ionic stops its inner components' ionFocus and ionBlur at the datetime, so that an app hears only the datetime's.
         AddHandler(AvonicButton.IonFocusEvent, (_, e) => e.Handled = true);
         AddHandler(AvonicButton.IonBlurEvent, (_, e) => e.Handled = true);
+
+        // CalendarRendering's default, read once here, as a prop's default from the config is. At style priority, and before any
+        // style, so that an app's value, set or in a style, wins.
+        if (AvonicConfig.DatetimeCalendarRendering != DatetimeCalendarRendering.ScrolledMonths)
+        {
+            SetValue(CalendarRenderingProperty, AvonicConfig.DatetimeCalendarRendering, BindingPriority.Style);
+        }
     }
 
     public DatetimeValue? Value

@@ -180,6 +180,16 @@ public static class AvonicConfig
     /// </remarks>
     public static bool ContentScrollBars { get; set; }
 
+    /// <summary>
+    /// Not Ionic's: the default of <see cref="AvonicDatetime.CalendarRendering"/>, how a datetime's calendar draws its months.
+    /// <see cref="Controls.DatetimeCalendarRendering.ScrolledMonths"/> by default, which is Ionic's.
+    /// </summary>
+    /// <remarks>
+    /// Read when the datetime is made, as a prop's default is: a change of this reaches only datetimes made after it, so set it at
+    /// start-up. The value is the datetime's at style priority, so an app's own, set or in a style, wins.
+    /// </remarks>
+    public static DatetimeCalendarRendering DatetimeCalendarRendering { get; set; }
+
     // ── ion-app (#65): read by AvonicApp when it's attached ─────────────────────────────────────
 
     /// <summary>

@@ -400,6 +400,15 @@ public partial class AvonicDatetime
     {
         base.OnAttachedToVisualTree(e);
         EmitStyle();
+        UpdateGridGesture(inTree: true);
+    }
+
+    /// <summary>A grid's fade on its way ends at its month, and its swipe stops listening, so that nothing goes on once it's gone.</summary>
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        FinishGridChange();
+        UpdateGridGesture(inTree: false);
     }
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
@@ -465,6 +474,12 @@ public partial class AvonicDatetime
         else if (change.Property == TimeLabelContentProperty)
         {
             RaisePropertyChanged(ShownTimeLabelProperty, change.GetOldValue<object?>() ?? "Time", ShownTimeLabel);
+        }
+
+        if (change.Property == CalendarRenderingProperty)
+        {
+            OnCalendarRenderingChanged();
+            return;
         }
 
         if (!_loaded)
