@@ -182,10 +182,11 @@ dotnet run --project samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
 
 ### Only some pages
 
-`AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas, ignoring case. Unset, every page
+`AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term
+that starts with `=` keeps only the page of that title (`=ion-datetime`, without `ion-datetime-button`). Unset, every page
 opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the three above,
 about a minute and a half on the phone, most of it the month changes; `datetime-x` only the three; `datetime-x1` only the one
-with the month changes.
+with the month changes. Use commas, not spaces, through `adb shell`, which splits its arguments again.
 
 On desktop it's the environment variable (`$env:AVONIC_PERF_ONLY = "datetime"`, and `Remove-Item Env:AVONIC_PERF_ONLY` for
 every page again). On Android it's an intent extra of the same name, which `MainActivity` reads before the shell starts:
@@ -217,7 +218,8 @@ datetime-month: round 2, 20 changes, first median 21.0 max 35.0 ms, heading medi
   heading shows the month (5 s at most). Avalonia paces them by its composition batches, one a frame of the render loop, so a
   frame the UI thread was too busy to give shows as a long gap. The first gap is from the click. The median gap is the
   display's frame when nothing is slow: 8.3 ms at 120 Hz. At 60 Hz an ordinary frame is near 16.7 ms, and some count as
-  over it, so read the 33 ms column there.
+  over it, so read the 33 ms column there. With no frame for 10 s (the display off, the app in the background) the round's
+  changes stop with a `failed:` line, and the run goes on.
 
 The frame callbacks need no meter, so they work with `MetricsSupport` off ([below](#on-android-only-the-total-is-measured));
 `PageCostTests` drives the same code headlessly, but it hasn't yet run on the phone.

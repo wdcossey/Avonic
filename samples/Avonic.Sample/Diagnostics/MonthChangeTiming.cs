@@ -47,19 +47,25 @@ public sealed class MonthChangeTiming
     /// <summary>The most each change is watched for, when the heading never shows the month it went to.</summary>
     public static readonly TimeSpan MaxWindow = TimeSpan.FromSeconds(5);
 
+    /// <summary>How often, after the window, the whole calendar is searched for the heading, so that searching adds little to the gaps.</summary>
+    private static readonly TimeSpan LookAgain = TimeSpan.FromMilliseconds(250);
+
     private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
     private const string HeadingFormat = "MMMM yyyy";
 
     private readonly Control _root;
     private readonly TimeSpan _window;
+    private readonly TimeSpan _maxWindow;
     private TextBlock? _heading;
 
     /// <param name="root">The calendar, or a page with one calendar.</param>
     /// <param name="window">The least each change is watched for: <see cref="DefaultWindow"/> unless given.</param>
-    public MonthChangeTiming(Control root, TimeSpan? window = null)
+    /// <param name="maxWindow">The most: <see cref="MaxWindow"/> unless given. With no frame for twice that, the change fails.</param>
+    public MonthChangeTiming(Control root, TimeSpan? window = null, TimeSpan? maxWindow = null)
     {
         _root = root;
         _window = window ?? DefaultWindow;
+        _maxWindow = maxWindow ?? MaxWindow;
     }
 
     /// <summary>
@@ -101,37 +107,70 @@ public sealed class MonthChangeTiming
         var frames = new List<long>();
         var rendered = new StrongBox<long>();
         var headingAt = 0L;
+        var lastLook = 0L;
+        var stopped = false;
         var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var start = Stopwatch.GetTimestamp();
         invoke.Invoke();
 
-        // The next batch is the first frame with the click's changes in it. Its Rendered task completes on the render thread, as
-        // it's drawn: only the time is taken there.
+        // The compositor's next batch, the one not yet committed, which is committed on this thread after the click's layout: the
+        // first frame with the click's changes in it. Its Rendered task completes on the render thread, as it's drawn: only the
+        // time is taken there.
         compositor?.RequestCompositionBatchCommitAsync().Rendered.ContinueWith(
             _ => Volatile.Write(ref rendered.Value, Stopwatch.GetTimestamp()),
             CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 
         void OnFrame(TimeSpan _)
         {
-            var now = Stopwatch.GetTimestamp();
-            frames.Add(now);
-            var elapsed = Stopwatch.GetElapsedTime(start, now);
-            if (headingAt == 0 && expected is not null && Shows(expected, rescan: elapsed >= _window))
+            if (stopped)
             {
-                headingAt = now;
-            }
-
-            if ((elapsed >= _window && (headingAt != 0 || expected is null)) || elapsed >= MaxWindow)
-            {
-                done.TrySetResult();
                 return;
             }
 
-            top.RequestAnimationFrame(OnFrame);
+            try
+            {
+                var now = Stopwatch.GetTimestamp();
+                frames.Add(now);
+                var elapsed = Stopwatch.GetElapsedTime(start, now);
+                if (headingAt == 0 && expected is not null)
+                {
+                    // Looked for again once the window is over, in case a design shows the month elsewhere, but not on every frame.
+                    var look = elapsed >= _window && Stopwatch.GetElapsedTime(lastLook, now) >= LookAgain;
+                    if (look)
+                    {
+                        lastLook = now;
+                    }
+
+                    if (Shows(expected, look))
+                    {
+                        headingAt = now;
+                    }
+                }
+
+                if ((elapsed >= _window && (headingAt != 0 || expected is null)) || elapsed >= _maxWindow)
+                {
+                    done.TrySetResult();
+                    return;
+                }
+
+                top.RequestAnimationFrame(OnFrame);
+            }
+            catch (Exception ex)
+            {
+                done.TrySetException(ex);
+            }
         }
 
         top.RequestAnimationFrame(OnFrame);
+
+        // Frames stop while the display is off or the app is in the background: say so, rather than wait for ever.
+        if (await Task.WhenAny(done.Task, Task.Delay(_maxWindow + _maxWindow)) != done.Task)
+        {
+            stopped = true;
+            throw new TimeoutException($"No frame for {(_maxWindow + _maxWindow).TotalSeconds:0.#} s after \"{name}\": is the display off, or the app in the background?");
+        }
+
         await done.Task;
 
         var gaps = new double[frames.Count];
@@ -162,16 +201,13 @@ public sealed class MonthChangeTiming
         return Month(_heading?.Text);
     }
 
-    private bool Shows(string expected, bool rescan)
-    {
-        if (_heading?.Text == expected)
-        {
-            return true;
-        }
-
-        // A design may build its heading again: look for it once the window is over, not on every frame before.
-        return rescan && Heading(rescan: true)?.ToString(HeadingFormat, EnUs) == expected;
-    }
+    /// <summary>
+    /// Whether the heading shows <paramref name="expected"/>: the one found last, or, when it has left the tree (a design that
+    /// builds its heading again) or <paramref name="lookAgain"/> asks, the one found now.
+    /// </summary>
+    private bool Shows(string expected, bool lookAgain) =>
+        (_heading?.Text == expected && TopLevel.GetTopLevel(_heading) is not null)
+        || Heading(lookAgain)?.ToString(HeadingFormat, EnUs) == expected;
 
     private static DateTime? Month(string? text) =>
         DateTime.TryParseExact(text, HeadingFormat, EnUs, DateTimeStyles.None, out var month) ? month : null;
@@ -191,9 +227,13 @@ public sealed class MonthChangeTiming
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"{label}: round {round}, {changes.Count} changes, first {MedianMax(changes.Select(c => c.FirstMs))}, heading {MedianMax(changes.Select(c => c.HeadingMs))}, longest {MedianMax(changes.Select(c => (double?)c.Gaps.LongestMs))}, gap median {Median([.. changes.Select(c => c.Gaps.MedianMs)]):0.0} ms, {changes.Sum(c => c.Gaps.Frames)} frames, {changes.Sum(c => c.Gaps.Over60)} over 16.7 ms, {changes.Sum(c => c.Gaps.Over30)} over 33 ms");
+            $"{label}: round {round}, {changes.Count} changes, first {MedianMax(changes.Select(c => c.FirstMs))}, heading {MedianMax(changes.Select(c => c.HeadingMs))}, longest {MedianMax(changes.Select(c => (double?)c.Gaps.LongestMs))}, gap median {Median([.. changes.Where(c => c.Gaps.Frames > 0).Select(c => c.Gaps.MedianMs)]):0.0} ms, {changes.Sum(c => c.Gaps.Frames)} frames, {changes.Sum(c => c.Gaps.Over60)} over 16.7 ms, {changes.Sum(c => c.Gaps.Over30)} over 33 ms");
     }
 
+    /// <summary>
+    /// The median, the middle two averaged, as <c>tools/page-costs/table.js</c> takes it; 0 for none. Not <see cref="StyleCost.Median"/>,
+    /// which takes the upper of the two and needs a value.
+    /// </summary>
     internal static double Median(IReadOnlyList<double> values)
     {
         if (values.Count == 0)

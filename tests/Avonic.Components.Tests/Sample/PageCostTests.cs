@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Headless;
@@ -61,6 +62,10 @@ public partial class PageCostTests
         Assert.Equal(["ion-button", "datetime-x2"], Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
         Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4"], Titles(PageCostSet.Select(SamplePages, "datetime-x")));
         Assert.Empty(PageCostSet.Select(SamplePages, "no-such-page"));
+
+        // A term with "=" is a whole title.
+        Assert.Equal(["ion-datetime", "ion-datetime-button"], Titles(PageCostSet.Select(SamplePages, "ion-datetime")));
+        Assert.Equal(["ion-datetime", "datetime-x1"], Titles(PageCostSet.Select(SamplePages, "=ION-DATETIME,=datetime-x1")));
     }
 
     [AvaloniaFact]
@@ -123,6 +128,23 @@ public partial class PageCostTests
         Assert.Contains("Next month", run.Exception!.InnerException!.Message, StringComparison.Ordinal);
     });
 
+    [AvaloniaFact]
+    public void A_Change_With_No_Frames_Fails_Rather_Than_Wait_For_Ever() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = DatetimeCostView.PinnedValue, Locale = "en-US" });
+
+        // No render tick, as with the display off: no frame callback comes.
+        var run = new MonthChangeTiming(datetime, TimeSpan.FromMilliseconds(20), TimeSpan.FromMilliseconds(100)).Run(1, 0);
+        var until = DateTime.UtcNow.AddSeconds(30);
+        while (!run.IsCompleted && DateTime.UtcNow < until)
+        {
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        Assert.True(run.IsFaulted);
+        Assert.IsType<TimeoutException>(run.Exception!.InnerException);
+    });
+
     // ── The lines ────────────────────────────────────────────────────────────────────────────
 
     [Fact]
@@ -143,6 +165,93 @@ public partial class PageCostTests
             summary);
         Assert.DoesNotMatch(ChangeLine(), summary);
         Assert.DoesNotMatch(PageLine(), summary);
+    }
+
+    [Fact]
+    public void A_Change_With_No_Frames_Is_Left_Out_Of_The_Rounds_Gap_Median()
+    {
+        var changes = new[] { new MonthChange(true, 1, null, null, null, null, FrameGaps.Of([8, 9])), new MonthChange(true, 2, null, null, null, null, FrameGaps.Of([])) };
+
+        Assert.Contains("gap median 8.5 ms", MonthChangeTiming.Summary("datetime-month", 1, changes), StringComparison.Ordinal);
+    }
+
+    // The lines as the run writes them, read by the script that tabulates them, so that the two can't drift apart.
+    [Fact]
+    public void Table_Js_Reads_The_Lines_A_Run_Writes()
+    {
+        var page = PerformanceMonitor.Format("datetime-x1", 180, 650, 98, 174, 0, 0);
+        string[] Run(double longest) =>
+        [
+            "AVONIC-PERF start: Test, Arm64, 9 cores, .NET",
+            "AVONIC-PERF " + page,
+            .. Enumerable.Range(1, 2).SelectMany(round => new[]
+            {
+                "AVONIC-PERF " + new MonthChange(true, 1, "June 2023", "July 2023", 20, 400, FrameGaps.Of([10, longest, 8])).Line("datetime-month", round),
+                "AVONIC-PERF " + new MonthChange(false, 1, "July 2023", "June 2023", null, null, FrameGaps.Of([8])).Line("datetime-month", round),
+                "AVONIC-PERF " + MonthChangeTiming.Summary("datetime-month", round, []),
+            }),
+        ];
+        var before = Path.GetTempFileName();
+        var after = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllLines(before, Run(40));
+            File.WriteAllLines(after, Run(20));
+
+            var one = Node(before);
+            Assert.Contains("| datetime-x1 | 650 | 180 | 180 | 0 |", one, StringComparison.Ordinal);
+            Assert.Contains("datetime-month: month changes", one, StringComparison.Ordinal);
+            Assert.Contains("| Changes | 2 | 2 | 2 |", one, StringComparison.Ordinal);
+            Assert.Contains("| Longest gap, most | 40 | 40 | 40 |", one, StringComparison.Ordinal);
+            Assert.Contains("| Gap between frames, median | 9.0 | 9.0 | 9.0 |", one, StringComparison.Ordinal);
+            Assert.Contains("| Gaps over 33 ms, per round | 1 | 1 | 1 |", one, StringComparison.Ordinal);
+
+            var two = Node(before, after);
+            Assert.Contains("| **all** | | | 180 | 180 | 1.00 |", two, StringComparison.Ordinal);
+            Assert.Contains("| Longest gap, median | 24 | 14 | 0.58 |", two, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(before);
+            File.Delete(after);
+        }
+    }
+
+    private static string Node(params string[] runs)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Avonic.sln")))
+        {
+            dir = dir.Parent;
+        }
+
+        Assert.NotNull(dir);
+        var start = new ProcessStartInfo("node") { RedirectStandardOutput = true, RedirectStandardError = true };
+        start.ArgumentList.Add(Path.Combine(dir.FullName, "tools", "page-costs", "table.js"));
+        foreach (var run in runs)
+        {
+            start.ArgumentList.Add(run);
+        }
+
+        Process process;
+        try
+        {
+            process = Process.Start(start)!;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            Assert.Skip("node isn't on the PATH");
+            throw;
+        }
+
+        using (process)
+        {
+            var output = process.StandardOutput.ReadToEnd();
+            var error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            Assert.True(process.ExitCode == 0, error);
+            return output.Replace("\r\n", "\n", StringComparison.Ordinal);
+        }
     }
 
     [Fact]

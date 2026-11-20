@@ -78,7 +78,7 @@ function summarise(group) {
     headingMax: most('heading'),
     longestMedian: median(known('longest')),
     longestMax: most('longest'),
-    gap: median(known('gap')),
+    gap: median(group.filter((c) => c.frames > 0).map((c) => c.gap)),
     over16: group.reduce((t, c) => t + c.over16, 0) / rounds,
     over33: group.reduce((t, c) => t + c.over33, 0) / rounds,
   };

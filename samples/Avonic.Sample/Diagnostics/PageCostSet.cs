@@ -19,7 +19,8 @@ public static class PageCostSet
 
     /// <summary>
     /// The pages to open, in order. <paramref name="only"/> is a list of terms split by commas or spaces: a page is kept when its
-    /// title contains any of them, ignoring case. Empty or null keeps every page.
+    /// title contains any of them, ignoring case, or, for a term that starts with <c>=</c>, is the rest of it. Empty or null keeps
+    /// every page.
     /// </summary>
     public static IReadOnlyList<SamplePageEntry> Select(IEnumerable<SamplePageEntry> samplePages, string? only)
     {
@@ -29,10 +30,15 @@ public static class PageCostSet
         var terms = Terms(only);
         return terms.Length == 0
             ? [.. all]
-            : [.. all.Where(page => terms.Any(term => page.Title.Contains(term, StringComparison.OrdinalIgnoreCase)))];
+            : [.. all.Where(page => terms.Any(term => Matches(page.Title, term)))];
     }
 
     /// <summary>The filter's terms.</summary>
     public static string[] Terms(string? only) =>
-        only?.Split([',', ' ', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+        only?.Split([',', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+    private static bool Matches(string title, string term) =>
+        term.StartsWith('=')
+            ? title.Equals(term[1..], StringComparison.OrdinalIgnoreCase)
+            : title.Contains(term, StringComparison.OrdinalIgnoreCase);
 }
