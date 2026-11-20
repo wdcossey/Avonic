@@ -42,7 +42,7 @@ public class AvonicNavLink : ContentControl
 
     public AvonicNavLink()
     {
-        _ = new NativeButton(this, _ => _ = OnClick(), () => false, () => { }) { StockButtonsClick = true };
+        _ = new NativeButton(this, _ => LogFault(OnClick()), () => false, () => { }) { StockButtonsClick = true };
     }
 
     public object? Component
@@ -89,6 +89,12 @@ public class AvonicNavLink : ContentControl
             _ => Task.FromResult(false),
         };
     }
+
+    /// <summary>Nobody awaits a click's call, so a page that can't be built is logged.</summary>
+    private void LogFault(Task<bool> call) => call.ContinueWith(
+        task => Avalonia.Logging.Logger.TryGet(Avalonia.Logging.LogEventLevel.Error, "Avonic")?
+            .Log(this, "[ion-nav-link] The navigation failed: {0}", task.Exception!.InnerException!.Message),
+        CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
 
     /// <summary>No role: an element of the page, whose content speaks for itself.</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new NoneAutomationPeer(this);

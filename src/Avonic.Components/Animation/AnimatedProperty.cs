@@ -89,7 +89,7 @@ internal abstract class AnimatedProperty
             // CSS's animated opacity replaces the element's own, so its Opacity is 1 while the mask carries the value.
             var mask = element.Bind(Visual.OpacityMaskProperty, new AnimationGroupOpacity.Masks(values), BindingPriority.Animation);
             var opacity = element.Bind(Visual.OpacityProperty, new AnimationGroupOpacity.Ones(values), BindingPriority.Animation);
-            return new AnimationGroupOpacity.Both(mask, opacity);
+            return new Both(mask, opacity);
         }
 
         internal override void SetStyle(Visual element, object value)
@@ -349,15 +349,6 @@ internal static class AnimationGroupOpacity
     {
         public IDisposable Subscribe(IObserver<object?> observer) =>
             opacities.Subscribe(new AnonymousObserver<object?>(v => observer.OnNext(v is double ? 1.0 : v), observer.OnError, observer.OnCompleted));
-    }
-
-    internal sealed class Both(IDisposable first, IDisposable second) : IDisposable
-    {
-        public void Dispose()
-        {
-            first.Dispose();
-            second.Dispose();
-        }
     }
 
     /// <summary>An animation's opacities, as masks.</summary>

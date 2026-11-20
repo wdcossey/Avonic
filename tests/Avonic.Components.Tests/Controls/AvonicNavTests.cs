@@ -1002,6 +1002,31 @@ public class AvonicNavTests
         Assert.True(page.MeasuredAtWillEnter);
     }
 
+    [AvaloniaFact]
+    public void N7_DeepWait_false_starts_without_the_layout_and_ViewIsReady_is_awaited_first()
+    {
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"));
+        stage.Done(Task.FromResult(true));
+        var page = new MeasuredPage();
+        _ = stage.Nav.Push(page, opts: new NavOptions { DeepWait = false });
+        stage.Clock.At(stage.Clock.Now.TotalMilliseconds + 16);
+        Stage.Settle();
+        Assert.False(page.MeasuredAtWillEnter);
+        stage.After(600);
+
+        var ready = new TaskCompletionSource();
+        Control? given = null;
+        var two = new TestPage("two");
+        var push = stage.Nav.Push(two, opts: new NavOptions { ViewIsReady = el => { given = el; return ready.Task; } });
+        stage.After(100);
+        Assert.Same(two, given);
+        Assert.DoesNotContain(stage.Log, l => l.StartsWith("willEnter two", StringComparison.Ordinal));
+        ready.SetResult();
+        stage.After(600);
+        Assert.Contains(stage.Log, l => l.StartsWith("willEnter two", StringComparison.Ordinal));
+        Assert.True(Ended(push));
+    }
+
     // ── N20: a detach keeps the stack ────────────────────────────────────────────────────────
 
     [AvaloniaFact]

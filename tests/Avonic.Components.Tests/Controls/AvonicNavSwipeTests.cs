@@ -177,4 +177,24 @@ public class AvonicNavSwipeTests
         Assert.Equal(1, stage.Nav.GetLength());
         Assert.True(stage.Nav.IsHitTestVisible);
     }
+
+    [AvaloniaFact]
+    public void N23_A_detach_ends_a_swipe_waiting_with_animations_off()
+    {
+        using var stage = new Stage(
+            nav => { nav.Root = new TestPage("one"); nav.NavSwipeGesture = true; nav.Animated = false; },
+            wrap: nav => new Panel { Children = { nav } });
+        stage.Done(Task.FromResult(true));
+        stage.Stack(new TestPage("two"));
+        stage.At(1000);
+        Swipe(stage, 10, 300, 10, out _, lift: false);
+        Assert.False(stage.Nav.IsHitTestVisible);
+
+        var parent = (Panel)stage.Nav.Parent!;
+        parent.Children.Remove(stage.Nav);
+        stage.After(50);
+        parent.Children.Add(stage.Nav);
+        stage.After(50);
+        Assert.True(stage.Nav.IsHitTestVisible);
+    }
 }

@@ -162,5 +162,7 @@ Ionic bugs Avonic doesn't copy (ADR 0005), each in [`docs/infra/ionic-issues.md`
   the page's layout before it starts the animation, as Ionic does, so a slow page starts late rather than jumping.
 - A `Control` page that's already in the tree (still in the stack, or in another panel) fails the call: a DOM element would move,
   and an Avalonia control has one parent, so it has to leave the other first.
+- A page's own `OpacityMask` is replaced while a transition fades it (the fade is a mask, as Avalonia's `Opacity` isn't a group),
+  and comes back at its end; CSS's `mask` and `opacity` are separate properties.
 - `focusManagerPriority`, Ionic's experimental focus manager, isn't built: it's off by default, and then does nothing.
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-nav` section, not run here.

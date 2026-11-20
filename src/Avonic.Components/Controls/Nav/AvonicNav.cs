@@ -292,6 +292,9 @@ public partial class AvonicNav : TemplatedControl
         // Ionic's disconnectedCallback unloads every view, and the root isn't set again, so a nav that's moved, as an inline
         // modal's content is, comes back empty. The stack is kept here (ADR 0005, docs/infra/ionic-issues.md).
         DetachBack();
+
+        // Ionic's disconnectedCallback also ends a swipe waiting for its end with animations off: here the gesture's pointer
+        // capture goes with the detach, which ends it (AvonicNavSwipeTests.N23_A_detach_ends_a_swipe_waiting_with_animations_off).
     }
 
     /// <summary>
