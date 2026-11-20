@@ -162,4 +162,9 @@
          Tokens/Modal.axaml keeps for light. -->
     <SolidColorBrush x:Key="Avonic.Modal.Md.HandleBackgroundBrush" Color="{DynamicResource Avonic.BackgroundColorStep350}" />
 
+    <!-- ion-datetime: its background reads ion-background-color-step-100, and the time button's ion-background-color-step-300,
+         which dark sets, before their literals, which Tokens/Datetime.axaml keeps for light. -->
+    <SolidColorBrush x:Key="Avonic.Datetime.Background" Color="{DynamicResource Avonic.BackgroundColorStep100}" />
+    <SolidColorBrush x:Key="Avonic.Datetime.Md.TimeButtonBackground" Color="{DynamicResource Avonic.BackgroundColorStep300}" />
+
 </ResourceDictionary>

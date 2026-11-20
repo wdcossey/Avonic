@@ -1,0 +1,26 @@
+{
+ "a": {
+  "log": [
+   "ionFocus"
+  ],
+  "active": "time-body"
+ },
+ "b": {
+  "log": [
+   "ionFocus",
+   "ionBlur"
+  ],
+  "popInDocument": true,
+  "inShadow": false,
+  "active": "ION-POPOVER",
+  "deep": "ION-POPOVER.md popover-translucent popover-side-bottom hydrated"
+ },
+ "c": {
+  "log": [
+   "ionFocus",
+   "ionBlur",
+   "ionFocus"
+  ],
+  "active": "ION-DATETIME"
+ }
+}

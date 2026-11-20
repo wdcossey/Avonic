@@ -143,3 +143,54 @@ it shows at 398 with `translateY(-8px)`. Presented at the bottom and then in the
 
 **Avonic** clears the transform for the middle, and its panel reads the middle's offset only in the middle
 (`B1_Top_Is_8_Down_And_The_Middle_Is_Floor_Of_Half_The_Rest_With_No_Transform`). Fairly sure, from the code.
+
+## `ion-datetime`: an adjacent day ignores the default buttons and the buttons slot
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#46), and the cause read in `datetime.js`.** A minimal page:
+
+```html
+<ion-datetime presentation="date" show-adjacent-days="true" show-default-buttons="true" value="2023-06-15T13:47:00"></ion-datetime>
+```
+
+A click on an adjacent day, July 3 in June's grid, raises `ionChange` with `2023-07-03T13:47:00` at once, before Done
+(`docs/components/ion-datetime/ref/behaviour.json`, `"adjacent"`). A day of the month itself waits for Done.
+
+`renderMonth`'s click handler for an adjacent day sets `activeParts` itself and calls `this.confirm()`, where every other selection
+goes through `setActiveParts`, which returns early with `showDefaultButtons` or a `buttons` slot, and sets `hasUnconfirmedSelection`.
+Ionic's own docs say the default buttons are what update the value. Calling `setActiveParts` (and then `animateToDate`) instead would
+fix it, and also let the parent overlay's present discard the selection as it does for any other.
+
+**Avonic** doesn't copy it: an adjacent day is selected as any other, then its month is shown
+(`B33_An_Adjacent_Day_Waits_For_Done_And_Shows_Its_Month`). Sure: the measurement and the code agree.
+
+## `ion-datetime`: Done with nothing chosen clears the value of a time, month or year wheel
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#46), and the cause read in `datetime.js`.** A minimal page:
+
+```html
+<ion-datetime presentation="time" show-default-buttons="true"></ion-datetime>
+```
+
+Done, with the wheel untouched, raises `ionChange` with no value, and the value stays unset, though the wheel shows a time
+(`ref/behaviour.json`, `"confirmNoSelectionTime"`). With `presentation="date" prefer-wheel="true"` the same Done writes the time
+shown, `2023-06-20T10:00:00` (`"confirmNoSelectionWheel"`).
+
+`confirm()` writes the working parts when nothing is selected only `if (preferWheel)`, under the comment "If the datetime is using a
+wheel picker, but the active parts are empty, then the user has confirmed the initial value (working parts) presented to them." The
+`time`, `month`, `month-year` and `year` presentations always show a wheel (the `preferWheel` docs say so), so the comment's case is
+theirs too. `!this.isGridStyle` in place of `preferWheel` would fix it.
+
+**Avonic** writes the working parts for every wheel presentation (`B34_Done_With_Nothing_Chosen_On_A_Time_Wheel_Writes_What_It_Shows`).
+Fairly sure: the comment says what's meant, but an app could rely on no value.
+
+## `ion-datetime`: a wheel can write a date past `max`
+
+**Read in `utils/manipulation.js` (#46); not measured.** `validateParts` clamps the parts to `min` and `max` (`clampDate` returns
+`maxParts` itself), and then, if the day asked for is past the end of the month asked for, sets the day of that clamped copy, which is
+`maxParts`, to the length of the month asked for. With `max="2021-01-15"` on a date wheel, the 29th of February 2020 moved to 2021
+gives 2021-02-29, past max, so it's clamped to 2021-01-15, and then cut to February's 28 days: the value is `2021-01-28T23:59:00`,
+13 days past max, and `maxParts` itself is now the 28th, so max has moved for the rest of the datetime's life. Cutting the day only
+when the parts weren't clamped would fix both.
+
+**Avonic** cuts the day only when the date wasn't clamped (`ValidateParts_Keeps_A_Date_Clamped_To_Max_Whole`), and its parts are
+values, so max can't move. Fairly sure, from the code.

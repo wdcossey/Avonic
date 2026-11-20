@@ -1,0 +1,1859 @@
+{
+ "clickDay": {
+  "r": {
+   "a": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   },
+   "b": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    2,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    2,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    2,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    101,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "clickDayNoValue": {
+  "r": {
+   "before": {
+    "month": "June 2023",
+    "active": [],
+    "focused": null,
+    "hidden": "",
+    "scrollLeft": 350
+   },
+   "after": {
+    "value": "2023-06-22T10:00:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-22"
+    ],
+    "focused": null,
+    "hidden": "2023-06-22T10:00:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-06-22T10:00:00\"}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":\"2023-06-22T10:00:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "clickDayTimeNoValue": {
+  "r": {
+   "value": "2023-06-22T10:00:00",
+   "month": "June 2023",
+   "active": [
+    "2023-6-22"
+   ],
+   "focused": null,
+   "time": "10:00 AM",
+   "hidden": "2023-06-22T10:00:00",
+   "scrollLeft": 350
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-06-22T10:00:00\"}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":\"2023-06-22T10:00:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "buttonsConfirm": {
+  "r": {
+   "a": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "b": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   },
+   "b2": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   },
+   "c": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   },
+   "d": {
+    "value": "2023-06-26T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-26"
+    ],
+    "focused": null,
+    "hidden": "2023-06-26T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    93,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    93,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    93,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    178,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    384,
+    "ionCancel",
+    "null",
+    "dt"
+   ],
+   [
+    580,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    580,
+    "ionValueChange",
+    "{\"value\":\"2023-06-26T13:47:00\"}",
+    "dt"
+   ],
+   [
+    580,
+    "ionChange",
+    "{\"value\":\"2023-06-26T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "confirmNoSelection": {
+  "r": {
+   "month": "June 2023",
+   "active": [],
+   "focused": null,
+   "hidden": "",
+   "scrollLeft": 350
+  },
+  "log": [
+   [
+    -4,
+    "ionChange",
+    "{}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "confirmNoSelectionWheel": {
+  "r": {
+   "value": "2023-06-20T10:00:00",
+   "active": [],
+   "focused": null,
+   "hidden": "2023-06-20T10:00:00"
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T10:00:00\"}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":\"2023-06-20T10:00:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "confirmNoSelectionTime": {
+  "r": {
+   "active": [],
+   "focused": null,
+   "hidden": ""
+  },
+  "log": [
+   [
+    1,
+    "ionChange",
+    "{}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "clear": {
+  "r": {
+   "month": "June 2023",
+   "active": [],
+   "focused": null,
+   "hidden": "",
+   "scrollLeft": 350
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "multiple": {
+  "r": [
+   {
+    "value": [
+     "2023-06-05"
+    ],
+    "month": "June 2023",
+    "active": [
+     "2023-6-5"
+    ],
+    "focused": null,
+    "header": "Mon, Jun 5",
+    "hidden": "2023-06-05",
+    "scrollLeft": 350
+   },
+   {
+    "value": [
+     "2023-06-05",
+     "2023-06-09"
+    ],
+    "month": "June 2023",
+    "active": [
+     "2023-6-5",
+     "2023-6-9"
+    ],
+    "focused": null,
+    "header": "2 days",
+    "hidden": "2023-06-05,2023-06-09",
+    "scrollLeft": 350
+   },
+   {
+    "value": [
+     "2023-06-05",
+     "2023-06-09",
+     "2023-06-12"
+    ],
+    "month": "June 2023",
+    "active": [
+     "2023-6-5",
+     "2023-6-9",
+     "2023-6-12"
+    ],
+    "focused": null,
+    "header": "3 days",
+    "hidden": "2023-06-05,2023-06-09,2023-06-12",
+    "scrollLeft": 350
+   },
+   {
+    "value": [
+     "2023-06-05",
+     "2023-06-12"
+    ],
+    "month": "June 2023",
+    "active": [
+     "2023-6-5",
+     "2023-6-12"
+    ],
+    "focused": null,
+    "header": "2 days",
+    "hidden": "2023-06-05,2023-06-12",
+    "scrollLeft": 350
+   },
+   {
+    "value": [
+     "2023-06-05",
+     "2023-06-12"
+    ],
+    "month": "June 2023",
+    "active": [
+     "2023-6-5",
+     "2023-6-12"
+    ],
+    "focused": null,
+    "header": "F:2023-06-05;2023-06-12",
+    "hidden": "2023-06-05,2023-06-12",
+    "scrollLeft": 350
+   }
+  ],
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-05\"]}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":[\"2023-06-05\"]}",
+    "dt"
+   ],
+   [
+    70,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    70,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-09\"]}",
+    "dt"
+   ],
+   [
+    70,
+    "ionChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-09\"]}",
+    "dt"
+   ],
+   [
+    147,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    147,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-09\",\"2023-06-12\"]}",
+    "dt"
+   ],
+   [
+    147,
+    "ionChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-09\",\"2023-06-12\"]}",
+    "dt"
+   ],
+   [
+    223,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    223,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-12\"]}",
+    "dt"
+   ],
+   [
+    223,
+    "ionChange",
+    "{\"value\":[\"2023-06-05\",\"2023-06-12\"]}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "multipleValue": {
+  "r": {
+   "value": [
+    "2023-06-02",
+    "2023-07-04"
+   ],
+   "month": "July 2023",
+   "active": [
+    "2023-6-2",
+    "2023-7-4"
+   ],
+   "focused": null,
+   "header": "2 days",
+   "hidden": "2023-06-02,2023-07-04",
+   "scrollLeft": 350
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-02\",\"2023-07-04\"]}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "nextPrev": {
+  "r": {
+   "a": {
+    "s": {
+     "value": "2023-06-15T13:47:00",
+     "month": "July 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": null,
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    },
+    "sl": [
+     [
+      32,
+      352
+     ],
+     [
+      49,
+      358
+     ],
+     [
+      65,
+      368
+     ],
+     [
+      81,
+      383
+     ],
+     [
+      98,
+      402
+     ],
+     [
+      116,
+      425
+     ],
+     [
+      131,
+      452
+     ],
+     [
+      147,
+      482
+     ],
+     [
+      165,
+      514
+     ],
+     [
+      183,
+      546
+     ],
+     [
+      198,
+      577
+     ],
+     [
+      215,
+      606
+     ],
+     [
+      231,
+      632
+     ],
+     [
+      248,
+      654
+     ],
+     [
+      265,
+      672
+     ],
+     [
+      283,
+      685
+     ],
+     [
+      298,
+      694
+     ],
+     [
+      315,
+      699
+     ],
+     [
+      331,
+      700
+     ],
+     [
+      399,
+      350
+     ]
+    ]
+   },
+   "b": {
+    "s": {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": null,
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    },
+    "sl": [
+     [
+      1014,
+      348
+     ],
+     [
+      1029,
+      342
+     ],
+     [
+      1045,
+      332
+     ],
+     [
+      1062,
+      317
+     ],
+     [
+      1080,
+      298
+     ],
+     [
+      1095,
+      275
+     ],
+     [
+      1112,
+      248
+     ],
+     [
+      1129,
+      218
+     ],
+     [
+      1146,
+      186
+     ],
+     [
+      1162,
+      154
+     ],
+     [
+      1180,
+      123
+     ],
+     [
+      1195,
+      94
+     ],
+     [
+      1213,
+      68
+     ],
+     [
+      1229,
+      46
+     ],
+     [
+      1245,
+      28
+     ],
+     [
+      1262,
+      15
+     ],
+     [
+      1280,
+      6
+     ],
+     [
+      1295,
+      1
+     ],
+     [
+      1312,
+      0
+     ],
+     [
+      1376,
+      350
+     ]
+    ]
+   }
+  },
+  "log": [],
+  "errors": []
+ },
+ "valueProgrammatic": {
+  "r": {
+   "s": {
+    "value": "2023-09-03",
+    "month": "September 2023",
+    "active": [
+     "2023-9-3"
+    ],
+    "focused": null,
+    "hidden": "2023-09-03",
+    "scrollLeft": 350
+   },
+   "sl": [
+    [
+     33,
+     352
+    ],
+    [
+     13,
+     358
+    ],
+    [
+     26,
+     368
+    ],
+    [
+     42,
+     383
+    ],
+    [
+     59,
+     402
+    ],
+    [
+     74,
+     425
+    ],
+    [
+     91,
+     452
+    ],
+    [
+     107,
+     482
+    ],
+    [
+     124,
+     514
+    ],
+    [
+     141,
+     546
+    ],
+    [
+     158,
+     577
+    ],
+    [
+     174,
+     606
+    ],
+    [
+     192,
+     632
+    ],
+    [
+     209,
+     654
+    ],
+    [
+     225,
+     672
+    ],
+    [
+     241,
+     685
+    ],
+    [
+     257,
+     694
+    ],
+    [
+     275,
+     699
+    ],
+    [
+     291,
+     700
+    ],
+    [
+     346,
+     350
+    ]
+   ]
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-09-03\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "monthYear": {
+  "r": {
+   "open": {
+    "cls": [
+     "md",
+     "datetime-presentation-date",
+     "datetime-size-fixed",
+     "datetime-grid",
+     "hydrated",
+     "datetime-ready",
+     "show-month-and-year",
+     "month-year-picker-open"
+    ],
+    "label": "Hide year picker"
+   },
+   "a": {
+    "value": "2023-08-15T13:47:00",
+    "month": "August 2023",
+    "active": [
+     "2023-8-15"
+    ],
+    "focused": null,
+    "hidden": "2023-08-15T13:47:00",
+    "scrollLeft": 0
+   },
+   "b": {
+    "value": "2021-08-15T13:47:00",
+    "month": "August 2021",
+    "active": [
+     "2021-8-15"
+    ],
+    "focused": null,
+    "hidden": "2021-08-15T13:47:00",
+    "scrollLeft": 0
+   },
+   "c": {
+    "value": "2021-08-15T13:47:00",
+    "month": "August 2021",
+    "active": [
+     "2021-8-15"
+    ],
+    "focused": null,
+    "hidden": "2021-08-15T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    294,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    294,
+    "ionValueChange",
+    "{\"value\":\"2023-08-15T13:47:00\"}",
+    "dt"
+   ],
+   [
+    294,
+    "ionChange",
+    "{\"value\":\"2023-08-15T13:47:00\"}",
+    "dt"
+   ],
+   [
+    1094,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1094,
+    "ionValueChange",
+    "{\"value\":\"2021-08-15T13:47:00\"}",
+    "dt"
+   ],
+   [
+    1094,
+    "ionChange",
+    "{\"value\":\"2021-08-15T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "readonly": {
+  "r": {
+   "a": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "b": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": "calendar-body ion-focusable ",
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "c": {
+    "value": "2023-06-15T13:47:00",
+    "month": "July 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": "md button button-clear in-buttons button-has-icon-only ion-activatable ion-focusable hydrated ",
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    114,
+    "ionFocus",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "disabledClick": {
+  "r": {
+   "s": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "dayDisabled": true,
+   "ariaDisabled": "true",
+   "tab": 0
+  },
+  "log": [],
+  "errors": []
+ },
+ "adjacent": {
+  "r": {
+   "days": "28a,29a,30a,31a,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,1a,2a,3a,4a,5a,6a,7a,8a",
+   "s": {
+    "value": "2023-07-03T13:47:00",
+    "month": "July 2023",
+    "active": [
+     "2023-7-3",
+     "2023-7-3"
+    ],
+    "focused": null,
+    "hidden": "2023-07-03T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-07-03T13:47:00\"}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":\"2023-07-03T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "minMax": {
+  "r": {
+   "a": {
+    "prev": true,
+    "next": false,
+    "d9": true,
+    "d10": false,
+    "part9": "calendar-day disabled"
+   },
+   "b": {
+    "s": {
+     "value": "2023-06-15T13:47:00",
+     "month": "July 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": null,
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    },
+    "prev": false,
+    "next": true,
+    "d20": false,
+    "d21": true
+   }
+  },
+  "log": [],
+  "errors": []
+ },
+ "minMaxTime": {
+  "r": {
+   "a": [
+    "12,1,2,3,4,5,6,7,8,9,10,11",
+    "00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59",
+    "AM,PM"
+   ],
+   "b": [
+    "12,1,2,3,4,5",
+    "00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59",
+    "AM,PM"
+   ],
+   "bs": {
+    "value": "2023-06-20T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-20"
+    ],
+    "focused": null,
+    "time": "1:47 PM",
+    "hidden": "2023-06-20T13:47:00",
+    "scrollLeft": 350
+   },
+   "c": [
+    "12,1,2,3,4,5,6,7,8,9,10,11",
+    "00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59",
+    "AM,PM"
+   ]
+  },
+  "log": [
+   [
+    3,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    3,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    3,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    106,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    106,
+    "ionValueChange",
+    "{\"value\":\"2023-06-17T13:47:00\"}",
+    "dt"
+   ],
+   [
+    106,
+    "ionChange",
+    "{\"value\":\"2023-06-17T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "isDateEnabled": {
+  "r": {
+   "d17": true,
+   "d18": true,
+   "d19": false
+  },
+  "log": [],
+  "errors": []
+ },
+ "isDateEnabledIso": {
+  "r": {
+   "n": 92,
+   "first": [
+    "2023-05-01",
+    "2023-05-02",
+    "2023-05-03"
+   ],
+   "last": [
+    "2023-07-30",
+    "2023-07-31"
+   ]
+  },
+  "log": [],
+  "errors": []
+ },
+ "highlighted": {
+  "r": [
+   {
+    "d": 5,
+    "color": "rgb(128, 0, 128)",
+    "bg": "rgb(255, 192, 203)",
+    "border": "0px none rgb(128, 0, 128)"
+   },
+   {
+    "d": 15,
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgb(0, 84, 233)",
+    "border": "1px solid rgb(0, 84, 233)"
+   },
+   {
+    "d": 20,
+    "color": "rgb(0, 84, 233)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "1px solid rgb(0, 128, 0)"
+   }
+  ],
+  "log": [],
+  "errors": []
+ },
+ "keyboard": {
+  "r": [
+   [
+    "tab1",
+    "calendar-month-year-toggle ion-activatable ion-focusable ion-focused ",
+    "ION-DATETIME"
+   ],
+   [
+    "tab2",
+    "md button button-clear in-buttons button-has-icon-only ion-activatable ion-focusable hydrated ion-focused "
+   ],
+   [
+    "tab3",
+    "md button button-clear in-buttons button-has-icon-only ion-activatable ion-focusable hydrated ion-focused "
+   ],
+   [
+    "tab4",
+    "calendar-day calendar-day-active 15"
+   ],
+   [
+    "ArrowRight",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 16",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "ArrowDown",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 23",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "ArrowLeft",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 22",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "ArrowUp",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day calendar-day-active 15",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "Home",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 11",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "End",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 17",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "PageDown",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "July 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 17",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "PageUp",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 17",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "Shift+PageDown",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2024",
+     "active": [],
+     "focused": "calendar-day 17",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "Shift+PageUp",
+    {
+     "value": "2023-06-15T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": "calendar-day 17",
+     "hidden": "2023-06-15T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "Enter",
+    {
+     "value": "2023-06-17T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-17"
+     ],
+     "focused": "calendar-day calendar-day-active 17",
+     "hidden": "2023-06-17T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "Space",
+    {
+     "value": "2023-06-18T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-18"
+     ],
+     "focused": "calendar-day calendar-day-active 18",
+     "hidden": "2023-06-18T13:47:00",
+     "scrollLeft": 350
+    }
+   ],
+   [
+    "tab-out",
+    null,
+    "after"
+   ]
+  ],
+  "log": [
+   [
+    2,
+    "ionFocus",
+    "null",
+    "dt"
+   ],
+   [
+    9903,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    9903,
+    "ionValueChange",
+    "{\"value\":\"2023-06-17T13:47:00\"}",
+    "dt"
+   ],
+   [
+    9903,
+    "ionChange",
+    "{\"value\":\"2023-06-17T13:47:00\"}",
+    "dt"
+   ],
+   [
+    10621,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    10621,
+    "ionValueChange",
+    "{\"value\":\"2023-06-18T13:47:00\"}",
+    "dt"
+   ],
+   [
+    10621,
+    "ionChange",
+    "{\"value\":\"2023-06-18T13:47:00\"}",
+    "dt"
+   ],
+   [
+    10821,
+    "ionBlur",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "keyboardFirstDay": {
+  "r": {
+   "a": "calendar-day 12",
+   "b": "calendar-day 18"
+  },
+  "log": [
+   [
+    1,
+    "ionFocus",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "keyboardRtl": {
+  "r": {
+   "a": "calendar-day 16"
+  },
+  "log": [
+   [
+    1,
+    "ionFocus",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "keyboardMin": {
+  "r": {
+   "a": "calendar-day 14",
+   "b": "calendar-day 14"
+  },
+  "log": [
+   [
+    2,
+    "ionFocus",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "timeButton": {
+  "r": {
+   "a": {
+    "part": "time-button active",
+    "presented": "shown",
+    "content": [
+     128,
+     389,
+     250,
+     200
+    ],
+    "button": [
+     267.109375,
+     368,
+     82.890625,
+     31
+    ],
+    "cols": [
+     [
+      "Select an hour",
+      162.21875,
+      389,
+      58,
+      200
+     ],
+     [
+      "Select a minute",
+      220.21875,
+      389,
+      58,
+      200
+     ],
+     [
+      "Select a day period",
+      278.21875,
+      389,
+      65.5625,
+      200
+     ]
+    ]
+   },
+   "b": {
+    "value": "2023-06-15T15:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "time": "3:47 PM",
+    "hidden": "2023-06-15T15:47:00",
+    "scrollLeft": 350
+   },
+   "c": {
+    "value": "2023-06-15T03:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "time": "3:47 AM",
+    "hidden": "2023-06-15T03:47:00",
+    "scrollLeft": 350
+   },
+   "d": {
+    "s": {
+     "value": "2023-06-15T03:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-15"
+     ],
+     "focused": null,
+     "time": "3:47 AM",
+     "hidden": "2023-06-15T03:47:00",
+     "scrollLeft": 350
+    },
+    "part": "time-button"
+   }
+  },
+  "log": [
+   [
+    875,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    875,
+    "ionValueChange",
+    "{\"value\":\"2023-06-15T15:47:00\"}",
+    "dt"
+   ],
+   [
+    875,
+    "ionChange",
+    "{\"value\":\"2023-06-15T15:47:00\"}",
+    "dt"
+   ],
+   [
+    1667,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1667,
+    "ionValueChange",
+    "{\"value\":\"2023-06-15T03:47:00\"}",
+    "dt"
+   ],
+   [
+    1667,
+    "ionChange",
+    "{\"value\":\"2023-06-15T03:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "wheelChange": {
+  "r": {
+   "a": {
+    "s": {
+     "value": "2023-02-15T13:47:00",
+     "active": [],
+     "focused": null,
+     "hidden": "2023-02-15T13:47:00"
+    },
+    "days": 28
+   }
+  },
+  "log": [
+   [
+    0,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    0,
+    "ionValueChange",
+    "{\"value\":\"2023-02-15T13:47:00\"}",
+    "dt"
+   ],
+   [
+    0,
+    "ionChange",
+    "{\"value\":\"2023-02-15T13:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "wheelDateTimeChange": {
+  "r": {
+   "a": {
+    "s": {
+     "value": "2023-06-20T13:47:00",
+     "active": [],
+     "focused": null,
+     "hidden": "2023-06-20T13:47:00"
+    },
+    "first": "2023-5-1",
+    "n": 92
+   },
+   "b": {
+    "s": {
+     "value": "2023-07-30T13:47:00",
+     "active": [],
+     "focused": null,
+     "hidden": "2023-07-30T13:47:00"
+    },
+    "first": "2023-6-1",
+    "n": 92
+   },
+   "c": {
+    "value": "2023-07-30T01:47:00",
+    "active": [],
+    "focused": null,
+    "hidden": "2023-07-30T01:47:00"
+   }
+  },
+  "log": [
+   [
+    1,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    1,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    799,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    799,
+    "ionValueChange",
+    "{\"value\":\"2023-07-30T13:47:00\"}",
+    "dt"
+   ],
+   [
+    799,
+    "ionChange",
+    "{\"value\":\"2023-07-30T13:47:00\"}",
+    "dt"
+   ],
+   [
+    1610,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    1610,
+    "ionValueChange",
+    "{\"value\":\"2023-07-30T01:47:00\"}",
+    "dt"
+   ],
+   [
+    1610,
+    "ionChange",
+    "{\"value\":\"2023-07-30T01:47:00\"}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "inItem": {
+  "r": [
+   "item",
+   "md",
+   "item-lines-default",
+   "in-list",
+   "ion-activatable",
+   "ion-focusable",
+   "hydrated",
+   "item-interactive",
+   "item-datetime"
+  ],
+  "log": [],
+  "errors": []
+ },
+ "hidden": {
+  "r": [
+   [
+    "ion-dt-0",
+    "2023-06-02,2023-06-04"
+   ]
+  ],
+  "log": [
+   [
+    0,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    0,
+    "ionValueChange",
+    "{\"value\":[\"2023-06-02\",\"2023-06-04\"]}",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "cancelRevert": {
+  "r": {
+   "a": {
+    "value": "2023-06-15T13:47:00",
+    "month": "July 2023",
+    "active": [
+     "2023-7-3"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "b": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [
+   [
+    1087,
+    "ionCancel",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "reset": {
+  "r": {
+   "a": {
+    "value": "2023-06-15T13:47:00",
+    "month": "February 2023",
+    "active": [
+     "2023-2-11"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   },
+   "b": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 350
+   }
+  },
+  "log": [],
+  "errors": []
+ },
+ "inPopover": {
+  "r": {
+   "a": {
+    "s": {
+     "value": "2023-06-20T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-20"
+     ],
+     "focused": null,
+     "hidden": "2023-06-20T13:47:00",
+     "scrollLeft": 0
+    },
+    "dis": [
+     {
+      "role": "datetime-confirm"
+     }
+    ]
+   },
+   "b": {
+    "s": {
+     "value": "2023-06-20T13:47:00",
+     "month": "June 2023",
+     "active": [
+      "2023-6-20"
+     ],
+     "focused": null,
+     "hidden": "2023-06-20T13:47:00",
+     "scrollLeft": 0
+    },
+    "dis": [
+     {
+      "role": "datetime-confirm"
+     },
+     {
+      "role": "datetime-cancel"
+     }
+    ]
+   }
+  },
+  "log": [
+   [
+    856,
+    "ionStyle",
+    "{\"interactive\":true,\"datetime\":true,\"interactive-disabled\":false}",
+    "dt"
+   ],
+   [
+    856,
+    "ionValueChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    856,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    944,
+    "ionChange",
+    "{\"value\":\"2023-06-20T13:47:00\"}",
+    "dt"
+   ],
+   [
+    2570,
+    "ionCancel",
+    "null",
+    "dt"
+   ]
+  ],
+  "errors": []
+ },
+ "unconfirmedInPopover": {
+  "r": {
+   "a": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-22"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 0
+   },
+   "b": {
+    "value": "2023-06-15T13:47:00",
+    "month": "June 2023",
+    "active": [
+     "2023-6-15"
+    ],
+    "focused": null,
+    "hidden": "2023-06-15T13:47:00",
+    "scrollLeft": 250
+   }
+  },
+  "log": [],
+  "errors": []
+ }
+}
