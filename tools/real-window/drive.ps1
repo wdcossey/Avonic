@@ -1865,8 +1865,9 @@ try {
         Key '{ESC}' 600
         Check 'Escape closes the popover' (-not (HourShown '2'))
 
-        # A swipe left on the calendar's middle row moves to August, 50 ms after the scroll rests.
-        $mid = Named $CT::Button 'Wednesday, July 12'
+        # A swipe left on the calendar's middle row moves to August, 50 ms after the scroll rests. It starts at the row's right end, so
+        # that the drag ends inside the window wherever the window is on the screen.
+        $mid = Named $CT::Button 'Saturday, July 15'
         if ($mid) {
             $x, $y = Centre $mid
             TouchDrag $x $y (- (Px 250)) 0 15 16
