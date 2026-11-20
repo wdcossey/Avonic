@@ -2,7 +2,10 @@ using Android.App;
 using Android.Content.PM;
 using Avalonia.Android;
 #if AVONIC_PERF
+using Android.AccessibilityServices;
+using Android.Content;
 using Android.OS;
+using Android.Views.Accessibility;
 #endif
 
 namespace Avonic.Sample.Android;
@@ -35,7 +38,23 @@ public class MainActivity : AvaloniaMainActivity
             SampleShell.PageCostsOnly = only;
         }
 
+        SampleShell.PageCostsPlatform = Accessibility;
         base.OnCreate(savedInstanceState);
+    }
+
+    /// <summary>
+    /// Whether accessibility is on, and which services: with it on, a service's queries of Avalonia's accessibility bridge run on
+    /// the UI thread, between frames, and can leave the app no idle time.
+    /// </summary>
+    private string Accessibility()
+    {
+        if (GetSystemService(Context.AccessibilityService) is not AccessibilityManager manager)
+        {
+            return "accessibility unknown";
+        }
+
+        var services = manager.GetEnabledAccessibilityServiceList(FeedbackFlags.AllMask)?.Select(s => s.Id).ToArray() ?? [];
+        return $"accessibility {(manager.IsEnabled ? "on" : "off")}, touch exploration {(manager.IsTouchExplorationEnabled ? "on" : "off")}, services: {(services.Length == 0 ? "none" : string.Join(" ", services))}";
     }
 #endif
 }

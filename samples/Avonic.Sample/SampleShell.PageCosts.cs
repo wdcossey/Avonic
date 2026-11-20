@@ -38,6 +38,12 @@ public partial class SampleShell
     /// </summary>
     public static string? PageCostsOnly { get; set; } = Environment.GetEnvironmentVariable(PageCostSet.OnlyVariable);
 
+    /// <summary>
+    /// What a head knows of its platform's state that can slow the app, logged at the start and in each round's check: on Android,
+    /// whether accessibility is on and which services are, as Avalonia's accessibility bridge answers them on the UI thread.
+    /// </summary>
+    public static Func<string>? PageCostsPlatform { get; set; }
+
     partial void Reported(string line)
     {
         Write(line);
@@ -70,6 +76,11 @@ public partial class SampleShell
             Write("no page matches");
         }
 
+        if (Platform() is { Length: > 0 } platform)
+        {
+            Write($"platform: {platform}");
+        }
+
         // Past the first frames and the start-up work.
         await Task.Delay(TimeSpan.FromSeconds(3));
         for (var round = 1; round <= PageCostRounds && pages.Count > 0; round++)
@@ -77,7 +88,7 @@ public partial class SampleShell
             foreach (var (title, create) in pages)
             {
                 _pendingReport = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-                Control page;
+                Control? page;
                 try
                 {
                     BeginTiming();
@@ -98,13 +109,27 @@ public partial class SampleShell
 
                 // Let it draw, then back to the list, as a user would go.
                 await Task.Delay(400);
-                if (title == PageCostSet.MonthChangePage)
+                if (title != PageCostSet.MonthChangePage)
                 {
-                    await TimeMonthChanges(page, round);
+                    page = null;
+                    ShowIndex();
+                    await Task.Delay(400);
+                    continue;
                 }
 
+                // The month changes, then what they may have left behind, once their page is gone: a frame loop, the page itself,
+                // or no idle time.
+                var before = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
+                await TimeMonthChanges(page, round);
+                var timed = new WeakReference(page);
+                page = null;
                 ShowIndex();
                 await Task.Delay(400);
+                var after = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
+                foreach (var line in PerfChecks.Lines(MonthChangeLabel, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform()))
+                {
+                    Write(line);
+                }
             }
 
             Write($"round {round} done");
@@ -131,6 +156,18 @@ public partial class SampleShell
         catch (Exception ex)
         {
             Write($"{MonthChangeLabel}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    private static string? Platform()
+    {
+        try
+        {
+            return PageCostsPlatform?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            return $"platform unknown: {ex.GetType().Name}";
         }
     }
 
