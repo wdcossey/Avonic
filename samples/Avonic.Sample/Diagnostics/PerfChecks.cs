@@ -20,28 +20,26 @@ public static class PerfChecks
     public static async Task<double?> BackgroundPostMs(TimeSpan limit)
     {
         var started = Stopwatch.GetTimestamp();
-        var ran = 0L;
-        var posted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        Dispatcher.UIThread.Post(
-            () =>
-            {
-                ran = Stopwatch.GetTimestamp();
-                posted.TrySetResult();
-            },
-            DispatcherPriority.Background);
-        using var cancel = new CancellationTokenSource();
-        var won = await Task.WhenAny(posted.Task, Task.Delay(limit, cancel.Token)) == posted.Task;
-        cancel.Cancel();
-        return won ? Stopwatch.GetElapsedTime(started, ran).TotalMilliseconds : null;
+        try
+        {
+            var ran = await Dispatcher.UIThread.InvokeAsync(Stopwatch.GetTimestamp, DispatcherPriority.Background).GetTask().WaitAsync(limit);
+            return Stopwatch.GetElapsedTime(started, ran).TotalMilliseconds;
+        }
+        catch (TimeoutException)
+        {
+            return null;
+        }
     }
 
-    /// <summary>Whether what <paramref name="page"/> refers to has been collected, after a full collection.</summary>
+    /// <summary>
+    /// Whether what <paramref name="page"/> refers to has been collected, after full collections. A short weak reference is cleared
+    /// once its target can't be reached, before any finalizer runs, so this waits for none, which could need the UI thread.
+    /// </summary>
     public static bool Collected(WeakReference page)
     {
-        for (var i = 0; i < 3 && page.IsAlive; i++)
+        for (var i = 0; i < 2 && page.IsAlive; i++)
         {
             GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
         return !page.IsAlive;
@@ -63,7 +61,7 @@ public static class PerfChecks
 
         if (!collected)
         {
-            yield return $"{label}: round {round}, warning: the timed page is still alive after it was left and a full collection";
+            yield return $"{label}: round {round}, warning: the timed page is still alive after it was left and a full collection: something still holds it";
         }
 
         if (after is not { } a || a > SlowBackground.TotalMilliseconds)

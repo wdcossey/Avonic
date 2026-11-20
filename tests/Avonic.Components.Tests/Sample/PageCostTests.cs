@@ -143,6 +143,9 @@ public partial class PageCostTests
 
         Assert.True(run.IsFaulted);
         Assert.IsType<TimeoutException>(run.Exception!.InnerException);
+
+        // The frame it asked for never came, and is off the count: a later check doesn't take it for a frame loop.
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });
 
     // ── What a timing leaves behind (#248: on the Pixel, every page after the first timing was 5 to 10 times slower) ──────────
@@ -205,13 +208,14 @@ public partial class PageCostTests
             Dispatcher.UIThread.RunJobs();
         }
 
-        var left = Stopwatch.StartNew();
+        var left = clock.Now;
         scene.Window.Content = null;
         Drive(clock, run);
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         Dispatcher.UIThread.RunJobs();
 
-        Assert.True(left.Elapsed < TimeSpan.FromSeconds(1), $"the change went on for {left.Elapsed.TotalMilliseconds:0} ms after its page was left");
+        // Drive draws a frame each 16 ms of the test clock: the change ends within the first, not at its window's end.
+        Assert.True(clock.Now - left <= TimeSpan.FromMilliseconds(32), $"the change went on for {(clock.Now - left).TotalMilliseconds:0} ms of frames after its page was left");
         Assert.True(run.IsFaulted);
         Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });

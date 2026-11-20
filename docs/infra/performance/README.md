@@ -199,9 +199,10 @@ adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avo
 
 On `datetime-x1`, after its line, each round changes month 10 times forward and 10 back, as a tap on the calendar's next
 and previous month buttons does (`Diagnostics/MonthChangeTiming.cs`). It finds the buttons by their automation names,
-`Next month` and `Previous month`, and raises the routed `Click` event their type registers, which a tap ends in, so a new
-design of the calendar is timed the same way as long as it keeps those names. It makes no automation peer: a peer stays on its
-control, and on Android it's what Avalonia's accessibility bridge works from. Each change is a line, and each round ends with
+`Next month` and `Previous month`, and raises the routed `Click` event their type, or the nearest base type, registers, which
+a tap ends in, so a new design of the calendar is timed the same way as long as it keeps those names and changes month on
+`Click` (not on a `Command`, which raising the event doesn't run). It makes no automation peer: a peer stays on its control, and
+on Android it's what Avalonia's accessibility bridge works from. Each change is a line, and each round ends with
 a summary:
 
 ```

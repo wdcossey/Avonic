@@ -28,7 +28,8 @@ namespace Avonic.Sample.Diagnostics;
 /// <para>
 /// It leaves nothing behind: no automation peer (a peer stays on its control, and on Android it's what Avalonia's accessibility
 /// bridge works from), no frame asked for once a change is over (<see cref="PendingFrames"/>), no timer, and no reference to the
-/// calendar once it has run. A change whose calendar leaves the tree ends at once. docs/infra/performance/README.md, "Page costs
+/// calendar once it has run. Raising the event, not a tap, it doesn't run a <c>Command</c> on the button or what a native button
+/// does around it (<c>NativeButton.Click</c>): a calendar that changes month through those isn't timed. A change whose calendar leaves the tree ends at once. docs/infra/performance/README.md, "Page costs
 /// on a device".
 /// </para>
 /// </remarks>
@@ -117,8 +118,7 @@ public sealed class MonthChangeTiming
         var top = TopLevel.GetTopLevel(root) ?? throw new InvalidOperationException("The calendar isn't in a top level.");
         var button = root.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => AutomationProperties.GetName(c) == name)
                      ?? throw new InvalidOperationException($"No control named \"{name}\" to automation.");
-        var click = RoutedEventRegistry.Instance.GetRegistered(button.GetType()).FirstOrDefault(e => e.Name == "Click")
-                    ?? throw new InvalidOperationException($"\"{name}\" has no Click event.");
+        var click = ClickEvent(button.GetType()) ?? throw new InvalidOperationException($"\"{name}\" has no Click event.");
         if (!button.IsEffectivelyEnabled)
         {
             throw new InvalidOperationException($"\"{name}\" is disabled.");
@@ -135,8 +135,8 @@ public sealed class MonthChangeTiming
         var lastLook = 0L;
         var start = 0L;
         var over = false;
+        var asked = 0;
         var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var stall = new CancellationTokenSource();
 
         // A calendar that leaves the tree ends its change at once, rather than have frames drawn for it until the window is over.
         void OnDetached(object? sender, VisualTreeAttachmentEventArgs e) =>
@@ -144,14 +144,22 @@ public sealed class MonthChangeTiming
 
         void Ask()
         {
+            asked++;
             Interlocked.Increment(ref _pendingFrames);
             top.RequestAnimationFrame(OnFrame);
         }
 
         void OnFrame(TimeSpan _)
         {
+            // A callback that comes after its change was over was taken off the count then.
+            if (over)
+            {
+                return;
+            }
+
+            asked--;
             Interlocked.Decrement(ref _pendingFrames);
-            if (over || done.Task.IsCompleted)
+            if (done.Task.IsCompleted)
             {
                 return;
             }
@@ -207,18 +215,22 @@ public sealed class MonthChangeTiming
 
             // Frames stop while the display is off or the app is in the background: say so, rather than wait for ever.
             var limit = _maxWindow + _maxWindow;
-            if (await Task.WhenAny(done.Task, Task.Delay(limit, stall.Token)) != done.Task)
+            try
+            {
+                await done.Task.WaitAsync(limit);
+            }
+            catch (TimeoutException)
             {
                 throw new TimeoutException($"No frame for {limit.TotalSeconds:0.#} s after \"{name}\": is the display off, or the app in the background?");
             }
-
-            await done.Task;
         }
         finally
         {
-            // However it ended, nothing of it goes on: a frame callback still asked for returns at once, and asks for no other.
+            // However it ended, nothing of it goes on: a frame callback still asked for (one that may never come, when frames
+            // have stopped) is taken off the count now, and returns at once if it comes, asking for no other.
             over = true;
-            stall.Cancel();
+            Interlocked.Add(ref _pendingFrames, -asked);
+            asked = 0;
             root.DetachedFromVisualTree -= OnDetached;
         }
 
@@ -237,6 +249,23 @@ public sealed class MonthChangeTiming
             drawn == 0 ? null : Stopwatch.GetElapsedTime(start, drawn).TotalMilliseconds,
             headingAt == 0 ? null : Stopwatch.GetElapsedTime(start, headingAt).TotalMilliseconds,
             FrameGaps.Of(gaps));
+    }
+
+    /// <summary>
+    /// The routed <c>Click</c> event of the button's type or the nearest base type that registers one: Avalonia's registry lists an
+    /// event under the type that registered it only.
+    /// </summary>
+    private static RoutedEvent? ClickEvent(Type? type)
+    {
+        for (; type is not null; type = type.BaseType)
+        {
+            if (RoutedEventRegistry.Instance.GetRegistered(type).FirstOrDefault(e => e.Name == "Click") is { } click)
+            {
+                return click;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>The month the heading shows, found again when asked to or when the one found last has gone.</summary>

@@ -35,7 +35,9 @@ function load(path) {
   let start = '';
   for (const text of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
     if (text.includes('start: ')) start = text.slice(text.indexOf('start: ') + 7);
-    if (/, (check|warning): |^(?:AVONIC-PERF )?platform: /.test(text)) checks.push(text.replace(/^AVONIC-PERF /, ''));
+    // After the prefix, wherever it is: a log captured without logcat's "-v raw" has a date, a pid and a tag before it.
+    const body = text.includes('AVONIC-PERF ') ? text.slice(text.indexOf('AVONIC-PERF ') + 12) : text;
+    if (/, (check|warning): |^platform: /.test(body)) checks.push(body);
     const c = change.exec(text);
     if (c) {
       if (!changes.has(c[1])) changes.set(c[1], []);

@@ -130,6 +130,9 @@ public partial class SampleShell
                 {
                     Write(line);
                 }
+
+                // Past the collections, before the next page's timing.
+                await Task.Delay(400);
             }
 
             Write($"round {round} done");

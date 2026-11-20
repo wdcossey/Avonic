@@ -44,11 +44,12 @@ public class MainActivity : AvaloniaMainActivity
 
     /// <summary>
     /// Whether accessibility is on, and which services: with it on, a service's queries of Avalonia's accessibility bridge run on
-    /// the UI thread, between frames, and can leave the app no idle time.
+    /// the UI thread, between frames, and can leave the app no idle time. From the application's context, so that the static it's
+    /// kept in holds no activity.
     /// </summary>
-    private string Accessibility()
+    private static string Accessibility()
     {
-        if (GetSystemService(Context.AccessibilityService) is not AccessibilityManager manager)
+        if (Application.Context.GetSystemService(Context.AccessibilityService) is not AccessibilityManager manager)
         {
             return "accessibility unknown";
         }
