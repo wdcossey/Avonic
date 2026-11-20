@@ -12,7 +12,7 @@
 // second table: per round, and over the later rounds, the median and the most of each change's time to its first frame drawn, to
 // the heading showing the new month, and of its longest gap between frames; and the gaps over 16.7 and 33 ms, per round. The
 // rounds' checks after the month changes ("datetime-month: round N, check: ..." and its warnings, PerfChecks.cs) are listed after,
-// with the platform line and any note of what took a page away (a back request, the activity), so that a run that measured
+// with the platform line, DeviceProbe's busy windows ("...: busy: ..."), and any note of what took a page away (a back request, the activity), so that a run that measured
 // something it left behind, or lost its page, says so.
 'use strict';
 const fs = require('fs');
@@ -38,7 +38,7 @@ function load(path) {
     if (text.includes('start: ')) start = text.slice(text.indexOf('start: ') + 7);
     // After the prefix, wherever it is: a log captured without logcat's "-v raw" has a date, a pid and a tag before it.
     const body = text.includes('AVONIC-PERF ') ? text.slice(text.indexOf('AVONIC-PERF ') + 12) : text;
-    if (/, (check|warning): |^(platform|note): /.test(body)) checks.push(body);
+    if (/, (check|warning): |: busy: |^(platform|note): /.test(body)) checks.push(body);
     const c = change.exec(text);
     if (c) {
       if (!changes.has(c[1])) changes.set(c[1], []);

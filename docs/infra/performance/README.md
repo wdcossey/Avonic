@@ -265,6 +265,29 @@ rounds now write a `note:` line when a back request or the back button takes the
 `table.js` lists it, in bold, with the checks. The single grid's change waits on no timer, only on frames, so it changes month with
 no idle time at all (the same test).
 
+### Device diagnostics
+
+After v2 itself (4f2ff30) showed it on the Pixel too, every page 7 to 10 times slower and the UI thread near 100% busy after
+round 1's month timing, with the render thread idle, the rounds add what tells the causes apart (`Diagnostics/DeviceProbe.cs`,
+#258), cheap enough for the device:
+
+- **On each page's line**, after its own figures: `gc 3/1/0, gc pause 12.3 ms, heap 85.2 MB, cpu 210 ms, ui thread 190 ms, passes 4,
+  tree 1234, peers 0`: collections of each generation and their pauses during the open, the heap after it, the process's and the UI
+  thread's CPU time (the thread's from `/proc/thread-self/stat`, `n/a` where there's none), the top level's layout passes, and the
+  visuals under the top level with how many have an automation peer already. `table.js` reads the line as before.
+- **A busy window** of 2 s after each page is left, and after each month timing's checks: `...: busy: 2.0 s, cpu 1830 ms, ui thread
+  1790 ms, passes 0, frames 120 longest 16.9 ms, default post 20/20 median 0.3 max 1.2 ms, background post 20/20 median 0.5 max 3.1
+  ms, gc 0/0/0, gc pause 0.0 ms, heap 85.2 MB, tree 312, peers 0, left page gone`, with the list on screen and nothing asked of the
+  app: its layout passes, its frames (asked for each frame, so a held thread shows as a long gap), how late a `Default` and a
+  `Background` post ran (one of each every 100 ms), the collector, the CPU, the tree, and the page just left: gone, or alive, in a
+  top level or not, with its visuals and peers, and how often its calendar's scroller changed. `table.js` lists these with the checks.
+
+Read them so: UI-thread CPU with no passes and no collections in the window is work above `Background` that isn't layout (a loop);
+passes with nothing on screen changing is layout invalidated again and again; pauses and a heap that grows from round to round are
+the collector; a tree that grows on the list, or a left page still in a top level, is something left behind; peers where there were
+none is Avalonia's accessibility bridge at work. Headless, 20 scrolled month changes leave nothing of this: the busy window after
+them is idle (16 ms of CPU, no passes, no collections) and the next page opens no slower.
+
 ### Keeping a run
 
 Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and

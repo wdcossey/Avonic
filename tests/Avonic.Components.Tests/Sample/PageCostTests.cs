@@ -279,6 +279,53 @@ public partial class PageCostTests
         return new WeakReference(page);
     }
 
+    // DeviceProbe (#258's device diagnostics): its busy window over a page just left, and what it says of that page; it keeps none.
+    [AvaloniaFact]
+    public void The_Busy_Probe_Reports_The_Ui_Thread_And_The_Page_Left_And_Keeps_Neither() => Run((scene, clock) =>
+    {
+        var left = OpenAndLeave(scene, clock);
+        var top = TopLevel.GetTopLevel(scene.Window);
+        Settle(clock, 100);
+
+        var busy = DeviceProbe.Busy("datetime-x1: round 1, after", top, left);
+        var until = DateTime.UtcNow.AddSeconds(30);
+        while (!busy.IsCompleted && DateTime.UtcNow < until)
+        {
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(5);
+        }
+
+        Assert.True(busy.IsCompletedSuccessfully);
+        var line = busy.Result;
+        Assert.StartsWith("datetime-x1: round 1, after: busy: ", line, StringComparison.Ordinal);
+        Assert.Matches(@"passes \d+, frames \d+ longest [\d.]+ ms, default post \d+/\d+ (median|none)", line);
+        Assert.Matches(@"background post \d+/\d+ .*gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap [\d.]+ MB, tree \d+, peers 0, left page ", line);
+        // Headless keeps a page until a collection: here it was alive, out of the tree, with its calendar's scroller watched.
+        Assert.Contains("left page alive, out of the tree", line, StringComparison.Ordinal);
+        Assert.Contains("its scrollers changed 0 times", line, StringComparison.Ordinal);
+
+        for (var i = 0; i < 3 && left.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.False(left.IsAlive);
+        Assert.Matches(@", gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap [\d.]+ MB, cpu \d+ ms, ui thread (\d+ ms|n/a), passes 2, tree \d+, peers 0$",
+            DeviceProbe.PageExtras(DeviceProbe.Snapshot.Take(), 2, top));
+    });
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static WeakReference OpenAndLeave(Scene scene, TestClock clock)
+    {
+        var page = new DatetimeCostView(1);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        scene.Window.Content = null;
+        return new WeakReference(page);
+    }
+
     // The page left in the middle of a change: the change ends at once, rather than keep the app drawing until its window is over.
     [AvaloniaFact]
     public void A_Page_Left_During_A_Change_Ends_It_At_Once_And_No_Frame_Is_Asked_For_After() => Run((scene, clock) =>
@@ -430,7 +477,8 @@ public partial class PageCostTests
         string[] Run(double longest) =>
         [
             "AVONIC-PERF start: Test, Arm64, 9 cores, .NET",
-            "AVONIC-PERF " + page,
+            "AVONIC-PERF " + page + ", gc 1/0/0, gc pause 1.2 ms, heap 50.0 MB, cpu 100 ms, ui thread n/a, passes 3, tree 700, peers 0",
+            "AVONIC-PERF datetime-x1: round 1, after: busy: 2.0 s, cpu 40 ms, ui thread n/a, passes 0, frames 120 longest 17.0 ms, default post 20/20 median 0.1 max 0.5 ms, background post 20/20 median 0.2 max 0.9 ms, gc 0/0/0, gc pause 0.0 ms, heap 50.0 MB, tree 300, peers 0, left page gone",
             .. Enumerable.Range(1, 2).SelectMany(round => new[]
             {
                 "AVONIC-PERF " + new MonthChange(true, 1, "June 2023", "July 2023", 20, 400, FrameGaps.Of([10, longest, 8])).Line("datetime-month", round),
@@ -462,6 +510,9 @@ public partial class PageCostTests
             Assert.Contains("- **datetime-month: round 2, warning: a Background post waited 900.0 ms", one, StringComparison.Ordinal);
             Assert.Contains("| Changes | 2 | 2 | 2 |", one, StringComparison.Ordinal);
             Assert.Contains("after: checks", two, StringComparison.Ordinal);
+
+            // DeviceProbe's busy line is listed with the checks; its figures on the page line don't change the table.
+            Assert.Contains("- datetime-x1: round 1, after: busy: 2.0 s, cpu 40 ms", one, StringComparison.Ordinal);
         }
         finally
         {

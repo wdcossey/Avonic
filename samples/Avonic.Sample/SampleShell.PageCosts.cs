@@ -31,6 +31,10 @@ public partial class SampleShell
     private static bool _pageCostsRunning;
     private TaskCompletionSource<string>? _pendingReport;
 
+    // The open's counters, for DeviceProbe's figures on its line.
+    private DeviceProbe.Snapshot _openBefore;
+    private DeviceProbe.LayoutPasses? _openPasses;
+
     /// <summary>
     /// Which pages the rounds open (<see cref="PageCostSet.Select"/>): <c>AVONIC_PERF_ONLY</c>, or what an Android head sets from
     /// its intent before the shell starts. Null or empty is every page.
@@ -45,6 +49,13 @@ public partial class SampleShell
 
     partial void Reported(string line)
     {
+        if (_openPasses is { } passes)
+        {
+            _openPasses = null;
+            passes.Dispose();
+            line += DeviceProbe.PageExtras(_openBefore, passes.Count, TopLevel.GetTopLevel(this));
+        }
+
         Write(line);
         _pendingReport?.TrySetResult(line);
     }
@@ -124,6 +135,9 @@ public partial class SampleShell
                 Control? page;
                 try
                 {
+                    _openPasses?.Dispose();
+                    _openPasses = new DeviceProbe.LayoutPasses(TopLevel.GetTopLevel(this));
+                    _openBefore = DeviceProbe.Snapshot.Take();
                     BeginTiming();
                     page = create();
                     ShowPage(title, page);
@@ -144,9 +158,11 @@ public partial class SampleShell
                 await Task.Delay(400);
                 if (PageCostSet.MonthChangeLabelOf(title) is not { } label)
                 {
+                    var left = new WeakReference(page);
                     page = null;
                     ShowIndex();
                     await Task.Delay(400);
+                    Write(await DeviceProbe.Busy($"{title}: round {round}, after", TopLevel.GetTopLevel(this), left));
                     continue;
                 }
 
@@ -163,6 +179,8 @@ public partial class SampleShell
                 {
                     Write(line);
                 }
+
+                Write(await DeviceProbe.Busy($"{label}: round {round}, after", TopLevel.GetTopLevel(this), timed));
 
                 // Past the collections, before the next page's timing.
                 await Task.Delay(400);
