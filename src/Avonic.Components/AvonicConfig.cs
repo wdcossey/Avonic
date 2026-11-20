@@ -161,6 +161,13 @@ public static class AvonicConfig
     /// </remarks>
     public static bool SwipeBackEnabled { get; set; }
 
+    /// <summary>
+    /// Ionic's <c>navAnimation</c> config: the page transition of an <see cref="AvonicNav"/> whose call and own
+    /// <see cref="AvonicNav.Animation"/> give none. Null is md's.
+    /// </summary>
+    /// <remarks>Read at each transition, as Ionic reads it in <c>transition()</c>.</remarks>
+    public static Animation.AnimationBuilder? NavAnimation { get; set; }
+
     // ── Avonic's own: no Ionic config has these ─────────────────────────────────────────────────
 
     /// <summary>

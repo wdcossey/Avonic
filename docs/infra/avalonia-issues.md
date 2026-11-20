@@ -91,7 +91,8 @@ the box isn't focused. Bringing the caret into view only while focused would mat
 white child over a grey sibling at 0.38 read 233, where CSS's `opacity`, which fades the group as one picture, gives 255.
 `AvonicToggle`'s disabled look fades with an `OpacityMask` of a solid brush at that alpha instead, which is a group. Found by
 `ion-toggle` (#21, PR #116). Other controls with overlapping parts may need the same: `AvonicTextarea`, `AvonicSearchbar` and
-`AvonicInput` now do (#134, #138, #141).
+`AvonicInput` now do (#134, #138, #141). `AvonicNav`'s pages fade in a transition as a group too: an animation's `opacity` on an element with
+`AnimationGroupOpacity` set is an `OpacityMask` (#130).
 
 ## `AutomationProperties.IsRequiredForForm` has nothing that reads it
 

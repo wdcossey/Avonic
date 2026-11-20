@@ -34,8 +34,6 @@ public class AvonicNavLink : ContentControl
     public static readonly StyledProperty<NavLinkRouterDirection> RouterDirectionProperty =
         AvaloniaProperty.Register<AvonicNavLink, NavLinkRouterDirection>(nameof(RouterDirection), NavLinkRouterDirection.Forward);
 
-    private readonly NativeButton _native;
-
     static AvonicNavLink()
     {
         // The host has no overflow rule.
@@ -44,7 +42,7 @@ public class AvonicNavLink : ContentControl
 
     public AvonicNavLink()
     {
-        _native = new NativeButton(this, _ => _ = OnClick(), () => false, () => { }) { StockButtonsClick = true };
+        _ = new NativeButton(this, _ => _ = OnClick(), () => false, () => { }) { StockButtonsClick = true };
     }
 
     public object? Component

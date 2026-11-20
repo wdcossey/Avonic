@@ -21,7 +21,6 @@ public partial class NavPage : UserControl
             _timer.Restart();
             _readyMs = 0;
         };
-        NavSampleView.WillEnter = _ => _readyMs = _timer.Elapsed.TotalMilliseconds;
         Nav.IonNavDidChange += (_, _) => UpdateStatus();
 
         PopToRootButton.Click += (_, _) => _ = Nav.PopToRoot();
@@ -29,6 +28,24 @@ public partial class NavPage : UserControl
         AnimatedToggle.IonChange += (_, e) => Nav.Animated = e.Checked;
         SwipeToggle.IonChange += (_, e) => Nav.NavSwipeGesture = e.Checked;
     }
+
+    // The views report their will-enter through a static hook, held only while this page is shown, so a closed page isn't kept.
+    protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        NavSampleView.WillEnter = OnWillEnter;
+    }
+
+    protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        if (NavSampleView.WillEnter == OnWillEnter)
+        {
+            NavSampleView.WillEnter = null;
+        }
+    }
+
+    private void OnWillEnter(NavSampleView view) => _readyMs = _timer.Elapsed.TotalMilliseconds;
 
     private void UpdateStatus()
     {

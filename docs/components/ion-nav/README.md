@@ -81,7 +81,7 @@ pages above it, with its state and scroll position, and removed from the nav whe
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
 | [x] | `animated` | `Animated` (`bool`, true) | Off: the pages change at the next frame with their events, no animation. `AvonicConfig.Animated` off too |
-| [x] | `animation` | `Animation` (`AnimationBuilder?`) | Given the nav and a `NavTransitionOptions` |
+| [x] | `animation` | `Animation` (`AnimationBuilder?`) | Given the nav and a `NavTransitionOptions`. Ionic's `navAnimation` config is `AvonicConfig.NavAnimation`, used when the call and the nav give none |
 | [x] | `root` | `Root` (`object?`) | A page form; set unanimated at the first attach, and again at each change |
 | [x] | `rootParams` | `RootParams` | `Root`'s props; a change of its own does nothing |
 | [x] | `swipeGesture` | `NavSwipeGesture` (`bool?`) | Named as `SegmentSwipeGesture` is. Null takes `AvonicConfig.SwipeBackEnabled` (false) at the first attach. See [Swipe back](#swipe-back) |
@@ -153,10 +153,14 @@ Ionic bugs Avonic doesn't copy (ADR 0005), each in [`docs/infra/ionic-issues.md`
 - A bare page form in `InsertPages` or `SetPages` works; Ionic throws a `TypeError` on a string there.
 - Calls dropped behind a failure complete false; Ionic's never settle.
 - The stack is kept when the nav is detached and attached again; Ionic empties it, so a nav in an inline modal shows nothing.
+- A call from an `IonNavWillChange` handler waits its turn (or is skipped with `SkipIfBusy`); in Ionic it runs alongside the
+  transition that raised the event.
 
 ## Known gaps
 
 - **Measured headless and on the desktop only.** The phone's build and layout cost (#248) isn't measured here; the nav waits for
   the page's layout before it starts the animation, as Ionic does, so a slow page starts late rather than jumping.
+- A `Control` page that's already in the tree (still in the stack, or in another panel) fails the call: a DOM element would move,
+  and an Avalonia control has one parent, so it has to leave the other first.
 - `focusManagerPriority`, Ionic's experimental focus manager, isn't built: it's off by default, and then does nothing.
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-nav` section, not run here.

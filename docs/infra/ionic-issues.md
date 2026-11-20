@@ -306,3 +306,12 @@ modal's content only when it's presented don't meet it; core's inline modal does
 **Avonic** keeps the stack across a detach: Avalonia moves controls routinely (`InlinePlacement` moves an inline overlay at every
 present) and has no "destroyed" (`N20_A_nav_moved_to_another_parent_keeps_its_stack`,
 `N20_A_nav_in_an_inline_modal_keeps_its_stack_through_present_and_dismiss`). Sure: measured.
+
+## `ion-nav`: a call from an `ionNavWillChange` handler runs alongside the transition that raised it
+
+**Read from `nav.js` in Ionic 9.0.11 (#130), not run.** `runTransition` emits `ionNavWillChange` and only then sets
+`isTransitioning = true`. A handler that calls `push()` (even with `skipIfBusy`) finds the nav not busy, so `nextTrns` starts a second
+`runTransition` while the first is still on its way: both read the active view and change the stack, and the first's end clears
+`isTransitioning` while the second runs. A handler that pushes each time recurses. **Avonic** marks the nav busy before the event, so
+such a call is skipped (`skipIfBusy`) or queued behind
+(`AvonicNavTests.N10_A_call_from_an_IonNavWillChange_handler_waits_its_turn`). Fairly sure, from the code.

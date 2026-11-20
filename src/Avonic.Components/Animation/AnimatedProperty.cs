@@ -75,12 +75,22 @@ internal abstract class AnimatedProperty
         internal override object Interpolate(object from, object to, double progress) =>
             Math.Clamp((double)from + ((double)to - (double)from) * progress, 0, 1);
 
-        internal override object Underlying(Visual element) => element.GetValue(Visual.OpacityProperty);
+        // In a group, what the element shows is its opacity times its mask's.
+        internal override object Underlying(Visual element) =>
+            AnimationGroupOpacity.GetIsEnabled(element) ? AnimationGroupOpacity.Of(element) : element.GetValue(Visual.OpacityProperty);
 
-        internal override IDisposable Bind(Visual element, IObservable<object?> values) =>
-            AnimationGroupOpacity.GetIsEnabled(element)
-                ? element.Bind(Visual.OpacityMaskProperty, new AnimationGroupOpacity.Masks(values), BindingPriority.Animation)
-                : element.Bind(Visual.OpacityProperty, values, BindingPriority.Animation);
+        internal override IDisposable Bind(Visual element, IObservable<object?> values)
+        {
+            if (!AnimationGroupOpacity.GetIsEnabled(element))
+            {
+                return element.Bind(Visual.OpacityProperty, values, BindingPriority.Animation);
+            }
+
+            // CSS's animated opacity replaces the element's own, so its Opacity is 1 while the mask carries the value.
+            var mask = element.Bind(Visual.OpacityMaskProperty, new AnimationGroupOpacity.Masks(values), BindingPriority.Animation);
+            var opacity = element.Bind(Visual.OpacityProperty, new AnimationGroupOpacity.Ones(values), BindingPriority.Animation);
+            return new AnimationGroupOpacity.Both(mask, opacity);
+        }
 
         internal override void SetStyle(Visual element, object value)
         {
@@ -329,6 +339,26 @@ internal static class AnimationGroupOpacity
 
     /// <summary>The mask for <paramref name="opacity"/>: none at 1, so that a still page draws as it does with no animation.</summary>
     internal static IBrush? Mask(double opacity) => opacity >= 1 ? null : new ImmutableSolidColorBrush(Colors.Black, opacity);
+
+    /// <summary>What an element in a group shows: its opacity times its mask's alpha.</summary>
+    internal static double Of(Visual element) =>
+        element.Opacity * (element.OpacityMask is ISolidColorBrush { Color: var color } brush ? brush.Opacity * color.A / 255.0 : 1);
+
+    /// <summary>1 for each of an animation's values, so the element's own opacity doesn't multiply the mask's.</summary>
+    internal sealed class Ones(IObservable<object?> opacities) : IObservable<object?>
+    {
+        public IDisposable Subscribe(IObserver<object?> observer) =>
+            opacities.Subscribe(new AnonymousObserver<object?>(v => observer.OnNext(v is double ? 1.0 : v), observer.OnError, observer.OnCompleted));
+    }
+
+    internal sealed class Both(IDisposable first, IDisposable second) : IDisposable
+    {
+        public void Dispose()
+        {
+            first.Dispose();
+            second.Dispose();
+        }
+    }
 
     /// <summary>An animation's opacities, as masks.</summary>
     internal sealed class Masks(IObservable<object?> opacities) : IObservable<object?>

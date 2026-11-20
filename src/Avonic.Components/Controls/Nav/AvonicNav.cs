@@ -83,6 +83,13 @@ public partial class AvonicNav : TemplatedControl
         ClipToBoundsProperty.OverrideDefaultValue<AvonicNav>(false);
     }
 
+    public AvonicNav()
+    {
+        // Ionic's componentWillLoad reads the swipe's config; the reader is made here, before any style, as ConfigOnLoad asks.
+        _swipeConfig = ConfigOnLoad<bool?>.IfUnset(this, NavSwipeGestureProperty);
+        Bind(IsHitTestVisibleProperty, _swipeClicksBlocked, Avalonia.Data.BindingPriority.Animation);
+    }
+
     public bool Animated
     {
         get => GetValue(AnimatedProperty);
@@ -309,7 +316,10 @@ public partial class AvonicNav : TemplatedControl
             return;
         }
 
-        _ = SetRoot(Root, RootParams);
+        // Nobody awaits it, so a root that can't be built is logged, as Ionic's rejection shows as an unhandled one.
+        SetRoot(Root, RootParams).ContinueWith(
+            task => Logger.TryGet(LogEventLevel.Error, "Avonic")?.Log(this, "[ion-nav] The root could not be set: {0}", task.Exception!.InnerException!.Message),
+            CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
     }
 
     internal void AddPage(Control page)

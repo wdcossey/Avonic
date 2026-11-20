@@ -83,8 +83,10 @@ public partial class AvonicNav
     {
         try
         {
-            RaiseEvent(new RoutedEventArgs(IonNavWillChangeEvent, this));
+            // Busy before the event, unlike Ionic, whose handler could start a second transition alongside this one
+            // (docs/infra/ionic-issues.md).
             _isTransitioning = true;
+            RaiseEvent(new RoutedEventArgs(IonNavWillChangeEvent, this));
             PrepareTI(ti);
             var leavingView = GetActive();
             var enteringView = GetEnteringView(ti, leavingView);

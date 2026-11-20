@@ -121,7 +121,7 @@ public class AvonicNavCaptureTests
             Advance(clock, start + 32 + t);
             Save(scene, $"avonic-nav-push-{t:000}ms.png");
             Advance(clock, start + 600);
-            Assert.True(push.Result);
+            Assert.True(AvonicNavTests.Ended(push));
         }
 
         Save(scene, "avonic-nav-pushed.png");
@@ -140,7 +140,7 @@ public class AvonicNavCaptureTests
             Advance(clock, start + 16 + t);
             Save(scene, $"avonic-nav-pop-{t:000}ms.png");
             Advance(clock, start + 600);
-            Assert.True(pop.Result);
+            Assert.True(AvonicNavTests.Ended(pop));
         }
     });
 }

@@ -39,7 +39,7 @@ public partial class AvonicNav
 
         var animated = opts.Animated ?? (Animated && AvonicConfig.Animated);
         var showGoBack = opts.ShowGoBack ?? CanGoBack(enteringView);
-        var builder = opts.AnimationBuilder ?? Animation;
+        var builder = opts.AnimationBuilder ?? Animation ?? AvonicConfig.NavAnimation;
         var hasCompleted = await PageTransition(
             enteringView, leavingView, opts.Direction ?? NavDirection.Forward, animated, opts.Duration, showGoBack, builder, opts,
             progressCallback);
@@ -66,11 +66,13 @@ public partial class AvonicNav
         ViewController enteringView, ViewController? leavingView, NavDirection direction, bool animated, double? duration,
         bool showGoBack, AnimationBuilder? builder, NavOptions opts, Action<AvonicAnimation?>? progressCallback)
     {
-        var enteringEl = enteringView.Element!;
+        var enteringEl = enteringView.Element
+            ?? throw new InvalidOperationException("The entering view has no page.");
         var leavingEl = leavingView?.Element;
-        BeforeTransition(enteringView, leavingView, direction, showGoBack);
         try
         {
+            BeforeTransition(enteringView, leavingView, direction, showGoBack);
+
             // getAnimationBuilder: none without a leaving page, with animations off, or a duration of 0.
             var animationBuilder = leavingEl is null || !animated || duration == 0 ? null : builder ?? MdTransitionAnimation;
             if (animationBuilder is null)

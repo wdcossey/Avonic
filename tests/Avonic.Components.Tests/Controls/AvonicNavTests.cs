@@ -186,6 +186,13 @@ public class AvonicNavTests
     /// <summary>The page's opacity as a group: its own, times its mask's, which a transition's opacity is.</summary>
     internal static double GroupOpacity(Visual visual) => visual.Opacity * ((visual.OpacityMask as ISolidColorBrush)?.Opacity ?? 1);
 
+    /// <summary>A task's result, once it has ended: a broken nav fails the test rather than hang it on <c>.Result</c>.</summary>
+    internal static bool Ended(Task<bool> task)
+    {
+        Assert.True(task.IsCompletedSuccessfully, $"the call hasn't ended successfully: {task.Status}");
+        return task.Result;
+    }
+
     internal static double TranslateY(Visual visual) => visual.RenderTransform?.Value.M32 ?? 0;
 
     internal static bool CanGoBackClass(Control page) => page.Classes.Contains(AvonicNav.CanGoBackPseudoClass);
@@ -228,7 +235,7 @@ public class AvonicNavTests
 
         stage.Attach();
         stage.After(600);
-        Assert.True(push.Result);
+        Assert.True(Ended(push));
         Assert.Equal(["one", "two"], Names(stage.Nav));
         Assert.Equal("ionNavWillChange@100", stage.Log[0]);
         Assert.Equal("willEnter one@116", stage.Log[1]);
@@ -310,7 +317,7 @@ public class AvonicNavTests
              "didEnter two@1320", "didLeave one@1320", "ionNavDidChange@1320"],
             stage.Log);
         Assert.True(push.IsCompletedSuccessfully);
-        Assert.True(push.Result);
+        Assert.True(Ended(push));
         Assert.Equal(1, GroupOpacity(two));
         Assert.Null(two.OpacityMask);
         Assert.Null(two.RenderTransform);
@@ -372,7 +379,7 @@ public class AvonicNavTests
             ["ionNavWillChange@2000", "willLeave two@2000", "willEnter one@2000",
              "didEnter one@2224", "didLeave two@2224", "willUnload two@2224", "ionNavDidChange@2224"],
             stage.Log);
-        Assert.True(pop.Result);
+        Assert.True(Ended(pop));
         Assert.Null(two.Parent);
         Assert.Null(two.GetVisualParent());
         Assert.Equal(1, stage.Nav.GetLength());
@@ -450,15 +457,15 @@ public class AvonicNavTests
         stage.After(50);
         var c = stage.Nav.Push(new TestPage("four"), opts: new NavOptions { SkipIfBusy = true });
         Assert.True(c.IsCompletedSuccessfully);
-        Assert.False(c.Result);
+        Assert.False(Ended(c));
 
         stage.At(600 + PushDone);
-        Assert.True(a.Result);
+        Assert.True(Ended(a));
         Assert.False(b.IsCompleted);
         Assert.Equal(["ionNavWillChange@600", "willLeave one@616", "willEnter two@616", "didEnter two@920", "didLeave one@920",
                       "ionNavDidChange@920", "ionNavWillChange@920"], stage.Log.Take(7));
         stage.After(600);
-        Assert.True(b.Result);
+        Assert.True(Ended(b));
         Assert.Equal(3, stage.Nav.GetLength());
         Assert.Equal("three", stage.Nav.GetActive()!.Element!.Name);
     }
@@ -508,12 +515,12 @@ public class AvonicNavTests
         var pushB = stage.Nav.Push(new TestPage("three"), done: (completed, _, _, _, _, error) => dropped.Add($"{completed} {error}"));
         stage.After(2000);
 
-        Assert.True(pushA.Result);
-        Assert.True(pop1.Result);
+        Assert.True(Ended(pushA));
+        Assert.True(Ended(pop1));
         Assert.True(pop2.IsFaulted);
         // Ionic leaves this one pending for ever (ref/extra.txt X1b): it's dropped, and completes false.
         Assert.True(pushB.IsCompletedSuccessfully);
-        Assert.False(pushB.Result);
+        Assert.False(Ended(pushB));
         Assert.Equal(["False "], dropped);
         Assert.Equal(1, stage.Nav.GetLength());
         Assert.Equal("one", stage.Nav.GetActive()!.Element!.Name);
@@ -537,7 +544,7 @@ public class AvonicNavTests
             stage.Log);
         Assert.Null(two.Parent);
         stage.After(600);
-        Assert.True(pop.Result);
+        Assert.True(Ended(pop));
         Assert.Equal(1, stage.Nav.GetLength());
     }
 
@@ -555,7 +562,7 @@ public class AvonicNavTests
         Assert.Equal(
             ["ionNavWillChange@1800", "willLeave two@1800", "didLeave two@1800", "willUnload two@1800", "ionNavDidChange@1800"],
             stage.Log);
-        Assert.True(remove.Result);
+        Assert.True(Ended(remove));
         Assert.Equal(["one", "three"], Names(stage.Nav));
         Assert.True(three.IsVisible);
     }
@@ -587,7 +594,7 @@ public class AvonicNavTests
         var insert = stage.Nav.Insert(1, typeof(PageThree));
         stage.After(16);
         Assert.Equal(["ionNavWillChange@1200", "ionNavDidChange@1216"], stage.Log);
-        Assert.True(insert.Result);
+        Assert.True(Ended(insert));
         Assert.Equal(["one", "three", "two"], Names(stage.Nav));
         Assert.Equal("two", stage.Nav.GetActive()!.Element!.Name);
         stage.Log.Clear();
@@ -596,7 +603,7 @@ public class AvonicNavTests
         TestPage.Constructed = page => built.Add(page.Name!);
         var pages = stage.Nav.InsertPages(-1, [typeof(PageOne), new NavComponentWithProps(typeof(PageTwo), new Dictionary<string, object?> { ["label"] = "last" })]);
         stage.After(600);
-        Assert.True(pages.Result);
+        Assert.True(Ended(pages));
         Assert.Equal(["two"], built);
         Assert.Equal(5, stage.Nav.GetLength());
         Assert.Null(stage.Nav.GetByIndex(3)!.Element);
@@ -629,7 +636,7 @@ public class AvonicNavTests
         // Back: the leaving page sinks over the new top.
         Assert.True(TranslateY(stage.Nav.Pages.First(p => p.Name == "three")) > 0);
         stage.After(600);
-        Assert.True(pages.Result);
+        Assert.True(Ended(pages));
         Assert.Equal(["-", "four"], Names(stage.Nav));
         Assert.Null(stage.Nav.GetByIndex(0)!.Element);
     }
@@ -651,7 +658,7 @@ public class AvonicNavTests
             Assert.Equal(
                 ["ionNavWillChange@600", "willLeave one@616", "willEnter two@616", "didEnter two@616", "didLeave one@616", "ionNavDidChange@616"],
                 stage.Log);
-            Assert.True(push.Result);
+            Assert.True(Ended(push));
             Assert.Equal(1, GroupOpacity(stage.Nav.GetActive()!.Element!));
         }
         finally
@@ -672,7 +679,7 @@ public class AvonicNavTests
         stage.At(600 + 32 + 496);
         Assert.Equal(0.01 + (0.99 * ForwardEasing.Ease(0.496)), GroupOpacity(two), 4);
         stage.After(600);
-        Assert.True(push.Result);
+        Assert.True(Ended(push));
         stage.Log.Clear();
 
         var three = new TestPage("three");
@@ -704,6 +711,104 @@ public class AvonicNavTests
         // Back to two: two was left by the push with "call".
         stage.Done(stage.Nav.Pop());
         Assert.Equal("call Back", used[^1]);
+    }
+
+    [AvaloniaFact]
+    public void N16_An_apps_builder_that_fades_without_removing_the_invisible_class_still_shows_the_page()
+    {
+        // In CSS the Web Animation's opacity beats .ion-page-invisible's 0, as here the animation's mask beats the class's.
+        using var stage = new Stage(nav =>
+        {
+            nav.Root = new TestPage("one");
+            nav.Animation = (_, options) => AvonicAnimation.Create()
+                .AddElement(((NavTransitionOptions)options!).EnteringElement).Duration(160).FromTo("opacity", 0, 1);
+        });
+        stage.Done(Task.FromResult(true));
+        var two = new TestPage("two");
+        _ = stage.Nav.Push(two);
+        stage.After(32 + 80);
+        Assert.Equal(0.5, GroupOpacity(two), 2);
+        stage.After(600);
+        Assert.Equal(1, GroupOpacity(two));
+    }
+
+    [AvaloniaFact]
+    public void N16_AvonicConfig_NavAnimation_is_the_transition_when_the_call_and_the_nav_give_none()
+    {
+        var used = 0;
+        AvonicConfig.NavAnimation = (_, options) =>
+        {
+            used++;
+            return AvonicAnimation.Create().AddElement(((NavTransitionOptions)options!).EnteringElement).Duration(50).FromTo("opacity", 0.5, 1);
+        };
+        try
+        {
+            using var stage = new Stage(nav => nav.Root = new TestPage("one"));
+            stage.Done(Task.FromResult(true));
+            stage.Done(stage.Nav.Push(new TestPage("two")));
+            Assert.Equal(1, used);
+            stage.Nav.Animation = AvonicNav.MdTransitionAnimation;
+            stage.Done(stage.Nav.Pop());
+            Assert.Equal(1, used);
+        }
+        finally
+        {
+            AvonicConfig.NavAnimation = null;
+        }
+    }
+
+    [AvaloniaFact]
+    public void N10_A_call_from_an_IonNavWillChange_handler_waits_its_turn()
+    {
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"));
+        stage.Done(Task.FromResult(true));
+        Task<bool>? skipped = null;
+        Task<bool>? queued = null;
+        void OnWillChange(object? sender, RoutedEventArgs e)
+        {
+            stage.Nav.IonNavWillChange -= OnWillChange;
+            skipped = stage.Nav.Push(new TestPage("skipped"), opts: new NavOptions { SkipIfBusy = true });
+            queued = stage.Nav.Push(new TestPage("three"));
+        }
+
+        stage.Nav.IonNavWillChange += OnWillChange;
+        var push = stage.Nav.Push(new TestPage("two"));
+        Assert.True(skipped!.IsCompletedSuccessfully);
+        Assert.False(Ended(skipped));
+        Assert.False(queued!.IsCompleted);
+        stage.After(1200);
+        Assert.True(Ended(push));
+        Assert.True(Ended(queued));
+        Assert.Equal(["one", "two", "three"], Names(stage.Nav));
+    }
+
+    [AvaloniaFact]
+    public void N3_A_page_already_in_the_tree_fails_and_leaves_the_nav_as_it_was()
+    {
+        var one = new TestPage("one");
+        using var stage = new Stage(nav => nav.Root = one);
+        stage.Done(Task.FromResult(true));
+        var push = stage.Nav.Push(one);
+        stage.After(100);
+        Assert.True(push.IsFaulted);
+        Assert.Equal(["one"], Names(stage.Nav));
+        Assert.Single(stage.Nav.Pages);
+        Assert.True(stage.Done(stage.Nav.Push(new TestPage("two"))));
+    }
+
+    [AvaloniaFact]
+    public void N3_A_view_whose_page_failed_to_build_can_be_pushed_again()
+    {
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"));
+        stage.Done(Task.FromResult(true));
+        var view = new ViewController(new DetailViewModel("later"));
+        var first = stage.Nav.Push(view);
+        stage.After(100);
+        Assert.True(first.IsFaulted);
+
+        stage.Nav.DataTemplates.Add(new FuncDataTemplate<DetailViewModel>((vm, _) => new TestPage("detail") { Label = vm.Title }));
+        Assert.True(stage.Done(stage.Nav.Push(view)));
+        Assert.Equal("later", ((TestPage)view.Element!).Label);
     }
 
     // ── N17, N18, N19: getters, hidden pages, events ─────────────────────────────────────────

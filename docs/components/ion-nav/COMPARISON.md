@@ -52,12 +52,13 @@ seen in the 64 ms frame. The nav's pages now take a transition's `opacity` as an
 | N8 | `z-index`, `pointer-events` | 101 / 100 forward, 99 / 100 back; neither page takes a tap mid-transition (X4) | `ZIndex` the same; `IsHitTestVisible` false at style priority during it | Match |
 | N9 | `can-go-back` | On the entering page when one is under it (M2) | `:can-go-back` | Match |
 | N10 | Queue, `skipIfBusy` | One at a time; `skipIfBusy` false at once (M5) | The same | Match |
+| N10 | A call from an `ionNavWillChange` handler | Runs alongside the transition (read from `nav.js`) | Waits its turn, or is skipped | Deliberate (ADR 0005) |
 | N11 | Failures | Rejects with the message, a warning, will-change but no did-change; nav works after (M4, X6) | Faulted task, the same message and warning | Match |
 | N12 | Middle views removed | Will-leave, did-leave, will-unload at once, before the transition (M6, M7) | The same | Match |
 | N13 | `insert` in the middle; `insertPages` | No transition; only the last page built; one with no page built when entered (M7, M8) | The same; an inserted middle page left at opacity 0 under the top one, as Ionic leaves it | Match |
 | N14 | `setRoot`, `setPages` | Unanimated unless `animated: true` (M9) | The same | Match |
 | N15 | Animations off | Events in one go, two frames on (M13) | In one go, a frame on | Match |
-| N16 | `duration`, `direction`, builders | 1000 replaces 280; back on a push runs the back animation (M14) | The same; a pop back uses the builder the page was left with | Match |
+| N16 | `duration`, `direction`, builders | 1000 replaces 280; back on a push runs the back animation (M14); a builder's opacity beats `ion-page-invisible` | The same; a pop back uses the builder the page was left with; `AvonicConfig.NavAnimation` is `navAnimation` | Match |
 | N18 | Pages under the top | `display: none`, `aria-hidden`; scroll kept (M11) | Not visible (out of layout and automation); scroll kept | Match |
 | N19 | Events bubble? | No (M16) | `Direct` | Match |
 | N20 | Detached and attached | Every view unloaded; a nav in an inline modal is empty (X7, X8) | The stack is kept | Deliberate (ADR 0005) |

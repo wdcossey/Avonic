@@ -6,6 +6,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Logging;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -28,7 +30,7 @@ public sealed class ViewController
     private readonly StyleValue<bool> _visible = new();
     private readonly StyleValue<bool> _hitTestVisible = new();
     private readonly StyleValue<int> _zIndex = new();
-    private readonly StyleValue<double> _opacity = new();
+    private readonly StyleValue<IBrush?> _invisible = new();
     private readonly List<IDisposable> _bindings = [];
     private bool _hidden;
     private bool _displayNone;
@@ -66,18 +68,25 @@ public sealed class ViewController
     /// </summary>
     internal void Init(AvonicNav nav)
     {
-        State = StateAttached;
         if (Element is not null)
         {
+            State = StateAttached;
             return;
         }
 
         var page = Build(nav, Component);
+        if (page.Parent is not null || page.GetVisualParent() is not null)
+        {
+            // A DOM element would move; an Avalonia control has one parent, so it has to leave the other first.
+            throw new InvalidOperationException("The page is already in the tree: remove it from its parent, or pop it, first.");
+        }
+
         page.Classes.Add("ion-page");
         page.Classes.Add(InvisibleClass);
         NavProps.Apply(page, Params);
-        Bind(page);
         Element = page;
+        Bind(page);
+        State = StateAttached;
         nav.AddPage(page);
     }
 
@@ -112,7 +121,7 @@ public sealed class ViewController
         _bindings.Add(page.Bind(Visual.IsVisibleProperty, _visible, BindingPriority.Style));
         _bindings.Add(page.Bind(Avalonia.Input.InputElement.IsHitTestVisibleProperty, _hitTestVisible, BindingPriority.Style));
         _bindings.Add(page.Bind(Visual.ZIndexProperty, _zIndex, BindingPriority.Style));
-        _bindings.Add(page.Bind(Visual.OpacityProperty, _opacity, BindingPriority.Style));
+        _bindings.Add(page.Bind(Visual.OpacityMaskProperty, _invisible, BindingPriority.Style));
         // A transition's opacity fades the page as one picture, as CSS does.
         Animation.AnimationGroupOpacity.SetIsEnabled(page, true);
         _bindings.Add(new ActionDisposable(() => page.ClearValue(Animation.AnimationGroupOpacity.IsEnabledProperty)));
@@ -128,8 +137,12 @@ public sealed class ViewController
         public void Dispose() => action();
     }
 
-    /// <summary><c>.ion-page-invisible { opacity: 0 }</c>, while the page has the class, as a transition's builder removes it.</summary>
-    private void UpdateOpacity() => _opacity.SetWhen(Element?.Classes.Contains(InvisibleClass) ?? true, 0);
+    /// <summary>
+    /// <c>.ion-page-invisible { opacity: 0 }</c>, while the page has the class, as a transition's builder removes it: as a mask, the
+    /// page's group opacity, which a transition's animated opacity replaces, as a Web Animation's beats the class in CSS.
+    /// </summary>
+    private void UpdateOpacity() =>
+        _invisible.SetWhen(Element?.Classes.Contains(InvisibleClass) == true, Animation.AnimationGroupOpacity.Mask(0));
 
     /// <summary>
     /// Ionic <c>setPageHidden</c>: <c>ion-page-hidden</c> (<c>display: none</c>) and <c>aria-hidden</c>. Hidden, it's out of the
@@ -219,13 +232,24 @@ internal static class NavProps
                     {
                         page.SetValue(property, converted);
                     }
+                    else
+                    {
+                        Dropped(page, key, value);
+                    }
 
                     continue;
                 }
 
-                if (FindClrProperty(page.GetType(), name) is { } clr && TryConvert(value, clr.PropertyType, out var clrValue))
+                if (FindClrProperty(page.GetType(), name) is { } clr)
                 {
-                    clr.SetValue(page, clrValue);
+                    if (TryConvert(value, clr.PropertyType, out var clrValue))
+                    {
+                        clr.SetValue(page, clrValue);
+                    }
+                    else
+                    {
+                        Dropped(page, key, value);
+                    }
                 }
             }
             catch (Exception exception)
@@ -234,6 +258,9 @@ internal static class NavProps
             }
         }
     }
+
+    private static void Dropped(Control page, string key, object? value) =>
+        Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(page, "[ion-nav] componentProps {0}: {1} isn't a value it takes", key, value);
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Documented: a trimmed app may strip a page's CLR property.")]
     private static PropertyInfo? FindClrProperty(Type type, string name) =>

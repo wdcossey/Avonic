@@ -103,7 +103,7 @@ The rest of this plan is written for B; A and C are B with forms taken out (thei
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
 | [x] | `animated` | `Animated` | `bool` | `true` | Off: no transition (M13). `AvonicConfig.Animated` off has the same effect, read at each transition, as `config.getBoolean('animated', true)` |
-| [x] | `animation` | `Animation` | `AnimationBuilder?` | null | Used when the call's options give none; else md's. The builder gets the nav and a `NavTransitionOptions` (entering and leaving page, direction, duration, `ShowGoBack`), Ionic's `animationOpts`. `config.get('navAnimation')` isn't mapped: no animation config is (`modalEnter` and the rest aren't either) |
+| [x] | `animation` | `Animation` | `AnimationBuilder?` | null | Used when the call's options give none; else md's. The builder gets the nav and a `NavTransitionOptions` (entering and leaving page, direction, duration, `ShowGoBack`), Ionic's `animationOpts`. `config.get('navAnimation')` is `AvonicConfig.NavAnimation` (added at review, by CLAUDE.md's config rule) |
 | [x] | `root` | `Root` | `object?` (a page form) | null | Set at the first load, unanimated (`SetRoot`); a change after load calls `SetRoot(Root, RootParams)` (M15). Null does nothing |
 | [x] | `rootParams` | `RootParams` | `IReadOnlyDictionary<string, object?>?` | null | Read with `Root`; a change of its own does nothing (M15) |
 | [x] | `swipeGesture` | `NavSwipeGesture` | `bool?` | null | Proposed: offered. Null takes Ionic's `swipeBackEnabled` config, false in md (M20), at the first load. True turns on the edge swipe back (`swipe-back.js`), driving the md transition by its progress, as Ionic does in md when it's set. See [§ Swipe back](#swipe-back) |

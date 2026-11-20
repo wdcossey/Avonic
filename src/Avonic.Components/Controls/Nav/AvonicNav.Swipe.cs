@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avonic.Components.Animation;
 using Avonic.Components.Behaviors;
 using Avonic.Components.Gestures;
@@ -31,7 +30,7 @@ public partial class AvonicNav
     /// <summary>The longest a swipe's end plays for, in ms.</summary>
     internal const double SwipeMaxDuration = 540;
 
-    private ConfigOnLoad<bool?>? _swipeConfig;
+    private readonly ConfigOnLoad<bool?> _swipeConfig;
     private Gesture? _gesture;
     private bool _rtl;
     private readonly StyleValue<bool> _swipeClicksBlocked = new();
@@ -46,9 +45,7 @@ public partial class AvonicNav
     /// <summary>Ionic's <c>componentWillLoad</c> and <c>componentDidLoad</c> for the swipe: the config's default, then the gesture.</summary>
     partial void LoadSwipeGesture()
     {
-        _swipeConfig ??= ConfigOnLoad<bool?>.IfUnset(this, NavSwipeGestureProperty);
         _swipeConfig.Load(() => AvonicConfig.SwipeBackEnabled);
-        Bind(IsHitTestVisibleProperty, _swipeClicksBlocked, BindingPriority.Animation);
         _gesture = Gesture.Create(new GestureConfig
         {
             Element = this,
