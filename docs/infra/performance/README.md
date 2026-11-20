@@ -181,6 +181,22 @@ $env:AVONIC_PERF_OUT = "$PWD/run.txt"; $env:AVONIC_PERF_EXIT = "1"
 dotnet run --project samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
 ```
 
+### Keep the screen on
+
+**On battery, `svc power stayon true` does nothing**: the screen locks after its timeout (30 s on the Pixel), and Android moves the app
+to the `/background` cpuset, the little cores. Every page then opens 7 to 10 times slower and `Background` work hardly gets a turn,
+which looks like the app's fault (#258's first runs, and likely #255's). Set the timeout for the run, and put it back after:
+
+```
+adb shell settings get system screen_off_timeout            # note it, 30000 on the Pixel
+adb shell settings put system screen_off_timeout 1800000    # 30 minutes, for the run
+adb shell settings put system screen_off_timeout 30000      # after
+```
+
+Each round's check line ends with the app's cpuset (`/proc/self/cpuset`, `/top-app` while it's in front), and on Android adds the
+screen off, the keyguard locked or the activity paused; any of those, or a cpuset other than `/top-app`, adds a
+`warning: the app wasn't in front`, which `table.js` shows in bold. A run with it measured a throttled phone: don't keep it.
+
 ### Only some pages
 
 `AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term

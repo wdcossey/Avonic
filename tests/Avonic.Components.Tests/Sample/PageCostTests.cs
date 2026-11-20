@@ -439,6 +439,25 @@ public partial class PageCostTests
         Assert.All(bad, l => Assert.DoesNotMatch(ChangeLine(), l));
     }
 
+    // The trap of #258's Pixel runs: on battery the screen locked after its timeout and Android moved the app to the little cores.
+    [Fact]
+    public void The_Check_Says_The_Cpuset_And_Warns_When_The_App_Isnt_In_Front()
+    {
+        Assert.Equal(
+            ["datetime-month: round 1, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.6 ms after, accessibility off, cpuset /top-app"],
+            PerfChecks.Lines("datetime-month", 1, 0, true, 0.4, 0.6, "accessibility off", "/top-app", null));
+
+        var locked = PerfChecks.Lines("datetime-month", 2, 0, true, 0.4, 0.6, null, "/background", "screen off, keyguard locked").ToArray();
+        Assert.Equal("datetime-month: round 2, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.6 ms after, cpuset /background, screen off, keyguard locked", locked[0]);
+        Assert.Equal("datetime-month: round 2, warning: the app wasn't in front (cpuset /background, screen off, keyguard locked): Android gives it the little cores, and every time is slower; keep the screen on (docs/infra/performance/README.md)", locked[1]);
+        Assert.Equal(2, locked.Length);
+
+        // Each alone is enough; where there's no cpuset file (the desktop) and nothing to say, nothing.
+        Assert.Contains(PerfChecks.Lines("m", 1, 0, true, 0.4, 0.6, null, "/top-app", "activity not resumed"), l => l.Contains(", warning: the app wasn't in front (cpuset /top-app, activity not resumed)", StringComparison.Ordinal));
+        Assert.Contains(PerfChecks.Lines("m", 1, 0, true, 0.4, 0.6, null, "/foreground", null), l => l.Contains(", warning: the app wasn't in front (cpuset /foreground)", StringComparison.Ordinal));
+        Assert.Single(PerfChecks.Lines("m", 1, 0, true, 0.4, 0.6, null, null, null));
+    }
+
     // ── The lines ────────────────────────────────────────────────────────────────────────────
 
     [Fact]

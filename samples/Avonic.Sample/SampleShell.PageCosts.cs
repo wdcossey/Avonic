@@ -47,6 +47,12 @@ public partial class SampleShell
     /// </summary>
     public static Func<string>? PageCostsPlatform { get; set; }
 
+    /// <summary>
+    /// What a head knows of whether the app is in front, which a run needs: null when it is, else what isn't (the screen off, the
+    /// keyguard, the activity paused). With <see cref="PerfChecks.Cpuset"/>, each round's check says it, and warns.
+    /// </summary>
+    public static Func<string?>? PageCostsForeground { get; set; }
+
     partial void Reported(string line)
     {
         if (_openPasses is { } passes)
@@ -175,7 +181,7 @@ public partial class SampleShell
                 ShowIndex();
                 await Task.Delay(400);
                 var after = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform()))
+                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform(), PerfChecks.Cpuset(), NotInFront()))
                 {
                     Write(line);
                 }
@@ -202,6 +208,18 @@ public partial class SampleShell
         catch (Exception ex)
         {
             Write($"{label}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    private static string? NotInFront()
+    {
+        try
+        {
+            return PageCostsForeground?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            return $"foreground unknown: {ex.GetType().Name}";
         }
     }
 

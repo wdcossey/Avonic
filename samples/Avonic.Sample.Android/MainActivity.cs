@@ -39,7 +39,49 @@ public class MainActivity : AvaloniaMainActivity
         }
 
         SampleShell.PageCostsPlatform = Accessibility;
+        SampleShell.PageCostsForeground = Foreground;
         base.OnCreate(savedInstanceState);
+    }
+
+    private static volatile bool s_resumed;
+
+    protected override void OnResume()
+    {
+        base.OnResume();
+        s_resumed = true;
+    }
+
+    protected override void OnPause()
+    {
+        s_resumed = false;
+        base.OnPause();
+    }
+
+    /// <summary>
+    /// Whether the app is in front, as a run needs it: the screen interactive, no keyguard, the activity resumed. On battery a
+    /// phone's screen locks after its timeout whatever <c>svc power stayon</c> says, and Android then moves the app to the
+    /// <c>/background</c> cpuset, the little cores: every page grew 7 to 10 times slower in #258's runs. Null when all is well,
+    /// else what isn't.
+    /// </summary>
+    private static string? Foreground()
+    {
+        var problems = new List<string>();
+        if (Application.Context.GetSystemService(Context.PowerService) is PowerManager power && !power.IsInteractive)
+        {
+            problems.Add("screen off");
+        }
+
+        if (Application.Context.GetSystemService(Context.KeyguardService) is KeyguardManager keyguard && keyguard.IsKeyguardLocked)
+        {
+            problems.Add("keyguard locked");
+        }
+
+        if (!s_resumed)
+        {
+            problems.Add("activity not resumed");
+        }
+
+        return problems.Count == 0 ? null : string.Join(", ", problems);
     }
 
     /// <summary>

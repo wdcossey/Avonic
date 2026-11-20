@@ -35,6 +35,22 @@ public static class PerfChecks
     /// Whether what <paramref name="page"/> refers to has been collected, after full collections. A short weak reference is cleared
     /// once its target can't be reached, before any finalizer runs, so this waits for none, which could need the UI thread.
     /// </summary>
+    /// <summary>
+    /// Linux's <c>/proc/self/cpuset</c>: on Android, <c>/top-app</c> while the app is in front, and <c>/background</c> (the little
+    /// cores) once the screen locks or the app goes behind. Null where there's no such file.
+    /// </summary>
+    public static string? Cpuset()
+    {
+        try
+        {
+            return File.Exists("/proc/self/cpuset") ? File.ReadAllText("/proc/self/cpuset").Trim() : null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public static bool Collected(WeakReference page)
     {
         for (var i = 0; i < 2 && page.IsAlive; i++)
@@ -49,11 +65,17 @@ public static class PerfChecks
     /// <c>datetime-month: round 1, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.6 ms after</c>,
     /// with the platform's state, then a warning line for each thing wrong.
     /// </summary>
-    public static IEnumerable<string> Lines(string label, int round, int pendingFrames, bool collected, double? before, double? after, string? platform)
+    public static IEnumerable<string> Lines(string label, int round, int pendingFrames, bool collected, double? before, double? after, string? platform,
+        string? cpuset = null, string? notInFront = null)
     {
         static string Ms(double? ms) => ms is { } v ? string.Create(CultureInfo.InvariantCulture, $"{v:0.0} ms") : "over 10 s";
 
-        yield return $"{label}: round {round}, check: {pendingFrames} frames asked for, page {(collected ? "collected" : "still alive")}, background post {Ms(before)} before and {Ms(after)} after{(platform is { Length: > 0 } ? ", " + platform : "")}";
+        yield return $"{label}: round {round}, check: {pendingFrames} frames asked for, page {(collected ? "collected" : "still alive")}, background post {Ms(before)} before and {Ms(after)} after{(platform is { Length: > 0 } ? ", " + platform : "")}{(cpuset is null ? "" : ", cpuset " + cpuset)}{(notInFront is null ? "" : ", " + notInFront)}";
+        if (notInFront is not null || cpuset is { } set && set != "/top-app")
+        {
+            yield return $"{label}: round {round}, warning: the app wasn't in front ({string.Join(", ", new[] { cpuset is null ? null : "cpuset " + cpuset, notInFront }.OfType<string>())}): Android gives it the little cores, and every time is slower; keep the screen on (docs/infra/performance/README.md)";
+        }
+
         if (pendingFrames != 0)
         {
             yield return $"{label}: round {round}, warning: {pendingFrames} frame callbacks still asked for after the timing: a frame loop is still running, and the app draws continuously";
