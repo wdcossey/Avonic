@@ -8,11 +8,12 @@
         <StackPanel Spacing="16" Margin="16">
             <TextBlock Name="DatetimeChanged" Text="Pick a date or a time" />
 
-            <!-- The default: a calendar and a time, picked at once. -->
-            <c:AvonicDatetime Name="DateTimeGrid" Value="2023-06-15T13:47:00" />
+            <!-- The default: a calendar and a time, picked at once. Its locale is pinned, as its value is, so that the real
+                 window's checks read the same names on any machine; the others follow the system's, as Ionic follows the browser's. -->
+            <c:AvonicDatetime Name="DateTimeGrid" Value="2023-06-15T13:47:00" Locale="en-US" />
 
             <!-- A header, the default buttons and Clear: a selection waits for Done. -->
-            <c:AvonicDatetime Name="WithButtons" Value="2023-06-15T13:47:00" Presentation="Date"
+            <c:AvonicDatetime Name="WithButtons" Value="2023-06-15T13:47:00" Presentation="Date" Locale="en-US"
                               ShowDefaultTitle="True" ShowDefaultButtons="True" ShowClearButton="True"
                               CancelText="Cancel date" DoneText="Done date" ClearText="Clear date" />
 
