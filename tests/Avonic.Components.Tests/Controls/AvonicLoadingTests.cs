@@ -393,7 +393,9 @@ public class AvonicLoadingTests
     {
         using var stage = new Stage();
         var loading = Watch(stage, new AvonicLoading { Message = "Forever", Duration = double.PositiveInfinity });
-        Shown(stage, loading);
+        var present = loading.Present(stage.Window);
+        stage.At(Entered);
+        Assert.True(present.IsCompletedSuccessfully, $"The present: {present.Status}, {present.Exception?.InnerException?.Message}");
         stage.Log.Clear();
         stage.At(5000);
         Assert.Empty(stage.Log);
@@ -635,6 +637,31 @@ public class AvonicLoadingTests
         loading.HtmlAttributes = null;
         AutomationProperties.SetName(loading, "Own");
         Assert.Equal("Own", peer.GetName());
+    }
+
+    [AvaloniaFact]
+    public void B12_A_New_Message_Raises_The_Dialogs_Name_Change()
+    {
+        using var stage = new Stage();
+        var loading = Shown(stage, new AvonicLoading { Message = "One" });
+        var peer = ControlAutomationPeer.CreatePeerForElement(loading);
+        Assert.Equal("One", peer.GetName());
+        var changes = new List<object?>();
+        peer.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == AutomationElementIdentifiers.NameProperty)
+            {
+                changes.Add(e.NewValue);
+            }
+        };
+
+        // As the element aria-labelledby names changes its text; then aria-label, and its own name.
+        loading.Message = "Two";
+        loading.Message = null;
+        loading.HtmlAttributes = new Dictionary<string, object?> { ["aria-label"] = "Busy" };
+        loading.HtmlAttributes = null;
+        AutomationProperties.SetName(loading, "Own");
+        Assert.Equal(["Two", null, "Busy", null, "Own"], changes);
     }
 
     [AvaloniaFact]
