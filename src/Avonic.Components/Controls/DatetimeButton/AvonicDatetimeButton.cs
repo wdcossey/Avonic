@@ -50,7 +50,8 @@ public class AvonicDatetimeButton : TemplatedControl
     public static readonly StyledProperty<IDataTemplate?> TimeTargetContentTemplateProperty =
         AvaloniaProperty.Register<AvonicDatetimeButton, IDataTemplate?>(nameof(TimeTargetContentTemplate));
 
-    private bool _loaded;
+    private bool _lookedUp;
+    private bool _ready;
     private bool _attached;
     private AvonicDatetime? _datetime;
     private AvonicOverlay? _overlay;
@@ -62,6 +63,7 @@ public class AvonicDatetimeButton : TemplatedControl
     private DatetimeButtonNative? _dateButton;
     private DatetimeButtonNative? _timeButton;
     private TopLevel? _layoutRoot;
+    private Action? _pendingPresent;
 
     /// <summary>Ionic's <c>selectedButton</c>: which button is the active one while the datetime shows.</summary>
     private enum Selected
@@ -115,12 +117,11 @@ public class AvonicDatetimeButton : TemplatedControl
     {
         base.OnAttachedToLogicalTree(e);
         _attached = true;
-        if (!_loaded)
+        if (!_lookedUp)
         {
-            _loaded = true;
             Load();
         }
-        else if (_datetime is not null)
+        else if (_ready && _datetime is not null)
         {
             // The listener was off while detached: the text as it would have followed.
             _datetime.ValueChange += OnValueChange;
@@ -132,15 +133,30 @@ public class AvonicDatetimeButton : TemplatedControl
     {
         base.OnDetachedFromLogicalTree(e);
         _attached = false;
-        if (_datetime is not null)
+        if (_ready && _datetime is not null)
         {
             _datetime.ValueChange -= OnValueChange;
         }
+
+        CancelPendingPresent();
     }
 
-    /// <summary>Ionic's <c>componentWillLoad</c>, then its <c>componentOnReady</c> callback.</summary>
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        // Ionic reads datetime once, at load, where a framework has already set it. A binding here can bring it after the first
+        // attach, so a name that comes while none was found is looked up then; once found, it's kept, as Ionic's is.
+        if (change.Property == DatetimeProperty && _lookedUp && _datetime is null && _attached)
+        {
+            Load();
+        }
+    }
+
+    /// <summary>Ionic's <c>componentWillLoad</c>.</summary>
     private void Load()
     {
+        _lookedUp = true;
         var name = Datetime;
         if (string.IsNullOrEmpty(name))
         {
@@ -148,7 +164,7 @@ public class AvonicDatetimeButton : TemplatedControl
             return;
         }
 
-        var found = OverlayTrigger.FindNameScope(this)?.Find(name);
+        var found = Find(name);
         if (found is null)
         {
             LogError($"[ion-datetime-button] - No ion-datetime instance found for ID '{name}'.");
@@ -170,31 +186,82 @@ public class AvonicDatetimeButton : TemplatedControl
             AddOverlayClass(_overlay);
         }
 
-        // componentOnReady: the datetime loaded (its componentWillLoad), which GetDefaultPart makes sure of.
+        // componentOnReady: once the datetime has loaded, which it does when it's attached, after its styles, so that what an app's
+        // style sets on it (its presentation, min, max) is what it loads with. One later in the tree than the button loads after it.
+        if (((ILogical)datetime).IsAttachedToLogicalTree)
+        {
+            OnDatetimeReady();
+        }
+        else
+        {
+            datetime.AttachedToLogicalTree += OnDatetimeAttached;
+        }
+    }
+
+    private void OnDatetimeAttached(object? sender, LogicalTreeAttachmentEventArgs e)
+    {
+        _datetime!.AttachedToLogicalTree -= OnDatetimeAttached;
+        OnDatetimeReady();
+    }
+
+    /// <summary>Ionic's <c>componentOnReady</c> callback: the presentation, read once, the text, and the selected button.</summary>
+    private void OnDatetimeReady()
+    {
+        var datetime = _datetime!;
+        _ready = true;
         datetime.GetDefaultPart();
         _presentation = datetime.Presentation;
-        datetime.ValueChange += OnValueChange;
         _selected = _presentation is DatetimePresentation.TimeDate or DatetimePresentation.Time ? Selected.Time : Selected.Date;
-        SetDateTimeText();
-        if (TopLevel.GetTopLevel(this) is not null)
+        if (_attached)
         {
-            CheckActive();
+            datetime.ValueChange += OnValueChange;
         }
+
+        SetDateTimeText();
+        CheckActive();
+    }
+
+    /// <summary>
+    /// <c>document.getElementById</c>: the name in the nearest name scope, then in each one around it (a template's, a user control's,
+    /// then the page's), as an id is the document's; from an overlay that's presented, on from its placeholder, where it was.
+    /// </summary>
+    private object? Find(string name)
+    {
+        for (StyledElement? element = this; element is not null;)
+        {
+            if (NameScope.GetNameScope(element) is { } scope && scope.Find(name) is { } found)
+            {
+                return found;
+            }
+
+            element = element is AvonicOverlay { Parent: OverlayHost, Placeholder: { } placeholder } ? placeholder : element.Parent;
+        }
+
+        return null;
     }
 
     /// <summary>
     /// <c>overlayEl.classList.add('ion-datetime-button-overlay')</c>, and core.css's rule for it: the overlay's size variables are
-    /// <c>fit-content</c>, a copy of the theme's dictionary merged into the overlay's resources, so an app's own key there wins.
+    /// <c>fit-content</c>, the theme's dictionary of them, each resolved, merged into the overlay's resources, so an app's own key
+    /// there wins. Once per overlay, whatever the number of buttons.
     /// </summary>
     private void AddOverlayClass(AvonicOverlay overlay)
     {
+        if (overlay.Classes.Contains(OverlayClass))
+        {
+            return;
+        }
+
         overlay.Classes.Add(OverlayClass);
         if (this.TryFindResource(OverlayResourcesKey, out var found) && found is IResourceDictionary theme)
         {
             var copy = new ResourceDictionary();
-            foreach (var (key, value) in theme)
+            foreach (var key in theme.Keys)
             {
-                copy[key] = value;
+                if (theme.TryGetResource(key, null, out var value))
+                {
+                    copy[key] = value;
+                }
             }
 
             overlay.Resources.MergedDictionaries.Add(copy);
@@ -315,24 +382,24 @@ public class AvonicDatetimeButton : TemplatedControl
         base.OnApplyTemplate(e);
         if (_dateButton is not null)
         {
-            _dateButton.Click -= OnDateClick;
+            _dateButton.Clicked -= OnDateClick;
         }
 
         if (_timeButton is not null)
         {
-            _timeButton.Click -= OnTimeClick;
+            _timeButton.Clicked -= OnTimeClick;
         }
 
         _dateButton = e.NameScope.Find<DatetimeButtonNative>("PART_DateButton");
         _timeButton = e.NameScope.Find<DatetimeButtonNative>("PART_TimeButton");
         if (_dateButton is not null)
         {
-            _dateButton.Click += OnDateClick;
+            _dateButton.Clicked += OnDateClick;
         }
 
         if (_timeButton is not null)
         {
-            _timeButton.Click += OnTimeClick;
+            _timeButton.Clicked += OnTimeClick;
         }
 
         UpdateButtons();
@@ -363,7 +430,7 @@ public class AvonicDatetimeButton : TemplatedControl
     }
 
     /// <summary>Ionic's <c>handleDateClick</c>: a date picker only, then the overlay.</summary>
-    private void OnDateClick(object? sender, RoutedEventArgs e)
+    private void OnDateClick(object? sender, Point? at)
     {
         if (_datetime is not { } datetime)
         {
@@ -380,11 +447,11 @@ public class AvonicDatetimeButton : TemplatedControl
         }
 
         Select(Selected.Date);
-        PresentOverlay(e, needsPresentationChange, _dateButton);
+        PresentOverlay(at, needsPresentationChange, _dateButton);
     }
 
     /// <summary>Ionic's <c>handleTimeClick</c>: a time picker only, then the overlay.</summary>
-    private void OnTimeClick(object? sender, RoutedEventArgs e)
+    private void OnTimeClick(object? sender, Point? at)
     {
         if (_datetime is not { } datetime)
         {
@@ -400,7 +467,7 @@ public class AvonicDatetimeButton : TemplatedControl
         }
 
         Select(Selected.Time);
-        PresentOverlay(e, needsPresentationChange, _timeButton);
+        PresentOverlay(at, needsPresentationChange, _timeButton);
     }
 
     private void Select(Selected selected)
@@ -413,21 +480,23 @@ public class AvonicDatetimeButton : TemplatedControl
     /// Ionic's <c>presentOverlay</c>: a popover is placed by the button tapped, its <c>ionShadowTarget</c>, once the datetime has
     /// drawn its new presentation (<c>ionRender</c>); a modal is presented as it is. With no overlay, nothing.
     /// </summary>
-    private void PresentOverlay(RoutedEventArgs e, bool needsPresentationChange, DatetimeButtonNative? trigger)
+    private void PresentOverlay(Point? at, bool needsPresentationChange, DatetimeButtonNative? trigger)
     {
         switch (_overlay)
         {
             case AvonicPopover popover:
-                var ev = new PopoverEvent(trigger, PopoverEvent.From(e).ClientPosition);
+                var ev = new PopoverEvent(trigger, at);
                 if (needsPresentationChange && _datetime is { } datetime)
                 {
+                    CancelPendingPresent();
                     void OnRendered(object? sender, EventArgs args)
                     {
-                        datetime.Rendered -= OnRendered;
+                        CancelPendingPresent();
                         LogFault(popover.Present(ev));
                     }
 
                     datetime.Rendered += OnRendered;
+                    _pendingPresent = () => datetime.Rendered -= OnRendered;
                 }
                 else
                 {
@@ -439,6 +508,13 @@ public class AvonicDatetimeButton : TemplatedControl
                 LogFault(overlay.Present());
                 break;
         }
+    }
+
+    /// <summary>A present still waiting for the datetime's <c>Rendered</c> doesn't happen: the button has gone, or another tap came.</summary>
+    private void CancelPendingPresent()
+    {
+        _pendingPresent?.Invoke();
+        _pendingPresent = null;
     }
 
     private void LogFault(Task task) =>
@@ -465,6 +541,8 @@ public class AvonicDatetimeButton : TemplatedControl
         base.OnDetachedFromVisualTree(e);
         LayoutUpdated -= OnLayoutUpdated;
         _layoutRoot = null;
+        // Not in a window, nothing is shown: collapsed, as it was before it was attached.
+        CheckActive();
     }
 
     private void OnLayoutUpdated(object? sender, EventArgs e) => CheckActive();

@@ -23,7 +23,7 @@ before and after each step, and the event timelines of a present and a dismiss),
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
 | [x] | `color` | `Color` | `string?` | | `ColorPalette.ColorProperty.AddOwner`; `:ion-color`. Only the active button's text reads it |
-| [x] | `datetime` | `Datetime` | `string?` | | The `Name` of the `AvonicDatetime`, looked up in the button's name scope, as an overlay's `Trigger` is (`OverlayTrigger`), at the first attach, as Ionic reads it once in `componentWillLoad` |
+| [x] | `datetime` | `Datetime` | `string?` | | The `Name` of the `AvonicDatetime`, looked up in the name scopes around the button, nearest first, at the first attach, as Ionic reads it once in `componentWillLoad`; a name that comes after an attach that found none is looked up then |
 | [x] | `disabled` | `IsEnabled` | `bool` | `true` | The mapping rule |
 | [ ] | `mode` | — | | | Not exposed (ADR 0001) |
 
@@ -129,7 +129,7 @@ the popover kept 12 in from the right), the time 181.56 x 200 at 196.44, 47; a t
 |---|---|---|
 | `:host { display: flex; flex-wrap: wrap; align-items: center; justify-content: center }` | 358 x 31 in the stage; two lines at 150 wide (`narrow`, 148 x 62); in an item's end slot as wide as its buttons (206.42, `x_item`); in RTL the date on the right (`x_rtl`) | |
 | `button { border-radius: 8px; margin-inline: 2px; padding: 6px 12px; border: none; font-size: 1rem; font-family: inherit; overflow: hidden }` | date 115.53 x 31, time 82.89 x 31, 4 apart | literals in the theme |
-| `background: var(--ion-color-step-300, var(--ion-background-color-step-300, #edeef0))` | `rgb(237, 238, 240)` | `Avonic.DatetimeButton.Md.Background`; dark follows `Avonic.BackgroundColorStep300` |
+| `background: var(--ion-color-step-300, var(--ion-background-color-step-300, #edeef0))` | `rgb(237, 238, 240)` | `Avonic.DatetimeButton.Md.Background` (`Color`) and `…BackgroundBrush`; dark follows `Avonic.BackgroundColorStep300` |
 | `color: var(--ion-text-color, #000)` | black | `Avonic.TextColorBrush` |
 | `transition: 150ms color ease-in-out` | the active colour fades in over 150 ms even when the button is first drawn (`x_firstColor`: black at 13 ms, the class at 29, `rgb(0, 84, 233)` at 173) | `BrushTransition`, `{a:CubicBezier 0.42, 0, 0.58, 1}` |
 | `:host(.date-active) #date-button`, `:host(.time-active) #time-button { color: var(--ion-color-primary) }` | `rgb(0, 84, 233)` | `Avonic.Color.PrimaryBrush` |
@@ -158,18 +158,21 @@ host. The host has no role.
 - **`AvonicDatetimeButton : TemplatedControl`** with `Color`, `Datetime`, `DateTargetContent`/`Template` and
   `TimeTargetContent`/`Template`; pseudoclasses `:date-active` and `:time-active` (Ionic's host classes; `datetime-button-disabled`
   is `:disabled`); `ClipToBounds` off, as CSS's host doesn't clip, so the focus ring can go outside it.
-- **`DatetimeButtonNative : Button`**, a type of its own for the two `<button>`s: its own `ControlTheme`, a `Text` that is the slot's
-  fallback (shown while there's no content), `Activatable` (tap-click) and a ripple in its template, and a peer with
+- **`DatetimeButtonNative : ContentControl`**, a type of its own for the two `<button>`s, clicked by `Behaviors/NativeButton` (the
+  mapping rule for a native `<button>`: on release, a finger within 15 px, Enter and Space): its own `ControlTheme`, a `Text` that is
+  the slot's fallback (shown while there's no content), `Activatable` (tap-click) and a ripple in its template, and a peer with
   `IExpandCollapseProvider` for `aria-expanded`, named by its text through `AccessibleText`. The host sets `Text`, `IsVisible` and
   the expanded state in code, as Ionic's `render()` does; the slot's content comes through a template binding.
 - **The look**: `src/Avonic.Themes/Controls/AvonicDatetimeButton.axaml` (the host, a `WrapPanel` with `ItemsAlignment="Center"`
   for `flex-wrap` and `justify-content: center`, the items centred in their line, and `DatetimeButtonNative`'s theme), and
   `Tokens/DatetimeButton.axaml`.
-- **Finding the datetime**: on the first attach to the logical tree, the name in the nearest name scope, through
-  `OverlayTrigger.FindNameScope` (made `internal`, the only change to `Overlays/`), which goes on from a presented overlay to its
-  placeholder, as `getElementById` sees the whole document. Ionic's three errors are logged at `Error`, and nothing renders.
-- **`componentOnReady`**: `AvonicDatetime.GetDefaultPart()`, which loads the datetime if it hasn't loaded yet (its
-  `componentWillLoad`), so its `ValueChange` comes; then the presentation, the text and the selected button. The listener is on
+- **Finding the datetime**: on the first attach to the logical tree, the name in the nearest name scope, then in each one around it
+  (a template's, a user control's, the page's), going on from a presented overlay to its placeholder, as `getElementById` sees the
+  whole document. Ionic's three errors are logged at `Error`, and nothing renders. A binding can bring `Datetime` after the attach,
+  where a framework sets Ionic's props before load, so a name that comes while none was found is looked up then (code review).
+- **`componentOnReady`**: once the datetime is attached to the logical tree, which is when it loads, after its styles (one later in
+  the tree than the button attaches after it), so that what an app's style gives it is what the button reads; then
+  `AvonicDatetime.GetDefaultPart()`, the presentation, the text and the selected button. The listener is on
   while the button is attached, and off when it isn't, as a .NET event would otherwise keep a removed button alive; attached again,
   the text is worked out again, as Ionic's never-removed listener would have kept it.
 - **The text**: `DatetimeIntl.LocalizedDateTime`, `LocalizedTime` and `GetHourCycle`, with the datetime's `Culture`, as the

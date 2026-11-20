@@ -64,7 +64,7 @@ a little, as in the datetime's own frames: Roboto has none of their glyphs, and 
 
 | # | Behaviour | Chromium | Avonic |
 |---|---|---|---|
-| B1 | The datetime by its id; the three errors | `getElementById` at load; `noId`, `wrongId`, `notDatetime` log Ionic's errors, the host 0 high | match: the `Name` in the nearest name scope (as an overlay's `Trigger`), read once at the first attach; the same messages at `Error`, the host 0 high |
+| B1 | The datetime by its id; the three errors | `getElementById` at load; `noId`, `wrongId`, `notDatetime` log Ionic's errors, the host 0 high | match: the `Name` in the name scopes around it, nearest first, read once at the first attach (or when a name comes after an attach that found none); the same messages at `Error`, the host 0 high |
 | B2 | The text of each presentation | `Jun 15, 2023` / `1:47 PM`; `June 2023`; `June`; `2023`; wheels together `Jun 15, 2023 1:47 PM`; format options (`Fri, June 16`, `09:05 AM`, `Jul 24`, `7/15`, `1 PM`); six locales and `h23` | match, every one: the datetime's own `DatetimeIntl` |
 | B3 | The values | a list's first; none: the datetime's default part (`8:20 AM` with value lists); `nonsense` keeps the text; `undefined` is today again; a date alone `Invalid Time`; a time alone `Jan 1, 2023` | match |
 | B4 | `multiple` | `3 days`, `0 days`, one value `Jun 5, 2023`; the formatter given the strings; its exception printed, `2 days` | match |

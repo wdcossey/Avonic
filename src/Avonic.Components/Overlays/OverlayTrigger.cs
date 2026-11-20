@@ -47,7 +47,7 @@ internal sealed class OverlayTrigger(AvonicOverlay overlay)
     /// placeholder in its page, as it would from where it was: an overlay inside another's content (a nested popover) still finds
     /// its trigger in the page while the one around it is in the overlay host, as <c>getElementById</c> looks in the whole document.
     /// </summary>
-    internal static INameScope? FindNameScope(StyledElement from)
+    private static INameScope? FindNameScope(StyledElement from)
     {
         for (var element = from; element is not null;)
         {

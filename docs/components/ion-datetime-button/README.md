@@ -28,8 +28,9 @@ comparison with real Ionic is in [COMPARISON.md](COMPARISON.md). It follows Ioni
 </c:AvonicPopover>
 ```
 
-`Datetime` is the datetime's `Name`, looked up in the button's name scope (as an overlay's `Trigger` is) when the button is first
-attached, as Ionic reads `datetime` once, at load. Change it later and nothing happens, as in Ionic.
+`Datetime` is the datetime's `Name`, looked up in the name scopes around the button, nearest first, when the button is first
+attached, as Ionic reads `datetime` once, at load. Once found, a change does nothing, as in Ionic; a name that comes after an attach
+that found none (a binding) is looked up then.
 
 ## Checklist
 
@@ -61,7 +62,7 @@ None, as in Ionic.
 
 ### CSS custom properties
 
-None in Ionic. The md literals are keys: `Avonic.DatetimeButton.Md.Background` (`#edeef0`; dark: step 300),
+None in Ionic. The md literals are keys: `Avonic.DatetimeButton.Md.Background`/`BackgroundBrush` (`#edeef0`; dark: step 300),
 `Avonic.DatetimeButton.Md.DisabledMask` (0.4), `Avonic.DatetimeButton.FocusRingColor`/`Brush` (Chromium's `#E59700`), and
 `Avonic.DatetimeButton.Overlay`, the dictionary of `core.css`'s `.ion-datetime-button-overlay` sizes (`Avonic.Modal.Width`,
 `Avonic.Modal.Height`, `Avonic.Popover.Width`, `Avonic.Popover.Height` = `fit-content`).

@@ -10,6 +10,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -139,6 +140,52 @@ public class AvonicDatetimeButtonTests
         Settle(clock, 100);
         Assert.Same(datetime, button.DatetimeElement);
         Assert.Null(button.LastError);
+    });
+
+    [AvaloniaFact]
+    public void B1_The_Name_Is_Found_In_A_Name_Scope_Around_The_Nearest() => Run((scene, clock) =>
+    {
+        // getElementById sees the whole document: a button in a template or a user control, with a scope of its own, finds a datetime
+        // named in the page's.
+        var inner = new StackPanel();
+        NameScope.SetNameScope(inner, new NameScope());
+        var button = new AvonicDatetimeButton { Datetime = "dt" };
+        inner.Children.Add(button);
+        var (_, datetime) = Stage(scene, clock, new AvonicDatetime { Value = June15 }, button: new AvonicDatetimeButton { Datetime = "dt" });
+        ((StackPanel)datetime.Parent!.Parent!).Children.Add(inner);
+        Settle(clock, 100);
+        Assert.Same(datetime, button.DatetimeElement);
+        Assert.Equal(("Jun 15, 2023", "1:47 PM"), Texts(button));
+    });
+
+    [AvaloniaFact]
+    public void B1_A_Name_That_Comes_After_The_First_Attach_Is_Looked_Up_Then() => Run((scene, clock) =>
+    {
+        // A binding can bring it after the attach, where a framework sets Ionic's props before load.
+        var button = new AvonicDatetimeButton { Datetime = "" };
+        var (_, datetime) = Stage(scene, clock, new AvonicDatetime { Value = June15 }, button: button);
+        Assert.Null(button.DatetimeElement);
+        button.Datetime = "dt";
+        Settle(clock, 100);
+        Assert.Same(datetime, button.DatetimeElement);
+        Assert.Equal(("Jun 15, 2023", "1:47 PM"), Texts(button));
+    });
+
+    [AvaloniaFact]
+    public void B1_The_Datetime_Is_Read_Once_It_Has_Loaded_With_An_Apps_Style() => Run((scene, clock) =>
+    {
+        // componentOnReady: the datetime after it, styled time-only by the app, gives a time button only, and its value lists are
+        // its own when it has no value.
+        scene.Window.Styles.Add(new Avalonia.Styling.Style(x => x.OfType<AvonicDatetime>())
+        {
+            Setters =
+            {
+                new Avalonia.Styling.Setter(AvonicDatetime.PresentationProperty, DatetimePresentation.Time),
+                new Avalonia.Styling.Setter(AvonicDatetime.HourValuesProperty, (DatetimeValueList?)new[] { 8, 14 }),
+            },
+        });
+        var (button, _) = Stage(scene, clock, new AvonicDatetime());
+        Assert.Equal((null, "8:00 AM"), Texts(button));
     });
 
     // ── B2: the text of each presentation ────────────────────────────────────────────────────
@@ -364,17 +411,15 @@ public class AvonicDatetimeButtonTests
     });
 
     [AvaloniaFact]
-    public void B6_A_Binding_On_The_Presentation_Stays() => Run((scene, clock) =>
+    public void B6_An_Apps_Binding_On_The_Presentation_Still_Drives_It() => Run((scene, clock) =>
     {
-        // The button sets it as Ionic sets the prop; SetCurrentValue, so an app's binding still holds.
+        // The button sets it as Ionic sets the prop, which a framework's binding sets again when its own value changes.
         var holder = new Border { Tag = DatetimePresentation.DateTime };
-        var source = new Avalonia.Data.Binding("Tag") { Source = holder, Mode = Avalonia.Data.BindingMode.OneWay };
         var datetime = new AvonicDatetime { Value = June15 };
-        datetime.Bind(AvonicDatetime.PresentationProperty, source);
+        datetime.Bind(AvonicDatetime.PresentationProperty, new Avalonia.Data.Binding("Tag") { Source = holder });
         var (button, _) = Stage(scene, clock, datetime);
         Tap(scene, clock, TimeButton(button));
         Assert.Equal(DatetimePresentation.Time, datetime.Presentation);
-        // The app's source still drives it.
         holder.Tag = DatetimePresentation.Date;
         Assert.Equal(DatetimePresentation.Date, datetime.Presentation);
     });
@@ -413,6 +458,16 @@ public class AvonicDatetimeButtonTests
         Assert.Empty(events);
         Settle(clock, 600);
         Assert.Equal(["ionRender", "willPresent"], events);
+    });
+
+    [AvaloniaFact]
+    public void B6_A_Button_Removed_Before_The_Datetime_Renders_Presents_Nothing() => Run((scene, clock) =>
+    {
+        var (button, datetime) = Stage(scene, clock, new AvonicDatetime { Value = June15 }, Place.Popover);
+        AvonicPickerColumnTests.Click(scene, AvonicPickerColumnTests.Centre(DateButton(button), scene));
+        ((StackPanel)button.Parent!).Children.Remove(button);
+        Settle(clock, 600);
+        Assert.False(((AvonicPopover)datetime.Parent!).IsShown);
     });
 
     [AvaloniaFact]
@@ -510,6 +565,16 @@ public class AvonicDatetimeButtonTests
             Settle(clock, 50);
             Assert.True(active == button.IsDatetimeActive, $"{px} px in view: expected {(active ? "active" : "inactive")}");
         }
+    });
+
+    [AvaloniaFact]
+    public void B7_Removed_From_The_Window_It_Is_Collapsed() => Run((scene, clock) =>
+    {
+        var (button, _) = Stage(scene, clock, new AvonicDatetime { Value = June15 }, Place.Page);
+        Assert.True(button.IsDatetimeActive);
+        ((StackPanel)button.Parent!).Children.Remove(button);
+        Assert.False(button.IsDatetimeActive);
+        Assert.Equal(ExpandCollapseState.Collapsed, Expanded(DateButton(button)));
     });
 
     [AvaloniaFact]
@@ -661,6 +726,28 @@ public class AvonicDatetimeButtonTests
         Settle(clock, 600);
         Assert.True(((AvonicModal)datetime.Parent!).IsShown);
         Assert.Equal(DatetimePresentation.Time, datetime.Presentation);
+    });
+
+    [AvaloniaTheory]
+    [InlineData(10, true)]
+    [InlineData(20, false)]
+    public void B11_A_Finger_That_Moves_15_Px_Or_More_Doesnt_Click(double drift, bool clicks) => Run((scene, clock) =>
+    {
+        // A native <button>'s click (NativeButton): a finger that moved 14 px clicks, 16 doesn't, though it ends on the button.
+        var (button, datetime) = Stage(scene, clock, new AvonicDatetime { Value = June15 });
+        var native = DateButton(button);
+        var box = Box(native, scene.Window);
+        var at = new Point(box.Center.X - 30, box.Center.Y);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+        var finger = scene.Window.TouchBegin(at, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        scene.Window.TouchMove(finger, at + new Point(drift, 0), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        scene.Window.TouchEnd(finger, at + new Point(drift, 0), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        Settle(clock, 600);
+        Assert.Equal(clicks, ((AvonicModal)datetime.Parent!).IsShown);
     });
 
     // ── B12: layout ──────────────────────────────────────────────────────────────────────────

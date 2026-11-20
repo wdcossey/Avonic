@@ -18,7 +18,7 @@
          background, the text colour, 1rem, overflow hidden (the ripple clipped to the radius), cursor: pointer; its colour eased
          over 150 ms ease-in-out. Chromium's focus ring when Tab focuses it, and the ripple in the text colour. -->
     <ControlTheme x:Key="{x:Type c:DatetimeButtonNative}" TargetType="c:DatetimeButtonNative">
-        <Setter Property="Background" Value="{DynamicResource Avonic.DatetimeButton.Md.Background}" />
+        <Setter Property="Background" Value="{DynamicResource Avonic.DatetimeButton.Md.BackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="Margin" Value="2,0" />
