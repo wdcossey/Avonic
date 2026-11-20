@@ -97,8 +97,9 @@ None.
 
 ## Known gaps
 
-- **What's in view is checked on each layout pass**, as Avalonia has no `IntersectionObserver`: a datetime moved into or out of view
-  only by a render transform isn't seen until the next layout. Ancestors that clip by default in Avalonia (`TemplatedControl`) clip
+- **What's in view is checked on each layout pass**, as Avalonia has no `IntersectionObserver`, and when the overlay's present and
+  dismiss end: a sheet sliding up is active once it's up (Chromium: as it enters), and a datetime moved into or out of view by a
+  render transform alone isn't seen until the next layout. Ancestors that clip by default in Avalonia (`TemplatedControl`) clip
   what counts.
 - **After Escape, the button has its focus again without Chromium's ring**: the overlays give focus back without `:focus-visible`.
 - **The overlay's popover is in the window's overlay layer**, as every Avonic popover: in a real popup window (another `TopLevel`) it

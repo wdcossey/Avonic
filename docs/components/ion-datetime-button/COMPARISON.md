@@ -86,8 +86,10 @@ a little, as in the datetime's own frames: Roboto has none of their glyphs, and 
   `IntersectionObserver` does. The button checks on each layout pass of its window (`LayoutUpdated`): the datetime in the same
   top level, effectively visible, and 1% of its box inside the window and every ancestor that clips (`ClipToBounds`), transformed.
   A scroll, a present, a dismiss and a hide each cause a layout pass, so each is seen within the frame, as measured above. A render
-  transform alone (an animation) causes none: a datetime moved into or out of view only by an animation isn't seen until the next
-  layout pass. Avalonia's `TemplatedControl`s clip by default where CSS doesn't, so a datetime overflowing such an ancestor counts
+  transform alone (an animation) causes none, so the button also checks when its overlay's present and dismiss end: a sheet that
+  slides up from below is active once it's up, where Chromium's is as soon as 1% of it is in view. Something else that moves the
+  datetime by a render transform alone isn't seen until the next layout pass. The check runs only while the datetime is in a window
+  (an overlay's unmounted content costs nothing). Avalonia's `TemplatedControl`s clip by default where CSS doesn't, so a datetime overflowing such an ancestor counts
   only what's inside it.
 - **`fit-content` around a datetime.** An `AvonicDatetime` fills the room it's measured with, up to its 350, as a block's
   `width: auto`; a modal or popover measures its content with the room it has, so a time datetime would be 350 wide where Chromium's

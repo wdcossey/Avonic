@@ -51,6 +51,8 @@ public class AvonicDatetimeButton : TemplatedControl
         AvaloniaProperty.Register<AvonicDatetimeButton, IDataTemplate?>(nameof(TimeTargetContentTemplate));
 
     private bool _lookedUp;
+    private string? _triedName;
+    private bool _watching;
     private bool _ready;
     private bool _attached;
     private AvonicDatetime? _datetime;
@@ -117,8 +119,9 @@ public class AvonicDatetimeButton : TemplatedControl
     {
         base.OnAttachedToLogicalTree(e);
         _attached = true;
-        if (!_lookedUp)
+        if (!_lookedUp || _datetime is null && Datetime != _triedName)
         {
+            // The first attach, or a name that came while it was out of the tree after one that found nothing.
             Load();
         }
         else if (_ready && _datetime is not null)
@@ -127,15 +130,20 @@ public class AvonicDatetimeButton : TemplatedControl
             _datetime.ValueChange += OnValueChange;
             SetDateTimeText();
         }
+        else if (_datetime is not null)
+        {
+            WaitForDatetime(_datetime);
+        }
     }
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromLogicalTree(e);
         _attached = false;
-        if (_ready && _datetime is not null)
+        if (_datetime is not null)
         {
             _datetime.ValueChange -= OnValueChange;
+            _datetime.AttachedToLogicalTree -= OnDatetimeAttached;
         }
 
         CancelPendingPresent();
@@ -157,7 +165,7 @@ public class AvonicDatetimeButton : TemplatedControl
     private void Load()
     {
         _lookedUp = true;
-        var name = Datetime;
+        var name = _triedName = Datetime;
         if (string.IsNullOrEmpty(name))
         {
             LogError("[ion-datetime-button] - An ID associated with an ion-datetime instance is required to function properly.");
@@ -184,16 +192,25 @@ public class AvonicDatetimeButton : TemplatedControl
         if (_overlay is not null)
         {
             AddOverlayClass(_overlay);
+            // Its enter and leave move the datetime by a render transform, which causes no layout pass: a check at each end.
+            _overlay.DidPresent += (_, _) => CheckActive();
+            _overlay.DidDismiss += (_, _) => CheckActive();
         }
 
         // componentOnReady: once the datetime has loaded, which it does when it's attached, after its styles, so that what an app's
         // style sets on it (its presentation, min, max) is what it loads with. One later in the tree than the button loads after it.
+        WaitForDatetime(datetime);
+    }
+
+    private void WaitForDatetime(AvonicDatetime datetime)
+    {
         if (((ILogical)datetime).IsAttachedToLogicalTree)
         {
             OnDatetimeReady();
         }
         else
         {
+            // Not kept while the button is out of the tree, so that a datetime never attached doesn't hold on to it.
             datetime.AttachedToLogicalTree += OnDatetimeAttached;
         }
     }
@@ -209,7 +226,6 @@ public class AvonicDatetimeButton : TemplatedControl
     {
         var datetime = _datetime!;
         _ready = true;
-        datetime.GetDefaultPart();
         _presentation = datetime.Presentation;
         _selected = _presentation is DatetimePresentation.TimeDate or DatetimePresentation.Time ? Selected.Time : Selected.Date;
         if (_attached)
@@ -217,8 +233,10 @@ public class AvonicDatetimeButton : TemplatedControl
             datetime.ValueChange += OnValueChange;
         }
 
+        datetime.AttachedToVisualTree += OnDatetimeVisualChanged;
+        datetime.DetachedFromVisualTree += OnDatetimeVisualChanged;
         SetDateTimeText();
-        CheckActive();
+        UpdateWatch();
     }
 
     /// <summary>
@@ -443,7 +461,8 @@ public class AvonicDatetimeButton : TemplatedControl
         {
             // The date+time wheel shows both together, so it keeps its presentation.
             datetime.SetCurrentValue(AvonicDatetime.PresentationProperty, DatetimePresentation.Date);
-            needsPresentationChange = true;
+            // A binding or a style that puts it back: nothing to wait for.
+            needsPresentationChange = datetime.Presentation == DatetimePresentation.Date;
         }
 
         Select(Selected.Date);
@@ -463,7 +482,7 @@ public class AvonicDatetimeButton : TemplatedControl
             && datetime.Presentation != DatetimePresentation.Time)
         {
             datetime.SetCurrentValue(AvonicDatetime.PresentationProperty, DatetimePresentation.Time);
-            needsPresentationChange = true;
+            needsPresentationChange = datetime.Presentation == DatetimePresentation.Time;
         }
 
         Select(Selected.Time);
@@ -529,19 +548,41 @@ public class AvonicDatetimeButton : TemplatedControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        // Each layout pass of the window (a scroll, a present, a dismiss, something hidden) is a check, as the observer looks at
-        // each frame.
         _layoutRoot = TopLevel.GetTopLevel(this);
-        LayoutUpdated += OnLayoutUpdated;
-        CheckActive();
+        UpdateWatch();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        LayoutUpdated -= OnLayoutUpdated;
         _layoutRoot = null;
         // Not in a window, nothing is shown: collapsed, as it was before it was attached.
+        UpdateWatch();
+    }
+
+    private void OnDatetimeVisualChanged(object? sender, VisualTreeAttachmentEventArgs e) => UpdateWatch();
+
+    /// <summary>
+    /// Each layout pass of the window (a scroll, a present, a dismiss, something hidden) is a check, as the observer looks at each
+    /// frame, while the button and the datetime are both in a window: a datetime out of one (an overlay's unmounted content) is
+    /// never shown, and costs nothing.
+    /// </summary>
+    private void UpdateWatch()
+    {
+        var watch = _layoutRoot is not null && _datetime is not null && TopLevel.GetTopLevel(_datetime) is not null;
+        if (watch != _watching)
+        {
+            _watching = watch;
+            if (watch)
+            {
+                LayoutUpdated += OnLayoutUpdated;
+            }
+            else
+            {
+                LayoutUpdated -= OnLayoutUpdated;
+            }
+        }
+
         CheckActive();
     }
 
@@ -558,7 +599,7 @@ public class AvonicDatetimeButton : TemplatedControl
             return;
         }
 
-        var active = _attached && _layoutRoot is not null && IsShown(_datetime, _layoutRoot);
+        var active = _attached && _watching && _layoutRoot is not null && IsShown(_datetime, _layoutRoot);
         if (active == _active)
         {
             return;

@@ -190,7 +190,8 @@ host. The host has no role.
 - **The observer**: `IntersectionObserver` has no Avalonia counterpart that tells a hide or a scroll. On each layout pass while the
   button is attached (`LayoutUpdated`, which a scroll, a present, a dismiss and an ancestor hidden all cause) the button checks:
   the datetime in the same visual root, effectively visible, and at least 1% of its area inside the root and every clipping
-  ancestor (`ClipToBounds`), its box transformed to the root. A box of no area that touches counts as 1, as Chromium's ratio does.
+  ancestor (`ClipToBounds`), its box transformed to the root; and when the overlay's present and dismiss end, as their animations are
+  render transforms. Only while the datetime is in a window (code review). A box of no area that touches counts as 1, as Chromium's ratio does.
 - **`AvonicDatetime` (#46), one change**: `Rendered` is raised a frame after a render that changed the presentation even when the
   datetime has no template yet (never shown), as Ionic's datetime renders while hidden. Without it, a tap on a datetime-button whose
   popover has never been shown would wait for good. Nothing else in the datetime changes.

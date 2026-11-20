@@ -38,10 +38,12 @@ public sealed class DatetimeButtonNative : ContentControl
         // ion-activatable, at style priority before any style, so an app's style wins.
         SetValue(Activatable.IsEnabledProperty, true, BindingPriority.Style);
 
-        // Where the release was, for the popover's event (clientX, clientY); a key's click has none.
+        // Where the release was, for the popover's event (clientX, clientY): known only while the release is on its way, around
+        // the native button's own handler, so a click from a key, or from inside, has none.
         AddHandler(PointerReleasedEvent, (_, e) => _releasedAt = TopLevel.GetTopLevel(this) is { } top ? e.GetPosition(top) : null,
             Avalonia.Interactivity.RoutingStrategies.Tunnel, handledEventsToo: true);
-        _ = new NativeButton(this, source => OnClick(source is DatetimeButtonNative ? null : _releasedAt), static () => true, static () => { });
+        _ = new NativeButton(this, _ => OnClick(_releasedAt), static () => true, static () => { });
+        AddHandler(PointerReleasedEvent, (_, _) => _releasedAt = null, Avalonia.Interactivity.RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     public string? Text
@@ -72,7 +74,6 @@ public sealed class DatetimeButtonNative : ContentControl
 
     private void OnClick(Point? at)
     {
-        _releasedAt = null;
         if (IsEffectivelyEnabled)
         {
             Clicked?.Invoke(this, at);

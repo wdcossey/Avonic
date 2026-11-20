@@ -172,6 +172,20 @@ public class AvonicDatetimeButtonTests
     });
 
     [AvaloniaFact]
+    public void B1_A_Name_Given_While_Out_Of_The_Tree_Is_Looked_Up_At_The_Next_Attach() => Run((scene, clock) =>
+    {
+        var button = new AvonicDatetimeButton { Datetime = "" };
+        var (_, datetime) = Stage(scene, clock, new AvonicDatetime { Value = June15 }, button: button);
+        var page = (StackPanel)button.Parent!;
+        page.Children.Remove(button);
+        button.Datetime = "dt";
+        page.Children.Insert(0, button);
+        Settle(clock, 100);
+        Assert.Same(datetime, button.DatetimeElement);
+        Assert.Equal(("Jun 15, 2023", "1:47 PM"), Texts(button));
+    });
+
+    [AvaloniaFact]
     public void B1_The_Datetime_Is_Read_Once_It_Has_Loaded_With_An_Apps_Style() => Run((scene, clock) =>
     {
         // componentOnReady: the datetime after it, styled time-only by the app, gives a time button only, and its value lists are
@@ -565,6 +579,21 @@ public class AvonicDatetimeButtonTests
             Settle(clock, 50);
             Assert.True(active == button.IsDatetimeActive, $"{px} px in view: expected {(active ? "active" : "inactive")}");
         }
+    });
+
+    [AvaloniaFact]
+    public void B7_Active_In_A_Sheet_That_Slides_Up() => Run((scene, clock) =>
+    {
+        // A sheet's enter moves it by a render transform alone, which causes no layout pass: the check at its present's end sees it.
+        var datetime = new AvonicDatetime { Value = June15 };
+        var (button, _) = Stage(scene, clock, datetime);
+        var modal = (AvonicModal)datetime.Parent!;
+        modal.Breakpoints = [0, 1];
+        modal.InitialBreakpoint = 1;
+        Tap(scene, clock, DateButton(button));
+        Assert.True(modal.IsShown);
+        Assert.True(button.IsDatetimeActive);
+        Assert.Equal(ExpandCollapseState.Expanded, Expanded(DateButton(button)));
     });
 
     [AvaloniaFact]
