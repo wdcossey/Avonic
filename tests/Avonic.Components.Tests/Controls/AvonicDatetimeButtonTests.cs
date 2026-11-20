@@ -267,12 +267,22 @@ public class AvonicDatetimeButtonTests
     [InlineData("en-US", DatetimeHourCycle.H23, "Jun 15, 2023", "13:47")]
     public void B2_The_Datetimes_Locale_And_Hour_Cycle(string locale, DatetimeHourCycle? hourCycle, string date, string time) => Run((scene, clock) =>
     {
-        // locales: the datetime's own helpers, so the text is the datetime's.
+        // locales: the datetime's own helpers, so the text is the datetime's on every platform; Chromium's strings where .NET's ICU
+        // was measured against Chromium (Windows: Linux's gives some locales' AM and PM in English, as the datetime's README says).
         var datetime = new AvonicDatetime { Value = June15, HourCycle = hourCycle };
         var (button, _) = Stage(scene, clock, datetime);
         datetime.Locale = locale;
         datetime.Value = "2023-06-15T13:47";
-        Assert.Equal((date, time), Texts(button));
+        var culture = DatetimeIntl.Culture(locale);
+        var parts = DatetimeUtils.ParseDate("2023-06-15T13:47")!.Value;
+        var own = DatetimeIntl.LocalizedDateTime(culture, parts,
+            new DateTimeFormatOptions { Month = DateTimeFormatMonth.Short, Day = DateTimeFormatNumber.Numeric, Year = DateTimeFormatNumber.Numeric });
+        var ownTime = DatetimeIntl.LocalizedTime(culture, parts, DatetimeIntl.GetHourCycle(culture, hourCycle), null);
+        Assert.Equal((own, ownTime), Texts(button));
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.Equal((date, time), Texts(button));
+        }
     });
 
     // ── B3: the values ───────────────────────────────────────────────────────────────────────

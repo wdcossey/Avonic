@@ -101,6 +101,8 @@ None.
   dismiss end: a sheet sliding up is active once it's up (Chromium: as it enters), and a datetime moved into or out of view by a
   render transform alone isn't seen until the next layout. Ancestors that clip by default in Avalonia (`TemplatedControl`) clip
   what counts.
+- **The text is the datetime's locale text**, with [its gaps](../ion-datetime/README.md#known-gaps): measured against Chromium on
+  Windows; Linux's ICU gives some locales' AM and PM in English (`PM 1:47` for Korean, which CI showed).
 - **After Escape, the button has its focus again without Chromium's ring**: the overlays give focus back without `:focus-visible`.
 - **The overlay's popover is in the window's overlay layer**, as every Avonic popover: in a real popup window (another `TopLevel`) it
   can't be tested headless.
