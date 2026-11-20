@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="using:Avonic.Components.Animation"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="12" Margin="16">
+            <c:AvonicDatetimeButton Datetime="PreviewDatetime" />
+            <c:AvonicDatetimeButton Datetime="PreviewDatetime" Color="danger" IsEnabled="False" />
+            <c:AvonicModal KeepContentsMounted="True">
+                <c:AvonicDatetime Name="PreviewDatetime" Value="2023-06-15T13:47:00" Locale="en-US" />
+            </c:AvonicModal>
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- One of the two native buttons: datetime-button.md.css's button rules. Radius 8, 2 on each side, padding 6px 12px, the step-300
+         background, the text colour, 1rem, overflow hidden (the ripple clipped to the radius), cursor: pointer; its colour eased
+         over 150 ms ease-in-out. Chromium's focus ring when Tab focuses it, and the ripple in the text colour. -->
+    <ControlTheme x:Key="{x:Type c:DatetimeButtonNative}" TargetType="c:DatetimeButtonNative">
+        <Setter Property="Background" Value="{DynamicResource Avonic.DatetimeButton.Md.BackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorBrush}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="{x:Static TemplatedControl.ForegroundProperty}" Duration="0:0:0.15" Easing="{a:CubicBezier 0.42, 0, 0.58, 1}" />
+            </Transitions>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="PART_Native"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ClipToBounds="True">
+                        <Panel>
+                            <ContentPresenter Name="PART_ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Padding="{TemplateBinding Padding}"
+                                              VerticalContentAlignment="Center" />
+                            <!-- The slot's fallback: the text, while there's no content. -->
+                            <TextBlock Name="PART_Text"
+                                       Text="{TemplateBinding Text}"
+                                       Margin="{TemplateBinding Padding}"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                        </Panel>
+                    </Border>
+                    <!-- outline: auto, 2 px from 1 outside to 1 inside, under nothing. -->
+                    <Border Name="PART_FocusRing"
+                            Margin="-1"
+                            BorderThickness="2"
+                            CornerRadius="9"
+                            BorderBrush="{DynamicResource Avonic.DatetimeButton.FocusRingBrush}"
+                            IsHitTestVisible="False"
+                            IsVisible="False" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- :host(.datetime-button-disabled) button { opacity: 0.4 }, the button as one. -->
+        <Style Selector="^:disabled">
+            <Setter Property="OpacityMask" Value="{DynamicResource Avonic.DatetimeButton.Md.DisabledMask}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- ion-datetime-button: display: flex; flex-wrap: wrap; align-items: center; justify-content: center. -->
+    <ControlTheme x:Key="{x:Type c:AvonicDatetimeButton}" TargetType="c:AvonicDatetimeButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <WrapPanel Name="PART_Container" Orientation="Horizontal" ItemsAlignment="Center">
+                    <c:DatetimeButtonNative Name="PART_DateButton"
+                                            Classes="native"
+                                            IsVisible="False"
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding DateTargetContent}"
+                                            ContentTemplate="{TemplateBinding DateTargetContentTemplate}" />
+                    <c:DatetimeButtonNative Name="PART_TimeButton"
+                                            Classes="native"
+                                            IsVisible="False"
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding TimeTargetContent}"
+                                            ContentTemplate="{TemplateBinding TimeTargetContentTemplate}" />
+                </WrapPanel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- :host(.date-active) #date-button, :host(.time-active) #time-button { color: var(ion-color-primary) } -->
+        <Style Selector="^:date-active /template/ c|DatetimeButtonNative#PART_DateButton">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+        <Style Selector="^:time-active /template/ c|DatetimeButtonNative#PART_TimeButton">
+            <Setter Property="Foreground" Value="{DynamicResource Avonic.Color.PrimaryBrush}" />
+        </Style>
+
+        <!-- :host(.ion-color.date-active) #date-button { color: var(ion-color-base) }, after them, which it beats. -->
+        <Style Selector="^:ion-color:date-active /template/ c|DatetimeButtonNative#PART_DateButton">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicDatetimeButton].(b:ColorPalette.Base)}" />
+        </Style>
+        <Style Selector="^:ion-color:time-active /template/ c|DatetimeButtonNative#PART_TimeButton">
+            <Setter Property="Foreground" Value="{Binding $parent[c:AvonicDatetimeButton].(b:ColorPalette.Base)}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -167,4 +167,8 @@
     <SolidColorBrush x:Key="Avonic.Datetime.Background" Color="{DynamicResource Avonic.BackgroundColorStep100}" />
     <SolidColorBrush x:Key="Avonic.Datetime.Md.TimeButtonBackground" Color="{DynamicResource Avonic.BackgroundColorStep300}" />
 
+    <!-- ion-datetime-button: its buttons' background reads ion-background-color-step-300, which dark sets, before the literal
+         Tokens/DatetimeButton.axaml keeps for light. -->
+    <SolidColorBrush x:Key="Avonic.DatetimeButton.Md.BackgroundBrush" Color="{DynamicResource Avonic.BackgroundColorStep300}" />
+
 </ResourceDictionary>

@@ -1,0 +1,21 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- The modal or popover an AvonicDatetimeButton presents has the class ion-datetime-button-overlay, and its size variables are
+         fit-content (Tokens/DatetimeButton.axaml), so its box is the datetime's max-content. A datetime fills the room it's measured
+         with, as a block's width: auto, up to its 350; stretched, it gives its content's width instead (the time wheels' 181.56, as
+         Chromium), and fills the box that takes. Global rules, as the class is on the overlay: two alternatives, whose target is a
+         datetime. -->
+    <Style Selector=".ion-datetime-button-overlay c|AvonicDatetime">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- core.css: .ion-datetime-button-overlay ion-datetime.datetime-grid { width: 320px; min-height: 320px }, a calendar narrower
+         than its own 350. -->
+    <Style Selector=".ion-datetime-button-overlay c|AvonicDatetime:grid">
+        <Setter Property="Width" Value="320" />
+        <Setter Property="MinHeight" Value="320" />
+    </Style>
+
+</Styles>
