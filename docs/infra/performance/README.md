@@ -162,7 +162,8 @@ first use; the later rounds are what a user pays each time.
 After the sample's pages, each round opens three pages that only this build has (`Diagnostics/PageCostSet.cs`), for the
 cost of one datetime (#248): `datetime-x1`, `datetime-x2` and `datetime-x4`, with 1, 2 and 4 plain `AvonicDatetime`s
 (`Diagnostics/DatetimeCostView.cs`), the default calendar and time, with `Locale="en-US"` and `Value="2023-06-15T13:47:00"`
-pinned, so that every run shows June 2023. The sample's own list doesn't show them.
+pinned, so that every run shows June 2023. Then the same three as single grids (`CalendarRendering="SingleGrid"`, #248's spike
+A): `datetime-x1-grid`, `datetime-x2-grid` and `datetime-x4-grid`. The sample's own list doesn't show them.
 
 ```
 dotnet build samples/Avonic.Sample.Android -c Release -p:AvonicPerf=true
@@ -184,9 +185,9 @@ dotnet run --project samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
 
 `AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term
 that starts with `=` keeps only the page of that title (`=ion-datetime`, without `ion-datetime-button`). Unset, every page
-opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the three above,
-about a minute and a half on the phone, most of it the month changes; `datetime-x` only the three; `datetime-x1` only the one
-with the month changes. Use commas, not spaces, through `adb shell`, which splits its arguments again.
+opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the six above,
+about a minute and a half on the phone, most of it the month changes; `datetime-x` only the six; `datetime-x1` only the two
+with the month changes. `-grid` keeps the grid pages and `ion-grid`. Use commas, not spaces, through `adb shell`, which splits its arguments again.
 
 On desktop it's the environment variable (`$env:AVONIC_PERF_ONLY = "datetime"`, and `Remove-Item Env:AVONIC_PERF_ONLY` for
 every page again). On Android it's an intent extra of the same name, which `MainActivity` reads before the shell starts:
@@ -197,7 +198,7 @@ adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avo
 
 ### Month changes
 
-On `datetime-x1`, after its line, each round changes month 10 times forward and 10 back, as a tap on the calendar's next
+On `datetime-x1`, and `datetime-x1-grid` (its lines labelled `datetime-month-grid`), after its line, each round changes month 10 times forward and 10 back, as a tap on the calendar's next
 and previous month buttons does (`Diagnostics/MonthChangeTiming.cs`). It finds the buttons by their automation names,
 `Next month` and `Previous month`, and raises the routed `Click` event their type, or the nearest base type, registers, which
 a tap ends in, so a new design of the calendar is timed the same way as long as it keeps those names and changes month on

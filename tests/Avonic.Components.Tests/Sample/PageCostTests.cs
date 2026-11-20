@@ -36,7 +36,8 @@ public partial class PageCostTests
     [Fact]
     public void With_No_Filter_Every_Sample_Page_But_The_Device_Page_Opens_Then_The_Datetime_Pages()
     {
-        var expected = Titles(SamplePages).Where(t => t != "device").Concat(["datetime-x1", "datetime-x2", "datetime-x4"]);
+        var expected = Titles(SamplePages).Where(t => t != "device")
+            .Concat(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"]);
 
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, null)));
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, " ")));
@@ -58,9 +59,12 @@ public partial class PageCostTests
         Assert.Contains("datetime-x4", datetime);
         Assert.DoesNotContain("ion-button", datetime);
 
-        Assert.Equal(["datetime-x1"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
-        Assert.Equal(["ion-button", "datetime-x2"], Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
-        Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4"], Titles(PageCostSet.Select(SamplePages, "datetime-x")));
+        Assert.Equal(["datetime-x1", "datetime-x1-grid"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
+        Assert.Equal(["ion-button", "datetime-x2", "datetime-x2-grid"], Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
+        Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"],
+            Titles(PageCostSet.Select(SamplePages, "datetime-x")));
+        // ion-grid is a sample page: "x1-grid" and so on, or "datetime", for the grid pages.
+        Assert.Equal(["ion-grid", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"], Titles(PageCostSet.Select(SamplePages, "-grid")));
         Assert.Empty(PageCostSet.Select(SamplePages, "no-such-page"));
 
         // A term with "=" is a whole title.
@@ -83,7 +87,49 @@ public partial class PageCostTests
             Assert.Equal("en-US", d.Locale);
             Assert.Equal(DatetimePresentation.DateTime, d.Presentation);
             Assert.Equal("June 2023", d.GetVisualDescendants().OfType<TextBlock>().First(t => t.Name == "PART_MonthYearText").Text);
+            Assert.Equal(DatetimeCalendarRendering.ScrolledMonths, d.CalendarRendering);
         });
+    });
+
+    [AvaloniaFact]
+    public void A_Grid_Page_Holds_The_Same_Datetimes_As_Single_Grids() => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(2, DatetimeCalendarRendering.SingleGrid);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+
+        var datetimes = page.GetVisualDescendants().OfType<AvonicDatetime>().ToArray();
+        Assert.Equal(2, datetimes.Length);
+        Assert.All(datetimes, d =>
+        {
+            Assert.Equal(DatetimeCostView.PinnedValue, d.Value.ToString());
+            Assert.Equal(DatetimeCalendarRendering.SingleGrid, d.CalendarRendering);
+            Assert.Equal(42, d.GetVisualDescendants().OfType<DatetimeCalendarDay>().Count());
+        });
+        Assert.Equal("datetime-x2-grid", DatetimeCostView.Title(2, DatetimeCalendarRendering.SingleGrid));
+        Assert.Equal(PageCostSet.MonthChangeLabel, PageCostSet.MonthChangeLabelOf("datetime-x1"));
+        Assert.Equal(PageCostSet.GridMonthChangeLabel, PageCostSet.MonthChangeLabelOf("datetime-x1-grid"));
+        Assert.Null(PageCostSet.MonthChangeLabelOf("datetime-x2-grid"));
+    });
+
+    [AvaloniaFact]
+    public void A_Grids_Month_Changes_Are_Timed_The_Same_Way() => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(1, DatetimeCalendarRendering.SingleGrid);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().Single();
+
+        var run = new MonthChangeTiming(datetime, TimeSpan.FromMilliseconds(20)).Run(2, 2);
+        Drive(clock, run);
+
+        var changes = run.Result;
+        Assert.Equal(
+            ["next 1 June 2023 to July 2023", "next 2 July 2023 to August 2023", "previous 1 August 2023 to July 2023", "previous 2 July 2023 to June 2023"],
+            changes.Select(c => $"{(c.Next ? "next" : "previous")} {c.Index} {c.From} to {c.To}"));
+        Assert.All(changes, c => Assert.NotNull(c.HeadingMs));
+        Assert.Matches(ChangeLine(), changes[0].Line(PageCostSet.GridMonthChangeLabel, 1));
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });
 
     // ── The month changes ────────────────────────────────────────────────────────────────────

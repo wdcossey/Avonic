@@ -14,8 +14,8 @@ namespace Avonic.Sample;
 /// <summary>
 /// A build with <c>-p:AvonicPerf=true</c> (with <c>-c Release</c>, the build an app ships) opens every page by itself, a few rounds,
 /// and writes each page's cost line, prefixed <c>AVONIC-PERF</c>, to the console: logcat's <c>DOTNET</c> tag on Android. The pages
-/// are <see cref="PageCostSet"/>'s: the sample's, and perf-only pages of 1, 2 and 4 datetimes, on the first of which the month
-/// changes are timed too (<see cref="MonthChangeTiming"/>). With <c>AVONIC_PERF_ONLY</c> set (on Android, the intent extra of that
+/// are <see cref="PageCostSet"/>'s: the sample's, and perf-only pages of 1, 2 and 4 datetimes, scrolled and as a single grid, on the
+/// first of each of which the month changes are timed too (<see cref="MonthChangeTiming"/>). With <c>AVONIC_PERF_ONLY</c> set (on Android, the intent extra of that
 /// name, which the head copies into <see cref="PageCostsOnly"/>) only the pages it names. With <c>AVONIC_PERF_OUT</c> set, it also
 /// appends the lines to that file, and with <c>AVONIC_PERF_EXIT=1</c> a desktop app closes after.
 /// docs/infra/performance/README.md, "Page costs on a device".
@@ -26,8 +26,6 @@ public partial class SampleShell
 
     /// <summary>Changes of month timed each round, forward and then back.</summary>
     private const int MonthChanges = 10;
-
-    private const string MonthChangeLabel = "datetime-month";
 
     private static bool _pageCostsStarted;
     private TaskCompletionSource<string>? _pendingReport;
@@ -109,7 +107,7 @@ public partial class SampleShell
 
                 // Let it draw, then back to the list, as a user would go.
                 await Task.Delay(400);
-                if (title != PageCostSet.MonthChangePage)
+                if (PageCostSet.MonthChangeLabelOf(title) is not { } label)
                 {
                     page = null;
                     ShowIndex();
@@ -120,13 +118,13 @@ public partial class SampleShell
                 // The month changes, then what they may have left behind, once their page is gone: a frame loop, the page itself,
                 // or no idle time.
                 var before = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                await TimeMonthChanges(page, round);
+                await TimeMonthChanges(page, round, label);
                 var timed = new WeakReference(page);
                 page = null;
                 ShowIndex();
                 await Task.Delay(400);
                 var after = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                foreach (var line in PerfChecks.Lines(MonthChangeLabel, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform()))
+                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform()))
                 {
                     Write(line);
                 }
@@ -148,17 +146,17 @@ public partial class SampleShell
     }
 
     /// <summary>Ten months forward and ten back on the page's datetime, each change a line, then the round's.</summary>
-    private static async Task TimeMonthChanges(Control page, int round)
+    private static async Task TimeMonthChanges(Control page, int round, string label)
     {
         try
         {
             var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().First();
-            var changes = await new MonthChangeTiming(datetime).Run(MonthChanges, MonthChanges, change => Write(change.Line(MonthChangeLabel, round)));
-            Write(MonthChangeTiming.Summary(MonthChangeLabel, round, changes));
+            var changes = await new MonthChangeTiming(datetime).Run(MonthChanges, MonthChanges, change => Write(change.Line(label, round)));
+            Write(MonthChangeTiming.Summary(label, round, changes));
         }
         catch (Exception ex)
         {
-            Write($"{MonthChangeLabel}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+            Write($"{label}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
         }
     }
 
