@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-loading: structure only. The look is in Avonic.Themes/Controls/AvonicLoading.axaml. The host covers the overlay layer:
+         the backdrop, then a focusable sentinel, the wrapper placed by the alert's panel, and another sentinel, as Ionic's
+         tabindex="0" divs, so that Tab wraps inside. The wrapper is a flex row of the spinner and the message. -->
+    <ControlTheme x:Key="{x:Type c:AvonicLoading}" TargetType="c:AvonicLoading">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <c:AvonicBackdrop Name="PART_Backdrop" Visible="{TemplateBinding ShowBackdrop}" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <Border Name="PART_SentinelStart" Focusable="True" />
+                    <c:AlertPanel Name="PART_Panel" ZIndex="10">
+                        <Border Name="PART_Wrapper">
+                            <c:FlexRow Name="PART_Row" HorizontalContentAlignment="Center">
+                                <Border Name="PART_SpinnerBox" VerticalAlignment="Center"
+                                        IsVisible="{TemplateBinding Spinner, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <c:AvonicSpinner Name="PART_Spinner" SpinnerName="{TemplateBinding Spinner}" VerticalAlignment="Top"
+                                                     AutomationProperties.AccessibilityView="Raw" />
+                                </Border>
+                                <Border Name="PART_Content" VerticalAlignment="Center"
+                                        IsVisible="{TemplateBinding Message, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <ContentPresenter Name="PART_MessagePresenter" Content="{TemplateBinding Message}" TextWrapping="Wrap"
+                                                      IsVisible="{TemplateBinding Message, Converter={x:Static c:AvonicLoading.HasText}}" />
+                                </Border>
+                            </c:FlexRow>
+                        </Border>
+                    </c:AlertPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
