@@ -24,6 +24,10 @@ it's compared with. #248 holds what was found and what to try.
 The two runs above are from before the spike harness, and have no `datetime-x` pages and no month changes. Compared with
 one, a newer run's last row sums only the pages both have.
 
+A datetime run made at v2 44824da measured nothing past its first round's month changes, which left the app with no idle time
+on the Pixel ([why](../README.md#what-the-month-changes-may-leave-behind)): don't keep one. Use a build with the round's
+checks, and a run whose checks have no `warning:`.
+
 ## A spike's run beside the baseline
 
 The datetime spikes of #248 (one 7×6 grid updated in place; only the month in view built until the first drag; lighter day

@@ -10,7 +10,9 @@
 //
 // A run with month changes (the datetime-x1 page's "datetime-month: round N, next 3, ..." lines, SampleShell.PageCosts.cs) gets a
 // second table: per round, and over the later rounds, the median and the most of each change's time to its first frame drawn, to
-// the heading showing the new month, and of its longest gap between frames; and the gaps over 16.7 and 33 ms, per round.
+// the heading showing the new month, and of its longest gap between frames; and the gaps over 16.7 and 33 ms, per round. The
+// rounds' checks after the month changes ("datetime-month: round N, check: ..." and its warnings, PerfChecks.cs) are listed after,
+// with the platform line, so that a run that measured something it left behind says so.
 'use strict';
 const fs = require('fs');
 
@@ -29,9 +31,13 @@ function median(values) {
 function load(path) {
   const pages = new Map();
   const changes = new Map(); // label -> [{ round, first, heading, frames, longest, gap, over16, over33 }]
+  const checks = [];
   let start = '';
   for (const text of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
     if (text.includes('start: ')) start = text.slice(text.indexOf('start: ') + 7);
+    // After the prefix, wherever it is: a log captured without logcat's "-v raw" has a date, a pid and a tag before it.
+    const body = text.includes('AVONIC-PERF ') ? text.slice(text.indexOf('AVONIC-PERF ') + 12) : text;
+    if (/, (check|warning): |^platform: /.test(body)) checks.push(body);
     const c = change.exec(text);
     if (c) {
       if (!changes.has(c[1])) changes.set(c[1], []);
@@ -62,7 +68,7 @@ function load(path) {
       elements: runs[0].elements,
     });
   }
-  return { start, pages: result, changes };
+  return { start, pages: result, changes, checks };
 }
 
 // One group of month changes: medians and maxima over its changes, and the long gaps per round.
@@ -115,6 +121,13 @@ if (!a) {
 }
 const before = load(a);
 const sumOf = (run, key, titles) => titles.reduce((t, title) => t + run.pages.get(title)[key], 0);
+const listChecks = (name, run) => {
+  if (run.checks.length === 0) return;
+  console.log(`
+${name}checks
+`);
+  for (const c of run.checks) console.log(`- ${c.includes(', warning: ') ? '**' + c + '**' : c}`);
+};
 
 if (!b) {
   console.log(`${before.start}\n`);
@@ -137,6 +150,7 @@ if (!b) {
       console.log(`| ${name} | ${columns.map(([, s]) => format(s[key])).join(' | ')} |`);
     }
   }
+  listChecks('', before);
 } else {
   const after = load(b);
   console.log(`before: ${before.start}\nafter:  ${after.start}\n`);
@@ -170,4 +184,6 @@ if (!b) {
       console.log(`| ${name} | ${p ? format(x) : ''} | ${q ? format(y) : ''} | ${ratio} |`);
     }
   }
+  listChecks('before: ', before);
+  listChecks('after: ', after);
 }

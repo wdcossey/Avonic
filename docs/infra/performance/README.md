@@ -199,9 +199,11 @@ adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avo
 
 On `datetime-x1`, after its line, each round changes month 10 times forward and 10 back, as a tap on the calendar's next
 and previous month buttons does (`Diagnostics/MonthChangeTiming.cs`). It finds the buttons by their automation names,
-`Next month` and `Previous month`, and invokes them through their automation peers, which raise the button's click, so a
-new design of the calendar is timed the same way as long as it keeps those names. Each change is a line, and each round
-ends with a summary:
+`Next month` and `Previous month`, and raises the routed `Click` event their type, or the nearest base type, registers, which
+a tap ends in, so a new design of the calendar is timed the same way as long as it keeps those names and changes month on
+`Click` (not on a `Command`, which raising the event doesn't run). It makes no automation peer: a peer stays on its control, and
+on Android it's what Avalonia's accessibility bridge works from. Each change is a line, and each round ends with
+a summary:
 
 ```
 datetime-month: round 2, next 3, August 2023 to September 2023, first 23.4 ms, heading 412.0 ms, 61 frames, longest 48.0 ms, gap median 8.3 ms, 3 over 16.7 ms, 1 over 33 ms
@@ -222,7 +224,35 @@ datetime-month: round 2, 20 changes, first median 21.0 max 35.0 ms, heading medi
   changes stop with a `failed:` line, and the run goes on.
 
 The frame callbacks need no meter, so they work with `MetricsSupport` off ([below](#on-android-only-the-total-is-measured));
-`PageCostTests` drives the same code headlessly, but it hasn't yet run on the phone.
+`PageCostTests` drives the same code headlessly.
+
+### What the month changes may leave behind
+
+The first run on the Pixel (v2 44824da, `-e AVONIC_PERF_ONLY datetime`) went wrong after the first round's month changes:
+every later page took 5 to 10 times as long to open, about 2 ms an element instead of 0.3, and no later month change was
+seen, because the calendar never got to its new month. Both wait on `Background` work: the page's line is posted at
+`Background`, and the calendar's scroll rest is a `Background` timer. On Android that runs only in the looper's idle time
+(Avalonia's idle handler), so something left the app no idle time, while its frames went on at 60 Hz. Headless, nothing was
+left: no frame callback asked for, no clock subscriber, nothing scheduled, and later rounds as fast as the first. So the
+timing now leaves nothing that could be the cause (#248):
+
+- no automation peer, the one thing it did that only Android answers on its UI thread;
+- no frame callback once a change is over, counted by `MonthChangeTiming.PendingFrames`;
+- no change going on after its page has gone: a calendar that leaves the tree ends its change at once, where it used to have
+  frames drawn for up to 5 s;
+- no timer, and no reference to the calendar once it has run.
+
+After each round's month changes, and their page has been left, the round checks it (`Diagnostics/PerfChecks.cs`):
+
+```
+datetime-month: round 1, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.6 ms after, accessibility off, touch exploration off, services: none
+```
+
+and adds a `warning:` line for a frame loop still running, a page still alive after a full collection, or a `Background` post
+that waited more than 100 ms (over 10 s reads `over 10 s`). The Android head adds whether accessibility is on and which services
+are, as their queries of Avalonia's accessibility bridge run on the UI thread, also in a `platform:` line at the start.
+`table.js` lists the checks under the tables, the warnings in bold. A run with a warning measured something other than the
+calendar: keep it out of `page-costs/`.
 
 ### Keeping a run
 

@@ -143,7 +143,123 @@ public partial class PageCostTests
 
         Assert.True(run.IsFaulted);
         Assert.IsType<TimeoutException>(run.Exception!.InnerException);
+
+        // The frame it asked for never came, and is off the count: a later check doesn't take it for a frame loop.
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });
+
+    // ── What a timing leaves behind (#248: on the Pixel, every page after the first timing was 5 to 10 times slower) ──────────
+
+    // A peer stays on its control for good, and on Android it's what Avalonia's accessibility bridge works from: the measuring
+    // mustn't add any.
+    [AvaloniaFact]
+    public void A_Timing_Leaves_No_Automation_Peer_On_The_Calendars_Buttons() => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(1);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().Single();
+        var buttons = datetime.GetVisualDescendants().OfType<Control>()
+            .Where(c => Avalonia.Automation.AutomationProperties.GetName(c) is MonthChangeTiming.NextName or MonthChangeTiming.PreviousName)
+            .ToArray();
+
+        var run = new MonthChangeTiming(datetime, TimeSpan.FromMilliseconds(20)).Run(1, 1);
+        Drive(clock, run);
+
+        Assert.True(run.IsCompletedSuccessfully);
+        Assert.Equal(2, buttons.Length);
+        Assert.All(buttons, b => Assert.Null(Avalonia.Automation.Peers.ControlAutomationPeer.FromElement(b)));
+    });
+
+    // Once its page has gone and the clock has run what was due (the calendar's 50 ms scroll rest among it): no frame is asked for,
+    // and nothing is scheduled. Whether the page is collected isn't asked here: this harness keeps even an untimed page alive, so
+    // the device run checks it (PerfChecks.Collected).
+    [AvaloniaFact]
+    public void After_A_Timing_And_Its_Page_No_Frame_Is_Asked_For_And_Nothing_Is_Scheduled() => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(1);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var run = new MonthChangeTiming(page.GetVisualDescendants().OfType<AvonicDatetime>().Single(), TimeSpan.FromMilliseconds(20)).Run(1, 1);
+        Drive(clock, run);
+        Assert.True(run.IsCompletedSuccessfully);
+
+        scene.Window.Content = null;
+        Settle(clock, 2000);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
+        Assert.Equal(0, clock.Pending);
+    });
+
+    // The page left in the middle of a change: the change ends at once, rather than keep the app drawing until its window is over.
+    [AvaloniaFact]
+    public void A_Page_Left_During_A_Change_Ends_It_At_Once_And_No_Frame_Is_Asked_For_After() => Run((scene, clock) =>
+    {
+        var page = new DatetimeCostView(1);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var run = new MonthChangeTiming(page.GetVisualDescendants().OfType<AvonicDatetime>().Single()).Run(1, 0);
+        for (var i = 0; i < 3; i++)
+        {
+            clock.At(clock.Now.TotalMilliseconds + 16);
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        var left = clock.Now;
+        scene.Window.Content = null;
+        Drive(clock, run);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+
+        // Drive draws a frame each 16 ms of the test clock: the change ends within the first, not at its window's end.
+        Assert.True(clock.Now - left <= TimeSpan.FromMilliseconds(32), $"the change went on for {(clock.Now - left).TotalMilliseconds:0} ms of frames after its page was left");
+        Assert.True(run.IsFaulted);
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
+    });
+
+    // As the rounds do: a second timing, on a new page, after the first one's page has gone.
+    [AvaloniaFact]
+    public void A_Second_Timing_On_A_New_Page_Sees_Its_Months_Change() => Run((scene, clock) =>
+    {
+        foreach (var round in new[] { 1, 2 })
+        {
+            var page = new DatetimeCostView(1);
+            scene.Window.Content = page;
+            Settle(clock, 400);
+            var run = new MonthChangeTiming(page.GetVisualDescendants().OfType<AvonicDatetime>().Single(), TimeSpan.FromMilliseconds(20)).Run(2, 0);
+            Drive(clock, run);
+
+            Assert.Equal(["June 2023 to July 2023", "July 2023 to August 2023"], run.Result.Select(c => $"{c.From} to {c.To}"));
+            Assert.All(run.Result, c => Assert.NotNull(c.HeadingMs));
+            scene.Window.Content = null;
+            Settle(clock, 100);
+        }
+    });
+
+    [AvaloniaFact]
+    public void A_Background_Post_Is_Timed() => Run((scene, clock) =>
+    {
+        var post = PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
+        Drive(clock, post);
+
+        Assert.True(post.Result is >= 0);
+    });
+
+    [Fact]
+    public void The_Check_Warns_Of_A_Frame_Loop_A_Live_Page_And_No_Idle_Time()
+    {
+        Assert.Equal(
+            ["datetime-month: round 1, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.6 ms after, accessibility off"],
+            PerfChecks.Lines("datetime-month", 1, 0, true, 0.4, 0.6, "accessibility off"));
+
+        var bad = PerfChecks.Lines("datetime-month", 2, 1, false, 0.4, null, null).ToArray();
+        Assert.Equal("datetime-month: round 2, check: 1 frames asked for, page still alive, background post 0.4 ms before and over 10 s after", bad[0]);
+        Assert.Equal(3, bad.Count(l => l.Contains(", warning: ", StringComparison.Ordinal)));
+        Assert.All(bad, l => Assert.DoesNotMatch(ChangeLine(), l));
+    }
 
     // ── The lines ────────────────────────────────────────────────────────────────────────────
 
@@ -189,7 +305,7 @@ public partial class PageCostTests
                 "AVONIC-PERF " + new MonthChange(true, 1, "June 2023", "July 2023", 20, 400, FrameGaps.Of([10, longest, 8])).Line("datetime-month", round),
                 "AVONIC-PERF " + new MonthChange(false, 1, "July 2023", "June 2023", null, null, FrameGaps.Of([8])).Line("datetime-month", round),
                 "AVONIC-PERF " + MonthChangeTiming.Summary("datetime-month", round, []),
-            }),
+            }.Concat(PerfChecks.Lines("datetime-month", round, 0, true, 0.4, round == 2 ? 900 : 0.5, null).Select(l => "AVONIC-PERF " + l))),
         ];
         var before = Path.GetTempFileName();
         var after = Path.GetTempFileName();
@@ -209,6 +325,12 @@ public partial class PageCostTests
             var two = Node(before, after);
             Assert.Contains("| **all** | | | 180 | 180 | 1.00 |", two, StringComparison.Ordinal);
             Assert.Contains("| Longest gap, median | 24 | 14 | 0.58 |", two, StringComparison.Ordinal);
+
+            // The checks, a warning in bold, and none of them read as a change.
+            Assert.Contains("- datetime-month: round 1, check: 0 frames asked for, page collected, background post 0.4 ms before and 0.5 ms after", one, StringComparison.Ordinal);
+            Assert.Contains("- **datetime-month: round 2, warning: a Background post waited 900.0 ms", one, StringComparison.Ordinal);
+            Assert.Contains("| Changes | 2 | 2 | 2 |", one, StringComparison.Ordinal);
+            Assert.Contains("after: checks", two, StringComparison.Ordinal);
         }
         finally
         {

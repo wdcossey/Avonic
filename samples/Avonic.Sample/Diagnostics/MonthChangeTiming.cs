@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Automation;
-using Avalonia.Automation.Peers;
-using Avalonia.Automation.Provider;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Rendering.Composition;
 using Avalonia.VisualTree;
 
@@ -13,17 +13,25 @@ namespace Avonic.Sample.Diagnostics;
 /// <summary>
 /// What a change of month costs a calendar, as a user's tap on its next or previous month button makes it: for the page-cost
 /// rounds of a <c>-p:AvonicPerf=true</c> build, on the <c>datetime-x1</c> page (#248). It finds the buttons by their automation
-/// names, <see cref="NextName"/> and <see cref="PreviousName"/>, and invokes them through their automation peers, which raise
-/// the button's click, so that any design of the calendar that keeps those names is timed the same way, with no private method
+/// names, <see cref="NextName"/> and <see cref="PreviousName"/>, and raises the routed <c>Click</c> event their type registers, as
+/// a tap ends in, so that any design of the calendar that keeps those names is timed the same way, with no private method
 /// called. The month heading, a <c>TextBlock</c> reading the month as en-US's <c>MMMM yyyy</c>, says when the new month is in.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Each change is timed from just before the click by the top level's frame callbacks (<see cref="TopLevel.RequestAnimationFrame"/>),
 /// asked for again from each one, so that every frame in the window is seen, whatever the calendar animates with. Avalonia paces
 /// them by its composition batches, one a frame of the render loop, so a frame the UI thread was too busy to give shows as a long
 /// gap. They don't need Avalonia's meter, which .NET for Android's <c>MetricsSupport</c> turns off. The first frame drawn is the
 /// compositor's next batch after the click, which its <c>Rendered</c> task says has been drawn.
-/// docs/infra/performance/README.md, "Page costs on a device".
+/// </para>
+/// <para>
+/// It leaves nothing behind: no automation peer (a peer stays on its control, and on Android it's what Avalonia's accessibility
+/// bridge works from), no frame asked for once a change is over (<see cref="PendingFrames"/>), no timer, and no reference to the
+/// calendar once it has run. Raising the event, not a tap, it doesn't run a <c>Command</c> on the button or what a native button
+/// does around it (<c>NativeButton.Click</c>): a calendar that changes month through those isn't timed. A change whose calendar leaves the tree ends at once. docs/infra/performance/README.md, "Page costs
+/// on a device".
+/// </para>
 /// </remarks>
 public sealed class MonthChangeTiming
 {
@@ -53,9 +61,11 @@ public sealed class MonthChangeTiming
     private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
     private const string HeadingFormat = "MMMM yyyy";
 
-    private readonly Control _root;
+    private static int _pendingFrames;
+
     private readonly TimeSpan _window;
     private readonly TimeSpan _maxWindow;
+    private Control? _root;
     private TextBlock? _heading;
 
     /// <param name="root">The calendar, or a page with one calendar.</param>
@@ -69,37 +79,52 @@ public sealed class MonthChangeTiming
     }
 
     /// <summary>
+    /// Frame callbacks asked for by any timing and not yet called, in the whole process: 0 once every timing is over, unless one
+    /// has left a frame loop running, which would keep the app drawing.
+    /// </summary>
+    public static int PendingFrames => Volatile.Read(ref _pendingFrames);
+
+    /// <summary>
     /// <paramref name="forward"/> changes to the next month, then <paramref name="back"/> to the previous, one after the other,
-    /// each once the last one's window is over. <paramref name="each"/> hears each as it's done.
+    /// each once the last one's window is over. <paramref name="each"/> hears each as it's done. It runs once: after it, the timing
+    /// holds no reference to the calendar.
     /// </summary>
     public async Task<IReadOnlyList<MonthChange>> Run(int forward, int back, Action<MonthChange>? each = null)
     {
-        var changes = new List<MonthChange>();
-        for (var i = 1; i <= forward + back; i++)
+        var root = _root ?? throw new InvalidOperationException("A timing runs once.");
+        try
         {
-            var next = i <= forward;
-            var change = await Change(next, next ? i : i - forward);
-            changes.Add(change);
-            each?.Invoke(change);
-        }
+            var changes = new List<MonthChange>();
+            for (var i = 1; i <= forward + back; i++)
+            {
+                var next = i <= forward;
+                var change = await Change(root, next, next ? i : i - forward);
+                changes.Add(change);
+                each?.Invoke(change);
+            }
 
-        return changes;
+            return changes;
+        }
+        finally
+        {
+            _root = null;
+            _heading = null;
+        }
     }
 
-    private async Task<MonthChange> Change(bool next, int index)
+    private async Task<MonthChange> Change(Control root, bool next, int index)
     {
         var name = next ? NextName : PreviousName;
-        var top = TopLevel.GetTopLevel(_root) ?? throw new InvalidOperationException("The calendar isn't in a top level.");
-        var button = _root.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => AutomationProperties.GetName(c) == name)
+        var top = TopLevel.GetTopLevel(root) ?? throw new InvalidOperationException("The calendar isn't in a top level.");
+        var button = root.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => AutomationProperties.GetName(c) == name)
                      ?? throw new InvalidOperationException($"No control named \"{name}\" to automation.");
-        var peer = ControlAutomationPeer.CreatePeerForElement(button);
-        var invoke = peer.GetProvider<IInvokeProvider>() ?? throw new InvalidOperationException($"\"{name}\" can't be invoked.");
-        if (!peer.IsEnabled())
+        var click = ClickEvent(button.GetType()) ?? throw new InvalidOperationException($"\"{name}\" has no Click event.");
+        if (!button.IsEffectivelyEnabled)
         {
             throw new InvalidOperationException($"\"{name}\" is disabled.");
         }
 
-        var from = Heading(rescan: true);
+        var from = Heading(root, rescan: true);
         DateTime? target = from?.AddMonths(next ? 1 : -1);
         var expected = target?.ToString(HeadingFormat, EnUs);
         var compositor = ElementComposition.GetElementVisual(top)?.Compositor;
@@ -108,22 +133,33 @@ public sealed class MonthChangeTiming
         var rendered = new StrongBox<long>();
         var headingAt = 0L;
         var lastLook = 0L;
-        var stopped = false;
+        var start = 0L;
+        var over = false;
+        var asked = 0;
         var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        var start = Stopwatch.GetTimestamp();
-        invoke.Invoke();
+        // A calendar that leaves the tree ends its change at once, rather than have frames drawn for it until the window is over.
+        void OnDetached(object? sender, VisualTreeAttachmentEventArgs e) =>
+            done.TrySetException(new InvalidOperationException("The calendar left the tree during a change."));
 
-        // The compositor's next batch, the one not yet committed, which is committed on this thread after the click's layout: the
-        // first frame with the click's changes in it. Its Rendered task completes on the render thread, as it's drawn: only the
-        // time is taken there.
-        compositor?.RequestCompositionBatchCommitAsync().Rendered.ContinueWith(
-            _ => Volatile.Write(ref rendered.Value, Stopwatch.GetTimestamp()),
-            CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+        void Ask()
+        {
+            asked++;
+            Interlocked.Increment(ref _pendingFrames);
+            top.RequestAnimationFrame(OnFrame);
+        }
 
         void OnFrame(TimeSpan _)
         {
-            if (stopped)
+            // A callback that comes after its change was over was taken off the count then.
+            if (over)
+            {
+                return;
+            }
+
+            asked--;
+            Interlocked.Decrement(ref _pendingFrames);
+            if (done.Task.IsCompleted)
             {
                 return;
             }
@@ -142,7 +178,7 @@ public sealed class MonthChangeTiming
                         lastLook = now;
                     }
 
-                    if (Shows(expected, look))
+                    if (Shows(root, expected, look))
                     {
                         headingAt = now;
                     }
@@ -154,7 +190,7 @@ public sealed class MonthChangeTiming
                     return;
                 }
 
-                top.RequestAnimationFrame(OnFrame);
+                Ask();
             }
             catch (Exception ex)
             {
@@ -162,16 +198,41 @@ public sealed class MonthChangeTiming
             }
         }
 
-        top.RequestAnimationFrame(OnFrame);
-
-        // Frames stop while the display is off or the app is in the background: say so, rather than wait for ever.
-        if (await Task.WhenAny(done.Task, Task.Delay(_maxWindow + _maxWindow)) != done.Task)
+        root.DetachedFromVisualTree += OnDetached;
+        try
         {
-            stopped = true;
-            throw new TimeoutException($"No frame for {(_maxWindow + _maxWindow).TotalSeconds:0.#} s after \"{name}\": is the display off, or the app in the background?");
-        }
+            start = Stopwatch.GetTimestamp();
+            button.RaiseEvent(new RoutedEventArgs(click, button));
 
-        await done.Task;
+            // The compositor's next batch, the one not yet committed, which is committed on this thread after the click's layout:
+            // the first frame with the click's changes in it. Its Rendered task completes on the render thread, as it's drawn: only
+            // the time is taken there.
+            compositor?.RequestCompositionBatchCommitAsync().Rendered.ContinueWith(
+                _ => Volatile.Write(ref rendered.Value, Stopwatch.GetTimestamp()),
+                CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+
+            Ask();
+
+            // Frames stop while the display is off or the app is in the background: say so, rather than wait for ever.
+            var limit = _maxWindow + _maxWindow;
+            try
+            {
+                await done.Task.WaitAsync(limit);
+            }
+            catch (TimeoutException)
+            {
+                throw new TimeoutException($"No frame for {limit.TotalSeconds:0.#} s after \"{name}\": is the display off, or the app in the background?");
+            }
+        }
+        finally
+        {
+            // However it ended, nothing of it goes on: a frame callback still asked for (one that may never come, when frames
+            // have stopped) is taken off the count now, and returns at once if it comes, asking for no other.
+            over = true;
+            Interlocked.Add(ref _pendingFrames, -asked);
+            asked = 0;
+            root.DetachedFromVisualTree -= OnDetached;
+        }
 
         var gaps = new double[frames.Count];
         for (var i = 0; i < frames.Count; i++)
@@ -190,12 +251,29 @@ public sealed class MonthChangeTiming
             FrameGaps.Of(gaps));
     }
 
+    /// <summary>
+    /// The routed <c>Click</c> event of the button's type or the nearest base type that registers one: Avalonia's registry lists an
+    /// event under the type that registered it only.
+    /// </summary>
+    private static RoutedEvent? ClickEvent(Type? type)
+    {
+        for (; type is not null; type = type.BaseType)
+        {
+            if (RoutedEventRegistry.Instance.GetRegistered(type).FirstOrDefault(e => e.Name == "Click") is { } click)
+            {
+                return click;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>The month the heading shows, found again when asked to or when the one found last has gone.</summary>
-    private DateTime? Heading(bool rescan)
+    private DateTime? Heading(Control root, bool rescan)
     {
         if (rescan || _heading is null || TopLevel.GetTopLevel(_heading) is null)
         {
-            _heading = _root.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.IsEffectivelyVisible && Month(t.Text) is not null);
+            _heading = root.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.IsEffectivelyVisible && Month(t.Text) is not null);
         }
 
         return Month(_heading?.Text);
@@ -205,9 +283,9 @@ public sealed class MonthChangeTiming
     /// Whether the heading shows <paramref name="expected"/>: the one found last, or, when it has left the tree (a design that
     /// builds its heading again) or <paramref name="lookAgain"/> asks, the one found now.
     /// </summary>
-    private bool Shows(string expected, bool lookAgain) =>
+    private bool Shows(Control root, string expected, bool lookAgain) =>
         (_heading?.Text == expected && TopLevel.GetTopLevel(_heading) is not null)
-        || Heading(lookAgain)?.ToString(HeadingFormat, EnUs) == expected;
+        || Heading(root, lookAgain)?.ToString(HeadingFormat, EnUs) == expected;
 
     private static DateTime? Month(string? text) =>
         DateTime.TryParseExact(text, HeadingFormat, EnUs, DateTimeStyles.None, out var month) ? month : null;
