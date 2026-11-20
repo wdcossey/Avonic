@@ -327,6 +327,19 @@ public class AvonicNavTests
     }
 
     [AvaloniaFact]
+    public void N5_The_animated_opacity_replaces_the_pages_own_as_CSSs_does_and_it_comes_back_after()
+    {
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"));
+        stage.Done(Task.FromResult(true));
+        var two = new TestPage("two") { Opacity = 0.5 };
+        _ = stage.Nav.Push(two);
+        stage.At(600 + 32 + 144);
+        Assert.Equal(0.01 + (0.99 * ForwardEasing.Ease(144 / 280.0)), GroupOpacity(two), 4);
+        stage.After(600);
+        Assert.Equal(0.5, GroupOpacity(two));
+    }
+
+    [AvaloniaFact]
     public void N5_IonNavDidChange_comes_before_an_awaiting_caller_continues()
     {
         using var stage = new Stage(nav => nav.Root = new TestPage("one"));

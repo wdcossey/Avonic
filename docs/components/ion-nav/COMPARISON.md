@@ -91,6 +91,6 @@ the median of five (ms):
 
 Nearly all of a push is the page's own first layout (styles, templates, measure), the cost #248 measured for opening a page, which
 on a Pixel 8 is 150 to 200 ms for a typical page; the nav waits for it, as Ionic does, then animates for 280 ms. What the nav adds is
-small: an instruction and its task, one frame's wait, and per frame of the animation, two bindings (the page's mask and transform);
+small: an instruction and its task, one frame's wait, and per frame of the animation, its values (the page's mask, opacity and transform);
 the pages under the top are hidden, so they cost nothing to lay out. The phone itself wasn't used (no device run here), so these are
 desktop headless numbers: read them as the shape, not the phone's time.
