@@ -66,6 +66,7 @@ seen in the 64 ms frame. The nav's pages now take a transition's `opacity` as an
 | N22 | A bare form in a list | `TypeError` on a string (M8) | Taken | Deliberate (ADR 0005) |
 | N23 | Swipe back | Off in md (M20); in iOS from the edge, linear, Ionic's end rule | Off by default; offered under md, with Ionic's rule | Deliberate: offered (Avonic's choice) |
 | N24 | Hardware back | The nav doesn't take it (M19) | Pops at priority 0 while it can go back (`HandleBackButton`) | Extension |
+| N24 | Back under a presented overlay | No nav listener; a framework's router (priority 0) goes back behind an overlay with `backdropDismiss` off, which registers no handler | A nav behind a presented overlay (toasts aside) never pops; one inside it does | Avonic's choice |
 | L1 | Link directions | Forward, back, root, `skipIfBusy` (M17) | The same | Match |
 | L2 | Clicks in the link | A click on its text; Space and Enter on a native button in it; a double click pushes once (M17, X2c) | The same, through `NativeButton` | Match |
 | L3 | No nav, no component | Nothing | Nothing | Match |

@@ -126,7 +126,9 @@ pages above it, with its state and scroll position, and removed from the nav whe
   router outlet, which goes back at priority 0. Here the nav does: while it can go back and is shown, a back request (Android's back,
   a mouse's back button, Alt+Left) pops it, at priority 0 inside an `AvonicApp`, so an overlay (100) and a menu (99) come first; of
   several navs, the innermost. At its root it leaves the request alone, for the platform (Android leaves the app) or the app's own
-  handler. An app that wants it for itself can:
+  handler. **While an overlay is presented** (a toast aside, as for the overlays' own back), a nav behind it never pops, even
+  under an overlay with `BackdropDismiss` off, which takes no back request itself; a nav inside the overlay (a nav in a modal) still
+  does. Ionic's router would go back behind such an overlay: Avonic doesn't. An app that wants it for itself can:
   - set **`HandleBackButton="False"`** on the nav, which then never takes a back request; or
   - register on **`HardwareBackButton.IonBackButtonEvent`** above priority 0 (`e.Register(1, …)`), which comes first, inside an
     `AvonicApp`.

@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
@@ -77,9 +78,15 @@ public partial class AvonicNav
 
         /// <summary>
         /// The innermost nav that takes the request: the last attached of those, as a nav inside another's page is attached after
-        /// it (a parent attaches before its children), and is removed when it's detached.
+        /// it (a parent attaches before its children), and is removed when it's detached. While an overlay is presented (a toast
+        /// aside, as for the overlays' own back), only a nav inside it: one behind it never pops, even under an overlay that takes
+        /// no back request itself (<c>BackdropDismiss</c> off), where Ionic's router would go back behind it.
         /// </summary>
-        private AvonicNav? Target() => Navs.LastOrDefault(nav => nav.TakesBack);
+        private AvonicNav? Target()
+        {
+            var overlay = OverlayHost.BackTargetIn(_topLevel);
+            return Navs.LastOrDefault(nav => nav.TakesBack && (overlay is null || overlay.IsVisualAncestorOf(nav)));
+        }
 
         private void OnIonBackButton(object? sender, BackButtonEventArgs e)
         {

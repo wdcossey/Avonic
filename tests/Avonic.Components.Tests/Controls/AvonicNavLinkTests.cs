@@ -261,4 +261,53 @@ public class AvonicNavLinkTests
         Assert.Equal([1], taken);
         Assert.Equal(1, stage.Nav.GetLength());
     }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void N24_An_overlay_over_the_nav_stops_back_even_one_that_takes_no_back_itself(bool inApp)
+    {
+        var app = new AvonicApp();
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"), wrap: inApp ? nav => { app.Content = nav; return app; } : null);
+        stage.Done(Task.FromResult(true));
+        stage.Stack(new TestPage("two"));
+        var modal = new AvonicModal { BackdropDismiss = false, Content = new TextBlock { Text = "Modal" } };
+        _ = modal.Present(stage.Window);
+        stage.After(600);
+        Assert.Same(modal, Avonic.Components.Overlays.OverlayHost.PresentedOverlayIn(stage.Window));
+
+        Back(stage.Window);
+        stage.After(600);
+        Assert.Equal(2, stage.Nav.GetLength());
+        Assert.Same(modal, Avonic.Components.Overlays.OverlayHost.PresentedOverlayIn(stage.Window));
+
+        _ = modal.Dismiss();
+        stage.After(600);
+        Assert.Null(Avonic.Components.Overlays.OverlayHost.PresentedOverlayIn(stage.Window));
+        Back(stage.Window);
+        stage.After(600);
+        Assert.Equal(1, stage.Nav.GetLength());
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void N24_A_nav_inside_the_presented_overlay_still_pops(bool inApp)
+    {
+        var app = new AvonicApp();
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"), wrap: inApp ? nav => { app.Content = nav; return app; } : null);
+        stage.Done(Task.FromResult(true));
+        stage.Stack(new TestPage("two"));
+        var inner = new AvonicNav { Root = new TestPage("a") };
+        var modal = new AvonicModal { BackdropDismiss = false, Content = inner };
+        _ = modal.Present(stage.Window);
+        stage.After(600);
+        stage.Done(inner.Push(new TestPage("b")));
+
+        Back(stage.Window);
+        stage.After(600);
+        Assert.Equal(1, inner.GetLength());
+        Assert.Equal(2, stage.Nav.GetLength());
+        Assert.Same(modal, Avonic.Components.Overlays.OverlayHost.PresentedOverlayIn(stage.Window));
+    }
 }

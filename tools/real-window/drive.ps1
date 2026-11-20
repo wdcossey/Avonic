@@ -2056,10 +2056,26 @@ try {
     # the nav (the extension) before the shell's own back, and leaves the request to the shell at the root. Names are distinctive:
     # the shell's own button is "Back". Checks are by names and regions, not wrapped text.
     Section 'ion-nav' {
+        # In this section only: a FindAll that fails with UIA's E_FAIL, which the real window showed now and then in the moments
+        # after a page left the nav (docs/infra/avalonia-issues.md), is tried once more 300 ms later, and the retry is printed.
+        # Any other error, or a second failure, still stops the section. The shared All is untouched.
+        function All($type) {
+            $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
+            try { $found = @($win.FindAll($TS::Descendants, $cond)) }
+            catch {
+                $com = $_.Exception.InnerException
+                if ($com -isnot [System.Runtime.InteropServices.COMException]) { throw }
+                Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
+                Start-Sleep -Milliseconds 300
+                $found = @($win.FindAll($TS::Descendants, $cond))
+            }
+            $found | ForEach-Object { $_ }
+        }
         Open 'ion-nav'
         $w = $win.Current.BoundingRectangle
         function NavStatus { FirstText 'Stack:*' }
-        function WaitStack($like) { [bool](WaitForText "Stack: $like*" 5) }
+        # The status line is written when a transition has ended; a page that left may still be settling, so wait a little more.
+        function WaitStack($like) { $ok = [bool](WaitForText "Stack: $like*" 5); Start-Sleep -Milliseconds 300; $ok }
         function InWin($el) { $el -and -not $el.Current.BoundingRectangle.IsEmpty -and $w.Contains($el.Current.BoundingRectangle) }
 
         Check 'the root page loads' (WaitStack 'Inbox (1)') (NavStatus)

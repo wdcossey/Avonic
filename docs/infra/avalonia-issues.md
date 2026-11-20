@@ -224,3 +224,23 @@ trailing full stops to the paragraph's direction and draws `...Loading` (measure
 made directly with the same text, Roboto 14 and `FlowDirection.RightToLeft` does split it, `...` at level 1 before `Loading` at level 2,
 so it's something in how `TextBlock` builds its layout. Avonic accepts it: Latin text in an RTL window ending in punctuation shows
 the punctuation at the other end from Chromium's. Not tried in a real window or with Arabic or Hebrew text, where it may not show.
+
+## UI Automation's `FindAll` fails now and then (E_FAIL) just after a page leaves an `AvonicNav`
+
+**Seen in the real window, not reproduced headless (#130, PR #252).** In `tools/real-window/drive.ps1`'s `ion-nav` section on Windows,
+`AutomationElement.FindAll(TreeScope.Descendants, ControlType=…)` on the window threw a `COMException` 0x80004005 ("Unexpected
+HRESULT") in the moments after a nav page was hidden or removed (after a push, a pop, a new root, a pop to root, a swipe back), though
+the status line already said the transition had ended. In 3 of 22 checks of one run, a retry 300 ms later succeeded, and a walk of the
+whole raw view right after each failure found no element that threw.
+
+What was ruled out headless (Avalonia 12.1.4, the sample's nav page, a real press and release on the items and buttons): walking the
+peers from the window after each frame of a push and a pop, every child's `GetParent()` is the peer that listed it, every owner is
+attached, every parent chain reaches the window's peer, and none of twenty-odd peer reads (name, control type, bounds, offscreen,
+providers) throws; no peer outside the tree raises `ChildrenChanged` or `PropertyChanged`. Read, not tested: focus isn't left in a
+hidden page, as `InputElement` clears it when an ancestor of the focused element turns invisible, or the element is detached.
+
+Unconfirmed suspicion: the UIA client walks the tree in many calls, each a separate dispatcher operation, while the window is still
+settling after the transition (a ripple finishing on the item that was pressed, in a page now hidden or gone, and the layout that
+follows), so a walk can meet a provider mid-change. The nav section retries a failing `FindAll` once and prints that it did; nothing
+else changes. Worth a minimal repro with a plain `Panel` whose child is removed while a client walks, before reporting.
+
