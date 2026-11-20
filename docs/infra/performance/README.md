@@ -159,30 +159,89 @@ opens every page by itself, three rounds, back to the list between, and writes e
 console (`SampleShell.PageCosts.cs`). The device page is left out, as its benchmark is its own. The first round pays for
 first use; the later rounds are what a user pays each time.
 
+After the sample's pages, each round opens three pages that only this build has (`Diagnostics/PageCostSet.cs`), for the
+cost of one datetime (#248): `datetime-x1`, `datetime-x2` and `datetime-x4`, with 1, 2 and 4 plain `AvonicDatetime`s
+(`Diagnostics/DatetimeCostView.cs`), the default calendar and time, with `Locale="en-US"` and `Value="2023-06-15T13:47:00"`
+pinned, so that every run shows June 2023. The sample's own list doesn't show them.
+
 ```
 dotnet build samples/Avonic.Sample.Android -c Release -p:AvonicPerf=true
 adb install -r samples/Avonic.Sample.Android/bin/Release/net10.0-android/io.github.wdcossey.avonic.sample-Signed.apk
 adb logcat -c
 adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avonic.sample.MainActivity
-adb logcat -v raw -s DOTNET    # until "AVONIC-PERF done", about 3 minutes on a Pixel 8
+adb logcat -v raw -s DOTNET    # until "AVONIC-PERF done": about 3 minutes on a Pixel 8, and a minute more of month changes
 ```
 
-On desktop, `AVONIC_PERF_OUT` names a file to append the lines to, and `AVONIC_PERF_EXIT=1` closes the window after:
+On desktop, `AVONIC_PERF_OUT` names a file to append the lines to, and `AVONIC_PERF_EXIT=1` closes the window after. From
+PowerShell 7, on any of the three:
 
 ```
-dotnet build samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
+$env:AVONIC_PERF_OUT = "$PWD/run.txt"; $env:AVONIC_PERF_EXIT = "1"
+dotnet run --project samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
 ```
+
+### Only some pages
+
+`AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term
+that starts with `=` keeps only the page of that title (`=ion-datetime`, without `ion-datetime-button`). Unset, every page
+opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the three above,
+about a minute and a half on the phone, most of it the month changes; `datetime-x` only the three; `datetime-x1` only the one
+with the month changes. Use commas, not spaces, through `adb shell`, which splits its arguments again.
+
+On desktop it's the environment variable (`$env:AVONIC_PERF_ONLY = "datetime"`, and `Remove-Item Env:AVONIC_PERF_ONLY` for
+every page again). On Android it's an intent extra of the same name, which `MainActivity` reads before the shell starts:
+
+```
+adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avonic.sample.MainActivity -e AVONIC_PERF_ONLY datetime
+```
+
+### Month changes
+
+On `datetime-x1`, after its line, each round changes month 10 times forward and 10 back, as a tap on the calendar's next
+and previous month buttons does (`Diagnostics/MonthChangeTiming.cs`). It finds the buttons by their automation names,
+`Next month` and `Previous month`, and invokes them through their automation peers, which raise the button's click, so a
+new design of the calendar is timed the same way as long as it keeps those names. Each change is a line, and each round
+ends with a summary:
+
+```
+datetime-month: round 2, next 3, August 2023 to September 2023, first 23.4 ms, heading 412.0 ms, 61 frames, longest 48.0 ms, gap median 8.3 ms, 3 over 16.7 ms, 1 over 33 ms
+datetime-month: round 2, 20 changes, first median 21.0 max 35.0 ms, heading median 405.0 max 460.0 ms, longest median 40.0 max 120.0 ms, gap median 8.3 ms, 1212 frames, 33 over 16.7 ms, 12 over 33 ms
+```
+
+- **first**: from the click until the first frame with it is drawn: the compositor's next batch, whose `Rendered` task
+  completes on the render thread.
+- **heading**: from the click until a frame in which the month heading, a `TextBlock` reading the month as en-US's
+  `MMMM yyyy`, shows the new month. Ionic's calendar changes it once its scroll has rested; a design that changes it at
+  once will read low here, and its transition is in the frames instead.
+- **frames**, **longest**, **gap median**, **over 16.7 ms**, **over 33 ms**: the top level's frame callbacks
+  (`RequestAnimationFrame`), asked for again from each one, over a window of at least 1 s from the click, and until the
+  heading shows the month (5 s at most). Avalonia paces them by its composition batches, one a frame of the render loop, so a
+  frame the UI thread was too busy to give shows as a long gap. The first gap is from the click. The median gap is the
+  display's frame when nothing is slow: 8.3 ms at 120 Hz. At 60 Hz an ordinary frame is near 16.7 ms, and some count as
+  over it, so read the 33 ms column there. With no frame for 10 s (the display off, the app in the background) the round's
+  changes stop with a `failed:` line, and the run goes on.
+
+The frame callbacks need no meter, so they work with `MetricsSupport` off ([below](#on-android-only-the-total-is-measured));
+`PageCostTests` drives the same code headlessly, but it hasn't yet run on the phone.
+
+### Keeping a run
 
 Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and
-`node tools/page-costs/table.js` puts one run, or a run before and after, in a table.
+`node tools/page-costs/table.js` puts one run, or a run before and after, in tables: the pages, and the month changes per
+round and over the later rounds. Comparing two runs, its last row sums only the pages both have, so a filtered run compares
+with a full one.
 
 Keep the phone unlocked and untouched for the whole run: a touch, a dimmed screen or a lock shows as pages several times
 slower.
 
-**On Android only the total is measured.** .NET for Android builds with `MetricsSupport` off, so Avalonia's meter is silent and
-the layout and render columns read 0. Turned on, it fills them, but makes every page 6 to 10 times slower (Pixel 8, measured
-2026-11-20: the datetime page 10 s instead of 1 s), so the perf build leaves it off. The share of the time that is layout comes
-from the desktop run, where the meter costs little.
+### On Android only the total is measured
+
+.NET for Android builds with `MetricsSupport` off, so Avalonia's meter is silent and the layout and render columns read 0.
+Turned on, it fills them, but makes every page 6 to 10 times slower (Pixel 8, measured 2026-11-20: the datetime page 10 s
+instead of 1 s), so the perf build leaves it off. The share of the time that is layout comes from the desktop run, where the
+meter costs little.
+
+CI builds the desktop sample and the Android head with `-p:AvonicPerf=true`, so that this code can't rot.
 
 ## Opt-in files
 

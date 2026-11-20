@@ -31,6 +31,9 @@ jobs:
       - name: API tool sanity
         run: node tools/ionic-api.js ion-item > /dev/null
 
+      - name: Page-costs tool sanity
+        run: node tools/page-costs/table.js docs/infra/performance/page-costs/2026-11-20-pixel8-release.txt > /dev/null
+
       - name: Restore
         run: dotnet restore Avonic.sln
 
@@ -39,6 +42,11 @@ jobs:
 
       - name: Test
         run: dotnet test Avonic.sln --no-build --configuration Release --logger "trx" --results-directory TestResults
+
+      # The page-cost build (docs/infra/performance/README.md, "Page costs on a device"), whose code only compiles with
+      # -p:AvonicPerf=true, so that it can't rot unnoticed. After the tests, as it builds the sample again with another symbol.
+      - name: Build the page-cost sample
+        run: dotnet build samples/Avonic.Sample.Desktop --configuration Release -p:AvonicPerf=true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -72,3 +80,8 @@ jobs:
         with:
           name: avonic-sample-apk
           path: samples/Avonic.Sample.Android/bin/Debug/net10.0-android/*-Signed.apk
+
+      # The head's page-cost code (MainActivity's AVONIC_PERF_ONLY extra) compiles only with -p:AvonicPerf=true. A Debug build
+      # compiles the same code as the Release one the phone runs, without its AOT time. After the upload, as it builds over the APK.
+      - name: Build the page-cost APK's code
+        run: dotnet build samples/Avonic.Sample.Android --configuration Debug -p:AvonicPerf=true -p:AndroidSdkDirectory="$ANDROID_HOME"
