@@ -16,6 +16,6 @@ public class SampleApplication(nint javaReference, JniHandleOwnership transfer) 
         return base.CustomizeAppBuilder(builder).WithRoboto().LogToTrace();
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("DEBUG"), Conditional("AVONIC_PERF")]
     private static void EnableDiagnostics() => Diagnostics.PerformanceMonitor.EnableDiagnostics();
 }

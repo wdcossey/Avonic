@@ -140,7 +140,7 @@ This one is from headless capture, and it hasn't been tried in a real window yet
 That's the time to open the page, from before it's made, the elements in it, the global rules and their alternatives, and Avalonia's own layout and
 render times over that time. The rules are the application's and those in the `Styles` of the page and each of its ancestors, counted
 for each page; rules further down cost only their own part, and aren't counted. With Avalonia's diagnostics off, the line says so,
-rather than show zeros. A Release build doesn't have it. **Nothing is added to the library,** because Avalonia has this
+rather than show zeros. A Release build doesn't have it, unless it's built for [page costs](#page-costs-on-a-device). **Nothing is added to the library,** because Avalonia has this
 built in, behind a switch that's off by default:
 
 - `AppContext.SetSwitch("Avalonia.Diagnostics.Diagnostic.IsEnabled", true)`, before Avalonia starts
@@ -151,6 +151,35 @@ built in, behind a switch that's off by default:
 
 Tracing activities costs far more than the checks being traced, so use its counts and not its times. The sample's line doesn't
 trace.
+
+## Page costs on a device
+
+A build with `-p:AvonicPerf=true` is a Release build (AOT and trimmed on Android, as an app ships) with the line on, which
+opens every page by itself, three rounds, back to the list between, and writes each line, prefixed `AVONIC-PERF`, to the
+console (`SampleShell.PageCosts.cs`). The device page is left out, as its benchmark is its own. The first round pays for
+first use; the later rounds are what a user pays each time.
+
+```
+dotnet build samples/Avonic.Sample.Android -c Release -p:AvonicPerf=true
+adb install -r samples/Avonic.Sample.Android/bin/Release/net10.0-android/io.github.wdcossey.avonic.sample-Signed.apk
+adb logcat -c
+adb shell am start -S -n io.github.wdcossey.avonic.sample/io.github.wdcossey.avonic.sample.MainActivity
+adb logcat -v raw -s DOTNET    # until "AVONIC-PERF done", about 3 minutes on a Pixel 8
+```
+
+On desktop, `AVONIC_PERF_OUT` names a file to append the lines to, and `AVONIC_PERF_EXIT=1` closes the window after:
+
+```
+dotnet build samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
+```
+
+Keep the phone unlocked and untouched for the whole run: a touch, a dimmed screen or a lock shows as pages several times
+slower.
+
+**On Android only the total is measured.** .NET for Android builds with `MetricsSupport` off, so Avalonia's meter is silent and
+the layout and render columns read 0. Turned on, it fills them, but makes every page 6 to 10 times slower (Pixel 8, measured
+2026-11-20: the datetime page 10 s instead of 1 s), so the perf build leaves it off. The share of the time that is layout comes
+from the desktop run, where the meter costs little.
 
 ## Opt-in files
 

@@ -8,6 +8,12 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
+  <!-- -p:AvonicPerf=true: a Release build with the page-cost line, which also opens every page by itself and logs what each cost
+       (docs/infra/performance/README.md, "Page costs on a device"). -->
+  <PropertyGroup Condition="'$(AvonicPerf)' == 'true'">
+    <DefineConstants>$(DefineConstants);AVONIC_PERF</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <!-- Window, ScrollViewer, TextBlock etc. need a base theme; Avonic styles only Avonic controls. -->

@@ -12,7 +12,7 @@ internal static class Program
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("DEBUG"), Conditional("AVONIC_PERF")]
     private static void EnableDiagnostics() => Diagnostics.PerformanceMonitor.EnableDiagnostics();
 
     public static AppBuilder BuildAvaloniaApp() =>
