@@ -1821,15 +1821,29 @@ try {
         $w = $win.Current.BoundingRectangle
         function DtStatus { FirstText '*ionChange*' }
         function Said($text) { [bool](WaitForText $text 3) }
+        # The month's name is in the month-year button, whose accessible name is "Show year picker" (as Ionic's aria-label), so a
+        # month is seen by its days: the calendar keeps the months either side of the one shown, off to the sides, out of the window.
+        function DayShown($name) {
+            $d = Named $CT::Button $name
+            if (-not $d) { return $false }
+            $r = $d.Current.BoundingRectangle
+            ($r.Left + $r.Width / 2) -gt $w.Left -and ($r.Left + $r.Width / 2) -lt $w.Right
+        }
+        # An hour in the time popover's wheel, wholly in the window: those far from the value are scrolled out of the wheel.
+        function HourShown($n) {
+            All $CT::Button | Where-Object { $_.Current.Name -eq $n -and $_.Current.BoundingRectangle.Top -gt $tb.Top -and
+                $_.Current.BoundingRectangle.Bottom -lt $w.Bottom } | Select-Object -First 1
+        }
 
         $day = Named $CT::Button 'Tuesday, June 20'
-        Check 'the first calendar shows June 2023, its value''s month' ($day -and [bool](FirstText 'June 2023')) (Texts -join ' | ')
+        Check 'the first calendar shows June 2023, its value''s month' ((DayShown 'Tuesday, June 20') -and -not (DayShown 'Monday, July 3')) "window $w"
         ClickOn $day
         Check 'a click on a day confirms it at once, with the time kept' (Said 'DateTimeGrid ionChange: 2023-06-20T13:47:00') (DtStatus)
         Shot 'datetime-clicked'
 
         ClickOn (Named $CT::Button 'Next month')
-        Check 'the next button scrolls to July' (Said 'July 2023') (Texts -join ' | ')
+        Start-Sleep -Milliseconds 800
+        Check 'the next button scrolls to July' ((DayShown 'Monday, July 3') -and -not (DayShown 'Tuesday, June 20')) "window $w"
         Shot 'datetime-july'
 
         ClickOn (Named $CT::Button 'Monday, July 3')
@@ -1844,12 +1858,12 @@ try {
         ClickOn $time
         Start-Sleep -Milliseconds 700
         Shot 'datetime-time-popover'
-        $hour = All $CT::Button | Where-Object { $_.Current.Name -eq '3' -and $_.Current.BoundingRectangle.Top -gt $tb.Top } | Select-Object -First 1
+        $hour = HourShown '2'
         Check 'its popover opens under the button, with the hours' ($hour -ne $null) "time $tb"
         if ($hour) { ClickOn $hour }
-        Check 'an hour chosen in the popover confirms it' (Said 'DateTimeGrid ionChange: 2023-07-04T15:47:00') (DtStatus)
+        Check 'an hour chosen in the popover confirms it' (Said 'DateTimeGrid ionChange: 2023-07-04T14:47:00') (DtStatus)
         Key '{ESC}' 600
-        Check 'Escape closes the popover' (-not (All $CT::Button | Where-Object { $_.Current.Name -eq '3' -and $_.Current.BoundingRectangle.Top -gt $tb.Top } | Select-Object -First 1))
+        Check 'Escape closes the popover' (-not (HourShown '2'))
 
         # A swipe left on the calendar's middle row moves to August, 50 ms after the scroll rests.
         $mid = Named $CT::Button 'Wednesday, July 12'
@@ -1859,7 +1873,7 @@ try {
             Start-Sleep -Milliseconds 800
         }
         Shot 'datetime-swiped'
-        Check 'a touch swipe left moves the calendar to August' ([bool](FirstText 'August 2023')) (Texts -join ' | ')
+        Check 'a touch swipe left moves the calendar to August' ((DayShown 'Wednesday, August 16') -and -not (DayShown 'Wednesday, July 12')) "window $w"
 
         # The datetime with the default buttons, below: the page scrolled by a wheel over the status line, which isn't a calendar.
         $status = FirstText '*ionChange*'
