@@ -1843,12 +1843,13 @@ try {
         Backdrop
         Check 'a click on the backdrop dismisses it with the backdrop role' ([bool](WaitForText 'NoSpinner dismissed with role backdrop')) (LoadStatus)
 
-        # The transparent backdrop still covers the page: a click where a page button is reaches the backdrop, not the button.
-        $custom = Named $CT::Button 'Show in custom colours'
+        # The transparent backdrop still covers the page: a click where a page button is reaches the backdrop, not the button. The
+        # button is one above the loading, which covers the buttons beside it in the phone-sized window.
+        $under = Named $CT::Button 'Show until a tap outside'
         ShowLoading 'Show with no backdrop'
         Shot 'loading-no-backdrop'
-        ClickOn $custom
-        Check 'with no backdrop, a click on a page button under it dismisses the loading, and the button gets nothing' (([bool](WaitForText 'NoBackdrop dismissed with role backdrop')) -and -not (Loading 'Custom colours')) (LoadStatus)
+        ClickOn $under
+        Check 'with no backdrop, a click on a page button under it dismisses the loading, and the button gets nothing' (([bool](WaitForText 'NoBackdrop dismissed with role backdrop')) -and -not (Loading 'Tap outside to close')) (LoadStatus)
 
         ShowLoading 'Show in custom colours'
         Shot 'loading-custom'
