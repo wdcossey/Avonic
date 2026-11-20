@@ -2092,6 +2092,18 @@ try {
         ClickOn (Named $CT::Button 'Pop to root')
         Check 'Pop to root goes back to the inbox' (WaitStack 'Inbox (1)') (NavStatus)
 
+        # Swipe back, off by default: a touch drag from 6 dips in from the window's left edge, ending inside the window.
+        ClickOn (Named $CT::Button 'Open message: Lunch*')
+        Check 'pushed for the swipe' (WaitStack 'Inbox > Lunch on Friday (2)') (NavStatus)
+        $midY = [int]($w.Y + $w.Height / 2)
+        TouchDrag ([int]($w.X + 6 * $scale)) $midY (Px 300) 0 15 16
+        Start-Sleep -Milliseconds 800
+        Check 'a swipe from the left edge does nothing while Swipe back is off' ([bool](FirstText 'Stack: Inbox > Lunch on Friday (2)*')) (NavStatus)
+        ClickOn (Named $CT::Button 'Swipe back*')
+        Start-Sleep -Milliseconds 300
+        TouchDrag ([int]($w.X + 6 * $scale)) $midY (Px 300) 0 15 16
+        Check 'with it on, a swipe past half the width goes back' (WaitStack 'Inbox (1)') (NavStatus)
+
         ClickOn (Named $CT::Button 'Open message: Quarterly*')
         Check 'pushed again' (WaitStack 'Inbox > Quarterly report (2)') (NavStatus)
         Fore

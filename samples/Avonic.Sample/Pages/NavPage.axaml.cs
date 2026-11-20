@@ -27,6 +27,7 @@ public partial class NavPage : UserControl
         PopToRootButton.Click += (_, _) => _ = Nav.PopToRoot();
         PushDraftButton.Click += (_, _) => _ = Nav.Push(() => new NavDraftView());
         AnimatedToggle.IonChange += (_, e) => Nav.Animated = e.Checked;
+        SwipeToggle.IonChange += (_, e) => Nav.NavSwipeGesture = e.Checked;
     }
 
     private void UpdateStatus()
