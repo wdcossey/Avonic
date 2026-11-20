@@ -65,6 +65,9 @@ public partial class AvonicDatetime
     /// <summary>The single grid draws the calendar: asked for, and the template has one.</summary>
     internal bool UsesSingleGrid => CalendarRendering == DatetimeCalendarRendering.SingleGrid && _calendarGrid is not null;
 
+    /// <summary>Whether the swipe listens.</summary>
+    internal bool HasGridSwipe => _gridGesture is not null;
+
     /// <summary>The month a fade is on its way to, if one is.</summary>
     internal DatetimeParts? GridTarget => _gridTarget;
 
@@ -97,10 +100,13 @@ public partial class AvonicDatetime
         _calendarGrid = null;
     }
 
-    /// <summary>The swipe, while the grid draws the calendar in the tree; none otherwise, so that nothing is left listening.</summary>
+    /// <summary>
+    /// The swipe, while the grid draws a grid presentation's calendar in the tree; none otherwise (a wheel or a time has no calendar
+    /// to swipe), so that nothing is left listening.
+    /// </summary>
     private void UpdateGridGesture(bool? inTree = null)
     {
-        var wanted = UsesSingleGrid && (inTree ?? TopLevel.GetTopLevel(this) is not null);
+        var wanted = UsesSingleGrid && IsGridStyle && (inTree ?? TopLevel.GetTopLevel(this) is not null);
         if (!wanted)
         {
             _gridGesture?.Destroy();
@@ -118,7 +124,7 @@ public partial class AvonicDatetime
             Element = _calendarGrid!,
             GestureName = "datetime-month-swipe",
             Direction = GestureDirection.X,
-            CanStart = _ => IsEffectivelyEnabled && !_showMonthAndYear,
+            CanStart = _ => IsEffectivelyEnabled && !_showMonthAndYear && IsGridStyle,
             OnEnd = OnGridSwipeEnd,
         });
         _gridGesture.Enable();
@@ -158,9 +164,10 @@ public partial class AvonicDatetime
     {
         var from = _gridTarget ?? _working;
         var target = _forceRenderDate ?? (next ? DatetimeUtils.GetNextMonth(from) : DatetimeUtils.GetPreviousMonth(from));
-        if (DatetimeUtils.IsMonthDisabled(new DatetimeParts(target.Month, null, target.Year),
-                _minParts is { } lo ? lo with { Day = null } : null, _maxParts is { } hi ? hi with { Day = null } : null))
+        if (IsMonthOutOfRange(target))
         {
+            // animateToDate's wait ends with no change, rather than hold every later change to a month it can't reach.
+            _forceDateScrolling?.TrySetResult();
             return;
         }
 
@@ -236,6 +243,22 @@ public partial class AvonicDatetime
         _gridFade?.Destroy();
         _gridFade = null;
         _gridFadingIn = false;
+    }
+
+    /// <summary>
+    /// A change on its way dropped, its fade with it, for a state set by another way (a value, a key, a selection, the month/year
+    /// wheel), which the change's month would otherwise overwrite when its fade ends. animateToDate's wait ends with it.
+    /// </summary>
+    internal void CancelGridChange()
+    {
+        if (_gridTarget is null && _gridFade is null)
+        {
+            return;
+        }
+
+        StopGridFade();
+        _gridTarget = null;
+        _forceDateScrolling?.TrySetResult();
     }
 
     /// <summary>Any month on its way shown now, and no fade left: for a change with no animation, and as the grid goes.</summary>

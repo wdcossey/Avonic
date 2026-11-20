@@ -53,8 +53,11 @@ public class AvonicDatetimeSingleGridTests
 
     private static AvonicButton Previous(AvonicDatetime datetime) => Part<AvonicButton>(datetime, "PART_PreviousButton");
 
-    /// <summary>A finger from the grid's centre by <paramref name="dx"/>, in steps of 5 with no time between, so no flick, then lifted.</summary>
-    private static void Swipe(Scene scene, AvonicDatetime datetime, double dx, Visual? from = null)
+    /// <summary>
+    /// A finger from the grid's centre by <paramref name="dx"/>, in steps of 5, then lifted: with no time between, so no flick, or
+    /// <paramref name="msPerStep"/> of the test clock between each.
+    /// </summary>
+    private static void Swipe(Scene scene, AvonicDatetime datetime, double dx, Visual? from = null, TestClock? clock = null, double msPerStep = 0)
     {
         GestureTests.Render();
         var at = Box(from ?? datetime.CalendarGrid!, scene.Window).Center;
@@ -63,6 +66,11 @@ public class AvonicDatetimeSingleGridTests
         var steps = (int)Math.Abs(dx / 5);
         for (var i = 1; i <= steps; i++)
         {
+            if (clock is not null)
+            {
+                clock.At(clock.Now.TotalMilliseconds + msPerStep);
+            }
+
             scene.Window.TouchMove(finger, at + new Point(Math.Sign(dx) * 5 * i, 0), RawInputModifiers.None);
             Dispatcher.UIThread.RunJobs();
         }
@@ -267,6 +275,65 @@ public class AvonicDatetimeSingleGridTests
         Assert.Equal("July 2023", MonthShown(datetime));
         Assert.Equal(0, changes);
         Assert.Equal(June15, datetime.Value.ToString());
+    });
+
+    [AvaloniaFact]
+    public void A_Short_Fast_Flick_Changes_The_Month_Its_Way() => Run((scene, clock) =>
+    {
+        // 30 px in 6 steps of 8 ms: about 0.6 px/ms, past 20 px and 0.3 px/ms, short of 50 px.
+        var datetime = Show(scene, clock, Grid());
+        Swipe(scene, datetime, -30, clock: clock, msPerStep: 8);
+        Settle(clock, 400);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Swipe(scene, datetime, 30, clock: clock, msPerStep: 8);
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+
+        // Slower, 30 px in 6 steps of 40 ms: no flick.
+        Swipe(scene, datetime, -30, clock: clock, msPerStep: 40);
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+    });
+
+    [AvaloniaFact]
+    public void In_Rtl_A_Flick_To_The_Right_Is_The_Next_Month() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, Grid(), FlowDirection.RightToLeft);
+        Swipe(scene, datetime, 30, clock: clock, msPerStep: 8);
+        Settle(clock, 400);
+        Assert.Equal("July 2023", MonthShown(datetime));
+    });
+
+    [AvaloniaFact]
+    public void A_State_Set_During_A_Fade_Wins_Over_The_Month_On_Its_Way() => Run((scene, clock) =>
+    {
+        // A value in the month shown, set while the fade heads to July: June stays, with the value's day.
+        var datetime = Show(scene, clock, Grid());
+        Click(scene, Next(datetime));
+        Settle(clock, 40);
+        datetime.Value = "2023-06-03";
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Equal(["6-3"], ActiveDays(datetime));
+        Assert.Equal(1, Shown(datetime), 3);
+
+        // The month/year wheel opened during a fade: the month stays where it was.
+        Click(scene, Next(datetime));
+        Settle(clock, 40);
+        Click(scene, Part<Button>(datetime, "PART_MonthYearButton"));
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Null(datetime.GridTarget);
+    });
+
+    [AvaloniaFact]
+    public void A_Wheel_Presentation_Has_No_Swipe() => Run((scene, clock) =>
+    {
+        var datetime = Show(scene, clock, Grid(set: d => d.PreferWheel = true));
+        Assert.False(datetime.HasGridSwipe);
+        datetime.PreferWheel = false;
+        Settle(clock, 100);
+        Assert.True(datetime.HasGridSwipe);
     });
 
     [AvaloniaFact]

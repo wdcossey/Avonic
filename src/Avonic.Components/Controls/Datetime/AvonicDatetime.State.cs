@@ -164,6 +164,7 @@ public partial class AvonicDatetime
     /// <summary>Ionic's <c>setWorkingParts</c>.</summary>
     internal void SetWorkingParts(DatetimeParts parts)
     {
+        CancelGridChange();
         _working = parts;
         Render();
     }
@@ -181,6 +182,8 @@ public partial class AvonicDatetime
     /// </summary>
     internal void SetActiveParts(DatetimeParts parts, bool removeDate = false)
     {
+        // A selection is of the month shown: a grid's change on its way would take it to another.
+        CancelGridChange();
         if (Readonly)
         {
             // The working parts the caller set still show, as Ionic's setWorkingParts renders before this returns.
@@ -218,6 +221,8 @@ public partial class AvonicDatetime
     /// </summary>
     private void ProcessValue(DatetimeValue? value, bool animated = true)
     {
+        // The value's month is decided from the month shown, not one a grid's change was on its way to.
+        CancelGridChange();
         _hasUnconfirmedSelection = false;
         var hasValue = value is { HasValue: true };
         List<DatetimeParts>? list = null;
@@ -521,6 +526,7 @@ public partial class AvonicDatetime
         else if (change.Property == PresentationProperty)
         {
             CheckFormatOptions(presentationOnly: true);
+            UpdateGridGesture();
             Render();
         }
         else if (change.Property == YearValuesProperty)
@@ -548,10 +554,15 @@ public partial class AvonicDatetime
             _minuteValues = MinuteValues?.Values.ToArray();
             Render();
         }
+        else if (change.Property == PreferWheelProperty)
+        {
+            UpdateGridGesture();
+            Render();
+        }
         else if (change.Property == ColorProperty || change.Property == LocaleProperty || change.Property == HourCycleProperty
                  || change.Property == FirstDayOfWeekProperty || change.Property == IsDateEnabledProperty
                  || change.Property == HighlightedDatesProperty || change.Property == MultipleProperty
-                 || change.Property == PreferWheelProperty || change.Property == ReadonlyProperty
+                 || change.Property == ReadonlyProperty
                  || change.Property == ShowAdjacentDaysProperty || change.Property == ShowClearButtonProperty
                  || change.Property == ShowDefaultButtonsProperty || change.Property == ShowDefaultTimeLabelProperty
                  || change.Property == ShowDefaultTitleProperty || change.Property == SizeProperty

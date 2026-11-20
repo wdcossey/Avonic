@@ -592,6 +592,7 @@ public partial class AvonicDatetime
 
     private void OnMonthYearClick(object? sender, RoutedEventArgs e)
     {
+        CancelGridChange();
         _showMonthAndYear = !_showMonthAndYear;
         Render();
     }
@@ -713,8 +714,7 @@ public partial class AvonicDatetime
             next = atStart ? DatetimeUtils.GetPreviousMonth(_working) : DatetimeUtils.GetNextMonth(_working);
         }
 
-        if (DatetimeUtils.IsMonthDisabled(new DatetimeParts(next.Month, null, next.Year),
-                _minParts is { } lo ? lo with { Day = null } : null, _maxParts is { } hi ? hi with { Day = null } : null))
+        if (IsMonthOutOfRange(next))
         {
             return;
         }
@@ -730,6 +730,11 @@ public partial class AvonicDatetime
             _calendarBody.Focus();
         }
     }
+
+    /// <summary>Whether the month of <paramref name="parts"/> is outside <see cref="Min"/> and <see cref="Max"/>, by month: one a change can't settle on.</summary>
+    private bool IsMonthOutOfRange(DatetimeParts parts) =>
+        DatetimeUtils.IsMonthDisabled(new DatetimeParts(parts.Month, null, parts.Year),
+            _minParts is { } lo ? lo with { Day = null } : null, _maxParts is { } hi ? hi with { Day = null } : null);
 
     // ── The keyboard ─────────────────────────────────────────────────────────────────────────
 
@@ -790,12 +795,6 @@ public partial class AvonicDatetime
         if (DatetimeUtils.IsDayDisabled(to, _minParts, _maxParts))
         {
             return;
-        }
-
-        // A grid's change on its way ends first, as the key moves from the day it was pressed on.
-        if (UsesSingleGrid)
-        {
-            FinishGridChange();
         }
 
         SetWorkingParts(_working with { Month = to.Month, Day = to.Day, Year = to.Year });

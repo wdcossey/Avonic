@@ -95,6 +95,27 @@ public partial class SampleShell
         // Past the first frames and the start-up work.
         await Task.Delay(TimeSpan.FromSeconds(3));
         _pageCostsRunning = true;
+        try
+        {
+            await RunRounds(pages);
+        }
+        finally
+        {
+            _pageCostsRunning = false;
+        }
+
+        _pendingReport = null;
+        Write("done");
+        if (Environment.GetEnvironmentVariable("AVONIC_PERF_EXIT") == "1"
+            && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+
+    /// <summary>The rounds: each page opened and left, and the month changes on their pages.</summary>
+    private async Task RunRounds(IReadOnlyList<SamplePageEntry> pages)
+    {
         for (var round = 1; round <= PageCostRounds && pages.Count > 0; round++)
         {
             foreach (var (title, create) in pages)
@@ -148,15 +169,6 @@ public partial class SampleShell
             }
 
             Write($"round {round} done");
-        }
-
-        _pendingReport = null;
-        _pageCostsRunning = false;
-        Write("done");
-        if (Environment.GetEnvironmentVariable("AVONIC_PERF_EXIT") == "1"
-            && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
         }
     }
 
