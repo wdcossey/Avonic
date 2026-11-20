@@ -78,6 +78,17 @@ public static class AvonicConfig
     public static ConfigSpinner? InfiniteLoadingSpinner { get; set; }
 
     /// <summary>
+    /// Ionic's <c>loadingSpinner</c> config: the <see cref="AvonicLoading.Spinner"/> of a loading that has none, before
+    /// <see cref="Spinner"/>. Null, not set, falls back to <see cref="Spinner"/>, then md's <see cref="SpinnerName.Crescent"/>;
+    /// <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is no spinner.
+    /// </summary>
+    /// <remarks>
+    /// Read when the loading is first attached, as Ionic reads it in <c>componentWillLoad</c>: for one made in code, at its first
+    /// present. A change of this reaches only loadings attached for the first time after it.
+    /// </remarks>
+    public static ConfigSpinner? LoadingSpinner { get; set; }
+
+    /// <summary>
     /// Ionic's <c>refreshingIcon</c> config: the <see cref="AvonicRefresherContent.PullingIcon"/> of a content that has none, which
     /// Ionic names after the icon its legacy refresher pulls with. Null, not set, is md's <see cref="SpinnerName.Circular"/>, which
     /// doesn't fall back to <see cref="Spinner"/> in md; <see cref="ConfigSpinner.None"/>, Ionic's <c>null</c>, is none, and with

@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.LoadingPage">
+
+    <!-- ion-loading: one declared in the page and opened by its trigger, one by IsOpen, and loadings made in code. The status line
+         says what each was dismissed with. -->
+    <c:AvonicContent>
+        <StackPanel>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Name="LoadingStatus" Text="Open one; some close themselves, some on a tap outside them" TextWrapping="Wrap" />
+                </c:AvonicLabel>
+            </c:AvonicItem>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="In the page, with a trigger" />
+            </c:AvonicListHeader>
+            <c:AvonicButton Name="ShowTimed" Content="Show a loading for two seconds" Margin="16,8,16,0" />
+            <c:AvonicLoading Name="TimedLoading" Trigger="ShowTimed" Message="Loading..." Duration="2000" />
+
+            <c:AvonicListHeader>
+                <TextBlock Text="Made in code, closed by a tap outside" />
+            </c:AvonicListHeader>
+            <StackPanel Margin="14,8" Spacing="8">
+                <c:AvonicButton Name="ShowDismissable" Content="Show until a tap outside" />
+                <c:AvonicButton Name="ShowNoSpinner" Content="Show with no spinner" />
+                <c:AvonicButton Name="ShowNoBackdrop" Content="Show with no backdrop" />
+                <c:AvonicButton Name="ShowCustom" Content="Show in custom colours" />
+                <c:AvonicButton Name="ShowSpinnerOnly" Content="Show a spinner alone" />
+            </StackPanel>
+
+            <c:AvonicListHeader>
+                <TextBlock Text="IsOpen" />
+            </c:AvonicListHeader>
+            <c:AvonicItem>
+                <c:AvonicLabel>
+                    <TextBlock Text="Open, until a tap outside" />
+                </c:AvonicLabel>
+                <c:AvonicItem.EndContent>
+                    <c:AvonicToggle Name="LoadingOpenToggle" AutomationProperties.Name="Loading IsOpen" />
+                </c:AvonicItem.EndContent>
+            </c:AvonicItem>
+            <c:AvonicLoading Name="IsOpenLoading" Message="Opened by IsOpen" Spinner="Dots" BackdropDismiss="True" />
+        </StackPanel>
+    </c:AvonicContent>
+</UserControl>

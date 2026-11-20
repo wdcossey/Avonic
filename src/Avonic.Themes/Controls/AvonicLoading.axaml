@@ -1,0 +1,112 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="300">
+            <TextBlock Text="The page under the loading indicator" Margin="16" />
+            <!-- A loading's look, as it is after its enter animation: the backdrop at 0.32 and the wrapper shown. -->
+            <c:AvonicBackdrop Opacity="{DynamicResource Avonic.BackdropOpacity}" />
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="2" Padding="24"
+                    Background="{DynamicResource Avonic.BackgroundColorStep50Brush}"
+                    BoxShadow="{DynamicResource Avonic.Loading.Md.BoxShadow}">
+                <c:FlexRow Spacing="16">
+                    <Border Padding="0,0,0,3" VerticalAlignment="Center">
+                        <c:AvonicSpinner SpinnerName="Crescent" Foreground="{DynamicResource Avonic.Color.PrimaryBrush}" />
+                    </Border>
+                    <TextBlock Text="Loading..." FontSize="14" LineHeight="16" VerticalAlignment="Center"
+                               Foreground="{DynamicResource Avonic.TextColorStep150Brush}" />
+                </c:FlexRow>
+            </Border>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of loading.md.css, with its base part. The host covers the window (position: fixed, inset 0), a flex box
+         centring the wrapper. contain, touch-action, user-select and font smoothing are hints to the browser, or what Avalonia
+         does already: the host takes every press, and a TextBlock isn't selectable. -->
+    <ControlTheme x:Key="{x:Type c:AvonicLoading}" TargetType="c:AvonicLoading">
+        <!-- font-family: var(ion-font-family, inherit); font-size: 0.875rem; color: var(ion-color-step-850, var(ion-text-color-step-150, #262626)) -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource Avonic.TextColorStep150Brush}" />
+        <!-- outline: none -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <!-- ion-backdrop visible={showBackdrop} tappable={backdropDismiss} -->
+                    <c:AvonicBackdrop Name="PART_Backdrop" Visible="{TemplateBinding ShowBackdrop}" Tappable="{TemplateBinding BackdropDismiss}" />
+                    <!-- The tabindex="0" divs around the wrapper, which the focus trap wraps at. -->
+                    <Border Name="PART_SentinelStart" Focusable="True" FocusAdorner="{x:Null}" />
+                    <!-- .loading-wrapper's z-index 10, over the backdrop's 2, on the panel, as ZIndex sorts siblings. -->
+                    <c:AlertPanel Name="PART_Panel" ZIndex="10">
+                        <!-- .loading-wrapper rests at opacity 0, which the enter animation takes away. -->
+                        <Border Name="PART_Wrapper" Opacity="0">
+                            <!-- display: flex; align-items: inherit; justify-content: inherit (center, center). The 16 between the
+                                 spinner and the message is the row's gap: .loading-spinner + .loading-content, as the gap is only
+                                 between two shown children. -->
+                            <c:FlexRow Name="PART_Row" HorizontalContentAlignment="Center" Spacing="16">
+                                <!-- .loading-spinner: the 28 px inline-block spinner on the baseline of a 14 px line, which is 3
+                                     deeper, as Chromium rounds the descent (31 high, measured). -->
+                                <Border Name="PART_SpinnerBox" VerticalAlignment="Center" Padding="0,0,0,3"
+                                        IsVisible="{TemplateBinding Spinner, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <c:AvonicSpinner Name="PART_Spinner" SpinnerName="{TemplateBinding Spinner}" VerticalAlignment="Top"
+                                                     AutomationProperties.AccessibilityView="Raw" />
+                                </Border>
+                                <!-- .loading-content: when message isn't undefined. An empty one is 0 by 0. -->
+                                <Border Name="PART_Content" VerticalAlignment="Center"
+                                        IsVisible="{TemplateBinding Message, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <ContentPresenter Name="PART_MessagePresenter" Content="{TemplateBinding Message}"
+                                                      IsVisible="{TemplateBinding Message, Converter={x:Static c:AvonicLoading.HasText}}" />
+                                </Border>
+                            </c:FlexRow>
+                        </Border>
+                    </c:AlertPanel>
+                    <Border Name="PART_SentinelEnd" Focusable="True" FocusAdorner="{x:Null}" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- width, min-width, max-width, height, min-height, max-height: var(...) -->
+        <Style Selector="^ /template/ c|AlertPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Loading.Width}" />
+            <Setter Property="ContentMinWidth" Value="{DynamicResource Avonic.Loading.MinWidth}" />
+            <Setter Property="ContentMaxWidth" Value="{DynamicResource Avonic.Loading.MaxWidth}" />
+            <Setter Property="ContentHeight" Value="{DynamicResource Avonic.Loading.Height}" />
+            <Setter Property="ContentMinHeight" Value="{DynamicResource Avonic.Loading.MinHeight}" />
+            <Setter Property="ContentMaxHeight" Value="{DynamicResource Avonic.Loading.MaxHeight}" />
+        </Style>
+
+        <!-- .loading-wrapper: background: var(background); border-radius: 2px; padding: 24px; the shadow -->
+        <Style Selector="^ /template/ Border#PART_Wrapper">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Loading.Background" />
+                    <DynamicResource ResourceKey="Avonic.BackgroundColorStep50Brush" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="24" />
+            <Setter Property="BoxShadow" Value="{DynamicResource Avonic.Loading.Md.BoxShadow}" />
+        </Style>
+
+        <!-- ion-spinner { color: var(spinner-color) } -->
+        <Style Selector="^ /template/ c|AvonicSpinner#PART_Spinner">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.Loading.SpinnerColor" />
+                    <DynamicResource ResourceKey="Avonic.Color.PrimaryBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- The message: line-height: normal, which Chromium makes 16 at 14 px Roboto (its ascent and descent each rounded), where
+             Avalonia's is 16.41; it wraps within the wrapper. -->
+        <Style Selector="^ /template/ ContentPresenter#PART_MessagePresenter">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="16" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

@@ -3007,27 +3007,27 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 172,
+     "t": 186,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 172,
+     "t": 186,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 401,
+     "t": 399,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 401,
+     "t": 399,
      "detail": null
     },
     {
      "ev": "ionLoadingWillDismiss",
-     "t": 403,
+     "t": 402,
      "detail": {
       "data": "data1",
       "role": "role1"
@@ -3035,7 +3035,7 @@
     },
     {
      "ev": "willDismiss",
-     "t": 403,
+     "t": 402,
      "detail": {
       "data": "data1",
       "role": "role1"
@@ -3043,7 +3043,7 @@
     },
     {
      "ev": "ionLoadingDidDismiss",
-     "t": 633,
+     "t": 632,
      "detail": {
       "data": "data1",
       "role": "role1"
@@ -3051,7 +3051,7 @@
     },
     {
      "ev": "didDismiss",
-     "t": 633,
+     "t": 632,
      "detail": {
       "data": "data1",
       "role": "role1"
@@ -3066,22 +3066,22 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 198,
+     "t": 210,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 198,
+     "t": 210,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 411,
+     "t": 439,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 411,
+     "t": 439,
      "detail": null
     }
    ]
@@ -3091,48 +3091,48 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 210,
+     "t": 190,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 210,
+     "t": 190,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 423,
+     "t": 402,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 423,
+     "t": 402,
      "detail": null
     },
     {
      "ev": "ionLoadingWillDismiss",
-     "t": 442,
+     "t": 420,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "willDismiss",
-     "t": 443,
+     "t": 420,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "ionLoadingDidDismiss",
-     "t": 656,
+     "t": 636,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "didDismiss",
-     "t": 656,
+     "t": 636,
      "detail": {
       "role": "backdrop"
      }
@@ -3144,22 +3144,22 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 199,
+     "t": 188,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 199,
+     "t": 188,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 429,
+     "t": 419,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 429,
+     "t": 419,
      "detail": null
     }
    ]
@@ -3169,48 +3169,48 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 182,
+     "t": 216,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 182,
+     "t": 216,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 412,
+     "t": 447,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 412,
+     "t": 447,
      "detail": null
     },
     {
      "ev": "ionLoadingWillDismiss",
-     "t": 430,
+     "t": 465,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "willDismiss",
-     "t": 430,
+     "t": 465,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "ionLoadingDidDismiss",
-     "t": 645,
+     "t": 679,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "didDismiss",
-     "t": 645,
+     "t": 679,
      "detail": {
       "role": "backdrop"
      }
@@ -3230,12 +3230,12 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 220,
+     "t": 202,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 220,
+     "t": 202,
      "detail": null
     },
     {
@@ -3255,48 +3255,48 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 178,
+     "t": 196,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 178,
+     "t": 196,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 408,
+     "t": 426,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 408,
+     "t": 426,
      "detail": null
     },
     {
      "ev": "ionLoadingWillDismiss",
-     "t": 409,
+     "t": 428,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "willDismiss",
-     "t": 409,
+     "t": 428,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "ionLoadingDidDismiss",
-     "t": 642,
+     "t": 643,
      "detail": {
       "role": "backdrop"
      }
     },
     {
      "ev": "didDismiss",
-     "t": 642,
+     "t": 643,
      "detail": {
       "role": "backdrop"
      }
@@ -3308,76 +3308,76 @@
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 189,
+     "t": 208,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 189,
+     "t": 208,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 418,
+     "t": 437,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 418,
+     "t": 437,
      "detail": null
     },
     {
      "ev": "ionLoadingWillDismiss",
-     "t": 934,
+     "t": 955,
      "detail": {
       "role": null
      }
     },
     {
      "ev": "willDismiss",
-     "t": 934,
+     "t": 955,
      "detail": {
       "role": null
      }
     },
     {
      "ev": "ionLoadingDidDismiss",
-     "t": 1151,
+     "t": 1171,
      "detail": {
       "role": null
      }
     },
     {
      "ev": "didDismiss",
-     "t": 1151,
+     "t": 1171,
      "detail": {
       "role": null
      }
     }
    ],
-   "didPresentToWillDismiss": 516
+   "didPresentToWillDismiss": 518
   },
   "durationManualDismiss": {
    "open": true,
    "log": [
     {
      "ev": "ionLoadingWillPresent",
-     "t": 1663,
+     "t": 1660,
      "detail": null
     },
     {
      "ev": "willPresent",
-     "t": 1663,
+     "t": 1660,
      "detail": null
     },
     {
      "ev": "ionLoadingDidPresent",
-     "t": 1877,
+     "t": 1861,
      "detail": null
     },
     {
      "ev": "didPresent",
-     "t": 1877,
+     "t": 1861,
      "detail": null
     }
    ]
