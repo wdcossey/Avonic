@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ion-datetime-button has no variables of its own: datetime-button.md.css's literals, where a global step falls back to a
+         literal Ionic's light theme doesn't set. The buttons' background: var(ion-color-step-300, var(ion-background-color-step-300,
+         #edeef0)). Palettes/Dark.axaml follows Avonic.BackgroundColorStep300, which dark sets. -->
+    <SolidColorBrush x:Key="Avonic.DatetimeButton.Md.Background" Color="#EDEEF0" />
+    <!-- :host(.datetime-button-disabled) button { opacity: 0.4 }, of each button as a whole, which an OpacityMask is. -->
+    <SolidColorBrush x:Key="Avonic.DatetimeButton.Md.DisabledMask" Color="#000000" Opacity="0.4" />
+
+    <!-- Not Ionic's: the focus ring Chromium draws on a native button that Tab focuses (outline: auto), measured in its Android
+         emulation: 2 px, from 1 outside the button to 1 inside, rounded with it. As AvonicContent's. -->
+    <Color x:Key="Avonic.DatetimeButton.FocusRingColor">#E59700</Color>
+    <SolidColorBrush x:Key="Avonic.DatetimeButton.FocusRingBrush" Color="{DynamicResource Avonic.DatetimeButton.FocusRingColor}" />
+
+    <!-- core.css: .ion-datetime-button-overlay { width: fit-content; height: fit-content }, the modal's and the popover's size
+         variables. AvonicDatetimeButton merges a copy into the overlay of its datetime, which gets the class, so an app's own key on
+         the overlay still wins. -->
+    <ResourceDictionary x:Key="Avonic.DatetimeButton.Overlay">
+        <x:String x:Key="Avonic.Modal.Width">fit-content</x:String>
+        <x:String x:Key="Avonic.Modal.Height">fit-content</x:String>
+        <x:String x:Key="Avonic.Popover.Width">fit-content</x:String>
+        <x:String x:Key="Avonic.Popover.Height">fit-content</x:String>
+    </ResourceDictionary>
+
+</ResourceDictionary>

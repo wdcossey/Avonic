@@ -282,22 +282,22 @@ public partial class AvonicDatetime
         try
         {
             RenderHost();
-            if (Template is null || _calendarMonths is null && _wheel is null)
+            // Without a template (never shown) there are no parts to draw, but the presentation check below still runs: Ionic's
+            // datetime renders while hidden, so ion-datetime-button's wait for ionRender ends (#79).
+            if (Template is not null && (_calendarMonths is not null || _wheel is not null))
             {
-                return;
-            }
+                var culture = Culture;
+                RenderHeader(culture);
+                if (IsGridStyle)
+                {
+                    RenderCalendar(culture);
+                    RenderMonthYearWheel(culture);
+                    RenderTime(culture);
+                }
 
-            var culture = Culture;
-            RenderHeader(culture);
-            if (IsGridStyle)
-            {
-                RenderCalendar(culture);
-                RenderMonthYearWheel(culture);
-                RenderTime(culture);
+                RenderWheel(culture);
+                RenderFooter();
             }
-
-            RenderWheel(culture);
-            RenderFooter();
         }
         finally
         {

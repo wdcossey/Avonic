@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.DatetimeButtonPage">
+
+    <!-- Every value and locale is pinned, so that the page reads the same on any machine and any day; each button's text differs,
+         so that the real window's checks find each by its name. Each datetime is in a modal or popover that keeps its contents
+         mounted, as Ionic's docs show it. -->
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="16">
+            <TextBlock Name="DatetimeButtonChanged" Text="Pick a date or a time" TextWrapping="Wrap" />
+
+            <!-- The default, date and time, in a modal: a tap shows only that half. Done waits for a confirm. -->
+            <TextBlock Text="In a modal" FontWeight="Bold" />
+            <c:AvonicDatetimeButton Name="ModalButton" Datetime="ModalDatetime" />
+            <c:AvonicModal Name="ModalOverlay" KeepContentsMounted="True">
+                <c:AvonicDatetime Name="ModalDatetime" Value="2023-06-15T13:47:00" Locale="en-US"
+                                  ShowDefaultButtons="True" DoneText="Done picking" CancelText="Cancel picking" />
+            </c:AvonicModal>
+
+            <!-- A date in a popover, under the button. A day is the value at once. -->
+            <TextBlock Text="In a popover" FontWeight="Bold" />
+            <c:AvonicDatetimeButton Name="PopoverButton" Datetime="PopoverDatetime" />
+            <c:AvonicPopover Name="PopoverOverlay" KeepContentsMounted="True">
+                <c:AvonicDatetime Name="PopoverDatetime" Value="2023-07-04T09:30:00" Presentation="Date" Locale="en-US" />
+            </c:AvonicPopover>
+
+            <!-- A time in a popover. -->
+            <c:AvonicDatetimeButton Name="TimeButton" Datetime="TimeDatetime" />
+            <c:AvonicPopover KeepContentsMounted="True">
+                <c:AvonicDatetime Name="TimeDatetime" Value="2023-07-04T21:15:00" Presentation="Time" Locale="en-US" />
+            </c:AvonicPopover>
+
+            <!-- Wheels: one button, the date and the time together. -->
+            <TextBlock Text="Wheels, a colour, disabled" FontWeight="Bold" />
+            <c:AvonicDatetimeButton Name="WheelButton" Datetime="WheelDatetime" />
+            <c:AvonicModal KeepContentsMounted="True">
+                <c:AvonicDatetime Name="WheelDatetime" Value="2023-08-20T18:05:00" PreferWheel="True" Locale="en-US"
+                                  ShowDefaultButtons="True" DoneText="Done wheels" CancelText="Cancel wheels" />
+            </c:AvonicModal>
+
+            <!-- The colour shows on the active button, while its datetime shows: here, in the page. -->
+            <c:AvonicDatetimeButton Name="ColorButton" Datetime="InlineDatetime" Color="danger" />
+            <c:AvonicDatetimeButton Name="DisabledButton" Datetime="DisabledDatetime" IsEnabled="False" />
+            <c:AvonicModal KeepContentsMounted="True">
+                <c:AvonicDatetime Name="DisabledDatetime" Value="2023-09-01T07:00:00" Locale="en-US" />
+            </c:AvonicModal>
+
+            <!-- The slots, and several dates. -->
+            <TextBlock Text="Slots, several dates, in an item" FontWeight="Bold" />
+            <c:AvonicDatetimeButton Name="SlotButton" Datetime="SlotDatetime">
+                <c:AvonicDatetimeButton.DateTargetContent>
+                    <TextBlock Text="Pick a day" />
+                </c:AvonicDatetimeButton.DateTargetContent>
+            </c:AvonicDatetimeButton>
+            <c:AvonicModal KeepContentsMounted="True">
+                <c:AvonicDatetime Name="SlotDatetime" Value="2023-10-12" Presentation="Date" Locale="en-US" />
+            </c:AvonicModal>
+            <c:AvonicDatetimeButton Name="SeveralButton" Datetime="SeveralDatetime" />
+            <c:AvonicModal KeepContentsMounted="True">
+                <c:AvonicDatetime Name="SeveralDatetime" Presentation="Date" Multiple="True" Locale="en-US"
+                                  ShowDefaultButtons="True" DoneText="Done several" CancelText="Cancel several" />
+            </c:AvonicModal>
+
+            <c:AvonicList>
+                <c:AvonicItem>
+                    <c:AvonicLabel Content="Starts" />
+                    <c:AvonicItem.EndContent>
+                        <c:AvonicDatetimeButton Name="ItemButton" Datetime="ItemDatetime" />
+                    </c:AvonicItem.EndContent>
+                </c:AvonicItem>
+            </c:AvonicList>
+            <c:AvonicPopover KeepContentsMounted="True">
+                <c:AvonicDatetime Name="ItemDatetime" Value="2023-11-02T08:45:00" Locale="en-US" />
+            </c:AvonicPopover>
+
+            <!-- The colour button's datetime, in the page: its date button is active while this shows. -->
+            <TextBlock Text="A datetime in the page" FontWeight="Bold" />
+            <c:AvonicDatetime Name="InlineDatetime" Value="2023-12-24T16:30:00" Locale="en-US" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

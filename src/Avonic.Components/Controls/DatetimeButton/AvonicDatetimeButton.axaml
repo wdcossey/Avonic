@@ -1,0 +1,48 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- Functional stub for one of ion-datetime-button's native buttons: structure only. The slot's content, or the text when
+         there's none, and the ripple. -->
+    <ControlTheme x:Key="{x:Type c:DatetimeButtonNative}" TargetType="c:DatetimeButtonNative">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="{TemplateBinding Background}">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}" />
+                    <TextBlock Name="PART_Text"
+                               Text="{TemplateBinding Text}"
+                               Margin="{TemplateBinding Padding}"
+                               IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}" />
+                    <c:AvonicRippleEffect Name="PART_Ripple" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- Functional stub for ion-datetime-button: structure only. A row that wraps, centred: the date button, then the time
+         button, each with its slot. -->
+    <ControlTheme x:Key="{x:Type c:AvonicDatetimeButton}" TargetType="c:AvonicDatetimeButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <WrapPanel Name="PART_Container" Orientation="Horizontal" ItemsAlignment="Center">
+                    <c:DatetimeButtonNative Name="PART_DateButton"
+                                            Classes="native"
+                                            IsVisible="False"
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding DateTargetContent}"
+                                            ContentTemplate="{TemplateBinding DateTargetContentTemplate}" />
+                    <c:DatetimeButtonNative Name="PART_TimeButton"
+                                            Classes="native"
+                                            IsVisible="False"
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding TimeTargetContent}"
+                                            ContentTemplate="{TemplateBinding TimeTargetContentTemplate}" />
+                </WrapPanel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
