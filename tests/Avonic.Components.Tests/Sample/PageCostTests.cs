@@ -239,6 +239,46 @@ public partial class PageCostTests
         Assert.Equal(0, clock.Pending);
     });
 
+    // #258's Pixel run: after round 1's month timing the timed page stayed alive ("something still holds it") and every later page
+    // was 5 to 10 times slower. The holder: the calendar's previous and next buttons took their colour from a SolidColorBrush made in
+    // the template's own Resources with a DynamicResource colour, which resolves through the theme's dictionary, so the theme, which
+    // lives as long as the app, held each brush, and through it the buttons, the datetime and its page. Every datetime that drew its
+    // calendar leaked so, timed or not, on v2 too. Each rendering, timed: the page goes once left, and nothing asks for a frame or
+    // waits on a timer for it.
+    [AvaloniaTheory]
+    [InlineData(DatetimeCalendarRendering.ScrolledMonths)]
+    [InlineData(DatetimeCalendarRendering.SingleGrid)]
+    public void A_Timed_Page_Is_Collected_Once_Left_And_Leaves_No_Frame_Or_Timer(DatetimeCalendarRendering rendering) => Run((scene, clock) =>
+    {
+        var page = TimeAndLeave(scene, clock, rendering);
+        Settle(clock, 2000);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+        for (var i = 0; i < 3 && page.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.False(page.IsAlive, "the timed page is still alive after it was left and a full collection");
+        Assert.Equal(0, MonthChangeTiming.PendingFrames);
+        Assert.Equal(0, clock.Pending);
+    });
+
+    // Its own method, so that no local of the test holds the page.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static WeakReference TimeAndLeave(Scene scene, TestClock clock, DatetimeCalendarRendering rendering)
+    {
+        var page = new DatetimeCostView(1, rendering);
+        scene.Window.Content = page;
+        Settle(clock, 400);
+        var run = new MonthChangeTiming(page.GetVisualDescendants().OfType<AvonicDatetime>().Single(), TimeSpan.FromMilliseconds(20)).Run(2, 2);
+        Drive(clock, run);
+        Assert.True(run.IsCompletedSuccessfully);
+        scene.Window.Content = null;
+        return new WeakReference(page);
+    }
+
     // The page left in the middle of a change: the change ends at once, rather than keep the app drawing until its window is over.
     [AvaloniaFact]
     public void A_Page_Left_During_A_Change_Ends_It_At_Once_And_No_Frame_Is_Asked_For_After() => Run((scene, clock) =>

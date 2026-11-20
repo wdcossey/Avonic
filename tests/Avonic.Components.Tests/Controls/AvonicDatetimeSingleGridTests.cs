@@ -502,6 +502,37 @@ public class AvonicDatetimeSingleGridTests
         Assert.Equal(1, Shown(datetime), 3);
     });
 
+    // The previous and next buttons, and the default buttons, used to take their colour from a brush made in the template's own
+    // Resources with a DynamicResource colour: the theme held each such brush, and through it the datetime, for as long as the
+    // theme lived (#258's Pixel run). Each rendering, with the footer's buttons too.
+    [AvaloniaTheory]
+    [InlineData(DatetimeCalendarRendering.ScrolledMonths, false)]
+    [InlineData(DatetimeCalendarRendering.SingleGrid, false)]
+    [InlineData(DatetimeCalendarRendering.ScrolledMonths, true)]
+    public void A_Datetime_That_Drew_Its_Calendar_Is_Collected_Once_Left(DatetimeCalendarRendering rendering, bool buttons) => Run((scene, clock) =>
+    {
+        var weak = ShowAndLeave(scene, clock, rendering, buttons);
+        Settle(clock, 1000);
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+        for (var i = 0; i < 3 && weak.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.False(weak.IsAlive);
+    });
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static WeakReference ShowAndLeave(Scene scene, TestClock clock, DatetimeCalendarRendering rendering, bool buttons)
+    {
+        var datetime = Show(scene, clock, new AvonicDatetime { Value = June15, CalendarRendering = rendering, ShowDefaultButtons = buttons });
+        Assert.True(Next(datetime).IsEffectivelyVisible);
+        scene.Window.Content = null;
+        return new WeakReference(datetime);
+    }
+
     [AvaloniaFact]
     public void Capture_Single_Grid() => Run((scene, clock) =>
     {

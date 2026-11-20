@@ -204,7 +204,7 @@
                                     </Button>
                                     <c:AvonicButtons Name="PART_NavButtons" Grid.Column="1">
                                         <c:AvonicButtons.Resources>
-                                            <SolidColorBrush x:Key="Avonic.Button.Color" Color="{DynamicResource Avonic.TextColorStep350}" />
+                                            <StaticResource x:Key="Avonic.Button.Color" ResourceKey="Avonic.TextColorStep350Brush" />
                                             <SolidColorBrush x:Key="Avonic.Button.Background" Color="Transparent" />
                                         </c:AvonicButtons.Resources>
                                         <c:AvonicButton Name="PART_PreviousButton" Classes="navigation-button" AutomationProperties.Name="Previous month">
@@ -267,7 +267,7 @@
                                               IsVisible="False" />
                             <c:AvonicButtons Name="PART_DefaultButtons" HorizontalAlignment="Right" IsVisible="False">
                                 <c:AvonicButtons.Resources>
-                                    <SolidColorBrush x:Key="Avonic.Button.Color" Color="{DynamicResource Avonic.Color.Primary}" />
+                                    <StaticResource x:Key="Avonic.Button.Color" ResourceKey="Avonic.Color.PrimaryBrush" />
                                 </c:AvonicButtons.Resources>
                                 <c:AvonicButtons.ItemsPanel>
                                     <ItemsPanelTemplate>
