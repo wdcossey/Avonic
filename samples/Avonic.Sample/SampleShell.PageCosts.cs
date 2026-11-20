@@ -181,7 +181,7 @@ public partial class SampleShell
                 ShowIndex();
                 await Task.Delay(400);
                 var after = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform(), PerfChecks.Cpuset(), NotInFront()))
+                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, await PerfChecks.CollectedAsync(timed), before, after, Platform(), PerfChecks.Cpuset(), NotInFront()))
                 {
                     Write(line);
                 }

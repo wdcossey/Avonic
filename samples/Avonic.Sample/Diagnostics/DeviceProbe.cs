@@ -150,11 +150,9 @@ public static class DeviceProbe
             }
         }
 
-        if (left?.Target is Control page)
+        if (left is not null)
         {
-            var (visuals, peers) = Tree(page);
-            leftState = $"alive, {(TopLevel.GetTopLevel(page) is null ? "out of the tree" : "STILL IN A TOP LEVEL")}, {visuals} visuals, {peers} peers";
-            scrollers.AddRange(page.GetVisualDescendants().OfType<ScrollViewer>().Where(s => s.Name == "PART_CalendarBody"));
+            leftState = LeftPage(left, scrollers);
             foreach (var scroller in scrollers)
             {
                 scroller.PropertyChanged += OnScroller;
@@ -185,6 +183,11 @@ public static class DeviceProbe
             }
         }
 
+        // The scrollers held the page through the window; let go of them, then ask again, from fresh turns of the dispatcher.
+        var watched = scrollers.Count;
+        scrollers.Clear();
+        var collectedAfter = left is null || !left.IsAlive ? (bool?)null : await PerfChecks.CollectedAsync(left);
+
         var after = Snapshot.Take();
         var window = Stopwatch.GetElapsedTime(started);
         var longest = 0.0;
@@ -199,7 +202,24 @@ public static class DeviceProbe
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"{label}: busy: {window.TotalSeconds:0.0} s, {after.Cpu(before)}, passes {passes.Count}, frames {frames.Count} longest {longest:0.0} ms, default post {defaultLate.Count}/{posted} {Late(defaultLate)}, background post {backgroundLate.Count}/{posted} {Late(backgroundLate)}, {after.Gc(before)}, tree {tree}, peers {treePeers}, left page {leftState}{(scrollers.Count > 0 ? $", its scrollers changed {scrollerMoves} times" : "")}");
+            $"{label}: busy: {window.TotalSeconds:0.0} s, {after.Cpu(before)}, passes {passes.Count}, frames {frames.Count} longest {longest:0.0} ms, default post {defaultLate.Count}/{posted} {Late(defaultLate)}, background post {backgroundLate.Count}/{posted} {Late(backgroundLate)}, {after.Gc(before)}, tree {tree}, peers {treePeers}, left page {leftState}{(watched > 0 ? $", its scrollers changed {scrollerMoves} times" : "")}{collectedAfter switch { true => ", then collected", false => ", STILL ALIVE after the window and a collection", null => "" }}");
+    }
+
+    /// <summary>
+    /// What's left of the page: <c>gone</c>, or alive, in a top level or not, with its visuals and peers; and its calendars'
+    /// scrollers, to watch. Its own method, so that no local of the probe's state machine holds the page past it.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static string LeftPage(WeakReference left, List<ScrollViewer> scrollers)
+    {
+        if (left.Target is not Control page)
+        {
+            return "gone";
+        }
+
+        var (visuals, peers) = Tree(page);
+        scrollers.AddRange(page.GetVisualDescendants().OfType<ScrollViewer>().Where(s => s.Name == "PART_CalendarBody"));
+        return $"alive, {(TopLevel.GetTopLevel(page) is null ? "out of the tree" : "STILL IN A TOP LEVEL")}, {visuals} visuals, {peers} peers";
     }
 
     internal static TimeSpan ProcessCpu()

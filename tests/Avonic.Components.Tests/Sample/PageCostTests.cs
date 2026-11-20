@@ -303,7 +303,7 @@ public partial class PageCostTests
         Assert.Matches(@"background post \d+/\d+ .*gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap [\d.]+ MB, tree \d+, peers 0, left page ", line);
         // Headless keeps a page until a collection: here it was alive, out of the tree, with its calendar's scroller watched.
         Assert.Contains("left page alive, out of the tree", line, StringComparison.Ordinal);
-        Assert.Contains("its scrollers changed 0 times", line, StringComparison.Ordinal);
+        Assert.Contains("its scrollers changed 0 times, then collected", line, StringComparison.Ordinal);
 
         for (var i = 0; i < 3 && left.IsAlive; i++)
         {

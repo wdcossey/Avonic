@@ -255,6 +255,5 @@ So the brush's `DynamicResource` seems to resolve through the theme's dictionary
 holds each brush the template makes, and through it whatever draws with it. A `StaticResource` of the top-level brush instead
 (`<StaticResource x:Key="Avonic.Button.Color" ResourceKey="Avonic.TextColorStep350Brush" />`) leaks nothing and draws the same,
 pixel for pixel (#258; `AvonicDatetimeSingleGridTests.A_Datetime_That_Drew_Its_Calendar_Is_Collected_Once_Left` and
-`PageCostTests.A_Timed_Page_Is_Collected_Once_Left_And_Leaves_No_Frame_Or_Timer` fail with the old form). On the Pixel 8, a run
-whose timed datetime page stayed alive was 5 to 10 times slower for every later page. CLAUDE.md's mapping already asks for
+`PageCostTests.A_Timed_Page_Is_Collected_Once_Left_And_Leaves_No_Frame_Or_Timer` fail with the old form). CLAUDE.md's mapping already asks for
 `StaticResource`s of top-level brushes in a nested dictionary, for a different reason.

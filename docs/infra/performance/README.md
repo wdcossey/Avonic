@@ -272,20 +272,18 @@ are, as their queries of Avalonia's accessibility bridge run on the UI thread, a
 calendar: keep it out of `page-costs/`.
 
 The baseline's round 1 (3201219) had two failures that later rounds didn't: ten nexts that never left June (`heading n/a`, each
-watched the full 5 s), then "the calendar left the tree" at the first previous. The first is the scroll rest, a `Background` timer,
-never running: `PageCostTests.With_No_Idle_Time_The_Calendar_Stays_In_The_Tree` gives the same lines with the timer held, so the
-phone gave no idle time during that round's changes, though the checks before and after found it (6.3 and 0.5 ms). Held so, the
-calendar stays in the tree; and nothing in the calendar or the timing takes a page away (only the shell's `ShowIndex` does, which
-the rounds call after the timing, and a back request). So the second came from outside: a back request, or the activity going. The
-rounds now write a `note:` line when a back request or the back button takes the page away, or the shell leaves its top level, and
-`table.js` lists it, in bold, with the checks. The single grid's change waits on no timer, only on frames, so it changes month with
-no idle time at all (the same test).
+watched the full 5 s), then "the calendar left the tree" at the first previous. Both most likely come from the screen locking
+during the round ([above](#keep-the-screen-on)): the phone on the little cores, and the scroll rest, a `Background` timer, never
+getting a turn (`PageCostTests.With_No_Idle_Time_The_Calendar_Stays_In_The_Tree` gives the same ten lines with the timer held);
+nothing in the calendar or the timing takes a page away. The rounds now write a `note:` line when a back request or the back
+button takes the page away, or the shell leaves its top level, and `table.js` lists it, in bold, with the checks. The single
+grid's change waits on no timer, only on frames, so it changes month with no idle time at all (the same test).
 
 ### Device diagnostics
 
-After v2 itself (4f2ff30) showed it on the Pixel too, every page 7 to 10 times slower and the UI thread near 100% busy after
-round 1's month timing, with the render thread idle, the rounds add what tells the causes apart (`Diagnostics/DeviceProbe.cs`,
-#258), cheap enough for the device:
+Made while every page of #258's Pixel runs, and of v2's, grew 7 to 10 times slower after round 1, to tell the collector, a
+loop on the UI thread and something left behind apart. It was none of them: the screen had locked ([above](#keep-the-screen-on)),
+and these figures were what ruled the app out. They stay, cheap enough for the device (`Diagnostics/DeviceProbe.cs`):
 
 - **On each page's line**, after its own figures: `gc 3/1/0, gc pause 12.3 ms, heap 85.2 MB, cpu 210 ms, ui thread 190 ms, passes 4,
   tree 1234, peers 0`: collections of each generation and their pauses during the open, the heap after it, the process's and the UI
@@ -296,13 +294,19 @@ round 1's month timing, with the render thread idle, the rounds add what tells t
   ms, gc 0/0/0, gc pause 0.0 ms, heap 85.2 MB, tree 312, peers 0, left page gone`, with the list on screen and nothing asked of the
   app: its layout passes, its frames (asked for each frame, so a held thread shows as a long gap), how late a `Default` and a
   `Background` post ran (one of each every 100 ms), the collector, the CPU, the tree, and the page just left: gone, or alive, in a
-  top level or not, with its visuals and peers, and how often its calendar's scroller changed. `table.js` lists these with the checks.
+  top level or not, with its visuals and peers, how often its calendar's scroller changed, and whether a collection after the
+  window takes it (`then collected`, or `STILL ALIVE`). `table.js` lists these with the checks.
 
 Read them so: UI-thread CPU with no passes and no collections in the window is work above `Background` that isn't layout (a loop);
 passes with nothing on screen changing is layout invalidated again and again; pauses and a heap that grows from round to round are
 the collector; a tree that grows on the list, or a left page still in a top level, is something left behind; peers where there were
 none is Avalonia's accessibility bridge at work. Headless, 20 scrolled month changes leave nothing of this: the busy window after
 them is idle (16 ms of CPU, no passes, no collections) and the next page opens no slower.
+
+**A page "still alive" on Android may not be held.** The runtime there is Mono, whose collector scans each thread's stack
+conservatively, so a reference left in a stack slot keeps a page until the slot is reused. The check now collects from fresh turns
+of the dispatcher, several times over 400 ms, and the busy window collects again at its end; a page that survives both is held.
+Headless (CoreCLR, precise), every timed page goes.
 
 ### Keeping a run
 

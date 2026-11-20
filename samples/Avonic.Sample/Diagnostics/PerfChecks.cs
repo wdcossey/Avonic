@@ -51,11 +51,34 @@ public static class PerfChecks
         }
     }
 
+    /// <summary>
+    /// <see cref="Collected"/>, tried again over the next few hundred milliseconds, each from a fresh turn of the dispatcher. On
+    /// Android the runtime is Mono, whose collector scans each thread's stack conservatively: a reference left in a stack slot the
+    /// thread hasn't reused yet keeps the page alive for a while, though nothing holds it. Alive after every try is alive.
+    /// </summary>
+    public static async Task<bool> CollectedAsync(WeakReference page)
+    {
+        for (var i = 0; i < 4; i++)
+        {
+            if (Collected(page))
+            {
+                return true;
+            }
+
+            await Task.Delay(100);
+        }
+
+        return Collected(page);
+    }
+
+    /// <summary>A full collection, finalizers run, and another: whether the page has gone. Its own frame, holding nothing.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     public static bool Collected(WeakReference page)
     {
         for (var i = 0; i < 2 && page.IsAlive; i++)
         {
             GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         return !page.IsAlive;
