@@ -173,6 +173,9 @@ On desktop, `AVONIC_PERF_OUT` names a file to append the lines to, and `AVONIC_P
 dotnet build samples/Avonic.Sample.Desktop -c Release -p:AvonicPerf=true
 ```
 
+Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and
+`node tools/page-costs/table.js` puts one run, or a run before and after, in a table.
+
 Keep the phone unlocked and untouched for the whole run: a touch, a dimmed screen or a lock shows as pages several times
 slower.
 
