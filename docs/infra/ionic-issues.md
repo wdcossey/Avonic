@@ -194,3 +194,31 @@ when the parts weren't clamped would fix both.
 
 **Avonic** cuts the day only when the date wasn't clamped (`ValidateParts_Keeps_A_Date_Clamped_To_Max_Whole`), and its parts are
 values, so max can't move. Fairly sure, from the code.
+
+## `ion-loading`: a second `present()` starts a second duration timer, which can dismiss a later presentation
+
+**Read in `loading.js` (#41), and its parts measured in Ionic 9.0.11, md, headless Chromium.** A minimal page:
+
+```html
+<ion-app>
+  <script>
+    const loading = document.createElement('ion-loading');
+    loading.message = 'Loading...';
+    loading.duration = 1000;
+    document.querySelector('ion-app').appendChild(loading);
+    loading.present();
+    setTimeout(() => loading.present(), 500);   // already presented: the shared present() returns at once
+    setTimeout(() => loading.present(), 1300);  // after the first timer's dismiss: presented again
+  </script>
+</ion-app>
+```
+
+`present()` runs `await present(this, …)`, which returns at once when the loading is already presented, and then always sets
+`this.durationTimeout = setTimeout(() => this.dismiss(), this.duration + 10)`. The second call starts a timer for 1510 ms and loses the
+first one's handle; the first still dismisses at about 1230 (200 ms of enter, then 1010) (measured: `willDismiss` 516 ms after `didPresent` for a duration of 500),
+and the second then dismisses the presentation made at 1300 only 210 ms in, where its own timer would have run to about 2530. `dismiss()`
+clears only the last handle, so a dismiss by hand doesn't stop the earlier one either.
+
+**Avonic** starts the timer only when a present presents it (`OnPresented`), so a second `Present()` does nothing, and each
+presentation has one timer, which its dismiss clears (`B7_A_Second_Present_Starts_No_Second_Timer`). Fairly sure, from the code; the
+whole sequence hasn't been run in Chromium.
