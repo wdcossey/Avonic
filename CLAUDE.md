@@ -66,7 +66,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          progressEnd for a gesture to drive; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js;
                          SmoothScroll, Chromium's scrollTo({ behavior: 'smooth' }) on either axis; CssTransition, a CSS
-                         transition of one number with a timing function
+                         transition of one number with a timing function; AnimationGroupOpacity, an animation's opacity as
+                         a group (an OpacityMask), for an element whose parts overlap
   AvonicConfig.cs        Ionic global config equivalents; internal clock/scheduler hooks for tests
   Icons/                 generated: all of ionicons, compressed, for AvonicIcon (tools/ionicons/generate.js)
   AvonicComponentsStyles.cs   merges every discovered Controls/**/*.axaml; AvonicTheme includes it
@@ -407,6 +408,11 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | An overlay's animation builder that sets an inline style before it animates (`wrapperEl.style.transform`, `style.top`) | A local value on the part (its `RenderTransform`) or on its panel, set by the `Md*Animation` builder, as an app's own builder wouldn't set it either; the animation's values, at `Animation` priority, beat it, and it stays after the dismiss, as the inline style does | `AvonicToast`'s `translateY` and the middle's `ToastPanel.MiddleTop` |
 | `white-space: var(--white-space)` on text | A string key read by `ToastContent.WhiteSpaceText` (`normal` and `nowrap` collapse runs of white space, `pre-line` keeps the breaks, `pre` keeps it all) and `.WhiteSpaceWrapping`, as a `TextBlock` keeps every space and line break | `AvonicToast`'s message |
 | A part with `tabindex="0"` in the shadow tree of a host with `tabindex="-1"`, which Chromium leaves out of Tab | A tab stop, as the part's `tabindex` asks, recorded in `docs/infra/ionic-issues.md` | `AvonicToast`'s buttons |
+| A component to build (`NavComponent`: a tag name, an element, a framework's function, a `ViewController`) | `object?` with Avalonia's forms, in order: a `Control` as it is; a `Type` of control, made when it's needed; a `Func<Control>`, called then; the container's own view type; anything else a view model, built by `FindDataTemplate` from the control (an app's view locator), with the object as its `DataContext` | `AvonicNav`'s pages, `AvonicNavLink.Component` (#130) |
+| `componentProps` (`Object.assign(el, props)` before the element is attached) | `IReadOnlyDictionary<string, object?>`, each key the built control's Avalonia property in camelCase or PascalCase, else its public settable CLR property (reflection: a trimmed app can strip one its own code never uses), a string converted as XAML would, before it's added | `AvonicNav`'s `NavProps` |
+| Lifecycle events a container dispatches on a child it made (`ionViewWillEnter`, `bubbles: false`) | Routed events registered on the container's type with `Direct`, raised on the child, and `Add<Name>Handler(child, …)` helpers | `AvonicNav.IonViewWillEnterEvent` and the other four |
+| `opacity` animated on an element whose parts overlap (a page) | `AnimationGroupOpacity.IsEnabled` on it, so the animation's `opacity` is an `OpacityMask` of a solid brush, a group, as Avalonia's `Opacity` fades each part on its own | `AvonicNav`'s pages |
+| A Stencil method called before the component has loaded (it waits for `componentDidLoad`) | Queued until the control's first attach, after what the load itself does | `AvonicNav`'s calls before `Root` is set |
 
 Avonic-only additions (touch-target enforcement, extra events) are allowed but live in a separate
 "Extensions" section of the control's doc and never shadow an Ionic name.

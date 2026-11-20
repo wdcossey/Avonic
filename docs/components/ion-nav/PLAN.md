@@ -12,8 +12,9 @@ phone with `settle.js` and the repo's Roboto; the pages are plain custom element
 framework writes them. `ref/push-*.png` and `ref/pop-*.png` are the transition paused with the Web Animations API at the times in
 their names (`frames.js`); `ref/page.png` is `render.js`'s, its command in [`ref/README.md`](ref/README.md).
 
-**Status of this plan:** the page type and `componentProps` are a proposal ([§ What a page is](#what-a-page-is-the-decision)),
-for the human to decide before any code, as the issue asks. Everything else follows from Ionic's code and the measurements.
+**Decided on 2026-11-20**, before any code, as the issue asks ([§ Decisions](#decisions)): option B for the page forms, with
+`componentProps` reaching CLR properties too; swipe back offered, off by default; hardware back as an extension, on by default;
+the stack kept across a detach. The checklists below are ticked as built; the README has the final ones.
 
 ## What a page is (the decision)
 
@@ -101,33 +102,33 @@ The rest of this plan is written for B; A and C are B with forms taken out (thei
 
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
-| [ ] | `animated` | `Animated` | `bool` | `true` | Off: no transition (M13). `AvonicConfig.Animated` off has the same effect, read at each transition, as `config.getBoolean('animated', true)` |
-| [ ] | `animation` | `Animation` | `AnimationBuilder?` | null | Used when the call's options give none; else md's. The builder gets the nav and a `NavTransitionOptions` (entering and leaving page, direction, duration, `ShowGoBack`), Ionic's `animationOpts`. `config.get('navAnimation')` isn't mapped: no animation config is (`modalEnter` and the rest aren't either) |
-| [ ] | `root` | `Root` | `object?` (a page form) | null | Set at the first load, unanimated (`SetRoot`); a change after load calls `SetRoot(Root, RootParams)` (M15). Null does nothing |
-| [ ] | `rootParams` | `RootParams` | `IReadOnlyDictionary<string, object?>?` | null | Read with `Root`; a change of its own does nothing (M15) |
-| [ ] | `swipeGesture` | `SwipeGesture` | `bool?` | null | Proposed: offered. Null takes Ionic's `swipeBackEnabled` config, false in md (M20), at the first load. True turns on the edge swipe back (`swipe-back.js`), driving the md transition by its progress, as Ionic does in md when it's set. See [§ Swipe back](#swipe-back) |
+| [x] | `animated` | `Animated` | `bool` | `true` | Off: no transition (M13). `AvonicConfig.Animated` off has the same effect, read at each transition, as `config.getBoolean('animated', true)` |
+| [x] | `animation` | `Animation` | `AnimationBuilder?` | null | Used when the call's options give none; else md's. The builder gets the nav and a `NavTransitionOptions` (entering and leaving page, direction, duration, `ShowGoBack`), Ionic's `animationOpts`. `config.get('navAnimation')` isn't mapped: no animation config is (`modalEnter` and the rest aren't either) |
+| [x] | `root` | `Root` | `object?` (a page form) | null | Set at the first load, unanimated (`SetRoot`); a change after load calls `SetRoot(Root, RootParams)` (M15). Null does nothing |
+| [x] | `rootParams` | `RootParams` | `IReadOnlyDictionary<string, object?>?` | null | Read with `Root`; a change of its own does nothing (M15) |
+| [x] | `swipeGesture` | `NavSwipeGesture` | `bool?` | null | Proposed: offered. Null takes Ionic's `swipeBackEnabled` config, false in md (M20), at the first load. True turns on the edge swipe back (`swipe-back.js`), driving the md transition by its progress, as Ionic does in md when it's set. See [§ Swipe back](#swipe-back) |
 
 ### ion-nav: events (2), methods (14), slot
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `ionNavWillChange` | `IonNavWillChange` | Routed, `Direct` (`bubbles: false`; measured M16). Raised at the start of every transition, synchronously inside the call that starts it (M2: before the page is built), also for one that then fails (M4) |
-| [ ] | `ionNavDidChange` | `IonNavDidChange` | Routed, `Direct`. After the transition, and after the task's result is set, before an awaiting caller continues (M2: `ionNavDidChange` then `push resolved`). Not raised when a transition fails |
-| [ ] | `push(component, componentProps?, opts?, done?)` | `Push(object component, IReadOnlyDictionary<string, object?>? componentProps = null, NavOptions? opts = null, TransitionDoneFn? done = null)` | `Task<bool>`: genuinely async. `insert(-1, …)` |
-| [ ] | `insert(insertIndex, component, componentProps?, opts?, done?)` | `Insert(int, object, …)` | `insertPages(index, [{ component, componentProps }])` |
-| [ ] | `insertPages(insertIndex, insertComponents, opts?, done?)` | `InsertPages(int, IEnumerable<object>, …)` | Each item a page form or a `NavComponentWithProps`. A plain string in the array throws in Ionic: a deliberate difference (D1) |
-| [ ] | `pop(opts?, done?)` | `Pop(NavOptions?, TransitionDoneFn?)` | `removeIndex(-1, 1)` |
-| [ ] | `popTo(indexOrViewCtrl, opts?, done?)` | `PopTo(int, …)`, `PopTo(ViewController, …)` | Two overloads for `number \| ViewController` |
-| [ ] | `popToRoot(opts?, done?)` | `PopToRoot(…)` | `removeIndex(1, -1)` |
-| [ ] | `removeIndex(startIndex, removeCount = 1, opts?, done?)` | `RemoveIndex(int, int removeCount = 1, …)` | |
-| [ ] | `setRoot(component, componentProps?, opts?, done?)` | `SetRoot(object, …)` | `setPages([{ component, componentProps }])` |
-| [ ] | `setPages(views, opts?, done?)` | `SetPages(IEnumerable<object>, …)` | Unanimated unless `opts.Animated` is true (M9, M9b) |
-| [ ] | `getActive()` | `GetActive()` → `ViewController?` | Synchronous: Ionic's is an `async` wrapper of `getActiveSync` |
-| [ ] | `getByIndex(index)` | `GetByIndex(int)` → `ViewController?` | Synchronous; null out of range |
-| [ ] | `canGoBack(view?)` | `CanGoBack(ViewController? view = null)` → `bool` | Synchronous |
-| [ ] | `getPrevious(view?)` | `GetPrevious(ViewController? view = null)` → `ViewController?` | Synchronous |
-| [ ] | `getLength()` | `GetLength()` → `int` | Synchronous |
-| [ ] | `(default)` slot | none | Ionic's `<slot>` holds the pages it makes; a child the app puts in the nav itself isn't a page. The nav's pages are its children; there's no `Content` |
+| [x] | `ionNavWillChange` | `IonNavWillChange` | Routed, `Direct` (`bubbles: false`; measured M16). Raised at the start of every transition, synchronously inside the call that starts it (M2: before the page is built), also for one that then fails (M4) |
+| [x] | `ionNavDidChange` | `IonNavDidChange` | Routed, `Direct`. After the transition, and after the task's result is set, before an awaiting caller continues (M2: `ionNavDidChange` then `push resolved`). Not raised when a transition fails |
+| [x] | `push(component, componentProps?, opts?, done?)` | `Push(object component, IReadOnlyDictionary<string, object?>? componentProps = null, NavOptions? opts = null, TransitionDoneFn? done = null)` | `Task<bool>`: genuinely async. `insert(-1, …)` |
+| [x] | `insert(insertIndex, component, componentProps?, opts?, done?)` | `Insert(int, object, …)` | `insertPages(index, [{ component, componentProps }])` |
+| [x] | `insertPages(insertIndex, insertComponents, opts?, done?)` | `InsertPages(int, IEnumerable<object>, …)` | Each item a page form or a `NavComponentWithProps`. A plain string in the array throws in Ionic: a deliberate difference (D1) |
+| [x] | `pop(opts?, done?)` | `Pop(NavOptions?, TransitionDoneFn?)` | `removeIndex(-1, 1)` |
+| [x] | `popTo(indexOrViewCtrl, opts?, done?)` | `PopTo(int, …)`, `PopTo(ViewController, …)` | Two overloads for `number \| ViewController` |
+| [x] | `popToRoot(opts?, done?)` | `PopToRoot(…)` | `removeIndex(1, -1)` |
+| [x] | `removeIndex(startIndex, removeCount = 1, opts?, done?)` | `RemoveIndex(int, int removeCount = 1, …)` | |
+| [x] | `setRoot(component, componentProps?, opts?, done?)` | `SetRoot(object, …)` | `setPages([{ component, componentProps }])` |
+| [x] | `setPages(views, opts?, done?)` | `SetPages(IEnumerable<object>, …)` | Unanimated unless `opts.Animated` is true (M9, M9b) |
+| [x] | `getActive()` | `GetActive()` → `ViewController?` | Synchronous: Ionic's is an `async` wrapper of `getActiveSync` |
+| [x] | `getByIndex(index)` | `GetByIndex(int)` → `ViewController?` | Synchronous; null out of range |
+| [x] | `canGoBack(view?)` | `CanGoBack(ViewController? view = null)` → `bool` | Synchronous |
+| [x] | `getPrevious(view?)` | `GetPrevious(ViewController? view = null)` → `ViewController?` | Synchronous |
+| [x] | `getLength()` | `GetLength()` → `int` | Synchronous |
+| [x] | `(default)` slot | none | Ionic's `<slot>` holds the pages it makes; a child the app puts in the nav itself isn't a page. The nav's pages are its children; there's no `Content` |
 
 ### Ionic's other public types and members
 
@@ -135,13 +136,13 @@ Not in `core.json` but part of the API an app uses:
 
 | ✓ | Ionic | Avonic | Notes |
 |---|---|---|---|
-| [ ] | `NavOptions` | `NavOptions` class | `Animated`, `AnimationBuilder`, `Duration` (ms), `Direction` (`NavDirection.Back` / `Forward`), `SkipIfBusy`, `ShowGoBack`, `DeepWait`, `ViewIsReady` (`Func<Control, Task>`), `ProgressAnimation` (the swipe's). `easing` is read only by the iOS transition; `keyboardClose` by nothing; `mode` isn't exposed (ADR 0001); `delegate` is `@internal` |
-| [ ] | `ViewController` | `ViewController` class | `Component`, `Params`, `Element` (the page, null until it's built), `Nav`. Its state is internal. Made by the nav, or by an app to pass a view in |
-| [ ] | `NavComponentWithProps` | `NavComponentWithProps` record | `Component`, `ComponentProps`, for `InsertPages` and `SetPages` |
-| [ ] | `TransitionDoneFn` | `TransitionDoneFn` delegate | `(hasCompleted, requiresTransition, enteringView, leavingView, direction)`; called before the task completes, and with `(false, false, reason)` on a failure |
-| [ ] | `ionViewWillEnter`, `ionViewDidEnter`, `ionViewWillLeave`, `ionViewDidLeave`, `ionViewWillUnload` | `AvonicNav.IonViewWillEnterEvent` and the other four | Routed, `Direct`, raised on the page (`bubbles: false`), with `AvonicNav.AddIonViewWillEnterHandler(page, …)` and the rest |
-| [ ] | `can-go-back` on the entering page | `:can-go-back` on the page | Set before each transition when the entering view has one under it (`showGoBack`, which `opts.ShowGoBack` overrides), removed otherwise. #47's back button shows by it (`.can-go-back > ion-header ion-back-button`) |
-| [ ] | `ion-page` on each page | class `ion-page` | As `AvonicTab` gives its component, for `AvonicContent`'s page lookup |
+| [x] | `NavOptions` | `NavOptions` class | `Animated`, `AnimationBuilder`, `Duration` (ms), `Direction` (`NavDirection.Back` / `Forward`), `SkipIfBusy`, `ShowGoBack`, `DeepWait`, `ViewIsReady` (`Func<Control, Task>`), `ProgressAnimation` (the swipe's). `easing` is read only by the iOS transition; `keyboardClose` by nothing; `mode` isn't exposed (ADR 0001); `delegate` is `@internal` |
+| [x] | `ViewController` | `ViewController` class | `Component`, `Params`, `Element` (the page, null until it's built), `Nav`. Its state is internal. Made by the nav, or by an app to pass a view in |
+| [x] | `NavComponentWithProps` | `NavComponentWithProps` record | `Component`, `ComponentProps`, for `InsertPages` and `SetPages` |
+| [x] | `TransitionDoneFn` | `TransitionDoneFn` delegate | `(hasCompleted, requiresTransition, enteringView, leavingView, direction)`; called before the task completes, and with `(false, false, reason)` on a failure |
+| [x] | `ionViewWillEnter`, `ionViewDidEnter`, `ionViewWillLeave`, `ionViewDidLeave`, `ionViewWillUnload` | `AvonicNav.IonViewWillEnterEvent` and the other four | Routed, `Direct`, raised on the page (`bubbles: false`), with `AvonicNav.AddIonViewWillEnterHandler(page, …)` and the rest |
+| [x] | `can-go-back` on the entering page | `:can-go-back` on the page | Set before each transition when the entering view has one under it (`showGoBack`, which `opts.ShowGoBack` overrides), removed otherwise. #47's back button shows by it (`.can-go-back > ion-header ion-back-button`) |
+| [x] | `ion-page` on each page | class `ion-page` | As `AvonicTab` gives its component, for `AvonicContent`'s page lookup |
 | — | `setRouteId`, `getRouteId` | none | **Not in Ionic 9:** removed with `ion-router` support ("as of Ionic 9 ion-nav is no longer a router outlet", `router/utils/dom.js`). Nothing to omit |
 | — | `delegate`, `ionNavWillLoad` | none | `@internal`: the framework's delegate (option B's forms play its part) and the router's wait for an outlet |
 | — | `focusManagerPriority` (the transition's focus controller) | none | Experimental global config, off by default; off, the controller does nothing |
@@ -150,10 +151,10 @@ Not in `core.json` but part of the API an app uses:
 
 | ✓ | Ionic | Avonic | Type | Default | Notes |
 |---|---|---|---|---|---|
-| [ ] | `component` | `Component` | `object?` (a page form) | null | Used for `Forward` and `Root`; null does nothing then (`navLink` resolves false) |
-| [ ] | `componentProps` | `ComponentProps` | `IReadOnlyDictionary<string, object?>?` | null | |
-| [ ] | `routerAnimation` | `RouterAnimation` | `AnimationBuilder?` | null | Passed as the call's `AnimationBuilder` |
-| [ ] | `routerDirection` | `RouterDirection` | `NavLinkRouterDirection` | `Forward` | `Back` pops, `Forward` pushes, `Root` sets the root; each with `SkipIfBusy` |
+| [x] | `component` | `Component` | `object?` (a page form) | null | Used for `Forward` and `Root`; null does nothing then (`navLink` resolves false) |
+| [x] | `componentProps` | `ComponentProps` | `IReadOnlyDictionary<string, object?>?` | null | |
+| [x] | `routerAnimation` | `RouterAnimation` | `AnimationBuilder?` | null | Passed as the call's `AnimationBuilder` |
+| [x] | `routerDirection` | `RouterDirection` | `NavLinkRouterDirection` | `Forward` | `Back` pops, `Forward` pushes, `Root` sets the root; each with `SkipIfBusy` |
 
 No events, methods, slots, parts or CSS variables. Its default slot (not in `core.json`) is `Content`: an `AvonicNavLink` is a
 `ContentControl`.
@@ -378,9 +379,18 @@ All merged in `v2`: `AvonicAnimation` (#5), `AvonicContent` (#11), `AvonicApp` a
 swipe), `Behaviors/NativeButton` (the link), the overlays (a nav in a modal), `AvonicHeader`, `AvonicToolbar`, `AvonicTitle`,
 `AvonicButton` for the sample and the frames. `ion-back-button` (#47) comes after and builds on `:can-go-back` and `CanGoBack`/`Pop`.
 
-## For you to decide
+## Decisions
 
-1. **The page forms:** A, B (recommended) or C, and whether `componentProps` reaches plain CLR properties.
-2. **Swipe back:** offered (with `AvonicConfig.SwipeBackEnabled`), or `SwipeGesture` left out.
-3. **Hardware back (E1):** on by default with `HandleBackButton`, as proposed; or off by default; or left out as Ionic's core does.
-4. **D3:** keep the stack across a detach (proposed), or destroy it as Ionic does.
+Taken by the human on 2026-11-20, from the proposal above:
+
+1. **The page forms: B**, and `componentProps` sets public CLR properties by reflection as well as Avalonia properties, with the
+   trimming caveat documented.
+2. **Swipe back: offered, off by default** (`NavSwipeGesture`, named as `SegmentSwipeGesture` is, and
+   `AvonicConfig.SwipeBackEnabled`, false), as an Avonic choice under md, with the note that on Android a left-edge drag competes with
+   the system's back gesture.
+3. **Hardware back (E1): an extension, on by default**: pops at priority 0 while the nav can go back, the innermost first;
+   `HandleBackButton="False"` turns it off, and an app can also take the request first above priority 0.
+4. **D3: the stack is kept** across a detach (ADR 0005).
+
+Found while building: Avalonia's `Opacity` isn't group opacity, so the pages' transition fades as an `OpacityMask`
+(`AnimationGroupOpacity`, a small opt-in in `Animation/AnimatedProperty.cs`); see COMPARISON.md.

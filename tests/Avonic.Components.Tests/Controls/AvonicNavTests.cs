@@ -218,6 +218,23 @@ public class AvonicNavTests
     }
 
     [AvaloniaFact]
+    public void N1_A_call_before_the_load_waits_for_it_and_runs_after_the_root()
+    {
+        using var stage = new Stage(nav => nav.Root = new TestPage("one"), attach: false);
+        var push = stage.Nav.Push(new TestPage("two"));
+        stage.After(100);
+        Assert.False(push.IsCompleted);
+        Assert.Empty(stage.Log);
+
+        stage.Attach();
+        stage.After(600);
+        Assert.True(push.Result);
+        Assert.Equal(["one", "two"], Names(stage.Nav));
+        Assert.Equal("ionNavWillChange@100", stage.Log[0]);
+        Assert.Equal("willEnter one@116", stage.Log[1]);
+    }
+
+    [AvaloniaFact]
     public void N2_Root_changed_after_load_sets_the_root_unanimated_and_RootParams_alone_does_nothing()
     {
         using var stage = new Stage(nav => nav.Root = new TestPage("one"));
