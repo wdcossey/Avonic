@@ -130,6 +130,7 @@ public partial class AvonicDatetime
             _calendarBody.AddHandler(KeyDownEvent, OnCalendarKeyDown, RoutingStrategies.Tunnel);
             _calendarBody.GotFocus += OnCalendarFocus;
             _calendarBody.SizeChanged += OnCalendarBodySize;
+            _calendarBody.AddHandler(PointerPressedEvent, OnCalendarPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         }
 
         if (_calendarMonths is not null)
@@ -229,8 +230,10 @@ public partial class AvonicDatetime
             _calendarBody.RemoveHandler(KeyDownEvent, OnCalendarKeyDown);
             _calendarBody.GotFocus -= OnCalendarFocus;
             _calendarBody.SizeChanged -= OnCalendarBodySize;
+            _calendarBody.RemoveHandler(PointerPressedEvent, OnCalendarPressed);
         }
 
+        CancelNeighbourDays();
         _smooth?.Stop();
         _smooth = null;
         DetachGrid();
@@ -440,7 +443,7 @@ public partial class AvonicDatetime
             return;
         }
 
-        if (_calendarMonths.EnsureMonths())
+        if (_calendarMonths.EnsureMonths(withNeighbours: _neighbourMonths == DatetimeNeighbourMonths.AtOnce))
         {
             foreach (var month in _calendarMonths.Months)
             {
@@ -481,6 +484,11 @@ public partial class AvonicDatetime
         AutomationProperties.SetAccessibilityView(monthPanel, isWorkingMonth ? AccessibilityView.Default : AccessibilityView.Raw);
         monthPanel.Month = month;
         monthPanel.Year = year;
+        if (monthPanel.Days.Count == 0)
+        {
+            // A month either side whose days aren't made yet (EnsureNeighbourDays): an empty page, which still snaps or doesn't.
+            return isWorkingMonth || !swipeDisabled;
+        }
 
         var cells = DatetimeUtils.GetDaysOfMonth(month, year, FirstDayOfWeekIndex, ShowAdjacentDays);
         for (var index = 0; index < monthPanel.Days.Count; index++)
@@ -616,6 +624,7 @@ public partial class AvonicDatetime
             return;
         }
 
+        EnsureNeighbourDays(2);
         _smooth.To(_calendarBody.Viewport.Width * 2, AvonicConfig.Animated);
     }
 
@@ -634,6 +643,7 @@ public partial class AvonicDatetime
             return;
         }
 
+        EnsureNeighbourDays(0);
         _smooth.To(0, AvonicConfig.Animated);
     }
 
@@ -672,6 +682,7 @@ public partial class AvonicDatetime
                 _calendarBody.Offset = new Vector(_calendarBody.Viewport.Width, 0);
             }
 
+            ScheduleNeighbourDays();
             return;
         }
 
@@ -679,6 +690,8 @@ public partial class AvonicDatetime
         {
             return;
         }
+
+        EnsureNeighbourDaysToward(e.GetNewValue<Vector>().X);
 
         _scrollRest?.Dispose();
         _scrollRest = AvonicConfig.Schedule(UpdateActiveMonth, ScrollRest);
