@@ -257,16 +257,29 @@ Every failing search was the one that spanned the moment the page left, 200 to 4
 over before the next search starts, so it never fails. The nav shows it in `drive.ps1` only because its section polls for the
 status line while the transition runs; the shell's page swaps are each followed by a sleep.
 
-UIA's documentation asks a provider to return `UIA_E_ELEMENTNOTAVAILABLE` for an element that has gone; Avalonia returns a null
-fragment root, which UIA core doesn't expect from a fragment. A screen reader that searches just after a navigation would get the
-same failure; one that retries, or works from events, would recover. `drive.ps1`'s ion-nav section retries a failing `FindAll` once,
-300 ms later, and prints it, which is the least-bad workaround for a client. On Avonic's side there is no clean one: the nav could
-wrap each page in a part of its own whose peer keeps the host as its parent after the page has left, so that a search meets a page
-that's still in a fragment, but every control that hides or removes a child (an overlay's dismiss, a segment view, an accordion)
-would need the same, and the leaving page's elements would still be found by a search under way. Not done. The repro, the
-client and the provider's hooks are in `tools/real-window/uia-findall/`; `UiaRepro --fix notavailable` and `--fix windowroot`
-answer a null fragment root with `UIA_E_ELEMENTNOTAVAILABLE` or with the window's root instead, to show what UIA makes of each
-(run.ps1's `fix-*` scenarios). **Not yet run**, so which answer stops the E_FAIL is open.
+What else the provider could answer, measured with the hooked provider changed (`UiaRepro --fix`, run.ps1's `fix-*`, the same
+runs as above):
+
+| A detached element's fragment root | hide, every 150 ms | remove, every 150 ms | nav, managed client | nav, `IUIAutomation` |
+|---|---|---|---|---|
+| null, as Avalonia does | 16 of 224 | 21 of 183 | 17 of 600 | 12 of 549 |
+| `UIA_E_ELEMENTNOTAVAILABLE` (0x80040201), as UIA's docs ask of an element that has gone | 0 of 288 | 6 of 210 | 1 of 788 | 0 of 835 |
+| the window's root, as if the element were still in the fragment | 0 of 323 | 0 of 301 | 0 of 752 | 0 of 816 |
+
+`UIA_E_ELEMENTNOTAVAILABLE` fails less often, but still fails the whole search now and then (`ElementNotAvailableException`). The
+window's root stopped it in every run: UIA core takes the element as part of the window's fragment, and the search goes on and
+ends where the detached subtree's sibling navigation does. **That is the suggestion for the upstream report:**
+`AutomationNode.GetFragmentRoot()` should answer the window's `RootAutomationNode` (the one the element last had) for a
+peer whose chain no longer reaches a root, not null. Every immediate retry succeeded, in every run.
+
+A screen reader that searches just after a navigation would get the same failure; one that retries, or works from events, would
+recover. `drive.ps1`'s ion-nav section retries a failing `FindAll` once, 300 ms later, and prints it, which is the least-bad
+workaround for a client. On Avonic's side, without hooking Avalonia, the window's root can only come through a peer of Avonic's own
+in the chain, as `GetAutomationRootCore` follows `GetParent()` and can't be overridden: the nav would wrap each page in a part
+whose peer's `GetParentCore` keeps answering the host's peer after the page has left. That changes the pages' visual parent, helps
+only the nav (an overlay's dismiss, a segment view and an accordion would each need the same), and a search under way would
+still find the leaving page's elements, so it isn't done. The repro, the client and the provider's hooks are in
+`tools/real-window/uia-findall/`.
 
 ## A `DynamicResource` brush in a template's own `Resources` keeps its control alive
 
