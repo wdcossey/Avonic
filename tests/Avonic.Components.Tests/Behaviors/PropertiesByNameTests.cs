@@ -147,10 +147,12 @@ public class PropertiesByNameTests
         var logged = new Border();
         using (var sink = Sink.Start())
         {
-            PropertiesByName.Apply(logged, Values(("width", "wide")), Plain with { LogDropped = true });
-            var message = Assert.Single(sink.From(logged));
-            Assert.Equal("[test] props {0}: {1} isn't a value it takes", message.Template);
-            Assert.Equal("width", message.Key);
+            PropertiesByName.Apply(logged, Values(("width", "wide"), ("height", null)), Plain with { LogDropped = true });
+
+            // Null for a number is a value it doesn't take, not one it's given and refuses.
+            Assert.Collection(sink.From(logged),
+                message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "width"), (message.Template, message.Key)),
+                message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "height"), (message.Template, message.Key)));
         }
     }
 
