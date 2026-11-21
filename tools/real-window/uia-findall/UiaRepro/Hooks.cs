@@ -23,6 +23,9 @@ internal static class Hooks
     private static Type? _rootType;
     private static object? _lastRoot;
 
+    [ThreadStatic]
+    private static bool _inFirstChance;
+
     /// <summary>UIA_E_ELEMENTNOTAVAILABLE.</summary>
     private const int UiaElementNotAvailable = unchecked((int)0x80040201);
 
@@ -97,14 +100,24 @@ internal static class Hooks
 
         AppDomain.CurrentDomain.FirstChanceException += (_, e) =>
         {
-            if (e.Exception is OperationCanceledException)
+            // Not for an exception the handler itself causes, which would come back here.
+            if (e.Exception is OperationCanceledException || _inFirstChance)
             {
                 return;
             }
 
+            _inFirstChance = true;
+            try
+            {
+
             var stack = new StackTrace(1, false).ToString().Split(Environment.NewLine).Take(25);
             Log.Event($"FIRST-CHANCE {e.Exception.GetType().FullName} 0x{e.Exception.HResult:X8}: {e.Exception.Message}" +
                 Environment.NewLine + "    " + string.Join(Environment.NewLine + "    ", stack));
+            }
+            finally
+            {
+                _inFirstChance = false;
+            }
         };
 
         Log.Event($"hooks installed: {Installed.Count}");
@@ -192,9 +205,17 @@ internal static class Hooks
         {
             if (_peerOf(node) is { } peer)
             {
-                chain = Environment.CurrentManagedThreadId == Log.UiThreadId
-                    ? Chain(peer)
-                    : Dispatcher.UIThread.InvokeAsync(() => Chain(peer)).Result;
+                // At most 200 ms: the UI thread may itself be waiting on UIA (a raised event with a listener), and the hook
+                // mustn't deadlock it.
+                if (Environment.CurrentManagedThreadId == Log.UiThreadId)
+                {
+                    chain = Chain(peer);
+                }
+                else
+                {
+                    var read = Dispatcher.UIThread.InvokeAsync(() => Chain(peer)).GetTask();
+                    chain = read.Wait(200) ? read.Result : "<the UI thread was busy for 200 ms>";
+                }
             }
         }
         catch (Exception ex)

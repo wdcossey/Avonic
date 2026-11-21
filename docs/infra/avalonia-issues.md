@@ -265,7 +265,8 @@ wrap each page in a part of its own whose peer keeps the host as its parent afte
 that's still in a fragment, but every control that hides or removes a child (an overlay's dismiss, a segment view, an accordion)
 would need the same, and the leaving page's elements would still be found by a search under way. Not done. The repro, the
 client and the provider's hooks are in `tools/real-window/uia-findall/`; `UiaRepro --fix notavailable` and `--fix windowroot`
-answer a null fragment root with `UIA_E_ELEMENTNOTAVAILABLE` or with the window's root instead, to show what UIA makes of each.
+answer a null fragment root with `UIA_E_ELEMENTNOTAVAILABLE` or with the window's root instead, to show what UIA makes of each
+(run.ps1's `fix-*` scenarios). **Not yet run**, so which answer stops the E_FAIL is open.
 
 ## A `DynamicResource` brush in a template's own `Resources` keeps its control alive
 

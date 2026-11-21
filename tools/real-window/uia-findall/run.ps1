@@ -1,4 +1,4 @@
-#requires -Version 7
+#requires -Version 7.3
 <#
 .SYNOPSIS
     #254: does a UIA search fail (E_FAIL) while a page leaves an AvonicNav, and does it without the nav?
@@ -61,8 +61,9 @@ if (-not $NoBuild) {
 
 # The hooks install and see a call, with no window.
 $check = Join-Path $Out 'hooks-check'
-& $reproExe --hooks-only --log $check
-if ($LASTEXITCODE -ne 0) { throw "UiaRepro's hooks didn't install: see $check" }
+# A WinExe: Start-Process -Wait, as & wouldn't wait for it or set $LASTEXITCODE.
+$hooks = Start-Process $reproExe -ArgumentList @('--hooks-only', '--log', "`"$check`"") -Wait -PassThru
+if ($hooks.ExitCode -ne 0) { throw "UiaRepro's hooks didn't install: see $check" }
 
 $sampleCycle = 'Open message: Lunch*|Write a reply|Discard the draft|Back to inbox|Push a draft|Push a draft|Pop to root|Open settings|Start over at a new inbox'
 $navCycle = 'Push a page|Pop this page'

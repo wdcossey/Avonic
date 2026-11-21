@@ -12,7 +12,8 @@ namespace UiaRepro;
 internal static class Log
 {
     private const int RingSize = 30000;
-    private const int MaxDumps = 40;
+    private const int MaxAnomalyDumps = 20;
+    private const int MaxClientDumps = 40;
 
     private static readonly object Gate = new();
     private static readonly string?[] Ring = new string?[RingSize];
@@ -20,6 +21,8 @@ internal static class Log
     private static long _next;
     private static long _dumpedUpTo;
     private static int _dumps;
+    private static int _anomalyDumps;
+    private static int _clientDumps;
     private static string _dir = ".";
     private static Timer? _requests;
 
@@ -41,15 +44,37 @@ internal static class Log
         writer.Start();
 
         // The client asks for a dump when one of its calls fails: dump-N.req in the folder.
+        // A one-shot timer, armed again after each look, so that two looks never overlap; a request still being written is
+        // read at the next look.
         _requests = new Timer(_ =>
         {
-            foreach (var req in Directory.GetFiles(_dir, "dump-*.req"))
+            try
             {
-                var reason = File.ReadAllText(req);
-                File.Delete(req);
-                Dump($"client: {Path.GetFileNameWithoutExtension(req)} {reason}");
+                foreach (var req in Directory.GetFiles(_dir, "dump-*.req"))
+                {
+                    string reason;
+                    try
+                    {
+                        reason = File.ReadAllText(req);
+                        File.Delete(req);
+                    }
+                    catch (IOException)
+                    {
+                        continue;
+                    }
+
+                    Dump($"client: {Path.GetFileNameWithoutExtension(req)} {reason}", fromClient: true);
+                }
             }
-        }, null, 100, 100);
+            catch (Exception ex)
+            {
+                Event($"dump requests: {ex.GetType().Name} {ex.Message}");
+            }
+            finally
+            {
+                _requests?.Change(100, Timeout.Infinite);
+            }
+        }, null, 100, Timeout.Infinite);
     }
 
     /// <summary>A provider call, to the ring only.</summary>
@@ -71,19 +96,50 @@ internal static class Log
             Ring[_next++ % RingSize] = line;
         }
 
-        Writes.Add(("app-events.log", line + Environment.NewLine));
+        Write("app-events.log", line + Environment.NewLine);
+    }
+
+    /// <summary>Queued for the writer; dropped once the log has been flushed at exit, as UIA calls can still come then.</summary>
+    private static void Write(string file, string text)
+    {
+        if (!Writes.IsAddingCompleted)
+        {
+            try
+            {
+                Writes.TryAdd((file, text));
+            }
+            catch (InvalidOperationException)
+            {
+                // Completed between the check and the add.
+            }
+        }
     }
 
     /// <summary>The calls since the last dump (at most the ring's size), to their own file.</summary>
-    public static void Dump(string reason)
+    public static void Dump(string reason, bool fromClient = false)
     {
         string[] lines;
         int n;
         lock (Gate)
         {
-            if (_dumps >= MaxDumps)
+            // Separate budgets, so that anomalies can't use up the dumps of the client's failed searches.
+            if (fromClient ? _clientDumps >= MaxClientDumps : _anomalyDumps >= MaxAnomalyDumps)
             {
+                if (fromClient)
+                {
+                    Write("app-events.log", $"{Now} DUMP DROPPED (over budget): {reason}{Environment.NewLine}");
+                }
+
                 return;
+            }
+
+            if (fromClient)
+            {
+                _clientDumps++;
+            }
+            else
+            {
+                _anomalyDumps++;
             }
 
             n = ++_dumps;
@@ -104,7 +160,7 @@ internal static class Log
             sb.AppendLine(l);
         }
 
-        Writes.Add(($"app-dump-{n:D2}.log", sb.ToString()));
+        Write($"app-dump-{n:D2}.log", sb.ToString());
         Event($"DUMP {n}: {reason}");
     }
 

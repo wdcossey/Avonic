@@ -18,6 +18,7 @@ namespace UiaClient;
 internal static class Program
 {
     private static readonly StringBuilder Summary = new();
+    private static readonly object WriteGate = new();
     private static StreamWriter _log = StreamWriter.Null;
     private static string _logDir = ".";
     private static int _dumpRequests;
@@ -89,6 +90,11 @@ internal static class Program
         }
         finally
         {
+            if (o.Listen)
+            {
+                Automation.RemoveAllEventHandlers();
+            }
+
             Close(p);
         }
 
@@ -98,11 +104,23 @@ internal static class Program
                    (stats.Stopped is { } s ? $"; STOPPED: {s}" : "");
         Write("summary " + line);
         Console.WriteLine(line);
-        _log.Dispose();
+        lock (WriteGate)
+        {
+            _log.Dispose();
+            _log = StreamWriter.Null;
+        }
+
         return 0;
     }
 
-    private static void Write(string text) => _log.WriteLine($"{Now} {text}");
+    // StructureChanged handlers write from UIA's event thread too.
+    private static void Write(string text)
+    {
+        lock (WriteGate)
+        {
+            _log.WriteLine($"{Now} {text}");
+        }
+    }
 
     private static void Poll(Probe probe, Options o, Stats stats, string what)
     {
@@ -163,9 +181,12 @@ internal static class Program
                 var target = probe.FindManaged(ControlType.Button).FirstOrDefault(e => regex.IsMatch(e.Current.Name ?? ""));
                 if (target is not null)
                 {
+                    // Read before the Invoke, as the element may be gone after it, and never invoked twice.
+                    var name = target.Current.Name;
+                    var invoke = (InvokePattern)target.GetCurrentPattern(InvokePattern.Pattern);
                     var at = Now;
-                    ((InvokePattern)target.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
-                    Write($"invoked '{target.Current.Name}' at {at}");
+                    invoke.Invoke();
+                    Write($"invoked '{name}' at {at}");
                     return;
                 }
             }
@@ -315,8 +336,9 @@ internal sealed class Probe
             };
             return new ProbeResult(count, null, null);
         }
-        catch (Exception ex) when (ex is COMException or ElementNotAvailableException or InvalidOperationException)
+        catch (Exception ex)
         {
+            // Any failure is a failed search, logged, never the end of the scenario.
             return new ProbeResult(0, ex, step);
         }
     }
