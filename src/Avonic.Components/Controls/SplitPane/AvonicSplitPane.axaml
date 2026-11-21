@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-split-pane: structure only. SplitPanePanel, its default panel, is the layout; the side widths and the border are the
+         theme's (Avonic.Themes/Controls/AvonicSplitPane.axaml). With none, a side takes its own width and has no border. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSplitPane}" TargetType="c:AvonicSplitPane">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    <c:SplitPaneBorders Name="PART_Borders" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

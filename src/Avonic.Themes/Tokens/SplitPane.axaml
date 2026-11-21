@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- ion-split-pane's variables, with split-pane.md.css's values. A size takes a number (px) or a CSS string: a percentage of
+         the split pane's width, "vw" and "vh" of the window, calc(), min(), or "auto". -->
+
+    <!-- side-width: 100%. CssUnset, it's the side menu's own width, Avonic.Menu.Width, as var(side-width, var(width)). -->
+    <x:String x:Key="Avonic.SplitPane.SideWidth">100%</x:String>
+    <!-- side-min-width: 270px, which beats the maximum. -->
+    <x:Double x:Key="Avonic.SplitPane.SideMinWidth">270</x:Double>
+    <!-- side-max-width: 28% -->
+    <x:String x:Key="Avonic.SplitPane.SideMaxWidth">28%</x:String>
+    <!-- border: 1px solid var(ion-item-border-color, var(ion-border-color, var(ion-color-step-150, ..., rgba(0, 0, 0, 0.13)))).
+         A shorthand has no Avalonia value, so it's a width and a colour, as the tab bar's border is; Avalonia draws solid lines
+         only. Unset, the colour follows Avonic.ItemBorderColorBrush. -->
+    <x:Double x:Key="Avonic.SplitPane.BorderWidth">1</x:Double>
+    <b:CssUnset x:Key="Avonic.SplitPane.BorderColor" />
+
+</ResourceDictionary>

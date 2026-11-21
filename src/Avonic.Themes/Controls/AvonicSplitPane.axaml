@@ -1,0 +1,48 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <Panel Width="390" Height="300">
+            <c:AvonicSplitPane ContentId="Main" When="True">
+                <c:AvonicMenu ContentId="Main">
+                    <TextBlock Text="Menu" Margin="16" />
+                </c:AvonicMenu>
+                <Border Name="Main" Background="White">
+                    <TextBlock Text="Main content" Margin="16" />
+                </Border>
+            </c:AvonicSplitPane>
+        </Panel>
+    </Design.PreviewWith>
+
+    <!-- A translation of split-pane.md.css and of menu.md.css's rules for a side pane, which SplitPanePanel lays out: the host
+         fills its parent (position: absolute; inset: 0); contain: strict clips it, as an ItemsControl does. The main content's
+         overflow: hidden while it's visible is the control's, at style priority. -->
+    <ControlTheme x:Key="{x:Type c:AvonicSplitPane}" TargetType="c:AvonicSplitPane">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    <c:SplitPaneBorders Name="PART_Borders" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- The side menu's width: var(side-width, var(width)); min-width: var(side-min-width); max-width: var(side-max-width);
+             border-inline-end (or -start, at the end): var(border). -->
+        <Style Selector="^ /template/ c|SplitPanePanel">
+            <Setter Property="SideWidth" Value="{DynamicResource Avonic.SplitPane.SideWidth}" />
+            <Setter Property="SideMinWidth" Value="{DynamicResource Avonic.SplitPane.SideMinWidth}" />
+            <Setter Property="SideMaxWidth" Value="{DynamicResource Avonic.SplitPane.SideMaxWidth}" />
+            <Setter Property="BorderThickness" Value="{DynamicResource Avonic.SplitPane.BorderWidth}" />
+            <Setter Property="BorderBrush">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.SplitPane.BorderColor" />
+                    <DynamicResource ResourceKey="Avonic.ItemBorderColorBrush" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

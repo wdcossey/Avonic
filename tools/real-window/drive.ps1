@@ -1741,6 +1741,63 @@ try {
         Away
     }
 
+    # ion-split-pane (#78): the page opens with When="xs", so the side menu is beside the main content in the 390-wide window, 270
+    # wide with its border, and the main content's menu button (named `menu`) is hidden; a real click on the side's `md` radio hides
+    # the side (390 is under 768), so the menu button shows and opens the side as an ordinary overlay menu, 304 wide; a click on `xs`
+    # in that open menu shows the side again, closing the menu; the `Disabled` toggle hides it, and in the menu opened again, turns it
+    # back on. The status line, from IonSplitPaneVisible, says which. The radios and the toggle are in the side menu, so every click
+    # is on what's on top: the side, the open menu, or the main content's toolbar. Not yet run.
+    Section 'ion-split-pane' {
+        Open 'ion-split-pane'
+        $w = $win.Current.BoundingRectangle
+        function PaneStatus { FirstText 'Side pane *' }
+        function MenuButton { All $CT::Button | Where-Object { $_.Current.Name -eq 'menu' -and -not $_.Current.IsOffscreen -and -not $_.Current.BoundingRectangle.IsEmpty } | Select-Object -First 1 }
+        function Radio($like) { Named $CT::RadioButton $like }
+
+        Check 'it opens with the side shown' ([bool](WaitForText 'Side pane shown')) (PaneStatus)
+        Shot 'split-pane-shown'
+        $inbox = Named $CT::Button 'Inbox'
+        $ib = if ($inbox) { $inbox.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the side is at the left, within 270' ($inbox -and $ib.X -ge $w.X -and $ib.Right -le ($w.X + (Px 271))) "window $w, Inbox $ib"
+        $title = Named $CT::Text 'Main'
+        $tb = if ($title) { $title.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the main content is beside it, from 270' ($title -and $tb.X -ge ($w.X + (Px 270))) "window $w, Main $tb"
+        Check 'and its menu button is hidden' (-not (MenuButton))
+
+        ClickOn (Radio 'md:*')
+        Check 'md hides the side in a 390-wide window' ([bool](WaitForText 'Side pane hidden*')) (PaneStatus)
+        Start-Sleep -Milliseconds 300
+        Shot 'split-pane-hidden'
+        $button = MenuButton
+        $bb = if ($button) { $button.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'and the menu button shows, at the left of the main content' ($button -and $bb.X -lt ($w.X + (Px 60))) "window $w, menu $bb"
+
+        ClickOn $button
+        Start-Sleep -Milliseconds 600
+        $xs = Radio 'xs:*'
+        $xb = if ($xs) { $xs.Current.BoundingRectangle } else { [Windows.Rect]::Empty }
+        Check 'the menu button opens the side as an ordinary menu, 304 wide' ($xs -and -not $xb.IsEmpty -and $xb.Right -le ($w.X + (Px 305))) "window $w, xs $xb"
+        Shot 'split-pane-menu-open'
+        ClickOn $xs
+        Check 'xs in the open menu shows the side again' ([bool](WaitForText 'Side pane shown')) (PaneStatus)
+        Start-Sleep -Milliseconds 400
+        Check 'and the menu button hides' (-not (MenuButton))
+
+        ClickOn (Named $CT::Button 'Disabled*')
+        Check 'Disabled hides the side' ([bool](WaitForText 'Side pane hidden*')) (PaneStatus)
+        Start-Sleep -Milliseconds 300
+        $button = MenuButton
+        Check 'and the menu button shows' ([bool]$button)
+        ClickOn $button
+        Start-Sleep -Milliseconds 600
+        ClickOn (Named $CT::Button 'Disabled*')
+        Check 'turned off in the open menu, the side shows again' ([bool](WaitForText 'Side pane shown')) (PaneStatus)
+        Start-Sleep -Milliseconds 400
+        Shot 'split-pane-enabled-again'
+        Check 'and the menu button hides' (-not (MenuButton))
+        Away
+    }
+
     # ion-toast (#38): the page's toast from its trigger with a real click, at the bottom, which doesn't block the page (a click on
     # a page button beside it shows a top toast) or take Escape; its icon-only and cancel buttons by their names; a handler returning
     # false keeping one open; real touch swipes dismissing a middle and a stacked toast with the gesture role; and a duration's

@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.SplitPanePage">
+
+    <!-- ion-split-pane: a side menu and the main content. While When matches the window, the menu sits beside the main content and
+         can't open or close, and the menu button hides; otherwise it's an ordinary menu. Its options are in the menu itself, so
+         when the side hides, open the menu with the button to change them back. -->
+    <c:AvonicSplitPane Name="Pane" ContentId="SplitMain" When="xs">
+        <c:AvonicMenu Name="SideMenu" MenuId="split-menu" ContentId="SplitMain">
+            <DockPanel>
+                <c:AvonicHeader DockPanel.Dock="Top">
+                    <c:AvonicToolbar Color="primary">
+                        <c:AvonicTitle Content="Side" />
+                    </c:AvonicToolbar>
+                </c:AvonicHeader>
+                <c:AvonicContent>
+                    <StackPanel>
+                        <c:AvonicListHeader>
+                            <TextBlock Text="When" />
+                        </c:AvonicListHeader>
+                        <c:AvonicRadioGroup Name="WhenGroup" Value="xs">
+                            <c:AvonicItem>
+                                <c:AvonicRadio Name="WhenXs" Value="xs" Content="xs: always" />
+                            </c:AvonicItem>
+                            <c:AvonicItem>
+                                <c:AvonicRadio Name="WhenMd" Value="md" Content="md: 768 and wider" />
+                            </c:AvonicItem>
+                            <c:AvonicItem>
+                                <c:AvonicRadio Name="WhenLg" Value="(min-width: 992px)" Content="992 and wider (Ionic's default)" />
+                            </c:AvonicItem>
+                            <c:AvonicItem>
+                                <c:AvonicRadio Name="WhenLandscape" Value="(orientation: landscape)" Content="Landscape" />
+                            </c:AvonicItem>
+                            <c:AvonicItem>
+                                <c:AvonicRadio Name="WhenNever" Value="never" Content="never" />
+                            </c:AvonicItem>
+                        </c:AvonicRadioGroup>
+                        <c:AvonicItem>
+                            <c:AvonicToggle Name="DisabledToggle" Content="Disabled" />
+                        </c:AvonicItem>
+                        <c:AvonicMenuToggle Menu="split-menu">
+                            <c:AvonicItem Name="SideInbox" Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="mail-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Inbox" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                    </StackPanel>
+                </c:AvonicContent>
+            </DockPanel>
+        </c:AvonicMenu>
+
+        <DockPanel Name="SplitMain" Background="{DynamicResource Avonic.BackgroundColorBrush}">
+            <c:AvonicHeader DockPanel.Dock="Top">
+                <c:AvonicToolbar>
+                    <c:AvonicToolbar.StartContent>
+                        <c:AvonicButtons>
+                            <c:AvonicMenuButton Name="SplitMenuButton" Menu="split-menu" />
+                        </c:AvonicButtons>
+                    </c:AvonicToolbar.StartContent>
+                    <c:AvonicTitle Content="Main" />
+                </c:AvonicToolbar>
+            </c:AvonicHeader>
+            <c:AvonicContent Padding="16">
+                <TextBlock Name="Status" Text="Main content" TextWrapping="Wrap" />
+            </c:AvonicContent>
+        </DockPanel>
+    </c:AvonicSplitPane>
+
+</UserControl>

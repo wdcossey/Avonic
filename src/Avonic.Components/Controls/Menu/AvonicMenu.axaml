@@ -25,6 +25,10 @@
                 </c:MenuRootPanel>
             </ControlTemplate>
         </Setter>
+        <!-- Beside the main content in a split pane, the container fills the menu, which the pane sizes. -->
+        <Style Selector="^:menu-pane-visible /template/ c|MenuPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="100%" />
+        </Style>
         <Style Selector="^:type-overlay:show-menu /template/ c|AvonicBackdrop#PART_Backdrop">
             <Setter Property="IsVisible" Value="True" />
         </Style>
