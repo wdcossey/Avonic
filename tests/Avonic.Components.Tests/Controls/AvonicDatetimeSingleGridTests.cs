@@ -419,15 +419,15 @@ public class AvonicDatetimeSingleGridTests
         var focused = scene.Window.FocusManager!.GetFocusedElement();
         Assert.Same(Day(datetime, 30), focused);
 
-        // Right from June 30: July 1, at once, as the scrolled calendar's keys are.
+        // Right from June 30: July 1, faded to as a button's change is (the keyboard's own tests are below).
         AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowRight);
-        Settle(clock, 40);
+        Settle(clock, 400);
         Assert.Equal("July 2023", MonthShown(datetime));
         Assert.Same(Day(datetime, 1), scene.Window.FocusManager.GetFocusedElement());
         Assert.Equal(1, Shown(datetime), 3);
 
         AvonicPickerColumnTests.Key(scene, PhysicalKey.PageDown);
-        Settle(clock, 40);
+        Settle(clock, 400);
         Assert.Equal("August 2023", MonthShown(datetime));
         Assert.Same(Day(datetime, 1), scene.Window.FocusManager.GetFocusedElement());
 
@@ -436,6 +436,137 @@ public class AvonicDatetimeSingleGridTests
         Settle(clock, 400);
         Assert.Equal("September 2023", MonthShown(datetime));
         Assert.Same(datetime.CalendarGrid, scene.Window.FocusManager.GetFocusedElement());
+    });
+
+    // ── The keyboard's fade ──────────────────────────────────────────────────────────────────
+
+    /// <summary>The grid shown, with the day of <paramref name="value"/> focused by the keyboard, as Tab leaves it.</summary>
+    private static AvonicDatetime FocusedGrid(Scene scene, TestClock clock, string value)
+    {
+        var datetime = Show(scene, clock, Grid(value));
+        datetime.CalendarGrid!.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(Day(datetime, DateTime.Parse(value, System.Globalization.CultureInfo.InvariantCulture).Day), Focused(scene));
+        return datetime;
+    }
+
+    private static object? Focused(Scene scene) => scene.Window.FocusManager!.GetFocusedElement();
+
+    /// <summary>The focused day's ring: <c>:focus</c>, and its part shown, inside a grid shown in full.</summary>
+    private static void AssertRingShown(AvonicDatetime datetime, DatetimeCalendarDay day)
+    {
+        Assert.Contains(":focus", day.Classes);
+        Assert.Equal(1, day.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Focus").Opacity, 3);
+        Assert.Equal(1, Shown(datetime), 3);
+        Assert.Null(datetime.CalendarGrid!.OpacityMask);
+    }
+
+    [AvaloniaFact]
+    public void A_Key_To_Another_Month_Fades_There_And_Focuses_Its_Day() => Run((scene, clock) =>
+    {
+        var datetime = FocusedGrid(scene, clock, "2023-06-30");
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowRight);
+        Settle(clock, 48);
+        // Fading out: June still shows, its day still focused, as a button's change shows June until the swap.
+        Assert.InRange(Shown(datetime), 0.4, 0.95);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Same(Day(datetime, 30), Focused(scene));
+        Settle(clock, 80);
+        // Swapped: July drawn, the key's day focused before the days fade in, so its ring fades in with them.
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Assert.InRange(Shown(datetime), 0, 0.6);
+        Assert.Same(Day(datetime, 1), Focused(scene));
+        Settle(clock, 300);
+        AssertRingShown(datetime, Day(datetime, 1));
+        Assert.Null(datetime.GridTarget);
+
+        // PageUp, and Shift+PageDown, a year: each fades, and ends on its day.
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.PageUp);
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        AssertRingShown(datetime, Day(datetime, 1));
+        scene.Window.KeyPressQwerty(PhysicalKey.PageDown, RawInputModifiers.Shift);
+        scene.Window.KeyReleaseQwerty(PhysicalKey.PageDown, RawInputModifiers.Shift);
+        Dispatcher.UIThread.RunJobs();
+        Settle(clock, 48);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Settle(clock, 400);
+        Assert.Equal("June 2024", MonthShown(datetime));
+        Assert.Same(Day(datetime, 1), Focused(scene));
+        AssertRingShown(datetime, Day(datetime, 1));
+    });
+
+    [AvaloniaFact]
+    public void Keys_During_A_Key_Fade_Go_On_From_The_Day_On_Its_Way() => Run((scene, clock) =>
+    {
+        // PageDown from June 30 to July 30, then Right during the fade: July 31, not July 1 from the June 30 still focused.
+        var datetime = FocusedGrid(scene, clock, "2023-06-30");
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.PageDown);
+        Settle(clock, 30);
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowRight);
+        Settle(clock, 400);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Assert.Same(Day(datetime, 31), Focused(scene));
+        AssertRingShown(datetime, Day(datetime, 31));
+
+        // PageDown then PageUp during the fade: back in July, at once, the fade dropped, the day focused.
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.PageDown);
+        Settle(clock, 30);
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.PageUp);
+        Settle(clock, 50);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Assert.Null(datetime.GridTarget);
+        Assert.Same(Day(datetime, 31), Focused(scene));
+        AssertRingShown(datetime, Day(datetime, 31));
+    });
+
+    [AvaloniaFact]
+    public void A_Key_Within_The_Month_Moves_At_Once() => Run((scene, clock) =>
+    {
+        var datetime = FocusedGrid(scene, clock, "2023-06-30");
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowLeft);
+        Assert.Null(datetime.GridTarget);
+        Settle(clock, 20);
+        Assert.Same(Day(datetime, 29), Focused(scene));
+        AssertRingShown(datetime, Day(datetime, 29));
+    });
+
+    [AvaloniaFact]
+    public void With_Animated_Off_A_Key_Changes_The_Month_At_Once() => Run((scene, clock) =>
+    {
+        var previous = AvonicConfig.Animated;
+        AvonicConfig.Animated = false;
+        try
+        {
+            var datetime = FocusedGrid(scene, clock, "2023-06-30");
+            AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowRight);
+            Assert.Equal("July 2023", MonthShown(datetime));
+            Assert.Null(datetime.GridTarget);
+            Settle(clock, 20);
+            Assert.Same(Day(datetime, 1), Focused(scene));
+            AssertRingShown(datetime, Day(datetime, 1));
+        }
+        finally
+        {
+            AvonicConfig.Animated = previous;
+        }
+    });
+
+    [AvaloniaFact]
+    public void The_Scrolled_Calendar_Keeps_Ionics_Keys_At_Once() => Run((scene, clock) =>
+    {
+        // Ionic's: setWorkingParts draws the month at once, and the day is focused on the next frame. No fade.
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = "2023-06-30" });
+        datetime.CalendarBody!.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.ArrowRight);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Settle(clock, 20);
+        var day = (DatetimeCalendarDay)Focused(scene)!;
+        Assert.Equal((7, 1), (day.Parts.Month!.Value, day.Parts.Day!.Value));
+        Assert.Same(datetime.CalendarMonths!.Months[1], day.FindAncestorOfType<DatetimeCalendarMonth>());
+        Assert.Null(datetime.GridTarget);
+        Assert.Equal(1, AnimationGroupOpacity.Of(datetime.CalendarBody), 3);
     });
 
     // ── The option ───────────────────────────────────────────────────────────────────────────

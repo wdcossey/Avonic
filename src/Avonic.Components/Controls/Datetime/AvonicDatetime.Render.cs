@@ -771,7 +771,7 @@ public partial class AvonicDatetime
             return;
         }
 
-        var parts = day.Parts;
+        var parts = GridKeyTarget ?? day.Parts;
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         DatetimeParts? target = e.Key switch
         {
@@ -793,6 +793,12 @@ public partial class AvonicDatetime
 
         e.Handled = true;
         if (DatetimeUtils.IsDayDisabled(to, _minParts, _maxParts))
+        {
+            return;
+        }
+
+        // Not Ionic's: the single grid fades to another month (README, Extensions); the scrolled calendar draws it at once.
+        if (UsesSingleGrid && ChangeGridMonthByKey(to))
         {
             return;
         }

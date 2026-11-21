@@ -51,6 +51,7 @@ public partial class AvonicDatetime
     private AvonicAnimation? _gridFade;
     private bool _gridFadingIn;
     private DatetimeParts? _gridTarget;
+    private bool _gridKeyChange;
 
     /// <inheritdoc cref="CalendarRenderingProperty"/>
     public DatetimeCalendarRendering CalendarRendering
@@ -171,6 +172,32 @@ public partial class AvonicDatetime
             return;
         }
 
+        _gridKeyChange = false;
+        StartGridChange(target);
+    }
+
+    /// <summary>
+    /// A key to a day in another month, in the grid: faded there as a button's change is, with the day focused once the new month is
+    /// drawn, so that its ring fades in with the days. At once, as the scrolled calendar's keys are, with
+    /// <see cref="AvonicConfig.Animated"/> off or the calendar not shown. A key during the fade goes on from the day on its way.
+    /// </summary>
+    private bool ChangeGridMonthByKey(DatetimeParts to)
+    {
+        if (!AvonicConfig.Animated || !IsCalendarReady || (to.Month == _working.Month && to.Year == _working.Year))
+        {
+            return false;
+        }
+
+        _gridKeyChange = true;
+        StartGridChange(_working with { Month = to.Month, Day = to.Day, Year = to.Year });
+        return true;
+    }
+
+    /// <summary>The day a key's change is on its way to, for the next key to go on from: the focused day still shows the old month.</summary>
+    private DatetimeParts? GridKeyTarget => _gridKeyChange ? _gridTarget : null;
+
+    private void StartGridChange(DatetimeParts target)
+    {
         _gridTarget = target;
         if (!AvonicConfig.Animated || !IsCalendarReady)
         {
@@ -258,6 +285,7 @@ public partial class AvonicDatetime
 
         StopGridFade();
         _gridTarget = null;
+        _gridKeyChange = false;
         _forceDateScrolling?.TrySetResult();
     }
 
@@ -270,7 +298,8 @@ public partial class AvonicDatetime
 
     /// <summary>
     /// Ionic's <c>updateActiveMonth</c>, for the grid: the target month the working one, drawn, and <c>animateToDate</c>'s wait over.
-    /// A focused day gives its focus to the grid, as a scrolled calendar's to its scroller: the day now shows another date.
+    /// A focused day gives its focus to the grid, as a scrolled calendar's to its scroller: the day now shows another date. After a
+    /// key's change, the key's day takes it, as the scrolled calendar's keys focus the working day.
     /// </summary>
     private void SwapGridMonth()
     {
@@ -281,11 +310,18 @@ public partial class AvonicDatetime
 
         var dayHadFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay focused
                           && focused.FindAncestorOfType<AvonicDatetime>() == this;
+        var byKey = _gridKeyChange;
         _gridTarget = null;
+        _gridKeyChange = false;
         _working = _working with { Month = target.Month, Day = target.Day, Year = target.Year };
         Render();
         _forceDateScrolling?.TrySetResult();
-        if (dayHadFocus)
+        if (dayHadFocus && byKey)
+        {
+            // The key's day, focused before the days fade in, so that its ring shows with them.
+            FocusWorkingDay();
+        }
+        else if (dayHadFocus)
         {
             _calendarGrid?.Focus();
         }
