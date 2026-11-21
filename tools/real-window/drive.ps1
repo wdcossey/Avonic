@@ -2084,7 +2084,9 @@ try {
         $june20 = Named $CT::Button 'Tuesday, June 20'
         if (-not $june20) { throw 'The first calendar shows no June 20' }
         $cal = $june20
-        while ($cal -and -not ($cal.GetSupportedPatterns() -contains [Windows.Automation.ScrollPattern]::Pattern)) { $cal = [Windows.Automation.TreeWalker]::ControlViewWalker.GetParent($cal) }
+        # The raw view, and the first scroller that scrolls across: the page's own scroller is the first in the control view.
+        function ScrollsAcross($el) { ($el.GetSupportedPatterns() -contains [Windows.Automation.ScrollPattern]::Pattern) -and $el.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern).Current.HorizontallyScrollable }
+        while ($cal -and -not (ScrollsAcross $cal)) { $cal = [Windows.Automation.TreeWalker]::RawViewWalker.GetParent($cal) }
         if (-not $cal) { throw 'June 20 is in no scroller' }
         $scroll = $cal.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern)
         Check 'the calendar scrolls across, a month in view, the middle of three' ($scroll.Current.HorizontallyScrollable -and [math]::Abs($scroll.Current.HorizontalViewSize - 100 / 3) -lt 1 -and [math]::Abs($scroll.Current.HorizontalScrollPercent - 50) -lt 1) "view $($scroll.Current.HorizontalViewSize)%, at $($scroll.Current.HorizontalScrollPercent)%"
