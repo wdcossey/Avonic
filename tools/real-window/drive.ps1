@@ -1960,10 +1960,10 @@ try {
 
     # ion-datetime's single grid (#248, #258), not Ionic's: the first datetime on the page drawn as one grid of 42 days, by the
     # page's toggle at the end, which a TogglePattern flips without scrolling to it. A change of month fades the days (90 ms out, 210
-    # ms in), so each check waits 700 ms. The heading is the "June 2023" text under the month-year button (its peer's child; the first
-    # such text on the page is the first datetime's, as the others show June 2023 or the current month). Only that datetime's days are
-    # counted: the day buttons between its heading and its time button. A grid has only its month's days, where the scrolled
-    # calendar has three months' (about 91), so the count also tells the rendering apart.
+    # ms in), so each check waits 700 ms. The month's name isn't in automation (the month-year button is named "Show year picker"),
+    # so a month is seen by its days, as in the section above. Only the first datetime's days are counted: the day buttons between
+    # its month-year button and its time button. A grid has only its month's days, where the scrolled calendar has three months'
+    # (about 91), so the count also tells the rendering apart.
     Section 'ion-datetime: the single grid' {
         Open 'ion-datetime'
         $toggle = Named $CT::Button 'Single grid calendar*'
@@ -1971,8 +1971,13 @@ try {
         function SetGrid($on) {
             $pattern = $toggle.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern)
             if (($pattern.Current.ToggleState -eq 'On') -ne $on) { $pattern.Toggle(); Start-Sleep -Milliseconds 700 }
+            # The toggle brings itself into view at the page's end: the page's scroller back to the top, where the first datetime is,
+            # through its ScrollPattern, as a wheel in the middle of the page would turn a picker's wheel.
+            $el = $toggle
+            while ($el -and -not ($el.GetSupportedPatterns() -contains [Windows.Automation.ScrollPattern]::Pattern)) { $el = [Windows.Automation.TreeWalker]::ControlViewWalker.GetParent($el) }
+            if (-not $el) { throw 'The toggle is in no scroller' }
+            $el.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern).SetScrollPercent(-1, 0); Start-Sleep -Milliseconds 400
         }
-        function Heading { Texts | Where-Object { $_ -match '^[A-Z][a-z]+ \d{4}$' } | Select-Object -First 1 }
         function GridDays {
             $top = (Named $CT::Button 'Show year picker').Current.BoundingRectangle.Bottom
             $bottom = (Named $CT::Button '1:47 PM').Current.BoundingRectangle.Top
@@ -1984,9 +1989,10 @@ try {
         function GridDay($name) { GridDays | Where-Object { $_.Current.Name -eq $name } | Select-Object -First 1 }
         function Shows($heading, $days, $day) {
             $all = GridDays
-            ((Heading) -eq $heading) -and $all.Count -eq $days -and [bool]($all | Where-Object { $_.Current.Name -eq $day })
+            # $heading names the month for the reader; the days are what's checked.
+            $all.Count -eq $days -and [bool]($all | Where-Object { $_.Current.Name -eq $day })
         }
-        function Seen { "heading '$(Heading)', $((GridDays).Count) days" }
+        function Seen { $all = GridDays; "$($all.Count) days, from $($all[0].Current.Name)" }
 
         $scrolledDays = (GridDays).Count
         SetGrid $true
@@ -2051,12 +2057,12 @@ try {
         $moved = Changed $ring (Region $b.X $b.Y $b.Width $b.Height)
         $ring.Dispose()
         Check 'the focused day''s ring shows after the fade, and goes with the focus' ($moved -gt 0) "$moved pixels"
-        Check 'Right moves the focus to July 28, with no fade' ((IsFocused (GridDay 'Friday, July 28')) -and (Heading) -eq 'July 2023') "focused: $($AE::FocusedElement.Current.Name)"
+        Check 'Right moves the focus to July 28, with no fade' ((IsFocused (GridDay 'Friday, July 28')) -and (Shows 'July 2023' 31 'Friday, July 28')) "focused: $($AE::FocusedElement.Current.Name)"
         Key '{ENTER}' 400
         Check 'Enter selects July 28' ([bool](WaitForText 'DateTimeGrid ionChange: 2023-07-28T13:47:00' 3)) (FirstText '*ionChange*')
 
         SetGrid $false
-        Check 'the toggle off brings back the scrolled months' ((GridDays).Count -gt 80 -and (Heading) -eq 'July 2023') (Seen)
+        Check 'the toggle off brings back the scrolled months, at July' ((GridDays).Count -gt 80 -and (GridDay 'Saturday, July 15')) (Seen)
         Away
     }
 
