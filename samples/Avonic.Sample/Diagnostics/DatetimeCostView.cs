@@ -10,7 +10,9 @@ namespace Avonic.Sample.Diagnostics;
 /// doesn't show it, and it's a view, not a <c>...Page</c>, as every type so named must have one. Each is the default presentation,
 /// a calendar and a time, with its value and locale pinned, so that every run shows the same month, June 2023, and no today ring.
 /// The <c>-grid</c> pages (<c>datetime-x1-grid</c> and so on) are the same datetimes in <see cref="DatetimeCalendarRendering.SingleGrid"/>,
-/// to compare with (#248, spike A). docs/infra/performance/README.md, "Page costs on a device".
+/// to compare with (#248, spike A). The <c>-eager</c> and <c>-press</c> pages (<c>datetime-x1-eager</c> and so on) are the scrolled
+/// calendar with the months either side of the working one made at once, as before, and only when first needed, against the default,
+/// a frame after the first (#248, spike B, <see cref="DatetimeNeighbours"/>). docs/infra/performance/README.md, "Page costs on a device".
 /// </summary>
 public sealed class DatetimeCostView : UserControl
 {
@@ -20,21 +22,42 @@ public sealed class DatetimeCostView : UserControl
     /// <summary>The locale each datetime shows, so that its month names read the same on any device.</summary>
     public const string PinnedLocale = "en-US";
 
-    public DatetimeCostView(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths)
+    /// <summary>
+    /// The <see cref="AppContext"/> data that picks, for the datetimes made while it's set, when the scrolled calendar makes the months
+    /// either side (the library's <c>AvonicDatetime.NeighbourMonthsSwitch</c>): a measuring switch of spike B's, not an API.
+    /// </summary>
+    public const string NeighbourMonthsSwitch = "Avonic.Datetime.NeighbourMonths";
+
+    public DatetimeCostView(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths,
+        DatetimeNeighbours neighbours = DatetimeNeighbours.Default)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
         Count = count;
         Rendering = rendering;
+        Neighbours = neighbours;
         var stack = new StackPanel { Spacing = 16, Margin = new Thickness(16) };
-        for (var i = 0; i < count; i++)
+        AppContext.SetData(NeighbourMonthsSwitch, neighbours switch
         {
-            var datetime = new AvonicDatetime { Value = PinnedValue, Locale = PinnedLocale };
-            if (rendering != DatetimeCalendarRendering.ScrolledMonths)
+            DatetimeNeighbours.AtOnce => "AtOnce",
+            DatetimeNeighbours.WhenNeeded => "WhenNeeded",
+            _ => null,
+        });
+        try
+        {
+            for (var i = 0; i < count; i++)
             {
-                datetime.CalendarRendering = rendering;
-            }
+                var datetime = new AvonicDatetime { Value = PinnedValue, Locale = PinnedLocale };
+                if (rendering != DatetimeCalendarRendering.ScrolledMonths)
+                {
+                    datetime.CalendarRendering = rendering;
+                }
 
-            stack.Children.Add(datetime);
+                stack.Children.Add(datetime);
+            }
+        }
+        finally
+        {
+            AppContext.SetData(NeighbourMonthsSwitch, null);
         }
 
         // As the sample's page is laid out: a scroller, 16 in, 16 between.
@@ -47,10 +70,30 @@ public sealed class DatetimeCostView : UserControl
     /// <summary>How each draws its calendar.</summary>
     public DatetimeCalendarRendering Rendering { get; }
 
+    /// <summary>When the scrolled calendar makes the months either side.</summary>
+    public DatetimeNeighbours Neighbours { get; }
+
     /// <summary>
     /// The page's title in the page-cost lines: <c>datetime-x1</c> and so on, and <c>datetime-x1-grid</c> and so on for
-    /// <see cref="DatetimeCalendarRendering.SingleGrid"/>.
+    /// <see cref="DatetimeCalendarRendering.SingleGrid"/>, <c>-eager</c> and <c>-press</c> for <see cref="DatetimeNeighbours"/>.
     /// </summary>
-    public static string Title(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths) =>
-        rendering == DatetimeCalendarRendering.SingleGrid ? $"datetime-x{count}-grid" : $"datetime-x{count}";
+    public static string Title(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths,
+        DatetimeNeighbours neighbours = DatetimeNeighbours.Default) =>
+        rendering == DatetimeCalendarRendering.SingleGrid ? $"datetime-x{count}-grid"
+        : neighbours == DatetimeNeighbours.AtOnce ? $"datetime-x{count}-eager"
+        : neighbours == DatetimeNeighbours.WhenNeeded ? $"datetime-x{count}-press"
+        : $"datetime-x{count}";
+}
+
+/// <summary>When a perf page's scrolled calendars make the months either side of the working one (#248, spike B).</summary>
+public enum DatetimeNeighbours
+{
+    /// <summary>The library's default: a frame after the calendar is first drawn, or sooner when needed.</summary>
+    Default,
+
+    /// <summary>With the working month, as Ionic's and as before spike B: the <c>-eager</c> pages.</summary>
+    AtOnce,
+
+    /// <summary>Only when first needed: a press on the calendar, a scroll, a change of month. The <c>-press</c> pages.</summary>
+    WhenNeeded,
 }

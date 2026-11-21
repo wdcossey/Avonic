@@ -162,6 +162,13 @@ public partial class SampleShell
 
                 // Let it draw, then back to the list, as a user would go.
                 await Task.Delay(400);
+                if (PageCostSet.SwipeLabelOf(title) is { } swipeLabel)
+                {
+                    // The first swipe after opening, then one back (#248, spike B), before any month change.
+                    await TimeSwipes(page, round, swipeLabel);
+                    await Task.Delay(400);
+                }
+
                 if (PageCostSet.MonthChangeLabelOf(title) is not { } label)
                 {
                     var left = new WeakReference(page);
@@ -203,6 +210,21 @@ public partial class SampleShell
         {
             var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().First();
             var changes = await new MonthChangeTiming(datetime).Run(MonthChanges, MonthChanges, change => Write(change.Line(label, round)));
+            Write(MonthChangeTiming.Summary(label, round, changes));
+        }
+        catch (Exception ex)
+        {
+            Write($"{label}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    /// <summary>A swipe to the next month on the page's scrolled calendar, then one back, each a line, then the round's.</summary>
+    private static async Task TimeSwipes(Control page, int round, string label)
+    {
+        try
+        {
+            var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().First();
+            var changes = await new MonthChangeTiming(datetime, bySwipe: true).Run(1, 1, change => Write(change.Line(label, round)));
             Write(MonthChangeTiming.Summary(label, round, changes));
         }
         catch (Exception ex)
