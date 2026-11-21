@@ -201,6 +201,9 @@ the header and the date column in some locales (`6月15日木` for Chromium's `6
 - **`SingleGrid` isn't Ionic's** (Extensions), and is opt-in: its swipe doesn't drag the month, and the month fades rather than
   slides, by the keys too. Measured on the Pixel 8 with the perf build; its real-window section
   (`drive.ps1 -Only '*single grid'`) is written and not yet run.
+- **The scrolled calendar makes the months either side of the one shown a few frames after it's drawn**, or sooner when a press, a
+  scroll or a change of month needs them (#248, spike B; COMPARISON.md, "The months either side, made later"): nothing on screen
+  differs, but `IsDateEnabled` and a `HighlightedDates` function are called for those months' days then, not at the first draw.
 - **Snapping after a touch swipe is Avalonia's**: it jumps to the month, or aims a fling at it, where Chromium eases (as the picker
   and the segment view).
 - **The month/year wheel closes at the parent overlay's next present**, not as soon as the datetime is hidden, as Avalonia doesn't say
