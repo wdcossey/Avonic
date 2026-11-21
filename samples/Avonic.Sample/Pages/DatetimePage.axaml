@@ -28,6 +28,10 @@
             <c:AvonicDatetime Name="WheelDateTime" Value="2023-06-15T13:47:00" Presentation="DateTime" PreferWheel="True" />
             <c:AvonicDatetime Name="TimeOnly" Value="2023-06-15T13:47:00" Presentation="Time" />
             <c:AvonicDatetime Name="MonthYear" Value="2023-06-15T13:47:00" Presentation="MonthYear" />
+
+            <!-- Not Ionic's: the first calendar drawn as one grid of 42 days, which fades to a new month (CalendarRendering, #248).
+                 At the end, so that the page opens and looks as it did; the real window's single grid section toggles it. -->
+            <ToggleButton Name="SingleGridToggle" Content="Single grid calendar (not Ionic's)" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>
