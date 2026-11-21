@@ -156,7 +156,7 @@ Ionic renders the working month and the two either side at once, 126 days. Avoni
 
 - **after its first two frames**, two weeks of days a frame, the next month then the previous, one datetime at a time (a page of
   several takes turns), so no frame makes much: six frames for one calendar;
-- **at once**, before they can be seen, if anything needs them sooner: a press on the calendar (both, before the finger moves), the
+- **at once**, before they can be seen, if anything needs them sooner: a touch or a pen pressed on the calendar (both, before it moves; not a mouse, which doesn't drag the scroller), the
   next or previous button and a value or an adjacent day in another month (that month, at the click, before the scroll), and any
   change of the scroller's offset toward one (a wheel, a key on the scroller, automation's `ScrollPattern`), in the same layout
   pass, so before it's drawn.

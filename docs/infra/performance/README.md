@@ -165,7 +165,8 @@ cost of one datetime (#248): `datetime-x1`, `datetime-x2` and `datetime-x4`, wit
 pinned, so that every run shows June 2023. Then the same three as single grids (`CalendarRendering="SingleGrid"`, #248's spike
 A): `datetime-x1-grid`, `datetime-x2-grid` and `datetime-x4-grid`. Then the scrolled three again with the months either side of the
 working one made at once, as before #248's spike B, and only when needed (`-eager` and `-press`, [below](#the-months-either-side)),
-against the default pages', made a few frames after the first. The sample's own list doesn't show them.
+against the default pages', made a few frames after the first; and `datetime-x1-idle`, the default named, for its swipes. The
+sample's own list doesn't show them.
 
 ```
 dotnet build samples/Avonic.Sample.Android -c Release -p:AvonicPerf=true
@@ -204,8 +205,8 @@ screen off, the keyguard locked or the activity paused; any of those, or a cpuse
 
 `AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term
 that starts with `=` keeps only the page of that title (`=ion-datetime`, without `ion-datetime-button`). Unset, every page
-opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the twelve above,
-about two minutes on the phone, most of it the month changes and the swipes; `datetime-x` only the twelve; `datetime-x1` only the four
+opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the thirteen above,
+about two minutes on the phone, most of it the month changes and the swipes; `datetime-x` only the thirteen; `datetime-x1` only the five
 with the month changes or the swipes. `-grid` keeps the grid pages and `ion-grid`. Use commas, not spaces, through `adb shell`, which splits its arguments again.
 
 On desktop it's the environment variable (`$env:AVONIC_PERF_ONLY = "datetime"`, and `Remove-Item Env:AVONIC_PERF_ONLY` for
@@ -336,7 +337,7 @@ months either side, made later"). Three variants were built, each a value of an 
 `AppContext` data `Avonic.Datetime.NeighbourMonths` (a measuring switch, not an API):
 
 - **`AtOnce`**: as Ionic, and as before: all three months at the first layout (the `-eager` pages).
-- **`WhenNeeded`**: the months either side only when needed: a press on the calendar, a scroll toward one, the next or previous
+- **`WhenNeeded`**: the months either side only when needed: a touch or a pen pressed on the calendar, a scroll toward one, the next or previous
   month, a value in another month (the `-press` pages).
 - **`AfterFirstFrame`**, the default: as `WhenNeeded`, and in any case after the calendar's first two frames, two weeks of days a
   frame, the next month then the previous, one datetime at a time (the plain pages).
@@ -368,11 +369,12 @@ Headless, Release, the real clock and frames, 390x844 at 2x, median of 10 rounds
 **Kept: `AfterFirstFrame`**, with `WhenNeeded`'s triggers, which every variant has, for whatever comes first. Nothing a user sees
 differs from Ionic's, so it's the scrolled calendar itself, not a third `CalendarRendering`.
 
-**On the phone**, each round of a `datetime` run now also times a swipe on each `datetime-x1` page, before its month changes:
+**On the phone**, each round of a `datetime` run now also times a swipe on `datetime-x1-eager`, `-press` and `-idle` (not the plain
+`datetime-x1`, whose month changes are timed as in the runs kept before):
 `MonthChangeTiming` with `bySwipe`, a touch pressed on the calendar's scroller, its offset moved a month over 12 frames from the
 frames' callbacks, as a finger's moves come, then lifted, and once back. Its lines are the month changes' (`table.js` reads them),
-labelled `datetime-swipe` (the default), `datetime-swipe-eager` and `datetime-swipe-press`: the first swipe's `first` and longest gap
-show what the press cost. `-e AVONIC_PERF_ONLY datetime-x` runs the twelve pages with the swipes and both pages' month changes.
+labelled `datetime-swipe-idle` (the default), `datetime-swipe-eager` and `datetime-swipe-press`: the first swipe's `first` and longest
+gap show what the press cost. `-e AVONIC_PERF_ONLY datetime-x` runs the thirteen pages with the swipes and both pages' month changes.
 
 ### Keeping a run
 
