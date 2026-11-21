@@ -36,12 +36,18 @@ public class PropertiesByNameTests
         Assert.Equal(HorizontalAlignment.Left, border.HorizontalAlignment);
         Assert.Equal(Avalonia.Media.FlowDirection.RightToLeft, border.FlowDirection);
         Assert.Equal("mine", border.Tag);
+
+        // A type only its TypeConverter reads a string as, not IConvertible.
+        var probe = new Probe();
+        PropertiesByName.Apply(probe, Values(("delay", "00:00:02")), Plain);
+        Assert.Equal(TimeSpan.FromSeconds(2), probe.GetValue(Probe.DelayProperty));
     }
 
     [AvaloniaFact]
     public void Unknown_Keys_Read_Only_Properties_And_Values_That_Dont_Fit_Are_Ignored()
     {
         var border = new Border { Tag = "before", Height = 30 };
+        PropertiesByName.Apply(border, null, Plain);
         PropertiesByName.Apply(border, Values(
             ("nothing", 1),
             ("", 1),
@@ -99,9 +105,12 @@ public class PropertiesByNameTests
         Assert.Null(off.Label);
 
         var on = new Probe();
-        PropertiesByName.Apply(on, Values(("count", "7"), ("Label", "seven")), Plain with { ClrProperties = true });
+        PropertiesByName.Apply(on, Values(("count", "7"), ("Label", "seven"), ("privatelySet", "x")), Plain with { ClrProperties = true });
         Assert.Equal(7, on.Count);
         Assert.Equal("seven", on.Label);
+
+        // Public settable only.
+        Assert.Null(on.PrivatelySet);
     }
 
     // ── The nav's rules: CLR properties after Avalonia's, drops and lookup errors logged ─────
@@ -167,6 +176,8 @@ public class PropertiesByNameTests
 
         public static readonly StyledProperty<string?> ShadowedProperty = AvaloniaProperty.Register<Probe, string?>("Shadowed");
 
+        public static readonly StyledProperty<TimeSpan> DelayProperty = AvaloniaProperty.Register<Probe, TimeSpan>("Delay");
+
         public static readonly StyledProperty<int> MixedProperty = AvaloniaProperty.Register<Probe, int>("Mixed");
 
         public static readonly DirectProperty<Probe, string?> FallenProperty =
@@ -177,6 +188,8 @@ public class PropertiesByNameTests
         public int Count { get; set; }
 
         public string? Label { get; set; }
+
+        public string? PrivatelySet { get; private set; }
 
         /// <summary>A CLR property with the name of an Avalonia property that isn't it.</summary>
         public string? Shadowed { get; set; }
