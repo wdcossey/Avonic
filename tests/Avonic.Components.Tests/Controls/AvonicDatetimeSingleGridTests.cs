@@ -183,6 +183,60 @@ public class AvonicDatetimeSingleGridTests
     });
 
     [AvaloniaFact]
+    public void The_Fade_Follows_Mds_Curves_As_One_Picture() => Run((scene, clock) =>
+    {
+        // md's fade through on the test clock, from the frame after the change: 90 ms out with the accelerate curve, then 210 ms in
+        // with the decelerate one. Linear would be 0.64 at 48 ms and 0.15 at 160 ms.
+        var datetime = Show(scene, clock, Grid());
+        var grid = datetime.CalendarGrid!;
+        datetime.NextMonth();
+        Settle(clock, 48);
+        Assert.InRange(Shown(datetime), 0.80, 0.84);
+        // As a group: a mask over the whole grid, the grid's own Opacity untouched, so the days and a ring don't fade one by one.
+        Assert.NotNull(grid.OpacityMask);
+        Assert.Equal(1, grid.Opacity);
+        Settle(clock, 112);
+        Assert.Equal(7, grid.Month);
+        Assert.InRange(Shown(datetime), 0.39, 0.44);
+        Assert.NotNull(grid.OpacityMask);
+        Settle(clock, 96);
+        Assert.InRange(Shown(datetime), 0.88, 0.93);
+        Settle(clock, 200);
+        Assert.Equal(1, Shown(datetime), 3);
+        Assert.Null(grid.OpacityMask);
+    });
+
+    [AvaloniaFact]
+    public void A_Selection_During_A_Fade_Wins_Over_The_Month_On_Its_Way() => Run((scene, clock) =>
+    {
+        // Next, then a click on June 20 while June still fades out: June stays, with June 20 chosen.
+        var datetime = Show(scene, clock, Grid());
+        Click(scene, Next(datetime));
+        Settle(clock, 40);
+        Click(scene, Day(datetime, 20));
+        Settle(clock, 400);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Equal(["6-20"], ActiveDays(datetime));
+        Assert.Equal("2023-06-20T13:47:00", datetime.Value.ToString());
+        Assert.Null(datetime.GridTarget);
+    });
+
+    [AvaloniaFact]
+    public void A_Change_Not_By_A_Key_Gives_A_Focused_Days_Focus_To_The_Grid() => Run((scene, clock) =>
+    {
+        // A day focused by the keyboard, then a value in another month from code: the day now shows another date, so the grid has
+        // the focus, as the scroller has in the scrolled calendar.
+        var datetime = Show(scene, clock, Grid());
+        datetime.CalendarGrid!.Focus(NavigationMethod.Tab);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(Day(datetime, 15), scene.Window.FocusManager!.GetFocusedElement());
+        datetime.Value = "2023-09-03";
+        Settle(clock, 600);
+        Assert.Equal("September 2023", MonthShown(datetime));
+        Assert.Same(datetime.CalendarGrid, scene.Window.FocusManager.GetFocusedElement());
+    });
+
+    [AvaloniaFact]
     public void With_Animated_Off_The_Month_Changes_At_Once() => Run((scene, clock) =>
     {
         var previous = AvonicConfig.Animated;
@@ -610,6 +664,20 @@ public class AvonicDatetimeSingleGridTests
     });
 
     [AvaloniaFact]
+    public void A_Button_During_A_Key_Fade_Makes_It_A_Buttons_Change() => Run((scene, clock) =>
+    {
+        // PageDown from June 30, then Next during the fade (from code, as automation's invoke, which moves no focus): August, and
+        // the grid has the focus, as after any button's change, not a day the key never reached.
+        var datetime = FocusedGrid(scene, clock, "2023-06-30");
+        AvonicPickerColumnTests.Key(scene, PhysicalKey.PageDown);
+        Settle(clock, 30);
+        datetime.NextMonth();
+        Settle(clock, 400);
+        Assert.Equal("August 2023", MonthShown(datetime));
+        Assert.Same(datetime.CalendarGrid, Focused(scene));
+    });
+
+    [AvaloniaFact]
     public void A_Key_Within_The_Month_Moves_At_Once() => Run((scene, clock) =>
     {
         var datetime = FocusedGrid(scene, clock, "2023-06-30");
@@ -707,6 +775,45 @@ public class AvonicDatetimeSingleGridTests
         Assert.True(datetime.CalendarBody!.IsEffectivelyVisible);
         Assert.Equal(7, datetime.CalendarMonths!.Months[1].Month);
         Assert.Equal(datetime.CalendarBody.Viewport.Width, datetime.CalendarBody.Offset.X, 1);
+    });
+
+    [AvaloniaFact]
+    public void A_Template_Applied_Again_Mid_Fade_Ends_At_The_Month() => Run((scene, clock) =>
+    {
+        // The old template's grid goes with its change landed: the new grid shows July at once, with nothing on its way.
+        var datetime = Show(scene, clock, Grid());
+        var old = datetime.CalendarGrid;
+        Click(scene, Next(datetime));
+        Settle(clock, 30);
+        var template = datetime.Template;
+        datetime.Template = null;
+        datetime.ApplyTemplate();
+        datetime.Template = template;
+        datetime.ApplyTemplate();
+        Assert.Null(datetime.GridTarget);
+        Assert.NotSame(old, datetime.CalendarGrid);
+        Settle(clock, 100);
+        Assert.Equal("July 2023", MonthShown(datetime));
+        Assert.Equal(1, Shown(datetime), 3);
+        Settle(clock, 400);
+        Assert.Equal("July 2023", MonthShown(datetime));
+    });
+
+    [AvaloniaFact]
+    public void A_Switch_Mid_Scroll_And_Back_Brings_The_Scroller_Back_To_Its_Middle_Month() => Run((scene, clock) =>
+    {
+        // The scrolled calendar part way through Next's scroll, switched to the grid and back: the scroller is on the working month.
+        var datetime = Show(scene, clock, new AvonicDatetime { Presentation = DatetimePresentation.Date, Value = June15 });
+        var body = datetime.CalendarBody!;
+        Click(scene, Next(datetime));
+        Settle(clock, 100);
+        Assert.InRange(body.Offset.X, body.Viewport.Width + 1, 2 * body.Viewport.Width - 1);
+        datetime.CalendarRendering = DatetimeCalendarRendering.SingleGrid;
+        Settle(clock, 100);
+        datetime.CalendarRendering = DatetimeCalendarRendering.ScrolledMonths;
+        Settle(clock, 600);
+        Assert.Equal("June 2023", MonthShown(datetime));
+        Assert.Equal(body.Viewport.Width, body.Offset.X, 1);
     });
 
     [AvaloniaFact]
