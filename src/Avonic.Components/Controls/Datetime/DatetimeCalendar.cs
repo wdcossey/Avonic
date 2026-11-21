@@ -184,23 +184,26 @@ public sealed class DatetimeCalendarMonth : Panel
     /// <summary>The number of days a month grid holds: 7 columns, 6 rows.</summary>
     internal const int DayCount = 42;
 
-    /// <summary>Makes the 42 days if they aren't made yet. True when it made them, so that the datetime hears their clicks.</summary>
-    internal bool EnsureDays()
-    {
-        if (Days.Count > 0)
-        {
-            return false;
-        }
+    /// <summary>Makes the 42 days, or those not made yet. True when it made any, so that the datetime hears their clicks.</summary>
+    internal bool EnsureDays() => AddDays(DayCount);
 
-        for (var i = 0; i < DayCount; i++)
+    /// <summary>Makes up to <paramref name="count"/> more days, to 42 at most. True when it made any.</summary>
+    internal bool AddDays(int count)
+    {
+        var made = false;
+        for (; count > 0 && Days.Count < DayCount; count--)
         {
             var day = new DatetimeCalendarDay();
             Days.Add(day);
             Children.Add(day);
+            made = true;
         }
 
-        return true;
+        return made;
     }
+
+    /// <summary>Whether all 42 days are made.</summary>
+    internal bool HasAllDays => Days.Count == DayCount;
 
     /// <summary>The padding of the grid: <c>padding: 4px 10px</c> in md, set by the theme.</summary>
     public static readonly StyledProperty<Thickness> PaddingProperty =
@@ -270,14 +273,18 @@ public sealed class DatetimeCalendarMonth : Panel
 /// Ionic's <c>.calendar-body</c> content: the previous, working and next months in a row, each the calendar's width, with a snap point
 /// at each that can be swiped to (<c>scroll-snap-align: start</c>; none for <c>calendar-month-disabled</c>). Its months are made when
 /// the datetime first draws them (<see cref="EnsureMonths"/>), so that a datetime in <see cref="DatetimeCalendarRendering.SingleGrid"/>
-/// makes none.
+/// makes none; and the days of the months either side of the working one when they're first needed (#248, spike B): until then each is
+/// an empty page of the calendar's width, so the scroller's extent and snap points are the same three pages.
 /// </summary>
 public sealed class DatetimeCalendarBodyPanel : Panel, IScrollSnapPointsInfo
 {
     private readonly bool[] _snap = [true, true, true];
     private double _pageWidth;
 
-    /// <summary>Makes the three months and their days if they aren't made yet. True when it made them.</summary>
+    /// <summary>
+    /// Makes the three months if they aren't made yet, with the working month's days; the months either side get theirs later. True
+    /// when it made them.
+    /// </summary>
     internal bool EnsureMonths()
     {
         if (Months.Count > 0)
@@ -288,13 +295,20 @@ public sealed class DatetimeCalendarBodyPanel : Panel, IScrollSnapPointsInfo
         for (var i = 0; i < 3; i++)
         {
             var month = new DatetimeCalendarMonth();
-            month.EnsureDays();
+            if (i == 1)
+            {
+                month.EnsureDays();
+            }
+
             Months.Add(month);
             Children.Add(month);
         }
 
         return true;
     }
+
+    /// <summary>Whether the months either side of the working one have their days.</summary>
+    internal bool HasNeighbourDays => Months.Count == 3 && Months[0].HasAllDays && Months[2].HasAllDays;
 
     internal List<DatetimeCalendarMonth> Months { get; } = [];
 

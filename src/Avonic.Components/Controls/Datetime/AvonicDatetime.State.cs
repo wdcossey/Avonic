@@ -406,6 +406,8 @@ public partial class AvonicDatetime
         base.OnAttachedToVisualTree(e);
         EmitStyle();
         UpdateGridGesture(inTree: true);
+        // Back in a window with the months either side still to make (left mid-way): the scroller's size may not change again.
+        ScheduleNeighbourDays();
     }
 
     /// <summary>A grid's fade on its way ends at its month, and its swipe stops listening, so that nothing goes on once it's gone.</summary>
@@ -414,6 +416,7 @@ public partial class AvonicDatetime
         base.OnDetachedFromVisualTree(e);
         FinishGridChange();
         UpdateGridGesture(inTree: false);
+        CancelNeighbourDays();
     }
 
     protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)

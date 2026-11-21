@@ -77,7 +77,13 @@ public partial class PageCostTests
     {
         var page = new DatetimeCostView(4);
         scene.Window.Content = page;
-        Settle(clock, 400);
+        scene.Window.UpdateLayout();
+        // The kept rendering (#248, spike B), as the Pixel run measured it: the months either side made after the first frames.
+        int[] Days(AvonicDatetime d) => [.. d.CalendarMonths!.Months.Select(m => m.Days.Count)];
+        Assert.All(page.GetVisualDescendants().OfType<AvonicDatetime>(), d => Assert.Equal([0, 42, 0], Days(d)));
+        // Four calendars, one at a time, six parts and a frame each after two frames: about 30 frames.
+        Settle(clock, 600);
+        Assert.All(page.GetVisualDescendants().OfType<AvonicDatetime>(), d => Assert.Equal([42, 42, 42], Days(d)));
 
         var datetimes = page.GetVisualDescendants().OfType<AvonicDatetime>().ToArray();
         Assert.Equal(4, datetimes.Length);

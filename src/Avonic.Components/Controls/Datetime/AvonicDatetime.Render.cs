@@ -130,6 +130,7 @@ public partial class AvonicDatetime
             _calendarBody.AddHandler(KeyDownEvent, OnCalendarKeyDown, RoutingStrategies.Tunnel);
             _calendarBody.GotFocus += OnCalendarFocus;
             _calendarBody.SizeChanged += OnCalendarBodySize;
+            _calendarBody.AddHandler(PointerPressedEvent, OnCalendarPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         }
 
         if (_calendarMonths is not null)
@@ -229,8 +230,10 @@ public partial class AvonicDatetime
             _calendarBody.RemoveHandler(KeyDownEvent, OnCalendarKeyDown);
             _calendarBody.GotFocus -= OnCalendarFocus;
             _calendarBody.SizeChanged -= OnCalendarBodySize;
+            _calendarBody.RemoveHandler(PointerPressedEvent, OnCalendarPressed);
         }
 
+        CancelNeighbourDays();
         _smooth?.Stop();
         _smooth = null;
         DetachGrid();
@@ -467,8 +470,12 @@ public partial class AvonicDatetime
         }
     }
 
-    /// <summary>Ionic's <c>renderMonth</c>. True when the month can be swiped to.</summary>
-    private bool RenderMonth(CultureInfo culture, DatetimeCalendarMonth monthPanel, int month, int year)
+    /// <summary>
+    /// Ionic's <c>renderMonth</c>. True when the month can be swiped to. From <paramref name="fromDay"/>, the index of the first day
+    /// to draw: the days just made of a month made in parts, so that the others aren't drawn again, nor <see cref="IsDateEnabled"/>
+    /// and a <see cref="HighlightedDates"/> function called again for them.
+    /// </summary>
+    private bool RenderMonth(CultureInfo culture, DatetimeCalendarMonth monthPanel, int month, int year, int fromDay = 0)
     {
         var disabled = !IsEnabled;
         var yearAllowed = _yearValues is null || _yearValues.Contains(year);
@@ -481,9 +488,14 @@ public partial class AvonicDatetime
         AutomationProperties.SetAccessibilityView(monthPanel, isWorkingMonth ? AccessibilityView.Default : AccessibilityView.Raw);
         monthPanel.Month = month;
         monthPanel.Year = year;
+        if (monthPanel.Days.Count == 0)
+        {
+            // A month either side whose days aren't made yet (EnsureNeighbourDays): an empty page, which still snaps or doesn't.
+            return isWorkingMonth || !swipeDisabled;
+        }
 
         var cells = DatetimeUtils.GetDaysOfMonth(month, year, FirstDayOfWeekIndex, ShowAdjacentDays);
-        for (var index = 0; index < monthPanel.Days.Count; index++)
+        for (var index = fromDay; index < monthPanel.Days.Count; index++)
         {
             var dayControl = monthPanel.Days[index];
             if (index >= cells.Count)
@@ -616,6 +628,7 @@ public partial class AvonicDatetime
             return;
         }
 
+        EnsureNeighbourDays(2);
         _smooth.To(_calendarBody.Viewport.Width * 2, AvonicConfig.Animated);
     }
 
@@ -634,6 +647,7 @@ public partial class AvonicDatetime
             return;
         }
 
+        EnsureNeighbourDays(0);
         _smooth.To(0, AvonicConfig.Animated);
     }
 
@@ -672,6 +686,7 @@ public partial class AvonicDatetime
                 _calendarBody.Offset = new Vector(_calendarBody.Viewport.Width, 0);
             }
 
+            ScheduleNeighbourDays();
             return;
         }
 
@@ -679,6 +694,8 @@ public partial class AvonicDatetime
         {
             return;
         }
+
+        EnsureNeighbourDaysToward(e.GetNewValue<Vector>().X);
 
         _scrollRest?.Dispose();
         _scrollRest = AvonicConfig.Schedule(UpdateActiveMonth, ScrollRest);

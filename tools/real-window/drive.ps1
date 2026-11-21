@@ -2066,6 +2066,45 @@ try {
         Away
     }
 
+    # ion-datetime's months either side (#248, spike B): the scrolled calendar makes the days of the months either side of the one
+    # shown when they're first needed, or a few frames after it's drawn, where Ionic makes all three at once. Whichever made them, a
+    # month scrolled into view has its days. The first datetime's calendar is scrolled by its own ScrollPattern, found from a day of
+    # June up to its scroller, with no input: halfway to July, July's first days are in the window (not a month change: the scroll
+    # doesn't rest lined up); all the way, it rests on July, which becomes the month shown; then back to June, and on to May by the
+    # previous button. Months are seen by their days (the month-year button's name is "Show year picker").
+    Section 'ion-datetime: the months either side' {
+        Open 'ion-datetime'
+        $w = $win.Current.BoundingRectangle
+        function DayShown($name) {
+            $d = Named $CT::Button $name
+            if (-not $d) { return $false }
+            $r = $d.Current.BoundingRectangle
+            ($r.Left + $r.Width / 2) -gt $w.Left -and ($r.Left + $r.Width / 2) -lt $w.Right
+        }
+        $june20 = Named $CT::Button 'Tuesday, June 20'
+        if (-not $june20) { throw 'The first calendar shows no June 20' }
+        $cal = $june20
+        # The raw view, and the first scroller that scrolls across: the page's own scroller is the first in the control view.
+        function ScrollsAcross($el) { ($el.GetSupportedPatterns() -contains [Windows.Automation.ScrollPattern]::Pattern) -and $el.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern).Current.HorizontallyScrollable }
+        while ($cal -and -not (ScrollsAcross $cal)) { $cal = [Windows.Automation.TreeWalker]::RawViewWalker.GetParent($cal) }
+        if (-not $cal) { throw 'June 20 is in no scroller' }
+        $scroll = $cal.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern)
+        Check 'the calendar scrolls across, a month in view, the middle of three' ($scroll.Current.HorizontallyScrollable -and [math]::Abs($scroll.Current.HorizontalViewSize - 100 / 3) -lt 1 -and [math]::Abs($scroll.Current.HorizontalScrollPercent - 50) -lt 1) "view $($scroll.Current.HorizontalViewSize)%, at $($scroll.Current.HorizontalScrollPercent)%"
+
+        $scroll.SetScrollPercent(75, [Windows.Automation.ScrollPattern]::NoScroll); Start-Sleep -Milliseconds 300
+        Shot 'datetime-halfway'
+        Check 'halfway to July, its first days are drawn in the window, beside June''s last' ((DayShown 'Monday, July 3') -and (DayShown 'Friday, June 30') -and -not (DayShown 'Tuesday, June 20')) "window $w, at $($scroll.Current.HorizontalScrollPercent)%"
+        $scroll.SetScrollPercent(100, [Windows.Automation.ScrollPattern]::NoScroll); Start-Sleep -Milliseconds 500
+        Check 'resting on July makes it the month shown, in the middle again' ((DayShown 'Saturday, July 15') -and -not (DayShown 'Thursday, June 15') -and [math]::Abs($scroll.Current.HorizontalScrollPercent - 50) -lt 1) "at $($scroll.Current.HorizontalScrollPercent)%"
+        $scroll.SetScrollPercent(0, [Windows.Automation.ScrollPattern]::NoScroll); Start-Sleep -Milliseconds 500
+        Check 'and back to June' ((DayShown 'Tuesday, June 20') -and -not (DayShown 'Saturday, July 15')) "at $($scroll.Current.HorizontalScrollPercent)%"
+        ClickOn (Named $CT::Button 'Previous month')
+        Start-Sleep -Milliseconds 800
+        Shot 'datetime-may'
+        Check 'the previous button scrolls to May, its days drawn' ((DayShown 'Monday, May 15') -and -not (DayShown 'Tuesday, June 20')) "window $w"
+        Away
+    }
+
     # ion-datetime-button (#79): every datetime on the page has its value and its locale (en-US) pinned, and each button's text
     # differs, so each is found by its accessible name, its text: "Jun 15, 2023" and "1:47 PM" for the modal's datetime, "Jul 4, 2023"
     # for the popover's. A click on the date button opens the modal with a calendar only (no time button inside), its days named as

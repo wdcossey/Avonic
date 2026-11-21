@@ -326,6 +326,38 @@ Extensions). The single grid halves the open and shows a new month 3 times soone
 follow the finger), and its fade has twice the long frames. The fade's timing stays md's fade through, 90 ms out and 210 ms in, as a
 group (`AnimationGroupOpacity`); making it and the swipe's threshold settable is on the roadmap.
 
+### The months either side
+
+#248's spike B ([#259](https://github.com/wdcossey/Avonic/pull/259)) keeps Ionic's scrolled calendar and makes less of it up front:
+only the working month's 42 days at the first layout, and the months either side's before they can be seen (a touch or a pen on the
+calendar, the next or previous month, a value in another month, an offset toward one) and in any case after the calendar's first two
+frames, two weeks of days a frame, one datetime at a time (`docs/components/ion-datetime/COMPARISON.md`, "The months either side,
+made later"). It's the scrolled calendar itself, with no option: nothing on screen differs from Ionic's.
+
+Two variants were measured against Ionic's three months at once (`-eager`): **variant 1** made the months either side only when
+needed (`-press`), **variant 2** also after the first frames (`-idle`, and the plain pages), each with a timed first swipe after
+opening (a touch pressed on the scroller, its offset moved a month over 12 frames, then lifted). On the Pixel 8, Release, the screen
+kept on, every round `/top-app` and every page collected (`page-costs/2026-11-21-pixel8-release-datetime-spike-b-e1f2a5b.txt`,
+rounds 2 and 3, the medians over their lines together, as `table.js` gives them):
+
+| | Ionic's, at once | Variant 1, when needed | Variant 2, kept | Single grid |
+|---|---:|---:|---:|---:|
+| `datetime-x1`, `-x2`, `-x4` to open | 149, 254, 502 ms | 53, 121, 204 ms | 63, 162, 224 ms | 57, 157, 228 ms |
+| First swipe: first frame drawn, median | 34 ms | 90 ms (most 149) | 38 ms | |
+| First swipe: longest gap, median | 23 ms | 60 ms (most 103) | 29 ms | |
+
+- **Opening costs 36 to 58% less** than Ionic's three months, about the single grid's, with Ionic's behaviour kept.
+- **Variant 1 is cheapest to open but hitches the first swipe**: the finger's first frame comes 90 ms after it lands, as the press
+  makes both months. **Variant 2 keeps the first swipe as Ionic's** (38 against 34 ms) for a few more milliseconds at the open. So
+  variant 2 is kept.
+- **The month changes are as before** (`datetime-month`: first frame 12 ms, heading 389 ms), as the months are made by then.
+- **One frame of 36 to 40 ms** shows in `datetime-x4`'s busy window after its open in rounds 2 and 3, the four calendars' parts; `x1`
+  and `x2` stay at about 16 ms.
+
+The comparison pages (`-eager`, `-press`, `-idle`), their swipe timings, the switch that picked a variant and the headless benchmark
+were removed once this run had decided; the file keeps their numbers. Headless, the same ranking held: x1 opened in 29 ms at once, 13
+ms either way deferred, the first press cost 17 ms in variant 1 and nothing in variant 2, whose parts cost 2 to 5 ms a frame.
+
 ### Keeping a run
 
 Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and

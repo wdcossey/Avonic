@@ -149,6 +149,35 @@ The swipe that doesn't follow the finger is the deliberate deviation. Elements o
 headless: 726 scrolled (725 before the grid's part, empty in this rendering, was added) and 292 as a single grid, as the two hidden
 months' days were most of the calendar.
 
+## The months either side, made later (#248, spike B)
+
+Ionic renders the working month and the two either side at once, 126 days. Avonic's scrolled calendar makes only the working month's
+42 at its first layout, and the others' when first needed (`AvonicDatetimeNeighbourMonthsTests`):
+
+- **after its first two frames**, two weeks of days a frame, the next month then the previous, one datetime at a time (a page of
+  several takes turns), so no frame makes much: six frames for one calendar;
+- **at once**, before they can be seen, if anything needs them sooner: a touch or a pen pressed on the calendar (both, before it moves; not a mouse, which doesn't drag the scroller), the
+  next or previous button and a value or an adjacent day in another month (that month, at the click, before the scroll), and any
+  change of the scroller's offset toward one (a wheel, a key on the scroller, automation's `ScrollPattern`), in the same layout
+  pass, so before it's drawn.
+
+Meanwhile a month without its days is an empty page of the calendar's width and height, so the scroller has the same three pages,
+offset and snap points, and a month outside `Min` and `Max` still isn't snapped to. **What a user sees and does is Ionic's**: the
+swipe follows the finger and snaps, the buttons scroll, the keys change the month at once (they never needed the months either
+side), and the today ring, the selection, `Min`, `Max`, `IsDateEnabled` and `HighlightedDates` are drawn as before when a month is made.
+
+What can be told apart, measured headless, none of it on screen:
+
+| | Ionic (and Avonic before) | Avonic now |
+|---|---|---|
+| Days made at the first draw | 126 | 42 |
+| Elements on the `datetime-x1` perf page at the first layout | 725 | 296 |
+| `IsDateEnabled` and a `HighlightedDates` function, at the first draw | called for the three months' days (B15: 92 calls) | for the working month's; the others' when each is made, a few frames later |
+| The days of the months either side in the automation tree | from the first draw | from when they're made (Ionic hides those months from assistive technology, `aria-hidden`, so a reader skips them in both) |
+
+So the scrolled calendar stays Ionic's rendering, with no new option. Headless and Pixel 8 numbers are in
+`docs/infra/performance/README.md`, "The months either side".
+
 ## Not in Avonic
 
 - `name` (an HTML form's hidden input) and `mode`, as the plan says.
