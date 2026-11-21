@@ -51,3 +51,6 @@ focus after second shift-tab  classes
 focused md button back-button-has-icon-only ion-activatable ion-focusable show-back-button hydrated rgb(0, 0, 0) rgba(0, 0, 0, 0) 0
 submitted after Enter 0
 submitted after Space 0
+
+## B6 setRoot going back: is the builder called
+{"ok":true,"calls":[],"len":1}
