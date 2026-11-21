@@ -19,6 +19,7 @@ namespace UiaRepro;
 /// <item><c>--mode remove</c>: the same, and "Toggle" removes B from the panel or adds it back.</item>
 /// </list>
 /// <c>--auto MS</c> does the change itself every MS ms (push and pop in turn for the nav), with no client input.
+/// <c>--fix notavailable</c> or <c>--fix windowroot</c> makes the hooked provider answer a null fragment root differently.
 /// <c>--content plain</c> builds the pages from stock <c>Button</c>s and <c>TextBlock</c>s instead of Avonic's item, list and
 /// content. <c>--log DIR</c> is where the logs go. "Status: ..." under the pages says what changed, and when.
 /// </summary>
@@ -36,6 +37,7 @@ internal static class Program
         {
             try
             {
+                Hooks.Fix = Options.Fix;
                 Hooks.Install();
             }
             catch (Exception ex)
@@ -80,6 +82,8 @@ internal sealed class Options
 
     public bool HooksOnly { get; private set; }
 
+    public string Fix { get; private set; } = "none";
+
     public int Rows { get; private set; } = 12;
 
     public string LogDir { get; private set; } = Path.Combine(Path.GetTempPath(), "uia-repro");
@@ -98,6 +102,7 @@ internal sealed class Options
                 case "--unanimated": o.Animated = false; break;
                 case "--no-hooks": o.NoHooks = true; break;
                 case "--hooks-only": o.HooksOnly = true; break;
+                case "--fix": o.Fix = Next(); break;
                 case "--rows": o.Rows = int.Parse(Next()); break;
                 case "--log": o.LogDir = Next(); break;
                 default: throw new ArgumentException($"unknown argument {args[i]}");

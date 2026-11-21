@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -20,6 +21,13 @@ internal static class Hooks
     private static readonly List<Hook> Installed = [];
     private static Func<object, AutomationPeer?> _peerOf = _ => null;
     private static Type? _rootType;
+    private static object? _lastRoot;
+
+    /// <summary>UIA_E_ELEMENTNOTAVAILABLE.</summary>
+    private const int UiaElementNotAvailable = unchecked((int)0x80040201);
+
+    /// <summary><c>--fix</c>: none, notavailable or windowroot, for a null fragment root.</summary>
+    public static string Fix { get; set; } = "none";
 
     public static void Install()
     {
@@ -41,6 +49,22 @@ internal static class Hooks
             if (r is null)
             {
                 Anomaly(self, "GetFragmentRoot returned null");
+
+                // What the provider could do instead (--fix), to see what UIA makes of it: UIA_E_ELEMENTNOTAVAILABLE, as UIA's
+                // docs ask of an element that has gone, or the window's root, as if the element were still in the fragment.
+                if (Fix == "notavailable")
+                {
+                    throw new COMException("--fix notavailable: the element has left the tree", UiaElementNotAvailable);
+                }
+
+                if (Fix == "windowroot" && _lastRoot is { } window)
+                {
+                    return window;
+                }
+            }
+            else
+            {
+                _lastRoot = r;
             }
 
             return r;

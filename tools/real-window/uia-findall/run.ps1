@@ -17,6 +17,8 @@
       hide-*           no nav: a plain Panel whose top child's IsVisible flips
       remove-*         no nav: the same child removed from the Panel and added back
       *-auto           the app changes itself on a timer, and the client only searches, for 20 s
+      fix-*            UiaRepro --fix: the hooked provider answers a null fragment root with UIA_E_ELEMENTNOTAVAILABLE
+                       (notavailable) or with the window's root (windowroot) instead
     The api part: managed = System.Windows.Automation's FindAll, as drive.ps1; com = IUIAutomation.FindAll; com-cache =
     FindAllBuildCache; *-walk = the raw view walked one element at a time, so that the failing step shows; listen = managed,
     with a StructureChanged handler on the window.
@@ -83,6 +85,15 @@ $scenarios = @(
     @{ Name = 'hide-auto';        Exe = $reproExe;  Args = '--mode hide --auto 150';   Api = 'managed';      Triggers = ''; Idle = 20000 }
     @{ Name = 'remove-auto';      Exe = $reproExe;  Args = '--mode remove --auto 150'; Api = 'managed';      Triggers = ''; Idle = 20000 }
     @{ Name = 'nav-auto';         Exe = $reproExe;  Args = '--mode nav --auto 400';    Api = 'managed';      Triggers = ''; Idle = 20000 }
+    # What the provider could answer instead of a null fragment root (UiaRepro --fix), to see what UIA makes of each.
+    @{ Name = 'fix-notavailable-hide-auto';   Exe = $reproExe; Args = '--mode hide --auto 150 --fix notavailable';   Api = 'managed'; Triggers = ''; Idle = 20000 }
+    @{ Name = 'fix-notavailable-remove-auto'; Exe = $reproExe; Args = '--mode remove --auto 150 --fix notavailable'; Api = 'managed'; Triggers = ''; Idle = 20000 }
+    @{ Name = 'fix-notavailable-nav-managed'; Exe = $reproExe; Args = '--mode nav --fix notavailable';               Api = 'managed'; Triggers = $navCycle }
+    @{ Name = 'fix-notavailable-nav-com';     Exe = $reproExe; Args = '--mode nav --fix notavailable';               Api = 'com';     Triggers = $navCycle }
+    @{ Name = 'fix-windowroot-hide-auto';     Exe = $reproExe; Args = '--mode hide --auto 150 --fix windowroot';     Api = 'managed'; Triggers = ''; Idle = 20000 }
+    @{ Name = 'fix-windowroot-remove-auto';   Exe = $reproExe; Args = '--mode remove --auto 150 --fix windowroot';   Api = 'managed'; Triggers = ''; Idle = 20000 }
+    @{ Name = 'fix-windowroot-nav-managed';   Exe = $reproExe; Args = '--mode nav --fix windowroot';                 Api = 'managed'; Triggers = $navCycle }
+    @{ Name = 'fix-windowroot-nav-com';       Exe = $reproExe; Args = '--mode nav --fix windowroot';                 Api = 'com';     Triggers = $navCycle }
 )
 
 $patterns = $Only -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }
