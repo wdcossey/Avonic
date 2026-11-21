@@ -17,6 +17,9 @@ public partial class DatetimePage : UserControl
             datetime.IonCancel += (_, _) => DatetimeChanged.Text = $"{datetime.Name} ionCancel";
         }
 
+        SingleGridToggle.IsCheckedChanged += (_, _) => DateTimeGrid.CalendarRendering =
+            SingleGridToggle.IsChecked == true ? DatetimeCalendarRendering.SingleGrid : DatetimeCalendarRendering.ScrolledMonths;
+
         // Two dates in June 2023, so that the page shows the same month any day.
         Several.Value = new[] { "2023-06-05", "2023-06-09" };
 

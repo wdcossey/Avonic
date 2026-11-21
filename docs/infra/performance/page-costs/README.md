@@ -8,7 +8,8 @@ change, to a control, to the rendering, or to the runtime, is compared with the 
 |---|---|---|---|
 | `2026-11-20-pixel8-release.txt` | Pixel 8 (`shiba`), Android API 37, arm64 | Release, AOT, trimmed; .NET 10.0.14 | v2 f5de215 + #247 |
 | `2026-11-20-desktop-release.txt` | Windows 11, x64, 64 cores | Release; .NET 10.0.13 | v2 f5de215 + #247 |
-| `2026-11-20-pixel8-release-datetime-3201219.txt` | Pixel 8 (`shiba`), Android API 37, arm64 | Release, AOT, trimmed; .NET 10.0.14; `AVONIC_PERF_ONLY=datetime` | v2 3201219 (#256): **the datetime spikes' baseline**. Checks clean. Round 1 is first use: its `ion-datetime-button` open (2609 ms) and its month changes (stopped after 10, "the calendar left the tree during a change") aren't counted; rounds 2 and 3 are |
+| `2026-11-20-pixel8-release-datetime-3201219.txt` | Pixel 8 (`shiba`), Android API 37, arm64 | Release, AOT, trimmed; .NET 10.0.14; `AVONIC_PERF_ONLY=datetime` | v2 3201219 (#256): **the datetime spikes' baseline**. Checks clean. Round 1 is first use: its `ion-datetime-button` open (2609 ms) and its month changes (stopped after 10, "the calendar left the tree during a change") aren't counted; rounds 2 and 3 are. Its round-1 oddities were most likely the screen locking ([why](../README.md#keep-the-screen-on)) |
+| `2026-11-20-pixel8-release-datetime-spike-a-a119279.txt` | Pixel 8 (`shiba`), Android API 37, arm64 | Release, AOT, trimmed; .NET 10.0.14; `AVONIC_PERF_ONLY=datetime`; screen kept on | spike A, `spike/datetime-single-grid` a119279 (#258): both renderings, with `DeviceProbe`'s figures. The "page still alive" checks are from before the check collected from a clean stack (ef51444) |
 
 The **Pixel's run is the reference.** The desktop is several times faster on every page (5.4× over all of them), so a change that
 looks free there may not be; use it for the share of the time that is layout, which Android can't measure

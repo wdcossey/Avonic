@@ -1958,6 +1958,114 @@ try {
         Away
     }
 
+    # ion-datetime's single grid (#248, #258), not Ionic's: the first datetime on the page drawn as one grid of 42 days, by the
+    # page's toggle at the end, which a TogglePattern flips without scrolling to it. A change of month fades the days (90 ms out, 210
+    # ms in), so each check waits 700 ms. The month's name isn't in automation (the month-year button is named "Show year picker"),
+    # so a month is seen by its days, as in the section above. Only the first datetime's days are counted: the day buttons between
+    # its month-year button and its time button. A grid has only its month's days, where the scrolled calendar has three months'
+    # (about 91), so the count also tells the rendering apart.
+    Section 'ion-datetime: the single grid' {
+        Open 'ion-datetime'
+        $toggle = Named $CT::Button 'Single grid calendar*'
+        if (-not $toggle) { throw 'The page has no single grid toggle' }
+        function SetGrid($on) {
+            $pattern = $toggle.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern)
+            if (($pattern.Current.ToggleState -eq 'On') -ne $on) { $pattern.Toggle(); Start-Sleep -Milliseconds 700 }
+            # The toggle brings itself into view at the page's end: the page's scroller back to the top, where the first datetime is,
+            # through its ScrollPattern, as a wheel in the middle of the page would turn a picker's wheel.
+            $el = $toggle
+            while ($el -and -not ($el.GetSupportedPatterns() -contains [Windows.Automation.ScrollPattern]::Pattern)) { $el = [Windows.Automation.TreeWalker]::ControlViewWalker.GetParent($el) }
+            if (-not $el) { throw 'The toggle is in no scroller' }
+            $el.GetCurrentPattern([Windows.Automation.ScrollPattern]::Pattern).SetScrollPercent(-1, 0); Start-Sleep -Milliseconds 400
+        }
+        function GridDays {
+            $top = (Named $CT::Button 'Show year picker').Current.BoundingRectangle.Bottom
+            $bottom = (Named $CT::Button '1:47 PM').Current.BoundingRectangle.Top
+            @(All $CT::Button | Where-Object {
+                $box = $_.Current.BoundingRectangle
+                $_.Current.Name -match '^[A-Z][a-z]+day, [A-Z][a-z]+ \d{1,2}$' -and ($box.Top + $box.Height / 2) -gt $top -and ($box.Top + $box.Height / 2) -lt $bottom
+            })
+        }
+        function GridDay($name) { GridDays | Where-Object { $_.Current.Name -eq $name } | Select-Object -First 1 }
+        function Shows($heading, $days, $day) {
+            $all = GridDays
+            # $heading names the month for the reader; the days are what's checked.
+            $all.Count -eq $days -and [bool]($all | Where-Object { $_.Current.Name -eq $day })
+        }
+        function Seen { $all = GridDays; "$($all.Count) days, from $($all[0].Current.Name)" }
+
+        $scrolledDays = (GridDays).Count
+        SetGrid $true
+        Check 'the toggle draws June 2023 as one grid of its 30 days' (Shows 'June 2023' 30 'Tuesday, June 20') "$(Seen), $scrolledDays before"
+        Shot 'datetime-grid'
+
+        # The buttons: a frame mid-fade for the eye, then July. The pixel counts are a note, as the frame's timing is the OS's.
+        $next = Named $CT::Button 'Next month'
+        $gx, $gy = Centre (GridDay 'Thursday, June 15')
+        $rx = $gx - (Px 150); $ry = $gy - (Px 60)
+        $before = Region $rx $ry (Px 300) (Px 120)
+        $nx, $ny = Centre $next
+        Guard; Within $nx $ny
+        [void][RealInput]::SetCursorPos($nx, $ny); Start-Sleep -Milliseconds 120
+        Press; Start-Sleep -Milliseconds 50; Release
+        Start-Sleep -Milliseconds 60
+        $mid = Region $rx $ry (Px 300) (Px 120)
+        Shot 'datetime-grid-fading'
+        Start-Sleep -Milliseconds 700
+        $after = Region $rx $ry (Px 300) (Px 120)
+        "  note  about 60 ms into the fade the days differ from June's in $([Pixels]::Differ($before, $mid)) pixels and from July's in $([Pixels]::Differ($after, $mid)) (both above 0: a fade caught)"
+        $before.Dispose(); $mid.Dispose(); $after.Dispose()
+        Check 'Next fades to July, its 31 days' (Shows 'July 2023' 31 'Saturday, July 1') (Seen)
+        ClickOn (Named $CT::Button 'Previous month')
+        Start-Sleep -Milliseconds 700
+        Check 'Previous fades back to June' (Shows 'June 2023' 30 'Tuesday, June 20') (Seen)
+        ClickOn $next
+        Start-Sleep -Milliseconds 700
+
+        # The swipe: a touch drag left from the middle row, past 50 px, goes to the next month once it ends; a mouse drag right, back.
+        $sx, $sy = Centre (GridDay 'Saturday, July 15')
+        TouchDrag $sx $sy (- (Px 200)) 0 15 16
+        Start-Sleep -Milliseconds 700
+        Shot 'datetime-grid-swiped'
+        Check 'a touch swipe left changes to August' (Shows 'August 2023' 31 'Wednesday, August 16') (Seen)
+        $sx, $sy = Centre (GridDay 'Tuesday, August 15')
+        MouseDrag ($sx - (Px 100)) $sy (Px 200) 0 15 16
+        Start-Sleep -Milliseconds 700
+        Check 'a mouse drag right changes back to July' (Shows 'July 2023' 31 'Saturday, July 15') (Seen)
+        # Short and slow: 30 px over half a second, neither far enough nor a flick.
+        $sx, $sy = Centre (GridDay 'Saturday, July 15')
+        TouchDrag $sx $sy (- (Px 30)) 0 15 33
+        Start-Sleep -Milliseconds 700
+        Check 'a short slow drag leaves July' (Shows 'July 2023' 31 'Saturday, July 15') (Seen)
+        Check 'a swipe selects no day' (-not (WaitForText 'DateTimeGrid ionChange*' 1)) (FirstText '*ionChange*')
+
+        # The keys: a day clicked, then PageDown to August and Up back to July, each faded, the key's day focused once the days show.
+        ClickOn (GridDay 'Monday, July 3')
+        Check 'a click on a day of the grid confirms it' ([bool](WaitForText 'DateTimeGrid ionChange: 2023-07-03T13:47:00' 3)) (FirstText '*ionChange*')
+        Key '{PGDN}' 700
+        Check 'PageDown fades to August' (Shows 'August 2023' 31 'Thursday, August 3') (Seen)
+        Check 'with August 3 focused' (IsFocused (GridDay 'Thursday, August 3')) "focused: $($AE::FocusedElement.Current.Name)"
+        Key '{UP}' 700
+        $day27 = GridDay 'Thursday, July 27'
+        Check 'Up from August 3 fades back to July' (Shows 'July 2023' 31 'Thursday, July 27') (Seen)
+        Check 'with July 27 focused' (IsFocused $day27) "focused: $($AE::FocusedElement.Current.Name)"
+        Shot 'datetime-grid-key'
+        # The ring is on July 27 once the days show: Right moves it within the month, at once, and the cell changes.
+        $b = $day27.Current.BoundingRectangle
+        $ring = Region $b.X $b.Y $b.Width $b.Height
+        Key '{RIGHT}' 300
+        $moved = Changed $ring (Region $b.X $b.Y $b.Width $b.Height)
+        $ring.Dispose()
+        Check 'the focused day''s ring shows after the fade, and goes with the focus' ($moved -gt 0) "$moved pixels"
+        Check 'Right moves the focus to July 28, with no fade' ((IsFocused (GridDay 'Friday, July 28')) -and (Shows 'July 2023' 31 'Friday, July 28')) "focused: $($AE::FocusedElement.Current.Name)"
+        Key '{ENTER}' 400
+        Check 'Enter selects July 28' ([bool](WaitForText 'DateTimeGrid ionChange: 2023-07-28T13:47:00' 3)) (FirstText '*ionChange*')
+
+        SetGrid $false
+        Check 'the toggle off brings back the scrolled months, at July' ((GridDays).Count -gt 80 -and (GridDay 'Saturday, July 15')) (Seen)
+        Away
+    }
+
     # ion-datetime-button (#79): every datetime on the page has its value and its locale (en-US) pinned, and each button's text
     # differs, so each is found by its accessible name, its text: "Jun 15, 2023" and "1:47 PM" for the modal's datetime, "Jul 4, 2023"
     # for the popover's. A click on the date button opens the modal with a calendar only (no time button inside), its days named as

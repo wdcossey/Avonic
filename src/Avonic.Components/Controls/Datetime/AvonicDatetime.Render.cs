@@ -54,8 +54,8 @@ public partial class AvonicDatetime
 
     internal AvonicPopover? TimePopover => _timePopover;
 
-    /// <summary>Ionic's <c>datetime-ready</c> for the grid: the calendar is laid out, so it can scroll.</summary>
-    private bool IsCalendarReady => _calendarBody is { Viewport.Width: > 0 } && IsEffectivelyVisible;
+    /// <summary>Ionic's <c>datetime-ready</c> for the grid: the calendar is laid out, so it can scroll (or, as a single grid, fade).</summary>
+    private bool IsCalendarReady => UsesSingleGrid ? IsGridReady : _calendarBody is { Viewport.Width: > 0 } && IsEffectivelyVisible;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -72,6 +72,7 @@ public partial class AvonicDatetime
         _daysOfWeek = scope.Find<Panel>("PART_CalendarDaysOfWeek");
         _calendarBody = scope.Find<ScrollViewer>("PART_CalendarBody");
         _calendarMonths = scope.Find<DatetimeCalendarBodyPanel>("PART_CalendarMonths");
+        AttachGrid(scope.Find<DatetimeCalendarMonth>("PART_CalendarGrid"));
         _monthYearWheel = scope.Find<AvonicPicker>("PART_MonthYearWheel");
         _timeButton = scope.Find<Button>("PART_TimeButton");
         _timeText = scope.Find<TextBlock>("PART_TimeText");
@@ -134,14 +135,6 @@ public partial class AvonicDatetime
         if (_calendarMonths is not null)
         {
             _calendarMonths.Owner = this;
-            foreach (var month in _calendarMonths.Months)
-            {
-                foreach (var day in month.Days)
-                {
-                    day.Click -= OnDayClick;
-                    day.Click += OnDayClick;
-                }
-            }
         }
 
         _wheelVariables?.Dispose();
@@ -240,6 +233,7 @@ public partial class AvonicDatetime
 
         _smooth?.Stop();
         _smooth = null;
+        DetachGrid();
     }
 
     /// <summary>
@@ -345,6 +339,7 @@ public partial class AvonicDatetime
         classes.Set(":show-month-and-year", _showMonthAndYear || IsMonthAndYearPresentation);
         classes.Set(":month-year-picker-open", _showMonthAndYear && !IsMonthAndYearPresentation);
         classes.Set(":readonly", Readonly);
+        classes.Set(":calendar-single-grid", UsesSingleGrid);
 
         var hasHeader = TitleContent is not null || ShowDefaultTitle;
         classes.Set(":has-header", hasHeader);
@@ -428,9 +423,29 @@ public partial class AvonicDatetime
             }
         }
 
+        if (UsesSingleGrid)
+        {
+            // The working month only: a forced one is shown when the fade reaches it (SwapGridMonth).
+            if (_calendarGrid!.EnsureDays())
+            {
+                HearDayClicks(_calendarGrid);
+            }
+
+            RenderMonth(culture, _calendarGrid, _working.Month!.Value, _working.Year!.Value);
+            return;
+        }
+
         if (_calendarMonths is null)
         {
             return;
+        }
+
+        if (_calendarMonths.EnsureMonths())
+        {
+            foreach (var month in _calendarMonths.Months)
+            {
+                HearDayClicks(month);
+            }
         }
 
         var months = DatetimeUtils.GenerateMonths(_working, _forceRenderDate);
@@ -441,6 +456,15 @@ public partial class AvonicDatetime
         }
 
         _calendarMonths.SetSnapPages(pageEnabled);
+    }
+
+    private void HearDayClicks(DatetimeCalendarMonth month)
+    {
+        foreach (var day in month.Days)
+        {
+            day.Click -= OnDayClick;
+            day.Click += OnDayClick;
+        }
     }
 
     /// <summary>Ionic's <c>renderMonth</c>. True when the month can be swiped to.</summary>
@@ -568,6 +592,7 @@ public partial class AvonicDatetime
 
     private void OnMonthYearClick(object? sender, RoutedEventArgs e)
     {
+        CancelGridChange();
         _showMonthAndYear = !_showMonthAndYear;
         Render();
     }
@@ -579,6 +604,12 @@ public partial class AvonicDatetime
     /// <summary>Ionic's <c>nextMonth</c>: a smooth scroll to the last month, at once when <see cref="AvonicConfig.Animated"/> is off.</summary>
     internal void NextMonth()
     {
+        if (UsesSingleGrid)
+        {
+            ChangeGridMonth(next: true);
+            return;
+        }
+
         if (_calendarBody is null || _smooth is null)
         {
             ResolveForcedWithoutScroll();
@@ -591,6 +622,12 @@ public partial class AvonicDatetime
     /// <summary>Ionic's <c>prevMonth</c>.</summary>
     internal void PrevMonth()
     {
+        if (UsesSingleGrid)
+        {
+            ChangeGridMonth(next: false);
+            return;
+        }
+
         if (_calendarBody is null || _smooth is null)
         {
             ResolveForcedWithoutScroll();
@@ -677,8 +714,7 @@ public partial class AvonicDatetime
             next = atStart ? DatetimeUtils.GetPreviousMonth(_working) : DatetimeUtils.GetNextMonth(_working);
         }
 
-        if (DatetimeUtils.IsMonthDisabled(new DatetimeParts(next.Month, null, next.Year),
-                _minParts is { } lo ? lo with { Day = null } : null, _maxParts is { } hi ? hi with { Day = null } : null))
+        if (IsMonthOutOfRange(next))
         {
             return;
         }
@@ -695,6 +731,11 @@ public partial class AvonicDatetime
         }
     }
 
+    /// <summary>Whether the month of <paramref name="parts"/> is outside <see cref="Min"/> and <see cref="Max"/>, by month: one a change can't settle on.</summary>
+    private bool IsMonthOutOfRange(DatetimeParts parts) =>
+        DatetimeUtils.IsMonthDisabled(new DatetimeParts(parts.Month, null, parts.Year),
+            _minParts is { } lo ? lo with { Day = null } : null, _maxParts is { } hi ? hi with { Day = null } : null);
+
     // ── The keyboard ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -703,21 +744,22 @@ public partial class AvonicDatetime
     /// </summary>
     private void OnCalendarFocus(object? sender, FocusChangedEventArgs e)
     {
-        if (e.Source == _calendarBody && e.NavigationMethod == NavigationMethod.Tab)
+        if (e.Source == sender && e.NavigationMethod == NavigationMethod.Tab)
         {
             FocusWorkingDay();
         }
     }
 
-    /// <summary>Ionic's <c>focusWorkingDay</c>: the working day of the middle month.</summary>
+    /// <summary>Ionic's <c>focusWorkingDay</c>: the working day of the middle month, or of the single grid.</summary>
     internal void FocusWorkingDay()
     {
-        if (_calendarMonths is null || _working.Day is null)
+        var month = UsesSingleGrid ? _calendarGrid : _calendarMonths?.Months.ElementAtOrDefault(1);
+        if (month is null || _working.Day is null)
         {
             return;
         }
 
-        var day = _calendarMonths.Months[1].Days.FirstOrDefault(d => d.IsVisible && !d.IsPadding && !d.IsAdjacent && d.Parts.Day == _working.Day);
+        var day = month.Days.FirstOrDefault(d => d.IsVisible && !d.IsPadding && !d.IsAdjacent && d.Parts.Day == _working.Day);
         day?.Focus(NavigationMethod.Directional);
     }
 
@@ -729,7 +771,26 @@ public partial class AvonicDatetime
             return;
         }
 
-        var parts = day.Parts;
+        if (e.Key is Key.Enter or Key.Space && GridKeyTarget is not null)
+        {
+            // Not Ionic's: during a key's fade the day chosen is the key's, not the one fading out with the focus (README,
+            // Extensions). The month is drawn now and the key's day focused; Enter clicks it here, as a button clicks on Enter's
+            // press, and Space's release clicks it, as a button clicks on Space's release, once it has the focus. Handled, so the day
+            // fading out isn't pressed.
+            e.Handled = true;
+            FinishGridChange();
+            if (e.Key == Key.Enter)
+            {
+                if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay chosen && chosen.FindAncestorOfType<AvonicDatetime>() == this)
+                {
+                    chosen.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                }
+            }
+
+            return;
+        }
+
+        var parts = GridKeyTarget ?? day.Parts;
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         DatetimeParts? target = e.Key switch
         {
@@ -751,6 +812,12 @@ public partial class AvonicDatetime
 
         e.Handled = true;
         if (DatetimeUtils.IsDayDisabled(to, _minParts, _maxParts))
+        {
+            return;
+        }
+
+        // Not Ionic's: the single grid fades to another month (README, Extensions); the scrolled calendar draws it at once.
+        if (UsesSingleGrid && ChangeGridMonthByKey(to))
         {
             return;
         }

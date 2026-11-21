@@ -244,3 +244,16 @@ settling after the transition (a ripple finishing on the item that was pressed, 
 follows), so a walk can meet a provider mid-change. The nav section retries a failing `FindAll` once and prints that it did; nothing
 else changes. Worth a minimal repro with a plain `Panel` whose child is removed while a client walks, before reporting.
 
+
+## A `DynamicResource` brush in a template's own `Resources` keeps its control alive
+
+**Measured headless, and the mechanism not read.** `ion-datetime`'s previous and next buttons took their colour from
+`<c:AvonicButtons.Resources><SolidColorBrush x:Key="Avonic.Button.Color" Color="{DynamicResource Avonic.TextColorStep350}" /></c:AvonicButtons.Resources>`
+inside the datetime's `ControlTemplate`. Once the buttons were drawn, the datetime, and the page it was on, stayed alive after it
+left the window and a full collection, for as long as the theme was installed; with the window closed and the theme removed, it went.
+So the brush's `DynamicResource` seems to resolve through the theme's dictionary, the parent the template was loaded in, and that
+holds each brush the template makes, and through it whatever draws with it. A `StaticResource` of the top-level brush instead
+(`<StaticResource x:Key="Avonic.Button.Color" ResourceKey="Avonic.TextColorStep350Brush" />`) leaks nothing and draws the same,
+pixel for pixel (#258; `AvonicDatetimeSingleGridTests.A_Datetime_That_Drew_Its_Calendar_Is_Collected_Once_Left` and
+`PageCostTests.A_Timed_Page_Is_Collected_Once_Left_And_Leaves_No_Frame_Or_Timer` fail with the old form). CLAUDE.md's mapping already asks for
+`StaticResource`s of top-level brushes in a nested dictionary, for a different reason.

@@ -1,8 +1,11 @@
+using Avonic.Components.Controls;
+
 namespace Avonic.Sample.Diagnostics;
 
 /// <summary>
 /// The pages a <c>-p:AvonicPerf=true</c> build opens in each round: every sample page but the device page, whose benchmark is its
-/// own, then the perf-only <see cref="DatetimeCostView"/>s, which the sample's list doesn't show. A filter, from
+/// own, then the perf-only <see cref="DatetimeCostView"/>s, which the sample's list doesn't show: Ionic's scrolled calendar, then
+/// the same in <see cref="DatetimeCalendarRendering.SingleGrid"/> (<c>-grid</c>), so that one run compares them. A filter, from
 /// <see cref="OnlyVariable"/> on desktop or the intent extra of the same name on Android, keeps a part of them.
 /// docs/infra/performance/README.md, "Page costs on a device".
 /// </summary>
@@ -17,6 +20,19 @@ public static class PageCostSet
     /// <summary>The page whose month changes are timed, after its open: the one with a single datetime.</summary>
     public static string MonthChangePage { get; } = DatetimeCostView.Title(1);
 
+    /// <summary>The single grid's page whose month changes are timed: the one with a single datetime.</summary>
+    public static string GridMonthChangePage { get; } = DatetimeCostView.Title(1, DatetimeCalendarRendering.SingleGrid);
+
+    /// <summary>The label of the scrolled calendar's month-change lines, as the baseline has it.</summary>
+    public const string MonthChangeLabel = "datetime-month";
+
+    /// <summary>The label of the single grid's month-change lines.</summary>
+    public const string GridMonthChangeLabel = "datetime-month-grid";
+
+    /// <summary>The label of the month changes timed on a page, or null for a page whose month changes aren't timed.</summary>
+    public static string? MonthChangeLabelOf(string title) =>
+        title == MonthChangePage ? MonthChangeLabel : title == GridMonthChangePage ? GridMonthChangeLabel : null;
+
     /// <summary>
     /// The pages to open, in order. <paramref name="only"/> is a list of terms split by commas or spaces: a page is kept when its
     /// title contains any of them, ignoring case, or, for a term that starts with <c>=</c>, is the rest of it. Empty or null keeps
@@ -26,7 +42,10 @@ public static class PageCostSet
     {
         var all = samplePages
             .Where(page => page.Title != "device")
-            .Concat(DatetimeCounts.Select(count => new SamplePageEntry(DatetimeCostView.Title(count), () => new DatetimeCostView(count))));
+            .Concat(DatetimeCounts.Select(count => new SamplePageEntry(DatetimeCostView.Title(count), () => new DatetimeCostView(count))))
+            .Concat(DatetimeCounts.Select(count => new SamplePageEntry(
+                DatetimeCostView.Title(count, DatetimeCalendarRendering.SingleGrid),
+                () => new DatetimeCostView(count, DatetimeCalendarRendering.SingleGrid))));
         var terms = Terms(only);
         return terms.Length == 0
             ? [.. all]

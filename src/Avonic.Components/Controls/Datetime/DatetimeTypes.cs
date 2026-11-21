@@ -24,6 +24,24 @@ public enum DatetimeSize
     Fixed,
 }
 
+/// <summary>
+/// Not Ionic's: how the calendar of a grid presentation draws its months, <see cref="AvonicDatetime.CalendarRendering"/>.
+/// </summary>
+public enum DatetimeCalendarRendering
+{
+    /// <summary>
+    /// Ionic's: the previous, current and next months side by side in a scroller that snaps, which a change of month scrolls and a
+    /// swipe drags (126 days).
+    /// </summary>
+    ScrolledMonths,
+
+    /// <summary>
+    /// One month of 42 days, drawn again in place when the month changes: the days fade out and in (none with
+    /// <see cref="AvonicConfig.Animated"/> off), and a swipe past a threshold changes the month without following the finger.
+    /// </summary>
+    SingleGrid,
+}
+
 /// <summary>Ionic <c>hourCycle</c>, and Intl's: <c>h11</c> is 0 to 11, <c>h12</c> 1 to 12, <c>h23</c> 0 to 23, <c>h24</c> 1 to 24.</summary>
 public enum DatetimeHourCycle
 {

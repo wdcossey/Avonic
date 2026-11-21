@@ -72,6 +72,9 @@
                         <ScrollViewer Name="PART_CalendarBody" Grid.Row="1" Theme="{StaticResource Avonic.Datetime.CalendarBodyStub}">
                             <c:DatetimeCalendarBodyPanel Name="PART_CalendarMonths" />
                         </ScrollViewer>
+                        <!-- Not Ionic's: CalendarRendering="SingleGrid", one month of days drawn again in place, its days made only then. -->
+                        <c:DatetimeCalendarMonth Name="PART_CalendarGrid" Grid.Row="1" IsVisible="False" Background="Transparent"
+                                                 Focusable="True" IsTabStop="True" />
                     </Grid>
                     <c:AvonicPicker Name="PART_MonthYearWheel" Grid.Row="3" IsVisible="False" />
                     <Grid Name="PART_Time" Grid.Row="4" ColumnDefinitions="*,Auto" IsVisible="False">
@@ -146,6 +149,14 @@
         <Style Selector="^:has-clear-button /template/ c|AvonicButton#PART_ClearButton">
             <Setter Property="IsVisible" Value="True" />
         </Style>
+        <!-- CalendarRendering="SingleGrid": the grid in place of the scroller, and hidden as it is while the month/year wheel shows. -->
+        <Style Selector="^:calendar-single-grid /template/ ScrollViewer#PART_CalendarBody">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:calendar-single-grid /template/ c|DatetimeCalendarMonth#PART_CalendarGrid">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
         <Style Selector="^:show-month-and-year /template/ c|AvonicButtons#PART_NavButtons">
             <Setter Property="IsVisible" Value="False" />
         </Style>
@@ -153,6 +164,9 @@
             <Setter Property="IsVisible" Value="False" />
         </Style>
         <Style Selector="^:show-month-and-year /template/ ScrollViewer#PART_CalendarBody">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:show-month-and-year /template/ c|DatetimeCalendarMonth#PART_CalendarGrid">
             <Setter Property="IsVisible" Value="False" />
         </Style>
         <Style Selector="^:show-month-and-year /template/ Grid#PART_Time">

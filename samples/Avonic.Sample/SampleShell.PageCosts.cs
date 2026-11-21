@@ -14,8 +14,8 @@ namespace Avonic.Sample;
 /// <summary>
 /// A build with <c>-p:AvonicPerf=true</c> (with <c>-c Release</c>, the build an app ships) opens every page by itself, a few rounds,
 /// and writes each page's cost line, prefixed <c>AVONIC-PERF</c>, to the console: logcat's <c>DOTNET</c> tag on Android. The pages
-/// are <see cref="PageCostSet"/>'s: the sample's, and perf-only pages of 1, 2 and 4 datetimes, on the first of which the month
-/// changes are timed too (<see cref="MonthChangeTiming"/>). With <c>AVONIC_PERF_ONLY</c> set (on Android, the intent extra of that
+/// are <see cref="PageCostSet"/>'s: the sample's, and perf-only pages of 1, 2 and 4 datetimes, scrolled and as a single grid, on the
+/// first of each of which the month changes are timed too (<see cref="MonthChangeTiming"/>). With <c>AVONIC_PERF_ONLY</c> set (on Android, the intent extra of that
 /// name, which the head copies into <see cref="PageCostsOnly"/>) only the pages it names. With <c>AVONIC_PERF_OUT</c> set, it also
 /// appends the lines to that file, and with <c>AVONIC_PERF_EXIT=1</c> a desktop app closes after.
 /// docs/infra/performance/README.md, "Page costs on a device".
@@ -27,10 +27,13 @@ public partial class SampleShell
     /// <summary>Changes of month timed each round, forward and then back.</summary>
     private const int MonthChanges = 10;
 
-    private const string MonthChangeLabel = "datetime-month";
-
     private static bool _pageCostsStarted;
+    private static bool _pageCostsRunning;
     private TaskCompletionSource<string>? _pendingReport;
+
+    // The open's counters, for DeviceProbe's figures on its line.
+    private DeviceProbe.Snapshot _openBefore;
+    private DeviceProbe.LayoutPasses? _openPasses;
 
     /// <summary>
     /// Which pages the rounds open (<see cref="PageCostSet.Select"/>): <c>AVONIC_PERF_ONLY</c>, or what an Android head sets from
@@ -44,10 +47,35 @@ public partial class SampleShell
     /// </summary>
     public static Func<string>? PageCostsPlatform { get; set; }
 
+    /// <summary>
+    /// What a head knows of whether the app is in front, which a run needs: null when it is, else what isn't (the screen off, the
+    /// keyguard, the activity paused). With <see cref="PerfChecks.Cpuset"/>, each round's check says it, and warns.
+    /// </summary>
+    public static Func<string?>? PageCostsForeground { get; set; }
+
     partial void Reported(string line)
     {
+        if (_openPasses is { } passes)
+        {
+            _openPasses = null;
+            passes.Dispose();
+            line += DeviceProbe.PageExtras(_openBefore, passes.Count, TopLevel.GetTopLevel(this));
+        }
+
         Write(line);
         _pendingReport?.TrySetResult(line);
+    }
+
+    /// <summary>
+    /// A line for what took the page away from the rounds, a back request or the activity, while they run: the baseline's round 1
+    /// lost its calendar in the middle of a change ("the calendar left the tree"), and nothing in the rounds says why.
+    /// </summary>
+    partial void PageCostsNote(string what)
+    {
+        if (_pageCostsRunning)
+        {
+            Write($"note: {what}");
+        }
     }
 
     partial void StartPageCosts()
@@ -83,6 +111,28 @@ public partial class SampleShell
 
         // Past the first frames and the start-up work.
         await Task.Delay(TimeSpan.FromSeconds(3));
+        _pageCostsRunning = true;
+        try
+        {
+            await RunRounds(pages);
+        }
+        finally
+        {
+            _pageCostsRunning = false;
+        }
+
+        _pendingReport = null;
+        Write("done");
+        if (Environment.GetEnvironmentVariable("AVONIC_PERF_EXIT") == "1"
+            && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+
+    /// <summary>The rounds: each page opened and left, and the month changes on their pages.</summary>
+    private async Task RunRounds(IReadOnlyList<SamplePageEntry> pages)
+    {
         for (var round = 1; round <= PageCostRounds && pages.Count > 0; round++)
         {
             foreach (var (title, create) in pages)
@@ -91,6 +141,9 @@ public partial class SampleShell
                 Control? page;
                 try
                 {
+                    _openPasses?.Dispose();
+                    _openPasses = new DeviceProbe.LayoutPasses(TopLevel.GetTopLevel(this));
+                    _openBefore = DeviceProbe.Snapshot.Take();
                     BeginTiming();
                     page = create();
                     ShowPage(title, page);
@@ -109,27 +162,31 @@ public partial class SampleShell
 
                 // Let it draw, then back to the list, as a user would go.
                 await Task.Delay(400);
-                if (title != PageCostSet.MonthChangePage)
+                if (PageCostSet.MonthChangeLabelOf(title) is not { } label)
                 {
+                    var left = new WeakReference(page);
                     page = null;
                     ShowIndex();
                     await Task.Delay(400);
+                    Write(await DeviceProbe.Busy($"{title}: round {round}, after", TopLevel.GetTopLevel(this), left));
                     continue;
                 }
 
                 // The month changes, then what they may have left behind, once their page is gone: a frame loop, the page itself,
                 // or no idle time.
                 var before = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                await TimeMonthChanges(page, round);
+                await TimeMonthChanges(page, round, label);
                 var timed = new WeakReference(page);
                 page = null;
                 ShowIndex();
                 await Task.Delay(400);
                 var after = await PerfChecks.BackgroundPostMs(TimeSpan.FromSeconds(10));
-                foreach (var line in PerfChecks.Lines(MonthChangeLabel, round, MonthChangeTiming.PendingFrames, PerfChecks.Collected(timed), before, after, Platform()))
+                foreach (var line in PerfChecks.Lines(label, round, MonthChangeTiming.PendingFrames, await PerfChecks.CollectedAsync(timed), before, after, Platform(), PerfChecks.Cpuset(), NotInFront()))
                 {
                     Write(line);
                 }
+
+                Write(await DeviceProbe.Busy($"{label}: round {round}, after", TopLevel.GetTopLevel(this), timed));
 
                 // Past the collections, before the next page's timing.
                 await Task.Delay(400);
@@ -137,28 +194,32 @@ public partial class SampleShell
 
             Write($"round {round} done");
         }
-
-        _pendingReport = null;
-        Write("done");
-        if (Environment.GetEnvironmentVariable("AVONIC_PERF_EXIT") == "1"
-            && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
-        }
     }
 
     /// <summary>Ten months forward and ten back on the page's datetime, each change a line, then the round's.</summary>
-    private static async Task TimeMonthChanges(Control page, int round)
+    private static async Task TimeMonthChanges(Control page, int round, string label)
     {
         try
         {
             var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().First();
-            var changes = await new MonthChangeTiming(datetime).Run(MonthChanges, MonthChanges, change => Write(change.Line(MonthChangeLabel, round)));
-            Write(MonthChangeTiming.Summary(MonthChangeLabel, round, changes));
+            var changes = await new MonthChangeTiming(datetime).Run(MonthChanges, MonthChanges, change => Write(change.Line(label, round)));
+            Write(MonthChangeTiming.Summary(label, round, changes));
         }
         catch (Exception ex)
         {
-            Write($"{MonthChangeLabel}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+            Write($"{label}: round {round}, failed: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    private static string? NotInFront()
+    {
+        try
+        {
+            return PageCostsForeground?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            return $"foreground unknown: {ex.GetType().Name}";
         }
     }
 

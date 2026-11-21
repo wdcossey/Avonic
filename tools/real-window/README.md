@@ -103,7 +103,14 @@ once if the window doesn't fit on the screen.
     down from the header, held still before the lift, settles at 0.25; a mouse drag up takes it to 1; a fast finger drag down
     closes it with `gesture`. Each breakpoint read from the page's `The sheet is at` line, and the sheet's top from its title, within
     12 dips of where the breakpoint puts it. Run in the full sweep on `4383769`.
-- **318 checks** in 31 sections run on v2 `4383769` (2026-11-18), all 318 passing; no section added since.
+  - `ion-datetime: the single grid` (#248, #258), not Ionic's: the page's toggle draws the first datetime as one grid
+    (`CalendarRendering="SingleGrid"`), checked by its heading (the text under the month-year button) and by its days, counted between
+    the heading and its time button: 30 for June, where the scrolled calendar has about 91. Next and Previous fade to July and back
+    (a frame and a pixel note about 60 ms in); a touch swipe left goes to August and a mouse drag right back to July; a short slow
+    drag changes nothing, and no swipe selects a day; a click on July 3, then PageDown to August 3 and Up to July 27, each faded with
+    the key's day focused after; the focused day's ring by pixel, Right within the month, Enter selecting July 28; and the toggle off
+    bringing back the scrolled months on July. Frames: `datetime-grid`, `-fading`, `-swiped`, `-key`. **Not yet run.**
+- **318 checks** in 31 sections run on v2 `4383769` (2026-11-18), all 318 passing; the single grid's section added since, not yet run.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 

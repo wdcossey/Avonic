@@ -92,6 +92,13 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 
+## Follow-ups
+
+- **`ion-datetime`'s single grid: the fade and the swipe settable in `AvonicConfig`** (#248, [#258](https://github.com/wdcossey/Avonic/pull/258)).
+  `DatetimeCalendarRendering.SingleGrid`'s fade is md's fade through, 90 ms out and 210 ms in, and its swipe changes the month past
+  50 px or a flick of 20 px at 0.3 px/ms, all constants in `AvonicDatetime.SingleGrid.cs`. Make the two durations and the swipe's
+  distance (and the flick's) static properties of `AvonicConfig`, read when a change starts, with today's values as their defaults.
+
 ## After the tiers
 
 **A Material 3 theme** (`Avonic.Themes.Material3`), as a second theme over the same components. On hold until P3 and P4 are

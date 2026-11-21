@@ -9,7 +9,8 @@ namespace Avonic.Sample.Diagnostics;
 /// of one datetime, where the sample's own page mixes eight kinds. It has no <see cref="SamplePageAttribute"/>, so the sample's list
 /// doesn't show it, and it's a view, not a <c>...Page</c>, as every type so named must have one. Each is the default presentation,
 /// a calendar and a time, with its value and locale pinned, so that every run shows the same month, June 2023, and no today ring.
-/// docs/infra/performance/README.md, "Page costs on a device".
+/// The <c>-grid</c> pages (<c>datetime-x1-grid</c> and so on) are the same datetimes in <see cref="DatetimeCalendarRendering.SingleGrid"/>,
+/// to compare with (#248, spike A). docs/infra/performance/README.md, "Page costs on a device".
 /// </summary>
 public sealed class DatetimeCostView : UserControl
 {
@@ -19,14 +20,21 @@ public sealed class DatetimeCostView : UserControl
     /// <summary>The locale each datetime shows, so that its month names read the same on any device.</summary>
     public const string PinnedLocale = "en-US";
 
-    public DatetimeCostView(int count)
+    public DatetimeCostView(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
         Count = count;
+        Rendering = rendering;
         var stack = new StackPanel { Spacing = 16, Margin = new Thickness(16) };
         for (var i = 0; i < count; i++)
         {
-            stack.Children.Add(new AvonicDatetime { Value = PinnedValue, Locale = PinnedLocale });
+            var datetime = new AvonicDatetime { Value = PinnedValue, Locale = PinnedLocale };
+            if (rendering != DatetimeCalendarRendering.ScrolledMonths)
+            {
+                datetime.CalendarRendering = rendering;
+            }
+
+            stack.Children.Add(datetime);
         }
 
         // As the sample's page is laid out: a scroller, 16 in, 16 between.
@@ -36,6 +44,13 @@ public sealed class DatetimeCostView : UserControl
     /// <summary>How many datetimes it holds.</summary>
     public int Count { get; }
 
-    /// <summary>The page's title in the page-cost lines: <c>datetime-x1</c> and so on.</summary>
-    public static string Title(int count) => $"datetime-x{count}";
+    /// <summary>How each draws its calendar.</summary>
+    public DatetimeCalendarRendering Rendering { get; }
+
+    /// <summary>
+    /// The page's title in the page-cost lines: <c>datetime-x1</c> and so on, and <c>datetime-x1-grid</c> and so on for
+    /// <see cref="DatetimeCalendarRendering.SingleGrid"/>.
+    /// </summary>
+    public static string Title(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths) =>
+        rendering == DatetimeCalendarRendering.SingleGrid ? $"datetime-x{count}-grid" : $"datetime-x{count}";
 }
