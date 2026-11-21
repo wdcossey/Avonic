@@ -443,7 +443,7 @@ public partial class AvonicDatetime
             return;
         }
 
-        if (_calendarMonths.EnsureMonths(withNeighbours: _neighbourMonths == DatetimeNeighbourMonths.AtOnce))
+        if (_calendarMonths.EnsureMonths())
         {
             foreach (var month in _calendarMonths.Months)
             {

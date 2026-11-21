@@ -163,10 +163,7 @@ After the sample's pages, each round opens three pages that only this build has 
 cost of one datetime (#248): `datetime-x1`, `datetime-x2` and `datetime-x4`, with 1, 2 and 4 plain `AvonicDatetime`s
 (`Diagnostics/DatetimeCostView.cs`), the default calendar and time, with `Locale="en-US"` and `Value="2023-06-15T13:47:00"`
 pinned, so that every run shows June 2023. Then the same three as single grids (`CalendarRendering="SingleGrid"`, #248's spike
-A): `datetime-x1-grid`, `datetime-x2-grid` and `datetime-x4-grid`. Then the scrolled three again with the months either side of the
-working one made at once, as before #248's spike B, and only when needed (`-eager` and `-press`, [below](#the-months-either-side)),
-against the default pages', made a few frames after the first; and `datetime-x1-idle`, the default named, for its swipes. The
-sample's own list doesn't show them.
+A): `datetime-x1-grid`, `datetime-x2-grid` and `datetime-x4-grid`. The sample's own list doesn't show them.
 
 ```
 dotnet build samples/Avonic.Sample.Android -c Release -p:AvonicPerf=true
@@ -205,9 +202,9 @@ screen off, the keyguard locked or the activity paused; any of those, or a cpuse
 
 `AVONIC_PERF_ONLY` keeps the pages whose titles hold any of its terms, split by commas or spaces, ignoring case; a term
 that starts with `=` keeps only the page of that title (`=ion-datetime`, without `ion-datetime-button`). Unset, every page
-opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the thirteen above,
-about two minutes on the phone, most of it the month changes and the swipes; `datetime-x` only the thirteen; `datetime-x1` only the five
-with the month changes or the swipes. `-grid` keeps the grid pages and `ion-grid`. Use commas, not spaces, through `adb shell`, which splits its arguments again.
+opens. The run's second line says which it kept. `datetime` keeps `ion-datetime`, `ion-datetime-button` and the six above,
+about a minute and a half on the phone, most of it the month changes; `datetime-x` only the six; `datetime-x1` only the two
+with the month changes. `-grid` keeps the grid pages and `ion-grid`. Use commas, not spaces, through `adb shell`, which splits its arguments again.
 
 On desktop it's the environment variable (`$env:AVONIC_PERF_ONLY = "datetime"`, and `Remove-Item Env:AVONIC_PERF_ONLY` for
 every page again). On Android it's an intent extra of the same name, which `MainActivity` reads before the shell starts:
@@ -331,50 +328,35 @@ group (`AnimationGroupOpacity`); making it and the swipe's threshold settable is
 
 ### The months either side
 
-#248's spike B keeps Ionic's scrolled calendar and makes less of it up front: only the working month's 42 days at the first layout,
-and the months either side's when first needed, or a few frames after the first (`docs/components/ion-datetime/COMPARISON.md`, "The
-months either side, made later"). Three variants were built, each a value of an internal switch, which the perf pages pick through the
-`AppContext` data `Avonic.Datetime.NeighbourMonths` (a measuring switch, not an API):
+#248's spike B ([#259](https://github.com/wdcossey/Avonic/pull/259)) keeps Ionic's scrolled calendar and makes less of it up front:
+only the working month's 42 days at the first layout, and the months either side's before they can be seen (a touch or a pen on the
+calendar, the next or previous month, a value in another month, an offset toward one) and in any case after the calendar's first two
+frames, two weeks of days a frame, one datetime at a time (`docs/components/ion-datetime/COMPARISON.md`, "The months either side,
+made later"). It's the scrolled calendar itself, with no option: nothing on screen differs from Ionic's.
 
-- **`AtOnce`**: as Ionic, and as before: all three months at the first layout (the `-eager` pages).
-- **`WhenNeeded`**: the months either side only when needed: a touch or a pen pressed on the calendar, a scroll toward one, the next or previous
-  month, a value in another month (the `-press` pages).
-- **`AfterFirstFrame`**, the default: as `WhenNeeded`, and in any case after the calendar's first two frames, two weeks of days a
-  frame, the next month then the previous, one datetime at a time (the plain pages).
+Two variants were measured against Ionic's three months at once (`-eager`): **variant 1** made the months either side only when
+needed (`-press`), **variant 2** also after the first frames (`-idle`, and the plain pages), each with a timed first swipe after
+opening (a touch pressed on the scroller, its offset moved a month over 12 frames, then lifted). On the Pixel 8, Release, the screen
+kept on, every round `/top-app` and every page collected (`page-costs/2026-11-21-pixel8-release-datetime-spike-b-e1f2a5b.txt`,
+rounds 2 and 3):
 
-Headless, Release, the real clock and frames, 390x844 at 2x, median of 10 rounds alternating the variants, two dropped
-(`DatetimeNeighbourCostBenchmark`, `AVONIC_DATETIME_COST=/absolute/path.md dotnet test tests/Avonic.Components.Tests -c Release
---filter FullyQualifiedName~DatetimeNeighbourCostBenchmark`). A sanity check: the desktop skews it, and the Pixel decides.
+| | Ionic's, at once | Variant 1, when needed | Variant 2, kept | Single grid |
+|---|---:|---:|---:|---:|
+| `datetime-x1`, `-x2`, `-x4` to open | 149, 254, 502 ms | 53, 121, 204 ms | 63, 162, 224 ms | 57, 157, 228 ms |
+| First swipe: first frame drawn, median | 34 ms | 90 ms (most 149) | 38 ms | |
+| First swipe: longest gap, median | 23 ms | 60 ms (most 103) | 29 ms | |
 
-| Variant | Datetimes | Elements | Open | Longest frame of the 40 after | First press on a calendar |
-|---|---:|---:|---:|---:|---:|
-| `AtOnce` | 1 | 725 | 29.3 ms | 8.6 ms | 0.1 ms |
-| `WhenNeeded` | 1 | 296 | 13.7 ms | 7.2 ms | 16.7 ms |
-| `AfterFirstFrame` | 1 | 296 | 13.3 ms | 8.7 ms | 0.0 ms |
-| `AtOnce` | 2 | 1442 | 59.2 ms | 10.4 ms | 0.1 ms |
-| `WhenNeeded` | 2 | 584 | 27.1 ms | 8.5 ms | 19.9 ms |
-| `AfterFirstFrame` | 2 | 584 | 25.8 ms | 25.5 ms | 0.0 ms |
-| `AtOnce` | 4 | 2891 | 146.0 ms | 49.2 ms | 0.1 ms |
-| `WhenNeeded` | 4 | 1175 | 51.9 ms | 12.0 ms | 42.2 ms |
-| `AfterFirstFrame` | 4 | 1175 | 54.1 ms | 33.8 ms | 0.0 ms |
+- **Opening costs 36 to 58% less** than Ionic's three months, about the single grid's, with Ionic's behaviour kept.
+- **Variant 1 is cheapest to open but hitches the first swipe**: the finger's first frame comes 90 ms after it lands, as the press
+  makes both months. **Variant 2 keeps the first swipe as Ionic's** (38 against 34 ms) for a few more milliseconds at the open. So
+  variant 2 is kept.
+- **The month changes are as before** (`datetime-month`: first frame 12 ms, heading 389 ms), as the months are made by then.
+- **One frame of 36 to 40 ms** shows in `datetime-x4`'s busy window after its open in rounds 2 and 3, the four calendars' parts; `x1`
+  and `x2` stay at about 16 ms.
 
-- **Opening costs less than half** with either deferred variant: the two months either side were 429 of the page's 725 elements.
-- **`WhenNeeded` moves the cost to the first press**, 17 ms for one calendar headless, about five times that on the phone going by
-  the opens: a hitch just as the finger lands, before its first move is drawn.
-- **`AfterFirstFrame` spreads it over the frames after**: each of its frames costs 2 to 5 ms headless (two weeks of days), after the
-  page's first two frames, which cost 7 to 15 ms in every variant. The longest frames above (25 and 34 ms for 2 and 4 datetimes) come
-  in the same frame of each round, and are most likely a collection; one calendar's six frames have none. The total work is the
-  same as before, but no frame carries much of it, and the first press finds the months made.
-
-**Kept: `AfterFirstFrame`**, with `WhenNeeded`'s triggers, which every variant has, for whatever comes first. Nothing a user sees
-differs from Ionic's, so it's the scrolled calendar itself, not a third `CalendarRendering`.
-
-**On the phone**, each round of a `datetime` run now also times a swipe on `datetime-x1-eager`, `-press` and `-idle` (not the plain
-`datetime-x1`, whose month changes are timed as in the runs kept before):
-`MonthChangeTiming` with `bySwipe`, a touch pressed on the calendar's scroller, its offset moved a month over 12 frames from the
-frames' callbacks, as a finger's moves come, then lifted, and once back. Its lines are the month changes' (`table.js` reads them),
-labelled `datetime-swipe-idle` (the default), `datetime-swipe-eager` and `datetime-swipe-press`: the first swipe's `first` and longest
-gap show what the press cost. `-e AVONIC_PERF_ONLY datetime-x` runs the thirteen pages with the swipes and both pages' month changes.
+The comparison pages (`-eager`, `-press`, `-idle`), their swipe timings, the switch that picked a variant and the headless benchmark
+were removed once this run had decided; the file keeps their numbers. Headless, the same ranking held: x1 opened in 29 ms at once, 13
+ms either way deferred, the first press cost 17 ms in variant 1 and nothing in variant 2, whose parts cost 2 to 5 ms a frame.
 
 ### Keeping a run
 

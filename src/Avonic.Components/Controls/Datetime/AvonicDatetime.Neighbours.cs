@@ -4,50 +4,22 @@ using Avalonia.Input;
 namespace Avonic.Components.Controls;
 
 /// <summary>
-/// When the scrolled calendar makes the days of the months either side of the working one (#248, spike B). Ionic renders all three
-/// months at once; what a user sees is the same in each, as a month is made before it can come into view.
-/// </summary>
-internal enum DatetimeNeighbourMonths
-{
-    /// <summary>With the working month, as Ionic's: 126 days at the first draw.</summary>
-    AtOnce,
-
-    /// <summary>When first needed: a press on the calendar, a scroll, the next or previous month, a value in another month.</summary>
-    WhenNeeded,
-
-    /// <summary>
-    /// As <see cref="WhenNeeded"/>, and in any case a frame after the calendar is first laid out: the next month, then the previous
-    /// a frame later.
-    /// </summary>
-    AfterFirstFrame,
-}
-
-/// <summary>
 /// The scrolled calendar's months either side of the working one, made when first needed (#248, spike B): until then an empty page
 /// of the calendar's width, so the scroller's extent and snap points are unchanged, and each is made before it can come into view: at
 /// a press on the calendar, before the next or previous month's scroll (a button, a value in another month, an adjacent day), and at
-/// any change of the scroller's offset toward one (a wheel, a key, automation), within the same layout pass, so before it's drawn.
+/// any change of the scroller's offset toward one (a wheel, a key, automation), within the same layout pass, so before it's drawn;
+/// and in any case after the calendar's first two frames, two weeks of days a frame. Measured against Ionic's three months at once and
+/// against making them only when needed on the Pixel 8: docs/infra/performance/README.md, "The months either side".
 /// </summary>
 public partial class AvonicDatetime
 {
-    /// <summary>The <see cref="AppContext"/> data that picks <see cref="DatetimeNeighbourMonths"/> for the perf build's pages (spike only).</summary>
-    internal const string NeighbourMonthsSwitch = "Avonic.Datetime.NeighbourMonths";
-
-    /// <summary>Tests pick the variant here; otherwise <see cref="NeighbourMonthsSwitch"/>, then <see cref="DefaultNeighbourMonths"/>.</summary>
-    internal static DatetimeNeighbourMonths? NeighbourMonthsOverride { get; set; }
-
-    internal const DatetimeNeighbourMonths DefaultNeighbourMonths = DatetimeNeighbourMonths.AfterFirstFrame;
-
-    private readonly DatetimeNeighbourMonths _neighbourMonths = NeighbourMonthsNow();
+    /// <summary>
+    /// Whether the months either side are made after the calendar's first frames as well as when needed: always, but tests turn it
+    /// off to see the triggers alone.
+    /// </summary>
+    internal static bool NeighbourMonthsAfterFirstFrames { get; set; } = true;
 
     private IDisposable? _neighbourFrame;
-
-    private static DatetimeNeighbourMonths NeighbourMonthsNow() =>
-        NeighbourMonthsOverride
-        ?? (AppContext.GetData(NeighbourMonthsSwitch) is string text && Enum.TryParse<DatetimeNeighbourMonths>(text, ignoreCase: true, out var mode)
-            && Enum.IsDefined(mode)
-            ? mode
-            : DefaultNeighbourMonths);
 
     /// <summary>
     /// Makes the days of the month at <paramref name="index"/> (0 or 2) not made yet, at most <paramref name="count"/>, and draws them,
@@ -107,10 +79,10 @@ public partial class AvonicDatetime
         EnsureNeighbourDays(0);
     }
 
-    /// <summary>The days a frame makes, at most, in <see cref="DatetimeNeighbourMonths.AfterFirstFrame"/>: two weeks.</summary>
+    /// <summary>The days a frame makes, at most, after the first frames: two weeks.</summary>
     internal const int NeighbourDaysPerFrame = 14;
 
-    /// <summary>The frames <see cref="DatetimeNeighbourMonths.AfterFirstFrame"/> lets go by after the calendar's first layout: its first two draws.</summary>
+    /// <summary>The frames let go by after the calendar's first layout before the first part: its first two draws.</summary>
     internal const int NeighbourFramesWaited = 2;
 
     /// <summary>The datetime making its months either side, a part a frame: one at a time, so a page of several takes turns.</summary>
@@ -123,13 +95,13 @@ public partial class AvonicDatetime
     internal static readonly TimeSpan NeighbourTurnStale = TimeSpan.FromMilliseconds(250);
 
     /// <summary>
-    /// <see cref="DatetimeNeighbourMonths.AfterFirstFrame"/>: once the calendar has its size, after its first two frames, two weeks of
+    /// Once the calendar has its size, after its first two frames, two weeks of
     /// days a frame, the next month's then the previous's, one datetime at a time, so no frame makes much. A press, a scroll or a
     /// change of month before they're done makes the rest at once.
     /// </summary>
     private void ScheduleNeighbourDays()
     {
-        if (_neighbourMonths != DatetimeNeighbourMonths.AfterFirstFrame || _neighbourFrame is not null || UsesSingleGrid
+        if (!NeighbourMonthsAfterFirstFrames || _neighbourFrame is not null || UsesSingleGrid
             || _calendarMonths is not { Months.Count: 3, HasNeighbourDays: false } panel)
         {
             return;

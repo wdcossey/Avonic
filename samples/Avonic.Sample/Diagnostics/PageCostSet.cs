@@ -5,9 +5,7 @@ namespace Avonic.Sample.Diagnostics;
 /// <summary>
 /// The pages a <c>-p:AvonicPerf=true</c> build opens in each round: every sample page but the device page, whose benchmark is its
 /// own, then the perf-only <see cref="DatetimeCostView"/>s, which the sample's list doesn't show: Ionic's scrolled calendar, then
-/// the same in <see cref="DatetimeCalendarRendering.SingleGrid"/> (<c>-grid</c>), then the scrolled calendar with its months either
-/// side made at once (<c>-eager</c>) and only when needed (<c>-press</c>), and <c>datetime-x1-idle</c>, the default named, so that one
-/// run compares them. A filter, from
+/// the same in <see cref="DatetimeCalendarRendering.SingleGrid"/> (<c>-grid</c>), so that one run compares them. A filter, from
 /// <see cref="OnlyVariable"/> on desktop or the intent extra of the same name on Android, keeps a part of them.
 /// docs/infra/performance/README.md, "Page costs on a device".
 /// </summary>
@@ -31,20 +29,6 @@ public static class PageCostSet
     /// <summary>The label of the single grid's month-change lines.</summary>
     public const string GridMonthChangeLabel = "datetime-month-grid";
 
-    /// <summary>The label of the scrolled calendar's first swipes after opening (#248, spike B), before its variant's suffix.</summary>
-    public const string SwipeLabel = "datetime-swipe";
-
-    /// <summary>
-    /// The label of the swipes timed on a page, or null for a page whose swipes aren't: <c>datetime-swipe-idle</c> on
-    /// <c>datetime-x1-idle</c> (the default, named), <c>datetime-swipe-eager</c> on <c>datetime-x1-eager</c>, <c>datetime-swipe-press</c>
-    /// on <c>datetime-x1-press</c>. Not on the plain <c>datetime-x1</c>, whose month changes are timed as in the runs kept before.
-    /// </summary>
-    public static string? SwipeLabelOf(string title) =>
-        title == DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AfterFirstFrame) ? SwipeLabel + "-idle"
-        : title == DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AtOnce) ? SwipeLabel + "-eager"
-        : title == DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.WhenNeeded) ? SwipeLabel + "-press"
-        : null;
-
     /// <summary>The label of the month changes timed on a page, or null for a page whose month changes aren't timed.</summary>
     public static string? MonthChangeLabelOf(string title) =>
         title == MonthChangePage ? MonthChangeLabel : title == GridMonthChangePage ? GridMonthChangeLabel : null;
@@ -61,14 +45,7 @@ public static class PageCostSet
             .Concat(DatetimeCounts.Select(count => new SamplePageEntry(DatetimeCostView.Title(count), () => new DatetimeCostView(count))))
             .Concat(DatetimeCounts.Select(count => new SamplePageEntry(
                 DatetimeCostView.Title(count, DatetimeCalendarRendering.SingleGrid),
-                () => new DatetimeCostView(count, DatetimeCalendarRendering.SingleGrid))))
-            .Concat(new[] { DatetimeNeighbours.AtOnce, DatetimeNeighbours.WhenNeeded }.SelectMany(neighbours => DatetimeCounts.Select(count =>
-                new SamplePageEntry(
-                    DatetimeCostView.Title(count, neighbours: neighbours),
-                    () => new DatetimeCostView(count, neighbours: neighbours)))))
-            .Append(new SamplePageEntry(
-                DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AfterFirstFrame),
-                () => new DatetimeCostView(1, neighbours: DatetimeNeighbours.AfterFirstFrame)));
+                () => new DatetimeCostView(count, DatetimeCalendarRendering.SingleGrid))));
         var terms = Terms(only);
         return terms.Length == 0
             ? [.. all]

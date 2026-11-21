@@ -282,10 +282,10 @@ public sealed class DatetimeCalendarBodyPanel : Panel, IScrollSnapPointsInfo
     private double _pageWidth;
 
     /// <summary>
-    /// Makes the three months if they aren't made yet, with the working month's days, and the days of the months either side too
-    /// when <paramref name="withNeighbours"/>. True when it made them.
+    /// Makes the three months if they aren't made yet, with the working month's days; the months either side get theirs later. True
+    /// when it made them.
     /// </summary>
-    internal bool EnsureMonths(bool withNeighbours)
+    internal bool EnsureMonths()
     {
         if (Months.Count > 0)
         {
@@ -295,7 +295,7 @@ public sealed class DatetimeCalendarBodyPanel : Panel, IScrollSnapPointsInfo
         for (var i = 0; i < 3; i++)
         {
             var month = new DatetimeCalendarMonth();
-            if (i == 1 || withNeighbours)
+            if (i == 1)
             {
                 month.EnsureDays();
             }

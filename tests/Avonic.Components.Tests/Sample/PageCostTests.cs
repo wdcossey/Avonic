@@ -37,9 +37,7 @@ public partial class PageCostTests
     public void With_No_Filter_Every_Sample_Page_But_The_Device_Page_Opens_Then_The_Datetime_Pages()
     {
         var expected = Titles(SamplePages).Where(t => t != "device")
-            .Concat(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid",
-                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press",
-                "datetime-x1-idle"]);
+            .Concat(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"]);
 
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, null)));
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, " ")));
@@ -61,16 +59,10 @@ public partial class PageCostTests
         Assert.Contains("datetime-x4", datetime);
         Assert.DoesNotContain("ion-button", datetime);
 
-        Assert.Equal(["datetime-x1", "datetime-x1-grid", "datetime-x1-eager", "datetime-x1-press", "datetime-x1-idle"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
-        Assert.Equal(["ion-button", "datetime-x2", "datetime-x2-grid", "datetime-x2-eager", "datetime-x2-press"],
-            Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
-        Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid",
-                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press",
-                "datetime-x1-idle"],
+        Assert.Equal(["datetime-x1", "datetime-x1-grid"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
+        Assert.Equal(["ion-button", "datetime-x2", "datetime-x2-grid"], Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
+        Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"],
             Titles(PageCostSet.Select(SamplePages, "datetime-x")));
-        // Spike B's swipes, alone.
-        Assert.Equal(["datetime-x1-eager", "datetime-x1-press", "datetime-x1-idle"],
-            Titles(PageCostSet.Select(SamplePages, "=datetime-x1-eager,=datetime-x1-press,=datetime-x1-idle")));
         // ion-grid is a sample page: "x1-grid" and so on, or "datetime", for the grid pages.
         Assert.Equal(["ion-grid", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"], Titles(PageCostSet.Select(SamplePages, "-grid")));
         Assert.Empty(PageCostSet.Select(SamplePages, "no-such-page"));
@@ -139,106 +131,6 @@ public partial class PageCostTests
         Assert.Matches(ChangeLine(), changes[0].Line(PageCostSet.GridMonthChangeLabel, 1));
         Assert.Equal(0, MonthChangeTiming.PendingFrames);
     });
-
-    [AvaloniaFact]
-    public void The_Eager_And_Press_Pages_Make_The_Months_Either_Side_As_Named() => Run((scene, clock) =>
-    {
-        int[] Days(DatetimeCostView page) =>
-            [.. page.GetVisualDescendants().OfType<AvonicDatetime>().Single().CalendarMonths!.Months.Select(m => m.Days.Count)];
-
-        var eager = new DatetimeCostView(1, neighbours: DatetimeNeighbours.AtOnce);
-        scene.Window.Content = eager;
-        scene.Window.UpdateLayout();
-        Assert.Equal([42, 42, 42], Days(eager));
-        Assert.Equal("datetime-x1-eager", DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AtOnce));
-
-        var press = new DatetimeCostView(1, neighbours: DatetimeNeighbours.WhenNeeded);
-        scene.Window.Content = press;
-        Settle(clock, 400);
-        Assert.Equal([0, 42, 0], Days(press));
-        Assert.Equal("datetime-x1-press", DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.WhenNeeded));
-
-        // The default, unnamed and named: made after the first frames; and the switch put back as it was, unset or the app's.
-        var plain = new DatetimeCostView(1);
-        scene.Window.Content = plain;
-        scene.Window.UpdateLayout();
-        Assert.Equal([0, 42, 0], Days(plain));
-        Settle(clock, 400);
-        Assert.Equal([42, 42, 42], Days(plain));
-        Assert.Null(AppContext.GetData(DatetimeCostView.NeighbourMonthsSwitch));
-        Assert.Equal(AvonicDatetime.NeighbourMonthsSwitch, DatetimeCostView.NeighbourMonthsSwitch);
-        Assert.Equal("datetime-x1-idle", DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AfterFirstFrame));
-        AppContext.SetData(DatetimeCostView.NeighbourMonthsSwitch, "AtOnce");
-        try
-        {
-            var idle = new DatetimeCostView(1, neighbours: DatetimeNeighbours.AfterFirstFrame);
-            scene.Window.Content = idle;
-            scene.Window.UpdateLayout();
-            Assert.Equal([0, 42, 0], Days(idle));
-            Assert.Equal("AtOnce", AppContext.GetData(DatetimeCostView.NeighbourMonthsSwitch));
-            var app = new DatetimeCostView(1);
-            scene.Window.Content = app;
-            scene.Window.UpdateLayout();
-            Assert.Equal([42, 42, 42], Days(app));
-        }
-        finally
-        {
-            AppContext.SetData(DatetimeCostView.NeighbourMonthsSwitch, null);
-        }
-
-        Assert.Null(PageCostSet.SwipeLabelOf("datetime-x1"));
-        Assert.Equal("datetime-swipe-idle", PageCostSet.SwipeLabelOf("datetime-x1-idle"));
-        Assert.Equal("datetime-swipe-eager", PageCostSet.SwipeLabelOf("datetime-x1-eager"));
-        Assert.Equal("datetime-swipe-press", PageCostSet.SwipeLabelOf("datetime-x1-press"));
-        Assert.Null(PageCostSet.SwipeLabelOf("datetime-x2-press"));
-        Assert.Null(PageCostSet.SwipeLabelOf("datetime-x1-grid"));
-    });
-
-    // ── The swipes (#248, spike B) ───────────────────────────────────────────────────────────
-
-    [AvaloniaFact]
-    public void A_Swipe_Is_A_Press_Then_The_Offset_Moved_A_Month_Over_Frames_Timed_Until_The_Heading_Shows_It() => Run((scene, clock) =>
-    {
-        var page = new DatetimeCostView(1, neighbours: DatetimeNeighbours.WhenNeeded);
-        scene.Window.Content = page;
-        Settle(clock, 400);
-        var datetime = page.GetVisualDescendants().OfType<AvonicDatetime>().Single();
-        var body = datetime.CalendarBody!;
-        var width = body.Viewport.Width;
-        var offsets = new List<double>();
-        body.PropertyChanged += (_, e) =>
-        {
-            if (e.Property == ScrollViewer.OffsetProperty)
-            {
-                offsets.Add(body.Offset.X);
-            }
-        };
-
-        var run = new MonthChangeTiming(datetime, TimeSpan.FromMilliseconds(20), bySwipe: true).Run(1, 1);
-        // The press made both months before the first move.
-        Assert.Equal([42, 42, 42], datetime.CalendarMonths!.Months.Select(m => m.Days.Count));
-        Assert.Empty(offsets);
-        Drive(clock, run);
-
-        var changes = run.Result;
-        Assert.Equal(["next 1 June 2023 to July 2023", "previous 1 July 2023 to June 2023"],
-            changes.Select(c => $"{(c.Next ? "next" : "previous")} {c.Index} {c.From} to {c.To}"));
-        Assert.All(changes, c => Assert.NotNull(c.HeadingMs));
-        Assert.Matches(ChangeLine(), changes[0].Line(PageCostSet.SwipeLabel, 1));
-        // A finger's moves, a frame each, to the next month: then back to the middle, as the scroll rests there.
-        Assert.Equal(Enumerable.Range(1, MonthChangeTiming.SwipeFrames).Select(i => width + width * i / MonthChangeTiming.SwipeFrames),
-            offsets.Take(MonthChangeTiming.SwipeFrames), new ToleranceComparer(0.5));
-        Assert.Equal(width, body.Offset.X, 1);
-        Assert.Equal("June 2023", datetime.GetVisualDescendants().OfType<TextBlock>().First(t => t.Name == "PART_MonthYearText").Text);
-        Assert.Equal(0, MonthChangeTiming.PendingFrames);
-    });
-
-    private sealed class ToleranceComparer(double tolerance) : IEqualityComparer<double>
-    {
-        public bool Equals(double x, double y) => Math.Abs(x - y) <= tolerance;
-
-        public int GetHashCode(double obj) => 0;
-    }
 
     // ── The month changes ────────────────────────────────────────────────────────────────────
 

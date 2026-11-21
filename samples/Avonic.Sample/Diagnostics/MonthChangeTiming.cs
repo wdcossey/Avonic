@@ -4,11 +4,9 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Rendering.Composition;
 using Avalonia.VisualTree;
-using Avonic.Components.Controls;
 
 namespace Avonic.Sample.Diagnostics;
 
@@ -65,30 +63,19 @@ public sealed class MonthChangeTiming
 
     private static int _pendingFrames;
 
-    /// <summary>The frames a timed swipe's finger takes to drag the calendar a month: 12, about 100 ms at 120 Hz.</summary>
-    public const int SwipeFrames = 12;
-
     private readonly TimeSpan _window;
     private readonly TimeSpan _maxWindow;
-    private readonly bool _bySwipe;
     private Control? _root;
     private TextBlock? _heading;
 
     /// <param name="root">The calendar, or a page with one calendar.</param>
     /// <param name="window">The least each change is watched for: <see cref="DefaultWindow"/> unless given.</param>
     /// <param name="maxWindow">The most: <see cref="MaxWindow"/> unless given. With no frame for twice that, the change fails.</param>
-    /// <param name="bySwipe">
-    /// Each change a finger's swipe on the scrolled calendar instead of a click (#248, spike B): a touch pressed on its scroller (the
-    /// <see cref="ScrollViewer"/> of its <see cref="DatetimeCalendarBodyPanel"/>), the offset moved a month over the next
-    /// <see cref="SwipeFrames"/> frames, as a finger's moves are, from each frame's callback, then the touch lifted; the calendar's
-    /// scroll rest then changes the month. Its first frame after the press shows what the press cost.
-    /// </param>
-    public MonthChangeTiming(Control root, TimeSpan? window = null, TimeSpan? maxWindow = null, bool bySwipe = false)
+    public MonthChangeTiming(Control root, TimeSpan? window = null, TimeSpan? maxWindow = null)
     {
         _root = root;
         _window = window ?? DefaultWindow;
         _maxWindow = maxWindow ?? MaxWindow;
-        _bySwipe = bySwipe;
     }
 
     /// <summary>
@@ -127,42 +114,14 @@ public sealed class MonthChangeTiming
 
     private async Task<MonthChange> Change(Control root, bool next, int index)
     {
-        var name = _bySwipe ? (next ? "a swipe to the next month" : "a swipe to the previous month") : next ? NextName : PreviousName;
+        var name = next ? NextName : PreviousName;
         var top = TopLevel.GetTopLevel(root) ?? throw new InvalidOperationException("The calendar isn't in a top level.");
-        Control? button = null;
-        RoutedEvent? click = null;
-        ScrollViewer? scroller = null;
-        if (_bySwipe)
-        {
-            scroller = root.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault(s => s.Content is DatetimeCalendarBodyPanel && s.IsEffectivelyVisible)
-                       ?? throw new InvalidOperationException("No scrolled calendar to swipe.");
-        }
-        else
-        {
-            button = root.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => AutomationProperties.GetName(c) == name)
+        var button = root.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => AutomationProperties.GetName(c) == name)
                      ?? throw new InvalidOperationException($"No control named \"{name}\" to automation.");
-            click = ClickEvent(button.GetType()) ?? throw new InvalidOperationException($"\"{name}\" has no Click event.");
-            if (!button.IsEffectivelyEnabled)
-            {
-                throw new InvalidOperationException($"\"{name}\" is disabled.");
-            }
-        }
-
-        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
-        var at = scroller is null ? default : scroller.TranslatePoint(new Point(scroller.Bounds.Width / 2, scroller.Bounds.Height / 2), top) ?? default;
-        var swipeFrom = scroller?.Offset.X ?? 0;
-        var swipeTo = scroller is null ? 0 : next ? 2 * scroller.Viewport.Width : 0;
-        var swipeStep = 0;
-        var pressed = false;
-
-        void Lift()
+        var click = ClickEvent(button.GetType()) ?? throw new InvalidOperationException($"\"{name}\" has no Click event.");
+        if (!button.IsEffectivelyEnabled)
         {
-            if (pressed && scroller is not null)
-            {
-                pressed = false;
-                scroller.RaiseEvent(new PointerReleasedEventArgs(scroller, finger, top, at, 0,
-                    new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
-            }
+            throw new InvalidOperationException($"\"{name}\" is disabled.");
         }
 
         var from = Heading(root, rescan: true);
@@ -207,17 +166,6 @@ public sealed class MonthChangeTiming
 
             try
             {
-                if (scroller is not null && swipeStep < SwipeFrames)
-                {
-                    // The finger's move for this frame, before its layout, as input comes; lifted at the last.
-                    swipeStep++;
-                    scroller.Offset = new Vector(swipeFrom + (swipeTo - swipeFrom) * swipeStep / SwipeFrames, 0);
-                    if (swipeStep == SwipeFrames)
-                    {
-                        Lift();
-                    }
-                }
-
                 var now = Stopwatch.GetTimestamp();
                 frames.Add(now);
                 var elapsed = Stopwatch.GetElapsedTime(start, now);
@@ -254,16 +202,7 @@ public sealed class MonthChangeTiming
         try
         {
             start = Stopwatch.GetTimestamp();
-            if (scroller is not null)
-            {
-                pressed = true;
-                scroller.RaiseEvent(new PointerPressedEventArgs(scroller, finger, top, at, 0,
-                    new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None));
-            }
-            else
-            {
-                button!.RaiseEvent(new RoutedEventArgs(click!, button));
-            }
+            button.RaiseEvent(new RoutedEventArgs(click, button));
 
             // The compositor's next batch, the one not yet committed, which is committed on this thread after the click's layout:
             // the first frame with the click's changes in it. Its Rendered task completes on the render thread, as it's drawn: only
@@ -290,8 +229,6 @@ public sealed class MonthChangeTiming
             // However it ended, nothing of it goes on: a frame callback still asked for (one that may never come, when frames
             // have stopped) is taken off the count now, and returns at once if it comes, asking for no other.
             over = true;
-            // A swipe that ended early (no frames, an error) lifts its finger, so nothing after starts from a press.
-            Lift();
             Interlocked.Add(ref _pendingFrames, -asked);
             asked = 0;
             root.DetachedFromVisualTree -= OnDetached;
