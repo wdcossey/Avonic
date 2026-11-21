@@ -38,7 +38,13 @@ public static class DeviceProbe
         /// <summary><c>gc 3/1/0, gc pause 12.3 ms, heap 85.2 MB</c>: collections of each generation and their pauses since, and the heap now.</summary>
         public string Gc(Snapshot since) => string.Create(
             CultureInfo.InvariantCulture,
-            $"gc {Gen0 - since.Gen0}/{Gen1 - since.Gen1}/{Gen2 - since.Gen2}, gc pause {(GcPause - since.GcPause).TotalMilliseconds:0.0} ms, heap {GC.GetTotalMemory(false) / 1048576.0:0.0} MB");
+            $"gc {Gen0 - since.Gen0}/{Gen1 - since.Gen1}/{Gen2 - since.Gen2}, gc pause {(GcPause - since.GcPause).TotalMilliseconds:0.0} ms, heap {HeapBytes() / 1048576.0:0.0} MB");
+
+        /// <summary>
+        /// The heap now. <c>GC.GetTotalMemory(false)</c> can read below 0 right after collections (seen headless, after four of each
+        /// generation in a test run: -3.1 MB); then the heap at the last collection.
+        /// </summary>
+        private static long HeapBytes() => GC.GetTotalMemory(false) is >= 0 and var bytes ? bytes : GC.GetGCMemoryInfo().HeapSizeBytes;
 
         /// <summary><c>cpu 1830 ms, ui thread 1790 ms</c>: the process's CPU time and the UI thread's since, where the platform says.</summary>
         public string Cpu(Snapshot since) => string.Create(
