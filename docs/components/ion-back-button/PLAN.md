@@ -9,8 +9,11 @@ Measured in real Ionic 9.0.11 in headless Chromium, md, on `render.js`'s phone (
 repo (`measure.js`, five scenes: B1 to B5). The nav's pages are plain custom elements (`page-one`, `page-two`), as an app with no
 framework writes them.
 
-**The navigation contract is for the human to decide** before anything is built: [§ The contract](#the-contract-for-you-to-decide).
-Everything else here holds whichever option is chosen, except where it says so.
+**Decided on 2026-11-21**, before any code ([§ The contract](#the-contract-for-you-to-decide)): option A with the variant: `DefaultHref`
+stays `string?` and raises `DefaultHrefRequested`, and an extension `DefaultPage` holds a page the closest nav goes back to; the
+config keys `backButtonText` and `backButtonDefaultHref` are added to `AvonicConfig` in this PR; `aspect-ratio: 1/1` is
+reproduced; the coloured toolbar's `ion-buttons` variables aren't mapped. The rest of the plan is as written before the decision,
+with the choices it left open recorded in [§ Decisions](#decisions).
 
 ## Fidelity checklist
 
@@ -231,6 +234,17 @@ No `DefaultHref`, no config default, no event; `RouterAnimation` stays for the p
 **Recommendation: A.** It is Ionic's prop as core Ionic runs it, and the one place Ionic needs a router becomes an event any
 app's own navigation can take, without Avonic deciding what a URL means. B can come later as the variant's extension if apps ask.
 
+### Decisions
+
+- **Option A with the variant.** `DefaultHref` (`string?`) and `DefaultHrefRequested`, as A; and `DefaultPage` (`object?`, the nav's
+  page forms), an extension. With nothing to pop: a `DefaultPage` and a nav around → `nav.SetRoot(page, null, { Direction: Back,
+  AnimationBuilder: RouterAnimation, SkipIfBusy: true })`, and no event; otherwise the event, by `DefaultHref`'s rule. A
+  `DefaultPage` shows the button, as a `DefaultHref` does.
+- **A `DefaultPage` with no nav around** can't be gone to, so the click is `DefaultHref`'s, as if no page were set: the event if
+  `DefaultHref` qualifies, else nothing. Chosen so that a back button in a view used both inside and outside a nav still reaches the
+  app's router outside one.
+- **`AvonicConfig.BackButtonText` and `.BackButtonDefaultHref`** added here, with `BackButtonIcon`'s summary naming the back button.
+
 ## Design (whatever the option)
 
 **`AvonicBackButton : TemplatedControl`** (no slot), in `Controls/BackButton/`, after `AvonicMenuButton`:
@@ -280,6 +294,7 @@ app's own navigation can take, without Avonic deciding what a URL means. B can c
 | K17 | Hover (mouse) and focus (keyboard): the overlay at 0.04 and 0.12 of the current colour; with a colour, hover's overlay is the base | md.css |
 | K18 | Automation: a button named `back`, the text, or `AutomationProperties.Name`; disabled with the host; hidden is out of the tree | `aria-label`, `inheritAriaAttributes` |
 | K19 | No hardware back of its own: with the nav's `HandleBackButton` off, a back request doesn't pop through the back button | `back-button.js` |
+| K20 | (Extension) `DefaultPage` shows it; with nothing to pop it's the nav's new root, going back with `RouterAnimation`, and no event; a pop comes first; with no nav the click is `DefaultHref`'s | the decision |
 
 Each test fails without its behaviour; `tools/breakage` proves it.
 
@@ -317,7 +332,7 @@ follows its header's page's `:can-go-back` through the page's `Classes`, the hea
 
 ## Extensions
 
-Option A's `DefaultHrefRequested` event, if chosen. `TextTransform`, as `AvonicItemOption`'s.
+`DefaultHrefRequested` (option A), `DefaultPage` (the variant), and `TextTransform`, as `AvonicItemOption`'s.
 
 ## Dependencies
 

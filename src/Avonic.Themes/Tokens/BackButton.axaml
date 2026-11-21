@@ -1,0 +1,57 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors">
+
+    <!-- The variables of ion-back-button, md: back-button.md.css's two :host blocks, the second winning. -->
+
+    <SolidColorBrush x:Key="Avonic.BackButton.Background" Color="Transparent" />
+    <!-- background-focused: currentColor. Unset, it follows the native part's colour. -->
+    <b:CssUnset x:Key="Avonic.BackButton.BackgroundFocused" />
+    <x:Double x:Key="Avonic.BackButton.BackgroundFocusedOpacity">0.12</x:Double>
+    <!-- background-hover: currentColor -->
+    <b:CssUnset x:Key="Avonic.BackButton.BackgroundHover" />
+    <x:Double x:Key="Avonic.BackButton.BackgroundHoverOpacity">0.04</x:Double>
+    <!-- border-radius: 4px, and 50% with only an icon (Avonic.BackButton.Md.BorderRadiusIconOnly), which an app's value beats. -->
+    <b:CssUnset x:Key="Avonic.BackButton.BorderRadius" />
+    <!-- color: currentColor, the colour inherited. -->
+    <b:CssUnset x:Key="Avonic.BackButton.Color" />
+    <!-- color-focused, color-hover: currentColor -->
+    <b:CssUnset x:Key="Avonic.BackButton.ColorFocused" />
+    <b:CssUnset x:Key="Avonic.BackButton.ColorHover" />
+    <!-- icon-font-size: 1.5rem -->
+    <x:Double x:Key="Avonic.BackButton.IconFontSize">24</x:Double>
+    <!-- icon-font-weight: normal. An AvonicIcon is a path, as Ionic's SVG is, so the weight draws nothing different. -->
+    <FontWeight x:Key="Avonic.BackButton.IconFontWeight">Normal</FontWeight>
+    <x:Double x:Key="Avonic.BackButton.IconMarginTop">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconMarginEnd">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconMarginBottom">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconMarginStart">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconPaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconPaddingEnd">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconPaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.IconPaddingStart">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.MarginTop">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.MarginEnd">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.MarginBottom">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.MarginStart">0</x:Double>
+    <!-- min-height: 32px; min-width: 44px. With only an icon, the host's own min-width and min-height of 48 beat them. -->
+    <x:Double x:Key="Avonic.BackButton.MinHeight">32</x:Double>
+    <x:Double x:Key="Avonic.BackButton.MinWidth">44</x:Double>
+    <x:Double x:Key="Avonic.BackButton.Opacity">1</x:Double>
+    <x:Double x:Key="Avonic.BackButton.PaddingTop">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.PaddingEnd">12</x:Double>
+    <x:Double x:Key="Avonic.BackButton.PaddingBottom">0</x:Double>
+    <x:Double x:Key="Avonic.BackButton.PaddingStart">12</x:Double>
+    <!-- ripple-color: currentColor -->
+    <b:CssUnset x:Key="Avonic.BackButton.RippleColor" />
+    <!-- transition: background-color, opacity 100ms linear: the background at once (no duration), the native's opacity over
+         100 ms. -->
+    <Transitions x:Key="Avonic.BackButton.Transition">
+        <DoubleTransition Property="{x:Static Visual.OpacityProperty}" Duration="0:0:0.1" />
+    </Transitions>
+
+    <!-- What back-button.md.css gives border-radius per class. Not an Ionic variable: override the key above instead. -->
+    <x:Double x:Key="Avonic.BackButton.Md.BorderRadius">4</x:Double>
+    <x:String x:Key="Avonic.BackButton.Md.BorderRadiusIconOnly">50%</x:String>
+
+</ResourceDictionary>

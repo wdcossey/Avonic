@@ -1,0 +1,23 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <!-- ion-back-button: structure only. The look is in Avonic.Themes/Controls/AvonicBackButton.axaml. The control fills the
+         icon, the text and the ripple's type, and shows each part while it has something to show. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBackButton}" TargetType="c:AvonicBackButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native" Background="Transparent">
+                    <Panel>
+                        <c:AvonicRippleEffect Name="PART_Ripple" />
+                        <StackPanel Name="PART_Inner" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <c:AvonicIcon Name="PART_Icon" VerticalAlignment="Center" />
+                            <TextBlock Name="PART_Text" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
