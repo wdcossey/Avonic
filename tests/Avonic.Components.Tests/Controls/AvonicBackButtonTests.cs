@@ -225,7 +225,10 @@ public class AvonicBackButtonTests
 
         Click(stage, button);
         stage.After(50);
-        Click(stage, button);
+
+        // A page in a transition takes no pointer (X4 in ion-nav's measurements), so the second comes from automation, as B4's
+        // second was a programmatic click().
+        ((IInvokeProvider)ControlAutomationPeer.CreatePeerForElement(button)).Invoke();
         stage.After(600);
         Assert.Equal(2, stage.Nav.GetLength());
         Assert.Equal("two", stage.Nav.GetActive()!.Element!.Name);
@@ -421,6 +424,14 @@ public class AvonicBackButtonTests
             Assert.Equal("home", icon.Icon);
             Assert.True(icon.FlipRtl);
 
+            // Disabled is a prop too: Ionic renders again, and reads the config.
+            AvonicConfig.BackButtonIcon = "star";
+            button.IsEnabled = false;
+            Assert.Equal("star", icon.Icon);
+            button.IsEnabled = true;
+
+            // An icon the app sets mirrors by the icon's own rule: measured, an arrow set as icon="arrow-back-sharp" has flip-rtl
+            // in RTL (B1 rtlicon), so FlipRtl is left unset, not false.
             button.Icon = "close";
             Assert.Equal("close", icon.Icon);
             Assert.Null(icon.FlipRtl);
@@ -470,8 +481,16 @@ public class AvonicBackButtonTests
     public void K13_Icon_Only_It_Is_48_Square_Round_With_An_Unbounded_Ripple()
     {
         var button = new AvonicBackButton { DefaultHref = "/" };
+        var unpadded = new AvonicBackButton { DefaultHref = "/" };
+        unpadded.Resources["Avonic.BackButton.PaddingStart"] = 0d;
+        unpadded.Resources["Avonic.BackButton.PaddingEnd"] = 0d;
         using var stage = NoNav(Toolbar(button));
+        ((AvonicButtons)((AvonicToolbar)stage.Root).StartContent!).Items.Add(unpadded);
+        stage.Render();
         Assert.Equal(new Size(48, 48), button.Bounds.Size);
+
+        // min-width and min-height of 48 with only an icon: 24 of icon and no padding is still 48 square.
+        Assert.Equal(new Size(48, 48), unpadded.Bounds.Size);
         var native = Part<Border>(button, "PART_Native");
         Assert.Equal(new CornerRadius(24), native.CornerRadius);
         Assert.Equal(RippleEffectType.Unbounded, Part<AvonicRippleEffect>(button, "PART_Ripple").Type);
@@ -609,6 +628,11 @@ public class AvonicBackButtonTests
         Dispatcher.UIThread.RunJobs();
         var dangerOverlay = Part<Border>(danger, "PART_Overlay");
         Assert.Equal(0.04, dangerOverlay.Opacity);
+        Assert.Equal(Color.FromRgb(0xc5, 0x00, 0x0f), ColorOf(dangerOverlay.Background));
+
+        // :host(.ion-color:hover) .button-native::after { background: base } beats the app's background-hover.
+        danger.Resources["Avonic.BackButton.BackgroundHover"] = new SolidColorBrush(Colors.Blue);
+        Dispatcher.UIThread.RunJobs();
         Assert.Equal(Color.FromRgb(0xc5, 0x00, 0x0f), ColorOf(dangerOverlay.Background));
     }
 

@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Automation.Peers;
@@ -253,7 +254,8 @@ public partial class AvonicBackButton : TemplatedControl
 
         // Ionic renders again when any of its props changes: the config and hostContext are read again.
         if (change.Property == DefaultHrefProperty || change.Property == IconProperty || change.Property == TextProperty
-            || change.Property == ColorProperty || change.Property == TextTransformProperty)
+            || change.Property == ColorProperty || change.Property == IsEnabledProperty || change.Property == RouterAnimationProperty
+            || change.Property == DefaultPageProperty || change.Property == TextTransformProperty)
         {
             if (this.IsAttachedToVisualTree())
             {
@@ -354,7 +356,7 @@ public partial class AvonicBackButton : TemplatedControl
 
         if (_text is not null)
         {
-            _text.Text = text is { Length: > 0 } && TextTransform == ButtonTextTransform.Uppercase ? text.ToUpperInvariant() : text;
+            _text.Text = (string?)AvonicButton.TextTransformConverter.Convert([text, TextTransform], typeof(string), null, CultureInfo.CurrentCulture);
             _text.IsVisible = !string.IsNullOrEmpty(text);
         }
 
