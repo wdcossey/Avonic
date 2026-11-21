@@ -1,5 +1,4 @@
 using System.Collections;
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Input;
@@ -527,81 +526,11 @@ internal static class SelectInterfaceOptions
         return null;
     }
 
-    public static void Apply(AvaloniaObject overlay, IReadOnlyDictionary<string, object?>? options)
-    {
-        if (options is null)
-        {
-            return;
-        }
+    /// <summary>The interface's own Avalonia properties only; the select's own keys left out.</summary>
+    private static readonly PropertiesByName.Rules Rules = new("[ion-select] interfaceOptions") { Skip = ReadBySelect };
 
-        foreach (var (key, value) in options)
-        {
-            if (ReadBySelect.Contains(key) || key.Length == 0)
-            {
-                continue;
-            }
-
-            var name = char.ToUpperInvariant(key[0]) + key[1..];
-            if (AvaloniaPropertyRegistry.Instance.FindRegistered(overlay, name) is not { IsReadOnly: false } property
-                || !TryConvert(value, property.PropertyType, out var converted))
-            {
-                continue;
-            }
-
-            try
-            {
-                overlay.SetValue(property, converted);
-            }
-            catch (Exception exception)
-            {
-                // A value the property won't take is dropped, as an element ignores what it can't use.
-                Avalonia.Logging.Logger.TryGet(Avalonia.Logging.LogEventLevel.Warning, "Avonic")?
-                    .Log(overlay, "[ion-select] interfaceOptions {0}: {1}", key, exception.Message);
-            }
-        }
-    }
-
-    private static bool TryConvert(object? value, Type type, out object? converted)
-    {
-        converted = value;
-        var target = Nullable.GetUnderlyingType(type) ?? type;
-        if (value is null)
-        {
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) is not null;
-        }
-
-        if (type.IsInstanceOfType(value) || target.IsInstanceOfType(value))
-        {
-            return true;
-        }
-
-        try
-        {
-            if (value is string text && target.IsEnum)
-            {
-                converted = Enum.Parse(target, text.Replace("-", ""), ignoreCase: true);
-                return true;
-            }
-
-            if (value is string s && TypeDescriptor.GetConverter(target) is { } converter && converter.CanConvertFrom(typeof(string)))
-            {
-                converted = converter.ConvertFromInvariantString(s);
-                return true;
-            }
-
-            if (value is IConvertible && typeof(IConvertible).IsAssignableFrom(target))
-            {
-                converted = Convert.ChangeType(value, target, System.Globalization.CultureInfo.InvariantCulture);
-                return true;
-            }
-        }
-        catch (Exception)
-        {
-            // A converter's failure is a value that can't be used: dropped.
-        }
-
-        return false;
-    }
+    public static void Apply(AvaloniaObject overlay, IReadOnlyDictionary<string, object?>? options) =>
+        PropertiesByName.Apply(overlay, options, Rules);
 
     /// <summary><c>interfaceOptions.cssClass</c>: a string of classes, or a list of them.</summary>
     private static IEnumerable<string> Classes(IReadOnlyDictionary<string, object?>? options) => Get(options, "cssClass") switch
