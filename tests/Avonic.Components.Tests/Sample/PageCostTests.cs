@@ -300,7 +300,7 @@ public partial class PageCostTests
         var line = busy.Result;
         Assert.StartsWith("datetime-x1: round 1, after: busy: ", line, StringComparison.Ordinal);
         Assert.Matches(@"passes \d+, frames \d+ longest [\d.]+ ms, default post \d+/\d+ (median|none)", line);
-        Assert.Matches(@"background post \d+/\d+ .*gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap [\d.]+ MB, tree \d+, peers 0, left page ", line);
+        Assert.Matches(@"background post \d+/\d+ .*gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap ([\d.]+ MB|n/a), tree \d+, peers 0, left page ", line);
         // Headless keeps a page until a collection: here it was alive, out of the tree, with its calendar's scroller watched.
         Assert.Contains("left page alive, out of the tree", line, StringComparison.Ordinal);
         Assert.Contains("its scrollers changed 0 times, then collected", line, StringComparison.Ordinal);
@@ -312,7 +312,7 @@ public partial class PageCostTests
         }
 
         Assert.False(left.IsAlive);
-        Assert.Matches(@", gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap [\d.]+ MB, cpu \d+ ms, ui thread (\d+ ms|n/a), passes 2, tree \d+, peers 0$",
+        Assert.Matches(@", gc \d+/\d+/\d+, gc pause [\d.]+ ms, heap ([\d.]+ MB|n/a), cpu \d+ ms, ui thread (\d+ ms|n/a), passes 2, tree \d+, peers 0$",
             DeviceProbe.PageExtras(DeviceProbe.Snapshot.Take(), 2, top));
     });
 

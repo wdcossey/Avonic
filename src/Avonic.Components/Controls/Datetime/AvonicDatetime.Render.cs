@@ -771,6 +771,25 @@ public partial class AvonicDatetime
             return;
         }
 
+        if (e.Key is Key.Enter or Key.Space && GridKeyTarget is not null)
+        {
+            // Not Ionic's: during a key's fade the day chosen is the key's, not the one fading out with the focus (README,
+            // Extensions). The month is drawn now and the key's day focused; Enter clicks it here, as a button clicks on Enter's
+            // press, and Space's release clicks it, as a button clicks on Space's release, once it has the focus. Handled, so the day
+            // fading out isn't pressed.
+            e.Handled = true;
+            FinishGridChange();
+            if (e.Key == Key.Enter)
+            {
+                if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay chosen && chosen.FindAncestorOfType<AvonicDatetime>() == this)
+                {
+                    chosen.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                }
+            }
+
+            return;
+        }
+
         var parts = GridKeyTarget ?? day.Parts;
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         DatetimeParts? target = e.Key switch

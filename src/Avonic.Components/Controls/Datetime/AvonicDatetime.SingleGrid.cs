@@ -95,7 +95,7 @@ public partial class AvonicDatetime
             grid.GotFocus -= OnCalendarFocus;
         }
 
-        FinishGridChange();
+        FinishGridChange(refocus: false);
         _gridGesture?.Destroy();
         _gridGesture = null;
         _calendarGrid = null;
@@ -193,8 +193,13 @@ public partial class AvonicDatetime
         return true;
     }
 
-    /// <summary>The day a key's change is on its way to, for the next key to go on from: the focused day still shows the old month.</summary>
-    private DatetimeParts? GridKeyTarget => _gridKeyChange ? _gridTarget : null;
+    /// <summary>
+    /// The day a key's change is on its way to, for the next key to go on from, as the focused day still shows the old month; with its
+    /// day of the week, which Home and End need and the working parts don't keep.
+    /// </summary>
+    internal DatetimeParts? GridKeyTarget => _gridKeyChange && _gridTarget is { Year: { } y, Month: { } m, Day: { } d } target
+        ? target with { DayOfWeek = (int)new DateTime(y, m, d).DayOfWeek }
+        : null;
 
     private void StartGridChange(DatetimeParts target)
     {
@@ -235,20 +240,21 @@ public partial class AvonicDatetime
             }
 
             SwapGridMonth();
-            FadeGridIn(fade);
+            FadeGridIn(fade, 0);
         }, oneTimeCallback: true);
         _ = fade.Play();
     }
 
-    private void FadeGridIn(AvonicAnimation fadeOut)
+    /// <summary>The days fade in from <paramref name="from"/>, in a share of the time as long as the way left.</summary>
+    private void FadeGridIn(AvonicAnimation fadeOut, double from)
     {
         var grid = _calendarGrid!;
         _gridFadingIn = true;
         var fade = AvonicAnimation.Create()
             .AddElement(grid)
-            .Duration(GridFadeInMs)
+            .Duration(GridFadeInMs * (1 - from))
             .Easing(GridFadeInEasing)
-            .FromTo("opacity", 0.0, 1.0);
+            .FromTo("opacity", from, 1.0);
         _gridFade = fade;
         fade.OnFinish((_, _) =>
         {
@@ -273,27 +279,40 @@ public partial class AvonicDatetime
     }
 
     /// <summary>
-    /// A change on its way dropped, its fade with it, for a state set by another way (a value, a key, a selection, the month/year
-    /// wheel), which the change's month would otherwise overwrite when its fade ends. animateToDate's wait ends with it.
+    /// A change on its way dropped, for a state set by another way (a value, a key, a selection, the month/year wheel), which the
+    /// change's month would otherwise overwrite when its fade ends; the days fade in again from where they are, rather than jump.
+    /// A fade in, once the month has changed, shows the month already, and goes on. animateToDate's wait ends with it.
     /// </summary>
     internal void CancelGridChange()
     {
-        if (_gridTarget is null && _gridFade is null)
+        if (_gridTarget is null)
         {
             return;
         }
 
-        StopGridFade();
         _gridTarget = null;
         _gridKeyChange = false;
+        var shown = _calendarGrid is { } grid ? AnimationGroupOpacity.Of(grid) : 1;
+        if (_gridFade is { } fadingOut && !_gridFadingIn && shown < 0.99 && AvonicConfig.Animated && IsCalendarReady)
+        {
+            FadeGridIn(fadingOut, shown);
+        }
+        else
+        {
+            StopGridFade();
+        }
+
         _forceDateScrolling?.TrySetResult();
     }
 
-    /// <summary>Any month on its way shown now, and no fade left: for a change with no animation, and as the grid goes.</summary>
-    private void FinishGridChange()
+    /// <summary>
+    /// Any month on its way shown now, and no fade left: for a change with no animation, and as the grid goes, when
+    /// <paramref name="refocus"/> is false, as the grid's days are about to leave.
+    /// </summary>
+    private void FinishGridChange(bool refocus = true)
     {
         StopGridFade();
-        SwapGridMonth();
+        SwapGridMonth(refocus);
     }
 
     /// <summary>
@@ -301,14 +320,14 @@ public partial class AvonicDatetime
     /// A focused day gives its focus to the grid, as a scrolled calendar's to its scroller: the day now shows another date. After a
     /// key's change, the key's day takes it, as the scrolled calendar's keys focus the working day.
     /// </summary>
-    private void SwapGridMonth()
+    private void SwapGridMonth(bool refocus = true)
     {
         if (_gridTarget is not { } target)
         {
             return;
         }
 
-        var dayHadFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay focused
+        var dayHadFocus = refocus && TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay focused
                           && focused.FindAncestorOfType<AvonicDatetime>() == this;
         var byKey = _gridKeyChange;
         _gridTarget = null;
@@ -333,8 +352,11 @@ public partial class AvonicDatetime
     private void OnCalendarRenderingChanged()
     {
         // A change on its way in either rendering lands now: the grid's fade, or the scroller's scroll and its rest, which a
-        // hidden scroller would otherwise end on a month of its own; and animateToDate's wait with it.
-        FinishGridChange();
+        // hidden scroller would otherwise end on a month of its own; and animateToDate's wait with it. A focused day's focus goes to
+        // the working day of the rendering now shown, once it's drawn, as the other's days are hidden.
+        var dayHadFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is DatetimeCalendarDay focused
+                          && focused.FindAncestorOfType<AvonicDatetime>() == this;
+        FinishGridChange(refocus: false);
         _smooth?.Stop();
         _scrollRest?.Dispose();
         _scrollRest = null;
@@ -345,6 +367,11 @@ public partial class AvonicDatetime
         {
             // The scroller comes back with the working month in view.
             body.Offset = new Vector(body.Viewport.Width, 0);
+        }
+
+        if (dayHadFocus)
+        {
+            AvonicConfig.RequestFrame(this, FocusWorkingDay);
         }
     }
 }
