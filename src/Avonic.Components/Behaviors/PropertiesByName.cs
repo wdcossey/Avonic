@@ -78,7 +78,15 @@ internal static class PropertiesByName
         {
             if (TryConvert(value, property.PropertyType, out var converted))
             {
-                Set(target, key, rules, () => target.SetValue(property, converted));
+                try
+                {
+                    target.SetValue(property, converted);
+                }
+                catch (Exception exception)
+                {
+                    // A value the property won't take is dropped, as an element ignores what it can't use.
+                    Failed(target, key, exception, rules);
+                }
             }
             else
             {
@@ -92,25 +100,19 @@ internal static class PropertiesByName
         {
             if (TryConvert(value, clr.PropertyType, out var converted))
             {
-                Set(target, key, rules, () => clr.SetValue(target, converted));
+                try
+                {
+                    clr.SetValue(target, converted);
+                }
+                catch (Exception exception)
+                {
+                    Failed(target, key, exception, rules);
+                }
             }
             else
             {
                 Dropped(target, key, value, rules);
             }
-        }
-    }
-
-    private static void Set(AvaloniaObject target, string key, Rules rules, Action set)
-    {
-        try
-        {
-            set();
-        }
-        catch (Exception exception)
-        {
-            // A value the property won't take is dropped, as an element ignores what it can't use.
-            Failed(target, key, exception, rules);
         }
     }
 
