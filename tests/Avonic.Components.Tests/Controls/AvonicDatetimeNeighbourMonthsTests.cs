@@ -89,6 +89,28 @@ public class AvonicDatetimeNeighbourMonthsTests
     });
 
     [AvaloniaFact]
+    public void The_Measuring_Switch_Is_Read_In_Any_Case_And_A_Value_It_Doesnt_Name_Is_The_Default() => Run((scene, clock) =>
+    {
+        try
+        {
+            AppContext.SetData(AvonicDatetime.NeighbourMonthsSwitch, "whenneeded");
+            var lower = Open(scene, Plain());
+            Settle(clock, 400);
+            Assert.Equal([0, 42, 0], Days(lower));
+
+            AppContext.SetData(AvonicDatetime.NeighbourMonthsSwitch, "7");
+            var number = Open(scene, Plain());
+            Assert.Equal([0, 42, 0], Days(number));
+            Settle(clock, 400);
+            Assert.Equal([42, 42, 42], Days(number));
+        }
+        finally
+        {
+            AppContext.SetData(AvonicDatetime.NeighbourMonthsSwitch, null);
+        }
+    });
+
+    [AvaloniaFact]
     public void When_Needed_Only_The_Working_Month_Has_Days_At_Rest() => With(DatetimeNeighbourMonths.WhenNeeded, (scene, clock) =>
     {
         var datetime = Open(scene, Plain());
@@ -133,6 +155,48 @@ public class AvonicDatetimeNeighbourMonthsTests
         Assert.Equal([0, 42, 14], Days(next));
     });
 
+    [AvaloniaFact]
+    public void A_Datetime_Back_In_A_Window_Makes_The_Rest() => With(DatetimeNeighbourMonths.AfterFirstFrame, (scene, clock) =>
+    {
+        // As a modal's datetime closed before its months were made, and presented again: its scroller's size doesn't change.
+        var datetime = Open(scene, Plain());
+        var content = scene.Window.Content;
+        Settle(clock, 48);
+        Assert.Equal([0, 42, 14], Days(datetime));
+        scene.Window.Content = null;
+        Settle(clock, 100);
+        Assert.Equal(0, clock.Pending);
+
+        scene.Window.Content = content;
+        scene.Window.UpdateLayout();
+        Settle(clock, 400);
+        Assert.Equal([42, 42, 42], Days(datetime));
+        Assert.Equal(0, clock.Pending);
+    });
+
+    [AvaloniaFact]
+    public void IsDateEnabled_Is_Asked_Once_For_Each_Day_Of_A_Month_Made_In_Parts() => With(DatetimeNeighbourMonths.AfterFirstFrame, (scene, clock) =>
+    {
+        var asked = new List<string>();
+        var datetime = Open(scene, new AvonicDatetime
+        {
+            Presentation = DatetimePresentation.Date,
+            Value = June15,
+            IsDateEnabled = iso =>
+            {
+                asked.Add(iso);
+                return true;
+            },
+        });
+        Settle(clock, 400);
+        Assert.Equal([42, 42, 42], Days(datetime));
+        var july = asked.Where(d => d.StartsWith("2023-07-", StringComparison.Ordinal)).ToList();
+        var may = asked.Where(d => d.StartsWith("2023-05-", StringComparison.Ordinal)).ToList();
+        Assert.Equal(31, july.Count);
+        Assert.Equal(july.Distinct(), july);
+        Assert.Equal(31, may.Count);
+    });
+
     // ── The scroller meanwhile ───────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -160,16 +224,25 @@ public class AvonicDatetimeNeighbourMonthsTests
     // ── Made before they're seen ─────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
-    public void A_Press_On_The_Calendar_Makes_Both_Before_The_Finger_Moves() => With(DatetimeNeighbourMonths.WhenNeeded, (scene, clock) =>
+    public void A_Touch_On_The_Calendar_Makes_Both_Before_The_Finger_Moves_And_A_Mouse_Click_Neither() => With(DatetimeNeighbourMonths.WhenNeeded, (scene, clock) =>
     {
         var datetime = Open(scene, Plain());
         Settle(clock, 400);
+        // A mouse doesn't drag the scroller: a click on a day of the month shown makes nothing.
         var at = Box(Day(datetime, 1, 21), scene.Window).Center;
         scene.Window.MouseDown(at, MouseButton.Left, RawInputModifiers.None);
+        Assert.Equal([0, 42, 0], Days(datetime));
+        scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
+
+        var day = Day(datetime, 1, 21);
+        var finger = new Pointer(Pointer.GetNextFreeId(), PointerType.Touch, true);
+        day.RaiseEvent(new PointerPressedEventArgs(day, finger, scene.Window, at, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None));
         Assert.Equal([42, 42, 42], Days(datetime));
         Assert.Equal((5, 31), (Day(datetime, 0, 31).Parts.Month!.Value, Day(datetime, 0, 31).Parts.Day!.Value));
         Assert.Equal(7, Day(datetime, 2, 1).Parts.Month);
-        scene.Window.MouseUp(at, MouseButton.Left, RawInputModifiers.None);
+        day.RaiseEvent(new PointerReleasedEventArgs(day, finger, scene.Window, at, 0,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
     });
 
     [AvaloniaFact]

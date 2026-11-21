@@ -470,8 +470,12 @@ public partial class AvonicDatetime
         }
     }
 
-    /// <summary>Ionic's <c>renderMonth</c>. True when the month can be swiped to.</summary>
-    private bool RenderMonth(CultureInfo culture, DatetimeCalendarMonth monthPanel, int month, int year)
+    /// <summary>
+    /// Ionic's <c>renderMonth</c>. True when the month can be swiped to. From <paramref name="fromDay"/>, the index of the first day
+    /// to draw: the days just made of a month made in parts, so that the others aren't drawn again, nor <see cref="IsDateEnabled"/>
+    /// and a <see cref="HighlightedDates"/> function called again for them.
+    /// </summary>
+    private bool RenderMonth(CultureInfo culture, DatetimeCalendarMonth monthPanel, int month, int year, int fromDay = 0)
     {
         var disabled = !IsEnabled;
         var yearAllowed = _yearValues is null || _yearValues.Contains(year);
@@ -491,7 +495,7 @@ public partial class AvonicDatetime
         }
 
         var cells = DatetimeUtils.GetDaysOfMonth(month, year, FirstDayOfWeekIndex, ShowAdjacentDays);
-        for (var index = 0; index < monthPanel.Days.Count; index++)
+        for (var index = fromDay; index < monthPanel.Days.Count; index++)
         {
             var dayControl = monthPanel.Days[index];
             if (index >= cells.Count)
