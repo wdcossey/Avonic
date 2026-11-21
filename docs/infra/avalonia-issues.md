@@ -225,25 +225,61 @@ made directly with the same text, Roboto 14 and `FlowDirection.RightToLeft` does
 so it's something in how `TextBlock` builds its layout. Avonic accepts it: Latin text in an RTL window ending in punctuation shows
 the punctuation at the other end from Chromium's. Not tried in a real window or with Arabic or Hebrew text, where it may not show.
 
-## UI Automation's `FindAll` fails now and then (E_FAIL) just after a page leaves an `AvonicNav`
+## A UIA search fails with E_FAIL when a subtree it's in leaves the tree: the provider gives its elements no fragment root
 
-**Seen in the real window, not reproduced headless (#130, PR #252).** In `tools/real-window/drive.ps1`'s `ion-nav` section on Windows,
-`AutomationElement.FindAll(TreeScope.Descendants, ControlType=…)` on the window threw a `COMException` 0x80004005 ("Unexpected
-HRESULT") in the moments after a nav page was hidden or removed (after a push, a pop, a new root, a pop to root, a swipe back), though
-the status line already said the transition had ended. In 3 of 22 checks of one run, a retry 300 ms later succeeded, and a walk of the
-whole raw view right after each failure found no element that threw.
+**Measured in the real window on Windows 11 (#254), with Avalonia's provider hooked, and reproduced without Avonic's nav.** A UI
+Automation `FindAll`, or a walk of the tree, that is under way when a subtree it has already reached is hidden (`IsVisible`
+false) or removed fails with E_FAIL (`COMException` 0x80004005, "Unexpected HRESULT"), for the whole search. The same search
+started a moment later succeeds. It's the same through the managed client (`System.Windows.Automation`), `IUIAutomation`'s
+`FindAll` and `FindAllBuildCache`, and a raw-view walk one element at a time.
 
-What was ruled out headless (Avalonia 12.1.4, the sample's nav page, a real press and release on the items and buttons): walking the
-peers from the window after each frame of a push and a pop, every child's `GetParent()` is the peer that listed it, every owner is
-attached, every parent chain reaches the window's peer, and none of twenty-odd peer reads (name, control type, bounds, offscreen,
-providers) throws; no peer outside the tree raises `ChildrenChanged` or `PropertyChanged`. Read, not tested: focus isn't left in a
-hidden page, as `InputElement` clears it when an ancestor of the focused element turns invisible, or the element is detached.
+What fails, from the hooked provider's log (`Avalonia.Win32.Automation`, 12.1.4): UIA core asks an element the search had reached
+for its fragment root, and `AutomationNode.GetFragmentRoot()` returns **null**. It is `GetOrCreate(Peer.GetAutomationRoot()) as
+RootAutomationNode`, and `GetAutomationRoot()` follows `GetParent()` to the top: a hidden or removed control's peer loses its
+parent at its old parent's next `GetChildren()` (`ControlAutomationPeer` lists only visible visual children, and unparents the
+rest), so for every element under it the chain ends at that control, which isn't a root. In the walk, the failing call is
+`Navigate(FirstChild)` on the page that had just left: Avalonia answers it (the detached page still has its children), UIA core
+reads the child's runtime id and then its fragment root, gets null, and returns E_FAIL to the client. Reading properties of an
+element with no fragment root doesn't fail; navigating to one does. No managed exception is thrown anywhere in the provider.
 
-Unconfirmed suspicion: the UIA client walks the tree in many calls, each a separate dispatcher operation, while the window is still
-settling after the transition (a ripple finishing on the item that was pressed, in a page now hidden or gone, and the layout that
-follows), so a walk can meet a provider mid-change. The nav section retries a failing `FindAll` once and prints that it did; nothing
-else changes. Worth a minimal repro with a plain `Panel` whose child is removed while a client walks, before reporting.
+Each provider call is its own round trip to the UI thread (`Dispatcher.UIThread.InvokeAsync(...).Result`), so a search of a
+phone-sized window is hundreds of round trips over 20 to 300 ms, and layout, animation and visibility changes run between them.
+Any change that lands during a search can do it:
 
+| Scenario (`tools/real-window/uia-findall/run.ps1`, 24 changes each, searching for 1.5 s after each) | Failed searches |
+|---|---|
+| A plain `Panel` whose child is hidden, or removed, every 150 ms by a timer, searched for 20 s | 16 of 224, 21 of 183 |
+| An `AvonicNav`'s animated push and pop, searched from the `Invoke` on (seven runs: each client, a walk, a listener, stock controls) | 12 to 18 per run of 100 to 1600 searches; the sample's ion-nav page, 10 of 1250 and 10 of 1390 |
+| The same nav unanimated, or the plain `Panel` changed in the `Invoke` itself | 0 of 792, 0 of 775 |
+
+Every failing search was the one that spanned the moment the page left, 200 to 420 ms after the `Invoke` (a pop ends about
+210 ms after it, a push about 320 ms), and every one succeeded when tried again at once. An unanimated change, or one made inside the `Invoke`, is
+over before the next search starts, so it never fails. The nav shows it in `drive.ps1` only because its section polls for the
+status line while the transition runs; the shell's page swaps are each followed by a sleep.
+
+What else the provider could answer, measured with the hooked provider changed (`UiaRepro --fix`, run.ps1's `fix-*`, the same
+runs as above):
+
+| A detached element's fragment root | hide, every 150 ms | remove, every 150 ms | nav, managed client | nav, `IUIAutomation` |
+|---|---|---|---|---|
+| null, as Avalonia does | 16 of 224 | 21 of 183 | 17 of 600 | 12 of 549 |
+| `UIA_E_ELEMENTNOTAVAILABLE` (0x80040201), as UIA's docs ask of an element that has gone | 0 of 288 | 6 of 210 | 1 of 788 | 0 of 835 |
+| the window's root, as if the element were still in the fragment | 0 of 323 | 0 of 301 | 0 of 752 | 0 of 816 |
+
+`UIA_E_ELEMENTNOTAVAILABLE` fails less often, but still fails the whole search now and then (`ElementNotAvailableException`). The
+window's root stopped it in every run: UIA core takes the element as part of the window's fragment, and the search goes on and
+ends where the detached subtree's sibling navigation does. **That is the suggestion for the upstream report:**
+`AutomationNode.GetFragmentRoot()` should answer the window's `RootAutomationNode` (the one the element last had) for a
+peer whose chain no longer reaches a root, not null. Every immediate retry succeeded, in every run.
+
+A screen reader that searches just after a navigation would get the same failure; one that retries, or works from events, would
+recover. `drive.ps1`'s ion-nav section retries a failing `FindAll` once, 300 ms later, and prints it, which is the least-bad
+workaround for a client. On Avonic's side, without hooking Avalonia, the window's root can only come through a peer of Avonic's own
+in the chain, as `GetAutomationRootCore` follows `GetParent()` and can't be overridden: the nav would wrap each page in a part
+whose peer's `GetParentCore` keeps answering the host's peer after the page has left. That changes the pages' visual parent, helps
+only the nav (an overlay's dismiss, a segment view and an accordion would each need the same), and a search under way would
+still find the leaving page's elements, so it isn't done. The repro, the client and the provider's hooks are in
+`tools/real-window/uia-findall/`.
 
 ## A `DynamicResource` brush in a template's own `Resources` keeps its control alive
 

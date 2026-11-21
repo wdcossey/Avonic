@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- #254: a window whose pages change while a UIA client walks it, with Avalonia's UIA provider hooked and logged. Not in
+       Avonic.sln. net8.0, as MonoMod.RuntimeDetour 25.1 refuses net10.0. Run by ../run.ps1. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Simple" />
+    <PackageReference Include="MonoMod.RuntimeDetour" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Avonic.Components\Avonic.Components.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Avonic.Themes\Avonic.Themes.csproj" />
+  </ItemGroup>
+
+</Project>

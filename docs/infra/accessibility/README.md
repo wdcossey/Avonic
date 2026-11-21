@@ -23,6 +23,10 @@ the peer as help text by themselves; not tried here, so a control with its own e
 | Android | `AccessibilityNodeInfo` | Supported (TalkBack). The docs give no detail beyond that |
 | Browser | ARIA attributes | Partial |
 
+On Windows, a UIA search that is under way when a subtree it has reached is hidden or removed fails with E_FAIL, as Avalonia's
+provider gives that subtree's elements no fragment root: an animated change (a nav's transition, an overlay's dismiss) can meet
+a screen reader's search (`docs/infra/avalonia-issues.md`, #254).
+
 Not tried here: TalkBack on the Pixel, Orca on Linux, VoiceOver. Only Windows' UI Automation is exercised, by
 `tools/real-window/drive.ps1`, which finds and reads every control through it: a real-window check is also a check of
 what a screen reader gets. Avalonia's own end-to-end tests use Appium (Windows, macOS); its docs say Appium has no stable

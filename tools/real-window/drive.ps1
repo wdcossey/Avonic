@@ -2203,9 +2203,10 @@ try {
     # the nav (the extension) before the shell's own back, and leaves the request to the shell at the root. Names are distinctive:
     # the shell's own button is "Back". Checks are by names and regions, not wrapped text.
     Section 'ion-nav' {
-        # In this section only: a FindAll that fails with UIA's E_FAIL, which the real window showed now and then in the moments
-        # after a page left the nav (docs/infra/avalonia-issues.md), is tried once more 300 ms later, and the retry is printed.
-        # Any other error, or a second failure, still stops the section. The shared All is untouched.
+        # In this section only: a FindAll that fails with UIA's E_FAIL is tried once more 300 ms later, and the retry is printed.
+        # It's Avalonia's (#254, docs/infra/avalonia-issues.md): a search under way when a page leaves the tree meets elements with
+        # no fragment root. Only this section searches while a transition runs (WaitStack polls from the click on), so only it
+        # meets it. Any other error, or a second failure, still stops the section. The shared All is untouched.
         function All($type) {
             $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
             try { $found = @($win.FindAll($TS::Descendants, $cond)) }

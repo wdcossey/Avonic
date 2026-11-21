@@ -128,3 +128,16 @@ sends a mouse move when the capture changes, which reached the gesture with no d
 
 The frames come from the screen, not `PrintWindow`, which offsets this window by its invisible border, and that looks like a bug
 in the app.
+
+## `uia-findall/`: a UIA search while the tree changes (#254)
+
+The repro for an Avalonia issue (`docs/infra/avalonia-issues.md`, "A UIA search fails with E_FAIL when a subtree it's in leaves
+the tree"), kept for when it's reported, and to check a new Avalonia against. `UiaRepro` is a window of pages in an `AvonicNav`
+or a plain `Panel`, with Avalonia's UIA provider hooked (MonoMod, so net8.0) and each call logged; `UiaClient` changes the pages
+through `Invoke` only and searches the window while they change, through the managed client or `IUIAutomation`, logging every
+HRESULT; `run.ps1` builds both and the sample and runs each scenario, about 15 minutes. Neither project is in `Avonic.sln`.
+Like `drive.ps1`, it brings windows to the front, so take the desktop's lease first:
+
+```
+pwsh -NoProfile -File tools/real-window/uia-findall/run.ps1 [-Only 'hide-*,fix-*'] [-Rounds 24]
+```
