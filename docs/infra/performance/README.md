@@ -338,7 +338,7 @@ Two variants were measured against Ionic's three months at once (`-eager`): **va
 needed (`-press`), **variant 2** also after the first frames (`-idle`, and the plain pages), each with a timed first swipe after
 opening (a touch pressed on the scroller, its offset moved a month over 12 frames, then lifted). On the Pixel 8, Release, the screen
 kept on, every round `/top-app` and every page collected (`page-costs/2026-11-21-pixel8-release-datetime-spike-b-e1f2a5b.txt`,
-rounds 2 and 3):
+rounds 2 and 3, the medians over their lines together, as `table.js` gives them):
 
 | | Ionic's, at once | Variant 1, when needed | Variant 2, kept | Single grid |
 |---|---:|---:|---:|---:|

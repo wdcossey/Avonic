@@ -4,7 +4,8 @@ namespace Avonic.Sample.Diagnostics;
 
 /// <summary>
 /// The pages a <c>-p:AvonicPerf=true</c> build opens in each round: every sample page but the device page, whose benchmark is its
-/// own, then the perf-only <see cref="DatetimeCostView"/>s, which the sample's list doesn't show: Ionic's scrolled calendar, then
+/// own, then the perf-only <see cref="DatetimeCostView"/>s, which the sample's list doesn't show: the scrolled calendar (Ionic's, its months either
+/// side of the working one made after its first frames since #248's spike B, so 297 elements for one, not the 725 of earlier runs), then
 /// the same in <see cref="DatetimeCalendarRendering.SingleGrid"/> (<c>-grid</c>), so that one run compares them. A filter, from
 /// <see cref="OnlyVariable"/> on desktop or the intent extra of the same name on Android, keeps a part of them.
 /// docs/infra/performance/README.md, "Page costs on a device".

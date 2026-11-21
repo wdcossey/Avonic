@@ -19,6 +19,9 @@ public partial class AvonicDatetime
     /// </summary>
     internal static bool NeighbourMonthsAfterFirstFrames { get; set; } = true;
 
+    /// <summary><see cref="NeighbourMonthsAfterFirstFrames"/> as it was when this datetime was made, so a test's change reaches no other.</summary>
+    private readonly bool _neighbourMonthsAfterFirstFrames = NeighbourMonthsAfterFirstFrames;
+
     private IDisposable? _neighbourFrame;
 
     /// <summary>
@@ -101,7 +104,7 @@ public partial class AvonicDatetime
     /// </summary>
     private void ScheduleNeighbourDays()
     {
-        if (!NeighbourMonthsAfterFirstFrames || _neighbourFrame is not null || UsesSingleGrid
+        if (!_neighbourMonthsAfterFirstFrames || _neighbourFrame is not null || UsesSingleGrid
             || _calendarMonths is not { Months.Count: 3, HasNeighbourDays: false } panel)
         {
             return;
