@@ -50,6 +50,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          {b:CssShadow} for it in XAML (docs/infra/box-shadow/README.md);
                          HiddenChainWatcher = waits for display: none on a control or an ancestor to end;
                          StyleValue = a value the control's code gives a property at style priority, or nothing;
+                         PropertiesByName = Object.assign by name, for componentProps and interfaceOptions;
                          KeepFocus = a pointerdown's preventDefault(), so that a press moves no focus)
   Gestures/              Ionic's utils/gesture: Gesture.Create (createGesture), GestureController (priority, capture,
                          blockers); capture is Avalonia's pointer capture, and an undecided gesture keeps a ScrollViewer

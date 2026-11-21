@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- #254: a UIA client that changes an app's pages through Invoke and searches it while they change, through the managed
+       client (System.Windows.Automation, as tools/real-window/drive.ps1) or the native one (IUIAutomation). Not in Avonic.sln.
+       Run by ../run.ps1. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Interop.UIAutomationClient" />
+  </ItemGroup>
+
+</Project>

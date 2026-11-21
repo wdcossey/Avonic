@@ -45,7 +45,7 @@ sheet (its button, the backdrop, Escape, back) raises `IonCancel`; every dismiss
 **`InterfaceOptions`** sets the overlay's properties by name, in Ionic's camelCase or Avonic's PascalCase (`"size"`, `"Side"`); a
 string converts as XAML would (`"cover"`). `header` is the alert's header (else the label), the popover's list header and the
 modal's title; `subHeader` and `message` the popover's too; `cssClass`, a string or a list, adds classes. A key with no property is
-ignored.
+ignored; a value the property can't take, and a dotted key (`grid.row`: an attached property), are ignored and logged.
 
 ## Checklist
 

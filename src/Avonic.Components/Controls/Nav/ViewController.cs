@@ -1,11 +1,7 @@
-using System.ComponentModel;
-using System.Globalization;
-using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
@@ -209,103 +205,7 @@ public sealed class ViewController
 /// </remarks>
 internal static class NavProps
 {
-    public static void Apply(Control page, IReadOnlyDictionary<string, object?>? props)
-    {
-        if (props is null)
-        {
-            return;
-        }
+    private static readonly PropertiesByName.Rules Rules = new("[ion-nav] componentProps") { ClrProperties = true };
 
-        foreach (var (key, value) in props)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                continue;
-            }
-
-            var name = char.ToUpperInvariant(key[0]) + key[1..];
-            try
-            {
-                if (AvaloniaPropertyRegistry.Instance.FindRegistered(page, name) is { IsReadOnly: false } property)
-                {
-                    if (TryConvert(value, property.PropertyType, out var converted))
-                    {
-                        page.SetValue(property, converted);
-                    }
-                    else
-                    {
-                        Dropped(page, key, value);
-                    }
-
-                    continue;
-                }
-
-                if (FindClrProperty(page.GetType(), name) is { } clr)
-                {
-                    if (TryConvert(value, clr.PropertyType, out var clrValue))
-                    {
-                        clr.SetValue(page, clrValue);
-                    }
-                    else
-                    {
-                        Dropped(page, key, value);
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(page, "[ion-nav] componentProps {0}: {1}", key, exception.Message);
-            }
-        }
-    }
-
-    private static void Dropped(Control page, string key, object? value) =>
-        Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(page, "[ion-nav] componentProps {0}: {1} isn't a value it takes", key, value);
-
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Documented: a trimmed app may strip a page's CLR property.")]
-    private static PropertyInfo? FindClrProperty(Type type, string name) =>
-        type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance) is { CanWrite: true, SetMethod.IsPublic: true } property
-            && property.GetIndexParameters().Length == 0 ? property : null;
-
-    private static bool TryConvert(object? value, Type type, out object? converted)
-    {
-        converted = value;
-        var target = Nullable.GetUnderlyingType(type) ?? type;
-        if (value is null)
-        {
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) is not null;
-        }
-
-        if (type.IsInstanceOfType(value) || target.IsInstanceOfType(value))
-        {
-            return true;
-        }
-
-        try
-        {
-            if (value is string text && target.IsEnum)
-            {
-                converted = Enum.Parse(target, text.Replace("-", ""), ignoreCase: true);
-                return true;
-            }
-
-            if (value is string s && TypeDescriptor.GetConverter(target) is { } converter && converter.CanConvertFrom(typeof(string)))
-            {
-                converted = converter.ConvertFromInvariantString(s);
-                return true;
-            }
-
-            if (value is IConvertible && typeof(IConvertible).IsAssignableFrom(target))
-            {
-                converted = Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
-                return true;
-            }
-        }
-        catch (Exception)
-        {
-            // A value that can't be converted is dropped.
-        }
-
-        return false;
-    }
+    public static void Apply(Control page, IReadOnlyDictionary<string, object?>? props) => PropertiesByName.Apply(page, props, Rules);
 }
