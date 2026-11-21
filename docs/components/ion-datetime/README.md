@@ -153,17 +153,27 @@ the header and the date column in some locales (`6月15日木` for Chromium's `6
 
 ## Extensions
 
-- **`CalendarRendering`** (`DatetimeCalendarRendering`), how the calendar of a grid presentation draws its months. A spike of
-  [#248](https://github.com/wdcossey/Avonic/issues/248), measured against Ionic's design before either is chosen:
+- **`CalendarRendering`** (`DatetimeCalendarRendering`), how the calendar of a grid presentation draws its months
+  ([#248](https://github.com/wdcossey/Avonic/issues/248)). **The default stays Ionic's `ScrolledMonths`; `SingleGrid` is opt-in**, for
+  an app that wants the cheaper calendar: for every datetime through `AvonicConfig.DatetimeCalendarRendering`, or for one through its
+  `CalendarRendering`. On the Pixel 8 the single grid opens in about half the time and shows a new month 3 times sooner, with more
+  frames over 33 ms during its fade (`docs/infra/performance/README.md`, "The single grid").
   - `ScrolledMonths`, the default, is Ionic's: the previous, current and next months side by side in a scroller that snaps, which a
     change of month scrolls and a swipe drags; 126 days.
-  - `SingleGrid` is one month of 42 days, drawn again in place. A change of month, by the buttons, a swipe or a value in another month,
-    fades the days out in 90 ms (md's accelerate curve, `cubic-bezier(0.4, 0, 1, 1)`) and in again in 210 ms (decelerate,
+  - `SingleGrid` is one month of 42 days, drawn again in place. A change of month, by the buttons, a swipe, the keys or a value in
+    another month, fades the days out in 90 ms (md's accelerate curve, `cubic-bezier(0.4, 0, 1, 1)`) and in again in 210 ms (decelerate,
     `cubic-bezier(0, 0, 0.2, 1)`): md's fade through, 300 ms, on `AvonicConfig`'s clock. With `AvonicConfig.Animated` off it changes at
     once. A horizontal swipe on the grid changes the month once it ends past 50 px (or a flick of 20 px at 0.3 px/ms): toward the next
     month when the finger moves toward the start of the line (left, or right in RTL). It doesn't follow the finger. The keys, focus,
     selection, `Min` and `Max`, `HighlightedDates`, `IsDateEnabled`, `FirstDayOfWeek`, `ShowAdjacentDays` and the automation names are
-    the scrolled calendar's (`AvonicDatetimeSingleGridTests` checks each day against it); a change by the keys is at once in both.
+    the scrolled calendar's (`AvonicDatetimeSingleGridTests` checks each day against it).
+  - **The keys in `SingleGrid`**: an arrow, Home, End or a page key to a day in another month fades there too, where the scrolled
+    calendar, as Ionic's, draws the new month at once. The focused day keeps its focus while the old month fades out; at the swap the
+    key's day in the new month takes it, before the days fade in, so its ring fades in with them and shows once the grid does. A key
+    during the fade goes on from the day on its way (PageDown then Right from June 30 is July 31), and one back to the month shown
+    drops the fade. A key within the month moves at once, and with `AvonicConfig.Animated` off a key to another month does too.
+    `ScrolledMonths` keeps Ionic's keys unchanged.
+  - The fade's durations and the swipe's threshold are constants for now; making them settable in `AvonicConfig` is on the roadmap.
 
   Each rendering makes only its own days, when the datetime first draws them. `AvonicConfig.DatetimeCalendarRendering` is the default for
   datetimes made after it is set, at style priority, so a value set on the datetime or in a style wins:
@@ -185,8 +195,9 @@ the header and the date column in some locales (`6月15日木` for Chromium's `6
 - **The locale's text is the platform's ICU, through .NET**: measured on Windows; Linux's gives some locales' AM and PM in English and
   `ar-SA` in the Gregorian calendar, and non-Latin narrow day names may be longer there (COMPARISON.md). Android, iOS and macOS
   weren't measured.
-- **`SingleGrid` isn't Ionic's** (Extensions): its swipe doesn't drag the month, and the month fades rather than slides. A spike: no
-  breakage run yet, and not tried in a real window or on a device.
+- **`SingleGrid` isn't Ionic's** (Extensions), and is opt-in: its swipe doesn't drag the month, and the month fades rather than
+  slides, by the keys too. Measured on the Pixel 8 with the perf build; its real-window section
+  (`drive.ps1 -Only '*single grid'`) is written and not yet run.
 - **Snapping after a touch swipe is Avalonia's**: it jumps to the month, or aims a fling at it, where Chromium eases (as the picker
   and the segment view).
 - **The month/year wheel closes at the parent overlay's next present**, not as soon as the datetime is hidden, as Avalonia doesn't say

@@ -182,6 +182,7 @@ central in `Directory.Packages.props`; warnings are errors. Solution file is `Av
 | `ion-modal` | `AvonicModal` (+ `ModalWrapper`, `ModalPanel`, `ModalCanDismiss`; the sheet: `ModalHandle`, `ModalPagePanel`, `ModalSheet`; `AvonicAnimation`'s `ProgressStart`/`Step`/`End`) | done — [docs](docs/components/ion-modal/README.md) |
 | `ion-popover` | `AvonicPopover` (+ `PopoverEvent`, Ionic's `event`: a target and a point; `PopoverPanel`, its wrapper) | done — [docs](docs/components/ion-popover/README.md) |
 | `ion-select`, `ion-select-option`, `ion-select-modal` | `AvonicSelect`, `AvonicSelectOption`, `AvonicSelectModal` (+ `AvonicSelectPopover`, Ionic's internal `ion-select-popover`; `SelectOverlayOption`, an option the popover and the modal show; each interface built in code, as `select.js` does) | done — [docs](docs/components/ion-select/README.md) |
+| `ion-datetime` | `AvonicDatetime` (+ `CalendarRendering`, an extension: Ionic's three scrolled months by default, or, opt-in by `AvonicConfig.DatetimeCalendarRendering`, one grid drawn again in place, fading to a new month) | done — [docs](docs/components/ion-datetime/README.md) |
 
 Every row has completed every step in `docs/PROCESS.md`. Rows are added in a roll-up at the end of
 each priority tier, not by the control's own PR, so a recently finished control may be missing. For

@@ -128,7 +128,8 @@ days of the Latin and Cyrillic locales elsewhere. Android, iOS and macOS use the
 
 ## Deviation: the single grid (an option)
 
-`CalendarRendering="SingleGrid"` (README, Extensions; #248, spike A) isn't Ionic's, and isn't the default. Ionic's calendar is three
+`CalendarRendering="SingleGrid"` (README, Extensions; #248, spike A) isn't Ionic's, and isn't the default: an app opts in, through
+`AvonicConfig.DatetimeCalendarRendering` or a datetime's `CalendarRendering`. Ionic's calendar is three
 months in a horizontally snapping scroller; the single grid is one month drawn again in place. What it shows is the same: its frame of
 June 2023 (`AvonicDatetimeSingleGridTests.Capture_Single_Grid`) is pixel for pixel the scrolled calendar's
 (`AvonicDatetimeCaptureTests.Reference_DateTime`), and each day's text, state, automation name and pseudoclasses equal the scrolled
@@ -141,6 +142,7 @@ calendar's working month in six cases (four locales, four first days, adjacent d
 | The heading | when the scroll rests (Pixel 8: 383 ms median) | at the end of the fade out (about 100 ms) |
 | `animated: false` | the scroll jumps | the month changes at once |
 | A swipe | drags the months with the finger, then snaps | changes the month once, at its end, past 50 px or a flick |
+| A key to another month | the month drawn at once, the day focused on the next frame | the same fade, the key's day focused at the swap, so its ring fades in with the days |
 | Days made | 126 (103 shown and templated in June 2023's three months) | 42 (34 shown) |
 
 The swipe that doesn't follow the finger is the deliberate deviation. Elements on the `datetime-x1` perf page (one default datetime),

@@ -308,6 +308,23 @@ conservatively, so a reference left in a stack slot keeps a page until the slot 
 of the dispatcher, several times over 400 ms, and the busy window collects again at its end; a page that survives both is held.
 Headless (CoreCLR, precise), every timed page goes.
 
+### The single grid
+
+#248's spike A ([#258](https://github.com/wdcossey/Avonic/pull/258)) measured a calendar of one 7x6 grid, drawn again in place, against
+Ionic's three scrolled months, on the Pixel 8 (`page-costs/2026-11-20-pixel8-release-datetime-spike-a-a119279.txt`, rounds 2 and 3):
+
+| | Scrolled | Single grid |
+|---|---:|---:|
+| `datetime-x1`, `-x2`, `-x4` to open | 159, 300, 513 ms | 82, 148, 264 ms |
+| A month change: the heading shows the new month, median | 389 ms | 119 ms |
+| A month change: frames over 33 ms, per round of 20 | 4.5 | 9.5 |
+
+**Decided: the default stays Ionic's `ScrolledMonths`, and `SingleGrid` is opt-in**, for every datetime through
+`AvonicConfig.DatetimeCalendarRendering` or for one through its `CalendarRendering` (`docs/components/ion-datetime/README.md`,
+Extensions). The single grid halves the open and shows a new month 3 times sooner, but isn't Ionic's (it fades, and its swipe doesn't
+follow the finger), and its fade has twice the long frames. The fade's timing stays md's fade through, 90 ms out and 210 ms in, as a
+group (`AnimationGroupOpacity`); making it and the swipe's threshold settable is on the roadmap.
+
 ### Keeping a run
 
 Each run worth keeping goes in [`page-costs/`](page-costs/README.md), with the device, the build and the commit, and
