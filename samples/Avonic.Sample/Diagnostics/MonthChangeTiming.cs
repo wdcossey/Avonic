@@ -153,6 +153,17 @@ public sealed class MonthChangeTiming
         var swipeFrom = scroller?.Offset.X ?? 0;
         var swipeTo = scroller is null ? 0 : next ? 2 * scroller.Viewport.Width : 0;
         var swipeStep = 0;
+        var pressed = false;
+
+        void Lift()
+        {
+            if (pressed && scroller is not null)
+            {
+                pressed = false;
+                scroller.RaiseEvent(new PointerReleasedEventArgs(scroller, finger, top, at, 0,
+                    new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+            }
+        }
 
         var from = Heading(root, rescan: true);
         DateTime? target = from?.AddMonths(next ? 1 : -1);
@@ -203,8 +214,7 @@ public sealed class MonthChangeTiming
                     scroller.Offset = new Vector(swipeFrom + (swipeTo - swipeFrom) * swipeStep / SwipeFrames, 0);
                     if (swipeStep == SwipeFrames)
                     {
-                        scroller.RaiseEvent(new PointerReleasedEventArgs(scroller, finger, top, at, 0,
-                            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+                        Lift();
                     }
                 }
 
@@ -246,6 +256,7 @@ public sealed class MonthChangeTiming
             start = Stopwatch.GetTimestamp();
             if (scroller is not null)
             {
+                pressed = true;
                 scroller.RaiseEvent(new PointerPressedEventArgs(scroller, finger, top, at, 0,
                     new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None));
             }
@@ -279,6 +290,8 @@ public sealed class MonthChangeTiming
             // However it ended, nothing of it goes on: a frame callback still asked for (one that may never come, when frames
             // have stopped) is taken off the count now, and returns at once if it comes, asking for no other.
             over = true;
+            // A swipe that ended early (no frames, an error) lifts its finger, so nothing after starts from a press.
+            Lift();
             Interlocked.Add(ref _pendingFrames, -asked);
             asked = 0;
             root.DetachedFromVisualTree -= OnDetached;

@@ -36,12 +36,13 @@ public sealed class DatetimeCostView : UserControl
         Rendering = rendering;
         Neighbours = neighbours;
         var stack = new StackPanel { Spacing = 16, Margin = new Thickness(16) };
-        AppContext.SetData(NeighbourMonthsSwitch, neighbours switch
+        // Set only for these datetimes, and put back as it was after, so a value the app set stays.
+        var previous = AppContext.GetData(NeighbourMonthsSwitch);
+        if (neighbours != DatetimeNeighbours.Default)
         {
-            DatetimeNeighbours.AtOnce => "AtOnce",
-            DatetimeNeighbours.WhenNeeded => "WhenNeeded",
-            _ => null,
-        });
+            AppContext.SetData(NeighbourMonthsSwitch, neighbours.ToString());
+        }
+
         try
         {
             for (var i = 0; i < count; i++)
@@ -57,7 +58,10 @@ public sealed class DatetimeCostView : UserControl
         }
         finally
         {
-            AppContext.SetData(NeighbourMonthsSwitch, null);
+            if (neighbours != DatetimeNeighbours.Default)
+            {
+                AppContext.SetData(NeighbourMonthsSwitch, previous);
+            }
         }
 
         // As the sample's page is laid out: a scroller, 16 in, 16 between.
@@ -75,13 +79,14 @@ public sealed class DatetimeCostView : UserControl
 
     /// <summary>
     /// The page's title in the page-cost lines: <c>datetime-x1</c> and so on, and <c>datetime-x1-grid</c> and so on for
-    /// <see cref="DatetimeCalendarRendering.SingleGrid"/>, <c>-eager</c> and <c>-press</c> for <see cref="DatetimeNeighbours"/>.
+    /// <see cref="DatetimeCalendarRendering.SingleGrid"/>, <c>-eager</c>, <c>-press</c> and <c>-idle</c> for <see cref="DatetimeNeighbours"/>.
     /// </summary>
     public static string Title(int count, DatetimeCalendarRendering rendering = DatetimeCalendarRendering.ScrolledMonths,
         DatetimeNeighbours neighbours = DatetimeNeighbours.Default) =>
         rendering == DatetimeCalendarRendering.SingleGrid ? $"datetime-x{count}-grid"
         : neighbours == DatetimeNeighbours.AtOnce ? $"datetime-x{count}-eager"
         : neighbours == DatetimeNeighbours.WhenNeeded ? $"datetime-x{count}-press"
+        : neighbours == DatetimeNeighbours.AfterFirstFrame ? $"datetime-x{count}-idle"
         : $"datetime-x{count}";
 }
 
@@ -96,4 +101,10 @@ public enum DatetimeNeighbours
 
     /// <summary>Only when first needed: a press on the calendar, a scroll, a change of month. The <c>-press</c> pages.</summary>
     WhenNeeded,
+
+    /// <summary>
+    /// After the first frames, two weeks a frame, or sooner when needed: the default, named, for the <c>datetime-x1-idle</c> page,
+    /// whose first swipe is timed, so that the plain <c>datetime-x1</c>'s month changes are timed as in the runs kept before.
+    /// </summary>
+    AfterFirstFrame,
 }

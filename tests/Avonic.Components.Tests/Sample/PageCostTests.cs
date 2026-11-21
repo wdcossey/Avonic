@@ -38,7 +38,8 @@ public partial class PageCostTests
     {
         var expected = Titles(SamplePages).Where(t => t != "device")
             .Concat(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid",
-                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press"]);
+                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press",
+                "datetime-x1-idle"]);
 
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, null)));
         Assert.Equal(expected, Titles(PageCostSet.Select(SamplePages, " ")));
@@ -60,14 +61,16 @@ public partial class PageCostTests
         Assert.Contains("datetime-x4", datetime);
         Assert.DoesNotContain("ion-button", datetime);
 
-        Assert.Equal(["datetime-x1", "datetime-x1-grid", "datetime-x1-eager", "datetime-x1-press"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
+        Assert.Equal(["datetime-x1", "datetime-x1-grid", "datetime-x1-eager", "datetime-x1-press", "datetime-x1-idle"], Titles(PageCostSet.Select(SamplePages, "DATETIME-X1")));
         Assert.Equal(["ion-button", "datetime-x2", "datetime-x2-grid", "datetime-x2-eager", "datetime-x2-press"],
             Titles(PageCostSet.Select(SamplePages, "ion-button, datetime-x2")));
         Assert.Equal(["datetime-x1", "datetime-x2", "datetime-x4", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid",
-                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press"],
+                "datetime-x1-eager", "datetime-x2-eager", "datetime-x4-eager", "datetime-x1-press", "datetime-x2-press", "datetime-x4-press",
+                "datetime-x1-idle"],
             Titles(PageCostSet.Select(SamplePages, "datetime-x")));
-        // Spike B's: the swipes and the pages to compare, alone.
-        Assert.Equal(["datetime-x1", "datetime-x1-eager", "datetime-x1-press"], Titles(PageCostSet.Select(SamplePages, "=datetime-x1,=datetime-x1-eager,=datetime-x1-press")));
+        // Spike B's swipes, alone.
+        Assert.Equal(["datetime-x1-eager", "datetime-x1-press", "datetime-x1-idle"],
+            Titles(PageCostSet.Select(SamplePages, "=datetime-x1-eager,=datetime-x1-press,=datetime-x1-idle")));
         // ion-grid is a sample page: "x1-grid" and so on, or "datetime", for the grid pages.
         Assert.Equal(["ion-grid", "datetime-x1-grid", "datetime-x2-grid", "datetime-x4-grid"], Titles(PageCostSet.Select(SamplePages, "-grid")));
         Assert.Empty(PageCostSet.Select(SamplePages, "no-such-page"));
@@ -155,7 +158,7 @@ public partial class PageCostTests
         Assert.Equal([0, 42, 0], Days(press));
         Assert.Equal("datetime-x1-press", DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.WhenNeeded));
 
-        // The default, unnamed: made a frame after the first; and the switch is left unset for any other datetime.
+        // The default, unnamed and named: made after the first frames; and the switch put back as it was, unset or the app's.
         var plain = new DatetimeCostView(1);
         scene.Window.Content = plain;
         scene.Window.UpdateLayout();
@@ -164,8 +167,27 @@ public partial class PageCostTests
         Assert.Equal([42, 42, 42], Days(plain));
         Assert.Null(AppContext.GetData(DatetimeCostView.NeighbourMonthsSwitch));
         Assert.Equal(AvonicDatetime.NeighbourMonthsSwitch, DatetimeCostView.NeighbourMonthsSwitch);
+        Assert.Equal("datetime-x1-idle", DatetimeCostView.Title(1, neighbours: DatetimeNeighbours.AfterFirstFrame));
+        AppContext.SetData(DatetimeCostView.NeighbourMonthsSwitch, "AtOnce");
+        try
+        {
+            var idle = new DatetimeCostView(1, neighbours: DatetimeNeighbours.AfterFirstFrame);
+            scene.Window.Content = idle;
+            scene.Window.UpdateLayout();
+            Assert.Equal([0, 42, 0], Days(idle));
+            Assert.Equal("AtOnce", AppContext.GetData(DatetimeCostView.NeighbourMonthsSwitch));
+            var app = new DatetimeCostView(1);
+            scene.Window.Content = app;
+            scene.Window.UpdateLayout();
+            Assert.Equal([42, 42, 42], Days(app));
+        }
+        finally
+        {
+            AppContext.SetData(DatetimeCostView.NeighbourMonthsSwitch, null);
+        }
 
-        Assert.Equal(PageCostSet.SwipeLabel, PageCostSet.SwipeLabelOf("datetime-x1"));
+        Assert.Null(PageCostSet.SwipeLabelOf("datetime-x1"));
+        Assert.Equal("datetime-swipe-idle", PageCostSet.SwipeLabelOf("datetime-x1-idle"));
         Assert.Equal("datetime-swipe-eager", PageCostSet.SwipeLabelOf("datetime-x1-eager"));
         Assert.Equal("datetime-swipe-press", PageCostSet.SwipeLabelOf("datetime-x1-press"));
         Assert.Null(PageCostSet.SwipeLabelOf("datetime-x2-press"));
