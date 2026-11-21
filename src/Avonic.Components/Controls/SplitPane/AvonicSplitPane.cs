@@ -360,6 +360,13 @@ public class AvonicSplitPane : ItemsControl
             }
         }
 
+        // The main content put back, or a new one added, while attached: marked again, as Ionic's element keeps its class when
+        // it's moved.
+        if (_attached && _main is null && ContentId is { } id && Items.OfType<Control>().Any(c => c.Name == id))
+        {
+            StyleMainElement();
+        }
+
         UpdateMainClip();
     }
 

@@ -125,6 +125,7 @@ public class SplitPanePanel : Panel
         var used = 0.0;
         var tallest = 0.0;
         var mains = new List<Control>();
+        var others = new List<int>();
         foreach (var child in Children)
         {
             if (!child.IsVisible)
@@ -138,6 +139,7 @@ public class SplitPanePanel : Panel
                 child.Measure(new Size(Math.Max(0, side - border), height));
                 _row.Add((child, IsEndSide(menu) ? Kind.End : Kind.Start, side));
                 used += side;
+                tallest = Math.Max(tallest, child.DesiredSize.Height);
             }
             else if (child.Classes.Contains(AvonicSplitPane.SplitPaneMain))
             {
@@ -146,12 +148,18 @@ public class SplitPanePanel : Panel
             }
             else
             {
-                // flex: 0 1 auto: its own width, shrunk to the room the row has left, as a flex item shrinks.
-                child.Measure(new Size(Math.Max(0, width - used), height));
-                _row.Add((child, Kind.Other, child.DesiredSize.Width));
-                used += child.DesiredSize.Width;
+                others.Add(_row.Count);
+                _row.Add((child, Kind.Other, 0));
             }
+        }
 
+        // flex: 0 1 auto, after the sides, which don't shrink: its own width, shrunk to the room the row has left.
+        foreach (var i in others)
+        {
+            var child = _row[i].Child;
+            child.Measure(new Size(Math.Max(0, width - used), height));
+            _row[i] = (child, Kind.Other, child.DesiredSize.Width);
+            used += child.DesiredSize.Width;
             tallest = Math.Max(tallest, child.DesiredSize.Height);
         }
 

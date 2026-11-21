@@ -914,6 +914,46 @@ public class AvonicSplitPaneTests
         Assert.InRange(stage.Box(stage.Main).X, 270, 390);
     }
 
+    [AvaloniaFact]
+    public void B16_Another_Child_Before_The_Side_Shrinks_To_What_The_Side_Leaves()
+    {
+        // The side has flex-shrink: 0, so a child before it in the items still gets only the 120 it leaves.
+        var other = new TextBlock { Text = string.Join(' ', Enumerable.Repeat("words", 40)), TextWrapping = TextWrapping.Wrap };
+        using var stage = new Stage(390, 844, s =>
+        {
+            s.Pane.When = "xs";
+            s.Pane.Items.Insert(0, other);
+        });
+        Box(stage.Box(stage.Menu), 0, 269);
+        Assert.InRange(stage.Box(other).Width, 1, 120);
+    }
+
+    [AvaloniaFact]
+    public void B16_With_No_Width_To_Fill_It_Measures_To_Its_Content()
+    {
+        // In a horizontal StackPanel the percentages have no basis: the side is its own width, and nothing is infinite.
+        using var stage = new Stage(390, 844, s =>
+        {
+            s.Pane.When = true;
+            s.Root.Children.Remove(s.Pane);
+            s.Root.Children.Add(new StackPanel { Orientation = Orientation.Horizontal, Children = { s.Pane } });
+        });
+        Assert.True(double.IsFinite(stage.Pane.DesiredSize.Width));
+        Assert.True(stage.Menu.IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void B7_The_Main_Content_Put_Back_Is_The_Main_Again()
+    {
+        using var stage = new Stage(1024, 768);
+        stage.Pane.Items.Remove(stage.Main);
+        Stage.Settle();
+        stage.Pane.Items.Add(stage.Main);
+        Stage.Settle();
+        Assert.Contains(AvonicSplitPane.SplitPaneMain, stage.Main.Classes);
+        Box(stage.Box(stage.Main), 287, 737);
+    }
+
     // ── B17: a wrapped menu ──────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
