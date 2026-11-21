@@ -890,6 +890,10 @@ public class AvonicSplitPaneTests
         Box(stage.Box(other), 270, 40);
         Box(stage.Box(stage.Main), 310, 80);
 
+        // Only the main content clips.
+        Assert.True(stage.Main.ClipToBounds);
+        Assert.False(other.ClipToBounds);
+
         // Hidden, every child fills the pane.
         stage.Pane.When = false;
         Stage.Settle();
