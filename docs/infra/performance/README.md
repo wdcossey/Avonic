@@ -193,7 +193,8 @@ adb shell settings put system screen_off_timeout 1800000    # 30 minutes, for th
 adb shell settings put system screen_off_timeout 30000      # after
 ```
 
-Each round's check line ends with the app's cpuset (`/proc/self/cpuset`, `/top-app` while it's in front), and on Android adds the
+On Android, each round's check line ends with the app's cpuset (`/proc/self/cpuset`, `/top-app` while it's in front; not read
+elsewhere, as a desktop Linux's says nothing of this), and adds the
 screen off, the keyguard locked or the activity paused; any of those, or a cpuset other than `/top-app`, adds a
 `warning: the app wasn't in front`, which `table.js` shows in bold. A run with it measured a throttled phone: don't keep it.
 

@@ -32,18 +32,14 @@ public static class PerfChecks
     }
 
     /// <summary>
-    /// Whether what <paramref name="page"/> refers to has been collected, after full collections. A short weak reference is cleared
-    /// once its target can't be reached, before any finalizer runs, so this waits for none, which could need the UI thread.
-    /// </summary>
-    /// <summary>
-    /// Linux's <c>/proc/self/cpuset</c>: on Android, <c>/top-app</c> while the app is in front, and <c>/background</c> (the little
-    /// cores) once the screen locks or the app goes behind. Null where there's no such file.
+    /// Android's <c>/proc/self/cpuset</c>: <c>/top-app</c> while the app is in front, and <c>/background</c> (the little cores) once
+    /// the screen locks or the app goes behind. Null elsewhere: a desktop Linux has the file too, with a cgroup that says nothing of this.
     /// </summary>
     public static string? Cpuset()
     {
         try
         {
-            return File.Exists("/proc/self/cpuset") ? File.ReadAllText("/proc/self/cpuset").Trim() : null;
+            return OperatingSystem.IsAndroid() && File.Exists("/proc/self/cpuset") ? File.ReadAllText("/proc/self/cpuset").Trim() : null;
         }
         catch (Exception)
         {
@@ -71,14 +67,17 @@ public static class PerfChecks
         return Collected(page);
     }
 
-    /// <summary>A full collection, finalizers run, and another: whether the page has gone. Its own frame, holding nothing.</summary>
+    /// <summary>
+    /// Whether what <paramref name="page"/> refers to has been collected, after two full collections, in a frame of its own that holds
+    /// nothing. A short weak reference is cleared once its target can't be reached, before any finalizer runs, so this waits for
+    /// none, which could need the UI thread.
+    /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     public static bool Collected(WeakReference page)
     {
         for (var i = 0; i < 2 && page.IsAlive; i++)
         {
             GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
         return !page.IsAlive;
