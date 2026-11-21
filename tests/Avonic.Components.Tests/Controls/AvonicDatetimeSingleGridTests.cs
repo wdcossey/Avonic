@@ -206,18 +206,21 @@ public class AvonicDatetimeSingleGridTests
         Assert.Null(grid.OpacityMask);
     });
 
-    [AvaloniaFact]
-    public void A_Selection_During_A_Fade_Wins_Over_The_Month_On_Its_Way() => Run((scene, clock) =>
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void A_Selection_During_A_Fade_Wins_Over_The_Month_On_Its_Way(bool buttons) => Run((scene, clock) =>
     {
-        // Next, then a click on June 20 while June still fades out: June stays, with June 20 chosen.
-        var datetime = Show(scene, clock, Grid());
+        // Next, then a click on June 20 while June still fades out: June stays, with June 20 chosen; confirmed at once, or waiting for
+        // Done with the default buttons, where no value comes back to cancel the change.
+        var datetime = Show(scene, clock, Grid(set: d => d.ShowDefaultButtons = buttons));
         Click(scene, Next(datetime));
         Settle(clock, 40);
         Click(scene, Day(datetime, 20));
         Settle(clock, 400);
         Assert.Equal("June 2023", MonthShown(datetime));
         Assert.Equal(["6-20"], ActiveDays(datetime));
-        Assert.Equal("2023-06-20T13:47:00", datetime.Value.ToString());
+        Assert.Equal(buttons ? June15 : "2023-06-20T13:47:00", datetime.Value.ToString());
         Assert.Null(datetime.GridTarget);
     });
 

@@ -170,9 +170,12 @@ the header and the date column in some locales (`6月15日木` for Chromium's `6
   - **The keys in `SingleGrid`**: an arrow, Home, End or a page key to a day in another month fades there too, where the scrolled
     calendar, as Ionic's, draws the new month at once. The focused day keeps its focus while the old month fades out; at the swap the
     key's day in the new month takes it, before the days fade in, so its ring fades in with them and shows once the grid does. A key
-    during the fade goes on from the day on its way (PageDown then Right from June 30 is July 31), and one back to the month shown
-    drops the fade. A key within the month moves at once, and with `AvonicConfig.Animated` off a key to another month does too.
-    `ScrolledMonths` keeps Ionic's keys unchanged.
+    during the fade goes on from the day on its way (PageDown then Right from June 30 is July 31; Home and End from its week), and
+    Enter or Space during it chooses that day, the new month drawn at once. A key back to the month shown drops the change, and the
+    days fade in again from where they were; once the month has changed, a key within it moves at once and lets the fade in end. With
+    `AvonicConfig.Animated` off a key to another month moves at once. `ScrolledMonths` keeps Ionic's keys unchanged.
+  - A change dropped during the fade out, by a value, a selection or the month/year wheel as well as a key, fades the days back in
+    from where they were, rather than jump.
   - The fade's durations and the swipe's threshold are constants for now; making them settable in `AvonicConfig` is on the roadmap.
 
   Each rendering makes only its own days, when the datetime first draws them. `AvonicConfig.DatetimeCalendarRendering` is the default for
