@@ -64,7 +64,8 @@ unless its form sets one. `GetActive().Component` is the form it was pushed as: 
 
 **`componentProps`** (`Push`'s, the link's `ComponentProps`, `RootParams`) are set on the page by name before it's attached, as
 `Object.assign` sets them on the element: each key the page's Avalonia property, camelCase or PascalCase, or else a public settable
-CLR property, the value converted as XAML converts a string. A key with neither is ignored. **Trimming:** a CLR property is found
+CLR property, the value converted as XAML converts a string. A key with neither is ignored; a value the property can't take, and a
+dotted key (`grid.row`: an attached property), are ignored and logged. **Trimming:** a CLR property is found
 by reflection, so a trimmed app (Android's head is) can lose a page's property that no code of its own sets; an Avalonia property
 is registered, and always found. Props given with a view model go to the page built for it.
 

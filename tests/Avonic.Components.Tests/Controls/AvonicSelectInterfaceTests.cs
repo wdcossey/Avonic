@@ -790,6 +790,18 @@ public class AvonicSelectInterfaceTests
     }
 
     [AvaloniaFact]
+    public void B24_An_Interface_Option_That_Is_No_Property_Is_Ignored_And_The_Rest_Still_Apply()
+    {
+        // A dotted key is an attached property, which Avalonia's registry refuses to look up by throwing.
+        using var stage = new Stage();
+        var select = Mount(stage, s => s.InterfaceOptions = new Dictionary<string, object?> { ["grid.row"] = 1, ["subHeader"] = "Sub" });
+        var open = select.Open();
+        stage.After(Settled);
+        Assert.True(open.IsCompletedSuccessfully);
+        Assert.Equal("Sub", Assert.IsType<AvonicAlert>(open.Result).SubHeader);
+    }
+
+    [AvaloniaFact]
     public void B25_A_New_Option_While_Open_Is_In_The_Interface()
     {
         using var stage = new Stage();

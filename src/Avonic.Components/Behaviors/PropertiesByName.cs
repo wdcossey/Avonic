@@ -11,7 +11,7 @@ namespace Avonic.Components.Behaviors;
 /// <c>Object.assign(el, props)</c>: an element's properties set from a dictionary keyed by name, for <c>ion-nav</c>'s
 /// <c>componentProps</c> and <c>ion-select</c>'s <c>interfaceOptions</c>. Each key is the property's name in Ionic's camelCase
 /// or Avonic's PascalCase; a string is converted as XAML would convert it; a key with no property, or a value the property can't
-/// take, is ignored, as an unknown property is on an element. What differs between the two is in <see cref="Rules"/>.
+/// take, is ignored and logged, as an unknown property is on an element. What differs between the two is in <see cref="Rules"/>.
 /// </summary>
 internal static class PropertiesByName
 {
@@ -27,16 +27,6 @@ internal static class PropertiesByName
         /// can strip one that no code of its own uses, where an Avalonia property is registered and always found.
         /// </summary>
         public bool ClrProperties { get; init; }
-
-        /// <summary>A value the property can't take is logged, as well as dropped.</summary>
-        public bool LogDropped { get; init; }
-
-        /// <summary>
-        /// An exception while finding a key's property (Avalonia's registry refuses a dotted name, <c>Grid.Row</c>, with
-        /// "Attached properties not supported"; reflection, a name two CLR properties have) is logged and the key skipped. Off, it
-        /// leaves <see cref="Apply"/>, and the keys after it aren't set; an exception while setting is logged either way.
-        /// </summary>
-        public bool LogLookupErrors { get; init; }
     }
 
     /// <summary>Sets <paramref name="target"/>'s properties from <paramref name="values"/>, in their order, at local priority.</summary>
@@ -54,19 +44,16 @@ internal static class PropertiesByName
                 continue;
             }
 
-            if (!rules.LogLookupErrors)
-            {
-                ApplyOne(target, key, value, rules);
-                continue;
-            }
-
             try
             {
                 ApplyOne(target, key, value, rules);
             }
             catch (Exception exception)
             {
-                Failed(target, key, exception, rules);
+                // A key whose property can't be found (Avalonia's registry refuses a dotted name, Grid.Row: "Attached properties
+                // not supported"; reflection, a name two CLR properties have) or won't take the value is dropped, as an element
+                // ignores what it can't use, and the keys after it still apply.
+                Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(target, rules.LogPrefix + " {0}: {1}", key, exception.Message);
             }
         }
     }
@@ -78,15 +65,7 @@ internal static class PropertiesByName
         {
             if (TryConvert(value, property.PropertyType, out var converted))
             {
-                try
-                {
-                    target.SetValue(property, converted);
-                }
-                catch (Exception exception)
-                {
-                    // A value the property won't take is dropped, as an element ignores what it can't use.
-                    Failed(target, key, exception, rules);
-                }
+                target.SetValue(property, converted);
             }
             else
             {
@@ -100,14 +79,7 @@ internal static class PropertiesByName
         {
             if (TryConvert(value, clr.PropertyType, out var converted))
             {
-                try
-                {
-                    clr.SetValue(target, converted);
-                }
-                catch (Exception exception)
-                {
-                    Failed(target, key, exception, rules);
-                }
+                clr.SetValue(target, converted);
             }
             else
             {
@@ -116,16 +88,8 @@ internal static class PropertiesByName
         }
     }
 
-    private static void Failed(AvaloniaObject target, string key, Exception exception, Rules rules) =>
-        Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(target, rules.LogPrefix + " {0}: {1}", key, exception.Message);
-
-    private static void Dropped(AvaloniaObject target, string key, object? value, Rules rules)
-    {
-        if (rules.LogDropped)
-        {
-            Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(target, rules.LogPrefix + " {0}: {1} isn't a value it takes", key, value);
-        }
-    }
+    private static void Dropped(AvaloniaObject target, string key, object? value, Rules rules) =>
+        Logger.TryGet(LogEventLevel.Warning, "Avonic")?.Log(target, rules.LogPrefix + " {0}: {1} isn't a value it takes", key, value);
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Documented: a trimmed app may strip a CLR property.")]
     private static PropertyInfo? FindClrProperty(Type type, string name) =>

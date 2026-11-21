@@ -501,7 +501,7 @@ public partial class AvonicSelect
 /// <summary>
 /// <c>interfaceOptions</c>, spread into an overlay's create options: each entry sets the overlay's property of that name, in
 /// Ionic's camelCase or Avonic's PascalCase. A string is converted as XAML would (<c>"cover"</c>, <c>"action-sheet"</c>); a key
-/// with no property, or a value the property can't take, is ignored, as an unknown property is on an element.
+/// with no property, or a value the property can't take, is ignored (logged), as an unknown property is on an element.
 /// </summary>
 internal static class SelectInterfaceOptions
 {

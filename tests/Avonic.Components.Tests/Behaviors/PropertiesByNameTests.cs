@@ -67,20 +67,16 @@ public class PropertiesByNameTests
     [AvaloniaFact]
     public void A_Value_The_Property_Refuses_Is_Logged_And_The_Keys_After_It_Still_Set()
     {
-        // Either way a lookup error goes: the select's and the nav's.
-        foreach (var lookupErrorsLogged in new[] { false, true })
-        {
-            var probe = new Probe();
-            using var sink = Sink.Start();
-            PropertiesByName.Apply(probe, Values(("positive", -1), ("width", 10.0), ("throwing", "x"), ("height", 20.0)),
-                Plain with { ClrProperties = true, LogLookupErrors = lookupErrorsLogged });
+        var probe = new Probe();
+        using var sink = Sink.Start();
+        PropertiesByName.Apply(probe, Values(("positive", -1), ("width", 10.0), ("throwing", "x"), ("height", 20.0)),
+            Plain with { ClrProperties = true });
 
-            Assert.Equal(1, probe.Positive);
-            Assert.Equal(10, probe.Width);
-            Assert.Equal(20, probe.Height);
-            Assert.Contains(sink.From(probe), m => m.Template.StartsWith("[test] props") && Equals(m.Key, "positive"));
-            Assert.Contains(sink.From(probe), m => Equals(m.Key, "throwing"));
-        }
+        Assert.Equal(1, probe.Positive);
+        Assert.Equal(10, probe.Width);
+        Assert.Equal(20, probe.Height);
+        Assert.Contains(sink.From(probe), m => m.Template.StartsWith("[test] props") && Equals(m.Key, "positive"));
+        Assert.Contains(sink.From(probe), m => Equals(m.Key, "throwing"));
     }
 
     // ── The select's rule: its own keys skipped, Avalonia properties only ─────────────────────
@@ -113,7 +109,7 @@ public class PropertiesByNameTests
         Assert.Null(on.PrivatelySet);
     }
 
-    // ── The nav's rules: CLR properties after Avalonia's, drops and lookup errors logged ─────
+    // ── The nav's rule: CLR properties, after Avalonia's ───────────────────────────────────────
 
     [AvaloniaFact]
     public void An_Avalonia_Property_Comes_Before_A_Clr_Property_Of_The_Name_And_A_Read_Only_One_Gives_Way()
@@ -134,41 +130,29 @@ public class PropertiesByNameTests
         Assert.Equal("clr", probe.FallenClr);
     }
 
+    // ── Both: what's dropped is logged ──────────────────────────────────────────────────────
+
     [AvaloniaFact]
-    public void A_Value_That_Doesnt_Convert_Is_Logged_Only_When_Asked()
+    public void A_Value_That_Doesnt_Convert_Is_Logged()
     {
-        var quiet = new Border();
-        using (var sink = Sink.Start())
-        {
-            PropertiesByName.Apply(quiet, Values(("width", "wide")), Plain);
-            Assert.Empty(sink.From(quiet));
-        }
+        var border = new Border();
+        using var sink = Sink.Start();
+        PropertiesByName.Apply(border, Values(("width", "wide"), ("height", null)), Plain);
 
-        var logged = new Border();
-        using (var sink = Sink.Start())
-        {
-            PropertiesByName.Apply(logged, Values(("width", "wide"), ("height", null)), Plain with { LogDropped = true });
-
-            // Null for a number is a value it doesn't take, not one it's given and refuses.
-            Assert.Collection(sink.From(logged),
-                message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "width"), (message.Template, message.Key)),
-                message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "height"), (message.Template, message.Key)));
-        }
+        // Null for a number is a value it doesn't take, not one it's given and refuses.
+        Assert.Collection(sink.From(border),
+            message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "width"), (message.Template, message.Key)),
+            message => Assert.Equal(("[test] props {0}: {1} isn't a value it takes", "height"), (message.Template, message.Key)));
     }
 
     [AvaloniaFact]
-    public void A_Key_Avalonias_Registry_Refuses_Leaves_Apply_Unless_Lookup_Errors_Are_Logged()
+    public void A_Key_Avalonias_Registry_Refuses_Is_Logged_And_The_Keys_After_It_Still_Set()
     {
-        var thrown = new Border();
-        Assert.Throws<InvalidOperationException>(() =>
-            PropertiesByName.Apply(thrown, Values(("grid.row", 1), ("width", 10.0)), Plain));
-        Assert.True(double.IsNaN(thrown.Width));
-
-        var logged = new Border();
+        var border = new Border();
         using var sink = Sink.Start();
-        PropertiesByName.Apply(logged, Values(("grid.row", 1), ("width", 10.0)), Plain with { LogLookupErrors = true });
-        Assert.Equal(10, logged.Width);
-        Assert.Contains(sink.From(logged), m => Equals(m.Key, "grid.row"));
+        PropertiesByName.Apply(border, Values(("grid.row", 1), ("width", 10.0)), Plain);
+        Assert.Equal(10, border.Width);
+        Assert.Contains(sink.From(border), m => Equals(m.Key, "grid.row"));
     }
 
     private sealed class Probe : Control

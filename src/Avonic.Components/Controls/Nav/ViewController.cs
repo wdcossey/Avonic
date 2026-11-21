@@ -205,12 +205,7 @@ public sealed class ViewController
 /// </remarks>
 internal static class NavProps
 {
-    private static readonly PropertiesByName.Rules Rules = new("[ion-nav] componentProps")
-    {
-        ClrProperties = true,
-        LogDropped = true,
-        LogLookupErrors = true,
-    };
+    private static readonly PropertiesByName.Rules Rules = new("[ion-nav] componentProps") { ClrProperties = true };
 
     public static void Apply(Control page, IReadOnlyDictionary<string, object?>? props) => PropertiesByName.Apply(page, props, Rules);
 }
