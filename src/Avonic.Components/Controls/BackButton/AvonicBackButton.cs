@@ -8,6 +8,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
@@ -27,7 +28,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Icon", typeof(AvonicIcon))]
 [TemplatePart("PART_Text", typeof(TextBlock))]
 [TemplatePart("PART_Ripple", typeof(AvonicRippleEffect))]
-[PseudoClasses(":in-toolbar", ":in-toolbar-color", ":icon-only")]
+[PseudoClasses(":in-toolbar", ":in-toolbar-color", ":has-icon-only")]
 public partial class AvonicBackButton : TemplatedControl
 {
     /// <summary>md's <c>backButtonIcon</c>, <c>arrowBackSharp</c>, when neither <see cref="Icon"/> nor the config is set.</summary>
@@ -102,7 +103,6 @@ public partial class AvonicBackButton : TemplatedControl
     private AvonicIcon? _icon;
     private TextBlock? _text;
     private AvonicRippleEffect? _ripple;
-    private bool _attached;
     private bool _inCanGoBackPage;
     private double _arrangedWidth;
 
@@ -110,6 +110,9 @@ public partial class AvonicBackButton : TemplatedControl
     {
         // The native <button> takes focus.
         FocusableProperty.OverrideDefaultValue<AvonicBackButton>(true);
+
+        // ion-buttons' align-items: center. A default, not a theme's value, as FlexSlot would take that for align-self.
+        VerticalAlignmentProperty.OverrideDefaultValue<AvonicBackButton>(VerticalAlignment.Center);
     }
 
     public AvonicBackButton()
@@ -226,7 +229,6 @@ public partial class AvonicBackButton : TemplatedControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        _attached = true;
 
         // componentWillLoad: the config's defaultHref, once, if the prop isn't set.
         _defaultHref.Load(() => AvonicConfig.BackButtonDefaultHref is { } href ? href : Optional<string?>.Empty);
@@ -237,7 +239,6 @@ public partial class AvonicBackButton : TemplatedControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _attached = false;
         UnwatchPages();
     }
 
@@ -252,9 +253,9 @@ public partial class AvonicBackButton : TemplatedControl
 
         // Ionic renders again when any of its props changes: the config and hostContext are read again.
         if (change.Property == DefaultHrefProperty || change.Property == IconProperty || change.Property == TextProperty
-            || change.Property == ColorProperty || change.Property == IsEnabledProperty || change.Property == TextTransformProperty)
+            || change.Property == ColorProperty || change.Property == TextTransformProperty)
         {
-            if (_attached)
+            if (this.IsAttachedToVisualTree())
             {
                 Render();
             }
@@ -270,7 +271,7 @@ public partial class AvonicBackButton : TemplatedControl
     /// </summary>
     private void WatchPages()
     {
-        UnwatchPages();
+        StopWatching();
         foreach (var header in this.GetVisualAncestors().OfType<AvonicHeader>())
         {
             if (PageOf(header) is { } page)
@@ -285,20 +286,28 @@ public partial class AvonicBackButton : TemplatedControl
 
     private void UnwatchPages()
     {
+        StopWatching();
+        UpdateCanGoBack();
+    }
+
+    private void StopWatching()
+    {
         foreach (var page in _pages)
         {
             page.Classes.CollectionChanged -= OnPageClassesChanged;
         }
 
         _pages.Clear();
-        UpdateCanGoBack();
     }
 
-    /// <summary>The page the header is a direct child of: its logical parent, past any panels, with class <c>ion-page</c>.</summary>
+    /// <summary>
+    /// The page the header is a direct child of: its logical parent, past any panels that aren't the page, with class
+    /// <c>ion-page</c>. A page can itself be a panel, as a nav page given as a <c>DockPanel</c>.
+    /// </summary>
     private static Control? PageOf(AvonicHeader header)
     {
         var parent = header.GetLogicalParent();
-        while (parent is Panel)
+        while (parent is Panel panel && !panel.Classes.Contains(PageClass))
         {
             parent = parent.GetLogicalParent();
         }
@@ -306,7 +315,16 @@ public partial class AvonicBackButton : TemplatedControl
         return parent is Control page && page.Classes.Contains(PageClass) ? page : null;
     }
 
-    private void OnPageClassesChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateCanGoBack();
+    /// <summary>Only a change of <c>:can-go-back</c>: a page's other pseudoclasses (<c>:pointerover</c>, focus) change often.</summary>
+    private void OnPageClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action == NotifyCollectionChangedAction.Reset || Touches(e.NewItems) || Touches(e.OldItems))
+        {
+            UpdateCanGoBack();
+        }
+
+        static bool Touches(System.Collections.IList? items) => items?.Contains(AvonicNav.CanGoBackPseudoClass) == true;
+    }
 
     private void UpdateCanGoBack()
     {
@@ -356,13 +374,13 @@ public partial class AvonicBackButton : TemplatedControl
             }
         }
 
-        if (PseudoClasses.Contains(":icon-only") != iconOnly)
+        if (PseudoClasses.Contains(":has-icon-only") != iconOnly)
         {
             _arrangedWidth = 0;
             InvalidateMeasure();
         }
 
-        PseudoClasses.Set(":icon-only", iconOnly);
+        PseudoClasses.Set(":has-icon-only", iconOnly);
         PseudoClasses.Set(":in-toolbar", inToolbar);
         PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
     }
@@ -377,7 +395,7 @@ public partial class AvonicBackButton : TemplatedControl
     protected override Size MeasureOverride(Size availableSize)
     {
         var size = base.MeasureOverride(availableSize);
-        if (!PseudoClasses.Contains(":icon-only"))
+        if (!PseudoClasses.Contains(":has-icon-only"))
         {
             return size;
         }
@@ -390,7 +408,7 @@ public partial class AvonicBackButton : TemplatedControl
     {
         // The width the layout gave it: its content's unless it's stretched. A new one is its height in the next measure, which
         // the width doesn't depend on, so it settles in one more pass.
-        if (PseudoClasses.Contains(":icon-only") && !finalSize.Width.Equals(_arrangedWidth))
+        if (PseudoClasses.Contains(":has-icon-only") && !finalSize.Width.Equals(_arrangedWidth))
         {
             _arrangedWidth = finalSize.Width;
             InvalidateMeasure();

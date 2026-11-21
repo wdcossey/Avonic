@@ -63,6 +63,8 @@ Ionic on the left:
   `Panel`s between the page and the header count, a `Border` doesn't.
 - **`--icon-font-weight`** is read onto the icon, and draws nothing different: an `AvonicIcon` is a path, as Ionic's SVG is.
 - **`type`** isn't mapped: HTML forms, and dead in Ionic, whose click handler prevents a submit (B5: 0 submits).
+- **Uppercase is `ToUpperInvariant`**, as `AvonicButton`'s converter has it: CSS's `text-transform` maps `ß` to `SS` and follows
+  `lang` (Turkish `i`), which .NET's simple case mapping doesn't.
 
 ## Known gaps
 

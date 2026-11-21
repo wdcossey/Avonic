@@ -126,4 +126,5 @@ Also `PART_Clip`, `PART_Overlay` (`.button-native::after`), `PART_Ripple`, `PART
 ## Deliberate differences
 
 In [COMPARISON.md](COMPARISON.md#deliberate-differences): the coloured toolbar's `ion-buttons` variables aren't mapped; panels
-between a page and its header count as the page's slot; `--icon-font-weight` draws nothing; `type` isn't mapped.
+between a page and its header count as the page's slot; `--icon-font-weight` draws nothing; `type` isn't mapped; uppercase is
+`ToUpperInvariant`.

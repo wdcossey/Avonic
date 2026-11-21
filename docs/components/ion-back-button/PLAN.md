@@ -252,7 +252,7 @@ app's own navigation can take, without Avonic deciding what a URL means. B can c
 - `NativeButton` (click, Enter, Space; press and release), `Activatable` and `FocusVisible` at style priority in the constructor,
   `Focusable` by `OverrideDefaultValue`. `ion-focusable` and `ion-activatable` always.
 - `:in-toolbar`, `:in-toolbar-color` worked out from the visual ancestors when it's attached and at each prop change, as
-  `AvonicMenuButton.Render` does; `:icon-only` (`back-button-has-icon-only`) from the resolved icon and text.
+  `AvonicMenuButton.Render` does; `:has-icon-only` (`back-button-has-icon-only`) from the resolved icon and text.
 - Render (Ionic's getters, read at the first attach and each prop change): the icon `Icon ?? AvonicConfig.BackButtonIcon ??
   "arrow-back-sharp"`, `FlipRtl` true when `Icon` is null, else null (the icon's own rule); the text `Text ??
   AvonicConfig.BackButtonText`; each part shown while it isn't null or empty; the ripple's `Type`.

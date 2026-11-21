@@ -200,6 +200,19 @@ public class AvonicBackButtonTests
         Assert.False(throughBorder.IsVisible);
     }
 
+    [AvaloniaFact]
+    public void K3_A_Page_That_Is_Itself_A_Panel_Holds_Its_Header()
+    {
+        // A nav page given as a DockPanel: the panel is the page, with ion-page and :can-go-back.
+        var button = new AvonicBackButton();
+        var header = Header(button);
+        DockPanel.SetDock(header, Dock.Top);
+        using var stage = Loaded(Page("one", null));
+        stage.Done(stage.Nav.Push(new DockPanel { Name = "two", Children = { header, new AvonicContent() } }));
+
+        Assert.True(button.IsVisible);
+    }
+
     // ── K4 to K6: the click ──────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -443,7 +456,7 @@ public class AvonicBackButtonTests
             Assert.Equal("Cfg", text.Text);
             button.Text = "";
             Assert.False(text.IsVisible);
-            Assert.True(((IPseudoClasses)button.Classes).Contains(":icon-only"));
+            Assert.True(((IPseudoClasses)button.Classes).Contains(":has-icon-only"));
         }
         finally
         {
@@ -476,7 +489,21 @@ public class AvonicBackButtonTests
         Assert.InRange(button.Bounds.Width, 91, 93);
         Assert.Equal(new CornerRadius(4), Part<Border>(button, "PART_Native").CornerRadius);
         Assert.Equal(RippleEffectType.Bounded, Part<AvonicRippleEffect>(button, "PART_Ripple").Type);
-        Assert.False(((IPseudoClasses)button.Classes).Contains(":icon-only"));
+        Assert.False(((IPseudoClasses)button.Classes).Contains(":has-icon-only"));
+    }
+
+    [AvaloniaFact]
+    public void K13_In_A_Row_Beside_A_Taller_Button_It_Is_Centred_At_Its_Own_Height()
+    {
+        // ion-buttons is align-items: center.
+        var text = new AvonicBackButton { DefaultHref = "/", Text = "Back" };
+        var icon = new AvonicBackButton { DefaultHref = "/" };
+        using var stage = NoNav(Toolbar(icon));
+        ((AvonicButtons)((AvonicToolbar)stage.Root).StartContent!).Items.Insert(0, text);
+        stage.Render();
+        Assert.Equal(32, text.Bounds.Height);
+        Assert.Equal(icon.Bounds.Y + 8, text.Bounds.Y);
+        Assert.Equal(new Size(48, 48), icon.Bounds.Size);
     }
 
     [AvaloniaFact]

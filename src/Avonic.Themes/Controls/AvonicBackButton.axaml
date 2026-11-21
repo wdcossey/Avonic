@@ -223,11 +223,11 @@
 
         <!-- :host(.back-button-has-icon-only) { border-radius: 50%; min-width: 48px; min-height: 48px; aspect-ratio: 1/1, which
              the control lays out } -->
-        <Style Selector="^:icon-only">
+        <Style Selector="^:has-icon-only">
             <Setter Property="MinWidth" Value="48" />
             <Setter Property="MinHeight" Value="48" />
         </Style>
-        <Style Selector="^:icon-only /template/ Border#PART_Native">
+        <Style Selector="^:has-icon-only /template/ Border#PART_Native">
             <Setter Property="CornerRadius">
                 <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
                     <DynamicResource ResourceKey="Avonic.BackButton.BorderRadius" />
