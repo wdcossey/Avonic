@@ -77,7 +77,8 @@ From `node tools/ionic-api.js ion-split-pane`. Every row is in [PLAN.md](PLAN.md
 - **`When`**: a boolean is the state; a shortcut follows the grid's breakpoint for the window (`GridViewport`); a media query is
   matched against the window's size by `MediaQuery`, Media Queries 4 as far as a split pane needs (lists, `not`, `only`, media
   types, `and`, `or`, `width`, `height`, `orientation`, `aspect-ratio`, the range forms, `px`, `em`, `rem` and the absolute
-  units), checked against Chromium's `matchMedia`; `never`, an empty string and a malformed query hide it. It's followed while the
+  units, exponents), checked against Chromium's `matchMedia`; a bracket it can't read is unknown, as Chromium's; `never`, an
+  empty string and a malformed query hide it. It's followed while the
   split pane is attached.
 - **`IonSplitPaneVisible`** when the state changes, and only then: at the first attach too, if it shows.
 - **The main content**, the item named `ContentId`, gets `:split-pane-main` when the split pane is attached, and a warning is
@@ -89,7 +90,8 @@ From `node tools/ionic-api.js ion-split-pane`. Every row is in [PLAN.md](PLAN.md
 - **The menu** in the side isn't active: `IsActive()` and `Open()` are false, its swipe is off, and one that was open closes at once
   with `IonDidClose` and the `gesture` role. Below the breakpoint it's an ordinary menu again, closed. Its menu buttons and toggles
   (`AutoHide`) hide while it's in the side.
-- **Another item** sits in the row at its own width while the side shows, and fills the split pane while it doesn't.
+- **Another item** sits in the row at its own width, shrunk to the room left, while the side shows, and fills the split pane while
+  it doesn't.
 - **Automation**: no role of its own, as Ionic's host has none.
 
 ## Resource keys
@@ -98,7 +100,7 @@ A size takes a number (px) or a CSS string: a percentage of the split pane's wid
 
 | Ionic | Key (`Tokens/SplitPane.axaml`) | md |
 |---|---|---|
-| `--side-width` | `Avonic.SplitPane.SideWidth` | `100%`; `CssUnset`: the menu's own `Avonic.Menu.Width` |
+| `--side-width` | `Avonic.SplitPane.SideWidth` | `100%`; `CssUnset`: the menu's own `Avonic.Menu.Width`; `auto`: the side's own width |
 | `--side-min-width` | `Avonic.SplitPane.SideMinWidth` | 270 |
 | `--side-max-width` | `Avonic.SplitPane.SideMaxWidth` | `28%` |
 | `--border` | `Avonic.SplitPane.BorderWidth`, `Avonic.SplitPane.BorderColor` | 1; unset: `Avonic.ItemBorderColorBrush` |
@@ -114,6 +116,4 @@ None.
   [COMPARISON.md](COMPARISON.md#gaps).
 - **Avalonia rounds the layout** to the device's pixels, so the side at 1024 is 287 wide, where Chromium's is 286.72.
 - **The push type's content shadow** isn't drawn over the side's last 12 px, as Ionic's is by accident.
-- **An app's plain style** for the main content's `ClipToBounds`, made before the split pane finds its main, loses to the split
-  pane's value, where an app's rule beats Ionic's `::slotted`.
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-split-pane` section, not run.

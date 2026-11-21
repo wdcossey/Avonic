@@ -48,6 +48,7 @@ public class SplitPanePanel : Panel
     internal const string MenuWidthKey = "Avonic.Menu.Width";
 
     private readonly List<(Control Child, Kind Kind, double Width)> _row = [];
+    private readonly List<(Rect Slot, Kind Kind)> _sideSlots = [];
     private AvonicSplitPane? _owner;
 
     private enum Kind
@@ -145,7 +146,8 @@ public class SplitPanePanel : Panel
             }
             else
             {
-                child.Measure(new Size(double.PositiveInfinity, height));
+                // flex: 0 1 auto: its own width, shrunk to the room the row has left, as a flex item shrinks.
+                child.Measure(new Size(Math.Max(0, width - used), height));
                 _row.Add((child, Kind.Other, child.DesiredSize.Width));
                 used += child.DesiredSize.Width;
             }
@@ -181,12 +183,14 @@ public class SplitPanePanel : Panel
                 child.Arrange(new Rect(finalSize));
             }
 
+            _sideSlots.Clear();
             _owner?.BordersChanged();
             return finalSize;
         }
 
         var border = Math.Max(0, BorderThickness);
         var x = 0.0;
+        _sideSlots.Clear();
         foreach (var kind in new[] { Kind.Start, Kind.Main, Kind.End })
         {
             foreach (var (child, k, w) in _row)
@@ -204,6 +208,11 @@ public class SplitPanePanel : Panel
                     _ => new Rect(x, 0, w, finalSize.Height),
                 };
                 child.Arrange(rect);
+                if (k is Kind.Start or Kind.End)
+                {
+                    _sideSlots.Add((new Rect(x, 0, w, finalSize.Height), k));
+                }
+
                 x += w;
             }
         }
@@ -224,16 +233,11 @@ public class SplitPanePanel : Panel
             yield break;
         }
 
-        foreach (var (child, kind, width) in _row)
+        // From each side's slot, not its bounds, which a margin or an alignment of its own can make narrower.
+        foreach (var (slot, kind) in _sideSlots)
         {
-            if (kind is not (Kind.Start or Kind.End) || !child.IsVisible)
-            {
-                continue;
-            }
-
-            var bounds = child.Bounds;
-            var w = Math.Min(border, width);
-            yield return kind == Kind.Start ? new Rect(bounds.Right, 0, w, Bounds.Height) : new Rect(bounds.Left - w, 0, w, Bounds.Height);
+            var w = Math.Min(border, slot.Width);
+            yield return kind == Kind.Start ? new Rect(slot.Right - w, 0, w, slot.Height) : new Rect(slot.Left, 0, w, slot.Height);
         }
     }
 
@@ -260,15 +264,20 @@ public class SplitPanePanel : Panel
 
     /// <summary>
     /// <c>width: var(--side-width, var(--width))</c> within <c>min-width: var(--side-min-width)</c> and
-    /// <c>max-width: var(--side-max-width)</c>, percentages of the split pane's width. With no width at all, the side's own.
+    /// <c>max-width: var(--side-max-width)</c>, percentages of the split pane's width. Unset, the menu's own <c>--width</c>; <c>auto</c>, the side's own width.
     /// </summary>
     private double SideWidthFor(AvonicMenu menu, Control child, double basis)
     {
         var viewport = TopLevel.GetTopLevel(this)?.ClientSize ?? new Size(basis, basis);
         var min = AlertPanel.Length(SideMinWidth, basis, viewport) ?? 0;
         var max = AlertPanel.Length(SideMaxWidth, basis, viewport) ?? double.PositiveInfinity;
-        var width = AlertPanel.Length(SideWidth, basis, viewport)
-            ?? (menu.TryFindResource(MenuWidthKey, menu.ActualThemeVariant, out var own) ? AlertPanel.Length(own, basis, viewport) : null);
+        // var(--side-width, var(--width)): unset (CssUnset), the menu's width; set to "auto", or a menu's width of "auto", the
+        // side's own.
+        var sideWidth = SideWidth is Behaviors.CssUnset or null
+            && menu.TryFindResource(MenuWidthKey, menu.ActualThemeVariant, out var own)
+            ? own
+            : SideWidth;
+        var width = AlertPanel.Length(sideWidth, basis, viewport);
         if (width is null)
         {
             // width: auto, the side's own width.

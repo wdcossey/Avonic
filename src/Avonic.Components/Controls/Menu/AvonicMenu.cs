@@ -725,8 +725,12 @@ public partial class AvonicMenu : ContentControl
         _splitPane?.AddSide(this);
 
         // Handled too: an app's Handled isn't stopPropagation() to most code that sets it, and a menu left in the wrong state is
-        // worse than one that hears an event an app meant to stop.
-        _topLevel?.AddHandler(AvonicSplitPane.IonSplitPaneVisibleEvent, OnSplitPaneVisible, RoutingStrategies.Bubble, handledEventsToo: true);
+        // worse than one that hears an event an app meant to stop. Only a side listens: Ionic's every menu does, and drops the
+        // events of any split pane but its own, which a menu with none would drop all of.
+        if (_splitPane is not null)
+        {
+            _topLevel?.AddHandler(AvonicSplitPane.IonSplitPaneVisibleEvent, OnSplitPaneVisible, RoutingStrategies.Bubble, handledEventsToo: true);
+        }
         UpdatePaneState();
     }
 

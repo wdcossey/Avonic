@@ -39,7 +39,8 @@
                         <c:AvonicItem>
                             <c:AvonicToggle Name="DisabledToggle" Content="Disabled" />
                         </c:AvonicItem>
-                        <c:AvonicMenuToggle Menu="split-menu">
+                        <!-- AutoHide off, as Ionic's split pane examples have it: the side's menu isn't active while it shows. -->
+                        <c:AvonicMenuToggle Menu="split-menu" AutoHide="False">
                             <c:AvonicItem Name="SideInbox" Button="True">
                                 <c:AvonicItem.StartContent>
                                     <c:AvonicIcon IconName="mail-outline" />

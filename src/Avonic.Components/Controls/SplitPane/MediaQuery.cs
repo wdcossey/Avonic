@@ -9,8 +9,9 @@ namespace Avonic.Components.Controls;
 /// media types (<c>all</c> and <c>screen</c> match, any other doesn't), <c>and</c>, <c>or</c>, brackets, <c>width</c> and
 /// <c>height</c> with <c>min-</c> and <c>max-</c>, plain and in the range forms, <c>orientation</c>, <c>aspect-ratio</c> with
 /// <c>min-</c> and <c>max-</c>, and lengths in <c>px</c>, <c>em</c> and <c>rem</c> (16 px), <c>cm</c>, <c>mm</c>, <c>q</c>,
-/// <c>in</c>, <c>pt</c>, <c>pc</c>, or <c>0</c>. A feature it doesn't read is unknown, so <c>not</c> of it is unknown too, and it
-/// matches only through <c>or</c> or a comma, as Chromium's unknown features do; a malformed query is <c>not all</c>. Pinned to
+/// <c>in</c>, <c>pt</c>, <c>pc</c>, or <c>0</c>. A feature it doesn't read, or a bracket that doesn't parse as one, is unknown, so
+/// <c>not</c> of it is unknown too, and it matches only through <c>or</c> or a comma, as Chromium's do; a query that is malformed
+/// outside its brackets is <c>not all</c>. Pinned to
 /// Chromium's <c>matchMedia</c> in <c>docs/components/ion-split-pane/ref/media-queries.txt</c>.
 /// </summary>
 internal static class MediaQuery
@@ -119,6 +120,16 @@ internal static class MediaQuery
                 while (i < s.Length && (char.IsDigit(s[i]) || s[i] == '.'))
                 {
                     i++;
+                }
+
+                // An exponent: 9.92e2px.
+                if (i + 1 < s.Length && s[i] == 'e' && (char.IsDigit(s[i + 1]) || (s[i + 1] is '+' or '-' && i + 2 < s.Length && char.IsDigit(s[i + 2]))))
+                {
+                    i += 2;
+                    while (i < s.Length && char.IsDigit(s[i]))
+                    {
+                        i++;
+                    }
                 }
 
                 if (!double.TryParse(s[begin..i], NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
@@ -278,7 +289,16 @@ internal static class MediaQuery
 
             var feature = tokens.GetRange(_at, close - _at);
             _at = close + 1;
-            return Feature(feature);
+            // A bracket that doesn't parse as a feature is general-enclosed: unknown, so it can still match through `or` or a
+            // comma, as Chromium's (min-width) or (min-width: 500px) does.
+            try
+            {
+                return Feature(feature);
+            }
+            catch (Malformed)
+            {
+                return Tri.Unknown;
+            }
         }
 
         // ── Features ─────────────────────────────────────────────────────────────────────────

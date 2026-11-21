@@ -114,7 +114,8 @@ Avonic app would mean. Any other string is a shortcut or a media query; null is 
   `or`, nested brackets, `width` and `height` with `min-` and `max-`, the plain and the range forms (`(width >= 600px)`,
   `(400px < width < 700px)`), `orientation`, `aspect-ratio` with `min-` and `max-`, and lengths in `px`, `em` and `rem` (16 px),
   `cm`, `mm`, `in`, `pt`, `pc`, `q`, or `0`. A feature it doesn't know (`hover`, `prefers-color-scheme`, `resolution`) is unknown,
-  which, as in Chromium, makes `not` unknown too and only matches through an `or` or a comma; a malformed query is `not all`.
+  and so is a bracket it can't parse (Chromium's general-enclosed), which, as in Chromium, makes `not` unknown too and only
+  matches through an `or` or a comma; a query malformed outside its brackets is `not all`. Exponents (`9.92e2px`) are read.
   Every row of `ref/media-queries.txt` it reads is a test case, at 600 x 800. `calc()` in a query isn't read (false).
 
 ## Design
@@ -130,10 +131,10 @@ Avonic app would mean. Any other string is a shortcut or a media query; null is 
   border at its inline end (start) or start (end) drawn by the panel inside that width; the main (`flex: 1`) takes what's left, at
   least 0; any other child sits in the row at its desired width, in order (S15). `SideWidth`, `SideMinWidth`, `SideMaxWidth`,
   `BorderBrush`, `BorderThickness` are the panel's, set by the theme from the keys.
-- **`overflow: hidden` on the main** while visible: `ClipToBounds` at style priority, bound by the split pane to the main when it marks
-  it, which costs nothing in the style budget, where a `::slotted` rule in `Styles/` would add an alternative for every element
-  (it went over the budget, 287 of 286, so it was moved). An app's plain style made before it loses to it, as it would to a
-  `Styles/` rule with a pseudoclass; Ionic's `::slotted` loses to an app's rule.
+- **`overflow: hidden` on the main** while visible: `ClipToBounds` at style priority, bound by the split pane to each item when it's
+  added, before it's styled, and given a value on the main only, so an app's own style for it wins, as an app's rule beats Ionic's
+  `::slotted`. It costs nothing in the style budget, where a `::slotted` rule in `Styles/` would add an alternative for every
+  element (it went over the budget, 287 of 286, so it was moved).
 - **`when`**: above. The split pane listens only while attached; while detached it keeps its last state, and reads it again when
   attached (Ionic's `matchMedia` reads a window that's always there).
 

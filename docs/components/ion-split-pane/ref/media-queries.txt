@@ -58,3 +58,24 @@
 "(-webkit-min-device-pixel-ratio: 2)"                    true   "(-webkit-min-device-pixel-ratio: 2)"
 "(display-mode: browser)"                                true   "(display-mode: browser)"
 inner [ 600, 800 ]
+
+At 992 x 800, after review: brackets that don't parse are unknown, and exponents
+"(min-width: 500px) or (hover hover)"                    true   "(min-width: 500px) or (hover hover)"
+"(hover hover)"                                          false   "(hover hover)"
+"not (hover hover)"                                      false   "not (hover hover)"
+"(min-width: 9.92e2px)"                                  true   "(min-width: 992px)"
+"(min-width: 5e2px)"                                     true   "(min-width: 500px)"
+"(min-width) or (min-width: 500px)"                      true   "(min-width) or (min-width: 500px)"
+"(min-width: 500px), (min-width)"                        true   "(min-width: 500px), (min-width)"
+"(width < )"                                             false   "(width < )"
+"(foo) or (min-width: 500px)"                            true   "(foo) or (min-width: 500px)"
+"(min-width: 500px) and (hover hover)"                   false   "(min-width: 500px) and (hover hover)"
+
+At 600 x 800, after breakage: the range forms at their boundaries
+"(width < 600px)"                                        false   "(width < 600px)"
+"(600px < width)"                                        false   "(600px < width)"
+"(width <= 600px)"                                       true   "(width <= 600px)"
+"(600px <= width < 601px)"                               true   "(600px <= width < 601px)"
+"(width > 599px)"                                        true   "(width > 599px)"
+"(width >= 600.5px)"                                     false   "(width >= 600.5px)"
+"(width = 600px)"                                        true   "(width = 600px)"

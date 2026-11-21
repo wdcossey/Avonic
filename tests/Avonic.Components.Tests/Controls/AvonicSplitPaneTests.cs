@@ -278,6 +278,13 @@ public class AvonicSplitPaneTests
     [InlineData("(width > 600px)", false)]
     [InlineData("(400px < width < 700px)", true)]
     [InlineData("(700px > width)", true)]
+    [InlineData("(width < 600px)", false)]
+    [InlineData("(600px < width)", false)]
+    [InlineData("(width <= 600px)", true)]
+    [InlineData("(600px <= width < 601px)", true)]
+    [InlineData("(width > 599px)", true)]
+    [InlineData("(width >= 600.5px)", false)]
+    [InlineData("(width = 600px)", true)]
     [InlineData("(min-aspect-ratio: 1/1)", false)]
     [InlineData("(max-aspect-ratio: 1/1)", true)]
     [InlineData("(aspect-ratio: 3/4)", true)]
@@ -316,6 +323,21 @@ public class AvonicSplitPaneTests
     [InlineData("not tv", true)]
     public void B4_A_Media_Query_Matches_As_Chromiums_Does(string query, bool chromium) =>
         Assert.Equal(chromium, MediaQuery.Matches(query, new Size(600, 800)));
+
+    /// <summary>The rows of ref/media-queries.txt measured at 992 x 800: brackets that don't parse, and exponents.</summary>
+    [Theory]
+    [InlineData("(min-width: 500px) or (hover hover)", true)]
+    [InlineData("(hover hover)", false)]
+    [InlineData("not (hover hover)", false)]
+    [InlineData("(min-width: 9.92e2px)", true)]
+    [InlineData("(min-width: 5e2px)", true)]
+    [InlineData("(min-width) or (min-width: 500px)", true)]
+    [InlineData("(min-width: 500px), (min-width)", true)]
+    [InlineData("(width < )", false)]
+    [InlineData("(foo) or (min-width: 500px)", true)]
+    [InlineData("(min-width: 500px) and (hover hover)", false)]
+    public void B4_A_Bracket_That_Doesnt_Parse_Is_Unknown_As_In_Chromium(string query, bool chromium) =>
+        Assert.Equal(chromium, MediaQuery.Matches(query, new Size(992, 800)));
 
     /// <summary>The rows of ref/media-queries.txt it doesn't read as Chromium does: features of the device, and calc().</summary>
     [Theory]
@@ -428,6 +450,19 @@ public class AvonicSplitPaneTests
     }
 
     [AvaloniaFact]
+    public void B7_A_Main_Removed_From_The_Items_Loses_Its_Mark()
+    {
+        // So that a menu in it, used elsewhere, isn't taken for a menu in a main content.
+        using var stage = new Stage(1024, 768);
+        Assert.Contains(AvonicSplitPane.SplitPaneMain, stage.Main.Classes);
+        Assert.True(stage.Main.ClipToBounds);
+        stage.Pane.Items.Remove(stage.Main);
+        Stage.Settle();
+        Assert.DoesNotContain(AvonicSplitPane.SplitPaneMain, stage.Main.Classes);
+        Assert.False(stage.Main.ClipToBounds);
+    }
+
+    [AvaloniaFact]
     public void B7_No_Main_Found_Warns()
     {
         var sink = new WarningSink();
@@ -489,6 +524,13 @@ public class AvonicSplitPaneTests
         Stage.Settle();
         Box(stage.Box(stage.Main), 195, 195);
 
+        // The default 100%, with no limits: the whole row.
+        stage.Pane.Resources["Avonic.SplitPane.SideMinWidth"] = 0d;
+        stage.Pane.Resources["Avonic.SplitPane.SideMaxWidth"] = "100%";
+        stage.Pane.Resources.Remove("Avonic.SplitPane.SideWidth");
+        Stage.Settle();
+        Box(stage.Box(stage.Main), 390, 0);
+
         stage.Pane.Resources["Avonic.SplitPane.SideWidth"] = "40%";
         stage.Pane.Resources["Avonic.SplitPane.SideMinWidth"] = 0d;
         stage.Pane.Resources["Avonic.SplitPane.SideMaxWidth"] = "100%";
@@ -506,6 +548,18 @@ public class AvonicSplitPaneTests
         stage.Pane.Resources["Avonic.SplitPane.SideMaxWidth"] = "100%";
         Stage.Settle();
         Box(stage.Box(stage.Main), 304, 86);
+    }
+
+    [AvaloniaFact]
+    public void B8_A_Side_Width_Of_Auto_Is_The_Sides_Own()
+    {
+        // var(side-width, var(width)) with side-width: auto: the side's content width, here the menu's text.
+        using var stage = new Stage(390, 844, s => s.Pane.When = "xs");
+        stage.Pane.Resources["Avonic.SplitPane.SideWidth"] = "auto";
+        stage.Pane.Resources["Avonic.SplitPane.SideMinWidth"] = 0d;
+        stage.Pane.Resources["Avonic.SplitPane.SideMaxWidth"] = "100%";
+        Stage.Settle();
+        Assert.InRange(stage.Box(stage.Main).X, 40, 200);
     }
 
     // ── B9: the border ───────────────────────────────────────────────────────────────────────
@@ -535,6 +589,17 @@ public class AvonicSplitPaneTests
         Assert.Equal(new Rect(266, 0, 4, 844), Assert.Single(stage.Panel.BorderRects()));
         Box(stage.Box(stage.Menu), 0, 266);
         Assert.Equal(Brushes.Red, stage.Panel.BorderBrush);
+    }
+
+    [AvaloniaFact]
+    public void B9_A_Sides_Margin_Leaves_The_Border_At_The_Edge_Of_Its_Room()
+    {
+        using var stage = new Stage(390, 844, s =>
+        {
+            s.Pane.When = "xs";
+            s.Menu.Margin = new Thickness(0, 0, 8, 0);
+        });
+        Assert.Equal(new Rect(269, 0, 1, 844), Assert.Single(stage.Panel.BorderRects()));
     }
 
     [AvaloniaFact]
@@ -789,6 +854,27 @@ public class AvonicSplitPaneTests
         Assert.False(stage.Main.ClipToBounds);
     }
 
+    [AvaloniaFact]
+    public void B15_An_Apps_Own_Style_For_The_Main_Content_Wins()
+    {
+        // An app's rule beats ::slotted: the split pane's value is bound before the main is styled, so the app's style wins.
+        var app = new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.Name(Avalonia.Styling.Selectors.OfType(x, typeof(Border)), "Main"))
+        {
+            Setters = { new Avalonia.Styling.Setter(Visual.ClipToBoundsProperty, false) },
+        };
+        Application.Current!.Styles.Add(app);
+        try
+        {
+            using var stage = new Stage(1024, 768);
+            Assert.Contains(AvonicSplitPane.SplitPaneVisible, stage.Pane.Classes);
+            Assert.False(stage.Main.ClipToBounds);
+        }
+        finally
+        {
+            Application.Current.Styles.Remove(app);
+        }
+    }
+
     // ── B16: other children ──────────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
@@ -808,6 +894,20 @@ public class AvonicSplitPaneTests
         stage.Pane.When = false;
         Stage.Settle();
         Box(stage.Box(stage.Main), 0, 390);
+    }
+
+    [AvaloniaFact]
+    public void B16_Another_Child_Shrinks_To_The_Room_Left()
+    {
+        // flex: 0 1 auto: a wrapping text that would be wider than the row shrinks to the 120 the side leaves.
+        var other = new TextBlock { Text = string.Join(' ', Enumerable.Repeat("words", 40)), TextWrapping = TextWrapping.Wrap };
+        using var stage = new Stage(390, 844, s =>
+        {
+            s.Pane.When = "xs";
+            s.Pane.Items.Insert(1, other);
+        });
+        Assert.InRange(stage.Box(other).Width, 1, 120);
+        Assert.InRange(stage.Box(stage.Main).X, 270, 390);
     }
 
     // ── B17: a wrapped menu ──────────────────────────────────────────────────────────────────
@@ -857,12 +957,29 @@ public class AvonicSplitPaneTests
     [AvaloniaFact]
     public void B18_A_Detached_Split_Pane_Stops_Following_The_Window()
     {
-        using var stage = new Stage(390, 844, s => s.Pane.When = "(min-width: 600px)");
+        // disconnectedCallback removes the listener: a resize while detached raises nothing, and the next attach reads the window.
+        using var stage = new Stage(700, 844, s => s.Pane.When = "(min-width: 600px)");
+        stage.Log.Clear();
         stage.Detach();
-        stage.Resize(700);
+        stage.Resize(390);
         Assert.Empty(stage.Log);
         stage.Attach();
-        Assert.Equal(["ionSplitPaneVisible(True)"], stage.Log.Where(l => l.StartsWith("ionSplit", StringComparison.Ordinal)));
+        Assert.Equal(["ionSplitPaneVisible(False)"], stage.Log);
+    }
+
+    [AvaloniaFact]
+    public void B18_A_Menu_With_No_Content_Found_Still_Shows_In_The_Pane_When_Attached_Again()
+    {
+        // render: menu-pane-visible and split-pane-side show it whether or not connectedCallback found its content.
+        using var stage = new Stage(390, 844, s => s.Pane.When = "(min-width: 600px)");
+        stage.Menu.ContentId = "Nothing";
+        stage.Pane.Items.Remove(stage.Menu);
+        Stage.Settle();
+        stage.Resize(700);
+        stage.Pane.Items.Insert(0, stage.Menu);
+        Stage.Settle();
+        Assert.True(stage.Menu.IsVisible);
+        Assert.Equal(270, stage.Box(stage.Main).X, 1);
     }
 
     // ── B19: automation ──────────────────────────────────────────────────────────────────────

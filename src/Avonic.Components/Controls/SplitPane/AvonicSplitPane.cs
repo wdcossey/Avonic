@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
@@ -76,14 +77,19 @@ public class AvonicSplitPane : ItemsControl
     private int _breakpoint = -1;
     private SplitPaneBorders? _borders;
 
-    // overflow: hidden on the main content while visible, at style priority, bound to the main once it's found.
-    private readonly StyleValue<bool> _mainClip = new();
+    // overflow: hidden on the main content while visible, at style priority: bound to each child when it's added, before it's
+    // styled, so that an app's own style for it still wins, and given a value on the main only.
+    private readonly Dictionary<Control, (StyleValue<bool> Clip, IDisposable Binding)> _clips = [];
     private Control? _main;
-    private IDisposable? _mainClipBinding;
 
     static AvonicSplitPane()
     {
         ItemsPanelProperty.OverrideDefaultValue<AvonicSplitPane>(DefaultPanel);
+    }
+
+    public AvonicSplitPane()
+    {
+        Items.CollectionChanged += OnItemsChanged;
     }
 
     public string? ContentId
@@ -183,6 +189,13 @@ public class AvonicSplitPane : ItemsControl
             }
         }
 
+        // An old main that has left the items loses its mark too, so that a menu in it, used elsewhere, isn't taken for a menu in
+        // a main content.
+        if (_main is not null && !ReferenceEquals(_main, main))
+        {
+            ((IPseudoClasses)_main.Classes).Set(SplitPaneMain, false);
+        }
+
         foreach (var item in Items)
         {
             if (item is Control child)
@@ -191,15 +204,8 @@ public class AvonicSplitPane : ItemsControl
             }
         }
 
-        // :host(.split-pane-visible) ::slotted(.split-pane-main) { overflow: hidden }, from here, which costs nothing in the style
-        // budget, where a rule in Styles/ would cost every element an alternative. Its position, flex: 1 and z-index: 0 are the
-        // panel's; its box-shadow: none is the menu's, which draws the push and reveal types' content shadow.
-        if (!ReferenceEquals(main, _main))
-        {
-            _mainClipBinding?.Dispose();
-            _mainClipBinding = main?.Bind(ClipToBoundsProperty, _mainClip, BindingPriority.Style);
-            _main = main;
-        }
+        _main = main;
+        UpdateMainClip();
 
         if (twice)
         {
@@ -305,13 +311,56 @@ public class AvonicSplitPane : ItemsControl
 
         _visible = visible;
         PseudoClasses.Set(SplitPaneVisible, visible);
-        _mainClip.SetWhen(visible, true);
+        UpdateMainClip();
         if (Panel is { } panel)
         {
             panel.IsSplit = visible;
         }
 
         RaiseEvent(new SplitPaneVisibleEventArgs(IonSplitPaneVisibleEvent, visible));
+    }
+
+    /// <summary>
+    /// <c>:host(.split-pane-visible) ::slotted(.split-pane-main) { overflow: hidden }</c>, from here, which costs nothing in the style
+    /// budget, where a rule in <c>Styles/</c> would cost every element an alternative. Its position, <c>flex: 1</c> and
+    /// <c>z-index: 0</c> are the panel's; its <c>box-shadow: none</c> is the menu's, which draws the push and reveal types' content
+    /// shadow.
+    /// </summary>
+    private void UpdateMainClip()
+    {
+        foreach (var (child, (clip, _)) in _clips)
+        {
+            clip.SetWhen(_visible && ReferenceEquals(child, _main), true);
+        }
+    }
+
+    /// <summary>Each child added gets its clip's binding, before it's styled; one removed loses it, and the main's mark.</summary>
+    private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        foreach (var child in _clips.Keys.ToList())
+        {
+            if (!Items.Contains(child))
+            {
+                _clips[child].Binding.Dispose();
+                _clips.Remove(child);
+                if (ReferenceEquals(child, _main))
+                {
+                    ((IPseudoClasses)child.Classes).Set(SplitPaneMain, false);
+                    _main = null;
+                }
+            }
+        }
+
+        foreach (var item in Items)
+        {
+            if (item is Control child && !_clips.ContainsKey(child))
+            {
+                var clip = new StyleValue<bool>();
+                _clips[child] = (clip, child.Bind(ClipToBoundsProperty, clip, BindingPriority.Style));
+            }
+        }
+
+        UpdateMainClip();
     }
 
     // ── What the menu calls ──────────────────────────────────────────────────────────────────
