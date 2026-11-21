@@ -151,6 +151,9 @@ list is from `utils/menu-controller`. Every row is in [PLAN.md](PLAN.md#fidelity
   0.5 and no click. Automation: a button named `menu` unless the app names it.
 - **The toggle** toggles its menu on any click inside it, a stock `Button` or an `AvonicButton` from a key too; no look of its own.
 - **Automation**: the menu is a `Navigation` landmark named `menu` unless the app names it.
+- **In an `AvonicSplitPane`** ([ion-split-pane](../ion-split-pane/README.md), #78): a menu that is its side, not in its main
+  content, is `:split-pane-side`; while the pane shows it's `:menu-pane-visible`, shown beside the main content and not active
+  (`IsActive()` and `Open()` false, no swipe; one that was open closes with the `gesture` role), and its buttons and toggles hide.
 
 ## Resource keys
 
@@ -191,6 +194,5 @@ None. `MenuController` is Ionic's `menuController`, and `MenuAnimationContext` i
 - **Two menus opened in one tick**: the second is refused, where Ionic's race opens both. See
   [COMPARISON.md](COMPARISON.md#deliberate-differences).
 - **One `MenuController` per process**, where Ionic's is one per document: menus in two windows are kept to one open between them.
-- **`ion-split-pane`** (#78) isn't built, so `IsActive()` is `IsEnabled`, and there's no `menu-pane-visible` state.
 - **The Android TalkBack workaround** (`aria-hidden` on the menu while it animates) isn't here.
 - Not tried in a real window: `tools/real-window/drive.ps1` has an `ion-menu` section, not run.

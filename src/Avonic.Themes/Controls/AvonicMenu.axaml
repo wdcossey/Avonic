@@ -64,9 +64,20 @@
             <Setter Property="ContentWidth" Value="{DynamicResource Avonic.Menu.Md.WidthSmall}" />
         </Style>
 
+        <!-- :host(.menu-pane-visible) .menu-inner { left: 0; right: 0; width: auto }: it fills the menu, which its split pane sizes.
+             After the small width's, which it beats, as its selector is the more specific in Ionic. -->
+        <Style Selector="^:menu-pane-visible /template/ c|MenuPanel#PART_Panel">
+            <Setter Property="ContentWidth" Value="100%" />
+        </Style>
+
         <!-- .menu-inner { transform: translateX(-9999px) }: off screen when it's shown but not yet animated. -->
         <Style Selector="^ /template/ Border#PART_Container">
             <Setter Property="RenderTransform" Value="translateX(-9999px)" />
+        </Style>
+
+        <!-- :host(.menu-pane-visible) .menu-inner { transform: none } -->
+        <Style Selector="^:menu-pane-visible /template/ Border#PART_Container">
+            <Setter Property="RenderTransform" Value="none" />
         </Style>
 
         <!-- :host(.menu-type-reveal.show-menu) .menu-inner { transform: translate3d(0, 0, 0) } -->

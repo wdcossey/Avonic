@@ -29,7 +29,7 @@ namespace Avonic.Components.Controls;
 [TemplatePart("PART_Backdrop", typeof(AvonicBackdrop))]
 [TemplatePart("PART_ContentShadow", typeof(Border))]
 [TemplatePart("PART_Panel", typeof(MenuPanel))]
-[PseudoClasses(TypeOverlay, TypePush, TypeReveal, SideStart, SideEnd, ShowMenu, SmallWidth)]
+[PseudoClasses(TypeOverlay, TypePush, TypeReveal, SideStart, SideEnd, ShowMenu, SmallWidth, MenuPaneVisible, SplitPaneSide)]
 public partial class AvonicMenu : ContentControl
 {
     /// <summary><c>menu-type-overlay</c>.</summary>
@@ -52,6 +52,12 @@ public partial class AvonicMenu : ContentControl
 
     /// <summary><c>@media (max-width: 340px)</c>, on the top level's width: <c>.menu-inner</c>'s <c>--width</c> is md's small one.</summary>
     public const string SmallWidth = ":small-width";
+
+    /// <summary><c>menu-pane-visible</c>: its <see cref="AvonicSplitPane"/> shows it beside the main content.</summary>
+    public const string MenuPaneVisible = ":menu-pane-visible";
+
+    /// <summary><c>split-pane-side</c>: it's the side of an <see cref="AvonicSplitPane"/>, not a menu inside its main content.</summary>
+    public const string SplitPaneSide = ":split-pane-side";
 
     /// <summary>The widest top level <see cref="SmallWidth"/> is on for: the media query's 340 px.</summary>
     internal const double SmallMaxWidth = 340;
@@ -157,6 +163,10 @@ public partial class AvonicMenu : ContentControl
     private IDisposable? _contentOffscreen;
     private bool _trapping;
 
+    // Its split pane, from getSplitPane() at each attach, and Ionic's isPaneVisible.
+    private AvonicSplitPane? _splitPane;
+    private bool _isPaneVisible;
+
     static AvonicMenu()
     {
         // role="navigation"
@@ -254,6 +264,12 @@ public partial class AvonicMenu : ContentControl
     /// <summary>The main content <see cref="ContentId"/> found, while it's attached.</summary>
     internal Control? MainContent => _contentEl;
 
+    /// <summary>
+    /// Shown beside the main content: <c>.menu-pane-visible.split-pane-side.menu-enabled</c>, which is <c>display: flex</c>. What
+    /// <see cref="SplitPanePanel"/> lays out as a side.
+    /// </summary>
+    internal bool IsPaneShown => _isPaneVisible && _splitPane is not null && IsEnabled;
+
     /// <summary>The animation it plays, Ionic's <c>this.animation</c>, for tests.</summary>
     internal AvonicAnimation? CurrentAnimation => _animation;
 
@@ -263,8 +279,8 @@ public partial class AvonicMenu : ContentControl
     public bool IsOpen() => IsOpenState;
 
     /// <summary>
-    /// Ionic <c>isActive()</c>: whether it can open or close, which is whether it's enabled (and not a split pane's side, which
-    /// Avonic has no split pane for yet).
+    /// Ionic <c>isActive()</c>: whether it can open or close, which is whether it's enabled and not shown in an
+    /// <see cref="AvonicSplitPane"/>.
     /// </summary>
     public bool IsActive() => IsActiveCore;
 
@@ -295,7 +311,8 @@ public partial class AvonicMenu : ContentControl
         return MenuController.SetOpen(this, shouldOpen, animated, role);
     }
 
-    private bool IsActiveCore => IsEnabled;
+    /// <summary>Ionic's <c>_isActive()</c>: <c>!disabled &amp;&amp; !isPaneVisible</c>.</summary>
+    private bool IsActiveCore => IsEnabled && !_isPaneVisible;
 
     /// <summary>Ionic's own <c>_setOpen</c>, which the controller calls.</summary>
     internal async Task<bool> SetOpenCore(bool shouldOpen, bool animated, string? role)
@@ -408,6 +425,7 @@ public partial class AvonicMenu : ContentControl
         }
 
         UpdateSmallWidth();
+        AttachToSplitPane();
         Connect();
         if (!_didLoad)
         {
@@ -486,6 +504,7 @@ public partial class AvonicMenu : ContentControl
             AfterAnimation(false, null);
         }
 
+        DetachFromSplitPane();
         _connected = false;
         _blocker.Destroy();
         _blocker = GestureController.Instance.CreateBlocker(disableScroll: true);
@@ -517,6 +536,7 @@ public partial class AvonicMenu : ContentControl
         else if (change.Property == SideProperty)
         {
             UpdateSideClasses();
+            _splitPane?.SidesChanged();
             if (_connected)
             {
                 SideChanged();
@@ -525,6 +545,8 @@ public partial class AvonicMenu : ContentControl
         else if (change.Property == IsEnabledProperty)
         {
             // disabledChanged, once it has loaded, as a Stencil watcher.
+            // menu-enabled: a disabled side isn't shown in the pane.
+            UpdatePaneState();
             if (_didLoad)
             {
                 UpdateState();
@@ -630,8 +652,23 @@ public partial class AvonicMenu : ContentControl
         PseudoClasses.Set(TypePush, type == MenuType.Push);
         PseudoClasses.Set(TypeReveal, type == MenuType.Reveal);
 
-        // :host(.menu-type-overlay) { z-index: 1000 }, reveal's 0, push's auto.
-        _zIndex.SetWhen(type == MenuType.Overlay, 1000);
+        UpdateZIndex();
+    }
+
+    /// <summary>
+    /// <c>:host(.menu-type-overlay) { z-index: 1000 }</c>, reveal's 0, push's auto; and <c>z-index: 0</c> beside the main content,
+    /// <c>.menu-pane-visible.split-pane-side</c>.
+    /// </summary>
+    private void UpdateZIndex()
+    {
+        if (_isPaneVisible && _splitPane is not null)
+        {
+            _zIndex.Set(0);
+        }
+        else
+        {
+            _zIndex.SetWhen(Type == MenuType.Overlay, 1000);
+        }
     }
 
     private void UpdateSideClasses()
@@ -671,6 +708,91 @@ public partial class AvonicMenu : ContentControl
 
     private void UpdateSmallWidth() =>
         PseudoClasses.Set(SmallWidth, _topLevel is { } top && top.ClientSize.Width <= SmallMaxWidth);
+
+    // ── Split pane ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Ionic's <c>getSplitPane()</c> and <c>split-pane-side</c>, then <c>componentDidLoad</c>'s <c>isPaneVisible = await
+    /// splitPane.isVisible()</c>, and the <c>ionSplitPaneVisible</c> listener on <c>body</c>, here the top level's. Ionic reads the
+    /// state once, at its load; here it's read at every attach, as a menu here is detached and attached again with its page far more
+    /// often, and hears no event while it's away.
+    /// </summary>
+    private void AttachToSplitPane()
+    {
+        _splitPane = FindSplitPane();
+        PseudoClasses.Set(SplitPaneSide, _splitPane is not null);
+        _isPaneVisible = _splitPane?.Visible ?? false;
+        _splitPane?.AddSide(this);
+
+        // Handled too: an app's Handled isn't stopPropagation() to most code that sets it, and a menu left in the wrong state is
+        // worse than one that hears an event an app meant to stop. Only a side listens: Ionic's every menu does, and drops the
+        // events of any split pane but its own, which a menu with none would drop all of.
+        if (_splitPane is not null)
+        {
+            _topLevel?.AddHandler(AvonicSplitPane.IonSplitPaneVisibleEvent, OnSplitPaneVisible, RoutingStrategies.Bubble, handledEventsToo: true);
+        }
+        UpdatePaneState();
+    }
+
+    private void DetachFromSplitPane()
+    {
+        _topLevel?.RemoveHandler(AvonicSplitPane.IonSplitPaneVisibleEvent, OnSplitPaneVisible);
+        _splitPane?.RemoveSide(this);
+        _splitPane = null;
+    }
+
+    /// <summary>
+    /// The nearest <see cref="AvonicSplitPane"/> it's in, unless the nearest main content (<see cref="AvonicSplitPane.SplitPaneMain"/>)
+    /// comes first: a menu in the main content, such as one in a page, is an ordinary menu. Not only a direct child, as a menu can be
+    /// wrapped in another control.
+    /// </summary>
+    private AvonicSplitPane? FindSplitPane()
+    {
+        for (Visual? visual = this; visual is not null; visual = visual.GetVisualParent())
+        {
+            if (visual is AvonicSplitPane pane)
+            {
+                return pane;
+            }
+
+            if (visual is StyledElement element && element.Classes.Contains(AvonicSplitPane.SplitPaneMain))
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ionic's <c>onSplitPaneChanged</c>: from its own split pane only, the state, then <c>updateState</c>, which closes it at once
+    /// once it's in the pane. <c>ion-menu-button</c> and <c>ion-menu-toggle</c> listen to the same event to check their menu again;
+    /// Avonic's listen to the controller's <c>ionMenuChange</c>, so it's raised for them here.
+    /// </summary>
+    private void OnSplitPaneVisible(object? sender, SplitPaneVisibleEventArgs e)
+    {
+        if (_splitPane is null || !ReferenceEquals(e.Source, _splitPane))
+        {
+            return;
+        }
+
+        _isPaneVisible = e.Visible;
+        UpdatePaneState();
+        UpdateState();
+        MenuController.RaiseMenuChanged(this);
+    }
+
+    /// <summary>
+    /// <c>menu-pane-visible</c>, and what follows from it: shown (<c>display: flex</c>) while it's an enabled side in a visible pane,
+    /// and <c>z-index: 0</c>. The pane lays out its sides again.
+    /// </summary>
+    private void UpdatePaneState()
+    {
+        PseudoClasses.Set(MenuPaneVisible, _isPaneVisible);
+        _shown.Set(PseudoClasses.Contains(ShowMenu) || IsPaneShown);
+        UpdateZIndex();
+        _splitPane?.SidesChanged();
+    }
 
     // ── Animation ────────────────────────────────────────────────────────────────────────────
 
@@ -716,7 +838,7 @@ public partial class AvonicMenu : ContentControl
     private void HideClosed()
     {
         _blocker.Unblock();
-        _shown.Set(false);
+        _shown.Set(IsPaneShown);
         _focusable.Set(false);
         PseudoClasses.Set(ShowMenu, false);
         _contentNoHit?.Dispose();
