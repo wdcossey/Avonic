@@ -10,6 +10,7 @@ using Avalonia.VisualTree;
 using Avonic.Components.Controls;
 using Avonic.Sample;
 using Avonic.Sample.Pages;
+using Avonic.Sample.Pages.Showcase;
 
 namespace Avonic.Components.Tests.Sample;
 
@@ -74,6 +75,59 @@ public class PreviewCaptureTests
         var tab = Assert.Single(page.GetVisualDescendants().OfType<AvonicTab>(), t => t.Tab == screen && t.IsVisible);
         Assert.True(tab.Bounds.Height > 400, $"The {screen} screen is {tab.Bounds.Height} high");
         Assert.Equal(screen, page.ScreenTabs.GetSelected());
+        AssertBackground(frame, dark);
+        Save(frame, $"showcase-{screen}-{(dark ? "dark" : "light")}.png");
+    });
+
+    public static TheoryData<string, bool> InboxScreens()
+    {
+        var data = new TheoryData<string, bool>();
+        foreach (var screen in ShowcasePage.InboxScreens)
+        {
+            data.Add(screen, false);
+            data.Add(screen, true);
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// What the inbox opens: its side menu, from the menu button, and its first message, pushed on its nav as a tap pushes it,
+    /// with the back button in the message's header.
+    /// </summary>
+    [AvaloniaTheory]
+    [MemberData(nameof(InboxScreens))]
+    public void Showcase_Inbox_Screen(string screen, bool dark) => Staged(dark, clock =>
+    {
+        var page = new ShowcasePage();
+        var pictures = new Pictures(page);
+        using var scene = new Scene(page, Width, Height);
+        Settle(scene, clock, pictures);
+        if (screen == "menu")
+        {
+            _ = page.Menu.Open();
+        }
+        else
+        {
+            var first = page.Inbox.GetVisualDescendants().OfType<AvonicItem>().First();
+            first.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(AvonicItem.ClickEvent));
+        }
+
+        var frame = Capture(scene, clock, pictures);
+
+        Assert.False(pictures.Loading, "A picture is still loading");
+        if (screen == "menu")
+        {
+            Assert.True(page.Menu.IsOpen(), "The menu didn't open");
+        }
+        else
+        {
+            Assert.Equal(2, page.Inbox.GetLength());
+            var message = Assert.IsType<MessageScreen>(page.Inbox.GetActive()?.Element);
+            Assert.Equal("Sarah Chen", message.Sender);
+            Assert.True(message.GetVisualDescendants().OfType<AvonicBackButton>().Single().IsEffectivelyVisible, "No back button");
+        }
+
         AssertBackground(frame, dark);
         Save(frame, $"showcase-{screen}-{(dark ? "dark" : "light")}.png");
     });

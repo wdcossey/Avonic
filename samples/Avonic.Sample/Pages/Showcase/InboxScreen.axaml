@@ -3,19 +3,15 @@
              xmlns:c="using:Avonic.Components.Controls"
              x:Class="Avonic.Sample.Pages.Showcase.InboxScreen">
 
-    <!-- An inbox: a header with a searchbar under its toolbar, and a list of messages. Swipe a message right to archive it,
-         or left for more, where More opens an action sheet. An avatar is a picture, or initials on one of the palette's
-         colours, which follow a dark palette. -->
+    <!-- An inbox, the root of the inbox tab's nav: a header with the menu's button and a searchbar under its toolbar, and a list
+         of messages. Tap one to push it; swipe it right to archive it, which shows a toast, or left for more, where More opens an
+         action sheet. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
                 <c:AvonicToolbar.StartContent>
                     <c:AvonicButtons>
-                        <c:AvonicButton>
-                            <c:AvonicButton.IconOnlyContent>
-                                <c:AvonicIcon IconName="menu" />
-                            </c:AvonicButton.IconOnlyContent>
-                        </c:AvonicButton>
+                        <c:AvonicMenuButton />
                     </c:AvonicButtons>
                 </c:AvonicToolbar.StartContent>
                 <c:AvonicTitle Content="Inbox" />
@@ -35,10 +31,10 @@
         </c:AvonicHeader>
 
         <c:AvonicContent Grid.Row="1">
-            <c:AvonicList>
+            <c:AvonicList Name="Messages">
                 <c:AvonicItemSliding>
                     <c:AvonicItemOptions Side="Start">
-                        <c:AvonicItemOption Color="success" Content="Archive">
+                        <c:AvonicItemOption Color="success" Content="Archive" Click="OnArchive">
                             <c:AvonicItemOption.TopContent>
                                 <c:AvonicIcon IconName="archive" />
                             </c:AvonicItemOption.TopContent>

@@ -4,45 +4,113 @@
              xmlns:s="using:Avonic.Sample.Pages.Showcase"
              x:Class="Avonic.Sample.Pages.ShowcasePage">
 
-    <!-- A small app made only of Avonic controls: four screens behind a tab bar, as an Ionic app's tabs starter is. Each
-         screen is a page of its own, with a header, a toolbar and a content, in Showcase/. The README's and PREVIEW.md's
-         pictures are these screens, captured by PreviewCaptureTests. -->
-    <c:AvonicTabs Name="Tabs">
-        <Panel>
-            <c:AvonicTab Tab="inbox">
-                <s:InboxScreen />
-            </c:AvonicTab>
-            <c:AvonicTab Tab="discover">
-                <s:DiscoverScreen />
-            </c:AvonicTab>
-            <c:AvonicTab Tab="profile">
-                <s:ProfileScreen />
-            </c:AvonicTab>
-            <c:AvonicTab Tab="settings">
-                <s:SettingsScreen />
-            </c:AvonicTab>
-        </Panel>
-        <c:AvonicTabs.BottomContent>
-            <c:AvonicTabBar>
-                <c:AvonicTabButton Tab="inbox">
-                    <c:AvonicIcon IconName="mail" />
-                    <c:AvonicLabel Content="Inbox" />
-                    <c:AvonicBadge Content="3" />
-                </c:AvonicTabButton>
-                <c:AvonicTabButton Tab="discover">
-                    <c:AvonicIcon IconName="compass" />
-                    <c:AvonicLabel Content="Discover" />
-                </c:AvonicTabButton>
-                <c:AvonicTabButton Tab="profile">
-                    <c:AvonicIcon IconName="person-circle" />
-                    <c:AvonicLabel Content="Profile" />
-                </c:AvonicTabButton>
-                <c:AvonicTabButton Tab="settings">
-                    <c:AvonicIcon IconName="settings" />
-                    <c:AvonicLabel Content="Settings" />
-                </c:AvonicTabButton>
-            </c:AvonicTabBar>
-        </c:AvonicTabs.BottomContent>
-    </c:AvonicTabs>
+    <!-- A small app made only of Avonic controls: four screens behind a tab bar, as an Ionic app's tabs starter is, and a side
+         menu over them, which the inbox's menu button opens. Each screen is a page of its own, with a header, a toolbar and a
+         content, in Showcase/; the inbox is the root of a nav, which pushes a message when one is tapped. The README's and
+         PREVIEW.md's pictures are these screens, captured by PreviewCaptureTests. -->
+    <Grid>
+        <c:AvonicMenu Name="SideMenu" ContentId="Tabs">
+            <DockPanel>
+                <c:AvonicHeader DockPanel.Dock="Top">
+                    <c:AvonicToolbar>
+                        <c:AvonicTitle Content="Mail" />
+                    </c:AvonicToolbar>
+                </c:AvonicHeader>
+                <c:AvonicContent>
+                    <c:AvonicList Lines="None">
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="mail-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Inbox" />
+                                <c:AvonicItem.EndContent>
+                                    <c:AvonicNote Content="3" />
+                                </c:AvonicItem.EndContent>
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="star-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Starred" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="paper-plane-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Sent" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="document-text-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Drafts" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="archive-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Archive" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                        <c:AvonicMenuToggle>
+                            <c:AvonicItem Button="True">
+                                <c:AvonicItem.StartContent>
+                                    <c:AvonicIcon IconName="trash-outline" />
+                                </c:AvonicItem.StartContent>
+                                <c:AvonicLabel Content="Trash" />
+                            </c:AvonicItem>
+                        </c:AvonicMenuToggle>
+                    </c:AvonicList>
+                </c:AvonicContent>
+            </DockPanel>
+        </c:AvonicMenu>
+
+        <c:AvonicTabs Name="Tabs">
+            <Panel>
+                <c:AvonicTab Tab="inbox">
+                    <c:AvonicNav Name="InboxNav" Root="{x:Type s:InboxScreen}" />
+                </c:AvonicTab>
+                <c:AvonicTab Tab="discover">
+                    <s:DiscoverScreen />
+                </c:AvonicTab>
+                <c:AvonicTab Tab="profile">
+                    <s:ProfileScreen />
+                </c:AvonicTab>
+                <c:AvonicTab Tab="settings">
+                    <s:SettingsScreen />
+                </c:AvonicTab>
+            </Panel>
+            <c:AvonicTabs.BottomContent>
+                <c:AvonicTabBar Name="ShowcaseTabBar">
+                    <c:AvonicTabButton Tab="inbox">
+                        <c:AvonicIcon IconName="mail" />
+                        <c:AvonicLabel Content="Inbox" />
+                        <c:AvonicBadge Content="3" />
+                    </c:AvonicTabButton>
+                    <c:AvonicTabButton Tab="discover">
+                        <c:AvonicIcon IconName="compass" />
+                        <c:AvonicLabel Content="Discover" />
+                    </c:AvonicTabButton>
+                    <c:AvonicTabButton Tab="profile">
+                        <c:AvonicIcon IconName="person-circle" />
+                        <c:AvonicLabel Content="Profile" />
+                    </c:AvonicTabButton>
+                    <c:AvonicTabButton Tab="settings">
+                        <c:AvonicIcon IconName="settings" />
+                        <c:AvonicLabel Content="Settings" />
+                    </c:AvonicTabButton>
+                </c:AvonicTabBar>
+            </c:AvonicTabs.BottomContent>
+        </c:AvonicTabs>
+    </Grid>
 
 </UserControl>

@@ -3,8 +3,8 @@
              xmlns:c="using:Avonic.Components.Controls"
              x:Class="Avonic.Sample.Pages.Showcase.ProfileScreen">
 
-    <!-- A form: a segment under the toolbar, inputs with floating and stacked labels, a textarea that grows with its text,
-         a radio group, a checkbox, and a block button, which opens an alert. -->
+    <!-- A form: a segment under the toolbar, inputs with floating and stacked labels, a birthday's datetime button, a textarea
+         that grows with its text, a radio group, a checkbox, and a block button, which opens an alert. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
@@ -37,6 +37,12 @@
                         <c:AvonicInput Label="Phone" LabelPlacement="Stacked" Type="Tel" Placeholder="+1 555 0100" />
                     </c:AvonicItem>
                     <c:AvonicItem>
+                        <c:AvonicLabel Content="Birthday" />
+                        <c:AvonicItem.EndContent>
+                            <c:AvonicDatetimeButton Datetime="BirthdayDatetime" />
+                        </c:AvonicItem.EndContent>
+                    </c:AvonicItem>
+                    <c:AvonicItem>
                         <c:AvonicTextarea Label="About you" LabelPlacement="Stacked" AutoGrow="True"
                                           Value="Weekend hiker, coffee lover and occasional photographer." />
                     </c:AvonicItem>
@@ -66,6 +72,13 @@
                 </c:AvonicList>
 
                 <c:AvonicButton Expand="Block" Content="Save changes" Margin="16,8,16,16" Click="OnSave" />
+
+                <!-- The birthday's datetime, in a modal that keeps it mounted for its button, as Ionic's docs show it. Its locale
+                     is pinned, so the button reads the same on any machine. -->
+                <c:AvonicModal KeepContentsMounted="True">
+                    <c:AvonicDatetime Name="BirthdayDatetime" Presentation="Date" Value="1990-04-12" Locale="en-US"
+                                      ShowDefaultButtons="True" />
+                </c:AvonicModal>
             </StackPanel>
         </c:AvonicContent>
     </Grid>

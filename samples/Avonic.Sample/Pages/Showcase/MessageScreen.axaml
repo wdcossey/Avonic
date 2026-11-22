@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.Showcase.MessageScreen">
+
+    <!-- A message, pushed on the inbox's nav when one is tapped. The back button shows because the nav marks this page
+         :can-go-back, and pops it. -->
+    <DockPanel>
+        <c:AvonicHeader DockPanel.Dock="Top">
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicBackButton />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Name="SubjectTitle" />
+                <c:AvonicToolbar.EndContent>
+                    <c:AvonicButtons>
+                        <c:AvonicButton AutomationProperties.Name="Archive">
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="archive-outline" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                        <c:AvonicButton AutomationProperties.Name="Delete">
+                            <c:AvonicButton.IconOnlyContent>
+                                <c:AvonicIcon IconName="trash-outline" />
+                            </c:AvonicButton.IconOnlyContent>
+                        </c:AvonicButton>
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.EndContent>
+            </c:AvonicToolbar>
+        </c:AvonicHeader>
+
+        <c:AvonicContent>
+            <StackPanel>
+                <c:AvonicItem Lines="None">
+                    <c:AvonicItem.StartContent>
+                        <c:AvonicAvatar Name="Avatar" />
+                    </c:AvonicItem.StartContent>
+                    <c:AvonicLabel>
+                        <StackPanel>
+                            <TextBlock Classes="h2" Name="SenderText" FontWeight="Medium" />
+                            <TextBlock Classes="p" Text="to me" />
+                        </StackPanel>
+                    </c:AvonicLabel>
+                    <c:AvonicItem.EndContent>
+                        <c:AvonicNote Name="TimeNote" />
+                    </c:AvonicItem.EndContent>
+                </c:AvonicItem>
+
+                <TextBlock Name="BodyText" Margin="16,8,16,16" TextWrapping="Wrap" FontSize="16" LineHeight="24" />
+
+                <StackPanel Orientation="Horizontal" Margin="14,0">
+                    <c:AvonicButton Fill="Outline" Content="Reply">
+                        <c:AvonicButton.StartContent>
+                            <c:AvonicIcon IconName="arrow-undo-outline" />
+                        </c:AvonicButton.StartContent>
+                    </c:AvonicButton>
+                    <c:AvonicButton Fill="Outline" Content="Forward">
+                        <c:AvonicButton.StartContent>
+                            <c:AvonicIcon IconName="arrow-redo-outline" />
+                        </c:AvonicButton.StartContent>
+                    </c:AvonicButton>
+                </StackPanel>
+            </StackPanel>
+        </c:AvonicContent>
+    </DockPanel>
+
+</UserControl>
