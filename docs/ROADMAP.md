@@ -1,7 +1,8 @@
 # Roadmap
 
 Ionic 9.0.11 has **94** components (`node tools/ionic-api.js --list`). Avonic v2 targets **89** of them,
-all but the five under "Out of scope" that Ionic 9 still has, in the issues listed by tier (families that can only be built and compared together
+all but the five of the router family under "Out of scope" (picker legacy, listed there too, Ionic 9 removed); with
+`ion-icon`, from ionicons and not in `core.json`, that is the 90 elements the README counts. They are in the issues listed by tier (families that can only be built and compared together
 share one issue), plus the shared infrastructure they stand on. This file is the map; the issues are the work.
 `CLAUDE.md` lists only what *exists*.
 

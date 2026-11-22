@@ -73,25 +73,63 @@ public class ShowcaseOverlayTests
     });
 
     [AvaloniaFact]
-    public void Archive_Shows_A_Toast_With_Undo_Once_And_Closes_The_Message() => Run(new InboxScreen(), (screen, scene, clock) =>
+    public void Archive_Takes_The_Message_Out_With_A_Toast_Above_The_Tab_Bar_Whose_Undo_Puts_It_Back() =>
+        Run(new ShowcasePage(), (page, scene, clock) =>
+        {
+            Advance(clock, 100);
+            var inbox = Assert.IsType<InboxScreen>(page.Inbox.GetActive()?.Element);
+            var list = Assert.Single(inbox.GetVisualDescendants().OfType<AvonicList>());
+            var count = list.Items.Count;
+            var sliding = Assert.IsType<AvonicItemSliding>(list.Items[0]);
+
+            Archive(sliding, clock, twice: true);
+            var toast = Assert.Single(scene.Window.GetVisualDescendants().OfType<AvonicToast>(), t => t.IsVisible);
+            Assert.Equal("Conversation archived", toast.Message);
+            Assert.Equal(["Undo"], toast.Buttons!.Select(b => b.Text));
+            Assert.Equal(count - 1, list.Items.Count);
+            Assert.DoesNotContain(sliding, list.Items.Cast<object>());
+
+            // Above the tab bar, anchored to it.
+            Render();
+            var bar = Assert.Single(page.GetVisualDescendants().OfType<AvonicTabBar>());
+            var barTop = bar.TranslatePoint(default, scene.Window)!.Value.Y;
+            var wrapper = toast.GetVisualDescendants().OfType<Control>().Single(c => c.Name == "PART_Wrapper");
+            var toastBottom = wrapper.TranslatePoint(new Point(0, wrapper.Bounds.Height), scene.Window)!.Value.Y;
+            Assert.True(toastBottom <= barTop + 0.5, $"The toast ends at {toastBottom}, the tab bar starts at {barTop}");
+
+            // Undo puts it back where it was.
+            _ = toast.Dismiss(null, "cancel");
+            Advance(clock, 600);
+            Assert.Equal(count, list.Items.Count);
+            Assert.Same(sliding, list.Items[0]);
+            Assert.Equal(0, sliding.GetOpenAmount());
+
+            // Archived again, once the first toast has gone: another toast. Left to its 3 s, it goes, and the message stays out.
+            Archive(sliding, clock, twice: false);
+            Assert.Single(scene.Window.GetVisualDescendants().OfType<AvonicToast>(), t => t.IsVisible && !ReferenceEquals(t, toast));
+            Assert.Equal(count - 1, list.Items.Count);
+            Advance(clock, 3600);
+            Assert.DoesNotContain(scene.Window.GetVisualDescendants().OfType<AvonicToast>(), t => t.IsVisible);
+            Assert.Equal(count - 1, list.Items.Count);
+            Assert.DoesNotContain(sliding, list.Items.Cast<object>());
+        });
+
+    /// <summary>The first message, the one with an Archive option, swiped open and its Archive tapped.</summary>
+    private static void Archive(AvonicItemSliding sliding, TestClock clock, bool twice)
     {
-        var sliding = screen.GetVisualDescendants().OfType<AvonicItemSliding>().First();
+        Render();
         sliding.Open(ItemOptionsSide.Start);
         Advance(clock, 500);
-        Assert.True(sliding.GetOpenAmount() < 0);
-
+        Render(); // A message put back by Undo has its options in the visual tree again only after a layout.
         var archive = Assert.Single(sliding.GetVisualDescendants().OfType<AvonicItemOption>(), o => o.Content as string == "Archive");
         archive.RaiseEvent(new RoutedEventArgs(AvonicItemOption.ClickEvent));
-        archive.RaiseEvent(new RoutedEventArgs(AvonicItemOption.ClickEvent));
-        Advance(clock, 500);
+        if (twice)
+        {
+            archive.RaiseEvent(new RoutedEventArgs(AvonicItemOption.ClickEvent));
+        }
 
-        var toast = Assert.Single(scene.Window.GetVisualDescendants().OfType<AvonicToast>());
-        Assert.Equal("Conversation archived", toast.Message);
-        Assert.Equal(["Undo"], toast.Buttons!.Select(b => b.Text));
-        Assert.Equal(3000, toast.Duration);
-        Assert.True(toast.IsVisible);
-        Assert.Equal(0, sliding.GetOpenAmount());
-    });
+        Advance(clock, 500);
+    }
 
     [AvaloniaFact]
     public void A_Tapped_Message_Is_Pushed_With_A_Back_Button_That_Pops_It() =>
@@ -110,7 +148,10 @@ public class ShowcaseOverlayTests
             Assert.Equal("Lunch tomorrow", message.Subject);
             Assert.Equal("Yesterday", message.Time);
             Assert.Equal("MW", message.Initials);
+            Assert.Equal("Success", message.AvatarColor);
             Assert.StartsWith("There's a new ramen place", message.Body);
+            var avatar = Assert.Single(message.GetVisualDescendants().OfType<AvonicAvatar>());
+            Assert.Same(message.FindResource("Avonic.Color.SuccessBrush"), avatar.Background);
 
             var back = Assert.Single(message.GetVisualDescendants().OfType<AvonicBackButton>());
             Assert.True(back.IsEffectivelyVisible, "The pushed message's back button is hidden");

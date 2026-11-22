@@ -4,8 +4,9 @@
              x:Class="Avonic.Sample.Pages.Showcase.InboxScreen">
 
     <!-- An inbox, the root of the inbox tab's nav: a header with the menu's button and a searchbar under its toolbar, and a list
-         of messages. Tap one to push it; swipe it right to archive it, which shows a toast, or left for more, where More opens an
-         action sheet. An avatar is a picture, or initials on one of the palette's colours, which follow a dark palette. -->
+         of messages. Tap one to push it; swipe it right to archive it, which takes it out with a toast whose Undo puts it
+         back, or left for more, where More opens an action sheet. An avatar is a picture, or initials on one of the palette's
+         colours, named in its Tag for the message pushed, which follow a dark palette. -->
     <Grid RowDefinitions="Auto,*">
         <c:AvonicHeader>
             <c:AvonicToolbar>
@@ -69,7 +70,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.TertiaryBrush}">
+                            <c:AvonicAvatar Tag="Tertiary" Background="{DynamicResource Avonic.Color.TertiaryBrush}">
                                 <TextBlock Text="PT" Foreground="{DynamicResource Avonic.Color.TertiaryContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -97,7 +98,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.SuccessBrush}">
+                            <c:AvonicAvatar Tag="Success" Background="{DynamicResource Avonic.Color.SuccessBrush}">
                                 <TextBlock Text="MW" Foreground="{DynamicResource Avonic.Color.SuccessContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -122,7 +123,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.WarningBrush}">
+                            <c:AvonicAvatar Tag="Warning" Background="{DynamicResource Avonic.Color.WarningBrush}">
                                 <TextBlock Text="PN" Foreground="{DynamicResource Avonic.Color.WarningContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -147,7 +148,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.DangerBrush}">
+                            <c:AvonicAvatar Tag="Danger" Background="{DynamicResource Avonic.Color.DangerBrush}">
                                 <TextBlock Text="JL" Foreground="{DynamicResource Avonic.Color.DangerContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -172,7 +173,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.SecondaryBrush}">
+                            <c:AvonicAvatar Tag="Secondary" Background="{DynamicResource Avonic.Color.SecondaryBrush}">
                                 <TextBlock Text="BK" Foreground="{DynamicResource Avonic.Color.SecondaryContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -197,7 +198,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.PrimaryBrush}">
+                            <c:AvonicAvatar Tag="Primary" Background="{DynamicResource Avonic.Color.PrimaryBrush}">
                                 <TextBlock Text="AM" Foreground="{DynamicResource Avonic.Color.PrimaryContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>
@@ -222,7 +223,7 @@
                 <c:AvonicItemSliding>
                     <c:AvonicItem Button="True">
                         <c:AvonicItem.StartContent>
-                            <c:AvonicAvatar Background="{DynamicResource Avonic.Color.MediumBrush}">
+                            <c:AvonicAvatar Tag="Medium" Background="{DynamicResource Avonic.Color.MediumBrush}">
                                 <TextBlock Text="RC" Foreground="{DynamicResource Avonic.Color.MediumContrastBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </c:AvonicAvatar>

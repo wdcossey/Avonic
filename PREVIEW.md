@@ -56,8 +56,9 @@ What's in them:
 - **Inbox:** the root of an `ion-nav`, with a header with two toolbars, the first holding an `ion-menu-button` and the second
   `ion-searchbar`; `ion-list` of `ion-item-sliding` messages, each an `ion-item` with an `ion-avatar` (an `ion-img`, or initials
   on one of the palette's colours), an `ion-label` with `h2`, `h3` and `p`, an `ion-note` and an `ion-badge`. One is swiped open
-  to show its `ion-item-option`s, whose More opens an `ion-action-sheet`, and whose Archive, on the other side, shows an
-  `ion-toast` above the tab bar. `ion-tabs` with an `ion-tab-bar` at the bottom, and a badge on a tab button.
+  to show its `ion-item-option`s, whose More opens an `ion-action-sheet`, and whose Archive, on the other side, takes it out of
+  the list with an `ion-toast` above the tab bar, whose Undo puts it back. `ion-tabs` with an `ion-tab-bar` at the
+  bottom, and a badge on a tab button.
 - **Menu:** the menu button opens an `ion-menu` over the tabs, a list of `ion-menu-toggle`d items, each closing it.
 - **Message:** a tap on a message pushes it on the nav, with an `ion-back-button` in its toolbar, which pops it.
 - **Discover:** `ion-chip`s with icons, `ion-card`s with an `ion-img`, an `ion-card-header` (title and subtitle),

@@ -7,7 +7,7 @@ namespace Avonic.Sample.Pages.Showcase;
 
 /// <summary>
 /// The showcase's inbox, the root of the inbox tab's <see cref="AvonicNav"/>: a searchbar, and messages that slide to show their
-/// options. A tap on a message pushes it, as a <see cref="MessageScreen"/>; Archive shows a toast and More opens
+/// options. A tap on a message pushes it, as a <see cref="MessageScreen"/>; Archive takes it out of the list with a toast whose Undo puts it back, and More opens
 /// an action sheet, both made in code as Ionic's <c>toastController</c> and <c>actionSheetController</c> make them.
 /// </summary>
 public partial class InboxScreen : UserControl
@@ -32,7 +32,6 @@ public partial class InboxScreen : UserControl
         var lines = item.GetVisualDescendants().OfType<TextBlock>().ToList();
         string Line(string classes) => lines.FirstOrDefault(t => t.Classes.Contains(classes))?.Text ?? "";
         var avatar = item.GetVisualDescendants().OfType<AvonicAvatar>().FirstOrDefault();
-        var initials = avatar?.Content as TextBlock;
         var message = new MessageScreen
         {
             Sender = Line("h2"),
@@ -40,9 +39,8 @@ public partial class InboxScreen : UserControl
             Body = Line("p"),
             Time = item.GetVisualDescendants().OfType<AvonicNote>().FirstOrDefault()?.Content as string ?? "",
             Picture = (avatar?.Content as AvonicImg)?.Src,
-            Initials = initials?.Text ?? "",
-            AvatarBackground = avatar?.Background,
-            AvatarForeground = initials?.Foreground,
+            Initials = (avatar?.Content as TextBlock)?.Text ?? "",
+            AvatarColor = avatar?.Tag as string,
         };
 
         // A factory, one of the nav's page forms: componentProps would set these by reflection, which a trimmed app can strip.
@@ -57,7 +55,14 @@ public partial class InboxScreen : UserControl
             return;
         }
 
-        option.FindAncestorOfType<AvonicItemSliding>()?.Close();
+        // The message leaves the list, and Undo puts it back where it was.
+        if (option.FindAncestorOfType<AvonicItemSliding>() is not { } sliding || Messages.Items.IndexOf(sliding) is not (>= 0 and var index))
+        {
+            return;
+        }
+
+        sliding.Close();
+        Messages.Items.RemoveAt(index);
         var toast = new AvonicToast
         {
             Message = "Conversation archived",
@@ -71,11 +76,15 @@ public partial class InboxScreen : UserControl
         try
         {
             await toast.Present(top);
-            await toast.OnDidDismiss();
+            if ((await toast.OnDidDismiss()).Role == "cancel")
+            {
+                Messages.Items.Insert(Math.Min(index, Messages.Items.Count), sliding);
+            }
         }
         catch (InvalidOperationException)
         {
-            // Nowhere to present it: nothing to show.
+            // Nowhere to present it: the message stays.
+            Messages.Items.Insert(Math.Min(index, Messages.Items.Count), sliding);
         }
         finally
         {
