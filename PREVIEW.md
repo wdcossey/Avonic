@@ -1,9 +1,10 @@
 # Avonic preview
 
 What Avonic looks like: Ionic's md mode, recreated for Avalonia. Every picture here is a real frame, rendered headless by
-Avalonia with Skia at 390 × 844 and a scale of 2, a phone's size. Nothing is mocked up or retouched; the one thing the capture
-does is swipe a message open in the inbox, through `AvonicItemSliding.Open()`. The font is Roboto, from `tools/fonts/roboto/`,
-as the sample has it. They're headless frames, not screenshots of a device or a window.
+Avalonia with Skia at 390 × 844 and a scale of 2, a phone's size. Nothing is mocked up or retouched; all the capture does is
+swipe a message open in the inbox, through `AvonicItemSliding.Open()`, and for the two screens the inbox opens, open the menu
+(`AvonicMenu.Open()`) or tap a message (its item's `Click`). The font is Roboto, from `tools/fonts/roboto/`, as the sample has
+it. They're headless frames, not screenshots of a device or a window.
 
 ## Showcase
 
@@ -22,7 +23,7 @@ code. Dark is Ionic's own dark palette, `avares://Avonic.Themes/Tokens/Palettes/
   <tr>
     <td><img src="docs/preview/showcase-inbox-light.png" width="200" alt="Inbox, light: a searchbar, messages with avatars, notes and badges, one swiped open" /></td>
     <td><img src="docs/preview/showcase-discover-light.png" width="200" alt="Discover, light: chips, cards with pictures and actions, a fab" /></td>
-    <td><img src="docs/preview/showcase-profile-light.png" width="200" alt="Profile, light: a segment, inputs, a textarea, radios, a checkbox and a block button" /></td>
+    <td><img src="docs/preview/showcase-profile-light.png" width="200" alt="Profile, light: a segment, inputs, a datetime button, a textarea, radios, a checkbox and a block button" /></td>
     <td><img src="docs/preview/showcase-settings-light.png" width="200" alt="Settings, light: toggles, a range, a select, notes, a badge and a progress bar" /></td>
   </tr>
   <tr>
@@ -33,17 +34,38 @@ code. Dark is Ionic's own dark palette, `avares://Avonic.Themes/Tokens/Palettes/
   </tr>
 </table>
 
+What the inbox opens:
+
+<table>
+  <tr>
+    <th>Menu</th>
+    <th>Message</th>
+    <th>Menu, dark</th>
+    <th>Message, dark</th>
+  </tr>
+  <tr>
+    <td><img src="docs/preview/showcase-menu-light.png" width="200" alt="Menu, light: a side menu over the inbox, with a toolbar and a list of mail folders" /></td>
+    <td><img src="docs/preview/showcase-message-light.png" width="200" alt="Message, light: a message pushed on the inbox, with a back button in its toolbar" /></td>
+    <td><img src="docs/preview/showcase-menu-dark.png" width="200" alt="Menu, dark" /></td>
+    <td><img src="docs/preview/showcase-message-dark.png" width="200" alt="Message, dark" /></td>
+  </tr>
+</table>
+
 What's in them:
 
-- **Inbox:** a header with two toolbars, the second holding `ion-searchbar`; `ion-list` of `ion-item-sliding` messages, each an
-  `ion-item` with an `ion-avatar` (an `ion-img`, or initials on one of the palette's colours), an `ion-label` with `h2`, `h3` and
-  `p`, an `ion-note` and an `ion-badge`. One is swiped open to show its `ion-item-option`s, whose More opens an
-  `ion-action-sheet`. `ion-tabs` with an `ion-tab-bar` at the bottom, and a badge on a tab button.
+- **Inbox:** the root of an `ion-nav`, with a header with two toolbars, the first holding an `ion-menu-button` and the second
+  `ion-searchbar`; `ion-list` of `ion-item-sliding` messages, each an `ion-item` with an `ion-avatar` (an `ion-img`, or initials
+  on one of the palette's colours), an `ion-label` with `h2`, `h3` and `p`, an `ion-note` and an `ion-badge`. One is swiped open
+  to show its `ion-item-option`s, whose More opens an `ion-action-sheet`, and whose Archive, on the other side, takes it out of
+  the list with an `ion-toast` above the tab bar, whose Undo puts it back. `ion-tabs` with an `ion-tab-bar` at the
+  bottom, and a badge on a tab button.
+- **Menu:** the menu button opens an `ion-menu` over the tabs, a list of `ion-menu-toggle`d items, each closing it.
+- **Message:** a tap on a message pushes it on the nav, with an `ion-back-button` in its toolbar, which pops it.
 - **Discover:** `ion-chip`s with icons, `ion-card`s with an `ion-img`, an `ion-card-header` (title and subtitle),
   `ion-card-content` and clear `ion-button`s with icons, a card whose author is an `ion-item`, and an `ion-fab` in the
   content's fixed slot.
-- **Profile:** an `ion-segment` in the header, `ion-input`s with floating and stacked labels, an `ion-textarea` that grows with
-  its text, an `ion-radio-group` under an `ion-list-header`, an `ion-checkbox`, and a block `ion-button`, which opens an
+- **Profile:** an `ion-segment` in the header, `ion-input`s with floating and stacked labels, an `ion-datetime-button` for the
+  birthday, whose `ion-datetime` is in an `ion-modal`, an `ion-textarea` that grows with its text, an `ion-radio-group` under an `ion-list-header`, an `ion-checkbox`, and a block `ion-button`, which opens an
   `ion-alert`.
 - **Settings:** items with icons at the start, `ion-toggle`s, an `ion-range` between two icons, an `ion-select` for the language
   (a popover), `ion-note`s for current values, an `ion-progress-bar`, and items with the detail chevron.
@@ -121,19 +143,29 @@ shows the machine it runs on.
     <td align="center"><img src="docs/preview/pages/ion-picker.png" width="200" alt="ion-picker" /><br /><a href="docs/components/ion-picker/README.md"><code>ion-picker</code> and its columns</a></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/preview/pages/ion-toast.png" width="200" alt="ion-toast" /><br /><a href="docs/components/ion-toast/README.md"><code>ion-toast</code></a></td>
     <td align="center"><img src="docs/preview/pages/ion-alert.png" width="200" alt="ion-alert" /><br /><a href="docs/components/ion-alert/README.md"><code>ion-alert</code></a></td>
     <td align="center"><img src="docs/preview/pages/ion-action-sheet.png" width="200" alt="ion-action-sheet" /><br /><a href="docs/components/ion-action-sheet/README.md"><code>ion-action-sheet</code></a></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/preview/pages/ion-loading.png" width="200" alt="ion-loading" /><br /><a href="docs/components/ion-loading/README.md"><code>ion-loading</code></a></td>
     <td align="center"><img src="docs/preview/pages/ion-modal.png" width="200" alt="ion-modal" /><br /><a href="docs/components/ion-modal/README.md"><code>ion-modal</code></a> and its sheet</td>
-  </tr>
-  <tr>
     <td align="center"><img src="docs/preview/pages/ion-popover.png" width="200" alt="ion-popover" /><br /><a href="docs/components/ion-popover/README.md"><code>ion-popover</code></a></td>
-    <td align="center"><img src="docs/preview/pages/ion-select.png" width="200" alt="ion-select" /><br /><a href="docs/components/ion-select/README.md"><code>ion-select</code></a>, <a href="docs/components/ion-select-option/README.md"><code>ion-select-option</code></a>, <a href="docs/components/ion-select-modal/README.md"><code>ion-select-modal</code></a></td>
-    <td align="center"><img src="docs/preview/pages/ion-app.png" width="200" alt="ion-app" /><br /><a href="docs/components/ion-app/README.md"><code>ion-app</code></a></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/preview/pages/ion-menu.png" width="200" alt="ion-menu" /><br /><a href="docs/components/ion-menu/README.md"><code>ion-menu</code></a>, <a href="docs/components/ion-menu-button/README.md"><code>ion-menu-button</code></a>, <a href="docs/components/ion-menu-toggle/README.md"><code>ion-menu-toggle</code></a></td>
+    <td align="center"><img src="docs/preview/pages/ion-select.png" width="200" alt="ion-select" /><br /><a href="docs/components/ion-select/README.md"><code>ion-select</code></a>, <a href="docs/components/ion-select-option/README.md"><code>ion-select-option</code></a>, <a href="docs/components/ion-select-modal/README.md"><code>ion-select-modal</code></a></td>
+    <td align="center"><img src="docs/preview/pages/ion-datetime.png" width="200" alt="ion-datetime" /><br /><a href="docs/components/ion-datetime/README.md"><code>ion-datetime</code></a></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/preview/pages/ion-back-button.png" width="200" alt="ion-back-button" /><br /><a href="docs/components/ion-back-button/README.md"><code>ion-back-button</code></a></td>
+    <td align="center"><img src="docs/preview/pages/ion-app.png" width="200" alt="ion-app" /><br /><a href="docs/components/ion-app/README.md"><code>ion-app</code></a></td>
     <td align="center"><img src="docs/preview/pages/typography.png" width="200" alt="Ionic's typography, opt-in" /><br /><a href="docs/infra/typography/README.md">typography</a></td>
-    <td></td>
-    <td></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/preview/pages/ion-split-pane.png" width="200" alt="ion-split-pane" /><br /><a href="docs/components/ion-split-pane/README.md"><code>ion-split-pane</code></a></td>
+    <td align="center"><img src="docs/preview/pages/ion-datetime-button.png" width="200" alt="ion-datetime-button" /><br /><a href="docs/components/ion-datetime-button/README.md"><code>ion-datetime-button</code></a></td>
+    <td align="center"><img src="docs/preview/pages/ion-nav.png" width="200" alt="ion-nav" /><br /><a href="docs/components/ion-nav/README.md"><code>ion-nav</code>, <code>ion-nav-link</code></a></td>
   </tr>
 </table>
 

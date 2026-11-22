@@ -315,3 +315,21 @@ present) and has no "destroyed" (`N20_A_nav_moved_to_another_parent_keeps_its_st
 `isTransitioning` while the second runs. A handler that pushes each time recurses. **Avonic** marks the nav busy before the event, so
 such a call is skipped (`skipIfBusy`) or queued behind
 (`AvonicNavTests.N10_A_call_from_an_IonNavWillChange_handler_waits_its_turn`). Fairly sure, from the code.
+
+## `ion-split-pane`: the old main keeps its mark when `contentId` changes, so two children share the room
+
+**Measured in Ionic 9.0.11, md, headless Chromium (#78; `docs/components/ion-split-pane/ref/measurements.txt`, S20).**
+`styleMainElement` adds `split-pane-main` to the child whose `id` is `contentId` at each `connectedCallback`, and never takes it off
+another. With a visible pane at 390 wide, `contentId` changed from `main` to `main2` and the split pane attached again, both `#main`
+and `#main2` have `split-pane-main`, and they share what the side leaves (60 px each, where `#main` had 112 alone). Ionic itself warns
+that there can only be one main (`[ion-split-pane] - Cannot have more than one main node.`), and only when two children have the same
+`id`. **Avonic** takes the mark off the old main
+(`AvonicSplitPaneTests.B7_The_Mark_Moves_When_It_Is_Attached_Again_With_Another_ContentId`). Sure: measured.
+
+## `ion-menu`: `display: hidden` on the backdrop in a visible split pane is invalid CSS
+
+**Read in `menu.md.css`, Ionic 9.0.11 (#78).** `:host(.menu-pane-visible) ion-backdrop { display: hidden !important; }`: `hidden` isn't
+a value of `display`, so the declaration is dropped, `!important` and all. Nothing shows for it: the backdrop measured
+`display: none` in a visible pane all the same (S20), so the rule is dead rather than wrong to the eye; `none` is most likely what was
+meant. **Avonic** shows the menu's backdrop only while the menu is open, which a side in a visible pane never is (its `IsActive()`
+is false there, as Ionic's `isActive()`), so it has nothing to copy. Sure: read, and measured.

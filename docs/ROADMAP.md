@@ -1,7 +1,8 @@
 # Roadmap
 
 Ionic 9.0.11 has **94** components (`node tools/ionic-api.js --list`). Avonic v2 targets **89** of them,
-all but the five under "Out of scope" that Ionic 9 still has, in the issues listed by tier (families that can only be built and compared together
+all but the five of the router family under "Out of scope" (picker legacy, listed there too, Ionic 9 removed); with
+`ion-icon`, from ionicons and not in `core.json`, that is the 90 elements the README counts. They are in the issues listed by tier (families that can only be built and compared together
 share one issue), plus the shared infrastructure they stand on. This file is the map; the issues are the work.
 `CLAUDE.md` lists only what *exists*.
 
@@ -9,13 +10,16 @@ Process per issue: `docs/PROCESS.md` §0. Start an issue only when its blockers 
 
 ## Priority tiers
 
-| Tier | Meaning | Issues |
-|---|---|---|
-| **P0** | Foundation — sequential, must land before any parallel work | [#1](https://github.com/wdcossey/Avonic/issues/1) swarm-safe repo · [#2](https://github.com/wdcossey/Avonic/issues/2) colour system · [#3](https://github.com/wdcossey/Avonic/issues/3) ion-icon |
-| **P1** | Foundations the rest sits on — parallel once P0 is merged | [#4](https://github.com/wdcossey/Avonic/issues/4) gesture utility · [#5](https://github.com/wdcossey/Avonic/issues/5) overlay system + backdrop · [#6](https://github.com/wdcossey/Avonic/issues/6) item · [#7](https://github.com/wdcossey/Avonic/issues/7) label · [#8](https://github.com/wdcossey/Avonic/issues/8) note + text · [#9](https://github.com/wdcossey/Avonic/issues/9) list family · [#10](https://github.com/wdcossey/Avonic/issues/10) button · [#11](https://github.com/wdcossey/Avonic/issues/11) content · [#12](https://github.com/wdcossey/Avonic/issues/12) toolbar family · [#13](https://github.com/wdcossey/Avonic/issues/13) card family · [#14](https://github.com/wdcossey/Avonic/issues/14) grid family · [#15](https://github.com/wdcossey/Avonic/issues/15) spinner · [#16](https://github.com/wdcossey/Avonic/issues/16) badge/avatar/thumbnail · [#17](https://github.com/wdcossey/Avonic/issues/17) img + skeleton-text · [#18](https://github.com/wdcossey/Avonic/issues/18) progress-bar · [#19](https://github.com/wdcossey/Avonic/issues/19) chip · [#71](https://github.com/wdcossey/Avonic/issues/71) item's layout · [#72](https://github.com/wdcossey/Avonic/issues/72) item's press handling, `Command` and the rest |
-| **P2** | Form controls and composites — parallel once their blockers are merged | [#20](https://github.com/wdcossey/Avonic/issues/20) checkbox · [#21](https://github.com/wdcossey/Avonic/issues/21) toggle · [#22](https://github.com/wdcossey/Avonic/issues/22) radio · [#23](https://github.com/wdcossey/Avonic/issues/23) range · [#24](https://github.com/wdcossey/Avonic/issues/24) input (+ password toggle) · [#25](https://github.com/wdcossey/Avonic/issues/25) textarea · [#26](https://github.com/wdcossey/Avonic/issues/26) searchbar · [#27](https://github.com/wdcossey/Avonic/issues/27) input-otp · [#28](https://github.com/wdcossey/Avonic/issues/28) segment family · [#29](https://github.com/wdcossey/Avonic/issues/29) tabs family · [#30](https://github.com/wdcossey/Avonic/issues/30) fab family · [#31](https://github.com/wdcossey/Avonic/issues/31) item-sliding family · [#32](https://github.com/wdcossey/Avonic/issues/32) accordion · [#33](https://github.com/wdcossey/Avonic/issues/33) breadcrumbs · [#34](https://github.com/wdcossey/Avonic/issues/34) reorder · [#35](https://github.com/wdcossey/Avonic/issues/35) refresher · [#36](https://github.com/wdcossey/Avonic/issues/36) infinite-scroll · [#37](https://github.com/wdcossey/Avonic/issues/37) picker family · [#65](https://github.com/wdcossey/Avonic/issues/65) `ion-app` · [#66](https://github.com/wdcossey/Avonic/issues/66) an Android project for the sample · [#67](https://github.com/wdcossey/Avonic/issues/67) content's keyboard scrolling and scroll indicator · [#68](https://github.com/wdcossey/Avonic/issues/68) list gaps in a virtualising panel · [#70](https://github.com/wdcossey/Avonic/issues/70) opt-in typography |
-| **P3** | Overlays — need the overlay system | [#38](https://github.com/wdcossey/Avonic/issues/38) toast · [#39](https://github.com/wdcossey/Avonic/issues/39) alert · [#40](https://github.com/wdcossey/Avonic/issues/40) action-sheet · [#41](https://github.com/wdcossey/Avonic/issues/41) loading · [#42](https://github.com/wdcossey/Avonic/issues/42) modal (+ sheet) · [#43](https://github.com/wdcossey/Avonic/issues/43) popover · [#44](https://github.com/wdcossey/Avonic/issues/44) menu family (menu, menu-button, menu-toggle) · [#78](https://github.com/wdcossey/Avonic/issues/78) split-pane · [#130](https://github.com/wdcossey/Avonic/issues/130) nav + nav-link (the navigation contract #47 binds to) · [#131](https://github.com/wdcossey/Avonic/issues/131) P2 follow-ups |
-| **P4** | Compound — need overlays / pickers / a navigation contract | [#45](https://github.com/wdcossey/Avonic/issues/45) select family · [#46](https://github.com/wdcossey/Avonic/issues/46) datetime · [#47](https://github.com/wdcossey/Avonic/issues/47) back-button · [#79](https://github.com/wdcossey/Avonic/issues/79) datetime-button |
+Every tier is done (rolled up on 2026-11-22): each issue below is closed, and every in-scope component has a row in
+`CLAUDE.md`'s table and in Done below. What's left is in the open issues, the follow-ups below, and after the tiers.
+
+| Tier | Meaning | Issues | Status |
+|---|---|---|---|
+| **P0** | Foundation — sequential, must land before any parallel work | [#1](https://github.com/wdcossey/Avonic/issues/1) swarm-safe repo · [#2](https://github.com/wdcossey/Avonic/issues/2) colour system · [#3](https://github.com/wdcossey/Avonic/issues/3) ion-icon | **done** |
+| **P1** | Foundations the rest sits on — parallel once P0 is merged | [#4](https://github.com/wdcossey/Avonic/issues/4) gesture utility · [#5](https://github.com/wdcossey/Avonic/issues/5) overlay system + backdrop · [#6](https://github.com/wdcossey/Avonic/issues/6) item · [#7](https://github.com/wdcossey/Avonic/issues/7) label · [#8](https://github.com/wdcossey/Avonic/issues/8) note + text · [#9](https://github.com/wdcossey/Avonic/issues/9) list family · [#10](https://github.com/wdcossey/Avonic/issues/10) button · [#11](https://github.com/wdcossey/Avonic/issues/11) content · [#12](https://github.com/wdcossey/Avonic/issues/12) toolbar family · [#13](https://github.com/wdcossey/Avonic/issues/13) card family · [#14](https://github.com/wdcossey/Avonic/issues/14) grid family · [#15](https://github.com/wdcossey/Avonic/issues/15) spinner · [#16](https://github.com/wdcossey/Avonic/issues/16) badge/avatar/thumbnail · [#17](https://github.com/wdcossey/Avonic/issues/17) img + skeleton-text · [#18](https://github.com/wdcossey/Avonic/issues/18) progress-bar · [#19](https://github.com/wdcossey/Avonic/issues/19) chip · [#71](https://github.com/wdcossey/Avonic/issues/71) item's layout · [#72](https://github.com/wdcossey/Avonic/issues/72) item's press handling, `Command` and the rest | **done** |
+| **P2** | Form controls and composites — parallel once their blockers are merged | [#20](https://github.com/wdcossey/Avonic/issues/20) checkbox · [#21](https://github.com/wdcossey/Avonic/issues/21) toggle · [#22](https://github.com/wdcossey/Avonic/issues/22) radio · [#23](https://github.com/wdcossey/Avonic/issues/23) range · [#24](https://github.com/wdcossey/Avonic/issues/24) input (+ password toggle) · [#25](https://github.com/wdcossey/Avonic/issues/25) textarea · [#26](https://github.com/wdcossey/Avonic/issues/26) searchbar · [#27](https://github.com/wdcossey/Avonic/issues/27) input-otp · [#28](https://github.com/wdcossey/Avonic/issues/28) segment family · [#29](https://github.com/wdcossey/Avonic/issues/29) tabs family · [#30](https://github.com/wdcossey/Avonic/issues/30) fab family · [#31](https://github.com/wdcossey/Avonic/issues/31) item-sliding family · [#32](https://github.com/wdcossey/Avonic/issues/32) accordion · [#33](https://github.com/wdcossey/Avonic/issues/33) breadcrumbs · [#34](https://github.com/wdcossey/Avonic/issues/34) reorder · [#35](https://github.com/wdcossey/Avonic/issues/35) refresher · [#36](https://github.com/wdcossey/Avonic/issues/36) infinite-scroll · [#37](https://github.com/wdcossey/Avonic/issues/37) picker family · [#65](https://github.com/wdcossey/Avonic/issues/65) `ion-app` · [#66](https://github.com/wdcossey/Avonic/issues/66) an Android project for the sample · [#67](https://github.com/wdcossey/Avonic/issues/67) content's keyboard scrolling and scroll indicator · [#68](https://github.com/wdcossey/Avonic/issues/68) list gaps in a virtualising panel · [#70](https://github.com/wdcossey/Avonic/issues/70) opt-in typography | **done** |
+| **P3** | Overlays — need the overlay system | [#38](https://github.com/wdcossey/Avonic/issues/38) toast · [#39](https://github.com/wdcossey/Avonic/issues/39) alert · [#40](https://github.com/wdcossey/Avonic/issues/40) action-sheet · [#41](https://github.com/wdcossey/Avonic/issues/41) loading · [#42](https://github.com/wdcossey/Avonic/issues/42) modal (+ sheet) · [#43](https://github.com/wdcossey/Avonic/issues/43) popover · [#44](https://github.com/wdcossey/Avonic/issues/44) menu family (menu, menu-button, menu-toggle) · [#78](https://github.com/wdcossey/Avonic/issues/78) split-pane · [#130](https://github.com/wdcossey/Avonic/issues/130) nav + nav-link (the navigation contract #47 binds to) · [#131](https://github.com/wdcossey/Avonic/issues/131) P2 follow-ups | **done** |
+| **P4** | Compound — need overlays / pickers / a navigation contract | [#45](https://github.com/wdcossey/Avonic/issues/45) select family · [#46](https://github.com/wdcossey/Avonic/issues/46) datetime · [#47](https://github.com/wdcossey/Avonic/issues/47) back-button · [#79](https://github.com/wdcossey/Avonic/issues/79) datetime-button | **done** |
 
 Priorities were derived from `core.json`'s dependency graph (`ion-ripple-effect` is depended on by
 13 components, `ion-backdrop` by 6, `ion-button`/`ion-spinner` by 3) plus the shared infrastructure
@@ -88,11 +92,23 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 | [#42](https://github.com/wdcossey/Avonic/issues/42) | `ion-modal` (+ sheet), with `isOpen`, `trigger` and inline overlays in the overlay system | **done** — [docs](components/ion-modal/README.md) |
 | [#43](https://github.com/wdcossey/Avonic/issues/43) | `ion-popover` | **done** — [docs](components/ion-popover/README.md) |
 | [#45](https://github.com/wdcossey/Avonic/issues/45) | `ion-select`, `ion-select-option`, `ion-select-modal` (all four interfaces) | **done** — [docs](components/ion-select/README.md) |
+| [#38](https://github.com/wdcossey/Avonic/issues/38) | `ion-toast` | **done** — [docs](components/ion-toast/README.md) |
+| [#41](https://github.com/wdcossey/Avonic/issues/41) | `ion-loading` | **done** — [docs](components/ion-loading/README.md) |
+| [#44](https://github.com/wdcossey/Avonic/issues/44) | `ion-menu`, `ion-menu-button`, `ion-menu-toggle` (and `menuController`) | **done** — [docs](components/ion-menu/README.md) |
+| [#78](https://github.com/wdcossey/Avonic/issues/78) | `ion-split-pane` | **done** — [docs](components/ion-split-pane/README.md) |
+| [#130](https://github.com/wdcossey/Avonic/issues/130) | `ion-nav`, `ion-nav-link` (the navigation contract the back button binds to) | **done** — [docs](components/ion-nav/README.md) |
+| [#46](https://github.com/wdcossey/Avonic/issues/46) | `ion-datetime` | **done** — [docs](components/ion-datetime/README.md) |
+| [#47](https://github.com/wdcossey/Avonic/issues/47) | `ion-back-button` | **done** — [docs](components/ion-back-button/README.md) |
+| [#79](https://github.com/wdcossey/Avonic/issues/79) | `ion-datetime-button` | **done** — [docs](components/ion-datetime-button/README.md) |
+| [#248](https://github.com/wdcossey/Avonic/issues/248) | infra: page costs in a Release build on a device, and the datetime's two spikes (the single grid, an extension; the months either side made later) | **done** — [docs](infra/performance/README.md) |
 | — | infra: accessibility in Avalonia, and Ionic's ARIA in Avonic | **done** — [docs](infra/accessibility/README.md) |
 | — | infra: a style budget, and what a page costs in a Debug build | **done** — [docs](infra/performance/README.md) |
 | — | infra: a real-window driver | **done** — [docs](../tools/real-window/README.md) |
 
 ## Follow-ups
+
+The rest is in open issues: shared code the PRs proposed ([#242](https://github.com/wdcossey/Avonic/issues/242), and [#266](https://github.com/wdcossey/Avonic/issues/266) for
+the last tier), the datetime's performance ([#260](https://github.com/wdcossey/Avonic/issues/260)), and each control's known gaps.
 
 - **`ion-datetime`'s single grid: the fade and the swipe settable in `AvonicConfig`** (#248, [#258](https://github.com/wdcossey/Avonic/pull/258)).
   `DatetimeCalendarRendering.SingleGrid`'s fade is md's fade through, 90 ms out and 210 ms in, and its swipe changes the month past
@@ -101,8 +117,9 @@ latest, see the `Status:` line in each `README.md` under `docs/components/` and 
 
 ## After the tiers
 
-**A Material 3 theme** (`Avonic.Themes.Material3`), as a second theme over the same components. On hold until P3 and P4 are
-done: no work starts before then, not even its spike of Content, Card and Button. What was measured, the nine decisions and
+**A Material 3 theme** (`Avonic.Themes.Material3`), as a second theme over the same components. It was on hold until P3 and P4
+were done, which they are now (2026-11-22); no work has started, not even its spike of Content, Card and Button, and it starts
+when the human says. What was measured, the nine decisions and
 the controls with no Material 3 counterpart are in [ADR 0003](decisions/0003-material-3-as-a-second-theme.md).
 
 ## Out of scope
@@ -122,4 +139,4 @@ menu controller, and the datetime button is the compact way to show a datetime o
 2026-11-08, as [#44](https://github.com/wdcossey/Avonic/issues/44), [#78](https://github.com/wdcossey/Avonic/issues/78) and
 [#79](https://github.com/wdcossey/Avonic/issues/79).)
 (`ion-app` was here, and it's in scope now as [#65](https://github.com/wdcossey/Avonic/issues/65), for hardware back, keyboard assist and status tap. See [ADR 0002](decisions/0002-decisions-from-the-first-swarm.md).)
-(`ion-back-button`, #47, pops the closest `ion-nav`, so it waits on [#130](https://github.com/wdcossey/Avonic/issues/130).)
+(`ion-back-button`, #47, pops the closest `ion-nav`, so it waited on [#130](https://github.com/wdcossey/Avonic/issues/130); both are done.)
