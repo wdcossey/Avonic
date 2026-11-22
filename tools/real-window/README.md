@@ -153,7 +153,7 @@ once if the window doesn't fit on the screen.
     `Jul 4, 2023` opens the popover under its button, a day confirms at once and Escape closes it; the disabled button is disabled
     to automation; the slot's and the several dates' names; the colour button collapsed while its datetime is out of view and
     expanded once a wheel brings it in. Run by the main session on `1f39770`.
-- **318 checks** in 31 sections run on v2 `4383769` (2026-11-18), all 318 passing; the single grid's section added since, not yet run.
+- **480 checks** in 41 sections run on `docs/rollup-final` `96f263f` (2026-11-22), the roll-up of every component, all 480 passing.
 
 **Look at the frames as well.** It saves a frame of each page, and most of what's wrong with a page isn't something it checks.
 
