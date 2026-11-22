@@ -85,6 +85,19 @@ These are mistakes this project has already made, so don't repeat them.
   opacity), `ModalPanel`'s and `AlertPanel.Length`'s CSS sizes, `AlertClasses`. Three overlays each copied `BackdropOpacity()`.
 - **A `drive.ps1` section's real click lands on whatever is on top.** Click only what the top overlay shows: a button under a
   full-screen modal is covered, and the click reached the modal (#228).
+- **Ionic's behaviour for your control can live in another control's `.js`:** the split pane does nothing by itself, as `menu.js`
+  reads it and `menu.md.css` lays the side out (#263). Say so in the plan, and if the other control has to change, put it in your
+  PR with a note at the top naming its files, so that it can be split off.
+- **Read the automation peers before writing a `drive.ps1` check.** A check can only find what a peer exposes, by its name and
+  control type: the single grid's section looked for a month heading's text, which isn't in automation (a month is read by its
+  days, and the month-year button's name is `Show year picker`, #258), and the months-either-side section's first scroller was
+  the page's, not the calendar's (#259). Find an element from one you know is there, and walk to it.
+- **A UIA search while a page leaves the tree can fail with E_FAIL,** Avalonia's (#254, `docs/infra/avalonia-issues.md`): a
+  section that polls during a transition retries once, as `ion-nav`'s does; one that waits for the transition to end doesn't meet it.
+- **Culture data differs by platform.** Linux's ICU gives other short day names, AM/PM text and spaces than Windows' (#246, #251):
+  compare with Chromium's strings where they were measured (Windows), and test the rest everywhere. CI's Ubuntu job finds it.
+- **On the Pixel, keep the screen on for a timed run:** a locked screen moves the app to the little cores and starves
+  `Background` work, which made every page 7 to 10 times slower (#258). Each round's check line reports the cpuset; read it.
 - **`role`, `aria-*` and `tabindex` in the `.js` are behaviours:** map each by `docs/infra/accessibility/README.md` (landmarks, live regions, names, help text, headings), at a priority an app's own value beats, or record the gap.
 
 ### Avalonia facts already learned
@@ -153,6 +166,13 @@ These are mistakes this project has already made, so don't repeat them.
   ignores a touch's leave (`AvonicPopover`'s hover trigger, #43).
 - **Avalonia's hit test finds the deepest visual,** so Ionic's `elementFromPoint() === el` ("the element itself, not a child") has no
   equivalent: test the element's subtree (#43).
+- **A brush made in a template's `Resources` with a `DynamicResource` colour keeps the control alive** through the theme's
+  dictionary: every datetime that drew its calendar leaked (#258). Use a `StaticResource` of a top-level brush there.
+- **A `DispatcherTimer` past `int.MaxValue` ms throws,** where a browser's `setTimeout` fires at once (#245, #249): guard a duration.
+- **On Android, `Background` work runs only when the UI thread is idle** (`AndroidDispatcherImpl`'s idle handler), and
+  `AvonicConfig.Schedule` and the datetime's scroll rest are `Background` timers (#256, #260).
+- **Android's runtime is Mono, whose collector scans stacks conservatively:** a leak check that collects on the same stack right
+  after the work can see the object alive. Collect from fresh turns of the dispatcher (#258).
 
 ## Review and PR
 
