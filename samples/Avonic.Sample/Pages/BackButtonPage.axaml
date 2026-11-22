@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:Avonic.Components.Controls"
+             x:Class="Avonic.Sample.Pages.BackButtonPage">
+
+    <!-- ion-back-button. Above: back buttons with a default href, which shows them; with nothing to pop, a click asks the app to
+         go there (DefaultHrefRequested, an extension), and the line under them says what was asked. Below: a nav whose root page's
+         back button is hidden, as there's nothing under it; each page it pushes shows its back button, which pops. -->
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicBackButton Name="DefaultHrefButton" DefaultHref="/home" />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="Default href" />
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicBackButton Name="TextButton" DefaultHref="/inbox" Text="Inbox" />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="With text" />
+            </c:AvonicToolbar>
+            <c:AvonicToolbar>
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicBackButton DefaultHref="/home" Color="danger" />
+                        <c:AvonicBackButton DefaultHref="/home" Icon="close" />
+                        <c:AvonicBackButton DefaultHref="/home" IsEnabled="False" />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="Danger, close, disabled" />
+            </c:AvonicToolbar>
+            <c:AvonicToolbar Color="primary">
+                <c:AvonicToolbar.StartContent>
+                    <c:AvonicButtons>
+                        <c:AvonicBackButton DefaultHref="/home" />
+                    </c:AvonicButtons>
+                </c:AvonicToolbar.StartContent>
+                <c:AvonicTitle Content="Primary toolbar" />
+            </c:AvonicToolbar>
+            <TextBlock Name="HrefStatus" Margin="16,8,16,0" Text="No default href asked for yet" TextWrapping="Wrap" />
+            <TextBlock Name="NavStatus" Margin="16,4,16,8" Text="Stack: Page 1 (1)" TextWrapping="Wrap" />
+        </StackPanel>
+        <c:AvonicNav Name="Nav" />
+    </DockPanel>
+</UserControl>

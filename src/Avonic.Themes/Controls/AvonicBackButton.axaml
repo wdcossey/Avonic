@@ -1,0 +1,251 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:b="using:Avonic.Components.Behaviors"
+                    xmlns:c="using:Avonic.Components.Controls">
+
+    <Design.PreviewWith>
+        <StackPanel Width="390" Spacing="8" Margin="16" Orientation="Horizontal">
+            <c:AvonicBackButton DefaultHref="/" />
+            <c:AvonicBackButton DefaultHref="/" Text="Back" />
+            <c:AvonicBackButton DefaultHref="/" Color="danger" />
+            <c:AvonicBackButton DefaultHref="/" IsEnabled="False" />
+        </StackPanel>
+    </Design.PreviewWith>
+
+    <!-- A translation of back-button.md.css, in its order: its state rules have equal specificity, so later beats earlier, and
+         so does everything here with a pseudoclass. Hidden (display: none) and shown by the control. -->
+    <ControlTheme x:Key="{x:Type c:AvonicBackButton}" TargetType="c:AvonicBackButton">
+        <!-- font-family: var(ion-font-family); font-size: 0.875rem; font-weight: 500; text-transform: uppercase -->
+        <Setter Property="FontFamily" Value="{DynamicResource Avonic.FontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <!-- min-width: var(min-width); min-height: var(min-height) -->
+        <Setter Property="MinWidth" Value="{DynamicResource Avonic.BackButton.MinWidth}" />
+        <Setter Property="MinHeight" Value="{DynamicResource Avonic.BackButton.MinHeight}" />
+        <!-- color: var(color), which is currentColor: the colour inherited. -->
+        <Setter Property="Foreground">
+            <MultiBinding Converter="{x:Static b:Css.Var}">
+                <DynamicResource ResourceKey="Avonic.BackButton.Color" />
+                <Binding Path="$parent[Control].(TextElement.Foreground)" />
+            </MultiBinding>
+        </Setter>
+        <!-- text-align: center; white-space: nowrap; text-overflow: ellipsis; font-kerning: none -->
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextBlock.FontFeatures">
+            <FontFeatureCollection>
+                <FontFeature Tag="kern" Value="0" />
+            </FontFeatureCollection>
+        </Setter>
+        <!-- cursor: pointer -->
+        <Setter Property="Cursor" Value="Hand" />
+        <!-- outline: none. The overlay is the focus state, not an adorner. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Native">
+                    <Border Name="PART_Clip" ClipToBounds="True">
+                        <Panel Background="Transparent">
+                            <!-- .button-native::after -->
+                            <Border Name="PART_Overlay" />
+                            <c:AvonicRippleEffect Name="PART_Ripple" />
+                            <!-- .button-inner: a centred row -->
+                            <StackPanel Name="PART_Inner" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- ion-icon: its padding and margin are this box's -->
+                                <Border Name="PART_IconBox" VerticalAlignment="Center" IsVisible="{Binding #PART_Icon.IsVisible}">
+                                    <c:AvonicIcon Name="PART_Icon" IsHitTestVisible="False" />
+                                </Border>
+                                <TextBlock Name="PART_Text" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Panel>
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- .button-native: border-radius, margin, background, opacity, transition; min-height: inherit; color: inherit. -->
+        <Style Selector="^ /template/ Border#PART_Native">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.Md.BorderRadius" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.MarginStart" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.MarginTop" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.MarginEnd" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.MarginBottom" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Background" Value="{DynamicResource Avonic.BackButton.Background}" />
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.BackButton.Opacity}" />
+            <Setter Property="Transitions" Value="{DynamicResource Avonic.BackButton.Transition}" />
+        </Style>
+
+        <!-- overflow: hidden, to the radius, which takes the ripple and the overlay. -->
+        <Style Selector="^ /template/ Border#PART_Clip">
+            <Setter Property="CornerRadius" Value="{Binding $parent[Border].CornerRadius}" />
+        </Style>
+
+        <!-- padding-inline-start: var(padding-start) and the rest, inside the overlay. -->
+        <Style Selector="^ /template/ StackPanel#PART_Inner">
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.PaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.PaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.PaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.PaddingBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ion-icon: padding, margin, font-size, font-weight; pointer-events: none -->
+        <Style Selector="^ /template/ Border#PART_IconBox">
+            <Setter Property="Padding">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconPaddingStart" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconPaddingTop" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconPaddingEnd" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconPaddingBottom" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.Box}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconMarginStart" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconMarginTop" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconMarginEnd" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.IconMarginBottom" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ c|AvonicIcon#PART_Icon">
+            <Setter Property="FontSize" Value="{DynamicResource Avonic.BackButton.IconFontSize}" />
+            <Setter Property="TextElement.FontWeight" Value="{DynamicResource Avonic.BackButton.IconFontWeight}" />
+        </Style>
+
+        <!-- .button-text { padding-inline: 4px }, line-height: 1 from the native. A TextBlock clips to its line height and keeps the
+             line at the top; CSS's never clips and splits the leading. -->
+        <Style Selector="^ /template/ TextBlock#PART_Text">
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="LineHeight" Value="{Binding $parent[c:AvonicBackButton].FontSize}" />
+            <Setter Property="ClipToBounds" Value="False" />
+            <Setter Property="Margin">
+                <MultiBinding Converter="{x:Static b:Css.HalfLeading}">
+                    <Binding Path="FontFamily" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FontWeight" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FontSize" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="LineHeight" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- ion-ripple-effect { color: var(ripple-color) }, currentColor. -->
+        <Style Selector="^ /template/ c|AvonicRippleEffect#PART_Ripple">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.RippleColor" />
+                    <Binding Path="$parent[Border].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- .button-native::after { opacity: 0 } -->
+        <Style Selector="^ /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- :host(.back-button-disabled) { cursor: default; opacity: 0.5; pointer-events: none }. A disabled control takes no input. -->
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+            <Setter Property="Cursor" Value="Arrow" />
+        </Style>
+
+        <!-- :host(.ion-focused) .button-native { color: var(color-focused) }, currentColor: the colour it has. -->
+        <Style Selector="^:ion-focused /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.ColorFocused" />
+                    <Binding Path="$parent[c:AvonicBackButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.BackgroundFocused" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.BackButton.BackgroundFocusedOpacity}" />
+        </Style>
+
+        <!-- @media (any-hover: hover) :host(:hover): mouse and pen. -->
+        <Style Selector="^:ion-hover /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.ColorHover" />
+                    <Binding Path="$parent[c:AvonicBackButton].Foreground" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+        <Style Selector="^:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.BackgroundHover" />
+                    <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+            <Setter Property="Opacity" Value="{DynamicResource Avonic.BackButton.BackgroundHoverOpacity}" />
+        </Style>
+
+        <!-- :host(.ion-color) .button-native { color: var(ion-color-base) }, and the same for .ion-focused and :hover, after the
+             states, which it beats. -->
+        <Style Selector="^:ion-color /template/ Border#PART_Native">
+            <Setter Property="TextElement.Foreground" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+
+        <!-- :host(.in-toolbar:not(.in-toolbar-color)) { color: var(ion-toolbar-color, var(color)) } -->
+        <Style Selector="^:in-toolbar:not(:in-toolbar-color)">
+            <Setter Property="Foreground">
+                <MultiBinding Converter="{x:Static b:Css.Var}">
+                    <DynamicResource ResourceKey="Avonic.ToolbarColorBrush" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.Color" />
+                    <Binding Path="$parent[Control].(TextElement.Foreground)" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.back-button-has-icon-only) { border-radius: 50%; min-width: 48px; min-height: 48px; aspect-ratio: 1/1, which
+             the control lays out } -->
+        <Style Selector="^:has-icon-only">
+            <Setter Property="MinWidth" Value="48" />
+            <Setter Property="MinHeight" Value="48" />
+        </Style>
+        <Style Selector="^:has-icon-only /template/ Border#PART_Native">
+            <Setter Property="CornerRadius">
+                <MultiBinding Converter="{x:Static b:BorderRadius.VarToCornerRadius}">
+                    <DynamicResource ResourceKey="Avonic.BackButton.BorderRadius" />
+                    <DynamicResource ResourceKey="Avonic.BackButton.Md.BorderRadiusIconOnly" />
+                    <Binding Path="Bounds" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="FlowDirection" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter>
+        </Style>
+
+        <!-- :host(.ion-color:hover) .button-native::after { background: var(ion-color-base) }; and .ion-color.ion-focused, which
+             comes after it. -->
+        <Style Selector="^:ion-color:ion-hover /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style Selector="^:ion-color:ion-focused /template/ Border#PART_Overlay">
+            <Setter Property="Background" Value="{Binding (b:ColorPalette.Base), RelativeSource={RelativeSource Self}}" />
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

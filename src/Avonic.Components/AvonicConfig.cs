@@ -46,15 +46,31 @@ public static class AvonicConfig
     public static ConfigSpinner? Spinner { get; set; }
 
     /// <summary>
-    /// Ionic's <c>backButtonIcon</c> config: the icon of an <see cref="AvonicSearchbar"/>'s md cancel button, an
-    /// <see cref="AvonicIcon.Icon"/>, when its <see cref="AvonicSearchbar.CancelButtonIcon"/> isn't set. Null is md's
-    /// <c>arrow-back-sharp</c>, which Ionic gives as SVG, so it isn't mirrored in RTL; a name given here is, as an arrow's is.
+    /// Ionic's <c>backButtonIcon</c> config, an <see cref="AvonicIcon.Icon"/>: the icon of an <see cref="AvonicBackButton"/> whose
+    /// <see cref="AvonicBackButton.Icon"/> is null, mirrored in RTL as the default is; and of an <see cref="AvonicSearchbar"/>'s md
+    /// cancel button when its <see cref="AvonicSearchbar.CancelButtonIcon"/> isn't set. Null is md's <c>arrow-back-sharp</c>: the
+    /// back button mirrors it in RTL (<c>flip-rtl</c>); the searchbar, which Ionic gives it as SVG, doesn't, and a name given here
+    /// is mirrored there as an arrow's is.
     /// </summary>
     /// <remarks>
-    /// Read when the searchbar is made, as Ionic reads it for <c>cancelButtonIcon</c>'s default in the constructor: a change of
-    /// this reaches only searchbars made after it. The value is the searchbar's at style priority, so an app's own wins.
+    /// The back button reads it when it renders: its first attach and each change of one of its props, as Ionic reads it in
+    /// <c>render()</c>. The searchbar reads it when it's made, as Ionic reads it for <c>cancelButtonIcon</c>'s default in the
+    /// constructor: a change of this reaches only searchbars made after it. The value is the searchbar's at style priority, so an
+    /// app's own wins.
     /// </remarks>
     public static string? BackButtonIcon { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>backButtonText</c> config: the text of an <see cref="AvonicBackButton"/> whose <see cref="AvonicBackButton.Text"/>
+    /// is null. Null is md's: no text. Read when the button renders: its first attach and each change of one of its props.
+    /// </summary>
+    public static string? BackButtonText { get; set; }
+
+    /// <summary>
+    /// Ionic's <c>backButtonDefaultHref</c> config: the <see cref="AvonicBackButton.DefaultHref"/> of a back button that has none
+    /// when it's first attached, as Ionic reads it in <c>componentWillLoad</c>. Clearing the button's later doesn't read it again.
+    /// </summary>
+    public static string? BackButtonDefaultHref { get; set; }
 
     /// <summary>
     /// Ionic's <c>toggleOnOffLabels</c> config: the default of <see cref="AvonicToggle.EnableOnOffLabels"/>. Ionic leaves it

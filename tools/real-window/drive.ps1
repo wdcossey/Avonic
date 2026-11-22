@@ -2336,6 +2336,81 @@ try {
         Away
     }
 
+    Section 'ion-back-button' {
+        # The same one-time retry as the ion-nav section's (#254): this section searches right after a nav transition, when a page
+        # leaving the tree can make UIA's FindAll fail with E_FAIL. Any other error, or a second failure, still stops the section.
+        function All($type) {
+            $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
+            try { $found = @($win.FindAll($TS::Descendants, $cond)) }
+            catch {
+                $com = $_.Exception.InnerException
+                if ($com -isnot [System.Runtime.InteropServices.COMException]) { throw }
+                Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
+                Start-Sleep -Milliseconds 300
+                $found = @($win.FindAll($TS::Descendants, $cond))
+            }
+            $found | ForEach-Object { $_ }
+        }
+        Open 'ion-back-button'
+        $w = $win.Current.BoundingRectangle
+        function NavStatus { FirstText 'Stack:*' }
+        function HrefStatus { FirstText '*default href*' }
+        function WaitStack($like) { $ok = [bool](WaitForText "Stack: $like*" 5); Start-Sleep -Milliseconds 300; $ok }
+        # The back buttons are named 'back' (aria-label's default), lower case; the shell's own is 'Back', which -ceq leaves out. A
+        # hidden one (display: none) isn't in the tree at all.
+        function Backs { @(All $CT::Button | Where-Object { $_.Current.Name -ceq 'back' }) }
+        # The nav is under the two status lines: a back button below them is a nav page's.
+        function InNav { $line = (Named $CT::Text 'Stack:*').Current.BoundingRectangle.Bottom; @(Backs | Where-Object { $_.Current.BoundingRectangle.Y -gt $line }) }
+        function InWin($el) { $el -and -not $el.Current.BoundingRectangle.IsEmpty -and $w.Contains($el.Current.BoundingRectangle) }
+
+        Check 'the nav loads its root' (WaitStack 'Page 1 (1)') (NavStatus)
+        Shot 'back-button'
+        Check 'five icon-only back buttons with a default href are shown above the nav' ((Backs).Count -eq 5) "$((Backs).Count)"
+        Check "the root page's back button is hidden: nothing under it, no default href" ((InNav).Count -eq 0) "$((InNav).Count)"
+        $disabled = Backs | Where-Object { -not $_.Current.IsEnabled }
+        Check 'one is disabled' (@($disabled).Count -eq 1)
+
+        ClickOn (Backs)[0]
+        Check 'a click with nothing to pop asks the app for its default href' ([bool](WaitForText 'Asked to go back to /home' 3)) (HrefStatus)
+        ClickOn (Named $CT::Button 'Inbox')
+        Check "the text button is named by its text and asks for its own" ([bool](WaitForText 'Asked to go back to /inbox' 3)) (HrefStatus)
+        ClickOn @($disabled)[0]
+        Start-Sleep -Milliseconds 300
+        Check 'a click on the disabled one asks nothing' ([bool](FirstText 'Asked to go back to /inbox')) (HrefStatus)
+
+        ClickOn (Named $CT::Button 'Push page 2')
+        Check 'a push' (WaitStack 'Page 1 > Page 2 (2)') (NavStatus)
+        $navBack = (InNav)[0]
+        Check "the pushed page's back button is shown, in its header" (InWin $navBack) "window $w"
+        Start-Sleep -Milliseconds 200
+        Shot 'back-button-pushed'
+        ClickOn $navBack
+        Check 'a click on it pops the nav' (WaitStack 'Page 1 (1)') (NavStatus)
+        Check 'and asks for no default href' ([bool](FirstText 'Asked to go back to /inbox')) (HrefStatus)
+        Check "the root's is hidden again" ((InNav).Count -eq 0) "$((InNav).Count)"
+
+        ClickOn (Named $CT::Button 'Push page 2')
+        Check 'pushed again' (WaitStack 'Page 1 > Page 2 (2)') (NavStatus)
+        ClickOn (Named $CT::Button 'Push page 3')
+        Check 'and again' (WaitStack 'Page 1 > Page 2 > Page 3 (3)') (NavStatus)
+        Invoke-Element (InNav)[0]
+        Check "automation's Invoke pops it as a click does" (WaitStack 'Page 1 > Page 2 (2)') (NavStatus)
+        Fore
+        (InNav)[0].SetFocus()
+        Start-Sleep -Milliseconds 200
+        Key '{ENTER}' 900
+        Check 'Enter on it pops it' (WaitStack 'Page 1 (1)') (NavStatus)
+
+        ClickOn (Named $CT::Button 'Open page 5 as the root')
+        Check 'a deep link: page 5 as the root, nothing under it' (WaitStack 'Page 5 (1)') (NavStatus)
+        Check 'its back button shows by its default page' ((InNav).Count -eq 1) "$((InNav).Count)"
+        Shot 'back-button-default-page'
+        ClickOn (InNav)[0]
+        Check 'a click sets page 1 as the root, going back' (WaitStack 'Page 1 (1)') (NavStatus)
+        Check 'with no default href asked for' ([bool](FirstText 'Asked to go back to /inbox')) (HrefStatus)
+        Away
+    }
+
     Section 'typography' {
         Open 'typography'
         Shot 'typography-top'
