@@ -905,6 +905,42 @@ public class AvonicModalTests
         Assert.Equal(new Size(450, 300), modal.Wrapper.Bounds.Size);
     }
 
+    [AvaloniaFact]
+    public void B14_Window_Units_Min_And_A_Calc_Of_Three_Read_As_Css()
+    {
+        // --width and --height are CSS lengths: vw and vh of the window, min(), and calc() of more than two terms.
+        using var stage = new Stage(1024, 768);
+        var modal = new AvonicModal { Content = new Border { Width = 100, Height = 120 } };
+        modal.Resources["Avonic.Modal.Width"] = "50vw";
+        modal.Resources["Avonic.Modal.Height"] = "min(50vh, 300px)";
+        modal.Present(stage.Window);
+        stage.At(Entered);
+        stage.Render();
+        Assert.Equal(new Size(512, 300), modal.Wrapper!.Bounds.Size);
+
+        modal.Resources["Avonic.Modal.Width"] = "calc(100% - 10px + 4px)";
+        modal.Resources["Avonic.Modal.Height"] = "25vh";
+        stage.Render();
+        Assert.Equal(new Size(1018, 192), modal.Wrapper.Bounds.Size);
+    }
+
+    [AvaloniaFact]
+    public void B14_Vw_And_Vh_Are_The_Windows_In_A_Host_Smaller_Than_It()
+    {
+        // vw and vh are of the viewport, the window, not of the box the wrapper is in, as a percentage is.
+        var wrapper = new Border();
+        var panel = new ModalPanel { ContentWidth = "50vw", ContentHeight = "10vh", Children = { wrapper } };
+        using var stage = new Stage(1000, 800, new Border { Width = 400, Height = 300, Child = panel });
+        stage.Render();
+        Assert.Equal(new Size(500, 80), wrapper.Bounds.Size);
+
+        // The window grows and the host doesn't: the wrapper follows the window.
+        stage.Window.Width = 1200;
+        stage.Window.Height = 1000;
+        stage.Render();
+        Assert.Equal(new Size(600, 100), wrapper.Bounds.Size);
+    }
+
     [AvaloniaTheory]
     [InlineData(390, 844, 24)]
     [InlineData(1024, 768, 0)]

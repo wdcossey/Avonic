@@ -1,12 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
 /// <summary>
 /// The menu's host as <c>menu.md.css</c> places <c>.menu-inner</c> in it: <c>position: absolute; top: 0; bottom: 0</c> at the left
 /// edge, or the right with <see cref="IsEndSide"/>, <c>--width</c> by <c>--height</c> within <c>--min-*</c> and <c>--max-*</c>. Each
-/// size is a number (px) or a CSS string, as the alert reads them (<see cref="AlertPanel.Length(object?, double, Size)"/>): a
+/// size is a number (px) or a CSS string, read by <see cref="CssLength.Read(object?, double, Size)"/>: a
 /// percentage of the host, <c>px</c>, <c>vw</c> and <c>vh</c> of the top level, <c>calc()</c>, <c>min()</c>, or <c>auto</c>. A width of
 /// <c>auto</c> is shrink-to-fit, the content's max-content at most the host's width; a height of <c>auto</c> is the host's, as
 /// <c>top: 0; bottom: 0</c> makes it. The maximum applies and then the minimum, which wins, as in CSS. It's laid out left to right,
@@ -66,17 +67,32 @@ public class MenuPanel : Panel
     /// <inheritdoc cref="IsEndSideProperty"/>
     public bool IsEndSide { get => GetValue(IsEndSideProperty); set => SetValue(IsEndSideProperty, value); }
 
+    private IDisposable? _viewport;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _viewport = CssLength.MeasureOnViewportChange(this);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _viewport?.Dispose();
+        _viewport = null;
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = availableSize.Width;
         var height = availableSize.Height;
         var viewport = TopLevel.GetTopLevel(this)?.ClientSize ?? availableSize;
-        var minWidth = AlertPanel.Length(ContentMinWidth, width, viewport) ?? 0;
-        var maxWidth = AlertPanel.Length(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
-        var minHeight = AlertPanel.Length(ContentMinHeight, height, viewport) ?? 0;
-        var maxHeight = AlertPanel.Length(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
-        var fixedWidth = AlertPanel.Length(ContentWidth, width, viewport);
-        var fixedHeight = AlertPanel.Length(ContentHeight, height, viewport);
+        var minWidth = CssLength.Read(ContentMinWidth, width, viewport) ?? 0;
+        var maxWidth = CssLength.Read(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
+        var minHeight = CssLength.Read(ContentMinHeight, height, viewport) ?? 0;
+        var maxHeight = CssLength.Read(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
+        var fixedWidth = CssLength.Read(ContentWidth, width, viewport);
+        var fixedHeight = CssLength.Read(ContentHeight, height, viewport);
 
         var desired = default(Size);
         foreach (var child in Children)

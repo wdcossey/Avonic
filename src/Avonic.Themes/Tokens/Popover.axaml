@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:b="using:Avonic.Components.Behaviors">
 
-    <!-- The variables of ion-popover. A size takes a number (px) or a CSS string: a percentage of the window, "250px", "auto", or
-         "none" for a maximum. -->
+    <!-- The variables of ion-popover. A size takes a number (px) or a CSS string, read by CssLength: px, a percentage of the
+         window, vw and vh, sums and differences, calc(), min(), max(), clamp(), "auto", or "none" for a maximum. -->
 
     <!-- backdrop-opacity: var(ion-backdrop-opacity, 0.32). Unset, it follows Avonic.BackdropOpacity. Read by the animations. -->
     <b:CssUnset x:Key="Avonic.Popover.BackdropOpacity" />

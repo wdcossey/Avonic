@@ -82,7 +82,7 @@ These are mistakes this project has already made, so don't repeat them.
 - **Headless popups are in the window's overlay layer,** so code for a control in a real popup window (another `TopLevel`) can't be
   tested headless. Say so in the PR (#227, #231).
 - **An overlay reuses what the overlays share** before writing its own: `Overlays/OverlayHandler` (a button's handler, the backdrop's
-  opacity), `ModalPanel`'s and `AlertPanel.Length`'s CSS sizes, `AlertClasses`. Three overlays each copied `BackdropOpacity()`.
+  opacity), the CSS sizes `Behaviors/CssLength` reads, `AlertClasses`. Three overlays each copied `BackdropOpacity()`.
 - **A `drive.ps1` section's real click lands on whatever is on top.** Click only what the top overlay shows: a button under a
   full-screen modal is covered, and the click reached the modal (#228).
 - **Ionic's behaviour for your control can live in another control's `.js`:** the split pane does nothing by itself, as `menu.js`

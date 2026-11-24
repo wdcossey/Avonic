@@ -12,6 +12,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 using Avonic.Components.Controls;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
 using Stage = Avonic.Components.Tests.Controls.AvonicModalTests.Stage;
 
@@ -751,8 +752,8 @@ public class AvonicAlertTests
     public void B15_Vw_And_Vh_Are_The_Windows_Width_And_Height_Whatever_The_Axis()
     {
         var viewport = new Size(400, 800);
-        Assert.Equal(400, AlertPanel.Length("50vh", 400, viewport));
-        Assert.Equal(320, AlertPanel.Length("80vw", 800, viewport));
+        Assert.Equal(400, CssLength.Read("50vh", 400, viewport));
+        Assert.Equal(320, CssLength.Read("80vw", 800, viewport));
     }
 
     [AvaloniaFact]
@@ -808,8 +809,21 @@ public class AvonicAlertTests
     [InlineData("calc(100% - 32px)", 400d, 368d)]
     [InlineData("auto", 100d, null)]
     [InlineData("none", 100d, null)]
+    [InlineData("calc(min(80px, 300px) - min(10px, 4px))", 100d, 76d)]
+    [InlineData("4px + min(100vw - 96px, 560px)", 600d, 508d)]
+    [InlineData("min(min(1px, 2px), 3px)", 100d, 1d)]
+    [InlineData("max(10px, 20%)", 200d, 40d)]
+    [InlineData("clamp(250px, calc(100% - 40px), 400px)", 1024d, 400d)]
+    [InlineData("clamp(250px, calc(100% - 40px), 400px)", 200d, 250d)]
+    [InlineData("calc(100% - (10px + 4px))", 100d, 86d)]
+    [InlineData("calc(100% * 2)", 100d, null)]
+    [InlineData("min(10px, auto)", 100d, null)]
+    [InlineData("calc(100%\n  - 32px)", 400d, 368d)]
+    [InlineData("infinity", 100d, null)]
+    [InlineData("calc(100% - NaNpx)", 100d, null)]
+    [InlineData("100% - -10px", 100d, 110d)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>
-        Assert.Equal(expected, AlertPanel.Length(value, basis));
+        Assert.Equal(expected, CssLength.Read(value, basis));
 
     // ── B16, B17: head and message ──────────────────────────────────────────────────────────
 

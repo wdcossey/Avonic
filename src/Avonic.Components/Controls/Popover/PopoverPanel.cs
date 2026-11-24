@@ -9,8 +9,8 @@ namespace Avonic.Components.Controls;
 /// <summary>
 /// The popover's <c>.popover-wrapper</c>, its <c>wrapper</c>: the host's whole box, in which the content (<c>.popover-content</c>,
 /// <c>position: absolute</c>) is <see cref="ContentWidth"/> by <see cref="ContentHeight"/> within their minimums and maximums,
-/// each read as the modal's are (<see cref="ModalPanel"/>): a number (px), a percentage of the host, <c>auto</c>, or <c>none</c> for
-/// a maximum. The popover gives it the place its enter animation works out; until then the content sits in the middle, where an
+/// each read by <see cref="CssLength"/>, as the modal's are: a number (px), a percentage of the host, <c>vw</c> and <c>vh</c> of the
+/// window, <c>calc()</c>, <c>min()</c>, <c>auto</c>, or <c>none</c> for a maximum. The popover gives it the place its enter animation works out; until then the content sits in the middle, where an
 /// absolute box with no inset sits in the host's centring flex box. <see cref="OffsetX"/> and <see cref="OffsetY"/> are added to
 /// the place, as <c>calc(… + var(--offset-x))</c>.
 /// </summary>
@@ -119,16 +119,32 @@ public class PopoverPanel : Panel
     /// <summary>The content's place: see <see cref="Place"/>. <paramref name="Mirrored"/>: the panel lays out right to left.</summary>
     internal readonly record struct Placement(double Top, double Left, double? Bottom, double? Width, bool Mirrored);
 
+    private IDisposable? _viewport;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _viewport = CssLength.MeasureOnViewportChange(this);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _viewport?.Dispose();
+        _viewport = null;
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = availableSize.Width;
         var height = availableSize.Height;
-        var minWidth = ModalPanel.Length(ContentMinWidth, width) ?? 0;
-        var maxWidth = ModalPanel.Length(ContentMaxWidth, width) ?? double.PositiveInfinity;
-        var minHeight = ModalPanel.Length(ContentMinHeight, height) ?? 0;
-        var maxHeight = ModalPanel.Length(ContentMaxHeight, height) ?? double.PositiveInfinity;
-        var fixedWidth = (_placement?.Width ?? ModalPanel.Length(ContentWidth, width)) is { } w ? Clamp(w, minWidth, maxWidth) : (double?)null;
-        double? fixedHeight = ModalPanel.Length(ContentHeight, height) is { } h ? Clamp(h, minHeight, maxHeight) : null;
+        var viewport = TopLevel.GetTopLevel(this)?.ClientSize ?? availableSize;
+        var minWidth = CssLength.Read(ContentMinWidth, width, viewport) ?? 0;
+        var maxWidth = CssLength.Read(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
+        var minHeight = CssLength.Read(ContentMinHeight, height, viewport) ?? 0;
+        var maxHeight = CssLength.Read(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
+        var fixedWidth = (_placement?.Width ?? CssLength.Read(ContentWidth, width, viewport)) is { } w ? Clamp(w, minWidth, maxWidth) : (double?)null;
+        double? fixedHeight = CssLength.Read(ContentHeight, height, viewport) is { } h ? Clamp(h, minHeight, maxHeight) : null;
 
         // height: auto with both top and bottom: what's between them.
         if (fixedHeight is null && _placement is { Bottom: { } bottom } place && !double.IsInfinity(height))

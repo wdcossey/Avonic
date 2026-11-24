@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -13,7 +14,7 @@ namespace Avonic.Components.Controls;
 /// </summary>
 /// <remarks>
 /// Sizes are CSS's content-box ones (the wrapper's <c>box-sizing</c>), so the wrapper's border is added to them; each is a number
-/// (px) or a CSS string, read by <see cref="AlertPanel.Length(object?, double, Size)"/>: a percentage of the window's width or
+/// (px) or a CSS string, read by <see cref="CssLength.Read(object?, double, Size)"/>: a percentage of the window's width or
 /// height, <c>auto</c> for none. An over-constrained width (wider than the room between the insets) starts at the start inset, as
 /// CSS 2.1 §10.3.7 has it.
 /// </remarks>
@@ -85,8 +86,8 @@ public class ToastPanel : Panel
         var width = double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width;
         var height = double.IsInfinity(availableSize.Height) ? 0 : availableSize.Height;
         var viewport = new Size(width, height);
-        var start = AlertPanel.Length(Start, width, viewport) ?? 0;
-        var end = AlertPanel.Length(End, width, viewport) ?? 0;
+        var start = CssLength.Read(Start, width, viewport) ?? 0;
+        var end = CssLength.Read(End, width, viewport) ?? 0;
         var room = Math.Max(0, width - start - end);
 
         foreach (var child in Children)
@@ -95,15 +96,15 @@ public class ToastPanel : Panel
             var borderWidth = border.Left + border.Right;
             var borderHeight = border.Top + border.Bottom;
 
-            var minWidth = AlertPanel.Length(ContentMinWidth, width, viewport) ?? 0;
-            var maxWidth = AlertPanel.Length(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
-            var contentWidth = AlertPanel.Length(ContentWidth, width, viewport) ?? Math.Max(0, room - borderWidth);
+            var minWidth = CssLength.Read(ContentMinWidth, width, viewport) ?? 0;
+            var maxWidth = CssLength.Read(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
+            var contentWidth = CssLength.Read(ContentWidth, width, viewport) ?? Math.Max(0, room - borderWidth);
             contentWidth = Math.Max(minWidth, Math.Min(contentWidth, maxWidth));
             var outerWidth = contentWidth + borderWidth;
 
-            var minHeight = AlertPanel.Length(ContentMinHeight, height, viewport) ?? 0;
-            var maxHeight = AlertPanel.Length(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
-            var fixedHeight = AlertPanel.Length(ContentHeight, height, viewport);
+            var minHeight = CssLength.Read(ContentMinHeight, height, viewport) ?? 0;
+            var maxHeight = CssLength.Read(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
+            var fixedHeight = CssLength.Read(ContentHeight, height, viewport);
             // Measured with no limit down, always: a limit would clamp what it wants, and a later change inside, measured against the
             // same limit, would then never reach this panel. The heights are applied at the arrange.
             child.Measure(new Size(outerWidth, double.PositiveInfinity));

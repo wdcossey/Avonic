@@ -115,6 +115,28 @@ writes them, and Avonic's own callers give neither: a boolean is `True` or `Fals
   element, or the last if the first was where it came from. Scoped: focus outside is left alone, and the sentinels wrap. A popup
   opened from inside (a `ComboBox`'s drop-down) counts as inside, by its logical parent.
 
+## Sizes from CSS variables
+
+Each overlay's wrapper is sized by its `--width`, `--height` and their `--min-*` and `--max-*`, which take any CSS length. One
+reader, `Behaviors/CssLength`, turns them into pixels for every panel: a number (px), `px`, a percentage of the panel's basis,
+`vw` and `vh` of a viewport, sums and differences, brackets, `calc()`, `min()`, `max()` and `clamp()`, nested; `auto`, `none`,
+the content sizes, `*` and `/` are no length, and leave the panel's own rule. The viewport is the top level's client size for
+the modal, the popover and the menu (and the split pane), and the panel's own size for the alert, the action sheet and the
+toast, whose host is the window's overlay layer, the same size. The modal and the popover had a reader of their own with no `vw`, `vh` or
+`min()`, until #266, and nested brackets were read wrongly until then.
+
+The panels stay apart, with no base class: each lays its wrapper out as a different CSS layout, and only the six properties and the
+clamp would be shared.
+
+| Panel | Ionic's CSS | Width with no length | Height with no length | Place |
+|---|---|---|---|---|
+| `AlertPanel` (alert, loading) | a flex item, centred | fit-content: the max-content, at most the room | the content's | centred |
+| `ActionSheetPanel` | absolute, `left`, `right` and `bottom` 0 | the room | the content's | bottom, centred across |
+| `ModalPanel` | a flex item, centred; a sheet's absolute at the bottom | the content's, within the room | the content's, or a sheet's `calc()` | centred, or bottom |
+| `PopoverPanel` | absolute, at the place its animation works out | the content's | the content's, or between top and bottom | placed |
+| `MenuPanel` | absolute, `top: 0; bottom: 0` at a side | fit-content | the host's | the start or the end side |
+| `ToastPanel` | absolute, `start`, `end` and a position | between start and end | the content's | top, middle or bottom |
+
 ## `AvonicAnimation`
 
 `AvonicAnimation.Create()` is `createAnimation()`, with Ionic's members in PascalCase. It animates `opacity` and `transform`

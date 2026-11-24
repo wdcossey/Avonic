@@ -10,7 +10,7 @@ namespace Avonic.Components.Controls;
 /// The action sheet's host as <c>action-sheet.css</c> places <c>.action-sheet-wrapper</c>: <c>position: absolute</c> with
 /// <c>left</c>, <c>right</c> and <c>bottom</c> 0, so at the bottom; <c>--width</c> within <c>--min-width</c> and <c>--max-width</c>,
 /// centred by <c>margin-inline: auto</c>; <c>--height</c> (<c>auto</c>: its content) within <c>--min-height</c> and
-/// <c>--max-height</c>. Each size is a number (px) or a CSS string, read as <see cref="AlertPanel"/> reads one: px, a percentage of
+/// <c>--max-height</c>. Each size is a number (px) or a CSS string, read by <see cref="CssLength"/>: px, a percentage of
 /// the host, <c>vw</c> and <c>vh</c>, sums and differences, <c>calc()</c>, <c>min()</c>, or <c>auto</c> and <c>none</c>. The
 /// maximum applies and then the minimum, which wins, as in CSS.
 /// </summary>
@@ -95,19 +95,19 @@ public class ActionSheetPanel : Panel
     {
         var width = availableSize.Width;
         var height = availableSize.Height;
-        var minWidth = AlertPanel.Length(ContentMinWidth, width, availableSize) ?? 0;
-        var maxWidth = AlertPanel.Length(ContentMaxWidth, width, availableSize) ?? double.PositiveInfinity;
-        var minHeight = AlertPanel.Length(ContentMinHeight, height, availableSize) ?? 0;
-        var maxHeight = AlertPanel.Length(ContentMaxHeight, height, availableSize) ?? double.PositiveInfinity;
+        var minWidth = CssLength.Read(ContentMinWidth, width, availableSize) ?? 0;
+        var maxWidth = CssLength.Read(ContentMaxWidth, width, availableSize) ?? double.PositiveInfinity;
+        var minHeight = CssLength.Read(ContentMinHeight, height, availableSize) ?? 0;
+        var maxHeight = CssLength.Read(ContentMaxHeight, height, availableSize) ?? double.PositiveInfinity;
 
         // width: auto on an element with left and right 0 is what's between them.
-        var w = Clamp(AlertPanel.Length(ContentWidth, width, availableSize) ?? width, minWidth, maxWidth);
+        var w = Clamp(CssLength.Read(ContentWidth, width, availableSize) ?? width, minWidth, maxWidth);
         if (double.IsInfinity(w))
         {
             w = 0;
         }
 
-        var fixedHeight = AlertPanel.Length(ContentHeight, height, availableSize);
+        var fixedHeight = CssLength.Read(ContentHeight, height, availableSize);
         var desired = default(Size);
         foreach (var child in Children)
         {
