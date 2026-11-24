@@ -196,6 +196,24 @@ function All($type) {
     $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
     $win.FindAll($TS::Descendants, $cond) | ForEach-Object { $_ }
 }
+# All, with a FindAll that fails with UIA's E_FAIL tried once more 300 ms later, and the retry printed. It's Avalonia's (#254,
+# docs/infra/avalonia-issues.md): a search under way when a page leaves the tree meets elements with no fragment root. Only the
+# sections that search while a nav transition runs meet it (ion-nav, ion-back-button: 5 and 2 retries in a run of each, 2026-11-24),
+# and each opts in with its own All that calls this, so every other section still stops at the first failure. Any other error,
+# or a second failure, still stops the section.
+function AllRetryingOnce($type) {
+    $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
+    try { $found = @($win.FindAll($TS::Descendants, $cond)) }
+    catch {
+        $com = $_.Exception.InnerException
+        # E_FAIL (0x80004005) only, the one #254 gives: any other COM error is a real one, and stops the section.
+        if ($com -isnot [System.Runtime.InteropServices.COMException] -or $com.HResult -ne -2147467259) { throw }
+        Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
+        Start-Sleep -Milliseconds 300
+        $found = @($win.FindAll($TS::Descendants, $cond))
+    }
+    $found | ForEach-Object { $_ }
+}
 function Named($type, $like) { All $type | Where-Object { $_.Current.Name -like $like } | Select-Object -First 1 }
 function Texts { (All $CT::Text | ForEach-Object { $_.Current.Name } | Where-Object { $_ }) }
 function FirstText($like) { Texts | Where-Object { $_ -like $like } | Select-Object -First 1 }
@@ -2260,22 +2278,8 @@ try {
     # the nav (the extension) before the shell's own back, and leaves the request to the shell at the root. Names are distinctive:
     # the shell's own button is "Back". Checks are by names and regions, not wrapped text.
     Section 'ion-nav' {
-        # In this section only: a FindAll that fails with UIA's E_FAIL is tried once more 300 ms later, and the retry is printed.
-        # It's Avalonia's (#254, docs/infra/avalonia-issues.md): a search under way when a page leaves the tree meets elements with
-        # no fragment root. Only this section searches while a transition runs (WaitStack polls from the click on), so only it
-        # meets it. Any other error, or a second failure, still stops the section. The shared All is untouched.
-        function All($type) {
-            $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
-            try { $found = @($win.FindAll($TS::Descendants, $cond)) }
-            catch {
-                $com = $_.Exception.InnerException
-                if ($com -isnot [System.Runtime.InteropServices.COMException]) { throw }
-                Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
-                Start-Sleep -Milliseconds 300
-                $found = @($win.FindAll($TS::Descendants, $cond))
-            }
-            $found | ForEach-Object { $_ }
-        }
+        # FindAll tried once more on UIA's E_FAIL (#254, AllRetryingOnce): WaitStack polls from the click on, while a page leaves.
+        function All($type) { AllRetryingOnce $type }
         Open 'ion-nav'
         $w = $win.Current.BoundingRectangle
         function NavStatus { FirstText 'Stack:*' }
@@ -2337,20 +2341,8 @@ try {
     }
 
     Section 'ion-back-button' {
-        # The same one-time retry as the ion-nav section's (#254): this section searches right after a nav transition, when a page
-        # leaving the tree can make UIA's FindAll fail with E_FAIL. Any other error, or a second failure, still stops the section.
-        function All($type) {
-            $cond = New-Object Windows.Automation.PropertyCondition $AE::ControlTypeProperty, $type
-            try { $found = @($win.FindAll($TS::Descendants, $cond)) }
-            catch {
-                $com = $_.Exception.InnerException
-                if ($com -isnot [System.Runtime.InteropServices.COMException]) { throw }
-                Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
-                Start-Sleep -Milliseconds 300
-                $found = @($win.FindAll($TS::Descendants, $cond))
-            }
-            $found | ForEach-Object { $_ }
-        }
+        # FindAll tried once more on UIA's E_FAIL (#254, AllRetryingOnce): this section searches right after a nav transition.
+        function All($type) { AllRetryingOnce $type }
         Open 'ion-back-button'
         $w = $win.Current.BoundingRectangle
         function NavStatus { FirstText 'Stack:*' }

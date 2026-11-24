@@ -273,7 +273,8 @@ ends where the detached subtree's sibling navigation does. **That is the suggest
 peer whose chain no longer reaches a root, not null. Every immediate retry succeeded, in every run.
 
 A screen reader that searches just after a navigation would get the same failure; one that retries, or works from events, would
-recover. `drive.ps1`'s ion-nav section retries a failing `FindAll` once, 300 ms later, and prints it, which is the least-bad
+recover. `drive.ps1`'s `AllRetryingOnce`, which its ion-nav and ion-back-button sections opt into, retries a `FindAll` failing with E_FAIL
+once, 300 ms later, and prints it, which is the least-bad
 workaround for a client. On Avonic's side, without hooking Avalonia, the window's root can only come through a peer of Avonic's own
 in the chain, as `GetAutomationRootCore` follows `GetParent()` and can't be overridden: the nav would wrap each page in a part
 whose peer's `GetParentCore` keeps answering the host's peer after the page has left. That changes the pages' visual parent, helps
