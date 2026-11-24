@@ -5,6 +5,7 @@ using Avalonia.Automation.Provider;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avonic.Components.Behaviors;
+using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
 
@@ -52,9 +53,9 @@ public class AlertActionButton : TemplatedControl
 
         if (button.HtmlAttributes is { } attributes)
         {
-            if (attributes.TryGetValue("aria-label", out var label) && label is not null)
+            if (OverlayAttributes.Read(attributes, "aria-label") is { } label)
             {
-                AutomationProperties.SetName(this, label.ToString());
+                AutomationProperties.SetName(this, label);
             }
 
             if (attributes.TryGetValue("disabled", out var disabled) && AlertClasses.IsTrue(disabled))

@@ -243,7 +243,7 @@ public class AvonicAlert : AvonicOverlay
                 return string.Join(" ", parts);
             }
 
-            if (HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } text)
+            if (OverlayAttributes.AriaLabel(HtmlAttributes) is { } text)
             {
                 return text;
             }
@@ -677,10 +677,7 @@ public class AvonicAlert : AvonicOverlay
                     field.Input = input;
                     AlertClasses.Apply(field, input.CssClass);
                     var attributes = input.Attributes;
-                    if (attributes is not null && attributes.TryGetValue("class", out var cls))
-                    {
-                        AlertClasses.Apply(field, cls?.ToString());
-                    }
+                    AlertClasses.Apply(field, OverlayAttributes.Read(attributes, "class"));
 
                     // attributes.disabled ?? disabled
                     field.IsEnabled = !(attributes is not null && attributes.TryGetValue("disabled", out var disabled) && disabled is not null

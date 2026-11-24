@@ -9,8 +9,8 @@ using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
 using Avonic.Components.Animation;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
@@ -130,18 +130,12 @@ public class AvonicLoading : AvonicOverlay
             : default;
     });
 
-    /// <summary>Chromium's ascent and descent of a font's line, each rounded on its own, as <c>TextareaNativeInput</c> works them out.</summary>
-    private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size)
-    {
-        using var layout = new TextLayout("x", new Typeface(family), size, null);
-        if (layout.TextLines.Count == 0)
-        {
-            return (0, 0);
-        }
-
-        var line = layout.TextLines[0];
-        return (Math.Round(line.Baseline, MidpointRounding.AwayFromZero), Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero));
-    }
+    /// <summary>
+    /// Chromium's ascent and descent of a font's line, each rounded, as <c>TextareaNativeInput</c> reads them too. From the family
+    /// alone, at the regular face, as the theme binds only the family and the size.
+    /// </summary>
+    private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size) =>
+        Css.NormalLine(new Typeface(family), size) ?? (0, 0);
 
     private readonly ConfigOnLoad<SpinnerName?> _spinner;
     private string[] _cssClasses = [];
@@ -257,9 +251,7 @@ public class AvonicLoading : AvonicOverlay
                 return message;
             }
 
-            return HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } ariaLabel
-                ? ariaLabel
-                : null;
+            return OverlayAttributes.AriaLabel(HtmlAttributes);
         }
     }
 
@@ -274,8 +266,7 @@ public class AvonicLoading : AvonicOverlay
                 .Select(t => t.Inlines is { Count: > 0 } inlines ? inlines.Text : t.Text).Where(t => !string.IsNullOrEmpty(t)));
 
     /// <summary><c>htmlAttributes.id</c>, the host's <c>AutomationId</c>.</summary>
-    internal string? HtmlId =>
-        HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id ? id : null;
+    internal string? HtmlId => OverlayAttributes.Id(HtmlAttributes);
 
     protected internal override bool BackdropDismissEnabled => BackdropDismiss;
 

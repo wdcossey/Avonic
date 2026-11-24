@@ -90,13 +90,13 @@ once if the window doesn't fit on the screen.
     sets a new root; the factory button pushes drafts and Pop to root goes back; a touch swipe from the left edge does nothing while
     Swipe back is off, and goes back with it on; Alt+Left pops the nav and the sample page stays, and at the root it's left to the
     shell, which goes back to the index. Each read from the page's `Stack:` line once its transition has ended. A search while a
-    page leaves can fail with UIA's E_FAIL, Avalonia's (#254, `uia-findall/` below), so this section tries one once more.
-    **Not yet run.**
+    page leaves can fail with UIA's E_FAIL, Avalonia's (#254, `uia-findall/` below), so this section tries one once more (`AllRetryingOnce`).
+    Ran 2026-11-24: 22 of 22, with 5 retries.
   - `ion-back-button` (#47): five icon-only back buttons with a default href above the nav, one disabled, and none on the root
     page; a click with nothing to pop asks the app for its default href (`DefaultHrefRequested`), the disabled one asks nothing; a
     push shows the pushed page's back button in its header, and a click, automation's `Invoke` and Enter each pop the nav, asking
     for no href; a deep link (page 5 as the root) shows its button by its `DefaultPage`, and a click sets page 1 as the root. With
-    the nav section's E_FAIL retry. **Not yet run.**
+    the nav section's E_FAIL retry (`AllRetryingOnce`). Ran 2026-11-24: 22 of 22, with 2 retries.
   - `typography`: frames only.
   - `ion-app` (#65): Alt+Left taken by the page's handler at priority 10 over the shell's 0, and with it off, the shell going back
     to the list at 0; a frame of `SetFocus`'s ring on row 1.

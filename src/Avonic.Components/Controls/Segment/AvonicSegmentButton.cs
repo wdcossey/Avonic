@@ -10,7 +10,6 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Logging;
 using Avalonia.LogicalTree;
-using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -219,15 +218,7 @@ public class AvonicSegmentButton : ItemsControl
         PseudoClasses.Set(":in-segment-scrollable", _segment?.Scrollable == true);
 
         // hostContext('ion-toolbar'), hostContext('ion-toolbar[color]').
-        bool inToolbar = false, inToolbarColor = false;
-        foreach (var toolbar in this.GetVisualAncestors().OfType<AvonicToolbar>())
-        {
-            inToolbar = true;
-            inToolbarColor |= toolbar.Color is not null;
-        }
-
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        ToolbarHostContext.Set(PseudoClasses, this);
 
         // hasLabel, hasIcon: querySelector, anywhere inside.
         var descendants = this.GetLogicalDescendants().ToList();

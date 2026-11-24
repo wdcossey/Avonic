@@ -358,10 +358,8 @@ public class AvonicButton : TemplatedControl, IItemControl
         // hostContext('ion-toolbar'), hostContext('ion-toolbar[color]') and hostContext('ion-buttons'): any ancestor, read at
         // each render, so a toolbar's color changing later shows at the button's next render, as measured. First, because
         // :in-buttons gives a Fill, which comes back here: the classes below then read the Fill it gave.
-        var (inToolbar, inToolbarColor, inButtons) = HostContext();
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
-        PseudoClasses.Set(":in-buttons", inButtons);
+        ToolbarHostContext.Set(PseudoClasses, this);
+        PseudoClasses.Set(":in-buttons", this.FindAncestorOfType<AvonicButtons>() is not null);
 
         // inToolbar (closest('ion-buttons')) gives its Clear through :in-buttons above; inListHeader is here, as it has no class.
         var fill = Fill ?? (_inListHeader ? ButtonFill.Clear : ButtonFill.Solid);
@@ -380,29 +378,6 @@ public class AvonicButton : TemplatedControl, IItemControl
         PseudoClasses.Set(":expand-full", Expand == ButtonExpand.Full);
         PseudoClasses.Set(":strong", Strong);
         PseudoClasses.Set(":has-icon-only", IconOnlyContent is not null);
-    }
-
-    /// <summary>
-    /// <c>ion-toolbar[color]</c> is any toolbar with a color attribute, even an empty one, and need not be the nearest toolbar.
-    /// Outside the tree, nothing.
-    /// </summary>
-    private (bool InToolbar, bool InToolbarColor, bool InButtons) HostContext()
-    {
-        bool inToolbar = false, inToolbarColor = false, inButtons = false;
-        foreach (var ancestor in this.GetVisualAncestors())
-        {
-            if (ancestor is AvonicToolbar toolbar)
-            {
-                inToolbar = true;
-                inToolbarColor |= toolbar.Color is not null;
-            }
-            else if (ancestor is AvonicButtons)
-            {
-                inButtons = true;
-            }
-        }
-
-        return (inToolbar, inToolbarColor, inButtons);
     }
 
     // ── Input ────────────────────────────────────────────────────────────────────────────────
