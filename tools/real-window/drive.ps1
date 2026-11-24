@@ -198,7 +198,8 @@ function All($type) {
 }
 # All, with a FindAll that fails with UIA's E_FAIL tried once more 300 ms later, and the retry printed. It's Avalonia's (#254,
 # docs/infra/avalonia-issues.md): a search under way when a page leaves the tree meets elements with no fragment root. Only the
-# sections that search while a nav transition runs meet it (ion-nav, ion-back-button: 5 and 2 retries in a run of each, 2026-11-24),
+# sections that search while a page or an overlay leaves the tree meet it (ion-nav, ion-back-button: 5 and 2 retries in a run of each;
+# ion-toast, which stopped at it in 4 of 5 runs, 2026-11-24),
 # and each opts in with its own All that calls this, so every other section still stops at the first failure. Any other error,
 # or a second failure, still stops the section.
 function AllRetryingOnce($type) {
@@ -1822,6 +1823,8 @@ try {
     # timeout. The status line says what each was dismissed with; each check waits for a line that differs from the one before.
     # Only what's on top is aimed at: the toasts never cover the page buttons clicked here. Durations are 0 but the last, 2 s.
     Section 'ion-toast' {
+        # FindAll tried once more on UIA's E_FAIL (#254, AllRetryingOnce): a dismissed toast leaves the tree while the next search runs.
+        function All($type) { AllRetryingOnce $type }
         Open 'ion-toast'
         $w = $win.Current.BoundingRectangle
         function ToastStatus { FirstText '*dismissed with role*' }
