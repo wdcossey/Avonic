@@ -1,6 +1,6 @@
 # ADR 0003 — Material 3 as a second theme, after every Ionic component
 
-**Date:** November 2026 · **Status:** accepted, and on hold: no work starts until P3 and P4 are done
+**Date:** November 2026 · **Status:** accepted. It was on hold until P3 and P4 were done, which they are (2026-11-22); it starts after [#266](https://github.com/wdcossey/Avonic/issues/266)
 
 ## Context
 
