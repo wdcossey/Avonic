@@ -1,3 +1,4 @@
+using Avonic.Components.Behaviors;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -751,8 +752,8 @@ public class AvonicAlertTests
     public void B15_Vw_And_Vh_Are_The_Windows_Width_And_Height_Whatever_The_Axis()
     {
         var viewport = new Size(400, 800);
-        Assert.Equal(400, AlertPanel.Length("50vh", 400, viewport));
-        Assert.Equal(320, AlertPanel.Length("80vw", 800, viewport));
+        Assert.Equal(400, CssLength.Read("50vh", 400, viewport));
+        Assert.Equal(320, CssLength.Read("80vw", 800, viewport));
     }
 
     [AvaloniaFact]
@@ -809,7 +810,7 @@ public class AvonicAlertTests
     [InlineData("auto", 100d, null)]
     [InlineData("none", 100d, null)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>
-        Assert.Equal(expected, AlertPanel.Length(value, basis));
+        Assert.Equal(expected, CssLength.Read(value, basis));
 
     // ── B16, B17: head and message ──────────────────────────────────────────────────────────
 

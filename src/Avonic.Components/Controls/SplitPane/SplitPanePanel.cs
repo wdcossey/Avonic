@@ -4,6 +4,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
 
@@ -16,7 +17,7 @@ namespace Avonic.Components.Controls;
 /// wins, as in CSS; start sides first, end sides last (<c>order: -1</c> and <c>1</c>); the main content (<c>flex: 1</c>) takes what's
 /// left; any other child sits in the row at its own width, in order. A side's border, <c>border-inline-end</c> at the start and
 /// <c>border-inline-start</c> at the end, is drawn by the panel inside its width. Each size is a number (px) or a CSS string, as the
-/// alert reads them (<see cref="AlertPanel.Length(object?, double, Size)"/>): a percentage is of the split pane's width.
+/// alert reads them (<see cref="CssLength.Read(object?, double, Size)"/>): a percentage is of the split pane's width.
 /// </summary>
 public class SplitPanePanel : Panel
 {
@@ -277,15 +278,15 @@ public class SplitPanePanel : Panel
     private double SideWidthFor(AvonicMenu menu, Control child, double basis)
     {
         var viewport = TopLevel.GetTopLevel(this)?.ClientSize ?? new Size(basis, basis);
-        var min = AlertPanel.Length(SideMinWidth, basis, viewport) ?? 0;
-        var max = AlertPanel.Length(SideMaxWidth, basis, viewport) ?? double.PositiveInfinity;
+        var min = CssLength.Read(SideMinWidth, basis, viewport) ?? 0;
+        var max = CssLength.Read(SideMaxWidth, basis, viewport) ?? double.PositiveInfinity;
         // var(--side-width, var(--width)): unset (CssUnset), the menu's width; set to "auto", or a menu's width of "auto", the
         // side's own.
         var sideWidth = SideWidth is Behaviors.CssUnset or null
             && menu.TryFindResource(MenuWidthKey, menu.ActualThemeVariant, out var own)
             ? own
             : SideWidth;
-        var width = AlertPanel.Length(sideWidth, basis, viewport);
+        var width = CssLength.Read(sideWidth, basis, viewport);
         if (width is null)
         {
             // width: auto, the side's own width.

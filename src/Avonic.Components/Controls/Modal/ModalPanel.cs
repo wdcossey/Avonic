@@ -10,8 +10,8 @@ namespace Avonic.Components.Controls;
 /// <summary>
 /// The modal's host as <c>modal.md.css</c> lays it out: <c>display: flex; align-items: center; justify-content: center</c> around
 /// the wrapper, which is <c>--width</c> by <c>--height</c>, within <c>--min-*</c> and <c>--max-*</c>. Each size is a number (px) or a
-/// CSS string: a percentage of the host, <c>px</c>, a content size (<c>auto</c>, <c>fit-content</c>, <c>max-content</c>,
-/// <c>min-content</c>), <c>none</c> for a maximum, or <c>calc()</c> of two of those lengths added or taken away. As in CSS, the
+/// CSS string read by <see cref="CssLength"/>: a percentage of the host, <c>px</c>, <c>vw</c> and <c>vh</c> of the window, <c>calc()</c>,
+/// <c>min()</c>, a content size (<c>auto</c>, <c>fit-content</c>, <c>max-content</c>, <c>min-content</c>), or <c>none</c> for a maximum. As in CSS, the
 /// maximum applies and then the minimum, which wins, and a wrapper larger than the host overflows both sides equally. A sheet's
 /// wrapper is <c>position: absolute; bottom: 0</c>: <see cref="VerticalContentAlignment"/> <see cref="VerticalAlignment.Bottom"/>.
 /// </summary>
@@ -83,12 +83,13 @@ public class ModalPanel : Panel
     {
         var width = availableSize.Width;
         var height = availableSize.Height;
-        var minWidth = Length(ContentMinWidth, width) ?? 0;
-        var maxWidth = Length(ContentMaxWidth, width) ?? double.PositiveInfinity;
-        var minHeight = Length(ContentMinHeight, height) ?? 0;
-        var maxHeight = Length(ContentMaxHeight, height) ?? double.PositiveInfinity;
-        var fixedWidth = Length(ContentWidth, width) is { } w ? Clamp(w, minWidth, maxWidth) : (double?)null;
-        var fixedHeight = Length(ContentHeight, height) is { } h ? Clamp(h, minHeight, maxHeight) : (double?)null;
+        var viewport = TopLevel.GetTopLevel(this)?.ClientSize ?? availableSize;
+        var minWidth = CssLength.Read(ContentMinWidth, width, viewport) ?? 0;
+        var maxWidth = CssLength.Read(ContentMaxWidth, width, viewport) ?? double.PositiveInfinity;
+        var minHeight = CssLength.Read(ContentMinHeight, height, viewport) ?? 0;
+        var maxHeight = CssLength.Read(ContentMaxHeight, height, viewport) ?? double.PositiveInfinity;
+        var fixedWidth = CssLength.Read(ContentWidth, width, viewport) is { } w ? Clamp(w, minWidth, maxWidth) : (double?)null;
+        var fixedHeight = CssLength.Read(ContentHeight, height, viewport) is { } h ? Clamp(h, minHeight, maxHeight) : (double?)null;
 
         var desired = default(Size);
         foreach (var child in Children)
@@ -121,56 +122,6 @@ public class ModalPanel : Panel
         }
 
         return finalSize;
-    }
-
-    /// <summary>
-    /// A CSS size in px, or null for one that isn't a length: a content size, <c>auto</c>, <c>none</c>, or nothing. A percentage of
-    /// an infinite basis is null too, and so is a <c>calc()</c> with either side null.
-    /// </summary>
-    internal static double? Length(object? value, double basis)
-    {
-        switch (value)
-        {
-            case double d:
-                return double.IsNaN(d) ? null : d;
-            case int i:
-                return i;
-            case string s:
-                s = s.Trim().ToLowerInvariant();
-                if (s.StartsWith("calc(", StringComparison.Ordinal) && s.EndsWith(')'))
-                {
-                    return Calc(s[5..^1], basis);
-                }
-
-                if (s.EndsWith('%') && double.TryParse(s[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var percent))
-                {
-                    return double.IsInfinity(basis) ? null : basis * percent / 100;
-                }
-
-                if (s.EndsWith("px", StringComparison.Ordinal))
-                {
-                    s = s[..^2];
-                }
-
-                return double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var px) ? px : null;
-            default:
-                return null;
-        }
-    }
-
-    /// <summary><c>calc(a - b)</c> or <c>calc(a + b)</c>, each side a length; CSS needs the spaces around the operator.</summary>
-    private static double? Calc(string expression, double basis)
-    {
-        foreach (var (op, sign) in new[] { (" - ", -1), (" + ", 1) })
-        {
-            var at = expression.LastIndexOf(op, StringComparison.Ordinal);
-            if (at > 0)
-            {
-                return Length(expression[..at], basis) is { } a && Length(expression[(at + op.Length)..], basis) is { } b ? a + sign * b : null;
-            }
-        }
-
-        return Length(expression, basis);
     }
 
     private static double Clamp(double value, double min, double max) => Math.Max(min, Math.Min(value, max));

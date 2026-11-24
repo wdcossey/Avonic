@@ -104,6 +104,26 @@ are controllers: see [PLAN.md](PLAN.md#deferred).
   element, or the last if the first was where it came from. Scoped: focus outside is left alone, and the sentinels wrap. A popup
   opened from inside (a `ComboBox`'s drop-down) counts as inside, by its logical parent.
 
+## Sizes from CSS variables
+
+Each overlay's wrapper is sized by its `--width`, `--height` and their `--min-*` and `--max-*`, which take any CSS length. One
+reader, `Behaviors/CssLength`, turns them into pixels for every panel: a number (px), `px`, a percentage of the panel's basis,
+`vw` and `vh` of the top level's client size, sums and differences, `calc()` and `min()`; `auto`, `none` and the content
+sizes are no length, and leave the panel's own rule. The modal and the popover had a reader of their own with no `vw`, `vh` or
+`min()`, until #266.
+
+The panels stay apart, with no base class: each lays its wrapper out as a different CSS layout, and only the six properties and the
+clamp would be shared.
+
+| Panel | Ionic's CSS | Width with no length | Height with no length | Place |
+|---|---|---|---|---|
+| `AlertPanel` (alert, loading) | a flex item, centred | fit-content: the max-content, at most the room | the content's | centred |
+| `ActionSheetPanel` | absolute, `left`, `right` and `bottom` 0 | the room | the content's | bottom, centred across |
+| `ModalPanel` | a flex item, centred; a sheet's absolute at the bottom | the content's, within the room | the content's, or a sheet's `calc()` | centred, or bottom |
+| `PopoverPanel` | absolute, at the place its animation works out | the content's | the content's, or between top and bottom | placed |
+| `MenuPanel` | absolute, `top: 0; bottom: 0` at a side | fit-content | the host's | the start or the end side |
+| `ToastPanel` | absolute, `start`, `end` and a position | between start and end | the content's | top, middle or bottom |
+
 ## `AvonicAnimation`
 
 `AvonicAnimation.Create()` is `createAnimation()`, with Ionic's members in PascalCase. It animates `opacity` and `transform`

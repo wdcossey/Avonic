@@ -38,8 +38,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
   Controls/App/          AvonicApp, and what it starts for its TopLevel: HardwareBackButton (ionBackButton's registry),
                          KeyboardAssist (ionKeyboardDidShow, ionKeyboardDidHide), InputShims (scroll assist and padding),
                          AppSafeArea
-  Controls/Alert/        AvonicAlert, and AlertPanel.Length (a CSS length: %, px, vw, vh, calc(), min()) and AlertClasses
-                         (cssClass, and the attribute values Ionic reads), which the action sheet and the loading use too
+  Controls/Alert/        AvonicAlert, and AlertClasses (cssClass, and the attribute values Ionic reads), which the action sheet and
+                         the loading use too
   Controls/SplitPane/    AvonicSplitPane, and MediaQuery (window.matchMedia: a media query list against the TopLevel's
                          client size), what a split pane's `when` reads when it isn't a breakpoint
   Behaviors/             Ionic's utilities as attached behaviours (NativeButton = what a native <button> does, for the controls with one;
@@ -47,6 +47,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          Activatable = tap-click; FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
+                         CssLength = a CSS length (%, px, vw, vh, calc(), min()), what the overlays' and the split pane's panels read;
                          BorderRadius = border-radius with percentages, for themes;
                          CssBoxShadow = box-shadow as Avalonia's BoxShadows with the blur converted, and
                          {b:CssShadow} for it in XAML (docs/infra/box-shadow/README.md);
