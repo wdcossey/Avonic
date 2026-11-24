@@ -14,8 +14,13 @@ namespace Avonic.Components.Controls;
 /// Ionic reads it in a control's <c>render</c>, and a toolbar's color doesn't render what's in it, so each control reads it at
 /// its own render: when it's attached and when one of its own props changes. <see cref="AvonicButton"/>,
 /// <see cref="AvonicMenuButton"/>, <see cref="AvonicBackButton"/>, <see cref="AvonicSegment"/> and
-/// <see cref="AvonicSegmentButton"/> set both classes; <see cref="AvonicBreadcrumbs"/> and <see cref="AvonicBreadcrumb"/> each set
-/// only the one their md CSS reads.
+/// <see cref="AvonicSegmentButton"/> set both classes. <see cref="AvonicBreadcrumb"/> sets only <c>in-toolbar-color</c>, as no rule
+/// in <c>breadcrumb.md.css</c> reads <c>in-toolbar</c>; <see cref="AvonicBreadcrumbs"/> only <c>in-toolbar</c>, as its
+/// <c>in-toolbar-color</c> rule sets the toolbar's contrast again, which the row inherits anyway.
+/// <para>
+/// <c>closest()</c> starts at the element itself, so Ionic's own toolbar is <c>in-toolbar</c>. The walk here starts at the parent,
+/// so a toolbar isn't in itself: no md rule reads a toolbar's <c>in-toolbar</c>, and <see cref="AvonicToolbar"/> doesn't call this.
+/// </para>
 /// </remarks>
 internal readonly record struct ToolbarHostContext(bool InToolbar, bool InToolbarColor)
 {

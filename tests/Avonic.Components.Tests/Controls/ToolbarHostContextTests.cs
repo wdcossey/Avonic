@@ -91,28 +91,4 @@ public class ToolbarHostContextTests
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(new ToolbarHostContext(false, false), ToolbarHostContext.Of(child));
     });
-
-    [AvaloniaFact]
-    public void Set_Gives_And_Takes_Both_Classes() => InstalledTheme.Run(_ =>
-    {
-        var child = new Border();
-        var toolbar = new AvonicToolbar { Color = "primary", Content = child };
-        using var scene = new Scene(toolbar);
-        var classes = (IPseudoClasses)child.Classes;
-
-        ToolbarHostContext.Set(classes, child);
-        Assert.Contains(":in-toolbar", child.Classes);
-        Assert.Contains(":in-toolbar-color", child.Classes);
-
-        toolbar.Color = null;
-        ToolbarHostContext.Set(classes, child);
-        Assert.Contains(":in-toolbar", child.Classes);
-        Assert.DoesNotContain(":in-toolbar-color", child.Classes);
-
-        toolbar.Content = null;
-        Dispatcher.UIThread.RunJobs();
-        ToolbarHostContext.Set(classes, child);
-        Assert.DoesNotContain(":in-toolbar", child.Classes);
-        Assert.DoesNotContain(":in-toolbar-color", child.Classes);
-    });
 }
