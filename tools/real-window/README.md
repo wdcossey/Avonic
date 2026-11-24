@@ -79,7 +79,8 @@ once if the window doesn't fit on the screen.
     leaves it; a click on a page button beside it shows a top toast (the page isn't blocked), whose icon-only button, found by its
     `aria-label`, dismisses it with `cancel`; the bottom toast's cancel button; a button with no role (`none`); a handler returning
     false keeping the danger toast open, then its role; a real touch swipe up dismissing the middle toast and one down dismissing the
-    stacked `IsOpen` toast, both with `gesture`; and a 2 s duration's `timeout`. **Not yet run.**
+    stacked `IsOpen` toast, both with `gesture`; and a 2 s duration's `timeout`. A dismissed toast leaving the tree can fail a
+    search with UIA's E_FAIL (#254), so it takes the nav section's retry (`AllRetryingOnce`). Ran 2026-11-24: 14 of 14, three times.
   - `ion-loading` (#41): a loading made in code from a real click, found by its message, its centre in the middle 40% of the
     window; Escape dismisses one with `BackdropDismiss` with `backdrop`, and so does a click on the backdrop; with no backdrop, a
     click where a page button is reaches the transparent backdrop, dismissing the loading, and the button opens nothing; the
