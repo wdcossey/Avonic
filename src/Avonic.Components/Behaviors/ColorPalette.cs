@@ -199,15 +199,4 @@ public static class ColorPalette
         var key = KeyPrefix + string.Concat(segments.Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..]));
         return BuiltInVariantKeys.Contains(key) ? null : key;
     }
-
-    private sealed class Subscriptions(IDisposable[] items) : IDisposable
-    {
-        public void Dispose()
-        {
-            foreach (var item in items)
-            {
-                item.Dispose();
-            }
-        }
-    }
 }

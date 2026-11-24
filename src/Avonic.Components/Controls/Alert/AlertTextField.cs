@@ -5,6 +5,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.TextInput;
+using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
 
@@ -59,7 +60,7 @@ public abstract class AlertTextField : TemplatedControl
     private static void Configure(TextBox native, AlertInput input)
     {
         var attributes = input.Attributes ?? new Dictionary<string, object?>();
-        string? Attribute(string name) => attributes.TryGetValue(name, out var value) ? value?.ToString() : null;
+        string? Attribute(string name) => OverlayAttributes.Read(attributes, name);
 
         native.Text = Convert.ToString(input.Value, System.Globalization.CultureInfo.InvariantCulture) ?? "";
         int? maxlength = int.TryParse(Attribute("maxlength"), out var max) ? max : null;

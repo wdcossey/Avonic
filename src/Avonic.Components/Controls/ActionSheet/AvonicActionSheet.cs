@@ -205,7 +205,7 @@ public class AvonicActionSheet : AvonicOverlay
                 }
             }
 
-            if (HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } text)
+            if (OverlayAttributes.AriaLabel(HtmlAttributes) is { } text)
             {
                 return text;
             }
@@ -377,7 +377,7 @@ public class AvonicActionSheet : AvonicOverlay
     private List<ActionSheetButton> GroupButtons => Buttons?.Where(b => b is not null && b.Role != "cancel").ToList() ?? [];
 
     private static bool IsRadio(ActionSheetButton button) =>
-        button.HtmlAttributes is { } attributes && attributes.TryGetValue("role", out var role) && role as string == "radio";
+        OverlayAttributes.Is(button.HtmlAttributes, "role", "radio");
 
     /// <summary>
     /// What identifies a button of the first group for <c>activeRadioId</c>: its <c>id</c>, else its place. Ionic's id also holds
@@ -397,7 +397,7 @@ public class AvonicActionSheet : AvonicOverlay
         var buttons = GroupButtons;
         for (var i = 0; i < buttons.Count; i++)
         {
-            if (IsRadio(buttons[i]) && buttons[i].HtmlAttributes!.TryGetValue("aria-checked", out var isChecked) && isChecked as string == "true")
+            if (IsRadio(buttons[i]) && OverlayAttributes.Is(buttons[i].HtmlAttributes, "aria-checked", "true"))
             {
                 _activeRadio = ButtonKey(buttons[i], i);
                 break;
@@ -482,7 +482,7 @@ public class AvonicActionSheet : AvonicOverlay
 
             // Its own disabled is ignored but for buttonClass: no ion-activatable or ion-focusable.
             control.IsActivatable = !cancel.Disabled;
-            if (attributes is not null && attributes.TryGetValue("id", out var id) && id?.ToString() is { Length: > 0 } automationId)
+            if (OverlayAttributes.Id(attributes) is { } automationId)
             {
                 AutomationProperties.SetAutomationId(control, automationId);
             }
@@ -542,9 +542,9 @@ public class AvonicActionSheet : AvonicOverlay
         control.Role = button.Role;
         control.IsSelected = button.Role == "selected";
         control.CssClass = button.CssClass;
-        if (button.HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label is not null)
+        if (OverlayAttributes.Read(button.HtmlAttributes, "aria-label") is { } label)
         {
-            AutomationProperties.SetName(control, label.ToString());
+            AutomationProperties.SetName(control, label);
         }
         else
         {
@@ -700,10 +700,7 @@ public class AvonicActionSheet : AvonicOverlay
 
         protected override string? GetNameCore() => _name = owner.AccessibleName;
 
-        protected override string? GetAutomationIdCore() =>
-            owner.HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id
-                ? id
-                : base.GetAutomationIdCore();
+        protected override string? GetAutomationIdCore() => OverlayAttributes.Id(owner.HtmlAttributes) ?? base.GetAutomationIdCore();
 
         protected override bool IsControlElementCore() => true;
 

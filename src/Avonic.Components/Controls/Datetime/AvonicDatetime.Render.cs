@@ -177,11 +177,6 @@ public partial class AvonicDatetime
         return new Subscriptions(subscriptions);
     }
 
-    private sealed class Subscriptions(List<IDisposable> list) : IDisposable
-    {
-        public void Dispose() => list.ForEach(s => s.Dispose());
-    }
-
     private void Detach()
     {
         if (_monthYearButton is not null)

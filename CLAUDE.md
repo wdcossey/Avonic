@@ -46,7 +46,9 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          AccessibleText = what a browser names a button from; TextContent = textContent, for a label to hide;
                          Activatable = tap-click; FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
-                         Css = var(), em, padding and transform values for themes;
+                         Css = var(), em, padding and transform values for themes, and NormalLine, Chromium's
+                         line-height: normal for code (the loading's message and spinner box, the textarea's lines);
+                         Subscriptions = disposables disposed as one;
                          BorderRadius = border-radius with percentages, for themes;
                          CssBoxShadow = box-shadow as Avalonia's BoxShadows with the blur converted, and
                          {b:CssShadow} for it in XAML (docs/infra/box-shadow/README.md);
@@ -64,7 +66,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          InlinePlacement), hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present()
                          with no TopLevel finds the current activity's under Android's MainViewFactory (OpenTopLevels, the
                          last one still open); OverlayHandler, what the overlays share: a button's handler run and awaited
-                         (safeCall), and var(--backdrop-opacity)
+                         (safeCall), and var(--backdrop-opacity); OverlayAttributes, htmlAttributes and attributes read as
+                         Stencil's spread writes them: id and aria-label for automation, role and aria-checked as the values
   Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock, with progressStart, progressStep and
                          progressEnd for a gesture to drive; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js;
@@ -328,7 +331,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | One `part` on several elements (`part="native"` on both of `ion-datetime-button`'s buttons) | A `PART_` name for each, from its id or role, and the part as a style class on each | `PART_DateButton`, `PART_TimeButton` with the class `native`; the datetime's `navigation-button` |
 | A prop typed `bool` or a function (`canDismiss`) | A struct with implicit conversions from both and a `TypeConverter` from `True`/`False` | `ModalCanDismiss` |
 | A button's `handler` on an overlay (`safeCall`, awaited; `false` keeps it open) | `Func<…>` on the button's data class, run by `OverlayHandler.Run`, a `Task` or `ValueTask` awaited and its result read | `AlertButton.Handler`, `ActionSheetButton.Handler` |
-| An interface's `htmlAttributes` / `attributes` (spread on an element) | A dictionary, with only the keys that map to automation or a property read; others ignored and documented | `AvonicAlert.HtmlAttributes`, `AlertButton.HtmlAttributes`, `AlertInput.Attributes` |
+| An interface's `htmlAttributes` / `attributes` (spread on an element) | A dictionary, with only the keys that map to automation or a property read; others ignored and documented. A value written as an attribute (`id`, `aria-label`, `class`, `maxlength`) is read as Stencil writes it, through `OverlayAttributes`; `disabled`, a button's property, and an input's `readonly` by `AlertClasses.IsTrue` | `AvonicAlert.HtmlAttributes`, `AlertButton.HtmlAttributes`, `AlertInput.Attributes` |
 | `interfaceOptions` (`any`, spread into an overlay's create options) | `IReadOnlyDictionary<string, object?>`, each key the overlay's property by name in camelCase or PascalCase, a string converted as XAML would; a key with no property, or a value it can't take, ignored and logged (`Behaviors/PropertiesByName`) | `AvonicSelect.InterfaceOptions` |
 | Work at an overlay's `willPresent` that needs it shown (focus) | Post it to the dispatcher from `WillPresent`: Avonic shows the overlay just after the event, for its enter animation | `AvonicSelect`'s focus at present |
 | An `async` method's `await` of a lock before its events (`dismiss()`), called from inside another's event | `Dispatcher.UIThread.Post` the call, so its events come after the ones on their way | `AvonicPopover`: the parent's dismiss from the child's, the child's from the parent's will-dismiss |
@@ -387,7 +390,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | Elements the component makes in `render`, one per item, with a part on each | A part that draws them, with a brush property per part. When they take input or focus, and what goes between them: types of their own with their own `ControlTheme`s, as `/template/` rules can't reach what code makes, and the host copying its state to each box as pseudoclasses | `RangeTicks` for `tick`, `tick-active`; `InputOtpBox`, `InputOtpSeparator` |
 | `::slotted(ion-icon[slot])` on a host with slots | A pseudoclass the host works out from what's in each slot, read by its own `ControlTheme`, so nothing goes in `Styles/` | `AvonicRange`'s `:start-icon`, `:end-icon` |
 | `rows`, `cols`, `autoGrow` on a `<textarea>` | A `TextBox` that measures `Rows` lines of its line height (2 when unset), and with `AutoGrow` as many lines as its text has, never fewer; `ceil(Cols × c) + 4`, `c` the `x` glyph's advance, or that rounded when it rounds up (fitted at 52 sizes and counts), which shows when the host is as wide as its content; `AutoGrow` drops the 4 (`overflow: hidden`) and widens to its longest line | `TextareaNativeInput`: 84, 164 and 324 for 10, 20 and 40 columns of 16 px Roboto, 133 for 20 of 13 px |
-| `line-height: normal`, where lines add up | Chromium's: the font's ascent, descent and line gap, each rounded, at style priority on the text box, so an app's style wins and an inherited value doesn't | `TextareaNativeInput`: 19 for 16 px Roboto, where Avalonia's is 18.75. It rounds the descent and the gap together, the same for Roboto, whose gap is 0 |
+| `line-height: normal`, where lines add up | Chromium's: the font's ascent, descent and line gap, each rounded, at style priority on the text box, so an app's style wins and an inherited value doesn't | `TextareaNativeInput`: 19 for 16 px Roboto, where Avalonia's is 18.75; `AvonicLoading.NormalLineHeight`, 16 at 14 px. Both through `Css.NormalLine`, which rounds the descent and the gap together, the same for Roboto, whose gap is 0 |
 | `display: flex; justify-content: center; gap`, with a `width` that's a basis and can shrink to `min-width` | `FlexRow` with `Spacing`, `Padding`, `HorizontalContentAlignment="Center"` (overflowing both sides) and the attached `FlexRow.FlexBasis`, as an Avalonia `Width` can't shrink | `ion-input-otp`'s group, `PART_Group` |
 | `setTimeout(fn, ms)` | `AvonicConfig.Schedule(fn, TimeSpan)`, internal, which tests drive on the same clock as `RequestFrame`. A wait counted in frames (`16 * 4`) is still a timer of that many ms | `AvonicSearchbar`'s clear, 64 ms |
 | A native `change` event, on Enter or blur | Raised only after a user's edit, and only if the text isn't what it was at focus or at the last change; on blur, before the control's own blur event, as Chromium does | `AvonicSearchbar`: its `onChange` raises `IonChange` before `IonBlur` after an edit |
