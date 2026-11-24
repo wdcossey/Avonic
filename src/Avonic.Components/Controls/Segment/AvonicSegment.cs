@@ -247,15 +247,7 @@ public class AvonicSegment : ItemsControl, IItemControl
     /// <summary>The classes from <c>render</c>: <c>hostContext('ion-toolbar')</c>, and <c>[color]</c> on it.</summary>
     private void UpdateClasses()
     {
-        bool inToolbar = false, inToolbarColor = false;
-        foreach (var toolbar in this.GetVisualAncestors().OfType<AvonicToolbar>())
-        {
-            inToolbar = true;
-            inToolbarColor |= toolbar.Color is not null;
-        }
-
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        ToolbarHostContext.Set(PseudoClasses, this);
         PseudoClasses.Set(":scrollable", Scrollable);
     }
 

@@ -6,7 +6,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -158,18 +157,7 @@ public class AvonicMenuButton : ContentControl
             _icon.IconName = AvonicConfig.MenuIcon ?? MdMenuIcon;
         }
 
-        bool inToolbar = false, inToolbarColor = false;
-        foreach (var ancestor in this.GetVisualAncestors())
-        {
-            if (ancestor is AvonicToolbar toolbar)
-            {
-                inToolbar = true;
-                inToolbarColor |= toolbar.Color is not null;
-            }
-        }
-
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        ToolbarHostContext.Set(PseudoClasses, this);
     }
 
     // ── Automation ───────────────────────────────────────────────────────────────────────────

@@ -366,16 +366,6 @@ public partial class AvonicBackButton : TemplatedControl
             _ripple.Type = iconOnly ? RippleEffectType.Unbounded : RippleEffectType.Bounded;
         }
 
-        bool inToolbar = false, inToolbarColor = false;
-        foreach (var ancestor in this.GetVisualAncestors())
-        {
-            if (ancestor is AvonicToolbar toolbar)
-            {
-                inToolbar = true;
-                inToolbarColor |= toolbar.Color is not null;
-            }
-        }
-
         if (PseudoClasses.Contains(":has-icon-only") != iconOnly)
         {
             _arrangedWidth = 0;
@@ -383,8 +373,7 @@ public partial class AvonicBackButton : TemplatedControl
         }
 
         PseudoClasses.Set(":has-icon-only", iconOnly);
-        PseudoClasses.Set(":in-toolbar", inToolbar);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        ToolbarHostContext.Set(PseudoClasses, this);
     }
 
     // ── Layout: aspect-ratio ─────────────────────────────────────────────────────────────────

@@ -5,7 +5,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.LogicalTree;
-using Avalonia.VisualTree;
 using Avonic.Components.Behaviors;
 
 namespace Avonic.Components.Controls;
@@ -167,8 +166,9 @@ public class AvonicBreadcrumbs : ItemsControl
     private void UpdateClasses()
     {
         // :host(.in-toolbar-color) only sets the toolbar's own contrast again, which the row inherits anyway, and each breadcrumb
-        // sets its own colour: so it isn't a pseudoclass here.
-        PseudoClasses.Set(":in-toolbar", this.GetVisualAncestors().OfType<AvonicToolbar>().Any());
+        // sets its own colour. Its rules for .breadcrumbs-collapsed-indicator don't apply in Ionic either, as the indicator is in
+        // each breadcrumb's shadow root. So it isn't a pseudoclass here.
+        PseudoClasses.Set(ToolbarHostContext.InToolbarPseudoClass, ToolbarHostContext.Of(this).InToolbar);
     }
 
     private void BreadcrumbsInit(List<AvonicBreadcrumb> breadcrumbs)
