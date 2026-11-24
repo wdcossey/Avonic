@@ -198,7 +198,7 @@ function All($type) {
 }
 # All, with a FindAll that fails with UIA's E_FAIL tried once more 300 ms later, and the retry printed. It's Avalonia's (#254,
 # docs/infra/avalonia-issues.md): a search under way when a page leaves the tree meets elements with no fragment root. Only the
-# sections that search while a nav transition runs meet it (ion-nav, ion-back-button: measured 5 and 2 retries in a run of each),
+# sections that search while a nav transition runs meet it (ion-nav, ion-back-button: 5 and 2 retries in a run of each, 2026-11-24),
 # and each opts in with its own All that calls this, so every other section still stops at the first failure. Any other error,
 # or a second failure, still stops the section.
 function AllRetryingOnce($type) {
@@ -206,7 +206,8 @@ function AllRetryingOnce($type) {
     try { $found = @($win.FindAll($TS::Descendants, $cond)) }
     catch {
         $com = $_.Exception.InnerException
-        if ($com -isnot [System.Runtime.InteropServices.COMException]) { throw }
+        # E_FAIL (0x80004005) only, the one #254 gives: any other COM error is a real one, and stops the section.
+        if ($com -isnot [System.Runtime.InteropServices.COMException] -or $com.HResult -ne -2147467259) { throw }
         Write-Host "  note  FindAll failed ($('0x{0:X8}' -f $com.HResult)), tried again after 300 ms"
         Start-Sleep -Milliseconds 300
         $found = @($win.FindAll($TS::Descendants, $cond))

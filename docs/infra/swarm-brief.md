@@ -93,7 +93,7 @@ These are mistakes this project has already made, so don't repeat them.
   days, and the month-year button's name is `Show year picker`, #258), and the months-either-side section's first scroller was
   the page's, not the calendar's (#259). Find an element from one you know is there, and walk to it.
 - **A UIA search while a page leaves the tree can fail with E_FAIL,** Avalonia's (#254, `docs/infra/avalonia-issues.md`): a
-  section that polls during a transition retries once, as `ion-nav`'s does; one that waits for the transition to end doesn't meet it.
+  section that polls during a transition retries once, through `drive.ps1`'s `AllRetryingOnce`, as `ion-nav`'s does; one that waits for the transition to end doesn't meet it.
 - **Culture data differs by platform.** Linux's ICU gives other short day names, AM/PM text and spaces than Windows' (#246, #251):
   compare with Chromium's strings where they were measured (Windows), and test the rest everywhere. CI's Ubuntu job finds it.
 - **On the Pixel, keep the screen on for a timed run:** a locked screen moves the app to the little cores and starves
