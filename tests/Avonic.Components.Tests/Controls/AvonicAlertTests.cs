@@ -818,6 +818,10 @@ public class AvonicAlertTests
     [InlineData("calc(100% - (10px + 4px))", 100d, 86d)]
     [InlineData("calc(100% * 2)", 100d, null)]
     [InlineData("min(10px, auto)", 100d, null)]
+    [InlineData("calc(100%\n  - 32px)", 400d, 368d)]
+    [InlineData("infinity", 100d, null)]
+    [InlineData("calc(100% - NaNpx)", 100d, null)]
+    [InlineData("100% - -10px", 100d, 110d)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>
         Assert.Equal(expected, CssLength.Read(value, basis));
 

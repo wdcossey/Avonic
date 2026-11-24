@@ -119,6 +119,21 @@ public class PopoverPanel : Panel
     /// <summary>The content's place: see <see cref="Place"/>. <paramref name="Mirrored"/>: the panel lays out right to left.</summary>
     internal readonly record struct Placement(double Top, double Left, double? Bottom, double? Width, bool Mirrored);
 
+    private IDisposable? _viewport;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _viewport = CssLength.MeasureOnViewportChange(this);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _viewport?.Dispose();
+        _viewport = null;
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = availableSize.Width;

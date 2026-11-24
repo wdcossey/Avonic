@@ -933,6 +933,12 @@ public class AvonicModalTests
         using var stage = new Stage(1000, 800, new Border { Width = 400, Height = 300, Child = panel });
         stage.Render();
         Assert.Equal(new Size(500, 80), wrapper.Bounds.Size);
+
+        // The window grows and the host doesn't: the wrapper follows the window.
+        stage.Window.Width = 1200;
+        stage.Window.Height = 1000;
+        stage.Render();
+        Assert.Equal(new Size(600, 100), wrapper.Bounds.Size);
     }
 
     [AvaloniaTheory]

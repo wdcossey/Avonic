@@ -1,12 +1,13 @@
 using System.Globalization;
 using Avalonia;
+using Avalonia.Controls;
 
 namespace Avonic.Components.Behaviors;
 
 /// <summary>
 /// A CSS length as a size variable gives it (<c>--width</c>, <c>--max-height</c>, <c>--start</c>): a number (px) or a string of
 /// <c>px</c>, a percentage of a basis, <c>vw</c> and <c>vh</c> of a viewport, sums and differences (in <c>calc()</c> or not, CSS's spaces
-/// around the operator), brackets, <c>min()</c>, <c>max()</c> and <c>clamp()</c>, nested as CSS nests them. <c>auto</c>, <c>none</c>, the
+/// or other white space around the operator), brackets, <c>min()</c>, <c>max()</c> and <c>clamp()</c>, nested as CSS nests them. <c>auto</c>, <c>none</c>, the
 /// content sizes, <c>*</c> and <c>/</c>, and anything else, are no length: null, which a panel reads as its own rule for no length.
 /// What the overlays' panels and the split pane's read.
 /// </summary>
@@ -18,7 +19,7 @@ internal static class CssLength
     /// </summary>
     internal static double? Read(object? value, double basis, Size viewport) => value switch
     {
-        double d => double.IsNaN(d) ? null : d,
+        double d => double.IsFinite(d) ? d : null,
         int i => i,
         string s => Parse(s.Trim().ToLowerInvariant(), basis, viewport),
         _ => null,
@@ -39,8 +40,8 @@ internal static class CssLength
         var at = LastOperator(s);
         if (at > 0)
         {
-            return Parse(s[..at], basis, viewport) is { } a && Parse(s[(at + 3)..], basis, viewport) is { } b
-                ? s[at + 1] == '-' ? a - b : a + b
+            return Parse(s[..at], basis, viewport) is { } a && Parse(s[(at + 1)..], basis, viewport) is { } b
+                ? s[at] == '-' ? a - b : a + b
                 : null;
         }
 
@@ -49,44 +50,84 @@ internal static class CssLength
         if (open >= 0 && s[^1] == ')' && Closing(s, open) == s.Length - 1)
         {
             var name = s[..open].Trim();
-            var args = Arguments(s[(open + 1)..^1]).Select(part => Parse(part, basis, viewport)).ToList();
-            if (args.Count == 0 || args.Any(x => x is null))
+            var parts = Arguments(s[(open + 1)..^1]);
+            var values = new double[parts.Count];
+            for (var i = 0; i < parts.Count; i++)
             {
-                return null;
+                if (Parse(parts[i], basis, viewport) is not { } value)
+                {
+                    return null;
+                }
+
+                values[i] = value;
             }
 
-            var values = args.Select(x => x!.Value).ToList();
             return name switch
             {
-                "" or "calc" when values.Count == 1 => values[0],
+                "" or "calc" when values.Length == 1 => values[0],
                 "min" => values.Min(),
                 "max" => values.Max(),
                 // clamp(min, value, max): the minimum wins, as in CSS.
-                "clamp" when values.Count == 3 => Math.Max(values[0], Math.Min(values[1], values[2])),
+                "clamp" when values.Length == 3 => Math.Max(values[0], Math.Min(values[1], values[2])),
                 _ => null,
             };
         }
 
-        foreach (var (unit, of) in new[] { ("%", basis), ("vw", viewport.Width), ("vh", viewport.Height) })
+        if (s.EndsWith('%'))
         {
-            if (s.EndsWith(unit, StringComparison.Ordinal))
+            return Percent(s[..^1], basis);
+        }
+
+        if (s.EndsWith("vw", StringComparison.Ordinal))
+        {
+            return Percent(s[..^2], viewport.Width);
+        }
+
+        if (s.EndsWith("vh", StringComparison.Ordinal))
+        {
+            return Percent(s[..^2], viewport.Height);
+        }
+
+        return Number(s.EndsWith("px", StringComparison.Ordinal) ? s[..^2] : s);
+    }
+
+    /// <summary>A share of <paramref name="of"/>, or null for one of an infinite basis.</summary>
+    private static double? Percent(string number, double of) =>
+        Number(number) is { } percent && double.IsFinite(of) ? of * percent / 100 : null;
+
+    /// <summary>A finite number, so that <c>nan</c> and <c>infinity</c>, which .NET reads, are no length, as in CSS.</summary>
+    private static double? Number(string s) =>
+        double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : null;
+
+    /// <summary>
+    /// Measures <paramref name="panel"/> again when its top level's client size changes, which <c>vw</c> and <c>vh</c> are of: a panel
+    /// whose own room stays the same would keep its old size. From the attach; dispose it at the detach.
+    /// </summary>
+    internal static IDisposable? MeasureOnViewportChange(Control panel)
+    {
+        if (TopLevel.GetTopLevel(panel) is not { } top)
+        {
+            return null;
+        }
+
+        void Changed(object? sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property == TopLevel.ClientSizeProperty)
             {
-                return double.TryParse(s[..^unit.Length], NumberStyles.Float, CultureInfo.InvariantCulture, out var percent)
-                       && !double.IsInfinity(of)
-                    ? of * percent / 100
-                    : null;
+                panel.InvalidateMeasure();
             }
         }
 
-        if (s.EndsWith("px", StringComparison.Ordinal))
-        {
-            s = s[..^2];
-        }
-
-        return double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var px) ? px : null;
+        top.PropertyChanged += Changed;
+        return new Unsubscribe(() => top.PropertyChanged -= Changed);
     }
 
-    /// <summary>Where the last <c> + </c> or <c> - </c> outside brackets starts (its space), or -1.</summary>
+    private sealed class Unsubscribe(Action action) : IDisposable
+    {
+        public void Dispose() => action();
+    }
+
+    /// <summary>Where the last <c>+</c> or <c>-</c> outside brackets is, with white space either side, as CSS wants it, or -1.</summary>
     private static int LastOperator(string s)
     {
         var depth = 0;
@@ -100,8 +141,8 @@ internal static class CssLength
                 case '(':
                     depth--;
                     break;
-                case '+' or '-' when depth == 0 && s[i - 1] == ' ' && i + 1 < s.Length && s[i + 1] == ' ':
-                    return i - 1;
+                case '+' or '-' when depth == 0 && char.IsWhiteSpace(s[i - 1]) && i + 1 < s.Length && char.IsWhiteSpace(s[i + 1]):
+                    return i;
             }
         }
 

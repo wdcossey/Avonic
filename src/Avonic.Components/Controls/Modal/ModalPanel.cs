@@ -79,6 +79,21 @@ public class ModalPanel : Panel
     /// <summary><c>--max-height</c>.</summary>
     public object? ContentMaxHeight { get => GetValue(ContentMaxHeightProperty); set => SetValue(ContentMaxHeightProperty, value); }
 
+    private IDisposable? _viewport;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _viewport = CssLength.MeasureOnViewportChange(this);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _viewport?.Dispose();
+        _viewport = null;
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = availableSize.Width;

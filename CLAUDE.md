@@ -47,7 +47,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          Activatable = tap-click; FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes;
-                         CssLength = a CSS length (%, px, vw, vh, calc(), min()), what the overlays' and the split pane's panels read;
+                         CssLength = a CSS length (%, px, vw, vh, sums, brackets, calc(), min(), max(), clamp()), what the overlays'
+                         and the split pane's panels read, and a panel measured again when the viewport of vw and vh changes;
                          BorderRadius = border-radius with percentages, for themes;
                          CssBoxShadow = box-shadow as Avalonia's BoxShadows with the blur converted, and
                          {b:CssShadow} for it in XAML (docs/infra/box-shadow/README.md);
