@@ -16,10 +16,10 @@ Every control and piece of infrastructure is a GitHub issue labelled `P0`…`P4`
 and `component` or `infra`. Issues list what blocks them; start one only when its blockers are
 closed. A fresh session needs nothing but the repo and the issue:
 
-1. Branch `feat/<ion-tag>` (or `infra/<name>`) from `v2`; `npm install`; `dotnet build Avonic.sln`.
+1. Branch `feat/<ion-tag>` (or `infra/<name>`) from `main`; `npm install`; `dotnet build Avonic.sln`.
 2. Run the loop below. The plan is **not** gated on a human mid-flight: write `PLAN.md`, then
    continue straight through Build → Compare → Review → Document.
-3. Open a PR into `v2` titled `feat: <ion-tag>` using the PR template. CI must be green.
+3. Open a PR into `main` titled `feat: <ion-tag>` using the PR template. CI must be green.
    The human review happens **once, at the PR**: plan, comparison, diff. Only the PR merge marks
    the control done: its README's `Status:` line lands and the issue closes with `Closes #N`.
    A control's PR doesn't edit the `CLAUDE.md` or `docs/ROADMAP.md` tables; see
@@ -103,7 +103,7 @@ and the resolved value of every CSS variable, under `docs/components/<ion-tag>/r
   | Pass 2, which checks pass 1's fixes | `medium` |
   | The one pass for docs, samples and chores | `medium` |
 
-  Invoke the `code-review` skill with the level, the branch and no cap: `high origin/v2...<branch> --max-findings all`. Always
+  Invoke the `code-review` skill with the level, the branch and no cap: `high origin/main...<branch> --max-findings all`. Always
   write the level (left out, it reuses the last one typed) and name the branch, never `HEAD` (the review runs in the main clone), on committed work.
   Never `max` or `ultra` unless the human asks. Findings are fixed or waived with a reason in the PR, which records each pass's
   level and its tokens, from the review's usage line ("not measured" if it can't be seen).
