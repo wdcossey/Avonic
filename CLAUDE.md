@@ -47,7 +47,7 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          Activatable = tap-click; FocusVisible = focus-visible; IonStyle = the internal ionStyle event;
                          ColorPalette = the `color` prop, see docs/infra/color-system/README.md;
                          Css = var(), em, padding and transform values for themes, and NormalLine, Chromium's
-                         line-height: normal for code (the loading's message, the textarea's lines);
+                         line-height: normal for code (the loading's message and spinner box, the textarea's lines);
                          Subscriptions = disposables disposed as one;
                          BorderRadius = border-radius with percentages, for themes;
                          CssBoxShadow = box-shadow as Avalonia's BoxShadows with the blur converted, and
