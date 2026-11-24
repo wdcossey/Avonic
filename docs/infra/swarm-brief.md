@@ -13,7 +13,7 @@ Your worked examples are `docs/components/ion-label/` (a child that depends on i
 
 ## Setup
 
-1. You're in a worktree. `git switch -c feat/<ion-tag> origin/v2`.
+1. You're in a worktree. `git switch -c feat/<ion-tag> origin/main`.
 2. `npm ci`, then `dotnet build Avonic.sln`.
 3. `node tools/ionic-api.js <ion-tag>` is your spec. The implementation is in `node_modules/@ionic/core/dist/collection/components/<name>/`.
 
@@ -33,7 +33,7 @@ The point is that the PRs can merge in any order without a conflict.
 - **The style budget's limits** are in a shared file. If you go over, raise them in your PR and say so, because they're meant to be raised.
   Say the new total in the PR, and expect a conflict to resolve. **Don't expect one when two PRs raise it by the same amount:** both
   change the same line to the same text, so git merges them "cleanly" and one raise is lost (#136 and #138 both set 283 → 284, where
-  the total was 285). After merging `v2`, add your raise to the total `v2` now has, and say both in the PR.
+  the total was 285). After merging `main`, add your raise to the total `main` now has, and say both in the PR.
 - **The reference render:** use `node tools/ionic-ref/render.js <ion-tag> --bare --html '...'`, and record the exact command at the top of
   `COMPARISON.md`. Don't add to `DEFAULT_HTML`.
 - **Use only your own temp folder,** for scripts, renders, clean clones and breakage copies. Whoever starts the batch names one for
@@ -176,12 +176,12 @@ These are mistakes this project has already made, so don't repeat them.
 
 ## Review and PR
 
-- **`/code-review` twice, at the levels in `docs/PROCESS.md` §4:** pass 1 `high origin/v2...<branch> --max-findings all` (`medium` for a small bug fix; always `high` on code many controls share, as listed there), pass 2 on the fixed code `medium origin/v2...<branch> --max-findings all` (a docs or chore PR: one pass at `medium`). Always write the level and name the branch, never `HEAD`. Findings are fixed or waived with a reason; the PR records each pass's level and tokens ("not measured" if you can't see them). Don't run extra passes: the level trial (#232) is the coordinator's.
-- **No conflict markers:** after merging or rebasing on `origin/v2`, and before your last push, `git grep -n -I -E '^(<<<<<<<|>>>>>>>)'` prints nothing. CI doesn't catch them in a doc.
+- **`/code-review` twice, at the levels in `docs/PROCESS.md` §4:** pass 1 `high origin/main...<branch> --max-findings all` (`medium` for a small bug fix; always `high` on code many controls share, as listed there), pass 2 on the fixed code `medium origin/main...<branch> --max-findings all` (a docs or chore PR: one pass at `medium`). Always write the level and name the branch, never `HEAD`. Findings are fixed or waived with a reason; the PR records each pass's level and tokens ("not measured" if you can't see them). Don't run extra passes: the level trial (#232) is the coordinator's.
+- **No conflict markers:** after merging or rebasing on `origin/main`, and before your last push, `git grep -n -I -E '^(<<<<<<<|>>>>>>>)'` prints nothing. CI doesn't catch them in a doc.
 - **The gate before every commit:** `dotnet build Avonic.sln && dotnet test Avonic.sln`.
 - **A clean clone:** before the PR, clone your branch to your temp folder, `npm ci`, and run a Release build and test. Nothing may be skipped.
 - **Commits** end with exactly this line: `Co-Authored-By: <the model's name> <noreply@anthropic.com>`, as the session's instructions give it.
-- **Push, and open the PR into `v2`,** titled `feat: <ion-tag>`, using `.github/PULL_REQUEST_TEMPLATE.md`, with `Closes #<issue>`, and **a screenshot:** Ionic's frame beside Avonic's, through URLs pinned to your commit.
+- **Push, and open the PR into `main`,** titled `feat: <ion-tag>`, using `.github/PULL_REQUEST_TEMPLATE.md`, with `Closes #<issue>`, and **a screenshot:** Ionic's frame beside Avonic's, through URLs pinned to your commit.
 - **The README's `Status:` line** goes in with the PR. Don't edit the `CLAUDE.md` or `ROADMAP.md` tables, whatever the issue says. PROCESS wins.
 - **CI must be green on your exact commit.** Wait on `gh run list --commit <sha>`, not `gh pr checks` without one, which can report an old run. Fix it if it's red.
 - **Be honest in the PR:** the true test count, what wasn't tried, every known gap, and every deliberate difference with its measurement. Don't tick a checklist item that isn't true.
