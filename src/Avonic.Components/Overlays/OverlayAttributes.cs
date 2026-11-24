@@ -4,8 +4,10 @@ namespace Avonic.Components.Overlays;
 /// What the alert, the action sheet, the toast and the loading read from an <c>htmlAttributes</c> dictionary (and the alert's
 /// inputs from <c>attributes</c>). Ionic spreads it on an element, and Stencil writes each value: a key that's missing or null
 /// isn't there, and anything else is written as text. Avonic reads the text with <see cref="object.ToString"/>, so a string is
-/// itself, an empty string stays empty, and a number is its digits; a boolean is <c>True</c> or <c>False</c>, where Stencil
-/// writes an attribute's <c>true</c> as <c>""</c> and an <c>id</c> as <c>"true"</c>. No caller is given one.
+/// itself, an empty string stays empty, and a number is its digits. A boolean is <c>True</c> or <c>False</c>, where Stencil writes
+/// an attribute's <c>true</c> as <c>""</c> and leaves out one that's <c>false</c>, and writes an <c>id</c> on a button as
+/// <c>"true"</c> or <c>"false"</c>; no caller is given one. <c>disabled</c> sets the button's property, so it's read as
+/// JavaScript's truthiness, by <c>AlertClasses.IsTrue</c>.
 /// </summary>
 internal static class OverlayAttributes
 {

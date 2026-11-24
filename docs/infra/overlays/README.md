@@ -85,7 +85,9 @@ action sheet, the toast and the loading (#266). Ionic spreads the dictionary on 
 leaving out a key that's missing or null. `Read` gives that text, an empty string kept; `Id` and `AriaLabel` give `id` and
 `aria-label`, the `AutomationId` and the name, or nothing when they're empty, as an empty one names nothing; `Is` compares
 `role` and `aria-checked` as the values themselves, as `action-sheet.js` does with `===`. A boolean is read as .NET writes it
-(`True`), where Stencil writes an attribute's `true` as `""` and an `id`'s as `"true"`; no caller is given one.
+(`True`, `False`), where Stencil writes an attribute's `true` as `""` and leaves out one that's `false`; no caller is given one.
+`disabled` sets the button's property, so it's read as JavaScript's truthiness, by `AlertClasses.IsTrue`, and so is an alert input's
+`readonly`.
 
 ## What it does, in short
 
