@@ -1,4 +1,3 @@
-using Avonic.Components.Behaviors;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -13,6 +12,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avonic.Components.Animation;
 using Avonic.Components.Controls;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
 using Stage = Avonic.Components.Tests.Controls.AvonicModalTests.Stage;
 
@@ -809,6 +809,15 @@ public class AvonicAlertTests
     [InlineData("calc(100% - 32px)", 400d, 368d)]
     [InlineData("auto", 100d, null)]
     [InlineData("none", 100d, null)]
+    [InlineData("calc(min(80px, 300px) - min(10px, 4px))", 100d, 76d)]
+    [InlineData("4px + min(100vw - 96px, 560px)", 600d, 508d)]
+    [InlineData("min(min(1px, 2px), 3px)", 100d, 1d)]
+    [InlineData("max(10px, 20%)", 200d, 40d)]
+    [InlineData("clamp(250px, calc(100% - 40px), 400px)", 1024d, 400d)]
+    [InlineData("clamp(250px, calc(100% - 40px), 400px)", 200d, 250d)]
+    [InlineData("calc(100% - (10px + 4px))", 100d, 86d)]
+    [InlineData("calc(100% * 2)", 100d, null)]
+    [InlineData("min(10px, auto)", 100d, null)]
     public void B15_Sizes_Read_As_Css(string value, double basis, double? expected) =>
         Assert.Equal(expected, CssLength.Read(value, basis));
 

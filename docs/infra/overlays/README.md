@@ -108,9 +108,11 @@ are controllers: see [PLAN.md](PLAN.md#deferred).
 
 Each overlay's wrapper is sized by its `--width`, `--height` and their `--min-*` and `--max-*`, which take any CSS length. One
 reader, `Behaviors/CssLength`, turns them into pixels for every panel: a number (px), `px`, a percentage of the panel's basis,
-`vw` and `vh` of the top level's client size, sums and differences, `calc()` and `min()`; `auto`, `none` and the content
-sizes are no length, and leave the panel's own rule. The modal and the popover had a reader of their own with no `vw`, `vh` or
-`min()`, until #266.
+`vw` and `vh` of a viewport, sums and differences, brackets, `calc()`, `min()`, `max()` and `clamp()`, nested; `auto`, `none`,
+the content sizes, `*` and `/` are no length, and leave the panel's own rule. The viewport is the top level's client size for
+the modal, the popover and the menu (and the split pane), and the panel's own size for the alert, the action sheet and the
+toast, whose host is the window's overlay layer, the same size. The modal and the popover had a reader of their own with no `vw`, `vh` or
+`min()`, until #266, and nested brackets were read wrongly until then.
 
 The panels stay apart, with no base class: each lays its wrapper out as a different CSS layout, and only the six properties and the
 clamp would be shared.

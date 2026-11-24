@@ -16,8 +16,8 @@ namespace Avonic.Components.Controls;
 /// <see cref="SideWidth"/> within <see cref="SideMinWidth"/> and <see cref="SideMaxWidth"/>, the maximum and then the minimum, which
 /// wins, as in CSS; start sides first, end sides last (<c>order: -1</c> and <c>1</c>); the main content (<c>flex: 1</c>) takes what's
 /// left; any other child sits in the row at its own width, in order. A side's border, <c>border-inline-end</c> at the start and
-/// <c>border-inline-start</c> at the end, is drawn by the panel inside its width. Each size is a number (px) or a CSS string, as the
-/// alert reads them (<see cref="CssLength.Read(object?, double, Size)"/>): a percentage is of the split pane's width.
+/// <c>border-inline-start</c> at the end, is drawn by the panel inside its width. Each size is a number (px) or a CSS string, read by
+/// <see cref="CssLength.Read(object?, double, Size)"/>: a percentage is of the split pane's width.
 /// </summary>
 public class SplitPanePanel : Panel
 {

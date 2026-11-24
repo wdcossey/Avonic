@@ -905,7 +905,6 @@ public class AvonicModalTests
         Assert.Equal(new Size(450, 300), modal.Wrapper.Bounds.Size);
     }
 
-
     [AvaloniaFact]
     public void B14_Window_Units_Min_And_A_Calc_Of_Three_Read_As_Css()
     {
@@ -924,6 +923,18 @@ public class AvonicModalTests
         stage.Render();
         Assert.Equal(new Size(1018, 192), modal.Wrapper.Bounds.Size);
     }
+
+    [AvaloniaFact]
+    public void B14_Vw_And_Vh_Are_The_Windows_In_A_Host_Smaller_Than_It()
+    {
+        // vw and vh are of the viewport, the window, not of the box the wrapper is in, as a percentage is.
+        var wrapper = new Border();
+        var panel = new ModalPanel { ContentWidth = "50vw", ContentHeight = "10vh", Children = { wrapper } };
+        using var stage = new Stage(1000, 800, new Border { Width = 400, Height = 300, Child = panel });
+        stage.Render();
+        Assert.Equal(new Size(500, 80), wrapper.Bounds.Size);
+    }
+
     [AvaloniaTheory]
     [InlineData(390, 844, 24)]
     [InlineData(1024, 768, 0)]

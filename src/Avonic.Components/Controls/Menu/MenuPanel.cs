@@ -7,7 +7,7 @@ namespace Avonic.Components.Controls;
 /// <summary>
 /// The menu's host as <c>menu.md.css</c> places <c>.menu-inner</c> in it: <c>position: absolute; top: 0; bottom: 0</c> at the left
 /// edge, or the right with <see cref="IsEndSide"/>, <c>--width</c> by <c>--height</c> within <c>--min-*</c> and <c>--max-*</c>. Each
-/// size is a number (px) or a CSS string, as the alert reads them (<see cref="CssLength.Read(object?, double, Size)"/>): a
+/// size is a number (px) or a CSS string, read by <see cref="CssLength.Read(object?, double, Size)"/>: a
 /// percentage of the host, <c>px</c>, <c>vw</c> and <c>vh</c> of the top level, <c>calc()</c>, <c>min()</c>, or <c>auto</c>. A width of
 /// <c>auto</c> is shrink-to-fit, the content's max-content at most the host's width; a height of <c>auto</c> is the host's, as
 /// <c>top: 0; bottom: 0</c> makes it. The maximum applies and then the minimum, which wins, as in CSS. It's laid out left to right,

@@ -170,6 +170,18 @@ public class AvonicPopoverTests
     // ── B1, B2: md's animations ─────────────────────────────────────────────────────────────
 
     [AvaloniaFact]
+    public void Content_Sizes_Read_As_Css_With_Vw_And_Vh_Of_The_Window()
+    {
+        // --width and --height are CSS lengths: vw and vh of the window, not the host, and min().
+        using var stage = new Stage(1000, 800);
+        var content = new Border();
+        var panel = new PopoverPanel { ContentWidth = "min(50vw, 600px)", ContentHeight = "10vh", Children = { content } };
+        stage.Page.Children.Add(new Border { Width = 400, Height = 300, Child = panel });
+        stage.Render();
+        Assert.Equal(new Size(500, 80), content.Bounds.Size);
+    }
+
+    [AvaloniaFact]
     public void B1_Enter_Is_Mds_Over_300ms_With_A_150ms_Wrapper()
     {
         using var stage = new Stage();
