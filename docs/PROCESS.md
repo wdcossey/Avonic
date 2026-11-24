@@ -145,7 +145,8 @@ The same PR brings the pictures in `README.md` and `PREVIEW.md` up to date, as t
 3. Use the new controls in the showcase (`samples/Avonic.Sample/Pages/Showcase/`) where an app would: in a screen that has a
    place for them, or a screen of their own, added to `ShowcasePage.Screens` and to `PREVIEW.md`. Swap a screen in
    `README.md`'s strip if a new one shows more.
-4. Update the counts in `README.md`'s status.
+4. Update the counts in `README.md`'s status, and its Status table: a row for each new component, linked to its docs, and the
+   marks of the work beyond the components.
 
 The tables lag between roll-ups, so don't read a missing row as "not built". The current record is
 the status lines, which `git grep -l "^Status: done" docs/components docs/infra` lists, and blockers

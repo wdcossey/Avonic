@@ -119,8 +119,11 @@ the last tier), the datetime's performance ([#260](https://github.com/wdcossey/A
 
 **A Material 3 theme** (`Avonic.Themes.Material3`), as a second theme over the same components. It was on hold until P3 and P4
 were done, which they are now (2026-11-22); no work has started, not even its spike of Content, Card and Button, and it starts
-when the human says. What was measured, the nine decisions and
+after the shared-code clean-up ([#266](https://github.com/wdcossey/Avonic/issues/266)), as the human decided on 2026-11-22. What was measured, the nine decisions and
 the controls with no Material 3 counterpart are in [ADR 0003](decisions/0003-material-3-as-a-second-theme.md).
+
+**iOS and macOS heads** for the sample, beside the desktop and Android ones, and **NuGet packages with a first release**.
+Neither has started or has a date.
 
 ## Out of scope
 

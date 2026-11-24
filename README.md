@@ -100,10 +100,9 @@ each name links to that component's docs, and its known gaps are in the [open is
 
 | Work | Done | In progress | Planned | Won't do |
 |---|:-:|:-:|:-:|:-:|
-| Shared code the last tiers copied ([#266](https://github.com/wdcossey/Avonic/issues/266)) |  |  | 📋 |  |
+| Shared code the PRs copied ([#266](https://github.com/wdcossey/Avonic/issues/266), [#242](https://github.com/wdcossey/Avonic/issues/242)) |  |  | 📋 |  |
 | A Material 3 theme ([ADR 0003](docs/decisions/0003-material-3-as-a-second-theme.md)) |  |  | 📋 |  |
-| Ionic's legacy refresher ([#143](https://github.com/wdcossey/Avonic/issues/143)) |  |  | 📋 |  |
-| iOS and macOS heads ([#179](https://github.com/wdcossey/Avonic/issues/179)) |  |  | 📋 |  |
+| iOS and macOS heads for the sample |  |  | 📋 |  |
 | The sample on desktop and Android | ✅ |  |  |  |
 | NuGet packages and a first release |  |  | 📋 |  |
 | Ionic's `ios` mode as a skin ([ADR 0001](docs/decisions/0001-single-md-skin.md)) |  |  |  | ❌ |
