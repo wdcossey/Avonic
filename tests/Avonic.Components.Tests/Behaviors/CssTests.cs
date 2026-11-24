@@ -155,4 +155,31 @@ public class CssTests
         Assert.True(Css.IsSet(0d));
         Assert.True(Css.IsSet(string.Empty));
     }
+
+    // line-height: normal, as Chromium measures it for Roboto: 16 at 14 px (the loading's message, 3 below its baseline), 19 at
+    // 16 px (the textarea's lines), 24 at 20 px (the alert's title, and the loading at that size, 5 below), 38 at 32 px.
+    [AvaloniaTheory]
+    [InlineData(14, 13, 3)]
+    [InlineData(16, 15, 4)]
+    [InlineData(20, 19, 5)]
+    [InlineData(32, 30, 8)]
+    public void NormalLine_Is_Chromiums_Rounded_Ascent_And_Descent(double size, double ascent, double descent)
+    {
+        Assert.Equal((ascent, descent), Css.NormalLine(new Typeface("Roboto"), size));
+
+        // Not Avalonia's own line, which isn't rounded.
+        using var layout = new Avalonia.Media.TextFormatting.TextLayout("x", new Typeface("Roboto"), size, null);
+        Assert.NotEqual(ascent + descent, layout.TextLines[0].Height);
+        Assert.Equal((ascent, descent), Css.NormalLine(layout));
+    }
+
+    // Chromium rounds the line gap on its own, and Avalonia's line holds it with the descent: the same only while the gap is 0.
+    [AvaloniaFact]
+    public void Robotos_Line_Gap_Is_0_So_NormalLine_Rounds_As_Chromium_Does()
+    {
+        // The embedded Roboto, not a fallback, as the theory above measures it too.
+        var glyphs = new Typeface("Roboto").GlyphTypeface;
+        Assert.Equal("Roboto", glyphs.FamilyName);
+        Assert.Equal(0, glyphs.Metrics.LineGap);
+    }
 }

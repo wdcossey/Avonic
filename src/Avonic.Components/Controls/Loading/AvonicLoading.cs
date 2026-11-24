@@ -9,8 +9,8 @@ using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
 using Avonic.Components.Animation;
+using Avonic.Components.Behaviors;
 using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
@@ -130,18 +130,12 @@ public class AvonicLoading : AvonicOverlay
             : default;
     });
 
-    /// <summary>Chromium's ascent and descent of a font's line, each rounded on its own, as <c>TextareaNativeInput</c> works them out.</summary>
-    private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size)
-    {
-        using var layout = new TextLayout("x", new Typeface(family), size, null);
-        if (layout.TextLines.Count == 0)
-        {
-            return (0, 0);
-        }
-
-        var line = layout.TextLines[0];
-        return (Math.Round(line.Baseline, MidpointRounding.AwayFromZero), Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero));
-    }
+    /// <summary>
+    /// Chromium's ascent and descent of a font's line, each rounded, as <c>TextareaNativeInput</c> reads them too. From the family
+    /// alone, at the regular face, as the theme binds only the family and the size.
+    /// </summary>
+    private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size) =>
+        Css.NormalLine(new Typeface(family), size) ?? (0, 0);
 
     private readonly ConfigOnLoad<SpinnerName?> _spinner;
     private string[] _cssClasses = [];
