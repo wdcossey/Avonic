@@ -24,8 +24,8 @@ namespace Avonic.Components.Controls;
 /// gives it no average width, and keeps 4 px for a phone's overlay scroll bar, which <c>autoGrow</c>'s <c>overflow: hidden</c>
 /// takes away; <c>autoGrow</c> also widens it to its longest line. Fitted to Chromium at 36 sizes and column counts, and 16
 /// sizes of 20 columns: 84, 164 and 324 for 10, 20 and 40 columns of 16 px Roboto, 133 for 20 of 13 px.</item>
-/// <item>Its lines are <c>line-height: normal</c> as Chromium works it out: the font's ascent, descent and gap, each rounded, which
-/// is 19 for 16 px Roboto, where Avalonia's own is 18.75. At style priority, so an app's style wins, and an inherited value
+/// <item>Its lines are <c>line-height: normal</c> as Chromium works it out (<c>Css.NormalLine</c>): the font's ascent, and its
+/// descent with the gap, each rounded, which is 19 for 16 px Roboto, where Avalonia's own is 18.75. At style priority, so an app's style wins, and an inherited value
 /// doesn't, as <c>.textarea-wrapper</c> sets <c>line-height: normal</c>.</item>
 /// </list>
 /// </remarks>
@@ -180,19 +180,17 @@ public sealed class TextareaNativeInput : TextBox, INativeFieldAutomation
     private Typeface Typeface => new(FontFamily, FontStyle, FontWeight, FontStretch);
 
     /// <summary>
-    /// Chromium's <c>line-height: normal</c>, the ascent, the descent and the gap each rounded on its own, and the <c>x</c> glyph's
-    /// advance, for the columns. Worked out when the font changes, not on each measure.
+    /// Chromium's <c>line-height: normal</c> (<see cref="Css.NormalLine(TextLayout)"/>), and the <c>x</c> glyph's advance, for the
+    /// columns, from one layout. Worked out when the font changes, not on each measure.
     /// </summary>
     private void UpdateFontMetrics()
     {
         // Null while the base constructors run.
         _twoCh?.Update();
         using var layout = new TextLayout("x", Typeface, FontSize, null);
-        if (layout.TextLines.Count > 0)
+        if (Css.NormalLine(layout) is { } line)
         {
-            var line = layout.TextLines[0];
-            _normal = Math.Round(line.Baseline, MidpointRounding.AwayFromZero)
-                      + Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero);
+            _normal = line.Ascent + line.Descent;
         }
 
         _xAdvance = layout.WidthIncludingTrailingWhitespace;

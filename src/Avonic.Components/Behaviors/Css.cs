@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
+using Avalonia.Media.TextFormatting;
 using Avalonia.Media.Transformation;
 
 namespace Avonic.Components.Behaviors;
@@ -75,6 +76,32 @@ public static class Css
     /// isn't a finite number is an invalid <c>calc()</c>, so it gives nothing.
     /// </summary>
     public static readonly IMultiValueConverter Negate = new NegateConverter();
+
+    /// <summary>
+    /// <c>line-height: normal</c> as Chromium works it out for a font, for code: the ascent and the descent of a layout's first line,
+    /// each rounded. Chromium rounds the ascent, the descent and the line gap each on its own; Avalonia's line holds the gap with
+    /// the descent, so the two are rounded together, which is the same for Roboto, whose gap is 0. 13 + 3 at 14 px Roboto, 15 + 4
+    /// at 16 px, where Avalonia's own line heights are 16.41 and 18.75. Null for a layout with no line. The loading's message and
+    /// spinner box, and the textarea's lines, read it.
+    /// </summary>
+    internal static (double Ascent, double Descent)? NormalLine(TextLayout layout)
+    {
+        if (layout.TextLines.Count == 0)
+        {
+            return null;
+        }
+
+        var line = layout.TextLines[0];
+        return (Math.Round(line.Baseline, MidpointRounding.AwayFromZero),
+            Math.Round(line.Height - line.Baseline, MidpointRounding.AwayFromZero));
+    }
+
+    /// <summary><see cref="NormalLine(TextLayout)"/> for a typeface at a size, from a line of one <c>x</c>.</summary>
+    internal static (double Ascent, double Descent)? NormalLine(Typeface typeface, double fontSize)
+    {
+        using var layout = new TextLayout("x", typeface, fontSize, null);
+        return NormalLine(layout);
+    }
 
     /// <summary>Whether a value from a <c>{DynamicResource}</c> or a binding counts as set: not null, unset or <see cref="CssUnset"/>.</summary>
     internal static bool IsSet(object? value) =>
