@@ -166,7 +166,8 @@ public class AvonicBreadcrumbs : ItemsControl
     private void UpdateClasses()
     {
         // :host(.in-toolbar-color) only sets the toolbar's own contrast again, which the row inherits anyway, and each breadcrumb
-        // sets its own colour: so it isn't a pseudoclass here.
+        // sets its own colour. Its rules for .breadcrumbs-collapsed-indicator don't apply in Ionic either, as the indicator is in
+        // each breadcrumb's shadow root. So it isn't a pseudoclass here.
         PseudoClasses.Set(ToolbarHostContext.InToolbarPseudoClass, ToolbarHostContext.Of(this).InToolbar);
     }
 

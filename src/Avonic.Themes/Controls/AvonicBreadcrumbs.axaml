@@ -31,7 +31,8 @@
             <Setter Property="Padding" Value="8,0" />
         </Style>
 
-        <!-- :host(.in-toolbar-color) sets the toolbar's contrast, which the row inherits from the toolbar anyway. -->
+        <!-- :host(.in-toolbar-color) sets the toolbar's contrast, which the row inherits from the toolbar anyway. Its rules for
+             .breadcrumbs-collapsed-indicator reach nothing, as the indicator is in each breadcrumb's shadow root. -->
     </ControlTheme>
 
 </ResourceDictionary>

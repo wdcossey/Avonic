@@ -16,7 +16,8 @@ namespace Avonic.Components.Controls;
 /// <see cref="AvonicMenuButton"/>, <see cref="AvonicBackButton"/>, <see cref="AvonicSegment"/> and
 /// <see cref="AvonicSegmentButton"/> set both classes. <see cref="AvonicBreadcrumb"/> sets only <c>in-toolbar-color</c>, as no rule
 /// in <c>breadcrumb.md.css</c> reads <c>in-toolbar</c>; <see cref="AvonicBreadcrumbs"/> only <c>in-toolbar</c>, as its
-/// <c>in-toolbar-color</c> rule sets the toolbar's contrast again, which the row inherits anyway.
+/// <c>in-toolbar-color</c> rules set the toolbar's contrast again, which the row inherits anyway, or style
+/// <c>.breadcrumbs-collapsed-indicator</c>, which is in each breadcrumb's shadow root, out of their reach.
 /// <para>
 /// <c>closest()</c> starts at the element itself, so Ionic's own toolbar is <c>in-toolbar</c>. The walk here starts at the parent,
 /// so a toolbar isn't in itself: no md rule reads a toolbar's <c>in-toolbar</c>, and <see cref="AvonicToolbar"/> doesn't call this.
