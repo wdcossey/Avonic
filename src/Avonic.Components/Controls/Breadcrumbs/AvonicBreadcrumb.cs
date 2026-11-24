@@ -364,22 +364,10 @@ public class AvonicBreadcrumb : TemplatedControl
         PseudoClasses.Set(":active", Active);
         PseudoClasses.Set(":collapsed", _collapsed);
 
-        // hostContext('ion-breadcrumbs[color]') and hostContext('ion-toolbar[color]'): any ancestor, at each render.
-        bool inBreadcrumbsColor = false, inToolbarColor = false;
-        foreach (var ancestor in this.GetVisualAncestors())
-        {
-            if (ancestor is AvonicBreadcrumbs { Color: not null })
-            {
-                inBreadcrumbsColor = true;
-            }
-            else if (ancestor is AvonicToolbar { Color: not null })
-            {
-                inToolbarColor = true;
-            }
-        }
-
-        PseudoClasses.Set(":in-breadcrumbs-color", inBreadcrumbsColor);
-        PseudoClasses.Set(":in-toolbar-color", inToolbarColor);
+        // hostContext('ion-breadcrumbs[color]') and hostContext('ion-toolbar[color]'): any ancestor, at each render. Ionic's
+        // in-toolbar too, which no rule in breadcrumb.md.css reads, so it isn't a pseudoclass here.
+        PseudoClasses.Set(":in-breadcrumbs-color", this.GetVisualAncestors().OfType<AvonicBreadcrumbs>().Any(b => b.Color is not null));
+        PseudoClasses.Set(ToolbarHostContext.InToolbarColorPseudoClass, ToolbarHostContext.Of(this).InToolbarColor);
 
         _link.SetWhen(Href is not null && !_collapsed, true);
 
