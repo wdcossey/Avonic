@@ -2,6 +2,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avonic.Components.Overlays;
 
 namespace Avonic.Components.Controls;
 
@@ -34,10 +35,7 @@ public class AlertWrapper : Border
             base.GetHelpTextCore() is { Length: > 0 } help ? help : Alert?.Message as string;
 
         // htmlAttributes is spread after the wrapper's own attributes; Avalonia's own id would be the part's name.
-        protected override string? GetAutomationIdCore() =>
-            Alert?.HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id
-                ? id
-                : base.GetAutomationIdCore();
+        protected override string? GetAutomationIdCore() => OverlayAttributes.Id(Alert?.HtmlAttributes) ?? base.GetAutomationIdCore();
 
         protected override bool IsControlElementCore() => true;
 

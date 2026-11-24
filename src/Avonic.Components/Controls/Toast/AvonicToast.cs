@@ -707,9 +707,9 @@ public partial class AvonicToast : AvonicOverlay
             native.Icon = button.Icon;
             native.Role = button.Role;
             native.IsInColor = !string.IsNullOrEmpty(Color);
-            if (button.HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label is not null)
+            if (OverlayAttributes.Read(button.HtmlAttributes, "aria-label") is { } label)
             {
-                AutomationProperties.SetName(native, label.ToString());
+                AutomationProperties.SetName(native, label);
             }
             else
             {
@@ -809,15 +809,9 @@ public partial class AvonicToast : AvonicOverlay
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
 
-        protected override string? GetNameCore() =>
-            owner.HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } text
-                ? text
-                : base.GetNameCore();
+        protected override string? GetNameCore() => OverlayAttributes.AriaLabel(owner.HtmlAttributes) ?? base.GetNameCore();
 
-        protected override string? GetAutomationIdCore() =>
-            owner.HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id
-                ? id
-                : base.GetAutomationIdCore();
+        protected override string? GetAutomationIdCore() => OverlayAttributes.Id(owner.HtmlAttributes) ?? base.GetAutomationIdCore();
 
         protected override bool IsControlElementCore() => true;
 
