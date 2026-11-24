@@ -175,6 +175,6 @@ public class CssTests
 
     // Chromium rounds the line gap on its own, and Avalonia's line holds it with the descent: the same only while the gap is 0.
     [AvaloniaFact]
-    public void NormalLine_Rounds_Robotos_Descent_With_A_Gap_Of_0() =>
+    public void Robotos_Line_Gap_Is_0_So_NormalLine_Rounds_As_Chromium_Does() =>
         Assert.Equal(0, new Typeface("Roboto").GlyphTypeface.Metrics.LineGap);
 }

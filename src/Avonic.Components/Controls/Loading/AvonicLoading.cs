@@ -130,7 +130,10 @@ public class AvonicLoading : AvonicOverlay
             : default;
     });
 
-    /// <summary>Chromium's ascent and descent of a font's line, each rounded, as <c>TextareaNativeInput</c> reads them too.</summary>
+    /// <summary>
+    /// Chromium's ascent and descent of a font's line, each rounded, as <c>TextareaNativeInput</c> reads them too. From the family
+    /// alone, at the regular face, as the theme binds only the family and the size.
+    /// </summary>
     private static (double Ascent, double Descent) LineMetrics(FontFamily family, double size) =>
         Css.NormalLine(new Typeface(family), size) ?? (0, 0);
 
