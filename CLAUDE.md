@@ -64,7 +64,8 @@ src/Avonic.Components/   controls: behaviour, properties, events, structure — 
                          InlinePlacement), hosted per TopLevel in its OverlayLayer (docs/infra/overlays/README.md); Present()
                          with no TopLevel finds the current activity's under Android's MainViewFactory (OpenTopLevels, the
                          last one still open); OverlayHandler, what the overlays share: a button's handler run and awaited
-                         (safeCall), and var(--backdrop-opacity)
+                         (safeCall), and var(--backdrop-opacity); OverlayAttributes, htmlAttributes and attributes read as
+                         Stencil's spread writes them: id and aria-label for automation, role and aria-checked as the values
   Animation/             Ionic's createAnimation: AvonicAnimation on AvonicConfig's clock, with progressStart, progressStep and
                          progressEnd for a gesture to drive; CubicBezierEasing, CSS's cubic-bezier
                          as Chromium solves it, and {a:CubicBezier} for it in XAML; CubicBezier, Ionic's cubic-bezier.js;
@@ -328,7 +329,7 @@ in the published npm package — do not look for `.tsx` or `.scss` files.
 | One `part` on several elements (`part="native"` on both of `ion-datetime-button`'s buttons) | A `PART_` name for each, from its id or role, and the part as a style class on each | `PART_DateButton`, `PART_TimeButton` with the class `native`; the datetime's `navigation-button` |
 | A prop typed `bool` or a function (`canDismiss`) | A struct with implicit conversions from both and a `TypeConverter` from `True`/`False` | `ModalCanDismiss` |
 | A button's `handler` on an overlay (`safeCall`, awaited; `false` keeps it open) | `Func<…>` on the button's data class, run by `OverlayHandler.Run`, a `Task` or `ValueTask` awaited and its result read | `AlertButton.Handler`, `ActionSheetButton.Handler` |
-| An interface's `htmlAttributes` / `attributes` (spread on an element) | A dictionary, with only the keys that map to automation or a property read; others ignored and documented | `AvonicAlert.HtmlAttributes`, `AlertButton.HtmlAttributes`, `AlertInput.Attributes` |
+| An interface's `htmlAttributes` / `attributes` (spread on an element) | A dictionary, with only the keys that map to automation or a property read; others ignored and documented. A value written as an attribute (`id`, `aria-label`, `class`, `maxlength`) is read as Stencil writes it, through `OverlayAttributes`; `disabled`, a button's property, and an input's `readonly` by `AlertClasses.IsTrue` | `AvonicAlert.HtmlAttributes`, `AlertButton.HtmlAttributes`, `AlertInput.Attributes` |
 | `interfaceOptions` (`any`, spread into an overlay's create options) | `IReadOnlyDictionary<string, object?>`, each key the overlay's property by name in camelCase or PascalCase, a string converted as XAML would; a key with no property, or a value it can't take, ignored and logged (`Behaviors/PropertiesByName`) | `AvonicSelect.InterfaceOptions` |
 | Work at an overlay's `willPresent` that needs it shown (focus) | Post it to the dispatcher from `WillPresent`: Avonic shows the overlay just after the event, for its enter animation | `AvonicSelect`'s focus at present |
 | An `async` method's `await` of a lock before its events (`dismiss()`), called from inside another's event | `Dispatcher.UIThread.Post` the call, so its events come after the ones on their way | `AvonicPopover`: the parent's dismiss from the child's, the child's from the parent's will-dismiss |
