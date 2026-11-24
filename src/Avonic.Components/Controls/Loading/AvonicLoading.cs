@@ -257,9 +257,7 @@ public class AvonicLoading : AvonicOverlay
                 return message;
             }
 
-            return HtmlAttributes is { } attributes && attributes.TryGetValue("aria-label", out var label) && label?.ToString() is { Length: > 0 } ariaLabel
-                ? ariaLabel
-                : null;
+            return OverlayAttributes.AriaLabel(HtmlAttributes);
         }
     }
 
@@ -274,8 +272,7 @@ public class AvonicLoading : AvonicOverlay
                 .Select(t => t.Inlines is { Count: > 0 } inlines ? inlines.Text : t.Text).Where(t => !string.IsNullOrEmpty(t)));
 
     /// <summary><c>htmlAttributes.id</c>, the host's <c>AutomationId</c>.</summary>
-    internal string? HtmlId =>
-        HtmlAttributes is { } attributes && attributes.TryGetValue("id", out var value) && value?.ToString() is { Length: > 0 } id ? id : null;
+    internal string? HtmlId => OverlayAttributes.Id(HtmlAttributes);
 
     protected internal override bool BackdropDismissEnabled => BackdropDismiss;
 

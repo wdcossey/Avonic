@@ -79,6 +79,14 @@ binding to the placeholder's, but not the page's own `Styles` and `Resources`, w
 Per-control events are each overlay's own (`ionAlertWillPresent` → `IonAlertWillPresent`, through `ControlWillPresentEvent`), as
 are controllers: see [PLAN.md](PLAN.md#deferred).
 
+**What the overlays share** besides the base: `OverlayHandler` runs a button's handler and awaits it (`safeCall`), and reads
+`var(--backdrop-opacity)`. `OverlayAttributes` reads `htmlAttributes` (and the alert inputs' `attributes`) for the alert, the
+action sheet, the toast and the loading (#266). Ionic spreads the dictionary on an element, and Stencil writes each value as text,
+leaving out a key that's missing or null. `Read` gives that text, an empty string kept; `Id` and `AriaLabel` give `id` and
+`aria-label`, the `AutomationId` and the name, or nothing when they're empty, as an empty one names nothing; `Is` compares
+`role` and `aria-checked` as the values themselves, as `action-sheet.js` does with `===`. A boolean is read as .NET writes it
+(`True`), where Stencil writes an attribute's `true` as `""` and an `id`'s as `"true"`; no caller is given one.
+
 ## What it does, in short
 
 - **Which top level**: `Present()` takes a desktop's active window, else its main one; a single view's main view's (iOS, the
